@@ -55,17 +55,31 @@ model VerificationToken {
 }
 
 model Game {
-  id              String    @id @default(cuid())
+  id              String        @id @default(cuid())
   title           String
-  platform        String
-  status          String
+  platform        GamePlatform?
+  status          GameStatus    @default(BACKLOG)
   rating          Int?
   review          String?
   userId          String
-  user            User      @relation(fields: [userId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
   imageUrl        String
   howLongToBeatId String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   deletedAt       DateTime?
+}
+
+enum GameStatus {
+  BACKLOG
+  INPROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+enum GamePlatform {
+  PC
+  XBOX
+  NINTENDO
+  PLAYSTATION
 }

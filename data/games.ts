@@ -1,31 +1,21 @@
-const STATUSES = ["backlog", "inprogress", "completed", "abandoned"] as const
-type ArrElement<ArrType> = ArrType extends readonly (infer ElementType)[]
-  ? ElementType
-  : never
+"use server"
 
-interface Game {
-  id: string
-  title: string
-  status: ArrElement<typeof STATUSES>
-  platform: string
-  imageUrl: string
+import { GameStatus, type Game } from "@prisma/client"
+
+import { getServerUserId } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+
+export default async function getGames() {
+  const userId = await getServerUserId()
+
+  const games: Game[] = await prisma.game.findMany({
+    where: { userId: userId },
+  })
+
+  return {
+    backlogged: games.filter((game) => game.status === GameStatus.BACKLOG),
+    inprogress: games.filter((game) => game.status === GameStatus.INPROGRESS),
+    completed: games.filter((game) => game.status === GameStatus.COMPLETED),
+    abandoned: games.filter((game) => game.status === GameStatus.ABANDONED),
+  }
 }
-
-export const games: Game[] = [
-  {
-    id: "1",
-    title: "The Last Of Us Part I",
-    status: "completed",
-    platform: "PlayStation",
-    imageUrl:
-      "https://howlongtobeat.com/games/109104_The_Last_of_Us_Part_I.jpg?width=250",
-  },
-  {
-    id: "2",
-    title: "The Legend of Zelda: Tears of the Kingdom",
-    status: "inprogress",
-    platform: "Nintendo",
-    imageUrl:
-      "https://howlongtobeat.com/games/72589_The_Legend_of_Zelda_Tears_of_the_Kingdom.jpg?width=250",
-  },
-]

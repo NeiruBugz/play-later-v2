@@ -5,7 +5,7 @@ const nextConfig = {
     domains: ["howlongtobeat.com"]
   },
   experimental: {
-    appDir: true,
+    serverActions: true,
   },
   async redirects() {
     return [
