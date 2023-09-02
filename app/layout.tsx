@@ -6,6 +6,7 @@ import { fontSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import ReactQuery from "@/components/query-provider"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: {
@@ -37,8 +38,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable
         )}
       >
-        <ReactQuery>{children}</ReactQuery>
-        <TailwindIndicator />
+        <ThemeProvider>
+          <ReactQuery>{children}</ReactQuery>
+          <TailwindIndicator />
+        </ThemeProvider>
       </body>
     </html>
   )
