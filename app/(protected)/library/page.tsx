@@ -2,6 +2,7 @@ import Image from "next/image"
 import { games } from "@/data/games"
 import { PlusCircle } from "lucide-react"
 
+import { prisma } from "@/lib/prisma"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -10,7 +11,9 @@ import { SiteHeader } from "@/components/site-header"
 const completed = games.filter((game) => game.status === "completed")
 const inprogress = games.filter((game) => game.status === "inprogress")
 
-export default function LibraryPage() {
+export default async function LibraryPage() {
+  const games = await prisma.game.findMany()
+  console.log(games)
   return (
     <>
       <SiteHeader />

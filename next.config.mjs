@@ -7,6 +7,15 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/library",
+        permanent: true,
+      },
+    ];
+  },
 }
 
 export default nextConfig
