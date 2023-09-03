@@ -1,4 +1,5 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
+import { HowLongToBeatEntry } from "howlongtobeat"
 
 export function useSearch() {
   return useMutation({
@@ -6,7 +7,7 @@ export function useSearch() {
       const request = await fetch(`api/search?q=${searchTerm}`)
       const { response } = await request.json()
 
-      return response
+      return response as HowLongToBeatEntry[]
     },
   })
 }

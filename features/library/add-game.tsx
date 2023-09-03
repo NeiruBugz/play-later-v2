@@ -1,8 +1,7 @@
-"use client"
-
+import React from "react"
+import { AddForm } from "@/features/library/add-game/form"
 import { PlusCircle } from "lucide-react"
 
-import { useSearch } from "@/lib/query"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -13,7 +12,6 @@ import {
 } from "@/components/ui/sheet"
 
 export default function AddGame() {
-  const { mutateAsync: search, data } = useSearch()
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -22,11 +20,11 @@ export default function AddGame() {
           <span>Add game</span>
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="w-1/2">
         <SheetHeader>
           <SheetTitle>Add game to library</SheetTitle>
         </SheetHeader>
-        <Button onClick={() => search("zelda")}>Search for zelda</Button>
+        <AddForm />
       </SheetContent>
     </Sheet>
   )

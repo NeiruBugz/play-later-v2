@@ -1,8 +1,6 @@
-import getGames from "@/data/games"
+import { getGames } from "@/data/games"
 import AddGame from "@/features/library/add-game"
-import { PlusCircle } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteHeader } from "@/components/site-header"
 
