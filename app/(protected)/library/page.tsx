@@ -1,5 +1,6 @@
 import { getGames } from "@/data/games"
 import AddGame from "@/features/library/add-game"
+import { GameCard } from "@/features/library/game-card"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteHeader } from "@/components/site-header"
@@ -11,7 +12,7 @@ export default async function LibraryPage() {
       <SiteHeader />
       <main className="container bg-background">
         <div className="h-full py-6">
-          <Tabs defaultValue="backlog" className="h-full space-y-6">
+          <Tabs defaultValue="inProgress" className="h-full space-y-6">
             <div className="space-between flex w-full items-center">
               <TabsList>
                 <TabsTrigger value="backlog">Backlog</TabsTrigger>
@@ -23,17 +24,25 @@ export default async function LibraryPage() {
                 <AddGame />
               </div>
             </div>
-            <TabsContent value="backlog">
-              {backlogged.map((game) => game.title)}
+            <TabsContent value="backlog" className="flex flex-wrap gap-4">
+              {backlogged.map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
             </TabsContent>
-            <TabsContent value="inProgress">
-              {inprogress.map((game) => game.title)}
+            <TabsContent value="inProgress" className="flex flex-wrap gap-4">
+              {inprogress.map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
             </TabsContent>
-            <TabsContent value="completed">
-              {completed.map((game) => game.title)}
+            <TabsContent value="completed" className="flex flex-wrap gap-4">
+              {completed.map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
             </TabsContent>
-            <TabsContent value="abandoned">
-              {abandoned.map((game) => game.title)}
+            <TabsContent value="abandoned" className="flex flex-wrap gap-4">
+              {abandoned.map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
             </TabsContent>
           </Tabs>
         </div>
