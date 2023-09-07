@@ -32,6 +32,7 @@
     "clsx": "^1.2.1",
     "cmdk": "^0.2.0",
     "date-fns": "^2.30.0",
+    "eslint-plugin-perfectionist": "^2.0.0",
     "howlongtobeat": "^1.8.0",
     "lucide-react": "0.105.0-alpha.4",
     "nanoid": "^4.0.2",

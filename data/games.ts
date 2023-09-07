@@ -32,6 +32,8 @@ export async function addGame(game: Omit<Game, "userId">) {
   return result
 }
 
+type GameEntity = HowLongToBeatEntry & Game
+
 export async function getGame(id: Game["id"]) {
   const userId = await getServerUserId()
   const game = await prisma.game.findUnique({
@@ -43,8 +45,24 @@ export async function getGame(id: Game["id"]) {
 
   if (game && game.howLongToBeatId) {
     const howLongToBeatService = new HowLongToBeatService()
-    return await howLongToBeatService.detail(game.howLongToBeatId)
+    const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId)
+    return { ...gameDetails, ...game }
   }
 
-  return {} as HowLongToBeatEntry
+  return {} as GameEntity
+}
+
+export async function updateStatus(id: Game["id"], status: GameStatus) {
+  const userId = await getServerUserId()
+
+  await prisma.game.update({
+    where: { userId: userId, id: id },
+    data: {
+      status,
+      updatedAt: new Date(),
+    },
+  })
+
+  revalidatePath("/library/[id]")
+  revalidatePath("/library")
 }

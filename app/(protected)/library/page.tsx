@@ -6,7 +6,7 @@ import { Ghost, Library, ListChecks, Play } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default async function LibraryPage() {
-  const { backlogged, completed, inprogress, abandoned } = await getGames()
+  const { abandoned, backlogged, completed, inprogress } = await getGames()
   return (
     <Tabs defaultValue="inProgress" className="h-full space-y-6">
       <div className="space-between flex w-full items-center">
@@ -33,7 +33,7 @@ export default async function LibraryPage() {
           <TabsTrigger value="Abandoned">
             <>
               <Ghost className="md:mr-1" />
-              <span className="hidden md:block">Completed</span>
+              <span className="hidden md:block">Abandoned</span>
             </>
           </TabsTrigger>
         </TabsList>

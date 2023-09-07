@@ -19,11 +19,6 @@ declare module "next-auth" {
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
-  secret: process.env.NEXTAUTH_SECRET,
-  session: {
-    strategy: "jwt",
-    maxAge: 1 * 24 * 60 * 60, // 1 day
-  },
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
@@ -51,6 +46,11 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    maxAge: 1 * 24 * 60 * 60, // 1 day
+    strategy: "jwt",
+  },
 }
 
 export const getServerUserId = async () => {

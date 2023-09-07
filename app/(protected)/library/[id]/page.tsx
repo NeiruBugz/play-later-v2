@@ -1,6 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
-import { getGame } from "@/data/games"
+import { getGame, updateStatus } from "@/data/games"
+import ChangeStatusButton from "@/features/library/change-status-button"
+import { GameStatus } from "@prisma/client"
 import { ArrowLeft } from "lucide-react"
 import { nanoid } from "nanoid"
 
@@ -21,9 +23,9 @@ const prepareDescription = (value: string) => {
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const gameInfo = await getGame(params.id)
-  console.log(gameInfo)
+
   return (
-    <div>
+    <div className="pb-4">
       <header className="flex items-center gap-2">
         <Link href="/library">
           <Button
@@ -44,13 +46,13 @@ export default async function GamePage({ params }: { params: { id: string } }) {
           width={760}
           height={570}
           priority
-          className="aspect-[3/4] w-64"
+          className="h-auto w-full md:w-64"
         />
         <article>
           <p className="leading-7 [&:not(:first-child)]:mt-6">
             {prepareDescription(gameInfo.description)}
           </p>
-          <p className="mt-2 font-bold">Platforms: </p>
+          <p className="my-2 font-bold">Platforms: </p>
           <ul className="flex flex-wrap gap-2">
             {gameInfo.platforms.map((platform) => (
               <li key={nanoid()}>
@@ -60,27 +62,35 @@ export default async function GamePage({ params }: { params: { id: string } }) {
               </li>
             ))}
           </ul>
-          <p className="mt-2 font-bold">Actions: </p>
+          <p className="my-2 font-bold">Actions: </p>
           <ul className="flex flex-wrap gap-2">
             <li>
-              <Button className="h-9 rounded-md px-3 md:h-10 md:px-4 md:py-2">
-                Put in backlog
-              </Button>
+              <ChangeStatusButton
+                gameStatus={gameInfo.status}
+                gameId={params.id}
+                buttonStatus="BACKLOG"
+              />
             </li>
             <li>
-              <Button className="h-9 rounded-md px-3 md:h-10 md:px-4 md:py-2">
-                Start playing
-              </Button>
+              <ChangeStatusButton
+                gameStatus={gameInfo.status}
+                gameId={params.id}
+                buttonStatus="INPROGRESS"
+              />
             </li>
             <li>
-              <Button className="h-9 rounded-md px-3 md:h-10 md:px-4 md:py-2">
-                Complete
-              </Button>
+              <ChangeStatusButton
+                gameStatus={gameInfo.status}
+                gameId={params.id}
+                buttonStatus="COMPLETED"
+              />
             </li>
             <li>
-              <Button className="h-9 rounded-md px-3 md:h-10 md:px-4 md:py-2">
-                Abandon
-              </Button>
+              <ChangeStatusButton
+                gameStatus={gameInfo.status}
+                gameId={params.id}
+                buttonStatus="ABANDONED"
+              />
             </li>
           </ul>
         </article>
