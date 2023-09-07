@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react"
 import { AddForm } from "@/features/library/add-game/form"
 import { PlusCircle } from "lucide-react"
@@ -12,8 +14,9 @@ import {
 } from "@/components/ui/sheet"
 
 export default function AddGame() {
+  const [isSheetOpen, setSheetOpen] = React.useState(false)
   return (
-    <Sheet>
+    <Sheet onOpenChange={setSheetOpen} open={isSheetOpen}>
       <SheetTrigger asChild>
         <Button className="flex justify-between gap-5">
           <PlusCircle className="mr-2 h-4 w-4" />
@@ -24,7 +27,7 @@ export default function AddGame() {
         <SheetHeader>
           <SheetTitle>Add game to library</SheetTitle>
         </SheetHeader>
-        <AddForm />
+        <AddForm afterSubmit={setSheetOpen} />
       </SheetContent>
     </Sheet>
   )

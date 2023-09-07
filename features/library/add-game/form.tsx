@@ -1,5 +1,3 @@
-"use client"
-
 import React from "react"
 import { addGame } from "@/data/games"
 import { GamePicker } from "@/features/library/add-game/game-picker"
@@ -38,7 +36,11 @@ const addGameSchema = z.object({
   status: z.enum(["BACKLOG", "INPROGRESS", "COMPLETED", "ABANDONED"]),
 })
 
-export function AddForm() {
+export function AddForm({
+  afterSubmit,
+}: {
+  afterSubmit: React.Dispatch<React.SetStateAction<boolean>>
+}) {
   const form = useForm<z.infer<typeof addGameSchema>>({
     resolver: zodResolver(addGameSchema),
   })
@@ -47,7 +49,6 @@ export function AddForm() {
   >(undefined)
 
   const [isPickerOpen, setPickerOpen] = React.useState(false)
-  const inputRef = React.useRef<HTMLInputElement>(null)
 
   const onGameSelect = React.useCallback(
     (game: HowLongToBeatEntry) => {
@@ -59,7 +60,10 @@ export function AddForm() {
   )
 
   const onSubmit = async (values: z.infer<typeof addGameSchema>) => {
-    if (selectedGame) {
+    if (!selectedGame) {
+      return
+    }
+    try {
       await addGame({
         title: values.title,
         status: values.status,
@@ -73,6 +77,10 @@ export function AddForm() {
         updatedAt: new Date(),
         deletedAt: null,
       })
+      form.reset()
+      afterSubmit(false)
+    } catch (e) {
+      console.error(e)
     }
   }
 
@@ -97,7 +105,12 @@ export function AddForm() {
               <FormItem>
                 <FormLabel>Game Title</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled />
+                  <Input
+                    {...field}
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled
+                  />
                 </FormControl>
               </FormItem>
             )}

@@ -18,6 +18,10 @@ module.exports = {
     },
     extend: {
       colors: {
+        nintendo: "#e60012",
+        playstation: "#0070d1",
+        xbox: "#107c10",
+        pc: "#1b2838",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
