@@ -38,7 +38,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable
         )}
       >
-        <ThemeProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReactQuery>{children}</ReactQuery>
           <TailwindIndicator />
         </ThemeProvider>

@@ -19,11 +19,11 @@ export default function AddGame() {
     <Sheet onOpenChange={setSheetOpen} open={isSheetOpen}>
       <SheetTrigger asChild>
         <Button className="flex justify-between gap-5">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          <span>Add game</span>
+          <PlusCircle className="h-4 w-4 md:mr-2" />
+          <span className="hidden">Add game</span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-1/2">
+      <SheetContent className="w-full md:w-1/2">
         <SheetHeader>
           <SheetTitle>Add game to library</SheetTitle>
         </SheetHeader>
