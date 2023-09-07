@@ -1,12 +1,14 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Game } from "@prisma/client"
-import { format, formatDistance } from "date-fns"
+import { differenceInHours, format, formatDistance } from "date-fns"
+import { Hourglass } from "lucide-react"
 
 import { platformEnumToColor, platformToUI } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 function Artwork({ game }: { game: Game }) {
+  const transitionTime = differenceInHours(game.updatedAt, game.createdAt)
   return (
     <div className="max-w-32 h-[310px] cursor-pointer rounded-sm border shadow-md hover:shadow-xl">
       <Image
@@ -17,20 +19,25 @@ function Artwork({ game }: { game: Game }) {
         height={256}
         priority
       />
-      <div className="flex flex-col justify-evenly gap-1 px-4 py-2">
-        <Badge
-          variant={
-            game.platform ? platformEnumToColor(game.platform) : "default"
-          }
-          className="w-fit normal-case"
-        >
-          {platformToUI(game.platform as string)}
-        </Badge>
+      <div className="flex flex-col justify-between gap-2 px-4 py-2">
+        <div className="flex items-center justify-between">
+          <Badge
+            variant={
+              game.platform ? platformEnumToColor(game.platform) : "default"
+            }
+            className="w-fit normal-case"
+          >
+            {platformToUI(game.platform as string)}
+          </Badge>
+          {transitionTime !== 0 ? (
+            <p className="item-center flex gap-0.5 text-xs font-bold">
+              <Hourglass className="h-4 w-4" />
+              <span>{transitionTime}h</span>
+            </p>
+          ) : null}
+        </div>
         <p className="text-md w-40 whitespace-pre-wrap font-medium">
           {game.title}
-        </p>
-        <p className="text-xs">
-          Last update: {format(game.updatedAt, "dd, MMM yyyy")}
         </p>
       </div>
     </div>
