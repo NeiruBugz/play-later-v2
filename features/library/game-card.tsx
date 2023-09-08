@@ -10,16 +10,16 @@ import { Badge } from "@/components/ui/badge"
 function Artwork({ game }: { game: Game }) {
   const transitionTime = differenceInHours(game.updatedAt, game.createdAt)
   return (
-    <div className="max-w-32 h-[310px] cursor-pointer rounded-sm border shadow-md hover:shadow-xl">
+    <div className="h-[256px] w-32 cursor-pointer rounded-sm border bg-background shadow-md transition-all hover:scale-105 hover:shadow-xl md:h-[300px] md:w-48">
       <Image
         src={game.imageUrl}
         alt={`${game.title} cover art`}
-        className="m-0 aspect-square h-48 w-48 bg-slate-400/60 object-scale-down"
+        className="m-0 aspect-square w-40 rounded-t-sm object-cover object-top md:h-48 md:w-48"
         width={256}
         height={256}
         priority
       />
-      <div className="flex flex-col justify-between gap-2 px-4 py-2">
+      <div className="flex flex-col justify-between gap-2 p-2 md:px-4 md:py-2">
         <div className="flex items-center justify-between">
           <Badge
             variant={
@@ -29,16 +29,14 @@ function Artwork({ game }: { game: Game }) {
           >
             {platformToUI(game.platform as string)}
           </Badge>
-          {transitionTime !== 0 ? (
-            <p className="item-center flex gap-0.5 text-xs font-bold">
+          {transitionTime ? (
+            <p className="item-center hidden gap-0.5 text-ellipsis text-xs font-bold md:flex">
               <Hourglass className="h-4 w-4" />
               <span>{transitionTime}h</span>
             </p>
           ) : null}
         </div>
-        <p className="text-md w-40 whitespace-pre-wrap font-medium">
-          {game.title}
-        </p>
+        <p className="text-sm font-medium">{game.title}</p>
       </div>
     </div>
   )

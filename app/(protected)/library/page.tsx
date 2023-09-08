@@ -13,26 +13,26 @@ export default async function LibraryPage() {
         <TabsList>
           <TabsTrigger value="backlog">
             <>
-              <Library className="md:mr-1" />
+              <Library className="md:mr-1 md:h-4 md:w-4" />
               &nbsp;
               <span className="hidden md:block">Backlog</span>
             </>
           </TabsTrigger>
           <TabsTrigger value="inProgress">
             <>
-              <Play className="md:mr-1" />
+              <Play className="md:mr-1 md:h-4 md:w-4" />
               <span className="hidden md:block">Playing</span>
             </>
           </TabsTrigger>
           <TabsTrigger value="completed">
             <>
-              <ListChecks className="md:mr-1" />
+              <ListChecks className="md:mr-1 md:h-4 md:w-4" />
               <span className="hidden md:block">Completed</span>
             </>
           </TabsTrigger>
           <TabsTrigger value="Abandoned">
             <>
-              <Ghost className="md:mr-1" />
+              <Ghost className="md:mr-1 md:h-4 md:w-4" />
               <span className="hidden md:block">Abandoned</span>
             </>
           </TabsTrigger>
