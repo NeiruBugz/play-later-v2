@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { LogOut, Moon, Settings, Sun } from "lucide-react"
+import { LogOut, Moon, Sun } from "lucide-react"
 import { Session } from "next-auth"
 import { signOut } from "next-auth/react"
 import { useTheme } from "next-themes"
 
+import { nameFirstLiterals } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -19,14 +19,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-function nameFirstLiterals(name: string) {
-  if (!name) {
-    return "U"
-  }
-  const [firstName, lastName] = name.split(" ")
-  return `${firstName[0]}${lastName[0]}`
-}
 
 export function UserDropdown({ session }: { session: Session | null }) {
   const { setTheme } = useTheme()
@@ -63,12 +55,12 @@ export function UserDropdown({ session }: { session: Session | null }) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuPortal></DropdownMenuPortal>
-        <DropdownMenuItem disabled>
+        {/* <DropdownMenuItem>
           <Link href="/settings" className="flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </Link>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
           <LogOut className="mr-2 h-4 w-4" />

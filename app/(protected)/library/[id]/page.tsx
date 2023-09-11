@@ -5,20 +5,9 @@ import ChangeStatusButton from "@/features/library/ui/change-status-button"
 import { ArrowLeft } from "lucide-react"
 import { nanoid } from "nanoid"
 
-import { platformEnumToColor } from "@/lib/utils"
+import { platformEnumToColor, prepareDescription } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-
-const prepareDescription = (value: string) => {
-  if (!value) {
-    return ""
-  }
-
-  let purified = value.slice()
-  purified = purified.replace(" ...Read More", "").trim()
-  const metaIndex = purified.indexOf("How long is")
-  return purified.slice(0, metaIndex)
-}
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const gameInfo = await getGame(params.id)

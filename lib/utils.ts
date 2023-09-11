@@ -1,3 +1,4 @@
+import { GameStatus } from "@prisma/client"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -6,15 +7,31 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function platformEnumToColor(value: string) {
-  switch (value) {
-    case "PLAYSTATION" || value.toLowerCase().includes("playstation"):
+  const fromHLTB = value.toLowerCase()
+
+  const forHTLB = () => {
+    if (fromHLTB.includes("playstation")) {
       return "playstation"
-    case "XBOX" || value.toLowerCase().includes("xbox"):
+    } else if (fromHLTB.includes("xbox")) {
       return "xbox"
-    case "NINTENDO" || value.toLowerCase().includes("nintendo"):
+    } else if (fromHLTB.includes("nintendo")) {
       return "nintendo"
-    default:
+    } else {
       return "pc"
+    }
+  }
+
+  switch (value) {
+    case "PLAYSTATION":
+      return "playstation"
+    case "XBOX":
+      return "xbox"
+    case "NINTENDO":
+      return "nintendo"
+    case "PC":
+      return "pc"
+    default:
+      return forHTLB()
   }
 }
 
@@ -23,4 +40,41 @@ export function platformToUI(value?: string) {
     return value
   }
   return `${value[0]}${value.slice(1).toLowerCase()}`
+}
+
+export function nameFirstLiterals(name: string) {
+  if (!name) {
+    return "U"
+  }
+  const [firstName, lastName] = name.split(" ")
+
+  if (!lastName) {
+    return firstName[0]
+  }
+
+  return `${firstName[0]}${lastName[0]}`
+}
+
+export function mapStatusToUI(value: GameStatus) {
+  switch (value) {
+    case "BACKLOG":
+      return "Put in backlog"
+    case "INPROGRESS":
+      return "Start playing"
+    case "COMPLETED":
+      return "Complete"
+    case "ABANDONED":
+      return "Abandon"
+  }
+}
+
+export function prepareDescription(value: string) {
+  if (!value) {
+    return ""
+  }
+
+  let purified = value.slice()
+  purified = purified.replace(" ...Read More", "").trim()
+  const metaIndex = purified.indexOf("How long is")
+  return purified.slice(0, metaIndex)
 }

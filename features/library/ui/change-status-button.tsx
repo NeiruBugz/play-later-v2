@@ -4,20 +4,8 @@ import { useCallback } from "react"
 import { updateStatus } from "@/features/library/actions"
 import { GameStatus } from "@prisma/client"
 
+import { mapStatusToUI } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-
-function mapStatusToUI(value: GameStatus) {
-  switch (value) {
-    case "BACKLOG":
-      return "Put in backlog"
-    case "INPROGRESS":
-      return "Start playing"
-    case "COMPLETED":
-      return "Complete"
-    case "ABANDONED":
-      return "Abandon"
-  }
-}
 
 export default function ChangeStatusButton({
   buttonStatus,
