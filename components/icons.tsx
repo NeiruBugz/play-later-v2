@@ -1,9 +1,9 @@
 import {
-  LucideProps,
   Moon,
   SunMedium,
   Twitter,
-  type Icon as LucideIcon,
+  type LucideIcon,
+  type LucideProps,
 } from "lucide-react"
 
 export type Icon = LucideIcon
@@ -23,6 +23,108 @@ export const Icons = {
         fill="currentColor"
         d="M11.572 0c-.176 0-.31.001-.358.007a19.76 19.76 0 0 1-.364.033C7.443.346 4.25 2.185 2.228 5.012a11.875 11.875 0 0 0-2.119 5.243c-.096.659-.108.854-.108 1.747s.012 1.089.108 1.748c.652 4.506 3.86 8.292 8.209 9.695.779.25 1.6.422 2.534.525.363.04 1.935.04 2.299 0 1.611-.178 2.977-.577 4.323-1.264.207-.106.247-.134.219-.158-.02-.013-.9-1.193-1.955-2.62l-1.919-2.592-2.404-3.558a338.739 338.739 0 0 0-2.422-3.556c-.009-.002-.018 1.579-.023 3.51-.007 3.38-.01 3.515-.052 3.595a.426.426 0 0 1-.206.214c-.075.037-.14.044-.495.044H7.81l-.108-.068a.438.438 0 0 1-.157-.171l-.05-.106.006-4.703.007-4.705.072-.092a.645.645 0 0 1 .174-.143c.096-.047.134-.051.54-.051.478 0 .558.018.682.154.035.038 1.337 1.999 2.895 4.361a10760.433 10760.433 0 0 0 4.735 7.17l1.9 2.879.096-.063a12.317 12.317 0 0 0 2.466-2.163 11.944 11.944 0 0 0 2.824-6.134c.096-.66.108-.854.108-1.748 0-.893-.012-1.088-.108-1.747-.652-4.506-3.859-8.292-8.208-9.695a12.597 12.597 0 0 0-2.499-.523A33.119 33.119 0 0 0 11.573 0zm4.069 7.217c.347 0 .408.005.486.047a.473.473 0 0 1 .237.277c.018.06.023 1.365.018 4.304l-.006 4.218-.744-1.14-.746-1.14v-3.066c0-1.982.01-3.097.023-3.15a.478.478 0 0 1 .233-.296c.096-.05.13-.054.5-.054z"
       />
+    </svg>
+  ),
+  google: () => (
+    <svg
+      width="46px"
+      height="46px"
+      viewBox="0 0 46 46"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+    >
+      <title>btn_google_light_normal_ios</title>
+      <desc>Created with Sketch.</desc>
+      <defs>
+        <filter
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
+          filterUnits="objectBoundingBox"
+          id="filter-1"
+        >
+          <feOffset
+            dx="0"
+            dy="1"
+            in="SourceAlpha"
+            result="shadowOffsetOuter1"
+          ></feOffset>
+          <feGaussianBlur
+            stdDeviation="0.5"
+            in="shadowOffsetOuter1"
+            result="shadowBlurOuter1"
+          ></feGaussianBlur>
+          <feColorMatrix
+            values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.168 0"
+            in="shadowBlurOuter1"
+            type="matrix"
+            result="shadowMatrixOuter1"
+          ></feColorMatrix>
+          <feOffset
+            dx="0"
+            dy="0"
+            in="SourceAlpha"
+            result="shadowOffsetOuter2"
+          ></feOffset>
+          <feGaussianBlur
+            stdDeviation="0.5"
+            in="shadowOffsetOuter2"
+            result="shadowBlurOuter2"
+          ></feGaussianBlur>
+          <feColorMatrix
+            values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.084 0"
+            in="shadowBlurOuter2"
+            type="matrix"
+            result="shadowMatrixOuter2"
+          ></feColorMatrix>
+          <feMerge>
+            <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+            <feMergeNode in="shadowMatrixOuter2"></feMergeNode>
+            <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+        <rect id="path-2" x="0" y="0" width="40" height="40" rx="2"></rect>
+      </defs>
+      <g
+        id="Google-Button"
+        stroke="none"
+        stroke-width="1"
+        fill="none"
+        fill-rule="evenodd"
+      >
+        <g id="9-PATCH" transform="translate(-608.000000, -160.000000)"></g>
+        <g
+          id="btn_google_light_normal"
+          transform="translate(-1.000000, -1.000000)"
+        >
+          <g id="logo_googleg_48dp" transform="translate(15.000000, 15.000000)">
+            <path
+              d="M17.64,9.20454545 C17.64,8.56636364 17.5827273,7.95272727 17.4763636,7.36363636 L9,7.36363636 L9,10.845 L13.8436364,10.845 C13.635,11.97 13.0009091,12.9231818 12.0477273,13.5613636 L12.0477273,15.8195455 L14.9563636,15.8195455 C16.6581818,14.2527273 17.64,11.9454545 17.64,9.20454545 L17.64,9.20454545 Z"
+              id="Shape"
+              fill="#4285F4"
+            ></path>
+            <path
+              d="M9,18 C11.43,18 13.4672727,17.1940909 14.9563636,15.8195455 L12.0477273,13.5613636 C11.2418182,14.1013636 10.2109091,14.4204545 9,14.4204545 C6.65590909,14.4204545 4.67181818,12.8372727 3.96409091,10.71 L0.957272727,10.71 L0.957272727,13.0418182 C2.43818182,15.9831818 5.48181818,18 9,18 L9,18 Z"
+              id="Shape"
+              fill="#34A853"
+            ></path>
+            <path
+              d="M3.96409091,10.71 C3.78409091,10.17 3.68181818,9.59318182 3.68181818,9 C3.68181818,8.40681818 3.78409091,7.83 3.96409091,7.29 L3.96409091,4.95818182 L0.957272727,4.95818182 C0.347727273,6.17318182 0,7.54772727 0,9 C0,10.4522727 0.347727273,11.8268182 0.957272727,13.0418182 L3.96409091,10.71 L3.96409091,10.71 Z"
+              id="Shape"
+              fill="#FBBC05"
+            ></path>
+            <path
+              d="M9,3.57954545 C10.3213636,3.57954545 11.5077273,4.03363636 12.4404545,4.92545455 L15.0218182,2.34409091 C13.4631818,0.891818182 11.4259091,0 9,0 C5.48181818,0 2.43818182,2.01681818 0.957272727,4.95818182 L3.96409091,7.29 C4.67181818,5.16272727 6.65590909,3.57954545 9,3.57954545 L9,3.57954545 Z"
+              id="Shape"
+              fill="#EA4335"
+            ></path>
+            <path d="M0,0 L18,0 L18,18 L0,18 L0,0 Z" id="Shape"></path>
+          </g>
+          <g id="handles_square"></g>
+        </g>
+      </g>
     </svg>
   ),
   moon: Moon,
