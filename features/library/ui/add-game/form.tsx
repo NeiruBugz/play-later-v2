@@ -1,6 +1,6 @@
 import React from "react"
-import { addGame } from "@/data/games"
-import { GamePicker } from "@/features/library/add-game/game-picker"
+import { addGame } from "@/features/library/actions"
+import { GamePicker } from "@/features/library/ui/add-game/game-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { GamePlatform, GameStatus } from "@prisma/client"
 import {
@@ -31,9 +31,9 @@ import {
 } from "@/components/ui/select"
 
 const addGameSchema = z.object({
-  title: z.string().min(1),
   platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
   status: z.enum(["BACKLOG", "INPROGRESS", "COMPLETED", "ABANDONED"]),
+  title: z.string().min(1),
 })
 
 export function AddForm({
@@ -65,17 +65,17 @@ export function AddForm({
     }
     try {
       await addGame({
-        title: values.title,
-        status: values.status,
-        platform: values.platform,
-        imageUrl: selectedGame.imageUrl,
+        createdAt: new Date(),
+        deletedAt: null,
         howLongToBeatId: selectedGame.id,
         id: nanoid(),
+        imageUrl: selectedGame.imageUrl,
+        platform: values.platform,
         rating: null,
         review: null,
-        createdAt: new Date(),
+        status: values.status,
+        title: values.title,
         updatedAt: new Date(),
-        deletedAt: null,
       })
       form.reset()
       afterSubmit(false)

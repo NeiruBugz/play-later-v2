@@ -11,21 +11,21 @@ export async function getGames() {
   const userId = await getServerUserId()
 
   const games: Game[] = await prisma.game.findMany({
-    where: { userId: userId },
+    where: { userId },
   })
 
   return {
-    backlogged: games.filter((game) => game.status === GameStatus.BACKLOG),
-    inprogress: games.filter((game) => game.status === GameStatus.INPROGRESS),
-    completed: games.filter((game) => game.status === GameStatus.COMPLETED),
     abandoned: games.filter((game) => game.status === GameStatus.ABANDONED),
+    backlogged: games.filter((game) => game.status === GameStatus.BACKLOG),
+    completed: games.filter((game) => game.status === GameStatus.COMPLETED),
+    inprogress: games.filter((game) => game.status === GameStatus.INPROGRESS),
   }
 }
 
 export async function addGame(game: Omit<Game, "userId">) {
   const userId = await getServerUserId()
 
-  const result = await prisma.game.create({ data: { ...game, userId: userId } })
+  const result = await prisma.game.create({ data: { ...game, userId } })
 
   revalidatePath("/library")
 
@@ -38,8 +38,8 @@ export async function getGame(id: Game["id"]) {
   const userId = await getServerUserId()
   const game = await prisma.game.findUnique({
     where: {
-      userId: userId,
-      id: id,
+      id,
+      userId,
     },
   })
 
@@ -56,11 +56,11 @@ export async function updateStatus(id: Game["id"], status: GameStatus) {
   const userId = await getServerUserId()
 
   await prisma.game.update({
-    where: { userId: userId, id: id },
     data: {
       status,
       updatedAt: new Date(),
     },
+    where: { id, userId },
   })
 
   revalidatePath("/library/[id]")

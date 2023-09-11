@@ -1,8 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
-import { getGame, updateStatus } from "@/data/games"
-import ChangeStatusButton from "@/features/library/change-status-button"
-import { GameStatus } from "@prisma/client"
+import { getGame } from "@/features/library/actions"
+import ChangeStatusButton from "@/features/library/ui/change-status-button"
 import { ArrowLeft } from "lucide-react"
 import { nanoid } from "nanoid"
 

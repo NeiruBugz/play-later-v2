@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { AddForm } from "@/features/library/add-game/form"
+import { AddForm } from "@/features/library/ui/add-game/form"
 import { PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"

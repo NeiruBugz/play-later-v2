@@ -1,5 +1,6 @@
 import "@/styles/globals.css"
 import { Metadata } from "next"
+import NextTopLoader from "nextjs-toploader"
 
 import { siteConfig } from "@/config/site"
 import { fontSans } from "@/lib/fonts"
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           fontSans.variable
         )}
       >
+        <NextTopLoader />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReactQuery>{children}</ReactQuery>
           <TailwindIndicator />

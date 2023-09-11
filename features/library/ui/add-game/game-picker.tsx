@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-import { GameStatus } from "@prisma/client"
 import { HowLongToBeatEntry } from "howlongtobeat"
 import { Loader2 } from "lucide-react"
 
@@ -19,11 +18,11 @@ export function GamePicker({
 }: {
   onGameSelect: (game: HowLongToBeatEntry) => void
 }) {
-  const { mutateAsync: search, data, reset, isLoading } = useSearch()
+  const { data, isLoading, mutateAsync: search, reset } = useSearch()
 
   React.useEffect(() => {
     return () => reset()
-  }, [])
+  }, [reset])
 
   return (
     <Command className="min-w-[360px]">

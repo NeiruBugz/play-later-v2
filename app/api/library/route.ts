@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
 export async function GET() {
   const userId = await getServerUserId()
   const games = await prisma.game.findMany({
-    where: { userId: userId },
+    where: { userId },
   })
 
   revalidatePath("/library")

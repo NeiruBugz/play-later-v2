@@ -1,6 +1,6 @@
-import { getGames } from "@/data/games"
-import AddGame from "@/features/library/add-game"
-import { GameCard } from "@/features/library/game-card"
+import { getGames } from "@/features/library/actions"
+import AddGame from "@/features/library/ui/add-game/add-game"
+import { GameCard } from "@/features/library/ui/game-card"
 import { Ghost, Library, ListChecks, Play } from "lucide-react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
