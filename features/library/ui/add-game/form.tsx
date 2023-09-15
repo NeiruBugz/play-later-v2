@@ -93,7 +93,10 @@ export function AddForm({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="z-[1000] w-full bg-white shadow-md">
-          <GamePicker onGameSelect={onGameSelect} />
+          <GamePicker
+            onGameSelect={onGameSelect}
+            selectedGame={selectedGame?.id}
+          />
         </PopoverContent>
       </Popover>
       <Form {...form}>

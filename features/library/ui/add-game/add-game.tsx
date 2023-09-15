@@ -23,7 +23,7 @@ export default function AddGame() {
           <span className="hidden md:block">Add game</span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full md:w-1/2">
+      <SheetContent className="w-full md:w-4/12">
         <SheetHeader>
           <SheetTitle>Add game to library</SheetTitle>
         </SheetHeader>

@@ -5,6 +5,7 @@ import { HowLongToBeatEntry } from "howlongtobeat"
 import { Loader2 } from "lucide-react"
 
 import { useSearch } from "@/lib/query"
+import { cn } from "@/lib/utils"
 import {
   Command,
   CommandEmpty,
@@ -14,9 +15,11 @@ import {
 } from "@/components/ui/command"
 
 export function GamePicker({
+  selectedGame,
   onGameSelect,
 }: {
   onGameSelect: (game: HowLongToBeatEntry) => void
+  selectedGame?: string
 }) {
   const { data, isLoading, mutateAsync: search, reset } = useSearch()
 
@@ -25,8 +28,8 @@ export function GamePicker({
   }, [reset])
 
   return (
-    <Command className="min-w-[360px]">
-      <CommandInput onValueChange={(value) => void search(value)} />
+    <Command className="w-full">
+      <CommandInput onValueChange={(value) => void search(value)} autoFocus />
       <CommandList>
         {isLoading ? (
           <CommandEmpty className="flex items-center justify-center">
@@ -38,7 +41,9 @@ export function GamePicker({
         ) : null}
         {data?.map((result) => (
           <CommandItem
-            className="cursor-pointer"
+            className={cn("cursor-pointer", {
+              "font-bold": selectedGame === result.id,
+            })}
             key={result.id}
             onSelect={() => onGameSelect(result)}
           >
