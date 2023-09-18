@@ -1,17 +1,17 @@
 import Link from "next/link"
 import { GameInfo } from "@/features/game/ui/game-info"
-import { getGame } from "@/features/library/actions"
+import { getWishlistedGame } from "@/features/wishlist/actions"
 import { ArrowLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
 export default async function GamePage({ params }: { params: { id: string } }) {
-  const gameInfo = await getGame(params.id)
+  const gameInfo = await getWishlistedGame(params.id)
 
   return (
     <div className="pb-4">
       <header className="flex items-center gap-2">
-        <Link href="/library">
+        <Link href="/wishlist">
           <Button
             variant="outline"
             className="h-full px-2 py-1 md:px-4 md:py-2"
@@ -20,7 +20,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
           </Button>
         </Link>
       </header>
-      <GameInfo game={gameInfo} gameStatus={gameInfo.status} />
+      <GameInfo game={gameInfo} />
     </div>
   )
 }

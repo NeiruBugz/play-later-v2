@@ -1,6 +1,6 @@
+import { GameCard } from "@/features/game/ui/game-card"
 import { getGames } from "@/features/library/actions"
 import AddGame from "@/features/library/ui/add-game/add-game"
-import { GameCard } from "@/features/library/ui/game-card"
 import { Ghost, Library, ListChecks, Play } from "lucide-react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,7 +12,7 @@ export default async function LibraryPage() {
       <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
         Library
       </h1>
-      <Tabs defaultValue="inProgress" className="h-full space-y-6 mt-4">
+      <Tabs defaultValue="inProgress" className="mt-4 h-full space-y-6">
         <div className="space-between flex w-full items-center">
           <TabsList>
             <TabsTrigger value="backlog">

@@ -1,17 +1,21 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 import { GameStatus, type Game } from "@prisma/client"
-import { HowLongToBeatEntry, HowLongToBeatService } from "howlongtobeat"
+import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat"
 
 import { getServerUserId } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+
+export type GameEntity = HowLongToBeatEntry & Game
 
 export async function getGames() {
   const userId = await getServerUserId()
 
   const games: Game[] = await prisma.game.findMany({
-    where: { userId },
+    where: { userId, deletedAt: null },
+    orderBy: { updatedAt: "desc" },
   })
 
   return {
@@ -31,8 +35,6 @@ export async function addGame(game: Omit<Game, "userId">) {
 
   return result
 }
-
-type GameEntity = HowLongToBeatEntry & Game
 
 export async function getGame(id: Game["id"]) {
   const userId = await getServerUserId()
@@ -65,4 +67,15 @@ export async function updateStatus(id: Game["id"], status: GameStatus) {
 
   revalidatePath("/library/[id]")
   revalidatePath("/library")
+}
+
+export async function deleteGame(id: Game["id"]) {
+  const userId = await getServerUserId()
+
+  await prisma.game.delete({
+    where: { id, userId },
+  })
+
+  revalidatePath("/library")
+  redirect("/library")
 }

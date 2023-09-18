@@ -10,12 +10,12 @@ export const siteConfig = {
       href: "/library",
     },
     {
-      title: "Search",
-      href: "/search",
-    },
-    {
       title: "Wishlist",
       href: "/wishlist",
+    },
+    {
+      title: "Search",
+      href: "/search",
     },
   ],
   links: {

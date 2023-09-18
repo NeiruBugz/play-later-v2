@@ -92,7 +92,7 @@ export const Icons = {
         stroke="none"
         stroke-width="1"
         fill="none"
-        fill-rule="evenodd"
+        fillRule="evenodd"
       >
         <g id="9-PATCH" transform="translate(-608.000000, -160.000000)"></g>
         <g
