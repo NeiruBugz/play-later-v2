@@ -36,14 +36,15 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  Game          Game[]
+  id             String           @id @default(cuid())
+  name           String?
+  email          String?          @unique
+  emailVerified  DateTime?
+  image          String?
+  accounts       Account[]
+  sessions       Session[]
+  Game           Game[]
+  WishlistedGame WishlistedGame[]
 }
 
 model VerificationToken {
@@ -67,6 +68,18 @@ model Game {
   howLongToBeatId String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+}
+
+model WishlistedGame {
+  id              String    @id @default(cuid())
+  title           String
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  imageUrl        String
+  howLongToBeatId String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
 }
 
