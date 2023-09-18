@@ -17,7 +17,7 @@ export function GameInfo({
   gameStatus?: GameStatus
 }) {
   return (
-    <div className="mt-6 flex flex-col gap-4 md:flex-row">
+    <div className="mt-6 flex flex-col flex-wrap gap-4 md:flex-row">
       <Image
         src={game.imageUrl}
         alt={`${game.name} artwork`}
@@ -58,7 +58,7 @@ export function GameInfo({
           <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
             Actions
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <GameStatusRadio gameStatus={gameStatus} gameId={game.id} />
             <GameDeleteDialog
               id={game.id}

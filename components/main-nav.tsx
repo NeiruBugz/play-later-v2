@@ -23,13 +23,11 @@ function Logo({ name }: { name: string }) {
 export function MainNav({ items }: MainNavProps) {
   return (
     <>
-      <div>
+      <div className="md:hidden">
         <MobileNav items={items} trigger={<Logo name={siteConfig.name} />} />
       </div>
       <div className="hidden gap-6 md:flex md:gap-10">
-        <Link href="/" className="flex items-center space-x-2">
-          <Logo name={siteConfig.name} />
-        </Link>
+        <Logo name={siteConfig.name} />
         {items?.length ? (
           <nav className="flex gap-6">
             {items?.map(
