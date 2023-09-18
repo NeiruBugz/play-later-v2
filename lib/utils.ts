@@ -2,6 +2,15 @@ import { GameStatus } from "@prisma/client"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+const NINTENDO_PLATFORMS = [
+  "wii u",
+  "game boy advance",
+  "wii",
+  "game boy color",
+  "game & watch",
+  "nes",
+]
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -14,7 +23,10 @@ export function platformEnumToColor(value: string) {
       return "playstation"
     } else if (fromHLTB.includes("xbox")) {
       return "xbox"
-    } else if (fromHLTB.includes("nintendo")) {
+    } else if (
+      fromHLTB.includes("nintendo") ||
+      NINTENDO_PLATFORMS.includes(fromHLTB)
+    ) {
       return "nintendo"
     } else {
       return "pc"

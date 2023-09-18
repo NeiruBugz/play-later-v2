@@ -27,6 +27,7 @@ test("platformEnumToColor", () => {
 
   expect(platformEnumToColor("Nintendo Switch")).toBe("nintendo")
   expect(platformEnumToColor("NINTENDO")).toBe("nintendo")
+  expect(platformEnumToColor("Wii U")).toBe("nintendo")
 
   expect(platformEnumToColor("macOS")).toBe("pc")
   expect(platformEnumToColor("PC")).toBe("pc")
