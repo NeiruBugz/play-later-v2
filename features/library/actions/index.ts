@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { GameStatus, type Game } from "@prisma/client"
+import { GamePlatform, GameStatus, type Game } from "@prisma/client"
 import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat"
 
 import { getServerUserId } from "@/lib/auth"
@@ -10,11 +10,19 @@ import { prisma } from "@/lib/prisma"
 
 export type GameEntity = HowLongToBeatEntry & Game
 
-export async function getGames() {
+export async function getGames(platformCriteria?: string) {
   const userId = await getServerUserId()
 
+  const platformFilter =
+    platformCriteria !== " "
+      ? { platform: platformCriteria as GamePlatform }
+      : {}
   const games: Game[] = await prisma.game.findMany({
-    where: { userId, deletedAt: null },
+    where: {
+      userId,
+      deletedAt: null,
+      ...platformFilter,
+    },
     orderBy: { updatedAt: "desc" },
   })
 

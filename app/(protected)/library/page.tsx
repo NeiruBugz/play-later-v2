@@ -1,12 +1,20 @@
 import { GameCard } from "@/features/game/ui/game-card"
 import { getGames } from "@/features/library/actions"
 import AddGame from "@/features/library/ui/add-game/add-game"
+import { PlatformFilter } from "@/features/library/ui/platform-filter"
 import { Ghost, Library, ListChecks, Play } from "lucide-react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export default async function LibraryPage() {
-  const { abandoned, backlogged, completed, inprogress } = await getGames()
+type LibraryPageProps = {
+  params: {}
+  searchParams: URLSearchParams
+}
+
+export default async function LibraryPage(props: LibraryPageProps) {
+  const filter = new URLSearchParams(props.searchParams).get("platform") ?? " "
+  const { abandoned, backlogged, completed, inprogress } =
+    await getGames(filter)
   return (
     <section>
       <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
@@ -41,7 +49,8 @@ export default async function LibraryPage() {
               </>
             </TabsTrigger>
           </TabsList>
-          <div className="ml-auto mr-4">
+          <div className="ml-auto flex gap-2">
+            <PlatformFilter />
             <AddGame />
           </div>
         </div>
