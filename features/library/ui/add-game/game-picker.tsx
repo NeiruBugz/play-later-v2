@@ -13,6 +13,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
+import { RenderWhen } from "@/components/render-when"
 
 export function GamePicker({
   selectedGame,
@@ -31,25 +32,24 @@ export function GamePicker({
     <Command className="w-full">
       <CommandInput onValueChange={(value) => void search(value)} autoFocus />
       <CommandList>
-        {isLoading ? (
+        <RenderWhen condition={isLoading}>
           <CommandEmpty className="flex items-center justify-center">
             <Loader2 className="animate-spin" />
           </CommandEmpty>
-        ) : null}
-        {!data && !isLoading ? (
-          <CommandEmpty>Start typing game title</CommandEmpty>
-        ) : null}
-        {data?.map((result) => (
-          <CommandItem
-            className={cn("cursor-pointer", {
-              "font-bold": selectedGame === result.id,
-            })}
-            key={result.id}
-            onSelect={() => onGameSelect(result)}
-          >
-            {result.name}
-          </CommandItem>
-        ))}
+        </RenderWhen>
+        <RenderWhen condition={Boolean(data) && data?.length !== 0}>
+          {data?.map((result) => (
+            <CommandItem
+              className={cn("cursor-pointer", {
+                "font-bold": selectedGame === result.id,
+              })}
+              key={result.id}
+              onSelect={() => onGameSelect(result)}
+            >
+              {result.name}
+            </CommandItem>
+          ))}
+        </RenderWhen>
       </CommandList>
     </Command>
   )

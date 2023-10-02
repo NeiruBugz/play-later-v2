@@ -11,7 +11,7 @@ export default function GoogleSignIn() {
   const callbackUrl = searchParams.get("callbackUrl") ?? "/library"
   return (
     <Button
-      className="bg-white font-roboto text-black text-sm shadow-md px-2 hover:bg-slate-200 transition-all h-[46px] pr-4 rounded-sm"
+      className="font-roboto h-[46px] rounded-sm bg-white px-2 pr-4 text-sm text-black shadow-md transition-all hover:bg-slate-200"
       onClick={() => signIn("google", { callbackUrl, redirect: true })}
     >
       <Icons.google />

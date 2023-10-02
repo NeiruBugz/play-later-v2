@@ -1,9 +1,10 @@
 import { expect, test } from "vitest"
 
 import {
+  hasSelectedPlatformInList,
   nameFirstLiterals,
   platformEnumToColor,
-  platformToUI,
+  uppercaseToNormal,
 } from "../../lib/utils"
 
 const nameMocks = [
@@ -34,7 +35,7 @@ test("platformEnumToColor", () => {
 })
 
 test("platformToUI", () => {
-  expect(platformToUI("PLAYSTATION")).toBe("Playstation")
+  expect(uppercaseToNormal("PLAYSTATION")).toBe("Playstation")
 
-  expect(platformToUI()).toBe(undefined)
+  expect(uppercaseToNormal()).toBe(undefined)
 })

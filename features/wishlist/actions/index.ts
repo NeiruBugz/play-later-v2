@@ -8,10 +8,11 @@ import { HowLongToBeatEntry, HowLongToBeatService } from "howlongtobeat"
 import { getServerUserId } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-export type WishlistEntity = HowLongToBeatEntry & WishlistedGame
+export type WishlistEntity = HowLongToBeatEntry &
+  WishlistedGame & { platform?: null; purchaseType?: null }
 
-export async function getWishlistedGames() {
-  const userId = await getServerUserId()
+export async function getWishlistedGames(id?: string) {
+  const userId = id ?? (await getServerUserId())
 
   const games: WishlistedGame[] = await prisma.wishlistedGame.findMany({
     where: { userId, deletedAt: null },

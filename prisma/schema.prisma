@@ -63,6 +63,7 @@ model Game {
   title           String
   platform        GamePlatform?
   status          GameStatus    @default(BACKLOG)
+  purchaseType    PurchaseType?
   rating          Int?
   review          String?
   userId          String
@@ -102,4 +103,9 @@ enum GamePlatform {
   XBOX
   NINTENDO
   PLAYSTATION
+}
+
+enum PurchaseType {
+  PHYSICAL
+  DIGITAL
 }

@@ -2,7 +2,7 @@ import React from "react"
 import { addGame } from "@/features/library/actions"
 import { GamePicker } from "@/features/library/ui/add-game/game-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { GamePlatform, GameStatus } from "@prisma/client"
+import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
 import {
   Popover,
   PopoverContent,
@@ -14,6 +14,7 @@ import { nanoid } from "nanoid"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
+import { cn, uppercaseToNormal } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -23,6 +24,7 @@ import {
   FormLabel,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
@@ -34,6 +36,7 @@ const addGameSchema = z.object({
   platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
   status: z.enum(["BACKLOG", "INPROGRESS", "COMPLETED", "ABANDONED"]),
   title: z.string().min(1),
+  purchaseType: z.enum(["PHYSICAL", "DIGITAL"]),
 })
 
 export function AddForm({
@@ -44,10 +47,10 @@ export function AddForm({
   const form = useForm<z.infer<typeof addGameSchema>>({
     resolver: zodResolver(addGameSchema),
   })
+
   const [selectedGame, setSelectedGame] = React.useState<
     HowLongToBeatEntry | undefined
   >(undefined)
-
   const [isPickerOpen, setPickerOpen] = React.useState(false)
 
   const onGameSelect = React.useCallback(
@@ -64,18 +67,21 @@ export function AddForm({
       return
     }
     try {
+      const { platform, purchaseType, status, title } = values
+      const { id, imageUrl } = selectedGame
       await addGame({
-        createdAt: new Date(),
-        deletedAt: null,
-        howLongToBeatId: selectedGame.id,
+        howLongToBeatId: id,
         id: nanoid(),
-        imageUrl: selectedGame.imageUrl,
-        platform: values.platform,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        imageUrl,
+        platform,
+        status,
+        title,
+        purchaseType,
         rating: null,
         review: null,
-        status: values.status,
-        title: values.title,
-        updatedAt: new Date(),
+        deletedAt: null,
       })
       form.reset()
       afterSubmit(false)
@@ -133,7 +139,11 @@ export function AddForm({
                   <SelectContent>
                     {Object.entries(GamePlatform).map(([key, value]) => (
                       <SelectItem key={key} value={key}>
-                        <span className="normal-case">{value}</span>
+                        <span className="normal-case">
+                          {value !== GamePlatform.PC
+                            ? uppercaseToNormal(value)
+                            : value}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -156,11 +166,78 @@ export function AddForm({
                   <SelectContent>
                     {Object.entries(GameStatus).map(([key, value]) => (
                       <SelectItem key={key} value={key}>
-                        <span className="normal-case">{value}</span>
+                        <span className="normal-case">
+                          {uppercaseToNormal(value)}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="purchaseType"
+            render={({ field }) => (
+              <FormItem className="space-x-4">
+                <FormLabel>Purchase type</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
+                  >
+                    <FormItem className="flex items-center space-x-0 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem
+                          value={PurchaseType.PHYSICAL}
+                          id="physical"
+                          className="sr-only"
+                        />
+                      </FormControl>
+                      <FormLabel
+                        htmlFor="physical"
+                        className={cn(
+                          "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
+                          "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
+                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                          {
+                            "bg-background text-foreground shadow-sm":
+                              form.getValues().purchaseType ===
+                              PurchaseType.PHYSICAL,
+                          }
+                        )}
+                      >
+                        Physical
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex items-center space-x-0 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem
+                          value={PurchaseType.DIGITAL}
+                          id="digital"
+                          className="sr-only"
+                        />
+                      </FormControl>
+                      <FormLabel
+                        htmlFor="digital"
+                        className={cn(
+                          "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
+                          "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
+                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                          {
+                            "bg-background text-foreground shadow-sm":
+                              form.getValues().purchaseType ===
+                              PurchaseType.DIGITAL,
+                          }
+                        )}
+                      >
+                        Digital
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
+                </FormControl>
               </FormItem>
             )}
           />

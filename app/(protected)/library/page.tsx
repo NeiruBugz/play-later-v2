@@ -42,7 +42,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
                 <span className="hidden md:block">Completed</span>
               </>
             </TabsTrigger>
-            <TabsTrigger value="Abandoned">
+            <TabsTrigger value="abandoned">
               <>
                 <Ghost className="md:mr-1 md:h-4 md:w-4" />
                 <span className="hidden md:block">Abandoned</span>
