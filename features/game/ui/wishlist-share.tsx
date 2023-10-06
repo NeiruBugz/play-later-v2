@@ -1,3 +1,4 @@
+import { CopyLink } from "@/features/game/ui/copy-link"
 import { Share } from "lucide-react"
 
 import { getServerUserId } from "@/lib/auth"
@@ -10,7 +11,7 @@ import {
 
 export async function WishlistShare() {
   const userId = await getServerUserId()
-  console.log(userId)
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -23,7 +24,7 @@ export async function WishlistShare() {
           Share this link to your friends if they&apos;re struggling with gift
           ideas :)
         </p>
-        <Button variant="outline">Copy link</Button>
+        <CopyLink userId={userId} />
       </PopoverContent>
     </Popover>
   )

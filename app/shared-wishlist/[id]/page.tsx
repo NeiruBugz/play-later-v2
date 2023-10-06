@@ -20,13 +20,13 @@ export default async function SharedWishlistPage(
   ])
   return (
     <main className="flex-1">
-      <header className="sticky top-0 z-10 bg-background px-16 py-4 shadow-sm">
+      <header className="sticky top-0 z-10 bg-background p-4 shadow-sm md:px-16">
         <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
           {username}&apos;s Wishlist
         </h1>
       </header>
-      <section className="mt-4 px-16 pb-16">
-        <ul className="columns-2 gap-8 md:columns-3 lg:columns-4">
+      <section className="mt-4 px-4 pb-16 md:px-16">
+        <ul className="columns-2 md:columns-3 md:gap-8 lg:columns-4">
           {games.map((game) => (
             <li className="group relative mb-4 w-fit cursor-pointer rounded-md">
               <Image
@@ -34,7 +34,7 @@ export default async function SharedWishlistPage(
                 height={1000}
                 src={game.imageUrl}
                 alt={`${game.title}`}
-                className="h-auto w-auto rounded-md"
+                className="h-auto w-[150px] rounded-md md:w-[180px] xl:w-[300px] 2xl:w-[400px]"
                 priority
               />
               <section className="absolute left-0 top-0 hidden h-full w-full rounded-md bg-black/25 p-6 group-hover:block">
