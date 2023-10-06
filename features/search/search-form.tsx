@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { ResultsList } from "@/features/search/results-list"
 import { Loader2Icon, Search } from "lucide-react"
 
@@ -13,9 +13,23 @@ export function SearchForm() {
   const [searchValue, setSearchValue] = useState("")
   const { mutateAsync: search, data: games, isLoading } = useSearch()
 
-  const onSubmit = async () => {
+  const onSubmit = useCallback(async () => {
     await search(searchValue)
-  }
+  }, [searchValue, search])
+
+  useEffect(() => {
+    const onEnterPress = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        onSubmit()
+      }
+    }
+
+    document.addEventListener("keydown", onEnterPress)
+
+    return () => {
+      document.removeEventListener("keydown", onEnterPress)
+    }
+  }, [onSubmit])
 
   return (
     <>

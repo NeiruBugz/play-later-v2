@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { type WishlistedGame } from "@prisma/client"
+import { Platform, type WishlistedGame } from "@prisma/client"
 import { HowLongToBeatEntry, HowLongToBeatService } from "howlongtobeat"
+import { nanoid } from "nanoid"
 
 import { getServerUserId } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
