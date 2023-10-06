@@ -12,7 +12,9 @@ export default async function WishlistPage() {
         <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
           Wishlist
         </h1>
-        <WishlistShare />
+        <RenderWhen condition={wishlist.length !== 0}>
+          <WishlistShare />
+        </RenderWhen>
       </header>
       <section className="mt-4 flex h-full flex-wrap gap-4">
         <RenderWhen condition={!wishlist || wishlist.length === 0}>
