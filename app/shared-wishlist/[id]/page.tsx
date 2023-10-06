@@ -1,11 +1,7 @@
 import { Metadata, ResolvingMetadata } from "next"
-import Image from "next/image"
-import Link from "next/link"
 import { getUserById } from "@/features/auth/actions"
 import { WishlistedGameShared } from "@/features/game/ui/wishlisted-game.shared"
 import { getWishlistedGames } from "@/features/wishlist/actions"
-
-import { Button } from "@/components/ui/button"
 
 type SharedWishlistPageProps = {
   params: {
@@ -43,7 +39,10 @@ export default async function SharedWishlistPage(
       <section className="mt-4 px-4 pb-16 md:px-16">
         <ul className="columns-2 md:columns-3 md:gap-8 lg:columns-4">
           {games.map((game) => (
-            <li className="group relative mb-4 w-fit cursor-pointer rounded-md">
+            <li
+              className="group relative mb-4 w-fit cursor-pointer rounded-md"
+              key={game.id}
+            >
               <WishlistedGameShared game={game} />
             </li>
           ))}
