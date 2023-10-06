@@ -47,7 +47,7 @@ export function platformEnumToColor(value: string) {
   }
 }
 
-export function platformToUI(value?: string) {
+export function uppercaseToNormal(value?: string) {
   if (!value) {
     return value
   }
@@ -89,4 +89,11 @@ export function prepareDescription(value: string) {
   purified = purified.replace(" ...Read More", "").trim()
   const metaIndex = purified.indexOf("How long is")
   return purified.slice(0, metaIndex)
+}
+
+export function hasSelectedPlatformInList(
+  platformFromList: string,
+  selectedPlatform: string
+) {
+  return platformFromList.toLowerCase().includes(selectedPlatform.toLowerCase())
 }

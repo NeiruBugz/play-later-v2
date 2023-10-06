@@ -6,8 +6,15 @@ import { WishlistEntity } from "@/features/wishlist/actions"
 import { GameStatus } from "@prisma/client"
 import { nanoid } from "nanoid"
 
-import { platformEnumToColor, prepareDescription } from "@/lib/utils"
+import {
+  cn,
+  hasSelectedPlatformInList,
+  platformEnumToColor,
+  prepareDescription,
+  uppercaseToNormal,
+} from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { RenderWhen } from "@/components/render-when"
 
 export function GameInfo({
   game,
@@ -16,6 +23,7 @@ export function GameInfo({
   game: GameEntity | WishlistEntity
   gameStatus?: GameStatus
 }) {
+  console.log(game.purchaseType, game.platforms)
   return (
     <div className="mt-6 flex flex-col flex-wrap gap-4 md:flex-row">
       <Image
@@ -30,24 +38,38 @@ export function GameInfo({
         <h1 className="mb-3 scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
           {game.name}
         </h1>
-        {game.platforms.length !== 0 ? (
+        <RenderWhen condition={!!game.purchaseType}>
+          <section>
+            <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
+              Format
+            </h3>
+            <Badge>{uppercaseToNormal(game.purchaseType as string)}</Badge>
+          </section>
+        </RenderWhen>
+        <RenderWhen condition={game.platforms.length !== 0}>
           <section>
             <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
               Platforms
             </h3>
             <ul className="flex flex-wrap gap-2">
-              {game.platforms
-                ? game.platforms.map((platform) => (
-                    <li key={nanoid()}>
-                      <Badge variant={platformEnumToColor(platform)}>
-                        {platform}
-                      </Badge>
-                    </li>
-                  ))
-                : null}
+              {game.platforms.map((platform) => (
+                <li key={nanoid()}>
+                  <Badge
+                    variant={platformEnumToColor(platform)}
+                    className={cn({
+                      bordered: hasSelectedPlatformInList(
+                        platform,
+                        game.platform as string
+                      ),
+                    })}
+                  >
+                    {platform}
+                  </Badge>
+                </li>
+              ))}
             </ul>
           </section>
-        ) : null}
+        </RenderWhen>
         <section>
           <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
             Description

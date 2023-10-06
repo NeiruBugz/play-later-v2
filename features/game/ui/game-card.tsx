@@ -2,8 +2,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Game } from "@prisma/client"
 
-import { platformEnumToColor, platformToUI } from "@/lib/utils"
+import { platformEnumToColor, uppercaseToNormal } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { RenderWhen } from "@/components/render-when"
 
 function Artwork({ game }: { game: Partial<Game> }) {
   return (
@@ -18,16 +19,16 @@ function Artwork({ game }: { game: Partial<Game> }) {
       />
       <div className="flex flex-col justify-between gap-2 p-2 md:px-4 md:py-2">
         <div className="flex items-center justify-between">
-          {game.platform ? (
+          <RenderWhen condition={Boolean(game.platform)}>
             <Badge
               variant={
                 game.platform ? platformEnumToColor(game.platform) : "default"
               }
               className="w-fit normal-case"
             >
-              {platformToUI(game.platform as string)}
+              {uppercaseToNormal(game.platform as string)}
             </Badge>
-          ) : null}
+          </RenderWhen>
         </div>
         <p className="text-sm font-medium">{game.title}</p>
       </div>

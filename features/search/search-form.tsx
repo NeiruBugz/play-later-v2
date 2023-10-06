@@ -7,6 +7,7 @@ import { Loader2Icon, Search } from "lucide-react"
 import { useSearch } from "@/lib/query"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { RenderWhen } from "@/components/render-when"
 
 export function SearchForm() {
   const [searchValue, setSearchValue] = useState("")
@@ -31,11 +32,12 @@ export function SearchForm() {
           <Search size={14} />
         </Button>
       </div>
-      {!isLoading ? (
+      <RenderWhen
+        condition={!isLoading}
+        fallback={<Loader2Icon className="animate-spin" />}
+      >
         <ResultsList games={games ?? []} />
-      ) : (
-        <Loader2Icon className="animate-spin" />
-      )}
+      </RenderWhen>
     </>
   )
 }
