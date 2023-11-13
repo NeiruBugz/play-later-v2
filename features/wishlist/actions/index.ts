@@ -2,8 +2,15 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { type WishlistedGame } from "@prisma/client"
+import {
+  Game,
+  GamePlatform,
+  GameStatus,
+  PurchaseType,
+  type WishlistedGame,
+} from "@prisma/client"
 import { HowLongToBeatEntry, HowLongToBeatService } from "howlongtobeat"
+import { nanoid } from "nanoid"
 
 import { getServerUserId } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
@@ -67,4 +74,40 @@ export async function deleteWishlistedGame(id: WishlistedGame["id"]) {
 
   revalidatePath("/wishlist")
   redirect("/wishlist")
+}
+
+export async function moveToLibrary(
+  id: WishlistedGame["id"],
+  platform: GamePlatform,
+  purchaseType: PurchaseType,
+  status: GameStatus
+) {
+  const userId = await getServerUserId()
+  const gameData = await getWishlistedGame(id)
+
+  if (!gameData) {
+    throw new Error("No game found")
+  }
+
+  const gamePayload: Game = {
+    id: nanoid(),
+    title: gameData.title,
+    platform,
+    status,
+    purchaseType,
+    rating: null,
+    review: null,
+    userId,
+    imageUrl: gameData.imageUrl,
+    howLongToBeatId: gameData.howLongToBeatId,
+    createdAt: gameData.createdAt,
+    updatedAt: new Date(),
+    deletedAt: null,
+  }
+
+  await prisma.game.create({
+    data: gamePayload,
+  })
+  await deleteWishlistedGame(id)
+  revalidatePath("/wishlist")
 }

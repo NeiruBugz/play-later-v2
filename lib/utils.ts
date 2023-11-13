@@ -75,8 +75,12 @@ export function prepareDescription(value: string) {
 }
 
 export function hasSelectedPlatformInList(
-  platformFromList: string,
-  selectedPlatform: string
+  platformFromList?: string,
+  selectedPlatform?: string
 ) {
+  if (!platformFromList || !selectedPlatform) {
+    return false
+  }
+
   return platformFromList.toLowerCase().includes(selectedPlatform.toLowerCase())
 }
