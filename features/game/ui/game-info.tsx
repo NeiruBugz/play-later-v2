@@ -13,7 +13,7 @@ import {
   prepareDescription,
   uppercaseToNormal,
 } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import { Badge, ColorVariant } from "@/components/ui/badge"
 import { RenderWhen } from "@/components/render-when"
 
 export function GameInfo({
@@ -23,7 +23,6 @@ export function GameInfo({
   game: GameEntity | WishlistEntity
   gameStatus?: GameStatus
 }) {
-  console.log(game.purchaseType, game.platforms)
   return (
     <div className="mt-6 flex flex-col flex-wrap gap-4 md:flex-row">
       <Image
@@ -55,7 +54,7 @@ export function GameInfo({
               {game.platforms.map((platform) => (
                 <li key={nanoid()}>
                   <Badge
-                    variant={platformEnumToColor(platform)}
+                    variant={platformEnumToColor(platform) as ColorVariant}
                     className={cn({
                       bordered: hasSelectedPlatformInList(
                         platform,

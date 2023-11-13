@@ -21,7 +21,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
         Library
       </h1>
       <Tabs defaultValue="inProgress" className="mt-4 h-full space-y-6">
-        <div className="space-between flex w-full items-center">
+        <div className="justify-between flex w-full items-center flex-wrap gap-4">
           <TabsList>
             <TabsTrigger value="backlog">
               <>
@@ -49,7 +49,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
               </>
             </TabsTrigger>
           </TabsList>
-          <div className="ml-auto flex gap-2">
+          <div className="flex gap-2 justify-between">
             <PlatformFilter />
             <AddGame />
           </div>

@@ -8,10 +8,16 @@ import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat"
 import { getServerUserId } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
+const LIBRARY_PATH = "/library"
+
 export type GameEntity = HowLongToBeatEntry & Game
 
+async function getUserId() {
+  return await getServerUserId()
+}
+
 export async function getGames(platformCriteria?: string) {
-  const userId = await getServerUserId()
+  const userId = await getUserId()
 
   const platformFilter =
     platformCriteria !== " "
@@ -35,17 +41,17 @@ export async function getGames(platformCriteria?: string) {
 }
 
 export async function addGame(game: Omit<Game, "userId">) {
-  const userId = await getServerUserId()
+  const userId = await getUserId()
 
   const result = await prisma.game.create({ data: { ...game, userId } })
 
-  revalidatePath("/library")
+  revalidatePath(LIBRARY_PATH)
 
   return result
 }
 
 export async function getGame(id: Game["id"]) {
-  const userId = await getServerUserId()
+  const userId = await getUserId()
   const game = await prisma.game.findUnique({
     where: {
       id,
@@ -63,7 +69,7 @@ export async function getGame(id: Game["id"]) {
 }
 
 export async function updateStatus(id: Game["id"], status: GameStatus) {
-  const userId = await getServerUserId()
+  const userId = await getUserId()
 
   await prisma.game.update({
     data: {
@@ -73,17 +79,20 @@ export async function updateStatus(id: Game["id"], status: GameStatus) {
     where: { id, userId },
   })
 
-  revalidatePath("/library/[id]")
-  revalidatePath("/library")
+  revalidatePath(`${LIBRARY_PATH}/${id}`)
+  revalidatePath(LIBRARY_PATH)
 }
 
 export async function deleteGame(id: Game["id"]) {
-  const userId = await getServerUserId()
+  const userId = await getUserId()
 
-  await prisma.game.delete({
+  await prisma.game.update({
+    data: {
+      deletedAt: new Date(),
+    },
     where: { id, userId },
   })
 
-  revalidatePath("/library")
-  redirect("/library")
+  revalidatePath(LIBRARY_PATH)
+  redirect(LIBRARY_PATH)
 }

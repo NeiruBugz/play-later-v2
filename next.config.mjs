@@ -4,9 +4,6 @@ const nextConfig = {
   images: {
     domains: ["howlongtobeat.com"]
   },
-  experimental: {
-    serverActions: true,
-  },
   async redirects() {
     return [
       {

@@ -60,7 +60,8 @@ export async function getWishlistedGame(id: WishlistedGame["id"]) {
 export async function deleteWishlistedGame(id: WishlistedGame["id"]) {
   const userId = await getServerUserId()
 
-  await prisma.wishlistedGame.delete({
+  await prisma.wishlistedGame.update({
+    data: { deletedAt: new Date() },
     where: { id, userId },
   })
 

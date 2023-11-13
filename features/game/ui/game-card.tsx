@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Game } from "@prisma/client"
 
 import { platformEnumToColor, uppercaseToNormal } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import { Badge, ColorVariant } from "@/components/ui/badge"
 import { RenderWhen } from "@/components/render-when"
 
 function Artwork({ game }: { game: Partial<Game> }) {
@@ -22,7 +22,9 @@ function Artwork({ game }: { game: Partial<Game> }) {
           <RenderWhen condition={Boolean(game.platform)}>
             <Badge
               variant={
-                game.platform ? platformEnumToColor(game.platform) : "default"
+                game.platform
+                  ? (platformEnumToColor(game.platform) as ColorVariant)
+                  : "default"
               }
               className="w-fit normal-case"
             >

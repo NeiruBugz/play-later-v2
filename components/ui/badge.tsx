@@ -3,6 +3,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+const colorVariants = {
+  default: "border-transparent bg-primary text-primary-foreground shadow",
+  destructive:
+    "border-transparent bg-destructive text-destructive-foreground shadow",
+  nintendo: "bg-nintendo border-transparent",
+  outline: "text-foreground",
+  pc: "bg-pc border-transparent",
+  playstation: "bg-playstation border-transparent",
+  secondary: "border-transparent bg-secondary text-secondary-foreground",
+  xbox: "bg-xbox border-transparent",
+}
+
+export type ColorVariant = keyof typeof colorVariants
+
 const badgeVariants = cva(
   "inline-flex items-center rounded-sm text-white border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {

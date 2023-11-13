@@ -11,7 +11,7 @@ import { RenderWhen } from "@/components/render-when"
 
 export function SearchForm() {
   const [searchValue, setSearchValue] = useState("")
-  const { mutateAsync: search, data: games, isLoading } = useSearch()
+  const { mutateAsync: search, data: games, isPending } = useSearch()
 
   const onSubmit = useCallback(async () => {
     await search(searchValue)
@@ -47,7 +47,7 @@ export function SearchForm() {
         </Button>
       </div>
       <RenderWhen
-        condition={!isLoading}
+        condition={!isPending}
         fallback={<Loader2Icon className="animate-spin" />}
       >
         <ResultsList games={games ?? []} />

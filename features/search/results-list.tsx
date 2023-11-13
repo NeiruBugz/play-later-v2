@@ -5,7 +5,7 @@ import { addToWishlist } from "@/features/wishlist/actions"
 import { type HowLongToBeatEntry } from "howlongtobeat"
 
 import { platformEnumToColor } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import { Badge, ColorVariant } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
@@ -28,7 +28,7 @@ export function ResultsList({ games }: { games: HowLongToBeatEntry[] }) {
                 {entry.platforms.map((platform) => (
                   <Badge
                     key={platform}
-                    variant={platformEnumToColor(platform)}
+                    variant={platformEnumToColor(platform) as ColorVariant}
                     className="h-fit"
                   >
                     {platform}

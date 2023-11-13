@@ -20,7 +20,7 @@ export default function AddGame() {
       <SheetTrigger asChild>
         <Button className="flex w-full justify-between gap-2">
           <PlusCircle className="h-4 w-4 md:mr-2" />
-          <span className="hidden whitespace-nowrap md:block">Add game</span>
+          <span className="whitespace-nowrap">Add game</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full md:w-4/12">

@@ -18,66 +18,50 @@ export function cn(...inputs: ClassValue[]) {
 export function platformEnumToColor(value: string) {
   const fromHLTB = value.toLowerCase()
 
-  const forHTLB = () => {
-    if (fromHLTB.includes("playstation")) {
-      return "playstation"
-    } else if (fromHLTB.includes("xbox")) {
-      return "xbox"
-    } else if (
-      fromHLTB.includes("nintendo") ||
-      NINTENDO_PLATFORMS.includes(fromHLTB)
-    ) {
-      return "nintendo"
-    } else {
-      return "pc"
-    }
+  const platformMapping = {
+    PLAYSTATION: "playstation",
+    XBOX: "xbox",
+    NINTENDO: "nintendo",
+    PC: "pc",
   }
 
-  switch (value) {
-    case "PLAYSTATION":
-      return "playstation"
-    case "XBOX":
-      return "xbox"
-    case "NINTENDO":
-      return "nintendo"
-    case "PC":
-      return "pc"
-    default:
-      return forHTLB()
+  const forHTLB = () => {
+    for (const platform of Object.keys(platformMapping)) {
+      if (fromHLTB.includes(platform.toLowerCase())) {
+        return platformMapping[platform as keyof typeof platformMapping]
+      }
+    }
+    if (NINTENDO_PLATFORMS.includes(fromHLTB)) {
+      return platformMapping.NINTENDO
+    }
+    return platformMapping.PC
   }
+
+  return platformMapping[value as keyof typeof platformMapping] || forHTLB()
 }
 
 export function uppercaseToNormal(value?: string) {
-  if (!value) {
-    return value
-  }
-  return `${value[0]}${value.slice(1).toLowerCase()}`
+  return value ? `${value[0]}${value.slice(1).toLowerCase()}` : value
 }
 
 export function nameFirstLiterals(name: string) {
   if (!name) {
     return "U"
   }
+
   const [firstName, lastName] = name.split(" ")
-
-  if (!lastName) {
-    return firstName[0]
-  }
-
-  return `${firstName[0]}${lastName[0]}`
+  return lastName ? `${firstName[0]}${lastName[0]}` : firstName[0]
 }
 
 export function mapStatusToUI(value: GameStatus) {
-  switch (value) {
-    case "BACKLOG":
-      return "Put in backlog"
-    case "INPROGRESS":
-      return "Start playing"
-    case "COMPLETED":
-      return "Complete"
-    case "ABANDONED":
-      return "Abandon"
+  const statusMapping = {
+    BACKLOG: "Put in backlog",
+    INPROGRESS: "Start playing",
+    COMPLETED: "Complete",
+    ABANDONED: "Abandon",
   }
+
+  return statusMapping[value] || value
 }
 
 export function prepareDescription(value: string) {
@@ -85,10 +69,9 @@ export function prepareDescription(value: string) {
     return ""
   }
 
-  let purified = value.slice()
-  purified = purified.replace(" ...Read More", "").trim()
+  const purified = value.replace(" ...Read More", "").trim()
   const metaIndex = purified.indexOf("How long is")
-  return purified.slice(0, metaIndex)
+  return metaIndex !== -1 ? purified.slice(0, metaIndex) : purified
 }
 
 export function hasSelectedPlatformInList(

@@ -22,7 +22,7 @@ export function GamePicker({
   onGameSelect: (game: HowLongToBeatEntry) => void
   selectedGame?: string
 }) {
-  const { data, isLoading, mutateAsync: search, reset } = useSearch()
+  const { data, isPending, mutateAsync: search, reset } = useSearch()
 
   React.useEffect(() => {
     return () => reset()
@@ -32,7 +32,7 @@ export function GamePicker({
     <Command className="w-full">
       <CommandInput onValueChange={(value) => void search(value)} autoFocus />
       <CommandList>
-        <RenderWhen condition={isLoading}>
+        <RenderWhen condition={isPending}>
           <CommandEmpty className="flex items-center justify-center">
             <Loader2 className="animate-spin" />
           </CommandEmpty>
