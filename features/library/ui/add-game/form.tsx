@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useRef } from "react"
 import { addGame } from "@/features/library/actions"
 import { GamePicker } from "@/features/library/ui/add-game/game-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -47,6 +47,7 @@ export function AddForm({
   const form = useForm<z.infer<typeof addGameSchema>>({
     resolver: zodResolver(addGameSchema),
   })
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   const [selectedGame, setSelectedGame] = React.useState<
     HowLongToBeatEntry | undefined
@@ -94,14 +95,15 @@ export function AddForm({
     <div className="my-6">
       <Popover modal onOpenChange={setPickerOpen} open={isPickerOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full" ref={triggerRef}>
             Find a game
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="z-[1000] w-full bg-white shadow-md">
+        <PopoverContent className="z-[1000] w-full shadow-md bg-popover">
           <GamePicker
             onGameSelect={onGameSelect}
             selectedGame={selectedGame?.id}
+            width={triggerRef.current?.getBoundingClientRect().width}
           />
         </PopoverContent>
       </Popover>
