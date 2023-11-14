@@ -41,18 +41,29 @@ const addGameSchema = z.object({
 
 export function AddForm({
   afterSubmit,
+  game,
 }: {
   afterSubmit: React.Dispatch<React.SetStateAction<boolean>>
+  game?: HowLongToBeatEntry
 }) {
   const form = useForm<z.infer<typeof addGameSchema>>({
     resolver: zodResolver(addGameSchema),
+    defaultValues: {
+      title: game?.name ?? "",
+    },
   })
   const triggerRef = useRef<HTMLButtonElement>(null)
 
   const [selectedGame, setSelectedGame] = React.useState<
     HowLongToBeatEntry | undefined
-  >(undefined)
+  >(game)
   const [isPickerOpen, setPickerOpen] = React.useState(false)
+
+  // React.useEffect(() => {
+  //   if (game) {
+  //     form.setValue("title", game.name)
+  //   }
+  // }, [game])
 
   const onGameSelect = React.useCallback(
     (game: HowLongToBeatEntry) => {
@@ -95,7 +106,12 @@ export function AddForm({
     <div className="my-6">
       <Popover modal onOpenChange={setPickerOpen} open={isPickerOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full" ref={triggerRef}>
+          <Button
+            variant="outline"
+            className="w-full"
+            ref={triggerRef}
+            disabled={game !== undefined}
+          >
             Find a game
           </Button>
         </PopoverTrigger>

@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import AddGame from "@/features/library/ui/add-game/add-game"
 import { addToWishlist } from "@/features/wishlist/actions"
 import { type HowLongToBeatEntry } from "howlongtobeat"
 
@@ -36,7 +37,7 @@ export function ResultsList({ games }: { games: HowLongToBeatEntry[] }) {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button>Add to Library</Button>
+                <AddGame label="Add to Library" game={entry} />
                 <Button
                   variant="secondary"
                   onClick={() => addToWishlist(entry)}

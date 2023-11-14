@@ -19,11 +19,11 @@ import { RenderWhen } from "@/components/render-when"
 export function GamePicker({
   selectedGame,
   onGameSelect,
-  width
+  width,
 }: {
   onGameSelect: (game: HowLongToBeatEntry) => void
   selectedGame?: string
-  width?: number;
+  width?: number
 }) {
   const { data, isPending, mutateAsync: search, reset } = useSearch()
   console.log(width)
@@ -53,7 +53,11 @@ export function GamePicker({
             >
               <div className="flex gap-2 items-center">
                 <Avatar className="rounded-md">
-                  <AvatarImage className="object-cover" src={result.imageUrl} alt={result.name} />
+                  <AvatarImage
+                    className="object-cover"
+                    src={result.imageUrl}
+                    alt={result.name}
+                  />
                   <AvatarFallback>{result.name}</AvatarFallback>
                 </Avatar>
                 {result.name}

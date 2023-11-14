@@ -43,11 +43,10 @@ export async function getGames(platformCriteria?: string) {
 export async function addGame(game: Omit<Game, "userId">) {
   const userId = await getUserId()
 
-  const result = await prisma.game.create({ data: { ...game, userId } })
+  await prisma.game.create({ data: { ...game, userId } })
 
   revalidatePath(LIBRARY_PATH)
-
-  return result
+  redirect(LIBRARY_PATH)
 }
 
 export async function getGame(id: Game["id"]) {

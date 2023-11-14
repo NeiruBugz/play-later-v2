@@ -2,6 +2,7 @@
 
 import React from "react"
 import { AddForm } from "@/features/library/ui/add-game/form"
+import { HowLongToBeatEntry } from "howlongtobeat"
 import { PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -13,21 +14,27 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 
-export default function AddGame() {
+export default function AddGame({
+  label = "Add Game",
+  game,
+}: {
+  label?: string
+  game?: HowLongToBeatEntry
+}) {
   const [isSheetOpen, setSheetOpen] = React.useState(false)
   return (
     <Sheet onOpenChange={setSheetOpen} open={isSheetOpen}>
       <SheetTrigger asChild>
-        <Button className="flex w-full justify-between gap-2">
+        <Button className={label ? "" : "flex w-full justify-between gap-2"}>
           <PlusCircle className="h-4 w-4 md:mr-2" />
-          <span className="whitespace-nowrap">Add game</span>
+          <span className="whitespace-nowrap">{label}</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full md:w-4/12">
         <SheetHeader>
           <SheetTitle>Add game to library</SheetTitle>
         </SheetHeader>
-        <AddForm afterSubmit={setSheetOpen} />
+        <AddForm afterSubmit={setSheetOpen} game={game} />
       </SheetContent>
     </Sheet>
   )
