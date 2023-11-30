@@ -225,7 +225,7 @@ export function GameStatusRadio({
         console.error(error)
       }
     },
-    [gameId]
+    [gameId, gameStatus]
   )
 
   return (
@@ -311,6 +311,30 @@ export function GameStatusRadio({
               <>
                 <ListChecks className="md:mr-1 md:h-4 md:w-4" />
                 <span className="hidden md:block">Complete</span>
+              </>
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem
+              value={GameStatus.FULL_COMPLETION}
+              id="r4"
+              className="group sr-only"
+            />
+            <Label
+              htmlFor="r4"
+              className={cn(
+                "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
+                "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                {
+                  "bg-background text-foreground shadow-sm":
+                    gameStatus === GameStatus.FULL_COMPLETION,
+                }
+              )}
+            >
+              <>
+                <ListChecks className="md:mr-1 md:h-4 md:w-4" />
+                <span className="hidden md:block">100% Completion</span>
               </>
             </Label>
           </div>

@@ -7,7 +7,7 @@ const globalForPrisma = globalThis as unknown as {
 
 type LogLevel = Array<"query" | "error" | "warn">
 const LOG_LEVEL: LogLevel =
-  env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]
+  env.NODE_ENV === "development" ? ["error", "warn"] : ["error"]
 const prismaFactory = (log_level = LOG_LEVEL) => {
   const prisma = new PrismaClient({ log: log_level })
 

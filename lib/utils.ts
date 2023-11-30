@@ -59,6 +59,7 @@ export function mapStatusToUI(value: GameStatus) {
     INPROGRESS: "Start playing",
     COMPLETED: "Complete",
     ABANDONED: "Abandon",
+    FULL_COMPLETION: "100% Complete",
   }
 
   return statusMapping[value] || value

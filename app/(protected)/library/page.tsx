@@ -13,7 +13,7 @@ type LibraryPageProps = {
 
 export default async function LibraryPage(props: LibraryPageProps) {
   const filter = new URLSearchParams(props.searchParams).get("platform") ?? " "
-  const { abandoned, backlogged, completed, inprogress } =
+  const { abandoned, backlogged, completed, inprogress, fullCompletion } =
     await getGames(filter)
   return (
     <section>
@@ -42,6 +42,12 @@ export default async function LibraryPage(props: LibraryPageProps) {
                 <span className="hidden md:block">Completed</span>
               </>
             </TabsTrigger>
+            <TabsTrigger value="fullCompletion">
+              <>
+                <ListChecks className="md:mr-1 md:h-4 md:w-4" />
+                <span className="hidden md:block">100% Completion</span>
+              </>
+            </TabsTrigger>
             <TabsTrigger value="abandoned">
               <>
                 <Ghost className="md:mr-1 md:h-4 md:w-4" />
@@ -66,6 +72,11 @@ export default async function LibraryPage(props: LibraryPageProps) {
         </TabsContent>
         <TabsContent value="completed" className="flex flex-wrap gap-4">
           {completed.map((game) => (
+            <GameCard key={game.id} game={game} />
+          ))}
+        </TabsContent>
+        <TabsContent value="fullCompletion" className="flex flex-wrap gap-4">
+          {fullCompletion.map((game) => (
             <GameCard key={game.id} game={game} />
           ))}
         </TabsContent>
