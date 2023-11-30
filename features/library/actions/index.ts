@@ -37,6 +37,9 @@ export async function getGames(platformCriteria?: string) {
     backlogged: games.filter((game) => game.status === GameStatus.BACKLOG),
     completed: games.filter((game) => game.status === GameStatus.COMPLETED),
     inprogress: games.filter((game) => game.status === GameStatus.INPROGRESS),
+    fullCompletion: games.filter(
+      (game) => game.status === GameStatus.FULL_COMPLETION
+    ),
   }
 }
 

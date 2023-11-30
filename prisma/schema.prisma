@@ -96,6 +96,7 @@ enum GameStatus {
   INPROGRESS
   COMPLETED
   ABANDONED
+  FULL_COMPLETION
 }
 
 enum GamePlatform {
