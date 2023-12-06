@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["howlongtobeat.com"]
+    domains: ["howlongtobeat.com"],
   },
   async redirects() {
     return [
@@ -11,7 +11,7 @@ const nextConfig = {
         destination: "/library",
         permanent: true,
       },
-    ];
+    ]
   },
 }
 

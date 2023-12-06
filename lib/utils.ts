@@ -40,6 +40,19 @@ export function platformEnumToColor(value: string) {
   return platformMapping[value as keyof typeof platformMapping] || forHTLB()
 }
 
+export function mapPlatformToSelectOption(value?: string) {
+  console.log(value)
+  if (!value) {
+    return ""
+  }
+
+  if (value === "FULL_COMPLETION") {
+    return "100% Complete"
+  }
+
+  return uppercaseToNormal(value)
+}
+
 export function uppercaseToNormal(value?: string) {
   return value ? `${value[0]}${value.slice(1).toLowerCase()}` : value
 }
