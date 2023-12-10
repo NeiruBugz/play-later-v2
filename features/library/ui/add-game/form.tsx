@@ -14,7 +14,8 @@ import { nanoid } from "nanoid"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
-import { cn, uppercaseToNormal } from "@/lib/utils"
+import { cn, mapPlatformToSelectOption, uppercaseToNormal } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -23,7 +24,6 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
@@ -36,7 +36,7 @@ const addGameSchema = z.object({
   platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
   status: z.enum(["BACKLOG", "INPROGRESS", "COMPLETED", "ABANDONED"]),
   title: z.string().min(1),
-  purchaseType: z.enum(["PHYSICAL", "DIGITAL"]),
+  purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]),
 })
 
 export function AddForm({
@@ -50,6 +50,7 @@ export function AddForm({
     resolver: zodResolver(addGameSchema),
     defaultValues: {
       title: game?.name ?? "",
+      purchaseType: "DIGITAL",
     },
   })
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -108,14 +109,14 @@ export function AddForm({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full"
+            className="mb-4 w-full"
             ref={triggerRef}
             disabled={game !== undefined}
           >
             Find a game
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="z-[1000] w-full shadow-md bg-popover">
+        <PopoverContent className="z-[1000] w-full bg-popover shadow-md">
           <GamePicker
             onGameSelect={onGameSelect}
             selectedGame={selectedGame?.id}
@@ -123,9 +124,24 @@ export function AddForm({
           />
         </PopoverContent>
       </Popover>
+      {selectedGame ? (
+        <div className="rounded-md border px-2 py-1 shadow-sm">
+          <div className="flex items-center gap-2 font-medium">
+            <Avatar className="rounded-md">
+              <AvatarImage
+                className="object-center"
+                src={selectedGame.imageUrl}
+                alt={selectedGame.name}
+              />
+              <AvatarFallback>{selectedGame.name}</AvatarFallback>
+            </Avatar>
+            {selectedGame.name}
+          </div>
+        </div>
+      ) : null}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
+          {/* <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
@@ -141,7 +157,7 @@ export function AddForm({
                 </FormControl>
               </FormItem>
             )}
-          />
+          /> */}
           <FormField
             control={form.control}
             name="platform"
@@ -185,7 +201,7 @@ export function AddForm({
                     {Object.entries(GameStatus).map(([key, value]) => (
                       <SelectItem key={key} value={key}>
                         <span className="normal-case">
-                          {uppercaseToNormal(value)}
+                          {mapPlatformToSelectOption(value)}
                         </span>
                       </SelectItem>
                     ))}
@@ -198,7 +214,7 @@ export function AddForm({
             control={form.control}
             name="purchaseType"
             render={({ field }) => (
-              <FormItem className="space-x-4">
+              <FormItem className="">
                 <FormLabel>Purchase type</FormLabel>
                 <FormControl>
                   <RadioGroup
@@ -252,6 +268,30 @@ export function AddForm({
                         )}
                       >
                         Digital
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex items-center space-x-0 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem
+                          value={PurchaseType.SUBSCRIPTION}
+                          id="digital"
+                          className="sr-only"
+                        />
+                      </FormControl>
+                      <FormLabel
+                        htmlFor="digital"
+                        className={cn(
+                          "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
+                          "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
+                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                          {
+                            "bg-background text-foreground shadow-sm":
+                              form.getValues().purchaseType ===
+                              PurchaseType.SUBSCRIPTION,
+                          }
+                        )}
+                      >
+                        Subscription
                       </FormLabel>
                     </FormItem>
                   </RadioGroup>

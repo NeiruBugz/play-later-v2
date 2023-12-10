@@ -341,11 +341,11 @@ export function GameStatusRadio({
           <div className="flex items-center space-x-2">
             <RadioGroupItem
               value={GameStatus.ABANDONED}
-              id="r4"
+              id="r5"
               className="group sr-only"
             />
             <Label
-              htmlFor="r4"
+              htmlFor="r5"
               className={cn(
                 "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
                 "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",

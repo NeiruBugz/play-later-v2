@@ -109,4 +109,5 @@ enum GamePlatform {
 enum PurchaseType {
   PHYSICAL
   DIGITAL
+  SUBSCRIPTION
 }
