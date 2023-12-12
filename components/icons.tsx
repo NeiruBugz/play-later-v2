@@ -90,7 +90,7 @@ export const Icons = {
       <g
         id="Google-Button"
         stroke="none"
-        stroke-width="1"
+        strokeWidth="1"
         fill="none"
         fillRule="evenodd"
       >

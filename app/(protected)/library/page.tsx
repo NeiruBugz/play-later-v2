@@ -1,9 +1,11 @@
 import { GameCard } from "@/features/game/ui/game-card"
 import { getGames } from "@/features/library/actions"
 import AddGame from "@/features/library/ui/add-game/add-game"
+import { PickerDialog } from "@/features/library/ui/pick-random-game/picker-dialog"
 import { PlatformFilter } from "@/features/library/ui/platform-filter"
 import { Ghost, Library, ListChecks, Play } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type LibraryPageProps = {
@@ -60,10 +62,15 @@ export default async function LibraryPage(props: LibraryPageProps) {
             <AddGame />
           </div>
         </div>
-        <TabsContent value="backlog" className="flex flex-wrap gap-4">
-          {backlogged.map((game) => (
-            <GameCard key={game.id} game={game} />
-          ))}
+        <TabsContent value="backlog">
+          <>
+            <PickerDialog items={backlogged} />
+            <section className="mt-4 flex flex-wrap gap-4">
+              {backlogged.map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
+            </section>
+          </>
         </TabsContent>
         <TabsContent value="inProgress" className="flex flex-wrap gap-4">
           {inprogress.map((game) => (

@@ -24,17 +24,7 @@ const badgeVariants = cva(
       variant: "default",
     },
     variants: {
-      variant: {
-        default: "border-transparent bg-primary text-primary-foreground shadow",
-        destructive:
-          "border-transparent bg-destructive text-destructive-foreground shadow",
-        nintendo: "bg-nintendo border-transparent",
-        outline: "text-foreground",
-        pc: "bg-pc border-transparent",
-        playstation: "bg-playstation border-transparent",
-        secondary: "border-transparent bg-secondary text-secondary-foreground",
-        xbox: "bg-xbox border-transparent",
-      },
+      variant: colorVariants,
     },
   }
 )
