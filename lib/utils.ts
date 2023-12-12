@@ -1,4 +1,4 @@
-import { GameStatus } from "@prisma/client"
+import { Game, GameStatus } from "@prisma/client"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -97,4 +97,13 @@ export function hasSelectedPlatformInList(
   }
 
   return platformFromList.toLowerCase().includes(selectedPlatform.toLowerCase())
+}
+
+export function getRandomItem<Game>(array: Game[]): Game | undefined {
+  if (array.length === 0) {
+    return
+  }
+
+  const randomIndex = Math.floor(Math.random() * array.length)
+  return array[randomIndex]
 }
