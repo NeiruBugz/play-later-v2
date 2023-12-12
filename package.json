@@ -38,6 +38,7 @@
     "clsx": "2.0.0",
     "cmdk": "0.2.0",
     "date-fns": "2.30.0",
+    "geist": "1.2.0",
     "howlongtobeat": "1.8.0",
     "lucide-react": "0.292.0",
     "nanoid": "5.0.3",

@@ -1,10 +1,10 @@
 import "@/styles/globals.css"
 
 import { Metadata } from "next"
+import { GeistSans } from "geist/font/sans"
 import NextTopLoader from "nextjs-toploader"
 
 import { siteConfig } from "@/config/site"
-import { fontSans, roboto } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import ReactQuery from "@/components/query-provider"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
@@ -36,9 +36,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
-          roboto.variable
+          "min-h-screen bg-background antialiased",
+          GeistSans.className
         )}
       >
         <NextTopLoader />

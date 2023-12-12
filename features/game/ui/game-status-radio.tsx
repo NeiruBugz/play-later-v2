@@ -230,12 +230,14 @@ export function GameStatusRadio({
 
   return (
     <>
-      <MoveFromWishlistDialog
-        isDialogOpen={isOpen}
-        onOpenChange={setIsOpen}
-        updatedStatus={checkedStatus}
-        gameId={gameId}
-      />
+      {gameStatus ? null : (
+        <MoveFromWishlistDialog
+          isDialogOpen={isOpen}
+          onOpenChange={setIsOpen}
+          updatedStatus={checkedStatus}
+          gameId={gameId}
+        />
+      )}
       <RadioGroup
         defaultValue={gameStatus}
         value={gameStatus ?? checkedStatus}
