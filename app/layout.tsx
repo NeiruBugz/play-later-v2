@@ -1,6 +1,7 @@
 import "@/styles/globals.css"
 
 import { Metadata } from "next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GeistSans } from "geist/font/sans"
 import NextTopLoader from "nextjs-toploader"
 
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <ReactQuery>{children}</ReactQuery>
           <TailwindIndicator />
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
