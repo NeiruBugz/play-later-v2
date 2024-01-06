@@ -8,16 +8,18 @@ import { RenderWhen } from "@/components/render-when"
 
 function Artwork({ game }: { game: Partial<Game> }) {
   return (
-    <div className="h-[256px] w-32 cursor-pointer rounded-sm border bg-background shadow-md transition-all hover:scale-105 hover:shadow-xl md:h-[300px] md:w-48">
-      <Image
-        src={game.imageUrl ?? ""}
-        alt={`${game.title} cover art`}
-        className="m-0 aspect-square w-40 rounded-t-sm object-cover object-top md:h-48 md:w-48"
-        width={256}
-        height={256}
-        priority
-      />
-      <div className="flex flex-col justify-between gap-2 p-2 md:px-4 md:py-2">
+    <div className="group relative cursor-pointer rounded-sm border bg-background shadow-md transition-all hover:scale-105 hover:shadow-xl">
+      <div className="size-32 md:size-48 xl:size-52 flex items-center justify-center">
+        <Image
+          src={game.imageUrl ?? ""}
+          alt={`${game.title} cover art`}
+          className="h-full w-full object-cover"
+          width={256}
+          height={256}
+          priority
+        />
+      </div>
+      <div className="absolute bottom-0 left-0 hidden w-32 flex-col justify-between gap-2 bg-slate-800 p-2 group-hover:flex md:w-48 md:px-4 md:py-2 xl:w-52">
         <div className="flex items-center justify-between">
           <RenderWhen condition={Boolean(game.platform)}>
             <Badge

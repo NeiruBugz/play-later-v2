@@ -1,6 +1,7 @@
 import { GameCard } from "@/features/game/ui/game-card"
 import { getGames } from "@/features/library/actions"
 import AddGame from "@/features/library/ui/add-game/add-game"
+import { ListWrapper } from "@/features/library/ui/list-wrapper"
 import { PickerDialog } from "@/features/library/ui/pick-random-game/picker-dialog"
 import { PlatformFilter } from "@/features/library/ui/platform-filter"
 import { Ghost, Library, ListChecks, Play } from "lucide-react"
@@ -65,32 +66,40 @@ export default async function LibraryPage(props: LibraryPageProps) {
         <TabsContent value="backlog">
           <>
             <PickerDialog items={backlogged} />
-            <section className="mt-4 flex flex-wrap gap-4">
+            <ListWrapper>
               {backlogged.map((game) => (
                 <GameCard key={game.id} game={game} />
               ))}
-            </section>
+            </ListWrapper>
           </>
         </TabsContent>
         <TabsContent value="inProgress" className="flex flex-wrap gap-4">
-          {inprogress.map((game) => (
-            <GameCard key={game.id} game={game} />
-          ))}
+          <ListWrapper>
+            {inprogress.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </ListWrapper>
         </TabsContent>
         <TabsContent value="completed" className="flex flex-wrap gap-4">
-          {completed.map((game) => (
-            <GameCard key={game.id} game={game} />
-          ))}
+          <ListWrapper>
+            {completed.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </ListWrapper>
         </TabsContent>
         <TabsContent value="fullCompletion" className="flex flex-wrap gap-4">
-          {fullCompletion.map((game) => (
-            <GameCard key={game.id} game={game} />
-          ))}
+          <ListWrapper>
+            {fullCompletion.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </ListWrapper>
         </TabsContent>
         <TabsContent value="abandoned" className="flex flex-wrap gap-4">
-          {abandoned.map((game) => (
-            <GameCard key={game.id} game={game} />
-          ))}
+          <ListWrapper>
+            {abandoned.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </ListWrapper>
         </TabsContent>
       </Tabs>
     </section>

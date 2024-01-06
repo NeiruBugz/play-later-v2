@@ -26,7 +26,6 @@ export function GamePicker({
   width?: number
 }) {
   const { data, isPending, mutateAsync: search, reset } = useSearch()
-  console.log(width)
 
   React.useEffect(() => {
     return () => reset()
@@ -51,7 +50,7 @@ export function GamePicker({
               value={`${result.name}_${result.id}`}
               onSelect={() => onGameSelect(result)}
             >
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <Avatar className="rounded-md">
                   <AvatarImage
                     className="object-cover"

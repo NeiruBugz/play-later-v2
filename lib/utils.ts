@@ -41,7 +41,6 @@ export function platformEnumToColor(value: string) {
 }
 
 export function mapPlatformToSelectOption(value?: string) {
-  console.log(value)
   if (!value) {
     return ""
   }

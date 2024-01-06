@@ -34,7 +34,13 @@ import {
 
 const addGameSchema = z.object({
   platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
-  status: z.enum(["BACKLOG", "INPROGRESS", "COMPLETED", "ABANDONED"]),
+  status: z.enum([
+    "BACKLOG",
+    "INPROGRESS",
+    "COMPLETED",
+    "ABANDONED",
+    "FULL_COMPLETION",
+  ]),
   title: z.string().min(1),
   purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]),
 })
@@ -274,12 +280,12 @@ export function AddForm({
                       <FormControl>
                         <RadioGroupItem
                           value={PurchaseType.SUBSCRIPTION}
-                          id="digital"
+                          id="subscription"
                           className="sr-only"
                         />
                       </FormControl>
                       <FormLabel
-                        htmlFor="digital"
+                        htmlFor="subscription"
                         className={cn(
                           "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
                           "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
