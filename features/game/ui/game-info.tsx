@@ -149,7 +149,9 @@ export function GameInfo({
           <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
             Description
           </h3>
-          <p className="leading-7">{prepareDescription(game.description)}</p>
+          <p className="text-pretty leading-7">
+            {prepareDescription(game.description)}
+          </p>
         </section>
       </article>
     </div>
