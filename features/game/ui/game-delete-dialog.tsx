@@ -14,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Icons } from "@/components/icons"
 
 export function GameDeleteDialog({
   id,
@@ -34,7 +35,9 @@ export function GameDeleteDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">Delete game</Button>
+        <Button variant="destructive" className="flex">
+          <Icons.delete />
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

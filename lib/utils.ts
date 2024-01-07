@@ -77,6 +77,18 @@ export function mapStatusToUI(value: GameStatus) {
   return statusMapping[value] || value
 }
 
+export function mapStatusForInfo(value: GameStatus) {
+  const statusMapping = {
+    BACKLOG: "Backlogged",
+    INPROGRESS: "Playing",
+    COMPLETED: "Completed",
+    ABANDONED: "Abandoned",
+    FULL_COMPLETION: "100% Complete",
+  }
+
+  return statusMapping[value] || value
+}
+
 export function prepareDescription(value: string) {
   if (!value) {
     return ""

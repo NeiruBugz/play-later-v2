@@ -66,7 +66,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
         <TabsContent value="backlog">
           <>
             <PickerDialog items={backlogged} />
-            <ListWrapper>
+            <ListWrapper count={backlogged.length}>
               {backlogged.map((game) => (
                 <GameCard key={game.id} game={game} />
               ))}
@@ -74,28 +74,28 @@ export default async function LibraryPage(props: LibraryPageProps) {
           </>
         </TabsContent>
         <TabsContent value="inProgress" className="flex flex-wrap gap-4">
-          <ListWrapper>
+          <ListWrapper count={inprogress.length}>
             {inprogress.map((game) => (
               <GameCard key={game.id} game={game} />
             ))}
           </ListWrapper>
         </TabsContent>
         <TabsContent value="completed" className="flex flex-wrap gap-4">
-          <ListWrapper>
+          <ListWrapper count={completed.length}>
             {completed.map((game) => (
               <GameCard key={game.id} game={game} />
             ))}
           </ListWrapper>
         </TabsContent>
         <TabsContent value="fullCompletion" className="flex flex-wrap gap-4">
-          <ListWrapper>
+          <ListWrapper count={fullCompletion.length}>
             {fullCompletion.map((game) => (
               <GameCard key={game.id} game={game} />
             ))}
           </ListWrapper>
         </TabsContent>
         <TabsContent value="abandoned" className="flex flex-wrap gap-4">
-          <ListWrapper>
+          <ListWrapper count={abandoned.length}>
             {abandoned.map((game) => (
               <GameCard key={game.id} game={game} />
             ))}

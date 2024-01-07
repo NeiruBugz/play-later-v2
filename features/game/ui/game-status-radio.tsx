@@ -5,7 +5,12 @@ import { updateStatus } from "@/features/library/actions"
 import { moveToLibrary } from "@/features/wishlist/actions"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
-import { Ghost, Library, ListChecks, Play } from "lucide-react"
+import {
+  TooltipArrow,
+  TooltipContent,
+  TooltipTrigger,
+} from "@radix-ui/react-tooltip"
+import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -34,6 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip"
 import { RenderWhen } from "@/components/render-when"
 
 const moveFromWishlistSchema = z.object({
@@ -42,6 +48,57 @@ const moveFromWishlistSchema = z.object({
 })
 
 type FormValues = z.infer<typeof moveFromWishlistSchema>
+
+const mapStatusToFormFieldValues = () => {
+  const statuses = new Map<string, GameStatus>()
+  for (const status of Object.values(GameStatus)) {
+    statuses.set(status, status)
+  }
+}
+
+const statusesMap = {
+  backlog: GameStatus.BACKLOG,
+  inprogress: GameStatus.INPROGRESS,
+  completed: GameStatus.COMPLETED,
+  full_completion: GameStatus.FULL_COMPLETION,
+  abandoned: GameStatus.ABANDONED,
+}
+
+const iconMapping = {
+  [GameStatus.BACKLOG]: <Library className="md:h-4 md:w-4" />,
+  [GameStatus.ABANDONED]: <Ghost className="md:h-4 md:w-4" />,
+  [GameStatus.COMPLETED]: <ListChecks className="md:h-4 md:w-4" />,
+  [GameStatus.FULL_COMPLETION]: <CheckCheck className="md:h-4 md:w-4" />,
+  [GameStatus.INPROGRESS]: <Play className="md:h-4 md:w-4" />,
+}
+
+const statusMapping = {
+  [GameStatus.BACKLOG]: {
+    icon: <Library className="md:h-4 md:w-4" />,
+    radioValue: "backlog",
+    tooltipValue: "Move to backlog",
+  },
+  [GameStatus.INPROGRESS]: {
+    icon: <Play className="md:h-4 md:w-4" />,
+    radioValue: "inprogress",
+    tooltipValue: "Playing",
+  },
+  [GameStatus.COMPLETED]: {
+    icon: <ListChecks className="md:h-4 md:w-4" />,
+    radioValue: "complete",
+    tooltipValue: "Mark as completed",
+  },
+  [GameStatus.FULL_COMPLETION]: {
+    icon: <CheckCheck className="md:h-4 md:w-4" />,
+    radioValue: "fullComplete",
+    tooltipValue: "Mark as 100% completed",
+  },
+  [GameStatus.ABANDONED]: {
+    icon: <Ghost className="md:h-4 md:w-4" />,
+    radioValue: "abandon",
+    tooltipValue: "Abandon game / Pause playing",
+  },
+}
 
 const MoveFromWishlistDialog = ({
   gameId,
@@ -80,7 +137,9 @@ const MoveFromWishlistDialog = ({
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger />
+      <DialogTrigger className="rounded bg-muted p-2">
+        Move from wishlist
+      </DialogTrigger>
       <DialogContent>
         <Form {...form}>
           <form
@@ -241,130 +300,48 @@ export function GameStatusRadio({
       <RadioGroup
         defaultValue={gameStatus}
         value={gameStatus ?? checkedStatus}
-        className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
+        className={cn(
+          "group flex flex-row items-center justify-center rounded-md bg-muted p-1 text-muted-foreground disabled:cursor-not-allowed lg:flex-col"
+        )}
         onValueChange={onUpdate}
+        disabled={gameStatus === undefined}
       >
-        <div className="flex items-center">
-          <RadioGroupItem
-            value={GameStatus.BACKLOG}
-            id="r1"
-            className="group sr-only"
-          />
-          <Label
-            htmlFor="r1"
-            className={cn(
-              "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-              "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-              {
-                "bg-background text-foreground shadow-sm":
-                  gameStatus === GameStatus.BACKLOG,
-              }
-            )}
-          >
-            <Library className="md:mr-1 md:h-4 md:w-4" />
-            &nbsp;
-            <span className="hidden md:block">Put in backlog</span>
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem
-            value={GameStatus.INPROGRESS}
-            id="r2"
-            className="group sr-only"
-          />
-          <Label
-            htmlFor="r2"
-            className={cn(
-              "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-              "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-              {
-                "bg-background text-foreground shadow-sm":
-                  gameStatus === GameStatus.INPROGRESS,
-              }
-            )}
-          >
-            <>
-              <Play className="md:mr-1 md:h-4 md:w-4" />
-              <span className="hidden md:block">Start playing</span>
-            </>
-          </Label>
-        </div>
-        <RenderWhen condition={Boolean(gameStatus)}>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem
-              value={GameStatus.COMPLETED}
-              id="r3"
-              className="group sr-only"
-            />
-            <Label
-              htmlFor="r3"
-              className={cn(
-                "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-                "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                {
-                  "bg-background text-foreground shadow-sm":
-                    gameStatus === GameStatus.COMPLETED,
-                }
-              )}
-            >
-              <>
-                <ListChecks className="md:mr-1 md:h-4 md:w-4" />
-                <span className="hidden md:block">Complete</span>
-              </>
-            </Label>
+        {Object.entries(statusMapping).map(([key, value]) => (
+          <div key={key}>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center">
+                    <RadioGroupItem
+                      value={key}
+                      id={value.radioValue}
+                      className="group sr-only"
+                    />
+                    <Label
+                      htmlFor={value.radioValue}
+                      className={cn(
+                        "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
+                        "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
+                        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+                        "hover:ring-2 group-disabled:cursor-not-allowed group-disabled:hover:ring-0",
+                        {
+                          "bg-background text-foreground shadow-sm":
+                            gameStatus === key,
+                        }
+                      )}
+                    >
+                      {value.icon}
+                    </Label>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="rounded bg-black p-2 text-xs text-white">
+                  {value.tooltipValue}
+                  <TooltipArrow />
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem
-              value={GameStatus.FULL_COMPLETION}
-              id="r4"
-              className="group sr-only"
-            />
-            <Label
-              htmlFor="r4"
-              className={cn(
-                "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-                "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                {
-                  "bg-background text-foreground shadow-sm":
-                    gameStatus === GameStatus.FULL_COMPLETION,
-                }
-              )}
-            >
-              <>
-                <ListChecks className="md:mr-1 md:h-4 md:w-4" />
-                <span className="hidden md:block">100% Completion</span>
-              </>
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem
-              value={GameStatus.ABANDONED}
-              id="r5"
-              className="group sr-only"
-            />
-            <Label
-              htmlFor="r5"
-              className={cn(
-                "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-                "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                {
-                  "bg-background text-foreground shadow-sm":
-                    gameStatus === GameStatus.ABANDONED,
-                }
-              )}
-            >
-              <>
-                <Ghost className="md:mr-1 md:h-4 md:w-4" />
-                <span className="hidden md:block">Abandon</span>
-              </>
-            </Label>
-          </div>
-        </RenderWhen>
+        ))}
       </RadioGroup>
     </>
   )

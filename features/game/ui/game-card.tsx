@@ -8,7 +8,7 @@ import { RenderWhen } from "@/components/render-when"
 
 function Artwork({ game }: { game: Partial<Game> }) {
   return (
-    <div className="group relative cursor-pointer rounded-sm border bg-background shadow-md transition-all hover:scale-105 hover:shadow-xl">
+    <div className="group relative cursor-pointer rounded-sm border bg-background text-white shadow-md transition-all">
       <div className="size-32 md:size-48 xl:size-52 flex items-center justify-center">
         <Image
           src={game.imageUrl ?? ""}
@@ -19,7 +19,7 @@ function Artwork({ game }: { game: Partial<Game> }) {
           priority
         />
       </div>
-      <div className="absolute bottom-0 left-0 hidden w-32 flex-col justify-between gap-2 bg-slate-800 p-2 group-hover:flex md:w-48 md:px-4 md:py-2 xl:w-52">
+      <div className="absolute bottom-0 left-0 hidden w-32 flex-col justify-between gap-2 bg-slate-800/70 p-2 group-hover:flex md:w-48 md:px-4 md:py-2 xl:w-52">
         <div className="flex items-center justify-between">
           <RenderWhen condition={Boolean(game.platform)}>
             <Badge
