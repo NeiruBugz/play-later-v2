@@ -98,3 +98,20 @@ export async function deleteGame(id: Game["id"]) {
   revalidatePath(LIBRARY_PATH)
   redirect(LIBRARY_PATH)
 }
+
+export async function updateGame(
+  id: Game["id"],
+  gameKey: keyof Game,
+  value: Game[keyof Game],
+  updatedAt?: Date
+) {
+  const userId = await getUserId()
+  await prisma.game.update({
+    data: {
+      [gameKey]: value,
+      updatedAt,
+    },
+    where: { id, userId },
+  })
+  revalidatePath(LIBRARY_PATH)
+}

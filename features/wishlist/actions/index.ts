@@ -101,6 +101,7 @@ export async function moveToLibrary(
     imageUrl: gameData.imageUrl,
     howLongToBeatId: gameData.howLongToBeatId,
     createdAt: gameData.createdAt,
+    gameplayTime: gameData.gameplayMain,
     updatedAt: new Date(),
     deletedAt: null,
   }

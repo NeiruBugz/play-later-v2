@@ -73,6 +73,7 @@ model Game {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   deletedAt       DateTime?
+  gameplayTime    Int?
 
   @@index([userId])
 }

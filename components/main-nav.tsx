@@ -37,7 +37,7 @@ export function MainNav({ items }: MainNavProps) {
                     key={index}
                     href={item.href}
                     className={cn(
-                      "text-pretty flex items-center font-medium text-muted-foreground",
+                      "flex items-center text-pretty font-medium text-muted-foreground",
                       item.disabled && "cursor-not-allowed opacity-80"
                     )}
                   >

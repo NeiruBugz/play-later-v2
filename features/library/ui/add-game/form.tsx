@@ -87,7 +87,7 @@ export function AddForm({
     }
     try {
       const { platform, purchaseType, status, title } = values
-      const { id, imageUrl } = selectedGame
+      const { id, imageUrl, gameplayMain } = selectedGame
       await addGame({
         howLongToBeatId: id,
         id: nanoid(),
@@ -98,6 +98,7 @@ export function AddForm({
         status,
         title,
         purchaseType,
+        gameplayTime: gameplayMain,
         rating: null,
         review: null,
         deletedAt: null,

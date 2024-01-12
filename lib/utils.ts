@@ -122,12 +122,12 @@ export function groupByYear(records: Game[]): Map<number, Game[]> {
   const grouped = new Map<number, Game[]>()
 
   records.forEach((record) => {
-    const year = new Date(record.updatedAt).getFullYear()
+    const year = new Date(record.createdAt).getFullYear()
     if (!grouped.has(year)) {
       grouped.set(year, [])
     }
     grouped.get(year)!.push(record)
   })
 
-  return grouped
+  return new Map([...grouped].sort().reverse())
 }

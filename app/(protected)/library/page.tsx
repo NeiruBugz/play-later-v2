@@ -1,13 +1,13 @@
 import { GameCard } from "@/features/game/ui/game-card"
-import { getGames } from "@/features/library/actions"
+import { getGames, updateGame } from "@/features/library/actions"
 import AddGame from "@/features/library/ui/add-game/add-game"
 import { ListWrapper } from "@/features/library/ui/list-wrapper"
 import { PickerDialog } from "@/features/library/ui/pick-random-game/picker-dialog"
 import { PlatformFilter } from "@/features/library/ui/platform-filter"
+import { HowLongToBeatService } from "howlongtobeat"
 import { Ghost, Library, ListChecks, Play } from "lucide-react"
 
 import { groupByYear } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type LibraryPageProps = {
@@ -19,15 +19,36 @@ export default async function LibraryPage(props: LibraryPageProps) {
   const filter = new URLSearchParams(props.searchParams).get("platform") ?? " "
   const { abandoned, backlogged, completed, inprogress, fullCompletion } =
     await getGames(filter)
+
+  for (const game of backlogged) {
+    if (!game.gameplayTime && game.howLongToBeatId) {
+      const hltbService = new HowLongToBeatService()
+      const details = await hltbService.detail(game.howLongToBeatId)
+      await updateGame(
+        game.id,
+        "gameplayTime",
+        details?.gameplayMain,
+        game.createdAt
+      )
+    }
+  }
+
+  const totalBacklogTime = backlogged.reduce(
+    (acc, game) => acc + (game.gameplayTime ? game.gameplayTime : 0),
+    0
+  )
+
   const completedByYear = groupByYear(completed)
   const fullCompletionByYear = groupByYear(fullCompletion)
   const backloggedByYear = groupByYear(backlogged)
 
   return (
     <section>
-      <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
-        Library
-      </h1>
+      <div>
+        <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
+          Library
+        </h1>
+      </div>
       <Tabs defaultValue="inProgress" className="mt-4 h-full space-y-6">
         <div className="flex w-full flex-wrap items-center justify-between gap-4">
           <TabsList>
@@ -70,7 +91,12 @@ export default async function LibraryPage(props: LibraryPageProps) {
         </div>
         <TabsContent value="backlog">
           <>
-            <PickerDialog items={backlogged} />
+            <div className="flex items-center gap-2">
+              <p className="text-lg font-bold">
+                Total backlog time is {totalBacklogTime} hours
+              </p>
+              <PickerDialog items={backlogged} />
+            </div>
             {[
               [...backloggedByYear.entries()].map(([year, games]) => {
                 return (
