@@ -28,7 +28,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
         game.id,
         "gameplayTime",
         details?.gameplayMain,
-        game.createdAt
+        game.updatedAt
       )
     }
   }
