@@ -118,3 +118,16 @@ export function getRandomItem<Game>(array: Game[]): Game | undefined {
   const randomIndex = Math.floor(Math.random() * array.length)
   return array[randomIndex]
 }
+export function groupByYear(records: Game[]): Map<number, Game[]> {
+  const grouped = new Map<number, Game[]>()
+
+  records.forEach((record) => {
+    const year = new Date(record.updatedAt).getFullYear()
+    if (!grouped.has(year)) {
+      grouped.set(year, [])
+    }
+    grouped.get(year)!.push(record)
+  })
+
+  return grouped
+}

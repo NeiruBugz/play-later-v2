@@ -6,6 +6,7 @@ import { PickerDialog } from "@/features/library/ui/pick-random-game/picker-dial
 import { PlatformFilter } from "@/features/library/ui/platform-filter"
 import { Ghost, Library, ListChecks, Play } from "lucide-react"
 
+import { groupByYear } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -18,6 +19,10 @@ export default async function LibraryPage(props: LibraryPageProps) {
   const filter = new URLSearchParams(props.searchParams).get("platform") ?? " "
   const { abandoned, backlogged, completed, inprogress, fullCompletion } =
     await getGames(filter)
+  const completedByYear = groupByYear(completed)
+  const fullCompletionByYear = groupByYear(fullCompletion)
+  const backloggedByYear = groupByYear(backlogged)
+
   return (
     <section>
       <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
@@ -66,11 +71,22 @@ export default async function LibraryPage(props: LibraryPageProps) {
         <TabsContent value="backlog">
           <>
             <PickerDialog items={backlogged} />
-            <ListWrapper count={backlogged.length}>
-              {backlogged.map((game) => (
-                <GameCard key={game.id} game={game} />
-              ))}
-            </ListWrapper>
+            {[
+              [...backloggedByYear.entries()].map(([year, games]) => {
+                return (
+                  <div className="mt-2">
+                    <h3 className="mb-2 text-xl font-bold">
+                      In backlog since {year}
+                    </h3>
+                    <ListWrapper count={completed.length}>
+                      {games.map((game) => (
+                        <GameCard key={game.id} game={game} />
+                      ))}
+                    </ListWrapper>
+                  </div>
+                )
+              }),
+            ]}
           </>
         </TabsContent>
         <TabsContent value="inProgress" className="flex flex-wrap gap-4">
@@ -81,18 +97,38 @@ export default async function LibraryPage(props: LibraryPageProps) {
           </ListWrapper>
         </TabsContent>
         <TabsContent value="completed" className="flex flex-wrap gap-4">
-          <ListWrapper count={completed.length}>
-            {completed.map((game) => (
-              <GameCard key={game.id} game={game} />
-            ))}
-          </ListWrapper>
+          {[
+            [...completedByYear.entries()].map(([year, games]) => {
+              return (
+                <div>
+                  <h3 className="mb-2 text-xl font-bold">
+                    Completed in {year}
+                  </h3>
+                  <ListWrapper count={completed.length}>
+                    {games.map((game) => (
+                      <GameCard key={game.id} game={game} />
+                    ))}
+                  </ListWrapper>
+                </div>
+              )
+            }),
+          ]}
         </TabsContent>
         <TabsContent value="fullCompletion" className="flex flex-wrap gap-4">
-          <ListWrapper count={fullCompletion.length}>
-            {fullCompletion.map((game) => (
-              <GameCard key={game.id} game={game} />
-            ))}
-          </ListWrapper>
+          {[
+            [...fullCompletionByYear.entries()].map(([year, games]) => {
+              return (
+                <div>
+                  <h3 className="mb-2 text-xl font-bold">100% in {year}</h3>
+                  <ListWrapper count={completed.length}>
+                    {games.map((game) => (
+                      <GameCard key={game.id} game={game} />
+                    ))}
+                  </ListWrapper>
+                </div>
+              )
+            }),
+          ]}
         </TabsContent>
         <TabsContent value="abandoned" className="flex flex-wrap gap-4">
           <ListWrapper count={abandoned.length}>
