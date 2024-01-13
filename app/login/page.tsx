@@ -1,71 +1,141 @@
+import Image from "next/image"
+import Link from "next/link"
 import GoogleSignIn from "@/features/auth/google-sign-in"
+import library from "@/images/library.png"
+import sharedWishlist from "@/images/shared-wishlist.png"
+import { BarChart, Gamepad2, Share } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 import { Logo } from "@/components/logo"
 
 const generateFeatures = () => [
   {
     title: "Game Organization",
-    description: "Easily organize your games into categories and genres.",
-    icon: "🎮",
+    description:
+      "Easily organize your games by statuses, navigate and check completed ones",
+    icon: <Gamepad2 />,
   },
   {
     title: "Progress Tracking",
     description:
-      "Track your progress in each game and set goals for completion.",
-    icon: "📊",
+      "Measure you backlog in playtime hours, view your yearly progression",
+    icon: <BarChart />,
   },
-  // {
-  //   title: "Reminders",
-  //   description: "Receive notifications for upcoming game releases and events.",
-  //   icon: "🔔",
-  // },
+  {
+    title: "Shareable wishlists",
+    description:
+      "Organize games that you want and share them with friends in an easy way of sharing a link to it",
+    icon: <Share />,
+  },
 ]
 export default function LoginPage() {
   return (
-    <div className="h-screen flex-1 bg-gradient-to-r from-gray-900 to-gray-800">
-      <nav className="p-4">
-        <div className="container m-0 flex items-center justify-between p-0 md:mx-auto md:p-8">
-          <div className="flex items-center gap-2 text-white">
-            <Logo name={"PlayLater"} />
-          </div>
-          <GoogleSignIn />
+    <div className="min-h-screen flex-1">
+      <header className="flex items-center justify-between bg-gray-800 p-4 text-white">
+        <div className="flex items-center gap-2">
+          <Logo name={"PlayLater"} />
         </div>
-      </nav>
+        <GoogleSignIn />
+      </header>
 
-      <main className=" text-white">
-        <section className="container mx-auto pt-16 text-center">
-          <h1 className="mb-4 text-6xl font-extrabold leading-tight">
+      <main className="container mb-4 flex flex-col">
+        <section className="py-4 text-center text-white md:py-6">
+          <h2 className="mb-4 text-5xl font-bold">
             Manage Your Gaming Backlog
-          </h1>
-          <p className="mb-8 text-xl">
+          </h2>
+          <p className="text-xl">
             Organize your games, track progress, and never miss a gaming session
             again.
           </p>
         </section>
 
-        <section className="bg-gradient-to-r from-gray-800 to-gray-700 py-16">
-          <div className="container mx-auto">
-            <h2 className="mb-12 text-center text-4xl font-extrabold text-white">
+        <section className="border-b py-4 md:py-6">
+          <section className="p-6">
+            <h3 className="mb-12 text-center text-4xl font-extrabold">
               Key Features
-            </h2>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-2">
+            </h3>
+            <div className="flex flex-wrap items-center justify-center gap-4">
               {generateFeatures().map((feature, index) => (
                 <div
+                  className="min-h-60 max-w-sm overflow-hidden rounded bg-muted p-6 text-center shadow-lg"
                   key={index}
-                  className="flex flex-col items-center rounded-lg bg-gray-700 p-8"
                 >
-                  <div className="mb-4 text-4xl">{feature.icon}</div>
-                  <h3 className="mb-2 text-xl font-bold">{feature.title}</h3>
-                  <p className="text-gray-300">{feature.description}</p>
+                  <div className="mb-4 flex items-center justify-center text-4xl text-primary">
+                    {feature.icon}
+                  </div>
+                  <div className="px-6 py-4 text-slate-300">
+                    <div className="mb-2 text-xl font-bold">
+                      {feature.title}
+                    </div>
+                    <p className="text-base text-slate-500">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
+        </section>
+
+        <section className="border-b py-4 text-center md:py-6">
+          <h3 className="mb-12 text-center text-4xl font-extrabold">
+            Join project&apos;s Discord server
+          </h3>
+          <p className="mb-8 text-xl">
+            On this server you can request access to application as a tester,
+            provide feedback and request new features
+          </p>
+          <Button className="bg-discord">
+            <Link href="https://discord.gg/NK3THJyPeT" target="_blank">
+              PlayLater&apos;s server
+            </Link>
+          </Button>
+        </section>
+
+        <section className="container mx-auto border-b py-4 text-center md:py-6">
+          <h2 className="mb-12 text-center text-4xl font-extrabold text-white">
+            Screenshots
+          </h2>
+          <Carousel opts={{ loop: true }}>
+            <CarouselContent>
+              <CarouselItem>
+                <div>
+                  <label>Library overview</label>
+                  <Image
+                    src={library}
+                    alt="Libary overview"
+                    fill
+                    className="!relative h-auto"
+                  />
+                </div>
+              </CarouselItem>
+              <CarouselItem>
+                <div>
+                  <label>Shared wishlist overview</label>
+                  <Image
+                    src={sharedWishlist}
+                    alt="Shared wishlist overview"
+                    fill
+                    className="!relative h-auto"
+                  />
+                </div>
+              </CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </section>
       </main>
 
-      <footer className="relative w-full bg-gradient-to-r from-gray-900 to-gray-800 p-4 md:fixed md:bottom-0">
-        <div className="container mx-auto text-center text-white">
+      <footer className="bg-gray-800 p-4 text-center text-white">
+        <div className="container mx-auto text-center">
           <p>&copy; 2023-{new Date().getFullYear()} PlayLater.</p>
         </div>
       </footer>

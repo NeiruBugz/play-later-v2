@@ -93,7 +93,8 @@ export default async function LibraryPage(props: LibraryPageProps) {
           <>
             <div className="flex items-center gap-2">
               <p className="text-lg font-bold">
-                Total backlog time is {totalBacklogTime} hours
+                Total backlog time is {totalBacklogTime} hours and includes{" "}
+                {backlogged.length} game(s)
               </p>
               <PickerDialog items={backlogged} />
             </div>

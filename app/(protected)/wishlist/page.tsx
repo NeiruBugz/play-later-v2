@@ -1,5 +1,6 @@
 import { GameCard } from "@/features/game/ui/game-card"
 import { WishlistShare } from "@/features/game/ui/wishlist-share"
+import { ListWrapper } from "@/features/library/ui/list-wrapper"
 import { getWishlistedGames } from "@/features/wishlist/actions"
 
 import { RenderWhen } from "@/components/render-when"
@@ -20,9 +21,11 @@ export default async function WishlistPage() {
         <RenderWhen condition={!wishlist || wishlist.length === 0}>
           <h2>Wishlist is empty</h2>
         </RenderWhen>
-        {wishlist.map((game) => (
-          <GameCard key={game.id} game={game} path="wishlist" />
-        ))}
+        <ListWrapper count={wishlist.length}>
+          {wishlist.map((game) => (
+            <GameCard key={game.id} game={game} path="wishlist" />
+          ))}
+        </ListWrapper>
       </section>
     </section>
   )

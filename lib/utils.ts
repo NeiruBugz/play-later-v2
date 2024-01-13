@@ -1,4 +1,4 @@
-import { Game, GameStatus } from "@prisma/client"
+import { Game, GameStatus, PurchaseType } from "@prisma/client"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -53,6 +53,9 @@ export function mapPlatformToSelectOption(value?: string) {
 }
 
 export function uppercaseToNormal(value?: string) {
+  if (value === "PC") {
+    return value
+  }
   return value ? `${value[0]}${value.slice(1).toLowerCase()}` : value
 }
 
@@ -130,4 +133,22 @@ export function groupByYear(records: Game[]): Map<number, Game[]> {
   })
 
   return new Map([...grouped].sort().reverse())
+}
+
+export const DescriptionStatusMapping: Record<GameStatus, string> = {
+  [GameStatus.ABANDONED]:
+    "Game is either put on shelf forever, either you paused playing it for some time",
+  [GameStatus.BACKLOG]:
+    "Game is put on shelf for some time, but you haven't started playing it yet",
+  [GameStatus.COMPLETED]: "Game is completed",
+  [GameStatus.FULL_COMPLETION]: "Game is completed by 100%",
+  [GameStatus.INPROGRESS]: "Game is currently being played",
+}
+
+export const DescriptionPurchaseTypeMapping: Record<PurchaseType, string> = {
+  [PurchaseType.DIGITAL]: "You have the game in your digital library",
+  [PurchaseType.PHYSICAL]:
+    "You have the game on a disc, cartridge or other physical ",
+  [PurchaseType.SUBSCRIPTION]:
+    "Game from Xbox Game Pass, PlayStation Plus or Nintendo Switch Online",
 }

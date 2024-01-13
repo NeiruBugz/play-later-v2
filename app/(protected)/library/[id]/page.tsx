@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const gameInfo = await getGame(params.id)
+  console.log(gameInfo)
 
   return (
     <div className="pb-4">

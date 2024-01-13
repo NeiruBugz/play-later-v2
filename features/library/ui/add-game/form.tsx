@@ -3,18 +3,18 @@ import { addGame } from "@/features/library/actions"
 import { GamePicker } from "@/features/library/ui/add-game/game-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@radix-ui/react-popover"
-import { SelectValue } from "@radix-ui/react-select"
 import { HowLongToBeatEntry } from "howlongtobeat"
 import { nanoid } from "nanoid"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
-import { cn, mapPlatformToSelectOption, uppercaseToNormal } from "@/lib/utils"
+import {
+  cn,
+  DescriptionPurchaseTypeMapping,
+  DescriptionStatusMapping,
+  mapPlatformToSelectOption,
+  uppercaseToNormal,
+} from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,13 +24,50 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select"
+
+function FormDescription() {
+  return (
+    <legend>
+      <h2 className="font-bold">Description</h2>
+      <h3 className="font-bold">Statuses</h3>
+      <ul>
+        {Object.entries(GameStatus).map(([key, value]) => (
+          <li
+            key={key}
+            className="border-b py-1 leading-7 last-of-type:border-none"
+          >
+            {mapPlatformToSelectOption(value)} -{" "}
+            {DescriptionStatusMapping[value]}
+          </li>
+        ))}
+      </ul>
+      <h3 className="font-bold">Purchase types</h3>
+      <ul>
+        {Object.entries(PurchaseType).map(([key, value]) => (
+          <li
+            key={key}
+            className="border-b py-1 leading-7 last-of-type:border-none"
+          >
+            {uppercaseToNormal(value)} -{DescriptionPurchaseTypeMapping[value]}
+          </li>
+        ))}
+      </ul>
+    </legend>
+  )
+}
 
 const addGameSchema = z.object({
   platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
@@ -147,7 +184,10 @@ export function AddForm({
         </div>
       ) : null}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4 overflow-auto"
+        >
           {/* <FormField
             control={form.control}
             name="title"
