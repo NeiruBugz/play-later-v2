@@ -25,12 +25,12 @@ export function UserDropdown({ session }: { session: Session | null }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="h-9 w-9 cursor-pointer rounded-full">
+        <Avatar className="h-9 w-9 cursor-pointer rounded">
           <AvatarImage
             src={session?.user.image ?? ""}
             alt={session?.user.email ?? ""}
           />
-          <AvatarFallback className="h-9 w-9 rounded-md">
+          <AvatarFallback className="h-9 w-9 rounded">
             {nameFirstLiterals(session?.user.name ?? "")}
           </AvatarFallback>
         </Avatar>

@@ -16,12 +16,21 @@ async function getUserId() {
   return await getServerUserId()
 }
 
-export async function getGames(platformCriteria?: string) {
+type FilterKeys = "platform" | "sortBy" | "order"
+
+export async function getGames(
+  filters: Record<FilterKeys, string | undefined>
+) {
   const userId = await getUserId()
 
+  const sortState = {
+    key: filters.sortBy || "updatedAt",
+    order: filters.order || "desc",
+  }
+
   const platformFilter =
-    platformCriteria !== " "
-      ? { platform: platformCriteria as GamePlatform }
+    filters.platform !== " "
+      ? { platform: filters.platform as GamePlatform }
       : {}
   const games: Game[] = await prisma.game.findMany({
     where: {
@@ -29,7 +38,7 @@ export async function getGames(platformCriteria?: string) {
       deletedAt: null,
       ...platformFilter,
     },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { [sortState.key]: sortState.order },
   })
 
   return {

@@ -152,3 +152,11 @@ export const DescriptionPurchaseTypeMapping: Record<PurchaseType, string> = {
   [PurchaseType.SUBSCRIPTION]:
     "Game from Xbox Game Pass, PlayStation Plus or Nintendo Switch Online",
 }
+
+export const StatusToUIMapping: Record<GameStatus, string> = {
+  ABANDONED: "Abandoned",
+  FULL_COMPLETION: "100% Completed",
+  BACKLOG: "Backlog",
+  INPROGRESS: "Playing",
+  COMPLETED: "Completed",
+}

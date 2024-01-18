@@ -220,11 +220,11 @@ export function AddForm({
                   <SelectContent>
                     {Object.entries(GamePlatform).map(([key, value]) => (
                       <SelectItem key={key} value={key}>
-                        <span className="normal-case">
+                        <div className="normal-case">
                           {value !== GamePlatform.PC
                             ? uppercaseToNormal(value)
                             : value}
-                        </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -247,9 +247,9 @@ export function AddForm({
                   <SelectContent>
                     {Object.entries(GameStatus).map(([key, value]) => (
                       <SelectItem key={key} value={key}>
-                        <span className="normal-case">
+                        <div className="normal-case">
                           {mapPlatformToSelectOption(value)}
-                        </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
