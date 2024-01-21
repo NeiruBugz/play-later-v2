@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Game } from "@prisma/client"
+import { Clock } from "lucide-react"
 
 import { platformEnumToColor, uppercaseToNormal } from "@/lib/utils"
 import { Badge, ColorVariant } from "@/components/ui/badge"
@@ -33,6 +34,10 @@ function Artwork({ game }: { game: Partial<Game> }) {
       </div>
       <div className="absolute bottom-0 left-0 hidden min-h-[30%] w-32 flex-col justify-center gap-2 bg-slate-800/70 p-2 group-hover:flex sm:w-36 md:w-48 md:px-4 md:py-2 xl:w-52">
         <p className="text-md font-medium">{game.title}</p>
+      </div>
+      <div className="absolute left-2 top-2 flex w-fit items-center justify-center gap-1 rounded-full bg-slate-500 p-1 text-xs">
+        <Clock className="h-3 w-3" />
+        {game.gameplayTime} h.
       </div>
     </div>
   )

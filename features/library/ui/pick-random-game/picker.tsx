@@ -42,7 +42,7 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
   }
   return (
     <div
-      className="my-4 flex cursor-pointer items-center justify-center gap-4 border border-transparent p-4 hover:rounded-md hover:border hover:border-primary"
+      className="my-4 flex cursor-pointer flex-col items-center justify-center gap-4 border border-transparent p-4 hover:rounded-md hover:border hover:border-primary md:flex-row"
       onClick={onClick}
     >
       {!isRunning ? (

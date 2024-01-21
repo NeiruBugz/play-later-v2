@@ -81,20 +81,25 @@ export default async function LibraryPage(props: LibraryPageProps) {
   const list = currentList()
 
   return (
-    <section>
-      <div className="flex flex-wrap justify-between">
-        <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
-          Library
-        </h1>
-        <AddGame />
-      </div>
-      <section>
-        <LibraryNavigation />
-      </section>
-      <section>
-        <LibraryFilters />
-      </section>
-      <section>
+    <section className="relative">
+      <header className="sticky top-0 z-40 bg-background p-4 md:container">
+        <div className="flex flex-wrap justify-between">
+          <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
+            Library
+          </h1>
+          {currentStatus === "BACKLOG" ? (
+            <PickerDialog items={backlogged} />
+          ) : null}
+          <AddGame />
+        </div>
+        <section>
+          <LibraryNavigation />
+        </section>
+        <section>
+          <LibraryFilters />
+        </section>
+      </header>
+      <section className="bg-background p-4 md:container">
         <div>
           {currentStatus === "BACKLOG" ? (
             <div className="flex items-center gap-2">
@@ -102,7 +107,6 @@ export default async function LibraryPage(props: LibraryPageProps) {
                 Total backlog time is {totalBacklogTime} hours and includes{" "}
                 {backlogged.length} game(s)
               </p>
-              <PickerDialog items={backlogged} />
             </div>
           ) : null}
           <ListWrapper count={backlogged.length}>

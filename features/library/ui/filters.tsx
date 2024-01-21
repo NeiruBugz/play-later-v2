@@ -55,7 +55,7 @@ function LibraryFilters() {
       options.push({
         value: `${value}-asc`,
         label: (
-          <div className="h-6 flex items-center gap-4 ">
+          <div className="flex h-6 items-center gap-4 ">
             {mapper[value as keyof typeof mapper]} <ArrowUp size={20} />
           </div>
         ),
@@ -63,7 +63,7 @@ function LibraryFilters() {
       options.push({
         value: `${value}-desc`,
         label: (
-          <div className="h-6 flex items-center gap-4">
+          <div className="flex h-6 items-center gap-4">
             {mapper[value as keyof typeof mapper]} <ArrowDown size={20} />
           </div>
         ),
@@ -72,8 +72,6 @@ function LibraryFilters() {
 
     return options
   }, [])
-
-  console.log(options)
 
   return (
     <>
@@ -85,7 +83,7 @@ function LibraryFilters() {
         >
           <div>
             <Label className="my-2 block">Sort</Label>
-            <SelectTrigger className="h-10 w-[230px]">
+            <SelectTrigger className="h-10 max-w-[230px]">
               <SelectValue placeholder="Select your platform" />
             </SelectTrigger>
             <SelectContent className="w-[230px]">

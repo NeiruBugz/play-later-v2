@@ -21,7 +21,7 @@ function PickerDialog({ items }: { items: Game[] }) {
       <DialogTrigger asChild>
         <Button variant="outline">Pick random game</Button>
       </DialogTrigger>
-      <DialogContent className="min-w-[700px]">
+      <DialogContent className="min-h-[500px] min-w-[320px]">
         <DialogHeader>
           <DialogTitle>Backlog picker</DialogTitle>
           <DialogDescription>
