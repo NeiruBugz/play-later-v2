@@ -32,11 +32,11 @@ export default function AddGame({
           </span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full md:w-4/12">
+      <SheetContent className="w-full lg:w-1/2">
         <SheetHeader>
           <SheetTitle>Add game to library</SheetTitle>
         </SheetHeader>
-        <AddForm afterSubmit={setSheetOpen} game={game} />
+        <AddForm game={game} />
       </SheetContent>
     </Sheet>
   )

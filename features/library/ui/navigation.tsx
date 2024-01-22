@@ -1,11 +1,10 @@
 "use client"
 
 import { useEffect } from "react"
-import { useSearchParams } from "next/navigation"
 import { GameStatus } from "@prisma/client"
 
 import { useSearchParamsMutation } from "@/lib/hooks/useSearchParamsMutation"
-import { cn, mapStatusToUI, StatusToUIMapping } from "@/lib/utils"
+import { cn, StatusToUIMapping } from "@/lib/utils"
 
 function LibraryNavigation() {
   const { currentValue, handleParamsMutation } = useSearchParamsMutation()
@@ -23,7 +22,7 @@ function LibraryNavigation() {
           <li
             key={key}
             className={cn(
-              "md:text-md cursor-pointer whitespace-nowrap border-b border-transparent px-1 text-[12px] transition-all duration-300 first-of-type:pl-0 hover:border-b hover:border-secondary md:p-2",
+              "md:text-md cursor-pointer whitespace-nowrap border-b border-transparent px-1 text-[12px] transition-all duration-300 first-of-type:pl-0 hover:border-b hover:border-secondary md:p-2 md:text-[16px]",
               {
                 "border-primary": currentValue("status") === value,
               }

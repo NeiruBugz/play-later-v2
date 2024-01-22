@@ -7,6 +7,7 @@ import NextTopLoader from "nextjs-toploader"
 
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
+import { Toaster } from "@/components/ui/toaster"
 import ReactQuery from "@/components/query-provider"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <NextTopLoader />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ReactQuery>{children}</ReactQuery>
+          <Toaster />
           <TailwindIndicator />
         </ThemeProvider>
         <SpeedInsights />

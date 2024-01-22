@@ -10,7 +10,6 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -56,7 +55,8 @@ function LibraryFilters() {
         value: `${value}-asc`,
         label: (
           <div className="flex h-6 items-center gap-4 ">
-            {mapper[value as keyof typeof mapper]} <ArrowUp size={20} />
+            {mapper[value as keyof typeof mapper]}{" "}
+            <ArrowUp className="h-4 w-4" />
           </div>
         ),
       })
@@ -64,7 +64,8 @@ function LibraryFilters() {
         value: `${value}-desc`,
         label: (
           <div className="flex h-6 items-center gap-4">
-            {mapper[value as keyof typeof mapper]} <ArrowDown size={20} />
+            {mapper[value as keyof typeof mapper]}{" "}
+            <ArrowDown className="h-4 w-4" />
           </div>
         ),
       })

@@ -137,7 +137,7 @@ export function groupByYear(records: Game[]): Map<number, Game[]> {
 
 export const DescriptionStatusMapping: Record<GameStatus, string> = {
   [GameStatus.ABANDONED]:
-    "Game is either put on shelf forever, either you paused playing it for some time",
+    "Game is put on shelf forever, probably, you would never return to this game",
   [GameStatus.BACKLOG]:
     "Game is put on shelf for some time, but you haven't started playing it yet",
   [GameStatus.COMPLETED]: "Game is completed",
@@ -155,8 +155,14 @@ export const DescriptionPurchaseTypeMapping: Record<PurchaseType, string> = {
 
 export const StatusToUIMapping: Record<GameStatus, string> = {
   ABANDONED: "Abandoned",
-  FULL_COMPLETION: "100% Completed",
+  FULL_COMPLETION: "100%",
   BACKLOG: "Backlog",
   INPROGRESS: "Playing",
   COMPLETED: "Completed",
+}
+
+export const PurchaseTypeToFormLabel: Record<PurchaseType, string> = {
+  PHYSICAL: "Physical",
+  DIGITAL: "Digital",
+  SUBSCRIPTION: "Subscription",
 }
