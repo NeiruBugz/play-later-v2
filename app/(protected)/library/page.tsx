@@ -1,7 +1,9 @@
 import { GameCard } from "@/features/game/ui/game-card"
 import { getGames, updateGame } from "@/features/library/actions"
 import AddGame from "@/features/library/ui/add-game/add-game"
+import { LibraryFilters } from "@/features/library/ui/filters"
 import { ListWrapper } from "@/features/library/ui/list-wrapper"
+import { LibraryNavigation } from "@/features/library/ui/navigation"
 import { PickerDialog } from "@/features/library/ui/pick-random-game/picker-dialog"
 import { PlatformFilter } from "@/features/library/ui/platform-filter"
 import { HowLongToBeatService } from "howlongtobeat"
@@ -16,9 +18,19 @@ type LibraryPageProps = {
 }
 
 export default async function LibraryPage(props: LibraryPageProps) {
-  const filter = new URLSearchParams(props.searchParams).get("platform") ?? " "
+  const params = new URLSearchParams(props.searchParams)
+  const platform = params.get("platform") ?? " "
+  const currentStatus = params.get("status")
+
+  const filters = {
+    platform,
+    order: params.get("order") ?? "asc",
+    sortBy: params.get("sortBy") ?? "updatedAt",
+  }
+
+  console.log(currentStatus)
   const { abandoned, backlogged, completed, inprogress, fullCompletion } =
-    await getGames(filter)
+    await getGames(filters)
 
   for (const game of backlogged) {
     if (!game.gameplayTime && game.howLongToBeatId) {
@@ -42,14 +54,73 @@ export default async function LibraryPage(props: LibraryPageProps) {
   const fullCompletionByYear = groupByYear(fullCompletion)
   const backloggedByYear = groupByYear(backlogged)
 
+  const currentList = () => {
+    if (currentStatus === "BACKLOG") {
+      return backloggedByYear
+    }
+
+    if (currentStatus === "INPROGRESS") {
+      return inprogress
+    }
+
+    if (currentStatus === "COMPLETED") {
+      return completedByYear
+    }
+
+    if (currentStatus === "FULL_COMPLETION") {
+      return fullCompletionByYear
+    }
+
+    if (currentStatus === "ABANDONED") {
+      return abandoned
+    }
+
+    return []
+  }
+
+  const list = currentList()
+
   return (
-    <section>
-      <div>
-        <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
-          Library
-        </h1>
-      </div>
-      <Tabs defaultValue="inProgress" className="mt-4 h-full space-y-6">
+    <section className="relative">
+      <header className="sticky top-0 z-40 bg-background p-4 md:container">
+        <div className="flex flex-wrap justify-between">
+          <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
+            Library
+          </h1>
+          {currentStatus === "BACKLOG" ? (
+            <PickerDialog items={backlogged} />
+          ) : null}
+          <AddGame />
+        </div>
+        <section>
+          <LibraryNavigation />
+        </section>
+        <section>
+          <LibraryFilters />
+        </section>
+      </header>
+      <section className="bg-background p-4 md:container">
+        <div>
+          {currentStatus === "BACKLOG" ? (
+            <div className="flex items-center gap-2">
+              <p className="text-lg font-bold">
+                Total backlog time is {totalBacklogTime} hours and includes{" "}
+                {backlogged.length} game(s)
+              </p>
+            </div>
+          ) : null}
+          <ListWrapper count={backlogged.length}>
+            {Array.isArray(list)
+              ? list.map((game) => <GameCard key={game.id} game={game} />)
+              : [...list.entries()].map(([year, games]) => {
+                  return games.map((game) => (
+                    <GameCard key={game.id} game={game} />
+                  ))
+                })}
+          </ListWrapper>
+        </div>
+      </section>
+      {/* <Tabs defaultValue="inProgress" className="mt-4 h-full space-y-6">
         <div className="flex w-full flex-wrap items-center justify-between gap-4">
           <TabsList>
             <TabsTrigger value="backlog">
@@ -164,7 +235,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
             ))}
           </ListWrapper>
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
     </section>
   )
 }

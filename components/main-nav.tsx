@@ -40,6 +40,7 @@ export function MainNav({ items }: MainNavProps) {
                       "flex items-center text-pretty font-medium text-muted-foreground",
                       item.disabled && "cursor-not-allowed opacity-80"
                     )}
+                    target={item.external ? "_blank" : "_parent"}
                   >
                     {item.title}
                   </Link>

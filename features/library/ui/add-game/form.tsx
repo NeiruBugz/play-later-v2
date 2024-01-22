@@ -2,7 +2,7 @@ import React, { useRef } from "react"
 import { addGame } from "@/features/library/actions"
 import { GamePicker } from "@/features/library/ui/add-game/game-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
+import { Game, GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
 import { HowLongToBeatEntry } from "howlongtobeat"
 import { nanoid } from "nanoid"
 import { useForm } from "react-hook-form"
@@ -13,6 +13,7 @@ import {
   DescriptionPurchaseTypeMapping,
   DescriptionStatusMapping,
   mapPlatformToSelectOption,
+  PurchaseTypeToFormLabel,
   uppercaseToNormal,
 } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -37,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
 
 function FormDescription() {
   return (
@@ -47,7 +49,7 @@ function FormDescription() {
         {Object.entries(GameStatus).map(([key, value]) => (
           <li
             key={key}
-            className="border-b py-1 leading-7 last-of-type:border-none"
+            className="border-b py-1 text-xs leading-7 last-of-type:border-none md:text-[14px]"
           >
             {mapPlatformToSelectOption(value)} -{" "}
             {DescriptionStatusMapping[value]}
@@ -59,9 +61,9 @@ function FormDescription() {
         {Object.entries(PurchaseType).map(([key, value]) => (
           <li
             key={key}
-            className="border-b py-1 leading-7 last-of-type:border-none"
+            className="border-b py-1 text-xs leading-7 last-of-type:border-none md:text-[14px]"
           >
-            {uppercaseToNormal(value)} -{DescriptionPurchaseTypeMapping[value]}
+            {uppercaseToNormal(value)} - {DescriptionPurchaseTypeMapping[value]}
           </li>
         ))}
       </ul>
@@ -82,13 +84,7 @@ const addGameSchema = z.object({
   purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]),
 })
 
-export function AddForm({
-  afterSubmit,
-  game,
-}: {
-  afterSubmit: React.Dispatch<React.SetStateAction<boolean>>
-  game?: HowLongToBeatEntry
-}) {
+export function AddForm({ game }: { game?: HowLongToBeatEntry }) {
   const form = useForm<z.infer<typeof addGameSchema>>({
     resolver: zodResolver(addGameSchema),
     defaultValues: {
@@ -97,17 +93,35 @@ export function AddForm({
     },
   })
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const { toast } = useToast()
 
   const [selectedGame, setSelectedGame] = React.useState<
     HowLongToBeatEntry | undefined
   >(game)
   const [isPickerOpen, setPickerOpen] = React.useState(false)
 
-  // React.useEffect(() => {
-  //   if (game) {
-  //     form.setValue("title", game.name)
-  //   }
-  // }, [game])
+  const showToast = (
+    type: "success" | "error",
+    name: string,
+    status: GameStatus
+  ) => {
+    if (type === "success") {
+      toast({
+        title: "Success",
+        description: `${name} was successfully added to your games`,
+      })
+      return
+    }
+
+    if (type === "error") {
+      toast({
+        title: "Oops, something happened",
+        description: `We couldn't add ${name} to your games`,
+        variant: "destructive",
+      })
+      return
+    }
+  }
 
   const onGameSelect = React.useCallback(
     (game: HowLongToBeatEntry) => {
@@ -140,9 +154,10 @@ export function AddForm({
         review: null,
         deletedAt: null,
       })
+      showToast("success", title, status)
       form.reset()
-      afterSubmit(false)
     } catch (e) {
+      showToast("error", values.title, values.status)
       console.error(e)
     }
   }
@@ -188,23 +203,6 @@ export function AddForm({
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 overflow-auto"
         >
-          {/* <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Game Title</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={field.value}
-                    onChange={field.onChange}
-                    disabled
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          /> */}
           <FormField
             control={form.control}
             name="platform"
@@ -220,11 +218,11 @@ export function AddForm({
                   <SelectContent>
                     {Object.entries(GamePlatform).map(([key, value]) => (
                       <SelectItem key={key} value={key}>
-                        <span className="normal-case">
+                        <div className="normal-case">
                           {value !== GamePlatform.PC
                             ? uppercaseToNormal(value)
                             : value}
-                        </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -247,9 +245,9 @@ export function AddForm({
                   <SelectContent>
                     {Object.entries(GameStatus).map(([key, value]) => (
                       <SelectItem key={key} value={key}>
-                        <span className="normal-case">
+                        <div className="normal-case">
                           {mapPlatformToSelectOption(value)}
-                        </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -262,91 +260,45 @@ export function AddForm({
             name="purchaseType"
             render={({ field }) => (
               <FormItem className="">
-                <FormLabel>Purchase type</FormLabel>
+                <FormLabel className="block">Purchase type</FormLabel>
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
                   >
-                    <FormItem className="flex items-center space-x-0 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem
-                          value={PurchaseType.PHYSICAL}
-                          id="physical"
-                          className="sr-only"
-                        />
-                      </FormControl>
-                      <FormLabel
-                        htmlFor="physical"
-                        className={cn(
-                          "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-                          "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                          {
-                            "bg-background text-foreground shadow-sm":
-                              form.getValues().purchaseType ===
-                              PurchaseType.PHYSICAL,
-                          }
-                        )}
-                      >
-                        Physical
-                      </FormLabel>
-                    </FormItem>
-                    <FormItem className="flex items-center space-x-0 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem
-                          value={PurchaseType.DIGITAL}
-                          id="digital"
-                          className="sr-only"
-                        />
-                      </FormControl>
-                      <FormLabel
-                        htmlFor="digital"
-                        className={cn(
-                          "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-                          "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                          {
-                            "bg-background text-foreground shadow-sm":
-                              form.getValues().purchaseType ===
-                              PurchaseType.DIGITAL,
-                          }
-                        )}
-                      >
-                        Digital
-                      </FormLabel>
-                    </FormItem>
-                    <FormItem className="flex items-center space-x-0 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem
-                          value={PurchaseType.SUBSCRIPTION}
-                          id="subscription"
-                          className="sr-only"
-                        />
-                      </FormControl>
-                      <FormLabel
-                        htmlFor="subscription"
-                        className={cn(
-                          "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-                          "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-                          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                          {
-                            "bg-background text-foreground shadow-sm":
-                              form.getValues().purchaseType ===
-                              PurchaseType.SUBSCRIPTION,
-                          }
-                        )}
-                      >
-                        Subscription
-                      </FormLabel>
-                    </FormItem>
+                    {Object.keys(PurchaseType).map((key) => (
+                      <FormItem className="flex items-center space-x-0 space-y-0">
+                        <FormControl key={key}>
+                          <RadioGroupItem
+                            value={key}
+                            id={key}
+                            className="sr-only"
+                          />
+                        </FormControl>
+                        <FormLabel
+                          htmlFor={key}
+                          className={cn(
+                            "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
+                            "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
+                            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                            {
+                              "bg-background text-foreground shadow-sm":
+                                form.getValues().purchaseType === key,
+                            }
+                          )}
+                        >
+                          {PurchaseTypeToFormLabel[key as PurchaseType]}
+                        </FormLabel>
+                      </FormItem>
+                    ))}
                   </RadioGroup>
                 </FormControl>
               </FormItem>
             )}
           />
           <Button type="submit">Submit</Button>
+          <FormDescription />
         </form>
       </Form>
     </div>

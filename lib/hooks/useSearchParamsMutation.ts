@@ -1,3 +1,5 @@
+"use client"
+
 import { useCallback } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
@@ -15,6 +17,19 @@ export function useSearchParamsMutation() {
     (name: string, value: string) => {
       const currentSearch = new URLSearchParams(searchParams)
       currentSearch.set(name, value)
+
+      router.push(`${pathname}?${currentSearch}`)
+    },
+    [router, pathname, searchParams]
+  )
+
+  const handleMultipleParamsMutation = useCallback(
+    (params: Array<Record<string, string>>) => {
+      const currentSearch = new URLSearchParams(searchParams)
+      params.forEach((param) => {
+        const [[key, value]] = Object.entries(param)
+        currentSearch.set(key, value)
+      })
 
       router.push(`${pathname}?${currentSearch}`)
     },
@@ -41,5 +56,6 @@ export function useSearchParamsMutation() {
     handleParamsMutation,
     handleParamsClear,
     handleParamsDeleteByName,
+    handleMultipleParamsMutation,
   }
 }

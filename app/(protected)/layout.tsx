@@ -7,7 +7,7 @@ export default function LibraryLayout({ children }: PropsWithChildren) {
   return (
     <Providers>
       <SiteHeader />
-      <main className="bg-background px-4 md:container">
+      <main className="bg-background">
         <div className="h-full py-6">{children}</div>
       </main>
     </Providers>
