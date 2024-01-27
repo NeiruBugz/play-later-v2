@@ -28,7 +28,6 @@ export default async function LibraryPage(props: LibraryPageProps) {
     sortBy: params.get("sortBy") ?? "updatedAt",
   }
 
-  console.log(currentStatus)
   const { abandoned, backlogged, completed, inprogress, fullCompletion } =
     await getGames(filters)
 

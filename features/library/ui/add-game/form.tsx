@@ -2,7 +2,7 @@ import React, { useRef } from "react"
 import { addGame } from "@/features/library/actions"
 import { GamePicker } from "@/features/library/ui/add-game/game-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Game, GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
+import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
 import { HowLongToBeatEntry } from "howlongtobeat"
 import { nanoid } from "nanoid"
 import { useForm } from "react-hook-form"
@@ -84,7 +84,15 @@ const addGameSchema = z.object({
   purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]),
 })
 
-export function AddForm({ game }: { game?: HowLongToBeatEntry }) {
+export function AddForm({
+  game,
+  isCompact = false,
+  submitLabel = "Submit",
+}: {
+  game?: HowLongToBeatEntry
+  isCompact?: boolean
+  submitLabel?: string
+}) {
   const form = useForm<z.infer<typeof addGameSchema>>({
     resolver: zodResolver(addGameSchema),
     defaultValues: {
@@ -100,11 +108,7 @@ export function AddForm({ game }: { game?: HowLongToBeatEntry }) {
   >(game)
   const [isPickerOpen, setPickerOpen] = React.useState(false)
 
-  const showToast = (
-    type: "success" | "error",
-    name: string,
-    status: GameStatus
-  ) => {
+  const showToast = (type: "success" | "error", name: string) => {
     if (type === "success") {
       toast({
         title: "Success",
@@ -154,36 +158,38 @@ export function AddForm({ game }: { game?: HowLongToBeatEntry }) {
         review: null,
         deletedAt: null,
       })
-      showToast("success", title, status)
+      showToast("success", title)
       form.reset()
     } catch (e) {
-      showToast("error", values.title, values.status)
+      showToast("error", values.title)
       console.error(e)
     }
   }
 
   return (
-    <div className="my-6">
-      <Popover modal onOpenChange={setPickerOpen} open={isPickerOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="mb-4 w-full"
-            ref={triggerRef}
-            disabled={game !== undefined}
-          >
-            Find a game
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="z-[1000] w-full bg-popover shadow-md">
-          <GamePicker
-            onGameSelect={onGameSelect}
-            selectedGame={selectedGame?.id}
-            width={triggerRef.current?.getBoundingClientRect().width}
-          />
-        </PopoverContent>
-      </Popover>
-      {selectedGame ? (
+    <div className={cn("my-6", { "m-0": isCompact })}>
+      {isCompact ? null : (
+        <Popover modal onOpenChange={setPickerOpen} open={isPickerOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="mb-4 w-full"
+              ref={triggerRef}
+              disabled={game !== undefined}
+            >
+              Find a game
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="z-[1000] w-full bg-popover shadow-md">
+            <GamePicker
+              onGameSelect={onGameSelect}
+              selectedGame={selectedGame?.id}
+              width={triggerRef.current?.getBoundingClientRect().width}
+            />
+          </PopoverContent>
+        </Popover>
+      )}
+      {!isCompact && selectedGame ? (
         <div className="rounded-md border px-2 py-1 shadow-sm">
           <div className="flex items-center gap-2 font-medium">
             <Avatar className="rounded-md">
@@ -297,8 +303,8 @@ export function AddForm({ game }: { game?: HowLongToBeatEntry }) {
               </FormItem>
             )}
           />
-          <Button type="submit">Submit</Button>
-          <FormDescription />
+          <Button type="submit">{submitLabel}</Button>
+          {isCompact ? null : <FormDescription />}
         </form>
       </Form>
     </div>

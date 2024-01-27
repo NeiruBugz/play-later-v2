@@ -10,6 +10,8 @@ import { Badge, ColorVariant } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
+import { AddForm } from "../library/ui/add-game/form"
+
 export function ResultsList({ games }: { games: HowLongToBeatEntry[] }) {
   return (
     <ScrollArea className="mt-2 h-[600px] px-1 2xl:h-[1000px]">
@@ -21,7 +23,7 @@ export function ResultsList({ games }: { games: HowLongToBeatEntry[] }) {
               height={200}
               src={entry.imageUrl}
               alt={`${entry.name} artwork`}
-              className="h-auto"
+              className="h-auto w-[320px]"
             />
             <section className="space-y-2">
               <p className="font-bold">{entry.name}</p>
@@ -37,7 +39,13 @@ export function ResultsList({ games }: { games: HowLongToBeatEntry[] }) {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
-                <AddGame label="Add to Library" game={entry} />
+                <div>
+                  <AddForm
+                    game={entry}
+                    submitLabel="Add to Library"
+                    isCompact
+                  />
+                </div>
                 <Button
                   variant="secondary"
                   onClick={() => addToWishlist(entry)}

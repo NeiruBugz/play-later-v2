@@ -18,6 +18,17 @@ async function getUserId() {
 
 type FilterKeys = "platform" | "sortBy" | "order"
 
+export async function getAllGames() {
+  const userId = await getUserId()
+
+  return await prisma.game.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+    },
+  })
+}
+
 export async function getGames(
   filters: Record<FilterKeys, string | undefined>
 ) {

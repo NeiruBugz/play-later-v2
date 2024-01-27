@@ -9,7 +9,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
   const gameInfo = await getWishlistedGame(params.id)
 
   return (
-    <div className="pb-4">
+    <div className="px-4 md:container">
       <header className="flex items-center gap-2">
         <Link href="/wishlist">
           <Button

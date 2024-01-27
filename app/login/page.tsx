@@ -46,7 +46,7 @@ export default function LoginPage() {
       </header>
 
       <main className="container mb-4 flex flex-col">
-        <section className="py-4 text-center text-white md:py-6">
+        <section className="py-4 text-center md:py-6">
           <h2 className="mb-4 text-5xl font-bold">
             Manage Your Gaming Backlog
           </h2>

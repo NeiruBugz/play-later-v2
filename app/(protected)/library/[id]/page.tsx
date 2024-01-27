@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { GameInfo } from "@/features/game/ui/game-info"
 import { getGame } from "@/features/library/actions"
 import { ArrowLeft } from "lucide-react"
@@ -8,10 +7,9 @@ import { BackLink } from "@/components/back-link"
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const gameInfo = await getGame(params.id)
-  console.log(gameInfo)
 
   return (
-    <div className="pb-4">
+    <div className="px-4 md:container">
       <header className="flex items-center gap-2">
         <BackLink>
           <Button
