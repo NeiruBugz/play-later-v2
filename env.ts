@@ -9,8 +9,8 @@ export const env = createEnv({
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]),
-    IGDB_CLIENT_ID: z.string(),
-    IGDB_CLIENT_SECRET: z.string(),
+    IGDB_CLIENT_ID: z.string().optional(),
+    IGDB_CLIENT_SECRET: z.string().optional(),
   },
   client: {},
   runtimeEnv: {
