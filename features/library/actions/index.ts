@@ -135,3 +135,26 @@ export async function updateGame(
   })
   revalidatePath(LIBRARY_PATH)
 }
+
+export async function addGameReview({
+  id,
+  review,
+  rating,
+}: {
+  id: Game["id"]
+  review: string
+  rating: number
+}) {
+  const userId = await getUserId()
+  await prisma.game.update({
+    data: {
+      rating: rating === 0 ? undefined : rating,
+      review: review,
+    },
+    where: {
+      id,
+      userId,
+    },
+  })
+  revalidatePath(`${LIBRARY_PATH}/${id}`)
+}

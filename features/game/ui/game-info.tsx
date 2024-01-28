@@ -1,6 +1,7 @@
 import Image from "next/image"
 import { GameDeleteDialog } from "@/features/game/ui/game-delete-dialog"
 import { GameStatusRadio } from "@/features/game/ui/game-status-radio"
+import { ReviewForm } from "@/features/game/ui/review-form"
 import { GameEntity } from "@/features/library/actions"
 import { WishlistEntity } from "@/features/wishlist/actions"
 import { GameStatus } from "@prisma/client"
@@ -17,6 +18,12 @@ import {
 } from "@/lib/utils"
 import { Badge, ColorVariant } from "@/components/ui/badge"
 import { RenderWhen } from "@/components/render-when"
+
+const reviewApplicableStatuses: Array<GameStatus> = [
+  "ABANDONED",
+  "COMPLETED",
+  "FULL_COMPLETION",
+]
 
 export function GameInfo({
   game,
@@ -153,6 +160,36 @@ export function GameInfo({
             {prepareDescription(game.description)}
           </p>
         </section>
+        <RenderWhen
+          condition={
+            gameStatus !== undefined &&
+            (!(game as GameEntity).rating || !(game as GameEntity).review) &&
+            reviewApplicableStatuses.includes(gameStatus)
+          }
+        >
+          <ReviewForm id={game.id} />
+        </RenderWhen>
+        <RenderWhen
+          condition={
+            (game as GameEntity).rating !== undefined ||
+            (game as GameEntity).review !== undefined
+          }
+        >
+          <section>
+            <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
+              Review and rating
+            </h3>
+            <p className="text-pretty leading-7">
+              {(game as GameEntity).review}
+            </p>
+            <p className="text-pretty leading-7">
+              Your score:{" "}
+              <span className="font-medium">
+                {(game as GameEntity).rating}/5
+              </span>
+            </p>
+          </section>
+        </RenderWhen>
       </article>
     </div>
   )
