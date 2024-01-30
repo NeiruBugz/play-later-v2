@@ -1,3 +1,5 @@
+import { getUserById, hasUsername } from "@/features/auth/actions"
+import { UserNameForm } from "@/features/auth/username-form"
 import { GameCard } from "@/features/game/ui/game-card"
 import { getGames, updateGame } from "@/features/library/actions"
 import AddGame from "@/features/library/ui/add-game/add-game"
@@ -7,6 +9,7 @@ import { LibraryNavigation } from "@/features/library/ui/navigation"
 import { PickerDialog } from "@/features/library/ui/pick-random-game/picker-dialog"
 import { HowLongToBeatService } from "howlongtobeat"
 
+import { getServerUserId } from "@/lib/auth"
 import { groupByYear } from "@/lib/utils"
 
 type LibraryPageProps = {
@@ -18,6 +21,8 @@ export default async function LibraryPage(props: LibraryPageProps) {
   const params = new URLSearchParams(props.searchParams)
   const platform = params.get("platform") ?? " "
   const currentStatus = params.get("status")
+
+  const withUsername = await hasUsername()
 
   const filters = {
     platform,
@@ -116,6 +121,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
           </ListWrapper>
         </div>
       </section>
+      {withUsername ? null : <UserNameForm />}
     </section>
   )
 }

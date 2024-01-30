@@ -1,19 +1,19 @@
-import { getServerSession } from "next-auth"
+import { getUserById } from "@/features/auth/actions"
 
 import { siteConfig } from "@/config/site"
-import { authOptions } from "@/lib/auth"
+import { getServerUserId } from "@/lib/auth"
 import { MainNav } from "@/components/main-nav"
 import { UserDropdown } from "@/components/user-dropdown"
 
 export async function SiteHeader() {
-  const session = await getServerSession(authOptions)
+  const user = await getUserById(await getServerUserId())
   return (
     <header className="sticky top-0 z-40 w-full bg-background">
       <div className="flex h-16 items-center space-x-4 px-4 md:container sm:justify-between sm:space-x-0">
         <MainNav items={siteConfig.mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center gap-1 space-x-1">
-            <UserDropdown session={session} />
+            <UserDropdown username={user ?? ""} />
           </nav>
         </div>
       </div>
