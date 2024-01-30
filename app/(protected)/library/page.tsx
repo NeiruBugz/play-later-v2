@@ -3,7 +3,7 @@ import { UserNameForm } from "@/features/auth/username-form"
 import { GameCard } from "@/features/game/ui/game-card"
 import { getGames, updateGame } from "@/features/library/actions"
 import AddGame from "@/features/library/ui/add-game/add-game"
-import { LibraryFilters } from "@/features/library/ui/filters"
+import { LibraryFiltersWrapper } from "@/features/library/ui/filters/filters"
 import { ListWrapper } from "@/features/library/ui/list-wrapper"
 import { LibraryNavigation } from "@/features/library/ui/navigation"
 import { PickerDialog } from "@/features/library/ui/pick-random-game/picker-dialog"
@@ -97,7 +97,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
           <LibraryNavigation />
         </section>
         <section>
-          <LibraryFilters />
+          <LibraryFiltersWrapper />
         </section>
       </header>
       <section className="bg-background p-4 md:container">
