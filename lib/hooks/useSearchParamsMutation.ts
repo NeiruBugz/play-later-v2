@@ -37,11 +37,9 @@ export function useSearchParamsMutation() {
   )
 
   const handleParamsClear = useCallback(() => {
-    const currentSearch = new URLSearchParams(searchParams)
-    for (const key in currentSearch.keys()) {
-      currentSearch.delete(key)
-    }
-  }, [searchParams])
+    const newParams = new URLSearchParams()
+    router.push(`${pathname}?${newParams}`)
+  }, [pathname, router])
 
   const handleParamsDeleteByName = useCallback(
     (name: string) => {

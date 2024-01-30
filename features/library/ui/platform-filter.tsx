@@ -42,7 +42,7 @@ export function PlatformFilter() {
     <Select value={defaultValue} onValueChange={onValueChange} defaultValue="+">
       <div>
         <Label className="my-2 block">Platform</Label>
-        <SelectTrigger className="h-10 min-w-[140px] max-w-[260px]">
+        <SelectTrigger className="h-10">
           <SelectValue placeholder="Platform filter" />
         </SelectTrigger>
         <SelectContent>
