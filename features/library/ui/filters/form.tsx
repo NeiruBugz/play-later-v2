@@ -1,10 +1,11 @@
-import { ReactNode, useEffect, useMemo, useState } from "react"
+import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react"
 import { LibraryFiltersUIProps } from "@/features/library/ui/filters/types"
 import { GamePlatform } from "@prisma/client"
 import { ArrowDown, ArrowUp } from "lucide-react"
 
 import { useSearchParamsMutation } from "@/lib/hooks/useSearchParamsMutation"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -41,7 +42,8 @@ function FiltersForm({
   const [filters, setFilters] = useState({
     order: currentValue("order") ?? DefaultSortState.order,
     sortBy: currentValue("sortBy") ?? DefaultSortState.sortBy,
-    platform: currentValue("platform") ?? "",
+    platform: currentValue("platform") ?? " ",
+    search: currentValue("search") ?? "",
   })
 
   useEffect(() => {
@@ -104,11 +106,18 @@ function FiltersForm({
     setFilters((prev) => ({ ...prev, sortBy: field, order }))
   }
 
+  const onSearchQueryChange = ({
+    currentTarget: { value },
+  }: ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => ({ ...prev, search: value }))
+  }
+
   const onClear = () => {
     handleMultipleParamsMutation([
       { sortBy: DefaultSortState.sortBy },
       { order: DefaultSortState.order },
       { platform: " " },
+      { search: "" },
     ])
     toggleOpen(false)
   }
@@ -118,12 +127,21 @@ function FiltersForm({
       { sortBy: filters.sortBy },
       { order: filters.order },
       { platform: filters.platform },
+      { search: filters.search },
     ])
     toggleOpen(false)
   }
 
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex flex-col gap-2 py-4">
+      <Label className="flex flex-col gap-2">
+        <span>Search</span>
+        <Input
+          onChange={onSearchQueryChange}
+          value={filters.search}
+          placeholder="Search within your library"
+        />
+      </Label>
       <Select
         value={`${filters.sortBy}-${filters.order}`}
         onValueChange={onSortingSelect}
