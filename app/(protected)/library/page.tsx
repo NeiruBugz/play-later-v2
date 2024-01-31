@@ -21,6 +21,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
   const params = new URLSearchParams(props.searchParams)
   const platform = params.get("platform") ?? " "
   const currentStatus = params.get("status")
+  const searchQuery = params.get("search") ?? ""
 
   const withUsername = await hasUsername()
 
@@ -28,6 +29,7 @@ export default async function LibraryPage(props: LibraryPageProps) {
     platform,
     order: params.get("order") ?? "asc",
     sortBy: params.get("sortBy") ?? "updatedAt",
+    search: searchQuery,
   }
 
   const { abandoned, backlogged, completed, inprogress, fullCompletion } =
