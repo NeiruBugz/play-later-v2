@@ -1,3 +1,26 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 "use server"
 
 import { revalidatePath } from "next/cache"
@@ -104,6 +127,7 @@ export async function moveToLibrary(
     gameplayTime: gameData.gameplayMain,
     updatedAt: new Date(),
     deletedAt: null,
+    list: null,
   }
 
   await prisma.game.create({
