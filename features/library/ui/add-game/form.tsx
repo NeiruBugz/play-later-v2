@@ -157,6 +157,7 @@ export function AddForm({
         rating: null,
         review: null,
         deletedAt: null,
+        listId: null,
       })
       showToast("success", title)
       form.reset()

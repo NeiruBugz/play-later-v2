@@ -45,7 +45,7 @@ function ReviewForm({ id }: { id: Game["id"] }) {
         review,
       })
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 

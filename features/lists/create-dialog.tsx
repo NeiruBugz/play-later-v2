@@ -38,7 +38,7 @@ function CreateList({ randomGames }: { randomGames: Game[] }) {
       setListName("")
       setOpen(false)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 

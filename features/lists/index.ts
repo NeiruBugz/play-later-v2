@@ -12,9 +12,10 @@ async function getLists() {
   return await prisma.list.findMany({
     where: {
       userId,
+      deletedAt: null,
     },
     orderBy: {
-      createdAt: "desc",
+      updatedAt: "desc",
     },
   })
 }
@@ -52,4 +53,29 @@ async function createList({
   revalidatePath("/lists")
 }
 
-export { getLists, createList }
+async function getList(id: List["id"]) {
+  const userId = await getServerUserId()
+  return await prisma.list.findUnique({
+    where: {
+      userId,
+      id,
+    },
+  })
+}
+
+async function deleteList(id: List["id"]) {
+  const userId = await getServerUserId()
+  await prisma.list.update({
+    where: {
+      userId,
+      id,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  })
+
+  revalidatePath("/lists")
+}
+
+export { getLists, createList, getList, deleteList }

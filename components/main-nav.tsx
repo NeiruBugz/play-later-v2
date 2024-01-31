@@ -1,4 +1,3 @@
-import * as React from "react"
 import Link from "next/link"
 import { Gamepad } from "lucide-react"
 
@@ -6,6 +5,7 @@ import { NavItem } from "@/types/nav"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { MobileNav } from "@/components/mobile-nav"
+import { NavLink } from "@/components/nav-link"
 
 interface MainNavProps {
   items: NavItem[]
@@ -28,34 +28,12 @@ export function MainNav({ items }: MainNavProps) {
       </div>
       <div className="hidden gap-6 md:flex md:gap-10">
         <Logo name={siteConfig.name} />
-        {items?.length ? (
-          <nav className="flex gap-6">
-            {items?.map((item, index) =>
-              item.href ? (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center text-pretty font-medium text-muted-foreground",
-                    item.disabled && "cursor-not-allowed opacity-80"
-                  )}
-                  target={item.external ? "_blank" : "_parent"}
-                >
-                  {item.title}
-                </Link>
-              ) : (
-                <span
-                  className={cn(
-                    "flex items-center text-pretty font-medium text-muted-foreground",
-                    item.disabled && "cursor-not-allowed opacity-80"
-                  )}
-                >
-                  {item.title}
-                </span>
-              )
-            )}
-          </nav>
-        ) : null}
+
+        <nav className="flex gap-6">
+          {items.map((item, index) => (
+            <NavLink item={item} key={`${index}_${item.title}_nav`} />
+          ))}
+        </nav>
       </div>
     </>
   )
