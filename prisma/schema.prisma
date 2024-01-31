@@ -49,6 +49,7 @@ model User {
   Game           Game[]
   WishlistedGame WishlistedGame[]
   username       String?
+  List           List[]
 }
 
 model VerificationToken {
@@ -75,8 +76,10 @@ model Game {
   updatedAt       DateTime      @updatedAt
   deletedAt       DateTime?
   gameplayTime    Int?
+  listId          String?
+  List            List?         @relation(fields: [listId], references: [id])
 
-  @@index([userId])
+  @@index([userId, listId])
 }
 
 model WishlistedGame {
@@ -89,6 +92,19 @@ model WishlistedGame {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
+
+  @@index([userId])
+}
+
+model List {
+  id        String    @id @default(cuid())
+  name      String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  games     Game[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([userId])
 }

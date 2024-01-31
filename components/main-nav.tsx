@@ -30,21 +30,29 @@ export function MainNav({ items }: MainNavProps) {
         <Logo name={siteConfig.name} />
         {items?.length ? (
           <nav className="flex gap-6">
-            {items?.map(
-              (item, index) =>
-                item.href && (
-                  <Link
-                    key={index}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center text-pretty font-medium text-muted-foreground",
-                      item.disabled && "cursor-not-allowed opacity-80"
-                    )}
-                    target={item.external ? "_blank" : "_parent"}
-                  >
-                    {item.title}
-                  </Link>
-                )
+            {items?.map((item, index) =>
+              item.href ? (
+                <Link
+                  key={index}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center text-pretty font-medium text-muted-foreground",
+                    item.disabled && "cursor-not-allowed opacity-80"
+                  )}
+                  target={item.external ? "_blank" : "_parent"}
+                >
+                  {item.title}
+                </Link>
+              ) : (
+                <span
+                  className={cn(
+                    "flex items-center text-pretty font-medium text-muted-foreground",
+                    item.disabled && "cursor-not-allowed opacity-80"
+                  )}
+                >
+                  {item.title}
+                </span>
+              )
             )}
           </nav>
         ) : null}

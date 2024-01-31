@@ -164,3 +164,15 @@ export async function addGameReview({
   })
   revalidatePath(`${LIBRARY_PATH}/${id}`)
 }
+
+export async function getRandomGames() {
+  const userId = await getUserId()
+  const games = await prisma.game.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+    },
+  })
+
+  return games.sort(() => Math.random() - 0.5).slice(0, 20)
+}
