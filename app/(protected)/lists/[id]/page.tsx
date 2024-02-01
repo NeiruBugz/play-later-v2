@@ -44,7 +44,9 @@ export default async function ListPage({
         <ListWrapper count={games.length}>
           <AddGameDialog id={listData?.id ?? ""} games={allGames} />
           {games.map((game) => (
-            <GameCard game={game} key={game.id} />
+            <div key={game.id} className="relative">
+              <GameCard game={game} path="lists" entityId={listData?.id} />
+            </div>
           ))}
         </ListWrapper>
       </section>

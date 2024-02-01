@@ -78,4 +78,19 @@ async function deleteList(id: List["id"]) {
   revalidatePath("/lists")
 }
 
-export { getLists, createList, getList, deleteList }
+async function deleteGameFromList(listId: List["id"], gameId: Game["id"]) {
+  const userId = await getServerUserId()
+  await prisma.game.update({
+    where: {
+      userId,
+      id: gameId,
+    },
+    data: {
+      listId: null,
+    },
+  })
+
+  revalidatePath(`/lists/${listId}`)
+}
+
+export { getLists, createList, getList, deleteList, deleteGameFromList }

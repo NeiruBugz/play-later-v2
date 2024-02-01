@@ -1,5 +1,9 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
+import { DeleteFromList } from "@/features/game/ui/delete-from-list"
+import { deleteGameFromList } from "@/features/lists"
 import { Game } from "@prisma/client"
 import { Clock } from "lucide-react"
 
@@ -48,7 +52,7 @@ function Artwork({ game }: { game: Partial<Game> }) {
           </div>
         </RenderWhen>
       </div>
-      <div className="absolute bottom-0 left-0 hidden min-h-[30%] w-32 flex-col justify-center gap-2 bg-slate-800/70 p-2 group-hover:flex sm:w-36 md:w-48 md:px-4 md:py-2 xl:w-52">
+      <div className="absolute bottom-0 left-0 hidden min-h-[30%] w-32 items-center justify-between gap-2 bg-slate-800/70 p-2 group-hover:flex sm:w-36 md:w-48 md:px-4 md:py-2 xl:w-52">
         <p className="text-md font-medium">{game.title}</p>
       </div>
     </div>
@@ -58,13 +62,34 @@ function Artwork({ game }: { game: Partial<Game> }) {
 export function GameCard({
   game,
   path = "library",
+  entityId,
 }: {
   game: Partial<Game>
   path?: string
+  entityId?: string
 }) {
+  const onDelete = async () => {
+    if (!game.id || !entityId) {
+      return
+    }
+
+    if (path.includes("lists")) {
+      try {
+        await deleteGameFromList(entityId, game.id)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
   return (
-    <Link href={`/${path}/${game.id}`} className="block w-32 md:w-48">
-      <Artwork game={game} />
-    </Link>
+    <div className="group flex w-full flex-col-reverse items-center justify-center">
+      {path === "lists" ? <DeleteFromList onDelete={onDelete} /> : null}
+      <Link
+        href={`/${path === "lists" ? "library" : path}/${game.id}`}
+        className="block w-32 md:w-48"
+      >
+        <Artwork game={game} />
+      </Link>
+    </div>
   )
 }
