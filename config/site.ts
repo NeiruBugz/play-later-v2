@@ -17,6 +17,10 @@ export const siteConfig = {
       href: "/search",
     },
     {
+      title: "Lists",
+      href: "/lists",
+    },
+    {
       title: "Discord Server",
       href: "https://discord.gg/NK3THJyPeT",
       external: true,

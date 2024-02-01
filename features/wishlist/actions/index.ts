@@ -104,6 +104,7 @@ export async function moveToLibrary(
     gameplayTime: gameData.gameplayMain,
     updatedAt: new Date(),
     deletedAt: null,
+    listId: null,
   }
 
   await prisma.game.create({

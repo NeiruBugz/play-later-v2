@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { GamePlatform, GameStatus, type Game } from "@prisma/client"
+import { GamePlatform, GameStatus, List, type Game } from "@prisma/client"
 import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat"
 
 import { getServerUserId } from "@/lib/auth"
@@ -25,6 +25,9 @@ export async function getAllGames() {
     where: {
       userId,
       deletedAt: null,
+    },
+    orderBy: {
+      title: "asc",
     },
   })
 }
@@ -163,4 +166,79 @@ export async function addGameReview({
     },
   })
   revalidatePath(`${LIBRARY_PATH}/${id}`)
+}
+
+export async function getRandomGames() {
+  const userId = await getUserId()
+  const games = await prisma.game.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+    },
+  })
+
+  return games.sort(() => Math.random() - 0.5).slice(0, 20)
+}
+
+export async function getListGames(id: List["id"]) {
+  const userId = await getUserId()
+  const games = await prisma.game.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+      listId: id,
+    },
+  })
+
+  return games
+}
+
+export async function getListGamesArtworks(id: List["id"]) {
+  const userId = await getUserId()
+  const games = await prisma.game.findMany({
+    where: {
+      userId,
+      deletedAt: null,
+      listId: id,
+    },
+  })
+
+  return games.map((game) => ({
+    id: game.id,
+    artwork: game.imageUrl,
+    game: game.title,
+  }))
+}
+
+export async function searchLibrary({ search }: { search: string }) {
+  const userId = await getServerUserId()
+
+  return await prisma.game.findMany({
+    where: {
+      userId,
+      title: {
+        contains: search,
+      },
+    },
+  })
+}
+
+export async function addGameToList({
+  gameId,
+  listId,
+}: {
+  gameId: Game["id"]
+  listId: List["id"]
+}) {
+  const userId = await getServerUserId()
+  await prisma.game.update({
+    data: {
+      listId,
+    },
+    where: {
+      id: gameId,
+      userId,
+    },
+  })
+  revalidatePath(`/list/${listId}`)
 }
