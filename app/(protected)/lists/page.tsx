@@ -44,32 +44,34 @@ export default async function ListsPage() {
       </header>
       <section className="flex flex-col gap-2 p-4 md:container">
         <CreateList randomGames={games} />
-        {lists.map((list) => {
-          const arts = artworks.get(list.id)
+        <div className="flex flex-wrap gap-3">
+          {lists.map((list) => {
+            const arts = artworks.get(list.id)
 
-          return (
-            <Link
-              href={`/lists/${list.id}`}
-              key={list.id}
-              className="relative h-fit w-fit rounded border p-4 hover:bg-secondary"
-            >
-              <div>
-                <Label>{list.name}</Label>
-                <div className="relative mt-1 grid w-fit grid-cols-3 gap-2">
-                  {arts?.map((art) => (
-                    <Image
-                      key={art.id}
-                      src={art.artwork}
-                      width="80"
-                      height="120"
-                      alt={`${art.game} cover art`}
-                    />
-                  ))}
+            return (
+              <Link
+                href={`/lists/${list.id}`}
+                key={list.id}
+                className="relative h-fit w-fit rounded border p-4 hover:bg-secondary"
+              >
+                <div>
+                  <Label>{list.name}</Label>
+                  <div className="relative mt-1 grid w-fit grid-cols-3 gap-2">
+                    {arts?.map((art) => (
+                      <Image
+                        key={art.id}
+                        src={art.artwork}
+                        width="80"
+                        height="120"
+                        alt={`${art.game} cover art`}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          )
-        })}
+              </Link>
+            )
+          })}
+        </div>
       </section>
     </section>
   )
