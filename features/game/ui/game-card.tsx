@@ -26,18 +26,20 @@ function GameTimeBadge({ time }: { time: Game["gameplayTime"] | undefined }) {
 
 function Artwork({ game }: { game: Partial<Game> }) {
   return (
-    <div className="group relative cursor-pointer rounded-sm border bg-background text-white shadow-md transition-all">
-      <div className="flex size-32 items-center justify-center sm:size-36 md:size-48 xl:size-52">
+    <div className="group relative flex cursor-pointer gap-4 rounded-sm border bg-background shadow-md transition-all">
+      <div className="">
         <Image
           src={game.imageUrl ?? ""}
           alt={`${game.title} cover art`}
-          className="h-full w-full object-cover"
-          width={256}
-          height={256}
+          className="!relative"
           priority
+          fill
         />
+      </div>
+      <div className="flex flex-col gap-2 py-2 pr-4">
+        <h6 className="w-full font-medium">{game.title}</h6>
         <RenderWhen condition={Boolean(game.platform)}>
-          <div className="absolute right-2 top-2 flex w-fit flex-col items-end gap-1 normal-case">
+          <div className="flex w-fit flex-col items-start gap-2 normal-case">
             <Badge
               variant={
                 game.platform
@@ -51,9 +53,6 @@ function Artwork({ game }: { game: Partial<Game> }) {
             <GameTimeBadge time={game.gameplayTime} />
           </div>
         </RenderWhen>
-      </div>
-      <div className="absolute bottom-0 left-0 hidden min-h-[30%] w-32 items-center justify-between gap-2 bg-slate-800/70 p-2 group-hover:flex sm:w-36 md:w-48 md:px-4 md:py-2 xl:w-52">
-        <p className="text-md font-medium">{game.title}</p>
       </div>
     </div>
   )
@@ -86,7 +85,7 @@ export function GameCard({
       {path === "lists" ? <DeleteFromList onDelete={onDelete} /> : null}
       <Link
         href={`/${path === "lists" ? "library" : path}/${game.id}`}
-        className="block w-32 md:w-48"
+        className="block"
       >
         <Artwork game={game} />
       </Link>

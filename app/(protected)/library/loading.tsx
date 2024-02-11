@@ -14,7 +14,7 @@ export default function Loading() {
       </header>
       <div className="flex gap-2 px-4 md:container">
         {[1, 2, 3, 4].map((_) => (
-          <Skeleton className="md:text-md h-6 w-8 cursor-pointer whitespace-nowrap border-b border-transparent px-1 text-[12px] transition-all duration-300 first-of-type:pl-0 hover:border-b hover:border-secondary md:p-2 " />
+          <Skeleton key={_} className="md:text-md h-6 w-8 cursor-pointer whitespace-nowrap border-b border-transparent px-1 text-[12px] transition-all duration-300 first-of-type:pl-0 hover:border-b hover:border-secondary md:p-2 " />
         ))}
       </div>
     </section>

@@ -118,7 +118,7 @@ function LibaryHeader({ currentStatus, backlogged }: LibraryHeaderProps) {
         <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
           Library
         </h1>
-        {currentStatus === "BACKLOG" ? (
+        {currentStatus === "BACKLOG" && backlogged.length !== 0 ? (
           <PickerDialog items={backlogged} />
         ) : null}
         <AddGame />
