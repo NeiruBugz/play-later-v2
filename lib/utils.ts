@@ -45,6 +45,10 @@ export function mapPlatformToSelectOption(value?: string) {
     return ""
   }
 
+  if (value === "INPROGRESS") {
+    return "Playing"
+  }
+
   if (value === "FULL_COMPLETION") {
     return "100% Complete"
   }

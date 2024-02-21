@@ -131,5 +131,5 @@ export const Icons = {
   moon: Moon,
   sun: SunMedium,
   twitter: Twitter,
-  delete: (props: LucideProps) => <Trash className="md:h-4 md:w-4" />,
+  delete: (props: LucideProps) => <Trash className="md:size-4" />,
 }

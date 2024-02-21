@@ -40,7 +40,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tooltip, TooltipProvider } from "@/components/ui/tooltip"
-import { RenderWhen } from "@/components/render-when"
 
 const moveFromWishlistSchema = z.object({
   platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
@@ -48,29 +47,6 @@ const moveFromWishlistSchema = z.object({
 })
 
 type FormValues = z.infer<typeof moveFromWishlistSchema>
-
-const mapStatusToFormFieldValues = () => {
-  const statuses = new Map<string, GameStatus>()
-  for (const status of Object.values(GameStatus)) {
-    statuses.set(status, status)
-  }
-}
-
-const statusesMap = {
-  backlog: GameStatus.BACKLOG,
-  inprogress: GameStatus.INPROGRESS,
-  completed: GameStatus.COMPLETED,
-  full_completion: GameStatus.FULL_COMPLETION,
-  abandoned: GameStatus.ABANDONED,
-}
-
-const iconMapping = {
-  [GameStatus.BACKLOG]: <Library className="md:h-4 md:w-4" />,
-  [GameStatus.ABANDONED]: <Ghost className="md:h-4 md:w-4" />,
-  [GameStatus.COMPLETED]: <ListChecks className="md:h-4 md:w-4" />,
-  [GameStatus.FULL_COMPLETION]: <CheckCheck className="md:h-4 md:w-4" />,
-  [GameStatus.INPROGRESS]: <Play className="md:h-4 md:w-4" />,
-}
 
 const statusMapping = {
   [GameStatus.BACKLOG]: {

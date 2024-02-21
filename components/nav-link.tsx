@@ -20,7 +20,7 @@ function NavLink({ item, children }: PropsWithChildren<{ item: NavItem }>) {
         "flex items-center text-pretty font-medium text-muted-foreground",
         {
           "cursor-not-allowed opacity-80": item.disabled,
-          "font-bold text-black": isActive,
+          "font-bold text-foreground": isActive,
         }
       )}
       target={item.external ? "_blank" : "_parent"}

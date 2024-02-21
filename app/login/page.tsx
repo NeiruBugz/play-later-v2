@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import GoogleSignIn from "@/features/auth/google-sign-in"
@@ -37,15 +38,17 @@ const generateFeatures = () => [
 ]
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex-1">
-      <header className="flex items-center justify-between bg-gray-800 p-4 text-white">
+    <div className="container min-h-screen flex-1">
+      <header className="flex items-center justify-between p-4 text-white">
         <div className="flex items-center gap-2">
           <Logo name={"PlayLater"} />
         </div>
-        <GoogleSignIn />
+        <Suspense>
+          <GoogleSignIn />
+        </Suspense>
       </header>
 
-      <main className="container mb-4 flex flex-col">
+      <main className="mb-4 flex flex-col">
         <section className="py-4 text-center md:py-6">
           <h2 className="mb-4 text-5xl font-bold">
             Manage Your Gaming Backlog
@@ -56,7 +59,7 @@ export default function LoginPage() {
           </p>
         </section>
 
-        <section className="border-b py-4 md:py-6">
+        <section className="py-4 md:py-6">
           <section className="p-6">
             <h3 className="mb-12 text-center text-4xl font-extrabold">
               Key Features
@@ -84,7 +87,7 @@ export default function LoginPage() {
           </section>
         </section>
 
-        <section className="border-b py-4 text-center md:py-6">
+        <section className="py-4 text-center md:py-6">
           <h3 className="mb-12 text-center text-4xl font-extrabold">
             Join project&apos;s Discord server
           </h3>
@@ -99,7 +102,7 @@ export default function LoginPage() {
           </Button>
         </section>
 
-        <section className="container mx-auto border-b py-4 text-center md:py-6">
+        <section className="container mx-auto py-4 text-center md:py-6">
           <h2 className="mb-12 text-center text-4xl font-extrabold text-white">
             Screenshots
           </h2>
@@ -134,7 +137,7 @@ export default function LoginPage() {
         </section>
       </main>
 
-      <footer className="bg-gray-800 p-4 text-center text-white">
+      <footer className="p-4 text-center text-white">
         <div className="container mx-auto text-center">
           <p>&copy; 2023-{new Date().getFullYear()} PlayLater.</p>
         </div>

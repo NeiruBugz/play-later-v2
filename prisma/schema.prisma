@@ -79,7 +79,8 @@ model Game {
   listId          String?
   List            List?         @relation(fields: [listId], references: [id])
 
-  @@index([userId, listId])
+  @@index([userId])
+  @@index([listId])
 }
 
 model WishlistedGame {

@@ -1,21 +1,19 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { ResultsList } from "@/features/search/results-list"
-import { Loader2Icon, Search } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Search } from "lucide-react"
 
-import { useSearch } from "@/lib/query"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { RenderWhen } from "@/components/render-when"
 
 export function SearchForm() {
   const [searchValue, setSearchValue] = useState("")
-  const { mutateAsync: search, data: games, isPending } = useSearch()
+  const router = useRouter()
 
   const onSubmit = useCallback(async () => {
-    await search(searchValue)
-  }, [searchValue, search])
+    router.push(`/search?q=${searchValue}`)
+  }, [router, searchValue])
 
   useEffect(() => {
     const onEnterPress = (event: KeyboardEvent) => {
@@ -33,7 +31,7 @@ export function SearchForm() {
 
   return (
     <>
-      <div className="mt-4 flex items-center gap-2">
+      <div className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
         <Input
           name="searchQuery"
           id="searchQuery"
@@ -41,17 +39,17 @@ export function SearchForm() {
           placeholder="Start typing game name"
           value={searchValue}
           onChange={(event) => setSearchValue(event.currentTarget.value)}
+          className="border-0 p-0 focus-visible:outline-none focus-visible:ring-0"
         />
-        <Button variant="ghost" className="p-0" onClick={onSubmit}>
-          <Search size={14} />
+        <Button
+          variant="ghost"
+          className="p-0 hover:bg-transparent hover:font-bold"
+          onClick={onSubmit}
+          disabled={searchValue.length === 0}
+        >
+          <Search size={12} />
         </Button>
       </div>
-      <RenderWhen
-        condition={!isPending}
-        fallback={<Loader2Icon className="animate-spin" />}
-      >
-        <ResultsList games={games ?? []} />
-      </RenderWhen>
     </>
   )
 }

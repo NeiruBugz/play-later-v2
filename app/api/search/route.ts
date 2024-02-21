@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server"
-import { HowLongToBeatService } from "howlongtobeat"
 
-async function searchHowLongToBeat(query: string) {
-  const hltb = new HowLongToBeatService()
-  const response = await hltb.search(query)
-  return response
-}
+import { searchHowLongToBeat } from "@/lib/hltb-search"
 
 export async function GET(req: Request) {
+  console.log(req)
   const { searchParams } = new URL(req.url)
+  console.log(searchParams)
   const query = searchParams.get("q")
+  console.log(query)
 
   if (typeof query === "string" && query !== "undefined") {
     const response = await searchHowLongToBeat(query)

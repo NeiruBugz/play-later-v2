@@ -20,15 +20,10 @@ export const siteConfig = {
       title: "Lists",
       href: "/lists",
     },
-    {
-      title: "Discord Server",
-      href: "https://discord.gg/NK3THJyPeT",
-      external: true,
-    },
   ],
   links: {
-    twitter: "https://twitter.com/shadcn",
-    github: "https://github.com/shadcn/ui",
-    docs: "https://ui.shadcn.com",
+    roadmap:
+      "https://frosted-atlasaurus-da4.notion.site/2efccedc88084981ae6e62772d3fbcbb?v=e81099931886450692b5ec847027a146",
+    discord: "https://discord.gg/NK3THJyPeT",
   },
 }

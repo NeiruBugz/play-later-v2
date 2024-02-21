@@ -2,7 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["howlongtobeat.com"],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'howlongtobeat.com'
+      }
+    ],
   },
   async redirects() {
     return [

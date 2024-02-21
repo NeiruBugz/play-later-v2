@@ -17,7 +17,7 @@ function GameTimeBadge({ time }: { time: Game["gameplayTime"] | undefined }) {
   }
 
   return (
-    <div className="flex w-fit items-center justify-center gap-1 rounded-full bg-slate-600 p-1 text-xs font-medium">
+    <div className="flex w-fit items-center justify-center gap-1 rounded-full bg-background/70 p-1 text-xs font-medium">
       <Clock className="h-3 w-3" />
       {time} h
     </div>
@@ -26,12 +26,12 @@ function GameTimeBadge({ time }: { time: Game["gameplayTime"] | undefined }) {
 
 function Artwork({ game }: { game: Partial<Game> }) {
   return (
-    <div className="group relative cursor-pointer rounded-sm border bg-background text-white shadow-md transition-all">
+    <div className="group relative w-fit cursor-pointer rounded border bg-background text-white shadow-md transition-all">
       <div className="flex size-32 items-center justify-center sm:size-36 md:size-48 xl:size-52">
         <Image
           src={game.imageUrl ?? ""}
           alt={`${game.title} cover art`}
-          className="h-full w-full object-cover"
+          className="h-full w-full rounded object-cover"
           width={256}
           height={256}
           priority
@@ -52,7 +52,7 @@ function Artwork({ game }: { game: Partial<Game> }) {
           </div>
         </RenderWhen>
       </div>
-      <div className="absolute bottom-0 left-0 hidden min-h-[30%] w-32 items-center justify-between gap-2 bg-slate-800/70 p-2 group-hover:flex sm:w-36 md:w-48 md:px-4 md:py-2 xl:w-52">
+      <div className="absolute bottom-0 left-0 hidden min-h-[30%] w-32 items-center justify-between gap-2 bg-background/70 p-2 group-hover:flex sm:w-36 md:w-48 md:px-4 md:py-2 xl:w-52">
         <p className="text-md font-medium">{game.title}</p>
       </div>
     </div>
@@ -82,11 +82,11 @@ export function GameCard({
     }
   }
   return (
-    <div className="group flex w-full flex-col-reverse items-center justify-center">
+    <div className="group w-full rounded">
       {path === "lists" ? <DeleteFromList onDelete={onDelete} /> : null}
       <Link
         href={`/${path === "lists" ? "library" : path}/${game.id}`}
-        className="block w-32 md:w-48"
+        className="block w-fit rounded"
       >
         <Artwork game={game} />
       </Link>

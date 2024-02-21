@@ -1,4 +1,6 @@
 import { getUserById } from "@/features/auth/actions"
+import { HeaderSearch } from "@/features/game/ui/header-search"
+import AddGame from "@/features/library/ui/add-game/add-game"
 
 import { siteConfig } from "@/config/site"
 import { getServerUserId } from "@/lib/auth"
@@ -12,7 +14,9 @@ export async function SiteHeader() {
       <div className="flex h-16 items-center space-x-4 px-4 md:container sm:justify-between sm:space-x-0">
         <MainNav items={siteConfig.mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center gap-1 space-x-1">
+          <nav className="flex items-center gap-2 space-x-1">
+            <HeaderSearch />
+            <AddGame />
             <UserDropdown username={user ?? ""} />
           </nav>
         </div>
