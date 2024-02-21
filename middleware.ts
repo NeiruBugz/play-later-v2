@@ -10,7 +10,8 @@ export default withAuth({
         pathname.startsWith("/_next") ||
         pathname.startsWith("/images/") ||
         pathname === "/favicon.ico" ||
-        pathname.includes("shared-wishlist")
+        pathname.includes("shared-wishlist") ||
+        pathname.includes("privacy-policy")
       ) {
         return true
       }
