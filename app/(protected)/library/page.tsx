@@ -42,7 +42,7 @@ async function fetchAndProcessGames(
   params: URLSearchParams
 ): Promise<LibraryData> {
   const platform = params.get("platform") ?? " "
-  const currentStatus = (params.get("status") as GameStatus) ?? ""
+  const currentStatus = (params.get("status") as GameStatus) ?? "BACKLOG"
   const searchQuery = params.get("search") ?? ""
 
   const filters = {
@@ -118,16 +118,15 @@ function LibaryHeader({ currentStatus, backlogged }: LibraryHeaderProps) {
         <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
           Library
         </h1>
+      </div>
+      <section className="mt-4 flex flex-wrap items-center justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <LibraryNavigation />
+          <LibraryFiltersWrapper />
+        </div>
         {currentStatus === "BACKLOG" && backlogged.length !== 0 ? (
           <PickerDialog items={backlogged} />
         ) : null}
-        <AddGame />
-      </div>
-      <section>
-        <LibraryNavigation />
-      </section>
-      <section>
-        <LibraryFiltersWrapper />
       </section>
     </header>
   )
@@ -178,8 +177,20 @@ function LibraryContent({
   )
 }
 
-export default async function LibraryPage(props: LibraryPageProps) {
-  const params = new URLSearchParams(props.searchParams)
+function setDefaultProps() {
+  const params = new URLSearchParams(window.location.search)
+  if (!params.get("sort")) {
+    params.set("sort", "updatedAt")
+    params.set("order", "desc")
+  }
+
+  return params
+}
+
+export default async function LibraryPage({
+  searchParams = setDefaultProps(),
+}: LibraryPageProps) {
+  const params = new URLSearchParams(searchParams)
   const { list, currentStatus, totalBacklogTime, backlogged } =
     await fetchAndProcessGames(params)
   const withUsername = await hasUsername()

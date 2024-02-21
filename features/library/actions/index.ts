@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { getUserById } from "@/features/auth/actions"
 import { GamePlatform, GameStatus, List, type Game } from "@prisma/client"
 import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat"
 
@@ -74,11 +75,33 @@ export async function getGames(
 
 export async function addGame(game: Omit<Game, "userId">) {
   const userId = await getUserId()
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  })
+  if (!user) {
+    return
+  }
 
-  await prisma.game.create({ data: { ...game, userId } })
-
-  revalidatePath(LIBRARY_PATH)
-  redirect(LIBRARY_PATH)
+  try {
+    await prisma.game.create({
+      data: {
+        ...game,
+        listId: undefined,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    })
+  } catch (e) {
+    console.log(e)
+  } finally {
+    revalidatePath(LIBRARY_PATH)
+    redirect(LIBRARY_PATH)
+  }
 }
 
 export async function getGame(id: Game["id"]) {

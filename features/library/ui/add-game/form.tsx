@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useRef } from "react"
 import { addGame } from "@/features/library/actions"
 import { GamePicker } from "@/features/library/ui/add-game/game-picker"
@@ -18,6 +20,7 @@ import {
 } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Form,
   FormControl,
@@ -39,6 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
+import { RenderWhen } from "@/components/render-when"
 
 function FormDescription() {
   return (
@@ -82,21 +86,25 @@ const addGameSchema = z.object({
   ]),
   title: z.string().min(1),
   purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]),
+  isWishlist: z.boolean().optional(),
 })
 
 export function AddForm({
   game,
   isCompact = false,
   submitLabel = "Submit",
+  withDescription = true,
 }: {
-  game?: HowLongToBeatEntry
+  game?: string
   isCompact?: boolean
   submitLabel?: string
+  withDescription?: boolean
 }) {
+  const entry = game ? (JSON.parse(game) as HowLongToBeatEntry) : undefined
   const form = useForm<z.infer<typeof addGameSchema>>({
     resolver: zodResolver(addGameSchema),
     defaultValues: {
-      title: game?.name ?? "",
+      title: entry?.name ?? "",
       purchaseType: "DIGITAL",
     },
   })
@@ -105,7 +113,7 @@ export function AddForm({
 
   const [selectedGame, setSelectedGame] = React.useState<
     HowLongToBeatEntry | undefined
-  >(game)
+  >(entry)
   const [isPickerOpen, setPickerOpen] = React.useState(false)
 
   const showToast = (type: "success" | "error", name: string) => {
@@ -164,6 +172,7 @@ export function AddForm({
     } catch (e) {
       showToast("error", values.title)
       console.error(e)
+      form.reset()
     }
   }
 
@@ -210,6 +219,25 @@ export function AddForm({
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 overflow-auto"
         >
+          <FormField
+            control={form.control}
+            name="isWishlist"
+            render={({ field }) => (
+              <FormItem className="my-2">
+                <FormLabel
+                  className="flex items-center gap-2"
+                  htmlFor="isWishlist"
+                >
+                  Is it wishlisted game?
+                  <Checkbox
+                    id="isWishlist"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormLabel>
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="platform"
@@ -305,7 +333,7 @@ export function AddForm({
             )}
           />
           <Button type="submit">{submitLabel}</Button>
-          {isCompact ? null : <FormDescription />}
+          {isCompact || !withDescription ? null : <FormDescription />}
         </form>
       </Form>
     </div>

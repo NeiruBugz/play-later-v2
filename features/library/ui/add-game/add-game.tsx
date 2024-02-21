@@ -26,7 +26,7 @@ export default function AddGame({
     <Sheet onOpenChange={setSheetOpen} open={isSheetOpen}>
       <SheetTrigger asChild>
         <Button className={label ? "" : "w-fit justify-between gap-3"}>
-          <PlusCircle className="h-4 w-4 md:mr-2" />
+          <PlusCircle className="size-4 md:mr-2" />
           <span className="hidden whitespace-nowrap md:inline-flex">
             {label}
           </span>
@@ -36,7 +36,7 @@ export default function AddGame({
         <SheetHeader>
           <SheetTitle>Add game to library</SheetTitle>
         </SheetHeader>
-        <AddForm game={game} />
+        <AddForm game={JSON.stringify(game)} />
       </SheetContent>
     </Sheet>
   )

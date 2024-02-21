@@ -37,7 +37,6 @@ function FiltersForm({
     handleParamsMutation,
     handleMultipleParamsMutation,
     handleParamsDeleteByName,
-    handleParamsClear,
   } = useSearchParamsMutation()
   const [filters, setFilters] = useState({
     order: currentValue("order") ?? DefaultSortState.order,
@@ -76,7 +75,7 @@ function FiltersForm({
         label: (
           <div className="flex h-6 items-center gap-4 ">
             {mapper[value as keyof typeof mapper]}{" "}
-            <ArrowUp className="h-4 w-4" />
+            <ArrowUp className="size-4" />
           </div>
         ),
       })
@@ -85,7 +84,7 @@ function FiltersForm({
         label: (
           <div className="flex h-6 items-center gap-4">
             {mapper[value as keyof typeof mapper]}{" "}
-            <ArrowDown className="h-4 w-4" />
+            <ArrowDown className="size-4" />
           </div>
         ),
       })
@@ -123,6 +122,16 @@ function FiltersForm({
   }
 
   const onApply = () => {
+    const params: Array<Record<string, string>> = [
+      { sortBy: filters.sortBy },
+      { order: filters.order },
+    ]
+    if (filters.platform) {
+      params.push({ platform: filters.platform })
+    }
+    if (filters.search) {
+      params.push({ search: filters.search })
+    }
     handleMultipleParamsMutation([
       { sortBy: filters.sortBy },
       { order: filters.order },
