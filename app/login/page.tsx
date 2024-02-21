@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import GoogleSignIn from "@/features/auth/google-sign-in"
@@ -42,7 +43,9 @@ export default function LoginPage() {
         <div className="flex items-center gap-2">
           <Logo name={"PlayLater"} />
         </div>
-        <GoogleSignIn />
+        <Suspense>
+          <GoogleSignIn />
+        </Suspense>
       </header>
 
       <main className="mb-4 flex flex-col">
