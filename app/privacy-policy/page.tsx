@@ -1,20 +1,20 @@
+import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { BackLink } from "@/components/back-link"
 
 export default function PrivacyPolicyPage() {
   return (
     <main className="flex-1">
       <header className="container sticky top-0 z-10 flex gap-2 bg-background py-4 shadow-sm">
-        <BackLink>
+        <Link href="/">
           <Button
             variant="outline"
             className="h-full px-2 py-1 md:px-4 md:py-2"
           >
             <ArrowLeft />
           </Button>
-        </BackLink>
+        </Link>
         <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
           Privacy Policy
         </h1>
