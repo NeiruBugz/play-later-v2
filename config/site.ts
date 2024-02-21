@@ -13,10 +13,6 @@ export const siteConfig = {
       href: "/wishlist",
     },
     {
-      title: "Search",
-      href: "/search",
-    },
-    {
       title: "Lists",
       href: "/lists",
     },
