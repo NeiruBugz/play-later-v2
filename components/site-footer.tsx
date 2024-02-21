@@ -21,6 +21,9 @@ function SiteFooter() {
         >
           Discord
         </Link>
+        <Link href="/privacy-policy" className="hover:underline">
+          Privacy Policy
+        </Link>
       </div>
     </footer>
   )
