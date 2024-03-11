@@ -44,7 +44,7 @@ export default async function ListsPage() {
       </header>
       <section className="flex flex-col gap-2 p-4 md:container">
         <CreateList randomGames={games} />
-        <div className="group flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3">
           {lists.map((list) => {
             const arts = artworks.get(list.id)
 
@@ -52,7 +52,7 @@ export default async function ListsPage() {
               <Link
                 href={`/lists/${list.id}`}
                 key={list.id}
-                className="relative size-fit rounded border p-4 group-hover:bg-secondary"
+                className="group relative size-fit rounded border p-4 group-hover:bg-secondary"
               >
                 <div>
                   <Label className="group-hover:text-secondary-foreground">
