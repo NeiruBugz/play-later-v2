@@ -42,7 +42,7 @@ export function GameInfo({
         className="!relative h-auto !w-[400px] rounded-md"
       />
       <article className="flex flex-col-reverse gap-4 lg:flex-row-reverse 2xl:max-w-[900px]">
-        <div className="flex h-fit w-fit flex-col flex-wrap items-center gap-2">
+        <div className="flex size-fit flex-col flex-wrap items-center gap-2">
           <GameStatusRadio gameStatus={gameStatus} gameId={game.id} />
           <GameDeleteDialog
             id={game.id}

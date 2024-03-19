@@ -5,6 +5,5 @@ export async function searchHowLongToBeat(query?: string | null) {
     return []
   }
   const hltb = new HowLongToBeatService()
-  const response = await hltb.search(query)
-  return response
+  return await hltb.search(query)
 }

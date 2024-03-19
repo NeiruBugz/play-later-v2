@@ -132,12 +132,7 @@ function FiltersForm({
     if (filters.search) {
       params.push({ search: filters.search })
     }
-    handleMultipleParamsMutation([
-      { sortBy: filters.sortBy },
-      { order: filters.order },
-      { platform: filters.platform },
-      { search: filters.search },
-    ])
+    handleMultipleParamsMutation(params)
     toggleOpen(false)
   }
 

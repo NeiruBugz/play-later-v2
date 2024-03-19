@@ -1,3 +1,5 @@
+import { type ReactNode } from "react"
+
 import { NavItem } from "@/types/nav"
 import {
   DropdownMenu,
@@ -11,7 +13,7 @@ export function MobileNav({
   trigger,
   items,
 }: {
-  trigger: React.ReactNode
+  trigger: ReactNode
   items: NavItem[]
 }) {
   return (

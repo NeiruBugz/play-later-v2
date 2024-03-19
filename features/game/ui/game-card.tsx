@@ -18,7 +18,7 @@ function GameTimeBadge({ time }: { time: Game["gameplayTime"] | undefined }) {
 
   return (
     <div className="flex w-fit items-center justify-center gap-1 rounded-full bg-background/70 p-1 text-xs font-medium">
-      <Clock className="h-3 w-3" />
+      <Clock className="size-3" />
       {time} h
     </div>
   )
@@ -31,7 +31,7 @@ function Artwork({ game }: { game: Partial<Game> }) {
         <Image
           src={game.imageUrl ?? ""}
           alt={`${game.title} cover art`}
-          className="h-full w-full rounded object-cover"
+          className="size-full rounded object-cover"
           width={256}
           height={256}
           priority

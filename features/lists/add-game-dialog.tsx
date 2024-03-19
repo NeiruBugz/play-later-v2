@@ -1,11 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import {
-  addGameToList,
-  getAllGames,
-  searchLibrary,
-} from "@/features/library/actions"
+import { addGameToList } from "@/features/library/actions"
 import { Game, GamePlatform, List } from "@prisma/client"
 import { Gamepad2Icon, Plus } from "lucide-react"
 

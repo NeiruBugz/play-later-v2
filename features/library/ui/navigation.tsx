@@ -17,31 +17,31 @@ import {
 
 const statusMapping = {
   [GameStatus.BACKLOG]: {
-    icon: <Library className="md:h-4 md:w-4" />,
+    icon: <Library className="md:size-4" />,
     radioValue: "BACKLOG",
     tooltipValue: "Backlogged games",
     label: "Backlog",
   },
   [GameStatus.INPROGRESS]: {
-    icon: <Play className="md:h-4 md:w-4" />,
+    icon: <Play className="md:size-4" />,
     radioValue: "INPROGRESS",
     tooltipValue: "Playing",
     label: "Playing",
   },
   [GameStatus.COMPLETED]: {
-    icon: <ListChecks className="md:h-4 md:w-4" />,
+    icon: <ListChecks className="md:size-4" />,
     radioValue: "COMPLETED",
     tooltipValue: "Completed games",
     label: "Completed",
   },
   [GameStatus.FULL_COMPLETION]: {
-    icon: <CheckCheck className="md:h-4 md:w-4" />,
+    icon: <CheckCheck className="md:size-4" />,
     radioValue: "FULL_COMPLETION",
     tooltipValue: "100% completed completed games",
     label: "100% Completed",
   },
   [GameStatus.ABANDONED]: {
-    icon: <Ghost className="md:h-4 md:w-4" />,
+    icon: <Ghost className="md:size-4" />,
     radioValue: "ABANDONED",
     tooltipValue: "Abandoned games",
     label: "Abandoned",

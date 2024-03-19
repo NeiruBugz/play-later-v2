@@ -38,14 +38,16 @@ export default async function SharedWishlistPage(
       </header>
       <section className="mt-4 px-4 pb-16 md:px-16">
         <ul className="columns-2 md:columns-3 md:gap-8 lg:columns-4">
-          {games.map((game) => (
-            <li
-              className="group relative mb-4 w-fit cursor-pointer rounded-md"
-              key={game.id}
-            >
-              <WishlistedGameShared game={game} />
-            </li>
-          ))}
+          {games
+            ? games.map((game) => (
+                <li
+                  className="group relative mb-4 w-fit cursor-pointer rounded-md"
+                  key={game.id}
+                >
+                  <WishlistedGameShared game={game} />
+                </li>
+              ))
+            : null}
         </ul>
       </section>
     </main>

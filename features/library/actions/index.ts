@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { getUserById } from "@/features/auth/actions"
 import { GamePlatform, GameStatus, List, type Game } from "@prisma/client"
 import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat"
 
@@ -22,7 +21,7 @@ type FilterKeys = "platform" | "sortBy" | "order" | "search"
 export async function getAllGames() {
   const userId = await getUserId()
 
-  return await prisma.game.findMany({
+  return prisma.game.findMany({
     where: {
       userId,
       deletedAt: null,
@@ -205,15 +204,13 @@ export async function getRandomGames() {
 
 export async function getListGames(id: List["id"]) {
   const userId = await getUserId()
-  const games = await prisma.game.findMany({
+  return prisma.game.findMany({
     where: {
       userId,
       deletedAt: null,
       listId: id,
     },
   })
-
-  return games
 }
 
 export async function getListGamesArtworks(id: List["id"]) {
@@ -236,7 +233,7 @@ export async function getListGamesArtworks(id: List["id"]) {
 export async function searchLibrary({ search }: { search: string }) {
   const userId = await getServerUserId()
 
-  return await prisma.game.findMany({
+  return prisma.game.findMany({
     where: {
       userId,
       title: {

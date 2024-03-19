@@ -1,6 +1,6 @@
 "use client"
 
-import { memo, useCallback, useEffect, useRef, useState } from "react"
+import { memo, useCallback, useEffect, useRef, useState, type FC } from "react"
 import { updateStatus } from "@/features/library/actions"
 import { type Game } from "@prisma/client"
 
@@ -46,9 +46,9 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
       onClick={onClick}
     >
       {!isRunning ? (
-        <Avatar className="h-fit w-fit rounded-md">
+        <Avatar className="size-fit rounded-md">
           <AvatarImage
-            className="h-20 w-20 object-cover"
+            className="size-20 object-cover"
             src={choice.imageUrl}
             alt={choice.title}
             width={128}
@@ -73,7 +73,7 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
 
 const MemoizedChoice = memo(PickerChoice)
 
-const PickerControls: React.FC<PickerControlsProps> = ({
+const PickerControls: FC<PickerControlsProps> = ({
   isRunning,
   hasChoice,
   start,
@@ -135,8 +135,7 @@ function Picker({ items, closeDialog }: PickerProps) {
   }, [items])
 
   const pickChoice = useCallback(() => {
-    const choice = getRandomItem(items) ?? items[0]
-    return choice
+    return getRandomItem(items) ?? items[0]
   }, [items])
 
   const setChoice = useCallback(() => {

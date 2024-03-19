@@ -22,11 +22,7 @@ export async function hasUsername() {
     },
   })
 
-  if (username?.username) {
-    return true
-  } else {
-    return false
-  }
+  return !!username?.username
 }
 
 export async function setUsername({ username }: { username: string }) {

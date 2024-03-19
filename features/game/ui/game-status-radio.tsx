@@ -50,27 +50,27 @@ type FormValues = z.infer<typeof moveFromWishlistSchema>
 
 const statusMapping = {
   [GameStatus.BACKLOG]: {
-    icon: <Library className="md:h-4 md:w-4" />,
+    icon: <Library className="md:size-4" />,
     radioValue: "backlog",
     tooltipValue: "Move to backlog",
   },
   [GameStatus.INPROGRESS]: {
-    icon: <Play className="md:h-4 md:w-4" />,
+    icon: <Play className="md:size-4" />,
     radioValue: "inprogress",
     tooltipValue: "Playing",
   },
   [GameStatus.COMPLETED]: {
-    icon: <ListChecks className="md:h-4 md:w-4" />,
+    icon: <ListChecks className="md:size-4" />,
     radioValue: "complete",
     tooltipValue: "Mark as completed",
   },
   [GameStatus.FULL_COMPLETION]: {
-    icon: <CheckCheck className="md:h-4 md:w-4" />,
+    icon: <CheckCheck className="md:size-4" />,
     radioValue: "fullComplete",
     tooltipValue: "Mark as 100% completed",
   },
   [GameStatus.ABANDONED]: {
-    icon: <Ghost className="md:h-4 md:w-4" />,
+    icon: <Ghost className="md:size-4" />,
     radioValue: "abandon",
     tooltipValue: "Abandon game / Pause playing",
   },

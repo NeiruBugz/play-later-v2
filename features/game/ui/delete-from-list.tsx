@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Game } from "@prisma/client"
 import { X } from "lucide-react"
 
 import {

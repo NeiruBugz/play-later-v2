@@ -2,7 +2,6 @@ import {
   Moon,
   SunMedium,
   Trash,
-  Twitter,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react"
@@ -130,6 +129,5 @@ export const Icons = {
   ),
   moon: Moon,
   sun: SunMedium,
-  twitter: Twitter,
   delete: (props: LucideProps) => <Trash className="md:size-4" />,
 }

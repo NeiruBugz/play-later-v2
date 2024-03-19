@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma"
 async function getLists() {
   const userId = await getServerUserId()
 
-  return await prisma.list.findMany({
+  return prisma.list.findMany({
     where: {
       userId,
       deletedAt: null,
@@ -55,7 +55,7 @@ async function createList({
 
 async function getList(id: List["id"]) {
   const userId = await getServerUserId()
-  return await prisma.list.findUnique({
+  return prisma.list.findUnique({
     where: {
       userId,
       id,

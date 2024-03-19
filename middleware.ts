@@ -6,17 +6,13 @@ export default withAuth({
       const pathname = req.nextUrl.pathname
       if (token) return true
 
-      if (
+      return (
         pathname.startsWith("/_next") ||
         pathname.startsWith("/images/") ||
         pathname === "/favicon.ico" ||
         pathname.includes("shared-wishlist") ||
         pathname.includes("privacy-policy")
-      ) {
-        return true
-      }
-
-      return false
+      )
     },
   },
   pages: {

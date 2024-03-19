@@ -1,11 +1,10 @@
 import { expect, test } from "vitest"
 
 import {
-  hasSelectedPlatformInList,
   nameFirstLiterals,
   platformEnumToColor,
   uppercaseToNormal,
-} from "../../lib/utils"
+} from "@/lib/utils"
 
 const nameMocks = [
   { name: "", expected: "U" },

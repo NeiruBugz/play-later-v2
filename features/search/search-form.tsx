@@ -16,9 +16,9 @@ export function SearchForm() {
   }, [router, searchValue])
 
   useEffect(() => {
-    const onEnterPress = (event: KeyboardEvent) => {
+    const onEnterPress = async (event: KeyboardEvent) => {
       if (event.key === "Enter") {
-        onSubmit()
+        await onSubmit()
       }
     }
 

@@ -1,12 +1,14 @@
+import type { PropsWithChildren, ReactNode } from "react"
+
 type RenderWhenProps = {
   condition: boolean
-  fallback?: React.ReactNode
+  fallback?: ReactNode
 }
 export function RenderWhen({
   condition,
   children,
   fallback,
-}: React.PropsWithChildren<RenderWhenProps>) {
+}: PropsWithChildren<RenderWhenProps>) {
   if (condition) {
     return children
   }

@@ -23,13 +23,13 @@ export function GameDeleteDialog({
   id: string
   isWishlist?: boolean
 }) {
-  const onDelete = () => {
+  const onDelete = async () => {
     if (isWishlist) {
-      deleteWishlistedGame(id)
+      await deleteWishlistedGame(id)
       return
     }
 
-    deleteGame(id)
+    await deleteGame(id)
   }
 
   return (
