@@ -2,18 +2,20 @@
 
 import React, { useRef } from "react"
 import { addGame } from "@/features/library/actions"
+import { FormDescription } from "@/features/library/ui/add-game/form/description"
+import {
+  addGameSchema,
+  type AddGameSchema,
+} from "@/features/library/ui/add-game/form/validation"
 import { GamePicker } from "@/features/library/ui/add-game/game-picker"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
 import { HowLongToBeatEntry } from "howlongtobeat"
 import { nanoid } from "nanoid"
 import { useForm } from "react-hook-form"
-import * as z from "zod"
 
 import {
   cn,
-  DescriptionPurchaseTypeMapping,
-  DescriptionStatusMapping,
   mapPlatformToSelectOption,
   PurchaseTypeToFormLabel,
   uppercaseToNormal,
@@ -43,51 +45,6 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
 
-function FormDescription() {
-  return (
-    <legend>
-      <h2 className="font-bold">Description</h2>
-      <h3 className="font-bold">Statuses</h3>
-      <ul>
-        {Object.entries(GameStatus).map(([key, value]) => (
-          <li
-            key={key}
-            className="border-b py-1 text-xs leading-7 last-of-type:border-none md:text-[14px]"
-          >
-            {mapPlatformToSelectOption(value)} -{" "}
-            {DescriptionStatusMapping[value]}
-          </li>
-        ))}
-      </ul>
-      <h3 className="font-bold">Purchase types</h3>
-      <ul>
-        {Object.entries(PurchaseType).map(([key, value]) => (
-          <li
-            key={key}
-            className="border-b py-1 text-xs leading-7 last-of-type:border-none md:text-[14px]"
-          >
-            {uppercaseToNormal(value)} - {DescriptionPurchaseTypeMapping[value]}
-          </li>
-        ))}
-      </ul>
-    </legend>
-  )
-}
-
-const addGameSchema = z.object({
-  platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
-  status: z.enum([
-    "BACKLOG",
-    "INPROGRESS",
-    "COMPLETED",
-    "ABANDONED",
-    "FULL_COMPLETION",
-  ]),
-  title: z.string().min(1),
-  purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]),
-  isWishlist: z.boolean().optional(),
-})
-
 export function AddForm({
   game,
   isCompact = false,
@@ -100,7 +57,7 @@ export function AddForm({
   withDescription?: boolean
 }) {
   const entry = game ? (JSON.parse(game) as HowLongToBeatEntry) : undefined
-  const form = useForm<z.infer<typeof addGameSchema>>({
+  const form = useForm<AddGameSchema>({
     resolver: zodResolver(addGameSchema),
     defaultValues: {
       title: entry?.name ?? "",
@@ -143,7 +100,7 @@ export function AddForm({
     [form]
   )
 
-  const onSubmit = async (values: z.infer<typeof addGameSchema>) => {
+  const onSubmit = async (values: AddGameSchema) => {
     if (!selectedGame) {
       return
     }
