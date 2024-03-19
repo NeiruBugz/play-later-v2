@@ -12,7 +12,9 @@ import { LibraryPageProps } from "@/types/library"
 export default async function LibraryPage({
   searchParams = setDefaultProps(),
 }: LibraryPageProps) {
-  const params = new URLSearchParams(searchParams)
+  const params = searchParams
+    ? new URLSearchParams(searchParams)
+    : setDefaultProps()
   const { list, currentStatus, totalBacklogTime, backlogged } =
     await fetchAndProcessGames(params)
   const withUsername = await hasUsername()

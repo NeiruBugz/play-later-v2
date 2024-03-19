@@ -2,6 +2,7 @@ import "@/styles/globals.css"
 
 import { type ReactNode } from "react"
 import { Metadata, Viewport } from "next"
+import Providers from "@/providers"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GeistSans } from "geist/font/sans"
 import NextTopLoader from "nextjs-toploader"
@@ -9,9 +10,7 @@ import NextTopLoader from "nextjs-toploader"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
-import ReactQuery from "@/components/query-provider"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
-import { ThemeProvider } from "@/components/theme-provider"
 
 export const viewport: Viewport = {
   themeColor: [
@@ -47,11 +46,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
         )}
       >
         <NextTopLoader />
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ReactQuery>{children}</ReactQuery>
+        <Providers attribute="class" defaultTheme="system" enableSystem>
+          {children}
           <Toaster />
           <TailwindIndicator />
-        </ThemeProvider>
+        </Providers>
         <SpeedInsights />
       </body>
     </html>

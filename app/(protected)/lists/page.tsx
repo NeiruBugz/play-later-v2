@@ -1,33 +1,11 @@
 import Image from "next/image"
 import Link from "next/link"
-import {
-  getListGamesArtworks,
-  getRandomGames,
-} from "@/features/library/actions"
+import { getRandomGames } from "@/features/library/actions"
 import { getLists } from "@/features/lists"
 import { CreateList } from "@/features/lists/create-dialog"
-import { Game, List } from "@prisma/client"
+import { getListGames } from "@/features/lists/lib"
 
 import { Label } from "@/components/ui/label"
-
-async function getListGames(lists: List[]) {
-  const artworksMap = new Map<
-    List["id"],
-    Array<{ id: Game["id"]; artwork: Game["imageUrl"]; game: Game["title"] }>
-  >()
-  if (lists.length === 0) {
-    return artworksMap
-  }
-
-  for (const list of lists) {
-    const games = await getListGamesArtworks(list.id)
-    if (games.length) {
-      artworksMap.set(list.id, games.slice(0, 6))
-    }
-  }
-
-  return artworksMap
-}
 
 export default async function ListsPage() {
   const [lists, games] = await Promise.all([getLists(), getRandomGames()])

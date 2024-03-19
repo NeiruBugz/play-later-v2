@@ -18,7 +18,7 @@ async function getUserId() {
 
 type FilterKeys = "platform" | "sortBy" | "order" | "search"
 
-export async function getAllGames() {
+export async function getAllGames(): Promise<Game[]> {
   const userId = await getUserId()
 
   return prisma.game.findMany({

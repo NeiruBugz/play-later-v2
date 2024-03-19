@@ -1,7 +1,7 @@
 "use client"
 
 import { deleteGame } from "@/features/library/actions"
-import { deleteWishlistedGame } from "@/features/wishlist/actions"
+import { deleteGameFromWishlist } from "@/features/wishlist/actions"
 
 import {
   AlertDialog,
@@ -25,7 +25,7 @@ export function GameDeleteDialog({
 }) {
   const onDelete = async () => {
     if (isWishlist) {
-      await deleteWishlistedGame(id)
+      await deleteGameFromWishlist(id)
       return
     }
 

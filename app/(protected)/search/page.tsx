@@ -20,7 +20,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         Results for {query}: {results.length} games were found
       </h1>
       <section className="py-4">
-        {/* <SearchForm /> */}
         <ScrollArea className="mt-2 h-[600px] px-1 2xl:h-[1000px]">
           <ul className="space-y-5">
             {results.map((entry) => (

@@ -17,7 +17,7 @@ function NavLink({ item, children }: PropsWithChildren<{ item: NavItem }>) {
     <Link
       href={item.href}
       className={cn(
-        "flex items-center text-pretty font-medium text-muted-foreground",
+        "flex items-center text-pretty font-medium text-muted-foreground hover:underline hover:underline-offset-1",
         {
           "cursor-not-allowed opacity-80": item.disabled,
           "font-bold text-foreground": isActive,

@@ -1,12 +1,12 @@
 import { GameCard } from "@/features/game/ui/game-card"
 import { WishlistShare } from "@/features/game/ui/wishlist-share"
 import { ListWrapper } from "@/features/library/ui/list-wrapper"
-import { getWishlistedGames } from "@/features/wishlist/actions"
+import { getGamesFromWishlist } from "@/features/wishlist/actions"
 
 import { RenderWhen } from "@/components/render-when"
 
 export default async function WishlistPage() {
-  const wishlist = await getWishlistedGames()
+  const wishlist = await getGamesFromWishlist()
   return (
     <section className="bg-background p-4 md:container">
       <header className="mb-4 flex items-center justify-between">

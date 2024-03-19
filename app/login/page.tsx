@@ -4,7 +4,7 @@ import Link from "next/link"
 import GoogleSignIn from "@/features/auth/google-sign-in"
 import library from "@/images/library.png"
 import sharedWishlist from "@/images/shared-wishlist.png"
-import { BarChart, Gamepad2, Share } from "lucide-react"
+import { BarChart, Gamepad2, ListIcon, Share } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -28,6 +28,11 @@ const generateFeatures = () => [
     description:
       "Measure you backlog in playtime hours, view your yearly progression",
     icon: <BarChart />,
+  },
+  {
+    title: "Custom lists",
+    description: "Create your lists and collections",
+    icon: <ListIcon />,
   },
   {
     title: "Shareable wishlists",

@@ -39,7 +39,7 @@ export function SearchForm() {
           placeholder="Start typing game name"
           value={searchValue}
           onChange={(event) => setSearchValue(event.currentTarget.value)}
-          className="border-0 p-0 focus-visible:outline-none focus-visible:ring-0"
+          className="border-0 p-0 shadow-none focus-visible:outline-none focus-visible:ring-0"
         />
         <Button
           variant="ghost"

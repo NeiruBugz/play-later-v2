@@ -18,15 +18,15 @@ import { prisma } from "@/lib/prisma"
 export type WishlistEntity = HowLongToBeatEntry &
   WishlistedGame & { platform?: null; purchaseType?: null }
 
-export async function getWishlistedGames(id?: string) {
+export async function getGamesFromWishlist(
+  id?: string
+): Promise<WishlistedGame[]> {
   const userId = id ?? (await getServerUserId())
 
-  const games: WishlistedGame[] = await prisma.wishlistedGame.findMany({
+  return prisma.wishlistedGame.findMany({
     where: { userId, deletedAt: null },
     orderBy: { updatedAt: "desc" },
   })
-
-  return games
 }
 
 export async function addToWishlist(game: HowLongToBeatEntry) {
@@ -45,7 +45,7 @@ export async function addToWishlist(game: HowLongToBeatEntry) {
   redirect("/wishlist")
 }
 
-export async function getWishlistedGame(id: WishlistedGame["id"]) {
+export async function getGameFromWishlist(id: WishlistedGame["id"]) {
   const userId = await getServerUserId()
 
   const game = await prisma.wishlistedGame.findUnique({
@@ -64,7 +64,7 @@ export async function getWishlistedGame(id: WishlistedGame["id"]) {
   return {} as WishlistEntity
 }
 
-export async function deleteWishlistedGame(id: WishlistedGame["id"]) {
+export async function deleteGameFromWishlist(id: WishlistedGame["id"]) {
   const userId = await getServerUserId()
 
   await prisma.wishlistedGame.update({
@@ -83,7 +83,7 @@ export async function moveToLibrary(
   status: GameStatus
 ) {
   const userId = await getServerUserId()
-  const gameData = await getWishlistedGame(id)
+  const gameData = await getGameFromWishlist(id)
 
   if (!gameData) {
     throw new Error("No game found")
@@ -107,9 +107,12 @@ export async function moveToLibrary(
     listId: null,
   }
 
-  await prisma.game.create({
-    data: gamePayload,
-  })
-  await deleteWishlistedGame(id)
+  const promises = [
+    prisma.game.create({
+      data: gamePayload,
+    }),
+    deleteGameFromWishlist(id),
+  ]
+  await Promise.all(promises)
   revalidatePath("/wishlist")
 }
