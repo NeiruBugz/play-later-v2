@@ -2,12 +2,12 @@
   "$schema": "https://json.schemastore.org/eslintrc",
   "root": true,
   "extends": [
-    "next",
     "next/core-web-vitals",
     "prettier",
-    "plugin:tailwindcss/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@tanstack/eslint-plugin-query/recommended"
   ],
-  "plugins": ["tailwindcss"],
+  "plugins": ["tailwindcss", "@typescript-eslint", "@tanstack/query"],
   "rules": {
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "off",
@@ -16,7 +16,7 @@
   "settings": {
     "tailwindcss": {
       "callees": ["cn"],
-      "config": "tailwind.config.js"
+      "config": "./tailwind.config.js"
     },
     "next": {
       "rootDir": ["./"]

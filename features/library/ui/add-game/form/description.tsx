@@ -1,12 +1,12 @@
-import React from "react"
-import { GameStatus, PurchaseType } from "@prisma/client"
+import React from "react";
+import { GameStatus, PurchaseType } from "@prisma/client";
 
 import {
   DescriptionPurchaseTypeMapping,
   DescriptionStatusMapping,
   mapPlatformToSelectOption,
   uppercaseToNormal,
-} from "@/lib/utils"
+} from "@/lib/utils";
 
 export function FormDescription() {
   return (
@@ -36,5 +36,5 @@ export function FormDescription() {
         ))}
       </ul>
     </legend>
-  )
+  );
 }

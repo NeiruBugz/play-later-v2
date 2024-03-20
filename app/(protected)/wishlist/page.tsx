@@ -1,14 +1,14 @@
-import { GameCard } from "@/features/game/ui/game-card"
-import { WishlistShare } from "@/features/game/ui/wishlist-share"
-import { ListWrapper } from "@/features/library/ui/list-wrapper"
-import { getGamesFromWishlist } from "@/features/wishlist/actions"
+import { GameCard } from "@/features/game/ui/game-card";
+import { WishlistShare } from "@/features/game/ui/wishlist-share";
+import { List } from "@/features/library/ui/list";
+import { getGamesFromWishlist } from "@/features/wishlist/actions";
 
-import { RenderWhen } from "@/components/render-when"
+import { RenderWhen } from "@/components/render-when";
 
 export default async function WishlistPage() {
-  const wishlist = await getGamesFromWishlist()
+  const wishlist = await getGamesFromWishlist();
   return (
-    <section className="bg-background p-4 md:container">
+    <section className="container bg-background">
       <header className="mb-4 flex items-center justify-between">
         <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
           Wishlist
@@ -21,12 +21,12 @@ export default async function WishlistPage() {
         <RenderWhen condition={!wishlist || wishlist.length === 0}>
           <h2>Wishlist is empty</h2>
         </RenderWhen>
-        <ListWrapper count={wishlist.length}>
+        <List count={wishlist.length}>
           {wishlist.map((game) => (
             <GameCard key={game.id} game={game} path="wishlist" />
           ))}
-        </ListWrapper>
+        </List>
       </section>
     </section>
-  )
+  );
 }

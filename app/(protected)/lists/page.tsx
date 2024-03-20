@@ -1,30 +1,30 @@
-import Image from "next/image"
-import Link from "next/link"
-import { getRandomGames } from "@/features/library/actions"
-import { getLists } from "@/features/lists"
-import { CreateList } from "@/features/lists/create-dialog"
-import { getListGames } from "@/features/lists/lib"
+import Image from "next/image";
+import Link from "next/link";
+import { getRandomGames } from "@/features/library/actions";
+import { getLists } from "@/features/lists";
+import { CreateList } from "@/features/lists/create-dialog";
+import { getListGames } from "@/features/lists/lib";
 
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
 
 export default async function ListsPage() {
-  const [lists, games] = await Promise.all([getLists(), getRandomGames()])
-  const artworks = await getListGames(lists)
+  const [lists, games] = await Promise.all([getLists(), getRandomGames()]);
+  const artworks = await getListGames(lists);
 
   return (
     <section>
-      <header className="sticky top-0 z-40 bg-background p-4 md:container">
+      <header className="container sticky top-0 z-40 bg-background">
         <div className="flex flex-wrap justify-between">
           <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
             Lists
           </h1>
         </div>
       </header>
-      <section className="flex flex-col gap-2 p-4 md:container">
+      <section className="container flex flex-col gap-2">
         <CreateList randomGames={games} />
         <div className="flex flex-wrap gap-3">
           {lists.map((list) => {
-            const arts = artworks.get(list.id)
+            const arts = artworks.get(list.id);
 
             return (
               <Link
@@ -49,10 +49,10 @@ export default async function ListsPage() {
                   </div>
                 </div>
               </Link>
-            )
+            );
           })}
         </div>
       </section>
     </section>
-  )
+  );
 }

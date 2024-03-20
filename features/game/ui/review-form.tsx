@@ -1,29 +1,29 @@
-"use client"
+"use client";
 
-import { Fragment } from "react"
-import { addGameReview } from "@/features/library/actions"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Game } from "@prisma/client"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { Fragment } from "react";
+import { addGameReview } from "@/features/library/actions";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Game } from "@prisma/client";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 
 const reviewSchema = z.object({
   rating: z.string().optional(),
   review: z.string().min(1),
-})
+});
 
-type Review = z.infer<typeof reviewSchema>
+type Review = z.infer<typeof reviewSchema>;
 
 function ReviewForm({ id }: { id: Game["id"] }) {
   const form = useForm<Review>({
@@ -31,11 +31,11 @@ function ReviewForm({ id }: { id: Game["id"] }) {
     defaultValues: {
       rating: "3",
     },
-  })
+  });
   const onSubmit = async (values: Review) => {
-    const { review, rating } = values
+    const { review, rating } = values;
     if (!review && !rating) {
-      return
+      return;
     }
 
     try {
@@ -43,11 +43,11 @@ function ReviewForm({ id }: { id: Game["id"] }) {
         id,
         rating: rating ? Number(rating) : 0,
         review,
-      })
+      });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   return (
     <section>
@@ -103,7 +103,7 @@ function ReviewForm({ id }: { id: Game["id"] }) {
         </form>
       </Form>
     </section>
-  )
+  );
 }
 
-export { ReviewForm }
+export { ReviewForm };

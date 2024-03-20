@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import userPic from "@/images/userpic.png"
-import { LogOut, Moon, Sun } from "lucide-react"
-import { signOut } from "next-auth/react"
-import { useTheme } from "next-themes"
+import Image from "next/image";
+import userPic from "@/images/userpic.png";
+import { LogOut, Moon, Sun } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 
 import {
   DropdownMenu,
@@ -15,10 +15,10 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 export function UserDropdown({ username }: { username?: string }) {
-  const { setTheme } = useTheme()
+  const { setTheme } = useTheme();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -56,5 +56,5 @@ export function UserDropdown({ username }: { username?: string }) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -1,23 +1,25 @@
-import "@/styles/globals.css"
+import "@/styles/globals.css";
 
-import { type ReactNode } from "react"
-import { Metadata, Viewport } from "next"
-import Providers from "@/providers"
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { GeistSans } from "geist/font/sans"
-import NextTopLoader from "nextjs-toploader"
+import { type ReactNode } from "react";
+import { Metadata, Viewport } from "next";
+import Providers from "@/providers";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GeistSans } from "geist/font/sans";
+import NextTopLoader from "nextjs-toploader";
 
-import { siteConfig } from "@/config/site"
-import { cn } from "@/lib/utils"
-import { Toaster } from "@/components/ui/toaster"
-import { TailwindIndicator } from "@/components/tailwind-indicator"
+import { Toaster } from "@/components/ui/toaster";
+import { TailwindIndicator } from "@/components/tailwind-indicator";
+
+import { cn } from "@/lib/utils";
+
+import { siteConfig } from "@/config/site";
 
 export const viewport: Viewport = {
   themeColor: [
     { color: "white", media: "(prefers-color-scheme: light)" },
     { color: "black", media: "(prefers-color-scheme: dark)" },
   ],
-}
+};
 
 export const metadata: Metadata = {
   description: siteConfig.description,
@@ -30,10 +32,10 @@ export const metadata: Metadata = {
     default: siteConfig.name,
     template: `%s - ${siteConfig.name}`,
   },
-}
+};
 
 interface RootLayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
@@ -54,5 +56,5 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <SpeedInsights />
       </body>
     </html>
-  )
+  );
 }

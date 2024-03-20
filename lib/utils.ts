@@ -1,6 +1,6 @@
-import { Game, GameStatus, PurchaseType } from "@prisma/client"
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { Game, GameStatus, PurchaseType } from "@prisma/client";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 const NINTENDO_PLATFORMS = [
   "wii u",
@@ -9,67 +9,67 @@ const NINTENDO_PLATFORMS = [
   "game boy color",
   "game & watch",
   "nes",
-]
+];
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function platformEnumToColor(value: string) {
-  const fromHLTB = value.toLowerCase()
+  const fromHLTB = value.toLowerCase();
 
   const platformMapping = {
     PLAYSTATION: "playstation",
     XBOX: "xbox",
     NINTENDO: "nintendo",
     PC: "pc",
-  }
+  };
 
   const forHTLB = () => {
     for (const platform of Object.keys(platformMapping)) {
       if (fromHLTB.includes(platform.toLowerCase())) {
-        return platformMapping[platform as keyof typeof platformMapping]
+        return platformMapping[platform as keyof typeof platformMapping];
       }
     }
     if (NINTENDO_PLATFORMS.includes(fromHLTB)) {
-      return platformMapping.NINTENDO
+      return platformMapping.NINTENDO;
     }
-    return platformMapping.PC
-  }
+    return platformMapping.PC;
+  };
 
-  return platformMapping[value as keyof typeof platformMapping] || forHTLB()
+  return platformMapping[value as keyof typeof platformMapping] || forHTLB();
 }
 
 export function mapPlatformToSelectOption(value?: string) {
   if (!value) {
-    return ""
+    return "";
   }
 
   if (value === "INPROGRESS") {
-    return "Playing"
+    return "Playing";
   }
 
   if (value === "FULL_COMPLETION") {
-    return "100% Complete"
+    return "100% Complete";
   }
 
-  return uppercaseToNormal(value)
+  return uppercaseToNormal(value);
 }
 
 export function uppercaseToNormal(value?: string) {
   if (value === "PC") {
-    return value
+    return value;
   }
-  return value ? `${value[0]}${value.slice(1).toLowerCase()}` : value
+  return value ? `${value[0]}${value.slice(1).toLowerCase()}` : value;
 }
 
 export function nameFirstLiterals(name: string) {
   if (!name) {
-    return "U"
+    return "U";
   }
 
-  const [firstName, lastName] = name.split(" ")
-  return lastName ? `${firstName[0]}${lastName[0]}` : firstName[0]
+  const [firstName, lastName] = name.split(" ");
+  return lastName ? `${firstName[0]}${lastName[0]}` : firstName[0];
 }
 
 export function mapStatusToUI(value: GameStatus) {
@@ -79,9 +79,9 @@ export function mapStatusToUI(value: GameStatus) {
     COMPLETED: "Complete",
     ABANDONED: "Abandon",
     FULL_COMPLETION: "100% Complete",
-  }
+  };
 
-  return statusMapping[value] || value
+  return statusMapping[value] || value;
 }
 
 export function mapStatusForInfo(value: GameStatus) {
@@ -91,19 +91,19 @@ export function mapStatusForInfo(value: GameStatus) {
     COMPLETED: "Completed",
     ABANDONED: "Abandoned",
     FULL_COMPLETION: "100% Complete",
-  }
+  };
 
-  return statusMapping[value] || value
+  return statusMapping[value] || value;
 }
 
 export function prepareDescription(value: string) {
   if (!value) {
-    return ""
+    return "";
   }
 
-  const purified = value.replace(" ...Read More", "").trim()
-  const metaIndex = purified.indexOf("How long is")
-  return metaIndex !== -1 ? purified.slice(0, metaIndex) : purified
+  const purified = value.replace(" ...Read More", "").trim();
+  const metaIndex = purified.indexOf("How long is");
+  return metaIndex !== -1 ? purified.slice(0, metaIndex) : purified;
 }
 
 export function hasSelectedPlatformInList(
@@ -111,32 +111,34 @@ export function hasSelectedPlatformInList(
   selectedPlatform?: string
 ) {
   if (!platformFromList || !selectedPlatform) {
-    return false
+    return false;
   }
 
-  return platformFromList.toLowerCase().includes(selectedPlatform.toLowerCase())
+  return platformFromList
+    .toLowerCase()
+    .includes(selectedPlatform.toLowerCase());
 }
 
 export function getRandomItem<Game>(array: Game[]): Game | undefined {
   if (array.length === 0) {
-    return
+    return;
   }
 
-  const randomIndex = Math.floor(Math.random() * array.length)
-  return array[randomIndex]
+  const randomIndex = Math.floor(Math.random() * array.length);
+  return array[randomIndex];
 }
 export function groupByYear(records: Game[]): Map<number, Game[]> {
-  const grouped = new Map<number, Game[]>()
+  const grouped = new Map<number, Game[]>();
 
   records.forEach((record) => {
-    const year = new Date(record.createdAt).getFullYear()
+    const year = new Date(record.createdAt).getFullYear();
     if (!grouped.has(year)) {
-      grouped.set(year, [])
+      grouped.set(year, []);
     }
-    grouped.get(year)!.push(record)
-  })
+    grouped.get(year)!.push(record);
+  });
 
-  return new Map([...grouped].sort().reverse())
+  return new Map([...grouped].sort().reverse());
 }
 
 export const DescriptionStatusMapping: Record<GameStatus, string> = {
@@ -147,7 +149,7 @@ export const DescriptionStatusMapping: Record<GameStatus, string> = {
   [GameStatus.COMPLETED]: "Game is completed",
   [GameStatus.FULL_COMPLETION]: "Game is completed by 100%",
   [GameStatus.INPROGRESS]: "Game is currently being played",
-}
+};
 
 export const DescriptionPurchaseTypeMapping: Record<PurchaseType, string> = {
   [PurchaseType.DIGITAL]: "You have the game in your digital library",
@@ -155,7 +157,7 @@ export const DescriptionPurchaseTypeMapping: Record<PurchaseType, string> = {
     "You have the game on a disc, cartridge or other physical ",
   [PurchaseType.SUBSCRIPTION]:
     "Game from Xbox Game Pass, PlayStation Plus or Nintendo Switch Online",
-}
+};
 
 export const StatusToUIMapping: Record<GameStatus, string> = {
   ABANDONED: "Abandoned",
@@ -163,10 +165,10 @@ export const StatusToUIMapping: Record<GameStatus, string> = {
   BACKLOG: "Backlog",
   INPROGRESS: "Playing",
   COMPLETED: "Completed",
-}
+};
 
 export const PurchaseTypeToFormLabel: Record<PurchaseType, string> = {
   PHYSICAL: "Physical",
   DIGITAL: "Digital",
   SUBSCRIPTION: "Subscription",
-}
+};

@@ -1,9 +1,9 @@
-import { HowLongToBeatService } from "howlongtobeat"
+import { HowLongToBeatService } from "howlongtobeat";
 
 export async function searchHowLongToBeat(query?: string | null) {
   if (!query) {
-    return []
+    return [];
   }
-  const hltb = new HowLongToBeatService()
-  return await hltb.search(query)
+  const hltb = new HowLongToBeatService();
+  return await hltb.search(query);
 }

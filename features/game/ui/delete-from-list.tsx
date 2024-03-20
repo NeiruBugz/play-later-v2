@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { X } from "lucide-react"
+import { useState } from "react";
+import { X } from "lucide-react";
 
 import {
   AlertDialog,
@@ -13,18 +13,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 function DeleteFromList({ onDelete }: { onDelete?: () => Promise<void> }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
-  if (!onDelete) return null
+  if (!onDelete) return null;
 
   const handleDelete = async () => {
-    setOpen(false)
-    await onDelete()
-  }
+    setOpen(false);
+    await onDelete();
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -59,7 +59,7 @@ function DeleteFromList({ onDelete }: { onDelete?: () => Promise<void> }) {
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }
 
-export { DeleteFromList }
+export { DeleteFromList };

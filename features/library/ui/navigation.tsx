@@ -1,19 +1,20 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { GameStatus } from "@prisma/client"
-import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react"
+import { useEffect } from "react";
+import { GameStatus } from "@prisma/client";
+import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react";
 
-import { useSearchParamsMutation } from "@/lib/hooks/useSearchParamsMutation"
-import { cn } from "@/lib/utils"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
+
+import { useSearchParamsMutation } from "@/lib/hooks/useSearchParamsMutation";
+import { cn } from "@/lib/utils";
 
 const statusMapping = {
   [GameStatus.BACKLOG]: {
@@ -46,16 +47,16 @@ const statusMapping = {
     tooltipValue: "Abandoned games",
     label: "Abandoned",
   },
-}
+};
 
 function LibraryNavigation() {
-  const { currentValue, handleParamsMutation } = useSearchParamsMutation()
+  const { currentValue, handleParamsMutation } = useSearchParamsMutation();
 
   useEffect(() => {
     if (!currentValue("status")) {
-      handleParamsMutation("status", GameStatus.BACKLOG as string)
+      handleParamsMutation("status", GameStatus.BACKLOG as string);
     }
-  }, [currentValue, handleParamsMutation])
+  }, [currentValue, handleParamsMutation]);
 
   return (
     <RadioGroup
@@ -103,7 +104,7 @@ function LibraryNavigation() {
         </div>
       ))}
     </RadioGroup>
-  )
+  );
 }
 
-export { LibraryNavigation }
+export { LibraryNavigation };

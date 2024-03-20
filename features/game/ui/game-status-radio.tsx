@@ -1,27 +1,26 @@
-"use client"
+"use client";
 
-import { useCallback, useId, useState } from "react"
-import { updateStatus } from "@/features/library/actions"
-import { moveToLibrary } from "@/features/wishlist/actions"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
+import { useCallback, useId, useState } from "react";
+import { updateStatus } from "@/features/library/actions";
+import { moveToLibrary } from "@/features/wishlist/actions";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client";
 import {
   TooltipArrow,
   TooltipContent,
   TooltipTrigger,
-} from "@radix-ui/react-tooltip"
-import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+} from "@radix-ui/react-tooltip";
+import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { cn, uppercaseToNormal } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -29,24 +28,26 @@ import {
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+} from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Tooltip, TooltipProvider } from "@/components/ui/tooltip"
+} from "@/components/ui/select";
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
+
+import { cn, uppercaseToNormal } from "@/lib/utils";
 
 const moveFromWishlistSchema = z.object({
   platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
   purchaseType: z.enum(["PHYSICAL", "DIGITAL"]),
-})
+});
 
-type FormValues = z.infer<typeof moveFromWishlistSchema>
+type FormValues = z.infer<typeof moveFromWishlistSchema>;
 
 const statusMapping = {
   [GameStatus.BACKLOG]: {
@@ -74,7 +75,7 @@ const statusMapping = {
     radioValue: "abandon",
     tooltipValue: "Abandon game / Pause playing",
   },
-}
+};
 
 const MoveFromWishlistDialog = ({
   gameId,
@@ -82,34 +83,34 @@ const MoveFromWishlistDialog = ({
   onOpenChange,
   updatedStatus,
 }: {
-  gameId: string
-  isDialogOpen: boolean
-  onOpenChange: (value: boolean) => void
-  updatedStatus?: GameStatus
+  gameId: string;
+  isDialogOpen: boolean;
+  onOpenChange: (value: boolean) => void;
+  updatedStatus?: GameStatus;
 }) => {
-  const formId = useId()
+  const formId = useId();
   const form = useForm<FormValues>({
     resolver: zodResolver(moveFromWishlistSchema),
     defaultValues: {
       platform: "PC",
       purchaseType: "DIGITAL",
     },
-  })
+  });
 
   const onSubmit = async (values: FormValues) => {
-    const { platform, purchaseType } = values
+    const { platform, purchaseType } = values;
     await moveToLibrary(
       gameId,
       platform as GamePlatform,
       purchaseType as PurchaseType,
       updatedStatus as GameStatus
-    )
-  }
+    );
+  };
 
   const onReset = () => {
-    form.reset()
-    onOpenChange(false)
-  }
+    form.reset();
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
@@ -231,37 +232,37 @@ const MoveFromWishlistDialog = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
 export function GameStatusRadio({
   gameStatus,
   gameId,
 }: {
-  gameId: string
-  gameStatus?: GameStatus
+  gameId: string;
+  gameStatus?: GameStatus;
 }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
   const [checkedStatus, setCheckedStatus] = useState<GameStatus | undefined>(
     gameStatus
-  )
+  );
 
   const onUpdate = useCallback(
     async (newStatus: string) => {
       if (gameStatus === undefined) {
-        setCheckedStatus(newStatus as GameStatus)
-        setIsOpen(true)
-        return
+        setCheckedStatus(newStatus as GameStatus);
+        setIsOpen(true);
+        return;
       }
 
       try {
-        await updateStatus(gameId, newStatus as GameStatus)
+        await updateStatus(gameId, newStatus as GameStatus);
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     },
     [gameId, gameStatus]
-  )
+  );
 
   return (
     <>
@@ -320,5 +321,5 @@ export function GameStatusRadio({
         ))}
       </RadioGroup>
     </>
-  )
+  );
 }

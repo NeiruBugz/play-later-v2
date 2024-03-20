@@ -1,4 +1,4 @@
-import { Moon, SunMedium, Trash, type LucideProps } from "lucide-react"
+import { Moon, SunMedium, Trash, type LucideProps } from "lucide-react";
 
 export const Icons = {
   google: () => (
@@ -106,4 +106,4 @@ export const Icons = {
   moon: Moon,
   sun: SunMedium,
   delete: (props: LucideProps) => <Trash className="md:size-4" {...props} />,
-}
+};

@@ -1,74 +1,75 @@
-import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react"
-import { LibraryFiltersUIProps } from "@/features/library/ui/filters/types"
-import { GamePlatform } from "@prisma/client"
-import { ArrowDown, ArrowUp } from "lucide-react"
+import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { LibraryFiltersUIProps } from "@/features/library/ui/filters/types";
+import { GamePlatform } from "@prisma/client";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
-import { useSearchParamsMutation } from "@/lib/hooks/useSearchParamsMutation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
+
+import { useSearchParamsMutation } from "@/lib/hooks/useSearchParamsMutation";
 
 const DefaultSortState = {
   order: "desc",
   sortBy: "updatedAt",
-}
+};
 
-const sortingFields = ["updatedAt", "gameplayTime", "createdAt"]
+const sortingFields = ["updatedAt", "gameplayTime", "createdAt"];
 
 const mapper = {
   updatedAt: "Updated",
   gameplayTime: "Time to beat the story",
   createdAt: "Creation date",
-}
+};
 function FiltersForm({
   toggleOpen,
 }: {
-  toggleOpen: LibraryFiltersUIProps["setOpen"]
+  toggleOpen: LibraryFiltersUIProps["setOpen"];
 }) {
   const {
     currentValue,
     handleParamsMutation,
     handleMultipleParamsMutation,
     handleParamsDeleteByName,
-  } = useSearchParamsMutation()
+  } = useSearchParamsMutation();
   const [filters, setFilters] = useState({
     order: currentValue("order") ?? DefaultSortState.order,
     sortBy: currentValue("sortBy") ?? DefaultSortState.sortBy,
     platform: currentValue("platform") ?? " ",
     search: currentValue("search") ?? "",
-  })
+  });
 
   useEffect(() => {
-    const sortOrder = currentValue("order")
-    const sortField = currentValue("sortBy")
-    const platform = currentValue("platform") ?? " "
+    const sortOrder = currentValue("order");
+    const sortField = currentValue("sortBy");
+    const platform = currentValue("platform") ?? " ";
 
     if (platform === " ") {
-      handleParamsDeleteByName("platform")
+      handleParamsDeleteByName("platform");
     }
 
     if (!sortOrder) {
-      handleParamsMutation("order", DefaultSortState.order)
+      handleParamsMutation("order", DefaultSortState.order);
     }
 
     if (!sortField) {
-      handleParamsMutation("sortBy", DefaultSortState.sortBy)
+      handleParamsMutation("sortBy", DefaultSortState.sortBy);
     }
 
     return () => {
-      handleParamsDeleteByName("platform")
-    }
-  }, [currentValue, handleParamsMutation, handleParamsDeleteByName])
+      handleParamsDeleteByName("platform");
+    };
+  }, [currentValue, handleParamsMutation, handleParamsDeleteByName]);
 
   const options = useMemo(() => {
-    const options: Array<{ value: string; label: ReactNode }> = []
+    const options: Array<{ value: string; label: ReactNode }> = [];
     sortingFields.forEach((value) => {
       options.push({
         value: `${value}-asc`,
@@ -78,7 +79,7 @@ function FiltersForm({
             <ArrowUp className="size-4" />
           </div>
         ),
-      })
+      });
       options.push({
         value: `${value}-desc`,
         label: (
@@ -87,29 +88,29 @@ function FiltersForm({
             <ArrowDown className="size-4" />
           </div>
         ),
-      })
-    })
+      });
+    });
 
-    return options
-  }, [])
+    return options;
+  }, []);
 
   const onValueChange = (value: string) => {
     if (value === "all") {
-      setFilters((prev) => ({ ...prev, platform: "" }))
+      setFilters((prev) => ({ ...prev, platform: "" }));
     }
-    setFilters((prev) => ({ ...prev, platform: value }))
-  }
+    setFilters((prev) => ({ ...prev, platform: value }));
+  };
 
   const onSortingSelect = (value: string) => {
-    const [field, order] = value.split("-")
-    setFilters((prev) => ({ ...prev, sortBy: field, order }))
-  }
+    const [field, order] = value.split("-");
+    setFilters((prev) => ({ ...prev, sortBy: field, order }));
+  };
 
   const onSearchQueryChange = ({
     currentTarget: { value },
   }: ChangeEvent<HTMLInputElement>) => {
-    setFilters((prev) => ({ ...prev, search: value }))
-  }
+    setFilters((prev) => ({ ...prev, search: value }));
+  };
 
   const onClear = () => {
     handleMultipleParamsMutation([
@@ -117,24 +118,24 @@ function FiltersForm({
       { order: DefaultSortState.order },
       { platform: " " },
       { search: "" },
-    ])
-    toggleOpen(false)
-  }
+    ]);
+    toggleOpen(false);
+  };
 
   const onApply = () => {
     const params: Array<Record<string, string>> = [
       { sortBy: filters.sortBy },
       { order: filters.order },
-    ]
+    ];
     if (filters.platform) {
-      params.push({ platform: filters.platform })
+      params.push({ platform: filters.platform });
     }
     if (filters.search) {
-      params.push({ search: filters.search })
+      params.push({ search: filters.search });
     }
-    handleMultipleParamsMutation(params)
-    toggleOpen(false)
-  }
+    handleMultipleParamsMutation(params);
+    toggleOpen(false);
+  };
 
   return (
     <section className="flex flex-col gap-2 py-4">
@@ -193,7 +194,7 @@ function FiltersForm({
         <Button onClick={onApply}>Apply</Button>
       </footer>
     </section>
-  )
+  );
 }
 
-export { FiltersForm }
+export { FiltersForm };

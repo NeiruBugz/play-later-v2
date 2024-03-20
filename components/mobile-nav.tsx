@@ -1,20 +1,21 @@
-import { type ReactNode } from "react"
+import { type ReactNode } from "react";
 
-import { NavItem } from "@/types/nav"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { NavLink } from "@/components/nav-link"
+} from "@/components/ui/dropdown-menu";
+import { NavLink } from "@/components/nav-link";
+
+import { NavItem } from "@/types/nav";
 
 export function MobileNav({
   trigger,
   items,
 }: {
-  trigger: ReactNode
-  items: NavItem[]
+  trigger: ReactNode;
+  items: NavItem[];
 }) {
   return (
     <DropdownMenu>
@@ -30,5 +31,5 @@ export function MobileNav({
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

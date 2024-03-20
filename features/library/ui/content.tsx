@@ -1,7 +1,7 @@
-import { GameCard } from "@/features/game/ui/game-card"
-import { ListWrapper } from "@/features/library/ui/list-wrapper"
+import { GameCard } from "@/features/game/ui/game-card";
+import { List } from "@/features/library/ui/list";
 
-import { LibraryContentProps } from "@/types/library"
+import { LibraryContentProps } from "@/types/library";
 
 export function LibraryContent({
   currentStatus,
@@ -20,13 +20,13 @@ export function LibraryContent({
             </p>
           </div>
         ) : null}
-        <ListWrapper count={backloggedLength}>
+        <List count={backloggedLength}>
           {list.map((game) => (
             <GameCard key={game.id} game={game} />
           ))}
-        </ListWrapper>
+        </List>
       </div>
-    )
+    );
   }
 
   return (
@@ -39,11 +39,11 @@ export function LibraryContent({
           </p>
         </div>
       ) : null}
-      <ListWrapper count={backloggedLength}>
+      <List count={backloggedLength}>
         {[...list.entries()].map(([year, games]) => {
-          return games.map((game) => <GameCard key={game.id} game={game} />)
+          return games.map((game) => <GameCard key={game.id} game={game} />);
         })}
-      </ListWrapper>
+      </List>
     </div>
-  )
+  );
 }

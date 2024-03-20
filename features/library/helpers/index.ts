@@ -1,90 +1,91 @@
-import { getGames, updateGame } from "@/features/library/actions"
-import { Game, GameStatus } from "@prisma/client"
-import { HowLongToBeatService } from "howlongtobeat"
+import { getGames, updateGame } from "@/features/library/actions";
+import { Game, GameStatus } from "@prisma/client";
+import { HowLongToBeatService } from "howlongtobeat";
 
-import { GamesByYear, LibraryData } from "@/types/library"
-import { groupByYear } from "@/lib/utils"
+import { groupByYear } from "@/lib/utils";
+
+import { GamesByYear, LibraryData } from "@/types/library";
 
 export const fetchAndProcessGames = async (
   params: URLSearchParams
 ): Promise<LibraryData> => {
-  const platform = params.get("platform") ?? " "
-  const currentStatus = (params.get("status") as GameStatus) ?? "BACKLOG"
-  const searchQuery = params.get("search") ?? ""
+  const platform = params.get("platform") ?? " ";
+  const currentStatus = (params.get("status") as GameStatus) ?? "BACKLOG";
+  const searchQuery = params.get("search") ?? "";
 
   const filters = {
     platform,
     order: params.get("order") ?? "asc",
     sortBy: params.get("sortBy") ?? "updatedAt",
     search: searchQuery,
-  }
+  };
 
   const { abandoned, backlogged, completed, inprogress, fullCompletion } =
-    await getGames(filters)
+    await getGames(filters);
 
   for (const game of backlogged) {
     if (!game.gameplayTime && game.howLongToBeatId) {
-      const hltbService = new HowLongToBeatService()
-      const details = await hltbService.detail(game.howLongToBeatId)
+      const hltbService = new HowLongToBeatService();
+      const details = await hltbService.detail(game.howLongToBeatId);
       await updateGame(
         game.id,
         "gameplayTime",
         details?.gameplayMain,
         game.updatedAt
-      )
+      );
     }
   }
 
   const totalBacklogTime = backlogged.reduce(
     (acc, game) => acc + (game.gameplayTime ? game.gameplayTime : 0),
     0
-  )
+  );
 
-  const completedByYear = groupByYear(completed)
-  const fullCompletionByYear = groupByYear(fullCompletion)
-  const backloggedByYear = groupByYear(backlogged)
+  const completedByYear = groupByYear(completed);
+  const fullCompletionByYear = groupByYear(fullCompletion);
+  const backloggedByYear = groupByYear(backlogged);
 
   const currentList = (): Game[] | GamesByYear => {
     if (currentStatus === "INPROGRESS") {
-      return inprogress
+      return inprogress;
     }
 
     if (currentStatus === "ABANDONED") {
-      return abandoned
+      return abandoned;
     }
 
     if (currentStatus === "BACKLOG") {
-      return backloggedByYear
+      return backloggedByYear;
     }
 
     if (currentStatus === "COMPLETED") {
-      return completedByYear
+      return completedByYear;
     }
 
     if (currentStatus === "FULL_COMPLETION") {
-      return fullCompletionByYear
+      return fullCompletionByYear;
     }
 
-    return []
-  }
+    return [];
+  };
 
-  const list = currentList()
+  const list = currentList();
 
   return {
     list,
     currentStatus,
     totalBacklogTime,
     backlogged,
-  }
-}
+  };
+};
 
 export const setDefaultProps = (): URLSearchParams => {
-  const params = new URLSearchParams(window.location.search)
-  console.log(params)
+  const params = new URLSearchParams(window.location.search);
+  console.log(params);
   if (!params.get("sort")) {
-    params.set("sort", "updatedAt")
-    params.set("order", "desc")
+    params.set("sort", "updatedAt");
+    params.set("order", "desc");
   }
 
-  return params
-}
+  return params;
+};

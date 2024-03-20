@@ -1,4 +1,4 @@
-import { Metadata, ResolvingMetadata } from "next"
+import { Metadata } from "next"
 import { getUserById } from "@/features/auth/actions"
 import { WishlistedGameShared } from "@/features/game/ui/wishlisted-game.shared"
 import { getGamesFromWishlist } from "@/features/wishlist/actions"
@@ -10,10 +10,9 @@ type SharedWishlistPageProps = {
   searchParams: URLSearchParams
 }
 
-export async function generateMetadata(
-  { params, searchParams }: SharedWishlistPageProps,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: SharedWishlistPageProps): Promise<Metadata> {
   const id = params.id
   const user = await getUserById(id)
 

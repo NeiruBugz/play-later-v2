@@ -1,33 +1,33 @@
-"use client"
+"use client";
 
-import { useCallback, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Search } from "lucide-react"
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function SearchForm() {
-  const [searchValue, setSearchValue] = useState("")
-  const router = useRouter()
+  const [searchValue, setSearchValue] = useState("");
+  const router = useRouter();
 
   const onSubmit = useCallback(async () => {
-    router.push(`/search?q=${searchValue}`)
-  }, [router, searchValue])
+    router.push(`/search?q=${searchValue}`);
+  }, [router, searchValue]);
 
   useEffect(() => {
     const onEnterPress = async (event: KeyboardEvent) => {
       if (event.key === "Enter") {
-        await onSubmit()
+        await onSubmit();
       }
-    }
+    };
 
-    document.addEventListener("keydown", onEnterPress)
+    document.addEventListener("keydown", onEnterPress);
 
     return () => {
-      document.removeEventListener("keydown", onEnterPress)
-    }
-  }, [onSubmit])
+      document.removeEventListener("keydown", onEnterPress);
+    };
+  }, [onSubmit]);
 
   return (
     <>
@@ -51,5 +51,5 @@ export function SearchForm() {
         </Button>
       </div>
     </>
-  )
+  );
 }

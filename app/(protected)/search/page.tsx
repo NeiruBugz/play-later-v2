@@ -7,7 +7,6 @@ import { Badge, ColorVariant } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 type SearchPageProps = {
-  params: {}
   searchParams: URLSearchParams
 }
 
@@ -15,7 +14,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = new URLSearchParams(searchParams).get("q")
   const results = await searchHowLongToBeat(query)
   return (
-    <section className="bg-background p-4 md:container">
+    <section className="container bg-background">
       <h1 className="scroll-m-20 text-2xl font-extrabold tracking-tight md:text-3xl lg:text-4xl">
         Results for {query}: {results.length} games were found
       </h1>

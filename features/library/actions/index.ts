@@ -1,25 +1,25 @@
-"use server"
+"use server";
 
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
-import { GamePlatform, GameStatus, List, type Game } from "@prisma/client"
-import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat"
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { GamePlatform, GameStatus, List, type Game } from "@prisma/client";
+import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat";
 
-import { getServerUserId } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { getServerUserId } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-const LIBRARY_PATH = "/library"
+const LIBRARY_PATH = "/library";
 
-export type GameEntity = HowLongToBeatEntry & Game
+export type GameEntity = HowLongToBeatEntry & Game;
 
 async function getUserId() {
-  return await getServerUserId()
+  return await getServerUserId();
 }
 
-type FilterKeys = "platform" | "sortBy" | "order" | "search"
+type FilterKeys = "platform" | "sortBy" | "order" | "search";
 
 export async function getAllGames(): Promise<Game[]> {
-  const userId = await getUserId()
+  const userId = await getUserId();
 
   return prisma.game.findMany({
     where: {
@@ -29,25 +29,25 @@ export async function getAllGames(): Promise<Game[]> {
     orderBy: {
       title: "asc",
     },
-  })
+  });
 }
 
 export async function getGames(
   filters: Record<FilterKeys, string | undefined>
 ) {
-  const userId = await getUserId()
+  const userId = await getUserId();
 
   const sortState = {
     key: filters.sortBy || "updatedAt",
     order: filters.order || "desc",
-  }
+  };
 
-  let platform: string | undefined = " "
+  let platform: string | undefined = " ";
 
   if (filters.platform === "" || filters.platform === " ") {
-    platform = undefined
+    platform = undefined;
   } else {
-    platform = filters.platform as GamePlatform
+    platform = filters.platform as GamePlatform;
   }
   const games: Game[] = await prisma.game.findMany({
     where: {
@@ -59,7 +59,7 @@ export async function getGames(
       platform: platform as GamePlatform,
     },
     orderBy: { [sortState.key]: sortState.order },
-  })
+  });
 
   return {
     abandoned: games.filter((game) => game.status === GameStatus.ABANDONED),
@@ -69,18 +69,18 @@ export async function getGames(
     fullCompletion: games.filter(
       (game) => game.status === GameStatus.FULL_COMPLETION
     ),
-  }
+  };
 }
 
 export async function addGame(game: Omit<Game, "userId">) {
-  const userId = await getUserId()
+  const userId = await getUserId();
   const user = await prisma.user.findUnique({
     where: {
       id: userId,
     },
-  })
+  });
   if (!user) {
-    return
+    return;
   }
 
   try {
@@ -94,35 +94,35 @@ export async function addGame(game: Omit<Game, "userId">) {
           },
         },
       },
-    })
+    });
   } catch (e) {
-    console.log(e)
+    console.log(e);
   } finally {
-    revalidatePath(LIBRARY_PATH)
-    redirect(LIBRARY_PATH)
+    revalidatePath(LIBRARY_PATH);
+    redirect(LIBRARY_PATH);
   }
 }
 
 export async function getGame(id: Game["id"]) {
-  const userId = await getUserId()
+  const userId = await getUserId();
   const game = await prisma.game.findUnique({
     where: {
       id,
       userId,
     },
-  })
+  });
 
   if (game && game.howLongToBeatId) {
-    const howLongToBeatService = new HowLongToBeatService()
-    const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId)
-    return { ...gameDetails, ...game }
+    const howLongToBeatService = new HowLongToBeatService();
+    const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId);
+    return { ...gameDetails, ...game };
   }
 
-  return {} as GameEntity
+  return {} as GameEntity;
 }
 
 export async function updateStatus(id: Game["id"], status: GameStatus) {
-  const userId = await getUserId()
+  const userId = await getUserId();
 
   await prisma.game.update({
     data: {
@@ -130,24 +130,24 @@ export async function updateStatus(id: Game["id"], status: GameStatus) {
       updatedAt: new Date(),
     },
     where: { id, userId },
-  })
+  });
 
-  revalidatePath(`${LIBRARY_PATH}/${id}`)
-  revalidatePath(LIBRARY_PATH)
+  revalidatePath(`${LIBRARY_PATH}/${id}`);
+  revalidatePath(LIBRARY_PATH);
 }
 
 export async function deleteGame(id: Game["id"]) {
-  const userId = await getUserId()
+  const userId = await getUserId();
 
   await prisma.game.update({
     data: {
       deletedAt: new Date(),
     },
     where: { id, userId },
-  })
+  });
 
-  revalidatePath(LIBRARY_PATH)
-  redirect(LIBRARY_PATH)
+  revalidatePath(LIBRARY_PATH);
+  redirect(LIBRARY_PATH);
 }
 
 export async function updateGame(
@@ -156,15 +156,15 @@ export async function updateGame(
   value: Game[keyof Game],
   updatedAt?: Date
 ) {
-  const userId = await getUserId()
+  const userId = await getUserId();
   await prisma.game.update({
     data: {
       [gameKey]: value,
       updatedAt,
     },
     where: { id, userId },
-  })
-  revalidatePath(LIBRARY_PATH)
+  });
+  revalidatePath(LIBRARY_PATH);
 }
 
 export async function addGameReview({
@@ -172,11 +172,11 @@ export async function addGameReview({
   review,
   rating,
 }: {
-  id: Game["id"]
-  review: string
-  rating: number
+  id: Game["id"];
+  review: string;
+  rating: number;
 }) {
-  const userId = await getUserId()
+  const userId = await getUserId();
   await prisma.game.update({
     data: {
       rating: rating === 0 ? undefined : rating,
@@ -186,52 +186,52 @@ export async function addGameReview({
       id,
       userId,
     },
-  })
-  revalidatePath(`${LIBRARY_PATH}/${id}`)
+  });
+  revalidatePath(`${LIBRARY_PATH}/${id}`);
 }
 
 export async function getRandomGames() {
-  const userId = await getUserId()
+  const userId = await getUserId();
   const games = await prisma.game.findMany({
     where: {
       userId,
       deletedAt: null,
     },
-  })
+  });
 
-  return games.sort(() => Math.random() - 0.5).slice(0, 20)
+  return games.sort(() => Math.random() - 0.5).slice(0, 20);
 }
 
 export async function getListGames(id: List["id"]) {
-  const userId = await getUserId()
+  const userId = await getUserId();
   return prisma.game.findMany({
     where: {
       userId,
       deletedAt: null,
       listId: id,
     },
-  })
+  });
 }
 
 export async function getListGamesArtworks(id: List["id"]) {
-  const userId = await getUserId()
+  const userId = await getUserId();
   const games = await prisma.game.findMany({
     where: {
       userId,
       deletedAt: null,
       listId: id,
     },
-  })
+  });
 
   return games.map((game) => ({
     id: game.id,
     artwork: game.imageUrl,
     game: game.title,
-  }))
+  }));
 }
 
 export async function searchLibrary({ search }: { search: string }) {
-  const userId = await getServerUserId()
+  const userId = await getServerUserId();
 
   return prisma.game.findMany({
     where: {
@@ -240,17 +240,17 @@ export async function searchLibrary({ search }: { search: string }) {
         contains: search,
       },
     },
-  })
+  });
 }
 
 export async function addGameToList({
   gameId,
   listId,
 }: {
-  gameId: Game["id"]
-  listId: List["id"]
+  gameId: Game["id"];
+  listId: List["id"];
 }) {
-  const userId = await getServerUserId()
+  const userId = await getServerUserId();
   await prisma.game.update({
     data: {
       listId,
@@ -259,6 +259,6 @@ export async function addGameToList({
       id: gameId,
       userId,
     },
-  })
-  revalidatePath(`/list/${listId}`)
+  });
+  revalidatePath(`/list/${listId}`);
 }

@@ -1,8 +1,8 @@
-import Image from "next/image"
-import Link from "next/link"
-import { WishlistedGame } from "@prisma/client"
+import Image from "next/image";
+import Link from "next/link";
+import { WishlistedGame } from "@prisma/client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 export function WishlistedGameShared({ game }: { game: WishlistedGame }) {
   return (
@@ -26,5 +26,5 @@ export function WishlistedGameShared({ game }: { game: WishlistedGame }) {
         </Link>
       </section>
     </>
-  )
+  );
 }

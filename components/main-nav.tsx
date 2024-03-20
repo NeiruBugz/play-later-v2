@@ -1,12 +1,13 @@
-import { Gamepad } from "lucide-react"
+import { Gamepad } from "lucide-react";
 
-import { NavItem } from "@/types/nav"
-import { siteConfig } from "@/config/site"
-import { MobileNav } from "@/components/mobile-nav"
-import { NavLink } from "@/components/nav-link"
+import { MobileNav } from "@/components/mobile-nav";
+import { NavLink } from "@/components/nav-link";
+
+import { NavItem } from "@/types/nav";
+import { siteConfig } from "@/config/site";
 
 interface MainNavProps {
-  items: NavItem[]
+  items: NavItem[];
 }
 
 function Logo({ name }: { name: string }) {
@@ -15,7 +16,7 @@ function Logo({ name }: { name: string }) {
       <Gamepad className="size-6" />
       <span className="inline-block font-bold">{name}</span>
     </div>
-  )
+  );
 }
 
 export function MainNav({ items }: MainNavProps) {
@@ -34,5 +35,5 @@ export function MainNav({ items }: MainNavProps) {
         </nav>
       </div>
     </>
-  )
+  );
 }

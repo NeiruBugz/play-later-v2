@@ -1,12 +1,15 @@
-import Image from "next/image"
-import { GameDeleteDialog } from "@/features/game/ui/game-delete-dialog"
-import { GameStatusRadio } from "@/features/game/ui/game-status-radio"
-import { ReviewForm } from "@/features/game/ui/review-form"
-import { GameEntity } from "@/features/library/actions"
-import { WishlistEntity } from "@/features/wishlist/actions"
-import { GameStatus } from "@prisma/client"
-import { differenceInDays, format } from "date-fns"
-import { nanoid } from "nanoid"
+import Image from "next/image";
+import { GameDeleteDialog } from "@/features/game/ui/game-delete-dialog";
+import { GameStatusRadio } from "@/features/game/ui/game-status-radio";
+import { ReviewForm } from "@/features/game/ui/review-form";
+import { GameEntity } from "@/features/library/actions";
+import { WishlistEntity } from "@/features/wishlist/actions";
+import { GameStatus } from "@prisma/client";
+import { differenceInDays, format } from "date-fns";
+import { nanoid } from "nanoid";
+
+import { Badge, ColorVariant } from "@/components/ui/badge";
+import { RenderWhen } from "@/components/render-when";
 
 import {
   cn,
@@ -15,22 +18,20 @@ import {
   platformEnumToColor,
   prepareDescription,
   uppercaseToNormal,
-} from "@/lib/utils"
-import { Badge, ColorVariant } from "@/components/ui/badge"
-import { RenderWhen } from "@/components/render-when"
+} from "@/lib/utils";
 
 const reviewApplicableStatuses: Array<GameStatus> = [
   "ABANDONED",
   "COMPLETED",
   "FULL_COMPLETION",
-]
+];
 
 export function GameInfo({
   game,
   gameStatus,
 }: {
-  game: GameEntity | WishlistEntity
-  gameStatus?: GameStatus
+  game: GameEntity | WishlistEntity;
+  gameStatus?: GameStatus;
 }) {
   return (
     <div className="mt-6 flex flex-col flex-wrap gap-4 md:flex-row">
@@ -192,5 +193,5 @@ export function GameInfo({
         </RenderWhen>
       </article>
     </div>
-  )
+  );
 }

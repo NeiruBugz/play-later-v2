@@ -1,24 +1,25 @@
-import { memo } from "react"
-import { updateStatus } from "@/features/library/actions"
-import type { PickerChoiceProps } from "@/features/library/types/components"
+import { memo } from "react";
+import { updateStatus } from "@/features/library/actions";
+import type { PickerChoiceProps } from "@/features/library/types/components";
 
-import { platformEnumToColor } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge, ColorVariant } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge, ColorVariant } from "@/components/ui/badge";
+
+import { platformEnumToColor } from "@/lib/utils";
 
 function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
   const onClick = async () => {
     if (isRunning) {
-      return
+      return;
     }
 
     try {
-      await updateStatus(choice.id, "INPROGRESS")
-      afterClick()
+      await updateStatus(choice.id, "INPROGRESS");
+      afterClick();
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
   return (
     <div
       className="my-4 flex cursor-pointer flex-col items-center justify-center gap-4 border border-transparent p-4 hover:rounded-md hover:border hover:border-primary md:flex-row"
@@ -47,11 +48,11 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
         </Badge>
       ) : null}
     </div>
-  )
+  );
 }
 
-const MemoizedChoice = memo(PickerChoice)
+const MemoizedChoice = memo(PickerChoice);
 
-MemoizedChoice.displayName = "PickerChoice"
+MemoizedChoice.displayName = "PickerChoice";
 
-export { MemoizedChoice }
+export { MemoizedChoice };

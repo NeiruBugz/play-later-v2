@@ -1,14 +1,13 @@
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
-import { addGameToList } from "@/features/library/actions"
-import { Game, GamePlatform, List } from "@prisma/client"
-import { Gamepad2Icon, Plus } from "lucide-react"
+import { useMemo, useState } from "react";
+import { addGameToList } from "@/features/library/actions";
+import { Game, GamePlatform, List } from "@prisma/client";
+import { Gamepad2Icon, Plus } from "lucide-react";
 
-import { platformEnumToColor, uppercaseToNormal } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge, ColorVariant } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge, ColorVariant } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandDialog,
@@ -16,19 +15,21 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { useToast } from "@/components/ui/use-toast"
+} from "@/components/ui/command";
+import { useToast } from "@/components/ui/use-toast";
+
+import { platformEnumToColor, uppercaseToNormal } from "@/lib/utils";
 
 function AddGameDialog({ id, games }: { id: List["id"]; games: Game[] }) {
-  const [open, setOpen] = useState(false)
-  const [search, setSearch] = useState("")
-  const { toast } = useToast()
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const { toast } = useToast();
 
   const filtered = useMemo(() => {
     return games.filter((game) =>
       game.title.toLowerCase().includes(search.toLowerCase())
-    )
-  }, [games, search])
+    );
+  }, [games, search]);
 
   const showToast = (type: "success" | "error", game: string) => {
     if (type === "success") {
@@ -36,9 +37,9 @@ function AddGameDialog({ id, games }: { id: List["id"]; games: Game[] }) {
         title: "Success",
         description: `${game} was successfully added to list`,
         duration: 2000,
-      })
-      setOpen(false)
-      return
+      });
+      setOpen(false);
+      return;
     }
 
     if (type === "error") {
@@ -47,25 +48,25 @@ function AddGameDialog({ id, games }: { id: List["id"]; games: Game[] }) {
         description: `We couldn't add ${game} to list`,
         variant: "destructive",
         duration: 2000,
-      })
-      setOpen(false)
-      return
+      });
+      setOpen(false);
+      return;
     }
-  }
+  };
 
   if (id === "") {
-    return
+    return;
   }
 
   const onItemClick = async (game: Game) => {
     try {
-      await addGameToList({ gameId: game.id, listId: id })
-      showToast("success", game.title)
+      await addGameToList({ gameId: game.id, listId: id });
+      showToast("success", game.title);
     } catch (error) {
-      console.error(error)
-      showToast("error", game.title)
+      console.error(error);
+      showToast("error", game.title);
     }
-  }
+  };
 
   return (
     <>
@@ -123,7 +124,7 @@ function AddGameDialog({ id, games }: { id: List["id"]; games: Game[] }) {
         </Command>
       </CommandDialog>
     </>
-  )
+  );
 }
 
-export { AddGameDialog }
+export { AddGameDialog };

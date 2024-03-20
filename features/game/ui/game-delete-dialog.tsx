@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { deleteGame } from "@/features/library/actions"
-import { deleteGameFromWishlist } from "@/features/wishlist/actions"
+import { deleteGame } from "@/features/library/actions";
+import { deleteGameFromWishlist } from "@/features/wishlist/actions";
 
 import {
   AlertDialog,
@@ -12,25 +12,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/icons";
 
 export function GameDeleteDialog({
   id,
   isWishlist = false,
 }: {
-  id: string
-  isWishlist?: boolean
+  id: string;
+  isWishlist?: boolean;
 }) {
   const onDelete = async () => {
     if (isWishlist) {
-      await deleteGameFromWishlist(id)
-      return
+      await deleteGameFromWishlist(id);
+      return;
     }
 
-    await deleteGame(id)
-  }
+    await deleteGame(id);
+  };
 
   return (
     <AlertDialog>
@@ -54,5 +54,5 @@ export function GameDeleteDialog({
         </AlertDialogHeader>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

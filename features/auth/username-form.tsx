@@ -1,21 +1,21 @@
-import { revalidatePath } from "next/cache"
-import { setUsername } from "@/features/auth/actions"
+import { revalidatePath } from "next/cache";
+import { setUsername } from "@/features/auth/actions";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function UserNameForm() {
   async function handleSubmit(formData: FormData) {
-    "use server"
-    await setUsername({ username: formData.get("username") as string })
-    revalidatePath("/library")
+    "use server";
+    await setUsername({ username: formData.get("username") as string });
+    revalidatePath("/library");
   }
   return (
     <Dialog open>
@@ -36,7 +36,7 @@ function UserNameForm() {
         </section>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export { UserNameForm }
+export { UserNameForm };

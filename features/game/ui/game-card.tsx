@@ -1,19 +1,20 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { DeleteFromList } from "@/features/game/ui/delete-from-list"
-import { deleteGameFromList } from "@/features/lists"
-import { Game } from "@prisma/client"
-import { Clock } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { DeleteFromList } from "@/features/game/ui/delete-from-list";
+import { deleteGameFromList } from "@/features/lists";
+import { Game } from "@prisma/client";
+import { Clock } from "lucide-react";
 
-import { platformEnumToColor, uppercaseToNormal } from "@/lib/utils"
-import { Badge, ColorVariant } from "@/components/ui/badge"
-import { RenderWhen } from "@/components/render-when"
+import { Badge, ColorVariant } from "@/components/ui/badge";
+import { RenderWhen } from "@/components/render-when";
+
+import { platformEnumToColor, uppercaseToNormal } from "@/lib/utils";
 
 function GameTimeBadge({ time }: { time: Game["gameplayTime"] | undefined }) {
   if (!time) {
-    return null
+    return null;
   }
 
   return (
@@ -21,7 +22,7 @@ function GameTimeBadge({ time }: { time: Game["gameplayTime"] | undefined }) {
       <Clock className="size-3" />
       {time} h
     </div>
-  )
+  );
 }
 
 function Artwork({ game }: { game: Partial<Game> }) {
@@ -56,7 +57,7 @@ function Artwork({ game }: { game: Partial<Game> }) {
         <p className="text-md font-medium">{game.title}</p>
       </div>
     </div>
-  )
+  );
 }
 
 export function GameCard({
@@ -64,23 +65,23 @@ export function GameCard({
   path = "library",
   entityId,
 }: {
-  game: Partial<Game>
-  path?: string
-  entityId?: string
+  game: Partial<Game>;
+  path?: string;
+  entityId?: string;
 }) {
   const onDelete = async () => {
     if (!game.id || !entityId) {
-      return
+      return;
     }
 
     if (path.includes("lists")) {
       try {
-        await deleteGameFromList(entityId, game.id)
+        await deleteGameFromList(entityId, game.id);
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
-  }
+  };
   return (
     <div className="group w-full rounded">
       {path === "lists" ? <DeleteFromList onDelete={onDelete} /> : null}
@@ -91,5 +92,5 @@ export function GameCard({
         <Artwork game={game} />
       </Link>
     </div>
-  )
+  );
 }

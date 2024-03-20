@@ -1,7 +1,7 @@
-import { PropsWithChildren } from "react"
+import { PropsWithChildren } from "react";
 
-import { SiteFooter } from "@/components/site-footer"
-import { SiteHeader } from "@/components/site-header"
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 
 export default function LibraryLayout({ children }: PropsWithChildren) {
   return (
@@ -12,5 +12,5 @@ export default function LibraryLayout({ children }: PropsWithChildren) {
       </main>
       <SiteFooter />
     </>
-  )
+  );
 }

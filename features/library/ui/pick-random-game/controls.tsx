@@ -1,7 +1,7 @@
-import { FC, memo } from "react"
-import type { PickerControlsProps } from "@/features/library/types/components"
+import { FC, memo } from "react";
+import type { PickerControlsProps } from "@/features/library/types/components";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 const PickerControls: FC<PickerControlsProps> = ({
   isRunning,
@@ -17,10 +17,10 @@ const PickerControls: FC<PickerControlsProps> = ({
       Stop
     </Button>
   </div>
-)
+);
 
-const MemoizedControls = memo(PickerControls)
+const MemoizedControls = memo(PickerControls);
 
-MemoizedControls.displayName = "PickerControls"
+MemoizedControls.displayName = "PickerControls";
 
-export { MemoizedControls }
+export { MemoizedControls };

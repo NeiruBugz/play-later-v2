@@ -1,12 +1,12 @@
-import Link from "next/link"
-import { GameInfo } from "@/features/game/ui/game-info"
-import { getGameFromWishlist } from "@/features/wishlist/actions"
-import { ArrowLeft } from "lucide-react"
+import Link from "next/link";
+import { GameInfo } from "@/features/game/ui/game-info";
+import { getGameFromWishlist } from "@/features/wishlist/actions";
+import { ArrowLeft } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 export default async function GamePage({ params }: { params: { id: string } }) {
-  const gameInfo = await getGameFromWishlist(params.id)
+  const gameInfo = await getGameFromWishlist(params.id);
 
   return (
     <div className="px-4 md:container">
@@ -22,5 +22,5 @@ export default async function GamePage({ params }: { params: { id: string } }) {
       </header>
       <GameInfo game={gameInfo} />
     </div>
-  )
+  );
 }

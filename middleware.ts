@@ -1,10 +1,10 @@
-import { withAuth } from "next-auth/middleware"
+import { withAuth } from "next-auth/middleware";
 
 export default withAuth({
   callbacks: {
     authorized: async ({ req, token }) => {
-      const pathname = req.nextUrl.pathname
-      if (token) return true
+      const pathname = req.nextUrl.pathname;
+      if (token) return true;
 
       return (
         pathname.startsWith("/_next") ||
@@ -12,10 +12,10 @@ export default withAuth({
         pathname === "/favicon.ico" ||
         pathname.includes("shared-wishlist") ||
         pathname.includes("privacy-policy")
-      )
+      );
     },
   },
   pages: {
     signIn: "/login",
   },
-})
+});
