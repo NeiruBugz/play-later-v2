@@ -26,9 +26,6 @@ export async function getAllGames(): Promise<Game[]> {
       userId,
       deletedAt: null,
     },
-    orderBy: {
-      title: "asc",
-    },
   });
 }
 

@@ -15,7 +15,7 @@ export const fetchAndProcessGames = async (
 
   const filters = {
     platform,
-    order: params.get("order") ?? "asc",
+    order: params.get("order") ?? "desc",
     sortBy: params.get("sortBy") ?? "updatedAt",
     search: searchQuery,
   };
@@ -81,7 +81,6 @@ export const fetchAndProcessGames = async (
 
 export const setDefaultProps = (): URLSearchParams => {
   const params = new URLSearchParams(window.location.search);
-  console.log(params);
   if (!params.get("sort")) {
     params.set("sort", "updatedAt");
     params.set("order", "desc");

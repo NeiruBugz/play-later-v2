@@ -1,22 +1,17 @@
-# next-template
+# Play Later
 
-A Next.js 13 template for building apps with Radix UI and Tailwind CSS.
+A game backlogging application
 
-## Usage
+## Deployment
 
-```bash
-npx create-next-app -e https://github.com/shadcn/next-template
-```
+[PlayLater](https://play-later.vercel.com)
 
-## Features
+## What's used
 
-- Next.js 13 App Directory
-- Radix UI Primitives
-- Tailwind CSS
-- Icons from [Lucide](https://lucide.dev)
-- Dark mode with `next-themes`
-- Tailwind CSS class sorting, merging and linting.
-
-## License
-
-Licensed under the [MIT license](https://github.com/shadcn/ui/blob/main/LICENSE.md).
+- [Next.js (w/App Router)](https://nextjs.org/)
+- [howlongtobeat package](https://github.com/ckatzorke/howlongtobeat)
+- [Prisma (Type-safe ORM)](https://prisma.io)
+- [shadcn-ui (UI primitives)](https://ui.shadcn.com/)
+- [TailwindCSS (Styling system)](https://tailwindcss.com/)
+- [Vercel (Deployment)](https://vercel.com)
+- [Vercel Postgres (Cloud-based Database)](https://vercel.com/docs/storage/vercel-postgres)
