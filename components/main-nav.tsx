@@ -23,7 +23,6 @@ export function MainNav({ items }: MainNavProps) {
       </div>
       <div className="hidden gap-6 md:flex md:gap-10">
         <Logo name={siteConfig.name} />
-
         <nav className="flex gap-6">
           {items.map((item, index) => (
             <NavLink item={item} key={`${index}_${item.title}_nav`} />

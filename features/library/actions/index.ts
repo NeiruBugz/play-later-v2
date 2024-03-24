@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { GamePlatform, GameStatus, List, type Game } from "@prisma/client";
+import { GameStatus, List, type Game } from "@prisma/client";
 import { HowLongToBeatService } from "howlongtobeat";
 
 import { getServerUserId } from "@/lib/auth";
@@ -42,7 +42,7 @@ export async function getGames(
   if (filters.platform === "" || filters.platform === " ") {
     platform = undefined;
   } else {
-    platform = filters.platform as GamePlatform;
+    platform = filters.platform;
   }
   const games: Game[] = await prisma.game.findMany({
     where: {
@@ -51,7 +51,7 @@ export async function getGames(
       },
       userId,
       deletedAt: null,
-      platform: platform as GamePlatform,
+      platform: { contains: platform },
     },
     orderBy: { [sortState.key]: sortState.order },
   });

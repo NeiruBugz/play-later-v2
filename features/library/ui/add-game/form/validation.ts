@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 export const addGameSchema = z.object({
-  platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
+  platform: z.string().optional(),
   status: z.enum([
     "BACKLOG",
     "INPROGRESS",
@@ -10,7 +10,7 @@ export const addGameSchema = z.object({
     "FULL_COMPLETION",
   ]),
   title: z.string().min(1),
-  purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]),
+  purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]).optional(),
   isWishlist: z.boolean().optional(),
 });
 

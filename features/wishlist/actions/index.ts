@@ -23,8 +23,8 @@ export async function getGamesFromWishlist(
 ): Promise<WishlistedGame[]> {
   const userId = id ?? (await getServerUserId());
 
-  return prisma.wishlistedGame.findMany({
-    where: { userId, deletedAt: null },
+  return prisma.game.findMany({
+    where: { userId, deletedAt: null, isWishlisted: true },
     orderBy: { updatedAt: "desc" },
   });
 }

@@ -64,7 +64,7 @@ model User {
 model Game {
     id              String        @id @default(cuid())
     title           String
-    platform        GamePlatform?
+    platform        String?
     status          GameStatus    @default(BACKLOG)
     purchaseType    PurchaseType?
     rating          Int?
@@ -119,6 +119,7 @@ enum GameStatus {
     COMPLETED
     ABANDONED
     FULL_COMPLETION
+    SHELVED
 }
 
 enum GamePlatform {

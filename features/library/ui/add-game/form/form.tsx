@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef } from "react";
-import { addGame } from "@/features/library/actions";
 import { FormDescription } from "@/features/library/ui/add-game/form/description";
 import {
   addGameSchema,
@@ -9,7 +8,8 @@ import {
 } from "@/features/library/ui/add-game/form/validation";
 import { GamePicker } from "@/features/library/ui/add-game/game-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client";
+import { Game, GameStatus, PurchaseType } from "@prisma/client";
+import { useMutation } from "@tanstack/react-query";
 import { HowLongToBeatEntry } from "howlongtobeat";
 import { nanoid } from "nanoid";
 import { useForm } from "react-hook-form";
@@ -39,12 +39,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 
-import {
-  cn,
-  mapPlatformToSelectOption,
-  PurchaseTypeToFormLabel,
-  uppercaseToNormal,
-} from "@/lib/utils";
+import { cn, mapStatusForInfo, PurchaseTypeToFormLabel } from "@/lib/utils";
 
 export function AddForm({
   game,
@@ -63,6 +58,7 @@ export function AddForm({
     defaultValues: {
       title: entry?.name ?? "",
       purchaseType: "DIGITAL",
+      status: "BACKLOG",
     },
   });
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -72,6 +68,15 @@ export function AddForm({
     HowLongToBeatEntry | undefined
   >(entry);
   const [isPickerOpen, setPickerOpen] = React.useState(false);
+  const { mutateAsync } = useMutation({
+    mutationKey: ["add-to-library"],
+    mutationFn: async (data: Omit<Game, "userId">) => {
+      return await fetch(`/api/library`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+  });
 
   const showToast = (type: "success" | "error", name: string) => {
     if (type === "success") {
@@ -102,28 +107,29 @@ export function AddForm({
   );
 
   const onSubmit = async (values: AddGameSchema) => {
+    console.log(selectedGame);
     if (!selectedGame) {
       return;
     }
     try {
-      const { platform, purchaseType, status, title } = values;
+      const { platform, purchaseType, status, title, isWishlist } = values;
       const { id, imageUrl, gameplayMain } = selectedGame;
-      await addGame({
+      await mutateAsync({
         howLongToBeatId: id,
         id: nanoid(),
         createdAt: new Date(),
         updatedAt: new Date(),
         imageUrl,
-        platform,
+        platform: platform || null,
         status,
         title,
-        purchaseType,
+        purchaseType: purchaseType ? purchaseType : "DIGITAL",
         gameplayTime: gameplayMain,
+        isWishlisted: Boolean(isWishlist),
         rating: null,
         review: null,
         deletedAt: null,
         listId: null,
-        isWishlisted: false,
       });
       showToast("success", title);
       form.reset();
@@ -175,7 +181,7 @@ export function AddForm({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 overflow-auto"
+          className={cn("space-y-4 overflow-auto", { hidden: !selectedGame })}
         >
           <FormField
             control={form.control}
@@ -209,13 +215,9 @@ export function AddForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {Object.entries(GamePlatform).map(([key, value]) => (
-                      <SelectItem key={key} value={key}>
-                        <div className="normal-case">
-                          {value !== GamePlatform.PC
-                            ? uppercaseToNormal(value)
-                            : value}
-                        </div>
+                    {selectedGame?.playableOn.map((platform) => (
+                      <SelectItem key={platform} value={platform}>
+                        <div className="normal-case">{platform}</div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -228,23 +230,40 @@ export function AddForm({
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.entries(GameStatus).map(([key, value]) => (
-                      <SelectItem key={key} value={key}>
-                        <div className="normal-case">
-                          {mapPlatformToSelectOption(value)}
-                        </div>
-                      </SelectItem>
+                <FormLabel className="block">Status</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
+                  >
+                    {Object.keys(GameStatus).map((key) => (
+                      <FormItem className="flex items-center space-x-0 space-y-0">
+                        <FormControl key={key}>
+                          <RadioGroupItem
+                            value={key}
+                            id={key}
+                            className="sr-only"
+                          />
+                        </FormControl>
+                        <FormLabel
+                          htmlFor={key}
+                          className={cn(
+                            "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
+                            "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
+                            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                            {
+                              "bg-background text-foreground shadow-sm":
+                                form.getValues().status === key,
+                            }
+                          )}
+                        >
+                          {mapStatusForInfo(key as GameStatus)}
+                        </FormLabel>
+                      </FormItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </RadioGroup>
+                </FormControl>
               </FormItem>
             )}
           />
