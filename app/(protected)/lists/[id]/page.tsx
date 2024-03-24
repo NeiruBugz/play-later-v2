@@ -41,7 +41,7 @@ export default async function ListPage({
         </div>
       </header>
       <section className="container flex flex-wrap gap-2">
-        <List count={games.length}>
+        <List>
           <AddGameDialog id={listData?.id ?? ""} games={allGames} />
           {games.map((game) => (
             <div key={game.id} className="relative">
