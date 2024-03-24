@@ -244,3 +244,15 @@ export async function addGameToList({
   });
   revalidatePath(`/list/${listId}`);
 }
+
+export async function getAllUserPlatforms() {
+  const userId = await getServerUserId();
+
+  return prisma.game.findMany({
+    where: { userId },
+    distinct: ["platform"],
+    select: {
+      platform: true,
+    },
+  });
+}

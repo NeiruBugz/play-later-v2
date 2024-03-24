@@ -1,4 +1,4 @@
-import { GameCard } from "@/features/game/ui/game-card";
+import { Card } from "@/features/game/ui/card/card";
 import { WishlistShare } from "@/features/game/ui/wishlist-share";
 import { List } from "@/features/library/ui/list";
 import { getGamesFromWishlist } from "@/features/wishlist/actions";
@@ -23,7 +23,7 @@ export default async function WishlistPage() {
         </RenderWhen>
         <List>
           {wishlist.map((game) => (
-            <GameCard key={game.id} game={game} path="wishlist" />
+            <Card key={game.id} game={game} path="wishlist" />
           ))}
         </List>
       </section>

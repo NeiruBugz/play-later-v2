@@ -2,16 +2,12 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-import { cn } from "@/lib/utils";
 
 export function SearchForm() {
   const [searchValue, setSearchValue] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const router = useRouter();
 
   const onSubmit = useCallback(async () => {
@@ -35,7 +31,7 @@ export function SearchForm() {
   }, [onSubmit]);
 
   return (
-    <div className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+    <div className="relative">
       <Input
         name="searchQuery"
         id="searchQuery"
@@ -43,18 +39,7 @@ export function SearchForm() {
         placeholder="Start typing game name"
         value={searchValue}
         onChange={(event) => setSearchValue(event.currentTarget.value)}
-        className="border-0 p-0 shadow-none focus-visible:outline-none focus-visible:ring-0"
       />
-      <Button
-        variant="ghost"
-        className={cn("p-0 hover:bg-transparent hover:font-bold", {
-          "animate-pulse": isPending,
-        })}
-        onClick={onSubmit}
-        disabled={searchValue.length === 0}
-      >
-        <Search size={12} />
-      </Button>
     </div>
   );
 }

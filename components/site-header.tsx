@@ -1,5 +1,5 @@
 import { getUserById } from "@/features/auth/actions";
-import { HeaderSearch } from "@/features/game/ui/header-search";
+// import { HeaderSearch } from "@/features/game/ui/header-search";
 import AddGame from "@/features/library/ui/add-game/add-game";
 
 import { MainNav } from "@/components/main-nav";
@@ -17,7 +17,7 @@ export async function SiteHeader() {
         <MainNav items={siteConfig.mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center gap-2 space-x-1">
-            <HeaderSearch />
+            {/* <HeaderSearch /> */}
             <AddGame />
             <UserDropdown username={user ?? ""} />
           </nav>

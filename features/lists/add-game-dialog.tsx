@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { addGameToList } from "@/features/library/actions";
-import { Game, GamePlatform, List } from "@prisma/client";
+import { Game, List } from "@prisma/client";
 import { Gamepad2Icon, Plus } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -110,7 +110,7 @@ function AddGameDialog({ id, games }: { id: List["id"]; games: Game[] }) {
                     <Badge
                       variant={
                         platformEnumToColor(
-                          game.platform as GamePlatform
+                          game.platform as string
                         ) as ColorVariant
                       }
                     >

@@ -5,7 +5,7 @@ import { Game } from "@prisma/client";
 import { Badge, ColorVariant } from "@/components/ui/badge";
 import { RenderWhen } from "@/components/render-when";
 
-import { platformEnumToColor, uppercaseToNormal } from "@/lib/utils";
+import { platformEnumToColor } from "@/lib/utils";
 
 export const Artwork = ({ game }: { game: Partial<Game> }) => {
   return (
@@ -28,7 +28,7 @@ export const Artwork = ({ game }: { game: Partial<Game> }) => {
                   : "default"
               }
             >
-              {uppercaseToNormal(game.platform as string)}
+              {game.platform}
             </Badge>
             <GameTimeBadge time={game.gameplayTime} />
           </div>

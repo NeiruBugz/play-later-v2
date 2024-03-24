@@ -1,4 +1,4 @@
-import { GameCard } from "@/features/game/ui/game-card";
+import { Card } from "@/features/game/ui/card/card";
 import { getAllGames, getListGames } from "@/features/library/actions";
 import { List } from "@/features/library/ui/list";
 import { getList } from "@/features/lists";
@@ -45,7 +45,7 @@ export default async function ListPage({
           <AddGameDialog id={listData?.id ?? ""} games={allGames} />
           {games.map((game) => (
             <div key={game.id} className="relative">
-              <GameCard game={game} path="lists" entityId={listData?.id} />
+              <Card game={game} path="lists" entityId={listData?.id} />
             </div>
           ))}
         </List>

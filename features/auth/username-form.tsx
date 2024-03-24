@@ -11,14 +11,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-function UserNameForm() {
+function UserNameForm({ show }: { show: boolean }) {
   async function handleSubmit(formData: FormData) {
     "use server";
     await setUsername({ username: formData.get("username") as string });
     revalidatePath("/library");
   }
   return (
-    <Dialog open>
+    <Dialog open={show}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add username to your profile</DialogTitle>

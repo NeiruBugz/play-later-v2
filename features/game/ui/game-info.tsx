@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { GameDeleteDialog } from "@/features/game/ui/game-delete-dialog";
-import { GameStatusRadio } from "@/features/game/ui/game-status-radio";
 import { ReviewForm } from "@/features/game/ui/review-form";
 import type { WishlistEntity } from "@/features/wishlist/actions";
 import { GameStatus } from "@prisma/client";
@@ -45,7 +44,6 @@ export function GameInfo({
       />
       <article className="flex w-full flex-col-reverse justify-between gap-4 lg:flex-row-reverse 2xl:max-w-[900px]">
         <div className="flex size-fit flex-col flex-wrap items-center gap-2">
-          <GameStatusRadio gameStatus={gameStatus} gameId={game.id} />
           <GameDeleteDialog
             id={game.id}
             isWishlist={gameStatus === undefined}

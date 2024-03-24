@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   Game,
-  GamePlatform,
   GameStatus,
   PurchaseType,
   type WishlistedGame,
@@ -62,7 +61,7 @@ export async function deleteGameFromWishlist(id: WishlistedGame["id"]) {
 
 export async function moveToLibrary(
   id: WishlistedGame["id"],
-  platform: GamePlatform,
+  platform: string,
   purchaseType: PurchaseType,
   status: GameStatus
 ) {

@@ -29,7 +29,7 @@ export default async function LibraryPage({
           backloggedLength={backlogged.length}
         />
       </section>
-      {withUsername ? null : <UserNameForm />}
+      <UserNameForm show={!withUsername} />
     </section>
   );
 }
