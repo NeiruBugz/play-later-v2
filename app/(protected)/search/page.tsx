@@ -1,18 +1,20 @@
-import Image from "next/image"
-import { AddDialog } from "@/features/search/add-dialog"
+import Image from "next/image";
+import { AddDialog } from "@/features/search/add-dialog";
 
-import { searchHowLongToBeat } from "@/lib/hltb-search"
-import { platformEnumToColor } from "@/lib/utils"
-import { Badge, ColorVariant } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Badge, ColorVariant } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+import { searchHowLongToBeat } from "@/lib/hltb-search";
+import { platformEnumToColor } from "@/lib/utils";
 
 type SearchPageProps = {
-  searchParams: URLSearchParams
-}
+  searchParams: URLSearchParams;
+};
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = new URLSearchParams(searchParams).get("q")
-  const results = await searchHowLongToBeat(query)
+  const query = new URLSearchParams(searchParams).get("q");
+  const results = await searchHowLongToBeat(query);
+
   return (
     <section className="container bg-background">
       <h1 className="scroll-m-20 text-2xl font-extrabold tracking-tight md:text-3xl lg:text-4xl">
@@ -51,5 +53,5 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </ScrollArea>
       </section>
     </section>
-  )
+  );
 }

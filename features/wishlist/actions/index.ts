@@ -29,22 +29,6 @@ export async function getGamesFromWishlist(
   });
 }
 
-export async function addToWishlist(game: HowLongToBeatEntry) {
-  const userId = await getServerUserId();
-
-  await prisma.wishlistedGame.create({
-    data: {
-      title: game.name,
-      imageUrl: game.imageUrl,
-      howLongToBeatId: game.id,
-      userId,
-    },
-  });
-
-  revalidatePath("/search");
-  redirect("/wishlist");
-}
-
 export async function getGameFromWishlist(id: WishlistedGame["id"]) {
   const userId = await getServerUserId();
 
@@ -105,6 +89,7 @@ export async function moveToLibrary(
     updatedAt: new Date(),
     deletedAt: null,
     listId: null,
+    isWishlisted: false,
   };
 
   const promises = [

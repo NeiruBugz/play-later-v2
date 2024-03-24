@@ -1,6 +1,5 @@
 import "@/styles/globals.css";
 
-import { type ReactNode } from "react";
 import { Metadata, Viewport } from "next";
 import Providers from "@/providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -12,6 +11,7 @@ import { TailwindIndicator } from "@/components/tailwind-indicator";
 
 import { cn } from "@/lib/utils";
 
+import type { RootLayoutProps } from "@/types/layout";
 import { siteConfig } from "@/config/site";
 
 export const viewport: Viewport = {
@@ -33,10 +33,6 @@ export const metadata: Metadata = {
     template: `%s - ${siteConfig.name}`,
   },
 };
-
-interface RootLayoutProps {
-  children: ReactNode;
-}
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (

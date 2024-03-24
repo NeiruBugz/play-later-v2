@@ -21,7 +21,7 @@ export default async function WishlistPage() {
         <RenderWhen condition={!wishlist || wishlist.length === 0}>
           <h2>Wishlist is empty</h2>
         </RenderWhen>
-        <List count={wishlist.length}>
+        <List>
           {wishlist.map((game) => (
             <GameCard key={game.id} game={game} path="wishlist" />
           ))}

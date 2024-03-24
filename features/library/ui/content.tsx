@@ -3,6 +3,32 @@ import { List } from "@/features/library/ui/list";
 
 import { LibraryContentProps } from "@/types/library";
 
+function EmptyBacklog() {
+  return (
+    <p className="text-lg font-bold">Congratulations! Your backlog is empty!</p>
+  );
+}
+
+function BacklogList({
+  count,
+  backlogTime,
+}: {
+  count: number;
+  backlogTime: number;
+}) {
+  if (count === 0) {
+    return <EmptyBacklog />;
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <p className="text-lg font-bold">
+        Total backlog time is {backlogTime} hours and includes {count} game(s)
+      </p>
+    </div>
+  );
+}
+
 export function LibraryContent({
   currentStatus,
   totalBacklogTime,
@@ -13,14 +39,12 @@ export function LibraryContent({
     return (
       <div>
         {currentStatus === "BACKLOG" ? (
-          <div className="flex items-center gap-2">
-            <p className="text-lg font-bold">
-              Total backlog time is {totalBacklogTime} hours and includes{" "}
-              {backloggedLength} game(s)
-            </p>
-          </div>
+          <BacklogList
+            count={backloggedLength}
+            backlogTime={totalBacklogTime}
+          />
         ) : null}
-        <List count={backloggedLength}>
+        <List>
           {list.map((game) => (
             <GameCard key={game.id} game={game} />
           ))}
@@ -32,15 +56,10 @@ export function LibraryContent({
   return (
     <div>
       {currentStatus === "BACKLOG" ? (
-        <div className="flex items-center gap-2">
-          <p className="text-lg font-bold">
-            Total backlog time is {totalBacklogTime} hours and includes{" "}
-            {backloggedLength} game(s)
-          </p>
-        </div>
+        <BacklogList count={backloggedLength} backlogTime={totalBacklogTime} />
       ) : null}
-      <List count={backloggedLength}>
-        {[...list.entries()].map(([year, games]) => {
+      <List>
+        {[...list.entries()].map(([, games]) => {
           return games.map((game) => <GameCard key={game.id} game={game} />);
         })}
       </List>

@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export function useSearchParamsMutation() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [, startTransition] = useTransition();
 
   const currentValue = useCallback(
     (name: string) => searchParams.get(name) ?? "",
@@ -18,9 +19,11 @@ export function useSearchParamsMutation() {
       const currentSearch = new URLSearchParams(searchParams);
       currentSearch.set(name, value);
 
-      router.push(`${pathname}?${currentSearch}`);
+      startTransition(() => {
+        router.push(`${pathname}?${currentSearch}`);
+      });
     },
-    [router, pathname, searchParams]
+    [router, pathname, searchParams, startTransition]
   );
 
   const handleMultipleParamsMutation = useCallback(
@@ -31,15 +34,20 @@ export function useSearchParamsMutation() {
         currentSearch.set(key, value);
       });
 
-      router.push(`${pathname}?${currentSearch}`);
+      startTransition(() => {
+        router.push(`${pathname}?${currentSearch}`);
+      });
     },
-    [router, pathname, searchParams]
+    [router, pathname, searchParams, startTransition]
   );
 
   const handleParamsClear = useCallback(() => {
     const newParams = new URLSearchParams();
     router.push(`${pathname}?${newParams}`);
-  }, [pathname, router]);
+    startTransition(() => {
+      router.push(`${pathname}?${newParams}`);
+    });
+  }, [pathname, router, startTransition]);
 
   const handleParamsDeleteByName = useCallback(
     (name: string) => {

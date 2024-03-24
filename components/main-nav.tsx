@@ -3,12 +3,8 @@ import { Gamepad } from "lucide-react";
 import { MobileNav } from "@/components/mobile-nav";
 import { NavLink } from "@/components/nav-link";
 
-import { NavItem } from "@/types/nav";
+import type { MainNavProps } from "@/types/ui";
 import { siteConfig } from "@/config/site";
-
-interface MainNavProps {
-  items: NavItem[];
-}
 
 function Logo({ name }: { name: string }) {
   return (

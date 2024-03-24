@@ -1,9 +1,7 @@
-import type { PropsWithChildren, ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 
-type RenderWhenProps = {
-  condition: boolean;
-  fallback?: ReactNode;
-};
+import type { RenderWhenProps } from "@/types/ui";
+
 export function RenderWhen({
   condition,
   children,

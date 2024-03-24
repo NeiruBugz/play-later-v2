@@ -72,18 +72,6 @@ export function nameFirstLiterals(name: string) {
   return lastName ? `${firstName[0]}${lastName[0]}` : firstName[0];
 }
 
-export function mapStatusToUI(value: GameStatus) {
-  const statusMapping = {
-    BACKLOG: "Put in backlog",
-    INPROGRESS: "Start playing",
-    COMPLETED: "Complete",
-    ABANDONED: "Abandon",
-    FULL_COMPLETION: "100% Complete",
-  };
-
-  return statusMapping[value] || value;
-}
-
 export function mapStatusForInfo(value: GameStatus) {
   const statusMapping = {
     BACKLOG: "Backlogged",
@@ -157,14 +145,6 @@ export const DescriptionPurchaseTypeMapping: Record<PurchaseType, string> = {
     "You have the game on a disc, cartridge or other physical ",
   [PurchaseType.SUBSCRIPTION]:
     "Game from Xbox Game Pass, PlayStation Plus or Nintendo Switch Online",
-};
-
-export const StatusToUIMapping: Record<GameStatus, string> = {
-  ABANDONED: "Abandoned",
-  FULL_COMPLETION: "100%",
-  BACKLOG: "Backlog",
-  INPROGRESS: "Playing",
-  COMPLETED: "Completed",
 };
 
 export const PurchaseTypeToFormLabel: Record<PurchaseType, string> = {

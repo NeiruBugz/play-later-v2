@@ -2,8 +2,7 @@ import Image from "next/image";
 import { GameDeleteDialog } from "@/features/game/ui/game-delete-dialog";
 import { GameStatusRadio } from "@/features/game/ui/game-status-radio";
 import { ReviewForm } from "@/features/game/ui/review-form";
-import { GameEntity } from "@/features/library/actions";
-import { WishlistEntity } from "@/features/wishlist/actions";
+import type { WishlistEntity } from "@/features/wishlist/actions";
 import { GameStatus } from "@prisma/client";
 import { differenceInDays, format } from "date-fns";
 import { nanoid } from "nanoid";
@@ -19,6 +18,8 @@ import {
   prepareDescription,
   uppercaseToNormal,
 } from "@/lib/utils";
+
+import type { GameEntity } from "@/types/library";
 
 const reviewApplicableStatuses: Array<GameStatus> = [
   "ABANDONED",
@@ -176,19 +177,26 @@ export function GameInfo({
             (game as GameEntity).review !== undefined
           }
         >
-          <section>
+          <section
+            className={cn({
+              hidden:
+                !(game as GameEntity).review || !(game as GameEntity).rating,
+            })}
+          >
             <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
               Review and rating
             </h3>
             <p className="text-pretty leading-7">
               {(game as GameEntity).review}
             </p>
-            <p className="text-pretty leading-7">
-              Your score:{" "}
-              <span className="font-medium">
-                {(game as GameEntity).rating}/5
-              </span>
-            </p>
+            {(game as GameEntity).rating ? (
+              <p className="text-pretty leading-7">
+                Your score:{" "}
+                <span className="font-medium">
+                  {(game as GameEntity).rating}/5
+                </span>
+              </p>
+            ) : null}
           </section>
         </RenderWhen>
       </article>

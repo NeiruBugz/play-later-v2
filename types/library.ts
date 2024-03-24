@@ -1,7 +1,7 @@
 import { Game } from "@prisma/client";
+import { HowLongToBeatEntry } from "howlongtobeat";
 
 export type LibraryPageProps = {
-  params: {};
   searchParams: URLSearchParams;
 };
 
@@ -25,3 +25,7 @@ export type LibraryData = {
   totalBacklogTime: number;
   backlogged: Game[];
 };
+
+export type GameEntity = HowLongToBeatEntry & Game;
+
+export type FilterKeys = "platform" | "sortBy" | "order" | "search";

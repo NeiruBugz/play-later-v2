@@ -1,31 +1,25 @@
-import { Metadata } from "next"
-import { getUserById } from "@/features/auth/actions"
-import { WishlistedGameShared } from "@/features/game/ui/wishlisted-game.shared"
-import { getGamesFromWishlist } from "@/features/wishlist/actions"
-
-type SharedWishlistPageProps = {
-  params: {
-    id: string
-  }
-  searchParams: URLSearchParams
-}
+import { Metadata } from "next";
+import { getUserById } from "@/features/auth/actions";
+import { WishlistedGameShared } from "@/features/game/ui/wishlisted-game.shared";
+import { getGamesFromWishlist } from "@/features/wishlist/actions";
+import type { SharedWishlistPageProps } from "@/features/wishlist/types";
 
 export async function generateMetadata({
   params,
 }: SharedWishlistPageProps): Promise<Metadata> {
-  const id = params.id
-  const user = await getUserById(id)
+  const id = params.id;
+  const user = await getUserById(id);
 
   return {
     title: `${user}'s Wishlist`,
-  }
+  };
 }
 
 export default async function SharedWishlistPage(
   props: SharedWishlistPageProps
 ) {
-  const username = await getUserById(props.params.id)
-  const games = await getGamesFromWishlist(props.params.id)
+  const username = await getUserById(props.params.id);
+  const games = await getGamesFromWishlist(props.params.id);
 
   return (
     <main className="flex-1">
@@ -49,5 +43,5 @@ export default async function SharedWishlistPage(
         </ul>
       </section>
     </main>
-  )
+  );
 }

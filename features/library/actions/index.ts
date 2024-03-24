@@ -3,20 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { GamePlatform, GameStatus, List, type Game } from "@prisma/client";
-import { HowLongToBeatService, type HowLongToBeatEntry } from "howlongtobeat";
+import { HowLongToBeatService } from "howlongtobeat";
 
 import { getServerUserId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const LIBRARY_PATH = "/library";
+import { FilterKeys, GameEntity } from "@/types/library";
 
-export type GameEntity = HowLongToBeatEntry & Game;
+const LIBRARY_PATH = "/library";
 
 async function getUserId() {
   return await getServerUserId();
 }
-
-type FilterKeys = "platform" | "sortBy" | "order" | "search";
 
 export async function getAllGames(): Promise<Game[]> {
   const userId = await getUserId();
@@ -225,19 +223,6 @@ export async function getListGamesArtworks(id: List["id"]) {
     artwork: game.imageUrl,
     game: game.title,
   }));
-}
-
-export async function searchLibrary({ search }: { search: string }) {
-  const userId = await getServerUserId();
-
-  return prisma.game.findMany({
-    where: {
-      userId,
-      title: {
-        contains: search,
-      },
-    },
-  });
 }
 
 export async function addGameToList({
