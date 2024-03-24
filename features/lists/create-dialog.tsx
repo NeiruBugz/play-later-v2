@@ -1,13 +1,12 @@
-"use client"
+"use client";
 
-import { ChangeEvent, useState } from "react"
-import { createList } from "@/features/lists"
-import { Game } from "@prisma/client"
-import { Plus } from "lucide-react"
+import { ChangeEvent, useState } from "react";
+import { createList } from "@/features/lists";
+import { Game } from "@prisma/client";
+import { Plus } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -16,44 +15,48 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+import { cn } from "@/lib/utils";
 
 function CreateList({ randomGames }: { randomGames: Game[] }) {
-  const [listName, setListName] = useState("")
-  const [gamesToAdd, setGamesToAdd] = useState<Map<Game["id"], Game>>(new Map())
-  const [open, setOpen] = useState(false)
+  const [listName, setListName] = useState("");
+  const [gamesToAdd, setGamesToAdd] = useState<Map<Game["id"], Game>>(
+    new Map()
+  );
+  const [open, setOpen] = useState(false);
 
   const onNameChange = ({
     currentTarget: { value },
   }: ChangeEvent<HTMLInputElement>) => {
-    setListName(value)
-  }
+    setListName(value);
+  };
 
   const onCreate = async () => {
     try {
-      const games = [...gamesToAdd.values()]
-      await createList({ name: listName, games })
-      setListName("")
-      setOpen(false)
+      const games = [...gamesToAdd.values()];
+      await createList({ name: listName, games });
+      setListName("");
+      setOpen(false);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const addGameToList = (game: Game) => {
     setGamesToAdd((prev) => {
-      const newMap = new Map(prev)
+      const newMap = new Map(prev);
       if (newMap.has(game.id)) {
-        newMap.delete(game.id)
+        newMap.delete(game.id);
       } else {
-        newMap.set(game.id, game)
+        newMap.set(game.id, game);
       }
 
-      return newMap
-    })
-  }
+      return newMap;
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -102,7 +105,7 @@ function CreateList({ randomGames }: { randomGames: Game[] }) {
         </DialogHeader>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export { CreateList }
+export { CreateList };

@@ -1,15 +1,15 @@
-import { env } from "@/env"
-import { PrismaClient } from "@prisma/client"
+import { env } from "@/env.mjs";
+import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+  prisma: PrismaClient | undefined;
+};
 
-type LogLevel = Array<"query" | "error" | "warn">
+type LogLevel = Array<"query" | "error" | "warn">;
 const LOG_LEVEL: LogLevel =
-  env.NODE_ENV === "development" ? ["error", "warn"] : ["error"]
+  env.NODE_ENV === "development" ? ["error", "warn"] : ["error"];
 const prismaFactory = (log_level = LOG_LEVEL) => {
-  const prisma = new PrismaClient({ log: log_level })
+  const prisma = new PrismaClient({ log: log_level });
 
   return prisma.$extends({
     name: "soft-delete",
@@ -19,13 +19,13 @@ const prismaFactory = (log_level = LOG_LEVEL) => {
           return prisma.game.update({
             ...args,
             data: { deletedAt: new Date() },
-          })
+          });
         },
       },
     },
-  }) as PrismaClient
-}
+  }) as PrismaClient;
+};
 
-export const prisma = globalForPrisma.prisma ?? prismaFactory()
+export const prisma = globalForPrisma.prisma ?? prismaFactory();
 
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

@@ -1,12 +1,12 @@
-import { AddForm } from "@/features/library/ui/add-game/form"
+import { AddForm } from "@/features/library/ui/add-game/form";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 function AddDialog({ entry }: { entry: string }) {
   return (
@@ -21,7 +21,7 @@ function AddDialog({ entry }: { entry: string }) {
         </section>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export { AddDialog }
+export { AddDialog };

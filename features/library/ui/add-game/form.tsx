@@ -1,93 +1,50 @@
-"use client"
+"use client";
 
-import React, { useRef } from "react"
-import { addGame } from "@/features/library/actions"
-import { GamePicker } from "@/features/library/ui/add-game/game-picker"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client"
-import { HowLongToBeatEntry } from "howlongtobeat"
-import { nanoid } from "nanoid"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-
+import React, { useRef } from "react";
+import { addGame } from "@/features/library/actions";
+import { FormDescription } from "@/features/library/ui/add-game/form/description";
 import {
-  cn,
-  DescriptionPurchaseTypeMapping,
-  DescriptionStatusMapping,
-  mapPlatformToSelectOption,
-  PurchaseTypeToFormLabel,
-  uppercaseToNormal,
-} from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+  addGameSchema,
+  type AddGameSchema,
+} from "@/features/library/ui/add-game/form/validation";
+import { GamePicker } from "@/features/library/ui/add-game/game-picker";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { GamePlatform, GameStatus, PurchaseType } from "@prisma/client";
+import { HowLongToBeatEntry } from "howlongtobeat";
+import { nanoid } from "nanoid";
+import { useForm } from "react-hook-form";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+} from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
-import { RenderWhen } from "@/components/render-when"
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 
-function FormDescription() {
-  return (
-    <legend>
-      <h2 className="font-bold">Description</h2>
-      <h3 className="font-bold">Statuses</h3>
-      <ul>
-        {Object.entries(GameStatus).map(([key, value]) => (
-          <li
-            key={key}
-            className="border-b py-1 text-xs leading-7 last-of-type:border-none md:text-[14px]"
-          >
-            {mapPlatformToSelectOption(value)} -{" "}
-            {DescriptionStatusMapping[value]}
-          </li>
-        ))}
-      </ul>
-      <h3 className="font-bold">Purchase types</h3>
-      <ul>
-        {Object.entries(PurchaseType).map(([key, value]) => (
-          <li
-            key={key}
-            className="border-b py-1 text-xs leading-7 last-of-type:border-none md:text-[14px]"
-          >
-            {uppercaseToNormal(value)} - {DescriptionPurchaseTypeMapping[value]}
-          </li>
-        ))}
-      </ul>
-    </legend>
-  )
-}
-
-const addGameSchema = z.object({
-  platform: z.enum(["PC", "XBOX", "PLAYSTATION", "NINTENDO"]),
-  status: z.enum([
-    "BACKLOG",
-    "INPROGRESS",
-    "COMPLETED",
-    "ABANDONED",
-    "FULL_COMPLETION",
-  ]),
-  title: z.string().min(1),
-  purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]),
-  isWishlist: z.boolean().optional(),
-})
+import {
+  cn,
+  mapPlatformToSelectOption,
+  PurchaseTypeToFormLabel,
+  uppercaseToNormal,
+} from "@/lib/utils";
 
 export function AddForm({
   game,
@@ -95,34 +52,34 @@ export function AddForm({
   submitLabel = "Submit",
   withDescription = true,
 }: {
-  game?: string
-  isCompact?: boolean
-  submitLabel?: string
-  withDescription?: boolean
+  game?: string;
+  isCompact?: boolean;
+  submitLabel?: string;
+  withDescription?: boolean;
 }) {
-  const entry = game ? (JSON.parse(game) as HowLongToBeatEntry) : undefined
-  const form = useForm<z.infer<typeof addGameSchema>>({
+  const entry = game ? (JSON.parse(game) as HowLongToBeatEntry) : undefined;
+  const form = useForm<AddGameSchema>({
     resolver: zodResolver(addGameSchema),
     defaultValues: {
       title: entry?.name ?? "",
       purchaseType: "DIGITAL",
     },
-  })
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const { toast } = useToast()
+  });
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const { toast } = useToast();
 
   const [selectedGame, setSelectedGame] = React.useState<
     HowLongToBeatEntry | undefined
-  >(entry)
-  const [isPickerOpen, setPickerOpen] = React.useState(false)
+  >(entry);
+  const [isPickerOpen, setPickerOpen] = React.useState(false);
 
   const showToast = (type: "success" | "error", name: string) => {
     if (type === "success") {
       toast({
         title: "Success",
         description: `${name} was successfully added to your games`,
-      })
-      return
+      });
+      return;
     }
 
     if (type === "error") {
@@ -130,27 +87,27 @@ export function AddForm({
         title: "Oops, something happened",
         description: `We couldn't add ${name} to your games`,
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-  }
+  };
 
   const onGameSelect = React.useCallback(
     (game: HowLongToBeatEntry) => {
-      form.setValue("title", game.name)
-      setSelectedGame(game)
-      setPickerOpen(false)
+      form.setValue("title", game.name);
+      setSelectedGame(game);
+      setPickerOpen(false);
     },
     [form]
-  )
+  );
 
-  const onSubmit = async (values: z.infer<typeof addGameSchema>) => {
+  const onSubmit = async (values: AddGameSchema) => {
     if (!selectedGame) {
-      return
+      return;
     }
     try {
-      const { platform, purchaseType, status, title } = values
-      const { id, imageUrl, gameplayMain } = selectedGame
+      const { platform, purchaseType, status, title } = values;
+      const { id, imageUrl, gameplayMain } = selectedGame;
       await addGame({
         howLongToBeatId: id,
         id: nanoid(),
@@ -166,15 +123,16 @@ export function AddForm({
         review: null,
         deletedAt: null,
         listId: null,
-      })
-      showToast("success", title)
-      form.reset()
+        isWishlisted: false,
+      });
+      showToast("success", title);
+      form.reset();
     } catch (e) {
-      showToast("error", values.title)
-      console.error(e)
-      form.reset()
+      showToast("error", values.title);
+      console.error(e);
+      form.reset();
     }
-  }
+  };
 
   return (
     <div className={cn("my-6", { "m-0": isCompact })}>
@@ -337,5 +295,5 @@ export function AddForm({
         </form>
       </Form>
     </div>
-  )
+  );
 }

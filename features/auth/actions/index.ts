@@ -1,36 +1,32 @@
-"use server"
+"use server";
 
-import { getServerUserId } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { getServerUserId } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function getUserById(id: string) {
   const user = await prisma.user.findUnique({
     where: {
       id,
     },
-  })
+  });
 
-  return user?.username
+  return user?.username;
 }
 
 export async function hasUsername() {
-  const id = await getServerUserId()
+  const id = await getServerUserId();
 
   const username = await prisma.user.findUnique({
     where: {
       id,
     },
-  })
+  });
 
-  if (username?.username) {
-    return true
-  } else {
-    return false
-  }
+  return !!username?.username;
 }
 
 export async function setUsername({ username }: { username: string }) {
-  const id = await getServerUserId()
+  const id = await getServerUserId();
   await prisma.user.update({
     data: {
       username,
@@ -38,5 +34,5 @@ export async function setUsername({ username }: { username: string }) {
     where: {
       id,
     },
-  })
+  });
 }

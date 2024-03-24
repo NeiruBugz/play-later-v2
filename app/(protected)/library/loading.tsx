@@ -1,9 +1,9 @@
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
     <section className="relative">
-      <header className="bg-background p-4 md:container">
+      <header className="container bg-background">
         <div className="flex flex-wrap justify-between">
           <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
             Library
@@ -21,5 +21,5 @@ export default function Loading() {
         ))}
       </div>
     </section>
-  )
+  );
 }

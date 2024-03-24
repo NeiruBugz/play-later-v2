@@ -1,35 +1,36 @@
-"use client"
+"use client";
 
-import React from "react"
-import { HowLongToBeatEntry } from "howlongtobeat"
-import { Loader2 } from "lucide-react"
+import React from "react";
+import { HowLongToBeatEntry } from "howlongtobeat";
+import { Loader2 } from "lucide-react";
 
-import { useSearch } from "@/lib/query"
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { RenderWhen } from "@/components/render-when"
+} from "@/components/ui/command";
+import { RenderWhen } from "@/components/render-when";
+
+import { useSearch } from "@/lib/query";
+import { cn } from "@/lib/utils";
 
 export function GamePicker({
   selectedGame,
   onGameSelect,
   width,
 }: {
-  onGameSelect: (game: HowLongToBeatEntry) => void
-  selectedGame?: string
-  width?: number
+  onGameSelect: (game: HowLongToBeatEntry) => void;
+  selectedGame?: string;
+  width?: number;
 }) {
-  const { data, isPending, mutateAsync: search, reset } = useSearch()
+  const { data, isPending, mutateAsync: search, reset } = useSearch();
 
   React.useEffect(() => {
-    return () => reset()
-  }, [reset])
+    return () => reset();
+  }, [reset]);
 
   return (
     <Command className="w-full" style={{ width: width }}>
@@ -66,5 +67,5 @@ export function GamePicker({
         </RenderWhen>
       </CommandList>
     </Command>
-  )
+  );
 }

@@ -1,16 +1,17 @@
-import { CopyLink } from "@/features/game/ui/copy-link"
-import { Share } from "lucide-react"
+import { CopyLink } from "@/features/game/ui/copy-link";
+import { Share } from "lucide-react";
 
-import { getServerUserId } from "@/lib/auth"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
+
+import { getServerUserId } from "@/lib/auth";
 
 export async function WishlistShare() {
-  const userId = await getServerUserId()
+  const userId = await getServerUserId();
 
   return (
     <Popover>
@@ -27,5 +28,5 @@ export async function WishlistShare() {
         <CopyLink userId={userId} />
       </PopoverContent>
     </Popover>
-  )
+  );
 }
