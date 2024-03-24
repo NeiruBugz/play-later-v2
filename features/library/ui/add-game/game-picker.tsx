@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { HowLongToBeatEntry } from "howlongtobeat";
 import { Loader2 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,15 +16,9 @@ import { RenderWhen } from "@/components/render-when";
 import { useSearch } from "@/lib/query";
 import { cn } from "@/lib/utils";
 
-export function GamePicker({
-  selectedGame,
-  onGameSelect,
-  width,
-}: {
-  onGameSelect: (game: HowLongToBeatEntry) => void;
-  selectedGame?: string;
-  width?: number;
-}) {
+import { IMAGE_API, IMAGE_SIZES } from "@/config/site";
+
+export function GamePicker({ width }: { width?: number }) {
   const { data, isPending, mutateAsync: search, reset } = useSearch();
 
   React.useEffect(() => {
@@ -42,25 +35,28 @@ export function GamePicker({
           </CommandEmpty>
         </RenderWhen>
         <RenderWhen condition={Boolean(data) && data?.length !== 0}>
-          {data?.map((result) => (
+          {data?.map(({ id, name, cover, first_release_date }) => (
             <CommandItem
               className={cn("cursor-pointer last-of-type:rounded-sm", {
-                "font-bold": selectedGame === result.id,
+                // "font-bold": selectedGame === id,
               })}
-              key={result.id}
-              value={`${result.name}_${result.id}`}
-              onSelect={() => onGameSelect(result)}
+              key={id}
+              value={`${name}_${id}`}
+              // onSelect={() => onGameSelect(result)}
             >
               <div className="flex items-center gap-2">
                 <Avatar className="rounded-md">
                   <AvatarImage
                     className="object-cover"
-                    src={result.imageUrl}
-                    alt={result.name}
+                    alt={name}
+                    src={`${IMAGE_API}/${IMAGE_SIZES["micro"]}/${cover?.image_id}.png`}
                   />
-                  <AvatarFallback>{result.name}</AvatarFallback>
+                  <AvatarFallback>{name}</AvatarFallback>
                 </Avatar>
-                {result.name}
+                {name}&nbsp;
+                {isNaN(new Date(first_release_date * 1000).getFullYear())
+                  ? ""
+                  : `(${new Date(first_release_date * 1000).getFullYear()})`}
               </div>
             </CommandItem>
           ))}
