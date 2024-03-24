@@ -1,15 +1,12 @@
 import Image from "next/image";
 import { AddDialog } from "@/features/search/add-dialog";
+import type { SearchPageProps } from "@/features/search/types";
 
 import { Badge, ColorVariant } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { searchHowLongToBeat } from "@/lib/hltb-search";
 import { platformEnumToColor } from "@/lib/utils";
-
-type SearchPageProps = {
-  searchParams: URLSearchParams;
-};
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = new URLSearchParams(searchParams).get("q");
