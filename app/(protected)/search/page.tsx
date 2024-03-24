@@ -1,29 +1,23 @@
-import Image from "next/image"
-import { AddForm } from "@/features/library/ui/add-game/form"
-import { AddGameDialog } from "@/features/lists/add-game-dialog"
-import { AddDialog } from "@/features/search/add-dialog"
-import { AddFromSearch } from "@/features/wishlist/ui/add-from-search"
+import Image from "next/image";
+import { AddDialog } from "@/features/search/add-dialog";
+import type { SearchPageProps } from "@/features/search/types";
 
-import { searchHowLongToBeat } from "@/lib/hltb-search"
-import { platformEnumToColor } from "@/lib/utils"
-import { Badge, ColorVariant } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Badge, ColorVariant } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-type SearchPageProps = {
-  params: {}
-  searchParams: URLSearchParams
-}
+import { searchHowLongToBeat } from "@/lib/hltb-search";
+import { platformEnumToColor } from "@/lib/utils";
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = new URLSearchParams(searchParams).get("q")
-  const results = await searchHowLongToBeat(query)
+  const query = new URLSearchParams(searchParams).get("q");
+  const results = await searchHowLongToBeat(query);
+
   return (
-    <section className="bg-background p-4 md:container">
+    <section className="container bg-background">
       <h1 className="scroll-m-20 text-2xl font-extrabold tracking-tight md:text-3xl lg:text-4xl">
         Results for {query}: {results.length} games were found
       </h1>
       <section className="py-4">
-        {/* <SearchForm /> */}
         <ScrollArea className="mt-2 h-[600px] px-1 2xl:h-[1000px]">
           <ul className="space-y-5">
             {results.map((entry) => (
@@ -56,5 +50,5 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </ScrollArea>
       </section>
     </section>
-  )
+  );
 }

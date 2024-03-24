@@ -1,20 +1,20 @@
-import { Suspense } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import GoogleSignIn from "@/features/auth/google-sign-in"
-import library from "@/images/library.png"
-import sharedWishlist from "@/images/shared-wishlist.png"
-import { BarChart, Gamepad2, Share } from "lucide-react"
+import { Suspense } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import GoogleSignIn from "@/features/auth/google-sign-in";
+import library from "@/images/library.png";
+import sharedWishlist from "@/images/shared-wishlist.png";
+import { BarChart, Gamepad2, ListIcon, Share } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"
-import { Logo } from "@/components/logo"
+} from "@/components/ui/carousel";
+import { Logo } from "@/components/logo";
 
 const generateFeatures = () => [
   {
@@ -30,12 +30,17 @@ const generateFeatures = () => [
     icon: <BarChart />,
   },
   {
+    title: "Custom lists",
+    description: "Create your lists and collections",
+    icon: <ListIcon />,
+  },
+  {
     title: "Shareable wishlists",
     description:
       "Organize games that you want and share them with friends in an easy way of sharing a link to it",
     icon: <Share />,
   },
-]
+];
 export default function LoginPage() {
   return (
     <div className="container min-h-screen flex-1">
@@ -143,5 +148,5 @@ export default function LoginPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

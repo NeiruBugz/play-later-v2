@@ -1,7 +1,7 @@
-import { FiltersForm } from "@/features/library/ui/filters/form"
-import { LibraryFiltersUIProps } from "@/features/library/ui/filters/types"
+import { FiltersForm } from "@/features/library/ui/filters/form";
+import { LibraryFiltersUIProps } from "@/features/library/ui/filters/types";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -9,7 +9,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer"
+} from "@/components/ui/drawer";
 
 function LibraryFiltersDrawer({ open, setOpen }: LibraryFiltersUIProps) {
   return (
@@ -29,7 +29,7 @@ function LibraryFiltersDrawer({ open, setOpen }: LibraryFiltersUIProps) {
         </div>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }
 
-export { LibraryFiltersDrawer }
+export { LibraryFiltersDrawer };

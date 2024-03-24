@@ -46,3 +46,4 @@ videos/*
 public/_next-video
 
 dumps/
+.local-data/

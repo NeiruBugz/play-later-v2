@@ -1,12 +1,14 @@
-import Image from "next/image"
-import { GameDeleteDialog } from "@/features/game/ui/game-delete-dialog"
-import { GameStatusRadio } from "@/features/game/ui/game-status-radio"
-import { ReviewForm } from "@/features/game/ui/review-form"
-import { GameEntity } from "@/features/library/actions"
-import { WishlistEntity } from "@/features/wishlist/actions"
-import { GameStatus } from "@prisma/client"
-import { differenceInDays, format } from "date-fns"
-import { nanoid } from "nanoid"
+import Image from "next/image";
+import { GameDeleteDialog } from "@/features/game/ui/game-delete-dialog";
+import { GameStatusRadio } from "@/features/game/ui/game-status-radio";
+import { ReviewForm } from "@/features/game/ui/review-form";
+import type { WishlistEntity } from "@/features/wishlist/actions";
+import { GameStatus } from "@prisma/client";
+import { differenceInDays, format } from "date-fns";
+import { nanoid } from "nanoid";
+
+import { Badge, ColorVariant } from "@/components/ui/badge";
+import { RenderWhen } from "@/components/render-when";
 
 import {
   cn,
@@ -15,22 +17,22 @@ import {
   platformEnumToColor,
   prepareDescription,
   uppercaseToNormal,
-} from "@/lib/utils"
-import { Badge, ColorVariant } from "@/components/ui/badge"
-import { RenderWhen } from "@/components/render-when"
+} from "@/lib/utils";
+
+import type { GameEntity } from "@/types/library";
 
 const reviewApplicableStatuses: Array<GameStatus> = [
   "ABANDONED",
   "COMPLETED",
   "FULL_COMPLETION",
-]
+];
 
 export function GameInfo({
   game,
   gameStatus,
 }: {
-  game: GameEntity | WishlistEntity
-  gameStatus?: GameStatus
+  game: GameEntity | WishlistEntity;
+  gameStatus?: GameStatus;
 }) {
   return (
     <div className="mt-6 flex flex-col flex-wrap gap-4 md:flex-row">
@@ -42,7 +44,7 @@ export function GameInfo({
         className="!relative h-auto !w-[400px] rounded-md"
       />
       <article className="flex flex-col-reverse gap-4 lg:flex-row-reverse 2xl:max-w-[900px]">
-        <div className="flex h-fit w-fit flex-col flex-wrap items-center gap-2">
+        <div className="flex size-fit flex-col flex-wrap items-center gap-2">
           <GameStatusRadio gameStatus={gameStatus} gameId={game.id} />
           <GameDeleteDialog
             id={game.id}
@@ -175,22 +177,29 @@ export function GameInfo({
             (game as GameEntity).review !== undefined
           }
         >
-          <section>
+          <section
+            className={cn({
+              hidden:
+                !(game as GameEntity).review || !(game as GameEntity).rating,
+            })}
+          >
             <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
               Review and rating
             </h3>
             <p className="text-pretty leading-7">
               {(game as GameEntity).review}
             </p>
-            <p className="text-pretty leading-7">
-              Your score:{" "}
-              <span className="font-medium">
-                {(game as GameEntity).rating}/5
-              </span>
-            </p>
+            {(game as GameEntity).rating ? (
+              <p className="text-pretty leading-7">
+                Your score:{" "}
+                <span className="font-medium">
+                  {(game as GameEntity).rating}/5
+                </span>
+              </p>
+            ) : null}
           </section>
         </RenderWhen>
       </article>
     </div>
-  )
+  );
 }

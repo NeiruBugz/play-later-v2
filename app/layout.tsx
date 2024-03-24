@@ -1,23 +1,25 @@
-import "@/styles/globals.css"
+import "@/styles/globals.css";
 
-import { Metadata, Viewport } from "next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { GeistSans } from "geist/font/sans"
-import NextTopLoader from "nextjs-toploader"
+import { Metadata, Viewport } from "next";
+import Providers from "@/providers";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GeistSans } from "geist/font/sans";
+import NextTopLoader from "nextjs-toploader";
 
-import { siteConfig } from "@/config/site"
-import { cn } from "@/lib/utils"
-import { Toaster } from "@/components/ui/toaster"
-import ReactQuery from "@/components/query-provider"
-import { TailwindIndicator } from "@/components/tailwind-indicator"
-import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster";
+import { TailwindIndicator } from "@/components/tailwind-indicator";
+
+import { cn } from "@/lib/utils";
+
+import type { RootLayoutProps } from "@/types/layout";
+import { siteConfig } from "@/config/site";
 
 export const viewport: Viewport = {
   themeColor: [
     { color: "white", media: "(prefers-color-scheme: light)" },
     { color: "black", media: "(prefers-color-scheme: dark)" },
   ],
-}
+};
 
 export const metadata: Metadata = {
   description: siteConfig.description,
@@ -30,11 +32,7 @@ export const metadata: Metadata = {
     default: siteConfig.name,
     template: `%s - ${siteConfig.name}`,
   },
-}
-
-interface RootLayoutProps {
-  children: React.ReactNode
-}
+};
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -46,13 +44,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
         )}
       >
         <NextTopLoader />
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ReactQuery>{children}</ReactQuery>
+        <Providers attribute="class" defaultTheme="system" enableSystem>
+          {children}
           <Toaster />
           <TailwindIndicator />
-        </ThemeProvider>
+        </Providers>
         <SpeedInsights />
       </body>
     </html>
-  )
+  );
 }

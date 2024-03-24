@@ -1,34 +1,26 @@
-import { Metadata, ResolvingMetadata } from "next"
-import { getUserById } from "@/features/auth/actions"
-import { WishlistedGameShared } from "@/features/game/ui/wishlisted-game.shared"
-import { getWishlistedGames } from "@/features/wishlist/actions"
+import { Metadata } from "next";
+import { getUserById } from "@/features/auth/actions";
+import { WishlistedGameShared } from "@/features/game/ui/wishlisted-game.shared";
+import { getGamesFromWishlist } from "@/features/wishlist/actions";
+import type { SharedWishlistPageProps } from "@/features/wishlist/types";
 
-type SharedWishlistPageProps = {
-  params: {
-    id: string
-  }
-  searchParams: URLSearchParams
-}
-
-export async function generateMetadata(
-  { params, searchParams }: SharedWishlistPageProps,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const id = params.id
-  const user = await getUserById(id)
+export async function generateMetadata({
+  params,
+}: SharedWishlistPageProps): Promise<Metadata> {
+  const id = params.id;
+  const user = await getUserById(id);
 
   return {
     title: `${user}'s Wishlist`,
-  }
+  };
 }
 
 export default async function SharedWishlistPage(
   props: SharedWishlistPageProps
 ) {
-  const [username, games] = await Promise.all([
-    getUserById(props.params.id),
-    getWishlistedGames(props.params.id),
-  ])
+  const username = await getUserById(props.params.id);
+  const games = await getGamesFromWishlist(props.params.id);
+
   return (
     <main className="flex-1">
       <header className="sticky top-0 z-10 bg-background p-4 shadow-sm md:px-16">
@@ -38,16 +30,18 @@ export default async function SharedWishlistPage(
       </header>
       <section className="mt-4 px-4 pb-16 md:px-16">
         <ul className="columns-2 md:columns-3 md:gap-8 lg:columns-4">
-          {games.map((game) => (
-            <li
-              className="group relative mb-4 w-fit cursor-pointer rounded-md"
-              key={game.id}
-            >
-              <WishlistedGameShared game={game} />
-            </li>
-          ))}
+          {games
+            ? games.map((game) => (
+                <li
+                  className="group relative mb-4 w-fit cursor-pointer rounded-md"
+                  key={game.id}
+                >
+                  <WishlistedGameShared game={game} />
+                </li>
+              ))
+            : null}
         </ul>
       </section>
     </main>
-  )
+  );
 }

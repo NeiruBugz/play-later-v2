@@ -1,19 +1,19 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import {
   DefaultSession,
   getServerSession,
   NextAuthOptions,
   Session,
-} from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
+} from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/prisma";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
-      id: string
-    } & DefaultSession["user"]
+      id: string;
+    } & DefaultSession["user"];
   }
 }
 
@@ -22,9 +22,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        token.id = user.id
+        token.id = user.id;
       }
-      return token
+      return token;
     },
 
     session: ({ session, token }) => {
@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
           ...session.user,
           id: token.id,
         },
-      }
+      };
     },
   },
   pages: {
@@ -51,9 +51,9 @@ export const authOptions: NextAuthOptions = {
     maxAge: 1 * 24 * 60 * 60, // 1 day
     strategy: "jwt",
   },
-}
+};
 
 export const getServerUserId = async () => {
-  const session = (await getServerSession(authOptions)) as Session
-  return session.user.id
-}
+  const session = (await getServerSession(authOptions)) as Session;
+  return session.user.id;
+};

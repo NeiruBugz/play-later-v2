@@ -1,7 +1,7 @@
-import { FiltersForm } from "@/features/library/ui/filters/form"
-import { LibraryFiltersUIProps } from "@/features/library/ui/filters/types"
+import { FiltersForm } from "@/features/library/ui/filters/form";
+import { LibraryFiltersUIProps } from "@/features/library/ui/filters/types";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
 
 function LibraryFiltersSheet({ open, setOpen }: LibraryFiltersUIProps) {
   return (
@@ -29,7 +29,7 @@ function LibraryFiltersSheet({ open, setOpen }: LibraryFiltersUIProps) {
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }
 
-export { LibraryFiltersSheet }
+export { LibraryFiltersSheet };

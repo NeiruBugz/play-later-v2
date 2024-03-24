@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { PropsWithChildren } from "react"
-import { useRouter } from "next/navigation"
+import { PropsWithChildren } from "react";
+import { useRouter } from "next/navigation";
 
 function BackLink({ children }: PropsWithChildren) {
-  const router = useRouter()
+  const router = useRouter();
 
   const onClick = () => {
-    router.back()
-  }
+    router.back();
+  };
 
-  return <div onClick={onClick}>{children}</div>
+  return <div onClick={onClick}>{children}</div>;
 }
 
-export { BackLink }
+export { BackLink };

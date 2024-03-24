@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Picker } from "@/features/library/ui/pick-random-game/picker"
-import { Game } from "@prisma/client"
+import { useState } from "react";
+import { Picker } from "@/features/library/ui/pick-random-game/picker";
+import { Game } from "@prisma/client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,10 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 function PickerDialog({ items }: { items: Game[] }) {
-  const [isOpen, onOpenChange] = useState(false)
+  const [isOpen, onOpenChange] = useState(false);
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
@@ -31,7 +31,7 @@ function PickerDialog({ items }: { items: Game[] }) {
         <Picker items={items} closeDialog={() => onOpenChange(false)} />
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export { PickerDialog }
+export { PickerDialog };

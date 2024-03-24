@@ -1,25 +1,24 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import userPic from "@/images/userpic.png"
-import { LogOut, Moon, Sun } from "lucide-react"
-import { signOut } from "next-auth/react"
-import { useTheme } from "next-themes"
+import Image from "next/image";
+import userPic from "@/images/userpic.png";
+import { LogOut, Moon, Sun } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 export function UserDropdown({ username }: { username?: string }) {
-  const { setTheme } = useTheme()
+  const { setTheme } = useTheme();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -50,13 +49,6 @@ export function UserDropdown({ username }: { username?: string }) {
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-        <DropdownMenuPortal></DropdownMenuPortal>
-        {/* <DropdownMenuItem>
-          <Link href="/settings" className="flex items-center">
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Link>
-        </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
           <LogOut className="mr-2 size-4" />
@@ -64,5 +56,5 @@ export function UserDropdown({ username }: { username?: string }) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
