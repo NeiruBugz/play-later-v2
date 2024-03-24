@@ -123,6 +123,7 @@ export function AddForm({
         review: null,
         deletedAt: null,
         listId: null,
+        isWishlisted: false,
       });
       showToast("success", title);
       form.reset();
