@@ -1,5 +1,3 @@
-import { hasUsername } from "@/features/auth/actions";
-import { UserNameForm } from "@/features/auth/username-form";
 import {
   fetchAndProcessGames,
   setDefaultProps,
@@ -17,7 +15,6 @@ export default async function LibraryPage({
     : setDefaultProps();
   const { list, currentStatus, totalBacklogTime, backlogged } =
     await fetchAndProcessGames(params);
-  const withUsername = await hasUsername();
   return (
     <section className="relative">
       <Header currentStatus={currentStatus} backlogged={backlogged} />
@@ -29,7 +26,6 @@ export default async function LibraryPage({
           backloggedLength={backlogged.length}
         />
       </section>
-      <UserNameForm show={!withUsername} />
     </section>
   );
 }

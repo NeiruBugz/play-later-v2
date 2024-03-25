@@ -74,6 +74,7 @@ export async function moveToLibrary(
 
   const gamePayload: Game = {
     id: nanoid(),
+    igdbId: null,
     title: gameData.title,
     platform,
     status,

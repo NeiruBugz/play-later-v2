@@ -10,7 +10,6 @@ import { GamePicker } from "@/features/library/ui/add-game/game-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Game, GameStatus, PurchaseType } from "@prisma/client";
 import { useMutation } from "@tanstack/react-query";
-import { HowLongToBeatEntry } from "howlongtobeat";
 import { nanoid } from "nanoid";
 import { useForm } from "react-hook-form";
 
@@ -41,6 +40,9 @@ import { useToast } from "@/components/ui/use-toast";
 
 import { cn, mapStatusForInfo, PurchaseTypeToFormLabel } from "@/lib/utils";
 
+import type { SearchResponse } from "@/types/igdb";
+import { IMAGE_API, IMAGE_SIZES } from "@/config/site";
+
 export function AddForm({
   game,
   isCompact = false,
@@ -52,7 +54,7 @@ export function AddForm({
   submitLabel?: string;
   withDescription?: boolean;
 }) {
-  const entry = game ? (JSON.parse(game) as HowLongToBeatEntry) : undefined;
+  const entry = game ? (JSON.parse(game) as SearchResponse) : undefined;
   const form = useForm<AddGameSchema>({
     resolver: zodResolver(addGameSchema),
     defaultValues: {
@@ -65,13 +67,14 @@ export function AddForm({
   const { toast } = useToast();
 
   const [selectedGame, setSelectedGame] = React.useState<
-    HowLongToBeatEntry | undefined
+    SearchResponse | undefined
   >(entry);
   const [isPickerOpen, setPickerOpen] = React.useState(false);
   const { mutateAsync } = useMutation({
     mutationKey: ["add-to-library"],
     mutationFn: async (data: Omit<Game, "userId">) => {
-      return await fetch(`/api/library`, {
+      console.log(data);
+      await fetch(`/api/library`, {
         method: "POST",
         body: JSON.stringify(data),
       });
@@ -98,7 +101,7 @@ export function AddForm({
   };
 
   const onGameSelect = React.useCallback(
-    (game: HowLongToBeatEntry) => {
+    (game: SearchResponse) => {
       form.setValue("title", game.name);
       setSelectedGame(game);
       setPickerOpen(false);
@@ -113,18 +116,20 @@ export function AddForm({
     }
     try {
       const { platform, purchaseType, status, title, isWishlist } = values;
-      const { id, imageUrl, gameplayMain } = selectedGame;
+      const howLongToBeatResponse = await fetch(`/api/hltb-search?q=${title}`);
+      const response = await howLongToBeatResponse.json();
       await mutateAsync({
-        howLongToBeatId: id,
+        howLongToBeatId: response.id,
+        igdbId: selectedGame.id,
         id: nanoid(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        imageUrl,
+        imageUrl: `${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${selectedGame.cover.image_id}.png`,
         platform: platform || null,
         status,
         title,
         purchaseType: purchaseType ? purchaseType : "DIGITAL",
-        gameplayTime: gameplayMain,
+        gameplayTime: response.gameplayTime,
         isWishlisted: Boolean(isWishlist),
         rating: null,
         review: null,
@@ -132,7 +137,7 @@ export function AddForm({
         listId: null,
       });
       showToast("success", title);
-      form.reset();
+      // form.reset();
     } catch (e) {
       showToast("error", values.title);
       console.error(e);
@@ -169,7 +174,7 @@ export function AddForm({
             <Avatar className="rounded-md">
               <AvatarImage
                 className="object-center"
-                src={selectedGame.imageUrl}
+                src={`${IMAGE_API}/${IMAGE_SIZES["micro"]}/${selectedGame.cover.image_id}.png`}
                 alt={selectedGame.name}
               />
               <AvatarFallback>{selectedGame.name}</AvatarFallback>
@@ -215,9 +220,9 @@ export function AddForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {selectedGame?.playableOn.map((platform) => (
-                      <SelectItem key={platform} value={platform}>
-                        <div className="normal-case">{platform}</div>
+                    {selectedGame?.platforms.map((platform) => (
+                      <SelectItem key={platform.id} value={platform.name}>
+                        <div className="normal-case">{platform.name}</div>
                       </SelectItem>
                     ))}
                   </SelectContent>

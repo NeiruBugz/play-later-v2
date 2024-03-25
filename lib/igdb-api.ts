@@ -1,6 +1,22 @@
 import { env } from "@/env.mjs";
 
+import {
+  FullGameInfoResponse,
+  RatedGameResponse,
+  RequestOptions,
+  SearchResponse,
+  TwitchTokenResponse,
+} from "@/types/igdb";
 import { API_URL, TOKEN_URL } from "@/config/site";
+
+const asError = (thrown: unknown): Error => {
+  if (thrown instanceof Error) return thrown;
+  try {
+    return new Error(JSON.stringify(thrown));
+  } catch {
+    return new Error(String(thrown));
+  }
+};
 
 const gamesByRating = `
   fields
@@ -45,18 +61,6 @@ const fullGameInfo = `
     websites.trusted
 ;`;
 
-type TwitchTokenResponse = {
-  access_token: string;
-  expires_in: number;
-  token_type: string;
-};
-
-interface RequestOptions {
-  resource: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  body?: any;
-}
-
 const igdbApi = {
   token: null as TwitchTokenResponse | null,
 
@@ -64,14 +68,17 @@ const igdbApi = {
     try {
       const res = await fetch(TOKEN_URL, { method: "POST", cache: "no-store" });
       this.token = await res.json();
-      console.log("token aquired");
-    } catch (error) {
-      console.error(error);
+    } catch (thrown) {
+      const error = asError(thrown);
+      console.error(`${error.name}: ${error.message}`);
+      if (error.stack) console.error(error.stack);
     }
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async request({ resource, ...options }: RequestOptions): Promise<any> {
+  async request<T>({
+    resource,
+    ...options
+  }: RequestOptions): Promise<T | void> {
     try {
       const response = await fetch(`${API_URL}${resource}`, {
         method: "POST",
@@ -85,21 +92,22 @@ const igdbApi = {
 
       const data = await response.json();
       return data;
-    } catch (error) {
-      return error;
+    } catch (thrown) {
+      const error = asError(thrown);
+      console.error(`${error.name}: ${error.message}`);
+      if (error.stack) console.error(error.stack);
     }
   },
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getGamesByRating(): Promise<any> {
+  async getGamesByRating(): Promise<RatedGameResponse[] | void> {
     return this.request({
       resource: "/games",
       body: gamesByRating,
     });
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getGameById(gameId: string): Promise<any> {
+  async getGameById(gameId: number): Promise<FullGameInfoResponse | void> {
     return this.request({
       resource: "/games",
       body: `${fullGameInfo} where id = (${gameId});`,
@@ -110,11 +118,9 @@ const igdbApi = {
     name = "",
     ...fields
   }: {
-    name?: string | null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }): Promise<any> {
+    name: string | null;
+    [key: string]: string | null;
+  }): Promise<SearchResponse[] | void> {
     if (!name) return;
     let str = "";
 
@@ -129,12 +135,10 @@ const igdbApi = {
         name,
         platforms.name,
         release_dates.human,
-        external_games,
         first_release_date,
         cover.image_id;
       where
-        cover.image_id != null &
-        parent_game = null
+        cover.image_id != null
         ${str};
       ${name ? `search "${name}";` : ""}
       limit 100;`,

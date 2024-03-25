@@ -9,15 +9,14 @@ import { platformEnumToColor } from "@/lib/utils";
 
 export const Artwork = ({ game }: { game: Partial<Game> }) => {
   return (
-    <div className="group relative w-fit cursor-pointer rounded border bg-background text-white shadow-md transition-all hover:shadow-xl">
-      <div className="flex size-32 items-center justify-center sm:size-36 md:size-48 xl:size-52">
+    <div className="group relative w-fit cursor-pointer rounded-xl border bg-background text-white shadow-md transition-all hover:shadow-xl">
+      <div className="flex h-[352px] w-[264px] items-center justify-center">
         <Image
           src={game.imageUrl ?? ""}
           alt={`${game.title} cover art`}
-          className="size-full rounded object-cover"
-          width={256}
-          height={256}
-          priority
+          className="h-full w-full rounded-xl object-cover"
+          unoptimized
+          fill
         />
         <RenderWhen condition={Boolean(game.platform)}>
           <div className="absolute right-2 top-2 flex w-fit flex-col items-end gap-1 normal-case">

@@ -68,15 +68,9 @@ export async function getGames(
 }
 
 export async function addGame(game: Omit<Game, "userId">) {
-  const userId = await getUserId();
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-  });
-  if (!user) {
-    return;
-  }
+  console.log(game);
+  const userId = await getServerUserId();
+  console.log(userId);
 
   try {
     await prisma.game.create({

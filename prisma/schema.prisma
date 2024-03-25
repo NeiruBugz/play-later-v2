@@ -72,6 +72,7 @@ model Game {
     isWishlisted    Boolean?      @default(false)
     imageUrl        String
     howLongToBeatId String?
+    igdbId          Int?
     createdAt       DateTime      @default(now())
     updatedAt       DateTime      @updatedAt
     deletedAt       DateTime?
@@ -120,13 +121,6 @@ enum GameStatus {
     ABANDONED
     FULL_COMPLETION
     SHELVED
-}
-
-enum GamePlatform {
-    PC
-    XBOX
-    NINTENDO
-    PLAYSTATION
 }
 
 enum PurchaseType {
