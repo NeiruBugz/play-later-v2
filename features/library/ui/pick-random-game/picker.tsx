@@ -43,13 +43,13 @@ function Picker({ items, closeDialog }: PickerProps) {
     setIsRunning(false);
   }, []);
 
-  const reset = useCallback(() => {
-    if (intervalRef.current !== null) {
-      clearInterval(intervalRef.current);
-    }
-    setIsRunning(false);
-    setCurrentChoice(getRandomItem(items) ?? items[0]);
-  }, [items]);
+  // const reset = useCallback(() => {
+  //   if (intervalRef.current !== null) {
+  //     clearInterval(intervalRef.current);
+  //   }
+  //   setIsRunning(false);
+  //   setCurrentChoice(getRandomItem(items) ?? items[0]);
+  // }, [items]);
 
   const pickChoice = useCallback(() => {
     return getRandomItem(items) ?? items[0];

@@ -1,6 +1,6 @@
 import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { getAllUserPlatforms } from "@/features/library/actions";
 import { LibraryFiltersUIProps } from "@/features/library/ui/filters/types";
-import { GamePlatform } from "@prisma/client";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,15 @@ function FiltersForm({
     platform: currentValue("platform") ?? " ",
     search: currentValue("search") ?? "",
   });
+  const [platformOptions, setPlatformOptions] = useState<
+    Array<Record<"platform", string>>
+  >([]);
+
+  useEffect(() => {
+    getAllUserPlatforms().then((res) =>
+      setPlatformOptions(res as Array<Record<"platform", string>>)
+    );
+  }, []);
 
   useEffect(() => {
     const sortOrder = currentValue("order");
@@ -176,9 +185,13 @@ function FiltersForm({
             <SelectValue placeholder="Platform filter" />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(GamePlatform).map(([key, value]) => (
-              <SelectItem key={key} value={key} className="normal-case">
-                {value}
+            {platformOptions.map((option) => (
+              <SelectItem
+                key={option.platform}
+                value={option.platform}
+                className="normal-case"
+              >
+                {option.platform}
               </SelectItem>
             ))}
             <SelectItem value={" "} className="normal-case">

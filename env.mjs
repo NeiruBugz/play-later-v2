@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs"
-import { z } from "zod"
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
 
 export const env = createEnv({
   server: {
@@ -9,8 +9,8 @@ export const env = createEnv({
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]),
-    IGDB_CLIENT_ID: z.string().optional(),
-    IGDB_CLIENT_SECRET: z.string().optional(),
+    IGDB_CLIENT_ID: z.string(),
+    IGDB_CLIENT_SECRET: z.string(),
     POSTGRES_URL: z.string().url(),
     POSTGRES_PRISMA_URL: z.string().url(),
     POSTGRES_URL_NO_SSL: z.string().url(),
@@ -39,4 +39,4 @@ export const env = createEnv({
     POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD,
     POSTGRES_DATABASE: process.env.POSTGRES_DATABASE,
   },
-})
+});

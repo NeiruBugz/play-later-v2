@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { GamePlatform, GameStatus, List, type Game } from "@prisma/client";
+import { GameStatus, List, type Game } from "@prisma/client";
 import { HowLongToBeatService } from "howlongtobeat";
 
 import { getServerUserId } from "@/lib/auth";
@@ -42,7 +42,7 @@ export async function getGames(
   if (filters.platform === "" || filters.platform === " ") {
     platform = undefined;
   } else {
-    platform = filters.platform as GamePlatform;
+    platform = filters.platform;
   }
   const games: Game[] = await prisma.game.findMany({
     where: {
@@ -51,7 +51,7 @@ export async function getGames(
       },
       userId,
       deletedAt: null,
-      platform: platform as GamePlatform,
+      platform: { contains: platform },
     },
     orderBy: { [sortState.key]: sortState.order },
   });
@@ -68,15 +68,9 @@ export async function getGames(
 }
 
 export async function addGame(game: Omit<Game, "userId">) {
-  const userId = await getUserId();
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-  });
-  if (!user) {
-    return;
-  }
+  console.log(game);
+  const userId = await getServerUserId();
+  console.log(userId);
 
   try {
     await prisma.game.create({
@@ -243,4 +237,16 @@ export async function addGameToList({
     },
   });
   revalidatePath(`/list/${listId}`);
+}
+
+export async function getAllUserPlatforms() {
+  const userId = await getServerUserId();
+
+  return prisma.game.findMany({
+    where: { userId },
+    distinct: ["platform"],
+    select: {
+      platform: true,
+    },
+  });
 }

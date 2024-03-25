@@ -1,4 +1,4 @@
-import { GameCard } from "@/features/game/ui/game-card";
+import { Card } from "@/features/game/ui/card/card";
 import { List } from "@/features/library/ui/list";
 
 import { LibraryContentProps } from "@/types/library";
@@ -46,7 +46,7 @@ export function LibraryContent({
         ) : null}
         <List>
           {list.map((game) => (
-            <GameCard key={game.id} game={game} />
+            <Card key={game.id} game={game} />
           ))}
         </List>
       </div>
@@ -60,7 +60,7 @@ export function LibraryContent({
       ) : null}
       <List>
         {[...list.entries()].map(([, games]) => {
-          return games.map((game) => <GameCard key={game.id} game={game} />);
+          return games.map((game) => <Card key={game.id} game={game} />);
         })}
       </List>
     </div>

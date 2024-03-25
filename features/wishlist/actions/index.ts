@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   Game,
-  GamePlatform,
   GameStatus,
   PurchaseType,
   type WishlistedGame,
@@ -23,8 +22,8 @@ export async function getGamesFromWishlist(
 ): Promise<WishlistedGame[]> {
   const userId = id ?? (await getServerUserId());
 
-  return prisma.wishlistedGame.findMany({
-    where: { userId, deletedAt: null },
+  return prisma.game.findMany({
+    where: { userId, deletedAt: null, isWishlisted: true },
     orderBy: { updatedAt: "desc" },
   });
 }
@@ -62,7 +61,7 @@ export async function deleteGameFromWishlist(id: WishlistedGame["id"]) {
 
 export async function moveToLibrary(
   id: WishlistedGame["id"],
-  platform: GamePlatform,
+  platform: string,
   purchaseType: PurchaseType,
   status: GameStatus
 ) {
@@ -75,6 +74,7 @@ export async function moveToLibrary(
 
   const gamePayload: Game = {
     id: nanoid(),
+    igdbId: null,
     title: gameData.title,
     platform,
     status,

@@ -1,4 +1,4 @@
-import { AddForm } from "@/features/library/ui/add-game/form";
+import { AddForm } from "@/features/library/ui/add-game/form/form";
 
 import { Button } from "@/components/ui/button";
 import {
