@@ -78,7 +78,7 @@ const igdbApi = {
   async request<T>({
     resource,
     ...options
-  }: RequestOptions): Promise<T | void> {
+  }: RequestOptions): Promise<T | undefined> {
     try {
       const response = await fetch(`${API_URL}${resource}`, {
         method: "POST",
@@ -100,14 +100,16 @@ const igdbApi = {
   },
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getGamesByRating(): Promise<RatedGameResponse[] | void> {
+  async getGamesByRating(): Promise<RatedGameResponse[] | undefined> {
     return this.request({
       resource: "/games",
       body: gamesByRating,
     });
   },
 
-  async getGameById(gameId: number): Promise<FullGameInfoResponse | void> {
+  async getGameById(
+    gameId: number
+  ): Promise<FullGameInfoResponse[] | undefined> {
     return this.request({
       resource: "/games",
       body: `${fullGameInfo} where id = (${gameId});`,
@@ -120,7 +122,7 @@ const igdbApi = {
   }: {
     name: string | null;
     [key: string]: string | null;
-  }): Promise<SearchResponse[] | void> {
+  }): Promise<SearchResponse[] | undefined> {
     if (!name) return;
     let str = "";
 

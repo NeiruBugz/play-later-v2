@@ -11,7 +11,7 @@ export function Card({
   entityId?: string;
 }) {
   return (
-    <div className="group w-full rounded">
+    <div className="group w-fit rounded">
       <Link
         href={`/${path === "lists" ? "library" : path}/${game.id}`}
         className="block w-fit rounded"

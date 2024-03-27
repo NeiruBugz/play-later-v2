@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { siteConfig } from "@/config/site";
 
-function SiteFooter() {
+export function SiteFooter() {
   return (
     <footer className="container z-40 flex h-12 shrink-0 flex-col items-center justify-center">
       <div className="flex h-fit items-center gap-2">
@@ -28,5 +28,3 @@ function SiteFooter() {
     </footer>
   );
 }
-
-export { SiteFooter };

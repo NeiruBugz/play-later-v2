@@ -29,7 +29,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     className="flex h-full w-[264px] flex-col justify-between gap-3"
                   >
                     <figure>
-                      <div className="c-bg-dark-blue relative aspect-[3/4] cursor-pointer rounded-xl border transition md:hover:brightness-110">
+                      <div className=" relative aspect-[3/4] cursor-pointer rounded-xl border transition md:hover:brightness-110">
                         <Image
                           src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${entry.cover?.image_id}.png`}
                           alt={`${entry.name} artwork`}

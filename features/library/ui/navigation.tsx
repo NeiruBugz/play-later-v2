@@ -49,7 +49,7 @@ const statusMapping = {
   },
 };
 
-function LibraryNavigation() {
+export function LibraryNavigation() {
   const { currentValue, handleParamsMutation } = useSearchParamsMutation();
 
   useEffect(() => {
@@ -106,5 +106,3 @@ function LibraryNavigation() {
     </RadioGroup>
   );
 }
-
-export { LibraryNavigation };

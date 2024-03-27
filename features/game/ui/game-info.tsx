@@ -1,12 +1,17 @@
 import Image from "next/image";
-import { GameDeleteDialog } from "@/features/game/ui/game-delete-dialog";
-import { ReviewForm } from "@/features/game/ui/review-form";
-import type { WishlistEntity } from "@/features/wishlist/actions";
-import { GameStatus } from "@prisma/client";
+import Link from "next/link";
+import { Game } from "@prisma/client";
 import { differenceInDays, format } from "date-fns";
-import { nanoid } from "nanoid";
+import { HowLongToBeatEntry } from "howlongtobeat";
 
 import { Badge, ColorVariant } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { RenderWhen } from "@/components/render-when";
 
 import {
@@ -14,39 +19,28 @@ import {
   hasSelectedPlatformInList,
   mapStatusForInfo,
   platformEnumToColor,
-  prepareDescription,
   uppercaseToNormal,
 } from "@/lib/utils";
 
-import type { GameEntity } from "@/types/library";
-
-const reviewApplicableStatuses: Array<GameStatus> = [
-  "ABANDONED",
-  "COMPLETED",
-  "FULL_COMPLETION",
-];
+import type { FullGameInfoResponse } from "@/types/igdb";
+import { IMAGE_API, IMAGE_SIZES } from "@/config/site";
 
 export function GameInfo({
   game,
-  gameStatus,
 }: {
-  game: GameEntity | WishlistEntity;
-  gameStatus?: GameStatus;
+  game: Game & HowLongToBeatEntry & FullGameInfoResponse;
 }) {
+  console.log(game);
   return (
-    <div className="mt-6 flex flex-col flex-wrap gap-4 md:flex-row">
-      <Image
-        src={game.imageUrl}
-        alt={`${game.name} artwork`}
-        fill
-        priority
-        className="!relative h-auto !w-[400px] rounded-md"
-      />
-      <article className="flex w-full flex-col-reverse justify-between gap-4 lg:flex-row-reverse 2xl:max-w-[900px]">
-        <div className="flex size-fit flex-col flex-wrap items-center gap-2">
-          <GameDeleteDialog
-            id={game.id}
-            isWishlist={gameStatus === undefined}
+    <section>
+      <div className="mt-6 flex flex-col flex-wrap gap-4 md:flex-row">
+        <div className=" relative aspect-[3/4] h-full w-[264px] cursor-pointer rounded-md border transition">
+          <Image
+            src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.cover?.image_id}.png`}
+            alt={`${game.name} artwork`}
+            className="rounded-md object-cover"
+            unoptimized
+            fill
           />
         </div>
         <div>
@@ -55,78 +49,108 @@ export function GameInfo({
           </h1>
           <div>
             <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
+              Description
+            </h3>
+            <p className="max-w-[600px]">{game.summary}</p>
+            <h3
+              className={cn(
+                "my-2 scroll-m-20 text-2xl font-semibold tracking-tight",
+                { hidden: game.platform === undefined }
+              )}
+            >
+              Chosen platform
+            </h3>
+            {game.platform ? (
+              <Badge
+                variant={platformEnumToColor(game.platform) as ColorVariant}
+                className={cn({
+                  bordered: hasSelectedPlatformInList(
+                    game.platform,
+                    game.platform as string
+                  ),
+                })}
+              >
+                {game.platform}
+              </Badge>
+            ) : null}
+            <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
               Added at
             </h3>
-            <p>{format(game.createdAt, "dd MMM, yyyy")}</p>
+            <p>
+              {game.createdAt ? format(game.createdAt, "dd MMM, yyyy") : "-"}
+            </p>
             <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
               Last updated
             </h3>
-            <p>{format(game.updatedAt, "dd MMM, yyyy")}</p>
+            <p>
+              {game.updatedAt ? format(game.updatedAt, "dd MMM, yyyy") : "-"}
+            </p>
             {differenceInDays(game.updatedAt, game.createdAt) >= 1 &&
-            gameStatus ? (
+            game.status ? (
               <p className="text-sm font-bold text-foreground">
-                How long in {mapStatusForInfo(gameStatus)}:{" "}
+                How long in {mapStatusForInfo(game.status)}:{" "}
                 {differenceInDays(game.updatedAt, game.createdAt)} days
               </p>
             ) : null}
           </div>
+        </div>
+        <div>
+          {game.external_games.map((game) => (
+            <Badge key={game.id}>
+              <Link href={game.url} target="_blank">
+                {game.name}
+              </Link>
+            </Badge>
+          ))}
+        </div>
+        <div>
+          {game.websites.map((site) => (
+            <Button variant="link">
+              <Link href={site.url} target="_blank">
+                {site.url}
+              </Link>
+            </Button>
+          ))}
+        </div>
+        <div>
           <RenderWhen condition={!!game.purchaseType}>
             <section>
               <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
-                Ownership
+                Format
               </h3>
               <Badge>{uppercaseToNormal(game.purchaseType as string)}</Badge>
             </section>
           </RenderWhen>
           <RenderWhen condition={game.platforms.length !== 0}>
             <section>
-              <h3
-                className={cn(
-                  "my-2 scroll-m-20 text-2xl font-semibold tracking-tight",
-                  { hidden: game.platform === undefined }
-                )}
-              >
-                Chosen platform
-              </h3>
-              {game.platform ? (
-                <Badge
-                  variant={platformEnumToColor(game.platform) as ColorVariant}
-                  className={cn({
-                    bordered: hasSelectedPlatformInList(
-                      game.platform,
-                      game.platform as string
-                    ),
-                  })}
-                >
-                  {game.platform}
-                </Badge>
-              ) : null}
               <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
-                {game.platform
-                  ? "Other available platforms"
-                  : "Available platforms"}
+                Releases
               </h3>
-              <ul className="flex flex-wrap gap-2">
-                {game.platforms.map((platform) =>
-                  !hasSelectedPlatformInList(
-                    platform,
-                    game.platform as string
-                  ) ? (
-                    <li key={nanoid()}>
+              <ul className="flex flex-wrap gap-1">
+                {game.release_dates.map((releaseDate) => {
+                  console.log(releaseDate.platform.name);
+                  return (
+                    <>
                       <Badge
-                        variant={platformEnumToColor(platform) as ColorVariant}
+                        key={releaseDate.id}
+                        variant={
+                          platformEnumToColor(
+                            releaseDate.platform.name
+                          ) as ColorVariant
+                        }
                         className={cn({
                           bordered: hasSelectedPlatformInList(
-                            platform,
+                            releaseDate.platform.name,
                             game.platform as string
                           ),
                         })}
                       >
-                        {platform}
+                        {releaseDate.platform.name}&nbsp;(Release Date:{" "}
+                        {releaseDate.human})
                       </Badge>
-                    </li>
-                  ) : null
-                )}
+                    </>
+                  );
+                })}
               </ul>
             </section>
           </RenderWhen>
@@ -150,54 +174,36 @@ export function GameInfo({
             </section>
           </section>
         </div>
-      </article>
-      <article>
-        <section>
-          <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
-            Description
-          </h3>
-          <p className="text-pretty leading-7">
-            {prepareDescription(game.description)}
-          </p>
-        </section>
-        <RenderWhen
-          condition={
-            gameStatus !== undefined &&
-            (!(game as GameEntity).rating || !(game as GameEntity).review) &&
-            reviewApplicableStatuses.includes(gameStatus)
-          }
-        >
-          <ReviewForm id={game.id} />
-        </RenderWhen>
-        <RenderWhen
-          condition={
-            (game as GameEntity).rating !== undefined ||
-            (game as GameEntity).review !== undefined
-          }
-        >
-          <section
-            className={cn({
-              hidden:
-                !(game as GameEntity).review || !(game as GameEntity).rating,
+      </div>
+
+      <section className="container mx-auto py-4 md:py-6">
+        <h4 className="mb-3 scroll-m-20 text-xl font-semibold tracking-tight">
+          Screenshots
+        </h4>
+        <Carousel opts={{ loop: true }}>
+          <CarouselContent>
+            {game.screenshots.map((screenshot) => {
+              return (
+                <div
+                  key={screenshot.id}
+                  className="relative mx-4 aspect-[16/9] h-[320px] w-[569px] cursor-pointer border transition"
+                >
+                  <Image
+                    src={`${IMAGE_API}/${IMAGE_SIZES["s-md"]}/${screenshot.image_id}.png`}
+                    alt={`${game.name} screenshot`}
+                    className="object-cover"
+                    height={320}
+                    width={569}
+                    priority
+                  />
+                </div>
+              );
             })}
-          >
-            <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
-              Review and rating
-            </h3>
-            <p className="text-pretty leading-7">
-              {(game as GameEntity).review}
-            </p>
-            {(game as GameEntity).rating ? (
-              <p className="text-pretty leading-7">
-                Your score:{" "}
-                <span className="font-medium">
-                  {(game as GameEntity).rating}/5
-                </span>
-              </p>
-            ) : null}
-          </section>
-        </RenderWhen>
-      </article>
-    </div>
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      </section>
+    </section>
   );
 }

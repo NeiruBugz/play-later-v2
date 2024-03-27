@@ -11,7 +11,7 @@ type Company = {
 type PlatformWithReleaseDate = {
   id: number;
   human: string;
-  platform: Platform;
+  name: string;
 };
 
 type GameCover = {
@@ -56,7 +56,7 @@ type PlayerPerspective = {
 type ReleaseDate = {
   id: number;
   human: string;
-  platform: PlatformWithReleaseDate[];
+  platform: PlatformWithReleaseDate;
 };
 
 type Screenshot = {

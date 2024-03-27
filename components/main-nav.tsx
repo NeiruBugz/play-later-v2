@@ -1,19 +1,9 @@
-import { Gamepad } from "lucide-react";
-
+import { Logo } from "@/components/logo";
 import { MobileNav } from "@/components/mobile-nav";
 import { NavLink } from "@/components/nav-link";
 
 import type { MainNavProps } from "@/types/ui";
 import { siteConfig } from "@/config/site";
-
-function Logo({ name }: { name: string }) {
-  return (
-    <div className="flex items-center space-x-2">
-      <Gamepad className="size-6" />
-      <span className="inline-block font-bold">{name}</span>
-    </div>
-  );
-}
 
 export function MainNav({ items }: MainNavProps) {
   return (

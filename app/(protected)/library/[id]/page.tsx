@@ -20,7 +20,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
           </Button>
         </BackLink>
       </header>
-      <GameInfo game={gameInfo} gameStatus={gameInfo.status} />
+      <GameInfo game={gameInfo} />
     </div>
   );
 }

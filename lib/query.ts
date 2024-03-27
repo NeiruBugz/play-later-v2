@@ -11,3 +11,12 @@ export function useSearch() {
     },
   });
 }
+
+// export function usePickerSearch() {
+//   return useMutation({
+//     mutationFn: async (searchTerm: string) => {
+//       const request = await igdbApi.search({ name: searchTerm });
+//       return request as SearchResponse[];
+//     },
+//   });
+// }

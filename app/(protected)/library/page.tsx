@@ -7,9 +7,7 @@ import { Header } from "@/features/library/ui/header";
 
 import { LibraryPageProps } from "@/types/library";
 
-export default async function LibraryPage({
-  searchParams = setDefaultProps(),
-}: LibraryPageProps) {
+export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const params = searchParams
     ? new URLSearchParams(searchParams)
     : setDefaultProps();

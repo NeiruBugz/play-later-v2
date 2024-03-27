@@ -3,12 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { GameStatus, List, type Game } from "@prisma/client";
-import { HowLongToBeatService } from "howlongtobeat";
+import { HowLongToBeatEntry, HowLongToBeatService } from "howlongtobeat";
 
 import { getServerUserId } from "@/lib/auth";
+import igdbApi from "@/lib/igdb-api";
 import { prisma } from "@/lib/prisma";
 
-import { FilterKeys, GameEntity } from "@/types/library";
+import { FullGameInfoResponse } from "@/types/igdb";
+import { FilterKeys } from "@/types/library";
 
 const LIBRARY_PATH = "/library";
 
@@ -101,13 +103,21 @@ export async function getGame(id: Game["id"]) {
     },
   });
 
-  if (game && game.howLongToBeatId) {
+  if (game && game.howLongToBeatId && game.igdbId) {
     const howLongToBeatService = new HowLongToBeatService();
     const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId);
-    return { ...gameDetails, ...game };
+    const igdbDetails = await igdbApi.getGameById(game.igdbId);
+    if (igdbDetails) {
+      console.log("IGDB: ", igdbDetails[0]);
+      console.log("HLTB: ", gameDetails);
+      console.log("PRISMA: ", game);
+      return { ...gameDetails, ...game, ...igdbDetails[0] } as Game &
+        HowLongToBeatEntry &
+        FullGameInfoResponse;
+    }
   }
 
-  return {} as GameEntity;
+  return {} as Game & HowLongToBeatEntry & FullGameInfoResponse;
 }
 
 export async function updateStatus(id: Game["id"], status: GameStatus) {
