@@ -3,6 +3,26 @@ import Link from "next/link";
 import { Game } from "@prisma/client";
 import { differenceInDays, format } from "date-fns";
 import { HowLongToBeatEntry } from "howlongtobeat";
+import {
+  FaDiscord,
+  FaFacebook,
+  FaGlobe,
+  FaInstagram,
+  FaReddit,
+  FaSteam,
+  FaTwitch,
+  FaTwitter,
+  FaWikipediaW,
+  FaYoutube,
+} from "react-icons/fa6";
+import {
+  SiAmazon,
+  SiEpicgames,
+  SiFandom,
+  SiPlaystation,
+  SiSteam,
+  SiXbox,
+} from "react-icons/si";
 
 import { Badge, ColorVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +32,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Icons } from "@/components/icons";
 import { RenderWhen } from "@/components/render-when";
 
 import {
@@ -25,12 +46,130 @@ import {
 import type { FullGameInfoResponse } from "@/types/igdb";
 import { IMAGE_API, IMAGE_SIZES } from "@/config/site";
 
+function StoreIcon({ storeName }: { storeName: string }) {
+  if (storeName.includes("steam")) {
+    return <SiSteam />;
+  }
+
+  if (storeName.includes("epic")) {
+    return <SiEpicgames />;
+  }
+  if (storeName.includes("playstation")) {
+    return <SiPlaystation />;
+  }
+  if (storeName.includes("amazon")) {
+    return <SiAmazon />;
+  }
+  if (storeName.includes("microsoft")) {
+    return <SiXbox />;
+  }
+  return <></>;
+}
+
+function SiteIcon({ siteName }: { siteName: string }) {
+  if (siteName.includes("twitch")) {
+    return <FaTwitch />;
+  }
+  if (siteName.includes("discord")) {
+    return <FaDiscord />;
+  }
+  if (siteName.includes("fandom")) {
+    return <SiFandom />;
+  }
+  if (siteName.includes("epic")) {
+    return <SiEpicgames />;
+  }
+  if (siteName.includes("reddit")) {
+    return <FaReddit />;
+  }
+  if (siteName.includes("youtube")) {
+    return <FaYoutube />;
+  }
+  if (siteName.includes("facebook")) {
+    return <FaFacebook />;
+  }
+  if (siteName.includes("twitter")) {
+    return <FaTwitter />;
+  }
+  if (siteName.includes("wikipedia")) {
+    return <FaWikipediaW />;
+  }
+  if (siteName.includes("instagram")) {
+    return <FaInstagram />;
+  }
+  if (siteName.includes("steam")) {
+    return <FaSteam />;
+  }
+  if (siteName.includes("gog.com")) {
+    return <Icons.gog />;
+  }
+  return <FaGlobe />;
+}
+
+function SiteLabel({ siteName }: { siteName: string }) {
+  if (siteName.includes("twitch")) {
+    return <span>Twitch</span>;
+  }
+  if (siteName.includes("discord")) {
+    return <span>Discord</span>;
+  }
+  if (siteName.includes("fandom")) {
+    return <span>Fandom</span>;
+  }
+  if (siteName.includes("epic")) {
+    return <span>Epic Games</span>;
+  }
+  if (siteName.includes("reddit")) {
+    return <span>Reddit</span>;
+  }
+  if (siteName.includes("youtube")) {
+    return <span>Youtube</span>;
+  }
+  if (siteName.includes("facebook")) {
+    return <span>Facebook</span>;
+  }
+  if (siteName.includes("twitter")) {
+    return <span>Twitter</span>;
+  }
+  if (siteName.includes("wikipedia")) {
+    return <span>Wikipedia</span>;
+  }
+  if (siteName.includes("instagram")) {
+    return <span>Instagram</span>;
+  }
+  if (siteName.includes("steam")) {
+    return <span>Steam</span>;
+  }
+  if (siteName.includes("gog.com")) {
+    return <span>GOG.com</span>;
+  }
+  if (siteName.includes("fextralife")) {
+    return <span>Fextralife</span>;
+  }
+
+  return <span>Official web-site</span>;
+}
+
+function SiteLink({ url }: { url: string }) {
+  return (
+    <Button variant="link">
+      <Link
+        href={url}
+        target="_blank"
+        className="flex max-w-[160px] items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700"
+      >
+        <SiteIcon siteName={url} />
+        <SiteLabel siteName={url} />
+      </Link>
+    </Button>
+  );
+}
+
 export function GameInfo({
   game,
 }: {
   game: Game & HowLongToBeatEntry & FullGameInfoResponse;
 }) {
-  console.log(game);
   return (
     <section>
       <div className="mt-6 flex flex-col flex-wrap gap-4 md:flex-row">
@@ -94,24 +233,27 @@ export function GameInfo({
             ) : null}
           </div>
         </div>
-        <div>
-          {game.external_games.map((game) => (
-            <Badge key={game.id}>
-              <Link href={game.url} target="_blank">
-                {game.name}
-              </Link>
-            </Badge>
-          ))}
-        </div>
-        <div>
-          {game.websites.map((site) => (
-            <Button variant="link">
-              <Link href={site.url} target="_blank">
-                {site.url}
-              </Link>
-            </Button>
-          ))}
-        </div>
+        <section>
+          <h4 className="mb-3 scroll-m-20 text-xl font-semibold tracking-tight">
+            Where to buy
+          </h4>
+          <div className="grid grid-cols-2 justify-items-start gap-1">
+            {game.external_games.map((game) =>
+              game.url.includes("twitch") ? null : (
+                <Button key={game.id} size="sm" variant="secondary">
+                  <Link
+                    href={game.url}
+                    target="_blank"
+                    className="flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700"
+                  >
+                    {game.name}
+                    <StoreIcon storeName={game.url} />
+                  </Link>
+                </Button>
+              )
+            )}
+          </div>
+        </section>
         <div>
           <RenderWhen condition={!!game.purchaseType}>
             <section>
@@ -128,7 +270,6 @@ export function GameInfo({
               </h3>
               <ul className="flex flex-wrap gap-1">
                 {game.release_dates.map((releaseDate) => {
-                  console.log(releaseDate.platform.name);
                   return (
                     <>
                       <Badge
@@ -204,6 +345,14 @@ export function GameInfo({
           <CarouselNext />
         </Carousel>
       </section>
+      <h4 className="mb-3 scroll-m-20 text-xl font-semibold tracking-tight">
+        Websites
+      </h4>
+      <div className="grid grid-cols-[170px_minmax(170px,_1fr)] justify-items-start gap-1">
+        {game.websites.map((site) => (
+          <SiteLink url={site.url} key={site.id} />
+        ))}
+      </div>
     </section>
   );
 }

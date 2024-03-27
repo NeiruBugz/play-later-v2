@@ -94,6 +94,25 @@ export async function addGame(game: Omit<Game, "userId">) {
   }
 }
 
+export async function prepareResponse({ game }: { game: Game }) {
+  if (game && game.howLongToBeatId && game.igdbId) {
+    const howLongToBeatService = new HowLongToBeatService();
+    const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId);
+    const igdbDetails = await igdbApi.getGameById(game.igdbId);
+    if (igdbDetails) {
+      return { ...gameDetails, ...game, ...igdbDetails[0] } as Game &
+        HowLongToBeatEntry &
+        FullGameInfoResponse;
+    } else {
+      return { ...gameDetails, ...game, ...{} } as Game &
+        HowLongToBeatEntry &
+        FullGameInfoResponse;
+    }
+  } else {
+    return {} as Game & HowLongToBeatEntry & FullGameInfoResponse;
+  }
+}
+
 export async function getGame(id: Game["id"]) {
   const userId = await getUserId();
   const game = await prisma.game.findUnique({
@@ -103,21 +122,20 @@ export async function getGame(id: Game["id"]) {
     },
   });
 
-  if (game && game.howLongToBeatId && game.igdbId) {
-    const howLongToBeatService = new HowLongToBeatService();
-    const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId);
-    const igdbDetails = await igdbApi.getGameById(game.igdbId);
-    if (igdbDetails) {
-      console.log("IGDB: ", igdbDetails[0]);
-      console.log("HLTB: ", gameDetails);
-      console.log("PRISMA: ", game);
-      return { ...gameDetails, ...game, ...igdbDetails[0] } as Game &
-        HowLongToBeatEntry &
-        FullGameInfoResponse;
-    }
-  }
+  return await prepareResponse({ game: game as Game });
+}
 
-  return {} as Game & HowLongToBeatEntry & FullGameInfoResponse;
+export async function getGameFromWishlist(id: Game["id"]) {
+  const userId = await getUserId();
+  const game = await prisma.game.findUnique({
+    where: {
+      id,
+      userId,
+      isWishlisted: true,
+    },
+  });
+
+  return await prepareResponse({ game: game as Game });
 }
 
 export async function updateStatus(id: Game["id"], status: GameStatus) {

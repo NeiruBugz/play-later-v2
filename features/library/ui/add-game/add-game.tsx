@@ -25,7 +25,7 @@ export default function AddGame({
   return (
     <Sheet onOpenChange={setSheetOpen} open={isSheetOpen}>
       <SheetTrigger asChild>
-        <Button className={label ? "" : "w-fit justify-between gap-3"}>
+        <Button className={label ? "h-9" : "h-9 w-fit justify-between gap-3"}>
           <PlusCircle className="size-4 md:mr-2" />
           <span className="hidden whitespace-nowrap md:inline-flex">
             {label}

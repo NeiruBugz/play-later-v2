@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { GameInfo } from "@/features/game/ui/game-info";
-import { getGameFromWishlist } from "@/features/wishlist/actions";
+import { getGameFromWishlist } from "@/features/library/actions";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

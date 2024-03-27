@@ -11,7 +11,6 @@ export async function GET(request: Request) {
   }
 
   const [result] = await searchHowLongToBeat(query);
-  console.log(result);
 
   return NextResponse.json({
     id: result.id,
