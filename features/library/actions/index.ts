@@ -70,14 +70,13 @@ export async function getGames(
 }
 
 export async function addGame(game: Omit<Game, "userId">) {
-  console.log(game);
   const userId = await getServerUserId();
-  console.log(userId);
-
   try {
     await prisma.game.create({
       data: {
         ...game,
+        platform: game.platform || undefined,
+        status: game.status || undefined,
         listId: undefined,
         user: {
           connect: {
@@ -87,7 +86,7 @@ export async function addGame(game: Omit<Game, "userId">) {
       },
     });
   } catch (e) {
-    console.log(e);
+    throw new Error("Couldn't save the game");
   } finally {
     revalidatePath(LIBRARY_PATH);
     redirect(LIBRARY_PATH);

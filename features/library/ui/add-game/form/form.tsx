@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import { useAddToLibrary } from "@/features/library/hooks/useAddToLibrary";
 import { FormDescription } from "@/features/library/ui/add-game/form/description";
 import {
   addGameSchema,
@@ -8,10 +9,10 @@ import {
 } from "@/features/library/ui/add-game/form/validation";
 import { GamePicker } from "@/features/library/ui/add-game/game-picker";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Game, GameStatus, PurchaseType } from "@prisma/client";
-import { useMutation } from "@tanstack/react-query";
+import { GameStatus, PurchaseType } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { useForm } from "react-hook-form";
+import { FaSpinner } from "react-icons/fa6";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -63,23 +64,15 @@ export function AddForm({
       status: "BACKLOG",
     },
   });
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const { mutateAsync, isPending } = useAddToLibrary();
   const { toast } = useToast();
+  const isWishlisted = form.watch("isWishlist");
 
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [selectedGame, setSelectedGame] = React.useState<
     SearchResponse | undefined
   >(entry);
   const [isPickerOpen, setPickerOpen] = React.useState(false);
-  const { mutateAsync } = useMutation({
-    mutationKey: ["add-to-library"],
-    mutationFn: async (data: Omit<Game, "userId">) => {
-      console.log(data);
-      await fetch(`/api/library`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-    },
-  });
 
   const showToast = (type: "success" | "error", name: string) => {
     if (type === "success") {
@@ -110,7 +103,6 @@ export function AddForm({
   );
 
   const onSubmit = async (values: AddGameSchema) => {
-    console.log(selectedGame);
     if (!selectedGame) {
       return;
     }
@@ -126,7 +118,7 @@ export function AddForm({
         updatedAt: new Date(),
         imageUrl: `${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${selectedGame.cover.image_id}.png`,
         platform: platform || null,
-        status,
+        status: status || null,
         title,
         purchaseType: purchaseType ? purchaseType : "DIGITAL",
         gameplayTime: response.gameplayTime,
@@ -137,11 +129,12 @@ export function AddForm({
         listId: null,
       });
       showToast("success", title);
-      // form.reset();
     } catch (e) {
       showToast("error", values.title);
       console.error(e);
+    } finally {
       form.reset();
+      setSelectedGame(undefined);
     }
   };
 
@@ -233,11 +226,13 @@ export function AddForm({
           <FormField
             control={form.control}
             name="status"
+            disabled={isWishlisted}
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="block">Status</FormLabel>
                 <FormControl>
                   <RadioGroup
+                    disabled={isWishlisted}
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
@@ -274,12 +269,14 @@ export function AddForm({
           />
           <FormField
             control={form.control}
+            disabled={isWishlisted}
             name="purchaseType"
             render={({ field }) => (
               <FormItem className="">
                 <FormLabel className="block">Purchase type</FormLabel>
                 <FormControl>
                   <RadioGroup
+                    disabled={isWishlisted}
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
@@ -314,7 +311,10 @@ export function AddForm({
               </FormItem>
             )}
           />
-          <Button type="submit">{submitLabel}</Button>
+          <Button type="submit">
+            {isPending ? <FaSpinner className="mr-2 animate-spin" /> : null}
+            {submitLabel}
+          </Button>
           {isCompact || !withDescription ? null : <FormDescription />}
         </form>
       </Form>

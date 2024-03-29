@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GameInfo } from "@/features/game/ui/game-info";
+import { GameInfo } from "@/features/game/ui/game-info/game-info";
 import { getGameFromWishlist } from "@/features/library/actions";
 import { ArrowLeft } from "lucide-react";
 
