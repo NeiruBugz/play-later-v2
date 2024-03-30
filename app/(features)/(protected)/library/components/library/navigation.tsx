@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GameStatus } from "@prisma/client";
 import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react";
 
@@ -13,7 +14,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { useSearchParamsMutation } from "@/lib/hooks/useSearchParamsMutation";
 import { cn } from "@/lib/utils";
 
 const statusMapping = {
@@ -50,22 +50,33 @@ const statusMapping = {
 };
 
 export function LibraryNavigation() {
-  const { currentValue, handleParamsMutation } = useSearchParamsMutation();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  const onChange = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams);
+      params.set("status", value);
+      replace(`${pathname}?${params.toString()}`);
+    },
+    [pathname, replace, searchParams]
+  );
 
   useEffect(() => {
-    if (!currentValue("status")) {
-      handleParamsMutation("status", GameStatus.BACKLOG as string);
+    if (!searchParams.get("status")) {
+      onChange("BACKLOG");
     }
-  }, [currentValue, handleParamsMutation]);
+  }, [onChange, searchParams]);
 
   return (
     <RadioGroup
-      defaultValue={currentValue("status")}
-      value={currentValue("status")}
+      defaultValue={searchParams.get("status") ?? "BACKLOG"}
+      value={searchParams.get("status") ?? "BACKLOG"}
       className={cn(
         "group my-2 flex flex-row items-center justify-center rounded-md bg-muted p-1 text-muted-foreground disabled:cursor-not-allowed"
       )}
-      onValueChange={(status) => handleParamsMutation("status", status)}
+      onValueChange={onChange}
     >
       {Object.entries(statusMapping).map(([key, value]) => (
         <div key={key}>
@@ -87,7 +98,7 @@ export function LibraryNavigation() {
                       "hover:ring-2 group-disabled:cursor-not-allowed group-disabled:hover:ring-0",
                       {
                         "bg-background text-foreground shadow-sm":
-                          currentValue("status") === key,
+                          searchParams.get("status") === key,
                       }
                     )}
                   >

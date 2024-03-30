@@ -1,5 +1,6 @@
-import { ChangeEvent, ReactNode, useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { useSearchParamsMutation } from "@/lib/hooks/useSearchParamsMutation";
 
 import { type LibraryFiltersUIProps } from "@/app/(features)/(protected)/library/components/library/filters/types";
 import { getAllUserPlatforms } from "@/app/(features)/(protected)/library/lib/actions";
@@ -34,18 +33,17 @@ function FiltersForm({
 }: {
   toggleOpen: LibraryFiltersUIProps["setOpen"];
 }) {
-  const {
-    currentValue,
-    handleParamsMutation,
-    handleMultipleParamsMutation,
-    handleParamsDeleteByName,
-  } = useSearchParamsMutation();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
   const [filters, setFilters] = useState({
-    order: currentValue("order") ?? DefaultSortState.order,
-    sortBy: currentValue("sortBy") ?? DefaultSortState.sortBy,
-    platform: currentValue("platform") ?? " ",
-    search: currentValue("search") ?? "",
+    search: searchParams.get("search") ?? "",
+    platform: searchParams.get("platform") ?? "",
+    sortBy: searchParams.get("sortBy") ?? DefaultSortState.sortBy,
+    order: searchParams.get("order") ?? DefaultSortState.order,
   });
+
   const [platformOptions, setPlatformOptions] = useState<
     Array<Record<"platform", string>>
   >([]);
@@ -56,27 +54,51 @@ function FiltersForm({
     );
   }, []);
 
-  useEffect(() => {
-    const sortOrder = currentValue("order");
-    const sortField = currentValue("sortBy");
-    const platform = currentValue("platform") ?? " ";
-
-    if (platform === " ") {
-      handleParamsDeleteByName("platform");
+  const onChange = (value: string, key: "search" | "sort" | "platform") => {
+    if (key === "sort") {
+      const [sortBy, order] = value.split("-");
+      setFilters((prev) => ({
+        ...prev,
+        sortBy,
+        order,
+      }));
     }
 
-    if (!sortOrder) {
-      handleParamsMutation("order", DefaultSortState.order);
+    if (key === "platform") {
+      setFilters((prev) => ({
+        ...prev,
+        platform: value,
+      }));
+    }
+  };
+
+  const handleSearch = (term: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      search: term,
+    }));
+  };
+
+  const onApply = () => {
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set("search", filters.search);
+    newSearchParams.set("platform", filters.platform);
+    newSearchParams.set("sortBy", filters.sortBy);
+    newSearchParams.set("order", filters.order);
+
+    if (pathname) {
+      replace(`${pathname}?${newSearchParams}`);
     }
 
-    if (!sortField) {
-      handleParamsMutation("sortBy", DefaultSortState.sortBy);
-    }
+    toggleOpen(false);
+  };
 
-    return () => {
-      handleParamsDeleteByName("platform");
-    };
-  }, [currentValue, handleParamsMutation, handleParamsDeleteByName]);
+  const onClear = () => {
+    if (pathname) {
+      replace(pathname);
+    }
+    toggleOpen(false);
+  };
 
   const options = useMemo(() => {
     const options: Array<{ value: string; label: ReactNode }> = [];
@@ -86,7 +108,7 @@ function FiltersForm({
         label: (
           <div className="flex h-6 items-center gap-4 ">
             {mapper[value as keyof typeof mapper]}{" "}
-            <ArrowUp className="size-4" />
+            <ChevronUp className="size-4" />
           </div>
         ),
       });
@@ -95,7 +117,7 @@ function FiltersForm({
         label: (
           <div className="flex h-6 items-center gap-4">
             {mapper[value as keyof typeof mapper]}{" "}
-            <ArrowDown className="size-4" />
+            <ChevronDown className="size-4" />
           </div>
         ),
       });
@@ -104,62 +126,19 @@ function FiltersForm({
     return options;
   }, []);
 
-  const onValueChange = (value: string) => {
-    if (value === "all") {
-      setFilters((prev) => ({ ...prev, platform: "" }));
-    }
-    setFilters((prev) => ({ ...prev, platform: value }));
-  };
-
-  const onSortingSelect = (value: string) => {
-    const [field, order] = value.split("-");
-    setFilters((prev) => ({ ...prev, sortBy: field, order }));
-  };
-
-  const onSearchQueryChange = ({
-    currentTarget: { value },
-  }: ChangeEvent<HTMLInputElement>) => {
-    setFilters((prev) => ({ ...prev, search: value }));
-  };
-
-  const onClear = () => {
-    handleMultipleParamsMutation([
-      { sortBy: DefaultSortState.sortBy },
-      { order: DefaultSortState.order },
-      { platform: " " },
-      { search: "" },
-    ]);
-    toggleOpen(false);
-  };
-
-  const onApply = () => {
-    const params: Array<Record<string, string>> = [
-      { sortBy: filters.sortBy },
-      { order: filters.order },
-    ];
-    if (filters.platform) {
-      params.push({ platform: filters.platform });
-    }
-    if (filters.search) {
-      params.push({ search: filters.search });
-    }
-    handleMultipleParamsMutation(params);
-    toggleOpen(false);
-  };
-
   return (
     <section className="flex flex-col gap-2 py-4">
       <Label className="flex flex-col gap-2">
         <span>Search</span>
         <Input
-          onChange={onSearchQueryChange}
-          value={filters.search}
           placeholder="Search within your library"
+          value={filters.search}
+          onChange={(e) => handleSearch(e.target.value)}
         />
       </Label>
       <Select
         value={`${filters.sortBy}-${filters.order}`}
-        onValueChange={onSortingSelect}
+        onValueChange={(value) => onChange(value, "sort")}
       >
         <div>
           <Label className="my-2 block">Sort</Label>
@@ -177,8 +156,7 @@ function FiltersForm({
       </Select>
       <Select
         value={filters.platform}
-        onValueChange={onValueChange}
-        defaultValue="+"
+        onValueChange={(value) => onChange(value, "platform")}
       >
         <div>
           <Label className="my-2 block">Platform</Label>
@@ -186,15 +164,17 @@ function FiltersForm({
             <SelectValue placeholder="Platform filter" />
           </SelectTrigger>
           <SelectContent>
-            {platformOptions.map((option) => (
-              <SelectItem
-                key={option.platform}
-                value={option.platform}
-                className="normal-case"
-              >
-                {option.platform}
-              </SelectItem>
-            ))}
+            {platformOptions
+              .filter((pl) => pl.platform !== null)
+              .map((option) => (
+                <SelectItem
+                  key={option.platform}
+                  value={option.platform}
+                  className="normal-case"
+                >
+                  {option.platform}
+                </SelectItem>
+              ))}
             <SelectItem value={" "} className="normal-case">
               All
             </SelectItem>
