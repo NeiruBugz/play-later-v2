@@ -20,7 +20,9 @@ function PickerDialog({ items }: { items: Game[] }) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="secondary">Pick random game</Button>
+        <Button variant="secondary" className="my-2 md:my-0">
+          Pick random game
+        </Button>
       </DialogTrigger>
       <DialogContent className="min-h-[500px] min-w-[320px]">
         <DialogHeader>

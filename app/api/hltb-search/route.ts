@@ -10,7 +10,9 @@ export async function GET(request: Request) {
     return NextResponse.error();
   }
 
+  console.log(query);
   const [result] = await searchHowLongToBeat(query);
+  console.log(result);
 
   return NextResponse.json({
     id: result.id,

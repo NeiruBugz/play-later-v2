@@ -236,7 +236,10 @@ export function AddForm({
                     className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
                   >
                     {Object.keys(GameStatus).map((key) => (
-                      <FormItem className="flex items-center space-x-0 space-y-0">
+                      <FormItem
+                        className="flex items-center space-x-0 space-y-0"
+                        key={key}
+                      >
                         <FormControl key={key}>
                           <RadioGroupItem
                             value={key}
@@ -280,7 +283,10 @@ export function AddForm({
                     className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
                   >
                     {Object.keys(PurchaseType).map((key) => (
-                      <FormItem className="flex items-center space-x-0 space-y-0">
+                      <FormItem
+                        className="flex items-center space-x-0 space-y-0"
+                        key={key}
+                      >
                         <FormControl key={key}>
                           <RadioGroupItem
                             value={key}
