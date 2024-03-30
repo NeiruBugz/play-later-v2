@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-import type { SearchResponse } from "@/types/igdb";
+import type { SearchResponse } from "@/lib/types/igdb";
 
 export function useSearch() {
   return useMutation({

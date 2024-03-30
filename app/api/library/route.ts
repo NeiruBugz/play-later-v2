@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { addGame } from "@/features/library/actions";
+
+import { addGame } from "@/app/(features)/(protected)/library/lib/actions";
 
 export async function POST(req: Request) {
   try {

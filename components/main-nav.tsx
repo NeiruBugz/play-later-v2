@@ -2,8 +2,8 @@ import { Logo } from "@/components/logo";
 import { MobileNav } from "@/components/mobile-nav";
 import { NavLink } from "@/components/nav-link";
 
-import type { MainNavProps } from "@/types/ui";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/lib/config/site";
+import type { MainNavProps } from "@/lib/types/ui";
 
 export function MainNav({ items }: MainNavProps) {
   return (
