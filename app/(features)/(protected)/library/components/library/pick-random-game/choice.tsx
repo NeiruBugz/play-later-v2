@@ -5,7 +5,7 @@ import { Badge, ColorVariant } from "@/components/ui/badge";
 
 import { platformEnumToColor } from "@/lib/utils";
 
-import { updateStatus } from "@/app/(features)/(protected)/library/lib/actions";
+import { updateStatus } from "@/app/(features)/(protected)/library/lib/actions/update-game";
 import type { PickerChoiceProps } from "@/app/(features)/(protected)/library/lib/types/components";
 
 function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {

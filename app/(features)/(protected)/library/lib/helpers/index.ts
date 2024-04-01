@@ -1,115 +1,75 @@
+"use server";
+
 import { Game, GameStatus } from "@prisma/client";
-import { HowLongToBeatEntry, HowLongToBeatService } from "howlongtobeat";
+import { HowLongToBeatService } from "howlongtobeat";
 
-import igdbApi from "@/lib/igdb-api";
-import { FullGameInfoResponse } from "@/lib/types/igdb";
-import { GamesByYear, LibraryData } from "@/lib/types/library";
-import { groupByYear } from "@/lib/utils";
+import { getServerUserId } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { GamesByYear } from "@/lib/types/library";
 
-import {
-  getGames,
-  updateGame,
-} from "@/app/(features)/(protected)/library/lib/actions";
+import { updateGame } from "@/app/(features)/(protected)/library/lib/actions/update-game";
 
-export const fetchAndProcessGames = async (
-  params: URLSearchParams
-): Promise<LibraryData> => {
-  const platform = params.get("platform") ?? " ";
-  const currentStatus = (params.get("status") as GameStatus) ?? "BACKLOG";
-  const searchQuery = params.get("search") ?? "";
-
-  const filters = {
-    platform,
-    order: params.get("order") ?? "desc",
-    sortBy: params.get("sortBy") ?? "updatedAt",
-    search: searchQuery,
-  };
-
-  const { abandoned, backlogged, completed, inprogress, fullCompletion } =
-    await getGames(filters);
-
+export const updateBackloggedGames = async (backlogged: Game[]) => {
   for (const game of backlogged) {
     if (!game.gameplayTime && game.howLongToBeatId) {
       const hltbService = new HowLongToBeatService();
       const details = await hltbService.detail(game.howLongToBeatId);
-      await updateGame(
-        game.id,
-        "gameplayTime",
-        details?.gameplayMain,
-        game.updatedAt
-      );
+      await updateGame(game.id, "gameplayTime", details?.gameplayMain);
     }
   }
+};
 
-  const totalBacklogTime = backlogged.reduce(
+export const getAllUserPlatforms = async () => {
+  const userId = await getServerUserId();
+
+  return prisma.game.findMany({
+    distinct: ["platform"],
+    where: { userId },
+    select: { platform: true },
+  });
+};
+
+export const calculateTotalBacklogTime = (backlogged: Game[]): number => {
+  return backlogged.reduce(
     (acc, game) => acc + (game.gameplayTime ? game.gameplayTime : 0),
     0
   );
+};
 
-  const completedByYear = groupByYear(completed);
-  const fullCompletionByYear = groupByYear(fullCompletion);
-  const backloggedByYear = groupByYear(backlogged);
+export const groupGamesByYear = (games: Game[]): GamesByYear => {
+  const grouped = new Map<number, Game[]>();
 
-  const currentList = (): Game[] | GamesByYear => {
-    if (currentStatus === "INPROGRESS") {
+  games.forEach((game) => {
+    const year = new Date(game.createdAt).getFullYear();
+    if (!grouped.has(year)) {
+      grouped.set(year, []);
+    }
+    grouped.get(year)!.push(game);
+  });
+
+  return new Map([...grouped].sort().reverse());
+};
+
+export const getListBasedOnStatus = (
+  currentStatus: GameStatus,
+  inprogress: Game[],
+  abandoned: Game[],
+  backloggedByYear: GamesByYear,
+  completedByYear: GamesByYear,
+  fullCompletionByYear: GamesByYear
+): Game[] | GamesByYear => {
+  switch (currentStatus) {
+    case "INPROGRESS":
       return inprogress;
-    }
-
-    if (currentStatus === "ABANDONED") {
+    case "ABANDONED":
       return abandoned;
-    }
-
-    if (currentStatus === "BACKLOG") {
+    case "BACKLOG":
       return backloggedByYear;
-    }
-
-    if (currentStatus === "COMPLETED") {
+    case "COMPLETED":
       return completedByYear;
-    }
-
-    if (currentStatus === "FULL_COMPLETION") {
+    case "FULL_COMPLETION":
       return fullCompletionByYear;
-    }
-
-    return [];
-  };
-
-  const list = currentList();
-
-  return {
-    list,
-    currentStatus,
-    totalBacklogTime,
-    backlogged,
-  };
-};
-
-export const setDefaultProps = (): URLSearchParams => {
-  const params = new URLSearchParams(window.location.search);
-  if (!params.get("sort")) {
-    params.set("sort", "updatedAt");
-    params.set("order", "desc");
+    default:
+      return [];
   }
-
-  return params;
 };
-
-export async function prepareResponse({ game }: { game: Game }) {
-  if (game && game.howLongToBeatId && game.igdbId) {
-    const howLongToBeatService = new HowLongToBeatService();
-    const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId);
-    const igdbDetails = await igdbApi.getGameById(game.igdbId);
-    console.log(igdbDetails);
-    if (igdbDetails) {
-      return { ...gameDetails, ...game, ...igdbDetails[0] } as Game &
-        HowLongToBeatEntry &
-        FullGameInfoResponse;
-    } else {
-      return { ...gameDetails, ...game, ...{} } as Game &
-        HowLongToBeatEntry &
-        FullGameInfoResponse;
-    }
-  } else {
-    return {} as Game & HowLongToBeatEntry & FullGameInfoResponse;
-  }
-}

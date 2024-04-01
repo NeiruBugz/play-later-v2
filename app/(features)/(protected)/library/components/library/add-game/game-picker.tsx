@@ -45,12 +45,16 @@ export function GamePicker({
         <RenderWhen condition={Boolean(data) && data?.length !== 0}>
           {data?.map((result) => (
             <CommandItem
-              className={cn("cursor-pointer last-of-type:rounded-sm", {
-                "font-bold": selectedGame === result.id,
-              })}
+              className={cn(
+                "!pointer-events-auto cursor-pointer !opacity-100 last-of-type:rounded-sm",
+                {
+                  "font-bold": selectedGame === result.id,
+                }
+              )}
               key={result.id}
               value={`${result.name}_${result.id}`}
               onSelect={() => onGameSelect(result)}
+              data-disabled="true"
             >
               <div className="flex items-center gap-2">
                 <Avatar className="rounded-md">

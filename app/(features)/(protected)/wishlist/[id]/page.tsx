@@ -1,13 +1,21 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 import { GameInfo } from "@/app/(features)/(protected)/library/components/game/ui/game-info/game-info";
-import { getGameFromWishlist } from "@/app/(features)/(protected)/library/lib/actions";
+import { getGameWithAdapter } from "@/app/(features)/(protected)/library/lib/actions/get-game";
 
 export default async function GamePage({ params }: { params: { id: string } }) {
-  const gameInfo = await getGameFromWishlist(params.id);
+  const gameInfo = await getGameWithAdapter({
+    gameId: params.id,
+    isFromWishlist: true,
+  });
+
+  if (!gameInfo) {
+    notFound();
+  }
 
   return (
     <div className="px-4 md:container">

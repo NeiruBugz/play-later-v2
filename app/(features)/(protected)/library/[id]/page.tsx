@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,10 +10,14 @@ import {
 } from "@/components/ui/breadcrumb";
 
 import { GameInfo } from "@/app/(features)/(protected)/library/components/game/ui/game-info/game-info";
-import { getGame } from "@/app/(features)/(protected)/library/lib/actions";
+import { getGameWithAdapter } from "@/app/(features)/(protected)/library/lib/actions/get-game";
 
 export default async function GamePage({ params }: { params: { id: string } }) {
-  const gameInfo = await getGame(params.id);
+  const gameInfo = await getGameWithAdapter({ gameId: params.id });
+
+  if (!gameInfo) {
+    notFound();
+  }
 
   return (
     <div className="container">

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 
 import { type LibraryFiltersUIProps } from "@/app/(features)/(protected)/library/components/library/filters/types";
-import { getAllUserPlatforms } from "@/app/(features)/(protected)/library/lib/actions";
+import { getAllUserPlatforms } from "@/app/(features)/(protected)/library/lib/helpers";
 
 const DefaultSortState = {
   order: "desc",
