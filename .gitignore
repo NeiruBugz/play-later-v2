@@ -47,3 +47,5 @@ public/_next-video
 
 dumps/
 .local-data/
+
+*.tsbuildinfo

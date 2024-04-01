@@ -9,6 +9,12 @@ import {
   platformEnumToColor,
 } from "@/lib/utils";
 
+const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>
+  records.filter(
+    (record, index, self) =>
+      index === self.findIndex((r) => r.platform.name === record.platform.name)
+  );
+
 export const Platforms = ({
   platformList,
   selectedPlatform,
@@ -21,7 +27,7 @@ export const Platforms = ({
       Platforms
     </h3>
     <div className="flex flex-grow-0 gap-2">
-      {platformList.map((releaseDate) => {
+      {uniqueRecords(platformList).map((releaseDate) => {
         return (
           <Badge
             key={releaseDate.id}

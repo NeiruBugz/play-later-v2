@@ -17,7 +17,6 @@ import { AddForm } from "@/app/(features)/(protected)/library/components/library
 
 export default function AddGame({
   label = "Add Game",
-  game,
 }: {
   label?: string;
   game?: HowLongToBeatEntry;
@@ -37,7 +36,7 @@ export default function AddGame({
         <SheetHeader>
           <SheetTitle>Add game to library</SheetTitle>
         </SheetHeader>
-        <AddForm game={JSON.stringify(game)} />
+        <AddForm />
       </SheetContent>
     </Sheet>
   );

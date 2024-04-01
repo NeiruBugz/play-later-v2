@@ -18,7 +18,7 @@ const nextConfig = {
     return [
       {
         source: "/",
-        destination: "/library",
+        destination: "/library?status=BACKLOG",
         permanent: true,
       },
     ];

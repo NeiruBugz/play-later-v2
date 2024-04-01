@@ -1,6 +1,8 @@
 import { Game, GameStatus } from "@prisma/client";
-import { HowLongToBeatService } from "howlongtobeat";
+import { HowLongToBeatEntry, HowLongToBeatService } from "howlongtobeat";
 
+import igdbApi from "@/lib/igdb-api";
+import { FullGameInfoResponse } from "@/lib/types/igdb";
 import { GamesByYear, LibraryData } from "@/lib/types/library";
 import { groupByYear } from "@/lib/utils";
 
@@ -91,3 +93,23 @@ export const setDefaultProps = (): URLSearchParams => {
 
   return params;
 };
+
+export async function prepareResponse({ game }: { game: Game }) {
+  if (game && game.howLongToBeatId && game.igdbId) {
+    const howLongToBeatService = new HowLongToBeatService();
+    const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId);
+    const igdbDetails = await igdbApi.getGameById(game.igdbId);
+    console.log(igdbDetails);
+    if (igdbDetails) {
+      return { ...gameDetails, ...game, ...igdbDetails[0] } as Game &
+        HowLongToBeatEntry &
+        FullGameInfoResponse;
+    } else {
+      return { ...gameDetails, ...game, ...{} } as Game &
+        HowLongToBeatEntry &
+        FullGameInfoResponse;
+    }
+  } else {
+    return {} as Game & HowLongToBeatEntry & FullGameInfoResponse;
+  }
+}

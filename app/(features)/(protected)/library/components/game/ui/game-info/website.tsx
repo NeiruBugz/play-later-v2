@@ -41,7 +41,7 @@ function SiteIcon({ siteName }: { siteName: string }) {
   if (siteName.includes("twitter")) {
     return <FaTwitter />;
   }
-  if (siteName.includes("wikipedia")) {
+  if (siteName.includes("wikipedia") || siteName.includes("wiki")) {
     return <FaWikipediaW />;
   }
   if (siteName.includes("instagram")) {
@@ -84,6 +84,9 @@ function SiteLabel({ siteName }: { siteName: string }) {
   if (siteName.includes("wikipedia")) {
     return <span>Wikipedia</span>;
   }
+  if (siteName.includes("wiki")) {
+    return <span>Fan Wiki</span>;
+  }
   if (siteName.includes("instagram")) {
     return <span>Instagram</span>;
   }
@@ -101,11 +104,11 @@ function SiteLabel({ siteName }: { siteName: string }) {
 }
 
 export const Website = ({ url }: { url: string }) => (
-  <Button variant="link">
+  <Button variant="link" className="justify-start">
     <Link
       href={url}
       target="_blank"
-      className="flex max-w-[160px] items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700"
+      className="flex max-w-[130px] items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700"
     >
       <SiteIcon siteName={url} />
       <SiteLabel siteName={url} />

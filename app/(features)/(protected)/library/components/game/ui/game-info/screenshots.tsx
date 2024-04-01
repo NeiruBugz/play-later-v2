@@ -17,7 +17,7 @@ export const Screenshots = ({
   screenshots: FullGameInfoResponse["screenshots"];
   name: string;
 }) => (
-  <section className="container mx-auto py-4 md:py-6">
+  <section className="container mx-auto hidden py-4 md:block md:py-6">
     <h4 className="mb-3 scroll-m-20 text-xl font-semibold tracking-tight">
       Screenshots
     </h4>

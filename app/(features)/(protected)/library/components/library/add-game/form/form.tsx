@@ -43,21 +43,18 @@ import { FormDescription } from "./description";
 import { addGameSchema, type AddGameSchema } from "./validation";
 
 export function AddForm({
-  game,
   isCompact = false,
   submitLabel = "Submit",
   withDescription = true,
 }: {
-  game?: string;
   isCompact?: boolean;
   submitLabel?: string;
   withDescription?: boolean;
 }) {
-  const entry = game ? (JSON.parse(game) as SearchResponse) : undefined;
   const form = useForm<AddGameSchema>({
     resolver: zodResolver(addGameSchema),
     defaultValues: {
-      title: entry?.name ?? "",
+      title: "",
       purchaseType: "DIGITAL",
       status: "BACKLOG",
     },
@@ -69,7 +66,7 @@ export function AddForm({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [selectedGame, setSelectedGame] = React.useState<
     SearchResponse | undefined
-  >(entry);
+  >(undefined);
   const [isPickerOpen, setPickerOpen] = React.useState(false);
 
   const showToast = (type: "success" | "error", name: string) => {
@@ -114,7 +111,7 @@ export function AddForm({
         id: nanoid(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        imageUrl: `${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${selectedGame.cover.image_id}.png`,
+        imageUrl: selectedGame.cover.image_id,
         platform: platform || null,
         status: status || null,
         title,
@@ -141,12 +138,7 @@ export function AddForm({
       {isCompact ? null : (
         <Popover modal onOpenChange={setPickerOpen} open={isPickerOpen}>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="mb-4 w-full"
-              ref={triggerRef}
-              disabled={game !== undefined}
-            >
+            <Button variant="outline" className="mb-4 w-full" ref={triggerRef}>
               Find a game
             </Button>
           </PopoverTrigger>

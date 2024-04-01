@@ -1,7 +1,7 @@
+import { Clock } from "lucide-react";
+
 export const HowLongToBeat = ({
   main,
-  mainExtra,
-  completionist,
 }: {
   main: number;
   mainExtra: number;
@@ -11,18 +11,12 @@ export const HowLongToBeat = ({
     <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
       Beating times
     </h3>
-    <section className="flex max-w-fit items-center gap-4 border-y-2">
-      <div className="p-2">
-        <p className="font-medium leading-7">Main </p>
-        <p className="leading-7">{main} h</p>
-      </div>
-      <div className="border-x-2 p-2">
-        <p className="font-medium leading-7">Main + Extra</p>
-        <p className="leading-7">{mainExtra} h</p>
-      </div>
-      <div className="p-2">
-        <p className="font-medium leading-7">Completionist</p>
-        <p className="leading-7">{completionist} h</p>
+    <section className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <p>Main story</p>
+        <div className="flex items-center gap-1">
+          <Clock /> <span>{main} h.</span>
+        </div>
       </div>
     </section>
   </section>

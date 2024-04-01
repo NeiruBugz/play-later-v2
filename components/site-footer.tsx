@@ -8,13 +8,6 @@ export function SiteFooter() {
       <div className="flex h-fit items-center gap-2">
         <p className="font-medium">Play Later {new Date().getFullYear()}</p>
         <Link
-          href={siteConfig.links.roadmap}
-          target="_blank"
-          className="hover:underline"
-        >
-          Roadmap
-        </Link>
-        <Link
           href={siteConfig.links.discord}
           target="_blank"
           className="hover:underline"

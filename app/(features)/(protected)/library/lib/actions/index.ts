@@ -3,13 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { GameStatus, List, type Game } from "@prisma/client";
-import { HowLongToBeatEntry, HowLongToBeatService } from "howlongtobeat";
 
 import { getServerUserId } from "@/lib/auth";
-import igdbApi from "@/lib/igdb-api";
 import { prisma } from "@/lib/prisma";
-import { FullGameInfoResponse } from "@/lib/types/igdb";
 import { FilterKeys } from "@/lib/types/library";
+
+import { prepareResponse } from "@/app/(features)/(protected)/library/lib/helpers";
 
 const LIBRARY_PATH = "/library";
 
@@ -117,25 +116,6 @@ export async function addGame(game: Omit<Game, "userId">) {
   } finally {
     revalidatePath(LIBRARY_PATH);
     redirect(LIBRARY_PATH);
-  }
-}
-
-export async function prepareResponse({ game }: { game: Game }) {
-  if (game && game.howLongToBeatId && game.igdbId) {
-    const howLongToBeatService = new HowLongToBeatService();
-    const gameDetails = await howLongToBeatService.detail(game.howLongToBeatId);
-    const igdbDetails = await igdbApi.getGameById(game.igdbId);
-    if (igdbDetails) {
-      return { ...gameDetails, ...game, ...igdbDetails[0] } as Game &
-        HowLongToBeatEntry &
-        FullGameInfoResponse;
-    } else {
-      return { ...gameDetails, ...game, ...{} } as Game &
-        HowLongToBeatEntry &
-        FullGameInfoResponse;
-    }
-  } else {
-    return {} as Game & HowLongToBeatEntry & FullGameInfoResponse;
   }
 }
 
