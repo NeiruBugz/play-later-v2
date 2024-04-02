@@ -77,8 +77,9 @@ export function mapStatusForInfo(value: GameStatus) {
     BACKLOG: "Backlogged",
     INPROGRESS: "Playing",
     COMPLETED: "Completed",
-    ABANDONED: "Abandoned",
     FULL_COMPLETION: "100% Complete",
+    ABANDONED: "Abandoned",
+    SHELVED: "Shelved",
   };
 
   return statusMapping[value] || value;
@@ -130,13 +131,13 @@ export function groupByYear(records: Game[]): Map<number, Game[]> {
 }
 
 export const DescriptionStatusMapping: Record<GameStatus, string> = {
-  [GameStatus.ABANDONED]:
-    "Game is put on shelf forever, probably, you would never return to this game",
+  [GameStatus.ABANDONED]: "You won't return to this game",
   [GameStatus.BACKLOG]:
     "Game is put on shelf for some time, but you haven't started playing it yet",
   [GameStatus.COMPLETED]: "Game is completed",
   [GameStatus.FULL_COMPLETION]: "Game is completed by 100%",
   [GameStatus.INPROGRESS]: "Game is currently being played",
+  [GameStatus.SHELVED]: "Started playing, but shelved for the best times",
 };
 
 export const DescriptionPurchaseTypeMapping: Record<PurchaseType, string> = {

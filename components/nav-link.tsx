@@ -4,11 +4,13 @@ import { PropsWithChildren } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { NavItem } from "@/lib/types/nav";
 import { cn } from "@/lib/utils";
 
-import { NavItem } from "@/types/nav";
-
-function NavLink({ item, children }: PropsWithChildren<{ item: NavItem }>) {
+export function NavLink({
+  item,
+  children,
+}: PropsWithChildren<{ item: NavItem }>) {
   const pathname = usePathname();
 
   const isActive =
@@ -30,5 +32,3 @@ function NavLink({ item, children }: PropsWithChildren<{ item: NavItem }>) {
     </Link>
   ) : null;
 }
-
-export { NavLink };
