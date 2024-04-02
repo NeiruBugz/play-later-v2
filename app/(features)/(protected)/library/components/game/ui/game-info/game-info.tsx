@@ -1,8 +1,17 @@
+import { Fragment } from "react";
 import Image from "next/image";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
 import type { FullGameInfoResponse } from "@/lib/types/igdb";
 
+import { ActionsMenu } from "@/app/(features)/(protected)/library/components/game/ui/game-info/actions-menu";
 import { HowLongToBeat } from "@/app/(features)/(protected)/library/components/game/ui/game-info/how-long-to-beat";
 import { Platform } from "@/app/(features)/(protected)/library/components/game/ui/game-info/platform";
 import { Platforms } from "@/app/(features)/(protected)/library/components/game/ui/game-info/platforms";
@@ -28,48 +37,107 @@ const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>
     : records;
 
 export function GameInfo({ game }: { game: GameResponseCombined }) {
-  console.log(game);
+  const {
+    summary,
+    name,
+    platform,
+    status,
+    createdAt,
+    updatedAt,
+    gameplayMain,
+    gameplayMainExtra,
+    gameplayCompletionist,
+    release_dates,
+    screenshots,
+    external_games,
+    websites,
+    similar_games,
+    cover,
+    genres,
+  } = game;
   return (
     <section>
-      <section className="flex flex-col items-center gap-3 md:flex-row md:items-end">
-        <div className="relative aspect-[3/4] h-full w-[264px] flex-shrink-0 cursor-pointer rounded-md border transition ">
-          <Image
-            width={264}
-            height={352}
-            src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.cover?.image_id}.png`}
-            alt={`${game.name} artwork`}
-            className="rounded-md object-cover"
-            priority
-          />
-        </div>
-        <div className="md:max-h-[352px]">
-          <h1 className="mb-3 max-w-[600px] scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
-            {game.name}
-          </h1>
-          <Summary summary={game.summary} />
-        </div>
-        <div className="mb-3 flex flex-col gap-2 self-start whitespace-nowrap md:mb-0 md:self-end">
-          <Platform platform={game.platform} />
-          <Timestamps
-            createdAt={game.createdAt}
-            updatedAt={game.updatedAt}
-            status={game.status}
-          />
+      <section className="flex flex-col-reverse gap-4 md:flex-row">
+        <section className="space-y-4">
+          <div className="grid gap-2">
+            <h1 className="text-3xl font-bold tracking-tighter lg:text-5xl">
+              {name}
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400">
+              {genres.map((genre, index) => (
+                <Fragment key={genre.id}>
+                  {genre.name} {index === genres.length - 1 ? "" : ", "}
+                </Fragment>
+              ))}
+            </p>
+          </div>
+          <div className="">
+            <Summary summary={summary} />
+          </div>
+        </section>
+        <div className="flex gap-1">
+          <div className="relative aspect-[3/4] h-fit w-[264px] flex-shrink-0 cursor-pointer rounded-md border transition">
+            <Image
+              width={264}
+              height={352}
+              src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${cover?.image_id}.png`}
+              alt={`${game.name} artwork`}
+              className="rounded-md object-cover"
+              priority
+            />
+          </div>
+          <div className="self-start">
+            <ActionsMenu gameId={game.id} status={status} />
+          </div>
         </div>
       </section>
-      <HowLongToBeat
-        main={game.gameplayMain}
-        mainExtra={game.gameplayMainExtra}
-        completionist={game.gameplayCompletionist}
-      />
-      <Platforms
-        platformList={uniqueRecords(game.release_dates)}
-        selectedPlatform={game.platform}
-      />
-      <Screenshots screenshots={game.screenshots} name={game.name} />
-      <Stores stores={game.external_games} />
-      <Websites sites={game.websites} />
-      <SimilarGames gamesList={game.similar_games} />
+      <div className="border-gray-20 mt-4 border-y dark:border-gray-800">
+        <div className="container grid max-w-4xl items-start gap-4 px-4 py-8 md:grid-cols-2 md:py-12 lg:grid-cols-3 lg:gap-8 xl:max-w-5xl xl:gap-12">
+          <Platforms
+            platformList={uniqueRecords(release_dates)}
+            selectedPlatform={platform}
+          />
+          <Platform platform={platform} />
+          <HowLongToBeat
+            main={gameplayMain}
+            mainExtra={gameplayMainExtra}
+            completionist={gameplayCompletionist}
+          />
+          <Timestamps
+            createdAt={createdAt}
+            updatedAt={updatedAt}
+            status={status}
+          />
+        </div>
+      </div>
+      <Accordion type="single" collapsible>
+        <AccordionItem value="screenshots">
+          <AccordionTrigger>Screenshots</AccordionTrigger>
+          <AccordionContent>
+            <Screenshots screenshots={screenshots} name={name} />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="websites">
+          <AccordionTrigger>Websites</AccordionTrigger>
+          <AccordionContent>
+            {websites?.length ? <Websites sites={websites} /> : null}
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="stores">
+          <AccordionTrigger>Where to buy</AccordionTrigger>
+          <AccordionContent>
+            {external_games?.length ? <Stores stores={external_games} /> : null}
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="similar-games">
+          <AccordionTrigger>Similar games</AccordionTrigger>
+          <AccordionContent>
+            {similar_games?.length ? (
+              <SimilarGames gamesList={similar_games} />
+            ) : null}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </section>
   );
 }

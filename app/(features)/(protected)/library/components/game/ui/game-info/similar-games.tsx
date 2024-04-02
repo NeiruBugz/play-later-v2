@@ -27,9 +27,6 @@ export const SimilarGames = ({
 
   return (
     <section>
-      <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
-        Similar games
-      </h3>
       <Suspense fallback={<ListSkeleton />}>
         <List>
           {gamesList.map((game) => {

@@ -10,7 +10,7 @@ export async function getUserById(id: string) {
     },
   });
 
-  return user?.username;
+  return user?.username || user?.name;
 }
 
 export async function setUsername({ username }: { username: string }) {

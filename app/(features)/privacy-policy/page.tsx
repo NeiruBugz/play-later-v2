@@ -3,6 +3,8 @@ import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-static";
+
 export default function PrivacyPolicyPage() {
   return (
     <main className="flex-1">

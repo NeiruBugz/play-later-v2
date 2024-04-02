@@ -16,9 +16,13 @@ export const Artwork = ({ game }: { game: Partial<Game> }) => {
         <Image
           src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.imageUrl}.png`}
           alt={`${game.title} cover art`}
+          width={264}
+          height={352}
+          style={{
+            maxWidth: "100%",
+            height: "auto",
+          }}
           className="h-full w-full rounded-xl object-cover"
-          unoptimized
-          fill
         />
         <RenderWhen condition={Boolean(game.platform)}>
           <div className="absolute right-2 top-2 flex w-fit flex-col items-end gap-1 normal-case">

@@ -8,10 +8,7 @@ export const Websites = ({
   sites: FullGameInfoResponse["websites"];
 }) => (
   <section className="my-3">
-    <h4 className="mb-3 scroll-m-20 text-xl font-semibold tracking-tight">
-      Websites
-    </h4>
-    <div className="grid grid-cols-[130px_minmax(130px,_1fr)] justify-items-start gap-1">
+    <div className="grid grid-cols-[180px_minmax(180px,_1fr)] justify-items-start gap-1">
       {sites.map((site) => (
         <Website url={site.url} key={site.id} />
       ))}

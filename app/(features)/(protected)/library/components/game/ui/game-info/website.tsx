@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  FaAppStore,
   FaDiscord,
   FaFacebook,
   FaGlobe,
@@ -53,6 +54,9 @@ function SiteIcon({ siteName }: { siteName: string }) {
   if (siteName.includes("gog.com")) {
     return <Icons.gog />;
   }
+  if (siteName.includes("apple")) {
+    return <FaAppStore />;
+  }
   return <FaGlobe />;
 }
 
@@ -99,6 +103,9 @@ function SiteLabel({ siteName }: { siteName: string }) {
   if (siteName.includes("fextralife")) {
     return <span>Fextralife</span>;
   }
+  if (siteName.includes("apple")) {
+    return <span>Apple App Store</span>;
+  }
 
   return <span>Official web-site</span>;
 }
@@ -108,7 +115,7 @@ export const Website = ({ url }: { url: string }) => (
     <Link
       href={url}
       target="_blank"
-      className="flex max-w-[130px] items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700"
+      className="flex max-w-[160px] items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700"
     >
       <SiteIcon siteName={url} />
       <SiteLabel siteName={url} />

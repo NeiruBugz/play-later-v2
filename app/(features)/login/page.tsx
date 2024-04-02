@@ -17,6 +17,8 @@ import { Logo } from "@/components/logo";
 
 import GoogleSignIn from "@/app/(features)/login/components/google-sign-in";
 
+export const dynamic = "force-static";
+
 const generateFeatures = () => [
   {
     title: "Game Organization",

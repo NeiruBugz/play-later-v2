@@ -8,6 +8,7 @@ export async function POST(req: Request) {
     await saveGameToLibrary(data);
     return NextResponse.json({ status: 200 });
   } catch (error) {
+    console.log(error);
     return NextResponse.json({ status: 500 });
   }
 }

@@ -12,9 +12,6 @@ export const Stores = ({
   stores: FullGameInfoResponse["external_games"];
 }) => (
   <section className="my-2">
-    <h4 className="mb-3 scroll-m-20 text-xl font-semibold tracking-tight">
-      Where to buy
-    </h4>
     <div className="grid grid-cols-1 justify-items-start gap-2 md:grid-cols-2">
       {stores.map((game) => {
         if (!game.url || !game.name) {

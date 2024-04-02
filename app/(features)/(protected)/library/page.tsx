@@ -4,6 +4,8 @@ import { LibraryContent } from "@/app/(features)/(protected)/library/components/
 import { Header } from "@/app/(features)/(protected)/library/components/library/page/header";
 import { getGamesListWithAdapter } from "@/app/(features)/(protected)/library/lib/actions/get-games";
 
+export const dynamic = "force-dynamic";
+
 export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const params = new URLSearchParams(searchParams);
   const { list, currentStatus, totalBacklogTime, backlogged } =
