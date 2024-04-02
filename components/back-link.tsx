@@ -3,7 +3,7 @@
 import { PropsWithChildren } from "react";
 import { useRouter } from "next/navigation";
 
-function BackLink({ children }: PropsWithChildren) {
+export function BackLink({ children }: PropsWithChildren) {
   const router = useRouter();
 
   const onClick = () => {
@@ -12,5 +12,3 @@ function BackLink({ children }: PropsWithChildren) {
 
   return <div onClick={onClick}>{children}</div>;
 }
-
-export { BackLink };

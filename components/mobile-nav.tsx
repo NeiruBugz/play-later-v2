@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { NavLink } from "@/components/nav-link";
 
-import { NavItem } from "@/types/nav";
+import { NavItem } from "@/lib/types/nav";
 
 export function MobileNav({
   trigger,

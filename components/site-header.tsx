@@ -1,13 +1,12 @@
-import { getUserById } from "@/features/auth/actions";
-import { HeaderSearch } from "@/features/game/ui/header-search";
-import AddGame from "@/features/library/ui/add-game/add-game";
-
 import { MainNav } from "@/components/main-nav";
 import { UserDropdown } from "@/components/user-dropdown";
 
 import { getServerUserId } from "@/lib/auth";
+import { siteConfig } from "@/lib/config/site";
 
-import { siteConfig } from "@/config/site";
+import { HeaderSearch } from "@/app/(features)/(protected)/library/components/game/ui/header-search";
+import AddGame from "@/app/(features)/(protected)/library/components/library/add-game/add-game";
+import { getUserById } from "@/app/(features)/login/lib/actions";
 
 export async function SiteHeader() {
   const user = await getUserById(await getServerUserId());

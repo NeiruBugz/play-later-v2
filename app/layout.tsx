@@ -9,10 +9,9 @@ import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/toaster";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 
+import { siteConfig } from "@/lib/config/site";
+import type { RootLayoutProps } from "@/lib/types/layout";
 import { cn } from "@/lib/utils";
-
-import type { RootLayoutProps } from "@/types/layout";
-import { siteConfig } from "@/config/site";
 
 export const viewport: Viewport = {
   themeColor: [
