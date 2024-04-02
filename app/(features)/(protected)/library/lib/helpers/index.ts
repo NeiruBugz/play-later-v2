@@ -57,6 +57,7 @@ export const getListBasedOnStatus = async ({
   backlogged,
   completed,
   fullyCompleted,
+  shelved,
 }: {
   currentStatus: GameStatus;
   inprogress: Game[];
@@ -64,6 +65,7 @@ export const getListBasedOnStatus = async ({
   backlogged: Game[];
   completed: Game[];
   fullyCompleted: Game[];
+  shelved: Game[];
 }): Promise<Game[]> => {
   switch (currentStatus) {
     case "INPROGRESS":
@@ -76,6 +78,8 @@ export const getListBasedOnStatus = async ({
       return completed;
     case "FULL_COMPLETION":
       return fullyCompleted;
+    case "SHELVED":
+      return shelved;
     default:
       return [];
   }

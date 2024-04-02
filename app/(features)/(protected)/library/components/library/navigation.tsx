@@ -4,6 +4,7 @@ import { useCallback, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { GameStatus } from "@prisma/client";
 import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react";
+import { BsBookshelf } from "react-icons/bs";
 
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -47,6 +48,12 @@ const statusMapping = {
     tooltipValue: "Abandoned games",
     label: "Abandoned",
   },
+  [GameStatus.SHELVED]: {
+    icon: <BsBookshelf className="md:size-4" />,
+    radioValue: "SHELVED",
+    tooltipValue: "Shelved games",
+    label: "Shelved",
+  },
 };
 
 export function LibraryNavigation() {
@@ -88,6 +95,7 @@ export function LibraryNavigation() {
                     value={key}
                     id={value.radioValue}
                     className="group sr-only"
+                    aria-label={`Navigate to ${value.tooltipValue}`}
                   />
                   <Label
                     htmlFor={value.radioValue}

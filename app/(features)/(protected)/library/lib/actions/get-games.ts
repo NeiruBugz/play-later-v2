@@ -63,6 +63,7 @@ export const getGames = async (
     fullCompletion: games.filter(
       (game) => game.status === GameStatus.FULL_COMPLETION
     ),
+    shelved: games.filter((game) => game.status === GameStatus.SHELVED),
   };
 };
 
@@ -90,8 +91,14 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
     search: searchQuery,
   };
 
-  const { abandoned, backlogged, completed, inprogress, fullCompletion } =
-    await getGames(filters);
+  const {
+    abandoned,
+    backlogged,
+    completed,
+    inprogress,
+    fullCompletion,
+    shelved,
+  } = await getGames(filters);
 
   await updateBackloggedGames(backlogged);
 
@@ -104,6 +111,7 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
     backlogged,
     completed,
     fullyCompleted: fullCompletion,
+    shelved,
   });
 
   return {

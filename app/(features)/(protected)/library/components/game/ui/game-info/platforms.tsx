@@ -27,9 +27,9 @@ export const Platforms = ({
 }) => (
   <section>
     <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
-      Platforms
+      Released on
     </h3>
-    <div className="flex flex-grow-0 gap-2">
+    <div className="flex flex-grow-0 flex-wrap gap-2">
       {uniqueRecords(platformList).map((releaseDate) => {
         return (
           <Badge

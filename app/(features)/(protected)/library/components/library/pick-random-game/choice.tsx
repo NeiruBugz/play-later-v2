@@ -3,6 +3,7 @@ import { memo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge, ColorVariant } from "@/components/ui/badge";
 
+import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
 import { platformEnumToColor } from "@/lib/utils";
 
 import { updateStatus } from "@/app/(features)/(protected)/library/lib/actions/update-game";
@@ -27,13 +28,13 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
       onClick={onClick}
     >
       {!isRunning ? (
-        <Avatar className="size-fit rounded-md">
+        <Avatar className="size-[90px] rounded-md">
           <AvatarImage
-            className="size-20 object-cover"
-            src={choice.imageUrl}
+            className="size-[90px] object-cover"
+            src={`${IMAGE_API}/${IMAGE_SIZES["thumb"]}/${choice.imageUrl}.png`}
             alt={choice.title}
-            width={128}
-            height={128}
+            width={90}
+            height={90}
           />
           <AvatarFallback>{choice.title}</AvatarFallback>
         </Avatar>

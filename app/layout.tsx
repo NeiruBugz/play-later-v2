@@ -1,9 +1,8 @@
 import "@/styles/globals.css";
 
 import { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import Providers from "@/providers";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { GeistSans } from "geist/font/sans";
 import NextTopLoader from "nextjs-toploader";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -33,13 +32,15 @@ export const metadata: Metadata = {
   },
 };
 
+const fontInter = Inter({ subsets: ["latin", "cyrillic"] });
+
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           "min-h-screen bg-background antialiased",
-          GeistSans.className
+          fontInter.className
         )}
       >
         <NextTopLoader />
@@ -48,7 +49,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <Toaster />
           <TailwindIndicator />
         </Providers>
-        <SpeedInsights />
       </body>
     </html>
   );

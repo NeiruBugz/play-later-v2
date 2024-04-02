@@ -1,8 +1,7 @@
 export const Summary = ({ summary }: { summary: string }) => (
   <article>
-    <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-      Description
-    </h3>
-    <p className="leading-7 [&:not(:first-child)]:mt-3">{summary}</p>
+    <p className="text-xl tracking-tighter text-gray-500 dark:text-gray-400 xl:text-2xl">
+      {summary}
+    </p>
   </article>
 );
