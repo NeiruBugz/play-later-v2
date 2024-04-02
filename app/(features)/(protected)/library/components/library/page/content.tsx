@@ -47,24 +47,6 @@ export function LibraryContent({
   backloggedLength,
   list,
 }: LibraryContentProps) {
-  if (Array.isArray(list)) {
-    return (
-      <div>
-        {currentStatus === "BACKLOG" ? (
-          <BacklogList
-            count={backloggedLength}
-            backlogTime={totalBacklogTime}
-          />
-        ) : null}
-        <List>
-          {list.map((game) => (
-            <Card key={game.id} game={game} />
-          ))}
-        </List>
-      </div>
-    );
-  }
-
   return (
     <div>
       <Suspense fallback={<ListSkeleton />}>
@@ -75,9 +57,9 @@ export function LibraryContent({
           />
         ) : null}
         <List>
-          {[...list.entries()].map(([, games]) => {
-            return games.map((game) => <Card key={game.id} game={game} />);
-          })}
+          {list.map((game) => (
+            <Card key={game.id} game={game} />
+          ))}
         </List>
       </Suspense>
     </div>

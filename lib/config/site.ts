@@ -10,10 +10,10 @@ export const siteConfig = {
       title: "Wishlist",
       href: "/wishlist",
     },
-    {
-      title: "Lists",
-      href: "/lists",
-    },
+    // {
+    //   title: "Lists",
+    //   href: "/lists",
+    // },
   ],
   links: {
     roadmap:

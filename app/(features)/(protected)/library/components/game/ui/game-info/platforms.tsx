@@ -10,10 +10,13 @@ import {
 } from "@/lib/utils";
 
 const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>
-  records.filter(
-    (record, index, self) =>
-      index === self.findIndex((r) => r.platform.name === record.platform.name)
-  );
+  records && records.length
+    ? records.filter(
+        (record, index, self) =>
+          index ===
+          self.findIndex((r) => r.platform.name === record.platform.name)
+      )
+    : records;
 
 export const Platforms = ({
   platformList,

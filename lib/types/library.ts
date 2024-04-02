@@ -5,7 +5,7 @@ export type LibraryPageProps = {
 };
 
 export type LibraryContentProps = {
-  list: Game[] | GamesByYear;
+  list: Game[];
   currentStatus: string;
   totalBacklogTime: number;
   backloggedLength: number;
@@ -19,7 +19,7 @@ export type LibraryHeaderProps = {
 export type GamesByYear = Map<number, Game[]>;
 
 export type LibraryData = {
-  list: Game[] | GamesByYear;
+  list: Game[];
   currentStatus: string;
   totalBacklogTime: number;
   backlogged: Game[];

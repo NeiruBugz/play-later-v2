@@ -1,6 +1,4 @@
 import Image from "next/image";
-import { Game } from "@prisma/client";
-import { HowLongToBeatEntry } from "howlongtobeat";
 
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
 import type { FullGameInfoResponse } from "@/lib/types/igdb";
@@ -14,22 +12,22 @@ import { Stores } from "@/app/(features)/(protected)/library/components/game/ui/
 import { Summary } from "@/app/(features)/(protected)/library/components/game/ui/game-info/summary";
 import { Timestamps } from "@/app/(features)/(protected)/library/components/game/ui/game-info/timestamps";
 import { Websites } from "@/app/(features)/(protected)/library/components/game/ui/game-info/websites";
+import type { GameResponseCombined } from "@/app/(features)/(protected)/library/lib/types/actions";
 
 const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>
-  records.filter(
-    (record, index, self) =>
-      index ===
-      self.findIndex(
-        (r) =>
-          r.human === record.human && r.platform.name === record.platform.name
+  records && records.length
+    ? records.filter(
+        (record, index, self) =>
+          index ===
+          self.findIndex(
+            (r) =>
+              r.human === record.human &&
+              r.platform.name === record.platform.name
+          )
       )
-  );
+    : records;
 
-export function GameInfo({
-  game,
-}: {
-  game: Game & HowLongToBeatEntry & FullGameInfoResponse;
-}) {
+export function GameInfo({ game }: { game: GameResponseCombined }) {
   console.log(game);
   return (
     <section>

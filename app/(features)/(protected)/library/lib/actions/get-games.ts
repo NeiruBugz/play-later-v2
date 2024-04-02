@@ -9,7 +9,6 @@ import { FilterKeys } from "@/lib/types/library";
 import {
   calculateTotalBacklogTime,
   getListBasedOnStatus,
-  groupGamesByYear,
   updateBackloggedGames,
 } from "@/app/(features)/(protected)/library/lib/helpers";
 import { FetcherAndProcessor } from "@/app/(features)/(protected)/library/lib/types/actions";
@@ -97,18 +96,15 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   await updateBackloggedGames(backlogged);
 
   const totalBacklogTime = calculateTotalBacklogTime(backlogged);
-  const completedByYear = groupGamesByYear(completed);
-  const fullCompletionByYear = groupGamesByYear(fullCompletion);
-  const backloggedByYear = groupGamesByYear(backlogged);
 
-  const list = getListBasedOnStatus(
+  const list = await getListBasedOnStatus({
     currentStatus,
     inprogress,
     abandoned,
-    backloggedByYear,
-    completedByYear,
-    fullCompletionByYear
-  );
+    backlogged,
+    completed,
+    fullyCompleted: fullCompletion,
+  });
 
   return {
     list,

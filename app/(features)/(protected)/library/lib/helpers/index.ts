@@ -50,25 +50,32 @@ export const groupGamesByYear = (games: Game[]): GamesByYear => {
   return new Map([...grouped].sort().reverse());
 };
 
-export const getListBasedOnStatus = (
-  currentStatus: GameStatus,
-  inprogress: Game[],
-  abandoned: Game[],
-  backloggedByYear: GamesByYear,
-  completedByYear: GamesByYear,
-  fullCompletionByYear: GamesByYear
-): Game[] | GamesByYear => {
+export const getListBasedOnStatus = async ({
+  currentStatus,
+  inprogress,
+  abandoned,
+  backlogged,
+  completed,
+  fullyCompleted,
+}: {
+  currentStatus: GameStatus;
+  inprogress: Game[];
+  abandoned: Game[];
+  backlogged: Game[];
+  completed: Game[];
+  fullyCompleted: Game[];
+}): Promise<Game[]> => {
   switch (currentStatus) {
     case "INPROGRESS":
       return inprogress;
     case "ABANDONED":
       return abandoned;
     case "BACKLOG":
-      return backloggedByYear;
+      return backlogged;
     case "COMPLETED":
-      return completedByYear;
+      return completed;
     case "FULL_COMPLETION":
-      return fullCompletionByYear;
+      return fullyCompleted;
     default:
       return [];
   }

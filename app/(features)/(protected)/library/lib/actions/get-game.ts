@@ -57,12 +57,15 @@ export const getGameWithAdapter: ResponsePreparer = async ({
     const howLongToBeatDetails = await howLongToBeatService.detail(
       game.howLongToBeatId
     );
-    result = { ...result, ...howLongToBeatDetails };
+    result = { ...howLongToBeatDetails, ...result };
   }
 
   if (game.igdbId) {
     const igdbDetails = await igdbApi.getGameById(game.igdbId);
-    result = { ...result, ...igdbDetails };
+    if (igdbDetails?.length) {
+      const [igdbGame] = igdbDetails;
+      result = { ...igdbGame, ...result };
+    }
   }
 
   return result as GameResponseCombined;

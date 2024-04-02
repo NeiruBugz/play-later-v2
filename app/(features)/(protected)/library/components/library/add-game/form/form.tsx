@@ -220,43 +220,22 @@ export function AddForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="block">Status</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    disabled={isWishlisted}
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
-                  >
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your platform" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
                     {Object.keys(GameStatus).map((key) => (
-                      <FormItem
-                        className="flex items-center space-x-0 space-y-0"
-                        key={key}
-                      >
-                        <FormControl key={key}>
-                          <RadioGroupItem
-                            value={key}
-                            id={key}
-                            className="sr-only"
-                          />
-                        </FormControl>
-                        <FormLabel
-                          htmlFor={key}
-                          className={cn(
-                            "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
-                            "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
-                            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-                            {
-                              "bg-background text-foreground shadow-sm":
-                                form.getValues().status === key,
-                            }
-                          )}
-                        >
+                      <SelectItem key={key} value={key}>
+                        <div className="normal-case">
                           {mapStatusForInfo(key as GameStatus)}
-                        </FormLabel>
-                      </FormItem>
+                        </div>
+                      </SelectItem>
                     ))}
-                  </RadioGroup>
-                </FormControl>
+                  </SelectContent>
+                </Select>
               </FormItem>
             )}
           />
