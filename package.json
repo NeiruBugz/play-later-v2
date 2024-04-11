@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 6060",
+    "dev": "next dev -p 6060 --turbo",
     "postinstall": "prisma generate",
     "build": "next build",
     "start": "next start",

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import {
   DefaultSession,
@@ -55,5 +56,8 @@ export const authOptions: NextAuthOptions = {
 
 export const getServerUserId = async () => {
   const session = (await getServerSession(authOptions)) as Session;
-  return session.user.id;
+  if (!session?.user) {
+    redirect("/login");
+  }
+  return session.user?.id;
 };
