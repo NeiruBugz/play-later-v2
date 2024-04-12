@@ -8,9 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
 import igdbApi from "@/lib/igdb-api";
 
-import { SignIn } from "@/app/login/components/sign-in";
-
-export default async function Page() {
+export default async function LoginPage() {
   const session = await auth();
   const trendingGames = await igdbApi.getGamesByRating();
 
@@ -31,9 +29,8 @@ export default async function Page() {
             to play later. You can also save games you want to play next time
             you log in.
           </p>
-          <SignIn />
         </div>
-        <div className="mb-8 md:m-0">
+        <div className="mb-8">
           <h2 className="scroll-m-20 pb-2 text-center text-3xl font-semibold tracking-tight first:mt-0">
             Trending now
           </h2>
@@ -45,8 +42,8 @@ export default async function Page() {
                   src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.cover.image_id}.png`}
                   alt={`${game.name} cover`}
                   className="mb-4 rounded-md"
-                  width={234}
-                  height={344}
+                  width={264}
+                  height={374}
                   priority
                 />
               );
