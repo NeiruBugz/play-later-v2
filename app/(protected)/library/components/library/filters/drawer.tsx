@@ -1,3 +1,5 @@
+import { SlidersVertical } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -15,7 +17,9 @@ function LibraryFiltersDrawer({ open, setOpen }: LibraryFiltersUIProps) {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant="outline">Filters</Button>
+        <Button variant="outline">
+          <SlidersVertical className="mr-2 size-4" /> Filters
+        </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">

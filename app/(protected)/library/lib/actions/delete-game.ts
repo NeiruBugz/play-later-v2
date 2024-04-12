@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getServerUserId } from "@/auth";
 import { Game } from "@prisma/client";
 
@@ -19,4 +20,5 @@ export async function deleteGame(id: Game["id"]) {
   });
 
   revalidatePath(LIBRARY_PATH);
+  redirect("/library");
 }

@@ -14,7 +14,7 @@ export function NavLink({
   const pathname = usePathname();
 
   const isActive =
-    item.href && pathname.toLowerCase().includes(item.href.toLowerCase());
+    item.href && pathname?.toLowerCase().includes(item.href.toLowerCase());
 
   return item.href ? (
     <Link

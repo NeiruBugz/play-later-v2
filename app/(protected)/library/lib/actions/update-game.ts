@@ -35,18 +35,3 @@ export const updateGame = async (
 ) => {
   await updateGameData(id, { [gameKey]: value });
 };
-
-export async function addGameReview({
-  id,
-  review,
-  rating,
-}: {
-  id: Game["id"];
-  review: string;
-  rating: number;
-}) {
-  await updateGameData(id, {
-    rating: rating === 0 ? undefined : rating,
-    review,
-  });
-}

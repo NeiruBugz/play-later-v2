@@ -5,7 +5,6 @@ import { Game, GameStatus } from "@prisma/client";
 import { HowLongToBeatService } from "howlongtobeat";
 
 import { prisma } from "@/lib/prisma";
-import { GamesByYear } from "@/lib/types/library";
 
 import { updateGame } from "@/app/(protected)/library/lib/actions/update-game";
 
@@ -29,25 +28,13 @@ export const getAllUserPlatforms = async () => {
   });
 };
 
-export const calculateTotalBacklogTime = (backlogged: Game[]): number => {
+export const calculateTotalBacklogTime = async (
+  backlogged: Game[]
+): Promise<number> => {
   return backlogged.reduce(
     (acc, game) => acc + (game.gameplayTime ? game.gameplayTime : 0),
     0
   );
-};
-
-export const groupGamesByYear = (games: Game[]): GamesByYear => {
-  const grouped = new Map<number, Game[]>();
-
-  games.forEach((game) => {
-    const year = new Date(game.createdAt).getFullYear();
-    if (!grouped.has(year)) {
-      grouped.set(year, []);
-    }
-    grouped.get(year)!.push(game);
-  });
-
-  return new Map([...grouped].sort().reverse());
 };
 
 export const getListBasedOnStatus = async ({

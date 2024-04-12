@@ -63,7 +63,7 @@ export function LibraryNavigation() {
 
   const onChange = useCallback(
     (value: string) => {
-      const params = new URLSearchParams(searchParams);
+      const params = new URLSearchParams(searchParams ?? new URLSearchParams());
       params.set("status", value);
       replace(`${pathname}?${params.toString()}`);
     },
@@ -71,15 +71,15 @@ export function LibraryNavigation() {
   );
 
   useEffect(() => {
-    if (!searchParams.get("status")) {
+    if (!searchParams?.get("status")) {
       onChange("BACKLOG");
     }
   }, [onChange, searchParams]);
 
   return (
     <RadioGroup
-      defaultValue={searchParams.get("status") ?? "BACKLOG"}
-      value={searchParams.get("status") ?? "BACKLOG"}
+      defaultValue={searchParams?.get("status") ?? "BACKLOG"}
+      value={searchParams?.get("status") ?? "BACKLOG"}
       className={cn(
         "group my-2 flex flex-row items-center justify-center rounded-md bg-muted p-1 text-muted-foreground disabled:cursor-not-allowed"
       )}
@@ -106,7 +106,7 @@ export function LibraryNavigation() {
                       "hover:ring-2 group-disabled:cursor-not-allowed group-disabled:hover:ring-0",
                       {
                         "bg-background text-foreground shadow-sm":
-                          searchParams.get("status") === key,
+                          searchParams?.get("status") === key,
                       }
                     )}
                   >

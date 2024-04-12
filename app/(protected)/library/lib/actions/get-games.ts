@@ -13,17 +13,6 @@ import {
 } from "@/app/(protected)/library/lib/helpers";
 import { FetcherAndProcessor } from "@/app/(protected)/library/lib/types/actions";
 
-export const getAllGames = async (): Promise<Game[]> => {
-  const userId = await getServerUserId();
-
-  return prisma.game.findMany({
-    where: {
-      userId,
-      deletedAt: null,
-    },
-  });
-};
-
 export const getGames = async (
   filters: Record<FilterKeys, string | undefined>
 ) => {
@@ -67,18 +56,6 @@ export const getGames = async (
   };
 };
 
-export const getRandomGames = async () => {
-  const userId = await getServerUserId();
-  const games = await prisma.game.findMany({
-    where: {
-      userId,
-      deletedAt: null,
-    },
-  });
-
-  return games.sort(() => Math.random() - 0.5).slice(0, 20);
-};
-
 export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   const platform = params.get("platform") ?? " ";
   const currentStatus = (params.get("status") as GameStatus) ?? "BACKLOG";
@@ -102,7 +79,7 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
 
   await updateBackloggedGames(backlogged);
 
-  const totalBacklogTime = calculateTotalBacklogTime(backlogged);
+  const totalBacklogTime = await calculateTotalBacklogTime(backlogged);
 
   const list = await getListBasedOnStatus({
     currentStatus,

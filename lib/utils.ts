@@ -1,4 +1,4 @@
-import { Game, GameStatus, PurchaseType } from "@prisma/client";
+import { GameStatus, PurchaseType } from "@prisma/client";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -85,16 +85,6 @@ export function mapStatusForInfo(value: GameStatus) {
   return statusMapping[value] || value;
 }
 
-export function prepareDescription(value: string) {
-  if (!value) {
-    return "";
-  }
-
-  const purified = value.replace(" ...Read More", "").trim();
-  const metaIndex = purified.indexOf("How long is");
-  return metaIndex !== -1 ? purified.slice(0, metaIndex) : purified;
-}
-
 export function hasSelectedPlatformInList(
   platformFromList?: string,
   selectedPlatform?: string
@@ -115,19 +105,6 @@ export function getRandomItem<Game>(array: Game[]): Game | undefined {
 
   const randomIndex = Math.floor(Math.random() * array.length);
   return array[randomIndex];
-}
-export function groupByYear(records: Game[]): Map<number, Game[]> {
-  const grouped = new Map<number, Game[]>();
-
-  records.forEach((record) => {
-    const year = new Date(record.createdAt).getFullYear();
-    if (!grouped.has(year)) {
-      grouped.set(year, []);
-    }
-    grouped.get(year)!.push(record);
-  });
-
-  return new Map([...grouped].sort().reverse());
 }
 
 export const DescriptionStatusMapping: Record<GameStatus, string> = {

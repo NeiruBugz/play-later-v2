@@ -11,7 +11,7 @@ export const GameTimeBadge = ({
   }
 
   return (
-    <div className="flex w-fit items-center justify-center gap-1 rounded-full bg-slate-600 px-2 py-1 text-xs font-medium">
+    <div className="flex w-fit items-center justify-center gap-1 rounded-full bg-foreground px-2 py-1 text-xs font-medium text-primary-foreground">
       <Clock className="size-3" />
       {time} h
     </div>

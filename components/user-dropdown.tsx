@@ -25,8 +25,8 @@ export function UserDropdown({ username }: { username?: string }) {
         <Image
           src={userPic}
           alt={`${username} default user avatar`}
-          width={40}
-          height={40}
+          width={36}
+          height={36}
           className="cursor-pointer rounded"
         />
       </DropdownMenuTrigger>

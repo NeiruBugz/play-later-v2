@@ -90,8 +90,7 @@ const igdbApi = {
         ...options,
       });
 
-      const data = await response.json();
-      return data;
+      return await response.json();
     } catch (thrown) {
       const error = asError(thrown);
       console.error(`${error.name}: ${error.message}`);
@@ -108,8 +107,9 @@ const igdbApi = {
   },
 
   async getGameById(
-    gameId: number
+    gameId: number | null
   ): Promise<FullGameInfoResponse[] | undefined> {
+    if (!gameId) return;
     return this.request({
       resource: "/games",
       body: `${fullGameInfo} where id = (${gameId});`,
@@ -121,7 +121,6 @@ const igdbApi = {
     ...fields
   }: {
     name: string | null;
-    [key: string]: string | null;
   }): Promise<SearchResponse[] | undefined> {
     if (!name) return;
     let str = "";

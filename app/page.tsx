@@ -1,18 +1,18 @@
-import Image from "next/image";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
-import igdbApi from "@/lib/igdb-api";
-
 import { SignIn } from "@/app/login/components/sign-in";
+import {
+  TrendingList,
+  TrendingListSkeleton,
+} from "@/app/login/components/trending-list";
 
 export default async function Page() {
   const session = await auth();
-  const trendingGames = await igdbApi.getGamesByRating();
 
   if (session) {
     redirect("/library?status=INPROGRESS");
@@ -21,7 +21,7 @@ export default async function Page() {
   return (
     <div className="min-h-screen flex-1">
       <SiteHeader />
-      <section className="container mb-8 flex h-full  columns-2 flex-col items-center md:h-[calc(100vh-64px-48px)] md:flex-row">
+      <section className="container flex columns-2 flex-col items-center md:h-[calc(100vh-64px-48px)] md:flex-row">
         <div>
           <h1 className="text-3xl font-bold tracking-tighter lg:text-5xl">
             Play Later
@@ -37,21 +37,9 @@ export default async function Page() {
           <h2 className="scroll-m-20 pb-2 text-center text-3xl font-semibold tracking-tight first:mt-0">
             Trending now
           </h2>
-          <div className="columns-3">
-            {trendingGames?.map((game) => {
-              return (
-                <Image
-                  key={game.id}
-                  src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.cover.image_id}.png`}
-                  alt={`${game.name} cover`}
-                  className="mb-4 rounded-md"
-                  width={234}
-                  height={344}
-                  priority
-                />
-              );
-            })}
-          </div>
+          <Suspense fallback={<TrendingListSkeleton />}>
+            <TrendingList />
+          </Suspense>
         </div>
       </section>
       <SiteFooter />
