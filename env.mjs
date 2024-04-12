@@ -10,7 +10,7 @@ export const env = createEnv({
     AUTH_GOOGLE_ID: z.string(),
     AUTH_GOOGLE_SECRET: z.string(),
     AUTH_SECRET: z.string(),
-    AUTH_URL: z.string().url(),
+    AUTH_URL: z.string().url().optional(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     IGDB_CLIENT_ID: z.string(),
     IGDB_CLIENT_SECRET: z.string(),
