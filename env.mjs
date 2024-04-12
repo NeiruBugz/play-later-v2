@@ -1,12 +1,16 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+
+
+
+
 export const env = createEnv({
   server: {
-    GOOGLE_CLIENT_ID: z.string(),
-    GOOGLE_CLIENT_SECRET: z.string(),
-    NEXTAUTH_SECRET: z.string(),
-    NEXTAUTH_URL: z.string().url(),
+    AUTH_GOOGLE_ID: z.string(),
+    AUTH_GOOGLE_SECRET: z.string(),
+    AUTH_SECRET: z.string(),
+    AUTH_URL: z.string().url().optional(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     IGDB_CLIENT_ID: z.string(),
     IGDB_CLIENT_SECRET: z.string(),
@@ -21,10 +25,10 @@ export const env = createEnv({
   },
   client: {},
   runtimeEnv: {
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
+    AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
+    AUTH_SECRET: process.env.AUTH_SECRET,
+    AUTH_URL: process.env.AUTH_URL,
     NODE_ENV: process.env.NODE_ENV ?? "development",
     IGDB_CLIENT_ID: process.env.IGDB_CLIENT_ID,
     IGDB_CLIENT_SECRET: process.env.IGDB_CLIENT_SECRET,

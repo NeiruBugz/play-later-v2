@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/config/site";
 
 export function SiteFooter() {
   return (
-    <footer className="container z-40 flex h-12 shrink-0 flex-col items-center justify-center">
+    <footer className="container fixed bottom-0 z-40 flex h-12 shrink-0 flex-col items-center justify-center bg-background">
       <div className="flex h-fit items-center gap-2">
         <p className="font-medium">Play Later {new Date().getFullYear()}</p>
         <Link

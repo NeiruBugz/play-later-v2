@@ -14,15 +14,6 @@ const nextConfig = {
       },
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/library?status=BACKLOG",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
