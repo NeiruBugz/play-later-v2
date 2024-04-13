@@ -1,8 +1,9 @@
 import { RenderWhen } from "@/components/render-when";
 
+import { cn } from "@/lib/utils";
+
 import { Card } from "@/app/(protected)/library/components/game/ui/card/card";
 import { WishlistShare } from "@/app/(protected)/library/components/game/ui/wishlist-share";
-import { List } from "@/app/(protected)/library/components/library/page/list";
 import { getGamesFromWishlist } from "@/app/(protected)/wishlist/lib/actions";
 
 export default async function WishlistPage() {
@@ -21,11 +22,17 @@ export default async function WishlistPage() {
         <RenderWhen condition={!wishlist || wishlist.length === 0}>
           <h2>Wishlist is empty</h2>
         </RenderWhen>
-        <List>
-          {wishlist.map((game) => (
-            <Card key={game.id} game={game} path="wishlist" />
-          ))}
-        </List>
+        <section className="flex w-full flex-col">
+          <section
+            className={cn(
+              "mt-4 flex flex-wrap justify-center gap-2 md:justify-start"
+            )}
+          >
+            {wishlist.map((game) => (
+              <Card key={game.id} game={game} path="wishlist" />
+            ))}
+          </section>
+        </section>
       </section>
     </section>
   );
