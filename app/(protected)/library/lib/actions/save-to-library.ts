@@ -2,13 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { Game } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
 const LIBRARY_PATH = '/library?status="BACKLOG"';
 
-export async function saveGameToLibrary(game: Omit<Game, "userId">) {
+export async function saveGameToLibrary(
+  game: Omit<Prisma.GameCreateInput, "user">
+) {
   try {
     const userId = await auth();
     if (!userId?.user || !userId.user.id) {
@@ -23,7 +25,6 @@ export async function saveGameToLibrary(game: Omit<Game, "userId">) {
       updatedAt,
       imageUrl,
       platform,
-      listId,
       deletedAt,
       review,
       rating,
@@ -42,7 +43,6 @@ export async function saveGameToLibrary(game: Omit<Game, "userId">) {
         updatedAt,
         imageUrl,
         platform,
-        listId,
         deletedAt,
         review,
         rating,

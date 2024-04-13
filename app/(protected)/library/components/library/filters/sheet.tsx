@@ -1,3 +1,5 @@
+import { SlidersVertical } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -15,7 +17,9 @@ function LibraryFiltersSheet({ open, setOpen }: LibraryFiltersUIProps) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline">Filters</Button>
+        <Button variant="outline">
+          <SlidersVertical className="mr-2 size-4" /> Filters
+        </Button>
       </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>

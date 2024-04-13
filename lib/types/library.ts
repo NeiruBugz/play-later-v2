@@ -16,8 +16,6 @@ export type LibraryHeaderProps = {
   backlogged: Game[];
 };
 
-export type GamesByYear = Map<number, Game[]>;
-
 export type LibraryData = {
   list: Game[];
   currentStatus: string;

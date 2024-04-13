@@ -1,9 +1,19 @@
 import { PropsWithChildren } from "react";
 
-export function List({ children }: PropsWithChildren) {
+import { cn } from "@/lib/utils";
+
+export function List({
+  viewMode,
+  children,
+}: PropsWithChildren<{ viewMode: "grid" | "list" }>) {
   return (
     <section className="flex w-full flex-col">
-      <section className="mt-4 flex flex-wrap justify-center gap-2 md:justify-start">
+      <section
+        className={cn(
+          "mt-4 flex flex-col flex-wrap justify-center gap-2 md:justify-start",
+          { "flex-row": viewMode === "grid" }
+        )}
+      >
         {children}
       </section>
     </section>

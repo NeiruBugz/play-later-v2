@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/config/site";
 
 export function SiteFooter() {
   return (
-    <footer className="container fixed bottom-0 z-40 flex h-12 shrink-0 flex-col items-center justify-center bg-background">
+    <footer className="container flex h-12 shrink-0 flex-col items-center justify-center bg-background">
       <div className="flex h-fit items-center gap-2">
         <p className="font-medium">Play Later {new Date().getFullYear()}</p>
         <Link
@@ -14,7 +14,7 @@ export function SiteFooter() {
         >
           Discord
         </Link>
-        <Link href="/privacy-policy" className="hover:underline">
+        <Link href={"/privacy-policy"} className="hover:underline">
           Privacy Policy
         </Link>
       </div>

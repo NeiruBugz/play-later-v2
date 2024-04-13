@@ -38,10 +38,10 @@ function FiltersForm({
   const { replace } = useRouter();
 
   const [filters, setFilters] = useState({
-    search: searchParams.get("search") ?? "",
-    platform: searchParams.get("platform") ?? "",
-    sortBy: searchParams.get("sortBy") ?? DefaultSortState.sortBy,
-    order: searchParams.get("order") ?? DefaultSortState.order,
+    search: searchParams?.get("search") ?? "",
+    platform: searchParams?.get("platform") ?? "",
+    sortBy: searchParams?.get("sortBy") ?? DefaultSortState.sortBy,
+    order: searchParams?.get("order") ?? DefaultSortState.order,
   });
 
   const [platformOptions, setPlatformOptions] = useState<

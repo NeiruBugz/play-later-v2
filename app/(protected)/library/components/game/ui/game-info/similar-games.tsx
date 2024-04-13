@@ -9,7 +9,7 @@ import { FullGameInfoResponse } from "@/lib/types/igdb";
 import { List } from "@/app/(protected)/library/components/library/page/list";
 
 const ListSkeleton = () => (
-  <List>
+  <List viewMode="grid">
     {Array.from({ length: 5 }, (_, index) => index + 1).map((index) => (
       <Skeleton className="h-[352px] w-[264px]" key={index} />
     ))}
@@ -28,7 +28,7 @@ export const SimilarGames = ({
   return (
     <section>
       <Suspense fallback={<ListSkeleton />}>
-        <List>
+        <List viewMode="grid">
           {gamesList.map((game) => {
             return (
               <div
