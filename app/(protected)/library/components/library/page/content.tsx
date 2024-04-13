@@ -4,6 +4,16 @@ import { Game } from "@prisma/client";
 import { format } from "date-fns";
 import { Calendar, Gamepad, Trash } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge, ColorVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -27,6 +37,44 @@ function EmptyBacklog() {
   );
 }
 
+function DeleteAction({ id }: { id: Game["id"] }) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" size="icon">
+          <Trash className="size-4" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>Delete game</AlertDialogHeader>
+        <AlertDialogDescription>
+          This action cannot be undone. This will delete this game from your
+          library.
+        </AlertDialogDescription>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            asChild
+            className="w-fit bg-transparent hover:bg-transparent"
+          >
+            <form
+              className="!hover:bg-transparent block w-fit bg-destructive"
+              action={async () => {
+                "use server";
+                await deleteGame(id);
+              }}
+            >
+              <Button variant="destructive" type="submit">
+                Delete
+              </Button>
+            </form>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 const QuickActions = ({
   currentStatus,
   id,
@@ -45,9 +93,7 @@ const QuickActions = ({
         >
           <Button type="submit">Start playing</Button>
         </form>
-        <Button variant="destructive" size="icon">
-          <Trash className="size-4" />
-        </Button>
+        <DeleteAction id={id} />
       </div>
     );
   }
@@ -63,16 +109,8 @@ const QuickActions = ({
         >
           <Button type="submit">Mastered</Button>
         </form>
-        <form
-          action={async () => {
-            "use server";
-            await deleteGame(id);
-          }}
-        >
-          <Button variant="destructive" size="icon">
-            <Trash className="size-4" />
-          </Button>
-        </form>
+
+        <DeleteAction id={id} />
       </div>
     );
   }
@@ -88,16 +126,8 @@ const QuickActions = ({
         >
           <Button type="submit">Start playing</Button>
         </form>
-        <form
-          action={async () => {
-            "use server";
-            await deleteGame(id);
-          }}
-        >
-          <Button variant="destructive" size="icon">
-            <Trash className="size-4" />
-          </Button>
-        </form>
+
+        <DeleteAction id={id} />
       </div>
     );
   }
@@ -137,16 +167,8 @@ const QuickActions = ({
         >
           <Button type="submit">Return later</Button>
         </form>
-        <form
-          action={async () => {
-            "use server";
-            await deleteGame(id);
-          }}
-        >
-          <Button variant="destructive" size="icon">
-            <Trash className="size-4" />
-          </Button>
-        </form>
+
+        <DeleteAction id={id} />
       </div>
     );
   }
