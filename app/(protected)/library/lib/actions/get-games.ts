@@ -23,13 +23,6 @@ export const getGames = async (
     order: filters.order || "desc",
   };
 
-  let platform: string | undefined;
-
-  if (filters.platform === "" || filters.platform === " ") {
-    platform = undefined;
-  } else {
-    platform = filters.platform;
-  }
   const games: Game[] = await prisma.game.findMany({
     where: {
       title: {
@@ -37,7 +30,6 @@ export const getGames = async (
       },
       userId,
       deletedAt: null,
-      platform: { contains: platform },
     },
     orderBy: {
       [sortState.key as keyof Game]: sortState.order as "asc" | "desc",

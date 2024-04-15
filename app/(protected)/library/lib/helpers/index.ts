@@ -1,10 +1,7 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { Game, GameStatus } from "@prisma/client";
 import { HowLongToBeatService } from "howlongtobeat";
-
-import { prisma } from "@/lib/prisma";
 
 import { updateGame } from "@/app/(protected)/library/lib/actions/update-game";
 
@@ -16,16 +13,6 @@ export const updateBackloggedGames = async (backlogged: Game[]) => {
       await updateGame(game.id, "gameplayTime", details?.gameplayMain);
     }
   }
-};
-
-export const getAllUserPlatforms = async () => {
-  const userId = await getServerUserId();
-
-  return prisma.game.findMany({
-    distinct: ["platform"],
-    where: { userId },
-    select: { platform: true },
-  });
 };
 
 export const calculateTotalBacklogTime = async (

@@ -13,7 +13,6 @@ import type { FullGameInfoResponse } from "@/lib/types/igdb";
 
 import { ActionsMenu } from "@/app/(protected)/library/components/game/ui/game-info/actions-menu";
 import { HowLongToBeat } from "@/app/(protected)/library/components/game/ui/game-info/how-long-to-beat";
-import { Platform } from "@/app/(protected)/library/components/game/ui/game-info/platform";
 import { Platforms } from "@/app/(protected)/library/components/game/ui/game-info/platforms";
 import { Screenshots } from "@/app/(protected)/library/components/game/ui/game-info/screenshots";
 import { SimilarGames } from "@/app/(protected)/library/components/game/ui/game-info/similar-games";
@@ -40,7 +39,6 @@ export function GameInfo({ game }: { game: GameResponseCombined }) {
   const {
     summary,
     name,
-    platform,
     status,
     createdAt,
     updatedAt,
@@ -91,13 +89,10 @@ export function GameInfo({ game }: { game: GameResponseCombined }) {
           </div>
         </div>
       </section>
+      <div></div>
       <div className="border-gray-20 mt-4 border-y dark:border-gray-800">
         <div className="container grid max-w-4xl items-start gap-4 px-4 py-8 md:grid-cols-2 md:py-12 lg:grid-cols-3 lg:gap-8 xl:max-w-5xl xl:gap-12">
-          <Platforms
-            platformList={uniqueRecords(release_dates)}
-            selectedPlatform={platform}
-          />
-          <Platform platform={platform} />
+          <Platforms platformList={uniqueRecords(release_dates)} />
           <HowLongToBeat
             main={gameplayMain}
             mainExtra={gameplayMainExtra}

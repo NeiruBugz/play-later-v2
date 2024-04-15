@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/select";
 
 import { type LibraryFiltersUIProps } from "@/app/(protected)/library/components/library/filters/types";
-import { getAllUserPlatforms } from "@/app/(protected)/library/lib/helpers";
 
 const DefaultSortState = {
   order: "desc",
@@ -39,20 +38,9 @@ function FiltersForm({
 
   const [filters, setFilters] = useState({
     search: searchParams?.get("search") ?? "",
-    platform: searchParams?.get("platform") ?? "",
     sortBy: searchParams?.get("sortBy") ?? DefaultSortState.sortBy,
     order: searchParams?.get("order") ?? DefaultSortState.order,
   });
-
-  const [platformOptions, setPlatformOptions] = useState<
-    Array<Record<"platform", string>>
-  >([]);
-
-  useEffect(() => {
-    getAllUserPlatforms().then((res) =>
-      setPlatformOptions(res as Array<Record<"platform", string>>)
-    );
-  }, []);
 
   const onChange = (value: string, key: "search" | "sort" | "platform") => {
     if (key === "sort") {
@@ -82,7 +70,6 @@ function FiltersForm({
   const onApply = () => {
     const newSearchParams = new URLSearchParams();
     newSearchParams.set("search", filters.search);
-    newSearchParams.set("platform", filters.platform);
     newSearchParams.set("sortBy", filters.sortBy);
     newSearchParams.set("order", filters.order);
 
@@ -151,33 +138,6 @@ function FiltersForm({
                 {value.label}
               </SelectItem>
             ))}
-          </SelectContent>
-        </div>
-      </Select>
-      <Select
-        value={filters.platform}
-        onValueChange={(value) => onChange(value, "platform")}
-      >
-        <div>
-          <Label className="my-2 block">Platform</Label>
-          <SelectTrigger className="h-10">
-            <SelectValue placeholder="Platform filter" />
-          </SelectTrigger>
-          <SelectContent>
-            {platformOptions
-              .filter((pl) => pl.platform !== null)
-              .map((option) => (
-                <SelectItem
-                  key={option.platform}
-                  value={option.platform}
-                  className="normal-case"
-                >
-                  {option.platform}
-                </SelectItem>
-              ))}
-            <SelectItem value={" "} className="normal-case">
-              All
-            </SelectItem>
           </SelectContent>
         </div>
       </Select>

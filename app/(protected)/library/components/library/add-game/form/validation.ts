@@ -1,7 +1,6 @@
 import * as z from "zod";
 
 export const addGameSchema = z.object({
-  platform: z.string().optional(),
   status: z
     .enum([
       "BACKLOG",

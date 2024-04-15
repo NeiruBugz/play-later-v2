@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Game } from "@prisma/client";
 import { format } from "date-fns";
-import { Calendar, Gamepad, Trash } from "lucide-react";
+import { Calendar, Trash } from "lucide-react";
 
 import {
   AlertDialog,
@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge, ColorVariant } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,7 +23,7 @@ import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
 import igdbApi from "@/lib/igdb-api";
 import { FullGameInfoResponse } from "@/lib/types/igdb";
 import { LibraryContentProps } from "@/lib/types/library";
-import { cn, platformEnumToColor } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 import { Card } from "@/app/(protected)/library/components/game/ui/card/card";
 import { GameTimeBadge } from "@/app/(protected)/library/components/game/ui/card/time-badge";
@@ -251,17 +251,6 @@ export const ListItem = async ({
               ))}
             </div>
             <div className="mt-2 flex gap-2">
-              <Badge
-                variant={
-                  game.platform
-                    ? (platformEnumToColor(game.platform) as ColorVariant)
-                    : "default"
-                }
-                className="rounded-full"
-              >
-                <Gamepad className="mr-1 size-3 " />
-                {game.platform}
-              </Badge>
               <GameTimeBadge time={game.gameplayTime} />
             </div>
           </div>
