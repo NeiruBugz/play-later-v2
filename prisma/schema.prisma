@@ -58,6 +58,7 @@ model User {
   List           List[]
   Account        Account[]
   Session        Session[]
+  Playthrough    Playthrough[]
 }
 
 // ----- Application Models ------
@@ -79,13 +80,33 @@ model Game {
   deletedAt       DateTime?
   gameplayTime    Int?
 
-  userId String
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  listId String?
-  List   List?   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listId      String?
+  List        List?         @relation(fields: [listId], references: [id], onDelete: Cascade)
+  Playthrough Playthrough[]
 
   @@index([userId])
   @@index([listId])
+}
+
+model Playthrough {
+  id       String @id @default(cuid())
+  label    String
+  platform String
+
+  gameId String
+  userId String
+
+  startedAt  DateTime
+  finishedAt DateTime
+
+  createdAt DateTime
+  updatedAt DateTime
+  deletedAt DateTime
+
+  game Game @relation(fields: [gameId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model WishlistedGame {
