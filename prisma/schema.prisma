@@ -98,11 +98,11 @@ model Playthrough {
   userId String
 
   startedAt  DateTime
-  finishedAt DateTime
+  finishedAt DateTime?
 
   createdAt DateTime
-  updatedAt DateTime
-  deletedAt DateTime
+  updatedAt DateTime?
+  deletedAt DateTime?
 
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)

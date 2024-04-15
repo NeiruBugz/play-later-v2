@@ -14,6 +14,8 @@ import type { FullGameInfoResponse } from "@/lib/types/igdb";
 import { ActionsMenu } from "@/app/(protected)/library/components/game/ui/game-info/actions-menu";
 import { HowLongToBeat } from "@/app/(protected)/library/components/game/ui/game-info/how-long-to-beat";
 import { Platforms } from "@/app/(protected)/library/components/game/ui/game-info/platforms";
+import { PlaythroughDialog } from "@/app/(protected)/library/components/game/ui/game-info/playthrough-dialog";
+import { Playthroughs } from "@/app/(protected)/library/components/game/ui/game-info/playthroughs";
 import { Screenshots } from "@/app/(protected)/library/components/game/ui/game-info/screenshots";
 import { SimilarGames } from "@/app/(protected)/library/components/game/ui/game-info/similar-games";
 import { Stores } from "@/app/(protected)/library/components/game/ui/game-info/stores";
@@ -74,24 +76,28 @@ export function GameInfo({ game }: { game: GameResponseCombined }) {
           </div>
         </section>
         <div className="flex gap-1">
-          <div className="relative aspect-[3/4] h-fit w-[264px] flex-shrink-0 cursor-pointer rounded-md border transition">
-            <Image
-              width={264}
-              height={352}
-              src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${cover?.image_id}.png`}
-              alt={`${game.name} artwork`}
-              className="rounded-md object-cover"
-              priority
-            />
+          <div className="flex flex-col gap-1">
+            <div className="relative aspect-[3/4] h-fit w-[264px] flex-shrink-0 cursor-pointer rounded-md border transition">
+              <Image
+                width={264}
+                height={352}
+                src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${cover?.image_id}.png`}
+                alt={`${game.name} artwork`}
+                className="rounded-md object-cover"
+                priority
+              />
+            </div>
+            <PlaythroughDialog id={game.id} platforms={release_dates} />
           </div>
           <div className="self-start">
             <ActionsMenu gameId={game.id} status={status} />
           </div>
         </div>
       </section>
-      <div></div>
+
       <div className="border-gray-20 mt-4 border-y dark:border-gray-800">
         <div className="container grid max-w-4xl items-start gap-4 px-4 py-8 md:grid-cols-2 md:py-12 lg:grid-cols-3 lg:gap-8 xl:max-w-5xl xl:gap-12">
+          <Playthroughs id={game.id} />
           <Platforms platformList={uniqueRecords(release_dates)} />
           <HowLongToBeat
             main={gameplayMain}
