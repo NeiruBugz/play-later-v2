@@ -1,13 +1,7 @@
-import { Game } from "@prisma/client";
-
 import { Badge, ColorVariant } from "@/components/ui/badge";
 
 import { FullGameInfoResponse } from "@/lib/types/igdb";
-import {
-  cn,
-  hasSelectedPlatformInList,
-  platformEnumToColor,
-} from "@/lib/utils";
+import { cn, platformEnumToColor } from "@/lib/utils";
 
 const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>
   records && records.length
@@ -20,10 +14,8 @@ const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>
 
 export const Platforms = ({
   platformList,
-  selectedPlatform,
 }: {
   platformList: FullGameInfoResponse["release_dates"];
-  selectedPlatform: Game["platform"];
 }) => (
   <section>
     <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
@@ -37,12 +29,7 @@ export const Platforms = ({
             variant={
               platformEnumToColor(releaseDate.platform.name) as ColorVariant
             }
-            className={cn("w-fit", {
-              "font-bold": hasSelectedPlatformInList(
-                releaseDate.platform.name,
-                selectedPlatform as string
-              ),
-            })}
+            className={cn("w-fit")}
           >
             {releaseDate.platform.name}
           </Badge>

@@ -26,7 +26,7 @@ export const SimilarGames = ({
   }
 
   return (
-    <section>
+    <section className="container">
       <Suspense fallback={<ListSkeleton />}>
         <List viewMode="grid">
           {gamesList.map((game) => {

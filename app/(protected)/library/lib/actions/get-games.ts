@@ -9,8 +9,8 @@ import { FilterKeys } from "@/lib/types/library";
 import {
   calculateTotalBacklogTime,
   getListBasedOnStatus,
-  updateBackloggedGames,
 } from "@/app/(protected)/library/lib/helpers";
+import { updateBackloggedGames } from "@/app/(protected)/library/lib/helpers/server-helpers";
 import { FetcherAndProcessor } from "@/app/(protected)/library/lib/types/actions";
 
 export const getGames = async (
@@ -23,13 +23,6 @@ export const getGames = async (
     order: filters.order || "desc",
   };
 
-  let platform: string | undefined;
-
-  if (filters.platform === "" || filters.platform === " ") {
-    platform = undefined;
-  } else {
-    platform = filters.platform;
-  }
   const games: Game[] = await prisma.game.findMany({
     where: {
       title: {
@@ -37,7 +30,6 @@ export const getGames = async (
       },
       userId,
       deletedAt: null,
-      platform: { contains: platform },
     },
     orderBy: {
       [sortState.key as keyof Game]: sortState.order as "asc" | "desc",
@@ -79,9 +71,9 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
 
   await updateBackloggedGames(backlogged);
 
-  const totalBacklogTime = await calculateTotalBacklogTime(backlogged);
+  const totalBacklogTime = calculateTotalBacklogTime(backlogged);
 
-  const list = await getListBasedOnStatus({
+  const list = getListBasedOnStatus({
     currentStatus,
     inprogress,
     abandoned,

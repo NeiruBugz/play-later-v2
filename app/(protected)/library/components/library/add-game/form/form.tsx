@@ -101,7 +101,7 @@ export function AddForm({
       return;
     }
     try {
-      const { platform, purchaseType, status, title, isWishlist } = values;
+      const { purchaseType, status, title, isWishlist } = values;
       const howLongToBeatResponse = await fetch(`/api/hltb-search?q=${title}`);
       const response = await howLongToBeatResponse.json();
       await saveGameToLibrary({
@@ -111,7 +111,6 @@ export function AddForm({
         createdAt: new Date(),
         updatedAt: new Date(),
         imageUrl: selectedGame.cover.image_id,
-        platform: platform || null,
         status: status || null,
         title,
         purchaseType: purchaseType ? purchaseType : "DIGITAL",
@@ -185,29 +184,6 @@ export function AddForm({
                     onCheckedChange={field.onChange}
                   />
                 </FormLabel>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="platform"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Platform</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your platform" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {selectedGame?.platforms.map((platform) => (
-                      <SelectItem key={platform.id} value={platform.name}>
-                        <div className="normal-case">{platform.name}</div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </FormItem>
             )}
           />

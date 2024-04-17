@@ -2,11 +2,9 @@ import { Suspense } from "react";
 
 import { LibraryPageProps } from "@/lib/types/library";
 
-import {
-  LibraryContent,
-  ListSkeleton,
-} from "@/app/(protected)/library/components/library/page/content";
+import { LibraryContent } from "@/app/(protected)/library/components/library/page/content";
 import { Header } from "@/app/(protected)/library/components/library/page/header";
+import { ListSkeleton } from "@/app/(protected)/library/components/library/page/list-skeleton";
 import { getGamesListWithAdapter } from "@/app/(protected)/library/lib/actions/get-games";
 
 export const dynamic = "force-dynamic";

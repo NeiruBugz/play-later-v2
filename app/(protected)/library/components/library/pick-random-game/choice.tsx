@@ -1,10 +1,8 @@
 import { memo } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge, ColorVariant } from "@/components/ui/badge";
 
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
-import { platformEnumToColor } from "@/lib/utils";
 
 import { updateStatus } from "@/app/(protected)/library/lib/actions/update-game";
 import type { PickerChoiceProps } from "@/app/(protected)/library/lib/types/components";
@@ -40,15 +38,6 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
         </Avatar>
       ) : null}
       <p className="text-xl font-bold">{choice.title}</p>
-      {!isRunning ? (
-        <Badge
-          variant={
-            platformEnumToColor(choice!.platform as string) as ColorVariant
-          }
-        >
-          {choice.platform}
-        </Badge>
-      ) : null}
     </div>
   );
 }
