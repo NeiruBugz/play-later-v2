@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
 import type { FullGameInfoResponse } from "@/lib/types/igdb";
@@ -64,9 +65,11 @@ export function GameInfo({ game }: { game: GameResponseCombined }) {
               {name}
             </h1>
             <p className="text-gray-500 dark:text-gray-400">
-              {genres.map((genre, index) => (
+              {genres.map((genre) => (
                 <Fragment key={genre.id}>
-                  {genre.name} {index === genres.length - 1 ? "" : ", "}
+                  <Badge variant="outline" className="mr-1">
+                    {genre.name}
+                  </Badge>
                 </Fragment>
               ))}
             </p>

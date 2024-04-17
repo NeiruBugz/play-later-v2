@@ -99,6 +99,11 @@ export type RatedGameResponse = {
   name: string;
 };
 
+export type GenresResponse = {
+  id: number;
+  genres: Genre[];
+};
+
 export type FullGameInfoResponse = {
   id: number;
   name: string;

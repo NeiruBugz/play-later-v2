@@ -3,6 +3,7 @@ import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/lib/config/site";
 import {
   FullGameInfoResponse,
+  GenresResponse,
   RatedGameResponse,
   RequestOptions,
   SearchResponse,
@@ -113,6 +114,17 @@ const igdbApi = {
     return this.request({
       resource: "/games",
       body: `${fullGameInfo} where id = (${gameId});`,
+    });
+  },
+
+  async getGameGenres(
+    gameId: number | null
+  ): Promise<Array<GenresResponse> | undefined> {
+    if (!gameId) return;
+
+    return this.request({
+      resource: "/games",
+      body: `fields genres.name; where id = (${gameId});`,
     });
   },
 
