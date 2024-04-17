@@ -7,6 +7,7 @@ export const addGameSchema = z.object({
       "INPROGRESS",
       "COMPLETED",
       "ABANDONED",
+      "SHELVED",
       "FULL_COMPLETION",
     ])
     .optional(),

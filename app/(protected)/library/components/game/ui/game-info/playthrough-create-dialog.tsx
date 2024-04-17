@@ -90,7 +90,10 @@ export const PlaythroughDialog = ({
           <Label>
             Platform of choice
             <Select name="platform">
-              <SelectTrigger className="mt-2">
+              <SelectTrigger
+                className="mt-2"
+                defaultValue={platforms[0].platform.name}
+              >
                 <SelectValue
                   placeholder="Select a platform"
                   defaultValue={platforms[0].platform.name}

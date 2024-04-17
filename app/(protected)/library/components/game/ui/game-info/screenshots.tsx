@@ -11,9 +11,6 @@ export const Screenshots = ({
   name: string;
 }) => (
   <section className="container mx-auto hidden py-4 md:block md:py-6">
-    <h4 className="mb-3 scroll-m-20 text-xl font-semibold tracking-tight">
-      Screenshots
-    </h4>
     <div className="flex flex-wrap items-center gap-4">
       {screenshots.map((screenshot) => {
         return (

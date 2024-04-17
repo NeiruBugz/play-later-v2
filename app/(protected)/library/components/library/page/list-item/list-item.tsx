@@ -25,7 +25,6 @@ export const ListItem = async ({
   if (gameInfo) {
     info = gameInfo[0];
   }
-  console.log(info);
 
   return (
     <div className="flex w-full items-center justify-between gap-4">
