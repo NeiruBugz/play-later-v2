@@ -100,33 +100,59 @@ export function AddForm({
     if (!selectedGame) {
       return;
     }
+    const { purchaseType, status, title, isWishlist } = values;
+    const {
+      id: idgbId,
+      cover: { image_id },
+    } = selectedGame;
     try {
-      const { purchaseType, status, title, isWishlist } = values;
       const howLongToBeatResponse = await fetch(`/api/hltb-search?q=${title}`);
-      const response = await howLongToBeatResponse.json();
-      await saveGameToLibrary({
-        howLongToBeatId: response.id,
-        igdbId: selectedGame.id,
+      const gameData = {
+        igdbId: idgbId,
         id: nanoid(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        imageUrl: selectedGame.cover.image_id,
+        imageUrl: image_id,
         status: status || null,
         title,
         purchaseType: purchaseType ? purchaseType : "DIGITAL",
-        gameplayTime: response.gameplayTime,
         isWishlisted: Boolean(isWishlist),
         rating: null,
         review: null,
         deletedAt: null,
-      });
-      showToast("success", title);
-    } catch (e) {
+      };
+      if (howLongToBeatResponse.ok) {
+        const response = await howLongToBeatResponse.json();
+        const withHLTB = {
+          ...gameData,
+          ...{
+            howLongToBeatId: response.id,
+            gameplayTime: response.gameplayTime,
+          },
+        };
+        await saveGameToLibrary(withHLTB);
+        showToast("success", title);
+        return gameData;
+      } else {
+        console.error(
+          "Error fetching How Long To Beat data:",
+          howLongToBeatResponse.statusText
+        );
+        const withoutHLTB = {
+          ...gameData,
+          ...{
+            howLongToBeatId: undefined,
+            gameplayTime: undefined,
+          },
+        };
+        await saveGameToLibrary(withoutHLTB);
+      }
+    } catch (error) {
+      console.error("Error:", error);
       showToast("error", values.title);
-      console.error(e);
+      return null;
     } finally {
       form.reset();
-      setSelectedGame(undefined);
     }
   };
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { Prisma } from "@prisma/client";
+import { nanoid } from "nanoid";
 
 import { prisma } from "@/lib/prisma";
 
@@ -33,9 +34,10 @@ export async function saveGameToLibrary(
       gameplayTime,
       purchaseType,
     } = game;
+
     await prisma.game.create({
       data: {
-        id,
+        id: id || nanoid(),
         igdbId,
         howLongToBeatId,
         status,
