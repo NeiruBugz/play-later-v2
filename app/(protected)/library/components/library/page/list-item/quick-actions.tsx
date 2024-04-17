@@ -73,7 +73,7 @@ export const QuickActions = ({
             await updateStatus(id, "COMPLETED");
           }}
         >
-          <Button type="submit">Mark completed</Button>
+          <Button type="submit">Finished</Button>
         </form>
         <form
           action={async () => {

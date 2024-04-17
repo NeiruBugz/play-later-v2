@@ -1,28 +1,28 @@
 "use server";
 
-import { auth } from "@/auth";
+import { getServerUserId } from "@/auth";
 import { Game } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
 export const getPlaythroughList = async ({ id }: { id: Game["id"] }) => {
   try {
-    const session = await auth();
+    const session = await getServerUserId();
 
-    if (!session || !session.user || !session.user.id) {
+    if (!session) {
       throw new Error("");
     }
 
     return prisma.playthrough.findMany({
       where: {
         gameId: id,
-        userId: session.user.id,
+        userId: session,
       },
       orderBy: {
         startedAt: "desc",
       },
     });
   } catch (e) {
-    throw new Error("");
+    console.error(e);
   }
 };

@@ -9,7 +9,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
-import type { FullGameInfoResponse } from "@/lib/types/igdb";
 
 import { ActionsMenu } from "@/app/(protected)/library/components/game/ui/game-info/actions-menu";
 import { HowLongToBeat } from "@/app/(protected)/library/components/game/ui/game-info/how-long-to-beat";
@@ -21,22 +20,10 @@ import { SimilarGames } from "@/app/(protected)/library/components/game/ui/game-
 import { Stores } from "@/app/(protected)/library/components/game/ui/game-info/stores";
 import { Summary } from "@/app/(protected)/library/components/game/ui/game-info/summary";
 import { Websites } from "@/app/(protected)/library/components/game/ui/game-info/websites";
+import { uniqueRecords } from "@/app/(protected)/library/lib/helpers";
 import type { GameResponseCombined } from "@/app/(protected)/library/lib/types/actions";
 
-const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>
-  records && records.length
-    ? records.filter(
-        (record, index, self) =>
-          index ===
-          self.findIndex(
-            (r) =>
-              r.human === record.human &&
-              r.platform.name === record.platform.name
-          )
-      )
-    : records;
-
-export function GameInfo({ game }: { game: GameResponseCombined }) {
+export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
   const {
     summary,
     name,
@@ -138,4 +125,4 @@ export function GameInfo({ game }: { game: GameResponseCombined }) {
       </Accordion>
     </section>
   );
-}
+};

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { getServerUserId } from "@/auth";
 
 import { prisma } from "@/lib/prisma";
 
@@ -13,9 +13,9 @@ export const updatePlaythrough = async ({
   payload: { id: string; label: string; startedAt: Date; finishedAt?: Date };
 }) => {
   try {
-    const session = await auth();
+    const session = await getServerUserId();
 
-    if (!session || !session.user || !session.user.id) {
+    if (!session) {
       throw new Error("");
     }
 

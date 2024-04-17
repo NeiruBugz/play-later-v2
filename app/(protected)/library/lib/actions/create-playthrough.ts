@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/auth";
+import { getServerUserId } from "@/auth";
 import { Game, Playthrough } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
@@ -13,13 +13,13 @@ export const createPlaythrough = async ({
   gameId: Game["id"];
   payload: Omit<Playthrough, "id" | "userId" | "gameId">;
 }) => {
-  const session = await auth();
-
-  if (!session || !session.user || !session.user.id) {
-    throw new Error("You must be logged in to save a game");
-  }
-
   try {
+    const session = await getServerUserId();
+
+    if (!session) {
+      throw new Error("");
+    }
+
     await prisma.playthrough.create({
       data: {
         label: payload.label,
@@ -31,7 +31,7 @@ export const createPlaythrough = async ({
         deletedAt: null,
         user: {
           connect: {
-            id: session.user.id,
+            id: session,
           },
         },
         game: {

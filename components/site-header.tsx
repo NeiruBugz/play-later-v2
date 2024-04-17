@@ -6,7 +6,7 @@ import { UserDropdown } from "@/components/user-dropdown";
 
 import { siteConfig } from "@/lib/config/site";
 
-import { HeaderSearch } from "@/app/(protected)/library/components/game/ui/header-search";
+// import { HeaderSearch } from "@/app/(protected)/library/components/game/ui/header-search";
 import AddGame from "@/app/(protected)/library/components/library/add-game/add-game";
 import { SignIn } from "@/app/login/components/sign-in";
 
@@ -31,7 +31,7 @@ export async function SiteHeader() {
         <MainNav items={siteConfig.mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center gap-2 space-x-1">
-            <HeaderSearch />
+            {/* <HeaderSearch /> */}
             <AddGame />
             <UserDropdown username={session?.user?.name ?? ""} />
           </nav>

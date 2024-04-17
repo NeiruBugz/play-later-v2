@@ -1,21 +1,21 @@
 "use server";
 
-import { auth } from "@/auth";
+import { getServerUserId } from "@/auth";
 import { Playthrough } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
 export const getPlaythrough = async ({ id }: { id: Playthrough["id"] }) => {
   try {
-    const session = await auth();
+    const session = await getServerUserId();
 
-    if (!session || !session.user || !session.user.id) {
+    if (!session) {
       throw new Error("");
     }
 
     return prisma.playthrough.findUnique({
       where: {
-        userId: session.user.id,
+        userId: session,
         id,
       },
     });

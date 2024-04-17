@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
@@ -32,11 +31,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 });
 
 export const getServerUserId = async () => {
-  const session = await auth();
+  try {
+    const session = await auth();
 
-  if (!session?.user) {
-    redirect("/");
+    if (!session || !session.user || !session.user.id) {
+      throw new Error("You must be logged in to save a game");
+    }
+
+    return session.user.id;
+  } catch (error) {
+    console.error(error);
   }
-
-  return session.user.id;
 };

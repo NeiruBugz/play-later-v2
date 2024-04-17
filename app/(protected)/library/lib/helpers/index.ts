@@ -1,30 +1,15 @@
-"use server";
-
 import { Game, GameStatus } from "@prisma/client";
-import { HowLongToBeatService } from "howlongtobeat";
 
-import { updateGame } from "@/app/(protected)/library/lib/actions/update-game";
+import { FullGameInfoResponse } from "@/lib/types/igdb";
 
-export const updateBackloggedGames = async (backlogged: Game[]) => {
-  for (const game of backlogged) {
-    if (!game.gameplayTime && game.howLongToBeatId) {
-      const hltbService = new HowLongToBeatService();
-      const details = await hltbService.detail(game.howLongToBeatId);
-      await updateGame(game.id, "gameplayTime", details?.gameplayMain);
-    }
-  }
-};
-
-export const calculateTotalBacklogTime = async (
-  backlogged: Game[]
-): Promise<number> => {
+export const calculateTotalBacklogTime = (backlogged: Game[]): number => {
   return backlogged.reduce(
     (acc, game) => acc + (game.gameplayTime ? game.gameplayTime : 0),
     0
   );
 };
 
-export const getListBasedOnStatus = async ({
+export const getListBasedOnStatus = ({
   currentStatus,
   inprogress,
   abandoned,
@@ -40,7 +25,7 @@ export const getListBasedOnStatus = async ({
   completed: Game[];
   fullyCompleted: Game[];
   shelved: Game[];
-}): Promise<Game[]> => {
+}): Game[] => {
   switch (currentStatus) {
     case "INPROGRESS":
       return inprogress;
@@ -58,3 +43,18 @@ export const getListBasedOnStatus = async ({
       return [];
   }
 };
+
+export const uniqueRecords = (
+  records: FullGameInfoResponse["release_dates"]
+) =>
+  records && records.length
+    ? records.filter(
+        (record, index, self) =>
+          index ===
+          self.findIndex(
+            (r) =>
+              r.human === record.human &&
+              r.platform.name === record.platform.name
+          )
+      )
+    : records;

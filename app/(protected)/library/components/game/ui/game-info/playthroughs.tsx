@@ -14,7 +14,7 @@ export const Playthroughs = async ({
 }) => {
   const list = await getPlaythroughList({ id });
 
-  if (!list.length) {
+  if (!list || list?.length === 0) {
     return null;
   }
 

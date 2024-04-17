@@ -9,8 +9,8 @@ import { FilterKeys } from "@/lib/types/library";
 import {
   calculateTotalBacklogTime,
   getListBasedOnStatus,
-  updateBackloggedGames,
 } from "@/app/(protected)/library/lib/helpers";
+import { updateBackloggedGames } from "@/app/(protected)/library/lib/helpers/server-helpers";
 import { FetcherAndProcessor } from "@/app/(protected)/library/lib/types/actions";
 
 export const getGames = async (
@@ -71,9 +71,9 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
 
   await updateBackloggedGames(backlogged);
 
-  const totalBacklogTime = await calculateTotalBacklogTime(backlogged);
+  const totalBacklogTime = calculateTotalBacklogTime(backlogged);
 
-  const list = await getListBasedOnStatus({
+  const list = getListBasedOnStatus({
     currentStatus,
     inprogress,
     abandoned,
