@@ -146,6 +146,7 @@ export function AddForm({
           },
         };
         await saveGameToLibrary(withoutHLTB);
+        showToast("success", title);
       }
     } catch (error) {
       console.error("Error:", error);
