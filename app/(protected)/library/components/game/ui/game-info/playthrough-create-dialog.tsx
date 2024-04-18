@@ -40,6 +40,10 @@ export const PlaythroughDialog = ({
   id: Game["id"];
   platforms: FullGameInfoResponse["release_dates"];
 }) => {
+  if (!platforms) {
+    return null;
+  }
+
   async function createPlaythroughAction(data: FormData) {
     "use server";
     const payload = {

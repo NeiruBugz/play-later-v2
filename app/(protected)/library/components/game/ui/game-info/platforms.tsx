@@ -16,25 +16,26 @@ export const Platforms = ({
   platformList,
 }: {
   platformList: FullGameInfoResponse["release_dates"];
-}) => (
-  <section>
-    <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
-      Released on
-    </h3>
-    <div className="flex flex-grow-0 flex-wrap gap-2">
-      {uniqueRecords(platformList).map((releaseDate) => {
-        return (
-          <Badge
-            key={releaseDate.id}
-            variant={
-              platformEnumToColor(releaseDate.platform.name) as ColorVariant
-            }
-            className={cn("w-fit")}
-          >
-            {releaseDate.platform.name}
-          </Badge>
-        );
-      })}
-    </div>
-  </section>
-);
+}) =>
+  platformList && platformList.length ? (
+    <section>
+      <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
+        Released on
+      </h3>
+      <div className="flex flex-grow-0 flex-wrap gap-2">
+        {uniqueRecords(platformList).map((releaseDate) => {
+          return (
+            <Badge
+              key={releaseDate.id}
+              variant={
+                platformEnumToColor(releaseDate.platform.name) as ColorVariant
+              }
+              className={cn("w-fit")}
+            >
+              {releaseDate.platform.name}
+            </Badge>
+          );
+        })}
+      </div>
+    </section>
+  ) : null;
