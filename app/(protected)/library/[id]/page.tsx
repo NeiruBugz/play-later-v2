@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 import {
   Breadcrumb,
@@ -13,6 +14,12 @@ import { GameInfo } from "@/app/(protected)/library/components/game/ui/game-info
 import { getGameWithAdapter } from "@/app/(protected)/library/lib/actions/get-game";
 
 export default async function GamePage({ params }: { params: { id: string } }) {
+  const session = await auth();
+
+  if (!session) {
+    redirect("/");
+  }
+
   const gameInfo = await getGameWithAdapter({ gameId: params.id });
 
   if (!gameInfo) {
