@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+
 import { RenderWhen } from "@/components/render-when";
 
 import { cn } from "@/lib/utils";
@@ -7,6 +10,11 @@ import { WishlistShare } from "@/app/(protected)/library/components/game/ui/wish
 import { getGamesFromWishlist } from "@/app/(protected)/wishlist/lib/actions";
 
 export default async function WishlistPage() {
+  const session = await auth();
+
+  if (!session) {
+    redirect("/");
+  }
   const wishlist = await getGamesFromWishlist();
   return (
     <section className="container bg-background">

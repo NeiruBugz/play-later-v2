@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 import { LibraryPageProps } from "@/lib/types/library";
 
@@ -10,6 +12,12 @@ import { getGamesListWithAdapter } from "@/app/(protected)/library/lib/actions/g
 export const dynamic = "force-dynamic";
 
 export default async function LibraryPage({ searchParams }: LibraryPageProps) {
+  const session = await auth();
+
+  if (!session) {
+    redirect("/");
+  }
+
   const params = new URLSearchParams(searchParams);
   const { list, currentStatus, totalBacklogTime, backlogged } =
     await getGamesListWithAdapter(params);
