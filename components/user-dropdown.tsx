@@ -50,7 +50,12 @@ export function UserDropdown({ username }: { username?: string }) {
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => {
+            signOut({ redirect: true, callbackUrl: "/" });
+          }}
+        >
           <LogOut className="mr-2 size-4" />
           Logout
         </DropdownMenuItem>
