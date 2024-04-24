@@ -9,8 +9,6 @@ import { Header } from "@/app/(protected)/library/components/library/page/header
 import { ListSkeleton } from "@/app/(protected)/library/components/library/page/list-skeleton";
 import { getGamesListWithAdapter } from "@/app/(protected)/library/lib/actions/get-games";
 
-export const dynamic = "force-dynamic";
-
 export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const session = await auth();
 
