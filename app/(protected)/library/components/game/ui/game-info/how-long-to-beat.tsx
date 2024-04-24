@@ -1,4 +1,11 @@
-import { Clock } from "lucide-react";
+const BeatingTime = ({ label, time }: { label: string; time: number }) => (
+  <div className="flex items-center justify-between">
+    <p>{label}:&nbsp;</p>
+    <div className="flex items-center gap-1">
+      <span className="font-medium">{time} h.</span>
+    </div>
+  </div>
+);
 
 export const HowLongToBeat = ({
   main,
@@ -11,27 +18,12 @@ export const HowLongToBeat = ({
 }) => (
   <section>
     <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">
-      Beating times
+      Time to beat
     </h3>
-    <section className="flex gap-2">
-      <div className="flex flex-col gap-2">
-        <p>Main story</p>
-        <div className="flex items-center gap-1">
-          <Clock /> <span>{main} h.</span>
-        </div>
-      </div>
-      <div className="flex flex-col gap-2 border-x px-2">
-        <p>Main + Extra</p>
-        <div className="flex items-center gap-1">
-          <Clock /> <span>{mainExtra} h.</span>
-        </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <p>100%</p>
-        <div className="flex items-center gap-1">
-          <Clock /> <span>{completionist} h.</span>
-        </div>
-      </div>
+    <section className="flex flex-col gap-2">
+      <BeatingTime label="Main Story" time={main} />
+      <BeatingTime label="Main + Extra" time={mainExtra} />
+      <BeatingTime label="100% Completion" time={completionist} />
     </section>
   </section>
 );

@@ -154,6 +154,7 @@ export function AddForm({
       return null;
     } finally {
       form.reset();
+      setSelectedGame(undefined);
     }
   };
 

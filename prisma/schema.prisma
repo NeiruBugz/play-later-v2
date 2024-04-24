@@ -59,10 +59,23 @@ model User {
   Account        Account[]
   Session        Session[]
   Playthrough    Playthrough[]
+  Friend         Friend[]
 }
 
 // ----- Application Models ------
 
+model Friend {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+}
+
+// Game model represents a game that a user has in their collection
 model Game {
   id              String        @id @default(cuid())
   title           String
@@ -89,6 +102,7 @@ model Game {
   @@index([listId])
 }
 
+// Playthrough model represents a playthrough of a game by a user
 model Playthrough {
   id       String @id @default(cuid())
   label    String
@@ -108,6 +122,7 @@ model Playthrough {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
+// WishlistedGame model represents a game that a user has wishlisted
 model WishlistedGame {
   id              String    @id @default(cuid())
   title           String
@@ -122,6 +137,7 @@ model WishlistedGame {
   @@index([userId])
 }
 
+// List model represents a list of games that a user has
 model List {
   id        String    @id @default(cuid())
   name      String
