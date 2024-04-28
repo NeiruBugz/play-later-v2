@@ -1,7 +1,6 @@
-import Link from "next/link";
+import { Button } from "@/src/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const dynamic = "force-static";
 
@@ -11,8 +10,8 @@ export default function PrivacyPolicyPage() {
       <header className="container sticky top-0 z-10 flex gap-2 bg-background py-4 shadow-sm">
         <Link href="/">
           <Button
-            variant="outline"
             className="h-full px-2 py-1 md:px-4 md:py-2"
+            variant="outline"
           >
             <ArrowLeft />
           </Button>

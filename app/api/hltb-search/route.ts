@@ -1,6 +1,5 @@
+import { searchHowLongToBeat } from "@/src/packages/hltb-search";
 import { NextResponse } from "next/server";
-
-import { searchHowLongToBeat } from "@/lib/hltb-search";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,7 +12,7 @@ export async function GET(request: Request) {
   const [result] = await searchHowLongToBeat(query);
 
   return NextResponse.json({
-    id: result.id,
     gameplayTime: result.gameplayMain,
+    id: result.id,
   });
 }

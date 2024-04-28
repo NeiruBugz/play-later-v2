@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-
+import { getGameWithAdapter } from "@/src/actions/library/get-game";
+import { GameInfo } from "@/src/components/library/game/ui/game-info/game-info";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,10 +8,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-
-import { GameInfo } from "@/app/(protected)/library/components/game/ui/game-info/game-info";
-import { getGameWithAdapter } from "@/app/(protected)/library/lib/actions/get-game";
+} from "@/src/components/ui/breadcrumb";
+import { notFound, redirect } from "next/navigation";
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const session = await auth();
@@ -34,7 +32,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/wishlist" className="text-xl">
+              <BreadcrumbLink className="text-xl" href="/wishlist">
                 Wishlist
               </BreadcrumbLink>
             </BreadcrumbItem>

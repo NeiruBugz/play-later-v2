@@ -1,17 +1,13 @@
-import Image from "next/image";
-import Link from "next/link";
-
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
-
-import { getList } from "./actions/get-list";
+import { getList } from "@/src/actions/backlogs/get-list";
+import { UserBacklog } from "@/src/components/backlogs/user-backlog";
 
 type BackloggedWithUser = {
   id: string;
   imageUrl: string;
   title: string;
   user: {
-    name?: string | null;
-    username?: string | null;
+    name?: null | string;
+    username?: null | string;
   };
 };
 
@@ -30,73 +26,15 @@ export default async function BacklogsPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {backlogs &&
             Object.keys(backlogs).map((backlogKey) => {
+              const list = backlogs[
+                backlogKey as keyof typeof backlogs
+              ] as unknown as BackloggedWithUser[];
               return (
-                <Link
-                  href={`/backlogs/${backlogKey}`}
-                  className="w-fit text-lg font-medium"
-                >
-                  <div
-                    key={backlogKey}
-                    className="relative h-full w-fit min-w-[270px] rounded-md border p-3"
-                  >
-                    <p className="text-lg font-medium">
-                      {backlogKey}&apos;s backlog
-                    </p>
-                    <div className="relative mt-2 h-[90px] w-full">
-                      {(
-                        backlogs[
-                          backlogKey as keyof typeof backlogs
-                        ] as unknown as BackloggedWithUser[]
-                      ).map((backlogItem, index) => {
-                        if (index >= 3) {
-                          return;
-                        }
-                        return (
-                          <div
-                            key={backlogItem.id}
-                            className="absolute top-0"
-                            style={{
-                              left: (index / 2) * 90,
-                              zIndex: index,
-                            }}
-                          >
-                            <div className="group relative w-fit cursor-pointer rounded-xl border bg-background text-white shadow-md transition-all hover:shadow-xl">
-                              <div className="flex size-[90px] items-center justify-center">
-                                <Image
-                                  src={`${IMAGE_API}/${IMAGE_SIZES["thumb"]}/${backlogItem.imageUrl}.png`}
-                                  alt={`${backlogItem.title} cover art`}
-                                  width={90}
-                                  height={90}
-                                  style={{
-                                    maxWidth: "100%",
-                                    height: "auto",
-                                  }}
-                                  className="h-full w-full rounded-xl object-cover"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {(
-                        backlogs[
-                          backlogKey as keyof typeof backlogs
-                        ] as unknown as BackloggedWithUser[]
-                      ).length ? (
-                        <div className="absolute left-[135px] top-0 z-10 flex size-[92px] items-center justify-center rounded bg-slate-200/85">
-                          <span className="text-xl font-bold">
-                            +&nbsp;
-                            {(
-                              backlogs[
-                                backlogKey as keyof typeof backlogs
-                              ] as unknown as BackloggedWithUser[]
-                            ).length - 3}
-                          </span>
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                </Link>
+                <UserBacklog
+                  backlogList={list}
+                  key={backlogKey}
+                  username={backlogKey}
+                />
               );
             })}
         </div>

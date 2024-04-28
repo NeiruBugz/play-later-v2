@@ -1,4 +1,4 @@
-import igdbApi from "@/lib/igdb-api";
+import igdbApi from "@/src/packages/igdb-api";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const gameInfo = await igdbApi.getGameById(Number(params.id));
