@@ -19,7 +19,7 @@ export async function Header({
           Library
         </h1>
       </div>
-      <section className="mt-4 flex flex-wrap items-center justify-between">
+      <section className="mt-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex w-full flex-wrap items-center justify-between gap-3">
           <LibraryNavigation counts={counts} />
           <div className="flex gap-2">
