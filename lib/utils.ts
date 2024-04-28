@@ -130,3 +130,8 @@ export const PurchaseTypeToFormLabel: Record<PurchaseType, string> = {
   DIGITAL: "Digital",
   SUBSCRIPTION: "Subscription",
 };
+
+export const isURL = (str: string) => {
+  const urlRegex = /^(?:https?|ftp):\/\/(?:\w+\.)+\w+(?:\/\S*)?$/;
+  return urlRegex.test(str);
+};

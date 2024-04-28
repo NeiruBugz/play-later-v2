@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/breadcrumb";
 
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { isURL } from "@/lib/utils";
 
 import { getUserList } from "@/app/(protected)/backlogs/actions/get-user-list";
 import { List } from "@/app/(protected)/library/components/library/page/list";
@@ -42,12 +43,15 @@ export default async function Page(props: { params: { id: string } }) {
       </header>
       <List viewMode="grid">
         {games.map((game) => {
+          const imageUrl = isURL(game.imageUrl)
+            ? game.imageUrl
+            : `${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.imageUrl}.png`;
           return (
             <div key={game.id} className="flex flex-col">
               <Image
                 width={264}
                 height={374}
-                src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.imageUrl}.png`}
+                src={imageUrl}
                 alt={`${game.title}`}
                 className="h-auto w-[150px] rounded-md md:w-[180px] xl:w-[300px] 2xl:w-[400px]"
                 priority

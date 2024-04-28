@@ -56,7 +56,11 @@ const statusMapping = {
   },
 };
 
-export function LibraryNavigation() {
+export function LibraryNavigation({
+  counts,
+}: {
+  counts?: Record<string, number>;
+}) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -112,6 +116,9 @@ export function LibraryNavigation() {
                   >
                     <span className="md:hidden">{value.icon}</span>
                     <span className="hidden md:block">{value.label}</span>
+                    {counts?.[key] ? (
+                      <span>&nbsp;({counts?.[key]})</span>
+                    ) : null}
                   </Label>
                 </div>
               </TooltipTrigger>

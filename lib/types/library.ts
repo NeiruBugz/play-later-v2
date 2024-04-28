@@ -23,4 +23,9 @@ export type LibraryData = {
   backlogged: Game[];
 };
 
-export type FilterKeys = "platform" | "sortBy" | "order" | "search";
+export type FilterKeys =
+  | "platform"
+  | "sortBy"
+  | "order"
+  | "search"
+  | "purchaseType";

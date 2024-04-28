@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-import { GameStatus, type Game } from "@prisma/client";
+import { GameStatus, PurchaseType, type Game } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { FilterKeys } from "@/lib/types/library";
@@ -28,6 +28,9 @@ export const getGames = async (
       title: {
         contains: filters.search || "",
       },
+      purchaseType: filters.purchaseType
+        ? (filters.purchaseType as PurchaseType)
+        : undefined,
       userId,
       deletedAt: null,
     },
@@ -52,12 +55,14 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   const platform = params.get("platform") ?? " ";
   const currentStatus = (params.get("status") as GameStatus) ?? "BACKLOG";
   const searchQuery = params.get("search") ?? "";
+  const purchaseType = params.get("purchase") ?? "";
 
   const filters = {
     platform,
     order: params.get("order") ?? "desc",
     sortBy: params.get("sortBy") ?? "updatedAt",
     search: searchQuery,
+    purchaseType,
   };
 
   const {
@@ -89,4 +94,68 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
     totalBacklogTime,
     backlogged,
   };
+};
+
+export const countGamesPerStatus = async () => {
+  try {
+    const session = await getServerUserId();
+
+    if (!session) {
+      return {
+        [GameStatus.INPROGRESS]: 0,
+        [GameStatus.BACKLOG]: 0,
+        [GameStatus.ABANDONED]: 0,
+        [GameStatus.COMPLETED]: 0,
+        [GameStatus.SHELVED]: 0,
+        [GameStatus.FULL_COMPLETION]: 0,
+      };
+    }
+
+    const backlogs = await prisma.game.count({
+      where: {
+        userId: session,
+        status: GameStatus.BACKLOG,
+      },
+    });
+    const inprogress = await prisma.game.count({
+      where: {
+        userId: session,
+        status: GameStatus.INPROGRESS,
+      },
+    });
+    const abandoned = await prisma.game.count({
+      where: {
+        userId: session,
+        status: GameStatus.ABANDONED,
+      },
+    });
+    const completed = await prisma.game.count({
+      where: {
+        userId: session,
+        status: GameStatus.COMPLETED,
+      },
+    });
+    const fullCompletion = await prisma.game.count({
+      where: {
+        userId: session,
+        status: GameStatus.FULL_COMPLETION,
+      },
+    });
+    const shelved = await prisma.game.count({
+      where: {
+        userId: session,
+        status: GameStatus.SHELVED,
+      },
+    });
+    return {
+      [GameStatus.INPROGRESS]: inprogress,
+      [GameStatus.BACKLOG]: backlogs,
+      [GameStatus.ABANDONED]: abandoned,
+      [GameStatus.COMPLETED]: completed,
+      [GameStatus.SHELVED]: shelved,
+      [GameStatus.FULL_COMPLETION]: fullCompletion,
+    };
+  } catch (error) {
+    console.error(error);
+  }
 };

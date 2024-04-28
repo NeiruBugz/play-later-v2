@@ -5,11 +5,13 @@ import { LibraryFiltersWrapper } from "@/app/(protected)/library/components/libr
 import { LibraryNavigation } from "@/app/(protected)/library/components/library/navigation";
 import { ViewModeToggle } from "@/app/(protected)/library/components/library/page/view-mode-toggle";
 import { PickerDialog } from "@/app/(protected)/library/components/library/pick-random-game/picker-dialog";
+import { countGamesPerStatus } from "@/app/(protected)/library/lib/actions/get-games";
 
 export async function Header({
   currentStatus,
   backlogged,
 }: LibraryHeaderProps) {
+  const counts = await countGamesPerStatus();
   return (
     <header className="container sticky top-0 z-40 bg-background">
       <div className="flex flex-wrap justify-between">
@@ -19,7 +21,7 @@ export async function Header({
       </div>
       <section className="mt-4 flex flex-wrap items-center justify-between">
         <div className="flex w-full flex-wrap items-center justify-between gap-3">
-          <LibraryNavigation />
+          <LibraryNavigation counts={counts} />
           <div className="flex gap-2">
             <LibraryFiltersWrapper />
             <ClearFilters />

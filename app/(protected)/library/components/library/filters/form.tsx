@@ -26,6 +26,7 @@ const mapper = {
   updatedAt: "Updated",
   gameplayTime: "Time to beat the story",
   createdAt: "Creation date",
+  purchaseType: "Purchase type",
 };
 function FiltersForm({
   toggleOpen,
@@ -40,9 +41,14 @@ function FiltersForm({
     search: searchParams?.get("search") ?? "",
     sortBy: searchParams?.get("sortBy") ?? DefaultSortState.sortBy,
     order: searchParams?.get("order") ?? DefaultSortState.order,
+    purchaseType: searchParams?.get("purchase") ?? "",
   });
 
-  const onChange = (value: string, key: "search" | "sort" | "platform") => {
+  const onChange = (
+    value: string,
+    key: "search" | "sort" | "platform" | "purchase"
+  ) => {
+    console.log(value, key);
     if (key === "sort") {
       const [sortBy, order] = value.split("-");
       setFilters((prev) => ({
@@ -56,6 +62,13 @@ function FiltersForm({
       setFilters((prev) => ({
         ...prev,
         platform: value,
+      }));
+    }
+
+    if (key === "purchase") {
+      setFilters((prev) => ({
+        ...prev,
+        purchaseType: value,
       }));
     }
   };
@@ -72,6 +85,7 @@ function FiltersForm({
     newSearchParams.set("search", filters.search);
     newSearchParams.set("sortBy", filters.sortBy);
     newSearchParams.set("order", filters.order);
+    newSearchParams.set("purchase", filters.purchaseType);
 
     if (pathname) {
       replace(`${pathname}?${newSearchParams}`);
@@ -138,6 +152,22 @@ function FiltersForm({
                 {value.label}
               </SelectItem>
             ))}
+          </SelectContent>
+        </div>
+      </Select>
+      <Select
+        value={`${filters.purchaseType}`}
+        onValueChange={(value) => onChange(value, "purchase")}
+      >
+        <div>
+          <Label className="my-2 block">Purchase type</Label>
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder="Select ownership" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="PHYSICAL">Physical</SelectItem>
+            <SelectItem value="DIGITAL">Digital</SelectItem>
+            <SelectItem value="SUBSCRIPTION">Subscription</SelectItem>
           </SelectContent>
         </div>
       </Select>

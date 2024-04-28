@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { isURL } from "@/lib/utils";
 
 import { getList } from "./actions/get-list";
 
@@ -51,6 +52,10 @@ export default async function BacklogsPage() {
                         if (index >= 3) {
                           return;
                         }
+
+                        const imageUrl = isURL(backlogItem.imageUrl)
+                          ? backlogItem.imageUrl
+                          : `${IMAGE_API}/${IMAGE_SIZES["thumb"]}/${backlogItem.imageUrl}.png`;
                         return (
                           <div
                             key={backlogItem.id}
@@ -63,13 +68,12 @@ export default async function BacklogsPage() {
                             <div className="group relative w-fit cursor-pointer rounded-xl border bg-background text-white shadow-md transition-all hover:shadow-xl">
                               <div className="flex size-[90px] items-center justify-center">
                                 <Image
-                                  src={`${IMAGE_API}/${IMAGE_SIZES["thumb"]}/${backlogItem.imageUrl}.png`}
+                                  src={imageUrl}
                                   alt={`${backlogItem.title} cover art`}
                                   width={90}
                                   height={90}
                                   style={{
                                     maxWidth: "100%",
-                                    height: "auto",
                                   }}
                                   className="h-full w-full rounded-xl object-cover"
                                 />
@@ -82,8 +86,8 @@ export default async function BacklogsPage() {
                         backlogs[
                           backlogKey as keyof typeof backlogs
                         ] as unknown as BackloggedWithUser[]
-                      ).length ? (
-                        <div className="absolute left-[135px] top-0 z-10 flex size-[92px] items-center justify-center rounded bg-slate-200/85">
+                      ).length - 3 ? (
+                        <div className="absolute left-[135px] top-0 z-10 flex size-[92px] items-center justify-center rounded-xl bg-slate-200/85">
                           <span className="text-xl font-bold">
                             +&nbsp;
                             {(
