@@ -30,8 +30,8 @@ export async function TrendingList() {
             src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
             alt={`${game.name} cover`}
             className="mb-4 rounded-md"
-            width={NEXT_IMAGE_SIZES["c-big"].width}
-            height={NEXT_IMAGE_SIZES["c-big"].height}
+            width={NEXT_IMAGE_SIZES["logo"].width}
+            height={NEXT_IMAGE_SIZES["logo"].height}
             priority
           />
         );

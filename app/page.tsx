@@ -21,8 +21,8 @@ export default async function Page() {
   return (
     <div className="min-h-screen flex-1">
       <SiteHeader />
-      <section className="container flex columns-2 flex-col items-center md:h-[calc(100vh-64px-48px)] md:flex-row">
-        <div>
+      <section className="container flex columns-2 flex-col items-center md:h-[calc(100vh-64px-48px)] md:flex-row md:justify-center">
+        <div className="md:max-w-[50%]">
           <h1 className="text-3xl font-bold tracking-tighter lg:text-5xl">
             Play Later
           </h1>
@@ -33,7 +33,7 @@ export default async function Page() {
           </p>
           <SignIn />
         </div>
-        <div className="mb-8 md:m-0">
+        <div className="mb-8 md:m-0 md:max-w-[50%]">
           <h2 className="scroll-m-20 pb-2 text-center text-3xl font-semibold tracking-tight first:mt-0">
             Trending now
           </h2>

@@ -41,9 +41,13 @@ export default async function LoginPage() {
                   key={game.id}
                   src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
                   alt={`${game.name} cover`}
-                  className="mb-4 rounded-md"
-                  width={NEXT_IMAGE_SIZES["c-big"].width}
-                  height={NEXT_IMAGE_SIZES["c-big"].height}
+                  className="mb-2 rounded-md"
+                  width={NEXT_IMAGE_SIZES["logo"].width}
+                  height={NEXT_IMAGE_SIZES["logo"].height}
+                  style={{
+                    width: 120,
+                    height: "auto",
+                  }}
                   priority
                 />
               );

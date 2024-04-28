@@ -111,40 +111,45 @@ export const countGamesPerStatus = async () => {
       };
     }
 
+    const defaultParams = {
+      userId: session,
+      deletedAt: null,
+    };
+
     const backlogs = await prisma.game.count({
       where: {
-        userId: session,
         status: GameStatus.BACKLOG,
+        ...defaultParams,
       },
     });
     const inprogress = await prisma.game.count({
       where: {
-        userId: session,
         status: GameStatus.INPROGRESS,
+        ...defaultParams,
       },
     });
     const abandoned = await prisma.game.count({
       where: {
-        userId: session,
         status: GameStatus.ABANDONED,
+        ...defaultParams,
       },
     });
     const completed = await prisma.game.count({
       where: {
-        userId: session,
         status: GameStatus.COMPLETED,
+        ...defaultParams,
       },
     });
     const fullCompletion = await prisma.game.count({
       where: {
-        userId: session,
         status: GameStatus.FULL_COMPLETION,
+        ...defaultParams,
       },
     });
     const shelved = await prisma.game.count({
       where: {
-        userId: session,
         status: GameStatus.SHELVED,
+        ...defaultParams,
       },
     });
     return {
