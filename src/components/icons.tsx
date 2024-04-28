@@ -1,4 +1,4 @@
-import { Moon, SunMedium, Trash, type LucideProps } from "lucide-react";
+import { type LucideProps, Moon, SunMedium, Trash } from "lucide-react";
 
 export const Icons = {
   delete: (props: LucideProps) => <Trash className="md:size-4" {...props} />,

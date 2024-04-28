@@ -1,5 +1,6 @@
 import { Game } from "@prisma/client";
 import Link from "next/link";
+
 import { Artwork } from "./artwork";
 
 export function Card({

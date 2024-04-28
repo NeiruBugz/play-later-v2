@@ -9,7 +9,7 @@ import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/lib/prisma";
 import { FetcherAndProcessor } from "@/src/types/library/actions";
 import { FilterKeys } from "@/src/types/library/components";
-import { GameStatus, PurchaseType, type Game } from "@prisma/client";
+import { type Game, GameStatus, PurchaseType } from "@prisma/client";
 
 export const getGames = async (
   filters: Record<FilterKeys, string | undefined>

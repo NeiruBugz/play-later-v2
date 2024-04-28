@@ -1,6 +1,6 @@
 import { BackloggedWithUser } from "@/src/types/backlogs";
 import { GameStatus, PurchaseType } from "@prisma/client";
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 const NINTENDO_PLATFORMS = [

@@ -1,5 +1,7 @@
 "use client";
 
+import type { SearchResponse } from "@/src/lib/types/igdb";
+
 import { saveGameToLibrary } from "@/src/actions/library/save-to-library";
 import { PickerPopover } from "@/src/components/shared/add-game/form/picker-popover";
 import { SelectedGame } from "@/src/components/shared/add-game/form/selected-game";
@@ -25,14 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import type { SearchResponse } from "@/src/lib/types/igdb";
-import { cn, mapStatusForInfo, PurchaseTypeToFormLabel } from "@/src/lib/utils";
+import { PurchaseTypeToFormLabel, cn, mapStatusForInfo } from "@/src/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GameStatus, PurchaseType } from "@prisma/client";
 import { nanoid } from "nanoid";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FaSpinner } from "react-icons/fa6";
+
 import { FormDescription } from "./description";
 
 export function AddForm({

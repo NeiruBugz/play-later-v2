@@ -1,3 +1,5 @@
+import type { PickerChoiceProps } from "@/src/types/library/components";
+
 import { updateStatus } from "@/src/actions/library/update-game";
 import {
   Avatar,
@@ -5,7 +7,6 @@ import {
   AvatarImage,
 } from "@/src/components/ui/avatar";
 import { IMAGE_API, IMAGE_SIZES } from "@/src/lib/config/site";
-import type { PickerChoiceProps } from "@/src/types/library/components";
 import { memo } from "react";
 
 function PickerChoice({ afterClick, choice, isRunning }: PickerChoiceProps) {

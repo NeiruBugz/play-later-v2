@@ -1,3 +1,5 @@
+import type { GameResponseCombined } from "@/src/types/library/actions";
+
 import { uniqueRecords } from "@/app/(protected)/library/lib/helpers";
 import { ActionsMenu } from "@/src/components/library/game/ui/game-info/actions-menu";
 import { HowLongToBeat } from "@/src/components/library/game/ui/game-info/how-long-to-beat";
@@ -21,7 +23,6 @@ import {
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
 } from "@/src/lib/config/site";
-import type { GameResponseCombined } from "@/src/types/library/actions";
 import Image from "next/image";
 
 export const GameInfo = ({ game }: { game: GameResponseCombined }) => {

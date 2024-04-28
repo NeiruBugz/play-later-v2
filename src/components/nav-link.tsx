@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/src/lib/utils";
 import type { NavItem } from "@/src/types/shared";
+
+import { cn } from "@/src/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PropsWithChildren } from "react";

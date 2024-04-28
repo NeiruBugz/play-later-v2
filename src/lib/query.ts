@@ -1,4 +1,5 @@
 import type { SearchResponse } from "@/src/lib/types/igdb";
+
 import { useMutation } from "@tanstack/react-query";
 
 export function useSearch() {

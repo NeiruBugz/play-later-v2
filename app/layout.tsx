@@ -1,8 +1,9 @@
+import type { RootLayoutProps } from "@/src/lib/types/layout";
+
 import Providers from "@/providers";
 import { TailwindIndicator } from "@/src/components/tailwind-indicator";
 import { Toaster } from "@/src/components/ui/toaster";
 import { siteConfig } from "@/src/lib/config/site";
-import type { RootLayoutProps } from "@/src/lib/types/layout";
 import { cn } from "@/src/lib/utils";
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
