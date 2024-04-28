@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Game } from "@prisma/client";
@@ -5,8 +6,9 @@ import { format } from "date-fns";
 import { Calendar } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import igdbApi from "@/lib/igdb-api";
 import { GenresResponse } from "@/lib/types/igdb";
 
@@ -16,9 +18,11 @@ import { QuickActions } from "@/app/(protected)/library/components/library/page/
 export const ListItem = async ({
   game,
   currentStatus,
+  imageKey = "logo",
 }: {
   game: Game;
   currentStatus: string;
+  imageKey?: keyof typeof NEXT_IMAGE_SIZES;
 }) => {
   let info: GenresResponse | null = null;
   const gameInfo = await igdbApi.getGameGenres(game.igdbId);
@@ -31,28 +35,36 @@ export const ListItem = async ({
       <Link href={`/library/${game.id}`}>
         <div className="flex gap-4">
           <Image
-            src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.imageUrl}.png`}
+            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.imageUrl}.png`}
             alt={`${game.title} thumbnail`}
-            width={90}
-            height={90}
-            className="rounded-md"
+            width={NEXT_IMAGE_SIZES[imageKey].width}
+            height={NEXT_IMAGE_SIZES[imageKey].height}
+            className="flex-shrink-0 rounded-md"
             priority
           />
           <div className="self-center justify-self-start md:min-w-[260px] lg:min-w-[400px] xl:min-w-[600px]">
             <h2 className="whitespace-pre-wrap text-2xl font-bold tracking-tight">
               {game.title}
             </h2>
-            <div className="mt-1 flex flex-wrap gap-2">
-              {info?.genres.map((genre) => (
-                <Badge
-                  key={genre.id}
-                  className="max-h-fit rounded"
-                  variant="outline"
-                >
-                  {genre.name}
-                </Badge>
-              ))}
-            </div>
+            <Suspense
+              fallback={
+                <>
+                  <Skeleton className="h-6 w-8" />
+                </>
+              }
+            >
+              <div className="mt-1 flex flex-wrap gap-2">
+                {info?.genres.map((genre) => (
+                  <Badge
+                    key={genre.id}
+                    className="max-h-fit rounded"
+                    variant="outline"
+                  >
+                    {genre.name}
+                  </Badge>
+                ))}
+              </div>
+            </Suspense>
             <div className="mt-2 flex gap-2">
               <GameTimeBadge time={game.gameplayTime} />
             </div>

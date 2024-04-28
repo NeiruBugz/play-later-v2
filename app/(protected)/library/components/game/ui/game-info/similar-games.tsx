@@ -3,7 +3,7 @@ import Image from "next/image";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import { FullGameInfoResponse } from "@/lib/types/igdb";
 
 import { List } from "@/app/(protected)/library/components/library/page/list";
@@ -36,8 +36,8 @@ export const SimilarGames = ({
                 className="relative aspect-[3/4] h-full w-[264px] flex-shrink-0 rounded-md border transition"
               >
                 <Image
-                  width={264}
-                  height={352}
+                  width={NEXT_IMAGE_SIZES["c-big"].width}
+                  height={NEXT_IMAGE_SIZES["c-big"].height}
                   src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.cover?.image_id}.png`}
                   alt={`${game.name} artwork`}
                   className="rounded-md object-cover"

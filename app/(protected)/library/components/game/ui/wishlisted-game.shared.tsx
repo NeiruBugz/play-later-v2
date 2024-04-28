@@ -4,14 +4,14 @@ import { WishlistedGame } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 
 export function WishlistedGameShared({ game }: { game: WishlistedGame }) {
   return (
     <>
       <Image
-        width={264}
-        height={374}
+        width={NEXT_IMAGE_SIZES["c-big"].width}
+        height={NEXT_IMAGE_SIZES["c-big"].height}
         src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.imageUrl}.png`}
         alt={`${game.title}`}
         className="h-auto w-[150px] rounded-md md:w-[180px] xl:w-[300px] 2xl:w-[400px]"

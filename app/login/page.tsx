@@ -5,7 +5,7 @@ import { auth } from "@/auth";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import igdbApi from "@/lib/igdb-api";
 
 export default async function LoginPage() {
@@ -39,11 +39,11 @@ export default async function LoginPage() {
               return (
                 <Image
                   key={game.id}
-                  src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.cover.image_id}.png`}
+                  src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
                   alt={`${game.name} cover`}
                   className="mb-4 rounded-md"
-                  width={264}
-                  height={374}
+                  width={NEXT_IMAGE_SIZES["c-big"].width}
+                  height={NEXT_IMAGE_SIZES["c-big"].height}
                   priority
                 />
               );

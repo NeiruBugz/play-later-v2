@@ -10,7 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import { isURL } from "@/lib/utils";
 
 import { getUserList } from "@/app/(protected)/backlogs/actions/get-user-list";
@@ -45,12 +45,12 @@ export default async function Page(props: { params: { id: string } }) {
         {games.map((game) => {
           const imageUrl = isURL(game.imageUrl)
             ? game.imageUrl
-            : `${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.imageUrl}.png`;
+            : `${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.imageUrl}.png`;
           return (
             <div key={game.id} className="flex flex-col">
               <Image
-                width={264}
-                height={374}
+                width={NEXT_IMAGE_SIZES["c-big"].width}
+                height={NEXT_IMAGE_SIZES["c-big"].height}
                 src={imageUrl}
                 alt={`${game.title}`}
                 className="h-auto w-[150px] rounded-md md:w-[180px] xl:w-[300px] 2xl:w-[400px]"

@@ -22,7 +22,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
-import { GetUserData } from "@/app/(protected)/settings/actions/get-user-data";
 import { setUserName } from "@/app/login/lib/actions";
 
 const userDataSchema = z.object({
@@ -37,7 +36,15 @@ type UserDataSchema = z.infer<typeof userDataSchema>;
 export const UserSettings = ({
   userData,
 }: {
-  userData: GetUserData | null | undefined;
+  userData:
+    | {
+        id: string;
+        email: string | undefined;
+        name: string | undefined;
+        username: string | undefined;
+      }
+    | null
+    | undefined;
 }) => {
   const [isOpen, setOpen] = useState(false);
   const form = useForm<UserDataSchema>({

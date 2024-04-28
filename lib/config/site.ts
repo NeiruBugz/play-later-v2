@@ -33,12 +33,55 @@ export const TOKEN_URL = `https://id.twitch.tv/oauth2/token?client_id=${process.
 
 // cover_small	90 x 12
 // screenshot_med	569 x 320
-// cover_big	264 x 374
+// cover_big	264 x 352
 // logo_med	284 x 160
 // screenshot_big	889 x 500
 // screenshot_huge	1280 x 720
 // thumb	90 x 90
 // micro	35 x 35
+
+export const NEXT_IMAGE_SIZES = {
+  micro: {
+    width: 40,
+    height: 40,
+  },
+  thumb: {
+    width: 90,
+    height: 90,
+  },
+  logo: {
+    width: 120,
+    height: 160,
+  },
+  "c-sm": {
+    width: 90,
+    height: 120,
+  },
+  "c-big": {
+    width: 264,
+    height: 352,
+  },
+  "s-md": {
+    width: 555,
+    height: 312,
+  },
+  "s-big": {
+    width: 940,
+    height: 529,
+  },
+  "s-huge": {
+    width: 1280,
+    height: 720,
+  },
+  hd: {
+    width: 520,
+    height: 720,
+  },
+  "full-hd": {
+    width: 719,
+    height: 959,
+  },
+};
 
 export const IMAGE_SIZES = {
   "c-sm": "t_cover_small",

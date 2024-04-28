@@ -29,7 +29,7 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
         <Avatar className="size-[90px] rounded-md">
           <AvatarImage
             className="size-[90px] object-cover"
-            src={`${IMAGE_API}/${IMAGE_SIZES["thumb"]}/${choice.imageUrl}.png`}
+            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${choice.imageUrl}.png`}
             alt={choice.title}
             width={90}
             height={90}
@@ -37,7 +37,7 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
           <AvatarFallback>{choice.title}</AvatarFallback>
         </Avatar>
       ) : null}
-      <p className="text-xl font-bold">{choice.title}</p>
+      <p className="text-center text-xl font-bold">{choice.title}</p>
     </div>
   );
 }

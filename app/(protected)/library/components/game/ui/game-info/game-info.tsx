@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 
 import { ActionsMenu } from "@/app/(protected)/library/components/game/ui/game-info/actions-menu";
 import { HowLongToBeat } from "@/app/(protected)/library/components/game/ui/game-info/how-long-to-beat";
@@ -68,9 +68,9 @@ export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
           <div className="flex flex-col gap-1">
             <div className="relative aspect-[3/4] h-fit w-[264px] flex-shrink-0 cursor-pointer rounded-md border transition">
               <Image
-                width={264}
-                height={352}
-                src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${cover?.image_id}.png`}
+                width={NEXT_IMAGE_SIZES["c-big"].width}
+                height={NEXT_IMAGE_SIZES["c-big"].height}
+                src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${cover?.image_id}.png`}
                 alt={`${game.name} artwork`}
                 className="rounded-md object-cover"
                 priority

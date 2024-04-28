@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getServerUserId } from "@/auth";
+import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
-
-import { GetUserData } from "@/app/(protected)/settings/actions/get-user-data";
 
 export async function getUserById(id: string) {
   try {
@@ -20,14 +20,43 @@ export async function getUserById(id: string) {
   }
 }
 
-export async function setUserName(payload: GetUserData | null | undefined) {
+export async function getUserData() {
   try {
-    if (!payload) {
+    const session = await getServerUserId();
+
+    if (!session) {
+      throw new Error("No session");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: session,
+      },
+    });
+
+    if (user) {
+      return user as {
+        id: string;
+        email: string | undefined;
+        name: string | undefined;
+        username: string | undefined;
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function setUserName(payload: Prisma.UserUpdateInput) {
+  try {
+    if (!payload || !payload.id) {
       throw new Error("Empty payload");
     }
     await prisma.user.update({
       where: {
-        id: payload.id,
+        id: payload.id as string,
       },
       data: {
         username: payload.username,

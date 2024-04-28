@@ -11,7 +11,7 @@ import { SignOut } from "@/components/sign-out";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserSettings } from "@/components/user-settings";
 
-import { getUserData } from "@/app/(protected)/settings/actions/get-user-data";
+import { getUserData } from "@/app/login/lib/actions";
 
 export async function UserDropdown({ username }: { username?: string }) {
   const userData = await getUserData();

@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import { FullGameInfoResponse } from "@/lib/types/igdb";
 
 export const Screenshots = ({
@@ -22,8 +22,8 @@ export const Screenshots = ({
               src={`${IMAGE_API}/${IMAGE_SIZES["s-md"]}/${screenshot.image_id}.png`}
               alt={`${name} screenshot ${screenshot.image_id}`}
               className="object-cover"
-              height={320}
-              width={569}
+              height={NEXT_IMAGE_SIZES["s-md"].height}
+              width={NEXT_IMAGE_SIZES["s-md"].width}
               priority
             />
           </div>

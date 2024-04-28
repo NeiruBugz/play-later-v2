@@ -85,19 +85,6 @@ export function mapStatusForInfo(value: GameStatus) {
   return statusMapping[value] || value;
 }
 
-export function hasSelectedPlatformInList(
-  platformFromList?: string,
-  selectedPlatform?: string
-) {
-  if (!platformFromList || !selectedPlatform) {
-    return false;
-  }
-
-  return platformFromList
-    .toLowerCase()
-    .includes(selectedPlatform.toLowerCase());
-}
-
 export function getRandomItem<Game>(array: Game[]): Game | undefined {
   if (array.length === 0) {
     return;

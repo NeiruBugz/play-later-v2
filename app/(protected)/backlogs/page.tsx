@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import { isURL } from "@/lib/utils";
 
 import { getList } from "./actions/get-list";
@@ -55,7 +55,7 @@ export default async function BacklogsPage() {
 
                         const imageUrl = isURL(backlogItem.imageUrl)
                           ? backlogItem.imageUrl
-                          : `${IMAGE_API}/${IMAGE_SIZES["thumb"]}/${backlogItem.imageUrl}.png`;
+                          : `${IMAGE_API}/${IMAGE_SIZES["hd"]}/${backlogItem.imageUrl}.png`;
                         return (
                           <div
                             key={backlogItem.id}
@@ -70,8 +70,8 @@ export default async function BacklogsPage() {
                                 <Image
                                   src={imageUrl}
                                   alt={`${backlogItem.title} cover art`}
-                                  width={90}
-                                  height={90}
+                                  width={NEXT_IMAGE_SIZES.thumb.width}
+                                  height={NEXT_IMAGE_SIZES.thumb.height}
                                   style={{
                                     maxWidth: "100%",
                                   }}
