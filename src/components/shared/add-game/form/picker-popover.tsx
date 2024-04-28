@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/src/components/ui/popover";
-import { SearchResponse } from "@/src/lib/types/igdb";
+import { SearchResponse } from "@/src/packages/types/igdb";
 import React, { useRef } from "react";
 
 export const PickerPopover = ({

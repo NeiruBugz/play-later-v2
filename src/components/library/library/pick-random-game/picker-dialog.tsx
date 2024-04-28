@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/src/components/ui/dialog";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/src/packages/utils";
 import { Game } from "@prisma/client";
 import { useState } from "react";
 

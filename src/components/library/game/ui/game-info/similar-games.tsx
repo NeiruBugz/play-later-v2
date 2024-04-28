@@ -4,8 +4,8 @@ import {
   IMAGE_API,
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
-} from "@/src/lib/config/site";
-import { FullGameInfoResponse } from "@/src/lib/types/igdb";
+} from "@/src/packages/config/site";
+import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import Image from "next/image";
 import { Suspense } from "react";
 

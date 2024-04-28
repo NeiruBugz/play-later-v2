@@ -3,7 +3,7 @@ import { getGamesFromWishlist } from "@/src/actions/wishlist/get-games-from-wish
 import { Card } from "@/src/components/library/game/ui/card/card";
 import { WishlistShare } from "@/src/components/library/game/ui/wishlist-share";
 import { RenderWhen } from "@/src/components/render-when";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/src/packages/utils";
 import { redirect } from "next/navigation";
 
 export default async function WishlistPage() {

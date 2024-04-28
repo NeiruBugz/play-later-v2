@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/src/components/ui/badge";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/src/packages/utils";
 import { GameStatus } from "@prisma/client";
 import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";

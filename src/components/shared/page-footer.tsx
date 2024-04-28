@@ -1,4 +1,4 @@
-import { siteConfig } from "@/src/lib/config/site";
+import { siteConfig } from "@/src/packages/config/site";
 import Link from "next/link";
 
 export function SiteFooter() {

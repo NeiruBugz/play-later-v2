@@ -1,10 +1,10 @@
-import type { RootLayoutProps } from "@/src/lib/types/layout";
+import type { RootLayoutProps } from "@/src/packages/types/layout";
 
 import Providers from "@/providers";
 import { TailwindIndicator } from "@/src/components/tailwind-indicator";
 import { Toaster } from "@/src/components/ui/toaster";
-import { siteConfig } from "@/src/lib/config/site";
-import { cn } from "@/src/lib/utils";
+import { siteConfig } from "@/src/packages/config/site";
+import { cn } from "@/src/packages/utils";
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";

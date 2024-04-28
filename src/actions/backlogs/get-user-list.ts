@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "@/src/packages/prisma";
 
 export const getUserList = async ({ name }: { name: string }) => {
   try {

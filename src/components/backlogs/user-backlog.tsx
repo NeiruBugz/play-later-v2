@@ -3,8 +3,8 @@ import {
   IMAGE_API,
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
-} from "@/src/lib/config/site";
-import { isURL } from "@/src/lib/utils";
+} from "@/src/packages/config/site";
+import { isURL } from "@/src/packages/utils";
 import { BackloggedWithUser } from "@/src/types/backlogs";
 import Image from "next/image";
 import Link from "next/link";

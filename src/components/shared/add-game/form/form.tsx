@@ -1,6 +1,6 @@
 "use client";
 
-import type { SearchResponse } from "@/src/lib/types/igdb";
+import type { SearchResponse } from "@/src/packages/types/igdb";
 
 import { saveGameToLibrary } from "@/src/actions/library/save-to-library";
 import { PickerPopover } from "@/src/components/shared/add-game/form/picker-popover";
@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { PurchaseTypeToFormLabel, cn, mapStatusForInfo } from "@/src/lib/utils";
+import { PurchaseTypeToFormLabel, cn, mapStatusForInfo } from "@/src/packages/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GameStatus, PurchaseType } from "@prisma/client";
 import { nanoid } from "nanoid";

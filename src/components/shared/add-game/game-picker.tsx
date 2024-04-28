@@ -13,10 +13,10 @@ import {
   CommandItem,
   CommandList,
 } from "@/src/components/ui/command";
-import { IMAGE_API, IMAGE_SIZES } from "@/src/lib/config/site";
-import { useSearch } from "@/src/lib/query";
-import { SearchResponse } from "@/src/lib/types/igdb";
-import { cn } from "@/src/lib/utils";
+import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/site";
+import { useSearch } from "@/src/packages/query";
+import { SearchResponse } from "@/src/packages/types/igdb";
+import { cn } from "@/src/packages/utils";
 import { Loader2 } from "lucide-react";
 import React from "react";
 

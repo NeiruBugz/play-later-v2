@@ -3,9 +3,9 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/src/components/ui/avatar";
-import { IMAGE_API, IMAGE_SIZES } from "@/src/lib/config/site";
-import { SearchResponse } from "@/src/lib/types/igdb";
-import { cn } from "@/src/lib/utils";
+import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/site";
+import { SearchResponse } from "@/src/packages/types/igdb";
+import { cn } from "@/src/packages/utils";
 import React from "react";
 
 export const SelectedGame = ({

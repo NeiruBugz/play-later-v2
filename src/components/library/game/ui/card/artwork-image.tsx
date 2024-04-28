@@ -5,7 +5,7 @@ import {
   IMAGE_API,
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
-} from "@/src/lib/config/site";
+} from "@/src/packages/config/site";
 import Image from "next/image";
 import { useMediaQuery } from "usehooks-ts";
 

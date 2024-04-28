@@ -3,7 +3,7 @@ import {
   IMAGE_API,
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
-} from "@/src/lib/config/site";
+} from "@/src/packages/config/site";
 import { WishlistedGame } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";

@@ -1,4 +1,4 @@
-import { FullGameInfoResponse } from "@/src/lib/types/igdb";
+import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { Game } from "@prisma/client";
 import { HowLongToBeatEntry } from "howlongtobeat";
 

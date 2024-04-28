@@ -1,7 +1,7 @@
 import { updateStatus } from "@/src/actions/library/update-game";
 import { DeleteAction } from "@/src/components/library/library/page/list-item/delete-action";
 import { Button } from "@/src/components/ui/button";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/src/packages/utils";
 import { Game } from "@prisma/client";
 
 export const QuickActions = ({

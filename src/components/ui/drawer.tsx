@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/src/packages/utils";
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 

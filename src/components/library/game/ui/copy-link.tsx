@@ -2,7 +2,7 @@
 
 import { Button } from "@/src/components/ui/button";
 import { useToast } from "@/src/components/ui/use-toast";
-import { useClipboardCopy } from "@/src/lib/hooks/useClipboardCopy";
+import { useClipboardCopy } from "@/src/packages/hooks/useClipboardCopy";
 
 export function CopyLink({ userId }: { userId: string }) {
   const { copy } = useClipboardCopy();

@@ -16,8 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { FullGameInfoResponse } from "@/src/lib/types/igdb";
-import { processPlaythroughPayload } from "@/src/lib/utils";
+import { FullGameInfoResponse } from "@/src/packages/types/igdb";
+import { processPlaythroughPayload } from "@/src/packages/utils";
 import { Game } from "@prisma/client";
 import { z } from "zod";
 

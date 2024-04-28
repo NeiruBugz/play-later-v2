@@ -1,6 +1,5 @@
 import type { GameResponseCombined } from "@/src/types/library/actions";
 
-import { uniqueRecords } from "@/app/(protected)/library/lib/helpers";
 import { ActionsMenu } from "@/src/components/library/game/ui/game-info/actions-menu";
 import { HowLongToBeat } from "@/src/components/library/game/ui/game-info/how-long-to-beat";
 import { Platforms } from "@/src/components/library/game/ui/game-info/platforms";
@@ -22,8 +21,10 @@ import {
   IMAGE_API,
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
-} from "@/src/lib/config/site";
+} from "@/src/packages/config/site";
+import { uniqueRecords } from "@/src/packages/library/client-helpers";
 import Image from "next/image";
+
 
 export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
   const {

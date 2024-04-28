@@ -1,15 +1,16 @@
 "use server";
 
+import { getServerUserId } from "@/auth";
 import {
   calculateTotalBacklogTime,
   getListBasedOnStatus,
-} from "@/app/(protected)/library/lib/helpers";
-import { updateBackloggedGames } from "@/app/(protected)/library/lib/helpers/server-helpers";
-import { getServerUserId } from "@/auth";
-import { prisma } from "@/src/lib/prisma";
+} from "@/src/packages/library/client-helpers";
+import { updateBackloggedGames } from "@/src/packages/library/server-helpers";
+import { prisma } from "@/src/packages/prisma";
 import { FetcherAndProcessor } from "@/src/types/library/actions";
 import { FilterKeys } from "@/src/types/library/components";
 import { type Game, GameStatus, PurchaseType } from "@prisma/client";
+
 
 export const getGames = async (
   filters: Record<FilterKeys, string | undefined>

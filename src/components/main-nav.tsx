@@ -3,7 +3,7 @@ import type { MainNavProps } from "@/src/types/shared/ui";
 import { Logo } from "@/src/components/logo";
 import { MobileNav } from "@/src/components/mobile-nav";
 import { NavLink } from "@/src/components/nav-link";
-import { siteConfig } from "@/src/lib/config/site";
+import { siteConfig } from "@/src/packages/config/site";
 
 export function MainNav({ items }: MainNavProps) {
   return (

@@ -4,7 +4,7 @@ import { Logo } from "@/src/components/logo";
 import { MainNav } from "@/src/components/main-nav";
 import { AddGame } from "@/src/components/shared/add-game/add-game";
 import { UserDropdown } from "@/src/components/user-dropdown";
-import { siteConfig } from "@/src/lib/config/site";
+import { siteConfig } from "@/src/packages/config/site";
 
 export async function SiteHeader() {
   const session = await auth();

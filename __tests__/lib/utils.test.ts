@@ -2,7 +2,7 @@ import {
   nameFirstLiterals,
   platformEnumToColor,
   uppercaseToNormal,
-} from "@/src/lib/utils";
+} from "@/src/packages/utils";
 import { expect, test } from "vitest";
 
 const nameMocks = [

@@ -1,5 +1,5 @@
 import { Website } from "@/src/components/library/game/ui/game-info/website/website";
-import { FullGameInfoResponse } from "@/src/lib/types/igdb";
+import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 
 export const Websites = ({
   sites,

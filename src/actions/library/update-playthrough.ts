@@ -2,7 +2,7 @@
 
 import { getServerUserId } from "@/auth";
 import { getPlaythrough } from "@/src/actions/library/get-playthrough";
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "@/src/packages/prisma";
 import { revalidatePath } from "next/cache";
 
 export const updatePlaythrough = async ({

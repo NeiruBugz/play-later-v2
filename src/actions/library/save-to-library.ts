@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "@/src/packages/prisma";
 import { Prisma } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";

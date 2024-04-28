@@ -3,7 +3,7 @@ import {
   DescriptionStatusMapping,
   mapPlatformToSelectOption,
   uppercaseToNormal,
-} from "@/src/lib/utils";
+} from "@/src/packages/utils";
 import { GameStatus, PurchaseType } from "@prisma/client";
 import React from "react";
 

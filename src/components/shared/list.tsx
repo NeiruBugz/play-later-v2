@@ -1,4 +1,4 @@
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/src/packages/utils";
 import { PropsWithChildren } from "react";
 
 export const List = ({

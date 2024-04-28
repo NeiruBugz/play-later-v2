@@ -1,5 +1,5 @@
 import { env } from "@/env.mjs";
-import { API_URL, TOKEN_URL } from "@/src/lib/config/site";
+import { API_URL, TOKEN_URL } from "@/src/packages/config/site";
 import {
   FullGameInfoResponse,
   GenresResponse,
@@ -7,7 +7,7 @@ import {
   RequestOptions,
   SearchResponse,
   TwitchTokenResponse,
-} from "@/src/lib/types/igdb";
+} from "@/src/packages/types/igdb";
 
 const asError = (thrown: unknown): Error => {
   if (thrown instanceof Error) return thrown;

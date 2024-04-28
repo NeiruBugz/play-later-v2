@@ -2,7 +2,7 @@
 
 import type { NavItem } from "@/src/types/shared";
 
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/src/packages/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PropsWithChildren } from "react";

@@ -4,7 +4,7 @@ import type { PickerProps } from "@/src/types/library/components";
 
 import { MemoizedChoice } from "@/src/components/library/library/pick-random-game/choice";
 import { MemoizedControls } from "@/src/components/library/library/pick-random-game/controls";
-import { getRandomItem } from "@/src/lib/utils";
+import { getRandomItem } from "@/src/packages/utils";
 import { type Game } from "@prisma/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 

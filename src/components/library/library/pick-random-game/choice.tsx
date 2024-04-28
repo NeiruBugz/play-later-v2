@@ -6,7 +6,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/src/components/ui/avatar";
-import { IMAGE_API, IMAGE_SIZES } from "@/src/lib/config/site";
+import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/site";
 import { memo } from "react";
 
 function PickerChoice({ afterClick, choice, isRunning }: PickerChoiceProps) {

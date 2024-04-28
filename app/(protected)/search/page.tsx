@@ -3,8 +3,8 @@ import {
   IMAGE_API,
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
-} from "@/src/lib/config/site";
-import igdbApi from "@/src/lib/igdb-api";
+} from "@/src/packages/config/site";
+import igdbApi from "@/src/packages/igdb-api";
 import { SearchPageProps } from "@/src/types/search";
 import Image from "next/image";
 import Link from "next/link";

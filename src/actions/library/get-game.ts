@@ -1,8 +1,8 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-import igdbApi from "@/src/lib/igdb-api";
-import { prisma } from "@/src/lib/prisma";
+import igdbApi from "@/src/packages/igdb-api";
+import { prisma } from "@/src/packages/prisma";
 import {
   GameResponseCombined,
   ResponsePreparer,
