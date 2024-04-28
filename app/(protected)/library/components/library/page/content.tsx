@@ -1,10 +1,8 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { LibraryContentProps } from "@/lib/types/library";
-
 import { Card } from "@/app/(protected)/library/components/game/ui/card/card";
 import { List } from "@/app/(protected)/library/components/library/page/list";
 import { ListItem } from "@/app/(protected)/library/components/library/page/list-item/list-item";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { LibraryContentProps } from "@/lib/types/library";
 
 function EmptyBacklog() {
   return (
@@ -13,11 +11,11 @@ function EmptyBacklog() {
 }
 
 function BacklogList({
-  count,
   backlogTime,
+  count,
 }: {
-  count: number;
   backlogTime: number;
+  count: number;
 }) {
   if (count === 0) {
     return <EmptyBacklog />;
@@ -33,25 +31,25 @@ function BacklogList({
 }
 
 export async function LibraryContent({
-  currentStatus,
   backloggedLength,
-  totalBacklogTime,
+  currentStatus,
   list,
+  totalBacklogTime,
   viewMode = "list",
-}: LibraryContentProps & { viewMode?: string }) {
+}: { viewMode?: string } & LibraryContentProps) {
   return (
     <>
       {currentStatus === "BACKLOG" ? (
-        <BacklogList count={backloggedLength} backlogTime={totalBacklogTime} />
+        <BacklogList backlogTime={totalBacklogTime} count={backloggedLength} />
       ) : null}
       <ScrollArea>
-        <List viewMode={viewMode as "list" | "grid"}>
+        <List viewMode={viewMode as "grid" | "list"}>
           {list.map((game) => {
             return viewMode === "list" ? (
               <ListItem
+                currentStatus={currentStatus}
                 game={game}
                 key={game.id}
-                currentStatus={currentStatus}
               />
             ) : (
               <Card game={game} key={game.id} />

@@ -1,30 +1,29 @@
-import Image from "next/image";
-
 import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import { FullGameInfoResponse } from "@/lib/types/igdb";
+import Image from "next/image";
 
 export const Screenshots = ({
-  screenshots,
   name,
+  screenshots,
 }: {
-  screenshots: FullGameInfoResponse["screenshots"];
   name: string;
+  screenshots: FullGameInfoResponse["screenshots"];
 }) => (
   <section className="container mx-auto hidden py-4 md:block md:py-6">
     <div className="flex flex-wrap items-center gap-4">
       {screenshots.map((screenshot) => {
         return (
           <div
-            key={screenshot.id}
             className="relative mx-4 aspect-[16/9] h-[320px] w-[569px] cursor-pointer border transition"
+            key={screenshot.id}
           >
             <Image
-              src={`${IMAGE_API}/${IMAGE_SIZES["s-md"]}/${screenshot.image_id}.png`}
               alt={`${name} screenshot ${screenshot.image_id}`}
               className="object-cover"
               height={NEXT_IMAGE_SIZES["s-md"].height}
-              width={NEXT_IMAGE_SIZES["s-md"].width}
               priority
+              src={`${IMAGE_API}/${IMAGE_SIZES["s-md"]}/${screenshot.image_id}.png`}
+              width={NEXT_IMAGE_SIZES["s-md"].width}
             />
           </div>
         );

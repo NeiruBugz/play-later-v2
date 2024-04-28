@@ -1,10 +1,9 @@
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
-
 import { WishlistedGameShared } from "@/app/(protected)/library/components/game/ui/wishlisted-game.shared";
 import { getGamesFromWishlist } from "@/app/(protected)/wishlist/lib/actions";
 import { SharedWishlistPageProps } from "@/app/(protected)/wishlist/lib/types";
 import { getUserById } from "@/app/login/lib/actions";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-static";
 

@@ -1,17 +1,15 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
-import { GameStatus, PurchaseType, type Game } from "@prisma/client";
-
-import { prisma } from "@/lib/prisma";
-import { FilterKeys } from "@/lib/types/library";
-
 import {
   calculateTotalBacklogTime,
   getListBasedOnStatus,
 } from "@/app/(protected)/library/lib/helpers";
 import { updateBackloggedGames } from "@/app/(protected)/library/lib/helpers/server-helpers";
 import { FetcherAndProcessor } from "@/app/(protected)/library/lib/types/actions";
+import { getServerUserId } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { FilterKeys } from "@/lib/types/library";
+import { GameStatus, PurchaseType, type Game } from "@prisma/client";
 
 export const getGames = async (
   filters: Record<FilterKeys, string | undefined>
@@ -24,18 +22,18 @@ export const getGames = async (
   };
 
   const games: Game[] = await prisma.game.findMany({
+    orderBy: {
+      [sortState.key as keyof Game]: sortState.order as "asc" | "desc",
+    },
     where: {
-      title: {
-        contains: filters.search || "",
-      },
+      deletedAt: null,
       purchaseType: filters.purchaseType
         ? (filters.purchaseType as PurchaseType)
         : undefined,
+      title: {
+        contains: filters.search || "",
+      },
       userId,
-      deletedAt: null,
-    },
-    orderBy: {
-      [sortState.key as keyof Game]: sortState.order as "asc" | "desc",
     },
   });
 
@@ -43,10 +41,10 @@ export const getGames = async (
     abandoned: games.filter((game) => game.status === GameStatus.ABANDONED),
     backlogged: games.filter((game) => game.status === GameStatus.BACKLOG),
     completed: games.filter((game) => game.status === GameStatus.COMPLETED),
-    inprogress: games.filter((game) => game.status === GameStatus.INPROGRESS),
     fullCompletion: games.filter(
       (game) => game.status === GameStatus.FULL_COMPLETION
     ),
+    inprogress: games.filter((game) => game.status === GameStatus.INPROGRESS),
     shelved: games.filter((game) => game.status === GameStatus.SHELVED),
   };
 };
@@ -58,19 +56,19 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   const purchaseType = params.get("purchase") ?? "";
 
   const filters = {
-    platform,
     order: params.get("order") ?? "desc",
-    sortBy: params.get("sortBy") ?? "updatedAt",
-    search: searchQuery,
+    platform,
     purchaseType,
+    search: searchQuery,
+    sortBy: params.get("sortBy") ?? "updatedAt",
   };
 
   const {
     abandoned,
     backlogged,
     completed,
-    inprogress,
     fullCompletion,
+    inprogress,
     shelved,
   } = await getGames(filters);
 
@@ -79,20 +77,20 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   const totalBacklogTime = calculateTotalBacklogTime(backlogged);
 
   const list = getListBasedOnStatus({
-    currentStatus,
-    inprogress,
     abandoned,
     backlogged,
     completed,
+    currentStatus,
     fullyCompleted: fullCompletion,
+    inprogress,
     shelved,
   });
 
   return {
-    list,
-    currentStatus,
-    totalBacklogTime,
     backlogged,
+    currentStatus,
+    list,
+    totalBacklogTime,
   };
 };
 
@@ -102,18 +100,18 @@ export const countGamesPerStatus = async () => {
 
     if (!session) {
       return {
-        [GameStatus.INPROGRESS]: 0,
-        [GameStatus.BACKLOG]: 0,
         [GameStatus.ABANDONED]: 0,
+        [GameStatus.BACKLOG]: 0,
         [GameStatus.COMPLETED]: 0,
-        [GameStatus.SHELVED]: 0,
         [GameStatus.FULL_COMPLETION]: 0,
+        [GameStatus.INPROGRESS]: 0,
+        [GameStatus.SHELVED]: 0,
       };
     }
 
     const defaultParams = {
-      userId: session,
       deletedAt: null,
+      userId: session,
     };
 
     const backlogs = await prisma.game.count({
@@ -153,12 +151,12 @@ export const countGamesPerStatus = async () => {
       },
     });
     return {
-      [GameStatus.INPROGRESS]: inprogress,
-      [GameStatus.BACKLOG]: backlogs,
       [GameStatus.ABANDONED]: abandoned,
+      [GameStatus.BACKLOG]: backlogs,
       [GameStatus.COMPLETED]: completed,
-      [GameStatus.SHELVED]: shelved,
       [GameStatus.FULL_COMPLETION]: fullCompletion,
+      [GameStatus.INPROGRESS]: inprogress,
+      [GameStatus.SHELVED]: shelved,
     };
   } catch (error) {
     console.error(error);

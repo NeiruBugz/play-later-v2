@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Game } from "@prisma/client";
-
+import { Picker } from "@/app/(protected)/library/components/library/pick-random-game/picker";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,15 +10,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-import { Picker } from "@/app/(protected)/library/components/library/pick-random-game/picker";
+import { Game } from "@prisma/client";
+import { useState } from "react";
 
 function PickerDialog({ items }: { items: Game[] }) {
   const [isOpen, onOpenChange] = useState(false);
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={isOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" className="my-2 md:my-0">
+        <Button className="my-2 md:my-0" variant="secondary">
           Pick random game
         </Button>
       </DialogTrigger>
@@ -31,7 +29,7 @@ function PickerDialog({ items }: { items: Game[] }) {
             Play a roulette and let the service pick a game from your backlog
           </DialogDescription>
         </DialogHeader>
-        <Picker items={items} closeDialog={() => onOpenChange(false)} />
+        <Picker closeDialog={() => onOpenChange(false)} items={items} />
       </DialogContent>
     </Dialog>
   );

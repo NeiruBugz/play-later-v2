@@ -1,12 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Settings } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { FaSpinner } from "react-icons/fa6";
-import { z } from "zod";
-
+import { setUserName } from "@/app/login/lib/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,13 +15,17 @@ import { Form, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-
-import { setUserName } from "@/app/login/lib/actions";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Settings } from "lucide-react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaSpinner } from "react-icons/fa6";
+import { z } from "zod";
 
 const userDataSchema = z.object({
+  email: z.string().email("Invalid email"),
   id: z.string(),
   name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
   username: z.string().min(1, "Username is required"),
 });
 
@@ -38,8 +36,8 @@ export const UserSettings = ({
 }: {
   userData:
     | {
-        id: string;
         email: string | undefined;
+        id: string;
         name: string | undefined;
         username: string | undefined;
       }
@@ -48,13 +46,13 @@ export const UserSettings = ({
 }) => {
   const [isOpen, setOpen] = useState(false);
   const form = useForm<UserDataSchema>({
-    resolver: zodResolver(userDataSchema),
     defaultValues: {
+      email: userData?.email ?? "",
       id: userData?.id,
       name: userData?.name ?? "",
-      email: userData?.email ?? "",
       username: userData?.username ?? "",
     },
+    resolver: zodResolver(userDataSchema),
   });
   const { toast } = useToast();
 
@@ -63,14 +61,14 @@ export const UserSettings = ({
       await setUserName(data);
       setOpen(false);
       toast({
-        title: "Success",
         description: "Your profile has been updated",
+        title: "Success",
       });
     } catch (error) {
       console.error(error);
       toast({
-        title: "Oops, something happened",
         description: "We couldn't update your profile",
+        title: "Oops, something happened",
         variant: "destructive",
       });
     }
@@ -80,8 +78,8 @@ export const UserSettings = ({
     <Dialog onOpenChange={setOpen} open={isOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="ghost"
           className="relative flex h-8 w-full cursor-default select-none items-center justify-start rounded-sm px-2 py-1.5 text-sm font-normal outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+          variant="ghost"
         >
           <Settings className="mr-2 size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           Edit Profile
@@ -95,7 +93,7 @@ export const UserSettings = ({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} id="user-settings">
+          <form id="user-settings" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="id"
@@ -110,7 +108,7 @@ export const UserSettings = ({
                   name="name"
                   render={({ field }) => (
                     <>
-                      <Label htmlFor="name" className="text-right">
+                      <Label className="text-right" htmlFor="name">
                         Name
                       </Label>
                       <Input className="col-span-3" disabled {...field} />
@@ -121,15 +119,15 @@ export const UserSettings = ({
               <div className="grid grid-cols-4 items-center gap-4">
                 <FormField
                   control={form.control}
+                  name="email"
                   render={({ field }) => (
                     <>
-                      <Label htmlFor="email" className="text-right">
+                      <Label className="text-right" htmlFor="email">
                         Email
                       </Label>
                       <Input className="col-span-3" disabled {...field} />
                     </>
                   )}
-                  name="email"
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -138,7 +136,7 @@ export const UserSettings = ({
                   name="username"
                   render={({ field }) => (
                     <>
-                      <Label htmlFor="username" className="text-right">
+                      <Label className="text-right" htmlFor="username">
                         Username
                       </Label>
                       <Input className="col-span-3" {...field} />
@@ -150,7 +148,7 @@ export const UserSettings = ({
           </form>
         </Form>
         <DialogFooter>
-          <Button type="submit" form="user-settings">
+          <Button form="user-settings" type="submit">
             {form.formState.isSubmitting ? (
               <FaSpinner className="mr-2 animate-spin" />
             ) : null}

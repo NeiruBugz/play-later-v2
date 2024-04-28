@@ -1,6 +1,8 @@
 import * as z from "zod";
 
 export const addGameSchema = z.object({
+  isWishlist: z.boolean().optional(),
+  purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]).optional(),
   status: z
     .enum([
       "BACKLOG",
@@ -12,8 +14,6 @@ export const addGameSchema = z.object({
     ])
     .optional(),
   title: z.string().min(1),
-  purchaseType: z.enum(["PHYSICAL", "DIGITAL", "SUBSCRIPTION"]).optional(),
-  isWishlist: z.boolean().optional(),
 });
 
 export type AddGameSchema = z.infer<typeof addGameSchema>;

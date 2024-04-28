@@ -1,3 +1,5 @@
+import { Icons } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
   FaAppStore,
@@ -13,9 +15,6 @@ import {
   FaYoutube,
 } from "react-icons/fa6";
 import { SiEpicgames, SiFandom } from "react-icons/si";
-
-import { Button } from "@/components/ui/button";
-import { Icons } from "@/components/icons";
 
 function SiteIcon({ siteName }: { siteName: string }) {
   if (siteName.includes("twitch")) {
@@ -111,11 +110,11 @@ function SiteLabel({ siteName }: { siteName: string }) {
 }
 
 export const Website = ({ url }: { url: string }) => (
-  <Button variant="link" className="justify-start">
+  <Button className="justify-start" variant="link">
     <Link
+      className="flex max-w-[160px] items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700"
       href={url}
       target="_blank"
-      className="flex max-w-[160px] items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-gray-700"
     >
       <SiteIcon siteName={url} />
       <SiteLabel siteName={url} />

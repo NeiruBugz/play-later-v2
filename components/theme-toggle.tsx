@@ -1,19 +1,17 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-
 import {
   DropdownMenuItem,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { cn } from "@/lib/utils";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export const ThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
+  const { setTheme, theme } = useTheme();
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger>
@@ -23,20 +21,20 @@ export const ThemeToggle = () => {
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
         <DropdownMenuItem
-          onClick={() => setTheme("light")}
           className={cn({ "font-bold": theme === "light" })}
+          onClick={() => setTheme("light")}
         >
           Light
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setTheme("dark")}
           className={cn({ "font-bold": theme === "dark" })}
+          onClick={() => setTheme("dark")}
         >
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setTheme("system")}
           className={cn({ "font-bold": theme === "system" })}
+          onClick={() => setTheme("system")}
         >
           System
         </DropdownMenuItem>

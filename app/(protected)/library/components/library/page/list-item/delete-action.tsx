@@ -1,6 +1,4 @@
-import { Game } from "@prisma/client";
-import { Trash } from "lucide-react";
-
+import { deleteGame } from "@/app/(protected)/library/lib/actions/delete-game";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,14 +10,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-
-import { deleteGame } from "@/app/(protected)/library/lib/actions/delete-game";
+import { Game } from "@prisma/client";
+import { Trash } from "lucide-react";
 
 export const DeleteAction = ({ id }: { id: Game["id"] }) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="icon">
+        <Button size="icon" variant="destructive">
           <Trash className="size-4" />
         </Button>
       </AlertDialogTrigger>
@@ -36,13 +34,13 @@ export const DeleteAction = ({ id }: { id: Game["id"] }) => {
             className="w-fit bg-transparent hover:bg-transparent"
           >
             <form
-              className="!hover:bg-transparent block w-fit bg-destructive"
               action={async () => {
                 "use server";
                 await deleteGame(id);
               }}
+              className="!hover:bg-transparent block w-fit bg-destructive"
             >
-              <Button variant="destructive" type="submit">
+              <Button type="submit" variant="destructive">
                 Delete
               </Button>
             </form>

@@ -1,15 +1,13 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
-import { HowLongToBeatService } from "howlongtobeat";
-
-import igdbApi from "@/lib/igdb-api";
-import { prisma } from "@/lib/prisma";
-
 import {
   GameResponseCombined,
   ResponsePreparer,
 } from "@/app/(protected)/library/lib/types/actions";
+import { getServerUserId } from "@/auth";
+import igdbApi from "@/lib/igdb-api";
+import { prisma } from "@/lib/prisma";
+import { HowLongToBeatService } from "howlongtobeat";
 
 export const getGameWithAdapter: ResponsePreparer = async ({
   gameId,
@@ -19,8 +17,8 @@ export const getGameWithAdapter: ResponsePreparer = async ({
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,
-      userId,
       isWishlisted: isFromWishlist,
+      userId,
     },
   });
 

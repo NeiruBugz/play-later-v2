@@ -1,14 +1,11 @@
-import { auth } from "@/auth";
-
-import { Logo } from "@/components/logo";
-import { MainNav } from "@/components/main-nav";
-import { UserDropdown } from "@/components/user-dropdown";
-
-import { siteConfig } from "@/lib/config/site";
-
 // import { HeaderSearch } from "@/app/(protected)/library/components/game/ui/header-search";
 import AddGame from "@/app/(protected)/library/components/library/add-game/add-game";
 import { SignIn } from "@/app/login/components/sign-in";
+import { auth } from "@/auth";
+import { Logo } from "@/components/logo";
+import { MainNav } from "@/components/main-nav";
+import { UserDropdown } from "@/components/user-dropdown";
+import { siteConfig } from "@/lib/config/site";
 
 export async function SiteHeader() {
   const session = await auth();

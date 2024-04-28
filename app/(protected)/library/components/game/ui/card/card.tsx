@@ -1,21 +1,20 @@
-import Link from "next/link";
 import { Game } from "@prisma/client";
-
+import Link from "next/link";
 import { Artwork } from "./artwork";
 
 export function Card({
   game,
   path = "library",
 }: {
+  entityId?: string;
   game: Partial<Game>;
   path?: string;
-  entityId?: string;
 }) {
   return (
     <div className="group w-fit rounded">
       <Link
-        href={`/${path === "lists" ? "library" : path}/${game.id}`}
         className="block w-fit rounded"
+        href={`/${path === "lists" ? "library" : path}/${game.id}`}
       >
         <Artwork game={game} />
       </Link>

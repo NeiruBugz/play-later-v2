@@ -1,9 +1,6 @@
 "use client";
 
-import React from "react";
-import { HowLongToBeatEntry } from "howlongtobeat";
-import { PlusCircle } from "lucide-react";
-
+import { AddForm } from "@/app/(protected)/library/components/library/add-game/form/form";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,14 +9,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-
-import { AddForm } from "@/app/(protected)/library/components/library/add-game/form/form";
+import { HowLongToBeatEntry } from "howlongtobeat";
+import { PlusCircle } from "lucide-react";
+import React from "react";
 
 export default function AddGame({
   label = "Add Game",
 }: {
-  label?: string;
   game?: HowLongToBeatEntry;
+  label?: string;
 }) {
   const [isSheetOpen, setSheetOpen] = React.useState(false);
   return (

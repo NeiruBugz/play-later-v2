@@ -1,12 +1,9 @@
-import Image from "next/image";
-import Link from "next/link";
-
+import type { SearchPageProps } from "@/app/(protected)/search/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import igdbApi from "@/lib/igdb-api";
-
-import type { SearchPageProps } from "@/app/(protected)/search/lib/types";
+import Image from "next/image";
+import Link from "next/link";
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = new URLSearchParams(searchParams).get("q");
@@ -27,17 +24,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 {results?.map((entry) => (
                   <Link href={`/game/${entry.id}`} key={entry.id}>
                     <li
-                      key={entry.id}
                       className="flex h-full w-[264px] flex-col justify-between gap-3"
+                      key={entry.id}
                     >
                       <figure>
                         <div className=" relative aspect-[3/4] cursor-pointer rounded-xl border transition md:hover:brightness-110">
                           <Image
-                            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${entry.cover?.image_id}.png`}
                             alt={`${entry.name} artwork`}
                             className="h-full w-full rounded-xl  object-cover"
-                            width={NEXT_IMAGE_SIZES["c-big"].width}
                             height={NEXT_IMAGE_SIZES["c-big"].height}
+                            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${entry.cover?.image_id}.png`}
+                            width={NEXT_IMAGE_SIZES["c-big"].width}
                           />
                         </div>
                         <figcaption className="mt-2.5 line-clamp-3	text-center text-xs font-bold sm:mt-3 sm:text-base">

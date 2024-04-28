@@ -1,11 +1,10 @@
 "use server";
 
+import { getServerUserId } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { Game } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getServerUserId } from "@/auth";
-import { Game } from "@prisma/client";
-
-import { prisma } from "@/lib/prisma";
 
 const LIBRARY_PATH = "/library";
 

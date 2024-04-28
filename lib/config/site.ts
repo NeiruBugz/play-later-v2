@@ -1,29 +1,29 @@
 export const siteConfig = {
-  name: "Play Later",
   description: "Your next gaming queue",
+  links: {
+    discord: "https://discord.gg/NK3THJyPeT",
+    roadmap:
+      "https://frosted-atlasaurus-da4.notion.site/2efccedc88084981ae6e62772d3fbcbb?v=e81099931886450692b5ec847027a146",
+  },
   mainNav: [
     {
-      title: "Library",
       href: "/library",
+      title: "Library",
     },
     {
-      title: "Wishlist",
       href: "/wishlist",
+      title: "Wishlist",
     },
     {
-      title: "Backlogs",
       href: "/backlogs",
+      title: "Backlogs",
     },
     // {
     //   title: "Lists",
     //   href: "/lists",
     // },
   ],
-  links: {
-    roadmap:
-      "https://frosted-atlasaurus-da4.notion.site/2efccedc88084981ae6e62772d3fbcbb?v=e81099931886450692b5ec847027a146",
-    discord: "https://discord.gg/NK3THJyPeT",
-  },
+  name: "Play Later",
 };
 
 export const API_URL = "https://api.igdb.com/v4";
@@ -41,57 +41,57 @@ export const TOKEN_URL = `https://id.twitch.tv/oauth2/token?client_id=${process.
 // micro	35 x 35
 
 export const NEXT_IMAGE_SIZES = {
-  micro: {
-    width: 40,
-    height: 40,
-  },
-  thumb: {
-    width: 90,
-    height: 90,
-  },
-  logo: {
-    width: 120,
-    height: 160,
+  "c-big": {
+    height: 352,
+    width: 264,
   },
   "c-sm": {
-    width: 90,
     height: 120,
-  },
-  "c-big": {
-    width: 264,
-    height: 352,
-  },
-  "s-md": {
-    width: 555,
-    height: 312,
-  },
-  "s-big": {
-    width: 940,
-    height: 529,
-  },
-  "s-huge": {
-    width: 1280,
-    height: 720,
-  },
-  hd: {
-    width: 520,
-    height: 720,
+    width: 90,
   },
   "full-hd": {
-    width: 719,
     height: 959,
+    width: 719,
+  },
+  hd: {
+    height: 720,
+    width: 520,
+  },
+  logo: {
+    height: 160,
+    width: 120,
+  },
+  micro: {
+    height: 40,
+    width: 40,
+  },
+  "s-big": {
+    height: 529,
+    width: 940,
+  },
+  "s-huge": {
+    height: 720,
+    width: 1280,
+  },
+  "s-md": {
+    height: 312,
+    width: 555,
+  },
+  thumb: {
+    height: 90,
+    width: 90,
   },
 };
 
 export const IMAGE_SIZES = {
-  "c-sm": "t_cover_small",
   "c-big": "t_cover_big",
-  "s-md": "t_screenshot_med",
+  "c-sm": "t_cover_small",
+  "full-hd": "t_1080p",
+  hd: "t_720p",
+  logo: "t_logo_med",
+  micro: "t_micro",
   "s-big": "t_screenshot_big",
   "s-huge": "t_screenshot_huge",
-  logo: "t_logo_med",
+  "s-md": "t_screenshot_med",
   thumb: "t_thumb",
-  micro: "t_micro",
-  hd: "t_720p",
-  "full-hd": "t_1080p",
 };

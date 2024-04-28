@@ -1,16 +1,15 @@
+import { List } from "@/app/(protected)/library/components/library/page/list";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { List } from "@/app/(protected)/library/components/library/page/list";
-
 export const ListSkeleton = ({ viewMode }: { viewMode: string }) => (
-  <List viewMode={viewMode as "list" | "grid"}>
+  <List viewMode={viewMode as "grid" | "list"}>
     {Array.from({ length: 15 }, (_, index) => index + 1).map((index) =>
       viewMode === "grid" ? (
         <Skeleton className="h-[352px] w-[264px]" key={index} />
       ) : (
         <div
-          key={index}
           className="flex w-full items-center justify-between gap-4"
+          key={index}
         >
           <div className="flex gap-4">
             <Skeleton className="h-[120px] w-[90px]" />

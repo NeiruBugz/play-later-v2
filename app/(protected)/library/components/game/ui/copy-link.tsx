@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-
 import { useClipboardCopy } from "@/lib/hooks/useClipboardCopy";
 
 export function CopyLink({ userId }: { userId: string }) {
@@ -20,7 +19,7 @@ export function CopyLink({ userId }: { userId: string }) {
   };
 
   return (
-    <Button variant="outline" onClick={onLinkCopy}>
+    <Button onClick={onLinkCopy} variant="outline">
       Copy link
     </Button>
   );

@@ -1,9 +1,7 @@
-import Image from "next/image";
-import Link from "next/link";
-
 import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import { isURL } from "@/lib/utils";
-
+import Image from "next/image";
+import Link from "next/link";
 import { getList } from "./actions/get-list";
 
 type BackloggedWithUser = {
@@ -11,8 +9,8 @@ type BackloggedWithUser = {
   imageUrl: string;
   title: string;
   user: {
-    name?: string | null;
-    username?: string | null;
+    name?: null | string;
+    username?: null | string;
   };
 };
 
@@ -33,12 +31,12 @@ export default async function BacklogsPage() {
             Object.keys(backlogs).map((backlogKey) => {
               return (
                 <Link
-                  href={`/backlogs/${backlogKey}`}
                   className="w-fit text-lg font-medium"
+                  href={`/backlogs/${backlogKey}`}
                 >
                   <div
-                    key={backlogKey}
                     className="relative h-full w-fit min-w-[270px] rounded-md border p-3"
+                    key={backlogKey}
                   >
                     <p className="text-lg font-medium">
                       {backlogKey}&apos;s backlog
@@ -58,8 +56,8 @@ export default async function BacklogsPage() {
                           : `${IMAGE_API}/${IMAGE_SIZES["hd"]}/${backlogItem.imageUrl}.png`;
                         return (
                           <div
-                            key={backlogItem.id}
                             className="absolute top-0"
+                            key={backlogItem.id}
                             style={{
                               left: (index / 2) * 90,
                               zIndex: index,
@@ -68,14 +66,14 @@ export default async function BacklogsPage() {
                             <div className="group relative w-fit cursor-pointer rounded-xl border bg-background text-white shadow-md transition-all hover:shadow-xl">
                               <div className="flex size-[90px] items-center justify-center">
                                 <Image
-                                  src={imageUrl}
                                   alt={`${backlogItem.title} cover art`}
-                                  width={NEXT_IMAGE_SIZES.thumb.width}
+                                  className="h-full w-full rounded-xl object-cover"
                                   height={NEXT_IMAGE_SIZES.thumb.height}
+                                  src={imageUrl}
                                   style={{
                                     maxWidth: "100%",
                                   }}
-                                  className="h-full w-full rounded-xl object-cover"
+                                  width={NEXT_IMAGE_SIZES.thumb.width}
                                 />
                               </div>
                             </div>

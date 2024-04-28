@@ -1,5 +1,4 @@
 import { Badge, ColorVariant } from "@/components/ui/badge";
-
 import { FullGameInfoResponse } from "@/lib/types/igdb";
 import { cn, platformEnumToColor } from "@/lib/utils";
 
@@ -26,11 +25,11 @@ export const Platforms = ({
         {uniqueRecords(platformList).map((releaseDate) => {
           return (
             <Badge
+              className={cn("w-fit")}
               key={releaseDate.id}
               variant={
                 platformEnumToColor(releaseDate.platform.name) as ColorVariant
               }
-              className={cn("w-fit")}
             >
               {releaseDate.platform.name}
             </Badge>

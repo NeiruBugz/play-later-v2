@@ -1,15 +1,13 @@
-import { Suspense } from "react";
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
-
 import { SignIn } from "@/app/login/components/sign-in";
 import {
   TrendingList,
   TrendingListSkeleton,
 } from "@/app/login/components/trending-list";
+import { auth } from "@/auth";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function Page() {
   const session = await auth();

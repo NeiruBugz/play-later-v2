@@ -1,11 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { nanoid } from "nanoid";
-
-import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 const LIBRARY_PATH = '/library?status="BACKLOG"';
 
@@ -19,38 +18,38 @@ export async function saveGameToLibrary(
     }
 
     const {
+      createdAt,
+      deletedAt,
+      gameplayTime,
+      howLongToBeatId,
       id,
       igdbId,
-      howLongToBeatId,
-      status,
-      updatedAt,
       imageUrl,
-      deletedAt,
-      review,
-      rating,
-      createdAt,
-      title,
       isWishlisted,
-      gameplayTime,
       purchaseType,
+      rating,
+      review,
+      status,
+      title,
+      updatedAt,
     } = game;
 
     await prisma.game.create({
       data: {
+        createdAt,
+        deletedAt,
+        gameplayTime,
+        howLongToBeatId,
         id: id || nanoid(),
         igdbId,
-        howLongToBeatId,
-        status,
-        updatedAt,
         imageUrl,
-        deletedAt,
-        review,
-        rating,
-        createdAt,
-        title,
         isWishlisted,
-        gameplayTime,
         purchaseType,
+        rating,
+        review,
+        status,
+        title,
+        updatedAt,
         userId: userId.user?.id,
       },
     });

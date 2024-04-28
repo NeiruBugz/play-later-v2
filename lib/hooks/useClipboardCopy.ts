@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-type CopiedValue = string | null;
+type CopiedValue = null | string;
 type CopyFn = (text: string) => Promise<boolean>; // Return success
 type useCopyToClipboardReturnValue = {
   copiedText: CopiedValue;

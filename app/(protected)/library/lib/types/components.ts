@@ -1,19 +1,19 @@
 import type { Game } from "@prisma/client";
 
 export interface PickerControlsProps {
-  isRunning: boolean;
   hasChoice: boolean;
+  isRunning: boolean;
   start: () => void;
   stop: () => void;
 }
 
 export interface PickerChoiceProps {
-  isRunning: boolean;
-  choice: Game;
   afterClick: () => void;
+  choice: Game;
+  isRunning: boolean;
 }
 
 export interface PickerProps {
-  items: Game[];
   closeDialog: () => void;
+  items: Game[];
 }

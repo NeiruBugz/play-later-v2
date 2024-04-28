@@ -1,10 +1,7 @@
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
-
-import { FullGameInfoResponse } from "@/lib/types/igdb";
-
 import { StoreIcon } from "@/app/(protected)/library/components/game/ui/game-info/store-icon";
+import { Button } from "@/components/ui/button";
+import { FullGameInfoResponse } from "@/lib/types/igdb";
+import Link from "next/link";
 
 export const Stores = ({
   stores,
@@ -20,9 +17,9 @@ export const Stores = ({
         return game?.url?.includes("twitch") ? null : (
           <Button key={game.id} size="sm" variant="secondary">
             <Link
+              className="my-2 flex items-center gap-2 whitespace-nowrap text-sm font-medium text-gray-500 transition hover:text-gray-700"
               href={game.url}
               target="_blank"
-              className="my-2 flex items-center gap-2 whitespace-nowrap text-sm font-medium text-gray-500 transition hover:text-gray-700"
             >
               {game.name}
               <StoreIcon storeName={game.url} />

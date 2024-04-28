@@ -1,17 +1,16 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getServerUserId } from "@/auth";
-import { Game, Playthrough } from "@prisma/client";
-
 import { prisma } from "@/lib/prisma";
+import { Game, Playthrough } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 export const createPlaythrough = async ({
   gameId,
   payload,
 }: {
   gameId: Game["id"];
-  payload: Omit<Playthrough, "id" | "userId" | "gameId">;
+  payload: Omit<Playthrough, "gameId" | "id" | "userId">;
 }) => {
   try {
     const session = await getServerUserId();
@@ -22,21 +21,21 @@ export const createPlaythrough = async ({
 
     await prisma.playthrough.create({
       data: {
-        label: payload.label,
-        platform: payload.platform,
         createdAt: new Date(),
-        startedAt: payload.startedAt,
-        finishedAt: payload.finishedAt,
-        updatedAt: null,
         deletedAt: null,
-        user: {
-          connect: {
-            id: session,
-          },
-        },
+        finishedAt: payload.finishedAt,
         game: {
           connect: {
             id: gameId,
+          },
+        },
+        label: payload.label,
+        platform: payload.platform,
+        startedAt: payload.startedAt,
+        updatedAt: null,
+        user: {
+          connect: {
+            id: session,
           },
         },
       },

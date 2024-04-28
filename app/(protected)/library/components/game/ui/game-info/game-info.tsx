@@ -1,15 +1,3 @@
-import Image from "next/image";
-
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-
-import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
-
 import { ActionsMenu } from "@/app/(protected)/library/components/game/ui/game-info/actions-menu";
 import { HowLongToBeat } from "@/app/(protected)/library/components/game/ui/game-info/how-long-to-beat";
 import { Platforms } from "@/app/(protected)/library/components/game/ui/game-info/platforms";
@@ -22,22 +10,31 @@ import { Summary } from "@/app/(protected)/library/components/game/ui/game-info/
 import { Websites } from "@/app/(protected)/library/components/game/ui/game-info/websites";
 import { uniqueRecords } from "@/app/(protected)/library/lib/helpers";
 import type { GameResponseCombined } from "@/app/(protected)/library/lib/types/actions";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
+import Image from "next/image";
 
 export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
   const {
-    summary,
-    name,
-    status,
+    cover,
+    external_games,
+    gameplayCompletionist,
     gameplayMain,
     gameplayMainExtra,
-    gameplayCompletionist,
+    genres,
+    name,
     release_dates,
     screenshots,
-    external_games,
-    websites,
     similar_games,
-    cover,
-    genres,
+    status,
+    summary,
+    websites,
   } = game;
   return (
     <section>
@@ -54,7 +51,7 @@ export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
             </div>
             <div className="text-center text-gray-500 dark:text-gray-400 md:text-start">
               {genres.map((genre) => (
-                <Badge variant="outline" className="mr-1" key={genre.id}>
+                <Badge className="mr-1" key={genre.id} variant="outline">
                   {genre.name}
                 </Badge>
               ))}
@@ -68,12 +65,12 @@ export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
           <div className="flex flex-col gap-1">
             <div className="relative aspect-[3/4] h-fit w-[264px] flex-shrink-0 cursor-pointer rounded-md border transition">
               <Image
-                width={NEXT_IMAGE_SIZES["c-big"].width}
-                height={NEXT_IMAGE_SIZES["c-big"].height}
-                src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${cover?.image_id}.png`}
                 alt={`${game.name} artwork`}
                 className="rounded-md object-cover"
+                height={NEXT_IMAGE_SIZES["c-big"].height}
                 priority
+                src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${cover?.image_id}.png`}
+                width={NEXT_IMAGE_SIZES["c-big"].width}
               />
             </div>
             <PlaythroughDialog id={game.id} platforms={release_dates} />
@@ -89,17 +86,17 @@ export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
           <Playthroughs id={game.id} platforms={uniqueRecords(release_dates)} />
           <Platforms platformList={uniqueRecords(release_dates)} />
           <HowLongToBeat
+            completionist={gameplayCompletionist}
             main={gameplayMain}
             mainExtra={gameplayMainExtra}
-            completionist={gameplayCompletionist}
           />
         </div>
       </div>
-      <Accordion type="single" collapsible>
+      <Accordion collapsible type="single">
         <AccordionItem value="screenshots">
           <AccordionTrigger>Screenshots</AccordionTrigger>
           <AccordionContent>
-            <Screenshots screenshots={screenshots} name={name} />
+            <Screenshots name={name} screenshots={screenshots} />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="websites">

@@ -1,10 +1,9 @@
+import type { RenderWhenProps } from "@/lib/types/ui";
 import type { PropsWithChildren } from "react";
 
-import type { RenderWhenProps } from "@/lib/types/ui";
-
 export function RenderWhen({
-  condition,
   children,
+  condition,
   fallback,
 }: PropsWithChildren<RenderWhenProps>) {
   if (condition) {

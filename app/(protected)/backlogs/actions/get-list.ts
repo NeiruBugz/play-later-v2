@@ -1,7 +1,6 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-
 import { prisma } from "@/lib/prisma";
 
 type BackloggedWithUser = {
@@ -9,8 +8,8 @@ type BackloggedWithUser = {
   imageUrl: string;
   title: string;
   user: {
-    name?: string | null;
-    username?: string | null;
+    name?: null | string;
+    username?: null | string;
   };
 };
 
@@ -41,14 +40,6 @@ export const getList = async () => {
     }
 
     const allBackloggedGames = await prisma.game.findMany({
-      where: {
-        status: "BACKLOG",
-        NOT: {
-          userId: {
-            equals: session,
-          },
-        },
-      },
       select: {
         id: true,
         imageUrl: true,
@@ -59,6 +50,14 @@ export const getList = async () => {
             username: true,
           },
         },
+      },
+      where: {
+        NOT: {
+          userId: {
+            equals: session,
+          },
+        },
+        status: "BACKLOG",
       },
     });
 

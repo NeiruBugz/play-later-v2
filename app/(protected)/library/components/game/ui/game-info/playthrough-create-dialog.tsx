@@ -1,6 +1,4 @@
-import { Game } from "@prisma/client";
-import { z } from "zod";
-
+import { createPlaythrough } from "@/app/(protected)/library/lib/actions/create-playthrough";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,19 +16,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { FullGameInfoResponse } from "@/lib/types/igdb";
-
-import { createPlaythrough } from "@/app/(protected)/library/lib/actions/create-playthrough";
+import { Game } from "@prisma/client";
+import { z } from "zod";
 
 const createPlaythroughSchema = z.object({
+  createdAt: z.date(),
+  deletedAt: z.date().optional().nullable(),
+  finishedAt: z.date().optional().nullable(),
   label: z.string().default("Playthrough #1"),
   platform: z.string(),
   startedAt: z.date(),
-  finishedAt: z.date().optional().nullable(),
-  createdAt: z.date(),
   updatedAt: z.date().optional().nullable(),
-  deletedAt: z.date().optional().nullable(),
 });
 
 export const PlaythroughDialog = ({
@@ -47,21 +44,21 @@ export const PlaythroughDialog = ({
   async function createPlaythroughAction(data: FormData) {
     "use server";
     const payload = {
+      createdAt: new Date(),
+      finishedAt: data.get("finishedAt")
+        ? new Date(data.get("finishedAt") as string)
+        : undefined,
       label: data.get("label"),
       platform: data.get("platform"),
       startedAt: data.get("startedAt")
         ? new Date(data.get("startedAt") as string)
         : new Date(),
-      finishedAt: data.get("finishedAt")
-        ? new Date(data.get("finishedAt") as string)
-        : undefined,
-      createdAt: new Date(),
     };
     const parsed = createPlaythroughSchema.safeParse(payload);
 
     if (parsed.success) {
       const data = {
-        ...{ finishedAt: null, updatedAt: null, deletedAt: null },
+        ...{ deletedAt: null, finishedAt: null, updatedAt: null },
         ...parsed.data,
       };
       await createPlaythrough({ gameId: id, payload: data });
@@ -78,17 +75,17 @@ export const PlaythroughDialog = ({
       <DialogContent>
         <DialogTitle>Add a Playthrough</DialogTitle>
         <form
-          className="flex flex-col gap-4"
           action={createPlaythroughAction}
+          className="flex flex-col gap-4"
           id="create-playthrough-form"
         >
           <Label>
             Playthrough label
             <Input
+              className="mt-2"
+              defaultValue="Playthrough #1"
               name="label"
               placeholder="Enter a name for your playthrough"
-              defaultValue="Playthrough #1"
-              className="mt-2"
             />
           </Label>
           <Label>
@@ -99,16 +96,16 @@ export const PlaythroughDialog = ({
                 defaultValue={platforms[0].platform.name}
               >
                 <SelectValue
-                  placeholder="Select a platform"
                   defaultValue={platforms[0].platform.name}
+                  placeholder="Select a platform"
                 />
               </SelectTrigger>
               <SelectContent>
                 {platforms.map((platform) => {
                   return (
                     <SelectItem
-                      value={platform.platform.name}
                       key={platform.platform.id}
+                      value={platform.platform.name}
                     >
                       {platform.platform.name}
                     </SelectItem>
@@ -120,19 +117,19 @@ export const PlaythroughDialog = ({
           <div className="flex justify-between gap-4">
             <Label className="w-full">
               Start Date
-              <Input type="date" name="startedAt" className="mt-2" />
+              <Input className="mt-2" name="startedAt" type="date" />
             </Label>
             <Label className="w-full">
               Finish Date
-              <Input type="date" name="finishedAt" className="mt-2" />
+              <Input className="mt-2" name="finishedAt" type="date" />
             </Label>
           </div>
         </form>
         <DialogFooter>
-          <Button type="reset" form="create-playthrough-form">
+          <Button form="create-playthrough-form" type="reset">
             Cancel
           </Button>
-          <Button type="submit" form="create-playthrough-form">
+          <Button form="create-playthrough-form" type="submit">
             Save
           </Button>
         </DialogFooter>

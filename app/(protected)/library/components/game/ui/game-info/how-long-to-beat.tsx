@@ -8,13 +8,13 @@ const BeatingTime = ({ label, time }: { label: string; time: number }) => (
 );
 
 export const HowLongToBeat = ({
+  completionist,
   main,
   mainExtra,
-  completionist,
 }: {
+  completionist: number;
   main: number;
   mainExtra: number;
-  completionist: number;
 }) => (
   <section>
     <h3 className="my-2 scroll-m-20 text-2xl font-semibold tracking-tight">

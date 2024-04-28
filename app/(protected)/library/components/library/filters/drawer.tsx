@@ -1,5 +1,5 @@
-import { SlidersVertical } from "lucide-react";
-
+import { FiltersForm } from "@/app/(protected)/library/components/library/filters/form";
+import { type LibraryFiltersUIProps } from "@/app/(protected)/library/components/library/filters/types";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -9,13 +9,11 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-
-import { FiltersForm } from "@/app/(protected)/library/components/library/filters/form";
-import { type LibraryFiltersUIProps } from "@/app/(protected)/library/components/library/filters/types";
+import { SlidersVertical } from "lucide-react";
 
 function LibraryFiltersDrawer({ open, setOpen }: LibraryFiltersUIProps) {
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer onOpenChange={setOpen} open={open}>
       <DrawerTrigger asChild>
         <Button variant="outline">
           <SlidersVertical className="mr-2 size-4" /> Filters

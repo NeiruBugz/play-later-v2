@@ -1,13 +1,11 @@
-import { Suspense } from "react";
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-
-import { LibraryPageProps } from "@/lib/types/library";
-
 import { LibraryContent } from "@/app/(protected)/library/components/library/page/content";
 import { Header } from "@/app/(protected)/library/components/library/page/header";
 import { ListSkeleton } from "@/app/(protected)/library/components/library/page/list-skeleton";
 import { getGamesListWithAdapter } from "@/app/(protected)/library/lib/actions/get-games";
+import { auth } from "@/auth";
+import { LibraryPageProps } from "@/lib/types/library";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const session = await auth();
@@ -17,7 +15,7 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   }
 
   const params = new URLSearchParams(searchParams);
-  const { list, currentStatus, totalBacklogTime, backlogged } =
+  const { backlogged, currentStatus, list, totalBacklogTime } =
     await getGamesListWithAdapter(params);
   const viewMode = params?.get("viewMode") ?? "list";
   return (
@@ -26,11 +24,11 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
       <section className="container bg-background">
         <Suspense fallback={<ListSkeleton viewMode={viewMode} />}>
           <LibraryContent
-            viewMode={viewMode}
             backloggedLength={backlogged.length}
-            list={list}
             currentStatus={currentStatus}
+            list={list}
             totalBacklogTime={totalBacklogTime}
+            viewMode={viewMode}
           />
         </Suspense>
       </section>

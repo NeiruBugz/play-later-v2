@@ -1,12 +1,11 @@
-import React from "react";
-import { GameStatus, PurchaseType } from "@prisma/client";
-
 import {
   DescriptionPurchaseTypeMapping,
   DescriptionStatusMapping,
   mapPlatformToSelectOption,
   uppercaseToNormal,
 } from "@/lib/utils";
+import { GameStatus, PurchaseType } from "@prisma/client";
+import React from "react";
 
 export function FormDescription() {
   return (
@@ -16,8 +15,8 @@ export function FormDescription() {
       <ul>
         {Object.entries(GameStatus).map(([key, value]) => (
           <li
-            key={key}
             className="border-b py-1 text-xs leading-7 last-of-type:border-none md:text-[14px]"
+            key={key}
           >
             {mapPlatformToSelectOption(value)} -{" "}
             {DescriptionStatusMapping[value]}
@@ -28,8 +27,8 @@ export function FormDescription() {
       <ul>
         {Object.entries(PurchaseType).map(([key, value]) => (
           <li
-            key={key}
             className="border-b py-1 text-xs leading-7 last-of-type:border-none md:text-[14px]"
+            key={key}
           >
             {uppercaseToNormal(value)} - {DescriptionPurchaseTypeMapping[value]}
           </li>

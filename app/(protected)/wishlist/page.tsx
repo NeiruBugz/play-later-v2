@@ -1,13 +1,10 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-
-import { RenderWhen } from "@/components/render-when";
-
-import { cn } from "@/lib/utils";
-
 import { Card } from "@/app/(protected)/library/components/game/ui/card/card";
 import { WishlistShare } from "@/app/(protected)/library/components/game/ui/wishlist-share";
 import { getGamesFromWishlist } from "@/app/(protected)/wishlist/lib/actions";
+import { auth } from "@/auth";
+import { RenderWhen } from "@/components/render-when";
+import { cn } from "@/lib/utils";
+import { redirect } from "next/navigation";
 
 export default async function WishlistPage() {
   const session = await auth();
@@ -37,7 +34,7 @@ export default async function WishlistPage() {
             )}
           >
             {wishlist.map((game) => (
-              <Card key={game.id} game={game} path="wishlist" />
+              <Card game={game} key={game.id} path="wishlist" />
             ))}
           </section>
         </section>

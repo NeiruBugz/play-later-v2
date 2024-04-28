@@ -1,16 +1,13 @@
-import "@/styles/globals.css";
-
-import { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
-import Providers from "@/providers";
-import NextTopLoader from "nextjs-toploader";
-
-import { Toaster } from "@/components/ui/toaster";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
-
+import { Toaster } from "@/components/ui/toaster";
 import { siteConfig } from "@/lib/config/site";
 import type { RootLayoutProps } from "@/lib/types/layout";
 import { cn } from "@/lib/utils";
+import Providers from "@/providers";
+import "@/styles/globals.css";
+import { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 
 export const viewport: Viewport = {
   themeColor: [

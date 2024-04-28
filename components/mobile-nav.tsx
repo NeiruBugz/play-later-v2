@@ -1,21 +1,19 @@
-import { type ReactNode } from "react";
-
+import { NavLink } from "@/components/nav-link";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { NavLink } from "@/components/nav-link";
-
 import { NavItem } from "@/lib/types/nav";
+import { type ReactNode } from "react";
 
 export function MobileNav({
-  trigger,
   items,
+  trigger,
 }: {
-  trigger: ReactNode;
   items: NavItem[];
+  trigger: ReactNode;
 }) {
   return (
     <DropdownMenu>
@@ -24,7 +22,7 @@ export function MobileNav({
         {items.map(
           (item, index) =>
             item.href && (
-              <NavLink key={`${index}_${item.title}_nav`} item={item}>
+              <NavLink item={item} key={`${index}_${item.title}_nav`}>
                 <DropdownMenuItem>{item.title}</DropdownMenuItem>
               </NavLink>
             )

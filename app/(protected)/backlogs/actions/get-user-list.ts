@@ -1,7 +1,6 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-
 import { prisma } from "@/lib/prisma";
 
 export const getUserList = async ({ name }: { name: string }) => {
@@ -12,23 +11,23 @@ export const getUserList = async ({ name }: { name: string }) => {
     }
 
     const userBackloggedGames = await prisma.game.findMany({
+      select: {
+        id: true,
+        imageUrl: true,
+        title: true,
+      },
       where: {
-        status: "BACKLOG",
         NOT: {
           userId: {
             equals: session,
           },
         },
+        status: "BACKLOG",
         user: {
           name: {
             equals: name.replace("%20", " "),
           },
         },
-      },
-      select: {
-        id: true,
-        imageUrl: true,
-        title: true,
       },
     });
 

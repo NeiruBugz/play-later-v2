@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { siteConfig } from "@/lib/config/site";
+import Link from "next/link";
 
 export function SiteFooter() {
   return (
@@ -8,13 +7,13 @@ export function SiteFooter() {
       <div className="flex h-fit items-center gap-2">
         <p className="font-medium">Play Later {new Date().getFullYear()}</p>
         <Link
+          className="hover:underline"
           href={siteConfig.links.discord}
           target="_blank"
-          className="hover:underline"
         >
           Discord
         </Link>
-        <Link href={"/privacy-policy"} className="hover:underline">
+        <Link className="hover:underline" href={"/privacy-policy"}>
           Privacy Policy
         </Link>
       </div>

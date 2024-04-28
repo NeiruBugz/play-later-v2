@@ -1,6 +1,5 @@
-import { Game, GameStatus } from "@prisma/client";
-
 import { FullGameInfoResponse } from "@/lib/types/igdb";
+import { Game, GameStatus } from "@prisma/client";
 
 export const calculateTotalBacklogTime = (backlogged: Game[]): number => {
   return backlogged.reduce(
@@ -10,20 +9,20 @@ export const calculateTotalBacklogTime = (backlogged: Game[]): number => {
 };
 
 export const getListBasedOnStatus = ({
-  currentStatus,
-  inprogress,
   abandoned,
   backlogged,
   completed,
+  currentStatus,
   fullyCompleted,
+  inprogress,
   shelved,
 }: {
-  currentStatus: GameStatus;
-  inprogress: Game[];
   abandoned: Game[];
   backlogged: Game[];
   completed: Game[];
+  currentStatus: GameStatus;
   fullyCompleted: Game[];
+  inprogress: Game[];
   shelved: Game[];
 }): Game[] => {
   switch (currentStatus) {

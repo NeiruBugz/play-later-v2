@@ -1,8 +1,6 @@
 "use client";
 
-import React from "react";
-import { Loader2 } from "lucide-react";
-
+import { RenderWhen } from "@/components/render-when";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Command,
@@ -11,16 +9,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { RenderWhen } from "@/components/render-when";
-
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
 import { useSearch } from "@/lib/query";
 import { SearchResponse } from "@/lib/types/igdb";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+import React from "react";
 
 export function GamePicker({
-  selectedGame,
   onGameSelect,
+  selectedGame,
   width,
 }: {
   onGameSelect: (game: SearchResponse) => void;
@@ -35,7 +33,7 @@ export function GamePicker({
 
   return (
     <Command className="w-full" style={{ width: width }}>
-      <CommandInput onValueChange={(value) => void search(value)} autoFocus />
+      <CommandInput autoFocus onValueChange={(value) => void search(value)} />
       <CommandList>
         <RenderWhen condition={isPending}>
           <CommandEmpty className="flex items-center justify-center">
@@ -51,16 +49,16 @@ export function GamePicker({
                   "font-bold": selectedGame === result.id,
                 }
               )}
-              key={result.id}
-              value={`${result.name}_${result.id}`}
-              onSelect={() => onGameSelect(result)}
               data-disabled="true"
+              key={result.id}
+              onSelect={() => onGameSelect(result)}
+              value={`${result.name}_${result.id}`}
             >
               <div className="flex items-center gap-2">
                 <Avatar className="rounded-md">
                   <AvatarImage
-                    className="object-cover"
                     alt={result.name}
+                    className="object-cover"
                     src={`${IMAGE_API}/${IMAGE_SIZES["micro"]}/${result.cover.image_id}.png`}
                   />
                   <AvatarFallback>{result.name}</AvatarFallback>

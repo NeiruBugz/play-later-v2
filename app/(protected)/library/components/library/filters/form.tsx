@@ -1,7 +1,4 @@
-import { ReactNode, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, ChevronUp } from "lucide-react";
-
+import { type LibraryFiltersUIProps } from "@/app/(protected)/library/components/library/filters/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { type LibraryFiltersUIProps } from "@/app/(protected)/library/components/library/filters/types";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactNode, useMemo, useState } from "react";
 
 const DefaultSortState = {
   order: "desc",
@@ -23,10 +21,10 @@ const DefaultSortState = {
 const sortingFields = ["updatedAt", "gameplayTime", "createdAt"];
 
 const mapper = {
-  updatedAt: "Updated",
-  gameplayTime: "Time to beat the story",
   createdAt: "Creation date",
+  gameplayTime: "Time to beat the story",
   purchaseType: "Purchase type",
+  updatedAt: "Updated",
 };
 function FiltersForm({
   toggleOpen,
@@ -38,23 +36,23 @@ function FiltersForm({
   const { replace } = useRouter();
 
   const [filters, setFilters] = useState({
-    search: searchParams?.get("search") ?? "",
-    sortBy: searchParams?.get("sortBy") ?? DefaultSortState.sortBy,
     order: searchParams?.get("order") ?? DefaultSortState.order,
     purchaseType: searchParams?.get("purchase") ?? "",
+    search: searchParams?.get("search") ?? "",
+    sortBy: searchParams?.get("sortBy") ?? DefaultSortState.sortBy,
   });
 
   const onChange = (
     value: string,
-    key: "search" | "sort" | "platform" | "purchase"
+    key: "platform" | "purchase" | "search" | "sort"
   ) => {
     console.log(value, key);
     if (key === "sort") {
       const [sortBy, order] = value.split("-");
       setFilters((prev) => ({
         ...prev,
-        sortBy,
         order,
+        sortBy,
       }));
     }
 
@@ -102,25 +100,25 @@ function FiltersForm({
   };
 
   const options = useMemo(() => {
-    const options: Array<{ value: string; label: ReactNode }> = [];
+    const options: Array<{ label: ReactNode; value: string }> = [];
     sortingFields.forEach((value) => {
       options.push({
-        value: `${value}-asc`,
         label: (
           <div className="flex h-6 items-center gap-4 ">
             {mapper[value as keyof typeof mapper]}{" "}
             <ChevronUp className="size-4" />
           </div>
         ),
+        value: `${value}-asc`,
       });
       options.push({
-        value: `${value}-desc`,
         label: (
           <div className="flex h-6 items-center gap-4">
             {mapper[value as keyof typeof mapper]}{" "}
             <ChevronDown className="size-4" />
           </div>
         ),
+        value: `${value}-desc`,
       });
     });
 
@@ -132,14 +130,14 @@ function FiltersForm({
       <Label className="flex flex-col gap-2">
         <span>Search</span>
         <Input
+          onChange={(e) => handleSearch(e.target.value)}
           placeholder="Search within your library"
           value={filters.search}
-          onChange={(e) => handleSearch(e.target.value)}
         />
       </Label>
       <Select
-        value={`${filters.sortBy}-${filters.order}`}
         onValueChange={(value) => onChange(value, "sort")}
+        value={`${filters.sortBy}-${filters.order}`}
       >
         <div>
           <Label className="my-2 block">Sort</Label>
@@ -148,7 +146,7 @@ function FiltersForm({
           </SelectTrigger>
           <SelectContent>
             {options.map((value) => (
-              <SelectItem value={value.value} key={value.value}>
+              <SelectItem key={value.value} value={value.value}>
                 {value.label}
               </SelectItem>
             ))}
@@ -156,8 +154,8 @@ function FiltersForm({
         </div>
       </Select>
       <Select
-        value={`${filters.purchaseType}`}
         onValueChange={(value) => onChange(value, "purchase")}
+        value={`${filters.purchaseType}`}
       >
         <div>
           <Label className="my-2 block">Purchase type</Label>
@@ -172,7 +170,7 @@ function FiltersForm({
         </div>
       </Select>
       <footer className="flex items-center justify-between pt-2">
-        <Button variant="secondary" onClick={onClear}>
+        <Button onClick={onClear} variant="secondary">
           Clear filters
         </Button>
         <Button onClick={onApply}>Apply</Button>

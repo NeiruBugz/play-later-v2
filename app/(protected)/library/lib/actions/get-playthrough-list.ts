@@ -1,9 +1,8 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-import { Game } from "@prisma/client";
-
 import { prisma } from "@/lib/prisma";
+import { Game } from "@prisma/client";
 
 export const getPlaythroughList = async ({ id }: { id: Game["id"] }) => {
   try {
@@ -14,12 +13,12 @@ export const getPlaythroughList = async ({ id }: { id: Game["id"] }) => {
     }
 
     return prisma.playthrough.findMany({
+      orderBy: {
+        startedAt: "desc",
+      },
       where: {
         gameId: id,
         userId: session,
-      },
-      orderBy: {
-        startedAt: "desc",
       },
     });
   } catch (e) {

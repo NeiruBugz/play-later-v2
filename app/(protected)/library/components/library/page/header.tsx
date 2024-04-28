@@ -1,15 +1,14 @@
-import { LibraryHeaderProps } from "@/lib/types/library";
-
 import { ClearFilters } from "@/app/(protected)/library/components/library/filters/clear-filters";
 import { LibraryFiltersWrapper } from "@/app/(protected)/library/components/library/filters/filters";
 import { LibraryNavigation } from "@/app/(protected)/library/components/library/navigation";
 import { ViewModeToggle } from "@/app/(protected)/library/components/library/page/view-mode-toggle";
 import { PickerDialog } from "@/app/(protected)/library/components/library/pick-random-game/picker-dialog";
 import { countGamesPerStatus } from "@/app/(protected)/library/lib/actions/get-games";
+import { LibraryHeaderProps } from "@/lib/types/library";
 
 export async function Header({
-  currentStatus,
   backlogged,
+  currentStatus,
 }: LibraryHeaderProps) {
   const counts = await countGamesPerStatus();
   return (

@@ -1,12 +1,10 @@
-import Image from "next/image";
-import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-
 import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
 import igdbApi from "@/lib/igdb-api";
+import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default async function LoginPage() {
   const session = await auth();
@@ -38,17 +36,17 @@ export default async function LoginPage() {
             {trendingGames?.map((game) => {
               return (
                 <Image
-                  key={game.id}
-                  src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
                   alt={`${game.name} cover`}
                   className="mb-2 rounded-md"
-                  width={NEXT_IMAGE_SIZES["logo"].width}
                   height={NEXT_IMAGE_SIZES["logo"].height}
-                  style={{
-                    width: 120,
-                    height: "auto",
-                  }}
+                  key={game.id}
                   priority
+                  src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
+                  style={{
+                    height: "auto",
+                    width: 120,
+                  }}
+                  width={NEXT_IMAGE_SIZES["logo"].width}
                 />
               );
             })}

@@ -1,10 +1,9 @@
+import { cn } from "@/lib/utils";
 import { PropsWithChildren } from "react";
 
-import { cn } from "@/lib/utils";
-
 export function List({
-  viewMode,
   children,
+  viewMode,
 }: PropsWithChildren<{ viewMode: "grid" | "list" }>) {
   return (
     <section className="flex w-full flex-col">

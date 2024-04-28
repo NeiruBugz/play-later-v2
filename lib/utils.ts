@@ -19,10 +19,10 @@ export function platformEnumToColor(value: string) {
   const fromHLTB = value.toLowerCase();
 
   const platformMapping = {
-    PLAYSTATION: "playstation",
-    XBOX: "xbox",
     NINTENDO: "nintendo",
     PC: "pc",
+    PLAYSTATION: "playstation",
+    XBOX: "xbox",
   };
 
   const forHTLB = () => {
@@ -74,11 +74,11 @@ export function nameFirstLiterals(name: string) {
 
 export function mapStatusForInfo(value: GameStatus) {
   const statusMapping = {
+    ABANDONED: "Abandoned",
     BACKLOG: "Backlogged",
-    INPROGRESS: "Playing",
     COMPLETED: "Completed",
     FULL_COMPLETION: "100% Complete",
-    ABANDONED: "Abandoned",
+    INPROGRESS: "Playing",
     SHELVED: "Shelved",
   };
 
@@ -113,8 +113,8 @@ export const DescriptionPurchaseTypeMapping: Record<PurchaseType, string> = {
 };
 
 export const PurchaseTypeToFormLabel: Record<PurchaseType, string> = {
-  PHYSICAL: "Physical",
   DIGITAL: "Digital",
+  PHYSICAL: "Physical",
   SUBSCRIPTION: "Subscription",
 };
 

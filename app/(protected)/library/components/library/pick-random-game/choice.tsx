@@ -1,13 +1,10 @@
-import { memo } from "react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
-
 import { updateStatus } from "@/app/(protected)/library/lib/actions/update-game";
 import type { PickerChoiceProps } from "@/app/(protected)/library/lib/types/components";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
+import { memo } from "react";
 
-function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
+function PickerChoice({ afterClick, choice, isRunning }: PickerChoiceProps) {
   const onClick = async () => {
     if (isRunning) {
       return;
@@ -28,11 +25,11 @@ function PickerChoice({ choice, isRunning, afterClick }: PickerChoiceProps) {
       {!isRunning ? (
         <Avatar className="size-[90px] rounded-md">
           <AvatarImage
-            className="size-[90px] object-cover"
-            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${choice.imageUrl}.png`}
             alt={choice.title}
-            width={90}
+            className="size-[90px] object-cover"
             height={90}
+            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${choice.imageUrl}.png`}
+            width={90}
           />
           <AvatarFallback>{choice.title}</AvatarFallback>
         </Avatar>

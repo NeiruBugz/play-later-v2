@@ -1,6 +1,6 @@
 export interface NavItem {
-  title: string;
-  href?: string | null;
   disabled?: boolean;
   external?: boolean;
+  href?: null | string;
+  title: string;
 }

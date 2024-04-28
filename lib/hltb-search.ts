@@ -1,6 +1,6 @@
 import { HowLongToBeatService } from "howlongtobeat";
 
-export async function searchHowLongToBeat(query?: string | null) {
+export async function searchHowLongToBeat(query?: null | string) {
   if (!query) {
     return [];
   }

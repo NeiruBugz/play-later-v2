@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { LayoutGrid, List } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import { LayoutGrid, List } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 
 export const ViewModeToggle = () => {
   const searchParams = useSearchParams();
@@ -14,7 +13,7 @@ export const ViewModeToggle = () => {
   const viewMode = searchParams?.get("viewMode") || "list";
 
   const onViewModeChange = useCallback(
-    (mode: "list" | "grid") => {
+    (mode: "grid" | "list") => {
       const newSearchParams = new URLSearchParams(
         searchParams ?? new URLSearchParams()
       );
@@ -29,9 +28,9 @@ export const ViewModeToggle = () => {
   if (viewMode === "list") {
     return (
       <Button
+        onClick={() => onViewModeChange("grid")}
         size="icon"
         variant="outline"
-        onClick={() => onViewModeChange("grid")}
       >
         <List className="size-4" />
       </Button>
@@ -40,9 +39,9 @@ export const ViewModeToggle = () => {
 
   return (
     <Button
+      onClick={() => onViewModeChange("list")}
       size="icon"
       variant="outline"
-      onClick={() => onViewModeChange("list")}
     >
       <LayoutGrid className="size-4" />
     </Button>

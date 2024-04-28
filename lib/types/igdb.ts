@@ -9,8 +9,8 @@ type Company = {
 };
 
 type PlatformWithReleaseDate = {
-  id: number;
   human: string;
+  id: number;
   name: string;
 };
 
@@ -20,8 +20,8 @@ type GameCover = {
 };
 
 type ExternalGame = {
-  id: number;
   category: number;
+  id: number;
   name: string;
   url: string;
 };
@@ -42,9 +42,9 @@ type Genre = {
 };
 
 type InvolvedCompany = {
-  id: number;
   company: Company;
   developer: boolean;
+  id: number;
   publisher: boolean;
 };
 
@@ -54,8 +54,8 @@ type PlayerPerspective = {
 };
 
 type ReleaseDate = {
-  id: number;
   human: string;
+  id: number;
   platform: PlatformWithReleaseDate;
 };
 
@@ -65,9 +65,9 @@ type Screenshot = {
 };
 
 type SimilarGame = {
+  cover: GameCover;
   id: number;
   name: string;
-  cover: GameCover;
 };
 
 type Theme = {
@@ -76,15 +76,15 @@ type Theme = {
 };
 
 type Website = {
-  id: number;
   category: number;
+  id: number;
   trusted: boolean;
   url: string;
 };
 
 export type RequestOptions = {
-  resource: string;
   body?: string;
+  resource: string;
 };
 
 export type TwitchTokenResponse = {
@@ -94,39 +94,39 @@ export type TwitchTokenResponse = {
 };
 
 export type RatedGameResponse = {
-  id: number;
   cover: GameCover;
+  id: number;
   name: string;
 };
 
 export type GenresResponse = {
-  id: number;
   genres: Genre[];
+  id: number;
 };
 
 export type FullGameInfoResponse = {
-  id: number;
-  name: string;
   aggregated_rating: number;
   cover: GameCover;
-  summary: string;
-  themes: Theme[];
   external_games: ExternalGame[];
   game_engines: GameEngine[];
-  websites: Website[];
-  similar_games: SimilarGame[];
-  screenshots: Screenshot[];
-  release_dates: ReleaseDate[];
-  player_perspectives: PlayerPerspective[];
-  involved_companies: InvolvedCompany[];
-  genres: Genre[];
   game_modes: GameMode[];
+  genres: Genre[];
+  id: number;
+  involved_companies: InvolvedCompany[];
+  name: string;
+  player_perspectives: PlayerPerspective[];
+  release_dates: ReleaseDate[];
+  screenshots: Screenshot[];
+  similar_games: SimilarGame[];
+  summary: string;
+  themes: Theme[];
+  websites: Website[];
 };
 
 export type SearchResponse = {
+  cover: GameCover;
+  first_release_date: number;
   id: number;
   name: string;
   platforms: Array<Platform>;
-  cover: GameCover;
-  first_release_date: number;
 };

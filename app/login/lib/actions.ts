@@ -1,11 +1,10 @@
 "use server";
 
+import { getServerUserId } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getServerUserId } from "@/auth";
-import { Prisma } from "@prisma/client";
-
-import { prisma } from "@/lib/prisma";
 
 export async function getUserById(id: string) {
   try {
@@ -36,8 +35,8 @@ export async function getUserData() {
 
     if (user) {
       return user as {
-        id: string;
         email: string | undefined;
+        id: string;
         name: string | undefined;
         username: string | undefined;
       };
@@ -55,11 +54,11 @@ export async function setUserName(payload: Prisma.UserUpdateInput) {
       throw new Error("Empty payload");
     }
     await prisma.user.update({
-      where: {
-        id: payload.id as string,
-      },
       data: {
         username: payload.username,
+      },
+      where: {
+        id: payload.id as string,
       },
     });
   } catch (error) {

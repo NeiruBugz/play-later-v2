@@ -1,15 +1,14 @@
 "use client";
 
-import { PropsWithChildren } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
 import { NavItem } from "@/lib/types/nav";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { PropsWithChildren } from "react";
 
 export function NavLink({
-  item,
   children,
+  item,
 }: PropsWithChildren<{ item: NavItem }>) {
   const pathname = usePathname();
 
@@ -18,7 +17,6 @@ export function NavLink({
 
   return item.href ? (
     <Link
-      href={item.href}
       className={cn(
         "flex items-center text-pretty font-medium text-muted-foreground hover:underline hover:underline-offset-1",
         {
@@ -26,6 +24,7 @@ export function NavLink({
           "font-bold text-foreground": isActive,
         }
       )}
+      href={item.href}
       target={item.external ? "_blank" : "_parent"}
     >
       {children ? children : item.title}

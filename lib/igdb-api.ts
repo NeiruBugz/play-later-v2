@@ -1,5 +1,4 @@
 import { env } from "@/env.mjs";
-
 import { API_URL, TOKEN_URL } from "@/lib/config/site";
 import {
   FullGameInfoResponse,
@@ -63,11 +62,38 @@ const fullGameInfo = `
 ;`;
 
 const igdbApi = {
-  token: null as TwitchTokenResponse | null,
+  async getGameById(
+    gameId: null | number
+  ): Promise<FullGameInfoResponse[] | undefined> {
+    if (!gameId) return;
+    return this.request({
+      body: `${fullGameInfo} where id = (${gameId});`,
+      resource: "/games",
+    });
+  },
+
+  async getGameGenres(
+    gameId: null | number
+  ): Promise<Array<GenresResponse> | undefined> {
+    if (!gameId) return;
+
+    return this.request({
+      body: `fields genres.name; where id = (${gameId});`,
+      resource: "/games",
+    });
+  },
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async getGamesByRating(): Promise<RatedGameResponse[] | undefined> {
+    return this.request({
+      body: gamesByRating,
+      resource: "/games",
+    });
+  },
 
   async getToken(): Promise<void> {
     try {
-      const res = await fetch(TOKEN_URL, { method: "POST", cache: "no-store" });
+      const res = await fetch(TOKEN_URL, { cache: "no-store", method: "POST" });
       this.token = await res.json();
     } catch (thrown) {
       const error = asError(thrown);
@@ -82,12 +108,12 @@ const igdbApi = {
   }: RequestOptions): Promise<T | undefined> {
     try {
       const response = await fetch(`${API_URL}${resource}`, {
-        method: "POST",
         headers: {
           Accept: "application/json",
-          "Client-ID": env.IGDB_CLIENT_ID,
           Authorization: `Bearer ${this.token?.access_token}`,
+          "Client-ID": env.IGDB_CLIENT_ID,
         },
+        method: "POST",
         ...options,
       });
 
@@ -99,40 +125,11 @@ const igdbApi = {
     }
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getGamesByRating(): Promise<RatedGameResponse[] | undefined> {
-    return this.request({
-      resource: "/games",
-      body: gamesByRating,
-    });
-  },
-
-  async getGameById(
-    gameId: number | null
-  ): Promise<FullGameInfoResponse[] | undefined> {
-    if (!gameId) return;
-    return this.request({
-      resource: "/games",
-      body: `${fullGameInfo} where id = (${gameId});`,
-    });
-  },
-
-  async getGameGenres(
-    gameId: number | null
-  ): Promise<Array<GenresResponse> | undefined> {
-    if (!gameId) return;
-
-    return this.request({
-      resource: "/games",
-      body: `fields genres.name; where id = (${gameId});`,
-    });
-  },
-
   async search({
     name = "",
     ...fields
   }: {
-    name: string | null;
+    name: null | string;
   }): Promise<SearchResponse[] | undefined> {
     if (!name) return;
     let str = "";
@@ -142,7 +139,6 @@ const igdbApi = {
     }
 
     return this.request({
-      resource: "/games",
       body: `
       fields
         name,
@@ -155,8 +151,11 @@ const igdbApi = {
         ${str};
       ${name ? `search "${name}";` : ""}
       limit 100;`,
+      resource: "/games",
     });
   },
+
+  token: null as TwitchTokenResponse | null,
 };
 
 await igdbApi.getToken();

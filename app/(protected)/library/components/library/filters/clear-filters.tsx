@@ -1,9 +1,8 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export const ClearFilters = () => {
   const searchParams = useSearchParams();
@@ -19,7 +18,7 @@ export const ClearFilters = () => {
   };
 
   return (
-    <Button variant="ghost" onClick={onClick}>
+    <Button onClick={onClick} variant="ghost">
       <X className="mr-1 size-4" />
       Clear filters
     </Button>

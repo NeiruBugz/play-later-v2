@@ -1,16 +1,14 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { getServerUserId } from "@/auth";
-
-import { prisma } from "@/lib/prisma";
-
 import { getPlaythrough } from "@/app/(protected)/library/lib/actions/get-playthrough";
+import { getServerUserId } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export const updatePlaythrough = async ({
   payload,
 }: {
-  payload: { id: string; label: string; startedAt: Date; finishedAt?: Date };
+  payload: { finishedAt?: Date; id: string; label: string; startedAt: Date };
 }) => {
   try {
     const session = await getServerUserId();
@@ -22,13 +20,13 @@ export const updatePlaythrough = async ({
     const playthrough = await getPlaythrough({ id: payload.id });
     if (playthrough) {
       await prisma.playthrough.update({
-        where: {
-          id: payload.id,
-        },
         data: {
+          finishedAt: payload.finishedAt ? payload.finishedAt : undefined,
           label: payload.label,
           startedAt: payload.startedAt,
-          finishedAt: payload.finishedAt ? payload.finishedAt : undefined,
+        },
+        where: {
+          id: payload.id,
         },
       });
       revalidatePath(`/library/${playthrough.gameId}`);

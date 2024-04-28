@@ -1,8 +1,5 @@
-import { Game } from "@prisma/client";
-import { format } from "date-fns";
-import { Pencil } from "lucide-react";
-import { z } from "zod";
-
+import { getPlaythrough } from "@/app/(protected)/library/lib/actions/get-playthrough";
+import { updatePlaythrough } from "@/app/(protected)/library/lib/actions/update-playthrough";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,17 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { FullGameInfoResponse } from "@/lib/types/igdb";
-
-import { getPlaythrough } from "@/app/(protected)/library/lib/actions/get-playthrough";
-import { updatePlaythrough } from "@/app/(protected)/library/lib/actions/update-playthrough";
+import { Game } from "@prisma/client";
+import { format } from "date-fns";
+import { Pencil } from "lucide-react";
+import { z } from "zod";
 
 const editPlaythroughSchema = z.object({
+  finishedAt: z.date().optional(),
   label: z.string().default("Playthrough #1"),
   platform: z.string(),
   startedAt: z.date(),
-  finishedAt: z.date().optional(),
 });
 
 export const PlaythroughEditDialog = async ({
@@ -49,15 +46,15 @@ export const PlaythroughEditDialog = async ({
   async function editPlaythroughAction(data: FormData) {
     "use server";
     const payload = {
+      createdAt: new Date(),
+      finishedAt: data.get("finishedAt")
+        ? new Date(data.get("finishedAt") as string)
+        : undefined,
       label: data.get("label"),
       platform: data.get("platform"),
       startedAt: data.get("startedAt")
         ? new Date(data.get("startedAt") as string)
         : new Date(),
-      finishedAt: data.get("finishedAt")
-        ? new Date(data.get("finishedAt") as string)
-        : undefined,
-      createdAt: new Date(),
     };
     const parsed = editPlaythroughSchema.safeParse(payload);
 
@@ -75,41 +72,41 @@ export const PlaythroughEditDialog = async ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="icon" variant="outline" className="flex-shrink-0">
+        <Button className="flex-shrink-0" size="icon" variant="outline">
           <Pencil className="size-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogTitle>Edit a Playthrough</DialogTitle>
         <form
-          className="flex flex-col gap-4"
           action={editPlaythroughAction}
+          className="flex flex-col gap-4"
           id="create-playthrough-form"
         >
           <Label>
             Playthrough label
             <Input
+              className="mt-2"
+              defaultValue={data.label}
               name="label"
               placeholder="Enter a name for your playthrough"
-              defaultValue={data.label}
-              className="mt-2"
             />
           </Label>
           <Label>
             Platform of choice
-            <Select name="platform" defaultValue={data.platform}>
+            <Select defaultValue={data.platform} name="platform">
               <SelectTrigger className="mt-2">
                 <SelectValue
-                  placeholder="Select a platform"
                   defaultValue={data.platform}
+                  placeholder="Select a platform"
                 />
               </SelectTrigger>
               <SelectContent>
                 {platforms.map((platform) => {
                   return (
                     <SelectItem
-                      value={platform.platform.name}
                       key={platform.platform.id}
+                      value={platform.platform.name}
                     >
                       {platform.platform.name}
                     </SelectItem>
@@ -122,29 +119,29 @@ export const PlaythroughEditDialog = async ({
             <Label className="w-full">
               Start Date
               <Input
-                type="date"
-                name="startedAt"
                 className="mt-2"
                 defaultValue={format(data.startedAt, "yyyy-MM-dd")}
+                name="startedAt"
+                type="date"
               />
             </Label>
             <Label className="w-full">
               Finish Date
               <Input
-                type="date"
-                name="finishedAt"
                 className="mt-2"
                 defaultValue={
                   data.finishedAt
                     ? format(data.finishedAt, "yyyy-MM-dd")
                     : undefined
                 }
+                name="finishedAt"
+                type="date"
               />
             </Label>
           </div>
         </form>
         <DialogFooter>
-          <Button type="submit" form="create-playthrough-form">
+          <Button form="create-playthrough-form" type="submit">
             Save
           </Button>
         </DialogFooter>

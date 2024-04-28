@@ -5,27 +5,27 @@ export type LibraryPageProps = {
 };
 
 export type LibraryContentProps = {
-  list: Game[];
-  currentStatus: string;
-  totalBacklogTime: number;
   backloggedLength: number;
+  currentStatus: string;
+  list: Game[];
+  totalBacklogTime: number;
 };
 
 export type LibraryHeaderProps = {
-  currentStatus: string;
   backlogged: Game[];
+  currentStatus: string;
 };
 
 export type LibraryData = {
-  list: Game[];
-  currentStatus: string;
-  totalBacklogTime: number;
   backlogged: Game[];
+  currentStatus: string;
+  list: Game[];
+  totalBacklogTime: number;
 };
 
 export type FilterKeys =
-  | "platform"
-  | "sortBy"
   | "order"
+  | "platform"
+  | "purchaseType"
   | "search"
-  | "purchaseType";
+  | "sortBy";

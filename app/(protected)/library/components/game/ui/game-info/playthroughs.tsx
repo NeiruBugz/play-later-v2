@@ -1,9 +1,7 @@
-import { Game } from "@prisma/client";
-
-import { FullGameInfoResponse } from "@/lib/types/igdb";
-
 import { PlaythroughItem } from "@/app/(protected)/library/components/game/ui/game-info/playthrough-item";
 import { getPlaythroughList } from "@/app/(protected)/library/lib/actions/get-playthrough-list";
+import { FullGameInfoResponse } from "@/lib/types/igdb";
+import { Game } from "@prisma/client";
 
 export const Playthroughs = async ({
   id,
@@ -26,11 +24,11 @@ export const Playthroughs = async ({
       <div className="flex flex-col gap-2">
         {list.map((playthrough) => (
           <PlaythroughItem
+            id={playthrough.id}
+            key={playthrough.id}
             label={playthrough.label}
             platform={playthrough.platform}
-            id={playthrough.id}
             platforms={platforms}
-            key={playthrough.id}
           />
         ))}
       </div>

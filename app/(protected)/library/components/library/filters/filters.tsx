@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useMediaQuery } from "usehooks-ts";
-
 import { LibraryFiltersDrawer } from "@/app/(protected)/library/components/library/filters/drawer";
 import { LibraryFiltersSheet } from "@/app/(protected)/library/components/library/filters/sheet";
+import { useState } from "react";
+import { useMediaQuery } from "usehooks-ts";
 
 function LibraryFiltersWrapper() {
   const [open, setOpen] = useState(false);

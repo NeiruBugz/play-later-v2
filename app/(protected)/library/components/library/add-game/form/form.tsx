@@ -1,12 +1,7 @@
 "use client";
 
-import React, { useRef } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { GameStatus, PurchaseType } from "@prisma/client";
-import { nanoid } from "nanoid";
-import { useForm } from "react-hook-form";
-import { FaSpinner } from "react-icons/fa6";
-
+import { GamePicker } from "@/app/(protected)/library/components/library/add-game/game-picker";
+import { saveGameToLibrary } from "@/app/(protected)/library/lib/actions/save-to-library";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,14 +26,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-
 import { IMAGE_API, IMAGE_SIZES } from "@/lib/config/site";
 import type { SearchResponse } from "@/lib/types/igdb";
 import { cn, mapStatusForInfo, PurchaseTypeToFormLabel } from "@/lib/utils";
-
-import { GamePicker } from "@/app/(protected)/library/components/library/add-game/game-picker";
-import { saveGameToLibrary } from "@/app/(protected)/library/lib/actions/save-to-library";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { GameStatus, PurchaseType } from "@prisma/client";
+import { nanoid } from "nanoid";
+import React, { useRef } from "react";
+import { useForm } from "react-hook-form";
+import { FaSpinner } from "react-icons/fa6";
 import { FormDescription } from "./description";
 import { addGameSchema, type AddGameSchema } from "./validation";
 
@@ -52,12 +48,12 @@ export function AddForm({
   withDescription?: boolean;
 }) {
   const form = useForm<AddGameSchema>({
-    resolver: zodResolver(addGameSchema),
     defaultValues: {
-      title: "",
       purchaseType: "DIGITAL",
       status: "BACKLOG",
+      title: "",
     },
+    resolver: zodResolver(addGameSchema),
   });
   const { toast } = useToast();
   const isWishlisted = form.watch("isWishlist");
@@ -68,19 +64,19 @@ export function AddForm({
   >(undefined);
   const [isPickerOpen, setPickerOpen] = React.useState(false);
 
-  const showToast = (type: "success" | "error", name: string) => {
+  const showToast = (type: "error" | "success", name: string) => {
     if (type === "success") {
       toast({
-        title: "Success",
         description: `${name} was successfully added to your games`,
+        title: "Success",
       });
       return;
     }
 
     if (type === "error") {
       toast({
-        title: "Oops, something happened",
         description: `We couldn't add ${name} to your games`,
+        title: "Oops, something happened",
         variant: "destructive",
       });
       return;
@@ -100,34 +96,34 @@ export function AddForm({
     if (!selectedGame) {
       return;
     }
-    const { purchaseType, status, title, isWishlist } = values;
+    const { isWishlist, purchaseType, status, title } = values;
     const {
-      id: idgbId,
       cover: { image_id },
+      id: idgbId,
     } = selectedGame;
     try {
       const howLongToBeatResponse = await fetch(`/api/hltb-search?q=${title}`);
       const gameData = {
-        igdbId: idgbId,
-        id: nanoid(),
         createdAt: new Date(),
-        updatedAt: new Date(),
+        deletedAt: null,
+        id: nanoid(),
+        igdbId: idgbId,
         imageUrl: image_id,
-        status: status || null,
-        title,
-        purchaseType: purchaseType ? purchaseType : "DIGITAL",
         isWishlisted: Boolean(isWishlist),
+        purchaseType: purchaseType ? purchaseType : "DIGITAL",
         rating: null,
         review: null,
-        deletedAt: null,
+        status: status || null,
+        title,
+        updatedAt: new Date(),
       };
       if (howLongToBeatResponse.ok) {
         const response = await howLongToBeatResponse.json();
         const withHLTB = {
           ...gameData,
           ...{
-            howLongToBeatId: response.id,
             gameplayTime: response.gameplayTime,
+            howLongToBeatId: response.id,
           },
         };
         await saveGameToLibrary(withHLTB);
@@ -141,8 +137,8 @@ export function AddForm({
         const withoutHLTB = {
           ...gameData,
           ...{
-            howLongToBeatId: undefined,
             gameplayTime: undefined,
+            howLongToBeatId: undefined,
           },
         };
         await saveGameToLibrary(withoutHLTB);
@@ -163,7 +159,7 @@ export function AddForm({
       {isCompact ? null : (
         <Popover modal onOpenChange={setPickerOpen} open={isPickerOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="mb-4 w-full" ref={triggerRef}>
+            <Button className="mb-4 w-full" ref={triggerRef} variant="outline">
               Find a game
             </Button>
           </PopoverTrigger>
@@ -181,9 +177,9 @@ export function AddForm({
           <div className="flex items-center gap-2 font-medium">
             <Avatar className="rounded-md">
               <AvatarImage
+                alt={selectedGame.name}
                 className="object-center"
                 src={`${IMAGE_API}/${IMAGE_SIZES["micro"]}/${selectedGame.cover.image_id}.png`}
-                alt={selectedGame.name}
               />
               <AvatarFallback>{selectedGame.name}</AvatarFallback>
             </Avatar>
@@ -193,8 +189,8 @@ export function AddForm({
       ) : null}
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
           className={cn("space-y-4 overflow-auto", { hidden: !selectedGame })}
+          onSubmit={form.handleSubmit(onSubmit)}
         >
           <FormField
             control={form.control}
@@ -207,8 +203,8 @@ export function AddForm({
                 >
                   Is it wishlisted game?
                   <Checkbox
-                    id="isWishlist"
                     checked={field.value}
+                    id="isWishlist"
                     onCheckedChange={field.onChange}
                   />
                 </FormLabel>
@@ -217,8 +213,8 @@ export function AddForm({
           />
           <FormField
             control={form.control}
-            name="status"
             disabled={isWishlisted}
+            name="status"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="block">Status</FormLabel>
@@ -250,10 +246,10 @@ export function AddForm({
                 <FormLabel className="block">Purchase type</FormLabel>
                 <FormControl>
                   <RadioGroup
+                    className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
+                    defaultValue={field.value}
                     disabled={isWishlisted}
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
                   >
                     {Object.keys(PurchaseType).map((key) => (
                       <FormItem
@@ -262,13 +258,12 @@ export function AddForm({
                       >
                         <FormControl key={key}>
                           <RadioGroupItem
-                            value={key}
-                            id={key}
                             className="sr-only"
+                            id={key}
+                            value={key}
                           />
                         </FormControl>
                         <FormLabel
-                          htmlFor={key}
                           className={cn(
                             "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
                             "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
@@ -278,6 +273,7 @@ export function AddForm({
                                 form.getValues().purchaseType === key,
                             }
                           )}
+                          htmlFor={key}
                         >
                           {PurchaseTypeToFormLabel[key as PurchaseType]}
                         </FormLabel>

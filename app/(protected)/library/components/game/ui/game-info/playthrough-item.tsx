@@ -1,14 +1,11 @@
-import { Playthrough } from "@prisma/client";
-import { Trash } from "lucide-react";
-
+import { PlaythroughEditDialog } from "@/app/(protected)/library/components/game/ui/game-info/playthrough-edit-dialog";
 import { Badge, ColorVariant } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
 import { prisma } from "@/lib/prisma";
 import { FullGameInfoResponse } from "@/lib/types/igdb";
 import { platformEnumToColor } from "@/lib/utils";
-
-import { PlaythroughEditDialog } from "@/app/(protected)/library/components/game/ui/game-info/playthrough-edit-dialog";
+import { Playthrough } from "@prisma/client";
+import { Trash } from "lucide-react";
 
 export const PlaythroughItem = ({
   id,
@@ -27,8 +24,8 @@ export const PlaythroughItem = ({
         <span className="whitespace-nowrap font-medium">{label}</span>
         {platform ? (
           <Badge
-            variant={platformEnumToColor(platform) as ColorVariant}
             className="w-fit whitespace-nowrap"
+            variant={platformEnumToColor(platform) as ColorVariant}
           >
             {platform}
           </Badge>
@@ -42,7 +39,7 @@ export const PlaythroughItem = ({
           await prisma.playthrough.delete({ where: { id } });
         }}
       >
-        <Button size="icon" variant="destructive" type="submit">
+        <Button size="icon" type="submit" variant="destructive">
           <Trash className="size-4" />
         </Button>
       </form>
