@@ -91,9 +91,6 @@
     "*.{ts,tsx}": [
       "sh -c tsc --noEmit",
       "eslint --quiet --fix"
-    ],
-    "*.{json,md,html,ts,tsx}": [
-      "prettier --write"
     ]
   }
 }
