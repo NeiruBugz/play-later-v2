@@ -1,4 +1,4 @@
-import { FullGameInfoResponse } from "@/lib/types/igdb";
+import { FullGameInfoResponse } from "@/src/lib/types/igdb";
 import { Game, GameStatus } from "@prisma/client";
 
 export const calculateTotalBacklogTime = (backlogged: Game[]): number => {

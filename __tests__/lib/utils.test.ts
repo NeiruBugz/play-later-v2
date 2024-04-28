@@ -1,15 +1,14 @@
-import { expect, test } from "vitest";
-
 import {
   nameFirstLiterals,
   platformEnumToColor,
   uppercaseToNormal,
-} from "@/lib/utils";
+} from "@/src/lib/utils";
+import { expect, test } from "vitest";
 
 const nameMocks = [
-  { name: "", expected: "U" },
-  { name: "Test User", expected: "TU" },
-  { name: "Test", expected: "T" },
+  { expected: "U", name: "" },
+  { expected: "TU", name: "Test User" },
+  { expected: "T", name: "Test" },
 ];
 
 test("nameFirstLiterals", () => {

@@ -1,8 +1,12 @@
 import { auth } from "@/auth";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
-import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
-import igdbApi from "@/lib/igdb-api";
+import { SiteFooter } from "@/src/components/shared/page-footer";
+import { SiteHeader } from "@/src/components/shared/page-header";
+import {
+  IMAGE_API,
+  IMAGE_SIZES,
+  NEXT_IMAGE_SIZES,
+} from "@/src/lib/config/site";
+import igdbApi from "@/src/lib/igdb-api";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 

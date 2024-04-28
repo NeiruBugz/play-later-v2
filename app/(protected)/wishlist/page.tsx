@@ -1,9 +1,9 @@
-import { Card } from "@/app/(protected)/library/components/game/ui/card/card";
-import { WishlistShare } from "@/app/(protected)/library/components/game/ui/wishlist-share";
-import { getGamesFromWishlist } from "@/app/(protected)/wishlist/lib/actions";
 import { auth } from "@/auth";
-import { RenderWhen } from "@/components/render-when";
-import { cn } from "@/lib/utils";
+import { getGamesFromWishlist } from "@/src/actions/wishlist/get-games-from-wishlist";
+import { Card } from "@/src/components/library/game/ui/card/card";
+import { WishlistShare } from "@/src/components/library/game/ui/wishlist-share";
+import { RenderWhen } from "@/src/components/render-when";
+import { cn } from "@/src/lib/utils";
 import { redirect } from "next/navigation";
 
 export default async function WishlistPage() {

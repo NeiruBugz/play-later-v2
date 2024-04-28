@@ -4,8 +4,8 @@ import {
   TrendingListSkeleton,
 } from "@/app/login/components/trending-list";
 import { auth } from "@/auth";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/src/components/shared/page-footer";
+import { SiteHeader } from "@/src/components/shared/page-header";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 

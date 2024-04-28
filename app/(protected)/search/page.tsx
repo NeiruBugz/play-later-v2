@@ -1,7 +1,11 @@
-import type { SearchPageProps } from "@/app/(protected)/search/lib/types";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
-import igdbApi from "@/lib/igdb-api";
+import { ScrollArea } from "@/src/components/ui/scroll-area";
+import {
+  IMAGE_API,
+  IMAGE_SIZES,
+  NEXT_IMAGE_SIZES,
+} from "@/src/lib/config/site";
+import igdbApi from "@/src/lib/igdb-api";
+import { SearchPageProps } from "@/src/types/search";
 import Image from "next/image";
 import Link from "next/link";
 

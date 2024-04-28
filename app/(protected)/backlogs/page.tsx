@@ -1,8 +1,12 @@
-import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
-import { isURL } from "@/lib/utils";
+import { getList } from "@/src/actions/backlogs/get-list";
+import {
+  IMAGE_API,
+  IMAGE_SIZES,
+  NEXT_IMAGE_SIZES,
+} from "@/src/lib/config/site";
+import { isURL } from "@/src/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { getList } from "./actions/get-list";
 
 type BackloggedWithUser = {
   id: string;
@@ -33,11 +37,9 @@ export default async function BacklogsPage() {
                 <Link
                   className="w-fit text-lg font-medium"
                   href={`/backlogs/${backlogKey}`}
+                  key={backlogKey}
                 >
-                  <div
-                    className="relative h-full w-fit min-w-[270px] rounded-md border p-3"
-                    key={backlogKey}
-                  >
+                  <div className="relative h-full w-fit min-w-[270px] rounded-md border p-3">
                     <p className="text-lg font-medium">
                       {backlogKey}&apos;s backlog
                     </p>

@@ -1,9 +1,9 @@
-import { LibraryContent } from "@/app/(protected)/library/components/library/page/content";
-import { Header } from "@/app/(protected)/library/components/library/page/header";
-import { ListSkeleton } from "@/app/(protected)/library/components/library/page/list-skeleton";
-import { getGamesListWithAdapter } from "@/app/(protected)/library/lib/actions/get-games";
 import { auth } from "@/auth";
-import { LibraryPageProps } from "@/lib/types/library";
+import { getGamesListWithAdapter } from "@/src/actions/library/get-games";
+import { LibraryContent } from "@/src/components/library/library/page/content";
+import { Header } from "@/src/components/library/library/page/header";
+import { ListSkeleton } from "@/src/components/library/library/page/list-skeleton";
+import { LibraryPageProps } from "@/src/types/library/components";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 

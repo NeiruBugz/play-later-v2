@@ -1,4 +1,4 @@
-import { searchHowLongToBeat } from "@/lib/hltb-search";
+import { searchHowLongToBeat } from "@/src/lib/hltb-search";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

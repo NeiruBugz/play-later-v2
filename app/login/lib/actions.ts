@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/src/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

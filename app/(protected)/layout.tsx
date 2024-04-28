@@ -1,5 +1,5 @@
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/src/components/shared/page-footer";
+import { SiteHeader } from "@/src/components/shared/page-header";
 import { PropsWithChildren } from "react";
 
 export default function LibraryLayout({ children }: PropsWithChildren) {

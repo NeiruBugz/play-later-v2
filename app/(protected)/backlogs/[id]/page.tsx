@@ -1,5 +1,5 @@
-import { getUserList } from "@/app/(protected)/backlogs/actions/get-user-list";
-import { List } from "@/app/(protected)/library/components/library/page/list";
+import { getUserList } from "@/src/actions/backlogs/get-user-list";
+import { List } from "@/src/components/shared/list";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,9 +7,13 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
-import { isURL } from "@/lib/utils";
+} from "@/src/components/ui/breadcrumb";
+import {
+  IMAGE_API,
+  IMAGE_SIZES,
+  NEXT_IMAGE_SIZES,
+} from "@/src/lib/config/site";
+import { isURL } from "@/src/lib/utils";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 

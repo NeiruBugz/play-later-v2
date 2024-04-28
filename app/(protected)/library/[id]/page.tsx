@@ -1,6 +1,6 @@
-import { GameInfo } from "@/app/(protected)/library/components/game/ui/game-info/game-info";
-import { getGameWithAdapter } from "@/app/(protected)/library/lib/actions/get-game";
 import { auth } from "@/auth";
+import { getGameWithAdapter } from "@/src/actions/library/get-game";
+import { GameInfo } from "@/src/components/library/game/ui/game-info/game-info";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,7 +8,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@/src/components/ui/breadcrumb";
 import { notFound, redirect } from "next/navigation";
 
 export default async function GamePage({ params }: { params: { id: string } }) {

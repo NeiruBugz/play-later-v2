@@ -1,6 +1,10 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { IMAGE_API, IMAGE_SIZES, NEXT_IMAGE_SIZES } from "@/lib/config/site";
-import igdbApi from "@/lib/igdb-api";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import {
+  IMAGE_API,
+  IMAGE_SIZES,
+  NEXT_IMAGE_SIZES,
+} from "@/src/lib/config/site";
+import igdbApi from "@/src/lib/igdb-api";
 import Image from "next/image";
 
 const placeholderArray = Array.from({ length: 12 }, (_, index) => index + 1);
