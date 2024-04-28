@@ -1,4 +1,4 @@
-import { getUserById } from "@/app/login/lib/actions";
+import { getUserById } from "@/src/actions/auth/actions";
 import { getGamesFromWishlist } from "@/src/actions/wishlist/get-games-from-wishlist";
 import { WishlistedGameShared } from "@/src/components/library/game/ui/wishlisted-game.shared";
 import { SharedWishlistPageProps } from "@/src/types/wishlist";

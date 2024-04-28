@@ -1,5 +1,5 @@
-import { SignIn } from "@/app/login/components/sign-in";
 import { auth } from "@/auth";
+import { SignIn } from "@/src/components/auth/sign-in";
 import { Logo } from "@/src/components/logo";
 import { MainNav } from "@/src/components/main-nav";
 import { AddGame } from "@/src/components/shared/add-game/add-game";

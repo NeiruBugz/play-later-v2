@@ -1,5 +1,5 @@
-import { getUserData } from "@/app/login/lib/actions";
 import userPic from "@/images/userpic.png";
+import { getUserData } from "@/src/actions/auth/actions";
 import { SignOut } from "@/src/components/sign-out";
 import { ThemeToggle } from "@/src/components/theme-toggle";
 import {

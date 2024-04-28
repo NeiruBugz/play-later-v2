@@ -1,9 +1,9 @@
-import { SignIn } from "@/app/login/components/sign-in";
+import { auth } from "@/auth";
+import { SignIn } from "@/src/components/auth/sign-in";
 import {
   TrendingList,
   TrendingListSkeleton,
-} from "@/app/login/components/trending-list";
-import { auth } from "@/auth";
+} from "@/src/components/auth/trending-list";
 import { SiteFooter } from "@/src/components/shared/page-footer";
 import { SiteHeader } from "@/src/components/shared/page-header";
 import { redirect } from "next/navigation";

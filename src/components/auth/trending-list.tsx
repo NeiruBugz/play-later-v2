@@ -13,7 +13,7 @@ export const TrendingListSkeleton = () => (
   <div className="columns-3">
     {placeholderArray.map((index) => (
       <Skeleton
-        className="mb-4 h-[190px] w-[140px]"
+        className="mb-4 h-[160px] w-[120px]"
         key={Math.random() * index}
       />
     ))}
