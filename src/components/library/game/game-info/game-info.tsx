@@ -1,15 +1,15 @@
 import type { GameResponseCombined } from "@/src/types/library/actions";
 
-import { ActionsMenu } from "@/src/components/library/game/ui/game-info/actions-menu";
-import { HowLongToBeat } from "@/src/components/library/game/ui/game-info/how-long-to-beat";
-import { Platforms } from "@/src/components/library/game/ui/game-info/platforms";
-import { PlaythroughDialog } from "@/src/components/library/game/ui/game-info/playthrough/playthrough-create-dialog";
-import { Playthroughs } from "@/src/components/library/game/ui/game-info/playthrough/playthroughs";
-import { Screenshots } from "@/src/components/library/game/ui/game-info/screenshots";
-import { SimilarGames } from "@/src/components/library/game/ui/game-info/similar-games";
-import { Stores } from "@/src/components/library/game/ui/game-info/store/stores";
-import { Summary } from "@/src/components/library/game/ui/game-info/summary";
-import { Websites } from "@/src/components/library/game/ui/game-info/website/websites";
+import { ActionsMenu } from "@/src/components/library/game/game-info/actions-menu";
+import { HowLongToBeat } from "@/src/components/library/game/game-info/how-long-to-beat";
+import { Platforms } from "@/src/components/library/game/game-info/platforms";
+import { PlaythroughDialog } from "@/src/components/library/game/game-info/playthrough/playthrough-create-dialog";
+import { Playthroughs } from "@/src/components/library/game/game-info/playthrough/playthroughs";
+import { Screenshots } from "@/src/components/library/game/game-info/screenshots";
+import { SimilarGames } from "@/src/components/library/game/game-info/similar-games";
+import { Stores } from "@/src/components/library/game/game-info/store/stores";
+import { Summary } from "@/src/components/library/game/game-info/summary";
+import { Websites } from "@/src/components/library/game/game-info/website/websites";
 import {
   Accordion,
   AccordionContent,

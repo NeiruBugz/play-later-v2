@@ -27,7 +27,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { PurchaseTypeToFormLabel, cn, mapStatusForInfo } from "@/src/packages/utils";
+import {
+  PurchaseTypeToFormLabel,
+  cn,
+  mapStatusForInfo,
+} from "@/src/packages/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GameStatus, PurchaseType } from "@prisma/client";
 import { nanoid } from "nanoid";
@@ -36,6 +40,7 @@ import { useForm } from "react-hook-form";
 import { FaSpinner } from "react-icons/fa6";
 
 import { FormDescription } from "./description";
+
 
 export function AddForm({
   isCompact = false,
@@ -152,7 +157,7 @@ export function AddForm({
                   Is it wishlisted game?
                   <Checkbox
                     checked={field.value}
-                    id="isWishlist"
+                    name={field.name}
                     onCheckedChange={field.onChange}
                   />
                 </FormLabel>
@@ -165,9 +170,9 @@ export function AddForm({
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block">Status</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
+                <FormLabel className="block" htmlFor="status">Status</FormLabel>
+                <Select name="status" onValueChange={field.onChange} value={field.value}>
+                  <FormControl id="status">
                     <SelectTrigger>
                       <SelectValue placeholder="Select your platform" />
                     </SelectTrigger>
@@ -191,13 +196,15 @@ export function AddForm({
             name="purchaseType"
             render={({ field }) => (
               <FormItem className="">
-                <FormLabel className="block">Purchase type</FormLabel>
+                <FormLabel className="block" htmlFor="purchaseType">Purchase type</FormLabel>
                 <FormControl>
                   <RadioGroup
                     className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
                     defaultValue={field.value}
                     disabled={isWishlisted}
+                    id="purchaseType"
                     onValueChange={field.onChange}
+                    {...field}
                   >
                     {Object.keys(PurchaseType).map((key) => (
                       <FormItem

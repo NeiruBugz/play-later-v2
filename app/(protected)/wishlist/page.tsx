@@ -1,10 +1,11 @@
 import { auth } from "@/auth";
 import { getGamesFromWishlist } from "@/src/actions/wishlist/get-games-from-wishlist";
-import { Card } from "@/src/components/library/game/ui/card/card";
-import { WishlistShare } from "@/src/components/library/game/ui/wishlist-share";
 import { RenderWhen } from "@/src/components/render-when";
+import { Card } from "@/src/components/shared/game-card/card";
+import { WishlistShare } from "@/src/components/wishlist/wishlist-share";
 import { cn } from "@/src/packages/utils";
 import { redirect } from "next/navigation";
+
 
 export default async function WishlistPage() {
   const session = await auth();

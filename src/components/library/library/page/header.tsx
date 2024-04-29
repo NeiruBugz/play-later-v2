@@ -1,16 +1,18 @@
-import { countGamesPerStatus } from "@/src/actions/library/get-games";
+import {
+  countGamesPerStatus,
+  getBackloggedGames,
+} from "@/src/actions/library/get-games";
 import { ClearFilters } from "@/src/components/library/library/filters/clear-filters";
 import { LibraryFiltersWrapper } from "@/src/components/library/library/filters/filters";
 import { LibraryNavigation } from "@/src/components/library/library/navigation";
 import { ViewModeToggle } from "@/src/components/library/library/page/view-mode-toggle";
 import { PickerDialog } from "@/src/components/library/library/pick-random-game/picker-dialog";
-import { LibraryHeaderProps } from "@/src/types/library/components";
 
-export async function Header({
-  backlogged,
-  currentStatus,
-}: LibraryHeaderProps) {
+
+export async function Header() {
   const counts = await countGamesPerStatus();
+  const backlogged = await getBackloggedGames();
+
   return (
     <header className="container sticky top-0 z-40 bg-background">
       <div className="flex flex-wrap justify-between">
@@ -27,7 +29,7 @@ export async function Header({
             <ViewModeToggle />
           </div>
         </div>
-        <PickerDialog currentStatus={currentStatus} items={backlogged} />
+        <PickerDialog items={backlogged ?? []} />
       </section>
     </header>
   );

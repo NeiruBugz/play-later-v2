@@ -1,16 +1,12 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-import {
-  calculateTotalBacklogTime,
-  getListBasedOnStatus,
-} from "@/src/packages/library/client-helpers";
-import { updateBackloggedGames } from "@/src/packages/library/server-helpers";
+import { calculateTotalBacklogTime } from "@/src/packages/library/client-helpers";
 import { prisma } from "@/src/packages/prisma";
+import { commonErrorHandler, sessionErrorHandler } from "@/src/packages/utils";
 import { FetcherAndProcessor } from "@/src/types/library/actions";
 import { FilterKeys } from "@/src/types/library/components";
 import { type Game, GameStatus, PurchaseType } from "@prisma/client";
-
 
 export const getGames = async (
   filters: Record<FilterKeys, string | undefined>
@@ -31,6 +27,7 @@ export const getGames = async (
       purchaseType: filters.purchaseType
         ? (filters.purchaseType as PurchaseType)
         : undefined,
+      status: filters.status ? (filters.status as GameStatus) : undefined,
       title: {
         contains: filters.search || "",
       },
@@ -38,21 +35,12 @@ export const getGames = async (
     },
   });
 
-  return {
-    abandoned: games.filter((game) => game.status === GameStatus.ABANDONED),
-    backlogged: games.filter((game) => game.status === GameStatus.BACKLOG),
-    completed: games.filter((game) => game.status === GameStatus.COMPLETED),
-    fullCompletion: games.filter(
-      (game) => game.status === GameStatus.FULL_COMPLETION
-    ),
-    inprogress: games.filter((game) => game.status === GameStatus.INPROGRESS),
-    shelved: games.filter((game) => game.status === GameStatus.SHELVED),
-  };
+  return games;
 };
 
 export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   const platform = params.get("platform") ?? " ";
-  const currentStatus = (params.get("status") as GameStatus) ?? "BACKLOG";
+  const currentStatus = (params.get("status") as GameStatus) ?? "INPROGRESS";
   const searchQuery = params.get("search") ?? "";
   const purchaseType = params.get("purchase") ?? "";
 
@@ -62,36 +50,13 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
     purchaseType,
     search: searchQuery,
     sortBy: params.get("sortBy") ?? "updatedAt",
+    status: currentStatus,
   };
 
-  const {
-    abandoned,
-    backlogged,
-    completed,
-    fullCompletion,
-    inprogress,
-    shelved,
-  } = await getGames(filters);
-
-  await updateBackloggedGames(backlogged);
-
-  const totalBacklogTime = calculateTotalBacklogTime(backlogged);
-
-  const list = getListBasedOnStatus({
-    abandoned,
-    backlogged,
-    completed,
-    currentStatus,
-    fullyCompleted: fullCompletion,
-    inprogress,
-    shelved,
-  });
+  const games = await getGames(filters);
 
   return {
-    backlogged,
-    currentStatus,
-    list,
-    totalBacklogTime,
+    list: games,
   };
 };
 
@@ -100,6 +65,7 @@ export const countGamesPerStatus = async () => {
     const session = await getServerUserId();
 
     if (!session) {
+      sessionErrorHandler();
       return {
         [GameStatus.ABANDONED]: 0,
         [GameStatus.BACKLOG]: 0,
@@ -161,5 +127,71 @@ export const countGamesPerStatus = async () => {
     };
   } catch (error) {
     console.error(error);
+  }
+};
+
+export const getBackloggedGames = async () => {
+  try {
+    const session = await getServerUserId();
+
+    if (!session) {
+      sessionErrorHandler();
+      return [] as Game[];
+    }
+
+    const backlogged = await prisma.game.findMany({
+      where: {
+        deletedAt: null,
+        status: GameStatus.BACKLOG,
+        userId: session,
+      },
+    });
+
+    if (!backlogged) {
+      return [] as Game[];
+    }
+
+    return backlogged as Game[];
+  } catch (error) {
+    commonErrorHandler("Couldn't find records");
+  }
+};
+
+export const computeBacklogTime = async () => {
+  try {
+    const session = await getServerUserId();
+
+    if (!session) {
+      sessionErrorHandler();
+      return {
+        time: 0,
+      };
+    }
+    const backlogged = await prisma.game.findMany({
+      select: {
+        gameplayTime: true,
+      },
+      where: {
+        deletedAt: null,
+        status: GameStatus.BACKLOG,
+        userId: session,
+      },
+    });
+    if (!backlogged) {
+      return {
+        time: 0,
+      };
+    }
+
+    const totalTime = calculateTotalBacklogTime(backlogged);
+
+    return {
+      time: totalTime,
+    };
+  } catch (error) {
+    commonErrorHandler("Couldn't find records");
+    return {
+      time: 0,
+    };
   }
 };

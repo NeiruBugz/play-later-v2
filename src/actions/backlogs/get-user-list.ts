@@ -2,12 +2,15 @@
 
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
+import { sessionErrorHandler } from "@/src/packages/utils";
+
 
 export const getUserList = async ({ name }: { name: string }) => {
   try {
     const session = await getServerUserId();
     if (!session) {
-      throw new Error("Missing authentication");
+      sessionErrorHandler();
+      return;
     }
 
     return await prisma.game.findMany({

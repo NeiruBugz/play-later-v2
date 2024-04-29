@@ -3,6 +3,7 @@ import { GameStatus, PurchaseType } from "@prisma/client";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+
 const NINTENDO_PLATFORMS = [
   "wii u",
   "game boy advance",
@@ -156,3 +157,13 @@ export const groupByUserName = (data?: BackloggedWithUser[]) => {
   });
   return groupedData;
 };
+
+export const sessionErrorHandler = () => {
+  console.error("No authorization");
+  throw new Error("No authorization");
+}
+
+export const commonErrorHandler = (errorMessage: string) => {
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+}

@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { getUserList } from "@/src/actions/backlogs/get-user-list";
 import { List } from "@/src/components/shared/list";
 import {
@@ -15,9 +16,14 @@ import {
 } from "@/src/packages/config/site";
 import { isURL } from "@/src/packages/utils";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function Page(props: { params: { id: string } }) {
+  const session = await auth();
+
+  if (!session) {
+    redirect("/");
+  }
   const games = await getUserList({ name: props.params.id });
   if (!games) {
     notFound();

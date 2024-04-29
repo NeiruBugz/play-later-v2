@@ -1,5 +1,8 @@
+import { auth } from "@/auth";
 import { getList } from "@/src/actions/backlogs/get-list";
 import { UserBacklog } from "@/src/components/backlogs/user-backlog";
+import { redirect } from "next/navigation";
+
 
 type BackloggedWithUser = {
   id: string;
@@ -12,6 +15,12 @@ type BackloggedWithUser = {
 };
 
 export default async function BacklogsPage() {
+  const session = await auth();
+
+  if (!session) {
+    redirect('/')
+  }
+
   const backlogs = await getList();
   return (
     <section className="relative">

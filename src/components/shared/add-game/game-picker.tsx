@@ -1,5 +1,3 @@
-"use client";
-
 import { RenderWhen } from "@/src/components/render-when";
 import {
   Avatar,
@@ -19,6 +17,7 @@ import { SearchResponse } from "@/src/packages/types/igdb";
 import { cn } from "@/src/packages/utils";
 import { Loader2 } from "lucide-react";
 import React from "react";
+
 
 export function GamePicker({
   onGameSelect,

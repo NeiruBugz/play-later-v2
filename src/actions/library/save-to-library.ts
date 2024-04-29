@@ -1,10 +1,12 @@
 "use server";
 
-import { auth } from "@/auth";
+import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
+import { sessionErrorHandler } from "@/src/packages/utils";
 import { Prisma } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
+
 
 const LIBRARY_PATH = '/library?status="BACKLOG"';
 
@@ -12,9 +14,10 @@ export async function saveGameToLibrary(
   game: Omit<Prisma.GameCreateInput, "user">
 ) {
   try {
-    const userId = await auth();
-    if (!userId?.user || !userId.user.id) {
-      throw new Error("You must be logged in to save a game");
+    const userId = await getServerUserId();
+    if (!userId) {
+      sessionErrorHandler();
+      return;
     }
 
     const {
@@ -50,7 +53,7 @@ export async function saveGameToLibrary(
         status,
         title,
         updatedAt,
-        userId: userId.user?.id,
+        userId,
       },
     });
   } catch (e) {

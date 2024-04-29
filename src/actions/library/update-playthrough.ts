@@ -3,7 +3,9 @@
 import { getServerUserId } from "@/auth";
 import { getPlaythrough } from "@/src/actions/library/get-playthrough";
 import { prisma } from "@/src/packages/prisma";
+import { commonErrorHandler, sessionErrorHandler } from "@/src/packages/utils";
 import { revalidatePath } from "next/cache";
+
 
 export const updatePlaythrough = async ({
   payload,
@@ -14,7 +16,8 @@ export const updatePlaythrough = async ({
     const session = await getServerUserId();
 
     if (!session) {
-      throw new Error("");
+      sessionErrorHandler();
+      return;
     }
 
     const playthrough = await getPlaythrough({ id: payload.id });
@@ -31,7 +34,8 @@ export const updatePlaythrough = async ({
       });
       revalidatePath(`/library/${playthrough.gameId}`);
     } else {
-      throw new Error(`Couldn't find playthrough`);
+      commonErrorHandler("Playthrough not found");
+      return;
     }
   } catch (e) {
     console.error(e);

@@ -1,9 +1,10 @@
 import { getUserById } from "@/src/actions/auth/actions";
 import { getGamesFromWishlist } from "@/src/actions/wishlist/get-games-from-wishlist";
-import { WishlistedGameShared } from "@/src/components/library/game/ui/wishlisted-game.shared";
+import { WishlistedGameShared } from "@/src/components/wishlist/wishlisted-game.shared";
 import { SharedWishlistPageProps } from "@/src/types/wishlist";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+
 
 export const dynamic = "force-static";
 

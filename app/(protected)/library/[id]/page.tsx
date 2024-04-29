@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { getGameWithAdapter } from "@/src/actions/library/get-game";
-import { GameInfo } from "@/src/components/library/game/ui/game-info/game-info";
+import { GameInfo } from "@/src/components/library/game/game-info/game-info";
 import {
   Breadcrumb,
   BreadcrumbItem,

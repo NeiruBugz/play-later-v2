@@ -1,6 +1,6 @@
 "use client";
 
-import { GameTimeBadge } from "@/src/components/library/game/ui/card/time-badge";
+import { GameTimeBadge } from "@/src/components/shared/game-card/time-badge";
 import {
   IMAGE_API,
   IMAGE_SIZES,
@@ -8,6 +8,7 @@ import {
 } from "@/src/packages/config/site";
 import Image from "next/image";
 import { useMediaQuery } from "usehooks-ts";
+
 
 export const ArtworkImage = ({
   imageUrl,

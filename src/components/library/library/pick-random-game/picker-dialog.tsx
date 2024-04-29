@@ -12,22 +12,23 @@ import {
 } from "@/src/components/ui/dialog";
 import { cn } from "@/src/packages/utils";
 import { Game } from "@prisma/client";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-const PickerDialog = ({
-  currentStatus,
-  items,
-}: {
-  currentStatus: string;
-  items: Game[];
-}) => {
+const PickerDialog = ({ items }: { items: Game[] }) => {
   const [isOpen, onOpenChange] = useState(false);
+  const params = useSearchParams();
+  const status = params.get("status");
+  if (!status) {
+    return;
+  }
+
   return (
     <Dialog onOpenChange={onOpenChange} open={isOpen}>
       <DialogTrigger asChild>
         <Button
           className={cn("my-2 md:my-0", {
-            hidden: currentStatus !== "BACKLOG" && items.length === 0,
+            hidden: (status && status !== "BACKLOG") || items.length === 0,
           })}
           variant="secondary"
         >

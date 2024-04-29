@@ -1,13 +1,14 @@
 import { getServerUserId } from "@/auth";
-import { CopyLink } from "@/src/components/library/game/ui/copy-link";
 import { Button } from "@/src/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/src/components/ui/popover";
+import { CopyLink } from "@/src/components/wishlist/copy-link";
 import { Share } from "lucide-react";
 import { redirect } from "next/navigation";
+
 
 export async function WishlistShare() {
   const userId = await getServerUserId();
