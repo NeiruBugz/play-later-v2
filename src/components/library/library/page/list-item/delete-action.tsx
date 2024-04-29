@@ -17,7 +17,11 @@ export const DeleteAction = ({ id }: { id: Game["id"] }) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button size="icon" variant="destructive">
+        <Button
+          aria-label="delete-game-dialog"
+          size="icon"
+          variant="destructive"
+        >
           <Trash className="size-4" />
         </Button>
       </AlertDialogTrigger>

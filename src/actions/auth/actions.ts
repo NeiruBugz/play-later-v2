@@ -2,9 +2,11 @@
 
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
+import { commonErrorHandler, sessionErrorHandler } from "@/src/packages/utils";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
 
 export async function getUserById(id: string) {
   try {
@@ -24,7 +26,8 @@ export async function getUserData() {
     const session = await getServerUserId();
 
     if (!session) {
-      throw new Error("No session");
+      sessionErrorHandler();
+      return;
     }
 
     const user = await prisma.user.findUnique({
@@ -51,7 +54,8 @@ export async function getUserData() {
 export async function setUserName(payload: Prisma.UserUpdateInput) {
   try {
     if (!payload || !payload.id) {
-      throw new Error("Empty payload");
+      commonErrorHandler("No user id provided");
+      return;
     }
     await prisma.user.update({
       data: {

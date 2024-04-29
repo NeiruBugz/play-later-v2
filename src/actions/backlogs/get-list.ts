@@ -2,13 +2,15 @@
 
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
-import { groupByUserName } from "@/src/packages/utils";
+import { groupByUserName, sessionErrorHandler } from "@/src/packages/utils";
+
 
 export const getList = async () => {
   try {
     const session = await getServerUserId();
     if (!session) {
-      throw new Error();
+      sessionErrorHandler();
+      return;
     }
 
     const allBackloggedGames = await prisma.game.findMany({

@@ -39,4 +39,5 @@ export type FilterKeys =
   | "platform"
   | "purchaseType"
   | "search"
-  | "sortBy";
+  | "sortBy"
+  | "status";

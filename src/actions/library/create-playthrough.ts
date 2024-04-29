@@ -2,8 +2,10 @@
 
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
+import { sessionErrorHandler } from "@/src/packages/utils";
 import { Game, Playthrough } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+
 
 export const createPlaythrough = async ({
   gameId,
@@ -16,7 +18,8 @@ export const createPlaythrough = async ({
     const session = await getServerUserId();
 
     if (!session) {
-      throw new Error("");
+      sessionErrorHandler();
+      return;
     }
 
     await prisma.playthrough.create({

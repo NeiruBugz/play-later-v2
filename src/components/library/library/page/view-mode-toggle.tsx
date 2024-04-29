@@ -5,6 +5,7 @@ import { LayoutGrid, List } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
+
 export const ViewModeToggle = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -28,6 +29,7 @@ export const ViewModeToggle = () => {
   if (viewMode === "list") {
     return (
       <Button
+        aria-label="toggle-view-mode-grid"
         onClick={() => onViewModeChange("grid")}
         size="icon"
         variant="outline"
@@ -39,6 +41,7 @@ export const ViewModeToggle = () => {
 
   return (
     <Button
+      aria-label="toggle-view-mode-list"
       onClick={() => onViewModeChange("list")}
       size="icon"
       variant="outline"

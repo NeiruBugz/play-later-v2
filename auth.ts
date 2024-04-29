@@ -1,7 +1,9 @@
 import { prisma } from "@/src/packages/prisma";
+import { sessionErrorHandler } from "@/src/packages/utils";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+
 
 export const { auth, handlers, signIn } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -34,7 +36,8 @@ export const getServerUserId = async () => {
     const session = await auth();
 
     if (!session || !session.user || !session.user.id) {
-      throw new Error("You must be logged in to save a game");
+      sessionErrorHandler();
+      return;
     }
 
     return session.user.id;

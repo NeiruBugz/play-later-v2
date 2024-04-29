@@ -1,5 +1,5 @@
-import { GameTimeBadge } from "@/src/components/library/game/ui/card/time-badge";
 import { QuickActions } from "@/src/components/library/library/page/list-item/quick-actions";
+import { GameTimeBadge } from "@/src/components/shared/game-card/time-badge";
 import { Badge } from "@/src/components/ui/badge";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import {
@@ -15,6 +15,7 @@ import { Calendar } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+
 
 export const ListItem = async ({
   currentStatus,

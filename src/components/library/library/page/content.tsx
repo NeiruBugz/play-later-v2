@@ -1,46 +1,38 @@
-import { Card } from "@/src/components/library/game/ui/card/card";
+import {
+  computeBacklogTime,
+  getGamesListWithAdapter,
+} from "@/src/actions/library/get-games";
 import { ListItem } from "@/src/components/library/library/page/list-item/list-item";
+import { Card } from "@/src/components/shared/game-card/card";
 import { List } from "@/src/components/shared/list";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
-import { LibraryContentProps } from "@/src/types/library/components";
 
-function EmptyBacklog() {
-  return (
-    <p className="text-lg font-bold">Congratulations! Your backlog is empty!</p>
-  );
-}
 
-function BacklogList({
-  backlogTime,
-  count,
-}: {
-  backlogTime: number;
-  count: number;
-}) {
-  if (count === 0) {
-    return <EmptyBacklog />;
+const BacklogList = async () => {
+  const { time} = await computeBacklogTime();
+  if (time === 0) {
+    return <p className="text-lg font-bold">Congratulations! Your backlog is empty!</p>;
   }
 
   return (
     <div className="flex items-center gap-2">
       <p className="text-lg font-bold">
-        Total backlog time is {backlogTime} hour(s)
+        Total backlog time is {time} hour(s)
       </p>
     </div>
   );
 }
 
 export async function LibraryContent({
-  backloggedLength,
-  currentStatus,
-  list,
-  totalBacklogTime,
-  viewMode = "list",
-}: { viewMode?: string } & LibraryContentProps) {
+  searchParams,
+}: { searchParams: URLSearchParams }) {
+  const viewMode = searchParams?.get("viewMode") ?? "list";
+  const currentStatus = searchParams?.get("status") ?? "INPROGRESS";
+  const { list } = await getGamesListWithAdapter(searchParams)
   return (
     <>
       {currentStatus === "BACKLOG" ? (
-        <BacklogList backlogTime={totalBacklogTime} count={backloggedLength} />
+        <BacklogList />
       ) : null}
       <ScrollArea>
         <List viewMode={viewMode as "grid" | "list"}>

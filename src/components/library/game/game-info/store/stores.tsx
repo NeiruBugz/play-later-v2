@@ -1,7 +1,8 @@
-import { StoreIcon } from "@/src/components/library/game/ui/game-info/store/store-icon";
+import { StoreIcon } from "@/src/components/library/game/game-info/store/store-icon";
 import { Button } from "@/src/components/ui/button";
 import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import Link from "next/link";
+
 
 export const Stores = ({
   stores,
