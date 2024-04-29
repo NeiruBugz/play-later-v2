@@ -8,7 +8,6 @@ import { FetcherAndProcessor } from "@/src/types/library/actions";
 import { FilterKeys } from "@/src/types/library/components";
 import { type Game, GameStatus, PurchaseType } from "@prisma/client";
 
-
 export const getGames = async (
   filters: Record<FilterKeys, string | undefined>
 ) => {
@@ -160,7 +159,24 @@ export const getBackloggedGames = async () => {
 
 export const computeBacklogTime = async () => {
   try {
-    const backlogged = await getBackloggedGames();
+    const session = await getServerUserId();
+
+    if (!session) {
+      sessionErrorHandler();
+      return {
+        time: 0,
+      };
+    }
+    const backlogged = await prisma.game.findMany({
+      select: {
+        gameplayTime: true,
+      },
+      where: {
+        deletedAt: null,
+        status: GameStatus.BACKLOG,
+        userId: session,
+      },
+    });
     if (!backlogged) {
       return {
         time: 0,

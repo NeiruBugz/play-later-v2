@@ -1,7 +1,9 @@
 import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { Game, GameStatus } from "@prisma/client";
 
-export const calculateTotalBacklogTime = (backlogged: Game[]): number => {
+export const calculateTotalBacklogTime = (
+  backlogged: { gameplayTime: null | number }[]
+): number => {
   return backlogged.reduce(
     (acc, game) => acc + (game.gameplayTime ? game.gameplayTime : 0),
     0
