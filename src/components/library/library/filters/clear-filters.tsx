@@ -9,7 +9,7 @@ export const ClearFilters = () => {
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  if (searchParams?.size === 2 && searchParams.get("viewMode")) {
+  if (searchParams?.size <= 2) {
     return null;
   }
 
