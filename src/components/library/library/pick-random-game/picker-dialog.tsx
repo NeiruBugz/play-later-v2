@@ -28,7 +28,7 @@ const PickerDialog = ({ items }: { items: Game[] }) => {
       <DialogTrigger asChild>
         <Button
           className={cn("my-2 md:my-0", {
-            hidden: (status && status !== "BACKLOG") || items.length === 0,
+            hidden: status !== "BACKLOG" || items.length === 0,
           })}
           variant="secondary"
         >

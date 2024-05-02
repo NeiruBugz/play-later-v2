@@ -42,7 +42,7 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   const platform = params.get("platform") ?? " ";
   const currentStatus = (params.get("status") as GameStatus) ?? "INPROGRESS";
   const searchQuery = params.get("search") ?? "";
-  const purchaseType = params.get("purchase") ?? "";
+  const purchaseType = params.get("purchaseType") ?? "";
 
   const filters = {
     order: params.get("order") ?? "desc",
@@ -148,12 +148,14 @@ export const getBackloggedGames = async () => {
     });
 
     if (!backlogged) {
+      commonErrorHandler("Couldn't find records");
       return [] as Game[];
     }
 
     return backlogged as Game[];
   } catch (error) {
     commonErrorHandler("Couldn't find records");
+    return [] as Game[];
   }
 };
 

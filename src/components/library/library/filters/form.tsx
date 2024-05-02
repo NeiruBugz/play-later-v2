@@ -18,12 +18,14 @@ const DefaultSortState = {
   sortBy: "updatedAt",
 };
 
-const sortingFields = ["updatedAt", "gameplayTime", "createdAt"];
+const sortingFields = ["updatedAt", "gameplayTime", "createdAt", "title"];
+const filterParameters = ["search", "sortBy", "order", "purchaseType"];
 
 const mapper = {
   createdAt: "Creation date",
   gameplayTime: "Time to beat the story",
   purchaseType: "Purchase type",
+  title: "Game Title",
   updatedAt: "Updated",
 };
 function FiltersForm({
@@ -37,16 +39,15 @@ function FiltersForm({
 
   const [filters, setFilters] = useState({
     order: searchParams?.get("order") ?? DefaultSortState.order,
-    purchaseType: searchParams?.get("purchase") ?? "",
+    purchaseType: searchParams?.get("purchaseType") ?? "",
     search: searchParams?.get("search") ?? "",
     sortBy: searchParams?.get("sortBy") ?? DefaultSortState.sortBy,
   });
 
   const onChange = (
     value: string,
-    key: "platform" | "purchase" | "search" | "sort"
+    key: "platform" | "purchaseType" | "search" | "sort"
   ) => {
-    console.log(value, key);
     if (key === "sort") {
       const [sortBy, order] = value.split("-");
       setFilters((prev) => ({
@@ -63,7 +64,7 @@ function FiltersForm({
       }));
     }
 
-    if (key === "purchase") {
+    if (key === "purchaseType") {
       setFilters((prev) => ({
         ...prev,
         purchaseType: value,
@@ -79,11 +80,14 @@ function FiltersForm({
   };
 
   const onApply = () => {
-    const newSearchParams = new URLSearchParams();
-    newSearchParams.set("search", filters.search);
-    newSearchParams.set("sortBy", filters.sortBy);
-    newSearchParams.set("order", filters.order);
-    newSearchParams.set("purchase", filters.purchaseType);
+    const newSearchParams = new URLSearchParams(searchParams);
+
+    filterParameters.forEach((param) => {
+      const filterValue = filters[param as keyof typeof filters];
+      if (filterValue) {
+        newSearchParams.set(param, filterValue);
+      }
+    });
 
     if (pathname) {
       replace(`${pathname}?${newSearchParams}`);
@@ -154,7 +158,7 @@ function FiltersForm({
         </div>
       </Select>
       <Select
-        onValueChange={(value) => onChange(value, "purchase")}
+        onValueChange={(value) => onChange(value, "purchaseType")}
         value={`${filters.purchaseType}`}
       >
         <div>

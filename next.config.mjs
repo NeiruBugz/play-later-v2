@@ -1,19 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
-  reactStrictMode: true,
   images: {
     remotePatterns: [
       {
-        protocol: "https",
         hostname: "howlongtobeat.com",
+        protocol: "https",
       },
       {
-        protocol: "https",
         hostname: "images.igdb.com",
+        protocol: "https",
       },
     ],
   },
+  output: "standalone",
+  reactStrictMode: true,
 };
 
 export default nextConfig;

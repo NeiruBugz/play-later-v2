@@ -5,11 +5,33 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-type LogLevel = Array<"error" | "query" | "warn">;
-const LOG_LEVEL: LogLevel =
-  env.NODE_ENV === "development" ? ["error", "warn"] : ["error"];
-const prismaFactory = (log_level = LOG_LEVEL) => {
-  const prisma = new PrismaClient({ log: log_level });
+const prismaFactory = () => {
+  const prisma = new PrismaClient({
+    log: [
+      {
+        emit: "event",
+        level: "query",
+      },
+      {
+        emit: "stdout",
+        level: "error",
+      },
+      {
+        emit: "stdout",
+        level: "info",
+      },
+      {
+        emit: "stdout",
+        level: "warn",
+      },
+    ],
+  });
+
+  prisma.$on("query", (e) => {
+    console.log("Query: " + e.query);
+    console.log("Params: " + e.params);
+    console.log("Duration: " + e.duration + "ms");
+  });
 
   return prisma.$extends({
     name: "soft-delete",
