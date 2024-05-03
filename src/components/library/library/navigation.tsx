@@ -4,8 +4,8 @@ import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/packages/utils";
 import { GameStatus } from "@prisma/client";
 import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { BsBookshelf } from "react-icons/bs";
 
 const statusMapping = {
@@ -55,44 +55,27 @@ export function LibraryNavigation({
   counts?: Record<string, number>;
 }) {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
-
-  const onChange = useCallback(
-    (value: string) => {
-      const params = new URLSearchParams(searchParams ?? new URLSearchParams());
-      params.set("status", value);
-      replace(`${pathname}?${params.toString()}`);
-    },
-    [pathname, replace, searchParams]
-  );
-
-  useEffect(() => {
-    if (!searchParams?.get("status")) {
-      onChange("BACKLOG");
-    }
-  }, [onChange, searchParams]);
 
   return (
     <div className="flex w-fit flex-wrap gap-2">
       {Object.entries(statusMapping).map(([key, value]) => (
-        <Badge
-          className={cn(
-            "h-8 cursor-pointer text-[16px] font-normal hover:bg-accent hover:text-accent-foreground",
-            {
-              "border-primary bg-primary font-medium text-primary-foreground":
-                searchParams?.get("status") === value.radioValue,
-            }
-          )}
-          key={key}
-          onClick={() => onChange(value.radioValue)}
-          variant="outline"
-        >
-          {value.label}
-          {counts?.[key] ? (
-            <span className="hidden md:block">&nbsp;({counts?.[key]})</span>
-          ) : null}
-        </Badge>
+        <Link href={`/library/?status=${key}`} key={key}>
+          <Badge
+            className={cn(
+              "h-8 cursor-pointer text-[16px] font-normal hover:bg-accent hover:text-accent-foreground",
+              {
+                "border-primary bg-primary font-medium text-primary-foreground":
+                  searchParams?.get("status") === value.radioValue,
+              }
+            )}
+            variant="outline"
+          >
+            {value.label}
+            {counts?.[key] ? (
+              <span className="hidden md:block">&nbsp;({counts?.[key]})</span>
+            ) : null}
+          </Badge>
+        </Link>
       ))}
     </div>
   );

@@ -1,7 +1,4 @@
-import {
-  countGamesPerStatus,
-  getBackloggedGames,
-} from "@/src/actions/library/get-games";
+import { getCountsAndBacklogList } from "@/src/actions/library/get-games";
 import { ClearFilters } from "@/src/components/library/library/filters/clear-filters";
 import { LibraryFiltersWrapper } from "@/src/components/library/library/filters/filters";
 import { LibraryNavigation } from "@/src/components/library/library/navigation";
@@ -27,15 +24,14 @@ export const HeaderSkeleton = () => (
         <div className="flex gap-2">
           <Skeleton className="h-10 w-[140px]" />
           <Skeleton className="size-10" />
-      </div>
+        </div>
       </div>
     </section>
   </header>
 );
 
 export async function Header() {
-  const counts = await countGamesPerStatus();
-  const backlogged = await getBackloggedGames();
+  const { backlogged, counts } = await getCountsAndBacklogList();
 
   return (
     <header className="container sticky top-0 z-40 bg-background">

@@ -1,5 +1,3 @@
-"use server";
-
 import { getServerUserId } from "@/auth";
 import igdbApi from "@/src/packages/igdb-api";
 import { prisma } from "@/src/packages/prisma";

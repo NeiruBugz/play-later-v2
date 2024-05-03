@@ -1,6 +1,6 @@
 "use client";
 
-import { setUserName } from "@/src/actions/auth/actions";
+import { setUserName } from "@/src/actions/auth/set-username";
 import { Button } from "@/src/components/ui/button";
 import {
   Dialog,

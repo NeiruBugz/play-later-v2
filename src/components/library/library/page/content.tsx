@@ -7,33 +7,34 @@ import { Card } from "@/src/components/shared/game-card/card";
 import { List } from "@/src/components/shared/list";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
 
-
 const BacklogList = async () => {
-  const { time} = await computeBacklogTime();
+  const { time } = await computeBacklogTime();
   if (time === 0) {
-    return <p className="text-lg font-bold">Congratulations! Your backlog is empty!</p>;
+    return (
+      <p className="text-lg font-bold">
+        Congratulations! Your backlog is empty!
+      </p>
+    );
   }
 
   return (
     <div className="flex items-center gap-2">
-      <p className="text-lg font-bold">
-        Total backlog time is {time} hour(s)
-      </p>
+      <p className="text-lg font-bold">Total backlog time is {time} hour(s)</p>
     </div>
   );
-}
+};
 
 export async function LibraryContent({
   searchParams,
-}: { searchParams: URLSearchParams }) {
+}: {
+  searchParams: URLSearchParams;
+}) {
   const viewMode = searchParams?.get("viewMode") ?? "list";
   const currentStatus = searchParams?.get("status") ?? "INPROGRESS";
-  const { list } = await getGamesListWithAdapter(searchParams)
+  const { list } = await getGamesListWithAdapter(searchParams);
   return (
     <>
-      {currentStatus === "BACKLOG" ? (
-        <BacklogList />
-      ) : null}
+      {currentStatus === "BACKLOG" ? <BacklogList /> : null}
       <ScrollArea>
         <List viewMode={viewMode as "grid" | "list"}>
           {list.map((game) => {

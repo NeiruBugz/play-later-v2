@@ -1,5 +1,3 @@
-"use server";
-
 import { getServerUserId } from "@/auth";
 import { calculateTotalBacklogTime } from "@/src/packages/library/client-helpers";
 import { prisma } from "@/src/packages/prisma";
@@ -60,19 +58,22 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   };
 };
 
-export const countGamesPerStatus = async () => {
+export const getCountsAndBacklogList = async () => {
   try {
     const session = await getServerUserId();
 
     if (!session) {
       sessionErrorHandler();
       return {
-        [GameStatus.ABANDONED]: 0,
-        [GameStatus.BACKLOG]: 0,
-        [GameStatus.COMPLETED]: 0,
-        [GameStatus.FULL_COMPLETION]: 0,
-        [GameStatus.INPROGRESS]: 0,
-        [GameStatus.SHELVED]: 0,
+        backlogged: [],
+        counts: {
+          [GameStatus.ABANDONED]: 0,
+          [GameStatus.BACKLOG]: 0,
+          [GameStatus.COMPLETED]: 0,
+          [GameStatus.FULL_COMPLETION]: 0,
+          [GameStatus.INPROGRESS]: 0,
+          [GameStatus.SHELVED]: 0,
+        },
       };
     }
 
@@ -81,81 +82,83 @@ export const countGamesPerStatus = async () => {
       userId: session,
     };
 
-    const backlogs = await prisma.game.count({
-      where: {
-        status: GameStatus.BACKLOG,
-        ...defaultParams,
-      },
-    });
-    const inprogress = await prisma.game.count({
-      where: {
-        status: GameStatus.INPROGRESS,
-        ...defaultParams,
-      },
-    });
-    const abandoned = await prisma.game.count({
-      where: {
-        status: GameStatus.ABANDONED,
-        ...defaultParams,
-      },
-    });
-    const completed = await prisma.game.count({
-      where: {
-        status: GameStatus.COMPLETED,
-        ...defaultParams,
-      },
-    });
-    const fullCompletion = await prisma.game.count({
-      where: {
-        status: GameStatus.FULL_COMPLETION,
-        ...defaultParams,
-      },
-    });
-    const shelved = await prisma.game.count({
-      where: {
-        status: GameStatus.SHELVED,
-        ...defaultParams,
-      },
-    });
+    const [
+      backlogged,
+      backlogCount,
+      inprogressCount,
+      abandonedCount,
+      completedCount,
+      fullCompletionCount,
+      shelvedCount,
+    ] = await prisma.$transaction([
+      prisma.game.findMany({
+        where: {
+          status: GameStatus.BACKLOG,
+          ...defaultParams,
+        },
+      }),
+      prisma.game.count({
+        where: {
+          status: GameStatus.BACKLOG,
+          ...defaultParams,
+        },
+      }),
+      prisma.game.count({
+        where: {
+          status: GameStatus.INPROGRESS,
+          ...defaultParams,
+        },
+      }),
+      prisma.game.count({
+        where: {
+          status: GameStatus.ABANDONED,
+          ...defaultParams,
+        },
+      }),
+      prisma.game.count({
+        where: {
+          status: GameStatus.COMPLETED,
+          ...defaultParams,
+        },
+      }),
+      prisma.game.count({
+        where: {
+          status: GameStatus.FULL_COMPLETION,
+          ...defaultParams,
+        },
+      }),
+      prisma.game.count({
+        where: {
+          status: GameStatus.SHELVED,
+          ...defaultParams,
+        },
+      }),
+    ]);
+
     return {
-      [GameStatus.ABANDONED]: abandoned,
-      [GameStatus.BACKLOG]: backlogs,
-      [GameStatus.COMPLETED]: completed,
-      [GameStatus.FULL_COMPLETION]: fullCompletion,
-      [GameStatus.INPROGRESS]: inprogress,
-      [GameStatus.SHELVED]: shelved,
+      backlogged,
+      counts: {
+        [GameStatus.ABANDONED]: abandonedCount,
+        [GameStatus.BACKLOG]: backlogCount,
+        [GameStatus.COMPLETED]: completedCount,
+        [GameStatus.FULL_COMPLETION]: fullCompletionCount,
+        [GameStatus.INPROGRESS]: inprogressCount,
+        [GameStatus.SHELVED]: shelvedCount,
+      },
     };
   } catch (error) {
-    console.error(error);
-  }
-};
-
-export const getBackloggedGames = async () => {
-  try {
-    const session = await getServerUserId();
-
-    if (!session) {
-      sessionErrorHandler();
-      return [] as Game[];
-    }
-
-    const backlogged = await prisma.game.findMany({
-      where: {
-        deletedAt: null,
-        status: GameStatus.BACKLOG,
-        userId: session,
-      },
-    });
-
-    if (!backlogged) {
-      commonErrorHandler("Couldn't find records");
-      return [] as Game[];
-    }
-
-    return backlogged as Game[];
-  } catch (error) {
     commonErrorHandler("Couldn't find records");
-    return [] as Game[];
+    return {
+      backlogged: [],
+      counts: {
+        [GameStatus.ABANDONED]: 0,
+        [GameStatus.BACKLOG]: 0,
+        [GameStatus.COMPLETED]: 0,
+        [GameStatus.FULL_COMPLETION]: 0,
+        [GameStatus.INPROGRESS]: 0,
+        [GameStatus.SHELVED]: 0,
+      },
+    };
   }
 };
 

@@ -1,5 +1,3 @@
-"use server";
-
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
 import { Game } from "@prisma/client";

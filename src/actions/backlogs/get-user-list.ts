@@ -1,9 +1,6 @@
-"use server";
-
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
 import { sessionErrorHandler } from "@/src/packages/utils";
-
 
 export const getUserList = async ({ name }: { name: string }) => {
   try {
