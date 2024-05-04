@@ -8,6 +8,26 @@ import {
 import { HowLongToBeatService } from "howlongtobeat";
 import { notFound } from "next/navigation";
 
+const fetchAdditionalGameDetails = async (
+  howLongToBeatId?: null | string,
+  igdbId?: null | number
+) => {
+  const hltbPromise = howLongToBeatId
+    ? new HowLongToBeatService().detail(howLongToBeatId)
+    : Promise.resolve({});
+  const igdbPromise = igdbId
+    ? igdbApi.getGameById(igdbId)
+    : Promise.resolve([]);
+
+  const [howLongToBeatDetails, igdbDetails] = await Promise.all([
+    hltbPromise,
+    igdbPromise,
+  ]);
+
+  const igdbGame = igdbDetails?.length ? igdbDetails[0] : {};
+  return { ...howLongToBeatDetails, ...igdbGame };
+};
+
 export const getGameWithAdapter: ResponsePreparer = async ({
   gameId,
   isFromWishlist = false,
@@ -25,23 +45,9 @@ export const getGameWithAdapter: ResponsePreparer = async ({
     notFound();
   }
 
-  let result = { ...game };
-
-  if (game.howLongToBeatId) {
-    const howLongToBeatService = new HowLongToBeatService();
-    const howLongToBeatDetails = await howLongToBeatService.detail(
-      game.howLongToBeatId
-    );
-    result = { ...howLongToBeatDetails, ...result };
-  }
-
-  if (game.igdbId) {
-    const igdbDetails = await igdbApi.getGameById(game.igdbId);
-    if (igdbDetails?.length) {
-      const [igdbGame] = igdbDetails;
-      result = { ...igdbGame, ...result };
-    }
-  }
-
-  return result as GameResponseCombined;
+  const additionalDetails = await fetchAdditionalGameDetails(
+    game.howLongToBeatId,
+    game.igdbId
+  );
+  return { ...additionalDetails, ...game } as GameResponseCombined;
 };

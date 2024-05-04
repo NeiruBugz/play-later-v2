@@ -2,28 +2,29 @@ import { getServerUserId } from "@/auth";
 import { calculateTotalBacklogTime } from "@/src/packages/library/client-helpers";
 import { prisma } from "@/src/packages/prisma";
 import { commonErrorHandler, sessionErrorHandler } from "@/src/packages/utils";
-import {
-  FetcherAndProcessor,
-  ListEntry,
-  PickerItem,
-} from "@/src/types/library/actions";
-import { FilterKeys } from "@/src/types/library/components";
+import { FetcherAndProcessor, PickerItem } from "@/src/types/library/actions";
 import { type Game, GameStatus, PurchaseType } from "@prisma/client";
 
-export const getGames = async (
-  filters: Record<FilterKeys, string | undefined>
-) => {
+type GameFilters = {
+  order?: "asc" | "desc";
+  purchaseType?: PurchaseType;
+  search?: string;
+  sortBy?: keyof Game;
+  status?: GameStatus;
+};
+
+export const getGames = async (filters: GameFilters) => {
   const userId = await getServerUserId();
+  const {
+    order = "desc",
+    purchaseType,
+    search = null,
+    sortBy = "updatedAt",
+    status,
+  } = filters;
 
-  const sortState = {
-    key: filters.sortBy || "updatedAt",
-    order: filters.order || "desc",
-  };
-
-  const games: ListEntry[] = await prisma.game.findMany({
-    orderBy: {
-      [sortState.key as keyof Game]: sortState.order as "asc" | "desc",
-    },
+  const games = await prisma.game.findMany({
+    orderBy: { [sortBy]: order },
     select: {
       createdAt: true,
       gameplayTime: true,
@@ -37,14 +38,9 @@ export const getGames = async (
     },
     where: {
       deletedAt: null,
-      purchaseType: filters.purchaseType
-        ? (filters.purchaseType as PurchaseType)
-        : undefined,
-      status: filters.status ? (filters.status as GameStatus) : undefined,
-      title: {
-        contains: filters.search || "",
-        mode: "insensitive",
-      },
+      purchaseType: purchaseType ? purchaseType : undefined,
+      status,
+      title: { contains: search || "", mode: "insensitive" },
       userId,
     },
   });
@@ -53,30 +49,34 @@ export const getGames = async (
 };
 
 export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
-  const platform = params.get("platform") ?? " ";
-  const currentStatus = (params.get("status") as GameStatus) ?? "INPROGRESS";
-  const searchQuery = params.get("search") ?? "";
-  const purchaseType = params.get("purchaseType") ?? "";
-
-  const filters = {
-    order: params.get("order") ?? "desc",
-    platform,
-    purchaseType,
-    search: searchQuery,
-    sortBy: params.get("sortBy") ?? "updatedAt",
-    status: currentStatus,
+  const filters: GameFilters = {
+    order: (params.get("order") ?? "desc") as GameFilters["order"],
+    purchaseType: params.get("purchaseType") as PurchaseType,
+    search: params.get("search") || undefined,
+    sortBy: (params.get("sortBy") as keyof Game) ?? "updatedAt",
+    status: params.get("status") as GameStatus,
   };
 
   const games = await getGames(filters);
 
-  return {
-    list: games,
-  };
+  return { list: games };
 };
 
 export type CountsAndBackloggedResponse = {
   backlogged: Array<PickerItem>;
   counts: Record<keyof typeof GameStatus, number>;
+};
+
+const emptyResponse: CountsAndBackloggedResponse = {
+  backlogged: [],
+  counts: {
+    [GameStatus.ABANDONED]: 0,
+    [GameStatus.BACKLOG]: 0,
+    [GameStatus.COMPLETED]: 0,
+    [GameStatus.FULL_COMPLETION]: 0,
+    [GameStatus.INPROGRESS]: 0,
+    [GameStatus.SHELVED]: 0,
+  },
 };
 export const getCountsAndBacklogList =
   async (): Promise<CountsAndBackloggedResponse> => {
@@ -85,17 +85,7 @@ export const getCountsAndBacklogList =
 
       if (!session) {
         sessionErrorHandler();
-        return {
-          backlogged: [],
-          counts: {
-            [GameStatus.ABANDONED]: 0,
-            [GameStatus.BACKLOG]: 0,
-            [GameStatus.COMPLETED]: 0,
-            [GameStatus.FULL_COMPLETION]: 0,
-            [GameStatus.INPROGRESS]: 0,
-            [GameStatus.SHELVED]: 0,
-          },
-        };
+        return emptyResponse;
       }
 
       const defaultParams = {
@@ -123,42 +113,9 @@ export const getCountsAndBacklogList =
             ...defaultParams,
           },
         }),
-        prisma.game.count({
-          where: {
-            status: GameStatus.BACKLOG,
-            ...defaultParams,
-          },
-        }),
-        prisma.game.count({
-          where: {
-            status: GameStatus.INPROGRESS,
-            ...defaultParams,
-          },
-        }),
-        prisma.game.count({
-          where: {
-            status: GameStatus.ABANDONED,
-            ...defaultParams,
-          },
-        }),
-        prisma.game.count({
-          where: {
-            status: GameStatus.COMPLETED,
-            ...defaultParams,
-          },
-        }),
-        prisma.game.count({
-          where: {
-            status: GameStatus.FULL_COMPLETION,
-            ...defaultParams,
-          },
-        }),
-        prisma.game.count({
-          where: {
-            status: GameStatus.SHELVED,
-            ...defaultParams,
-          },
-        }),
+        ...Object.values(GameStatus).map((status) =>
+          prisma.game.count({ where: { status, ...defaultParams } })
+        ),
       ]);
 
       return {
@@ -174,17 +131,7 @@ export const getCountsAndBacklogList =
       };
     } catch (error) {
       commonErrorHandler("Couldn't find records");
-      return {
-        backlogged: [],
-        counts: {
-          [GameStatus.ABANDONED]: 0,
-          [GameStatus.BACKLOG]: 0,
-          [GameStatus.COMPLETED]: 0,
-          [GameStatus.FULL_COMPLETION]: 0,
-          [GameStatus.INPROGRESS]: 0,
-          [GameStatus.SHELVED]: 0,
-        },
-      };
+      return emptyResponse;
     }
   };
 

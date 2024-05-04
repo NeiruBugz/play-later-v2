@@ -33,16 +33,16 @@ export const SimilarGames = ({
           {gamesList.map((game) => {
             return (
               <div
-                className="relative aspect-[3/4] h-full w-[264px] flex-shrink-0 rounded-md border transition"
+                className="relative aspect-[3/4] h-full flex-shrink-0 rounded-md border transition"
                 key={game.id}
               >
                 <Image
                   alt={`${game.name} artwork`}
                   className="rounded-md object-cover"
-                  height={NEXT_IMAGE_SIZES["c-big"].height}
+                  height={NEXT_IMAGE_SIZES["logo"].height}
                   priority
-                  src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${game.cover?.image_id}.png`}
-                  width={NEXT_IMAGE_SIZES["c-big"].width}
+                  src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover?.image_id}.png`}
+                  width={NEXT_IMAGE_SIZES["logo"].width}
                 />
               </div>
             );
