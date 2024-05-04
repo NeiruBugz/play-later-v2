@@ -4,3 +4,10 @@ export type SharedWishlistPageProps = {
   };
   searchParams: URLSearchParams;
 };
+
+export type SharedWishlistGame = {
+  gameplayTime: null | number;
+  id: string;
+  imageUrl: string;
+  title: string;
+};

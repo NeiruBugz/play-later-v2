@@ -11,11 +11,11 @@ import {
   DialogTrigger,
 } from "@/src/components/ui/dialog";
 import { cn } from "@/src/packages/utils";
-import { Game } from "@prisma/client";
+import { PickerItem } from "@/src/types/library/actions";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-const PickerDialog = ({ items }: { items: Game[] }) => {
+const PickerDialog = ({ items }: { items: PickerItem[] }) => {
   const [isOpen, onOpenChange] = useState(false);
   const params = useSearchParams();
   const status = params.get("status");

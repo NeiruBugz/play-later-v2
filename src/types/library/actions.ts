@@ -2,7 +2,6 @@ import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { Game } from "@prisma/client";
 import { HowLongToBeatEntry } from "howlongtobeat";
 
-
 export type FetcherAndProcessor = (
   params: URLSearchParams
 ) => Promise<LibraryData>;
@@ -21,5 +20,20 @@ export type ResponsePreparer = ({
 }) => Promise<GameResponseCombined> | void;
 
 export type LibraryData = {
-  list: Game[];
+  list: ListEntry[];
 };
+
+export type PickerItem = Pick<Game, "id" | "imageUrl" | "title">;
+
+export type ListEntry = Pick<
+  Game,
+  | "createdAt"
+  | "gameplayTime"
+  | "howLongToBeatId"
+  | "id"
+  | "igdbId"
+  | "imageUrl"
+  | "status"
+  | "title"
+  | "updatedAt"
+>;

@@ -1,8 +1,9 @@
+import type { PickerItem } from "@/src/types/library/actions";
+
 import { BackloggedWithUser } from "@/src/types/backlogs";
 import { GameStatus, PurchaseType } from "@prisma/client";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-
 
 const NINTENDO_PLATFORMS = [
   "wii u",
@@ -87,7 +88,7 @@ export function mapStatusForInfo(value: GameStatus) {
   return statusMapping[value] || value;
 }
 
-export function getRandomItem<Game>(array: Game[]): Game | undefined {
+export function getRandomItem(array: PickerItem[]): PickerItem | undefined {
   if (array.length === 0) {
     return;
   }
@@ -161,9 +162,9 @@ export const groupByUserName = (data?: BackloggedWithUser[]) => {
 export const sessionErrorHandler = () => {
   console.error("No authorization");
   throw new Error("No authorization");
-}
+};
 
 export const commonErrorHandler = (errorMessage: string) => {
-    console.error(errorMessage);
-    throw new Error(errorMessage);
-}
+  console.error(errorMessage);
+  throw new Error(errorMessage);
+};

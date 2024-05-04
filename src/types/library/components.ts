@@ -1,5 +1,7 @@
 import type { Game } from "@prisma/client";
 
+import { PickerItem } from "@/src/types/library/actions";
+
 export interface PickerControlsProps {
   hasChoice: boolean;
   isRunning: boolean;
@@ -9,13 +11,13 @@ export interface PickerControlsProps {
 
 export interface PickerChoiceProps {
   afterClick: () => void;
-  choice: Game;
+  choice: PickerItem;
   isRunning: boolean;
 }
 
 export interface PickerProps {
   closeDialog: () => void;
-  items: Game[];
+  items: PickerItem[];
 }
 
 export type LibraryPageProps = {

@@ -2,7 +2,11 @@ import { getServerUserId } from "@/auth";
 import { calculateTotalBacklogTime } from "@/src/packages/library/client-helpers";
 import { prisma } from "@/src/packages/prisma";
 import { commonErrorHandler, sessionErrorHandler } from "@/src/packages/utils";
-import { FetcherAndProcessor } from "@/src/types/library/actions";
+import {
+  FetcherAndProcessor,
+  ListEntry,
+  PickerItem,
+} from "@/src/types/library/actions";
 import { FilterKeys } from "@/src/types/library/components";
 import { type Game, GameStatus, PurchaseType } from "@prisma/client";
 
@@ -16,9 +20,20 @@ export const getGames = async (
     order: filters.order || "desc",
   };
 
-  const games: Game[] = await prisma.game.findMany({
+  const games: ListEntry[] = await prisma.game.findMany({
     orderBy: {
       [sortState.key as keyof Game]: sortState.order as "asc" | "desc",
+    },
+    select: {
+      createdAt: true,
+      gameplayTime: true,
+      howLongToBeatId: true,
+      id: true,
+      igdbId: true,
+      imageUrl: true,
+      status: true,
+      title: true,
+      updatedAt: true,
     },
     where: {
       deletedAt: null,
@@ -58,12 +73,106 @@ export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
   };
 };
 
-export const getCountsAndBacklogList = async () => {
-  try {
-    const session = await getServerUserId();
+export type CountsAndBackloggedResponse = {
+  backlogged: Array<PickerItem>;
+  counts: Record<keyof typeof GameStatus, number>;
+};
+export const getCountsAndBacklogList =
+  async (): Promise<CountsAndBackloggedResponse> => {
+    try {
+      const session = await getServerUserId();
 
-    if (!session) {
-      sessionErrorHandler();
+      if (!session) {
+        sessionErrorHandler();
+        return {
+          backlogged: [],
+          counts: {
+            [GameStatus.ABANDONED]: 0,
+            [GameStatus.BACKLOG]: 0,
+            [GameStatus.COMPLETED]: 0,
+            [GameStatus.FULL_COMPLETION]: 0,
+            [GameStatus.INPROGRESS]: 0,
+            [GameStatus.SHELVED]: 0,
+          },
+        };
+      }
+
+      const defaultParams = {
+        deletedAt: null,
+        userId: session,
+      };
+
+      const [
+        backlogged,
+        backlogCount,
+        inprogressCount,
+        abandonedCount,
+        completedCount,
+        fullCompletionCount,
+        shelvedCount,
+      ] = await prisma.$transaction([
+        prisma.game.findMany({
+          select: {
+            id: true,
+            imageUrl: true,
+            title: true,
+          },
+          where: {
+            status: GameStatus.BACKLOG,
+            ...defaultParams,
+          },
+        }),
+        prisma.game.count({
+          where: {
+            status: GameStatus.BACKLOG,
+            ...defaultParams,
+          },
+        }),
+        prisma.game.count({
+          where: {
+            status: GameStatus.INPROGRESS,
+            ...defaultParams,
+          },
+        }),
+        prisma.game.count({
+          where: {
+            status: GameStatus.ABANDONED,
+            ...defaultParams,
+          },
+        }),
+        prisma.game.count({
+          where: {
+            status: GameStatus.COMPLETED,
+            ...defaultParams,
+          },
+        }),
+        prisma.game.count({
+          where: {
+            status: GameStatus.FULL_COMPLETION,
+            ...defaultParams,
+          },
+        }),
+        prisma.game.count({
+          where: {
+            status: GameStatus.SHELVED,
+            ...defaultParams,
+          },
+        }),
+      ]);
+
+      return {
+        backlogged,
+        counts: {
+          [GameStatus.ABANDONED]: abandonedCount,
+          [GameStatus.BACKLOG]: backlogCount,
+          [GameStatus.COMPLETED]: completedCount,
+          [GameStatus.FULL_COMPLETION]: fullCompletionCount,
+          [GameStatus.INPROGRESS]: inprogressCount,
+          [GameStatus.SHELVED]: shelvedCount,
+        },
+      };
+    } catch (error) {
+      commonErrorHandler("Couldn't find records");
       return {
         backlogged: [],
         counts: {
@@ -76,91 +185,7 @@ export const getCountsAndBacklogList = async () => {
         },
       };
     }
-
-    const defaultParams = {
-      deletedAt: null,
-      userId: session,
-    };
-
-    const [
-      backlogged,
-      backlogCount,
-      inprogressCount,
-      abandonedCount,
-      completedCount,
-      fullCompletionCount,
-      shelvedCount,
-    ] = await prisma.$transaction([
-      prisma.game.findMany({
-        where: {
-          status: GameStatus.BACKLOG,
-          ...defaultParams,
-        },
-      }),
-      prisma.game.count({
-        where: {
-          status: GameStatus.BACKLOG,
-          ...defaultParams,
-        },
-      }),
-      prisma.game.count({
-        where: {
-          status: GameStatus.INPROGRESS,
-          ...defaultParams,
-        },
-      }),
-      prisma.game.count({
-        where: {
-          status: GameStatus.ABANDONED,
-          ...defaultParams,
-        },
-      }),
-      prisma.game.count({
-        where: {
-          status: GameStatus.COMPLETED,
-          ...defaultParams,
-        },
-      }),
-      prisma.game.count({
-        where: {
-          status: GameStatus.FULL_COMPLETION,
-          ...defaultParams,
-        },
-      }),
-      prisma.game.count({
-        where: {
-          status: GameStatus.SHELVED,
-          ...defaultParams,
-        },
-      }),
-    ]);
-
-    return {
-      backlogged,
-      counts: {
-        [GameStatus.ABANDONED]: abandonedCount,
-        [GameStatus.BACKLOG]: backlogCount,
-        [GameStatus.COMPLETED]: completedCount,
-        [GameStatus.FULL_COMPLETION]: fullCompletionCount,
-        [GameStatus.INPROGRESS]: inprogressCount,
-        [GameStatus.SHELVED]: shelvedCount,
-      },
-    };
-  } catch (error) {
-    commonErrorHandler("Couldn't find records");
-    return {
-      backlogged: [],
-      counts: {
-        [GameStatus.ABANDONED]: 0,
-        [GameStatus.BACKLOG]: 0,
-        [GameStatus.COMPLETED]: 0,
-        [GameStatus.FULL_COMPLETION]: 0,
-        [GameStatus.INPROGRESS]: 0,
-        [GameStatus.SHELVED]: 0,
-      },
-    };
-  }
-};
+  };
 
 export const computeBacklogTime = async () => {
   try {

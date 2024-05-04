@@ -9,13 +9,12 @@ import {
 } from "@/src/packages/config/site";
 import igdbApi from "@/src/packages/igdb-api";
 import { GenresResponse } from "@/src/packages/types/igdb";
-import { Game } from "@prisma/client";
+import { ListEntry } from "@/src/types/library/actions";
 import { format } from "date-fns";
 import { Calendar } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-
 
 export const ListItem = async ({
   currentStatus,
@@ -23,10 +22,11 @@ export const ListItem = async ({
   imageKey = "logo",
 }: {
   currentStatus: string;
-  game: Game;
+  game: ListEntry;
   imageKey?: keyof typeof NEXT_IMAGE_SIZES;
 }) => {
   let info: GenresResponse | null = null;
+
   const gameInfo = await igdbApi.getGameGenres(game.igdbId);
   if (gameInfo) {
     info = gameInfo[0];

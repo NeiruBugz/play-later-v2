@@ -4,11 +4,11 @@ import {
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
 } from "@/src/packages/config/site";
-import { WishlistedGame } from "@prisma/client";
+import { SharedWishlistGame } from "@/src/types/wishlist";
 import Image from "next/image";
 import Link from "next/link";
 
-export function WishlistedGameShared({ game }: { game: WishlistedGame }) {
+export function WishlistedGameShared({ game }: { game: SharedWishlistGame }) {
   return (
     <>
       <Image

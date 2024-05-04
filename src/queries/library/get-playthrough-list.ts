@@ -16,6 +16,11 @@ export const getPlaythroughList = async ({ id }: { id: Game["id"] }) => {
       orderBy: {
         startedAt: "desc",
       },
+      select: {
+        id: true,
+        label: true,
+        platform: true,
+      },
       where: {
         gameId: id,
         userId: session,

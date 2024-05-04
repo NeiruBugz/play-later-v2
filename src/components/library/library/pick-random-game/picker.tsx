@@ -5,12 +5,12 @@ import type { PickerProps } from "@/src/types/library/components";
 import { MemoizedChoice } from "@/src/components/library/library/pick-random-game/choice";
 import { MemoizedControls } from "@/src/components/library/library/pick-random-game/controls";
 import { getRandomItem } from "@/src/packages/utils";
-import { type Game } from "@prisma/client";
+import { PickerItem } from "@/src/types/library/actions";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 function Picker({ closeDialog, items }: PickerProps) {
   const [isRunning, setIsRunning] = useState(false);
-  const [currentChoice, setCurrentChoice] = useState<Game>(
+  const [currentChoice, setCurrentChoice] = useState<PickerItem>(
     getRandomItem(items) ?? items[0]
   );
 

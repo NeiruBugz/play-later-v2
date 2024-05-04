@@ -15,12 +15,14 @@ export const HeaderSkeleton = () => (
     </div>
     <section className="mt-4 flex flex-wrap items-center justify-between gap-2">
       <div className="flex w-full flex-wrap items-center justify-between gap-3">
-        <Skeleton className="h-8 w-[140px]" />
-        <Skeleton className="h-8 w-[140px]" />
-        <Skeleton className="h-8 w-[140px]" />
-        <Skeleton className="h-8 w-[140px]" />
-        <Skeleton className="h-8 w-[140px]" />
-        <Skeleton className="h-8 w-[140px]" />
+        <div className="flex w-fit flex-wrap gap-2">
+          <Skeleton className="h-8 w-[140px]" />
+          <Skeleton className="h-8 w-[140px]" />
+          <Skeleton className="h-8 w-[140px]" />
+          <Skeleton className="h-8 w-[140px]" />
+          <Skeleton className="h-8 w-[140px]" />
+          <Skeleton className="h-8 w-[140px]" />
+        </div>
         <div className="flex gap-2">
           <Skeleton className="h-10 w-[140px]" />
           <Skeleton className="size-10" />
