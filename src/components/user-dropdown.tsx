@@ -1,5 +1,4 @@
 import userPic from "@/images/userpic.png";
-import { getUserData } from "@/src/actions/auth/actions";
 import { SignOut } from "@/src/components/sign-out";
 import { ThemeToggle } from "@/src/components/theme-toggle";
 import {
@@ -9,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
 import { UserSettings } from "@/src/components/user-settings";
+import { getUserData } from "@/src/queries/auth";
 import Image from "next/image";
 
 export async function UserDropdown({ username }: { username?: string }) {

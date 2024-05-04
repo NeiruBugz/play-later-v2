@@ -1,11 +1,11 @@
-import {
-  computeBacklogTime,
-  getGamesListWithAdapter,
-} from "@/src/actions/library/get-games";
 import { ListItem } from "@/src/components/library/library/page/list-item/list-item";
 import { Card } from "@/src/components/shared/game-card/card";
 import { List } from "@/src/components/shared/list";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
+import {
+  computeBacklogTime,
+  getGamesListWithAdapter,
+} from "@/src/queries/library/get-games";
 
 const BacklogList = async () => {
   const { time } = await computeBacklogTime();

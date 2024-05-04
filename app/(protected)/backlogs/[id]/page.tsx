@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { getUserList } from "@/src/actions/backlogs/get-user-list";
 import { List } from "@/src/components/shared/list";
 import {
   Breadcrumb,
@@ -15,6 +14,7 @@ import {
   NEXT_IMAGE_SIZES,
 } from "@/src/packages/config/site";
 import { isURL } from "@/src/packages/utils";
+import { getUserList } from "@/src/queries/backlogs/get-user-list";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 

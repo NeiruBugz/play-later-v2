@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { getGameWithAdapter } from "@/src/actions/library/get-game";
 import { GameInfo } from "@/src/components/library/game/game-info/game-info";
 import {
   Breadcrumb,
@@ -9,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/src/components/ui/breadcrumb";
+import { getGameWithAdapter } from "@/src/queries/library/get-game";
 import { notFound, redirect } from "next/navigation";
 
 export default async function GamePage({ params }: { params: { id: string } }) {

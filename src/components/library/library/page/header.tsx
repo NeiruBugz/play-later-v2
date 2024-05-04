@@ -1,10 +1,10 @@
-import { getCountsAndBacklogList } from "@/src/actions/library/get-games";
 import { ClearFilters } from "@/src/components/library/library/filters/clear-filters";
 import { LibraryFiltersWrapper } from "@/src/components/library/library/filters/filters";
 import { LibraryNavigation } from "@/src/components/library/library/navigation";
 import { ViewModeToggle } from "@/src/components/library/library/page/view-mode-toggle";
 import { PickerDialog } from "@/src/components/library/library/pick-random-game/picker-dialog";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { getCountsAndBacklogList } from "@/src/queries/library/get-games";
 
 export const HeaderSkeleton = () => (
   <header className="container sticky top-0 z-40 bg-background">

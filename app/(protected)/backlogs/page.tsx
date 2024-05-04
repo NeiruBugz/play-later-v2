@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { getList } from "@/src/actions/backlogs/get-list";
 import { UserBacklog } from "@/src/components/backlogs/user-backlog";
+import { getList } from "@/src/queries/backlogs/get-list";
 import { redirect } from "next/navigation";
 
 

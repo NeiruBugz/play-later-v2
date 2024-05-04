@@ -6,7 +6,6 @@ import { prisma } from "@/src/packages/prisma";
 import { commonErrorHandler, sessionErrorHandler } from "@/src/packages/utils";
 import { revalidatePath } from "next/cache";
 
-
 export const updatePlaythrough = async ({
   payload,
 }: {

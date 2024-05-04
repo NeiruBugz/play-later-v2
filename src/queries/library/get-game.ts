@@ -6,6 +6,7 @@ import {
   ResponsePreparer,
 } from "@/src/types/library/actions";
 import { HowLongToBeatService } from "howlongtobeat";
+import { notFound } from "next/navigation";
 
 export const getGameWithAdapter: ResponsePreparer = async ({
   gameId,
@@ -21,7 +22,7 @@ export const getGameWithAdapter: ResponsePreparer = async ({
   });
 
   if (!game) {
-    throw new Error("Game not found");
+    notFound();
   }
 
   let result = { ...game };
