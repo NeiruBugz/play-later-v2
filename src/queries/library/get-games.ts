@@ -43,6 +43,7 @@ export const getGames = async (
       status: filters.status ? (filters.status as GameStatus) : undefined,
       title: {
         contains: filters.search || "",
+        mode: "insensitive",
       },
       userId,
     },
