@@ -6,6 +6,7 @@ import { Platforms } from "@/src/components/library/game/game-info/platforms";
 import { PlaythroughDialog } from "@/src/components/library/game/game-info/playthrough/playthrough-create-dialog";
 import { Playthroughs } from "@/src/components/library/game/game-info/playthrough/playthroughs";
 import { ReviewCreateDialog } from "@/src/components/library/game/game-info/review/review-create-dialog";
+import { ReviewList } from "@/src/components/library/game/game-info/review/review-list";
 import { Screenshots } from "@/src/components/library/game/game-info/screenshots";
 import { SimilarGames } from "@/src/components/library/game/game-info/similar-games";
 import { Stores } from "@/src/components/library/game/game-info/store/stores";
@@ -100,6 +101,16 @@ export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
         </div>
       </div>
       <Accordion collapsible type="single">
+        <AccordionItem value="reviews">
+          <AccordionTrigger>Reviews</AccordionTrigger>
+          <AccordionContent>
+            <ReviewList
+              gameId={game.id}
+              imageUrl={game.imageUrl}
+              name={game.title}
+            />
+          </AccordionContent>
+        </AccordionItem>
         <AccordionItem value="screenshots">
           <AccordionTrigger>Screenshots</AccordionTrigger>
           <AccordionContent>

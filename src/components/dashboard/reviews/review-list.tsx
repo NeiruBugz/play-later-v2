@@ -46,8 +46,6 @@ export async function ReviewList() {
     return null;
   }
 
-  console.log(reviews);
-
   return (
     <DashboardItemLayout
       heading={

@@ -42,3 +42,26 @@ export const getReviews = async (): Promise<ReviewItem[]> => {
     return [];
   }
 };
+
+export async function getGameReviews(gameId: string) {
+  try {
+    const reviews = await prisma.review.findMany({
+      include: {
+        author: {
+          select: {
+            name: true,
+            username: true,
+          },
+        },
+      },
+      where: {
+        gameId,
+      },
+    });
+
+    return reviews;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
