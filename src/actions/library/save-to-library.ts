@@ -30,7 +30,6 @@ export async function saveGameToLibrary(
       isWishlisted,
       purchaseType,
       rating,
-      review,
       status,
       title,
       updatedAt,
@@ -48,7 +47,7 @@ export async function saveGameToLibrary(
         isWishlisted,
         purchaseType,
         rating,
-        review,
+        review: undefined,
         status,
         title,
         updatedAt,
@@ -56,6 +55,7 @@ export async function saveGameToLibrary(
       },
     });
   } catch (e) {
+    console.error(e);
     throw new Error("Couldn't save the game");
   } finally {
     revalidatePath(LIBRARY_PATH);

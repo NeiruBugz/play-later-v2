@@ -5,6 +5,8 @@ import { HowLongToBeat } from "@/src/components/library/game/game-info/how-long-
 import { Platforms } from "@/src/components/library/game/game-info/platforms";
 import { PlaythroughDialog } from "@/src/components/library/game/game-info/playthrough/playthrough-create-dialog";
 import { Playthroughs } from "@/src/components/library/game/game-info/playthrough/playthroughs";
+import { ReviewCreateDialog } from "@/src/components/library/game/game-info/review/review-create-dialog";
+import { ReviewList } from "@/src/components/library/game/game-info/review/review-list";
 import { Screenshots } from "@/src/components/library/game/game-info/screenshots";
 import { SimilarGames } from "@/src/components/library/game/game-info/similar-games";
 import { Stores } from "@/src/components/library/game/game-info/store/stores";
@@ -24,7 +26,6 @@ import {
 } from "@/src/packages/config/site";
 import { uniqueRecords } from "@/src/packages/library/client-helpers";
 import Image from "next/image";
-
 
 export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
   const {
@@ -80,6 +81,7 @@ export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
               />
             </div>
             <PlaythroughDialog id={game.id} platforms={release_dates} />
+            <ReviewCreateDialog gameId={game.id} />
           </div>
           <div className="hidden self-start md:block">
             <ActionsMenu gameId={game.id} status={status} />
@@ -99,6 +101,16 @@ export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
         </div>
       </div>
       <Accordion collapsible type="single">
+        <AccordionItem value="reviews">
+          <AccordionTrigger>Reviews</AccordionTrigger>
+          <AccordionContent>
+            <ReviewList
+              gameId={game.id}
+              imageUrl={game.imageUrl}
+              name={game.title}
+            />
+          </AccordionContent>
+        </AccordionItem>
         <AccordionItem value="screenshots">
           <AccordionTrigger>Screenshots</AccordionTrigger>
           <AccordionContent>

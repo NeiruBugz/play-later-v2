@@ -41,7 +41,6 @@ import { FaSpinner } from "react-icons/fa6";
 
 import { FormDescription } from "./description";
 
-
 export function AddForm({
   isCompact = false,
   submitLabel = "Submit",
@@ -94,7 +93,7 @@ export function AddForm({
         isWishlisted: Boolean(isWishlist),
         purchaseType: purchaseType ? purchaseType : "DIGITAL",
         rating: null,
-        review: null,
+        review: undefined,
         status: status || null,
         title,
         updatedAt: new Date(),
@@ -170,8 +169,14 @@ export function AddForm({
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="block" htmlFor="status">Status</FormLabel>
-                <Select name="status" onValueChange={field.onChange} value={field.value}>
+                <FormLabel className="block" htmlFor="status">
+                  Status
+                </FormLabel>
+                <Select
+                  name="status"
+                  onValueChange={field.onChange}
+                  value={field.value}
+                >
                   <FormControl id="status">
                     <SelectTrigger>
                       <SelectValue placeholder="Select your platform" />
@@ -196,7 +201,9 @@ export function AddForm({
             name="purchaseType"
             render={({ field }) => (
               <FormItem className="">
-                <FormLabel className="block" htmlFor="purchaseType">Purchase type</FormLabel>
+                <FormLabel className="block" htmlFor="purchaseType">
+                  Purchase type
+                </FormLabel>
                 <FormControl>
                   <RadioGroup
                     className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
