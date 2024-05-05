@@ -1,12 +1,15 @@
 import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/src/packages/config/site";
 import {
+  Event,
   FullGameInfoResponse,
   GenresResponse,
   RatedGameResponse,
   RequestOptions,
   SearchResponse,
   TwitchTokenResponse,
+  UpcomingEventsResponse,
+  UpcomingReleaseResponse,
 } from "@/src/packages/types/igdb";
 
 const asError = (thrown: unknown): Error => {
@@ -17,6 +20,9 @@ const asError = (thrown: unknown): Error => {
     return new Error(String(thrown));
   }
 };
+const getTimeStamp = () => {
+  return Math.floor(Date.now() / 1000);
+};
 
 const gamesByRating = `
   fields
@@ -25,6 +31,13 @@ const gamesByRating = `
   sort aggregated_rating desc;
   where aggregated_rating_count > 20 & aggregated_rating != null & rating != null & category = 0;
   limit 12;
+`;
+
+const gamingEvents = `
+  fields checksum,created_at,description,end_time,event_logo,event_networks,games,live_stream_url,name,slug,start_time,time_zone,updated_at,videos;
+  sort start_time asc;
+  where start_time >= ${getTimeStamp()};
+  limit 10;
 `;
 
 const fullGameInfo = `
@@ -61,7 +74,42 @@ const fullGameInfo = `
     websites.trusted
 ;`;
 
+/**
+ * 
+ * {
+  id: 363,
+  name: 'Ubisoft Forward',
+  slug: 'ubisoft-forward',
+  event_logo: 550,
+  start_time: 1718042400,
+  time_zone: 'PST',
+  event_networks: [ 160985, 160986 ],
+  created_at: 1712258883,
+  updated_at: 1713875085,
+  checksum: '17c063a2-b5ea-97cc-5837-4ff8d74cb2ee'
+}
+ */
+
 const igdbApi = {
+  async getEventLogo(
+    id: Event["event_logo"]
+  ): Promise<
+    | { height: number; id: number; image_id: string; width: number }[]
+    | undefined
+  > {
+    return this.request({
+      body: `fields width,height,image_id; where id = (${id});`,
+      resource: "/event_logos",
+    });
+  },
+
+  async getEvents(): Promise<UpcomingEventsResponse | undefined> {
+    return this.request({
+      body: gamingEvents,
+      resource: "/events",
+    });
+  },
+
   async getGameById(
     gameId: null | number
   ): Promise<FullGameInfoResponse[] | undefined> {
@@ -87,6 +135,21 @@ const igdbApi = {
   async getGamesByRating(): Promise<RatedGameResponse[] | undefined> {
     return this.request({
       body: gamesByRating,
+      resource: "/games",
+    });
+  },
+
+  async getNextMonthReleases(
+    ids: number[]
+  ): Promise<UpcomingReleaseResponse[] | undefined> {
+    return this.request({
+      body: `fields
+  name,
+  cover.image_id,
+  first_release_date,
+  release_dates.human;
+  sort first_release_date asc;
+  where id = (${ids.join(",")}) & first_release_date > ${getTimeStamp()};`,
       resource: "/games",
     });
   },

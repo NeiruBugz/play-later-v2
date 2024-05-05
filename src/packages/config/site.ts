@@ -7,7 +7,11 @@ export const siteConfig = {
   },
   mainNav: [
     {
-      href: "/library",
+      href: "/dashboard",
+      title: "Dashboard",
+    },
+    {
+      href: "/library?status=INPROGRESS",
       title: "Library",
     },
     {
@@ -81,7 +85,7 @@ export const NEXT_IMAGE_SIZES = {
     height: 90,
     width: 90,
   },
-};
+} as const;
 
 export const IMAGE_SIZES = {
   "c-big": "t_cover_big",

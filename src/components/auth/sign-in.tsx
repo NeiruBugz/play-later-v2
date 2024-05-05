@@ -6,7 +6,7 @@ export function SignIn() {
     <form
       action={async () => {
         "use server";
-        await signIn("google", { redirectTo: "/library?status=INPROGRESS" });
+        await signIn("google", { redirectTo: "/dashboard" });
       }}
     >
       <Button type="submit" variant="outline">
