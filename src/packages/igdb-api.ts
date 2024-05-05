@@ -147,6 +147,7 @@ const igdbApi = {
   name,
   cover.image_id,
   first_release_date,
+  release_dates.platform.name,
   release_dates.human;
   sort first_release_date asc;
   where id = (${ids.join(",")}) & first_release_date >= ${getTimeStamp()};`,

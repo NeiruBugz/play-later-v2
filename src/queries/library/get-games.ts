@@ -38,6 +38,7 @@ export const getGames = async (filters: GameFilters) => {
     },
     where: {
       deletedAt: null,
+      isWishlisted: false,
       purchaseType: purchaseType ? purchaseType : undefined,
       status,
       title: { contains: search || "", mode: "insensitive" },

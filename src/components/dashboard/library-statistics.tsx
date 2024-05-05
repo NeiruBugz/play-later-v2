@@ -1,11 +1,17 @@
 import { DashboardItemLayout } from "@/src/components/dashboard/dashboard-item-layout";
 import { Skeleton } from "@/src/components/ui/skeleton";
-import { getCounts } from "@/src/queries/dashboard/get-counts";
-import { BarChartBig, Gamepad, Library, Play } from "lucide-react";
+import {
+  getCompletedThisYearCount,
+  getCounts,
+} from "@/src/queries/dashboard/get-counts";
+import { BarChartBig, Gamepad, Library, ListChecks, Play } from "lucide-react";
 import { Suspense } from "react";
 
 async function Statistics() {
-  const { backlog, playing, total } = await getCounts();
+  const [{ backlog, total }, completed] = await Promise.all([
+    getCounts(),
+    getCompletedThisYearCount(),
+  ]);
 
   return (
     <>
@@ -23,9 +29,10 @@ async function Statistics() {
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <Play className="md:size-4" />
+        <ListChecks className="md:size-4" />
         <p>
-          Playing right now <span className="font-medium">{playing}</span> games
+          Completed this year <span className="font-medium">{completed}</span>{" "}
+          games
         </p>
       </div>
     </>

@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { LibraryStatistics } from "@/src/components/dashboard/library-statistics";
 import { PlayingGames } from "@/src/components/dashboard/playing-games";
+import { ReviewsWidget } from "@/src/components/dashboard/reviews/review-list";
 import { UpcomingEvents } from "@/src/components/dashboard/upcoming-events";
 import { UpcomingReleases } from "@/src/components/dashboard/upcoming-releases";
 import { LayoutHeader } from "@/src/components/ui/layout-header";
@@ -25,6 +26,7 @@ export default async function DashboardPage() {
           <LibraryStatistics />
           <PlayingGames />
         </section>
+        <ReviewsWidget />
         <section className="mt-2">
           <UpcomingEvents />
         </section>
