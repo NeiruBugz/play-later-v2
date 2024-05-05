@@ -5,6 +5,7 @@ import {
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
 } from "@/src/packages/config/site";
+import { cn } from "@/src/packages/utils";
 import { getWishlistReleases } from "@/src/queries/dashboard/get-wishlist-releases";
 import { Game } from "@prisma/client";
 import { Calendar } from "lucide-react";
@@ -21,14 +22,20 @@ type UpcomingRelease = {
 };
 
 const Release = ({
+  index,
   release,
 }: {
   gameId: Game["id"];
+  index: number;
   release: UpcomingRelease;
 }) => {
   const date = release.release_dates[0];
   return (
-    <div className="relative flex flex-col items-center gap-1.5">
+    <div
+      className={cn("relative flex flex-col items-center gap-1.5", {
+        "hidden md:flex": index >= 3,
+      })}
+    >
       <Image
         alt={`${release.name} artwork`}
         className="rounded-md object-cover"
@@ -50,8 +57,13 @@ export async function ReleasesList() {
   return (
     <div className="flex w-full justify-center gap-3">
       {releases.length ? (
-        releases.map((release) => (
-          <Release gameId={release.gameId} key={release.id} release={release} />
+        releases.map((release, index) => (
+          <Release
+            gameId={release.gameId}
+            index={index}
+            key={release.id}
+            release={release}
+          />
         ))
       ) : (
         <div className="flex flex-col items-center justify-center gap-3">
