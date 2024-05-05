@@ -130,3 +130,29 @@ export type SearchResponse = {
   name: string;
   platforms: Array<Platform>;
 };
+
+export type UpcomingReleaseResponse = {
+  cover: GameCover;
+  first_release_date: number;
+  id: number;
+  name: string;
+  release_dates: ReleaseDate[];
+};
+
+export type Event = {
+  checksum: string;
+  created_at: number;
+  description?: string;
+  end_time: number;
+  event_logo: number;
+  event_networks: number[];
+  id: number;
+  live_stream_url?: string;
+  name: string;
+  slug: string;
+  start_time: number;
+  time_zone: string;
+  updated_at: number;
+};
+
+export type UpcomingEventsResponse = Event[];

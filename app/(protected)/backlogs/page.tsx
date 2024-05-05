@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
 import { UserBacklog } from "@/src/components/backlogs/user-backlog";
+import { LayoutHeader } from "@/src/components/ui/layout-header";
 import { getList } from "@/src/queries/backlogs/get-list";
 import { redirect } from "next/navigation";
-
 
 type BackloggedWithUser = {
   id: string;
@@ -18,19 +18,13 @@ export default async function BacklogsPage() {
   const session = await auth();
 
   if (!session) {
-    redirect('/')
+    redirect("/");
   }
 
   const backlogs = await getList();
   return (
     <section className="relative">
-      <header className="container sticky top-0 z-40 bg-background">
-        <div className="flex flex-wrap justify-between">
-          <h1 className="scroll-m-20 text-3xl font-extrabold tracking-tight md:text-4xl lg:text-5xl">
-            Backlogs
-          </h1>
-        </div>
-      </header>
+      <LayoutHeader heading="Backlogs" />
       <div className="container mt-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {backlogs &&
