@@ -21,7 +21,6 @@ export const getWishlistReleases = async () => {
         imageUrl: true,
         title: true,
       },
-      take: 5,
       where: {
         isWishlisted: true,
         userId: session,

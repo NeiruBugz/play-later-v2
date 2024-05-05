@@ -149,7 +149,7 @@ const igdbApi = {
   first_release_date,
   release_dates.human;
   sort first_release_date asc;
-  where id = (${ids.join(",")}) & first_release_date > ${getTimeStamp()};`,
+  where id = (${ids.join(",")}) & first_release_date >= ${getTimeStamp()};`,
       resource: "/games",
     });
   },

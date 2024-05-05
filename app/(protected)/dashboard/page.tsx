@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { LibraryCounter } from "@/src/components/dashboard/library-counter";
+import { LibraryStatistics } from "@/src/components/dashboard/library-statistics";
 import { PlayingGames } from "@/src/components/dashboard/playing-games";
 import { UpcomingEvents } from "@/src/components/dashboard/upcoming-events";
 import { UpcomingReleases } from "@/src/components/dashboard/upcoming-releases";
@@ -22,7 +22,7 @@ export default async function DashboardPage() {
       <section className="mt-4">
         <section className="container mt-2 flex max-w-[100vw] flex-col gap-3 md:flex-row">
           <UpcomingReleases />
-          <LibraryCounter />
+          <LibraryStatistics />
           <PlayingGames />
         </section>
         <section className="container mt-2">
