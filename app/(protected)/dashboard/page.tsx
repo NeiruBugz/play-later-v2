@@ -19,13 +19,13 @@ export default async function DashboardPage() {
   return (
     <div>
       <LayoutHeader heading={`Welcome back, ${user?.username ?? user?.name}`} />
-      <section className="mt-4">
-        <section className="container mt-2 flex max-w-[100vw] flex-col gap-3 md:flex-row">
+      <section className="container mt-4">
+        <section className="mt-2 flex max-w-[100vw] flex-col gap-3 md:flex-row">
           <UpcomingReleases />
           <LibraryStatistics />
           <PlayingGames />
         </section>
-        <section className="container mt-2">
+        <section className="mt-2">
           <UpcomingEvents />
         </section>
       </section>
