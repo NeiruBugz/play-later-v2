@@ -5,6 +5,7 @@ import { MainNav } from "@/src/components/main-nav";
 import { AddGame } from "@/src/components/shared/add-game/add-game";
 import { UserDropdown } from "@/src/components/user-dropdown";
 import { siteConfig } from "@/src/packages/config/site";
+import Link from "next/link";
 
 export async function SiteHeader() {
   const session = await auth();
@@ -12,7 +13,9 @@ export async function SiteHeader() {
     return (
       <header className="sticky top-0 z-40 w-full bg-background">
         <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
-          <Logo name={siteConfig.name} />
+          <Link href="/">
+            <Logo name={siteConfig.name} />
+          </Link>
           <div className="flex flex-1 items-center justify-end space-x-4">
             <nav className="flex items-center gap-2 space-x-1">
               <SignIn />

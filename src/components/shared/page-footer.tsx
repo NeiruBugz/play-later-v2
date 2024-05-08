@@ -13,6 +13,9 @@ export function SiteFooter() {
         >
           Discord
         </Link>
+        <Link className="hover:underline" href={siteConfig.links.roadmap}>
+          Roadmap
+        </Link>
         <Link className="hover:underline" href={"/privacy-policy"}>
           Privacy Policy
         </Link>
