@@ -1,6 +1,6 @@
-import userPic from "@/images/userpic.png";
 import { SignOut } from "@/src/components/sign-out";
 import { ThemeToggle } from "@/src/components/theme-toggle";
+import { Avatar, AvatarFallback } from "@/src/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,6 @@ import {
 } from "@/src/components/ui/dropdown-menu";
 import { UserSettings } from "@/src/components/user-settings";
 import { getUserData } from "@/src/queries/auth";
-import Image from "next/image";
 
 export async function UserDropdown({ username }: { username?: string }) {
   const userData = await getUserData();
@@ -17,13 +16,9 @@ export async function UserDropdown({ username }: { username?: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Image
-          alt={`${username} default user avatar`}
-          className="cursor-pointer rounded"
-          height={36}
-          src={userPic}
-          width={36}
-        />
+        <Avatar>
+          <AvatarFallback>{username ? username[0] : "U"}</AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <UserSettings userData={userData} />

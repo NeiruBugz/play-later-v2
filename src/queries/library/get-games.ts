@@ -98,9 +98,9 @@ export const getCountsAndBacklogList =
         backlogged,
         backlogCount,
         inprogressCount,
-        abandonedCount,
         completedCount,
         fullCompletionCount,
+        abandonedCount,
         shelvedCount,
       ] = await prisma.$transaction([
         prisma.game.findMany({
