@@ -1,12 +1,7 @@
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
 import igdbApi from "@/src/packages/igdb-api";
 import { SearchPageProps } from "@/src/types/search";
-import Image from "next/image";
 import Link from "next/link";
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
@@ -33,12 +28,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     >
                       <figure>
                         <div className=" relative aspect-[3/4] cursor-pointer rounded-xl border transition md:hover:brightness-110">
-                          <Image
+                          <CustomImage
                             alt={`${entry.name} artwork`}
                             className="h-full w-full rounded-xl  object-cover"
-                            height={NEXT_IMAGE_SIZES["c-big"].height}
-                            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${entry.cover?.image_id}.png`}
-                            width={NEXT_IMAGE_SIZES["c-big"].width}
+                            imageUrl={entry.cover?.image_id}
+                            size="c-big"
                           />
                         </div>
                         <figcaption className="mt-2.5 line-clamp-3	text-center text-xs font-bold sm:mt-3 sm:text-base">

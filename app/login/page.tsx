@@ -1,13 +1,8 @@
 import { auth } from "@/auth";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { SiteFooter } from "@/src/components/shared/page-footer";
 import { SiteHeader } from "@/src/components/shared/page-header";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
 import igdbApi from "@/src/packages/igdb-api";
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
 export default async function LoginPage() {
@@ -39,18 +34,17 @@ export default async function LoginPage() {
           <div className="columns-3">
             {trendingGames?.map((game) => {
               return (
-                <Image
+                <CustomImage
                   alt={`${game.name} cover`}
                   className="mb-2 rounded-md"
-                  height={NEXT_IMAGE_SIZES["logo"].height}
+                  imageUrl={game.cover.image_id}
                   key={game.id}
                   priority
-                  src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
+                  size="logo"
                   style={{
                     height: "auto",
                     width: 120,
                   }}
-                  width={NEXT_IMAGE_SIZES["logo"].width}
                 />
               );
             })}

@@ -45,6 +45,7 @@ export async function saveGameToLibrary(
         igdbId,
         imageUrl,
         isWishlisted,
+        ownagePlatform: [],
         purchaseType,
         rating,
         review: undefined,

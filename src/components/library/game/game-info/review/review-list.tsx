@@ -1,12 +1,7 @@
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { getGameReviews } from "@/src/queries/dashboard/get-reviews";
 import { ReviewItem } from "@/src/types/dashboard/review";
 import { format } from "date-fns";
-import Image from "next/image";
 
 const Review = ({
   imageUrl,
@@ -20,13 +15,12 @@ const Review = ({
   return (
     <div className="flex max-w-[320px] flex-col gap-2">
       <header className="flex items-center gap-2">
-        <Image
+        <CustomImage
           alt={`${name} artwork`}
           className="rounded-md object-cover"
-          height={NEXT_IMAGE_SIZES["micro"].height}
+          imageUrl={imageUrl}
           priority
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageUrl}.png`}
-          width={NEXT_IMAGE_SIZES["micro"].width}
+          size="micro"
         />
         <div className="flex flex-col">
           <p>

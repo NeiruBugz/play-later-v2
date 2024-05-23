@@ -26,4 +26,5 @@ export async function setUserName(payload: Prisma.UserUpdateInput) {
   revalidatePath("/library");
   revalidatePath("/backlogs");
   revalidatePath("/wishlist");
+  revalidatePath("/dashboard");
 }

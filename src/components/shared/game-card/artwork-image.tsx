@@ -1,9 +1,4 @@
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
-import Image from "next/image";
+import { CustomImage } from "@/src/components/shared/custom-image";
 
 export const ArtworkImage = ({
   imageUrl,
@@ -14,16 +9,15 @@ export const ArtworkImage = ({
   title: string;
 }) => {
   return (
-    <Image
+    <CustomImage
       alt={`${title} cover art`}
       className="h-auto flex-shrink-0 rounded-xl object-cover"
-      height={NEXT_IMAGE_SIZES["logo"].height}
-      src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageUrl}.png`}
+      imageUrl={imageUrl}
+      size="logo"
       style={{
         height: "auto",
         maxWidth: "100%",
       }}
-      width={NEXT_IMAGE_SIZES["logo"].width}
     />
   );
 };

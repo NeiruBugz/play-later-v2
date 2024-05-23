@@ -21,11 +21,15 @@ export default async function LibraryPage({ searchParams }: LibraryPageProps) {
 
   return (
     <section className="relative">
-      <Suspense fallback={<HeaderSkeleton />}>
+      <Suspense fallback={<HeaderSkeleton />} key={JSON.stringify(params)}>
         <Header />
       </Suspense>
       <section className="container bg-background">
-        <Suspense fallback={<ListSkeleton viewMode={viewMode} />}>
+        <Suspense
+          fallback={
+            <ListSkeleton key={JSON.stringify(params)} viewMode={viewMode} />
+          }
+        >
           <LibraryContent searchParams={params} />
         </Suspense>
       </section>

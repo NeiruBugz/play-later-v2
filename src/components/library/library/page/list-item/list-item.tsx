@@ -1,18 +1,14 @@
 import { QuickActions } from "@/src/components/library/library/page/list-item/quick-actions";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { GameTimeBadge } from "@/src/components/shared/game-card/time-badge";
 import { Badge } from "@/src/components/ui/badge";
 import { Skeleton } from "@/src/components/ui/skeleton";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
+import { IMAGE_SIZES } from "@/src/packages/config/igdb.config";
 import igdbApi from "@/src/packages/igdb-api";
 import { GenresResponse } from "@/src/packages/types/igdb";
 import { ListEntry } from "@/src/types/library/actions";
 import { format } from "date-fns";
 import { Calendar } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -23,7 +19,7 @@ export const ListItem = async ({
 }: {
   currentStatus: string;
   game: ListEntry;
-  imageKey?: keyof typeof NEXT_IMAGE_SIZES;
+  imageKey?: keyof typeof IMAGE_SIZES;
 }) => {
   let info: GenresResponse | null = null;
 
@@ -36,13 +32,12 @@ export const ListItem = async ({
     <div className="flex w-full items-center justify-between gap-4">
       <Link href={`/library/${game.id}`}>
         <div className="flex gap-4">
-          <Image
+          <CustomImage
             alt={`${game.title} thumbnail`}
             className="flex-shrink-0 rounded-md"
-            height={NEXT_IMAGE_SIZES[imageKey].height}
+            imageUrl={game.imageUrl}
             priority
-            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.imageUrl}.png`}
-            width={NEXT_IMAGE_SIZES[imageKey].width}
+            size={imageKey}
           />
           <div className="self-center justify-self-start md:min-w-[260px] lg:min-w-[400px] xl:min-w-[600px]">
             <h2 className="whitespace-pre-wrap text-2xl font-bold tracking-tight">

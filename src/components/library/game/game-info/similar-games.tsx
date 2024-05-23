@@ -1,12 +1,7 @@
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { List } from "@/src/components/shared/list";
 import { Skeleton } from "@/src/components/ui/skeleton";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
 import { FullGameInfoResponse } from "@/src/packages/types/igdb";
-import Image from "next/image";
 import { Suspense } from "react";
 
 const ListSkeleton = () => (
@@ -36,13 +31,12 @@ export const SimilarGames = ({
                 className="relative aspect-[3/4] h-full flex-shrink-0 rounded-md border transition"
                 key={game.id}
               >
-                <Image
+                <CustomImage
                   alt={`${game.name} artwork`}
                   className="rounded-md object-cover"
-                  height={NEXT_IMAGE_SIZES["logo"].height}
+                  imageUrl={game.cover?.image_id}
                   priority
-                  src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover?.image_id}.png`}
-                  width={NEXT_IMAGE_SIZES["logo"].width}
+                  size="logo"
                 />
               </div>
             );

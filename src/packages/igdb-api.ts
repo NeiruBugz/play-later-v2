@@ -1,5 +1,5 @@
 import { env } from "@/env.mjs";
-import { API_URL, TOKEN_URL } from "@/src/packages/config/site";
+import { API_URL, TOKEN_URL } from "@/src/packages/config/igdb.config";
 import {
   Event,
   FullGameInfoResponse,
@@ -38,6 +38,10 @@ const gamingEvents = `
   sort start_time asc;
   where start_time >= ${getTimeStamp()};
   limit 10;
+`;
+
+const platforms = `
+  fields name;
 `;
 
 const fullGameInfo = `
@@ -152,6 +156,13 @@ const igdbApi = {
   sort first_release_date asc;
   where id = (${ids.join(",")}) & first_release_date >= ${getTimeStamp()};`,
       resource: "/games",
+    });
+  },
+
+  async getPlatforms() {
+    return this.request({
+      body: platforms,
+      resource: "/platforms",
     });
   },
 

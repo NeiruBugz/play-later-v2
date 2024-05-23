@@ -23,7 +23,9 @@ export const getGames = async (filters: GameFilters) => {
     status,
   } = filters;
 
-  const games = await prisma.game.findMany({
+  console.log(status);
+
+  return prisma.game.findMany({
     orderBy: { [sortBy]: order },
     select: {
       createdAt: true,
@@ -40,13 +42,11 @@ export const getGames = async (filters: GameFilters) => {
       deletedAt: null,
       isWishlisted: false,
       purchaseType: purchaseType ? purchaseType : undefined,
-      status,
+      status: status ? status : undefined,
       title: { contains: search || "", mode: "insensitive" },
       userId,
     },
   });
-
-  return games;
 };
 
 export const getGamesListWithAdapter: FetcherAndProcessor = async (params) => {
