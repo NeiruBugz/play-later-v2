@@ -58,6 +58,20 @@ export function LibraryNavigation({
 
   return (
     <div className="flex w-fit flex-wrap gap-2">
+      <Link href={`/library`}>
+        <Badge
+          className={cn(
+            "h-8 cursor-pointer text-[16px] font-normal hover:bg-accent hover:text-accent-foreground",
+            {
+              "border-primary bg-primary font-medium text-primary-foreground":
+                searchParams?.get("status") === null,
+            }
+          )}
+          variant="outline"
+        >
+          All
+        </Badge>
+      </Link>
       {Object.entries(statusMapping).map(([key, value]) => (
         <Link href={`/library/?status=${key}`} key={key}>
           <Badge

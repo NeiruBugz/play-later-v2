@@ -21,7 +21,7 @@ export default async function DashboardPage() {
     <div>
       <LayoutHeader heading={`Welcome back, ${user?.username ?? user?.name}`} />
       <section className="container mt-4">
-        <section className="mt-2 flex max-w-[100vw] flex-col gap-3 md:flex-row">
+        <section className="mt-2 flex max-w-[100vw] flex-col justify-between gap-3 md:flex-row">
           <UpcomingReleases />
           <LibraryStatistics />
           <PlayingGames />

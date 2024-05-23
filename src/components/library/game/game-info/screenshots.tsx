@@ -1,10 +1,5 @@
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { FullGameInfoResponse } from "@/src/packages/types/igdb";
-import Image from "next/image";
 
 export const Screenshots = ({
   name,
@@ -21,13 +16,12 @@ export const Screenshots = ({
             className="relative mx-4 aspect-[16/9] h-[320px] w-[569px] cursor-pointer border transition"
             key={screenshot.id}
           >
-            <Image
+            <CustomImage
               alt={`${name} screenshot ${screenshot.image_id}`}
               className="object-cover"
-              height={NEXT_IMAGE_SIZES["s-md"].height}
+              imageUrl={screenshot.image_id}
               priority
-              src={`${IMAGE_API}/${IMAGE_SIZES["s-md"]}/${screenshot.image_id}.png`}
-              width={NEXT_IMAGE_SIZES["s-md"].width}
+              size="s-md"
             />
           </div>
         );

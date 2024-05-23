@@ -1,13 +1,8 @@
 import { auth } from "@/auth";
 import { SignIn } from "@/src/components/auth/sign-in";
-import {
-  TrendingList,
-  TrendingListSkeleton,
-} from "@/src/components/auth/trending-list";
 import { SiteFooter } from "@/src/components/shared/page-footer";
 import { SiteHeader } from "@/src/components/shared/page-header";
 import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function Page() {
   const session = await auth();
@@ -30,14 +25,6 @@ export default async function Page() {
             you log in.
           </p>
           <SignIn />
-        </div>
-        <div className="mb-8 md:m-0 md:max-w-[50%]">
-          <h2 className="scroll-m-20 pb-2 text-center text-3xl font-semibold tracking-tight first:mt-0">
-            Trending now
-          </h2>
-          <Suspense fallback={<TrendingListSkeleton />}>
-            <TrendingList />
-          </Suspense>
         </div>
       </section>
       <SiteFooter />

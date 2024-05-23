@@ -1,12 +1,7 @@
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { cn } from "@/src/packages/utils";
 import { getPlayingGames } from "@/src/queries/dashboard/get-playing-games";
 import { Game } from "@prisma/client";
-import Image from "next/image";
 import Link from "next/link";
 
 const GameWidget = ({
@@ -17,13 +12,12 @@ const GameWidget = ({
   return (
     <Link href={`/library/${game.id}`}>
       <div className="flex flex-col items-center gap-1.5">
-        <Image
+        <CustomImage
           alt={`${game.title} artwork`}
           className="rounded-md object-cover"
-          height={NEXT_IMAGE_SIZES["logo"].height}
+          imageUrl={game.imageUrl}
           priority
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.imageUrl}.png`}
-          width={NEXT_IMAGE_SIZES["logo"].width}
+          size="logo"
         />
       </div>
     </Link>

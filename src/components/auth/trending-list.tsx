@@ -1,11 +1,6 @@
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { Skeleton } from "@/src/components/ui/skeleton";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
 import igdbApi from "@/src/packages/igdb-api";
-import Image from "next/image";
 
 const placeholderArray = Array.from({ length: 12 }, (_, index) => index + 1);
 
@@ -27,14 +22,13 @@ export async function TrendingList() {
     <div className="columns-3">
       {trendingGames?.map((game) => {
         return (
-          <Image
+          <CustomImage
             alt={`${game.name} cover`}
             className="mb-4 rounded-md"
-            height={NEXT_IMAGE_SIZES["logo"].height}
+            imageUrl={game.cover.image_id}
             key={game.id}
             priority
-            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
-            width={NEXT_IMAGE_SIZES["logo"].width}
+            size="logo"
           />
         );
       })}

@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { List } from "@/src/components/shared/list";
 import {
   Breadcrumb,
@@ -8,14 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/src/components/ui/breadcrumb";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
-import { isURL } from "@/src/packages/utils";
 import { getUserList } from "@/src/queries/backlogs/get-user-list";
-import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 
 export default async function Page(props: { params: { id: string } }) {
@@ -50,18 +44,14 @@ export default async function Page(props: { params: { id: string } }) {
       </header>
       <List viewMode="grid">
         {games.map((game) => {
-          const imageUrl = isURL(game.imageUrl)
-            ? game.imageUrl
-            : `${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.imageUrl}.png`;
           return (
             <div className="flex flex-col" key={game.id}>
-              <Image
+              <CustomImage
                 alt={`${game.title}`}
                 className="h-auto w-[150px] rounded-md md:w-[180px] xl:w-[300px] 2xl:w-[400px]"
-                height={NEXT_IMAGE_SIZES["c-big"].height}
+                imageUrl={game.imageUrl}
                 priority
-                src={imageUrl}
-                width={NEXT_IMAGE_SIZES["c-big"].width}
+                size="c-big"
               />
               <p className="h-auto w-[150px] whitespace-break-spaces text-pretty rounded-md text-center font-medium md:w-[180px] xl:w-[300px] 2xl:w-[400px]">
                 {game.title}

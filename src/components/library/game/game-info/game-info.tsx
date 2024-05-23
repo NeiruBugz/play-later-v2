@@ -12,6 +12,7 @@ import { SimilarGames } from "@/src/components/library/game/game-info/similar-ga
 import { Stores } from "@/src/components/library/game/game-info/store/stores";
 import { Summary } from "@/src/components/library/game/game-info/summary";
 import { Websites } from "@/src/components/library/game/game-info/website/websites";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import {
   Accordion,
   AccordionContent,
@@ -19,13 +20,7 @@ import {
   AccordionTrigger,
 } from "@/src/components/ui/accordion";
 import { Badge } from "@/src/components/ui/badge";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
 import { uniqueRecords } from "@/src/packages/library/client-helpers";
-import Image from "next/image";
 
 export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
   const {
@@ -71,13 +66,12 @@ export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
         <div className="flex justify-center gap-1 md:justify-normal">
           <div className="flex flex-col gap-1">
             <div className="relative aspect-[3/4] h-fit w-[264px] flex-shrink-0 cursor-pointer rounded-md border transition">
-              <Image
+              <CustomImage
                 alt={`${game.name} artwork`}
                 className="rounded-md object-cover"
-                height={NEXT_IMAGE_SIZES["c-big"].height}
+                imageUrl={cover?.image_id}
                 priority
-                src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${cover?.image_id}.png`}
-                width={NEXT_IMAGE_SIZES["c-big"].width}
+                size="c-big"
               />
             </div>
             <PlaythroughDialog id={game.id} platforms={release_dates} />

@@ -1,15 +1,10 @@
 import { AddGame } from "@/src/components/shared/add-game/add-game";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { Badge } from "@/src/components/ui/badge";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
 import { cn } from "@/src/packages/utils";
 import { getWishlistReleases } from "@/src/queries/dashboard/get-wishlist-releases";
 import { Game } from "@prisma/client";
 import { Calendar } from "lucide-react";
-import Image from "next/image";
 
 type UpcomingRelease = {
   cover: {
@@ -36,13 +31,12 @@ const Release = ({
         "hidden md:flex": index >= 3,
       })}
     >
-      <Image
+      <CustomImage
         alt={`${release.name} artwork`}
         className="rounded-md object-cover"
-        height={NEXT_IMAGE_SIZES["logo"].height}
+        imageUrl={release.cover.image_id}
         priority
-        src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${release.cover.image_id}.png`}
-        width={NEXT_IMAGE_SIZES["logo"].width}
+        size="logo"
       />
       <Badge className="flex items-center gap-1">
         <Calendar className="size-3.5" />

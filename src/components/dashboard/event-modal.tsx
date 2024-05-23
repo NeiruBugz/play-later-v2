@@ -1,5 +1,5 @@
 import { Button } from "@/src/components/ui/button";
-import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/site";
+import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
 import igdbApi from "@/src/packages/igdb-api";
 import { Event } from "@/src/packages/types/igdb";
 import { formatISO } from "date-fns";

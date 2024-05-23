@@ -28,6 +28,7 @@ const mapper = {
   title: "Game Title",
   updatedAt: "Updated",
 };
+
 function FiltersForm({
   toggleOpen,
 }: {

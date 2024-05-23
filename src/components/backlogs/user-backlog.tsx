@@ -1,12 +1,6 @@
 import { Counter } from "@/src/components/backlogs/counter";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
-import { isURL } from "@/src/packages/utils";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { BackloggedWithUser } from "@/src/types/backlogs";
-import Image from "next/image";
 import Link from "next/link";
 
 export const UserBacklog = ({
@@ -26,9 +20,6 @@ export const UserBacklog = ({
               return;
             }
 
-            const imageUrl = isURL(backlogItem.imageUrl)
-              ? backlogItem.imageUrl
-              : `${IMAGE_API}/${IMAGE_SIZES["hd"]}/${backlogItem.imageUrl}.png`;
             return (
               <div
                 className="absolute top-0"
@@ -40,15 +31,14 @@ export const UserBacklog = ({
               >
                 <div className="group relative w-fit cursor-pointer rounded-xl border bg-background text-white shadow-md transition-all hover:shadow-xl">
                   <div className="flex size-[90px] items-center justify-center">
-                    <Image
+                    <CustomImage
                       alt={`${backlogItem.title} cover art`}
                       className="h-full w-full rounded-xl object-cover"
-                      height={NEXT_IMAGE_SIZES.thumb.height}
-                      src={imageUrl}
+                      imageUrl={backlogItem.imageUrl}
+                      size="thumb"
                       style={{
                         maxWidth: "100%",
                       }}
-                      width={NEXT_IMAGE_SIZES.thumb.width}
                     />
                   </div>
                 </div>

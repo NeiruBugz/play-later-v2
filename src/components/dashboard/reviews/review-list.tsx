@@ -1,28 +1,22 @@
 import { DashboardItemLayout } from "@/src/components/dashboard/dashboard-item-layout";
+import { CustomImage } from "@/src/components/shared/custom-image";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/site";
 import { getReviews } from "@/src/queries/dashboard/get-reviews";
 import { ReviewItem } from "@/src/types/dashboard/review";
 import { format } from "date-fns";
 import { Newspaper } from "lucide-react";
-import Image from "next/image";
 import { Suspense } from "react";
 
 const Review = ({ review }: { review: ReviewItem }) => {
   return (
     <div className="flex max-w-[320px] flex-col gap-2">
       <header className="flex items-center gap-2">
-        <Image
+        <CustomImage
           alt={`${review.game.title} artwork`}
           className="rounded-md object-cover"
-          height={NEXT_IMAGE_SIZES["micro"].height}
+          imageUrl={review.game.imageUrl}
           priority
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${review.game.imageUrl}.png`}
-          width={NEXT_IMAGE_SIZES["micro"].width}
+          size="micro"
         />
         <div className="flex flex-col">
           <p>
