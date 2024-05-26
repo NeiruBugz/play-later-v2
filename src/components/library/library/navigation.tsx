@@ -73,7 +73,7 @@ export function LibraryNavigation({
         </Badge>
       </Link>
       {Object.entries(statusMapping).map(([key, value]) => (
-        <Link href={`/library/?status=${key}`} key={key}>
+        <Link href={`/library/?status=${key}`} key={key} prefetch>
           <Badge
             className={cn(
               "h-8 cursor-pointer text-[16px] font-normal hover:bg-accent hover:text-accent-foreground",

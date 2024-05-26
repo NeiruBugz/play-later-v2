@@ -56,7 +56,7 @@ export async function EventWidget({ event }: { event: Event }) {
   });
 
   return (
-    <div className="mx-auto max-w-[360px]">
+    <div className="max-w-[360px]">
       <div className="relative aspect-video min-w-[320px] max-w-[360px] overflow-hidden rounded-lg">
         {imageData?.image_id ? (
           <Image
@@ -76,12 +76,17 @@ export async function EventWidget({ event }: { event: Event }) {
             </h2>
             <div className="flex items-center gap-2">
               <Button
+                aria-label="Join Live Stream"
                 className="w-full"
                 disabled={!event.live_stream_url}
                 variant={event.live_stream_url ? "default" : "secondary"}
               >
                 {event.live_stream_url ? (
-                  <Link href={event.live_stream_url} target="_blank">
+                  <Link
+                    aria-label="Live Stream link"
+                    href={event.live_stream_url}
+                    target="_blank"
+                  >
                     Join Live Stream
                   </Link>
                 ) : (
@@ -89,10 +94,12 @@ export async function EventWidget({ event }: { event: Event }) {
                 )}
               </Button>
               <Button
+                aria-label="Add to Google Calendar"
                 size="icon"
                 variant={!event.live_stream_url ? "default" : "secondary"}
               >
                 <Link
+                  aria-label="Add to Google Calendar Link"
                   className="flex items-center px-2"
                   href={calendarUrl}
                   target="_blank"

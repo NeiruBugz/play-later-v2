@@ -19,7 +19,7 @@ export async function UpcomingEvents() {
       }
     >
       <Suspense fallback="Loading...">
-        <div className="flex w-full flex-col flex-wrap gap-3 overflow-auto md:flex-row">
+        <div className="flex w-full flex-col flex-wrap gap-2 overflow-auto md:flex-row">
           {events.map((event) => (
             <EventWidget event={event} key={event.id} />
           ))}

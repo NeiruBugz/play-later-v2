@@ -36,7 +36,6 @@ export const ListItem = async ({
             alt={`${game.title} thumbnail`}
             className="flex-shrink-0 rounded-md"
             imageUrl={game.imageUrl}
-            priority
             size={imageKey}
           />
           <div className="self-center justify-self-start md:min-w-[260px] lg:min-w-[400px] xl:min-w-[600px]">

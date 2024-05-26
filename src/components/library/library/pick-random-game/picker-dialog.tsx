@@ -19,19 +19,14 @@ const PickerDialog = ({ items }: { items: PickerItem[] }) => {
   const [isOpen, onOpenChange] = useState(false);
   const params = useSearchParams();
   const status = params.get("status");
-  if (!status) {
+  if (!status || status !== "BACKLOG") {
     return;
   }
 
   return (
     <Dialog onOpenChange={onOpenChange} open={isOpen}>
       <DialogTrigger asChild>
-        <Button
-          className={cn("my-2 md:my-0", {
-            hidden: status !== "BACKLOG" || items.length === 0,
-          })}
-          variant="secondary"
-        >
+        <Button className={cn("my-2 md:my-0")} variant="secondary">
           Pick random game
         </Button>
       </DialogTrigger>
