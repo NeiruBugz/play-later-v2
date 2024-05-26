@@ -34,7 +34,9 @@ const prismaFactory = () => {
     console.log("Duration: " + e.duration + "ms");
   });
 
-  prisma.$extends(withOptimize());
+  if (process.env.NODE_ENV === "development") {
+    prisma.$extends(withOptimize());
+  }
 
   return prisma.$extends({
     name: "soft-delete",
