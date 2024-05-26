@@ -1,5 +1,6 @@
 import { env } from "@/env.mjs";
 import { PrismaClient } from "@prisma/client";
+import { withOptimize } from "@prisma/extension-optimize";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -32,6 +33,8 @@ const prismaFactory = () => {
     console.log("Params: " + e.params);
     console.log("Duration: " + e.duration + "ms");
   });
+
+  prisma.$extends(withOptimize());
 
   return prisma.$extends({
     name: "soft-delete",

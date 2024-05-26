@@ -36,6 +36,7 @@ export const getWishlistReleases = async () => {
       .filter((id) => id !== null);
 
     const releases = await igdbApi.getNextMonthReleases(ids as number[]);
+
     if (!releases) {
       return [];
     }

@@ -1,5 +1,4 @@
 import { AddGame } from "@/src/components/shared/add-game/add-game";
-import { CustomImage } from "@/src/components/shared/custom-image";
 import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/packages/utils";
 import { getWishlistReleases } from "@/src/queries/dashboard/get-wishlist-releases";
@@ -13,7 +12,11 @@ type UpcomingRelease = {
   };
   id: number;
   name: string;
-  release_dates: Array<{ human: string; id: number }>;
+  release_dates: Array<{
+    human: string;
+    id: number;
+    platform: { id: number; name: string };
+  }>;
 };
 
 const Release = ({
@@ -27,21 +30,25 @@ const Release = ({
   const date = release.release_dates[0];
   return (
     <div
-      className={cn("relative flex flex-col items-center gap-1.5", {
+      className={cn("relative flex flex-col gap-1.5", {
         "hidden md:flex": index >= 3,
       })}
     >
-      <CustomImage
-        alt={`${release.name} artwork`}
-        className="rounded-md object-cover"
-        imageUrl={release.cover.image_id}
-        priority
-        size="logo"
-      />
-      <Badge className="flex items-center gap-1">
-        <Calendar className="size-3.5" />
-        <p>{date.human}</p>
-      </Badge>
+      <p className="font-medium">{release.name}</p>
+      <div className="flex items-center gap-1">
+        <Badge className="flex h-fit w-fit flex-shrink-0 items-center gap-1">
+          <Calendar className="size-3.5" />
+          <p>{date.human}</p>
+        </Badge>
+        <div>
+          {release.release_dates.map((platform, index) => (
+            <span className="text-xs text-slate-500">
+              {platform.platform.name}
+              {release.release_dates.length - 1 === index ? "" : ", "}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
@@ -49,7 +56,7 @@ export async function ReleasesList() {
   const releases = await getWishlistReleases();
 
   return (
-    <div className="flex w-full justify-center gap-3">
+    <div className="flex w-full flex-col justify-start gap-3">
       {releases.length ? (
         releases.map((release, index) => (
           <Release
