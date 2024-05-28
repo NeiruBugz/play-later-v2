@@ -1,7 +1,17 @@
-import { LibraryFiltersUIProps } from "@/src/components/library/library/filters/types";
+import {
+  DefaultSortState,
+  mapper,
+  sortingFields,
+} from "@/src/components/library/library/filters/constants";
+import {
+  FormAction,
+  FormState,
+  LibraryFiltersUIProps,
+} from "@/src/components/library/library/filters/types";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -9,25 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { buildUrl } from "@/src/packages/library/client-helpers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ReactNode, useMemo, useState } from "react";
-
-const DefaultSortState = {
-  order: "desc",
-  sortBy: "updatedAt",
-};
-
-const sortingFields = ["updatedAt", "gameplayTime", "createdAt", "title"];
-const filterParameters = ["search", "sortBy", "order", "purchaseType"];
-
-const mapper = {
-  createdAt: "Creation date",
-  gameplayTime: "Time to beat the story",
-  purchaseType: "Purchase type",
-  title: "Game Title",
-  updatedAt: "Updated",
-};
+import { startTransition, useActionState } from "react";
 
 function FiltersForm({
   toggleOpen,
@@ -36,132 +30,90 @@ function FiltersForm({
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { replace } = useRouter();
+  const { push } = useRouter();
 
-  const [filters, setFilters] = useState({
-    order: searchParams?.get("order") ?? DefaultSortState.order,
-    purchaseType: searchParams?.get("purchaseType") ?? "",
-    search: searchParams?.get("search") ?? "",
-    sortBy: searchParams?.get("sortBy") ?? DefaultSortState.sortBy,
-  });
-
-  const onChange = (
-    value: string,
-    key: "platform" | "purchaseType" | "search" | "sort"
-  ) => {
-    if (key === "sort") {
-      const [sortBy, order] = value.split("-");
-      setFilters((prev) => ({
-        ...prev,
-        order,
-        sortBy,
-      }));
-    }
-
-    if (key === "platform") {
-      setFilters((prev) => ({
-        ...prev,
-        platform: value,
-      }));
-    }
-
-    if (key === "purchaseType") {
-      setFilters((prev) => ({
-        ...prev,
-        purchaseType: value,
-      }));
-    }
-  };
-
-  const handleSearch = (term: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      search: term,
-    }));
-  };
-
-  const onApply = () => {
-    const newSearchParams = new URLSearchParams(searchParams);
-
-    filterParameters.forEach((param) => {
-      const filterValue = filters[param as keyof typeof filters];
-      if (filterValue) {
-        newSearchParams.set(param, filterValue);
-      }
+  const formAction: FormAction = (prevState, formData) => {
+    const purchaseType = formData.get("purchaseType") as string;
+    const search = formData.get("search")
+      ? (formData.get("search") as string)
+      : undefined;
+    const sortBy = formData.get("sortBy") as string;
+    const order = (formData.get("order") as string) ?? DefaultSortState.order;
+    startTransition(() => {
+      push(
+        buildUrl(pathname, {
+          ...prevState,
+          order,
+          purchaseType: purchaseType ? (purchaseType as string) : undefined,
+          search: search,
+          sortBy,
+        })
+      );
+      toggleOpen(false);
     });
-
-    if (pathname) {
-      replace(`${pathname}?${newSearchParams}`);
-    }
-
-    toggleOpen(false);
+    return {
+      ...prevState,
+      order,
+      purchaseType: purchaseType ? (purchaseType as string) : undefined,
+      search: search,
+      sortBy,
+    };
   };
 
-  const onClear = () => {
-    if (pathname) {
-      replace(pathname);
-    }
-    toggleOpen(false);
-  };
-
-  const options = useMemo(() => {
-    const options: Array<{ label: ReactNode; value: string }> = [];
-    sortingFields.forEach((value) => {
-      options.push({
-        label: (
-          <div className="flex h-6 items-center gap-4 ">
-            {mapper[value as keyof typeof mapper]}{" "}
-            <ChevronUp className="size-4" />
-          </div>
-        ),
-        value: `${value}-asc`,
-      });
-      options.push({
-        label: (
-          <div className="flex h-6 items-center gap-4">
-            {mapper[value as keyof typeof mapper]}{" "}
-            <ChevronDown className="size-4" />
-          </div>
-        ),
-        value: `${value}-desc`,
-      });
-    });
-
-    return options;
-  }, []);
+  const [state, action, isPending] = useActionState<FormState, FormData>(
+    formAction,
+    {
+      order: searchParams?.get("order") ?? DefaultSortState.order,
+      purchaseType: searchParams?.get("purchaseType") ?? "",
+      search: searchParams?.get("search") ?? "",
+      sortBy: searchParams?.get("sortBy") ?? DefaultSortState.sortBy,
+      status: searchParams?.get("status") ?? "INPROGRESS",
+    } as FormState
+  );
 
   return (
-    <section className="flex flex-col gap-2 py-4">
+    <form action={action} className="flex flex-col gap-2 py-4">
       <Label className="flex flex-col gap-2">
         <span>Search</span>
         <Input
-          onChange={(e) => handleSearch(e.target.value)}
+          defaultValue={state.search}
+          name="search"
           placeholder="Search within your library"
-          value={filters.search}
         />
       </Label>
-      <Select
-        onValueChange={(value) => onChange(value, "sort")}
-        value={`${filters.sortBy}-${filters.order}`}
-      >
+      <Select defaultValue={`${state.sortBy}`} name="sortBy">
         <div>
           <Label className="my-2 block">Sort</Label>
           <SelectTrigger className="h-10">
             <SelectValue placeholder="Select your platform" />
           </SelectTrigger>
           <SelectContent>
-            {options.map((value) => (
-              <SelectItem key={value.value} value={value.value}>
-                {value.label}
+            {sortingFields.map((fieldKey) => (
+              <SelectItem key={fieldKey} value={`${fieldKey}`}>
+                {mapper[fieldKey as keyof typeof mapper]}
               </SelectItem>
             ))}
           </SelectContent>
         </div>
       </Select>
-      <Select
-        onValueChange={(value) => onChange(value, "purchaseType")}
-        value={`${filters.purchaseType}`}
-      >
+      <div>
+        <Label>Order</Label>
+        <RadioGroup
+          className="mt-2 flex items-center gap-2"
+          defaultValue={state.order}
+          name="order"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem id="r1" value="asc" />
+            <Label htmlFor="r1">ASC</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem id="r2" value="desc" />
+            <Label htmlFor="r2">DESC</Label>
+          </div>
+        </RadioGroup>
+      </div>
+      <Select defaultValue={`${state.purchaseType}`} name="purchaseType">
         <div>
           <Label className="my-2 block">Purchase type</Label>
           <SelectTrigger className="h-10">
@@ -175,12 +127,14 @@ function FiltersForm({
         </div>
       </Select>
       <footer className="flex items-center justify-between pt-2">
-        <Button onClick={onClear} variant="secondary">
-          Clear filters
+        <Button disabled={isPending} type="reset" variant="secondary">
+          Clear selection
         </Button>
-        <Button onClick={onApply}>Apply</Button>
+        <Button disabled={isPending} type="submit">
+          Apply
+        </Button>
       </footer>
-    </section>
+    </form>
   );
 }
 

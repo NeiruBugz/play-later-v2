@@ -1,3 +1,4 @@
+import { FormState } from "@/src/components/library/library/filters/types";
 import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { Game, GameStatus } from "@prisma/client";
 
@@ -59,3 +60,21 @@ export const uniqueRecords = (
           )
       )
     : records;
+
+export const buildUrl = (pathname: string, filters: FormState) => {
+  const { order, purchaseType, search, sortBy, status } = filters;
+  let url = pathname;
+
+  url += `?status=${status}`;
+  url += `&order=${order}`;
+  url += `&sortBy=${sortBy}`;
+
+  if (purchaseType) {
+    url += `&purchaseType=${purchaseType}`;
+  }
+  if (search) {
+    url += `&search=${search}`;
+  }
+
+  return url;
+};

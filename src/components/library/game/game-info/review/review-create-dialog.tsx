@@ -12,14 +12,14 @@ import {
 } from "@/src/components/ui/dialog";
 import { Textarea } from "@/src/components/ui/textarea";
 import { useSession } from "next-auth/react";
-import { useId, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useId, useState } from "react";
+import { useFormStatus } from "react-dom";
 
 export const ReviewCreateDialog = ({ gameId }: { gameId: string }) => {
   const session = useSession();
   const [isOpen, setOpen] = useState(false);
   const { pending } = useFormStatus();
-  const [state, formAction] = useFormState(createReview, { message: "" });
+  const [state, formAction] = useActionState(createReview, { message: "" });
   const formId = useId();
   return (
     <Dialog onOpenChange={setOpen} open={isOpen}>

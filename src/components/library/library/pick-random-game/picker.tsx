@@ -2,8 +2,8 @@
 
 import type { PickerProps } from "@/src/types/library/components";
 
-import { MemoizedChoice } from "@/src/components/library/library/pick-random-game/choice";
-import { MemoizedControls } from "@/src/components/library/library/pick-random-game/controls";
+import { PickerChoice } from "@/src/components/library/library/pick-random-game/choice";
+import { PickerControls } from "@/src/components/library/library/pick-random-game/controls";
 import { getRandomItem } from "@/src/packages/utils";
 import { PickerItem } from "@/src/types/library/actions";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -62,12 +62,12 @@ function Picker({ closeDialog, items }: PickerProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <MemoizedChoice
+      <PickerChoice
         afterClick={closeDialog}
         choice={currentChoice}
         isRunning={isRunning}
       />
-      <MemoizedControls
+      <PickerControls
         hasChoice={currentChoice !== undefined}
         isRunning={isRunning}
         start={start}

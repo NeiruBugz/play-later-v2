@@ -7,14 +7,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 export const ClearFilters = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { replace } = useRouter();
+  const { push } = useRouter();
 
   if (searchParams?.size <= 2) {
     return null;
   }
 
   const onClick = () => {
-    replace(`${pathname}?status=BACKLOG`);
+    push(`${pathname}?status=INPROGRESS`);
   };
 
   return (

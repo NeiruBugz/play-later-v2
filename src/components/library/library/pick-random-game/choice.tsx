@@ -7,7 +7,6 @@ import {
   AvatarImage,
 } from "@/src/components/ui/avatar";
 import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
-import { memo } from "react";
 
 function PickerChoice({ afterClick, choice, isRunning }: PickerChoiceProps) {
   const onClick = async () => {
@@ -44,8 +43,4 @@ function PickerChoice({ afterClick, choice, isRunning }: PickerChoiceProps) {
   );
 }
 
-const MemoizedChoice = memo(PickerChoice);
-
-MemoizedChoice.displayName = "PickerChoice";
-
-export { MemoizedChoice };
+export { PickerChoice };
