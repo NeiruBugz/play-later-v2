@@ -8,11 +8,18 @@
     "plugin:@tanstack/eslint-plugin-query/recommended",
     "plugin:perfectionist/recommended-natural"
   ],
-  "plugins": ["tailwindcss", "@typescript-eslint", "@tanstack/query", "perfectionist"],
+  "plugins": [
+    "tailwindcss",
+    "@typescript-eslint",
+    "@tanstack/query",
+    "perfectionist",
+    "eslint-plugin-react-compiler"
+  ],
   "rules": {
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "off",
-    "tailwindcss/no-custom-classname": "off"
+    "tailwindcss/no-custom-classname": "off",
+    "react-compiler/react-compiler": "error"
   },
   "settings": {
     "tailwindcss": {
