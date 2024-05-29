@@ -1,6 +1,7 @@
+import type { BackloggedWithUser } from "@/src/types/backlogs";
+
 import { Counter } from "@/src/components/backlogs/counter";
 import { CustomImage } from "@/src/components/shared/custom-image";
-import { BackloggedWithUser } from "@/src/types/backlogs";
 import Link from "next/link";
 
 export const UserBacklog = ({

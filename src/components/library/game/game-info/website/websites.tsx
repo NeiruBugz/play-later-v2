@@ -1,5 +1,6 @@
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
+
 import { Website } from "@/src/components/library/game/game-info/website/website";
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 
 export const Websites = ({
   sites,

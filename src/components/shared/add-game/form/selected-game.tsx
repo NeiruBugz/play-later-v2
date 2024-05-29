@@ -1,10 +1,11 @@
+import type { SearchResponse } from "@/src/packages/types/igdb";
+
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/src/components/ui/avatar";
 import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
-import { SearchResponse } from "@/src/packages/types/igdb";
 import { cn } from "@/src/packages/utils";
 import React from "react";
 

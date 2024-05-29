@@ -1,4 +1,5 @@
-import { Game } from "@prisma/client";
+import type { Game } from "@prisma/client";
+
 import Link from "next/link";
 
 import { Artwork } from "./artwork";

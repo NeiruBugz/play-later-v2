@@ -1,6 +1,4 @@
-import { env } from "@/env.mjs";
-import { API_URL, TOKEN_URL } from "@/src/packages/config/igdb.config";
-import {
+import type {
   Event,
   FullGameInfoResponse,
   GenresResponse,
@@ -11,6 +9,9 @@ import {
   UpcomingEventsResponse,
   UpcomingReleaseResponse,
 } from "@/src/packages/types/igdb";
+
+import { env } from "@/env.mjs";
+import { API_URL, TOKEN_URL } from "@/src/packages/config/igdb.config";
 
 const asError = (thrown: unknown): Error => {
   if (thrown instanceof Error) return thrown;

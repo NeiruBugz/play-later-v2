@@ -1,5 +1,6 @@
+import type { LibraryFiltersUIProps } from "@/src/components/library/library/filters/types";
+
 import { FiltersForm } from "@/src/components/library/library/filters/form";
-import { LibraryFiltersUIProps } from "@/src/components/library/library/filters/types";
 import { Button } from "@/src/components/ui/button";
 import {
   Sheet,

@@ -1,8 +1,9 @@
+import type { ReviewItem } from "@/src/types/dashboard/review";
+
 import { DashboardItemLayout } from "@/src/components/dashboard/dashboard-item-layout";
 import { CustomImage } from "@/src/components/shared/custom-image";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
 import { getReviews } from "@/src/queries/dashboard/get-reviews";
-import { ReviewItem } from "@/src/types/dashboard/review";
 import { format } from "date-fns";
 import { Newspaper } from "lucide-react";
 import { Suspense } from "react";

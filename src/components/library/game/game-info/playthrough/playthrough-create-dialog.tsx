@@ -1,3 +1,6 @@
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
+import type { Game } from "@prisma/client";
+
 import { createPlaythrough } from "@/src/actions/library/create-playthrough";
 import { Button } from "@/src/components/ui/button";
 import {
@@ -16,9 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { processPlaythroughPayload } from "@/src/packages/utils";
-import { Game } from "@prisma/client";
 import { z } from "zod";
 
 const createPlaythroughSchema = z.object({

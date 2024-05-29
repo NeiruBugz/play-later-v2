@@ -1,9 +1,13 @@
+import type {
+  FetcherAndProcessor,
+  PickerItem,
+} from "@/src/types/library/actions";
+
 import { getServerUserId } from "@/auth";
 import { calculateTotalBacklogTime } from "@/src/packages/library/client-helpers";
 import { prisma } from "@/src/packages/prisma";
 import { commonErrorHandler, sessionErrorHandler } from "@/src/packages/utils";
-import { FetcherAndProcessor, PickerItem } from "@/src/types/library/actions";
-import { type Game, GameStatus, PurchaseType } from "@prisma/client";
+import { type Game, GameStatus, type PurchaseType } from "@prisma/client";
 
 type GameFilters = {
   order?: "asc" | "desc";

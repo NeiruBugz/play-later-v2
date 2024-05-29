@@ -1,4 +1,4 @@
-import { BackloggedWithUser } from "@/src/types/backlogs";
+import type { BackloggedWithUser } from "@/src/types/backlogs";
 
 export const Counter = ({
   backlogList,

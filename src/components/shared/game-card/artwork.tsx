@@ -1,7 +1,6 @@
-"use client";
+import type { Game } from "@prisma/client";
 
 import { ArtworkImage } from "@/src/components/shared/game-card/artwork-image";
-import { Game } from "@prisma/client";
 
 export const Artwork = ({ game }: { game: Partial<Game> }) => {
   return (

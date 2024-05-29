@@ -1,4 +1,5 @@
-import { Game } from "@prisma/client";
+import type { Game } from "@prisma/client";
+
 import { Clock } from "lucide-react";
 
 export const GameTimeBadge = ({

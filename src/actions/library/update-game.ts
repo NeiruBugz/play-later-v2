@@ -1,8 +1,9 @@
 "use server";
 
+import type { Game, Prisma } from "@prisma/client";
+
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
-import { Game, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 const LIBRARY_PATH = "/library";

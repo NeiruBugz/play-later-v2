@@ -1,9 +1,10 @@
+import type { UpcomingReleaseResponse } from "@/src/packages/types/igdb";
+import type { Game } from "@prisma/client";
+
 import { getServerUserId } from "@/auth";
 import igdbApi from "@/src/packages/igdb-api";
 import { prisma } from "@/src/packages/prisma";
-import { UpcomingReleaseResponse } from "@/src/packages/types/igdb";
 import { sessionErrorHandler } from "@/src/packages/utils";
-import { Game } from "@prisma/client";
 
 export const getWishlistReleases = async () => {
   try {

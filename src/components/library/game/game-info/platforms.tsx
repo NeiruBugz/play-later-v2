@@ -1,5 +1,6 @@
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
+
 import { Badge, ColorVariant } from "@/src/components/ui/badge";
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { cn, platformEnumToColor } from "@/src/packages/utils";
 
 const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>

@@ -1,9 +1,10 @@
 "use server";
 
+import type { Prisma } from "@prisma/client";
+
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
 import { sessionErrorHandler } from "@/src/packages/utils";
-import { Prisma } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { revalidatePath } from "next/cache";
 

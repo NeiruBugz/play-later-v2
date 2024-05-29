@@ -1,7 +1,8 @@
 "use server";
 
+import type { Game } from "@prisma/client";
+
 import { updateGame } from "@/src/actions/library/update-game";
-import { Game } from "@prisma/client";
 import { HowLongToBeatService } from "howlongtobeat";
 
 export const updateBackloggedGames = async (backlogged: Game[]) => {

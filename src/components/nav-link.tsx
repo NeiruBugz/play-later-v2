@@ -1,11 +1,11 @@
 "use client";
 
 import type { NavItem } from "@/src/types/shared";
+import type { PropsWithChildren } from "react";
 
 import { cn } from "@/src/packages/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PropsWithChildren } from "react";
 
 export function NavLink({
   children,

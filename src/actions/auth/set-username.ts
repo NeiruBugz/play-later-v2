@@ -1,8 +1,9 @@
 "use server";
 
+import type { Prisma } from "@prisma/client";
+
 import { prisma } from "@/src/packages/prisma";
 import { commonErrorHandler } from "@/src/packages/utils";
-import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function setUserName(payload: Prisma.UserUpdateInput) {

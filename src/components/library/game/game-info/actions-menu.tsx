@@ -1,5 +1,8 @@
 "use client";
 
+import type { Game, GameStatus } from "@prisma/client";
+import type { MouseEvent } from "react";
+
 import { deleteGame } from "@/src/actions/library/delete-game";
 import { updateStatus } from "@/src/actions/library/update-game";
 import { Button } from "@/src/components/ui/button";
@@ -11,7 +14,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu";
-import { Game, GameStatus } from "@prisma/client";
 import {
   CheckCheck,
   EllipsisVertical,
@@ -21,7 +23,6 @@ import {
   Play,
   Trash2Icon,
 } from "lucide-react";
-import { MouseEvent } from "react";
 import { IconContext } from "react-icons";
 import { BsBookshelf } from "react-icons/bs";
 

@@ -1,5 +1,7 @@
 "use client";
 
+import type { PickerItem } from "@/src/types/library/actions";
+
 import { Picker } from "@/src/components/library/library/pick-random-game/picker";
 import { Button } from "@/src/components/ui/button";
 import {
@@ -11,7 +13,6 @@ import {
   DialogTrigger,
 } from "@/src/components/ui/dialog";
 import { cn } from "@/src/packages/utils";
-import { PickerItem } from "@/src/types/library/actions";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 

@@ -1,11 +1,11 @@
 "use server";
 
+import type { Game, Playthrough } from "@prisma/client";
+
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
 import { sessionErrorHandler } from "@/src/packages/utils";
-import { Game, Playthrough } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-
 
 export const createPlaythrough = async ({
   gameId,

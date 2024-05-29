@@ -1,8 +1,8 @@
-import { PlaythroughItem } from "@/src/components/library/game/game-info/playthrough/playthrough-item";
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
-import { getPlaythroughList } from "@/src/queries/library/get-playthrough-list";
-import { Game } from "@prisma/client";
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
+import type { Game } from "@prisma/client";
 
+import { PlaythroughItem } from "@/src/components/library/game/game-info/playthrough/playthrough-item";
+import { getPlaythroughList } from "@/src/queries/library/get-playthrough-list";
 
 export const Playthroughs = async ({
   id,

@@ -1,6 +1,7 @@
+import type { ReviewItem } from "@/src/types/dashboard/review";
+
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
-import { ReviewItem } from "@/src/types/dashboard/review";
 
 export const getReviews = async (): Promise<ReviewItem[]> => {
   try {

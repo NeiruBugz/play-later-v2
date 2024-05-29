@@ -1,3 +1,6 @@
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
+import type { Game } from "@prisma/client";
+
 import { getPlaythrough } from "@/src/actions/library/get-playthrough";
 import { updatePlaythrough } from "@/src/actions/library/update-playthrough";
 import { Button } from "@/src/components/ui/button";
@@ -17,9 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { processPlaythroughPayload } from "@/src/packages/utils";
-import { Game } from "@prisma/client";
 import { format } from "date-fns";
 import { Pencil } from "lucide-react";
 import { z } from "zod";

@@ -1,12 +1,12 @@
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
+import type { Playthrough } from "@prisma/client";
+
 import { PlaythroughEditDialog } from "@/src/components/library/game/game-info/playthrough/playthrough-edit-dialog";
-import { Badge, ColorVariant } from "@/src/components/ui/badge";
+import { Badge, type ColorVariant } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { prisma } from "@/src/packages/prisma";
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { platformEnumToColor } from "@/src/packages/utils";
-import { Playthrough } from "@prisma/client";
 import { Trash } from "lucide-react";
-
 
 export const PlaythroughItem = ({
   id,

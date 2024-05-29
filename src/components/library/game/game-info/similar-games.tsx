@@ -1,7 +1,8 @@
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
+
 import { CustomImage } from "@/src/components/shared/custom-image";
 import { List } from "@/src/components/shared/list";
 import { Skeleton } from "@/src/components/ui/skeleton";
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { Suspense } from "react";
 
 const ListSkeleton = () => (

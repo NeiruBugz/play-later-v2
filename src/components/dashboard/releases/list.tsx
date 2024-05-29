@@ -1,8 +1,9 @@
+import type { Game } from "@prisma/client";
+
 import { AddGame } from "@/src/components/shared/add-game/add-game";
 import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/packages/utils";
 import { getWishlistReleases } from "@/src/queries/dashboard/get-wishlist-releases";
-import { Game } from "@prisma/client";
 import { Calendar } from "lucide-react";
 
 type UpcomingRelease = {

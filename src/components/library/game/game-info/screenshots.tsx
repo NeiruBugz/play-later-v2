@@ -1,5 +1,6 @@
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
+
 import { CustomImage } from "@/src/components/shared/custom-image";
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 
 export const Screenshots = ({
   name,

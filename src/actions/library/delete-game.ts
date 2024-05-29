@@ -1,8 +1,9 @@
 "use server";
 
+import type { Game } from "@prisma/client";
+
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/packages/prisma";
-import { Game } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 

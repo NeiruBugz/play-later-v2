@@ -1,3 +1,6 @@
+import type { GenresResponse } from "@/src/packages/types/igdb";
+import type { ListEntry } from "@/src/types/library/actions";
+
 import { QuickActions } from "@/src/components/library/library/page/list-item/quick-actions";
 import { CustomImage } from "@/src/components/shared/custom-image";
 import { GameTimeBadge } from "@/src/components/shared/game-card/time-badge";
@@ -5,8 +8,6 @@ import { Badge } from "@/src/components/ui/badge";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { IMAGE_SIZES } from "@/src/packages/config/igdb.config";
 import igdbApi from "@/src/packages/igdb-api";
-import { GenresResponse } from "@/src/packages/types/igdb";
-import { ListEntry } from "@/src/types/library/actions";
 import { format } from "date-fns";
 import { Calendar } from "lucide-react";
 import Link from "next/link";

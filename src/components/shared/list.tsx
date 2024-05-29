@@ -1,5 +1,6 @@
+import type { PropsWithChildren } from "react";
+
 import { cn } from "@/src/packages/utils";
-import { PropsWithChildren } from "react";
 
 export const List = ({
   children,

@@ -1,5 +1,7 @@
 "use client";
 
+import type { HowLongToBeatEntry } from "howlongtobeat";
+
 import { AddForm } from "@/src/components/shared/add-game/form/form";
 import { Button } from "@/src/components/ui/button";
 import {
@@ -16,7 +18,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/src/components/ui/sheet";
-import { HowLongToBeatEntry } from "howlongtobeat";
 import { PlusCircle } from "lucide-react";
 import React from "react";
 import { useMediaQuery } from "usehooks-ts";

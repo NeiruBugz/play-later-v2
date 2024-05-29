@@ -1,13 +1,14 @@
+import type {
+  FormAction,
+  FormState,
+  LibraryFiltersUIProps,
+} from "@/src/components/library/library/filters/types";
+
 import {
   DefaultSortState,
   mapper,
   sortingFields,
 } from "@/src/components/library/library/filters/constants";
-import {
-  FormAction,
-  FormState,
-  LibraryFiltersUIProps,
-} from "@/src/components/library/library/filters/types";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";

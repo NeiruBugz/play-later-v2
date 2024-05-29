@@ -1,10 +1,11 @@
-import { getServerUserId } from "@/auth";
-import igdbApi from "@/src/packages/igdb-api";
-import { prisma } from "@/src/packages/prisma";
-import {
+import type {
   GameResponseCombined,
   ResponsePreparer,
 } from "@/src/types/library/actions";
+
+import { getServerUserId } from "@/auth";
+import igdbApi from "@/src/packages/igdb-api";
+import { prisma } from "@/src/packages/prisma";
 import { HowLongToBeatService } from "howlongtobeat";
 import { notFound } from "next/navigation";
 
