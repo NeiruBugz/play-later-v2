@@ -1,9 +1,6 @@
+import { GameStatus, PurchaseType } from "@prisma/client";
 import type { BackloggedWithUser } from "@/src/types/backlogs";
 import type { PickerItem } from "@/src/types/library/actions";
-
-import { GameStatus, PurchaseType } from "@prisma/client";
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 
 const NINTENDO_PLATFORMS = [
   "wii u",
@@ -13,10 +10,6 @@ const NINTENDO_PLATFORMS = [
   "game & watch",
   "nes",
 ];
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 export function platformEnumToColor(value: string) {
   const fromHLTB = value.toLowerCase();
@@ -157,14 +150,4 @@ export const groupByUserName = (data?: BackloggedWithUser[]) => {
     groupedData[userName].push(item);
   });
   return groupedData;
-};
-
-export const sessionErrorHandler = () => {
-  console.error("No authorization");
-  throw new Error("No authorization");
-};
-
-export const commonErrorHandler = (errorMessage: string) => {
-  console.error(errorMessage);
-  throw new Error(errorMessage);
 };

@@ -1,17 +1,16 @@
-import type { GenresResponse } from "@/src/packages/types/igdb";
-import type { ListEntry } from "@/src/types/library/actions";
-
-import { QuickActions } from "@/src/components/library/library/page/list-item/quick-actions";
-import { CustomImage } from "@/src/components/shared/custom-image";
-import { GameTimeBadge } from "@/src/components/shared/game-card/time-badge";
-import { Badge } from "@/src/components/ui/badge";
-import { Skeleton } from "@/src/components/ui/skeleton";
-import { IMAGE_SIZES } from "@/src/packages/config/igdb.config";
-import igdbApi from "@/src/packages/igdb-api";
 import { format } from "date-fns";
 import { Calendar } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { QuickActions } from "@/src/components/library/library/page/list-item/quick-actions";
+import { IMAGE_SIZES } from "@/src/packages/config/igdb.config";
+import type { ListEntry } from "@/src/types/library/actions";
+import { GameTimeBadge } from "@/src/components/shared/game-card/time-badge";
+import igdbApi from "@/src/shared/api/igdb";
+import type { GenresResponse } from "@/src/shared/types/igdb";
+import { Badge } from "@/src/shared/ui/badge";
+import { CustomImage } from "@/src/shared/ui/custom-image";
+import { Skeleton } from "@/src/shared/ui/skeleton";
 
 export const ListItem = async ({
   currentStatus,

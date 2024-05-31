@@ -1,14 +1,14 @@
 import { SignOut } from "@/src/components/sign-out";
-import { ThemeToggle } from "@/src/components/theme-toggle";
-import { Avatar, AvatarFallback } from "@/src/components/ui/avatar";
+import { UserSettings } from "@/src/components/user-settings";
+import { getUserData } from "@/src/entities/user/get-user-data";
+import { Avatar, AvatarFallback } from "@/src/shared/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu";
-import { UserSettings } from "@/src/components/user-settings";
-import { getUserData } from "@/src/queries/auth";
+} from "@/src/shared/ui/dropdown-menu";
+import { ThemeToggle } from "@/src/shared/ui/theme-toggle";
 
 export async function UserDropdown({ username }: { username?: string }) {
   const userData = await getUserData();

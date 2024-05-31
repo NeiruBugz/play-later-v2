@@ -1,29 +1,28 @@
-import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import type { Game } from "@prisma/client";
-
-import { getPlaythrough } from "@/src/actions/library/get-playthrough";
-import { updatePlaythrough } from "@/src/actions/library/update-playthrough";
-import { Button } from "@/src/components/ui/button";
+import { format } from "date-fns";
+import { Pencil } from "lucide-react";
+import { z } from "zod";
+import { processPlaythroughPayload } from "@/src/packages/utils";
+import { getPlaythrough } from "@/src/entities/playthrough/get-playthrough";
+import { updatePlaythrough } from "@/src/entities/playthrough/update-playthrough";
+import type { FullGameInfoResponse } from "@/src/shared/types/igdb";
+import { Button } from "@/src/shared/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogTitle,
   DialogTrigger,
-} from "@/src/components/ui/dialog";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
+} from "@/src/shared/ui/dialog";
+import { Input } from "@/src/shared/ui/input";
+import { Label } from "@/src/shared/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/ui/select";
-import { processPlaythroughPayload } from "@/src/packages/utils";
-import { format } from "date-fns";
-import { Pencil } from "lucide-react";
-import { z } from "zod";
+} from "@/src/shared/ui/select";
 
 const editPlaythroughSchema = z.object({
   finishedAt: z.date().optional(),

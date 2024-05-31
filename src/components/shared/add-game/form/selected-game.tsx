@@ -1,13 +1,8 @@
-import type { SearchResponse } from "@/src/packages/types/igdb";
-
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/src/components/ui/avatar";
-import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
-import { cn } from "@/src/packages/utils";
 import React from "react";
+import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import type { SearchResponse } from "@/src/shared/types/igdb";
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/shared/ui/avatar";
 
 export const SelectedGame = ({
   selectedGame,

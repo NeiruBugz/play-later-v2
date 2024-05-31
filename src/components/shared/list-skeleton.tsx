@@ -1,5 +1,5 @@
 import { List } from "@/src/components/shared/list";
-import { Skeleton } from "@/src/components/ui/skeleton";
+import { Skeleton } from "@/src/shared/ui/skeleton";
 
 export const ListSkeleton = ({ viewMode }: { viewMode: string }) => (
   <List viewMode={viewMode as "grid" | "list"}>

@@ -1,8 +1,7 @@
-import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
-
-import { StoreIcon } from "@/src/components/library/game/game-info/store/store-icon";
-import { Button } from "@/src/components/ui/button";
 import Link from "next/link";
+import { StoreIcon } from "@/src/components/library/game/game-info/store/store-icon";
+import { Button } from "@/src/shared/ui/button";
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
 
 export const Stores = ({
   stores,

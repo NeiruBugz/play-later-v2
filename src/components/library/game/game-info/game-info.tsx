@@ -1,5 +1,3 @@
-import type { GameResponseCombined } from "@/src/types/library/actions";
-
 import { ActionsMenu } from "@/src/components/library/game/game-info/actions-menu";
 import { HowLongToBeat } from "@/src/components/library/game/game-info/how-long-to-beat";
 import { Platforms } from "@/src/components/library/game/game-info/platforms";
@@ -12,15 +10,16 @@ import { SimilarGames } from "@/src/components/library/game/game-info/similar-ga
 import { Stores } from "@/src/components/library/game/game-info/store/stores";
 import { Summary } from "@/src/components/library/game/game-info/summary";
 import { Websites } from "@/src/components/library/game/game-info/website/websites";
-import { CustomImage } from "@/src/components/shared/custom-image";
+import { uniqueRecords } from "@/src/packages/library/client-helpers";
+import type { GameResponseCombined } from "@/src/types/library/actions";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/src/components/ui/accordion";
-import { Badge } from "@/src/components/ui/badge";
-import { uniqueRecords } from "@/src/packages/library/client-helpers";
+} from "@/src/shared/ui/accordion";
+import { Badge } from "@/src/shared/ui/badge";
+import { CustomImage } from "@/src/shared/ui/custom-image";
 
 export const GameInfo = ({ game }: { game: GameResponseCombined }) => {
   const {

@@ -1,28 +1,27 @@
-import type {
-  FormAction,
-  FormState,
-  LibraryFiltersUIProps,
-} from "@/src/components/library/library/filters/types";
-
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { startTransition, useActionState } from "react";
 import {
   DefaultSortState,
   mapper,
   sortingFields,
 } from "@/src/components/library/library/filters/constants";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
+import type {
+  FormAction,
+  FormState,
+  LibraryFiltersUIProps,
+} from "@/src/components/library/library/filters/types";
+import { buildUrl } from "@/src/packages/library/client-helpers";
+import { Button } from "@/src/shared/ui/button";
+import { Input } from "@/src/shared/ui/input";
+import { Label } from "@/src/shared/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/src/shared/ui/radio-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/ui/select";
-import { buildUrl } from "@/src/packages/library/client-helpers";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { startTransition, useActionState } from "react";
+} from "@/src/shared/ui/select";
 
 function FiltersForm({
   toggleOpen,

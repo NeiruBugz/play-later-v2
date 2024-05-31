@@ -1,19 +1,6 @@
 "use client";
 
 import type { Game, GameStatus } from "@prisma/client";
-import type { MouseEvent } from "react";
-
-import { deleteGame } from "@/src/actions/library/delete-game";
-import { updateStatus } from "@/src/actions/library/update-game";
-import { Button } from "@/src/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu";
 import {
   CheckCheck,
   EllipsisVertical,
@@ -23,8 +10,20 @@ import {
   Play,
   Trash2Icon,
 } from "lucide-react";
+import type { MouseEvent } from "react";
 import { IconContext } from "react-icons";
 import { BsBookshelf } from "react-icons/bs";
+import { deleteGame } from "@/src/entities/game/delete-game";
+import { updateStatus } from "@/src/entities/game/update-game";
+import { Button } from "@/src/shared/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/src/shared/ui/dropdown-menu";
 
 export const ActionsMenu = ({
   gameId,

@@ -1,9 +1,8 @@
 import type { Game } from "@prisma/client";
-
-import { updateStatus } from "@/src/actions/library/update-game";
 import { DeleteAction } from "@/src/components/library/library/page/list-item/delete-action";
-import { Button } from "@/src/components/ui/button";
-import { cn } from "@/src/packages/utils";
+import { updateStatus } from "@/src/entities/game/update-game";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import { Button } from "@/src/shared/ui/button";
 
 export const QuickActions = ({
   currentStatus,

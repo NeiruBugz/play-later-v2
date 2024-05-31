@@ -1,6 +1,6 @@
+import type { Game, GameStatus } from "@prisma/client";
 import type { FormState } from "@/src/components/library/library/filters/types";
 import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
-import type { Game, GameStatus } from "@prisma/client";
 
 export const calculateTotalBacklogTime = (
   backlogged: { gameplayTime: null | number }[]

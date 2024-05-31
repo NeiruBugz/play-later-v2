@@ -1,5 +1,5 @@
-import igdbApi from "@/src/packages/igdb-api";
 import { NextResponse } from "next/server";
+import igdbApi from "@/src/shared/api/igdb";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

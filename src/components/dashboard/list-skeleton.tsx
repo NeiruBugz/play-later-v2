@@ -1,4 +1,4 @@
-import { Skeleton } from "@/src/components/ui/skeleton";
+import { Skeleton } from "@/src/shared/ui/skeleton";
 
 export const ListSkeleton = ({ length = 4 }: { length?: number }) => (
   <div className="flex w-full justify-center gap-3">

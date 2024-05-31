@@ -1,5 +1,5 @@
-import { searchHowLongToBeat } from "@/src/packages/hltb-search";
 import { NextResponse } from "next/server";
+import { searchHowLongToBeat } from "@/src/shared/api/hltb-search";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

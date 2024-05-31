@@ -1,7 +1,6 @@
-import type { PickerControlsProps } from "@/src/types/library/components";
-
-import { Button } from "@/src/components/ui/button";
 import { FC } from "react";
+import type { PickerControlsProps } from "@/src/types/library/components";
+import { Button } from "@/src/shared/ui/button";
 
 const PickerControls: FC<PickerControlsProps> = ({
   hasChoice,

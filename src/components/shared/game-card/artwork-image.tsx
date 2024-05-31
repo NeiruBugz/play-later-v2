@@ -1,4 +1,4 @@
-import { CustomImage } from "@/src/components/shared/custom-image";
+import { CustomImage } from "@/src/shared/ui/custom-image";
 
 export const ArtworkImage = ({
   imageUrl,

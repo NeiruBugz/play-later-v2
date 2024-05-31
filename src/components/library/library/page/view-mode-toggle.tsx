@@ -1,10 +1,9 @@
 "use client";
 
-import { Button } from "@/src/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-
+import { Button } from "@/src/shared/ui/button";
 
 export const ViewModeToggle = () => {
   const searchParams = useSearchParams();

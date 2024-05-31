@@ -1,7 +1,7 @@
-import type { LibraryFiltersUIProps } from "@/src/components/library/library/filters/types";
-
+import { SlidersVertical } from "lucide-react";
 import { FiltersForm } from "@/src/components/library/library/filters/form";
-import { Button } from "@/src/components/ui/button";
+import type { LibraryFiltersUIProps } from "@/src/components/library/library/filters/types";
+import { Button } from "@/src/shared/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -9,8 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/src/components/ui/sheet";
-import { SlidersVertical } from "lucide-react";
+} from "@/src/shared/ui/sheet";
 
 function LibraryFiltersSheet({ open, setOpen }: LibraryFiltersUIProps) {
   return (

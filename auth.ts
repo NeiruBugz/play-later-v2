@@ -1,11 +1,11 @@
-import { prisma } from "@/src/packages/prisma";
-import { sessionErrorHandler } from "@/src/packages/utils";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import { db } from "@/src/shared/api";
+import { sessionErrorHandler } from "@/src/shared/lib/error-handlers";
 
 export const { auth, handlers, signIn } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(db),
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {

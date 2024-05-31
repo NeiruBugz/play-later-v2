@@ -1,25 +1,28 @@
 {
   "$schema": "https://json.schemastore.org/eslintrc",
   "root": true,
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "next/core-web-vitals",
     "prettier",
     "plugin:@typescript-eslint/recommended",
     "plugin:@tanstack/eslint-plugin-query/recommended",
-    "plugin:perfectionist/recommended-natural"
+    "@feature-sliced"
   ],
   "plugins": [
     "tailwindcss",
     "@typescript-eslint",
     "@tanstack/query",
-    "perfectionist",
     "eslint-plugin-react-compiler"
   ],
   "rules": {
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "off",
     "tailwindcss/no-custom-classname": "off",
-    "react-compiler/react-compiler": "error"
+    "react-compiler/react-compiler": "error",
+    "import/order": "warn",
+    "import/no-internal-modules": "warn",
+    "boundaries/element-types": "warn"
   },
   "settings": {
     "tailwindcss": {
@@ -28,6 +31,11 @@
     },
     "next": {
       "rootDir": ["./"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
     }
   },
   "overrides": [

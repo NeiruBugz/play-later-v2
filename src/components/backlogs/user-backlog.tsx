@@ -1,8 +1,8 @@
+import Link from "next/link";
+import { Counter } from "@/src/components/backlogs/counter";
 import type { BackloggedWithUser } from "@/src/types/backlogs";
 
-import { Counter } from "@/src/components/backlogs/counter";
-import { CustomImage } from "@/src/components/shared/custom-image";
-import Link from "next/link";
+import { CustomImage } from "@/src/shared/ui/custom-image";
 
 export const UserBacklog = ({
   backlogList,

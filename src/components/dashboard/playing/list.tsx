@@ -1,9 +1,8 @@
 import type { Game } from "@prisma/client";
-
-import { CustomImage } from "@/src/components/shared/custom-image";
-import { cn } from "@/src/packages/utils";
-import { getPlayingGames } from "@/src/queries/dashboard/get-playing-games";
 import Link from "next/link";
+import { getPlayingGames } from "@/src/entities/game/get-playing-games";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import { CustomImage } from "@/src/shared/ui/custom-image";
 
 const GameWidget = ({
   game,

@@ -1,8 +1,7 @@
-import type { SharedWishlistGame } from "@/src/types/wishlist";
-
-import { CustomImage } from "@/src/components/shared/custom-image";
-import { Button } from "@/src/components/ui/button";
 import Link from "next/link";
+import type { SharedWishlistGame } from "@/src/types/wishlist";
+import { Button } from "@/src/shared/ui/button";
+import { CustomImage } from "@/src/shared/ui/custom-image";
 
 export function WishlistedGameShared({ game }: { game: SharedWishlistGame }) {
   return (

@@ -1,26 +1,25 @@
-import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import type { Game } from "@prisma/client";
-
-import { createPlaythrough } from "@/src/actions/library/create-playthrough";
-import { Button } from "@/src/components/ui/button";
+import { z } from "zod";
+import { processPlaythroughPayload } from "@/src/packages/utils";
+import { createPlaythrough } from "@/src/entities/playthrough/create-playthrough";
+import type { FullGameInfoResponse } from "@/src/shared/types/igdb";
+import { Button } from "@/src/shared/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogTitle,
   DialogTrigger,
-} from "@/src/components/ui/dialog";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
+} from "@/src/shared/ui/dialog";
+import { Input } from "@/src/shared/ui/input";
+import { Label } from "@/src/shared/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/ui/select";
-import { processPlaythroughPayload } from "@/src/packages/utils";
-import { z } from "zod";
+} from "@/src/shared/ui/select";
 
 const createPlaythroughSchema = z.object({
   createdAt: z.date(),

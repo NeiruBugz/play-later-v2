@@ -1,7 +1,13 @@
 "use client";
 
-import { setUserName } from "@/src/actions/auth/set-username";
-import { Button } from "@/src/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Settings } from "lucide-react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaSpinner } from "react-icons/fa6";
+import { z } from "zod";
+import { setUserName } from "@/src/entities/user/set-username";
+import { Button } from "@/src/shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,17 +16,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/src/components/ui/dialog";
-import { Form, FormField } from "@/src/components/ui/form";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
-import { useToast } from "@/src/components/ui/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Settings } from "lucide-react";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { FaSpinner } from "react-icons/fa6";
-import { z } from "zod";
+} from "@/src/shared/ui/dialog";
+import { Form, FormField } from "@/src/shared/ui/form";
+import { Input } from "@/src/shared/ui/input";
+import { Label } from "@/src/shared/ui/label";
+import { useToast } from "@/src/shared/ui/use-toast";
 
 const userDataSchema = z.object({
   email: z.string().email("Invalid email"),

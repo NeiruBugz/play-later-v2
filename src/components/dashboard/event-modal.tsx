@@ -1,12 +1,11 @@
-import type { Event } from "@/src/packages/types/igdb";
-
-import { Button } from "@/src/components/ui/button";
-import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
-import igdbApi from "@/src/packages/igdb-api";
 import { formatISO } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
+import igdbApi from "@/src/shared/api/igdb";
+import { Button } from "@/src/shared/ui/button";
+import type { Event } from "@/src/packages/types/igdb";
 
 const GOOGLE_CALENDAR_LINK =
   "https://calendar.google.com/calendar/u/0/r/eventedit";

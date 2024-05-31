@@ -1,8 +1,8 @@
-import { auth } from "@/auth";
-import { SignIn } from "@/src/components/auth/sign-in";
-import { SiteFooter } from "@/src/components/shared/page-footer";
-import { SiteHeader } from "@/src/components/shared/page-header";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { SignIn } from "@/src/widgets/sign-in";
+import { SiteFooter } from "@/src/shared/ui/page-footer";
+import { SiteHeader } from "@/src/shared/ui/page-header";
 
 export default async function Page() {
   const session = await auth();

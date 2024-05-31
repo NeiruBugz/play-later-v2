@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/src/components/ui/button";
-import { useToast } from "@/src/components/ui/use-toast";
-import { useClipboardCopy } from "@/src/packages/hooks/useClipboardCopy";
+import { useCopyToClipboard } from "usehooks-ts";
+import { Button } from "@/src/shared/ui/button";
+import { useToast } from "@/src/shared/ui/use-toast";
 
 export function CopyLink({ userId }: { userId: string }) {
-  const { copy } = useClipboardCopy();
+  const [, copy] = useCopyToClipboard();
   const { toast } = useToast();
 
   const onLinkCopy = async () => {

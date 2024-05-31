@@ -1,7 +1,7 @@
-import type { LibraryFiltersUIProps } from "@/src/components/library/library/filters/types";
-
+import { SlidersVertical } from "lucide-react";
 import { FiltersForm } from "@/src/components/library/library/filters/form";
-import { Button } from "@/src/components/ui/button";
+import type { LibraryFiltersUIProps } from "@/src/components/library/library/filters/types";
+import { Button } from "@/src/shared/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -9,8 +9,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/src/components/ui/drawer";
-import { SlidersVertical } from "lucide-react";
+} from "@/src/shared/ui/drawer";
 
 function LibraryFiltersDrawer({ open, setOpen }: LibraryFiltersUIProps) {
   return (

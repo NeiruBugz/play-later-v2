@@ -1,12 +1,12 @@
 "use client";
 
-import { Badge } from "@/src/components/ui/badge";
-import { cn } from "@/src/packages/utils";
 import { GameStatus } from "@prisma/client";
 import { CheckCheck, Ghost, Library, ListChecks, Play } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { BsBookshelf } from "react-icons/bs";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import { Badge } from "@/src/shared/ui/badge";
 
 const statusMapping = {
   [GameStatus.BACKLOG]: {
@@ -21,7 +21,6 @@ const statusMapping = {
     radioValue: "INPROGRESS",
     tooltipValue: "Playing",
   },
-  // eslint-disable-next-line perfectionist/sort-objects
   [GameStatus.COMPLETED]: {
     icon: <ListChecks className="md:size-4" />,
     label: "Completed",
@@ -34,7 +33,6 @@ const statusMapping = {
     radioValue: "FULL_COMPLETION",
     tooltipValue: "100% completed completed games",
   },
-  // eslint-disable-next-line perfectionist/sort-objects
   [GameStatus.ABANDONED]: {
     icon: <Ghost className="md:size-4" />,
     label: "Abandoned",

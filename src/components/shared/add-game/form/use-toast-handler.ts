@@ -1,5 +1,5 @@
-import { useToast } from "@/src/components/ui/use-toast";
 import React from "react";
+import { useToast } from "@/src/shared/ui/use-toast";
 
 export const useToastHandler = () => {
   const { toast } = useToast();

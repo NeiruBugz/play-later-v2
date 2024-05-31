@@ -1,6 +1,5 @@
 import type { PropsWithChildren } from "react";
-
-import { cn } from "@/src/packages/utils";
+import { cn } from "@/src/shared/lib/tailwind-merge";
 
 export const List = ({
   children,

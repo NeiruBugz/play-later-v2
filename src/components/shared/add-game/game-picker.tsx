@@ -1,23 +1,18 @@
-import type { SearchResponse } from "@/src/packages/types/igdb";
-
-import { RenderWhen } from "@/src/components/render-when";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/src/components/ui/avatar";
+import { Loader2 } from "lucide-react";
+import React from "react";
+import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
+import { useSearch } from "@/src/packages/query";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import type { SearchResponse } from "@/src/shared/types/igdb";
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/shared/ui/avatar";
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/src/components/ui/command";
-import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
-import { useSearch } from "@/src/packages/query";
-import { cn } from "@/src/packages/utils";
-import { Loader2 } from "lucide-react";
-import React from "react";
+} from "@/src/shared/ui/command";
+import { RenderWhen } from "@/src/shared/ui/render-when";
 
 export function GamePicker({
   onGameSelect,

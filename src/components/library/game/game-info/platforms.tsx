@@ -1,7 +1,7 @@
+import { platformEnumToColor } from "@/src/packages/utils";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import { Badge, ColorVariant } from "@/src/shared/ui/badge";
 import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
-
-import { Badge, ColorVariant } from "@/src/components/ui/badge";
-import { cn, platformEnumToColor } from "@/src/packages/utils";
 
 const uniqueRecords = (records: FullGameInfoResponse["release_dates"]) =>
   records && records.length

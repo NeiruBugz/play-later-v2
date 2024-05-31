@@ -1,11 +1,11 @@
+import { BarChartBig, Gamepad, Library, ListChecks, Play } from "lucide-react";
+import { Suspense } from "react";
 import { DashboardItemLayout } from "@/src/components/dashboard/dashboard-item-layout";
-import { Skeleton } from "@/src/components/ui/skeleton";
 import {
   getCompletedThisYearCount,
   getCounts,
-} from "@/src/queries/dashboard/get-counts";
-import { BarChartBig, Gamepad, Library, ListChecks, Play } from "lucide-react";
-import { Suspense } from "react";
+} from "@/src/entities/game/get-counts";
+import { Skeleton } from "@/src/shared/ui/skeleton";
 
 async function Statistics() {
   const [{ backlog, total }, completed] = await Promise.all([

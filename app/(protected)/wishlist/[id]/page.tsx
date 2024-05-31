@@ -1,5 +1,7 @@
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { GameInfo } from "@/src/components/library/game/game-info/game-info";
+import { getGameWithAdapter } from "@/src/entities/game/get-game";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,9 +9,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/src/components/ui/breadcrumb";
-import { getGameWithAdapter } from "@/src/queries/library/get-game";
-import { notFound, redirect } from "next/navigation";
+} from "@/src/shared/ui/breadcrumb";
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const session = await auth();

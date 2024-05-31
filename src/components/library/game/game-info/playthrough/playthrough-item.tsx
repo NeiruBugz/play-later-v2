@@ -1,12 +1,11 @@
-import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import type { Playthrough } from "@prisma/client";
-
-import { PlaythroughEditDialog } from "@/src/components/library/game/game-info/playthrough/playthrough-edit-dialog";
-import { Badge, type ColorVariant } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
-import { prisma } from "@/src/packages/prisma";
-import { platformEnumToColor } from "@/src/packages/utils";
 import { Trash } from "lucide-react";
+import { PlaythroughEditDialog } from "@/src/components/library/game/game-info/playthrough/playthrough-edit-dialog";
+import { platformEnumToColor } from "@/src/packages/utils";
+import { db } from "@/src/shared/api";
+import { Badge, type ColorVariant } from "@/src/shared/ui/badge";
+import { Button } from "@/src/shared/ui/button";
+import type { FullGameInfoResponse } from "@/src/packages/types/igdb";
 
 export const PlaythroughItem = ({
   id,
@@ -37,7 +36,7 @@ export const PlaythroughItem = ({
         action={async () => {
           "use server";
 
-          await prisma.playthrough.delete({ where: { id } });
+          await db.playthrough.delete({ where: { id } });
         }}
       >
         <Button size="icon" type="submit" variant="destructive">

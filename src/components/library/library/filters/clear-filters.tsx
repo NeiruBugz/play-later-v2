@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/src/components/ui/button";
 import { X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/src/shared/ui/button";
 
 export const ClearFilters = () => {
   const searchParams = useSearchParams();

@@ -3,8 +3,8 @@ import { LibraryFiltersWrapper } from "@/src/components/library/library/filters/
 import { LibraryNavigation } from "@/src/components/library/library/navigation";
 import { ViewModeToggle } from "@/src/components/library/library/page/view-mode-toggle";
 import { PickerDialog } from "@/src/components/library/library/pick-random-game/picker-dialog";
-import { Skeleton } from "@/src/components/ui/skeleton";
-import { getCountsAndBacklogList } from "@/src/queries/library/get-games";
+import { getCountsAndBacklogList } from "@/src/entities/game/get-games";
+import { Skeleton } from "@/src/shared/ui/skeleton";
 
 export const HeaderSkeleton = () => (
   <header className="container sticky top-0 z-40 bg-background">

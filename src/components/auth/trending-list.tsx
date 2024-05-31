@@ -1,6 +1,6 @@
-import { CustomImage } from "@/src/components/shared/custom-image";
-import { Skeleton } from "@/src/components/ui/skeleton";
-import igdbApi from "@/src/packages/igdb-api";
+import igdbApi from "@/src/shared/api/igdb";
+import { CustomImage } from "@/src/shared/ui/custom-image";
+import { Skeleton } from "@/src/shared/ui/skeleton";
 
 const placeholderArray = Array.from({ length: 12 }, (_, index) => index + 1);
 

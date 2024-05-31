@@ -1,12 +1,7 @@
-import type { PickerChoiceProps } from "@/src/types/library/components";
-
-import { updateStatus } from "@/src/actions/library/update-game";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/src/components/ui/avatar";
 import { IMAGE_API, IMAGE_SIZES } from "@/src/packages/config/igdb.config";
+import type { PickerChoiceProps } from "@/src/types/library/components";
+import { updateStatus } from "@/src/entities/game/update-game";
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/shared/ui/avatar";
 
 function PickerChoice({ afterClick, choice, isRunning }: PickerChoiceProps) {
   const onClick = async () => {

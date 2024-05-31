@@ -1,5 +1,3 @@
-import { Icons } from "@/src/components/icons";
-import { Button } from "@/src/components/ui/button";
 import Link from "next/link";
 import {
   FaAppStore,
@@ -15,6 +13,8 @@ import {
   FaYoutube,
 } from "react-icons/fa6";
 import { SiEpicgames, SiFandom } from "react-icons/si";
+import { Button } from "@/src/shared/ui/button";
+import { Icons } from "@/src/components/icons";
 
 function SiteIcon({ siteName }: { siteName: string }) {
   if (siteName.includes("twitch")) {

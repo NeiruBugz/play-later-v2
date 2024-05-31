@@ -1,7 +1,7 @@
-import { CustomImage } from "@/src/components/shared/custom-image";
-import { getGameReviews } from "@/src/queries/dashboard/get-reviews";
-import { ReviewItem } from "@/src/types/dashboard/review";
 import { format } from "date-fns";
+import { ReviewItem } from "@/src/types/dashboard/review";
+import { getGameReviews } from "@/src/entities/review/get-reviews";
+import { CustomImage } from "@/src/shared/ui/custom-image";
 
 const Review = ({
   imageUrl,

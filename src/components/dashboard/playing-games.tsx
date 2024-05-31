@@ -1,8 +1,8 @@
+import { Play } from "lucide-react";
+import { Suspense } from "react";
 import { DashboardItemLayout } from "@/src/components/dashboard/dashboard-item-layout";
 import { ListSkeleton } from "@/src/components/dashboard/list-skeleton";
 import { PlayingGamesList } from "@/src/components/dashboard/playing/list";
-import { Play } from "lucide-react";
-import { Suspense } from "react";
 
 export function PlayingGames() {
   return (

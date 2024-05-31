@@ -1,13 +1,12 @@
-import type { SearchResponse } from "@/src/packages/types/igdb";
-
+import React, { useRef } from "react";
 import { GamePicker } from "@/src/components/shared/add-game/game-picker";
-import { Button } from "@/src/components/ui/button";
+import type { SearchResponse } from "@/src/shared/types/igdb";
+import { Button } from "@/src/shared/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/src/components/ui/popover";
-import React, { useRef } from "react";
+} from "@/src/shared/ui/popover";
 
 export const PickerPopover = ({
   onGameSelect,

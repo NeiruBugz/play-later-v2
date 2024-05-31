@@ -1,6 +1,6 @@
-import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 import { Game } from "@prisma/client";
 import { HowLongToBeatEntry } from "howlongtobeat";
+import { FullGameInfoResponse } from "@/src/packages/types/igdb";
 
 export type FetcherAndProcessor = (
   params: URLSearchParams

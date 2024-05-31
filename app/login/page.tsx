@@ -1,9 +1,9 @@
-import { auth } from "@/auth";
-import { CustomImage } from "@/src/components/shared/custom-image";
-import { SiteFooter } from "@/src/components/shared/page-footer";
-import { SiteHeader } from "@/src/components/shared/page-header";
-import igdbApi from "@/src/packages/igdb-api";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import igdbApi from "@/src/shared/api/igdb";
+import { CustomImage } from "@/src/shared/ui/custom-image";
+import { SiteFooter } from "@/src/shared/ui/page-footer";
+import { SiteHeader } from "@/src/shared/ui/page-header";
 
 export default async function LoginPage() {
   const session = await auth();

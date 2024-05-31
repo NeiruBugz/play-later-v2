@@ -1,7 +1,10 @@
 "use client";
 
-import { createReview } from "@/src/actions/library/create-review";
-import { Button } from "@/src/components/ui/button";
+import { useSession } from "next-auth/react";
+import { useActionState, useId, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { createReview } from "@/src/entities/review/create-review";
+import { Button } from "@/src/shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,11 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/src/components/ui/dialog";
-import { Textarea } from "@/src/components/ui/textarea";
-import { useSession } from "next-auth/react";
-import { useActionState, useId, useState } from "react";
-import { useFormStatus } from "react-dom";
+} from "@/src/shared/ui/dialog";
+import { Textarea } from "@/src/shared/ui/textarea";
 
 export const ReviewCreateDialog = ({ gameId }: { gameId: string }) => {
   const session = useSession();

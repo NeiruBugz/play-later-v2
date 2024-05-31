@@ -1,9 +1,11 @@
 "use client";
 
-import type { PickerItem } from "@/src/types/library/actions";
-
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { Picker } from "@/src/components/library/library/pick-random-game/picker";
-import { Button } from "@/src/components/ui/button";
+import type { PickerItem } from "@/src/types/library/actions";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import { Button } from "@/src/shared/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,10 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/src/components/ui/dialog";
-import { cn } from "@/src/packages/utils";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+} from "@/src/shared/ui/dialog";
 
 const PickerDialog = ({ items }: { items: PickerItem[] }) => {
   const [isOpen, onOpenChange] = useState(false);

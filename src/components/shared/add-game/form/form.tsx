@@ -1,37 +1,5 @@
 "use client";
 
-import type { SearchResponse } from "@/src/packages/types/igdb";
-
-import { saveGameToLibrary } from "@/src/actions/library/save-to-library";
-import { PickerPopover } from "@/src/components/shared/add-game/form/picker-popover";
-import { SelectedGame } from "@/src/components/shared/add-game/form/selected-game";
-import { useToastHandler } from "@/src/components/shared/add-game/form/use-toast-handler";
-import {
-  AddGameSchema,
-  addGameSchema,
-} from "@/src/components/shared/add-game/form/validation";
-import { Button } from "@/src/components/ui/button";
-import { Checkbox } from "@/src/components/ui/checkbox";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/src/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/components/ui/select";
-import {
-  PurchaseTypeToFormLabel,
-  cn,
-  mapStatusForInfo,
-} from "@/src/packages/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GameStatus, PurchaseType } from "@prisma/client";
 import { nanoid } from "nanoid";
@@ -39,6 +7,37 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { FaSpinner } from "react-icons/fa6";
 
+import {
+  PurchaseTypeToFormLabel,
+  mapStatusForInfo,
+} from "@/src/packages/utils";
+import { saveGameToLibrary } from "@/src/entities/game/save-to-library";
+import { PickerPopover } from "@/src/components/shared/add-game/form/picker-popover";
+import { SelectedGame } from "@/src/components/shared/add-game/form/selected-game";
+import { useToastHandler } from "@/src/components/shared/add-game/form/use-toast-handler";
+import {
+  AddGameSchema,
+  addGameSchema,
+} from "@/src/components/shared/add-game/form/validation";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import type { SearchResponse } from "@/src/shared/types/igdb";
+import { Button } from "@/src/shared/ui/button";
+import { Checkbox } from "@/src/shared/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/src/shared/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/src/shared/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/shared/ui/select";
 import { FormDescription } from "./description";
 
 export function AddForm({

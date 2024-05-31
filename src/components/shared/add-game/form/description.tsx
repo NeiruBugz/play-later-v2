@@ -1,11 +1,11 @@
+import { GameStatus, PurchaseType } from "@prisma/client";
+import React from "react";
 import {
   DescriptionPurchaseTypeMapping,
   DescriptionStatusMapping,
   mapPlatformToSelectOption,
   uppercaseToNormal,
 } from "@/src/packages/utils";
-import { GameStatus, PurchaseType } from "@prisma/client";
-import React from "react";
 
 export function FormDescription({
   className,

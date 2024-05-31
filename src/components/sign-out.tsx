@@ -1,9 +1,8 @@
 "use client";
 
-import { DropdownMenuItem } from "@/src/components/ui/dropdown-menu";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
-
+import { DropdownMenuItem } from "@/src/shared/ui/dropdown-menu";
 
 export const SignOut = () => (
   <DropdownMenuItem

@@ -1,6 +1,6 @@
 import type { Game } from "@prisma/client";
-
-import { deleteGame } from "@/src/actions/library/delete-game";
+import { Trash } from "lucide-react";
+import { deleteGame } from "@/src/entities/game/delete-game";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,9 +10,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTrigger,
-} from "@/src/components/ui/alert-dialog";
-import { Button } from "@/src/components/ui/button";
-import { Trash } from "lucide-react";
+} from "@/src/shared/ui/alert-dialog";
+import { Button } from "@/src/shared/ui/button";
 
 export const DeleteAction = ({ id }: { id: Game["id"] }) => {
   return (

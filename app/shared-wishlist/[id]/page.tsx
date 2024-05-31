@@ -1,9 +1,9 @@
-import { WishlistedGameShared } from "@/src/components/wishlist/wishlisted-game.shared";
-import { getUserById } from "@/src/queries/auth";
-import { getGamesFromWishlist } from "@/src/queries/wishlist/get-games-from-wishlist";
-import { SharedWishlistPageProps } from "@/src/types/wishlist";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { SharedWishlistPageProps } from "@/src/types/wishlist";
+import { getGamesFromWishlist } from "@/src/entities/game/get-games-from-wishlist";
+import { getUserById } from "@/src/entities/user/get-user-by-id";
+import { WishlistedGameShared } from "@/src/components/wishlist/wishlisted-game.shared";
 
 export const dynamic = "force-static";
 

@@ -1,26 +1,25 @@
 "use client";
 
 import type { HowLongToBeatEntry } from "howlongtobeat";
-
+import { PlusCircle } from "lucide-react";
+import React from "react";
+import { useMediaQuery } from "usehooks-ts";
 import { AddForm } from "@/src/components/shared/add-game/form/form";
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/shared/ui/button";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/src/components/ui/drawer";
+} from "@/src/shared/ui/drawer";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/src/components/ui/sheet";
-import { PlusCircle } from "lucide-react";
-import React from "react";
-import { useMediaQuery } from "usehooks-ts";
+} from "@/src/shared/ui/sheet";
 
 export const AddGame = ({
   label = "Add Game",

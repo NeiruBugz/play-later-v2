@@ -1,10 +1,9 @@
 import type { Game } from "@prisma/client";
-
-import { AddGame } from "@/src/components/shared/add-game/add-game";
-import { Badge } from "@/src/components/ui/badge";
-import { cn } from "@/src/packages/utils";
-import { getWishlistReleases } from "@/src/queries/dashboard/get-wishlist-releases";
 import { Calendar } from "lucide-react";
+import { getWishlistReleases } from "@/src/entities/game/get-wishlist-releases";
+import { AddGame } from "@/src/components/shared/add-game/add-game";
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import { Badge } from "@/src/shared/ui/badge";
 
 type UpcomingRelease = {
   cover: {
