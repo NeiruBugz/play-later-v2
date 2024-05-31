@@ -1,4 +1,5 @@
 import { HTMLAttributes } from "react";
+
 import { cn } from "@/src/shared/lib/tailwind-merge";
 
 function Skeleton({ className, ...props }: HTMLAttributes<HTMLDivElement>) {

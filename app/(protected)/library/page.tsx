@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+
 import { auth } from "@/auth";
-import { Library } from "@/src/page-layer/library";
-import { LibraryPageProps } from "@/src/types/library/components";
+import { Library } from "@/src/views/library";
+
+import { LibraryPageProps } from "@/src/entities/game/types";
 
 export default async function LibraryPage({ searchParams }: LibraryPageProps) {
   const session = await auth();

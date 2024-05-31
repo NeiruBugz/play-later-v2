@@ -1,4 +1,5 @@
 import { PropsWithChildren } from "react";
+
 import { SiteFooter } from "@/src/shared/ui/page-footer";
 import { SiteHeader } from "@/src/shared/ui/page-header";
 

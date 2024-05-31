@@ -1,9 +1,10 @@
+import { expect, test } from "vitest";
+
 import {
   nameFirstLiterals,
-  platformEnumToColor,
   uppercaseToNormal,
-} from "@/src/packages/utils";
-import { expect, test } from "vitest";
+} from "@/src/shared/lib/string-functions";
+import { platformEnumToColor } from "@/src/shared/lib/ui-variant-mappers";
 
 const nameMocks = [
   { expected: "U", name: "" },

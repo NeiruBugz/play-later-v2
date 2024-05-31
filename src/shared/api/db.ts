@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { withOptimize } from "@prisma/extension-optimize";
+
 import { env } from "@/env.mjs";
 
 const globalForPrisma = globalThis as unknown as {

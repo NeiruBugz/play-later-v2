@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { PropsWithChildren } from "react";
+
 import { cn } from "@/src/shared/lib/tailwind-merge";
-import type { NavItem } from "@/src/types/shared";
+import type { NavItem } from "@/src/shared/types/shared";
 
 export function NavLink({
   children,

@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
+
 import { auth } from "@/auth";
-import { UsersBacklog } from "@/src/page-layer/backlog-id";
-import { getUserList } from "@/src/entities/backlog/get-user-list";
+import { UsersBacklog } from "@/src/views/backlog-id";
+
+import { getBacklogListForUser } from "@/src/entities/game/api/get-backlog-for-user";
 
 export default async function Page(props: { params: { id: string } }) {
   const session = await auth();
@@ -9,7 +11,7 @@ export default async function Page(props: { params: { id: string } }) {
   if (!session) {
     redirect("/");
   }
-  const games = await getUserList({ name: props.params.id });
+  const games = await getBacklogListForUser({ name: props.params.id });
   if (!games) {
     notFound();
   }

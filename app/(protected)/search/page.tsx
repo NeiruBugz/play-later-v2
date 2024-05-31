@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { SearchPageProps } from "@/src/types/search";
+
 import igdbApi from "@/src/shared/api/igdb";
+import { SearchPageProps } from "@/src/shared/types/search";
 import { CustomImage } from "@/src/shared/ui/custom-image";
 import { ScrollArea } from "@/src/shared/ui/scroll-area";
 

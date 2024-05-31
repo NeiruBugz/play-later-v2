@@ -1,14 +1,15 @@
 import { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
+import type { PropsWithChildren } from "react";
 
-import { siteConfig } from "@/src/packages/config/site";
-import type { RootLayoutProps } from "@/src/packages/types/layout";
-import Providers from "@/src/app/providers";
+import "@/src/app/styles/globals.css";
+import { siteConfig } from "@/src/shared/config/site";
 import { cn } from "@/src/shared/lib/tailwind-merge";
 import { TailwindIndicator } from "@/src/shared/ui/tailwind-indicator";
 import { Toaster } from "@/src/shared/ui/toaster";
-import "@/src/app/styles/globals.css";
+
+import Providers from "@/src/app/providers";
 
 export const viewport: Viewport = {
   themeColor: [
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
 
 const fontInter = Inter({ subsets: ["latin", "cyrillic"] });
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body

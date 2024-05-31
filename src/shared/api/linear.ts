@@ -1,4 +1,5 @@
 import { LinearClient } from "@linear/sdk";
+
 import { env } from "@/env.mjs";
 
 const linearClient = new LinearClient({

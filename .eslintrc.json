@@ -7,7 +7,8 @@
     "prettier",
     "plugin:@typescript-eslint/recommended",
     "plugin:@tanstack/eslint-plugin-query/recommended",
-    "@feature-sliced"
+    "@feature-sliced",
+    "@feature-sliced/eslint-config/rules/import-order/experimental"
   ],
   "plugins": [
     "tailwindcss",

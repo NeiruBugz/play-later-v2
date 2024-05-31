@@ -1,8 +1,8 @@
-import { siteConfig } from "@/src/packages/config/site";
+import { siteConfig } from "@/src/shared/config/site";
+import type { MainNavProps } from "@/src/shared/types/shared/ui";
 import { Logo } from "@/src/shared/ui/logo";
 import { MobileNav } from "@/src/shared/ui/mobile-nav";
 import { NavLink } from "@/src/shared/ui/nav-link";
-import type { MainNavProps } from "@/src/types/shared/ui";
 
 export function MainNav({ items }: MainNavProps) {
   return (

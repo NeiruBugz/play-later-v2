@@ -1,8 +1,11 @@
 import { redirect } from "next/navigation";
+
 import { auth } from "@/auth";
-import { SignIn } from "@/src/widgets/sign-in";
+
 import { SiteFooter } from "@/src/shared/ui/page-footer";
 import { SiteHeader } from "@/src/shared/ui/page-header";
+
+import { SignIn } from "@/src/widgets/sign-in";
 
 export default async function Page() {
   const session = await auth();

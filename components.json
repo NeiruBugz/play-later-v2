@@ -11,6 +11,6 @@
   },
   "aliases": {
     "components": "@/src/shared/ui",
-    "utils": "@/src/lib/utils"
+    "utils": "@/shared/lib/tailwind-merge"
   }
 }

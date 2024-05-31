@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from "react";
-import type { RenderWhenProps } from "@/src/types/shared/ui";
+
+import type { RenderWhenProps } from "@/src/shared/types/shared/ui";
 
 export function RenderWhen({
   children,

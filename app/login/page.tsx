@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+
 import { auth } from "@/auth";
+
 import igdbApi from "@/src/shared/api/igdb";
 import { CustomImage } from "@/src/shared/ui/custom-image";
 import { SiteFooter } from "@/src/shared/ui/page-footer";

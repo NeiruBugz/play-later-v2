@@ -1,10 +1,11 @@
 import Image, { ImageProps } from "next/image";
+
 import {
   IMAGE_API,
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
-} from "@/src/packages/config/igdb.config";
-import { isURL } from "@/src/packages/utils";
+} from "@/src/shared/config/igdb.config";
+import { isURL } from "@/src/shared/lib/string-functions";
 
 type CustomImageProps = {
   imageUrl: string;

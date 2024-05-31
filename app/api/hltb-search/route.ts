@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { searchHowLongToBeat } from "@/src/shared/api/hltb-search";
 
 export async function GET(request: Request) {

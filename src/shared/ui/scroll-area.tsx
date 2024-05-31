@@ -2,6 +2,7 @@
 
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import * as React from "react";
+
 import { cn } from "@/src/shared/lib/tailwind-merge";
 
 const ScrollArea = React.forwardRef<

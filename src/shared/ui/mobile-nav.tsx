@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+
+import type { NavItem } from "@/src/shared/types/shared";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from "@/src/shared/ui/dropdown-menu";
 import { NavLink } from "@/src/shared/ui/nav-link";
-import type { NavItem } from "@/src/types/shared";
 
 export function MobileNav({
   items,

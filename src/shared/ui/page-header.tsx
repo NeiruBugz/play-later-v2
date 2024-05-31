@@ -1,11 +1,14 @@
 import Link from "next/link";
+
 import { auth } from "@/auth";
-import { UserDropdown } from "@/src/components/user-dropdown";
-import { siteConfig } from "@/src/packages/config/site";
-import { SignIn } from "@/src/widgets/sign-in";
-import { AddGame } from "@/src/components/shared/add-game/add-game";
+
+import { siteConfig } from "@/src/shared/config/site";
 import { Logo } from "@/src/shared/ui/logo";
 import { MainNav } from "@/src/shared/ui/main-nav";
+
+import { AddGame } from "@/src/widgets/add-game";
+import { SignIn } from "@/src/widgets/sign-in";
+import { UserDropdown } from "@/src/widgets/user-dropdown";
 
 export async function SiteHeader() {
   const session = await auth();

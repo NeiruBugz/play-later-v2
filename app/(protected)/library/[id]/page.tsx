@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
+
 import { auth } from "@/auth";
-import { Game } from "@/src/page-layer/game";
-import { getGameWithAdapter } from "@/src/entities/game/get-game";
+import { Game } from "@/src/views/game";
+
+import { getGameWithAdapter } from "@/src/entities/game/api/get-game";
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const session = await auth();
@@ -16,5 +18,11 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     notFound();
   }
 
-  return <Game gameInfo={gameInfo} />;
+  return (
+    <Game
+      gameInfo={gameInfo}
+      breadcrumbLink="library"
+      breadcrumbName="Library"
+    />
+  );
 }
