@@ -1,8 +1,9 @@
-import { CustomImage } from "@/src/components/shared/custom-image";
-import { ScrollArea } from "@/src/components/ui/scroll-area";
-import igdbApi from "@/src/packages/igdb-api";
-import { SearchPageProps } from "@/src/types/search";
 import Link from "next/link";
+
+import igdbApi from "@/src/shared/api/igdb";
+import { SearchPageProps } from "@/src/shared/types/search";
+import { CustomImage } from "@/src/shared/ui/custom-image";
+import { ScrollArea } from "@/src/shared/ui/scroll-area";
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = new URLSearchParams(searchParams).get("q");

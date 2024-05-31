@@ -1,6 +1,6 @@
-import { SiteHeader } from "@/src/components/shared/page-header";
-import { Badge } from "@/src/components/ui/badge";
-import { getMyIssues } from "@/src/packages/linear";
+import { getMyIssues } from "@/src/shared/api/linear";
+import { Badge } from "@/src/shared/ui/badge";
+import { SiteHeader } from "@/src/shared/ui/page-header";
 
 export default async function RoadmapPage() {
   const roadmap = await getMyIssues();
