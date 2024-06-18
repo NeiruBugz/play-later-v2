@@ -30,9 +30,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`{
-          "min-h-screen bg-background antialiased ${fontInter.className}
-        }`}
+        className={`"min-h-screen bg-background antialiased ${fontInter.className}`}
       >
         <NextTopLoader />
         <Providers attribute="class" defaultTheme="system" enableSystem>

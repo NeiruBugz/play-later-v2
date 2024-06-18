@@ -9,8 +9,7 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-// ----- NextAuth Authorization Models ------
-//
+// ----- NextAuth Authorization Models ------//
 
 model Account {
   id                String  @id @default(cuid())
@@ -48,12 +47,51 @@ model VerificationToken {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
   username      String?
   Account       Account[]
   Session       Session[]
+  Game          Game[]
+  BacklogItem   BacklogItem[]
+}
+
+// ----- Application Models ------//
+model Game {
+  id              Int             @id @default(autoincrement())
+  igdbId          Int             @unique
+  hltbId          Int?            @unique
+  title           String
+  description     String?
+  coverImage      String?
+  releaseDate     DateTime?
+  mainStory       Int?
+  mainExtra       Int?
+  completionist   Int?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  userId          String
+  backlogItems    BacklogItem[]   @relation("GameBacklogItems")
+  acquisitionType AcquisitionType
+  User            User            @relation(fields: [userId], references: [id])
+}
+
+model BacklogItem {
+  id        Int      @id @default(autoincrement())
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  gameId    Int
+  game      Game     @relation("GameBacklogItems", fields: [gameId], references: [id])
+  User      User     @relation(fields: [userId], references: [id])
+}
+
+enum AcquisitionType {
+  PHYSICAL
+  DIGITAL
+  SUBSCRIPTION
 }
