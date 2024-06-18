@@ -1,7 +1,8 @@
 import Providers from "@/providers";
 import "@/styles/globals.css";
+import { cn } from "@/src/shared/lib";
 import { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter as FontSans, Inter } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { PropsWithChildren } from "react";
 
@@ -24,13 +25,19 @@ export const metadata: Metadata = {
   },
 };
 
-const fontInter = Inter({ subsets: ["latin", "cyrillic"] });
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export default function RootLayout({ children }: PropsWithChildren) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`"min-h-screen bg-background antialiased ${fontInter.className}`}
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable
+        )}
       >
         <NextTopLoader />
         <Providers attribute="class" defaultTheme="system" enableSystem>

@@ -80,14 +80,21 @@ model Game {
 }
 
 model BacklogItem {
-  id        Int      @id @default(autoincrement())
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int               @id @default(autoincrement())
+  status    BacklogItemStatus @default(TO_PLAY)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
   userId    String
   gameId    Int
-  game      Game     @relation("GameBacklogItems", fields: [gameId], references: [id])
-  User      User     @relation(fields: [userId], references: [id])
+  game      Game              @relation("GameBacklogItems", fields: [gameId], references: [id])
+  User      User              @relation(fields: [userId], references: [id])
+}
+
+enum BacklogItemStatus {
+  TO_PLAY
+  PLAYED
+  COMPLETED
+  WISHLIST
 }
 
 enum AcquisitionType {

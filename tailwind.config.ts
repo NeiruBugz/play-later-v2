@@ -1,14 +1,19 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
+
+const config = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
-    "./features/**/*.{ts,tsx}",
   ],
+  prefix: "",
   theme: {
+    fontFamily: {
+      sans: ["var(--font-sans)", ...fontFamily.sans],
+    },
     container: {
       center: true,
       padding: "2rem",
@@ -27,7 +32,6 @@ module.exports = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        discord: "hsl(var(--discord))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -53,8 +57,8 @@ module.exports = {
           foreground: "hsl(var(--popover-foreground))",
         },
         card: {
-          DEFAULT: "hsl(var(--game-card))",
-          foreground: "hsl(var(--game-card-foreground))",
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
         },
       },
       borderRadius: {
@@ -64,12 +68,12 @@ module.exports = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
+          to: { height: "0" },
         },
       },
       animation: {
@@ -79,4 +83,6 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+} satisfies Config;
+
+export default config;
