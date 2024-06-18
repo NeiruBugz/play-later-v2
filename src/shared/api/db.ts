@@ -33,19 +33,7 @@ const prismaFactory = () => {
     console.log("Duration: " + e.duration + "ms");
   });
 
-  return prisma.$extends({
-    name: "soft-delete",
-    query: {
-      game: {
-        async delete({ args }) {
-          return prisma.game.update({
-            ...args,
-            data: { deletedAt: new Date() },
-          });
-        },
-      },
-    },
-  }) as PrismaClient;
+  return prisma as PrismaClient;
 };
 
 export const prisma = globalForPrisma.prisma ?? prismaFactory();
