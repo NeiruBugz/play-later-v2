@@ -9,8 +9,9 @@ export function SignIn() {
         "use server";
         await signIn("google");
       }}
+      className="mt-2"
     >
-      <Button type="submit">Signin with Google</Button>
+      <Button type="submit" variant="outline">Sign In with Google</Button>
     </form>
   );
 }

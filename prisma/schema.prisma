@@ -63,7 +63,7 @@ model User {
 model Game {
   id              Int             @id @default(autoincrement())
   igdbId          Int             @unique
-  hltbId          Int?            @unique
+  hltbId          String?         @unique
   title           String
   description     String?
   coverImage      String?
@@ -75,7 +75,6 @@ model Game {
   updatedAt       DateTime        @updatedAt
   userId          String
   backlogItems    BacklogItem[]   @relation("GameBacklogItems")
-  acquisitionType AcquisitionType
   User            User            @relation(fields: [userId], references: [id])
 }
 
@@ -84,15 +83,18 @@ model BacklogItem {
   status    BacklogItemStatus @default(TO_PLAY)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
+  platform  String?
   userId    String
+  acquisitionType AcquisitionType @default(DIGITAL)
   gameId    Int
-  game      Game              @relation("GameBacklogItems", fields: [gameId], references: [id])
+  game      Game              @relation("GameBacklogItems", fields: [gameId], references: [id], onDelete: Cascade)
   User      User              @relation(fields: [userId], references: [id])
 }
 
 enum BacklogItemStatus {
   TO_PLAY
   PLAYED
+  PLAYING
   COMPLETED
   WISHLIST
 }
