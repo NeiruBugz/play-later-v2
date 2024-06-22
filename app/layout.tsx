@@ -2,8 +2,7 @@ import Providers from "@/providers";
 import "@/styles/globals.css";
 import { cn } from "@/src/shared/lib";
 import { Metadata, Viewport } from "next";
-import { Inter as FontSans, Inter } from "next/font/google";
-import NextTopLoader from "nextjs-toploader";
+import { Inter as FontSans } from "next/font/google";
 import { PropsWithChildren } from "react";
 
 export const viewport: Viewport = {
@@ -39,8 +38,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
           fontSans.variable
         )}
       >
-        <NextTopLoader />
-        <Providers attribute="class" defaultTheme="system" enableSystem>
+        <Providers>
           {children}
         </Providers>
       </body>

@@ -13,6 +13,7 @@ import { Button } from "@/src/shared/ui/button";
 import { useFormState, useFormStatus } from 'react-dom';
 import { createGameAction } from "../api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/shared/ui/select"
+import { useToast } from "@/src/shared/ui/use-toast";
 
 type HiddenInputProps = {
   name: string;
@@ -38,15 +39,15 @@ const initialFormValues: BacklogItemFormValues = {
   platform: "",
 };
 
-
 export function AddGameForm() {
   const [selectedGame, setSelectedGame] = useState<SearchResponse | undefined>(undefined);
   const [gameValues, setGameValues] = useState<GameFormValues>(undefined);
   const [backlogItemValues, setBacklogItemValues] = useState<BacklogItemFormValues>(initialFormValues);
-
   const [platformOptions, setPlatformOptions] = useState<SearchResponse['platforms']>([]);
+
   const [state, formAction] = useFormState(createGameAction, { message: "", isError: false });
   const { pending } = useFormStatus();
+  const { toast } = useToast();
 
   const { data: howLongToBeatData } = useHowLongToBeatSearch(gameValues?.title);
 
@@ -61,6 +62,12 @@ export function AddGameForm() {
       setGameValues(undefined);
       setPlatformOptions([])
     }
+
+    toast({
+      title: "Add Game",
+      description: state.message,
+      variant: state.isError ? "destructive" : "default",
+    })
   }, [state.message]);
 
 
@@ -102,7 +109,6 @@ export function AddGameForm() {
     setBacklogItemValues((prevState) => ({ ...prevState, backlogStatus: status as unknown as BacklogItemStatus }));
   }, [setBacklogItemValues])
 
-  console.log(state);
   return (
     <div>
       <form action={formAction}>

@@ -5,12 +5,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-export default async function CollectionPage() {
+export default async function CollectionPage(props: { params: Record<string, string>; searchParams: Record<string, string> }) {
   const session = await auth();
 
   if (!session) {
     redirect("/");
   }
+
   return (
     <>
       <Header/>
@@ -20,7 +21,7 @@ export default async function CollectionPage() {
           <Link href="/collection/add-game" className="font-bold hover:underline cursor-pointer">Add Game</Link>
         </div>
         <Suspense fallback={"Loading..."}>
-          <CollectionList/>
+          <CollectionList params={props.searchParams}/>
         </Suspense>
       </div>
     </>

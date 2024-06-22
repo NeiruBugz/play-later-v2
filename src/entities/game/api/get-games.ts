@@ -1,72 +1,32 @@
 import { prisma } from "@/src/shared/api";
 import { getServerUserId } from "@/auth";
-import type { BacklogItem, Game } from "@prisma/client";
+import type { BacklogItem, BacklogItemStatus, Game } from "@prisma/client";
+import { z } from "zod";
 
 type GameWithBacklogItems = {
   game: Game;
   backlogItems: Omit<BacklogItem, 'game'>[];
 }
 
-export async function getGames() {
+const FilterParamsSchema = z.object({
+  platform: z.string().optional().default(""),
+  status: z.string().optional().default(""),
+})
+
+export async function getUserGamesWithGroupedBacklog(params: Record<string, string>): Promise<GameWithBacklogItems[]> {
   try {
     const userId = await getServerUserId();
-
-    if (!userId) {
-      return [];
-    }
-
-    return prisma.game.findMany({
-      where: {
-        userId,
-      },
-      select: {
-        id: true,
-        title: true,
-        coverImage: true,
-        releaseDate: true,
-        backlogItems: {
-          select: {
-            status: true,
-          },
-        },
-      },
-      orderBy: {
-        title: "asc"
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching user game collection:', error);
-    throw new Error('Could not fetch user game collection.');
-  }
-}
-
-export async function getGamesWithStatuses() {
-  try {
-    const userId = await getServerUserId();
-
-    if (!userId) {
-      return [];
-    }
-
-    return prisma.backlogItem.findMany({
-      where: {
-        userId,
-      },
-      include: {
-        game: true,
-      }
+    const parsedPayload = FilterParamsSchema.safeParse({
+      platform: params.platform,
+      status: params.status
     })
-  } catch (e) {
-    console.error('Error fetching user game collection:', e);
-  }
-}
 
-export async function getUserGamesWithGroupedBacklog(): Promise<GameWithBacklogItems[]> {
-  try {
-    const userId = await getServerUserId();
+    console.log('parsedPayload: ', parsedPayload.data)
     const userGames = await prisma.backlogItem.findMany({
       where: {
         userId: userId,
+        platform: parsedPayload.data?.platform === '' ? undefined : parsedPayload.data?.platform,
+        status: parsedPayload.data?.status === '' ? undefined : parsedPayload.data?.status as unknown as BacklogItemStatus,
       },
       include: {
         game: true,

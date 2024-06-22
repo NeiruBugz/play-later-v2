@@ -22,6 +22,7 @@ export async function getGame(id: number) {
       mainExtra: true,
       completionist: true,
       backlogItems: true,
+      userId: true,
     }
   })
 }
