@@ -16,5 +16,7 @@ export function ClearFilters() {
     router.replace(`/?${paramsToUpdate.toString()}`);
   }, [params, router])
 
+  if (params.size === 0) return null;
+
   return <Button variant="outline" onClick={onClearFilters} type="button" aria-label="Clear filters">Clear filters</Button>
 }

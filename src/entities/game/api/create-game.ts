@@ -26,6 +26,8 @@ async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
       },
     });
 
+    console.log("Game payload: ", { game })
+
     let savedGame;
 
     if (existingGame) {
@@ -36,7 +38,7 @@ async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
           igdbId: game.igdbId,
           title: game.title,
           coverImage: game.coverImage,
-          hltbId: game.hltbId,
+          hltbId: game.hltbId === '' ? null : game.hltbId,
           mainExtra: game.mainExtra,
           mainStory: game.mainStory,
           completionist: game.completionist,

@@ -42,7 +42,7 @@ export async function CollectionList({ params }: { params: Record<string, string
         <CollectionFilters/>
       </Suspense>
       <ul
-        className="flex flex-wrap gap-3">
+        className="flex flex-wrap gap-3 justify-center md:justify-start">
         {collection?.map(({ game, backlogItems }) => (
           <li key={game.id} className="bg-background rounded-lg overflow-hidden shadow-md w-fit hover:shadow-xl">
             <GameCard

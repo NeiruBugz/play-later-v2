@@ -4,7 +4,7 @@ import { SearchResponse } from "@/src/shared/types";
 import { GamePicker } from "@/src/widgets/game-picker";
 import type { Game } from "@prisma/client";
 import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
-import { type HTMLAttributes, useCallback, useEffect, useState } from "react";
+import { ElementRef, type HTMLAttributes, useCallback, useEffect, useRef, useState } from "react";
 import { useHowLongToBeatSearch } from "@/src/features/search/api";
 import { Label } from "@/src/shared/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/src/shared/ui/radio-group";
@@ -40,6 +40,8 @@ const initialFormValues: BacklogItemFormValues = {
 };
 
 export function AddGameForm() {
+  const formRef = useRef<ElementRef<"form">>(null);
+
   const [selectedGame, setSelectedGame] = useState<SearchResponse | undefined>(undefined);
   const [gameValues, setGameValues] = useState<GameFormValues>(undefined);
   const [backlogItemValues, setBacklogItemValues] = useState<BacklogItemFormValues>(initialFormValues);
@@ -61,6 +63,7 @@ export function AddGameForm() {
       setBacklogItemValues(initialFormValues);
       setGameValues(undefined);
       setPlatformOptions([])
+      formRef?.current?.reset();
     }
 
     toast({
@@ -68,7 +71,7 @@ export function AddGameForm() {
       description: state.message,
       variant: state.isError ? "destructive" : "default",
     })
-  }, [state.message]);
+  }, [state.isError, state.message, toast]);
 
 
   useEffect(() => {
@@ -87,6 +90,7 @@ export function AddGameForm() {
       setSelectedGame(undefined);
       setGameValues(undefined);
       setBacklogItemValues(initialFormValues);
+      setPlatformOptions([])
       return;
     }
 
@@ -111,7 +115,7 @@ export function AddGameForm() {
 
   return (
     <div>
-      <form action={formAction}>
+      <form action={formAction} ref={formRef}>
         <GamePicker
           clearSelection={() => onGameSelect(undefined)}
           onGameSelect={(game) => onGameSelect(game)}
