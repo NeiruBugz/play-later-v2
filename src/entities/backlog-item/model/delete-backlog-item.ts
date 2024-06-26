@@ -1,7 +1,7 @@
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/shared/api";
 
-export async function deleteGame(gameId: number) {
+export async function deleteBacklogItem(backlogItemId: number) {
   const userId = await getServerUserId();
 
   if (!userId) {
@@ -11,10 +11,10 @@ export async function deleteGame(gameId: number) {
   try {
     await prisma.backlogItem.delete({
       where: {
-        id: gameId,
+        id: backlogItemId,
         userId,
-      }
-    })
+      },
+    });
   } catch (error) {
     console.error(error);
   }

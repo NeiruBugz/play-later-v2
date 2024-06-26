@@ -1,5 +1,5 @@
-import { prisma } from "@/src/shared/api";
 import { getServerUserId } from "@/auth";
+import { prisma } from "@/src/shared/api";
 
 export async function getUserUniquePlatforms(): Promise<(string | null)[]> {
   const userId = await getServerUserId();
@@ -12,12 +12,12 @@ export async function getUserUniquePlatforms(): Promise<(string | null)[]> {
       select: {
         platform: true,
       },
-      distinct: ['platform'],
+      distinct: ["platform"],
     });
 
-    return platforms.map(item => item.platform).filter(Boolean);
+    return platforms.map((item) => item.platform).filter(Boolean);
   } catch (error) {
-    console.error('Error fetching user game collection:', error);
+    console.error("Error fetching user game collection:", error);
     return [];
   }
 }

@@ -9,6 +9,6 @@ module.exports = {
   semi: true,
   singleQuote: false,
   tabWidth: 2,
-  tailwindConfig: "./tailwind.config.js",
+  tailwindConfig: "./tailwind.config.ts",
   trailingComma: "es5",
 };

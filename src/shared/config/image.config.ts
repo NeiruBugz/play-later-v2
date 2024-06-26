@@ -63,5 +63,4 @@ export const IMAGE_SIZES = {
   thumb: "t_thumb",
 } as const;
 
-
 export const IMAGE_API = "https://images.igdb.com/igdb/image/upload";

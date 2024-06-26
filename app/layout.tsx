@@ -3,7 +3,6 @@ import "@/styles/globals.css";
 import { cn } from "@/src/shared/lib";
 import { Metadata, Viewport } from "next";
 import { Inter as FontSans } from "next/font/google";
-import { PropsWithChildren } from "react";
 
 export const viewport: Viewport = {
   themeColor: [
@@ -29,7 +28,10 @@ const fontSans = FontSans({
   variable: "--font-sans",
 });
 
-export default function RootLayout({ children }: PropsWithChildren) {
+export default function RootLayout(props: {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -38,9 +40,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
           fontSans.variable
         )}
       >
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{props.children}</Providers>
       </body>
     </html>
   );

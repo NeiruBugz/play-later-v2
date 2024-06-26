@@ -1,10 +1,10 @@
-import { format, parseISO } from 'date-fns';
+import { format, parseISO } from "date-fns";
 
 export function isoToReadable(iso: string) {
-  return format(parseISO(iso), 'yyyy');
+  return format(parseISO(iso), "yyyy");
 }
 
 export function convertUnixToHumanReadable(unixTimestamp: number) {
   const date = new Date(unixTimestamp * 1000); // Convert to milliseconds
-  return format(date, 'MMM dd, yyyy');
-};
+  return format(date, "MMM dd, yyyy");
+}

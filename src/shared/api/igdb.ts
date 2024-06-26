@@ -1,6 +1,16 @@
 import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/src/shared/config/igdb";
-import { FullGameInfoResponse, GenresResponse, RatedGameResponse, RequestOptions, SearchResponse, TwitchTokenResponse, UpcomingEventsResponse, UpcomingReleaseResponse, Event } from "@/src/shared/types";
+import {
+  Event,
+  FullGameInfoResponse,
+  GenresResponse,
+  RatedGameResponse,
+  RequestOptions,
+  SearchResponse,
+  TwitchTokenResponse,
+  UpcomingEventsResponse,
+  UpcomingReleaseResponse,
+} from "@/src/shared/types";
 
 const asError = (thrown: unknown): Error => {
   if (thrown instanceof Error) return thrown;
@@ -71,17 +81,17 @@ const fullGameInfo = `
 /**
  *
  * {
-  id: 363,
-  name: 'Ubisoft Forward',
-  slug: 'ubisoft-forward',
-  event_logo: 550,
-  start_time: 1718042400,
-  time_zone: 'PST',
-  event_networks: [ 160985, 160986 ],
-  created_at: 1712258883,
-  updated_at: 1713875085,
-  checksum: '17c063a2-b5ea-97cc-5837-4ff8d74cb2ee'
-}
+ id: 363,
+ name: 'Ubisoft Forward',
+ slug: 'ubisoft-forward',
+ event_logo: 550,
+ start_time: 1718042400,
+ time_zone: 'PST',
+ event_networks: [ 160985, 160986 ],
+ created_at: 1712258883,
+ updated_at: 1713875085,
+ checksum: '17c063a2-b5ea-97cc-5837-4ff8d74cb2ee'
+ }
  */
 
 const igdbApi = {
@@ -102,6 +112,27 @@ const igdbApi = {
       body: gamingEvents,
       resource: "/events",
     });
+  },
+
+  async getGameScreenshots(
+    gameId: null | number | undefined
+  ): Promise<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }> {
+    if (!gameId) {
+      return { id: 0, screenshots: [] };
+    }
+
+    const response:
+      | Array<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }>
+      | undefined = await this.request({
+      body: `fields screenshots.image_id; where id = (${gameId});`,
+      resource: "/games",
+    });
+
+    if (!response) {
+      return { id: 0, screenshots: [] };
+    }
+
+    return response[0];
   },
 
   async getGameById(

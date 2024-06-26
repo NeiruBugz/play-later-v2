@@ -57,38 +57,52 @@ model User {
   Session       Session[]
   Game          Game[]
   BacklogItem   BacklogItem[]
+  Review        Review[]
 }
 
 // ----- Application Models ------//
 model Game {
-  id              Int             @id @default(autoincrement())
-  igdbId          Int             @unique
-  hltbId          String?         @unique
-  title           String
-  description     String?
-  coverImage      String?
-  releaseDate     DateTime?
-  mainStory       Int?
-  mainExtra       Int?
-  completionist   Int?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  userId          String
-  backlogItems    BacklogItem[]   @relation("GameBacklogItems")
-  User            User            @relation(fields: [userId], references: [id])
+  id            String           @id @default(cuid())
+  igdbId        Int           @unique
+  hltbId        String?       @unique
+  title         String
+  description   String?
+  coverImage    String?
+  releaseDate   DateTime?
+  mainStory     Int?
+  mainExtra     Int?
+  completionist Int?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  userId        String
+  backlogItems  BacklogItem[] @relation("GameBacklogItems")
+  User          User          @relation(fields: [userId], references: [id])
+  Review        Review[]
 }
 
 model BacklogItem {
-  id        Int               @id @default(autoincrement())
-  status    BacklogItemStatus @default(TO_PLAY)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  platform  String?
+  id              Int               @id @default(autoincrement())
+  status          BacklogItemStatus @default(TO_PLAY)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  platform        String?
+  userId          String
+  acquisitionType AcquisitionType   @default(DIGITAL)
+  gameId          String
+  game            Game              @relation("GameBacklogItems", fields: [gameId], references: [id], onDelete: Cascade)
+  User            User              @relation(fields: [userId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int      @default(0) // Rating from 0 to 10
+  content   String? // Optional review text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   userId    String
-  acquisitionType AcquisitionType @default(DIGITAL)
-  gameId    Int
-  game      Game              @relation("GameBacklogItems", fields: [gameId], references: [id], onDelete: Cascade)
-  User      User              @relation(fields: [userId], references: [id])
+  gameId    String
+  User      User     @relation(fields: [userId], references: [id])
+  Game      Game     @relation(fields: [gameId], references: [id])
 }
 
 enum BacklogItemStatus {

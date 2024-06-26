@@ -1,1 +1,1 @@
-export { getUserUniquePlatforms } from './get-uniques-platforms'
+export { getUserUniquePlatforms } from "./get-uniques-platforms";

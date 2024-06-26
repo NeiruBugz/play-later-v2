@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
+import { Button } from "@/src/shared/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { Button } from "@/src/shared/ui/button";
 
 export function ClearFilters() {
   const router = useRouter();
@@ -11,12 +11,21 @@ export function ClearFilters() {
   const onClearFilters = useCallback(() => {
     const paramsToUpdate = new URLSearchParams(params);
 
-    paramsToUpdate.delete('platform');
-    paramsToUpdate.delete('status');
+    paramsToUpdate.delete("platform");
+    paramsToUpdate.delete("status");
     router.replace(`/?${paramsToUpdate.toString()}`);
-  }, [params, router])
+  }, [params, router]);
 
   if (params.size === 0) return null;
 
-  return <Button variant="outline" onClick={onClearFilters} type="button" aria-label="Clear filters">Clear filters</Button>
+  return (
+    <Button
+      variant="outline"
+      onClick={onClearFilters}
+      type="button"
+      aria-label="Clear filters"
+    >
+      Clear filters
+    </Button>
+  );
 }

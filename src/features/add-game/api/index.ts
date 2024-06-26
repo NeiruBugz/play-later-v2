@@ -1,1 +1,1 @@
-export { createGameAction } from './action'
+export { createGameAction } from "./action";

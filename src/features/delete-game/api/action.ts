@@ -1,26 +1,30 @@
-'use server'
-import { z } from 'zod';
-import { deleteGame } from "@/src/entities/game/api/delete-game";
+"use server";
+
+import { deleteBacklogItem } from "@/src/entities/backlog-item";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 const DeleteGameSchema = z.object({
   gameId: z.number(),
-})
+});
 
-export async function deleteGameAction(prevState: { message: string }, payload: FormData) {
+export async function deleteGameAction(
+  prevState: { message: string },
+  payload: FormData
+) {
   const parsedPayload = DeleteGameSchema.safeParse({
-    gameId: Number(payload.get('gameId'))
-  })
+    gameId: Number(payload.get("gameId")),
+  });
 
   if (!parsedPayload.success) {
-    return { message: 'Error occurred while deleting game' };
+    return { message: "Error occurred while deleting game" };
   }
 
   try {
-    await deleteGame(parsedPayload.data.gameId);
-    revalidatePath('/')
-    return { message: 'Game was deleted successfully' };
+    await deleteBacklogItem(parsedPayload.data.gameId);
+    revalidatePath("/");
+    return { message: "Game was deleted successfully" };
   } catch (err) {
-    return { message: 'Error occurred while deleting game' };
+    return { message: "Error occurred while deleting game" };
   }
 }

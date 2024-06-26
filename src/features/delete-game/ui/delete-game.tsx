@@ -1,5 +1,6 @@
-'use client'
+"use client";
 
+import { deleteGameAction } from "@/src/features/delete-game/api/action";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,21 +10,21 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger
+  AlertDialogTrigger,
 } from "@/src/shared/ui/alert-dialog";
-import { TrashIcon } from "lucide-react";
-import { useFormState, useFormStatus } from 'react-dom';
-import { deleteGameAction } from "@/src/features/delete-game/api/action";
 import { Button } from "@/src/shared/ui/button";
+import { TrashIcon } from "lucide-react";
+import { useFormState, useFormStatus } from "react-dom";
 
 export function DeleteGame({ gameId }: { gameId: number }) {
-  const [, action] = useFormState(deleteGameAction, { message: '' });
+  const [, action] = useFormState(deleteGameAction, { message: "" });
   const { pending } = useFormStatus();
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button className="p-2">
-        <TrashIcon className="w-4 h-4 color-text-secondary" /></Button>
+          <TrashIcon className="color-text-secondary h-4 w-4" />
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -34,10 +35,14 @@ export function DeleteGame({ gameId }: { gameId: number }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel type="button" disabled={pending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel type="button" disabled={pending}>
+            Cancel
+          </AlertDialogCancel>
           <form action={action}>
-            <input name="gameId" defaultValue={gameId} className="sr-only"/>
-            <AlertDialogAction type="submit" disabled={pending}>Continue</AlertDialogAction>
+            <input name="gameId" defaultValue={gameId} className="sr-only" />
+            <AlertDialogAction type="submit" disabled={pending}>
+              Continue
+            </AlertDialogAction>
           </form>
         </AlertDialogFooter>
       </AlertDialogContent>

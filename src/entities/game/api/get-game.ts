@@ -1,7 +1,7 @@
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/shared/api";
 
-export async function getGame(id: number) {
+export async function getGame(id: string) {
   const userId = await getServerUserId();
 
   if (!userId) {
@@ -16,6 +16,7 @@ export async function getGame(id: number) {
     select: {
       id: true,
       title: true,
+      igdbId: true,
       description: true,
       coverImage: true,
       mainStory: true,
@@ -23,6 +24,7 @@ export async function getGame(id: number) {
       completionist: true,
       backlogItems: true,
       userId: true,
-    }
-  })
+      Review: true,
+    },
+  });
 }

@@ -1,2 +1,2 @@
-export * from './igdb'
-export * from './ui';
+export * from "./igdb";
+export * from "./ui";

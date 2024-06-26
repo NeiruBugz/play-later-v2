@@ -11,7 +11,9 @@ export function SignIn() {
       }}
       className="mt-2"
     >
-      <Button type="submit" variant="outline">Sign In with Google</Button>
+      <Button type="submit" variant="outline">
+        Sign In with Google
+      </Button>
     </form>
   );
 }
