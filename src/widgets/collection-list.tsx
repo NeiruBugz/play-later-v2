@@ -1,6 +1,8 @@
-import { getUserGamesWithGroupedBacklog } from "@/src/entities/backlog-item";
-import { GameCard } from "@/src/entities/game";
-import { CollectionFilters } from "@/src/features/filter";
+import {
+  BacklogItemCard,
+  getUserGamesWithGroupedBacklog,
+} from "@/src/entities/backlog-item";
+import { CollectionFilters } from "@/src/widgets/collection-filters";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -12,6 +14,7 @@ export async function CollectionList({
   const collection = await getUserGamesWithGroupedBacklog({
     platform: params.platform,
     status: params.status,
+    search: params.search,
   });
 
   if (
@@ -53,11 +56,8 @@ export async function CollectionList({
       </Suspense>
       <ul className="flex flex-wrap justify-center gap-3 md:justify-start">
         {collection?.map(({ game, backlogItems }) => (
-          <li
-            key={game.id}
-            className="h-40 w-fit overflow-hidden rounded-lg border bg-background shadow-md hover:shadow-xl"
-          >
-            <GameCard
+          <li key={game.id}>
+            <BacklogItemCard
               game={{
                 id: game.id,
                 title: game.title,

@@ -1,34 +1,34 @@
 "use client";
 
-import { useHowLongToBeatSearch } from "@/src/features/search/api";
+import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { ElementRef, useCallback, useEffect, useRef, useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
+import { GamePicker } from "@/src/widgets/game-picker";
+import {
+  BacklogItemFormValues,
+  GameFormValues,
+  initialFormValues,
+} from "@/src/features/add-game";
+import { createGameAction } from "@/src/features/add-game/api/action";
+import { useHowLongToBeatSearch } from "@/src/features/search";
 import {
   AcquisitionStatusMapper,
   BacklogStatusMapper,
   cn,
 } from "@/src/shared/lib";
 import { SearchResponse } from "@/src/shared/types";
-import { Button } from "@/src/shared/ui/button";
-import { HiddenInput } from "@/src/shared/ui/hidden-input";
-import { Label } from "@/src/shared/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/src/shared/ui/radio-group";
 import {
+  Button,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/shared/ui/select";
+} from "@/src/shared/ui";
+import { HiddenInput } from "@/src/shared/ui/hidden-input";
+import { Label } from "@/src/shared/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/src/shared/ui/radio-group";
 import { useToast } from "@/src/shared/ui/use-toast";
-import { GamePicker } from "@/src/widgets/game-picker";
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
-import { ElementRef, useCallback, useEffect, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
-import { createGameAction } from "../api";
-import {
-  BacklogItemFormValues,
-  GameFormValues,
-  initialFormValues,
-} from "../model";
 
 export function AddGameForm() {
   const formRef = useRef<ElementRef<"form">>(null);
@@ -147,9 +147,9 @@ export function AddGameForm() {
         <HiddenInput name="mainExtra" value={gameValues?.mainExtra} />
         <HiddenInput name="completionist" value={gameValues?.completionist} />
         <HiddenInput name="releaseDate" value={gameValues?.releaseDate} />
-        <div className="mt-2">
+        <div className="mt-3">
           <div
-            className={cn("relative mt-2 flex flex-col gap-2", {
+            className={cn("relative mt-2 flex flex-col gap-4", {
               hidden: platformOptions.length === 0,
             })}
           >
@@ -167,7 +167,7 @@ export function AddGameForm() {
               </SelectContent>
             </Select>
           </div>
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="mt-3 flex flex-col gap-4">
             <Label htmlFor="acquisitionType">Acquisition type</Label>
             <RadioGroup
               className="inline-flex h-10 w-fit items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
@@ -197,20 +197,21 @@ export function AddGameForm() {
               ))}
             </RadioGroup>
           </div>
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="mt-3 flex flex-col gap-4">
             <Label htmlFor="backlogStatus">Backlog Status</Label>
             <RadioGroup
-              className="inline-flex h-10 w-fit items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
+              className="inline-flex h-fit w-fit flex-wrap items-center justify-start rounded-md bg-muted p-1 text-muted-foreground"
               defaultValue={backlogItemValues.backlogStatus ?? "TO_PLAY"}
               onValueChange={onBacklogStatusChange}
               id="backlogStatus"
               name="backlogStatus"
             >
               {Object.keys(BacklogItemStatus).map((key) => (
-                <div key={key}>
+                <div key={key} className="w-fit">
                   <RadioGroupItem className="sr-only" id={key} value={key} />
                   <Label
                     className={cn(
+                      "w-fit",
                       "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
                       "py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none",
                       "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",

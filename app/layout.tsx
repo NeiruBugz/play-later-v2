@@ -1,8 +1,9 @@
 import Providers from "@/providers";
-import "@/styles/globals.css";
-import { cn } from "@/src/shared/lib";
-import { Metadata, Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter as FontSans } from "next/font/google";
+import "@/src/shared/globals.css";
+import { SendFeedbackForm } from "@/src/features/send-feedback/ui/send-feedback-form";
+import { cn } from "@/src/shared/lib";
 
 export const viewport: Viewport = {
   themeColor: [
@@ -40,7 +41,10 @@ export default function RootLayout(props: {
           fontSans.variable
         )}
       >
-        <Providers>{props.children}</Providers>
+        <Providers>
+          {props.children}
+          <SendFeedbackForm />
+        </Providers>
       </body>
     </html>
   );

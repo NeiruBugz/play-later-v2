@@ -1,5 +1,5 @@
-import { Button } from "@/src/shared/ui/button";
+import { Button } from "@/src/shared/ui";
 
-export function AddReviewDialog() {
+export function AddReviewDialog({ gameId }: { gameId: string }) {
   return <Button disabled>Add Review</Button>;
 }

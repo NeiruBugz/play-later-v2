@@ -1,3 +1,8 @@
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { GameStats } from "@/src/widgets/game-stats";
+import { Header } from "@/src/widgets/header";
+import { IgdbInfo } from "@/src/widgets/igdb-info";
 import { getGame } from "@/src/entities/game";
 import {
   IMAGE_API,
@@ -20,11 +25,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/src/shared/ui/breadcrumb";
-import { GameStats } from "@/src/widgets/game-stats";
-import { Header } from "@/src/widgets/header";
-import { IgdbInfo } from "@/src/widgets/igdb-info";
-import Image from "next/image";
-import { notFound } from "next/navigation";
 
 export default async function GamePage(props: GenericPageProps) {
   const game = await getGame(props.params.id);
@@ -62,13 +62,17 @@ export default async function GamePage(props: GenericPageProps) {
               {game.description}
             </p>
           </div>
-          <div className="self-start">
-            <GameStats existingReviews={game.Review} gameId={game.id} />
+          <div>
+            <GameStats
+              existingReviews={game.Review}
+              gameId={game.id}
+              igdbId={game.igdbId}
+            />
           </div>
         </section>
         <section className="container mx-auto px-4 md:px-6 lg:px-8">
-          <div>
-            <h2>Entries</h2>
+          <div className="my-2">
+            <h2>Your entries</h2>
             <ul>
               {game.backlogItems.map((backlogItem) => (
                 <li key={backlogItem.id}>
@@ -89,8 +93,8 @@ export default async function GamePage(props: GenericPageProps) {
               ))}
             </ul>
           </div>
-          <div>
-            <h2>Backlog entries</h2>
+          <div className="my-2">
+            <h2>Community entries</h2>
             <p>
               {
                 game.backlogItems.filter(

@@ -1,5 +1,11 @@
-import { GameScreenshots } from "@/src/widgets/game-screenshots";
 import { Suspense } from "react";
+import { GameScreenshots } from "@/src/widgets/game-screenshots";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/src/shared/ui/accordion";
 
 export function IgdbInfo({
   igdbId,
@@ -7,12 +13,19 @@ export function IgdbInfo({
 }: {
   igdbId: number | undefined | null;
   gameName: string;
-}): JSX.Element {
+}) {
   return (
     <div>
-      <Suspense fallback="Loading...">
-        <GameScreenshots gameId={igdbId} gameName={gameName} />
-      </Suspense>
+      <Accordion type="single" collapsible>
+        <AccordionItem value="screenshots">
+          <AccordionTrigger>Screenshots</AccordionTrigger>
+          <AccordionContent>
+            <Suspense fallback="Loading...">
+              <GameScreenshots gameId={igdbId} gameName={gameName} />
+            </Suspense>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }

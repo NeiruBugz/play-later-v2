@@ -1,7 +1,7 @@
-import { getServerUserId } from "@/auth";
-import { prisma } from "@/src/shared/api";
 import { BacklogItemStatus, type BacklogItem, type Game } from "@prisma/client";
 import { z } from "zod";
+import { getServerUserId } from "@/auth";
+import { prisma } from "@/src/shared/api";
 
 type GameWithBacklogItems = {
   game: Game;
@@ -11,6 +11,7 @@ type GameWithBacklogItems = {
 const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),
   status: z.union([z.nativeEnum(BacklogItemStatus), z.string()]).optional(),
+  search: z.string().optional(),
 });
 
 export async function getUserGamesWithGroupedBacklog(
@@ -21,6 +22,7 @@ export async function getUserGamesWithGroupedBacklog(
     const parsedPayload = FilterParamsSchema.safeParse({
       platform: params.platform,
       status: params.status,
+      search: params.search,
     });
 
     if (!parsedPayload.success) {
@@ -32,10 +34,25 @@ export async function getUserGamesWithGroupedBacklog(
       where: {
         userId: userId,
         platform: parsedPayload.data.platform || undefined,
-        status:
-          parsedPayload.data.status === ""
-            ? undefined
-            : (parsedPayload.data.status as BacklogItemStatus),
+        status: {
+          not: BacklogItemStatus.WISHLIST,
+          equals:
+            parsedPayload.data.status === ""
+              ? undefined
+              : (parsedPayload.data.status as BacklogItemStatus),
+        },
+        game: {
+          OR: parsedPayload.data.search
+            ? [
+                {
+                  title: {
+                    contains: parsedPayload.data.search,
+                    mode: "insensitive",
+                  },
+                },
+              ]
+            : undefined,
+        },
       },
       include: {
         game: true,

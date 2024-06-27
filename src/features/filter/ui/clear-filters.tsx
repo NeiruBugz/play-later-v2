@@ -1,8 +1,9 @@
 "use client";
 
-import { Button } from "@/src/shared/ui/button";
+import { XIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { Button } from "@/src/shared/ui";
 
 export function ClearFilters() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export function ClearFilters() {
       aria-label="Clear filters"
     >
       Clear filters
+      <XIcon className="ml-2 size-4" />
     </Button>
   );
 }

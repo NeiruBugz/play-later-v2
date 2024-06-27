@@ -1,6 +1,6 @@
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { SignIn } from "@/src/features/sign-in";
-import { redirect } from "next/navigation";
 
 export default async function Page() {
   const session = await auth();

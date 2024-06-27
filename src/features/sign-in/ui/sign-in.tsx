@@ -1,6 +1,6 @@
-import { signIn } from "@/auth";
-import { Button } from "@/src/shared/ui/button";
 import React from "react";
+import { signIn } from "@/auth";
+import { Button } from "@/src/shared/ui";
 
 export function SignIn() {
   return (

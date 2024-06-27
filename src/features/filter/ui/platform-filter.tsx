@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/shared/ui/select";
+} from "@/src/shared/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
@@ -42,8 +42,8 @@ export function PlatformFilter({
       onValueChange={onPlatformSelect}
       value={params.get("platform") ?? ""}
     >
-      <SelectTrigger className="max-w-[260px]" aria-label="platforms">
-        <SelectValue placeholder="Filter by platform" />
+      <SelectTrigger className="gap-1 md:max-w-[260px]" aria-label="platforms">
+        <SelectValue placeholder="Platform" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={"All"}>All</SelectItem>

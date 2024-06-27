@@ -1,4 +1,7 @@
-import { useIGDBSearch } from "@/src/features/search/api";
+import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useIGDBSearch } from "@/src/features/search";
 import {
   IMAGE_API,
   IMAGE_SIZES,
@@ -6,12 +9,8 @@ import {
 } from "@/src/shared/config/image.config";
 import { cn } from "@/src/shared/lib";
 import { SearchResponse } from "@/src/shared/types";
-import { Button } from "@/src/shared/ui/button";
-import { Input } from "@/src/shared/ui/input";
+import { Button, Input } from "@/src/shared/ui";
 import { Label } from "@/src/shared/ui/label";
-import { useQueryClient } from "@tanstack/react-query";
-import Image from "next/image";
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 type GamePreviewItemProps = {
   game: SearchResponse;

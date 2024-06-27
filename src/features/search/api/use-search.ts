@@ -1,5 +1,5 @@
-import { SearchResponse } from "@/src/shared/types";
 import { useQuery } from "@tanstack/react-query";
+import { SearchResponse } from "@/src/shared/types";
 
 const fetchSearchResults = async (
   query: string

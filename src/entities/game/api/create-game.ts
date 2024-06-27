@@ -1,5 +1,5 @@
-import { prisma } from "@/src/shared/api";
 import type { Game } from "@prisma/client";
+import { prisma } from "@/src/shared/api";
 
 type CreateGameInput = {
   game: Omit<Game, "id" | "createdAt" | "updatedAt" | "userId">;

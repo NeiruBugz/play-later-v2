@@ -1,8 +1,8 @@
 "use server";
 
-import { deleteBacklogItem } from "@/src/entities/backlog-item";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { deleteBacklogItem } from "@/src/entities/backlog-item";
 
 const DeleteGameSchema = z.object({
   gameId: z.number(),

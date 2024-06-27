@@ -1,7 +1,7 @@
-import { cn } from "@/src/shared/lib/tailwind-merge";
 import { CheckIcon } from "@radix-ui/react-icons";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import * as React from "react";
+import { cn } from "@/src/shared/lib/tailwind-merge";
 
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,

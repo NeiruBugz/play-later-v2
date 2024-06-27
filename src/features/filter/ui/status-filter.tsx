@@ -1,5 +1,8 @@
 "use client";
 
+import { BacklogItemStatus } from "@prisma/client";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 import { BacklogStatusMapper } from "@/src/shared/lib";
 import {
   Select,
@@ -7,10 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/shared/ui/select";
-import { BacklogItemStatus } from "@prisma/client";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+} from "@/src/shared/ui";
 
 export function StatusFilter() {
   const params = useSearchParams();
@@ -37,8 +37,8 @@ export function StatusFilter() {
 
   return (
     <Select onValueChange={onStatusSelect} value={params.get("status") ?? ""}>
-      <SelectTrigger className="max-w-[260px]" aria-label="backlogStatus">
-        <SelectValue placeholder="Filter by status" />
+      <SelectTrigger className="max-w-[260px] gap-1" aria-label="backlogStatus">
+        <SelectValue placeholder="Status" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="All">All</SelectItem>

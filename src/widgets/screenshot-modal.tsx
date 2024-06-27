@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   IMAGE_API,
   IMAGE_SIZES,
@@ -13,24 +14,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/src/shared/ui/alert-dialog";
-import Image from "next/image";
 
 export function ScreenshotModal({
   imageId,
   gameName,
 }: {
-  imageId: number;
+  imageId: string;
   gameName: string;
 }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <li>
+        <li className="w-full">
           <Image
             alt={`${gameName} screenshot`}
             src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageId}.png`}
-            width={NEXT_IMAGE_SIZES.hd.width}
-            height={NEXT_IMAGE_SIZES.hd.height}
+            width={NEXT_IMAGE_SIZES["s-md"].width}
+            height={NEXT_IMAGE_SIZES["s-md"].height}
+            className="h-auto w-full"
           />
         </li>
       </AlertDialogTrigger>
@@ -41,9 +42,9 @@ export function ScreenshotModal({
         </AlertDialogHeader>
         <Image
           alt={`${gameName} screenshot`}
-          src={`${IMAGE_API}/${IMAGE_SIZES["s-md"]}/${imageId}.png`}
-          width={NEXT_IMAGE_SIZES.hd.width}
-          height={NEXT_IMAGE_SIZES.hd.height}
+          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageId}.png`}
+          width={NEXT_IMAGE_SIZES["s-big"].width}
+          height={NEXT_IMAGE_SIZES["s-big"].height}
         />
         <AlertDialogFooter>
           <AlertDialogCancel>Close</AlertDialogCancel>

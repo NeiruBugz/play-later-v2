@@ -1,1 +1,1 @@
-export * from "./ui";
+export { deleteGameAction } from './api'

@@ -1,7 +1,14 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/src/shared/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/shared/ui";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/src/shared/ui/dropdown-menu";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { memo } from "react";
 
 const getFirstTwoLiterals = (name: string | null | undefined) => {
@@ -20,17 +27,27 @@ const User = memo(function User() {
   if (!session.data || !session.data.user) return null;
 
   return (
-    <Avatar>
-      {session.data.user.image ? (
-        <AvatarImage
-          src={session.data.user.image ?? ""}
-          alt={session.data.user.email ?? ""}
-        />
-      ) : null}
-      <AvatarFallback>
-        {getFirstTwoLiterals(session.data.user.name)}
-      </AvatarFallback>
-    </Avatar>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Avatar
+          className="rounded size-9 cursor-pointer">
+          {session.data.user.image ? (
+            <AvatarImage
+              src={session.data.user.image ?? ""}
+              alt={session.data.user.email ?? ""}
+            />
+          ) : null}
+          <AvatarFallback>
+            {getFirstTwoLiterals(session.data.user.name)}
+          </AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem>
+          <Link href={`/user/${session.data.user.id}`}>Settings</Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 });
 
