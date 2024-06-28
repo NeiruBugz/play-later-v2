@@ -1,8 +1,8 @@
-import Link from "next/link";
 import {
   BacklogItemCard,
   getWishlistedItems,
 } from "@/src/entities/backlog-item";
+import Link from "next/link";
 
 export async function WishlistedList() {
   const wishlistedItems = await getWishlistedItems();
@@ -15,7 +15,7 @@ export async function WishlistedList() {
           Start{" "}
           <Link
             href="/collection/add-game"
-            className="cursor-pointer font-bold hover:underline"
+            className="hover:font-bolder cursor-pointer font-bold underline"
           >
             adding
           </Link>{" "}

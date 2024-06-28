@@ -21,6 +21,10 @@ const linksConfig = [
     label: "Wishlist",
   },
   {
+    href: "/backlogs",
+    label: "Backlogs",
+  },
+  {
     href: "/changelog",
     label: "Changelog",
   },

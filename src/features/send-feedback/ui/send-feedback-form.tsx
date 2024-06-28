@@ -18,7 +18,6 @@ import {
 } from "@/src/shared/ui/select";
 import { Textarea } from "@/src/shared/ui/textarea";
 import { useToast } from "@/src/shared/ui/use-toast";
-import { FormInputIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
 
@@ -38,12 +37,13 @@ export function SendFeedbackForm() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (state.message === 'Success') {
+    if (state.message === "Success") {
       formRef.current?.reset();
+      setPopoverOpen(false);
       toast({
         title: "Success",
         description: "Feedback sent successfully!",
-      })
+      });
     }
   }, [state.message, toast]);
 
@@ -52,7 +52,7 @@ export function SendFeedbackForm() {
       <Popover open={isPopoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button className="fixed bottom-6 right-6 rounded-full shadow-lg">
-            <FormInputIcon />
+            💬
           </Button>
         </PopoverTrigger>
         <PopoverContent>

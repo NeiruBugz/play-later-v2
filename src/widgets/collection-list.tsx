@@ -28,7 +28,7 @@ export async function CollectionList({
           Start{" "}
           <Link
             href="/collection/add-game"
-            className="cursor-pointer font-bold hover:underline"
+            className="hover:font-bolder cursor-pointer font-bold underline"
           >
             adding
           </Link>{" "}

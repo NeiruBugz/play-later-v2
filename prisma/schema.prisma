@@ -62,7 +62,7 @@ model User {
 
 // ----- Application Models ------//
 model Game {
-  id            String           @id @default(cuid())
+  id            String        @id @default(cuid())
   igdbId        Int           @unique
   hltbId        String?       @unique
   title         String
@@ -81,16 +81,17 @@ model Game {
 }
 
 model BacklogItem {
-  id              Int               @id @default(autoincrement())
-  status          BacklogItemStatus @default(TO_PLAY)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  platform        String?
-  userId          String
-  acquisitionType AcquisitionType   @default(DIGITAL)
-  gameId          String
-  game            Game              @relation("GameBacklogItems", fields: [gameId], references: [id], onDelete: Cascade)
-  User            User              @relation(fields: [userId], references: [id])
+  id               Int               @id @default(autoincrement())
+  status           BacklogItemStatus @default(TO_PLAY)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  platform         String?
+  originalPlatform String?
+  userId           String
+  acquisitionType  AcquisitionType   @default(DIGITAL)
+  gameId           String
+  game             Game              @relation("GameBacklogItems", fields: [gameId], references: [id], onDelete: Cascade)
+  User             User              @relation(fields: [userId], references: [id])
 }
 
 model Review {

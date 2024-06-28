@@ -1,9 +1,9 @@
 "use server";
 
+import { AddGameToBacklogInput } from "@/src/entities/game";
 import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { AddGameToBacklogInput } from "@/src/entities/game";
 import { saveGameAndAddToBacklog } from "./add-game";
 
 const CreateGameActionSchema = z.object({
@@ -45,30 +45,30 @@ export async function createGameAction(
     return { message: "Failed to save game", isError: true };
   }
 
-  try {
-    const preparedPayload = {
-      game: {
-        igdbId: parsedPayload.data.igdbId,
-        title: parsedPayload.data.title,
-        description: parsedPayload.data.description ?? "",
-        releaseDate: parsedPayload.data.releaseDate
-          ? new Date(parsedPayload.data.releaseDate * 1000)
-          : null,
-        coverImage: parsedPayload.data.coverImage,
-        hltbId: parsedPayload.data.hltbId,
-        mainStory: parsedPayload.data.mainStory,
-        mainExtra: parsedPayload.data.mainExtra,
-        completionist: parsedPayload.data.completionist,
-      },
-      backlogItem: {
-        acquisitionType: parsedPayload.data
-          .acquisitionType as unknown as AcquisitionType,
-        backlogStatus: parsedPayload.data
-          .backlogStatus as unknown as BacklogItemStatus,
-        platform: parsedPayload.data.platform,
-      },
-    } satisfies AddGameToBacklogInput;
+  const preparedPayload = {
+    game: {
+      igdbId: parsedPayload.data.igdbId,
+      title: parsedPayload.data.title,
+      description: parsedPayload.data.description ?? "",
+      releaseDate: parsedPayload.data.releaseDate
+        ? new Date(parsedPayload.data.releaseDate * 1000)
+        : null,
+      coverImage: parsedPayload.data.coverImage,
+      hltbId: parsedPayload.data.hltbId,
+      mainStory: parsedPayload.data.mainStory,
+      mainExtra: parsedPayload.data.mainExtra,
+      completionist: parsedPayload.data.completionist,
+    },
+    backlogItem: {
+      acquisitionType: parsedPayload.data
+        .acquisitionType as unknown as AcquisitionType,
+      backlogStatus: parsedPayload.data
+        .backlogStatus as unknown as BacklogItemStatus,
+      platform: parsedPayload.data.platform,
+    },
+  } satisfies AddGameToBacklogInput;
 
+  try {
     await saveGameAndAddToBacklog(preparedPayload);
     revalidatePath("/collection");
     return {

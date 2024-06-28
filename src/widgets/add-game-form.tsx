@@ -1,9 +1,5 @@
 "use client";
 
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
-import { ElementRef, useCallback, useEffect, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
-import { GamePicker } from "@/src/widgets/game-picker";
 import {
   BacklogItemFormValues,
   GameFormValues,
@@ -29,6 +25,61 @@ import { HiddenInput } from "@/src/shared/ui/hidden-input";
 import { Label } from "@/src/shared/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/src/shared/ui/radio-group";
 import { useToast } from "@/src/shared/ui/use-toast";
+import { GamePicker } from "@/src/widgets/game-picker";
+import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { ElementRef, useCallback, useEffect, useRef, useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
+
+const playingOnPlatforms = [
+  {
+    value: "playstation",
+    label: "Playstation",
+  },
+  {
+    value: "xbox",
+    label: "Xbox",
+  },
+  {
+    value: "nintendo",
+    label: "Nintendo",
+  },
+  {
+    value: "pc",
+    label: "PC",
+  },
+  {
+    value: "mac",
+    label: "Mac",
+  },
+  {
+    value: "mobile",
+    label: "Mobile devices",
+  },
+];
+
+function SubmitButton({ onFormReset, isDisabled }: { onFormReset: () => void, isDisabled?: boolean }) {
+  const { pending } = useFormStatus();
+  return (
+    <>
+      <Button
+        className="mr-2 mt-2"
+        type="submit"
+        disabled={isDisabled || pending}
+      >
+        Save
+      </Button>
+      <Button
+        variant="secondary"
+        onClick={onFormReset}
+        className="mt-2"
+        type="reset"
+        disabled={isDisabled || pending}
+      >
+        Reset
+      </Button>
+    </>
+  );
+}
 
 export function AddGameForm() {
   const formRef = useRef<ElementRef<"form">>(null);
@@ -47,7 +98,6 @@ export function AddGameForm() {
     message: "",
     isError: false,
   });
-  const { pending } = useFormStatus();
   const { toast } = useToast();
 
   const { data: howLongToBeatData } = useHowLongToBeatSearch(gameValues?.title);
@@ -153,15 +203,34 @@ export function AddGameForm() {
               hidden: platformOptions.length === 0,
             })}
           >
-            <Label htmlFor="platform">Platform of choice</Label>
-            <Select name="platform" defaultValue={backlogItemValues.platform}>
+            <Label htmlFor="originalPlatform">Release platform</Label>
+            <Select name="originalPlatform" defaultValue={""}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a platform" className="mt-2" />
+                <SelectValue placeholder="Select a platform" className="mt-2"/>
               </SelectTrigger>
               <SelectContent>
                 {platformOptions.map((platform) => (
                   <SelectItem value={platform.name} key={platform.id}>
                     {platform.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div
+            className={cn("relative mt-2 flex flex-col gap-4", {
+              hidden: platformOptions.length === 0,
+            })}
+          >
+            <Label htmlFor="platform">Playing on (for Backward-Compatible games)</Label>
+            <Select name="platform" defaultValue={""}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a platform" className="mt-2"/>
+              </SelectTrigger>
+              <SelectContent>
+                {playingOnPlatforms.map((platform) => (
+                  <SelectItem value={platform.value} key={platform.value}>
+                    {platform.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -178,7 +247,7 @@ export function AddGameForm() {
             >
               {Object.keys(AcquisitionType).map((key) => (
                 <div key={key}>
-                  <RadioGroupItem className="sr-only" id={key} value={key} />
+                  <RadioGroupItem className="sr-only" id={key} value={key}/>
                   <Label
                     className={cn(
                       "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3",
@@ -208,7 +277,7 @@ export function AddGameForm() {
             >
               {Object.keys(BacklogItemStatus).map((key) => (
                 <div key={key} className="w-fit">
-                  <RadioGroupItem className="sr-only" id={key} value={key} />
+                  <RadioGroupItem className="sr-only" id={key} value={key}/>
                   <Label
                     className={cn(
                       "w-fit",
@@ -229,22 +298,7 @@ export function AddGameForm() {
             </RadioGroup>
           </div>
         </div>
-        <Button
-          className="mr-2 mt-2"
-          type="submit"
-          disabled={selectedGame === undefined || pending}
-        >
-          Save
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={onFormReset}
-          className="mt-2"
-          type="reset"
-          disabled={selectedGame === undefined || pending}
-        >
-          Reset
-        </Button>
+        <SubmitButton onFormReset={onFormReset} isDisabled={selectedGame === undefined}/>
       </form>
     </div>
   );
