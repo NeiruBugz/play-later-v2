@@ -18,6 +18,7 @@ import {
 } from "@/src/shared/ui/select";
 import { Textarea } from "@/src/shared/ui/textarea";
 import { useToast } from "@/src/shared/ui/use-toast";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
 
@@ -35,6 +36,7 @@ export function SendFeedbackForm() {
   const [state, action] = useFormState(postFeedbackAction, { message: "" });
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (state.message === "Success") {
@@ -46,6 +48,8 @@ export function SendFeedbackForm() {
       });
     }
   }, [state.message, toast]);
+
+  if (pathname === "/") return null;
 
   return (
     <>

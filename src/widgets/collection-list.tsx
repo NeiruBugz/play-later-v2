@@ -54,7 +54,7 @@ export async function CollectionList({
       <Suspense fallback={"Loading..."}>
         <CollectionFilters />
       </Suspense>
-      <ul className="flex flex-wrap justify-center gap-3 md:justify-start">
+      <ul className="flex max-h-[624px] flex-wrap justify-center gap-3 overflow-scroll md:max-h-[824px] md:justify-start">
         {collection?.map(({ game, backlogItems }) => (
           <li key={game.id}>
             <BacklogItemCard

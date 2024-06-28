@@ -21,10 +21,10 @@ export async function CollectionFilters() {
           <ClearFilters />
         </div>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between md:hidden">
         <Drawer>
           <DrawerTrigger asChild>
-            <Button className="my-2 block md:hidden" variant="outline">
+            <Button className="my-2" variant="outline">
               Filters
             </Button>
           </DrawerTrigger>

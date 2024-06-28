@@ -1,5 +1,6 @@
 "use client";
 
+import { normalizeString } from "@/src/shared/lib";
 import {
   Select,
   SelectContent,
@@ -49,7 +50,7 @@ export function PlatformFilter({
         <SelectItem value={"All"}>All</SelectItem>
         {platformOptions.map((platform) => (
           <SelectItem value={platform ?? ""} key={platform}>
-            {platform}
+            {normalizeString(platform as string)}
           </SelectItem>
         ))}
       </SelectContent>
