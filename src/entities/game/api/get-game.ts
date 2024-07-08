@@ -8,10 +8,9 @@ export async function getGame(id: string) {
     return null;
   }
 
-  return prisma.game.findUnique({
+  const game = await prisma.game.findUnique({
     where: {
       id,
-      userId,
     },
     select: {
       id: true,
@@ -23,8 +22,12 @@ export async function getGame(id: string) {
       mainExtra: true,
       completionist: true,
       backlogItems: true,
-      userId: true,
       Review: true,
     },
   });
+  if (game) {
+    return { game, userId };
+  }
+
+  return null;
 }

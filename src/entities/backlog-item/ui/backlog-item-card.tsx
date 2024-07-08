@@ -22,8 +22,8 @@ type GameCardProps = {
 export function BacklogItemCard({ game, backlogItems }: GameCardProps) {
   return (
     <Link href={`/game/${game.id}`}>
-      <div className="group relative w-full max-w-[300px] cursor-pointer overflow-hidden rounded shadow-lg transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:border hover:shadow-xl">
-        <div className="absolute top-0 z-10 hidden h-[209px] w-full flex-grow flex-col items-center justify-center rounded bg-slate-400 opacity-0 transition-opacity ease-in-out group-hover:flex group-hover:opacity-95">
+      <div className="group relative w-full max-w-[300px] cursor-pointer overflow-hidden rounded shadow-lg hover:border hover:shadow-xl">
+        <div className="absolute top-0 z-10 hidden h-[208px] w-full flex-grow flex-col items-center justify-center rounded bg-slate-400 opacity-0 transition-opacity ease-in-out group-hover:flex group-hover:opacity-95">
           <p className="text-center text-[16px] font-bold text-white">
             {game.title}
           </p>

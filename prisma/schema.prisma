@@ -55,7 +55,6 @@ model User {
   username      String?
   Account       Account[]
   Session       Session[]
-  Game          Game[]
   BacklogItem   BacklogItem[]
   Review        Review[]
 }
@@ -74,9 +73,7 @@ model Game {
   completionist Int?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  userId        String
   backlogItems  BacklogItem[] @relation("GameBacklogItems")
-  User          User          @relation(fields: [userId], references: [id])
   Review        Review[]
 }
 

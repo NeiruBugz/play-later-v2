@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/src/shared/ui";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useTransition } from "react";
 
 export function PlatformFilter({
   platformOptions,
@@ -18,6 +18,7 @@ export function PlatformFilter({
 }) {
   const params = useSearchParams();
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
   const onPlatformSelect = useCallback(
     (value: string | null) => {
@@ -32,8 +33,9 @@ export function PlatformFilter({
       } else {
         paramsToUpdate.set("platform", value);
       }
-
-      router.replace(`/collection/?${paramsToUpdate.toString()}`);
+      startTransition(() => {
+        router.replace(`/collection/?${paramsToUpdate.toString()}`);
+      });
     },
     [router, params]
   );
@@ -42,6 +44,7 @@ export function PlatformFilter({
     <Select
       onValueChange={onPlatformSelect}
       value={params.get("platform") ?? ""}
+      disabled={pending}
     >
       <SelectTrigger className="gap-1 md:max-w-[260px]" aria-label="platforms">
         <SelectValue placeholder="Platform" />

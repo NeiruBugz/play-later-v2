@@ -3,11 +3,11 @@ import type { Game } from "@prisma/client";
 
 type CreateGameInput = {
   game: Omit<Game, "id" | "createdAt" | "updatedAt" | "userId">;
-} & { userId: string };
+};
 
 export async function createGame(payload: CreateGameInput) {
   try {
-    const { game, userId } = payload;
+    const { game } = payload;
 
     const createdGame = await prisma.game.create({
       data: {
@@ -20,11 +20,6 @@ export async function createGame(payload: CreateGameInput) {
         completionist: game.completionist,
         releaseDate: game.releaseDate,
         description: game.description,
-        User: {
-          connect: {
-            id: userId,
-          },
-        },
       },
     });
 

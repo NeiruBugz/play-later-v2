@@ -11,6 +11,7 @@ import { z } from "zod";
 type GameWithBacklogItems = {
   game: Game;
   backlogItems: Omit<BacklogItem, "game">[];
+  totalMainStoryHours?: number;
 };
 
 const FilterParamsSchema = z.object({
@@ -130,7 +131,7 @@ export async function getBacklogs() {
 export async function getUsersBacklog({ backlogId }: { backlogId: string }) {
   try {
     console.log(backlogId);
-    const userGames = await prisma.backlogItem.findMany({
+    return await prisma.backlogItem.findMany({
       where: {
         userId: backlogId,
       },
@@ -141,8 +142,6 @@ export async function getUsersBacklog({ backlogId }: { backlogId: string }) {
         createdAt: "asc",
       },
     });
-
-    return userGames;
   } catch (e) {
     console.error("Error fetching user game collection:", e);
     return [];

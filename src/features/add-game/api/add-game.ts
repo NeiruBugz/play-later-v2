@@ -24,7 +24,7 @@ export async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
       if (existingGame) {
         savedGame = existingGame;
       } else {
-        const createdGameResponse = await createGame({ game, userId });
+        const createdGameResponse = await createGame({ game });
         if (createdGameResponse?.createdGame) {
           savedGame = createdGameResponse?.createdGame;
         } else {

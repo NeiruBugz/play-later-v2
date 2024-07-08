@@ -1,9 +1,10 @@
 "use client";
 
+import { Button } from "@/src/shared/ui";
 import { XIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { Button } from "@/src/shared/ui";
+
 
 export function ClearFilters() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export function ClearFilters() {
 
     paramsToUpdate.delete("platform");
     paramsToUpdate.delete("status");
+    console.log(paramsToUpdate.toString());
     router.replace(`/?${paramsToUpdate.toString()}`);
   }, [params, router]);
 

@@ -1,8 +1,15 @@
-import { Suspense } from "react";
+import { auth } from "@/auth";
 import { Header } from "@/src/widgets/header";
 import { WishlistedList } from "@/src/widgets/wishlisted-list";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+
 
 export default async function WishlistPage() {
+  const session = await auth();
+  if (!session) {
+    redirect("/");
+  }
   return (
     <>
       <Header />

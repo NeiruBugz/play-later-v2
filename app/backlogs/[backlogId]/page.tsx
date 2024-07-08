@@ -1,9 +1,12 @@
+import { auth } from "@/auth";
 import { getUsersBacklog } from "@/src/entities/backlog-item";
 import { getUserInfo } from "@/src/entities/user";
 import { IMAGE_API, IMAGE_SIZES } from "@/src/shared/config/image.config";
 import { BacklogStatusMapper } from "@/src/shared/lib";
 import { Header } from "@/src/widgets/header";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+
 
 export default async function UsersBacklogPage(props: {
   params: Record<string, string>;
@@ -13,6 +16,10 @@ export default async function UsersBacklogPage(props: {
     backlogId: props.params.backlogId,
   });
   const user = await getUserInfo(props.params.backlogId);
+  const session = await auth();
+  if (!session) {
+    redirect("/");
+  }
 
   return (
     <>

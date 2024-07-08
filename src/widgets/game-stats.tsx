@@ -1,6 +1,6 @@
-import { Review } from "@prisma/client";
 import { AddReviewDialog } from "@/src/features/add-review";
 import igdbApi from "@/src/shared/api/igdb";
+import { Review } from "@prisma/client";
 
 type GameStatsProps = {
   gameId: string;
@@ -31,7 +31,9 @@ export async function GameStats({
     return (
       <div className="self-center">
         <div>No Ratings from community yet</div>
-        <div>Aggregated Rating: {aggregatedRating.aggregated_rating}</div>
+        <div>
+          Aggregated Rating: {aggregatedRating.aggregated_rating?.toFixed(1)}
+        </div>
         <AddReviewDialog gameId={gameId} />
       </div>
     );
