@@ -8,7 +8,7 @@ import {
 } from "@prisma/client";
 import { z } from "zod";
 
-type GameWithBacklogItems = {
+export type GameWithBacklogItems = {
   game: Game;
   backlogItems: Omit<BacklogItem, "game">[];
   totalMainStoryHours?: number;

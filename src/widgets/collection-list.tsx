@@ -1,8 +1,7 @@
-import {
-  BacklogItemCard,
-  getUserGamesWithGroupedBacklog,
-} from "@/src/entities/backlog-item";
+import { getUserGamesWithGroupedBacklog } from "@/src/entities/backlog-item";
 import { CollectionFilters } from "@/src/widgets/collection-filters";
+import { GridView } from "@/src/widgets/grid-view";
+import { ListView } from "@/src/widgets/list-view";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -16,6 +15,8 @@ export async function CollectionList({
     status: params.status,
     search: params.search,
   });
+
+  const viewMode = params.viewMode || "grid";
 
   if (
     !collection ||
@@ -54,20 +55,12 @@ export async function CollectionList({
       <Suspense fallback={"Loading..."}>
         <CollectionFilters />
       </Suspense>
-      <ul className="flex flex-wrap justify-center gap-3 overflow-scroll pb-4 md:justify-start">
-        {collection?.map(({ game, backlogItems }) => (
-          <li key={game.id}>
-            <BacklogItemCard
-              game={{
-                id: game.id,
-                title: game.title,
-                coverImage: game.coverImage,
-              }}
-              backlogItems={backlogItems}
-            />
-          </li>
-        ))}
-      </ul>
+      {viewMode === "grid" ? (
+        <Suspense>
+          <GridView backlogItems={collection} />
+        </Suspense>
+      ) : null}
+      {viewMode === "list" ? <ListView backlogItems={collection} /> : null}
     </div>
   );
 }

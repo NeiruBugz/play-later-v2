@@ -1,11 +1,11 @@
 import { User } from "@/src/entities/user";
-import { Button } from "@/src/shared/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/src/shared/ui/dropdown-menu";
+import { AddGameLink } from "@/src/widgets/add-game-link";
 import { AppLink } from "@/src/widgets/app-link";
 import { GamepadIcon, MenuIcon } from "lucide-react";
 import Link from "next/link";
@@ -51,8 +51,9 @@ export function Header() {
           </DropdownMenu>
         </div>
         <Link href="/">
-          <h1 className="mr-4 font-bold md:text-lg xl:text-xl flex items-center">
-            <GamepadIcon className="size-6 mr-2"/>PlayLater
+          <h1 className="mr-4 flex items-center font-bold md:text-lg xl:text-xl">
+            <GamepadIcon className="mr-2 size-6" />
+            PlayLater
           </h1>
         </Link>
         <div className="hidden items-center gap-3 md:flex">
@@ -62,12 +63,7 @@ export function Header() {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <Link
-          href="/collection/add-game"
-          className="cursor-pointer hover:underline"
-        >
-          <Button>Add Game</Button>
-        </Link>
+        <AddGameLink />
         <User />
       </div>
     </header>

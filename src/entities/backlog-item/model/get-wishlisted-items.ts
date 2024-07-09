@@ -8,9 +8,9 @@ type GameWithBacklogItems = {
 };
 
 
-export async function getWishlistedItems() {
+export async function getWishlistedItems(id?: string) {
   try {
-    const userId = await getServerUserId();
+    const userId = id ?? await getServerUserId();
     const wishlisted = await prisma.backlogItem.findMany({
       where: {
         userId: userId,

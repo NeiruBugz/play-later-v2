@@ -12,14 +12,17 @@ export function ClearFilters() {
 
   const onClearFilters = useCallback(() => {
     const paramsToUpdate = new URLSearchParams(params);
-
+    const viewMode = params.get("viewMode");
     paramsToUpdate.delete("platform");
     paramsToUpdate.delete("status");
-    console.log(paramsToUpdate.toString());
+    paramsToUpdate.delete('search');
+    paramsToUpdate.set('viewMode', viewMode ?? 'grid')
     router.replace(`/?${paramsToUpdate.toString()}`);
   }, [params, router]);
 
   if (params.size === 0) return null;
+
+  if (params.get('viewMode') && params.size === 1) return null;
 
   return (
     <Button
