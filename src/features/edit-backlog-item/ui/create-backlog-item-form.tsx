@@ -1,7 +1,10 @@
 "use client";
 
 import { DeleteBacklogItem } from "@/src/features/delete-backlog-item";
-import { createBacklogItemAction, editBacklogItemAction } from "@/src/features/edit-backlog-item/api/action";
+import {
+  createBacklogItemAction,
+  editBacklogItemAction,
+} from "@/src/features/edit-backlog-item/api/action";
 import { BacklogStatusMapper, cn, playingOnPlatforms } from "@/src/shared/lib";
 import {
   Button,
@@ -104,13 +107,11 @@ export function CreateBacklogItemForm({ gameId }: { gameId: string }) {
           <Input type="date" name="completedAt" defaultValue={""} />
         </div>
       </div>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-2">
-          <Button variant="outline" type="reset">
-            Cancel
-          </Button>
-          <SubmitEdit />
-        </div>
+      <div className="flex justify-between gap-2">
+        <Button variant="outline" type="reset">
+          Cancel
+        </Button>
+        <SubmitEdit />
       </div>
     </form>
   );

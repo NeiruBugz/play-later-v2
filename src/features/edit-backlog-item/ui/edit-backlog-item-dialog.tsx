@@ -30,7 +30,7 @@ export async function EditBacklogItemDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="my-2 w-full">Edit entry</Button>
+        <Button className="my-2 w-full hidden md:block">Edit entry</Button>
       </DialogTrigger>
       <DialogContent className="max-w-fit">
         <DialogHeader>

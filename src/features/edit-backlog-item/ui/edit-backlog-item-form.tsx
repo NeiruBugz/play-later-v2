@@ -48,6 +48,7 @@ export function EditBacklogItemForm({
     message: "",
   });
   const { toast } = useToast();
+
   useEffect(() => {
     if (state.message === 'Success') {
       toast({
@@ -56,6 +57,7 @@ export function EditBacklogItemForm({
       });
     }
   }, [state.message, toast])
+
   return (
     <form className="mb-4 flex flex-col gap-3" action={formAction}>
       <HiddenInput name="id" value={entryId} />
@@ -90,7 +92,7 @@ export function EditBacklogItemForm({
         </Select>
       </div>
       <div className="flex justify-between gap-2">
-        <div className="flex w-full flex-col gap-2">
+        <div className="flex w-fit flex-col gap-2">
           <Label>Start date</Label>
           <Input
             type="date"
@@ -98,7 +100,7 @@ export function EditBacklogItemForm({
             defaultValue={parseDate(startedAt)}
           />
         </div>
-        <div className="flex w-full flex-col gap-2">
+        <div className="flex w-fit flex-col gap-2">
           <Label>Completion date</Label>
           <Input
             type="date"

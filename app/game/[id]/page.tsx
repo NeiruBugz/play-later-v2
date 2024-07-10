@@ -1,5 +1,6 @@
 import { getGame } from "@/src/entities/game";
 import { EditBacklogItemDialog } from "@/src/features/edit-backlog-item/ui/edit-backlog-item-dialog";
+import { EditBacklogItemDrawer } from "@/src/features/edit-backlog-item/ui/edit-backlog-item-drawer";
 import igdbApi from "@/src/shared/api/igdb";
 import {
   IMAGE_API,
@@ -62,7 +63,7 @@ export default async function GamePage(props: GenericPageProps) {
       </Breadcrumb>
       <section className="container w-full pb-4">
         <div className="flex flex-col gap-4 border-b pb-4 md:flex-row">
-          <div className="w-full h-full max-w-[264px]">
+          <div className="w-full h-full max-w-[264px] self-center">
             <Image
               src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.png`}
               alt={`${game.title} cover art`}
@@ -71,6 +72,7 @@ export default async function GamePage(props: GenericPageProps) {
               className="self-center rounded-md border md:self-start flex-shrink-0"
             />
             <EditBacklogItemDialog gameId={game.id} igdbId={game.igdbId} gameTitle={game.title} />
+            <EditBacklogItemDrawer gameId={game.id} igdbId={game.igdbId} gameTitle={game.title}/>
           </div>
           <div>
             <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
@@ -101,7 +103,7 @@ export default async function GamePage(props: GenericPageProps) {
               {game.description}
             </p>
             <div className="mt-4 flex gap-2">
-              <p className="w-24 font-medium">Genres: </p>
+              <p className="w-24 font-medium flex-shrink-0">Genres: </p>
               <div className="flex flex-wrap gap-2">
                 {igdbData?.genres.map((genre) => (
                   <Badge variant="outline" key={genre.id}>
@@ -111,7 +113,7 @@ export default async function GamePage(props: GenericPageProps) {
               </div>
             </div>
             <div className="mt-2 flex gap-2">
-              <p className="w-24 text-nowrap font-medium">Released on: </p>
+              <p className="w-24 text-nowrap font-medium flex-shrink-0">Released on: </p>
               <div className="flex flex-wrap gap-2">
                 {uniquePlatforms.map((date) => (
                   <Badge
