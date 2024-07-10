@@ -46,40 +46,17 @@ export function BacklogItemCard({
 
   return (
     <Link href={`/game/${game.id}`}>
-      <div className="group relative w-full max-w-[300px] cursor-pointer overflow-hidden rounded shadow-lg hover:border hover:shadow-xl">
-        <div className="absolute top-0 z-10 hidden h-[208px] w-full flex-grow flex-col items-center justify-center rounded bg-slate-400 opacity-0 transition-opacity ease-in-out group-hover:flex group-hover:opacity-95">
-          <p className="text-center text-[16px] font-bold text-white">
+      <div className="group relative w-full cursor-pointer overflow-hidden rounded border">
+        <div className="absolute top-0 z-10 hidden h-full w-full flex-grow flex-col items-center justify-center rounded bg-slate-400 opacity-0 transition-opacity ease-in-out group-hover:flex group-hover:opacity-95">
+          <p className="text-center font-medium text-white">
             {game.title}
           </p>
-          <div className="mt-1 flex flex-col gap-1">
-            {backlogItems?.map((item) =>
-              item.status && item.platform ? (
-                <div
-                  key={item.id}
-                  className="text-center text-xs font-medium text-white"
-                >
-                  <Badge className="px-0.5">
-                    {BacklogStatusMapper[item.status]}
-                  </Badge>
-                  &nbsp;|&nbsp;
-                  <Badge
-                    className={cn(
-                      "px-0.5",
-                      platformToBackgroundColor(item.platform)
-                    )}
-                  >
-                    {normalizeString(item.platform as string)}
-                  </Badge>
-                </div>
-              ) : null
-            )}
-          </div>
         </div>
         <Image
           src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.png`}
           alt={`${game.title} cover art`}
-          width={156}
-          height={220}
+          width={120}
+          height={200}
           className="object-cover"
         />
       </div>

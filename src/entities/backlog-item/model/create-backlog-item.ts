@@ -6,6 +6,8 @@ type CreateBacklogItemInput = {
     backlogStatus: string;
     acquisitionType: string;
     platform?: string;
+    startedAt?: Date;
+    completedAt?: Date;
   };
   userId: string;
   gameId: string;
@@ -23,6 +25,8 @@ export async function createBacklogItem({
         acquisitionType:
           backlogItem.acquisitionType as unknown as AcquisitionType,
         platform: backlogItem.platform,
+        startedAt: backlogItem.startedAt,
+        completedAt: backlogItem.completedAt,
         User: {
           connect: {
             id: userId,

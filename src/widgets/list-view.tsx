@@ -24,15 +24,15 @@ export function ListView({
           <table className="relative min-w-full bg-white">
             <thead className="sticky top-0 bg-white shadow-sm">
               <tr className="border-b">
-                <th className="px-4 py-2 text-start">Game Title</th>
-                <th className="px-4 py-2 text-start">Status</th>
-                <th className="px-4 py-2 text-start">Platform</th>
-                <th className="px-4 py-2 text-start">Actions</th>
+                <th className="px-4 py-1 text-start">Game Title</th>
+                <th className="px-4 py-1 text-start">Status</th>
+                <th className="px-4 py-1 text-start">Platform</th>
+                <th className="px-4 py-1 text-start">Actions</th>
               </tr>
             </thead>
             <tbody className="max-h-[600px] min-h-[600px] overflow-auto">
               {backlogItems.map(({ game, backlogItems }) => (
-                <tr key={game.id} className="border-b py-2">
+                <tr key={game.id} className="border-b py-1">
                   <td >
                     <div className="flex items-center gap-2 px-4 py-2 font-medium underline w-fit">
                     <Image
@@ -43,14 +43,14 @@ export function ListView({
                     />
                     <Link href={`/game/${game.id}`} className="text-pretty w-fit hover:text-slate-500">{game.title}</Link></div>
                   </td>
-                  <td className="border-l px-4 py-2">
+                  <td className="border-l px-4 py-1">
                     {backlogItems.map((item) => (
                       <Badge key={item.id} className="mr-1 last-of-type:mr-0">
                         {BacklogStatusMapper[item.status]}
                       </Badge>
                     ))}
                   </td>
-                  <td className="border-x px-4 py-2">
+                  <td className="border-x px-4 py-1">
                     {backlogItems.map((item) => (
                       <Badge
                         className={cn(
@@ -63,7 +63,7 @@ export function ListView({
                       </Badge>
                     ))}
                   </td>
-                  <td className="px-4 py-2 text-center">
+                  <td className="px-4 py-1 text-center">
                     <Button variant="ghost">
                       <EllipsisIcon />
                     </Button>

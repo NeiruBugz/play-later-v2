@@ -1,4 +1,7 @@
+"use client";
+
 import { deleteBacklogItem } from "@/src/entities/backlog-item";
+import { deleteBacklogItemAction } from "@/src/features/delete-backlog-item/api/action";
 import { Button } from "@/src/shared/ui";
 import {
   AlertDialog,
@@ -11,17 +14,23 @@ import {
   AlertDialogTrigger,
 } from "@/src/shared/ui/alert-dialog";
 import { TrashIcon } from "lucide-react";
+import { useFormState } from "react-dom";
 
 export function DeleteBacklogItem({
   backlogItemId,
 }: {
   backlogItemId: number;
 }) {
+  const deleteBacklogItem = deleteBacklogItemAction.bind(
+    null,
+    { message: "" },
+    backlogItemId
+  );
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="icon" className="size-4">
-          <TrashIcon className="size-3" />
+        <Button variant="destructive">
+          <TrashIcon className="mr-2 size-3" /> Delete
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -35,12 +44,7 @@ export function DeleteBacklogItem({
             className="group bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
             asChild
           >
-            <form
-              action={async () => {
-                "use server";
-                await deleteBacklogItem(backlogItemId);
-              }}
-            >
+            <form action={deleteBacklogItem}>
               <Button variant="ghost" className="group-hover:bg-transparent">
                 Delete
               </Button>

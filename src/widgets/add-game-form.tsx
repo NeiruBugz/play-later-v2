@@ -11,6 +11,7 @@ import {
   AcquisitionStatusMapper,
   BacklogStatusMapper,
   cn,
+  playingOnPlatforms,
 } from "@/src/shared/lib";
 import { SearchResponse } from "@/src/shared/types";
 import {
@@ -29,33 +30,6 @@ import { GamePicker } from "@/src/widgets/game-picker";
 import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
 import { ElementRef, useCallback, useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-
-const playingOnPlatforms = [
-  {
-    value: "playstation",
-    label: "Playstation",
-  },
-  {
-    value: "xbox",
-    label: "Xbox",
-  },
-  {
-    value: "nintendo",
-    label: "Nintendo",
-  },
-  {
-    value: "pc",
-    label: "PC",
-  },
-  {
-    value: "mac",
-    label: "Mac",
-  },
-  {
-    value: "mobile",
-    label: "Mobile devices",
-  },
-];
 
 function SubmitButton({
   onFormReset,

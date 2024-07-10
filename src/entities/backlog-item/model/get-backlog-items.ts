@@ -130,13 +130,34 @@ export async function getBacklogs() {
 
 export async function getUsersBacklog({ backlogId }: { backlogId: string }) {
   try {
-    console.log(backlogId);
     return await prisma.backlogItem.findMany({
       where: {
         userId: backlogId,
       },
       include: {
         game: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+  } catch (e) {
+    console.error("Error fetching user game collection:", e);
+    return [];
+  }
+}
+
+export async function getBacklogItems({ gameId }: { gameId: string }) {
+  try {
+    const userId = await getServerUserId();
+    if (!userId) {
+      throw new Error("No user ID found");
+    }
+  
+    return await prisma.backlogItem.findMany({
+      where: {
+        gameId: gameId,
+        userId: userId,
       },
       orderBy: {
         createdAt: "asc",

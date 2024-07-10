@@ -88,6 +88,8 @@ model BacklogItem {
   gameId          String
   game            Game              @relation("GameBacklogItems", fields: [gameId], references: [id], onDelete: Cascade)
   User            User              @relation(fields: [userId], references: [id])
+  startedAt       DateTime?
+  completedAt     DateTime?
 }
 
 model Review {

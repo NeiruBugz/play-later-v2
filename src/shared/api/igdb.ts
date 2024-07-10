@@ -1,16 +1,7 @@
 import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/src/shared/config/igdb";
-import {
-  Event,
-  FullGameInfoResponse,
-  GenresResponse,
-  RatedGameResponse,
-  RequestOptions,
-  SearchResponse,
-  TwitchTokenResponse,
-  UpcomingEventsResponse,
-  UpcomingReleaseResponse,
-} from "@/src/shared/types";
+import { Event, FullGameInfoResponse, GenresResponse, RatedGameResponse, RequestOptions, SearchResponse, TwitchTokenResponse, UpcomingEventsResponse, UpcomingReleaseResponse } from "@/src/shared/types";
+
 
 const asError = (thrown: unknown): Error => {
   if (thrown instanceof Error) return thrown;
@@ -200,12 +191,18 @@ const igdbApi = {
 
   async getGameById(
     gameId: number | null
-  ): Promise<FullGameInfoResponse[] | undefined> {
+  ): Promise<FullGameInfoResponse | undefined> {
     if (!gameId) return;
-    return this.request({
+    const response = await this.request<FullGameInfoResponse[] | undefined>({
       body: `${queries.fullGameInfo} where id = (${gameId});`,
       resource: "/games",
     });
+
+    if (response?.length) {
+      return response[0];
+    }
+
+    return undefined;
   },
 
   async getGameGenres(

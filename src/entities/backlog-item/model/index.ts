@@ -4,5 +4,6 @@ export {
   getUserGamesWithGroupedBacklog,
   getBacklogs,
   getUsersBacklog,
+  getBacklogItems,
 } from "./get-backlog-items";
 export { getWishlistedItems } from "./get-wishlisted-items";

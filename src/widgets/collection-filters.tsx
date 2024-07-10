@@ -20,7 +20,7 @@ export async function CollectionFilters() {
           <PlatformFilter platformOptions={uniquePlatforms} />
           <StatusFilter />
           <ClearFilters />
-          <ViewModeToggle />
+          {/* <ViewModeToggle /> */}
         </div>
       </div>
       <div className="flex items-center justify-between md:hidden">

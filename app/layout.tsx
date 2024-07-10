@@ -41,7 +41,7 @@ export default function RootLayout(props: {
           fontSans.variable
         )}
       >
-        <Providers>
+        <Providers attribute="class" defaultTheme="system" enableSystem>
           {props.children}
           <SendFeedbackForm />
         </Providers>
