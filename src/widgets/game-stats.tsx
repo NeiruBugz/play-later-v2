@@ -1,4 +1,3 @@
-import { AddReviewDialog } from "@/src/features/add-review";
 import igdbApi from "@/src/shared/api/igdb";
 import { Review } from "@prisma/client";
 import { StarIcon } from "lucide-react";
@@ -27,7 +26,7 @@ export async function GameStats({
 }: GameStatsProps) {
   const averageRating = calculateAverageScore(existingReviews);
   const aggregatedRating = await igdbApi.getGameRating(igdbId);
-  console.log(aggregatedRating);
+
   if (averageRating === 0) {
     return (
       <div className="md:self-center">
@@ -38,18 +37,23 @@ export async function GameStats({
         <p className="flex items-center">
           <StarIcon className="mr-2 size-4 text-slate-500" />
           <span className="font-medium">Aggregated Rating:&nbsp;</span>
-          {aggregatedRating.aggregated_rating?.toFixed(1)}
+          {aggregatedRating.aggregated_rating?.toFixed(1) ?? "N/A"}
         </p>
-        {/* <AddReviewDialog gameId={gameId} /> */}
       </div>
     );
   }
   return (
-    <div className="self-center">
-      <p className="whitespace-nowrap">
-        Average Rating: {averageRating} among {existingReviews.length}
+    <div className="md:self-center">
+      <p className="my-2 flex items-center">
+        <StarIcon className="mr-2 size-4 text-slate-500" />
+        <span className="font-medium">Average Rating:&nbsp;</span>
+        {averageRating.toFixed(1)} among {existingReviews.length} reviews
       </p>
-      {/* <AddReviewDialog gameId={gameId} /> */}
+      <p className="flex items-center">
+        <StarIcon className="mr-2 size-4 text-slate-500" />
+        <span className="font-medium">Aggregated Rating:&nbsp;</span>
+        {aggregatedRating.aggregated_rating?.toFixed(1) ?? "N/A"}
+      </p>
     </div>
   );
 }

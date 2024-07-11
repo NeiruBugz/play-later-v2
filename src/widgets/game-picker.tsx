@@ -24,7 +24,7 @@ function GamePreviewItem({ game, type }: GamePreviewItemProps) {
     return (
       <>
         <Image
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
+          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.webp`}
           width={NEXT_IMAGE_SIZES.micro.width}
           height={NEXT_IMAGE_SIZES.micro.height}
           alt={`${game.name} cover art`}
@@ -48,7 +48,7 @@ function GamePreviewItem({ game, type }: GamePreviewItemProps) {
     return (
       <div className="flex gap-4">
         <Image
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.png`}
+          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.webp`}
           width={NEXT_IMAGE_SIZES.micro.width}
           height={NEXT_IMAGE_SIZES.micro.height}
           alt={`${game.name} cover art`}

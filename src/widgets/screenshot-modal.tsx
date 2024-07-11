@@ -28,7 +28,7 @@ export function ScreenshotModal({
         <li className="w-full">
           <Image
             alt={`${gameName} screenshot`}
-            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageId}.png`}
+            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageId}.webp`}
             width={NEXT_IMAGE_SIZES["s-md"].width}
             height={NEXT_IMAGE_SIZES["s-md"].height}
             className="h-auto w-full"
@@ -42,7 +42,7 @@ export function ScreenshotModal({
         </AlertDialogHeader>
         <Image
           alt={`${gameName} screenshot`}
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageId}.png`}
+          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageId}.webp`}
           width={NEXT_IMAGE_SIZES["s-big"].width}
           height={NEXT_IMAGE_SIZES["s-big"].height}
         />

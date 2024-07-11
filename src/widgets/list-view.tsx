@@ -36,7 +36,7 @@ export function ListView({
                   <td >
                     <div className="flex items-center gap-2 px-4 py-2 font-medium underline w-fit">
                     <Image
-                      src={`${IMAGE_API}/${IMAGE_SIZES["logo"]}/${game.coverImage}.png`}
+                      src={`${IMAGE_API}/${IMAGE_SIZES["logo"]}/${game.coverImage}.webp`}
                       alt={`${game.title} cover`}
                       width={40}
                       height={40}

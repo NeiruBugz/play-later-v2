@@ -35,7 +35,7 @@ export default async function UsersBacklogPage(props: {
               className="group relative flex max-w-[160px] flex-col items-center gap-1.5 rounded border bg-background shadow"
             >
               <Image
-                src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${backlogItem.game.coverImage}.png`}
+                src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${backlogItem.game.coverImage}.webp`}
                 alt={`${backlogItem.game.title} cover art`}
                 width={160}
                 height={160}

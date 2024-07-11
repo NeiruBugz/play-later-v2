@@ -51,7 +51,7 @@ export async function BacklogList() {
                           <Image
                             alt={`${backlogItem.game.title} cover art`}
                             className="h-full w-full rounded-xl object-cover"
-                            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${backlogItem.game.coverImage}.png`}
+                            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${backlogItem.game.coverImage}.webp`}
                             width={NEXT_IMAGE_SIZES["thumb"].width}
                             height={NEXT_IMAGE_SIZES["thumb"].height}
                             style={{

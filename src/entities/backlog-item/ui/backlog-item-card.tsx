@@ -34,7 +34,7 @@ export function BacklogItemCard({
           </p>
         </div>
         <Image
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.png`}
+          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`}
           alt={`${game.title} cover art`}
           width={156}
           height={220}
@@ -53,7 +53,7 @@ export function BacklogItemCard({
           </p>
         </div>
         <Image
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.png`}
+          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`}
           alt={`${game.title} cover art`}
           width={120}
           height={200}

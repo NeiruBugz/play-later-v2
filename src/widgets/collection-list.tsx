@@ -1,5 +1,6 @@
 import { getUserGamesWithGroupedBacklog } from "@/src/entities/backlog-item";
 import { CollectionFilters } from "@/src/widgets/collection-filters";
+import { CollectionFiltersSkeleton } from "@/src/widgets/collection-filters-skeleton";
 import { GridView } from "@/src/widgets/grid-view";
 import { ListView } from "@/src/widgets/list-view";
 import Link from "next/link";
@@ -42,7 +43,7 @@ export async function CollectionList({
   if (collection.length === 0 && Object.keys(params).length !== 0) {
     return (
       <div>
-        <Suspense fallback={"Loading..."}>
+        <Suspense fallback={<CollectionFiltersSkeleton />}>
           <CollectionFilters />
         </Suspense>
         <div>No matches found</div>
@@ -52,15 +53,14 @@ export async function CollectionList({
 
   return (
     <div>
-      <Suspense fallback={"Loading..."}>
+      <Suspense fallback={<CollectionFiltersSkeleton />}>
         <CollectionFilters />
       </Suspense>
       {viewMode === "grid" ? (
-        <Suspense>
-          <GridView backlogItems={collection} />
-        </Suspense>
-      ) : null}
-      {viewMode === "list" ? <ListView backlogItems={collection} /> : null}
+        <GridView backlogItems={collection} />
+      ) : (
+        <ListView backlogItems={collection} />
+      )}
     </div>
   );
 }

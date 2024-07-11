@@ -32,6 +32,11 @@ const queries = {
   platforms: `
     fields name;
   `,
+  similarGames: `
+    fields
+      similar_games.name,
+      similar_games.cover.image_id;
+  `,
   fullGameInfo: `
     fields
       name,
@@ -203,6 +208,27 @@ const igdbApi = {
     }
 
     return undefined;
+  },
+
+  async getSimilarGames(gameId: number): Promise<{id: number, similar_games: FullGameInfoResponse['similar_games']}> {
+    const response =
+      await this.request<
+      Array<
+        { id: number; similar_games: FullGameInfoResponse["similar_games"] }
+       > | undefined
+      >({
+        body: `${queries.similarGames} where id = (${gameId});`,
+        resource: "/games",
+      });
+  
+    if (response && response?.length) {
+      return response[0];
+    }
+
+    return {
+      id: 0,
+      similar_games: []
+    };
   },
 
   async getGameGenres(

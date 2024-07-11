@@ -5,7 +5,6 @@ import {
   SearchInput,
   StatusFilter,
 } from "@/src/features/filter";
-import { ViewModeToggle } from "@/src/features/view-mode-toggle";
 import { Button } from "@/src/shared/ui";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/src/shared/ui/drawer";
 
@@ -20,7 +19,6 @@ export async function CollectionFilters() {
           <PlatformFilter platformOptions={uniquePlatforms} />
           <StatusFilter />
           <ClearFilters />
-          {/* <ViewModeToggle /> */}
         </div>
       </div>
       <div className="flex items-center justify-between md:hidden">
@@ -40,7 +38,6 @@ export async function CollectionFilters() {
             </div>
           </DrawerContent>
         </Drawer>
-
         <ClearFilters />
       </div>
     </>
