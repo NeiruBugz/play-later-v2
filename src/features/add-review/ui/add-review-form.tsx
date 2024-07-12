@@ -22,14 +22,13 @@ export function AddReviewForm({ gameId }: { gameId: string }) {
       <HiddenInput name="userId" value={session.data?.user?.id} />
       <HiddenInput name="gameId" value={gameId} />
       <HiddenInput name="rating" value={ratingValue} />
-      <div className="mb-4 flex flex-col">
+      <div className="mb-4 flex flex-col gap-2">
         <Label
           htmlFor="rating"
-          className="mb-2 text-sm font-medium text-gray-700"
         >
           Rating
         </Label>
-        <div className="flex items-center gap-2 my-2">
+        <div className="flex items-center gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
             <StarIcon
               key={value}

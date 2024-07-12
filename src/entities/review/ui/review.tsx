@@ -1,4 +1,4 @@
-import { cn } from "@/src/shared/lib";
+import { cn, normalizeString } from "@/src/shared/lib";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/shared/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/src/shared/ui/card";
 import type { Review, User } from "@prisma/client";
@@ -29,7 +29,7 @@ export function Review({ review }: { review: Review & { User: User } }) {
           <div className="grid gap-1">
             <div className="font-semibold">
               {review.User.username ?? review.User.name}&nbsp;
-              <span className="font-normal">on</span>&nbsp;{review.completedOn}
+              <span className="font-normal">on</span>&nbsp;{normalizeString(review.completedOn)}
             </div>
             <div className="flex items-center gap-0.5 text-sm">
               {Array.from({ length: 10 }, (_, i) => (
