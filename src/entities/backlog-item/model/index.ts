@@ -7,3 +7,4 @@ export {
   getBacklogItems,
 } from "./get-backlog-items";
 export { getWishlistedItems } from "./get-wishlisted-items";
+export { getUpcomingWishlistItems } from "./get-upcoming-wishlist-items";

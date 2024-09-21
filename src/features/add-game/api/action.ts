@@ -41,7 +41,6 @@ export async function createGameAction(
   });
 
   if (!parsedPayload.success) {
-    console.log(parsedPayload.error.errors);
     return { message: "Failed to save game", isError: true };
   }
 

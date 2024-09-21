@@ -17,7 +17,6 @@ export async function postFeedbackAction(
   payload: FormData
 ) {
   try {
-    console.log(payload.get("label"))
     const parsedPayload = PostFeedbackSchema.safeParse({
       feedback: payload.get("feedback"),
       label: payload.get("label"),
@@ -27,7 +26,6 @@ export async function postFeedbackAction(
 
 
     if (!parsedPayload.success) {
-      console.log(parsedPayload.error.errors)
       return { message: "Error occurred while posting feedback" };
     }
 

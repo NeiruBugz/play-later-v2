@@ -2,11 +2,10 @@ import { auth } from "@/auth";
 import { getUsersBacklog } from "@/src/entities/backlog-item";
 import { getUserInfo } from "@/src/entities/user";
 import { IMAGE_API, IMAGE_SIZES } from "@/src/shared/config/image.config";
-import { BacklogStatusMapper } from "@/src/shared/lib";
+import { BacklogStatusMapper, normalizeString } from "@/src/shared/lib";
 import { Header } from "@/src/widgets/header";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-
 
 export default async function UsersBacklogPage(props: {
   params: Record<string, string>;
@@ -47,7 +46,7 @@ export default async function UsersBacklogPage(props: {
                 </span>
                 <span className="text-center text-sm font-medium text-foreground text-white">
                   {BacklogStatusMapper[backlogItem.status]} |{" "}
-                  {backlogItem.platform}
+                  {normalizeString(backlogItem.platform)}
                 </span>
               </div>
             </li>

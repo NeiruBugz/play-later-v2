@@ -45,6 +45,9 @@ const User = memo(function User() {
       <DropdownMenuContent>
         <ThemeToggle />
         <DropdownMenuItem>
+          <Link href={`/user/stats`}>Stats</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
           <Link href={`/user/${session.data.user.id}`}>Settings</Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

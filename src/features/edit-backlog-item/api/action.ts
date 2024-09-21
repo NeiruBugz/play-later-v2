@@ -30,13 +30,11 @@ export async function editBacklogItemAction(
   });
 
   if (!parsedPayload.success) {
-    console.log(parsedPayload.error.errors);
     return {
       message: "Invalid payload",
     };
   }
 
-  console.log(parsedPayload.data);
   try {
     await updateBacklogItem(parsedPayload.data);
     return {
@@ -77,7 +75,6 @@ export async function createBacklogItemAction(
   });
 
   if (!parsedPayload.success) {
-    console.log(parsedPayload.error.errors);
     return {
       message: "Invalid payload",
     };

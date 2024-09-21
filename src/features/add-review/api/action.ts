@@ -25,7 +25,6 @@ export async function createReviewAction(
   });
 
   if (!parsedInput.success) {
-    console.log(parsedInput.error.errors);
     return { message: "Invalid input", type: "error" };
   }
 
