@@ -1,11 +1,11 @@
 "use client";
 
-import { User } from "@prisma/client";
-import { useFormState, useFormStatus } from "react-dom";
 import { updateUsernameAction } from "@/src/features/edit-user";
 import { Button, Input } from "@/src/shared/ui";
 import { HiddenInput } from "@/src/shared/ui/hidden-input";
 import { Label } from "@/src/shared/ui/label";
+import { User } from "@prisma/client";
+import { useFormState, useFormStatus } from "react-dom";
 
 function SubmitButton() {
   const status = useFormStatus();
@@ -22,9 +22,9 @@ export function EditUserForm({ userInfo }: { userInfo: User }) {
 
   return (
     <div>
-      <h1 className="my-2 font-bold md:text-xl xl:text-2xl">
+      <h2 className="my-2 font-bold md:text-xl xl:text-2xl">
         Edit User settings
-      </h1>
+      </h2>
       <form className="flex flex-col gap-3" action={action}>
         <HiddenInput name="userId" value={userInfo.id} />
         {userInfo.name ? (

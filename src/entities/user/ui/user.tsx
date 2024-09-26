@@ -50,6 +50,9 @@ const User = memo(function User() {
         <DropdownMenuItem>
           <Link href={`/user/${session.data.user.id}`}>Settings</Link>
         </DropdownMenuItem>
+        <DropdownMenuItem>
+          Import games from Steam
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
