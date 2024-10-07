@@ -22,7 +22,7 @@ export default async function UserPage({ params }: GenericPageProps) {
           <Button className="my-2 w-fit">
             <Link href="/import/steam">Import Steam games</Link>
           </Button>
-          <Button className="my-2 w-fit">Import Xbox games</Button>
+          <Button className="my-2 w-fit" disabled>Import Xbox games</Button>
           <Button className="my-2 w-fit" disabled>
             Import PlayStation games
           </Button>

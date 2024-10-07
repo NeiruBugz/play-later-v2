@@ -64,7 +64,9 @@ export async function getUserGamesWithGroupedBacklog(
         game: true,
       },
       orderBy: {
-        createdAt: "asc",
+        game: {
+          title: "asc",
+        },
       },
     });
 
@@ -153,7 +155,7 @@ export async function getBacklogItems({ gameId }: { gameId: string }) {
     if (!userId) {
       throw new Error("No user ID found");
     }
-  
+
     return await prisma.backlogItem.findMany({
       where: {
         gameId: gameId,

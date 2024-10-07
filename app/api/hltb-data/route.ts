@@ -1,7 +1,7 @@
 import { HowLongToBeatService } from "howlongtobeat";
 import { NextResponse } from "next/server";
 
-async function fetchHowLongToBeatData(gameTitle: string) {
+export async function fetchHowLongToBeatData(gameTitle: string) {
   if (gameTitle.length === 0) {
     return undefined;
   }
@@ -9,6 +9,7 @@ async function fetchHowLongToBeatData(gameTitle: string) {
   try {
     const htlbService = new HowLongToBeatService();
     const data = await htlbService.search(gameTitle);
+    
     if (!data) {
       return undefined;
     }

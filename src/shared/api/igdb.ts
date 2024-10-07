@@ -1,16 +1,7 @@
 import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/src/shared/config/igdb";
-import {
-  Event,
-  FullGameInfoResponse,
-  GenresResponse,
-  RatedGameResponse,
-  RequestOptions,
-  SearchResponse,
-  TwitchTokenResponse,
-  UpcomingEventsResponse,
-  UpcomingReleaseResponse,
-} from "@/src/shared/types";
+import { Event, FullGameInfoResponse, GenresResponse, RatedGameResponse, RequestOptions, SearchResponse, TwitchTokenResponse, UpcomingEventsResponse, UpcomingReleaseResponse } from "@/src/shared/types";
+
 
 const asError = (thrown: unknown): Error => {
   if (thrown instanceof Error) return thrown;
@@ -219,16 +210,22 @@ const igdbApi = {
     return undefined;
   },
 
-  async getSimilarGames(gameId: number): Promise<{id: number, similar_games: FullGameInfoResponse['similar_games']}> {
-    const response =
-      await this.request<
-      Array<
-        { id: number; similar_games: FullGameInfoResponse["similar_games"] }
-       > | undefined
-      >({
-        body: `${queries.similarGames} where id = (${gameId});`,
-        resource: "/games",
-      });
+  async getSimilarGames(
+    gameId: number
+  ): Promise<{
+    id: number;
+    similar_games: FullGameInfoResponse["similar_games"];
+  }> {
+    const response = await this.request<
+      | Array<{
+          id: number;
+          similar_games: FullGameInfoResponse["similar_games"];
+        }>
+      | undefined
+    >({
+      body: `${queries.similarGames} where id = (${gameId});`,
+      resource: "/games",
+    });
 
     if (response && response?.length) {
       return response[0];
@@ -236,7 +233,7 @@ const igdbApi = {
 
     return {
       id: 0,
-      similar_games: []
+      similar_games: [],
     };
   },
 
@@ -278,8 +275,11 @@ const igdbApi = {
     ...fields
   }: {
     name: null | string;
+    fields?: Record<string, string>
   }): Promise<SearchResponse[] | undefined> {
     if (!name) return;
+
+    console.log("IGDB API::Search for: ", { name });
 
     const filters = Object.entries(fields)
       .map(([key, value]) => ` & ${key} = ${value}`)
