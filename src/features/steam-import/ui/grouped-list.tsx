@@ -1,5 +1,6 @@
 "use client";
 
+import { addGameToCollection } from "@/src/features/steam-import/api";
 import { SteamAppInfo } from "@/src/shared/types";
 import { Button, Input } from "@/src/shared/ui";
 import {
@@ -34,11 +35,25 @@ const GroupedSteamGameList: React.FC<GroupedSteamGameListProps> = ({
     Omit<IgnoredImportedGames, "id" | "userId">[]
   >([]);
   const [gamesToSave, setGamesToSave] = useState<SteamAppInfo[]>([]);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState<number>(0);
+  const [addedGames, setAddedGames] = useState<
+    Array<SteamAppInfo & { status: "success" | "error" }>
+  >([]);
 
   const onAddAllClick = useCallback(async () => {
-    // Implement the logic to add all games
-  }, []);
+    for (const steamGame of games) {
+      try {
+        const result = await addGameToCollection(steamGame);
+        setAddedGames((prevGames) => [
+          ...prevGames,
+          { ...steamGame, status: result.error ? "error" : "success" },
+        ]);
+        setProgress((prev) => prev + 1);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, [games]);
 
   const onIgnoreClick = useCallback((steamGame: SteamAppInfo) => {
     setIgnoredGames((prev) => [...prev, { name: steamGame.name }]);
@@ -113,20 +128,32 @@ const GroupedSteamGameList: React.FC<GroupedSteamGameListProps> = ({
               isMarkedForSave={gamesToSave.some(
                 (gameForSave) => gameForSave.name === game.name
               )}
+              isAdded={addedGames.some(
+                (steamGame) => steamGame.appid === game.appid
+              )}
             />
           ))}
         </div>
       </div>
-      <BatchSaveProgress progress={progress} />
+      <BatchSaveProgress
+        progress={progress}
+        gamesCount={filteredAndSortedGames.length}
+      />
     </>
   );
 };
 
-const BatchSaveProgress: React.FC<{ progress: number }> = ({ progress }) => (
-  <div className="fixed bottom-20 right-4 z-[100] w-[300px] overflow-y-auto rounded border p-4 shadow-md">
-    <h3 className="mb-2 text-lg font-semibold">Batch Save Progress</h3>
-    <p className="mt-2 text-sm">{Math.round(progress)}% completed</p>
-  </div>
-);
+const BatchSaveProgress: React.FC<{
+  progress: number;
+  gamesCount: number;
+}> = ({ progress, gamesCount }) =>
+  progress ? (
+    <div className="fixed bottom-20 right-4 z-[100] w-[300px] overflow-y-auto rounded border p-4 shadow-md">
+      <h3 className="mb-2 text-lg font-semibold">Batch Save Progress</h3>
+      <p className="mt-2 text-sm">
+        {progress}/{gamesCount}
+      </p>
+    </div>
+  ) : null;
 
 export { GroupedSteamGameList };

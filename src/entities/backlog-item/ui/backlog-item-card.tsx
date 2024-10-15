@@ -1,5 +1,5 @@
 import { IMAGE_API, IMAGE_SIZES } from "@/src/shared/config/image.config";
-import { BacklogItem } from "@prisma/client";
+import type { BacklogItem } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 

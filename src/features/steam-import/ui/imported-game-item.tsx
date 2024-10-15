@@ -12,6 +12,7 @@ type ImportedGameItemProps = {
   markGameForSave: (game: SteamAppInfo) => void;
   isIgnored: boolean;
   isMarkedForSave: boolean;
+  isAdded: boolean;
 };
 
 function ImportedGameItem({
@@ -20,7 +21,12 @@ function ImportedGameItem({
   markGameForSave,
   isIgnored,
   isMarkedForSave,
+  isAdded,
 }: ImportedGameItemProps) {
+  if (isAdded) {
+    return null;
+  }
+
   return (
     <div
       key={game.appid}

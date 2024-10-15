@@ -6,48 +6,57 @@ import { saveGameAndAddToBacklog } from "@/src/features/add-game/api/add-game";
 import igdbApi from "@/src/shared/api/igdb";
 import { SteamAppInfo } from "@/src/shared/types";
 import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import Fuse from "fuse.js";
+
+const fuseOptions = {
+  keys: ["name", "platforms.name"],
+  threshold: 0.3,
+};
 
 function removeSpecialChars(input: string): string {
-  const specialCharsRegex =
-    /[\u2122\u00A9\u00AE\u0024\u20AC\u00A3\u00A5\u2022\u2026]/g;
-
-  return input.replace(specialCharsRegex, "");
+  const specialCharsRegex = /[^\w\s]/g;
+  return input.replace(specialCharsRegex, "").trim().toLowerCase();
 }
 
 export async function addGameToCollection(game: SteamAppInfo) {
   try {
     const userId = await getServerUserId();
 
-    const returnValue = {
-      igdb: "",
-      htlb: "",
-    };
-
     if (!userId) {
       throw new Error("No user found");
     }
 
     const { name, appid } = game;
-
-    const sanitizedName = removeSpecialChars(name).toLowerCase();
+    const sanitizedName = removeSpecialChars(name);
 
     const gameDataFromIGDB = await igdbApi.search({
       name: sanitizedName,
     });
 
     if (!gameDataFromIGDB?.length) {
-      throw new Error("Games not found");
+      throw new Error(`No games found in IGDB for ${sanitizedName}`);
     }
 
-    const correctGame = gameDataFromIGDB
-      .sort((a, b) => a.name.length - b.name.length)
-      .find((gameData) => gameData.name.toLowerCase() === sanitizedName);
+    console.log({ gameDataFromIGDB, name });
+
+    const fuse = new Fuse(gameDataFromIGDB, fuseOptions);
+    const result = fuse.search(sanitizedName);
+
+    if (!result.length) {
+      throw new Error(`No matching game found for ${sanitizedName}`);
+    }
+
+    console.log({ result: JSON.stringify(result) });
+
+    const correctGame = result.find(({ item }) =>
+      item.platforms.some((platform) =>
+        ["pc", "pc (microsoft windows)"].includes(platform.name.toLowerCase())
+      )
+    )?.item;
 
     if (!correctGame) {
-      throw new Error("Game not found");
+      throw new Error(`No correct game found for PC platform`);
     }
-
-    returnValue.igdb = "fetch success";
 
     const payload = {
       game: {
@@ -68,15 +77,22 @@ export async function addGameToCollection(game: SteamAppInfo) {
         platform: "pc",
         backlogStatus: (game.playtime_forever === 0
           ? "TO_PLAY"
-          : "PLAYED") as unknown as BacklogItemStatus,
-        acquisitionType: "DIGITAL" as unknown as AcquisitionType,
+          : "PLAYED") as BacklogItemStatus,
+        acquisitionType: "DIGITAL" as AcquisitionType,
       },
     } satisfies AddGameToBacklogInput;
 
     await saveGameAndAddToBacklog(payload);
 
-    return returnValue;
+    return {
+      igdb: "fetch success",
+      htlb: "",
+    };
   } catch (error) {
-    console.error(error);
+    console.error(
+      `Error adding game to collection: ${(error as Error).message}`
+    );
+    // Возвращаем ошибку, которую можно обработать в UI
+    return { error: (error as Error).message };
   }
 }

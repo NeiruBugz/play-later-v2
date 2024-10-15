@@ -101,19 +101,21 @@ function ImportDialog({
   });
 
   return (
-    <div className="my-3">
-      <form action={action} className="mb-4 flex items-center gap-2">
-        <Input
-          placeholder="Enter Steam profile URL"
-          name="steamProfileUrl"
-          disabled={state.gameCount !== 0}
-          type="text"
-        />
-        <FetchSteamProfileButton isDisabled={state.gameCount !== 0} />
-      </form>
-      <GameInfo gameCount={state.gameCount} />
-      <GameTabs gameGroups={gameGroups} gameCount={state.gameCount} />
-    </div>
+    <>
+      <div className="my-3">
+        <form action={action} className="mb-4 flex items-center gap-2">
+          <Input
+            placeholder="Enter Steam profile URL"
+            name="steamProfileUrl"
+            disabled={state.gameCount !== 0}
+            type="text"
+          />
+          <FetchSteamProfileButton isDisabled={state.gameCount !== 0} />
+        </form>
+        <GameInfo gameCount={state.gameCount} />
+        <GameTabs gameGroups={gameGroups} gameCount={state.gameCount} />
+      </div>
+    </>
   );
 }
 

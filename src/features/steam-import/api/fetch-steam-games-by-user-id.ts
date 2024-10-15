@@ -2,7 +2,6 @@ import { resolveVanityUrl } from "@/src/features/steam-import/api/resolve-vanity
 import { steamUrlBuilder } from "@/src/features/steam-import/lib";
 import { SteamAppInfo } from "@/src/shared/types";
 
-
 type SteamUserGamesResponse = {
   response: {
     game_count: number;
@@ -30,8 +29,7 @@ async function fetchSteamGamesByUserId({
     }
     const steamUrl = steamUrlBuilder(steam64Id.toString());
     const request = await fetch(steamUrl);
-    const response: SteamUserGamesResponse = await request.json();
-    return response;
+    return await request.json();
   } catch (error) {
     console.error(error);
     return {

@@ -11,10 +11,13 @@ const IGNORED_KEYWORDS = [
 ] as const;
 
 function cleanGameName(name: string): string {
-  let cleanName = name;
+  let cleanName = name.toLowerCase();
 
   IGNORED_KEYWORDS.forEach((keyword) => {
-    cleanName = cleanName.replace(new RegExp(` - ${keyword}`, "gi"), "");
+    cleanName = cleanName.replace(
+      new RegExp(` - ${keyword.toLowerCase()}`, "gi"),
+      ""
+    );
   });
 
   cleanName = cleanName.replace(/\(\d{4}\)/, "");

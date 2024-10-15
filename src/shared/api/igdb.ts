@@ -1,7 +1,16 @@
 import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/src/shared/config/igdb";
-import { Event, FullGameInfoResponse, GenresResponse, RatedGameResponse, RequestOptions, SearchResponse, TwitchTokenResponse, UpcomingEventsResponse, UpcomingReleaseResponse } from "@/src/shared/types";
-
+import {
+  Event,
+  FullGameInfoResponse,
+  GenresResponse,
+  RatedGameResponse,
+  RequestOptions,
+  SearchResponse,
+  TwitchTokenResponse,
+  UpcomingEventsResponse,
+  UpcomingReleaseResponse,
+} from "@/src/shared/types";
 
 const asError = (thrown: unknown): Error => {
   if (thrown instanceof Error) return thrown;
@@ -96,6 +105,7 @@ const queries = {
       platforms.name,
       release_dates.human,
       first_release_date,
+      category,
       cover.image_id;
     where
       cover.image_id != null
@@ -210,9 +220,7 @@ const igdbApi = {
     return undefined;
   },
 
-  async getSimilarGames(
-    gameId: number
-  ): Promise<{
+  async getSimilarGames(gameId: number): Promise<{
     id: number;
     similar_games: FullGameInfoResponse["similar_games"];
   }> {
@@ -275,7 +283,7 @@ const igdbApi = {
     ...fields
   }: {
     name: null | string;
-    fields?: Record<string, string>
+    fields?: Record<string, string>;
   }): Promise<SearchResponse[] | undefined> {
     if (!name) return;
 

@@ -7,7 +7,7 @@ export function GridView({
   backlogItems: GameWithBacklogItems[];
 }) {
   return (
-    <ul className="flex flex-wrap justify-center gap-3 overflow-scroll pb-4 md:justify-start">
+    <ul className="my-4 grid h-fit grid-cols-[repeat(auto-fit,_minmax(100px,_1fr))] justify-between gap-4 overflow-auto">
       {backlogItems.map(({ game, backlogItems }) => (
         <li key={game.id}>
           <BacklogItemCard
