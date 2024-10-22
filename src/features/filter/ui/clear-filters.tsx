@@ -14,9 +14,9 @@ export function ClearFilters() {
     const viewMode = params.get("viewMode");
     const page = params.get("page");
     paramsToUpdate.delete("platform");
-    paramsToUpdate.delete("status");
     paramsToUpdate.delete("search");
     paramsToUpdate.delete("page");
+    paramsToUpdate.set("status", "PLAYING");
     if (page) {
       paramsToUpdate.set("page", page);
     }
