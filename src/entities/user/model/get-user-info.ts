@@ -1,7 +1,7 @@
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/shared/api";
 
-export async function getUserInfo(userId: string) {
+export async function getUserInfo(userId?: string) {
   try {
     const serverUserId = await getServerUserId();
     const user = await prisma.user.findUnique({
