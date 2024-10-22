@@ -17,8 +17,6 @@ export default async function SteamImportPage() {
     userInfo,
   ]);
 
-  console.log(userData);
-
   return (
     <>
       <Header />

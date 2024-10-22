@@ -97,7 +97,7 @@ function ImportDialog({
 }: {
   existingGames: GameWithBacklogItems[];
   ignoredGames: IgnoredImportedGames[];
-  userData: User;
+  userData: User | undefined;
 }) {
   const [state, action] = useFormState(fetchSteamProfile, {
     message: "",
@@ -159,7 +159,7 @@ function ImportDialog({
             placeholder="Enter Steam profile URL"
             name="steamProfileUrl"
             disabled={state.gameCount !== 0}
-            defaultValue={userData.steamProfileURL ?? ""}
+            defaultValue={userData?.steamProfileURL ?? ""}
             type="text"
           />
           <FetchSteamProfileButton isDisabled={state.gameCount !== 0} />

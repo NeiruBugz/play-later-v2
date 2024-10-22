@@ -15,8 +15,8 @@ import Image from "next/image";
 import { minToHours } from "../lib";
 
 type ImportedGameItemProps = {
-  game: SteamAppInfo & { status: BacklogItemStatus };
-  onGameStatusChange: (appId: number, status: string) => void;
+  game: SteamAppInfo & { status?: BacklogItemStatus };
+  onGameStatusChange?: (appId: number, status: string) => void;
   onIgnoreClick?: (game: SteamAppInfo) => void;
   markGameForSave?: (game: SteamAppInfo) => void;
   isIgnored?: boolean;
@@ -71,7 +71,7 @@ function ImportedGameItem({
       <div className="my-3 flex justify-between gap-2">
         <Select
           value={game.status}
-          onValueChange={(value) => onGameStatusChange(game.appid, value)}
+          onValueChange={(value) => onGameStatusChange?.(game.appid, value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status"></SelectValue>
