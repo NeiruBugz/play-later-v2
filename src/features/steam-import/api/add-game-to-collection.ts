@@ -37,7 +37,6 @@ export async function addGameToCollection(game: SteamAppInfo) {
       throw new Error(`No games found in IGDB for ${sanitizedName}`);
     }
 
-    console.log({ gameDataFromIGDB, name });
 
     const fuse = new Fuse(gameDataFromIGDB, fuseOptions);
     const result = fuse.search(sanitizedName);
@@ -45,8 +44,6 @@ export async function addGameToCollection(game: SteamAppInfo) {
     if (!result.length) {
       throw new Error(`No matching game found for ${sanitizedName}`);
     }
-
-    console.log({ result: JSON.stringify(result) });
 
     const correctGame = result.find(({ item }) =>
       item.platforms.some((platform) =>

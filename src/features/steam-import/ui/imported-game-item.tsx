@@ -1,23 +1,33 @@
 "use client";
 
-import { cn } from "@/src/shared/lib";
+import { BacklogStatusMapper, cn } from "@/src/shared/lib";
 import { SteamAppInfo } from "@/src/shared/types";
-import { Button } from "@/src/shared/ui";
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/shared/ui";
+import { BacklogItemStatus } from "@prisma/client";
 import Image from "next/image";
 import { minToHours } from "../lib";
 
 type ImportedGameItemProps = {
-  game: SteamAppInfo;
-  onIgnoreClick: (game: SteamAppInfo) => void;
-  markGameForSave: (game: SteamAppInfo) => void;
-  isIgnored: boolean;
-  isMarkedForSave: boolean;
-  isAdded: boolean;
+  game: SteamAppInfo & { status: BacklogItemStatus };
+  onGameStatusChange: (appId: number, status: string) => void;
+  onIgnoreClick?: (game: SteamAppInfo) => void;
+  markGameForSave?: (game: SteamAppInfo) => void;
+  isIgnored?: boolean;
+  isMarkedForSave?: boolean;
+  isAdded?: boolean;
 };
 
 function ImportedGameItem({
   game,
   onIgnoreClick,
+  onGameStatusChange,
   markGameForSave,
   isIgnored,
   isMarkedForSave,
@@ -31,10 +41,10 @@ function ImportedGameItem({
     <div
       key={game.appid}
       className={cn(
-        "my-2 flex h-auto flex-col justify-evenly rounded border p-4 px-2",
+        "my-2 flex h-auto justify-between rounded border p-4 px-2",
         {
-          "shadow-lg text-underline border-0 font-bold": isMarkedForSave,
-          "text-muted-foreground bg-muted-background": isIgnored,
+          "text-underline border-0 font-bold shadow-lg": isMarkedForSave,
+          "bg-muted-background text-muted-foreground": isIgnored,
         }
       )}
     >
@@ -46,20 +56,40 @@ function ImportedGameItem({
           alt={`${game.name} Steam Logo`}
           src={`https://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`}
         />
-        <p className="w-full font-medium">{game.name}</p>
+        <div>
+          <p className="w-full font-medium">{game.name}</p>
+          <span
+            className={cn("hidden text-sm", {
+              inline: game.playtime_forever !== 0,
+            })}
+          >
+            Playtime: {minToHours(game.playtime_forever)} h.
+          </span>
+        </div>
       </div>
-      <span
-        className={cn("hidden text-sm", {
-          inline: game.playtime_forever !== 0,
-        })}
-      >
-        Playtime: {minToHours(game.playtime_forever)} h.
-      </span>
+
       <div className="my-3 flex justify-between gap-2">
-        <Button onClick={() => markGameForSave(game)} disabled={isIgnored}>Mark for save</Button>
+        <Select
+          value={game.status}
+          onValueChange={(value) => onGameStatusChange(game.appid, value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select status"></SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Object.values(BacklogItemStatus).map((key) => {
+              return (
+                <SelectItem value={key} key={key}>
+                  {BacklogStatusMapper[key]}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+        {/*<Button onClick={() => markGameForSave?.(game)} disabled={isIgnored}>Mark for save</Button>*/}
         <Button
           variant="destructive"
-          onClick={() => onIgnoreClick(game)}
+          onClick={() => onIgnoreClick?.(game)}
           disabled={isMarkedForSave}
         >
           Ignore

@@ -1,7 +1,7 @@
 import { GameWithBacklogItems } from "@/src/entities/backlog-item/model/get-backlog-items";
 import { mergeSteamGames } from "@/src/features/steam-import/lib/merge-steam-games";
 import { SteamAppInfo } from "@/src/shared/types";
-import { IgnoredImportedGames } from "@prisma/client";
+import { BacklogItemStatus, IgnoredImportedGames } from "@prisma/client";
 import { useMemo } from "react";
 
 function removeSpecialChars(input: string): string {
@@ -20,22 +20,19 @@ function useImportedGames({
   existingGames: GameWithBacklogItems[];
   ignoredGames: IgnoredImportedGames[];
 }) {
-  const gameGroups = useMemo(() => {
+  const processedGames: Array<SteamAppInfo & { status: BacklogItemStatus }> = useMemo(() => {
     if (!games.length) {
-      return {
-        Backlog: [],
-        Played: [],
-      };
+      return [];
     }
 
     const merged = mergeSteamGames([...games]);
-    const sortedGames = merged
+    return merged
       .sort((gameA, gameB) => gameA.name.localeCompare(gameB.name))
       .filter((steamGame) => {
         const matchedGame = existingGames.find(
           (existingGame) =>
             existingGame.game.title.toLowerCase() ===
-            removeSpecialChars(steamGame.name).toLowerCase()
+            steamGame.name.toLowerCase()
         );
 
         if (matchedGame) {
@@ -58,34 +55,19 @@ function useImportedGames({
       })
       .filter((steamGame) => {
         const lowerCasedName = steamGame.name.toLowerCase();
-        if (
-          lowerCasedName.includes("test") ||
+        return !(lowerCasedName.includes("test") ||
           lowerCasedName.includes("demo") ||
-          lowerCasedName.includes("beta")
-        ) {
-          return false;
-        }
-
-        return true;
+          lowerCasedName.includes("beta"));
+      }).sort((a, b) => b.playtime_forever - a.playtime_forever).map((game) => {
+        return {
+          ...game,
+          status: game.playtime_forever === 0 ? BacklogItemStatus.TO_PLAY as BacklogItemStatus : BacklogItemStatus.PLAYED as BacklogItemStatus,
+        };
       });
-    const played: SteamAppInfo[] = [];
-    const unPlayed: SteamAppInfo[] = [];
-
-    sortedGames.forEach((steamGame) => {
-      if (steamGame.playtime_forever === 0) {
-        unPlayed.push(steamGame);
-      } else {
-        played.push(steamGame);
-      }
-    });
-
-    return {
-      Backlog: unPlayed,
-      Played: played,
-    };
   }, [existingGames, games, ignoredGames]);
 
-  return { gameGroups };
+
+  return { processedGames };
 }
 
 export { useImportedGames };

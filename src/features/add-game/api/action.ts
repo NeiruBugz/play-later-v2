@@ -40,8 +40,6 @@ export async function createGameAction(
     platform: payload.get("platform"),
   });
 
-  console.log(parsedPayload.data?.platform);
-
   if (!parsedPayload.success) {
     return { message: "Failed to save game", isError: true };
   }

@@ -148,7 +148,7 @@ const BatchSaveProgress: React.FC<{
   gamesCount: number;
 }> = ({ progress, gamesCount }) =>
   progress ? (
-    <div className="fixed bottom-20 right-4 z-[100] w-[300px] overflow-y-auto rounded border p-4 shadow-md">
+    <div className="fixed bottom-20 right-4 z-[100] w-[300px] overflow-y-auto rounded border p-4 shadow-md bg-background">
       <h3 className="mb-2 text-lg font-semibold">Batch Save Progress</h3>
       <p className="mt-2 text-sm">
         {progress}/{gamesCount}

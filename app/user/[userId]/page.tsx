@@ -16,13 +16,15 @@ export default async function UserPage({ params }: GenericPageProps) {
   return (
     <>
       <Header />
-      <div className="container mx-auto">
+      <div className="container mx-auto pt-[60px]">
         <h2 className="my-2 font-bold md:text-xl xl:text-2xl">Games import</h2>
         <div className="flex flex-wrap gap-2">
           <Button className="my-2 w-fit">
             <Link href="/import/steam">Import Steam games</Link>
           </Button>
-          <Button className="my-2 w-fit" disabled>Import Xbox games</Button>
+          <Button className="my-2 w-fit" disabled>
+            Import Xbox games
+          </Button>
           <Button className="my-2 w-fit" disabled>
             Import PlayStation games
           </Button>

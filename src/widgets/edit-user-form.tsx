@@ -43,6 +43,10 @@ export function EditUserForm({ userInfo }: { userInfo: User }) {
           <Label>Username</Label>
           <Input name="username" defaultValue={userInfo.username ?? ""} />
         </div>
+        <div className="flex flex-col gap-2">
+          <Label>Steam Profile URL</Label>
+          <Input name="steamProfileURL" defaultValue={userInfo.steamProfileURL ?? ""} />
+        </div>
         <SubmitButton />
       </form>
     </div>

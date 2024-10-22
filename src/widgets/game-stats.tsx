@@ -37,7 +37,7 @@ export async function GameStats({
         <p className="flex items-center">
           <StarIcon className="mr-2 size-4 text-slate-500" />
           <span className="font-medium">Aggregated Rating:&nbsp;</span>
-          {aggregatedRating.aggregated_rating?.toFixed(1) ?? "N/A"}
+          {aggregatedRating?.aggregated_rating?.toFixed(1) ?? "N/A"}
         </p>
       </div>
     );

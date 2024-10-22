@@ -2,7 +2,6 @@ import { getUserGamesWithGroupedBacklog } from "@/src/entities/backlog-item";
 import { CollectionFilters } from "@/src/widgets/collection-filters";
 import { CollectionFiltersSkeleton } from "@/src/widgets/collection-filters-skeleton";
 import { GridView } from "@/src/widgets/grid-view";
-import { ListView } from "@/src/widgets/list-view";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -11,13 +10,12 @@ export async function CollectionList({
 }: {
   params: Record<string, string>;
 }) {
-  const collection = await getUserGamesWithGroupedBacklog({
+  const { collection, count } = await getUserGamesWithGroupedBacklog({
     platform: params.platform,
     status: params.status,
     search: params.search,
+    page: Number(params.page) || 1,
   });
-
-  const viewMode = params.viewMode || "grid";
 
   if (
     !collection ||
@@ -44,7 +42,7 @@ export async function CollectionList({
     return (
       <div>
         <Suspense fallback={<CollectionFiltersSkeleton />}>
-          <CollectionFilters />
+          <CollectionFilters count={count} />
         </Suspense>
         <div>No matches found</div>
       </div>
@@ -54,13 +52,9 @@ export async function CollectionList({
   return (
     <div>
       <Suspense fallback={<CollectionFiltersSkeleton />}>
-        <CollectionFilters />
+        <CollectionFilters count={count} />
       </Suspense>
-      {viewMode === "grid" ? (
-        <GridView backlogItems={collection} />
-      ) : (
-        <ListView backlogItems={collection} />
-      )}
+      <GridView backlogItems={collection} />
     </div>
   );
 }

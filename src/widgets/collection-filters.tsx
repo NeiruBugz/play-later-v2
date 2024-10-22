@@ -5,21 +5,23 @@ import {
   SearchInput,
   StatusFilter,
 } from "@/src/features/filter";
+import { Pagination } from "@/src/features/filter/ui/pagination";
 import { Button } from "@/src/shared/ui";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/src/shared/ui/drawer";
 
-export async function CollectionFilters() {
+export async function CollectionFilters({ count }: { count: number }) {
   const uniquePlatforms = await getUserUniquePlatforms();
 
   return (
     <>
-      <div className="mb-3 hidden flex-wrap items-center justify-center md:flex md:flex-nowrap md:justify-between">
+      <div className="mb-3 flex w-full flex-wrap items-center justify-center md:flex-nowrap md:justify-between">
+        <StatusFilter />
+        <Pagination totalCount={count} />
+      </div>
+      <div className="my-4 hidden flex-wrap gap-2 md:flex md:flex-nowrap">
+        <PlatformFilter platformOptions={uniquePlatforms} />
         <SearchInput />
-        <div className="my-4 flex flex-wrap justify-center gap-2 md:flex-nowrap">
-          <PlatformFilter platformOptions={uniquePlatforms} />
-          <StatusFilter />
-          <ClearFilters />
-        </div>
+        <ClearFilters />
       </div>
       <div className="flex items-center justify-between md:hidden">
         <Drawer>
@@ -33,7 +35,6 @@ export async function CollectionFilters() {
               <SearchInput />
               <div className="my-4 flex flex-grow justify-center gap-2 md:flex-nowrap">
                 <PlatformFilter platformOptions={uniquePlatforms} />
-                <StatusFilter />
               </div>
             </div>
           </DrawerContent>
