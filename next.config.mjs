@@ -12,10 +12,10 @@ const nextConfig = {
       },
     ],
   },
-  reactStrictMode: true,
-  experimental: {
-    reactCompiler: true,
+  images: {
+    unoptimized: true,
   },
+  reactStrictMode: true,
 };
 
 export default nextConfig;

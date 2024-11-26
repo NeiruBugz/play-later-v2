@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "Playthrough" ALTER COLUMN "finishedAt" DROP NOT NULL,
-ALTER COLUMN "updatedAt" DROP NOT NULL,
-ALTER COLUMN "deletedAt" DROP NOT NULL;

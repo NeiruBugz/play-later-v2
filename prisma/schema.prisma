@@ -9,8 +9,7 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-// ----- NextAuth Authorization Models ------
-//
+// ----- NextAuth Authorization Models ------//
 
 model Account {
   id                String  @id @default(cuid())
@@ -48,135 +47,73 @@ model VerificationToken {
 }
 
 model User {
-  id             String           @id @default(cuid())
-  name           String?
-  email          String?          @unique
-  emailVerified  DateTime?
-  image          String?
-  Game           Game[]
-  WishlistedGame WishlistedGame[]
-  username       String?
-  List           List[]
-  Account        Account[]
-  Session        Session[]
-  Playthrough    Playthrough[]
-  Friend         Friend[]
-  Review         Review[]
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?       @unique
+  emailVerified DateTime?
+  image         String?
+  username      String?
+  Account       Account[]
+  Session       Session[]
+  BacklogItem   BacklogItem[]
+  Review        Review[]
 }
 
-// ----- Application Models ------
-
-model Friend {
-  id        String   @id @default(cuid())
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@index([userId])
-}
-
-// Game model represents a game that a user has in their collection
+// ----- Application Models ------//
 model Game {
-  id              String        @id @default(cuid())
-  title           String
-  status          GameStatus?
-  purchaseType    PurchaseType?
-  rating          Int?
-  review          Review[]
-  isWishlisted    Boolean?      @default(false)
-  imageUrl        String
-  howLongToBeatId String?
-  igdbId          Int?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?
-  gameplayTime    Int?
-  ownagePlatform  String[]
-
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  listId      String?
-  List        List?         @relation(fields: [listId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  Playthrough Playthrough[]
-  reviewId    Int?
-
-  @@index([userId])
-  @@index([listId])
+  id            String        @id @default(cuid())
+  igdbId        Int           @unique
+  hltbId        String?       @unique
+  title         String
+  description   String?
+  coverImage    String?
+  releaseDate   DateTime?
+  mainStory     Int?
+  mainExtra     Int?
+  completionist Int?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  backlogItems  BacklogItem[] @relation("GameBacklogItems")
+  Review        Review[]
 }
 
-// Playthrough model represents a playthrough of a game by a user
-model Playthrough {
-  id       String @id @default(cuid())
-  label    String
-  platform String
-
-  gameId String
-  userId String
-
-  startedAt  DateTime
-  finishedAt DateTime?
-
-  createdAt DateTime
-  updatedAt DateTime?
-  deletedAt DateTime?
-
-  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-}
-
-// WishlistedGame model represents a game that a user has wishlisted
-model WishlistedGame {
-  id              String    @id @default(cuid())
-  title           String
+model BacklogItem {
+  id              Int               @id @default(autoincrement())
+  status          BacklogItemStatus @default(TO_PLAY)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  platform        String?
   userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  imageUrl        String
-  howLongToBeatId String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
-
-  @@index([userId])
-}
-
-// List model represents a list of games that a user has
-model List {
-  id        String    @id @default(cuid())
-  name      String
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  games     Game[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@index([userId])
+  acquisitionType AcquisitionType   @default(DIGITAL)
+  gameId          String
+  game            Game              @relation("GameBacklogItems", fields: [gameId], references: [id], onDelete: Cascade)
+  User            User              @relation(fields: [userId], references: [id])
+  startedAt       DateTime?
+  completedAt     DateTime?
 }
 
 model Review {
-  id        Int       @id @unique @default(autoincrement())
-  name      String?
-  content   String
-  author    User      @relation(fields: [userId], references: [id])
-  userId    String
-  game      Game      @relation(fields: [gameId], references: [id])
-  createdAt DateTime
-  deletedAt DateTime?
-  gameId    String
+  id          Int      @id @default(autoincrement())
+  rating      Int      @default(0) // Rating from 0 to 10
+  content     String? // Optional review text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  completedOn String?
+  userId      String
+  gameId      String
+  User        User     @relation(fields: [userId], references: [id])
+  Game        Game     @relation(fields: [gameId], references: [id])
 }
 
-enum GameStatus {
-  BACKLOG
-  INPROGRESS
+enum BacklogItemStatus {
+  TO_PLAY
+  PLAYED
+  PLAYING
   COMPLETED
-  ABANDONED
-  FULL_COMPLETION
-  SHELVED
+  WISHLIST
 }
 
-enum PurchaseType {
+enum AcquisitionType {
   PHYSICAL
   DIGITAL
   SUBSCRIPTION

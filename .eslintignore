@@ -3,6 +3,5 @@ dist/*
 public
 node_modules
 *.esm.js
-tailwind.config.js
-vitest.config.ts
+tailwind.config.ts
 postcss.config.js

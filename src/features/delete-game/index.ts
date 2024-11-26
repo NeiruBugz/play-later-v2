@@ -1,0 +1,1 @@
+export { deleteGameAction } from './api'
