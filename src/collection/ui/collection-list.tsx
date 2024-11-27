@@ -1,9 +1,9 @@
-import { getUserGamesWithGroupedBacklog } from "@/src/entities/backlog-item";
-import { CollectionFilters } from "@/src/widgets/collection-filters";
-import { CollectionFiltersSkeleton } from "@/src/widgets/collection-filters-skeleton";
+import { getUserGamesWithGroupedBacklog } from "@/src/collection/actions";
 import { GridView } from "@/src/widgets/grid-view";
 import Link from "next/link";
 import { Suspense } from "react";
+import { CollectionFilters } from "./collection-filters";
+import { CollectionFiltersSkeleton } from "./collection-filters-skeleton";
 
 export async function CollectionList({
   params,
@@ -25,14 +25,14 @@ export async function CollectionList({
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-3xl font-bold">Your collection is empty</h1>
         <p className="text-gray-500">
-          Start{" "}
+          Start&nbsp;
           <Link
             href="/collection/add-game"
             className="hover:font-bolder cursor-pointer font-bold underline"
           >
             adding
-          </Link>{" "}
-          games to your collection
+          </Link>
+          &nbsp; games to your collection
         </p>
       </div>
     );
