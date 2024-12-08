@@ -21,6 +21,7 @@ export const env = createEnv({
     POSTGRES_URL_NO_SSL: process.env.POSTGRES_URL_NO_SSL,
     POSTGRES_URL_NON_POOLING: process.env.POSTGRES_URL_NON_POOLING,
     POSTGRES_USER: process.env.POSTGRES_USER,
+    STEAM_API_KEY: process.env.STEAM_API_KEY,
   },
   server: {
     AUTH_GOOGLE_ID: z.string(),
@@ -40,5 +41,6 @@ export const env = createEnv({
     POSTGRES_URL_NO_SSL: z.string().url(),
     POSTGRES_URL_NON_POOLING: z.string().url(),
     POSTGRES_USER: z.string(),
+    STEAM_API_KEY: z.string(),
   },
 });

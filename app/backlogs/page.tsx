@@ -7,12 +7,12 @@ import { Suspense } from "react";
 export default async function BacklogsPage() {
   const session = await auth();
   if (!session) {
-    redirect('/')
+    redirect("/");
   }
   return (
     <>
       <Header />
-      <div className="container">
+      <div className="container pt-[60px]">
         <Suspense fallback="Loading...">
           <BacklogList />
         </Suspense>

@@ -9,6 +9,7 @@ async function fetchHowLongToBeatData(gameTitle: string) {
   try {
     const htlbService = new HowLongToBeatService();
     const data = await htlbService.search(gameTitle);
+
     if (!data) {
       return undefined;
     }

@@ -13,7 +13,7 @@ import React from "react";
 
 const linksConfig = [
   {
-    href: "/collection",
+    href: "/collection?status=PLAYING&page=1",
     label: "Collection",
   },
   {
@@ -32,7 +32,7 @@ const linksConfig = [
 
 export function Header() {
   return (
-    <header className="container mx-auto flex items-center justify-between px-4 py-3 md:px-6 lg:px-8">
+    <header className="w-full mx-auto flex items-center justify-between px-4 py-3 md:px-6 lg:px-8 fixed top-0 z-20 bg-background mb-[60px]">
       <div className="flex items-center gap-3">
         <div className="block md:hidden">
           <DropdownMenu>

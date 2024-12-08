@@ -1,6 +1,7 @@
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/src/shared/api";
 import { BacklogItemStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 type UpdateBacklogItemInput = {
   id: number;
@@ -23,7 +24,8 @@ export async function updateBacklogItem(payload: UpdateBacklogItemInput) {
         startedAt: payload.startedAt,
         completedAt: payload.completedAt,
       },
-    })
+    });
+    revalidatePath("/collection");
   } catch (error) {
     console.error("Error updating backlog item:", error);
   }

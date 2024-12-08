@@ -3,7 +3,9 @@ import { prisma } from "@/src/shared/api";
 export async function updateUserName(payload: {
   id: string;
   username: string;
+  steamProfileUrl?: string;
 }) {
+  console.log(payload);
   try {
     await prisma.user.update({
       where: {
@@ -11,6 +13,7 @@ export async function updateUserName(payload: {
       },
       data: {
         username: payload.username,
+        steamProfileURL: payload.steamProfileUrl,
       },
     });
   } catch (e) {
