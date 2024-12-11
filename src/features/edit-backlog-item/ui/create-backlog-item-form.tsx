@@ -21,8 +21,8 @@ import { useToast } from "@/src/shared/ui/use-toast";
 import { BacklogItemStatus } from "@prisma/client";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useEffect, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 function parseDate(dateString?: Date | null) {
   if (!dateString) return "";
@@ -44,7 +44,7 @@ function SubmitEdit() {
 
 export function CreateBacklogItemForm({ gameId }: { gameId: string }) {
   const session = useSession();
-  const [state, formAction] = useFormState(createBacklogItemAction, {
+  const [state, formAction] = useActionState(createBacklogItemAction, {
     message: "",
   });
 

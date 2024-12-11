@@ -9,8 +9,8 @@ import { Label } from "@/src/shared/ui/label";
 import { useToast } from "@/src/shared/ui/use-toast";
 import { BacklogItemStatus } from "@prisma/client";
 import { format } from "date-fns";
-import { useEffect } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useEffect, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 
 function parseDate(dateString?: Date | null) {
@@ -44,7 +44,7 @@ export function EditBacklogItemForm({
   startedAt?: Date | null;
   completedAt?: Date | null;
 }) {
-  const [state, formAction] = useFormState(editBacklogItemAction, {
+  const [state, formAction] = useActionState(editBacklogItemAction, {
     message: "",
   });
   const { toast } = useToast();

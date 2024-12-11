@@ -4,7 +4,8 @@ import { Button, Input } from "@/src/shared/ui";
 import { HiddenInput } from "@/src/shared/ui/hidden-input";
 import { Label } from "@/src/shared/ui/label";
 import { User } from "@prisma/client";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { editUserAction } from "../api";
 
 function SubmitButton() {
@@ -18,7 +19,7 @@ function SubmitButton() {
 }
 
 export function EditUserForm({ userInfo }: { userInfo: User }) {
-  const [state, action] = useFormState(editUserAction, {});
+  const [state, action] = useActionState(editUserAction, {});
 
   return (
     <div>
@@ -45,7 +46,10 @@ export function EditUserForm({ userInfo }: { userInfo: User }) {
         </div>
         <div className="flex flex-col gap-2">
           <Label>Steam Profile URL</Label>
-          <Input name="steamProfileURL" defaultValue={userInfo.steamProfileURL ?? ""} />
+          <Input
+            name="steamProfileURL"
+            defaultValue={userInfo.steamProfileURL ?? ""}
+          />
         </div>
         <SubmitButton />
       </form>

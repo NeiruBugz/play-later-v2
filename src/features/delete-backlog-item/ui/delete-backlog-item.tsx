@@ -1,3 +1,4 @@
+import { useActionState } from "react";
 "use client";
 
 import { deleteBacklogItem } from "@/src/entities/backlog-item";
@@ -14,7 +15,6 @@ import {
   AlertDialogTrigger,
 } from "@/src/shared/ui/alert-dialog";
 import { TrashIcon } from "lucide-react";
-import { useFormState } from "react-dom";
 
 export function DeleteBacklogItem({
   backlogItemId,

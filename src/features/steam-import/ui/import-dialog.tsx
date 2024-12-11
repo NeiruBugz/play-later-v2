@@ -16,8 +16,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useCallback, useEffect, useMemo, useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 function FetchSteamProfileButton({ isDisabled }: { isDisabled: boolean }) {
   const { pending } = useFormStatus();
@@ -99,7 +99,7 @@ function ImportDialog({
   ignoredGames: IgnoredImportedGames[];
   userData: User | undefined;
 }) {
-  const [state, action] = useFormState(fetchSteamProfile, {
+  const [state, action] = useActionState(fetchSteamProfile, {
     message: "",
     gameList: [],
     gameCount: 0,

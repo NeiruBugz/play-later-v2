@@ -28,8 +28,8 @@ import { RadioGroup, RadioGroupItem } from "@/src/shared/ui/radio-group";
 import { useToast } from "@/src/shared/ui/use-toast";
 import { GamePicker } from "@/src/widgets/game-picker";
 import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
-import { ElementRef, useCallback, useEffect, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { ElementRef, useCallback, useEffect, useRef, useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 function SubmitButton({
   onFormReset,
@@ -74,7 +74,7 @@ export function AddGameForm() {
     SearchResponse["platforms"]
   >([]);
 
-  const [state, formAction] = useFormState(createGameAction, {
+  const [state, formAction] = useActionState(createGameAction, {
     message: "",
     isError: false,
   });
