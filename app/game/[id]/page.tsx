@@ -1,13 +1,8 @@
-import { getGame } from "@/src/entities/game";
 import { EditBacklogItemDialog } from "@/src/features/edit-backlog-item/ui/edit-backlog-item-dialog";
 import { EditBacklogItemDrawer } from "@/src/features/edit-backlog-item/ui/edit-backlog-item-drawer";
+import { GameStats, getGame, IgdbInfo, Reviews } from "@/src/page-slices/game";
 import igdbApi from "@/src/shared/api/igdb";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/shared/config/image.config";
-import { cn } from "@/src/shared/lib";
+import { cn, getUniquePlatforms } from "@/src/shared/lib";
 import { platformToColorBadge } from "@/src/shared/lib/platform-to-color";
 import { GenericPageProps } from "@/src/shared/types";
 import { Badge } from "@/src/shared/ui/badge";
@@ -19,12 +14,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/src/shared/ui/breadcrumb";
-import { GameStats } from "@/src/widgets/game-stats";
+import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import { Header } from "@/src/widgets/header";
-import { IgdbInfo } from "@/src/widgets/igdb-info";
-import { Reviews } from "@/src/widgets/reviews";
 import { CalendarIcon } from "lucide-react";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -39,26 +31,7 @@ export default async function GamePage(props: GenericPageProps) {
 
   const { game } = gameResponse;
 
-  const uniquePlatforms =
-    igdbData?.release_dates && igdbData?.release_dates.length
-      ? igdbData?.release_dates
-          .filter(
-            (record, index, self) =>
-              index ===
-              self.findIndex((r) => r.platform.name === record.platform.name)
-          )
-          .sort((a, b) => {
-            const titleA = a.platform.name.toUpperCase();
-            const titleB = b.platform.name.toUpperCase();
-            if (titleA < titleB) {
-              return -1;
-            }
-            if (titleA > titleB) {
-              return 1;
-            }
-            return 0;
-          })
-      : [];
+  const uniquePlatforms = getUniquePlatforms(igdbData?.release_dates);
 
   return (
     <>
@@ -78,12 +51,12 @@ export default async function GamePage(props: GenericPageProps) {
         <section className="container w-full pb-4">
           <div className="flex flex-col gap-4 border-b pb-4 md:flex-row">
             <div className="h-full w-full max-w-[264px] flex-shrink-0 self-center md:self-start">
-              <Image
-                src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`}
-                alt={`${game.title} cover art`}
-                width={NEXT_IMAGE_SIZES["c-big"].width}
-                height={NEXT_IMAGE_SIZES["c-big"].height}
+              <IgdbImage
                 className="flex-shrink-0 self-center rounded-md border md:self-start"
+                gameTitle={game.title}
+                coverImageId={game.coverImage}
+                igdbSrcSize={"hd"}
+                igdbImageSize={"c-big"}
               />
               <EditBacklogItemDialog
                 gameId={game.id}

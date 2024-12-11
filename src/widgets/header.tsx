@@ -1,4 +1,3 @@
-import { User } from "@/src/entities/user";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +9,7 @@ import { AppLink } from "@/src/widgets/app-link";
 import { GamepadIcon, MenuIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+import { User } from "src/page-slices/user";
 
 const linksConfig = [
   {

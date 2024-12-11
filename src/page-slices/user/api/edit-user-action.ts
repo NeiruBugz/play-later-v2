@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { updateUserName } from "@/src/entities/user";
+import { updateUserName } from "./update-user-name";
 
 const UpdateUsernameSchema = z.object({
   id: z.string(),
@@ -10,7 +10,7 @@ const UpdateUsernameSchema = z.object({
   steamProfileUrl: z.string(),
 });
 
-export async function updateUsernameAction(prevState: any, payload: FormData) {
+export async function editUserAction(prevState: any, payload: FormData) {
   const parsedPayload = UpdateUsernameSchema.safeParse({
     id: payload.get("userId"),
     username: payload.get("username"),

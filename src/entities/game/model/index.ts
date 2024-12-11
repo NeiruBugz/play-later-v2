@@ -1,1 +1,1 @@
-export * from "./types";
+export type { AddGameToBacklogInput } from "./types";

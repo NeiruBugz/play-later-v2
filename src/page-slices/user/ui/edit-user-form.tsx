@@ -1,11 +1,11 @@
 "use client";
 
-import { updateUsernameAction } from "@/src/features/edit-user";
 import { Button, Input } from "@/src/shared/ui";
 import { HiddenInput } from "@/src/shared/ui/hidden-input";
 import { Label } from "@/src/shared/ui/label";
 import { User } from "@prisma/client";
 import { useFormState, useFormStatus } from "react-dom";
+import { editUserAction } from "../api";
 
 function SubmitButton() {
   const status = useFormStatus();
@@ -18,7 +18,7 @@ function SubmitButton() {
 }
 
 export function EditUserForm({ userInfo }: { userInfo: User }) {
-  const [state, action] = useFormState(updateUsernameAction, {});
+  const [state, action] = useFormState(editUserAction, {});
 
   return (
     <div>

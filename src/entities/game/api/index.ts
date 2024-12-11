@@ -1,2 +1,1 @@
-export { getGame } from "./get-game";
-export { createGame } from './create-game'
+export { createGame } from "./create-game";
