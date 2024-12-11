@@ -1,2 +1,2 @@
-export * from "./api";
-export * from "./model";
+export { createGame } from "./api";
+export { type AddGameToBacklogInput } from "./model";

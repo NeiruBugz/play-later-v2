@@ -1,7 +1,5 @@
 "use client";
 
-import { TrashIcon } from "lucide-react";
-import { useFormState, useFormStatus } from "react-dom";
 import { deleteGameAction } from "@/src/features/delete-game";
 import { Button } from "@/src/shared/ui";
 import {
@@ -15,9 +13,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/src/shared/ui/alert-dialog";
+import { TrashIcon } from "lucide-react";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 export function DeleteGame({ gameId }: { gameId: number }) {
-  const [, action] = useFormState(deleteGameAction, { message: "" });
+  const [, action] = useActionState(deleteGameAction, { message: "" });
   const { pending } = useFormStatus();
   return (
     <AlertDialog>

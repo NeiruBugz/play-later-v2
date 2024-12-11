@@ -9,12 +9,5 @@ export async function deleteBacklogItemAction(
 ) {
   try {
     await deleteBacklogItem(id);
-    return {
-      message: "Backlog item deleted successfully",
-    };
-  } catch (error) {
-    return {
-      message: "Failed to delete backlog item",
-    };
-  }
+  } catch (error) {}
 }

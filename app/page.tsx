@@ -6,7 +6,7 @@ export default async function Page() {
   const session = await auth();
 
   if (session) {
-    redirect("/collection");
+    redirect("/collection?page=1&status=PLAYING");
   }
 
   return (

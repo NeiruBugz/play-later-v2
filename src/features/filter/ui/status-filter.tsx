@@ -1,20 +1,16 @@
 "use client";
 
+import { Button } from "@/src/shared/ui";
 import { BacklogItemStatus } from "@prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { BacklogStatusMapper } from "@/src/shared/lib";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/src/shared/ui";
 
 export function StatusFilter() {
   const params = useSearchParams();
   const router = useRouter();
+
+  const currentStatusParam = params.get("status");
 
   const onStatusSelect = useCallback(
     (value: string | null) => {
@@ -29,6 +25,7 @@ export function StatusFilter() {
       } else {
         paramsToUpdate.set("status", value);
       }
+      paramsToUpdate.set("page", "1");
 
       router.replace(`/collection/?${paramsToUpdate.toString()}`);
     },
@@ -36,18 +33,20 @@ export function StatusFilter() {
   );
 
   return (
-    <Select onValueChange={onStatusSelect} value={params.get("status") ?? ""}>
-      <SelectTrigger className="max-w-[260px] gap-1" aria-label="backlogStatus">
-        <SelectValue placeholder="Status" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="All">All</SelectItem>
-        {Object.keys(BacklogItemStatus).map((key) => (
-          <SelectItem value={key} key={key}>
+    <div className="flex flex-wrap gap-1">
+      {Object.keys(BacklogItemStatus)
+        .filter((key) => key !== "WISHLIST")
+        .map((key) => (
+          <Button
+            key={key}
+            onClick={() => onStatusSelect(key)}
+            disabled={currentStatusParam === key}
+            size="sm"
+            variant="outline"
+          >
             {BacklogStatusMapper[key as unknown as BacklogItemStatus]}
-          </SelectItem>
+          </Button>
         ))}
-      </SelectContent>
-    </Select>
+    </div>
   );
 }

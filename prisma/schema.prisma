@@ -47,16 +47,18 @@ model VerificationToken {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  name          String?
-  email         String?       @unique
-  emailVerified DateTime?
-  image         String?
-  username      String?
-  Account       Account[]
-  Session       Session[]
-  BacklogItem   BacklogItem[]
-  Review        Review[]
+  id                   String                 @id @default(cuid())
+  name                 String?
+  email                String?                @unique
+  emailVerified        DateTime?
+  image                String?
+  username             String?
+  steamProfileURL      String?
+  Account              Account[]
+  Session              Session[]
+  BacklogItem          BacklogItem[]
+  Review               Review[]
+  IgnoredImportedGames IgnoredImportedGames[]
 }
 
 // ----- Application Models ------//
@@ -75,6 +77,7 @@ model Game {
   updatedAt     DateTime      @updatedAt
   backlogItems  BacklogItem[] @relation("GameBacklogItems")
   Review        Review[]
+  steamAppId    Int?
 }
 
 model BacklogItem {
@@ -103,6 +106,13 @@ model Review {
   gameId      String
   User        User     @relation(fields: [userId], references: [id])
   Game        Game     @relation(fields: [gameId], references: [id])
+}
+
+model IgnoredImportedGames {
+  id     String @id @default(cuid())
+  name   String
+  userId String
+  User   User   @relation(fields: [userId], references: [id])
 }
 
 enum BacklogItemStatus {

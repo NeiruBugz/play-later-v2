@@ -19,8 +19,7 @@ import {
 import { Textarea } from "@/src/shared/ui/textarea";
 import { useToast } from "@/src/shared/ui/use-toast";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { useFormState } from "react-dom";
+import { useEffect, useRef, useState, useActionState } from "react";
 
 const feedbackTypeOptions = [
   { label: "Idea", type: "idea" },
@@ -33,7 +32,7 @@ const feedbackTypeOptions = [
 
 export function SendFeedbackForm() {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const [state, action] = useFormState(postFeedbackAction, { message: "" });
+  const [state, action] = useActionState(postFeedbackAction, { message: "" });
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
   const pathname = usePathname();

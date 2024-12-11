@@ -1,5 +1,5 @@
 import { IMAGE_API, IMAGE_SIZES } from "@/src/shared/config/image.config";
-import { BacklogItem } from "@prisma/client";
+import type { BacklogItem } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -39,11 +39,9 @@ export function BacklogItemCard({
 
   return (
     <Link href={`/game/${game.id}`}>
-      <div className="group relative w-full cursor-pointer overflow-hidden rounded border">
+      <div className="group relative w-full cursor-pointer overflow-hidden rounded">
         <div className="absolute top-0 z-10 hidden h-full w-full flex-grow flex-col items-center justify-center rounded bg-slate-400 opacity-0 transition-opacity ease-in-out group-hover:flex group-hover:opacity-95">
-          <p className="text-center font-medium text-white">
-            {game.title}
-          </p>
+          <p className="text-center font-medium text-white">{game.title}</p>
         </div>
         <Image
           src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`}

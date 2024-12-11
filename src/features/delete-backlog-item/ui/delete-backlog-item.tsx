@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteBacklogItem } from "@/src/entities/backlog-item";
 import { deleteBacklogItemAction } from "@/src/features/delete-backlog-item/api/action";
 import { Button } from "@/src/shared/ui";
 import {
@@ -14,7 +13,6 @@ import {
   AlertDialogTrigger,
 } from "@/src/shared/ui/alert-dialog";
 import { TrashIcon } from "lucide-react";
-import { useFormState } from "react-dom";
 
 export function DeleteBacklogItem({
   backlogItemId,

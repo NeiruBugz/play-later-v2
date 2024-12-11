@@ -1,4 +1,4 @@
 export type GenericPageProps = {
-  params: Record<string, string>;
-  searchParams: URLSearchParams;
+  params: Promise<Record<string, string>>;
+  searchParams: Promise<URLSearchParams>;
 };

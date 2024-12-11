@@ -8,8 +8,7 @@ import { Label } from "@/src/shared/ui/label";
 import { Textarea } from "@/src/shared/ui/textarea";
 import { StarIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { useFormState } from "react-dom";
+import { useEffect, useState, useActionState } from "react";
 
 
 export function AddReviewForm({ gameId }: { gameId: string }) {

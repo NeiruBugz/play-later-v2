@@ -33,6 +33,8 @@ export function PlatformFilter({
       } else {
         paramsToUpdate.set("platform", value);
       }
+
+      paramsToUpdate.set("page", "1");
       startTransition(() => {
         router.replace(`/collection/?${paramsToUpdate.toString()}`);
       });
@@ -46,7 +48,10 @@ export function PlatformFilter({
       value={params.get("platform") ?? ""}
       disabled={pending}
     >
-      <SelectTrigger className="gap-1 md:max-w-[260px]" aria-label="platforms">
+      <SelectTrigger
+        className="h-8 gap-1 md:max-w-[260px]"
+        aria-label="platforms"
+      >
         <SelectValue placeholder="Platform" />
       </SelectTrigger>
       <SelectContent>
