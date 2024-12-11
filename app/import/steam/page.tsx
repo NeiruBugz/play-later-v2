@@ -1,7 +1,7 @@
 import { getUserGamesWithGroupedBacklog } from "@/src/entities/backlog-item";
 import { getIgnoredGames } from "@/src/entities/ignored-game";
-import { getUserInfo } from "@/src/entities/user";
 import { ImportDialog } from "@/src/features/steam-import";
+import { getUserInfo } from "@/src/page-slices/user/api/get-user-info";
 import { Header } from "@/src/widgets/header";
 
 export default async function SteamImportPage() {
@@ -11,7 +11,7 @@ export default async function SteamImportPage() {
   });
   const ignoredPromise = getIgnoredGames();
   const userInfo = await getUserInfo();
-  const [{ collection }, ignoredGames, userData] = await Promise.all([
+  const [collection, ignoredGames, userData] = await Promise.all([
     collectionPromise,
     ignoredPromise,
     userInfo,

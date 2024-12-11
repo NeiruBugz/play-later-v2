@@ -6,7 +6,7 @@ import { GenericPageProps } from "@/src/shared/types";
 import { Header } from "@/src/widgets/header";
 
 export default async function SharedWishlistPage(props: GenericPageProps) {
-  const wishlistedItems = await getWishlistedItems(props.params.userId);
+  const wishlistedItems = await getWishlistedItems((await props.params).userId);
   return (
     <div>
       <Header />

@@ -1,5 +1,6 @@
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
 import { prisma } from "@/src/shared/api";
+import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 type CreateBacklogItemInput = {
   backlogItem: {
@@ -39,6 +40,7 @@ export async function createBacklogItem({
         },
       },
     });
+    revalidatePath("/collection");
   } catch (e) {
     console.error(e);
   }

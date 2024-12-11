@@ -21,7 +21,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 export default async function GamePage(props: GenericPageProps) {
-  const gameResponse = await getGame(props.params.id);
+  const gameResponse = await getGame((await props.params).id);
 
   if (!gameResponse?.game) {
     return notFound();

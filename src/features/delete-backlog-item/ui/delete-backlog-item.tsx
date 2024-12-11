@@ -1,7 +1,5 @@
-import { useActionState } from "react";
 "use client";
 
-import { deleteBacklogItem } from "@/src/entities/backlog-item";
 import { deleteBacklogItemAction } from "@/src/features/delete-backlog-item/api/action";
 import { Button } from "@/src/shared/ui";
 import {

@@ -1,10 +1,11 @@
-import { getUserInfo } from "@/src/entities/user";
+import { getUserInfo } from "@/src/page-slices/user/api/get-user-info";
 import { GenericPageProps } from "@/src/shared/types";
 import { Header } from "@/src/widgets/header";
 import { notFound } from "next/navigation";
 import { EditUserForm, ExternalLibrariesImport } from "src/page-slices/user";
 
-export default async function UserPage({ params }: GenericPageProps) {
+export default async function UserPage(props: GenericPageProps) {
+  const params = await props.params;
   const user = await getUserInfo(params.userId);
 
   if (!user) {
