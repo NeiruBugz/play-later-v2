@@ -1,8 +1,9 @@
-"use client";
+"use client"
 
-import { cn } from "@/src/shared/lib/tailwind-merge";
-import * as React from "react";
-import { Drawer as DrawerPrimitive } from "vaul";
+import * as React from "react"
+import { Drawer as DrawerPrimitive } from "vaul"
+
+import { cn } from "@/src/shared/lib/tailwind-merge"
 
 const Drawer = ({
   shouldScaleBackground = true,
@@ -12,7 +13,7 @@ const Drawer = ({
     shouldScaleBackground={shouldScaleBackground}
     {...props}
   />
-);
+)
 Drawer.displayName = "Drawer"
 
 const DrawerTrigger = DrawerPrimitive.Trigger
@@ -31,7 +32,7 @@ const DrawerOverlay = React.forwardRef<
     {...props}
   />
 ))
-DrawerOverlay.displayName = "DrawerOverlay"
+DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
@@ -89,7 +90,7 @@ const DrawerTitle = React.forwardRef<
     {...props}
   />
 ))
-DrawerTitle.displayName = "DrawerTitle"
+DrawerTitle.displayName = DrawerPrimitive.Title.displayName
 
 const DrawerDescription = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Description>,
@@ -101,7 +102,7 @@ const DrawerDescription = React.forwardRef<
     {...props}
   />
 ))
-DrawerDescription.displayName = "DrawerDescription"
+DrawerDescription.displayName = DrawerPrimitive.Description.displayName
 
 export {
   Drawer,

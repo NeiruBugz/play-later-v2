@@ -1,2 +1,1 @@
-export { ImportDialog } from './import-dialog';
-export { GroupedSteamGameList } from './grouped-list';
+export { ImportDialog } from "./imported-steam-game-list";

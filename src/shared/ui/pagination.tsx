@@ -1,13 +1,7 @@
 import * as React from "react"
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons"
-
 import { cn } from "@/src/shared/lib/tailwind-merge"
 import { ButtonProps, buttonVariants } from "@/src/shared/ui/button"
-import Link from "next/link"
+import { ChevronLeftIcon, ChevronRightIcon, DotsHorizontalIcon } from "@radix-ui/react-icons"
 
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
@@ -41,7 +35,8 @@ PaginationItem.displayName = "PaginationItem"
 
 type PaginationLinkProps = {
   isActive?: boolean
-} & Pick<ButtonProps, "size"> & React.ComponentProps<typeof Link>
+} & Pick<ButtonProps, "size"> &
+  React.ComponentProps<"a">
 
 const PaginationLink = ({
   className,
@@ -49,7 +44,7 @@ const PaginationLink = ({
   size = "icon",
   ...props
 }: PaginationLinkProps) => (
-  <Link
+  <a
     aria-current={isActive ? "page" : undefined}
     className={cn(
       buttonVariants({
