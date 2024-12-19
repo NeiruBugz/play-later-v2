@@ -2,7 +2,6 @@ import { getUserGamesWithGroupedBacklog } from "@/src/entities/backlog-item";
 import { CollectionFilters } from "@/src/widgets/collection-filters";
 import { CollectionFiltersSkeleton } from "@/src/widgets/collection-filters-skeleton";
 import { GridView } from "@/src/widgets/grid-view";
-import { ListView } from "@/src/widgets/list-view";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -16,8 +15,6 @@ export async function CollectionList({
     status: params.status,
     search: params.search,
   });
-
-  const viewMode = params.viewMode || "grid";
 
   if (
     !collection ||
@@ -56,11 +53,7 @@ export async function CollectionList({
       <Suspense fallback={<CollectionFiltersSkeleton />}>
         <CollectionFilters />
       </Suspense>
-      {viewMode === "grid" ? (
-        <GridView backlogItems={collection} />
-      ) : (
-        <ListView backlogItems={collection} />
-      )}
+      <GridView backlogItems={collection} />
     </div>
   );
 }

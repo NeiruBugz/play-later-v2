@@ -14,19 +14,24 @@ export async function SimilarGames({ igdbId }: { igdbId: number }) {
         Similar games
       </h3>
       <ul className="my-4 flex flex-wrap justify-center gap-3 md:justify-start">
-        {games.similar_games?.map((game) => (
-          <li key={game.id}>
-            <BacklogItemCard
-              game={{
-                id: String(game.id),
-                title: game.name,
-                coverImage: game.cover.image_id,
-              }}
-              backlogItems={[]}
-              isFromSharedWishlist
-            />
-          </li>
-        ))}
+        {games.similar_games?.map((game) => {
+          if (!game?.cover?.image_id) {
+            return null;
+          }
+          return (
+            <li key={game.id}>
+              <BacklogItemCard
+                game={{
+                  id: String(game.id),
+                  title: game.name,
+                  coverImage: game.cover.image_id,
+                }}
+                backlogItems={[]}
+                isFromSharedWishlist
+              />
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

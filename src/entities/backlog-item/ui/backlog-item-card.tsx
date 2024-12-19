@@ -1,6 +1,5 @@
-import { IMAGE_API, IMAGE_SIZES } from "@/src/shared/config/image.config";
+import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import type { BacklogItem } from "@prisma/client";
-import Image from "next/image";
 import Link from "next/link";
 
 type GameCardProps = {
@@ -26,12 +25,14 @@ export function BacklogItemCard({
             {game.title}
           </p>
         </div>
-        <Image
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`}
-          alt={`${game.title} cover art`}
+        <IgdbImage
           width={156}
           height={220}
           className="object-cover"
+          gameTitle={game.title}
+          coverImageId={game.coverImage}
+          igdbSrcSize={"hd"}
+          igdbImageSize={"hd"}
         />
       </div>
     );
@@ -43,12 +44,14 @@ export function BacklogItemCard({
         <div className="absolute top-0 z-10 hidden h-full w-full flex-grow flex-col items-center justify-center rounded bg-slate-400 opacity-0 transition-opacity ease-in-out group-hover:flex group-hover:opacity-95">
           <p className="text-center font-medium text-white">{game.title}</p>
         </div>
-        <Image
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`}
-          alt={`${game.title} cover art`}
+        <IgdbImage
           width={120}
           height={200}
           className="object-cover"
+          gameTitle={game.title}
+          coverImageId={game.coverImage}
+          igdbSrcSize={"hd"}
+          igdbImageSize={"hd"}
         />
       </div>
     </Link>

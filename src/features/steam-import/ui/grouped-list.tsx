@@ -1,6 +1,7 @@
 "use client";
 
 import { addGameToCollection } from "@/src/features/steam-import/api";
+import igdbApi from "@/src/shared/api/igdb";
 import { SteamAppInfo } from "@/src/shared/types";
 import { Button, Input } from "@/src/shared/ui";
 import {
@@ -54,6 +55,31 @@ const GroupedSteamGameList: React.FC<GroupedSteamGameListProps> = ({
       }
     }
   }, [games]);
+
+  const getIgdbInfo = useCallback(async (name: string) => {
+    try {
+      const igdbInfo = await fetch(`/api/igdb-search?q=${name.toLowerCase()}`);
+
+      if (igdbInfo.ok) {
+        console.log(igdbInfo.json());
+        return igdbInfo.json();
+      }
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }, []);
+
+  const onSaveClick = useCallback(
+    async (steamGame: SteamAppInfo) => {
+      try {
+        const igdbInfo = await getIgdbInfo(steamGame.name);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [getIgdbInfo]
+  );
 
   const onIgnoreClick = useCallback((steamGame: SteamAppInfo) => {
     setIgnoredGames((prev) => [...prev, { name: steamGame.name }]);
@@ -122,6 +148,7 @@ const GroupedSteamGameList: React.FC<GroupedSteamGameListProps> = ({
               game={game}
               onIgnoreClick={onIgnoreClick}
               markGameForSave={addToCollectionClick}
+              onSaveGameClick={onSaveClick}
               isIgnored={ignoredGames.some(
                 (ignoredGame) => game.name === ignoredGame.name
               )}
@@ -148,7 +175,7 @@ const BatchSaveProgress: React.FC<{
   gamesCount: number;
 }> = ({ progress, gamesCount }) =>
   progress ? (
-    <div className="fixed bottom-20 right-4 z-[100] w-[300px] overflow-y-auto rounded border p-4 shadow-md bg-background">
+    <div className="fixed bottom-20 right-4 z-[100] w-[300px] overflow-y-auto rounded border bg-background p-4 shadow-md">
       <h3 className="mb-2 text-lg font-semibold">Batch Save Progress</h3>
       <p className="mt-2 text-sm">
         {progress}/{gamesCount}

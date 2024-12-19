@@ -32,7 +32,7 @@ const linksConfig = [
 
 export function Header() {
   return (
-    <header className="w-full mx-auto flex items-center justify-between px-4 py-3 md:px-6 lg:px-8 fixed top-0 z-20 bg-background mb-[60px]">
+    <header className="container fixed top-0 z-20 mx-auto mb-[60px] flex w-full items-center justify-between bg-background px-4 py-3 md:px-6 lg:px-8">
       <div className="flex items-center gap-3">
         <div className="block md:hidden">
           <DropdownMenu>

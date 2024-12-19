@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/src/shared/ui";
 import { BacklogItemStatus } from "@prisma/client";
+import { SaveIcon } from "lucide-react";
 import Image from "next/image";
 import { minToHours } from "../lib";
 
@@ -19,6 +20,7 @@ type ImportedGameItemProps = {
   onGameStatusChange?: (appId: number, status: string) => void;
   onIgnoreClick?: (game: SteamAppInfo) => void;
   markGameForSave?: (game: SteamAppInfo) => void;
+  onSaveGameClick: (game: SteamAppInfo) => Promise<void>;
   isIgnored?: boolean;
   isMarkedForSave?: boolean;
   isAdded?: boolean;
@@ -29,6 +31,7 @@ function ImportedGameItem({
   onIgnoreClick,
   onGameStatusChange,
   markGameForSave,
+  onSaveGameClick,
   isIgnored,
   isMarkedForSave,
   isAdded,
@@ -87,6 +90,9 @@ function ImportedGameItem({
           </SelectContent>
         </Select>
         {/*<Button onClick={() => markGameForSave?.(game)} disabled={isIgnored}>Mark for save</Button>*/}
+        <Button variant="ghost" onClick={() => onSaveGameClick(game)}>
+          <SaveIcon />
+        </Button>
         <Button
           variant="destructive"
           onClick={() => onIgnoreClick?.(game)}

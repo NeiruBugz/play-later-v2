@@ -1,16 +1,11 @@
-import { useQueryClient } from "@tanstack/react-query";
-import Image from "next/image";
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useIGDBSearch } from "@/src/features/search";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/shared/config/image.config";
 import { cn } from "@/src/shared/lib";
 import { SearchResponse } from "@/src/shared/types";
 import { Button, Input } from "@/src/shared/ui";
+import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import { Label } from "@/src/shared/ui/label";
+import { useQueryClient } from "@tanstack/react-query";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 type GamePreviewItemProps = {
   game: SearchResponse;
@@ -23,11 +18,12 @@ function GamePreviewItem({ game, type }: GamePreviewItemProps) {
     const firstReleaseDate = game.release_dates?.[0].human.slice(-4);
     return (
       <>
-        <Image
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.webp`}
-          width={NEXT_IMAGE_SIZES.micro.width}
-          height={NEXT_IMAGE_SIZES.micro.height}
+        <IgdbImage
           alt={`${game.name} cover art`}
+          gameTitle={game.name}
+          coverImageId={game.cover.image_id}
+          igdbSrcSize={"hd"}
+          igdbImageSize={"micro"}
         />
         <div className="flex flex-col gap-1">
           <span className="font-medium">{game.name}</span>
@@ -47,12 +43,13 @@ function GamePreviewItem({ game, type }: GamePreviewItemProps) {
     const firstReleaseDate = game.release_dates?.[0].human;
     return (
       <div className="flex gap-4">
-        <Image
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.cover.image_id}.webp`}
-          width={NEXT_IMAGE_SIZES.micro.width}
-          height={NEXT_IMAGE_SIZES.micro.height}
+        <IgdbImage
           alt={`${game.name} cover art`}
           className="shrink-0"
+          gameTitle={game.name}
+          coverImageId={game.cover.image_id}
+          igdbSrcSize={"hd"}
+          igdbImageSize={"micro"}
         />
         <div className="flex flex-col gap-1 text-[12px] md:text-[14px] xl:text-xl">
           <span className="font-bold">{game.name}</span>
