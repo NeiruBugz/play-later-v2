@@ -48,9 +48,15 @@ export function BacklogItemCard({
           </div>
           <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
             <TooltipProvider>
-              <StartPlayingActionButton game={game} />
-              <CompleteActionButton game={game} />
-              <MoveToBacklogActionButton game={game} />
+              <StartPlayingActionButton
+                game={game}
+                backlogItems={backlogItems}
+              />
+              <CompleteActionButton game={game} backlogItems={backlogItems} />
+              <MoveToBacklogActionButton
+                game={game}
+                backlogItems={backlogItems}
+              />
             </TooltipProvider>
           </div>
         </div>

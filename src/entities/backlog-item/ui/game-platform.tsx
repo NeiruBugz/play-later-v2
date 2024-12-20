@@ -1,20 +1,15 @@
 "use client";
 
+import { useMatchingBacklogItem } from "@/src/entities/backlog-item/ui/use-matching-backlog-item";
 import { normalizeString } from "@/src/shared/lib";
 import { BacklogItem } from "@prisma/client";
-import { useSearchParams } from "next/navigation";
 
 type GamePlatformProps = {
   backlogItems?: Omit<BacklogItem, "game">[];
 };
 
 export function GamePlatform({ backlogItems }: GamePlatformProps) {
-  const params = useSearchParams();
-  const statusFilter = params.get("status");
-  const matchingStatusItem = backlogItems?.find(
-    (item) => (item.status as unknown as string) === statusFilter
-  );
-
+  const matchingStatusItem = useMatchingBacklogItem({ backlogItems });
   if (!matchingStatusItem) {
     return null;
   }
