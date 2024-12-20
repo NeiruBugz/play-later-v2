@@ -23,8 +23,8 @@ function IgdbImage({
     <Image
       src={`${IMAGE_API}/${IMAGE_SIZES[igdbSrcSize]}/${coverImageId}.webp`}
       alt={`${gameTitle} cover art`}
-      width={NEXT_IMAGE_SIZES[igdbImageSize].width}
-      height={NEXT_IMAGE_SIZES[igdbImageSize].height}
+      width={rest.width || NEXT_IMAGE_SIZES[igdbImageSize].width}
+      height={rest.height || NEXT_IMAGE_SIZES[igdbImageSize].height}
       {...rest}
     />
   );

@@ -16,7 +16,6 @@ export async function CollectionFilters({ count }: { count: number }) {
     <>
       <div className="mb-3 flex w-full flex-wrap items-center justify-center md:flex-nowrap md:justify-between">
         <StatusFilter />
-        <Pagination totalCount={count} />
       </div>
       <div className="my-4 hidden flex-wrap gap-2 md:flex md:flex-nowrap">
         <PlatformFilter platformOptions={uniquePlatforms} />

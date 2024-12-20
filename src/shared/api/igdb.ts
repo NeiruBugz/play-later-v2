@@ -1,6 +1,7 @@
 import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/src/shared/config/igdb";
 import {
+  Artwork,
   Event,
   FullGameInfoResponse,
   GenresResponse,
@@ -43,6 +44,7 @@ const queries = {
   `,
   similarGames: `
     fields
+      genres.name,
       similar_games.name,
       similar_games.cover.image_id;
   `,
@@ -113,6 +115,8 @@ const queries = {
     ${name ? `search "${name}";` : ""}
     limit 100;
   `,
+  artworks: (gameId: number) =>
+    `fields alpha_channel,animated,checksum,game,height,image_id,url,width; where game = ${gameId};`,
 };
 
 const igdbApi = {
@@ -296,6 +300,12 @@ const igdbApi = {
     return this.request({
       body: queries.search(name, filters),
       resource: "/games",
+    });
+  },
+  async getArtworks(gameId: number): Promise<Artwork[] | undefined> {
+    return this.request({
+      body: queries.artworks(gameId),
+      resource: "/artworks",
     });
   },
 };

@@ -1,4 +1,5 @@
 import { getUserGamesWithGroupedBacklog } from "@/src/collection/actions";
+import { Pagination } from "@/src/features/filter/ui/pagination";
 import { GridView } from "@/src/widgets/grid-view";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -55,6 +56,9 @@ export async function CollectionList({
         <CollectionFilters count={count} />
       </Suspense>
       <GridView backlogItems={collection} />
+      <div className="my-3 flex items-center justify-center">
+        <Pagination totalCount={count} />
+      </div>
     </div>
   );
 }

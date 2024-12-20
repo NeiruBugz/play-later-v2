@@ -2,6 +2,8 @@
 
 import { Button } from "@/src/shared/ui";
 import {
+  ChevronFirst,
+  ChevronLast,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -46,45 +48,47 @@ export function Pagination({ totalCount }: { totalCount: number }) {
   }, [params, router, totalPages]);
 
   return (
-    <div className="flex items-center gap-1 text-xs">
-      <Button
-        variant="ghost"
-        onClick={onGoToFirst}
-        className="h-6 w-6 p-0"
-        disabled={currentPage === 1}
-      >
-        <ChevronsLeft className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        disabled={!currentPage || currentPage === 1}
-        onClick={() => onPageChange("prev")}
-        className="h-6 w-6 p-0"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </Button>
+    <div className="flex w-full items-center justify-between">
+      <p className="text-sm text-muted-foreground">Total games: {totalCount}</p>
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onGoToFirst}
+          disabled={currentPage === 1}
+        >
+          <ChevronFirst className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          disabled={!currentPage || currentPage === 1}
+          onClick={() => onPageChange("prev")}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
 
-      <span className="font-medium">
-        {currentPage ?? 1} | {totalPages}
-      </span>
+        <span className="text-sm font-medium">
+          {currentPage ?? 1} | {totalPages}
+        </span>
 
-      <Button
-        variant="ghost"
-        onClick={() => onPageChange("next")}
-        disabled={currentPage >= totalPages}
-        className="h-6 w-6 p-0"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        onClick={onGoToLast}
-        className="h-6 w-6 p-0"
-        disabled={currentPage >= totalPages}
-      >
-        <ChevronsRight className="h-5 w-5" />
-      </Button>
-      <span>Total games: {totalCount}</span>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => onPageChange("next")}
+          disabled={currentPage >= totalPages}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onGoToLast}
+          disabled={currentPage >= totalPages}
+        >
+          <ChevronLast className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
