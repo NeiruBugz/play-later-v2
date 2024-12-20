@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/src/shared/ui/dialog";
+import { Star } from "lucide-react";
 import { AddReviewForm } from "./add-review-form";
 
 export function AddReviewDialog({
@@ -19,13 +20,17 @@ export function AddReviewDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="my-2 w-full">Add review</Button>
+        <Button className="flex items-center gap-2">
+          <Star className="h-4 w-4" />
+          <span>Write a Review</span>
+        </Button>
       </DialogTrigger>
       <DialogContent className="w-full max-w-md">
         <DialogHeader>
           <DialogTitle>{gameTitle}</DialogTitle>
           <DialogDescription>
-            Share your thoughts on a game you&apos;ve played. Rate it, describe your experience, and select the platform you played on.
+            Share your thoughts on a game you&apos;ve played. Rate it, describe
+            your experience, and select the platform you played on.
           </DialogDescription>
         </DialogHeader>
         <div className="my-3">
