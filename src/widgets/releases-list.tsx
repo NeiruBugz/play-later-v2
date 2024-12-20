@@ -55,8 +55,6 @@ const Release = ({
 export async function ReleasesList() {
   const releases = await getUpcomingWishlistItems();
 
-  console.log({  releases})
-
   return (
     <div className="flex w-full flex-col justify-start gap-3">
       {releases.length ? (

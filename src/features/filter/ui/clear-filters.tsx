@@ -13,16 +13,20 @@ export function ClearFilters() {
   const onClearFilters = useCallback(() => {
     const paramsToUpdate = new URLSearchParams(params);
     const viewMode = params.get("viewMode");
+    const page = params.get("page");
     paramsToUpdate.delete("platform");
-    paramsToUpdate.delete("status");
-    paramsToUpdate.delete('search');
-    paramsToUpdate.set('viewMode', viewMode ?? 'grid')
-    router.replace(`/?${paramsToUpdate.toString()}`);
+    paramsToUpdate.delete("search");
+    paramsToUpdate.delete("page");
+    paramsToUpdate.set("status", "PLAYING");
+    if (page) {
+      paramsToUpdate.set("page", page);
+    }
+    router.replace(`/collection?${paramsToUpdate.toString()}`);
   }, [params, router]);
 
   if (params.size === 0) return null;
 
-  if (params.get('viewMode') && params.size === 1) return null;
+  if (params.get("page") && params.size === 1) return null;
 
   return (
     <Button
@@ -30,6 +34,7 @@ export function ClearFilters() {
       onClick={onClearFilters}
       type="button"
       aria-label="Clear filters"
+      size="sm"
     >
       Clear filters
       <XIcon className="ml-2 size-4" />

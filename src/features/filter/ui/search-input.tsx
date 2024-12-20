@@ -1,8 +1,8 @@
 "use client";
 
+import { Button, Input } from "@/src/shared/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
-import { Button, Input } from "@/src/shared/ui";
 
 export function SearchInput() {
   const params = useSearchParams();
@@ -32,6 +32,7 @@ export function SearchInput() {
     const paramsToUpdate = new URLSearchParams(params);
 
     paramsToUpdate.set("search", inputValue);
+    paramsToUpdate.set("page", "1");
 
     router.replace(`/collection/?${paramsToUpdate.toString()}`);
   }, [inputValue, params, router]);
@@ -39,12 +40,17 @@ export function SearchInput() {
   return (
     <div className="flex items-center gap-3">
       <Input
-        className="md:w-[400px]"
+        className="h-8 md:w-[400px]"
         placeholder="Search by name"
         value={inputValue}
         onChange={onInputChange}
       />
-      <Button type="button" disabled={inputValue.length < 3} onClick={onApply}>
+      <Button
+        type="button"
+        disabled={inputValue.length < 3}
+        onClick={onApply}
+        size="sm"
+      >
         Apply
       </Button>
     </div>

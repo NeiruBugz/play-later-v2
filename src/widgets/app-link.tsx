@@ -9,7 +9,7 @@ export function AppLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className={cn("cursor-pointer hover:underline", {
+      className={cn("cursor-pointer text-sm hover:underline", {
         "font-bold": pathname === href || pathname.includes(href),
       })}
     >

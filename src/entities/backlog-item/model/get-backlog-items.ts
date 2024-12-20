@@ -153,7 +153,7 @@ export async function getBacklogItems({ gameId }: { gameId: string }) {
     if (!userId) {
       throw new Error("No user ID found");
     }
-  
+
     return await prisma.backlogItem.findMany({
       where: {
         gameId: gameId,

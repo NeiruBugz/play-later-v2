@@ -1,4 +1,4 @@
-export function normalizeString(value: string | null) {
+export function normalizeString(value: string | null | undefined) {
   if (!value || value.length === 0) {
     return value;
   }

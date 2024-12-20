@@ -25,12 +25,8 @@ export async function createReviewAction(
   });
 
   if (!parsedInput.success) {
-    return { message: "Invalid input", type: "error" };
+    return;
   }
 
   await createReview(parsedInput.data);
-
-  return {
-    message: "Review created successfully",
-  };
 }

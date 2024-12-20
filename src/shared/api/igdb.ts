@@ -1,6 +1,7 @@
 import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/src/shared/config/igdb";
 import {
+  Artwork,
   Event,
   FullGameInfoResponse,
   GenresResponse,
@@ -43,6 +44,7 @@ const queries = {
   `,
   similarGames: `
     fields
+      genres.name,
       similar_games.name,
       similar_games.cover.image_id;
   `,
@@ -105,6 +107,7 @@ const queries = {
       platforms.name,
       release_dates.human,
       first_release_date,
+      category,
       cover.image_id;
     where
       cover.image_id != null
@@ -112,6 +115,8 @@ const queries = {
     ${name ? `search "${name}";` : ""}
     limit 100;
   `,
+  artworks: (gameId: number) =>
+    `fields alpha_channel,animated,checksum,game,height,image_id,url,width; where game = ${gameId};`,
 };
 
 const igdbApi = {
@@ -219,16 +224,20 @@ const igdbApi = {
     return undefined;
   },
 
-  async getSimilarGames(gameId: number): Promise<{id: number, similar_games: FullGameInfoResponse['similar_games']}> {
-    const response =
-      await this.request<
-      Array<
-        { id: number; similar_games: FullGameInfoResponse["similar_games"] }
-       > | undefined
-      >({
-        body: `${queries.similarGames} where id = (${gameId});`,
-        resource: "/games",
-      });
+  async getSimilarGames(gameId: number): Promise<{
+    id: number;
+    similar_games: FullGameInfoResponse["similar_games"];
+  }> {
+    const response = await this.request<
+      | Array<{
+          id: number;
+          similar_games: FullGameInfoResponse["similar_games"];
+        }>
+      | undefined
+    >({
+      body: `${queries.similarGames} where id = (${gameId});`,
+      resource: "/games",
+    });
 
     if (response && response?.length) {
       return response[0];
@@ -236,7 +245,7 @@ const igdbApi = {
 
     return {
       id: 0,
-      similar_games: []
+      similar_games: [],
     };
   },
 
@@ -278,8 +287,11 @@ const igdbApi = {
     ...fields
   }: {
     name: null | string;
+    fields?: Record<string, string>;
   }): Promise<SearchResponse[] | undefined> {
     if (!name) return;
+
+    console.log("IGDB API::Search for: ", { name });
 
     const filters = Object.entries(fields)
       .map(([key, value]) => ` & ${key} = ${value}`)
@@ -288,6 +300,12 @@ const igdbApi = {
     return this.request({
       body: queries.search(name, filters),
       resource: "/games",
+    });
+  },
+  async getArtworks(gameId: number): Promise<Artwork[] | undefined> {
+    return this.request({
+      body: queries.artworks(gameId),
+      resource: "/artworks",
     });
   },
 };

@@ -16,7 +16,7 @@ export function AddGameLink() {
       href="/collection/add-game"
       className="cursor-pointer hover:underline"
     >
-      <Button>Add Game</Button>
+      <Button variant="link">Add Game</Button>
     </Link>
   );
 }

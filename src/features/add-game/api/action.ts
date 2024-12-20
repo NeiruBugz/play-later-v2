@@ -57,6 +57,7 @@ export async function createGameAction(
       mainStory: parsedPayload.data.mainStory,
       mainExtra: parsedPayload.data.mainExtra,
       completionist: parsedPayload.data.completionist,
+      steamAppId: null,
     },
     backlogItem: {
       acquisitionType: parsedPayload.data

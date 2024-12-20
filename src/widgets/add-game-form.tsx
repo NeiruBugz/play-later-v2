@@ -6,7 +6,6 @@ import {
   initialFormValues,
 } from "@/src/features/add-game";
 import { createGameAction } from "@/src/features/add-game/api/action";
-import { useHowLongToBeatSearch } from "@/src/features/search";
 import {
   AcquisitionStatusMapper,
   BacklogStatusMapper,
@@ -28,8 +27,15 @@ import { RadioGroup, RadioGroupItem } from "@/src/shared/ui/radio-group";
 import { useToast } from "@/src/shared/ui/use-toast";
 import { GamePicker } from "@/src/widgets/game-picker";
 import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
-import { ElementRef, useCallback, useEffect, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import {
+  ElementRef,
+  useActionState,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useFormStatus } from "react-dom";
 
 function SubmitButton({
   onFormReset,
@@ -74,13 +80,11 @@ export function AddGameForm() {
     SearchResponse["platforms"]
   >([]);
 
-  const [state, formAction] = useFormState(createGameAction, {
+  const [state, formAction] = useActionState(createGameAction, {
     message: "",
     isError: false,
   });
   const { toast } = useToast();
-
-  const { data: howLongToBeatData } = useHowLongToBeatSearch(gameValues?.title);
 
   const updateFormValues = useCallback((newValues: Partial<GameFormValues>) => {
     setGameValues((prevState) => ({ ...prevState, ...newValues }));
@@ -105,17 +109,6 @@ export function AddGameForm() {
       });
     }
   }, [state.isError, state.message, toast, onFormReset]);
-
-  useEffect(() => {
-    if (howLongToBeatData) {
-      updateFormValues({
-        hltbId: howLongToBeatData.id,
-        mainStory: howLongToBeatData.mainStory,
-        mainExtra: howLongToBeatData.mainExtra,
-        completionist: howLongToBeatData.completionist,
-      });
-    }
-  }, [howLongToBeatData, updateFormValues]);
 
   const onGameSelect = useCallback(
     (game?: SearchResponse) => {

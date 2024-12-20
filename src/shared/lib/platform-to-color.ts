@@ -24,4 +24,6 @@ export function platformToColorBadge(platform: string) {
   if (platform.toLowerCase().includes("nintendo")) {
     return "text-nintendo border-nintendo bg-transparent";
   }
+
+  return "text-primary border-primary bg-transparent";
 }

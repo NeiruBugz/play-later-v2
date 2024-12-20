@@ -1,164 +1,168 @@
-import { getGame } from "@/src/entities/game";
-import { EditBacklogItemDialog } from "@/src/features/edit-backlog-item/ui/edit-backlog-item-dialog";
-import { EditBacklogItemDrawer } from "@/src/features/edit-backlog-item/ui/edit-backlog-item-drawer";
+import { GameStats, getGame, Reviews } from "@/src/page-slices/game";
+import { Artwork } from "@/src/page-slices/game/ui/artwork";
+import { SimilarGames } from "@/src/page-slices/game/ui/similar-games";
 import igdbApi from "@/src/shared/api/igdb";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/shared/config/image.config";
-import { cn } from "@/src/shared/lib";
+import { BacklogStatusMapper, cn, getUniquePlatforms } from "@/src/shared/lib";
 import { platformToColorBadge } from "@/src/shared/lib/platform-to-color";
 import { GenericPageProps } from "@/src/shared/types";
 import { Badge } from "@/src/shared/ui/badge";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/src/shared/ui/breadcrumb";
-import { GameStats } from "@/src/widgets/game-stats";
+import { Button } from "@/src/shared/ui/button";
+import { IgdbImage } from "@/src/shared/ui/igdb-image";
+import { Skeleton } from "@/src/shared/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/shared/ui/tabs";
 import { Header } from "@/src/widgets/header";
-import { IgdbInfo } from "@/src/widgets/igdb-info";
-import { Reviews } from "@/src/widgets/reviews";
-import { CalendarIcon, ClockIcon } from "lucide-react";
-import Image from "next/image";
+import { BookmarkIcon, Heart, ListPlus, Star } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 export default async function GamePage(props: GenericPageProps) {
-  const gameResponse = await getGame(props.params.id);
+  const gameResponse = await getGame((await props.params).id);
 
   if (!gameResponse?.game) {
     return notFound();
   }
 
-  const igdbData = await igdbApi.getGameById(gameResponse.game.igdbId);
+  const [igdbData, screenshots] = await Promise.all([
+    igdbApi.getGameById(gameResponse.game.igdbId),
+    igdbApi.getGameScreenshots(gameResponse.game.igdbId),
+  ]);
 
   const { game } = gameResponse;
 
-  const uniquePlatforms =
-    igdbData?.release_dates && igdbData?.release_dates.length
-      ? igdbData?.release_dates
-          .filter(
-            (record, index, self) =>
-              index ===
-              self.findIndex((r) => r.platform.name === record.platform.name)
-          )
-          .sort((a, b) => {
-            const titleA = a.platform.name.toUpperCase();
-            const titleB = b.platform.name.toUpperCase();
-            if (titleA < titleB) {
-              return -1;
-            }
-            if (titleA > titleB) {
-              return 1;
-            }
-            return 0;
-          })
-      : [];
+  const uniquePlatforms = getUniquePlatforms(igdbData?.release_dates);
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Header />
-      <Breadcrumb className="container my-2">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Collection</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{game.title}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <section className="container w-full pb-4">
-        <div className="flex flex-col gap-4 border-b pb-4 md:flex-row">
-          <div className="h-full w-full max-w-[264px] flex-shrink-0 self-center md:self-start">
-            <Image
-              src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`}
-              alt={`${game.title} cover art`}
-              width={NEXT_IMAGE_SIZES["c-big"].width}
-              height={NEXT_IMAGE_SIZES["c-big"].height}
-              className="flex-shrink-0 self-center rounded-md border md:self-start"
-            />
-            <EditBacklogItemDialog
-              gameId={game.id}
-              igdbId={game.igdbId}
-              gameTitle={game.title}
-            />
-            <EditBacklogItemDrawer
-              gameId={game.id}
-              igdbId={game.igdbId}
-              gameTitle={game.title}
-            />
-          </div>
-          <div>
-            <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-              {game.title}
-            </h2>
-            <div className="flex flex-col gap-3 md:flex-row">
-              <div>
-                <p className="my-2 flex items-center">
-                  <CalendarIcon className="mr-2 size-4 text-slate-500" />
-                  <span className="font-medium">Released:&nbsp;</span>
-                  {igdbData?.release_dates[0].human}
-                </p>
-                <p className="flex items-center">
-                  <ClockIcon className="mr-2 size-4 text-slate-500" />
-                  <span className="font-medium">
-                    Average beating time:&nbsp;
-                  </span>
-                  {game.mainStory}h.
-                </p>
-              </div>
-              <Suspense>
-                <GameStats
-                  existingReviews={game.Review}
-                  gameId={game.id}
-                  igdbId={game.igdbId}
-                />
-              </Suspense>
-            </div>
-            <p className="my-2 leading-7 [&:not(:first-child)]:mt-6">
-              {game.description}
-            </p>
-            <div className="mt-4 flex gap-2">
-              <p className="w-24 flex-shrink-0 font-medium">Genres: </p>
-              <div className="flex flex-wrap gap-2">
-                {igdbData?.genres.map((genre) => (
-                  <Badge variant="outline" key={genre.id}>
-                    {genre.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <div className="mt-2 flex gap-2">
-              <p className="w-24 flex-shrink-0 text-nowrap font-medium">
-                Released on:{" "}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {uniquePlatforms.map((date) => (
-                  <Badge
-                    key={date.id}
-                    variant="outline"
-                    className={cn(
-                      "border bg-transparent text-primary shadow-none hover:bg-transparent hover:shadow-none",
-                      platformToColorBadge(date.platform.name)
-                    )}
-                  >
-                    {date.platform.name}
-                  </Badge>
-                ))}
+      <Suspense fallback={"Loading..."}>
+        <div className="relative flex min-h-[60vh] w-full justify-center overflow-hidden">
+          <Artwork igdbId={game.igdbId} gameTitle={game.title} />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-8">
+            <div className="container flex flex-col items-end gap-6 md:flex-row">
+              <IgdbImage
+                gameTitle={game.title}
+                coverImageId={game.coverImage}
+                igdbSrcSize={"hd"}
+                igdbImageSize={"c-big"}
+              />
+              <div className="mb-4 flex-1">
+                <h1 className="mb-4 text-3xl font-bold text-white drop-shadow-md md:text-4xl lg:text-5xl">
+                  {game.title}
+                </h1>
+                <div className="flex flex-wrap items-center gap-4">
+                  {igdbData?.genres.map((genre) => {
+                    return (
+                      <Badge
+                        key={genre.id}
+                        variant="secondary"
+                        className="text-sm md:text-base"
+                      >
+                        {genre.name}
+                      </Badge>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <Reviews gameId={game.id} gameTitle={game.title} />
-        <IgdbInfo gameName={game.title} igdbId={game.igdbId} />
-      </section>
-    </>
+        <main className="container py-8">
+          <div className="flex flex-col gap-8 lg:flex-row">
+            <div className="flex-1 space-y-8">
+              <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="space-y-1">
+                  <div className="text-sm text-muted-foreground">Released</div>
+                  <Suspense fallback={<Skeleton className="h-8 w-full" />}>
+                    <div className="font-medium">
+                      {igdbData?.release_dates[0].human}
+                    </div>
+                  </Suspense>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge>
+                    {BacklogStatusMapper[game.backlogItems[0].status]}
+                  </Badge>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Heart className="h-4 w-4" />
+                    <span>Add to Wishlist</span>
+                  </Button>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <ListPlus className="h-4 w-4" />
+                    <span>Add to Collection</span>
+                  </Button>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <BookmarkIcon className="h-4 w-4" />
+                    <span>Bookmark</span>
+                  </Button>
+                  <Button className="flex items-center gap-2">
+                    <Star className="h-4 w-4" />
+                    <span>Write a Review</span>
+                  </Button>
+                </div>
+              </div>
+
+              <Tabs defaultValue="about">
+                <TabsList className="justify-start">
+                  <TabsTrigger value="about">About</TabsTrigger>
+                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
+                </TabsList>
+                <TabsContent value="about" className="space-y-4">
+                  <p className="leading-relaxed text-muted-foreground">
+                    {game.description}
+                  </p>
+                  <div className="grid gap-4">
+                    <div className="font-medium">Available on</div>
+                    <div className="flex flex-wrap gap-2">
+                      {uniquePlatforms.map((platform) => (
+                        <Badge
+                          className={cn(
+                            "border border-primary bg-transparent text-sm text-primary shadow-none hover:bg-transparent hover:shadow-none",
+                            platformToColorBadge(platform.platform.name)
+                          )}
+                          key={platform.id}
+                        >
+                          {platform.platform.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="reviews">
+                  <Reviews gameId={game.id} gameTitle={game.title} />
+                </TabsContent>
+                <TabsContent value="screenshots">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {screenshots && screenshots.screenshots
+                      ? screenshots.screenshots?.map((i) => (
+                          <IgdbImage
+                            key={i.id}
+                            className="w-full rounded-lg"
+                            gameTitle={game.title}
+                            coverImageId={i.image_id}
+                            igdbSrcSize={"hd"}
+                            igdbImageSize={"c-big"}
+                          />
+                        ))
+                      : null}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Right Column */}
+            <div className="w-full space-y-8 lg:w-80">
+              <Suspense fallback={"Loading..."}>
+                <GameStats igdbId={game.igdbId} gameId={game.id} />
+              </Suspense>
+              <Suspense fallback={"Loading..."}>
+                <SimilarGames igdbId={game.igdbId} />
+              </Suspense>
+            </div>
+          </div>
+        </main>
+      </Suspense>
+    </div>
   );
 }

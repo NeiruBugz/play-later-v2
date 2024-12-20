@@ -1,9 +1,3 @@
-import Image from "next/image";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/shared/config/image.config";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -14,6 +8,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/src/shared/ui/alert-dialog";
+import { IgdbImage } from "@/src/shared/ui/igdb-image";
 
 export function ScreenshotModal({
   imageId,
@@ -26,12 +21,13 @@ export function ScreenshotModal({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <li className="w-full">
-          <Image
+          <IgdbImage
             alt={`${gameName} screenshot`}
-            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageId}.webp`}
-            width={NEXT_IMAGE_SIZES["s-md"].width}
-            height={NEXT_IMAGE_SIZES["s-md"].height}
             className="h-auto w-full"
+            gameTitle={gameName}
+            coverImageId={imageId}
+            igdbSrcSize={"s-md"}
+            igdbImageSize={"s-md"}
           />
         </li>
       </AlertDialogTrigger>
@@ -40,11 +36,12 @@ export function ScreenshotModal({
           <AlertDialogTitle>{gameName}</AlertDialogTitle>
           <AlertDialogDescription></AlertDialogDescription>
         </AlertDialogHeader>
-        <Image
+        <IgdbImage
           alt={`${gameName} screenshot`}
-          src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${imageId}.webp`}
-          width={NEXT_IMAGE_SIZES["s-big"].width}
-          height={NEXT_IMAGE_SIZES["s-big"].height}
+          gameTitle={gameName}
+          coverImageId={imageId}
+          igdbSrcSize={"s-big"}
+          igdbImageSize={"s-big"}
         />
         <AlertDialogFooter>
           <AlertDialogCancel>Close</AlertDialogCancel>

@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { SearchResponse } from "@/src/shared/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 const fetchSearchResults = async (
   query: string
@@ -23,4 +23,14 @@ export function useIGDBSearch(query: string | undefined) {
   });
 
   return { data, error, isFetching, isError, refetch, isStale };
+}
+
+export function useIGDBSearchMutation() {
+  return useMutation({
+    mutationKey: ["search", "idgb"],
+    mutationFn: async (query: string) => {
+      const response = await fetchSearchResults(query);
+      return response.response;
+    },
+  });
 }

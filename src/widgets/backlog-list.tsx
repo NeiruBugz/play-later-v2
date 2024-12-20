@@ -1,10 +1,5 @@
 import { getBacklogs } from "@/src/entities/backlog-item";
-import {
-  IMAGE_API,
-  IMAGE_SIZES,
-  NEXT_IMAGE_SIZES,
-} from "@/src/shared/config/image.config";
-import Image from "next/image";
+import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import Link from "next/link";
 
 export async function BacklogList() {
@@ -48,15 +43,15 @@ export async function BacklogList() {
                     >
                       <div className="group relative w-fit cursor-pointer rounded-xl border bg-background text-white shadow-md transition-all hover:shadow-xl">
                         <div className="flex size-[90px] items-center justify-center">
-                          <Image
-                            alt={`${backlogItem.game.title} cover art`}
+                          <IgdbImage
                             className="h-full w-full rounded-xl object-cover"
-                            src={`${IMAGE_API}/${IMAGE_SIZES["hd"]}/${backlogItem.game.coverImage}.webp`}
-                            width={NEXT_IMAGE_SIZES["thumb"].width}
-                            height={NEXT_IMAGE_SIZES["thumb"].height}
                             style={{
                               maxWidth: "100%",
                             }}
+                            gameTitle={backlogItem.game.title}
+                            coverImageId={backlogItem.game.coverImage}
+                            igdbSrcSize={"hd"}
+                            igdbImageSize={"thumb"}
                           />
                         </div>
                       </div>

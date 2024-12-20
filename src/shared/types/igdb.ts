@@ -158,3 +158,15 @@ export type Event = {
 };
 
 export type UpcomingEventsResponse = Event[];
+
+export type Artwork = {
+  id: number;
+  alpha_channel: boolean;
+  animated: boolean;
+  game: number;
+  height: number;
+  image_id: string;
+  url: string;
+  width: number;
+  checksum: string;
+};
