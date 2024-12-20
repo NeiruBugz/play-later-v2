@@ -1,11 +1,10 @@
-import * as React from "react"
-import { DayPicker } from "react-day-picker"
+import { cn } from "@/src/shared/lib/tailwind-merge";
+import { buttonVariants } from "@/src/shared/ui/button";
+import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
+import * as React from "react";
+import { DayPicker } from "react-day-picker";
 
-import { cn } from "@/src/shared/lib/tailwind-merge"
-import { buttonVariants } from "@/src/shared/ui/button"
-import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
-
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 function Calendar({
   className,
@@ -59,16 +58,22 @@ function Calendar({
       }}
       components={{
         IconLeft: ({ className, ...props }) => (
-          <ChevronLeftIcon className={cn("h-4 w-4", className)} {...props} />
+          <ChevronLeftIcon
+            className={cn("h-4 w-4", className)}
+            style={props.style}
+          />
         ),
         IconRight: ({ className, ...props }) => (
-          <ChevronRightIcon className={cn("h-4 w-4", className)} {...props} />
+          <ChevronRightIcon
+            className={cn("h-4 w-4", className)}
+            style={props.style}
+          />
         ),
       }}
       {...props}
     />
-  )
+  );
 }
-Calendar.displayName = "Calendar"
+Calendar.displayName = "Calendar";
 
-export { Calendar }
+export { Calendar };
