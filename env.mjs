@@ -2,9 +2,6 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 export const env = createEnv({
-  client: {
-    NEXT_PUBLIC_IFRAME_HOST: z.string().url(),
-  },
   runtimeEnv: {
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
@@ -24,7 +21,6 @@ export const env = createEnv({
     POSTGRES_URL_NON_POOLING: process.env.POSTGRES_URL_NON_POOLING,
     POSTGRES_USER: process.env.POSTGRES_USER,
     STEAM_API_KEY: process.env.STEAM_API_KEY,
-    NEXT_PUBLIC_IFRAME_HOST: process.env.NEXT_PUBLIC_IFRAME_HOST,
   },
   server: {
     AUTH_GOOGLE_ID: z.string(),

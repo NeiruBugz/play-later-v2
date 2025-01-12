@@ -13,7 +13,6 @@ import { Skeleton } from "@/src/shared/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/shared/ui/tabs";
 import { GameScreenshots } from "@/src/widgets/game-screenshots";
 import { Header } from "@/src/widgets/header";
-import { IframeDrawer } from "@/src/widgets/iframe-drawer";
 import { Heart, Star } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -101,7 +100,6 @@ export default async function GamePage(props: GenericPageProps) {
                     <Star className="h-4 w-4" />
                     <span>Write a Review</span>
                   </Button>
-                  <IframeDrawer igdbId={game.igdbId} />
                 </div>
               </div>
 

@@ -13,7 +13,6 @@ import { Skeleton } from "@/src/shared/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/shared/ui/tabs";
 import { GameScreenshots } from "@/src/widgets/game-screenshots";
 import { Header } from "@/src/widgets/header";
-import { IframeDrawer } from "@/src/widgets/iframe-drawer";
 import { SimilarGames } from "@/src/widgets/similar-games";
 import { Heart, ListPlus, Star } from "lucide-react";
 import { Suspense } from "react";
