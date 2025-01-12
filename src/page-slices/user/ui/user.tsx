@@ -9,6 +9,7 @@ import {
 } from "@/src/shared/ui/dropdown-menu";
 import { ThemeToggle } from "@/src/widgets/theme-toggle";
 import { ExitIcon } from "@radix-ui/react-icons";
+import { Settings } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { memo } from "react";
@@ -46,9 +47,7 @@ const User = memo(function User() {
       <DropdownMenuContent>
         <ThemeToggle />
         <DropdownMenuItem>
-          <Link href={`/user/stats`}>Stats</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
+          <Settings />
           <Link href={`/user/${session.data.user.id}`}>Settings</Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
