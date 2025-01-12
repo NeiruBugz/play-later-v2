@@ -16,6 +16,8 @@ type GameCardProps = {
   };
   backlogItems?: Omit<BacklogItem, "game">[];
   isFromSharedWishlist?: boolean;
+  hasActions?: boolean;
+  isExternalGame?: boolean;
 };
 
 const isNewCard = true;
@@ -24,10 +26,15 @@ export function BacklogItemCard({
   game,
   backlogItems,
   isFromSharedWishlist,
+  hasActions = true,
+  isExternalGame = false,
 }: GameCardProps) {
   if (isNewCard) {
     return (
-      <Link href={`/game/${game.id}`}>
+      <Link
+        href={isExternalGame ? `/game/external/${game.id}` : `/game/${game.id}`}
+        className="flex-shrink-0"
+      >
         <div
           key={game.id}
           className="group relative aspect-[4/5] overflow-hidden rounded-lg"
@@ -47,19 +54,21 @@ export function BacklogItemCard({
             <h3 className="text-base font-semibold text-white">{game.title}</h3>
             <GamePlatform backlogItems={backlogItems} />
           </div>
-          <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-            <TooltipProvider>
-              <StartPlayingActionButton
-                game={game}
-                backlogItems={backlogItems}
-              />
-              <CompleteActionButton game={game} backlogItems={backlogItems} />
-              <MoveToBacklogActionButton
-                game={game}
-                backlogItems={backlogItems}
-              />
-            </TooltipProvider>
-          </div>
+          {hasActions ? (
+            <div className="absolute right-2 top-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+              <TooltipProvider>
+                <StartPlayingActionButton
+                  game={game}
+                  backlogItems={backlogItems}
+                />
+                <CompleteActionButton game={game} backlogItems={backlogItems} />
+                <MoveToBacklogActionButton
+                  game={game}
+                  backlogItems={backlogItems}
+                />
+              </TooltipProvider>
+            </div>
+          ) : null}
         </div>
       </Link>
     );

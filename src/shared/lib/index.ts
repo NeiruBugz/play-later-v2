@@ -6,3 +6,4 @@ export { platformToBackgroundColor } from "./platform-to-color";
 export { normalizeString } from "./string";
 export { playingOnPlatforms } from "./platform-select-options";
 export { getUniquePlatforms } from "./get-unique-platforms";
+export { platformMapper } from "./platform-mapper";

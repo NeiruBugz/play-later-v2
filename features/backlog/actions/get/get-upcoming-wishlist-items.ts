@@ -6,6 +6,7 @@ import { UpcomingReleaseResponse } from "@/src/shared/types";
 export async function getUpcomingWishlistItems() {
   try {
     const userId = await getServerUserId();
+    await igdbApi.getToken();
 
     if (!userId) {
       return [];
@@ -33,11 +34,11 @@ export async function getUpcomingWishlistItems() {
     }
     const releases = await igdbApi.getNextMonthReleases(ids as number[]);
 
-    if (!releases) {
+    if (!releases || !releases.length) {
       return [];
     }
 
-    const games = [...releases] as unknown as Array<
+    const games = [...(releases ?? [])] as unknown as Array<
       { gameId: number } & UpcomingReleaseResponse
     >;
 

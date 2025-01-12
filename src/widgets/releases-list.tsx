@@ -1,7 +1,13 @@
+import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
 import { getUpcomingWishlistItems } from "@/features/backlog/actions";
-import { cn } from "@/src/shared/lib";
+import {
+  cn,
+  platformMapper,
+  platformToBackgroundColor,
+} from "@/src/shared/lib";
 import { Badge } from "@/src/shared/ui/badge";
 import { Calendar } from "lucide-react";
+import { cache } from "react";
 
 type UpcomingRelease = {
   cover: {
@@ -16,6 +22,7 @@ type UpcomingRelease = {
     platform: { id: number; name: string };
   }>;
 };
+const isNewCard = true;
 
 const Release = ({
   index,
@@ -26,6 +33,46 @@ const Release = ({
   release: UpcomingRelease;
 }) => {
   const date = release.release_dates?.[0];
+
+  if (isNewCard) {
+    return (
+      <div className="group relative flex-shrink-0">
+        <div>
+          <BacklogItemCard
+            game={{
+              id: String(release.id),
+              title: release.name,
+              coverImage: release.cover.image_id,
+              igdbId: release.id,
+            }}
+            backlogItems={[]}
+            hasActions={false}
+            isExternalGame
+          />
+        </div>
+        <div className="invisible absolute bottom-0 w-full rounded-b-lg bg-slate-500/60 p-2 group-hover:visible">
+          <Badge className="flex h-fit w-fit flex-shrink-0 items-center gap-1">
+            <Calendar className="size-3.5" />
+            <p>{date.human}</p>
+          </Badge>
+          <div className="mt-1 flex flex-wrap gap-1">
+            {release.release_dates.map((platform, index) => (
+              <span
+                className={cn(
+                  "rounded-md bg-slate-400 px-2 py-1 text-xs font-medium text-white",
+                  {},
+                  platformToBackgroundColor(platform.platform.name)
+                )}
+                key={platform.id}
+              >
+                {platformMapper(platform.platform.name)}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -52,11 +99,15 @@ const Release = ({
   );
 };
 
+const getReleases = cache(async () => await getUpcomingWishlistItems());
+
 export async function ReleasesList() {
-  const releases = await getUpcomingWishlistItems();
+  const releases = await getReleases();
+
+  console.log({ releases });
 
   return (
-    <div className="flex w-full flex-col justify-start gap-3">
+    <div className="flex w-full max-w-[420px] justify-start gap-3 overflow-x-auto">
       {releases.length ? (
         releases.map((release, index) => (
           <Release

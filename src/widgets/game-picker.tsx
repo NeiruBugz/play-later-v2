@@ -151,7 +151,7 @@ export function GamePicker({
       />
       <div
         className={cn(
-          "absolute top-[62px] z-10 max-h-[260px] w-full overflow-scroll rounded-md rounded-t-none border border-input border-t-transparent shadow-sm",
+          "absolute top-[63px] z-10 max-h-[260px] w-full overflow-scroll rounded-md rounded-t-none border border-input border-t-transparent bg-background py-2 shadow-sm",
           {
             hidden: !isPopoverOpen,
             // "border-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring": isInputFocused

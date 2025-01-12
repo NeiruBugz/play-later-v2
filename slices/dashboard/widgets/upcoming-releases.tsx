@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/shared/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/shared/ui/card";
 import { ReleasesList } from "@/src/widgets/releases-list";
 import { Clock } from "lucide-react";
 import { Suspense } from "react";
@@ -13,7 +19,7 @@ export function UpcomingReleases() {
         <CardDescription>List of your anticipated games</CardDescription>
       </CardHeader>
       <CardContent>
-        <Suspense>
+        <Suspense fallback={"Loading..."}>
           <ReleasesList />
         </Suspense>
       </CardContent>
