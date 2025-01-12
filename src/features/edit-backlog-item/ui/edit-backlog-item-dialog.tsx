@@ -1,5 +1,4 @@
-import { getBacklogItems } from "@/src/entities/backlog-item";
-import { DeleteBacklogItem } from "@/src/features/delete-backlog-item";
+import { getBacklogItems } from "@/features/backlog/actions";
 import { CreateBacklogItemForm } from "@/src/features/edit-backlog-item/ui/create-backlog-item-form";
 import { BacklogStatusMapper, normalizeString } from "@/src/shared/lib";
 import { Button } from "@/src/shared/ui";
@@ -29,7 +28,7 @@ export async function EditBacklogItemDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="my-2 w-full hidden md:block">Edit entry</Button>
+        <Button className="my-2">Edit entry</Button>
       </DialogTrigger>
       <DialogContent className="max-w-fit">
         <DialogHeader>

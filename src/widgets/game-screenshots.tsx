@@ -1,5 +1,5 @@
-import { ScreenshotModal } from "@/src/widgets/screenshot-modal";
 import igdbApi from "@/src/shared/api/igdb";
+import { IgdbImage } from "@/src/shared/ui/igdb-image";
 
 export async function GameScreenshots({
   gameId,
@@ -15,16 +15,19 @@ export async function GameScreenshots({
   }
 
   return (
-    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {screenshots.map((screenshot) => {
-        return (
-          <ScreenshotModal
-            key={screenshot.id}
-            gameName={gameName}
-            imageId={screenshot.image_id}
-          />
-        );
-      })}
-    </ul>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {screenshots && screenshots
+        ? screenshots?.map((i) => (
+            <IgdbImage
+              key={i.id}
+              className="w-full rounded-lg"
+              gameTitle={gameName}
+              coverImageId={i.image_id}
+              igdbSrcSize={"hd"}
+              igdbImageSize={"c-big"}
+            />
+          ))
+        : null}
+    </div>
   );
 }

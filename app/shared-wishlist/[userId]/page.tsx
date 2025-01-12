@@ -1,7 +1,5 @@
-import {
-  BacklogItemCard,
-  getWishlistedItems,
-} from "@/src/entities/backlog-item";
+import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
+import { getWishlistedItems } from "@/features/backlog/actions";
 import { GenericPageProps } from "@/src/shared/types";
 import { Header } from "@/src/widgets/header";
 
@@ -20,6 +18,7 @@ export default async function SharedWishlistPage(props: GenericPageProps) {
                     id: game.id,
                     title: game.title,
                     coverImage: game.coverImage,
+                    igdbId: game.igdbId,
                   }}
                   backlogItems={backlogItems}
                   isFromSharedWishlist

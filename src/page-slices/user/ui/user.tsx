@@ -8,7 +8,8 @@ import {
   DropdownMenuTrigger,
 } from "@/src/shared/ui/dropdown-menu";
 import { ThemeToggle } from "@/src/widgets/theme-toggle";
-import { useSession } from "next-auth/react";
+import { ExitIcon } from "@radix-ui/react-icons";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { memo } from "react";
 
@@ -49,6 +50,10 @@ const User = memo(function User() {
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Link href={`/user/${session.data.user.id}`}>Settings</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+          <ExitIcon />
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,4 +1,4 @@
-import { getUserGamesWithGroupedBacklog } from "@/src/collection/actions";
+import { getUserGamesWithGroupedBacklogPaginated } from "@/src/collection/actions";
 import { Pagination } from "@/src/features/filter/ui/pagination";
 import { GridView } from "@/src/widgets/grid-view";
 import Link from "next/link";
@@ -11,7 +11,7 @@ export async function CollectionList({
 }: {
   params: Record<string, string>;
 }) {
-  const { collection, count } = await getUserGamesWithGroupedBacklog({
+  const { collection, count } = await getUserGamesWithGroupedBacklogPaginated({
     platform: params.platform,
     status: params.status,
     search: params.search,

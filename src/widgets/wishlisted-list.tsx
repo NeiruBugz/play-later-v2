@@ -1,7 +1,5 @@
-import {
-  BacklogItemCard,
-  getWishlistedItems,
-} from "@/src/entities/backlog-item";
+import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
+import { getWishlistedItems } from "@/features/backlog/actions";
 import Link from "next/link";
 
 export async function WishlistedList() {
@@ -35,6 +33,7 @@ export async function WishlistedList() {
                 id: game.id,
                 title: game.title,
                 coverImage: game.coverImage,
+                igdbId: game.igdbId,
               }}
               backlogItems={backlogItems}
             />

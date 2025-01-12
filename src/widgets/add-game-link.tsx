@@ -1,13 +1,11 @@
-"use client";
-
+import { auth } from "@/auth";
 import { Button } from "@/src/shared/ui";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 
-export function AddGameLink() {
-  const session = useSession();
+export async function AddGameLink() {
+  const session = await auth();
 
-  if (!session) {
+  if (!session?.user) {
     return;
   }
 

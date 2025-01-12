@@ -1,4 +1,4 @@
-import { getBacklogs } from "@/src/entities/backlog-item";
+import { getBacklogs } from "@/features/backlog/actions";
 import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import Link from "next/link";
 
@@ -20,7 +20,7 @@ export async function BacklogList() {
           <Link
             key={backlog.user.id}
             className="w-fit text-lg font-medium"
-            href={`/backlogs/${backlog.user.id}`}
+            href={`/backlog/${backlog.user.id}`}
           >
             <div className="relative h-full w-fit min-w-[270px] rounded-md border p-3">
               <p className="text-lg font-medium">

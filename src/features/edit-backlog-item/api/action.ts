@@ -1,9 +1,8 @@
 "use server";
 
-import { createBacklogItem } from "@/src/entities/backlog-item";
-import { updateBacklogItem } from "@/src/entities/backlog-item/model/update-backlog-item";
+import { createBacklogItem } from "@/features/backlog/actions";
+import { updateBacklogItem } from "@/features/backlog/actions/update/update-backlog-item";
 import { z } from "zod";
-
 
 const EditBacklogItemSchema = z.object({
   status: z.string(),
@@ -91,7 +90,7 @@ export async function createBacklogItemAction(
       },
       userId: parsedPayload.data.userId,
       gameId: parsedPayload.data.gameId,
-    })
+    });
     return {
       message: "Success",
       data: parsedPayload.data,
@@ -101,4 +100,4 @@ export async function createBacklogItemAction(
       message: "Failed to create backlog item",
     };
   }
-};
+}

@@ -1,7 +1,7 @@
-import { CompleteActionButton } from "@/src/entities/backlog-item/ui/complete-action-button";
-import { GamePlatform } from "@/src/entities/backlog-item/ui/game-platform";
-import { MoveToBacklogActionButton } from "@/src/entities/backlog-item/ui/move-to-backlog-action-button";
-import { StartPlayingActionButton } from "@/src/entities/backlog-item/ui/start-playing-action-button";
+import { CompleteActionButton } from "@/components/backlog/complete-action-button";
+import { GamePlatform } from "@/components/backlog/game-platform";
+import { MoveToBacklogActionButton } from "@/components/backlog/move-to-backlog-action-button";
+import { StartPlayingActionButton } from "@/components/backlog/start-playing-action-button";
 import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import { TooltipProvider } from "@/src/shared/ui/tooltip";
 import type { BacklogItem } from "@prisma/client";
@@ -12,6 +12,7 @@ type GameCardProps = {
     id: string;
     title: string;
     coverImage: string | null;
+    igdbId: number;
   };
   backlogItems?: Omit<BacklogItem, "game">[];
   isFromSharedWishlist?: boolean;

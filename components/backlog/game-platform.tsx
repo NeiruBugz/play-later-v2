@@ -1,6 +1,6 @@
 "use client";
 
-import { useMatchingBacklogItem } from "@/src/entities/backlog-item/ui/use-matching-backlog-item";
+import { useMatchingBacklogItem } from "@/components/backlog/use-matching-backlog-item";
 import { normalizeString } from "@/src/shared/lib";
 import { BacklogItem } from "@prisma/client";
 

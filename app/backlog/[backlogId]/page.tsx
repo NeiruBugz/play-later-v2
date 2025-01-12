@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getUsersBacklog } from "@/src/entities/backlog-item";
+import { getUsersBacklog } from "@/features/backlog/actions";
 import { getUserInfo } from "@/src/page-slices/user/api/get-user-info";
 import { BacklogStatusMapper, normalizeString } from "@/src/shared/lib";
 import { IgdbImage } from "@/src/shared/ui/igdb-image";
@@ -22,11 +22,11 @@ export default async function UsersBacklogPage(props: {
   return (
     <>
       <Header />
-      <div className="container">
+      <div className="container pt-[60px]">
         <h1 className="font-bold md:text-xl xl:text-2xl">
           {user?.username ?? user?.name}&apos;s Backlog
         </h1>
-        <ul className="mt-2 flex flex-wrap gap-2">
+        <ul className="mt-2 flex flex-wrap justify-evenly gap-2">
           {userGamesList.map((backlogItem) => (
             <li
               key={backlogItem.id}

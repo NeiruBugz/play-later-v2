@@ -1,4 +1,4 @@
-import { getUpcomingWishlistItems } from "@/src/entities/backlog-item/model";
+import { getUpcomingWishlistItems } from "@/features/backlog/actions";
 import { cn } from "@/src/shared/lib";
 import { Badge } from "@/src/shared/ui/badge";
 import { Calendar } from "lucide-react";

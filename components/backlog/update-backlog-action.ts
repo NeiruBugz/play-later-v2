@@ -1,6 +1,6 @@
 "use server";
 
-import { updateBacklogItemStatus } from "@/src/entities/backlog-item/model/update-backlog-item";
+import { updateBacklogItemStatus } from "@/features/backlog/actions/update/update-backlog-item";
 import { BacklogItemStatus } from "@prisma/client";
 
 export async function updateBacklogItemAction({

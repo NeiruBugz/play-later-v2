@@ -8,7 +8,7 @@ import { AddGameLink } from "@/src/widgets/add-game-link";
 import { AppLink } from "@/src/widgets/app-link";
 import { GamepadIcon, MenuIcon } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { memo } from "react";
 import { User } from "src/page-slices/user";
 
 const linksConfig = [
@@ -21,7 +21,7 @@ const linksConfig = [
     label: "Wishlist",
   },
   {
-    href: "/backlogs",
+    href: "/backlog",
     label: "Backlogs",
   },
   {
@@ -30,10 +30,10 @@ const linksConfig = [
   },
 ] as const;
 
-export function Header() {
+const Header = memo(function Header() {
   return (
-    <header className="fixed top-0 z-20 mx-auto mb-[60px] flex w-full items-center justify-between bg-gradient-to-b from-background via-background/60 to-transparent px-4 py-3 md:px-6 lg:px-8">
-      <div className="container flex items-center gap-3">
+    <header className="container fixed top-0 z-20 mx-auto mb-[60px] flex w-full items-center justify-between bg-gradient-to-b from-background via-background/60 to-transparent py-3">
+      <div className="flex items-center gap-3">
         <div className="block md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -68,4 +68,8 @@ export function Header() {
       </div>
     </header>
   );
-}
+});
+
+Header.displayName = "Header";
+
+export { Header };

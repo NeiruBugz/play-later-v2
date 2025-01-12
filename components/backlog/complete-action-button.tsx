@@ -1,7 +1,7 @@
 "use client";
 
-import { updateBacklogItemAction } from "@/src/entities/backlog-item/ui/update-backlog-action";
-import { useMatchingBacklogItem } from "@/src/entities/backlog-item/ui/use-matching-backlog-item";
+import { updateBacklogItemAction } from "@/components/backlog/update-backlog-action";
+import { useMatchingBacklogItem } from "@/components/backlog/use-matching-backlog-item";
 import { Button } from "@/src/shared/ui";
 import {
   Tooltip,
@@ -9,10 +9,10 @@ import {
   TooltipTrigger,
 } from "@/src/shared/ui/tooltip";
 import { BacklogItem } from "@prisma/client";
-import { Play } from "lucide-react";
-import { MouseEvent, useCallback } from "react";
+import { Check } from "lucide-react";
+import { useCallback, type MouseEvent } from "react";
 
-type StartPlayingActionButtonProps = {
+type CompleteActionButtonProps = {
   game: {
     id: string;
     title: string;
@@ -20,10 +20,11 @@ type StartPlayingActionButtonProps = {
   };
   backlogItems?: Omit<BacklogItem, "game">[];
 };
-export function StartPlayingActionButton({
+
+export function CompleteActionButton({
   game,
   backlogItems,
-}: StartPlayingActionButtonProps) {
+}: CompleteActionButtonProps) {
   const matchingStatusItem = useMatchingBacklogItem({ backlogItems });
 
   const onClick = useCallback(
@@ -36,17 +37,16 @@ export function StartPlayingActionButton({
       try {
         await updateBacklogItemAction({
           id: matchingStatusItem.id,
-          status: "PLAYING",
+          status: "COMPLETED",
         });
       } catch (e) {}
     },
     [matchingStatusItem]
   );
 
-  if (matchingStatusItem?.status === "PLAYING") {
-    return;
+  if (matchingStatusItem?.status === "COMPLETED") {
+    return null;
   }
-
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -54,13 +54,13 @@ export function StartPlayingActionButton({
           variant="secondary"
           size="icon"
           className="h-7 w-7"
-          onClick={onClick}
+          onClick={() => console.log(game.id, "completed")}
         >
-          <Play className="h-3 w-3" />
+          <Check className="h-3 w-3" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Start Playing</p>
+        <p>Mark as Completed</p>
       </TooltipContent>
     </Tooltip>
   );

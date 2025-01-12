@@ -1,5 +1,5 @@
 import { getServerUserId } from "@/auth";
-import { GameWithBacklogItems } from "@/src/entities/backlog-item/model/get-backlog-items";
+import type { GameWithBacklogItems } from "@/features/backlog/actions/get/get-user-games-with-grouped-backlog";
 import { prisma } from "@/src/shared/api";
 import { BacklogItemStatus } from "@prisma/client";
 import { z } from "zod";
@@ -11,7 +11,7 @@ const FilterParamsSchema = z.object({
   page: z.number().optional().default(1),
 });
 
-export async function getUserGamesWithGroupedBacklog(
+export async function getUserGamesWithGroupedBacklogPaginated(
   params: Record<string, string | number>
 ): Promise<{ collection: GameWithBacklogItems[]; count: number }> {
   try {
@@ -42,13 +42,13 @@ export async function getUserGamesWithGroupedBacklog(
         game: {
           OR: parsedPayload.data.search
             ? [
-              {
-                title: {
-                  contains: parsedPayload.data.search,
-                  mode: "insensitive",
+                {
+                  title: {
+                    contains: parsedPayload.data.search,
+                    mode: "insensitive",
+                  },
                 },
-              },
-            ]
+              ]
             : undefined,
         },
       },
@@ -78,13 +78,13 @@ export async function getUserGamesWithGroupedBacklog(
         game: {
           OR: parsedPayload.data.search
             ? [
-              {
-                title: {
-                  contains: parsedPayload.data.search,
-                  mode: "insensitive",
+                {
+                  title: {
+                    contains: parsedPayload.data.search,
+                    mode: "insensitive",
+                  },
                 },
-              },
-            ]
+              ]
             : undefined,
         },
       },

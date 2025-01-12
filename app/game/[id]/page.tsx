@@ -1,3 +1,4 @@
+import { EditBacklogItemDialog } from "@/src/features/edit-backlog-item";
 import { GameStats, getGame, Reviews } from "@/src/page-slices/game";
 import { Artwork } from "@/src/page-slices/game/ui/artwork";
 import { SimilarGames } from "@/src/page-slices/game/ui/similar-games";
@@ -10,8 +11,10 @@ import { Button } from "@/src/shared/ui/button";
 import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import { Skeleton } from "@/src/shared/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/shared/ui/tabs";
+import { GameScreenshots } from "@/src/widgets/game-screenshots";
 import { Header } from "@/src/widgets/header";
-import { BookmarkIcon, Heart, ListPlus, Star } from "lucide-react";
+import { IframeDrawer } from "@/src/widgets/iframe-drawer";
+import { Heart, Star } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -22,10 +25,7 @@ export default async function GamePage(props: GenericPageProps) {
     return notFound();
   }
 
-  const [igdbData, screenshots] = await Promise.all([
-    igdbApi.getGameById(gameResponse.game.igdbId),
-    igdbApi.getGameScreenshots(gameResponse.game.igdbId),
-  ]);
+  const igdbData = await igdbApi.getGameById(gameResponse.game.igdbId);
 
   const { game } = gameResponse;
 
@@ -67,8 +67,8 @@ export default async function GamePage(props: GenericPageProps) {
             </div>
           </div>
         </div>
-        <main className="container py-8">
-          <div className="flex flex-col gap-8 lg:flex-row">
+        <main className="p-8">
+          <div className="container flex flex-col gap-8 lg:flex-row">
             <div className="flex-1 space-y-8">
               <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div className="space-y-1">
@@ -83,22 +83,25 @@ export default async function GamePage(props: GenericPageProps) {
                   <Badge>
                     {BacklogStatusMapper[game.backlogItems[0].status]}
                   </Badge>
-                  <Button variant="outline" className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    className={cn("flex items-center gap-2", {
+                      hidden: game.backlogItems.length,
+                    })}
+                  >
                     <Heart className="h-4 w-4" />
                     <span>Add to Wishlist</span>
                   </Button>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <ListPlus className="h-4 w-4" />
-                    <span>Add to Collection</span>
-                  </Button>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <BookmarkIcon className="h-4 w-4" />
-                    <span>Bookmark</span>
-                  </Button>
+                  <EditBacklogItemDialog
+                    gameId={game.id}
+                    igdbId={game.igdbId}
+                    gameTitle={game.title}
+                  />
                   <Button className="flex items-center gap-2">
                     <Star className="h-4 w-4" />
                     <span>Write a Review</span>
                   </Button>
+                  <IframeDrawer igdbId={game.igdbId} />
                 </div>
               </div>
 
@@ -133,20 +136,12 @@ export default async function GamePage(props: GenericPageProps) {
                   <Reviews gameId={game.id} gameTitle={game.title} />
                 </TabsContent>
                 <TabsContent value="screenshots">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {screenshots && screenshots.screenshots
-                      ? screenshots.screenshots?.map((i) => (
-                          <IgdbImage
-                            key={i.id}
-                            className="w-full rounded-lg"
-                            gameTitle={game.title}
-                            coverImageId={i.image_id}
-                            igdbSrcSize={"hd"}
-                            igdbImageSize={"c-big"}
-                          />
-                        ))
-                      : null}
-                  </div>
+                  <Suspense>
+                    <GameScreenshots
+                      gameId={game.igdbId}
+                      gameName={game.title}
+                    />
+                  </Suspense>
                 </TabsContent>
               </Tabs>
             </div>

@@ -1,5 +1,5 @@
 import { getServerUserId } from "@/auth";
-import { createBacklogItem } from "@/src/entities/backlog-item";
+import { createBacklogItem } from "@/features/backlog/actions";
 import { AddGameToBacklogInput, createGame } from "@/src/entities/game";
 import { prisma } from "@/src/shared/api";
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { deleteBacklogItem } from "@/src/entities/backlog-item";
+import { deleteBacklogItem } from "@/features/backlog/actions";
 
 export async function deleteBacklogItemAction(
   prevState: { message: string },

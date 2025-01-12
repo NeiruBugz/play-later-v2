@@ -124,6 +124,7 @@ const igdbApi = {
 
   async getToken(): Promise<void> {
     try {
+      console.log(TOKEN_URL);
       const res = await fetch(TOKEN_URL, { cache: "no-store", method: "POST" });
       this.token = await res.json();
     } catch (thrown) {

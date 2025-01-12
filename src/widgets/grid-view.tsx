@@ -1,5 +1,5 @@
-import { BacklogItemCard } from "@/src/entities/backlog-item";
-import { GameWithBacklogItems } from "@/src/entities/backlog-item/model/get-backlog-items";
+import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
+import type { GameWithBacklogItems } from "@/features/backlog/actions/get/get-user-games-with-grouped-backlog";
 
 export function GridView({
   backlogItems,
@@ -15,6 +15,7 @@ export function GridView({
               id: game.id,
               title: game.title,
               coverImage: game.coverImage,
+              igdbId: game.igdbId,
             }}
             backlogItems={backlogItems}
           />

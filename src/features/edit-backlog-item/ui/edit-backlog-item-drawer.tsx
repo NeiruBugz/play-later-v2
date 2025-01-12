@@ -1,4 +1,4 @@
-import { getBacklogItems } from "@/src/entities/backlog-item";
+import { getBacklogItems } from "@/features/backlog/actions";
 import { EditDrawerContent } from "@/src/features/edit-backlog-item/ui/drawer-content";
 import { Button } from "@/src/shared/ui";
 import {

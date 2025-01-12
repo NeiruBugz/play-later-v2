@@ -1,4 +1,4 @@
-import { BacklogItemCard } from "@/src/entities/backlog-item";
+import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
 import igdbApi from "@/src/shared/api/igdb";
 
 export async function SimilarGames({ igdbId }: { igdbId: number }) {
@@ -25,6 +25,7 @@ export async function SimilarGames({ igdbId }: { igdbId: number }) {
                   id: String(game.id),
                   title: game.name,
                   coverImage: game.cover.image_id,
+                  igdbId,
                 }}
                 backlogItems={[]}
                 isFromSharedWishlist

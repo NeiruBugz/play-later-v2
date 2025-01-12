@@ -1,7 +1,7 @@
 "use client";
 
-import { updateBacklogItemAction } from "@/src/entities/backlog-item/ui/update-backlog-action";
-import { useMatchingBacklogItem } from "@/src/entities/backlog-item/ui/use-matching-backlog-item";
+import { updateBacklogItemAction } from "@/components/backlog/update-backlog-action";
+import { useMatchingBacklogItem } from "@/components/backlog/use-matching-backlog-item";
 import { Button } from "@/src/shared/ui";
 import {
   Tooltip,

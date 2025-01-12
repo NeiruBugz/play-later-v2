@@ -1,4 +1,4 @@
-import { getUserGamesWithGroupedBacklog } from "@/src/entities/backlog-item";
+import { getUserGamesWithGroupedBacklog } from "@/features/backlog/actions";
 import { getIgnoredGames } from "@/src/entities/ignored-game";
 import { ImportDialog } from "@/src/features/steam-import";
 import { getUserInfo } from "@/src/page-slices/user/api/get-user-info";
