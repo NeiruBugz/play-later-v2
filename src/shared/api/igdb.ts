@@ -5,6 +5,7 @@ import {
   Event,
   FullGameInfoResponse,
   GenresResponse,
+  IgdbGameResponseItem,
   RatedGameResponse,
   RequestOptions,
   SearchResponse,
@@ -28,7 +29,7 @@ function normalizeString(input: string) {
   return input
     .toLowerCase()
     .replace(/[:\-]/g, "")
-    .replace(/\b(?:the)\b/g, "")
+    .replace(/\bthe\b/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -350,6 +351,17 @@ const igdbApi = {
     return this.request({
       body: `fields id, name; search "${platformName}"; limit 1;`,
       resource: "/platforms",
+    });
+  },
+
+  async getGameByName(
+    gameName: string
+  ): Promise<IgdbGameResponseItem[] | undefined> {
+    const query = `fields name, cover.url, cover.image_id version_title; search "${gameName}";`;
+
+    return this.request<IgdbGameResponseItem[]>({
+      body: query,
+      resource: "/games",
     });
   },
 };

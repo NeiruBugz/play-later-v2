@@ -18,8 +18,8 @@ import {
   TooltipTrigger,
 } from "@/src/shared/ui/tooltip";
 import { BacklogItemStatus } from "@prisma/client";
-import { EyeOff, Save, SaveIcon } from "lucide-react";
-import Image from "next/image";
+import { EyeOff, Save } from "lucide-react";
+import { memo, useCallback, useTransition } from "react";
 import { minToHours } from "../lib";
 
 type ImportedGameItemProps = {
@@ -37,25 +37,33 @@ function ImportedGameCard({
   game,
   onIgnoreClick,
   onGameStatusChange,
-  markGameForSave,
   onSaveGameClick,
-  isIgnored,
-  isMarkedForSave,
-  isAdded,
 }: ImportedGameItemProps) {
+  const [isPending, startTransition] = useTransition();
+
+  const onSaveClick = useCallback(() => {
+    if (onSaveGameClick) {
+      startTransition(async () => {
+        await onSaveGameClick(game);
+      });
+    }
+  }, [game, onSaveGameClick]);
+
+  const onIgnore = useCallback(() => {
+    if (onIgnoreClick) {
+      startTransition(() => {
+        onIgnoreClick(game);
+      });
+    }
+  }, [game, onIgnoreClick]);
+
   return (
-    <Card className="overflow-hidden">
+    <Card
+      className={cn("overflow-hidden", {
+        "animate-pulse": isPending,
+      })}
+    >
       <div className="flex items-center gap-4 p-4">
-        <div className="flex-shrink-0">
-          <Image
-            src={`https://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`}
-            alt={game.name}
-            width={32}
-            height={32}
-            className="rounded-md object-cover"
-            priority
-          />
-        </div>
         <div className="min-w-0 flex-1">
           <CardTitle>{game.name}</CardTitle>
           <CardDescription>
@@ -88,7 +96,8 @@ function ImportedGameCard({
                     size="icon"
                     variant="outline"
                     className="text-green-600 hover:bg-green-50 hover:text-green-700"
-                    onClick={() => onSaveGameClick(game)}
+                    onClick={onSaveClick}
+                    disabled={isPending}
                   >
                     <Save className="h-4 w-4" />
                   </Button>
@@ -105,7 +114,8 @@ function ImportedGameCard({
                     size="icon"
                     variant="outline"
                     className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                    onClick={() => onIgnoreClick?.(game)}
+                    onClick={onIgnore}
+                    disabled={isPending}
                   >
                     <EyeOff className="h-4 w-4" />
                   </Button>
@@ -122,83 +132,7 @@ function ImportedGameCard({
   );
 }
 
-function ImportedGameItem({
-  game,
-  onIgnoreClick,
-  onGameStatusChange,
-  markGameForSave,
-  onSaveGameClick,
-  isIgnored,
-  isMarkedForSave,
-  isAdded,
-}: ImportedGameItemProps) {
-  if (isAdded) {
-    return null;
-  }
+const ImportedGame = memo(ImportedGameCard);
+ImportedGame.displayName = "ImportedGameCard";
 
-  return (
-    <div
-      key={game.appid}
-      className={cn(
-        "my-2 flex h-auto justify-between rounded border p-4 px-2",
-        {
-          "text-underline border-0 font-bold shadow-lg": isMarkedForSave,
-          "bg-muted-background text-muted-foreground": isIgnored,
-        }
-      )}
-    >
-      <div className="flex w-fit items-center gap-2">
-        <Image
-          width={32}
-          height={32}
-          className="overflow-hidden"
-          alt={`${game.name} Steam Logo`}
-          src={`https://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`}
-        />
-        <div>
-          <p className="w-full font-medium">{game.name}</p>
-          <span
-            className={cn("hidden text-sm", {
-              inline: game.playtime_forever !== 0,
-            })}
-          >
-            Playtime: {minToHours(game.playtime_forever)} h.
-          </span>
-        </div>
-      </div>
-
-      <div className="my-3 flex justify-between gap-2">
-        <Select
-          value={game.status}
-          onValueChange={(value) => onGameStatusChange?.(game.appid, value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select status"></SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {Object.values(BacklogItemStatus).map((key) => {
-              return (
-                <SelectItem value={key} key={key}>
-                  {BacklogStatusMapper[key]}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-        {/*<Button onClick={() => markGameForSave?.(game)} disabled={isIgnored}>Mark for save</Button>*/}
-        <Button variant="ghost" onClick={() => onSaveGameClick(game)}>
-          <SaveIcon />
-        </Button>
-        <Button
-          variant="destructive"
-          onClick={() => onIgnoreClick?.(game)}
-          disabled={isMarkedForSave}
-        >
-          Ignore
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-export { ImportedGameItem, ImportedGameCard };
+export { ImportedGame as ImportedGameCard };

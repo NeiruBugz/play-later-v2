@@ -170,3 +170,14 @@ export type Artwork = {
   width: number;
   checksum: string;
 };
+
+export type IgdbGameResponseItem = {
+  name: string;
+  version_title: string;
+  id: number;
+  cover: {
+    image_id: string;
+    id: number;
+    url: string;
+  };
+};

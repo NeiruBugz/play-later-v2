@@ -104,9 +104,7 @@ function sortAndMapGames(
   steamGames: SteamAppInfo[]
 ): Array<SteamAppInfo & { status: BacklogItemStatus }> {
   return steamGames
-    .sort((a, b) =>
-      normalizeTitle(a.name).localeCompare(normalizeTitle(b.name))
-    )
+    .sort((a, b) => b.rtime_last_played - a.rtime_last_played)
     .map((game) => ({
       ...game,
       status:
