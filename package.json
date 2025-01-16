@@ -84,6 +84,7 @@
   "devDependencies": {
     "@feature-sliced/eslint-config": "0.1.1",
     "@ianvs/prettier-plugin-sort-imports": "4.2.1",
+    "@next/bundle-analyzer": "15.1.4",
     "@t3-oss/env-nextjs": "0.10.1",
     "@tanstack/eslint-plugin-query": "5.43.1",
     "@types/node": "20.14.5",

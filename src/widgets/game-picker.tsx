@@ -151,7 +151,7 @@ export function GamePicker({
       />
       <div
         className={cn(
-          "absolute top-[63px] z-10 max-h-[260px] w-full overflow-scroll rounded-md rounded-t-none border border-input border-t-transparent bg-background py-2 shadow-sm",
+          "absolute top-[63px] z-10 max-h-[260px] w-full overflow-scroll rounded-md rounded-t-none border border-input border-t-transparent bg-gray-900 py-2 shadow-sm",
           {
             hidden: !isPopoverOpen,
             // "border-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring": isInputFocused
@@ -164,7 +164,7 @@ export function GamePicker({
             {data.map((searchItem) => (
               <li
                 key={searchItem.id}
-                className="group flex cursor-pointer gap-2 p-2 hover:bg-slate-100"
+                className="group flex cursor-pointer gap-2 p-2 hover:bg-slate-600"
                 onClick={() => onListItemClick(searchItem)}
               >
                 <GamePreviewItem type="listitem" game={searchItem} />

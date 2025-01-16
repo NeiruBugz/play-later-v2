@@ -1,5 +1,5 @@
-import { ImportedGameCard } from "@/src/features/steam-import/ui/imported-game-item";
 import { SteamAppInfo } from "@/src/shared/types";
+import { ImportedGameCard } from "./imported-game-item";
 
 const GameList: React.FC<{
   games: SteamAppInfo[];

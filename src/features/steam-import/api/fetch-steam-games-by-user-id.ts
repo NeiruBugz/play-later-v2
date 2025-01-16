@@ -1,5 +1,5 @@
+import { steamUrlBuilder } from "@/slices/import/steam/lib";
 import { resolveVanityUrl } from "@/src/features/steam-import/api/resolve-vanity-url";
-import { steamUrlBuilder } from "@/src/features/steam-import/lib";
 import { SteamAppInfo } from "@/src/shared/types";
 
 type SteamUserGamesResponse = {

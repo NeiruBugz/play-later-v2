@@ -2,9 +2,14 @@ import { SearchResponse } from "@/src/shared/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const fetchSearchResults = async (
-  query: string
+  query: string,
+  filters?: Record<string, any>
 ): Promise<{ response: SearchResponse[] }> => {
-  const res = await fetch(`/api/igdb-search?q=${query}`);
+  let platform = "";
+  if (filters && "platform" in filters) {
+    platform = filters.platform;
+  }
+  const res = await fetch(`/api/igdb-search?q=${query}&platform=${platform}`);
   if (!res.ok) {
     throw new Error("Network response was not ok");
   }
@@ -28,8 +33,14 @@ export function useIGDBSearch(query: string | undefined) {
 export function useIGDBSearchMutation() {
   return useMutation({
     mutationKey: ["search", "idgb"],
-    mutationFn: async (query: string) => {
-      const response = await fetchSearchResults(query);
+    mutationFn: async ({
+      query,
+      filters,
+    }: {
+      query: string;
+      filters?: Record<string, any>;
+    }) => {
+      const response = await fetchSearchResults(query, { platform: 6 });
       return response.response;
     },
   });

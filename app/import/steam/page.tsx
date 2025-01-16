@@ -1,10 +1,13 @@
+import { getUserGamesWithGroupedBacklog } from "@/slices/backlog/api";
+import { ImportDialog } from "@/slices/import/steam";
 import { getUserInfo } from "@/slices/user/api/get-user-info";
 import { getIgnoredGames } from "@/src/entities/ignored-game";
-import { ImportDialog } from "@/src/features/steam-import";
+import igdbApi from "@/src/shared/api/igdb";
 import { Header } from "@/src/widgets/header";
-import { getUserGamesWithGroupedBacklog } from "slices/backlog/api";
 
 export default async function SteamImportPage() {
+  const platformId = await igdbApi.getPlatformId("PC (Microsoft Windows)");
+  console.log(platformId);
   const collectionPromise = getUserGamesWithGroupedBacklog({
     platform: "",
     status: "",
@@ -33,6 +36,7 @@ export default async function SteamImportPage() {
           existingGames={collection}
           ignoredGames={ignoredGames ?? []}
           userData={userData}
+          platformId={platformId?.platformId?.[0]?.id || 0}
         />
       </div>
     </>

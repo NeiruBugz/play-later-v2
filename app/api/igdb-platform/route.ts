@@ -3,18 +3,10 @@ import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get("q");
-  const platform = searchParams.get("platform");
-
-  console.log({ platform });
+  const query = searchParams.get("platform");
 
   if (query && query !== "undefined") {
-    const response = await igdbApi.search({
-      name: query,
-      fields: {
-        platform: platform || "",
-      },
-    });
+    const response = await igdbApi.getPlatformId(query);
     return NextResponse.json({ response });
   }
 }

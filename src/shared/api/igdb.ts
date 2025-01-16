@@ -24,6 +24,21 @@ const asError = (thrown: unknown): Error => {
 
 const getTimeStamp = (): number => Math.floor(Date.now() / 1000);
 
+function normalizeString(input: string) {
+  return input
+    .toLowerCase()
+    .replace(/[:\-]/g, "")
+    .replace(/\b(?:the)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeTitle(input: string): string {
+  const specialCharsRegex =
+    /[\u2122\u00A9\u00AE\u0024\u20AC\u00A3\u00A5\u2022\u2026]/g;
+  return input.replace(specialCharsRegex, "").toLowerCase().trim();
+}
+
 const queries = {
   gamesByRating: `
     fields
@@ -292,21 +307,32 @@ const igdbApi = {
 
   async search({
     name = "",
-    ...fields
+    fields,
   }: {
     name: null | string;
     fields?: Record<string, string>;
   }): Promise<SearchResponse[] | undefined> {
     if (!name) return;
 
-    console.log("IGDB API::Search for: ", { name });
+    console.log("IGDB API::Search for: ", { name, fields });
 
-    const filters = Object.entries(fields)
-      .map(([key, value]) => ` & ${key} = ${value}`)
-      .join("");
+    let filters = "";
+
+    if (fields) {
+      if (fields["platform"]) {
+        // Corrected 'platform' to 'platforms'
+        filters = `& platforms=(${fields.platform})`;
+      }
+    }
+
+    const constructedQuery = queries.search(
+      normalizeTitle(normalizeString(name)),
+      filters
+    );
+    console.log("Constructed IGDB Query:", constructedQuery);
 
     return this.request({
-      body: queries.search(name, filters),
+      body: constructedQuery,
       resource: "/games",
     });
   },
@@ -316,8 +342,16 @@ const igdbApi = {
       resource: "/artworks",
     });
   },
-};
 
-void igdbApi.getToken();
+  async getPlatformId(
+    platformName: string
+  ): Promise<{ platformId: Array<{ id: number; name: string }> } | undefined> {
+    console.log(platformName);
+    return this.request({
+      body: `fields id, name; search "${platformName}"; limit 1;`,
+      resource: "/platforms",
+    });
+  },
+};
 
 export default igdbApi;
