@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { CollectionList } from "@/src/collection/ui";
+import { CollectionList } from "@/slices/collection/widgets";
 import { Header } from "@/src/widgets/header";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";

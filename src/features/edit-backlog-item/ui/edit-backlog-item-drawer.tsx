@@ -1,4 +1,3 @@
-import { getBacklogItems } from "@/features/backlog/actions";
 import { EditDrawerContent } from "@/src/features/edit-backlog-item/ui/drawer-content";
 import { Button } from "@/src/shared/ui";
 import {
@@ -9,6 +8,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/src/shared/ui/drawer";
+import { getBacklogItems } from "slices/backlog/api";
 
 export async function EditBacklogItemDrawer({
   gameId,

@@ -1,4 +1,4 @@
-import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
+import { BacklogItemCard } from "@/slices/shared/widgets/backlog-item-card";
 import igdbApi from "@/src/shared/api/igdb";
 
 export async function SimilarGames({ igdbId }: { igdbId: number }) {

@@ -19,7 +19,7 @@ export async function Artwork({
       igdbSrcSize={"full-hd"}
       igdbImageSize={"full-hd"}
       height={900}
-      className="absolute aspect-video w-full"
+      className="absolute w-full"
     />
   ) : null;
 }

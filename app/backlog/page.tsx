@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { BacklogList } from "@/src/widgets/backlog-list";
+import { BacklogList } from "@/slices/backlog/widgets/backlog-list";
 import { Header } from "@/src/widgets/header";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";

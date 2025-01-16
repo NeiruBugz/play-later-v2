@@ -1,6 +1,6 @@
 "use server";
 
-import { deleteBacklogItem } from "@/features/backlog/actions";
+import { deleteBacklogItem } from "slices/backlog/api";
 
 export async function deleteBacklogItemAction(
   prevState: { message: string },

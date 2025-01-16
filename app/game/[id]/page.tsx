@@ -31,12 +31,12 @@ export default async function GamePage(props: GenericPageProps) {
   const uniquePlatforms = getUniquePlatforms(igdbData?.release_dates);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-900">
       <Header />
       <Suspense fallback={"Loading..."}>
         <div className="relative flex min-h-[60vh] w-full justify-center overflow-hidden">
           <Artwork igdbId={game.igdbId} gameTitle={game.title} />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+          <div className="via-gray-90/30 absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8">
             <div className="container flex flex-col items-end gap-6 md:flex-row">
               <IgdbImage
@@ -96,7 +96,7 @@ export default async function GamePage(props: GenericPageProps) {
                     igdbId={game.igdbId}
                     gameTitle={game.title}
                   />
-                  <Button className="flex items-center gap-2">
+                  <Button className="flex items-center gap-2 bg-gradient-to-r from-amber-700 to-yellow-500 text-white hover:from-yellow-700 hover:to-yellow-700">
                     <Star className="h-4 w-4" />
                     <span>Write a Review</span>
                   </Button>

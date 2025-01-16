@@ -122,11 +122,12 @@ const queries = {
 const igdbApi = {
   token: null as TwitchTokenResponse | null,
 
-  async getToken(): Promise<void> {
+  async getToken(): Promise<TwitchTokenResponse | void> {
     try {
-      console.log(TOKEN_URL);
       const res = await fetch(TOKEN_URL, { cache: "no-store", method: "POST" });
-      this.token = await res.json();
+      const token = await res.json();
+      this.token = token;
+      return token;
     } catch (thrown) {
       this.handleError(thrown);
     }
@@ -137,10 +138,16 @@ const igdbApi = {
     ...options
   }: RequestOptions): Promise<T | undefined> {
     try {
+      const token = await this.getToken();
+
+      if (!token) {
+        this.handleError(new Error("Unauthorized in IGDB.com"));
+        return;
+      }
       const response = await fetch(`${API_URL}${resource}`, {
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${this.token?.access_token}`,
+          Authorization: `Bearer ${token.access_token}`,
           "Client-ID": env.IGDB_CLIENT_ID,
         },
         method: "POST",

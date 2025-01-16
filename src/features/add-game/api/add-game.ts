@@ -1,7 +1,7 @@
 import { getServerUserId } from "@/auth";
-import { createBacklogItem } from "@/features/backlog/actions";
 import { AddGameToBacklogInput, createGame } from "@/src/entities/game";
 import { prisma } from "@/src/shared/api";
+import { createBacklogItem } from "slices/backlog/api";
 
 export async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
   const userId = await getServerUserId();

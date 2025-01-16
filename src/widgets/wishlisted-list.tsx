@@ -1,6 +1,6 @@
-import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
-import { getWishlistedItems } from "@/features/backlog/actions";
+import { BacklogItemCard } from "@/slices/shared/widgets/backlog-item-card";
 import Link from "next/link";
+import { getWishlistedItems } from "slices/backlog/api";
 
 export async function WishlistedList() {
   const wishlistedItems = await getWishlistedItems();

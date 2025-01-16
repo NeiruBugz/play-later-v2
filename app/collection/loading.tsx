@@ -1,4 +1,4 @@
-import { CollectionFiltersSkeleton } from "@/src/collection/ui/collection-filters-skeleton";
+import { CollectionFiltersSkeleton } from "@/slices/collection/widgets/collection-filters-skeleton";
 
 export default function Loading() {
   return (

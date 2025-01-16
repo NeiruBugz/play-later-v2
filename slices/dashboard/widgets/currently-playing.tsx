@@ -1,8 +1,4 @@
-import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
-import {
-  getBacklogItems,
-  getUserGamesWithGroupedBacklog,
-} from "@/features/backlog/actions";
+import { BacklogItemCard } from "@/slices/shared/widgets/backlog-item-card";
 import {
   Card,
   CardContent,
@@ -10,6 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/shared/ui/card";
+import { getUserGamesWithGroupedBacklog } from "slices/backlog/api";
 
 export async function CurrentlyPlaying() {
   const currentlyPlayingGames = await getUserGamesWithGroupedBacklog({

@@ -28,7 +28,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
   const uniquePlatforms = getUniquePlatforms(igdbData?.release_dates);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-900">
       <Header />
       <Suspense fallback={"Loading..."}>
         <div className="relative flex min-h-[60vh] w-full justify-center overflow-hidden">

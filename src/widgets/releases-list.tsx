@@ -1,5 +1,4 @@
-import { BacklogItemCard } from "@/components/backlog/backlog-item-card";
-import { getUpcomingWishlistItems } from "@/features/backlog/actions";
+import { BacklogItemCard } from "@/slices/shared/widgets/backlog-item-card";
 import {
   cn,
   platformMapper,
@@ -8,6 +7,7 @@ import {
 import { Badge } from "@/src/shared/ui/badge";
 import { Calendar } from "lucide-react";
 import { cache } from "react";
+import { getUpcomingWishlistItems } from "slices/backlog/api";
 
 type UpcomingRelease = {
   cover: {
@@ -48,9 +48,13 @@ const Release = ({
             backlogItems={[]}
             hasActions={false}
             isExternalGame
+            isUpcomingGame
           />
         </div>
         <div className="invisible absolute bottom-0 w-full rounded-b-lg bg-slate-500/60 p-2 group-hover:visible">
+          <h3 className="my-1 text-base font-semibold text-white">
+            {release.name}
+          </h3>
           <Badge className="flex h-fit w-fit flex-shrink-0 items-center gap-1">
             <Calendar className="size-3.5" />
             <p>{date.human}</p>
@@ -103,8 +107,6 @@ const getReleases = cache(async () => await getUpcomingWishlistItems());
 
 export async function ReleasesList() {
   const releases = await getReleases();
-
-  console.log({ releases });
 
   return (
     <div className="flex w-full max-w-[420px] justify-start gap-3 overflow-x-auto">

@@ -1,7 +1,7 @@
 "use server";
 
-import { deleteBacklogItem } from "@/features/backlog/actions";
 import { revalidatePath } from "next/cache";
+import { deleteBacklogItem } from "slices/backlog/api";
 import { z } from "zod";
 
 const DeleteGameSchema = z.object({

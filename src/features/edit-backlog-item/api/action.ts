@@ -1,7 +1,7 @@
 "use server";
 
-import { createBacklogItem } from "@/features/backlog/actions";
-import { updateBacklogItem } from "@/features/backlog/actions/update/update-backlog-item";
+import { updateBacklogItem } from "@/slices/backlog/api/update/update-backlog-item";
+import { createBacklogItem } from "slices/backlog/api";
 import { z } from "zod";
 
 const EditBacklogItemSchema = z.object({

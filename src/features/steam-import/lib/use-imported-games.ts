@@ -1,4 +1,4 @@
-import type { GameWithBacklogItems } from "@/features/backlog/actions/get/get-user-games-with-grouped-backlog";
+import type { GameWithBacklogItems } from "@/slices/backlog/api/get/get-user-games-with-grouped-backlog";
 import { mergeSteamGames } from "@/src/features/steam-import/lib/merge-steam-games";
 import { SteamAppInfo } from "@/src/shared/types";
 import { BacklogItemStatus, IgnoredImportedGames } from "@prisma/client";

@@ -1,21 +1,22 @@
 import { auth } from "@/auth";
-import { getUsersBacklog } from "@/features/backlog/actions";
-import { getUserInfo } from "@/src/page-slices/user/api/get-user-info";
+import { getUserInfo } from "@/slices/user/api/get-user-info";
 import { BacklogStatusMapper, normalizeString } from "@/src/shared/lib";
 import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import { Header } from "@/src/widgets/header";
 import { redirect } from "next/navigation";
+import { getUsersBacklog } from "slices/backlog/api";
 
 export default async function UsersBacklogPage(props: {
   params: Promise<Record<string, string>>;
   searchParams: Promise<URLSearchParams>;
 }) {
-  const userGamesList = await getUsersBacklog({
-    backlogId: (await props.params).backlogId,
-  });
-  const user = await getUserInfo((await props.params).backlogId);
-  const session = await auth();
-  if (!session) {
+  const [userGamesList, user, session] = await Promise.all([
+    getUsersBacklog({ backlogId: (await props.params).backlogId }),
+    getUserInfo((await props.params).backlogId),
+    auth(),
+  ]);
+
+  if (!session?.user) {
     redirect("/");
   }
 

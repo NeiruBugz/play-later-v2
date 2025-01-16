@@ -1,6 +1,6 @@
 "use client";
 
-import type { GameWithBacklogItems } from "@/features/backlog/actions/get/get-user-games-with-grouped-backlog";
+import type { GameWithBacklogItems } from "@/slices/backlog/api/get/get-user-games-with-grouped-backlog";
 import { addIgnoredGame } from "@/src/entities/ignored-game";
 import { addImportedGame } from "@/src/features/add-game/api/add-imported-game";
 import { useIGDBSearchMutation } from "@/src/features/search/api/use-search";

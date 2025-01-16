@@ -1,4 +1,3 @@
-import { getBacklogItems } from "@/features/backlog/actions";
 import { CreateBacklogItemForm } from "@/src/features/edit-backlog-item/ui/create-backlog-item-form";
 import { BacklogStatusMapper, normalizeString } from "@/src/shared/lib";
 import { Button } from "@/src/shared/ui";
@@ -12,6 +11,7 @@ import {
 } from "@/src/shared/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/shared/ui/tabs";
 import { PlusIcon } from "lucide-react";
+import { getBacklogItems } from "slices/backlog/api";
 import { EditBacklogItemForm } from "./edit-backlog-item-form";
 
 export async function EditBacklogItemDialog({
@@ -28,7 +28,9 @@ export async function EditBacklogItemDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="my-2">Edit entry</Button>
+        <Button className="my-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700">
+          Edit entry
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-fit">
         <DialogHeader>

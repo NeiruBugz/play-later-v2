@@ -50,6 +50,7 @@ export function SearchInput() {
         disabled={inputValue.length < 3}
         onClick={onApply}
         size="sm"
+        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:bg-green-700"
       >
         Apply
       </Button>
