@@ -1,17 +1,19 @@
-import igdbApi from "@/src/shared/api/igdb";
+import { FullGameInfoResponse } from "@/src/shared/types";
 import { Card, CardContent } from "@/src/shared/ui/card";
 import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import Link from "next/link";
 
-export async function SimilarGames({ igdbId }: { igdbId: number }) {
-  const similarGames = await igdbApi.getSimilarGames(igdbId);
-
+export async function SimilarGames({
+  similarGames,
+}: {
+  similarGames?: FullGameInfoResponse["similar_games"];
+}) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-medium">Similar Games</h2>
       <div className="grid max-h-[300px] gap-4 overflow-scroll">
-        {similarGames && similarGames.similar_games
-          ? similarGames.similar_games.map((similarGame) => (
+        {similarGames && similarGames.length
+          ? similarGames.map((similarGame) => (
               <Link
                 href={`/game/external/${similarGame.id}`}
                 key={similarGame.id}

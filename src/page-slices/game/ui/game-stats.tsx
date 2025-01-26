@@ -1,11 +1,9 @@
-import igdbApi from "@/src/shared/api/igdb";
 import { Card, CardContent } from "@/src/shared/ui/card";
 import { Review } from "@prisma/client";
 import { Star } from "lucide-react";
 
 type GameStatsProps = {
-  gameId: string;
-  igdbId: number;
+  rating?: string;
 };
 
 const calculateAverageScore = (reviews: Review[]) => {
@@ -19,9 +17,7 @@ const calculateAverageScore = (reviews: Review[]) => {
   return parseFloat(averageRating.toFixed(2));
 };
 
-export async function GameStats({ igdbId }: GameStatsProps) {
-  const aggregatedRating = await igdbApi.getGameRating(igdbId);
-
+export async function GameStats({ rating }: GameStatsProps) {
   return (
     <Card>
       <CardContent className="pt-6">
@@ -30,7 +26,7 @@ export async function GameStats({ igdbId }: GameStatsProps) {
             <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
           </div>
           <div className="text-2xl font-medium">
-            {aggregatedRating?.aggregated_rating?.toFixed(1)}
+            {rating || "No rating yet"}
           </div>
           <div className="text-sm text-muted-foreground">Aggregated Rating</div>
         </div>

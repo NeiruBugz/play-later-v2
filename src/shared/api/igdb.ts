@@ -286,7 +286,7 @@ const igdbApi = {
       resource: "/games",
     });
 
-    if (!response || (response !== undefined && !response[0])) {
+    if (!response || !response[0]) {
       return { id: null, aggregated_rating: null };
     }
 

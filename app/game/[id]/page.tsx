@@ -6,8 +6,8 @@ import igdbApi from "@/src/shared/api/igdb";
 import { BacklogStatusMapper, cn, getUniquePlatforms } from "@/src/shared/lib";
 import { platformToColorBadge } from "@/src/shared/lib/platform-to-color";
 import { GenericPageProps } from "@/src/shared/types";
+import { Button } from "@/src/shared/ui";
 import { Badge } from "@/src/shared/ui/badge";
-import { Button } from "@/src/shared/ui/button";
 import { IgdbImage } from "@/src/shared/ui/igdb-image";
 import { Skeleton } from "@/src/shared/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/shared/ui/tabs";
@@ -38,48 +38,17 @@ export default async function GamePage(props: GenericPageProps) {
           <Artwork igdbId={game.igdbId} gameTitle={game.title} />
           <div className="via-gray-90/30 absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8">
-            <div className="container flex flex-col items-end gap-6 md:flex-row">
-              <IgdbImage
-                gameTitle={game.title}
-                coverImageId={game.coverImage}
-                igdbSrcSize={"hd"}
-                igdbImageSize={"c-big"}
-              />
-              <div className="mb-4 flex-1">
-                <h1 className="mb-4 text-3xl font-bold text-white drop-shadow-md md:text-4xl lg:text-5xl">
-                  {game.title}
-                </h1>
-                <div className="flex flex-wrap items-center gap-4">
-                  {igdbData?.genres.map((genre) => {
-                    return (
-                      <Badge
-                        key={genre.id}
-                        variant="secondary"
-                        className="text-sm md:text-base"
-                      >
-                        {genre.name}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <main className="p-8">
-          <div className="container flex flex-col gap-8 lg:flex-row">
-            <div className="flex-1 space-y-8">
-              <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-                <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">Released</div>
-                  <Suspense fallback={<Skeleton className="h-8 w-full" />}>
-                    <div className="font-medium">
-                      {igdbData?.release_dates[0].human}
-                    </div>
-                  </Suspense>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge>
+            <div className="container relative flex flex-col items-end gap-6 md:flex-row">
+              <div className="align-center relative flex flex-col">
+                <IgdbImage
+                  gameTitle={game.title}
+                  coverImageId={game.coverImage}
+                  igdbSrcSize={"hd"}
+                  igdbImageSize={"c-big"}
+                  className=""
+                />
+                <div className="-bottom-[4px] z-50 flex max-w-[264px] flex-wrap items-center justify-center gap-3 rounded-md border-2 bg-gray-700/70 p-2">
+                  <Badge className="size-9 w-fit hover:bg-primary">
                     {BacklogStatusMapper[game.backlogItems[0].status]}
                   </Badge>
                   <Button
@@ -102,7 +71,17 @@ export default async function GamePage(props: GenericPageProps) {
                   </Button>
                 </div>
               </div>
-
+              <div className="mb-4 flex-1">
+                <h1 className="mb-4 text-3xl font-bold text-white drop-shadow-md md:text-4xl lg:text-5xl">
+                  {game.title}
+                </h1>
+              </div>
+            </div>
+          </div>
+        </div>
+        <main className="p-8">
+          <div className="container flex flex-col gap-8 lg:flex-row">
+            <div className="flex-1 space-y-8">
               <Tabs defaultValue="about">
                 <TabsList className="justify-start">
                   <TabsTrigger value="about">About</TabsTrigger>
@@ -144,13 +123,36 @@ export default async function GamePage(props: GenericPageProps) {
               </Tabs>
             </div>
 
-            {/* Right Column */}
             <div className="w-full space-y-8 lg:w-80">
+              <div className="space-y-1">
+                <div className="text-sm text-muted-foreground">Genres</div>
+                <div className="flex flex-wrap items-center gap-4">
+                  {igdbData?.genres.map((genre) => {
+                    return (
+                      <Badge
+                        key={genre.id}
+                        variant="secondary"
+                        className="text-sm md:text-base"
+                      >
+                        {genre.name}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm text-muted-foreground">Released</div>
+                <Suspense fallback={<Skeleton className="h-8 w-full" />}>
+                  <div className="font-medium">
+                    {igdbData?.release_dates[0].human}
+                  </div>
+                </Suspense>
+              </div>
               <Suspense fallback={"Loading..."}>
-                <GameStats igdbId={game.igdbId} gameId={game.id} />
+                <GameStats rating={igdbData?.aggregated_rating.toFixed(1)} />
               </Suspense>
               <Suspense fallback={"Loading..."}>
-                <SimilarGames igdbId={game.igdbId} />
+                <SimilarGames similarGames={igdbData?.similar_games} />
               </Suspense>
             </div>
           </div>
