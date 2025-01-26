@@ -1,8 +1,11 @@
 import { getServerUserId } from "@/auth";
 import type { GameWithBacklogItems } from "@/slices/backlog/api/get/get-user-games-with-grouped-backlog";
 import { prisma } from "@/src/shared/api";
-import { BacklogItemStatus } from "@prisma/client";
+import { BacklogItemStatus, Prisma } from "@prisma/client";
+import { redirect } from "next/navigation";
 import { z } from "zod";
+
+const ITEMS_PER_PAGE = 24;
 
 const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),
@@ -11,106 +14,152 @@ const FilterParamsSchema = z.object({
   page: z.number().optional().default(1),
 });
 
+type FilterParams = z.infer<typeof FilterParamsSchema>;
+
+/**
+ * Builds the Prisma 'where' filter for games based on parsed filter parameters and user ID.
+ * @param userId - The ID of the user.
+ * @param params - The parsed filter parameters.
+ * @returns A Prisma 'where' filter object for games.
+ */
+const buildPrismaGameFilter = (userId: string, params: FilterParams) => {
+  const { platform, status, search } = params;
+
+  const backlogItemFilter: Prisma.BacklogItemWhereInput = {
+    userId,
+    platform: platform || undefined,
+    status:
+      status === ""
+        ? { not: BacklogItemStatus.WISHLIST }
+        : {
+            equals: status as BacklogItemStatus,
+            not: BacklogItemStatus.WISHLIST,
+          },
+  };
+
+  if (search) {
+    backlogItemFilter.game = {
+      is: {
+        title: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    };
+  }
+
+  return {
+    backlogItems: {
+      some: backlogItemFilter,
+    },
+  };
+};
+
+/**
+ * Builds the Prisma 'where' filter for backlog items based on parsed filter parameters and user ID.
+ * @param userId - The ID of the user.
+ * @param params - The parsed filter parameters.
+ * @returns A Prisma 'where' filter object for backlog items.
+ */
+const buildPrismaBacklogFilter = (userId: string, params: FilterParams) => {
+  const { platform, status, search } = params;
+
+  const filter: Prisma.BacklogItemWhereInput = {
+    userId,
+    platform: platform || undefined,
+    status:
+      status === ""
+        ? { not: BacklogItemStatus.WISHLIST }
+        : {
+            equals: status as BacklogItemStatus,
+            not: BacklogItemStatus.WISHLIST,
+          },
+  };
+
+  if (search) {
+    filter.game = {
+      is: {
+        title: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    };
+  }
+
+  return filter;
+};
+
+/**
+ * Fetches user games with grouped backlog items in a paginated manner, paginating based on games.
+ * @param params - Query parameters including platform, status, search, and page.
+ * @returns An object containing the collection of games with backlog items and the total count.
+ */
 export async function getUserGamesWithGroupedBacklogPaginated(
   params: Record<string, string | number>
 ): Promise<{ collection: GameWithBacklogItems[]; count: number }> {
   try {
     const userId = await getServerUserId();
-    const parsedPayload = FilterParamsSchema.safeParse({
+
+    if (!userId) {
+      console.error("Unable to find authenticated user");
+      redirect("/");
+    }
+
+    const parsedParams = FilterParamsSchema.safeParse({
       platform: params.platform,
       status: params.status,
       search: params.search,
-      page: params.page,
+      page: Number(params.page), // Ensure 'page' is a number
     });
 
-    if (!parsedPayload.success) {
-      console.error("Invalid filter parameters:", parsedPayload.error.errors);
+    if (!parsedParams.success) {
+      console.error("Invalid filter parameters:", parsedParams.error.errors);
       return { collection: [], count: 0 };
     }
 
-    const userGames = await prisma.backlogItem.findMany({
-      where: {
-        userId: userId,
-        platform: parsedPayload.data.platform || undefined,
-        status: {
-          not: BacklogItemStatus.WISHLIST,
-          equals:
-            parsedPayload.data.status === ""
-              ? undefined
-              : (parsedPayload.data.status as BacklogItemStatus),
-        },
-        game: {
-          OR: parsedPayload.data.search
-            ? [
-                {
-                  title: {
-                    contains: parsedPayload.data.search,
-                    mode: "insensitive",
-                  },
-                },
-              ]
-            : undefined,
-        },
-      },
-      include: {
-        game: true,
-      },
-      orderBy: {
-        game: {
-          title: "asc",
-        },
-      },
-      take: 24,
-      skip: (parsedPayload.data.page - 1) * 24,
+    const { platform, status, search, page } = parsedParams.data;
+
+    const gameFilter = buildPrismaGameFilter(userId, {
+      platform,
+      status,
+      search,
+      page,
     });
 
-    const userGamesCount = await prisma.backlogItem.count({
-      where: {
-        userId: userId,
-        platform: parsedPayload.data.platform || undefined,
-        status: {
-          not: BacklogItemStatus.WISHLIST,
-          equals:
-            parsedPayload.data.status === ""
-              ? undefined
-              : (parsedPayload.data.status as BacklogItemStatus),
-        },
-        game: {
-          OR: parsedPayload.data.search
-            ? [
-                {
-                  title: {
-                    contains: parsedPayload.data.search,
-                    mode: "insensitive",
-                  },
-                },
-              ]
-            : undefined,
-        },
-      },
-      orderBy: {
-        game: {
-          title: "asc",
-        },
-      },
-    });
+    const skip = (page - 1) * ITEMS_PER_PAGE;
+    const take = ITEMS_PER_PAGE;
 
-    const groupedGames = userGames.reduce(
-      (acc: Record<string, GameWithBacklogItems>, item) => {
-        const { game, ...backlogItem } = item;
-        if (!acc[game.id]) {
-          acc[game.id] = { game, backlogItems: [] };
-        }
-        acc[game.id].backlogItems.push(backlogItem);
-        return acc;
-      },
-      {}
-    );
+    const [games, totalGames] = await Promise.all([
+      prisma.game.findMany({
+        where: gameFilter,
+        orderBy: { title: "asc" },
+        take,
+        skip,
+        include: {
+          backlogItems: {
+            where: buildPrismaBacklogFilter(userId, {
+              platform,
+              status,
+              search,
+              page,
+            }),
+          },
+        },
+      }),
+      prisma.game.count({
+        where: gameFilter,
+      }),
+    ]);
 
-    return { collection: Object.values(groupedGames), count: userGamesCount };
-  } catch (e) {
-    console.error("Error fetching user game collection:", e);
+    const collection: GameWithBacklogItems[] = games.map((game) => ({
+      game,
+      backlogItems: game.backlogItems,
+    }));
 
+    return { collection, count: totalGames };
+  } catch (error) {
+    console.error("Error fetching user game collection:", error);
     return { collection: [], count: 0 };
   }
 }

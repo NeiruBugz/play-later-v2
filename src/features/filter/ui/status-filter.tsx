@@ -1,10 +1,10 @@
 "use client";
 
+import { BacklogStatusMapper } from "@/src/shared/lib";
 import { Button } from "@/src/shared/ui";
 import { BacklogItemStatus } from "@prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { BacklogStatusMapper } from "@/src/shared/lib";
 
 export function StatusFilter() {
   const params = useSearchParams();
@@ -34,6 +34,14 @@ export function StatusFilter() {
 
   return (
     <div className="flex flex-wrap gap-1">
+      <Button
+        onClick={() => onStatusSelect("All")}
+        disabled={!currentStatusParam}
+        size="sm"
+        variant="outline"
+      >
+        All
+      </Button>
       {Object.keys(BacklogItemStatus)
         .filter((key) => key !== "WISHLIST")
         .map((key) => (
