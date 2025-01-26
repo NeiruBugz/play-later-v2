@@ -6,8 +6,6 @@ export async function GET(request: Request) {
   const query = searchParams.get("q");
   const platform = searchParams.get("platform");
 
-  console.log({ platform });
-
   if (query && query !== "undefined") {
     const response = await igdbApi.search({
       name: query,

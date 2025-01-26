@@ -25,7 +25,7 @@ const asError = (thrown: unknown): Error => {
 
 const getTimeStamp = (): number => Math.floor(Date.now() / 1000);
 
-function normalizeString(input: string) {
+function normalizeString(input: string): string {
   return input
     .toLowerCase()
     .replace(/[:\-]/g, "")
@@ -40,135 +40,88 @@ function normalizeTitle(input: string): string {
   return input.replace(specialCharsRegex, "").toLowerCase().trim();
 }
 
-const queries = {
-  gamesByRating: `
-    fields
-      name,
-      cover.image_id;
-    sort aggregated_rating desc;
-    where aggregated_rating_count > 20 & aggregated_rating != null & rating != null & category = 0;
-    limit 12;
-  `,
-  gamingEvents: `
-    fields checksum,created_at,description,end_time,event_logo,event_networks,games,live_stream_url,name,slug,start_time,time_zone,updated_at,videos;
-    sort start_time asc;
-    where start_time >= ${getTimeStamp()};
-    limit 10;
-  `,
-  platforms: `
-    fields name;
-  `,
-  similarGames: `
-    fields
-      genres.name,
-      similar_games.name,
-      similar_games.cover.image_id;
-  `,
-  fullGameInfo: `
-    fields
-      name,
-      summary,
-      aggregated_rating,
-      cover.image_id,
-      genres.name,
-      screenshots.image_id,
-      release_dates.platform.name,
-      release_dates.human,
-      involved_companies.developer,
-      involved_companies.publisher,
-      involved_companies.company.name,
-      game_modes.name,
-      game_engines.name,
-      player_perspectives.name,
-      themes.name,
-      external_games.category,
-      external_games.name,
-      external_games.url,
-      similar_games.name,
-      similar_games.cover.image_id,
-      websites.url,
-      websites.category,
-      websites.trusted;
-  `,
-  eventLogo: (id: number) => `
-    fields width,height,image_id;
-    where id = (${id});
-  `,
-  gameRating: (gameId: number) => `
-    fields aggregated_rating;
-    where id = (${gameId});
-  `,
-  gameScreenshots: (gameId: number) => `
-    fields screenshots.image_id;
-    where id = (${gameId});
-  `,
-  gameGenres: (gameId: number) => `
-    fields genres.name;
-    where id = (${gameId});
-  `,
-  nextMonthReleases: (ids: number[]) => `
-    fields
-      name,
-      cover.image_id,
-      first_release_date,
-      release_dates.platform.name,
-      release_dates.human;
-    sort first_release_date asc;
-    where id = (${ids.join(",")}) & first_release_date >= ${getTimeStamp()};
-  `,
-  search: (name: string, filters: string) => `
-    fields
-      name,
-      summary,
-      platforms.name,
-      release_dates.human,
-      first_release_date,
-      category,
-      cover.image_id;
-    where
-      cover.image_id != null
-      ${filters};
-    ${name ? `search "${name}";` : ""}
-    limit 100;
-  `,
-  artworks: (gameId: number) =>
-    `fields alpha_channel,animated,checksum,game,height,image_id,url,width; where game = ${gameId};`,
-};
+class QueryBuilder {
+  private query: string = "";
+
+  fields(fields: string[]): this {
+    this.query += `fields ${fields.join(", ")};\n`;
+    return this;
+  }
+
+  sort(field: string, order: "asc" | "desc" = "asc"): this {
+    this.query += `sort ${field} ${order};\n`;
+    return this;
+  }
+
+  where(condition: string): this {
+    this.query += `where ${condition};\n`;
+    return this;
+  }
+
+  limit(count: number): this {
+    this.query += `limit ${count};\n`;
+    return this;
+  }
+
+  search(term: string): this {
+    this.query += `search "${term}";\n`;
+    return this;
+  }
+
+  build(): string {
+    return this.query.trim();
+  }
+}
 
 const igdbApi = {
   token: null as TwitchTokenResponse | null,
+  tokenExpiry: 0 as number,
 
-  async getToken(): Promise<TwitchTokenResponse | void> {
+  async fetchToken(): Promise<TwitchTokenResponse | void> {
     try {
       const res = await fetch(TOKEN_URL, { cache: "no-store", method: "POST" });
-      const token = await res.json();
+      if (!res.ok) {
+        throw new Error(`Failed to fetch token: ${res.statusText}`);
+      }
+      const token: TwitchTokenResponse = await res.json();
       this.token = token;
+      this.tokenExpiry = getTimeStamp() + token.expires_in - 60;
       return token;
     } catch (thrown) {
       this.handleError(thrown);
     }
   },
 
-  async request<T>({
-    resource,
-    ...options
-  }: RequestOptions): Promise<T | undefined> {
-    try {
-      const token = await this.getToken();
+  async getToken(): Promise<string | undefined> {
+    if (this.token && getTimeStamp() < this.tokenExpiry) {
+      return this.token.access_token;
+    }
+    const token = await this.fetchToken();
+    return token?.access_token;
+  },
 
-      if (!token) {
-        this.handleError(new Error("Unauthorized in IGDB.com"));
+  async request<T>(options: RequestOptions): Promise<T | undefined> {
+    try {
+      const accessToken = await this.getToken();
+
+      if (!accessToken) {
+        this.handleError(new Error("Unauthorized: No valid token available."));
         return;
       }
-      const response = await fetch(`${API_URL}${resource}`, {
+
+      const response = await fetch(`${API_URL}${options.resource}`, {
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${token.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           "Client-ID": env.IGDB_CLIENT_ID,
         },
         method: "POST",
-        ...options,
+        body: options.body,
       });
+
+      if (!response.ok) {
+        throw new Error(`IGDB API error: ${response.statusText}`);
+      }
 
       return await response.json();
     } catch (thrown) {
@@ -188,56 +141,97 @@ const igdbApi = {
     | { height: number; id: number; image_id: string; width: number }[]
     | undefined
   > {
+    const query = new QueryBuilder()
+      .fields(["width", "height", "image_id"])
+      .where(`id = (${id})`)
+      .build();
+
     return this.request({
-      body: queries.eventLogo(id),
+      body: query,
       resource: "/event_logos",
     });
   },
 
-  async getGameRating(
-    gameId: number
-  ): Promise<
-    | { id: number; aggregated_rating: number }
-    | { id: null; aggregated_rating: null }
-  > {
-    const response = await this.request<
-      Array<{ id: number; aggregated_rating: number }>
-    >({
-      body: queries.gameRating(gameId),
+  async getGamesByRating(): Promise<RatedGameResponse[] | undefined> {
+    const query = new QueryBuilder()
+      .fields(["name", "cover.image_id"])
+      .sort("aggregated_rating", "desc")
+      .where(
+        "aggregated_rating_count > 20 & aggregated_rating != null & rating != null & category = 0"
+      )
+      .limit(12)
+      .build();
+
+    return this.request<RatedGameResponse[]>({
+      body: query,
       resource: "/games",
     });
-
-    return response ? response[0] : { id: null, aggregated_rating: null };
   },
 
   async getEvents(): Promise<UpcomingEventsResponse | undefined> {
-    return this.request({
-      body: queries.gamingEvents,
+    const query = new QueryBuilder()
+      .fields([
+        "checksum",
+        "created_at",
+        "description",
+        "end_time",
+        "event_logo",
+        "event_networks",
+        "games",
+        "live_stream_url",
+        "name",
+        "slug",
+        "start_time",
+        "time_zone",
+        "updated_at",
+        "videos",
+      ])
+      .sort("start_time", "asc")
+      .where(`start_time >= ${getTimeStamp()}`)
+      .limit(10)
+      .build();
+
+    return this.request<UpcomingEventsResponse>({
+      body: query,
       resource: "/events",
     });
-  },
-
-  async getGameScreenshots(
-    gameId: number | null | undefined
-  ): Promise<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }> {
-    if (!gameId) return { id: 0, screenshots: [] };
-
-    const response = await this.request<
-      Array<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }>
-    >({
-      body: queries.gameScreenshots(gameId),
-      resource: "/games",
-    });
-
-    return response ? response[0] : { id: 0, screenshots: [] };
   },
 
   async getGameById(
     gameId: number | null
   ): Promise<FullGameInfoResponse | undefined> {
     if (!gameId) return;
-    const response = await this.request<FullGameInfoResponse[] | undefined>({
-      body: `${queries.fullGameInfo} where id = (${gameId});`,
+    const query = new QueryBuilder()
+      .fields([
+        "name",
+        "summary",
+        "aggregated_rating",
+        "cover.image_id",
+        "genres.name",
+        "screenshots.image_id",
+        "release_dates.platform.name",
+        "release_dates.human",
+        "involved_companies.developer",
+        "involved_companies.publisher",
+        "involved_companies.company.name",
+        "game_modes.name",
+        "game_engines.name",
+        "player_perspectives.name",
+        "themes.name",
+        "external_games.category",
+        "external_games.name",
+        "external_games.url",
+        "similar_games.name",
+        "similar_games.cover.image_id",
+        "websites.url",
+        "websites.category",
+        "websites.trusted",
+      ])
+      .where(`id = (${gameId})`)
+      .build();
+
+    const response = await this.request<FullGameInfoResponse[]>({
+      body: query,
       resource: "/games",
     });
 
@@ -248,60 +242,154 @@ const igdbApi = {
     return undefined;
   },
 
-  async getSimilarGames(gameId: number): Promise<{
-    id: number;
-    similar_games: FullGameInfoResponse["similar_games"];
-  }> {
+  async getGameScreenshots(
+    gameId: number | null | undefined
+  ): Promise<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }> {
+    if (!gameId) return { id: 0, screenshots: [] };
+
+    const query = new QueryBuilder()
+      .fields(["screenshots.image_id"])
+      .where(`id = (${gameId})`)
+      .build();
+
     const response = await this.request<
-      | Array<{
-          id: number;
-          similar_games: FullGameInfoResponse["similar_games"];
-        }>
-      | undefined
+      Array<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }>
     >({
-      body: `${queries.similarGames} where id = (${gameId});`,
+      body: query,
       resource: "/games",
     });
 
-    if (response && response?.length) {
-      return response[0];
+    if (!response || (response !== undefined && !response[0])) {
+      return { id: 0, screenshots: [] };
     }
 
-    return {
-      id: 0,
-      similar_games: [],
-    };
+    return response[0];
   },
 
+  async getGameRating(
+    gameId: number | null | undefined
+  ): Promise<
+    | { id: number; aggregated_rating: number }
+    | { id: null; aggregated_rating: null }
+  > {
+    if (!gameId) return { id: null, aggregated_rating: null };
+
+    const query = new QueryBuilder()
+      .fields(["aggregated_rating"])
+      .where(`id = (${gameId})`)
+      .build();
+
+    const response = await this.request<
+      Array<{ id: number; aggregated_rating: number }>
+    >({
+      body: query,
+      resource: "/games",
+    });
+
+    if (!response || (response !== undefined && !response[0])) {
+      return { id: null, aggregated_rating: null };
+    }
+
+    return response[0];
+  },
+
+  async getSimilarGames(
+    gameId: number | null | undefined
+  ): Promise<
+    | { id: number; similar_games: FullGameInfoResponse["similar_games"] }
+    | { id: null; similar_games: [] }
+  > {
+    if (!gameId) {
+      return { id: null, similar_games: [] };
+    }
+
+    const query = new QueryBuilder()
+      .fields([
+        "genres.name",
+        "similar_games.name",
+        "similar_games.cover.image_id",
+      ])
+      .where(`id = (${gameId})`)
+      .build();
+
+    const response = await this.request<
+      Array<{
+        id: number;
+        similar_games: FullGameInfoResponse["similar_games"];
+      }>
+    >({
+      body: query,
+      resource: "/games",
+    });
+
+    if (!response || (response !== undefined && response[0] === undefined)) {
+      return {
+        id: null,
+        similar_games: [],
+      };
+    }
+
+    return response[0];
+  },
   async getGameGenres(
-    gameId: number | null
-  ): Promise<Array<GenresResponse> | undefined> {
-    if (!gameId) return;
-    return this.request({
-      body: queries.gameGenres(gameId),
-      resource: "/games",
-    });
-  },
+    gameId: number | null | undefined
+  ): Promise<Array<GenresResponse> | Array<{ id: null; genres: [] }>> {
+    if (!gameId) return [];
 
-  async getGamesByRating(): Promise<RatedGameResponse[] | undefined> {
-    return this.request({
-      body: queries.gamesByRating,
+    const query = new QueryBuilder()
+      .fields(["genres.name"])
+      .where(`id = (${gameId})`)
+      .build();
+
+    const response = await this.request<
+      Array<GenresResponse> | Array<{ id: null; genres: [] }>
+    >({
+      body: query,
       resource: "/games",
     });
+
+    if (!response) {
+      return [];
+    }
+
+    return response;
   },
 
   async getNextMonthReleases(
     ids: number[]
-  ): Promise<UpcomingReleaseResponse[] | undefined> {
-    return this.request({
-      body: queries.nextMonthReleases(ids),
+  ): Promise<UpcomingReleaseResponse[] | []> {
+    if (!ids || ids.length === 0) {
+      return [];
+    }
+
+    const query = new QueryBuilder()
+      .fields([
+        "name",
+        "cover.image_id",
+        "first_release_date",
+        "release_dates.platform.name",
+        "release_dates.human",
+      ])
+      .sort("first_release_date", "asc")
+      .where(`id = (${ids.join(",")})`)
+      .build();
+
+    const response = await this.request<UpcomingReleaseResponse[] | []>({
+      body: query,
       resource: "/games",
     });
-  },
 
+    if (!response) {
+      return [];
+    }
+
+    return response;
+  },
   async getPlatforms() {
+    const query = new QueryBuilder().fields(["name"]).build();
+
     return this.request({
-      body: queries.platforms,
+      body: query,
       resource: "/platforms",
     });
   },
@@ -320,44 +408,79 @@ const igdbApi = {
     let filters = "";
 
     if (fields) {
-      if (fields["platform"]) {
-        // Corrected 'platform' to 'platforms'
-        filters = `& platforms=(${fields.platform})`;
-      }
+      const filterConditions = Object.entries(fields)
+        .map(([key, value]) => {
+          if (Array.isArray(value)) {
+            return `${key}=(${value.join(",")})`;
+          }
+          return `${key}="${value}"`;
+        })
+        .join(" & ");
+      filters = `& ${filterConditions}`;
     }
 
-    const constructedQuery = queries.search(
-      normalizeTitle(normalizeString(name)),
-      filters
-    );
-    console.log("Constructed IGDB Query:", constructedQuery);
+    const query = new QueryBuilder()
+      .fields([
+        "name",
+        "summary",
+        "platforms.name",
+        "release_dates.human",
+        "first_release_date",
+        "category",
+        "cover.image_id",
+      ])
+      .where(`cover.image_id != null ${filters}`)
+      .search(normalizeTitle(normalizeString(name)))
+      .limit(100)
+      .build();
 
-    return this.request({
-      body: constructedQuery,
+    return this.request<SearchResponse[]>({
+      body: query,
       resource: "/games",
     });
   },
+
   async getArtworks(gameId: number): Promise<Artwork[] | undefined> {
-    return this.request({
-      body: queries.artworks(gameId),
+    const query = new QueryBuilder()
+      .fields([
+        "alpha_channel",
+        "animated",
+        "checksum",
+        "game",
+        "height",
+        "image_id",
+        "url",
+        "width",
+      ])
+      .where(`game = ${gameId}`)
+      .build();
+
+    return this.request<Artwork[] | undefined>({
+      body: query,
       resource: "/artworks",
     });
   },
-
   async getPlatformId(
     platformName: string
   ): Promise<{ platformId: Array<{ id: number; name: string }> } | undefined> {
-    console.log(platformName);
+    const query = new QueryBuilder()
+      .fields(["id", "name"])
+      .search(platformName)
+      .limit(1)
+      .build();
+
     return this.request({
-      body: `fields id, name; search "${platformName}"; limit 1;`,
+      body: query,
       resource: "/platforms",
     });
   },
-
   async getGameByName(
     gameName: string
   ): Promise<IgdbGameResponseItem[] | undefined> {
-    const query = `fields name, cover.url, cover.image_id version_title; search "${gameName}";`;
+    const query = new QueryBuilder()
+      .fields(["name", "cover.url", "cover.image_id", "version_title"])
+      .search(gameName)
+      .build();
 
     return this.request<IgdbGameResponseItem[]>({
       body: query,

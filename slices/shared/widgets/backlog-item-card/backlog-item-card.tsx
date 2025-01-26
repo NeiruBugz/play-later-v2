@@ -108,7 +108,7 @@ export function BacklogItemCard({
           </div> */}
           <div
             className={cn(
-              "absolute right-2 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100",
+              "absolute right-2 hidden gap-2 opacity-0 transition-opacity group-hover:opacity-100 md:flex",
               {}
             )}
             style={{ top: "10px" }}

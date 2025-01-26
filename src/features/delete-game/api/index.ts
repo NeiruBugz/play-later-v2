@@ -1,1 +1,0 @@
-export { deleteGameAction } from './action'

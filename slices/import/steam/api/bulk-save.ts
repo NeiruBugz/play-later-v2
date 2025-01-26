@@ -44,7 +44,6 @@ async function fetchFromIgdb(gameName: string) {
 async function bulkSaveGames(
   steamGames: Array<SteamAppInfo & { status: BacklogItemStatus }>
 ) {
-  console.log(steamGames);
   const userId = await getServerUserId();
 
   if (!userId) return null;

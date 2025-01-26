@@ -7,7 +7,6 @@ import { Header } from "@/src/widgets/header";
 
 export default async function SteamImportPage() {
   const platformId = await igdbApi.getPlatformId("PC (Microsoft Windows)");
-  console.log(platformId);
   const collectionPromise = getUserGamesWithGroupedBacklog({
     platform: "",
     status: "",

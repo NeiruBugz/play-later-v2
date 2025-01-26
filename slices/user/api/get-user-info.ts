@@ -4,6 +4,9 @@ import { prisma } from "@/src/shared/api";
 export async function getUserInfo(userId?: string) {
   try {
     const serverUserId = await getServerUserId();
+    if (!serverUserId) {
+      throw new Error("Can't find user");
+    }
     const user = await prisma.user.findUnique({
       where: { id: userId ?? serverUserId },
     });
