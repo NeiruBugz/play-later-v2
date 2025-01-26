@@ -407,16 +407,21 @@ const igdbApi = {
 
     let filters = "";
 
-    if (fields) {
+    if (fields && Object.values(fields).length !== 0) {
       const filterConditions = Object.entries(fields)
         .map(([key, value]) => {
+          if (!value) {
+            return;
+          }
           if (Array.isArray(value)) {
             return `${key}=(${value.join(",")})`;
           }
           return `${key}="${value}"`;
         })
         .join(" & ");
-      filters = `& ${filterConditions}`;
+      if (filterConditions) {
+        filters = `& ${filterConditions}`;
+      }
     }
 
     const query = new QueryBuilder()
@@ -433,6 +438,8 @@ const igdbApi = {
       .search(normalizeTitle(normalizeString(name)))
       .limit(100)
       .build();
+
+    console.log({ query });
 
     return this.request<SearchResponse[]>({
       body: query,

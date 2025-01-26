@@ -22,6 +22,13 @@ export const metadata: Metadata = {
     default: "PlayLater",
     template: `%s - PlayLater`,
   },
+  description: "PlayLater – Your ultimate game backlog companion",
+  openGraph: {
+    title: "PlayLater",
+    description: "PlayLater – Your ultimate game backlog companion",
+    siteName: "PlayLater",
+    url: "https://playlater.vercel.app",
+  },
 };
 
 const fontSans = FontSans({
