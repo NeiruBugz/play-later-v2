@@ -28,7 +28,7 @@ export default async function SteamImportPage() {
             Import Steam Games
           </h1>
           <p className="text-muted-foreground">
-            Enter your Steam profile URL to import your games library
+            Enter your Steam profile custom name or ID
           </p>
         </div>
         <ImportDialog

@@ -5,11 +5,11 @@ const fetchSearchResults = async (
   query: string,
   filters?: Record<string, any>
 ): Promise<{ response: SearchResponse[] }> => {
-  let platform = "";
-  if (filters && "platform" in filters) {
-    platform = filters.platform;
+  let platforms = "";
+  if (filters && "platforms" in filters) {
+    platforms = filters.platforms;
   }
-  const res = await fetch(`/api/igdb-search?q=${query}&platform=${platform}`);
+  const res = await fetch(`/api/igdb-search?q=${query}&platforms=${platforms}`);
   if (!res.ok) {
     throw new Error("Network response was not ok");
   }
@@ -40,7 +40,7 @@ export function useIGDBSearchMutation() {
       query: string;
       filters?: Record<string, any>;
     }) => {
-      const response = await fetchSearchResults(query, { platform: 6 });
+      const response = await fetchSearchResults(query, { platforms: 6 });
       return response.response;
     },
   });

@@ -44,27 +44,27 @@ class QueryBuilder {
   private query: string = "";
 
   fields(fields: string[]): this {
-    this.query += `fields ${fields.join(", ")};\n`;
+    this.query += `fields ${fields.join(", ")};`;
     return this;
   }
 
   sort(field: string, order: "asc" | "desc" = "asc"): this {
-    this.query += `sort ${field} ${order};\n`;
+    this.query += `sort ${field} ${order};`;
     return this;
   }
 
   where(condition: string): this {
-    this.query += `where ${condition};\n`;
+    this.query += `where ${condition};`;
     return this;
   }
 
   limit(count: number): this {
-    this.query += `limit ${count};\n`;
+    this.query += `limit ${count};`;
     return this;
   }
 
   search(term: string): this {
-    this.query += `search "${term}";\n`;
+    this.query += `search "${term}";`;
     return this;
   }
 
@@ -120,6 +120,7 @@ const igdbApi = {
       });
 
       if (!response.ok) {
+        console.error(response);
         throw new Error(`IGDB API error: ${response.statusText}`);
       }
 
@@ -413,14 +414,19 @@ const igdbApi = {
           if (!value) {
             return;
           }
+
+          const fieldName = key === "platform" ? "platforms" : key;
+
           if (Array.isArray(value)) {
-            return `${key}=(${value.join(",")})`;
+            return `${fieldName}=(${value.join(",")})`;
           }
-          return `${key}="${value}"`;
+          return `${fieldName} = (${value})`;
         })
+        .filter((condition) => condition)
         .join(" & ");
+
       if (filterConditions) {
-        filters = `& ${filterConditions}`;
+        filters = ` & ${filterConditions}`;
       }
     }
 

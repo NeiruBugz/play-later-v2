@@ -7,6 +7,11 @@ const FetchSteamProfileSchema = z.object({
   steamProfileUrl: z.string(),
 });
 
+function hasNonDigits(str: string): boolean {
+  const nonDigitRegex = /\D/;
+  return nonDigitRegex.test(str);
+}
+
 async function fetchSteamProfile(
   prevState: { message: string; gameList: any[]; gameCount: number },
   payload: FormData
@@ -24,11 +29,9 @@ async function fetchSteamProfile(
   }
 
   try {
-    const [path, userNamePath] = new URL(parsedPayload.data.steamProfileUrl).pathname.split('/').filter(Boolean);
-
     const steamUserGamesResponse = await fetchSteamGamesByUserId({
-      steamId: userNamePath,
-      isCustom: path === 'id',
+      steamId: parsedPayload.data.steamProfileUrl,
+      isCustom: hasNonDigits(parsedPayload.data.steamProfileUrl),
     });
     if (steamUserGamesResponse.response.game_count === 0) {
       return {

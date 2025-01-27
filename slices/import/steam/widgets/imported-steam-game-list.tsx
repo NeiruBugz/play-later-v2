@@ -1,6 +1,8 @@
 "use client";
 
 import type { GameWithBacklogItems } from "@/slices/backlog/api/get/get-user-games-with-grouped-backlog";
+import { GameList } from "@/slices/import/steam/widgets/game-list";
+import { PaginationControls } from "@/slices/import/steam/widgets/list-pagination";
 import { addIgnoredGame } from "@/src/entities/ignored-game";
 import { addImportedGame } from "@/src/features/add-game/api/add-imported-game";
 import { useIGDBSearchMutation } from "@/src/features/search/api/use-search";
@@ -20,15 +22,14 @@ import {
   useActionState,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type SetStateAction,
 } from "react";
 import { useFormStatus } from "react-dom";
 import { useImportedGames } from "../lib/use-imported-games";
-import { GameList } from "./game-list";
 import { ImportNotice } from "./import-notice";
-import { PaginationControls } from "./list-pagination";
 
 /** Normalize string for comparison. */
 function normalizeString(input: string) {
@@ -37,6 +38,13 @@ function normalizeString(input: string) {
     .replace(/[:\-]/g, "")
     .replace(/\b(?:the)\b/g, "")
     .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/™|®|:|-|,|\.|\s+/g, " ")
     .trim();
 }
 
@@ -77,6 +85,39 @@ function FetchSteamProfileButton({ isDisabled }: { isDisabled: boolean }) {
   );
 }
 
+interface ProgressBarProps {
+  value: number;
+  max: number;
+  count: number;
+  totalCount: number;
+  className?: string;
+}
+
+export const ProgressBar: React.FC<ProgressBarProps> = ({
+  value,
+  max,
+  count,
+  totalCount,
+  className,
+}) => {
+  const progress = Math.min(Math.max(value / max, 0), 1) * 100; // Clamp between 0 and 100
+
+  return (
+    <div className={cn("relative my-2 h-[100px] w-full", {}, className)}>
+      <div className="mb-1 flex justify-between">
+        <span className="text-sm text-white">{`${count} / ${totalCount}`}</span>
+        <span className="text-sm text-white">{`${Math.round(progress)}%`}</span>
+      </div>
+      <div className="h-2 w-full rounded bg-gray-200">
+        <div
+          className="h-full rounded bg-blue-500"
+          style={{ width: `${progress}%`, transition: "width 0.3s ease" }}
+        />
+      </div>
+    </div>
+  );
+};
+
 /** Get IGDB information for a game. */
 async function fetchIgdbInfo(
   name: string,
@@ -84,24 +125,33 @@ async function fetchIgdbInfo(
   searchIGDB: ReturnType<typeof useIGDBSearchMutation>["mutateAsync"],
   toast: ReturnType<typeof useToast>["toast"]
 ) {
+  console.log({
+    name,
+    normalized: normalizeString(name),
+    normalizeTitle: normalizeTitle(name),
+  });
   try {
     const igdbResults = await searchIGDB({
-      query: name,
-      filters: { platform: `(${platformId})` },
+      query: normalizeTitle(name),
+      filters: { platforms: platformId },
     });
 
-    if (!igdbResults.length) {
+    console.log({ igdbResults });
+
+    if (!igdbResults || !igdbResults.length) {
       return;
     }
 
     const matchedGame = igdbResults.find((igdbGame) =>
-      areStringsLooselyEquivalent(igdbGame.name, name)
+      areStringsLooselyEquivalent(igdbGame.name, normalizeTitle(name))
     );
+
+    console.log({ matchedGame });
 
     if (!matchedGame) {
       toast({
         title: "Steam game import",
-        description: "Could not find matching game in IGDB",
+        description: `Could not find matching game for ${name}  in IGDB`,
       });
     }
 
@@ -131,7 +181,8 @@ async function saveSteamGame(
         status: BacklogItemStatus;
       })[]
     >
-  >
+  >,
+  isBatch?: boolean
 ) {
   try {
     const igdbInfo = await fetchIgdbInfo(
@@ -144,7 +195,7 @@ async function saveSteamGame(
     if (!igdbInfo) {
       toast({
         title: "Steam game import",
-        description: "Could not find matching game in IGDB",
+        description: `Could not find matching game for ${steamGame.name}  in IGDB`,
         variant: "destructive",
       });
       return;
@@ -173,23 +224,27 @@ async function saveSteamGame(
       backlogItem: {
         backlogStatus: gameStatus,
         acquisitionType: AcquisitionType.DIGITAL,
-        platform: "PC",
+        platform: "pc",
       },
     });
 
     setGames((prevGames) =>
       prevGames.filter((game) => game.appid !== steamGame.appid)
     );
-    toast({
-      title: "Steam game import",
-      description: `Saved ${steamGame.name} to your collection`,
-    });
+    if (!isBatch) {
+      toast({
+        title: "Steam game import",
+        description: `Saved ${steamGame.name} to your collection`,
+      });
+    }
   } catch (error) {
     console.error("Error saving game:", error);
-    toast({
-      title: "Steam game import",
-      description: `Failed to save ${steamGame.name} to your collection`,
-    });
+    if (!isBatch) {
+      toast({
+        title: "Steam game import",
+        description: `Failed to save ${steamGame.name} to your collection`,
+      });
+    }
   }
 }
 
@@ -228,27 +283,34 @@ function ImportedSteamGameList({
   existingGames,
   ignoredGames,
   userData,
-  platformId,
+  platformId = 6,
 }: {
   existingGames: GameWithBacklogItems[];
   ignoredGames: IgnoredImportedGames[];
   userData: User | undefined;
   platformId: number;
 }) {
-  const [state, action] = useActionState(fetchSteamProfile, {
-    message: "",
-    gameList: [],
-    gameCount: 0,
-  });
+  const [state, fetchSteamProfileFormAction] = useActionState(
+    fetchSteamProfile,
+    {
+      message: "",
+      gameList: [],
+      gameCount: 0,
+    }
+  );
   const [page, setPage] = useState(1);
   const { processedGames } = useImportedGames({
     games: state.gameList,
     ignoredGames,
     existingGames,
   });
+  const [progress, setProgress] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [processedCount, setProcessedCount] = useState(0);
   const [games, setGames] = useState(processedGames);
   const { mutateAsync: searchIGDB } = useIGDBSearchMutation();
   const { toast } = useToast();
+  const cancelRef = useRef(false); // Ref to track cancellation
 
   useEffect(() => {
     if (processedGames.length !== games.length && processedGames.length > 0) {
@@ -266,20 +328,114 @@ function ImportedSteamGameList({
     return games.slice(startIndex, startIndex + 10);
   }, [page, games]);
 
+  const handleSaveAll = async () => {
+    setIsSaving(true);
+    setProgress(0);
+    setProcessedCount(0);
+    cancelRef.current = false;
+    const totalGames = games.length;
+    const errors: string[] = [];
+
+    for (let i = 0; i < totalGames; i++) {
+      if (cancelRef.current) {
+        toast({
+          title: "Import Stopped",
+          description: `Process stopped. ${i} of ${totalGames} games saved.`,
+          variant: "default",
+        });
+        setIsSaving(false);
+        setProgress(0); // Reset progress
+        return;
+      }
+      const game = games[i];
+      try {
+        await saveSteamGame(
+          game,
+          games,
+          platformId,
+          searchIGDB,
+          toast,
+          setGames,
+          true
+        );
+        setProcessedCount(i + 1);
+      } catch (error) {
+        errors.push(game.name);
+      }
+      setProgress(Math.round(((i + 1) / totalGames) * 100));
+    }
+
+    if (errors.length > 0) {
+      toast({
+        title: "Save All Completed",
+        description: `${totalGames - errors.length} games saved. ${errors.length} failed.`,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Save All Completed",
+        description: "All games saved successfully!",
+      });
+    }
+
+    setIsSaving(false);
+    setProgress(0); // Reset progress bar.
+    setProcessedCount(0);
+  };
+  const handleStopImport = () => {
+    cancelRef.current = true;
+  };
+
   return (
     <div className="my-3">
-      <form action={action} className="mb-4 flex max-w-2xl gap-4">
+      <form
+        action={fetchSteamProfileFormAction}
+        className="mb-4 flex min-w-full max-w-2xl gap-4"
+      >
         <Input
           placeholder="Enter Steam profile URL"
           name="steamProfileUrl"
-          disabled={state.gameCount !== 0}
+          disabled={state.gameCount !== 0 || isSaving}
           defaultValue={userData?.steamProfileURL ?? ""}
           type="text"
           className="flex-1"
         />
-        <FetchSteamProfileButton isDisabled={state.gameCount !== 0} />
+        <FetchSteamProfileButton
+          isDisabled={state.gameCount !== 0 || isSaving}
+        />
       </form>
       <ImportNotice gameCount={state.gameCount} />
+      {state.gameCount ? (
+        <div className="flex flex-col items-start gap-2">
+          <div className="flex gap-2">
+            <Button
+              onClick={handleSaveAll}
+              disabled={isSaving}
+              className={cn("relative", { "animate-pulse": isSaving })}
+            >
+              Save all to backlog
+            </Button>
+            {isSaving && (
+              <Button
+                variant="destructive"
+                onClick={handleStopImport}
+                className="relative"
+              >
+                Stop Import
+              </Button>
+            )}
+          </div>
+          {isSaving && (
+            <ProgressBar
+              value={progress}
+              max={100}
+              count={processedCount}
+              totalCount={games.length}
+              className="w-full rounded"
+            />
+          )}
+        </div>
+      ) : null}
       {state.gameCount > 0 && (
         <>
           <div className="my-2 flex items-center justify-between">

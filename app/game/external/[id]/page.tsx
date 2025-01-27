@@ -1,9 +1,8 @@
 import { AddToCollectionModal } from "@/components/game/add-to-collection-modal";
-import { EditBacklogItemDialog } from "@/src/features/edit-backlog-item";
-import { GameStats, Reviews } from "@/src/page-slices/game";
+import { GameStats } from "@/src/page-slices/game";
 import { Artwork } from "@/src/page-slices/game/ui/artwork";
 import igdbApi from "@/src/shared/api/igdb";
-import { BacklogStatusMapper, cn, getUniquePlatforms } from "@/src/shared/lib";
+import { cn, getUniquePlatforms } from "@/src/shared/lib";
 import { platformToColorBadge } from "@/src/shared/lib/platform-to-color";
 import { GenericPageProps } from "@/src/shared/types";
 import { Button } from "@/src/shared/ui";
@@ -14,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/shared/ui/tabs";
 import { GameScreenshots } from "@/src/widgets/game-screenshots";
 import { Header } from "@/src/widgets/header";
 import { SimilarGames } from "@/src/widgets/similar-games";
-import { Heart, ListPlus, Star } from "lucide-react";
+import { Heart } from "lucide-react";
 import { Suspense } from "react";
 
 export default async function ExternalGamePage(props: GenericPageProps) {
@@ -127,7 +126,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
             </div>
             <div className="w-full space-y-8 lg:w-80">
               <Suspense fallback={"Loading..."}>
-                <GameStats igdbId={igdbData.id} gameId={""} />
+                <GameStats />
               </Suspense>
               <Suspense fallback={"Loading..."}>
                 <SimilarGames igdbId={igdbData.id} />

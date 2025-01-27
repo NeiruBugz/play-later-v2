@@ -31,7 +31,7 @@ const User = memo(function User() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="h-0 w-9 cursor-pointer rounded">
+        <Avatar className="w-9 cursor-pointer rounded">
           {session.data.user.image ? (
             <AvatarImage
               src={session.data.user.image ?? ""}
