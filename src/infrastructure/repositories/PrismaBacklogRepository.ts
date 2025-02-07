@@ -41,4 +41,37 @@ export class PrismaBacklogRepository implements BacklogRepository {
 
     return found;
   }
+
+  async getUniqueUserPlatforms(userId: string) {
+    const result: Array<{ platform: string }> = [];
+    const platforms = await prisma.backlogItem.findMany({
+      where: {
+        userId: userId,
+      },
+      select: {
+        platform: true,
+      },
+      distinct: ["platform"],
+    });
+
+    if (platforms.length === 0) {
+      result.push(
+        ...[
+          { platform: "pc" },
+          { platform: "playstation" },
+          { platform: "nintendo" },
+          { platform: "xbox" },
+          { platform: "all" },
+        ],
+      );
+    }
+
+    platforms.forEach((platform) => {
+      if (typeof platform.platform === "string") {
+        result.push({ platform: platform.platform });
+      }
+    });
+
+    return result;
+  }
 }

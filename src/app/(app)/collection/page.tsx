@@ -1,5 +1,24 @@
-import { Box } from "@chakra-ui/react";
+import { Filters } from "@/app/(app)/collection/_components/filters";
+import { List } from "@/app/(app)/collection/_components/list";
+import { Box, Flex, Heading } from "@chakra-ui/react";
+import { Suspense } from "react";
 
-export default function CollectionPage() {
-  return <Box>Collection Page</Box>;
+export default async function CollectionPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
+  const awaited = await searchParams;
+
+  return (
+    <Box>
+      <Heading as="h2">Collection</Heading>
+      <Flex>
+        <Filters />
+      </Flex>
+      <Suspense fallback={"Loading..."}>
+        <List params={awaited} />
+      </Suspense>
+    </Box>
+  );
 }
