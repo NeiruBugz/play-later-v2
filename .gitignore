@@ -49,3 +49,5 @@ dumps/
 .local-data/
 
 *.tsbuildinfo
+
+*storybook.log
