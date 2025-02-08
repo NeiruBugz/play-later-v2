@@ -1,8 +1,9 @@
 "use client";
 
-import { Button } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { LuX } from "react-icons/lu";
 
 export function ClearFilters() {
   const router = useRouter();
@@ -33,7 +34,8 @@ export function ClearFilters() {
       aria-label="Clear filters"
       size="sm"
     >
-      Clear filters
+      <LuX />
+      <Box flex="1">Clear filters</Box>
     </Button>
   );
 }
