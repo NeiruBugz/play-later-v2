@@ -1,7 +1,9 @@
 import { UserAvatar } from "@/components/ui/user";
-import { Flex, HStack, Link, Text } from "@chakra-ui/react";
+import { Button, Flex, HStack, Link, Text } from "@chakra-ui/react";
 import { Suspense } from "react";
 import NextLink from "next/link";
+import { SkeletonCircle } from "@/components/ui/skeleton";
+import { UserMenu } from "@/components/ui/user-menu";
 
 const linksConfig = [
   {
@@ -33,9 +35,18 @@ export function AppHeader() {
           ))}
         </HStack>
       </Flex>
-      <Suspense>
-        <UserAvatar />
-      </Suspense>
+      <Flex gap={2} align="center">
+        <Button variant="plain" asChild size="sm" colorPalette="blue">
+          <Link asChild>
+            <NextLink href="/collection/add">Add game</NextLink>
+          </Link>
+        </Button>
+        <UserMenu>
+          <Suspense fallback={<SkeletonCircle />}>
+            <UserAvatar />
+          </Suspense>
+        </UserMenu>
+      </Flex>
     </Flex>
   );
 }
