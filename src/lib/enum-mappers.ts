@@ -4,10 +4,10 @@ import {
 } from "@/domain/entities/BacklogItem";
 
 export const BacklogStatusMapper: Record<BacklogItemStatus, string> = {
-  COMPLETED: "Completed",
-  PLAYED: "Played",
-  PLAYING: "Playing",
   TO_PLAY: "Backlog",
+  PLAYING: "Playing",
+  PLAYED: "Played",
+  COMPLETED: "Completed",
   WISHLIST: "Wishlist",
 };
 

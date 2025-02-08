@@ -37,7 +37,7 @@ export function StatusFilter() {
       <Button
         onClick={() => onStatusSelect("All")}
         disabled={!currentStatusParam}
-        size="sm"
+        size="xs"
         variant="outline"
       >
         All
@@ -49,7 +49,7 @@ export function StatusFilter() {
             key={key}
             onClick={() => onStatusSelect(key)}
             disabled={currentStatusParam === key}
-            size="sm"
+            size="xs"
             variant="outline"
           >
             {BacklogStatusMapper[key as BacklogItemStatus]}

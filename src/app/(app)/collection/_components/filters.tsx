@@ -1,17 +1,21 @@
-import { Flex } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import { PlatformFilter } from "./filters/platform";
 import { getUniqueUserPlatforms } from "@/server/actions/backlogActions";
 import { StatusFilter } from "@/app/(app)/collection/_components/filters/status";
+import { Search } from "@/app/(app)/collection/_components/filters/search";
 
 export async function Filters() {
   const uniquePlatforms = await getUniqueUserPlatforms();
 
   return (
-    <Flex direction="column" my={2}>
+    <Box my={2}>
       <Flex>
         <StatusFilter />
       </Flex>
-      <PlatformFilter platformOptions={uniquePlatforms} />
-    </Flex>
+      <Flex gap={2} align="center" my={2}>
+        <PlatformFilter platformOptions={uniquePlatforms} />
+        <Search />
+      </Flex>
+    </Box>
   );
 }

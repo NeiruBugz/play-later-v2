@@ -3,7 +3,6 @@
 import {
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectRoot,
   SelectTrigger,
   SelectValueText,
@@ -66,8 +65,9 @@ export function PlatformFilter({
       disabled={pending}
       value={[currentPlatform]}
       onValueChange={(e) => onPlatformSelect(e.value)}
+      flexShrink={0}
+      maxW="400px"
     >
-      <SelectLabel>Select platform</SelectLabel>
       <SelectTrigger>
         <SelectValueText placeholder="Select platform" />
       </SelectTrigger>
