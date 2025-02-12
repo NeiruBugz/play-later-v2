@@ -1,4 +1,4 @@
-import { Game } from "@/domain/entities/Game";
+import { Game } from '@/domain/entities/Game';
 
 export interface FilterParams {
   platform?: string;
@@ -9,7 +9,7 @@ export interface FilterParams {
 
 export interface GameWithBacklogItems {
   game: Game;
-  backlogItems: Game["backlogItems"];
+  backlogItems: Game['backlogItems'];
 }
 
 export interface GameRepository {
@@ -18,4 +18,8 @@ export interface GameRepository {
     params: FilterParams,
     itemsPerPage?: number,
   ): Promise<{ collection: GameWithBacklogItems[]; count: number }>;
+  findGameByIgdbId(igdbId: number): Promise<Game | null>;
+  create(
+    gameData: Partial<Game> & { igdbId: number; name: string },
+  ): Promise<Game>;
 }

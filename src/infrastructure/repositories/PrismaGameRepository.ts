@@ -1,12 +1,37 @@
+import { Game } from '@/domain/entities/Game';
 import {
   FilterParams,
   GameRepository,
   GameWithBacklogItems,
-} from "@/domain/repositories/GameRepository";
-import { prisma } from "@/infrastructure/prisma/client";
-import { BacklogItemStatus, Prisma } from "@prisma/client";
+} from '@/domain/repositories/GameRepository';
+import { prisma } from '@/infrastructure/prisma/client';
+import { BacklogItemStatus, Prisma } from '@prisma/client';
 
 export class PrismaGameRepository implements GameRepository {
+  async create(
+    gameData: Game & {
+      igdbId: number;
+      name: string;
+      coverImage?: string | null;
+    },
+  ) {
+    const record = await prisma.game.create({
+      data: {
+        igdbId: gameData.igdbId,
+        title: gameData.name,
+        coverImage: gameData.coverImage,
+      },
+    });
+
+    return record;
+  }
+  async findGameByIgdbId(igdbId: number): Promise<Game | null> {
+    return prisma.game.findUnique({
+      where: {
+        igdbId,
+      },
+    });
+  }
   async getUserGamesWithGroupedBacklog(
     userId: string,
     params: FilterParams,
@@ -19,7 +44,7 @@ export class PrismaGameRepository implements GameRepository {
         userId,
         platform: platform || undefined,
         status:
-          !status || status === ""
+          !status || status === ''
             ? { not: BacklogItemStatus.WISHLIST }
             : {
                 equals: status as BacklogItemStatus,
@@ -32,7 +57,7 @@ export class PrismaGameRepository implements GameRepository {
           is: {
             title: {
               contains: search,
-              mode: "insensitive",
+              mode: 'insensitive',
             },
           },
         };
@@ -50,7 +75,7 @@ export class PrismaGameRepository implements GameRepository {
         userId,
         platform: platform || undefined,
         status:
-          !status || status === ""
+          !status || status === ''
             ? { not: BacklogItemStatus.WISHLIST }
             : {
                 equals: status as BacklogItemStatus,
@@ -63,7 +88,7 @@ export class PrismaGameRepository implements GameRepository {
           is: {
             title: {
               contains: search,
-              mode: "insensitive",
+              mode: 'insensitive',
             },
           },
         };
@@ -81,7 +106,7 @@ export class PrismaGameRepository implements GameRepository {
     const [games, totalGames] = await Promise.all([
       prisma.game.findMany({
         where: gameFilter,
-        orderBy: { title: "asc" },
+        orderBy: { title: 'asc' },
         take,
         skip,
         include: {
