@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   SelectContent,
@@ -6,11 +6,11 @@ import {
   SelectRoot,
   SelectTrigger,
   SelectValueText,
-} from "@/components/ui/select";
-import { normalizeString } from "@/lib/normalize-string";
-import { createListCollection } from "@chakra-ui/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useTransition } from "react";
+} from '@/components/ui/select';
+import { normalizeString } from '@/lib/normalize-string';
+import { createListCollection } from '@chakra-ui/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useMemo, useTransition } from 'react';
 
 const mapStringToCollection = (options: { platform: string }[]) =>
   createListCollection({
@@ -39,13 +39,13 @@ export function PlatformFilter({
 
       const paramsToUpdate = new URLSearchParams(params);
 
-      if (platform === "All") {
-        paramsToUpdate.delete("platform");
+      if (platform === 'all') {
+        paramsToUpdate.delete('platform');
       } else {
-        paramsToUpdate.set("platform", platform);
+        paramsToUpdate.set('platform', platform);
       }
 
-      paramsToUpdate.set("page", "1");
+      paramsToUpdate.set('page', '1');
       startTransition(() => {
         router.replace(`/collection/?${paramsToUpdate.toString()}`);
       });
@@ -53,7 +53,7 @@ export function PlatformFilter({
     [router, params],
   );
 
-  const currentPlatform = params.get("platform") || "all";
+  const currentPlatform = params.get('platform') || 'all';
   const options = useMemo(
     () => mapStringToCollection(platformOptions),
     [platformOptions],
@@ -72,6 +72,7 @@ export function PlatformFilter({
         <SelectValueText placeholder="Select platform" />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem item={{ value: 'all', label: 'All' }}>All</SelectItem>
         {options.items.map((option) => (
           <SelectItem item={option} key={option.value}>
             {option.label}

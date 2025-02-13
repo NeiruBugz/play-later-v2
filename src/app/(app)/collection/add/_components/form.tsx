@@ -1,8 +1,9 @@
 'use client';
 
+import { InputGroup } from '@/components/ui/input-group';
 import { addGameToBacklogAction } from '@/server/actions/backlogActions';
 import { searchGamesAction } from '@/server/actions/gameActions';
-import { SearchResponse } from '@/shared/types/igdb.types';
+import type { SearchResponse } from '@/shared/types/igdb.types';
 import {
   Box,
   Button,
@@ -12,10 +13,24 @@ import {
   Field,
   NativeSelectRoot,
   NativeSelectField,
+  ProgressCircle,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import { ChangeEvent, useRef, useState } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useDebounceValue } from 'usehooks-ts';
+
+function IndeterminateSpinner() {
+  return (
+    <ProgressCircle.Root size="sm" value={null}>
+      <ProgressCircle.Circle css={{ '--thickness': '4px' }}>
+        <ProgressCircle.Track />
+        <ProgressCircle.Range />
+      </ProgressCircle.Circle>
+    </ProgressCircle.Root>
+  );
+}
 
 export function Form() {
   const { data } = useSession();
@@ -25,16 +40,34 @@ export function Form() {
   const [platform, setPlatform] = useState('');
   const [acquisitionType, setAcquisitionType] = useState('');
   const isGameSelected = useRef(false);
+  const [debouncedQuery] = useDebounceValue(searchQuery, 300);
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const suggestionRefs = useRef<(HTMLLIElement | null)[]>([]);
 
-  const { data: suggestions } = useQuery({
-    queryKey: ['search', 'games', searchQuery],
-    queryFn: () => searchGamesAction(searchQuery),
-    enabled: searchQuery.length >= 3 && isGameSelected.current === false,
+  useEffect(() => {
+    if (highlightedIndex >= 0 && suggestionRefs.current[highlightedIndex]) {
+      suggestionRefs.current[highlightedIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  }, [highlightedIndex]);
+
+  useEffect(() => {
+    if (debouncedQuery.length === 0) {
+      isGameSelected.current = false;
+      setSelectedGame(null);
+    }
+  }, [debouncedQuery]);
+
+  const { data: suggestions, isLoading: isFetchingSuggestions } = useQuery({
+    queryKey: ['search', 'games', debouncedQuery],
+    queryFn: () => searchGamesAction(debouncedQuery),
+    enabled: debouncedQuery.length >= 3 && isGameSelected.current === false,
   });
 
   const handleSearchChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const term = event.currentTarget.value;
-
     setSearchQuery(term);
   };
 
@@ -44,7 +77,26 @@ export function Form() {
     isGameSelected.current = true;
   };
 
-  console.log({ suggestions });
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (!suggestions || suggestions.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex((prevIndex) =>
+        prevIndex < suggestions.length - 1 ? prevIndex + 1 : 0,
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex((prevIndex) =>
+        prevIndex > 0 ? prevIndex - 1 : suggestions.length - 1,
+      );
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
+        handleGameSelect(suggestions[highlightedIndex]);
+      }
+    }
+  };
 
   const handleSubmit = async () => {
     if (
@@ -68,14 +120,15 @@ export function Form() {
         platform,
         acquisitionType,
       });
-
+    } catch (error) {
+      console.error('Error adding game to backlog:', error);
+    } finally {
       setSelectedGame(null);
       setSearchQuery('');
       setStatus('');
       setPlatform('');
       setAcquisitionType('');
-    } catch (error) {
-      console.error('Error adding game to backlog:', error);
+      isGameSelected.current = false;
     }
   };
 
@@ -83,14 +136,22 @@ export function Form() {
     <Box>
       <Field.Root mb={4} position="relative">
         <Field.Label>Search Game</Field.Label>
-        <Input
-          value={searchQuery}
-          onChange={handleSearchChange}
-          placeholder="Type game name..."
-          position="relative"
-        />
+        <InputGroup
+          width="full"
+          flex="1"
+          endElement={isFetchingSuggestions ? <IndeterminateSpinner /> : null}
+        >
+          <Input
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Type game name..."
+            position="relative"
+            onKeyDown={handleKeyDown}
+          />
+        </InputGroup>
         {suggestions
-          ? suggestions.length > 0 && (
+          ? suggestions.length > 0 &&
+            !isGameSelected.current && (
               <List.Root
                 border="1px"
                 borderColor="gray.200"
@@ -105,14 +166,21 @@ export function Form() {
                 maxH="260px"
                 overflowY="scroll"
               >
-                {suggestions?.map((game) => (
+                {suggestions?.map((game, index) => (
                   <List.Item
                     w="full"
                     key={game.id}
                     listStyle="none"
                     p={2}
-                    _hover={{ background: 'gray.100', cursor: 'pointer' }}
                     onClick={() => handleGameSelect(game)}
+                    bg={index === highlightedIndex ? 'gray.200' : 'white'}
+                    _hover={{ background: 'gray.100', cursor: 'pointer' }}
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                    ref={(el) => {
+                      if (el) {
+                        suggestionRefs.current[index] = el;
+                      }
+                    }}
                   >
                     {game.name} ({game.release_dates?.[0].human.slice(-4)})
                   </List.Item>

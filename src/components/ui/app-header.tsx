@@ -1,22 +1,22 @@
-import { UserAvatar } from "@/components/ui/user";
-import { Button, Flex, HStack, Link, Text } from "@chakra-ui/react";
-import { Suspense } from "react";
-import NextLink from "next/link";
-import { SkeletonCircle } from "@/components/ui/skeleton";
-import { UserMenu } from "@/components/ui/user-menu";
+import { UserAvatar } from '@/components/ui/user';
+import { Button, Flex, HStack, Link, Text } from '@chakra-ui/react';
+import { Suspense } from 'react';
+import NextLink from 'next/link';
+import { SkeletonCircle } from '@/components/ui/skeleton';
+import { UserMenu } from '@/components/ui/user-menu';
 
 const linksConfig = [
   {
-    href: "/collection?status=PLAYING&page=1",
-    label: "Collection",
+    href: '/collection?status=PLAYING&page=1',
+    label: 'Collection',
   },
   {
-    href: "/wishlist",
-    label: "Wishlist",
+    href: '/wishlist?page=1',
+    label: 'Wishlist',
   },
   {
-    href: "/backlog",
-    label: "Backlogs",
+    href: '/backlog',
+    label: 'Backlogs',
   },
 ] as const;
 

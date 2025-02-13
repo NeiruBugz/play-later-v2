@@ -8,6 +8,7 @@ import {
 import { GetUniquePlatformsForUser } from '@/domain/use-cases/backlog/getUniquePlatforms';
 import { PrismaBacklogRepository } from '@/infrastructure/repositories/PrismaBacklogRepository';
 import { PrismaGameRepository } from '@/infrastructure/repositories/PrismaGameRepository';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function createBacklogItemAction(input: CreateBacklogItemInput) {
@@ -39,5 +40,8 @@ export async function addGameToBacklogAction(params: {
   const gameRepository = new PrismaGameRepository();
   const backlogRepository = new PrismaBacklogRepository();
 
-  return await addGameToBacklog(params, gameRepository, backlogRepository);
+  await addGameToBacklog(params, gameRepository, backlogRepository);
+
+  revalidatePath('/collection');
+  revalidatePath('/wishlist');
 }

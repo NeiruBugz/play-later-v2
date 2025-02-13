@@ -26,10 +26,12 @@ export class PrismaGameRepository implements GameRepository {
     return record;
   }
   async findGameByIgdbId(igdbId: number): Promise<Game | null> {
+    return prisma.game.findUnique({ where: { igdbId } });
+  }
+  async findGameByIdWithUsersBacklog(gameId: string, userId: string) {
     return prisma.game.findUnique({
-      where: {
-        igdbId,
-      },
+      where: { id: gameId },
+      include: { backlogItems: { where: { userId } } },
     });
   }
   async getUserGamesWithGroupedBacklog(
@@ -54,20 +56,11 @@ export class PrismaGameRepository implements GameRepository {
 
       if (search) {
         backlogItemFilter.game = {
-          is: {
-            title: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
+          is: { title: { contains: search, mode: 'insensitive' } },
         };
       }
 
-      return {
-        backlogItems: {
-          some: backlogItemFilter,
-        },
-      };
+      return { backlogItems: { some: backlogItemFilter } };
     };
 
     const buildPrismaBacklogFilter = () => {
@@ -85,12 +78,7 @@ export class PrismaGameRepository implements GameRepository {
 
       if (search) {
         filter.game = {
-          is: {
-            title: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
+          is: { title: { contains: search, mode: 'insensitive' } },
         };
       }
 
@@ -106,18 +94,12 @@ export class PrismaGameRepository implements GameRepository {
     const [games, totalGames] = await Promise.all([
       prisma.game.findMany({
         where: gameFilter,
-        orderBy: { title: 'asc' },
+        orderBy: { createdAt: 'desc' },
         take,
         skip,
-        include: {
-          backlogItems: {
-            where: backlogFilter,
-          },
-        },
+        include: { backlogItems: { where: backlogFilter } },
       }),
-      prisma.game.count({
-        where: gameFilter,
-      }),
+      prisma.game.count({ where: gameFilter }),
     ]);
 
     const collection: GameWithBacklogItems[] = games.map((game) => ({
@@ -126,5 +108,41 @@ export class PrismaGameRepository implements GameRepository {
     }));
 
     return { collection, count: totalGames };
+  }
+
+  async getUserWishlistedGamesGroupedBacklog(
+    userId: string,
+    pageParam: string,
+  ) {
+    const page = Number(pageParam);
+    const skip = ((page || 1) - 1) * 24;
+    const take = 24;
+
+    const [games, totalGames] = await Promise.all([
+      prisma.game.findMany({
+        where: { backlogItems: { some: { userId, status: 'WISHLIST' } } },
+        orderBy: { createdAt: 'desc' },
+        take,
+        skip,
+        include: {
+          backlogItems: {
+            where: {
+              userId,
+              status: 'WISHLIST',
+            },
+          },
+        },
+      }),
+      prisma.game.count({
+        where: { backlogItems: { some: { userId, status: 'WISHLIST' } } },
+      }),
+    ]);
+
+    const wishlistedGames: GameWithBacklogItems[] = games.map((game) => ({
+      game,
+      backlogItems: game.backlogItems ?? [],
+    }));
+
+    return { wishlistedGames, count: totalGames };
   }
 }

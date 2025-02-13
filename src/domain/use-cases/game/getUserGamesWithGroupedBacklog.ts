@@ -1,13 +1,13 @@
-import { z } from "zod";
+import { z } from 'zod';
 import type {
   GameRepository,
   GameWithBacklogItems,
-} from "../../repositories/GameRepository";
+} from '../../repositories/GameRepository';
 
 const ITEMS_PER_PAGE = 24;
 
 const FilterParamsSchema = z.object({
-  platform: z.string().optional().default(""),
+  platform: z.string().optional().default(''),
   status: z.string().optional(),
   search: z.string().optional(),
   page: z.number().optional().default(1),
@@ -31,8 +31,10 @@ export class GetUserGamesWithGroupedBacklog {
       page: Number(params.page),
     });
 
+    console.log(parsedParams.data);
+
     if (!parsedParams.success) {
-      throw new Error("Invalid filters");
+      throw new Error('Invalid filters');
     }
 
     const { data: filterParams } = parsedParams;

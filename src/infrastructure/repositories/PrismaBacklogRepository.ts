@@ -1,6 +1,6 @@
-import { BacklogItem } from "@/domain/entities/BacklogItem";
-import { BacklogRepository } from "@/domain/repositories/BacklogRepository";
-import { prisma } from "@/infrastructure/prisma/client";
+import { BacklogItem } from '@/domain/entities/BacklogItem';
+import { BacklogRepository } from '@/domain/repositories/BacklogRepository';
+import { prisma } from '@/infrastructure/prisma/client';
 
 export class PrismaBacklogRepository implements BacklogRepository {
   async create(item: BacklogItem): Promise<BacklogItem> {
@@ -27,11 +27,7 @@ export class PrismaBacklogRepository implements BacklogRepository {
     const updated = await prisma.backlogItem.update({
       where: { id: item.id! },
       data: {
-        status: item.status,
-        platform: item.platform,
-        acquisitionType: item.acquisitionType,
-        startedAt: item.startedAt,
-        completedAt: item.completedAt,
+        ...item,
       },
     });
     return { ...item, updatedAt: updated.updatedAt };
@@ -51,23 +47,23 @@ export class PrismaBacklogRepository implements BacklogRepository {
       select: {
         platform: true,
       },
-      distinct: ["platform"],
+      distinct: ['platform'],
     });
 
     if (platforms.length === 0) {
       result.push(
         ...[
-          { platform: "pc" },
-          { platform: "playstation" },
-          { platform: "nintendo" },
-          { platform: "xbox" },
-          { platform: "all" },
+          { platform: 'pc' },
+          { platform: 'playstation' },
+          { platform: 'nintendo' },
+          { platform: 'xbox' },
+          { platform: 'all' },
         ],
       );
     }
 
     platforms.forEach((platform) => {
-      if (typeof platform.platform === "string") {
+      if (typeof platform.platform === 'string') {
         result.push({ platform: platform.platform });
       }
     });
