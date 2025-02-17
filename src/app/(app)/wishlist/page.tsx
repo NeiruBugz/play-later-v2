@@ -22,8 +22,6 @@ export default async function WishlistPage({
     awaitedParams.page,
   );
 
-  console.log({ wishlistedGames });
-
   if (count === 0) {
     return (
       <Box>

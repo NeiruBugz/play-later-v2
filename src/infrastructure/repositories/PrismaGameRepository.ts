@@ -5,21 +5,51 @@ import {
   GameWithBacklogItems,
 } from '@/domain/repositories/GameRepository';
 import { prisma } from '@/infrastructure/prisma/client';
-import { BacklogItemStatus, Prisma } from '@prisma/client';
+import { BacklogItemStatus, Genre, Prisma, Screenshot } from '@prisma/client';
 
 export class PrismaGameRepository implements GameRepository {
   async create(
-    gameData: Game & {
+    gameData: Partial<Game> & {
       igdbId: number;
       name: string;
       coverImage?: string | null;
+      description?: string;
+      releaseDate?: Date | null;
+      screenshots?: Screenshot[];
+      genres?: Genre[];
+      aggregatedRating: number | null;
     },
-  ) {
+  ): Promise<Game> {
+    const genresConnectOrCreate = gameData.genres?.map((genre) => ({
+      where: { id: genre.id },
+      create: {
+        id: genre.id,
+        name: genre.name,
+      },
+    }));
+
+    const screenshots = gameData.screenshots?.map((screenshot) => ({
+      where: { id: screenshot.id },
+      create: {
+        id: screenshot.id,
+        image_id: screenshot.image_id,
+      },
+    }));
+
     const record = await prisma.game.create({
       data: {
         igdbId: gameData.igdbId,
         title: gameData.name,
         coverImage: gameData.coverImage,
+        releaseDate: gameData.releaseDate,
+        description: gameData.description,
+        aggregatedRating: gameData.aggregatedRating,
+        screenshots: {
+          connectOrCreate: screenshots || [],
+        },
+        genres: {
+          connectOrCreate: genresConnectOrCreate || [],
+        },
       },
     });
 
@@ -97,7 +127,11 @@ export class PrismaGameRepository implements GameRepository {
         orderBy: { createdAt: 'desc' },
         take,
         skip,
-        include: { backlogItems: { where: backlogFilter } },
+        include: {
+          backlogItems: { where: backlogFilter },
+          screenshots: false,
+          genres: false,
+        },
       }),
       prisma.game.count({ where: gameFilter }),
     ]);

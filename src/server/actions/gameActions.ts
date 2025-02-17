@@ -1,4 +1,5 @@
 'use server';
+
 import { getServerUserId } from '@/domain/auth/auth-service';
 import { GetGameById } from '@/domain/use-cases/game/getGameById';
 import { GetUserGamesWithGroupedBacklog } from '@/domain/use-cases/game/getUserGamesWithGroupedBacklog';
@@ -38,8 +39,12 @@ export async function getUserWishlistedGamesGroupedBacklog(pageParam: string) {
 
 export const searchGamesAction = async (query: string) => {
   const igdbClient = new IGDBClient();
-  const results = await igdbClient.search({ name: query });
-  return results;
+  return await igdbClient.search({ name: query });
+};
+
+export const getIGDBGameData = async (igdbId: number) => {
+  const igdbClient = new IGDBClient();
+  return await igdbClient.getGameById(igdbId);
 };
 
 export async function getGameById(id: string) {

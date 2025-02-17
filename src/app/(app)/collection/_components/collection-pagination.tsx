@@ -20,6 +20,10 @@ export function CollectionPagination({ count }: { count: number }) {
     router.replace(`/collection?${paramsToUpdate.toString()}`);
   };
 
+  if (count === 0) {
+    return null;
+  }
+
   return (
     <>
       <PaginationRoot

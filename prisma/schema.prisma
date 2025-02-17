@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -62,21 +62,24 @@ model User {
 
 // ----- Application Models ------//
 model Game {
-  id            String        @id @default(cuid())
-  igdbId        Int           @unique
-  hltbId        String?       @unique
-  title         String
-  description   String?
-  coverImage    String?
-  releaseDate   DateTime?
-  mainStory     Int?
-  mainExtra     Int?
-  completionist Int?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  backlogItems  BacklogItem[] @relation("GameBacklogItems")
-  Review        Review[]
-  steamAppId    Int?
+  id               String        @id @default(cuid())
+  igdbId           Int           @unique
+  hltbId           String?       @unique
+  title            String
+  description      String?
+  coverImage       String?
+  releaseDate      DateTime?
+  mainStory        Int?
+  mainExtra        Int?
+  completionist    Int?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  backlogItems     BacklogItem[] @relation("GameBacklogItems")
+  Review           Review[]
+  steamAppId       Int?
+  genres           Genre[]
+  aggregatedRating Float?
+  screenshots      Screenshot[]
 }
 
 model BacklogItem {
@@ -112,6 +115,20 @@ model IgnoredImportedGames {
   name   String
   userId String
   User   User   @relation(fields: [userId], references: [id])
+}
+
+model Genre {
+  id     Int     @id
+  name   String
+  Game   Game?   @relation(fields: [gameId], references: [id])
+  gameId String?
+}
+
+model Screenshot {
+  id       Int     @id
+  image_id String
+  Game     Game?   @relation(fields: [gameId], references: [id])
+  gameId   String?
 }
 
 enum BacklogItemStatus {

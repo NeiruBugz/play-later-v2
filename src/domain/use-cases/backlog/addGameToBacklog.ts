@@ -6,6 +6,8 @@ import {
 } from '@/domain/entities/BacklogItem';
 import { GameRepository } from '@/domain/repositories/GameRepository';
 import { BacklogRepository } from '@/domain/repositories/BacklogRepository';
+import { Screenshot } from '@/domain/entities/Screenshot';
+import { Genre } from '@/domain/entities/Genre';
 
 export interface AddGameToBacklogParams {
   userId: string;
@@ -13,6 +15,11 @@ export interface AddGameToBacklogParams {
     igdbId: number;
     name: string;
     coverImage?: string | null;
+    description: string;
+    releaseDate: Date | null;
+    aggregatedRating: number | null;
+    screenshots?: Screenshot[];
+    genres?: Genre[];
   };
   status: string;
   platform: string;

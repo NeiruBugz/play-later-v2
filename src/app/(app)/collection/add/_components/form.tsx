@@ -2,7 +2,10 @@
 
 import { InputGroup } from '@/components/ui/input-group';
 import { addGameToBacklogAction } from '@/server/actions/backlogActions';
-import { searchGamesAction } from '@/server/actions/gameActions';
+import {
+  getIGDBGameData,
+  searchGamesAction,
+} from '@/server/actions/gameActions';
 import type { SearchResponse } from '@/shared/types/igdb.types';
 import {
   Box,
@@ -16,6 +19,7 @@ import {
   ProgressCircle,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
+import { parse } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -63,8 +67,15 @@ export function Form() {
   const { data: suggestions, isLoading: isFetchingSuggestions } = useQuery({
     queryKey: ['search', 'games', debouncedQuery],
     queryFn: () => searchGamesAction(debouncedQuery),
-    enabled: debouncedQuery.length >= 3 && isGameSelected.current === false,
+    enabled: debouncedQuery.length >= 3 && !isGameSelected.current,
   });
+
+  const { data: igdbFullGameResponse, isLoading: isFetchingGameData } =
+    useQuery({
+      queryKey: ['igdb', 'game', 'get-by-id', selectedGame?.id],
+      queryFn: () => getIGDBGameData(selectedGame?.id || 0),
+      enabled: Boolean(selectedGame?.id),
+    });
 
   const handleSearchChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const term = event.currentTarget.value;
@@ -109,12 +120,24 @@ export function Form() {
       return;
 
     try {
+      const parsedDate = selectedGame.release_dates?.[0].human
+        ? parse(
+            selectedGame.release_dates?.[0].human,
+            'MMM dd, yyyy',
+            new Date(),
+          )
+        : null;
       await addGameToBacklogAction({
         userId: data.user.id,
         igdbGame: {
           igdbId: selectedGame.id,
           name: selectedGame.name,
           coverImage: selectedGame.cover.image_id,
+          description: selectedGame.summary || '',
+          releaseDate: parsedDate,
+          aggregatedRating: igdbFullGameResponse?.aggregated_rating || null,
+          screenshots: igdbFullGameResponse?.screenshots,
+          genres: igdbFullGameResponse?.genres,
         },
         status,
         platform,
@@ -139,7 +162,11 @@ export function Form() {
         <InputGroup
           width="full"
           flex="1"
-          endElement={isFetchingSuggestions ? <IndeterminateSpinner /> : null}
+          endElement={
+            isFetchingSuggestions || isFetchingGameData ? (
+              <IndeterminateSpinner />
+            ) : null
+          }
         >
           <Input
             value={searchQuery}

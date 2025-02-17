@@ -1,4 +1,6 @@
 import { Game } from '@/domain/entities/Game';
+import { Genre } from '@/domain/entities/Genre';
+import { Screenshot } from '@/domain/entities/Screenshot';
 
 export interface FilterParams {
   platform?: string;
@@ -24,7 +26,16 @@ export interface GameRepository {
     userId: string,
   ): Promise<Game | null>;
   create(
-    gameData: Partial<Game> & { igdbId: number; name: string },
+    gameData: Partial<Game> & {
+      igdbId: number;
+      name: string;
+      coverImage?: string | null;
+      description?: string;
+      releaseDate?: Date | null;
+      screenshots?: Screenshot[];
+      genres?: Genre[];
+      aggregatedRating: number | null;
+    },
   ): Promise<Game>;
   getUserWishlistedGamesGroupedBacklog(
     userId: string,

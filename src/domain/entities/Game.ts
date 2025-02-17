@@ -1,4 +1,6 @@
-import type { BacklogItem } from "./BacklogItem";
+import { Screenshot } from '@/domain/entities/Screenshot';
+import type { BacklogItem } from './BacklogItem';
+import { Genre } from '@/domain/entities/Genre';
 
 export interface Game {
   id: string;
@@ -15,4 +17,7 @@ export interface Game {
   createdAt: Date;
   updatedAt: Date;
   backlogItems?: BacklogItem[];
+  screenshots?: Screenshot[];
+  genres?: Genre[];
+  aggregatedRating: number | null;
 }

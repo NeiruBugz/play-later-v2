@@ -31,8 +31,6 @@ export class GetUserGamesWithGroupedBacklog {
       page: Number(params.page),
     });
 
-    console.log(parsedParams.data);
-
     if (!parsedParams.success) {
       throw new Error('Invalid filters');
     }

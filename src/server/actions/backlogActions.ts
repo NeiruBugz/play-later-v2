@@ -1,5 +1,7 @@
 'use server';
 import { getServerUserId } from '@/domain/auth/auth-service';
+import { Genre } from '@/domain/entities/Genre';
+import { Screenshot } from '@/domain/entities/Screenshot';
 import { addGameToBacklog } from '@/domain/use-cases/backlog/addGameToBacklog';
 import {
   CreateBacklogItem,
@@ -32,7 +34,16 @@ export async function getUniqueUserPlatforms() {
 
 export async function addGameToBacklogAction(params: {
   userId: string;
-  igdbGame: { igdbId: number; name: string; coverImage?: string | null };
+  igdbGame: {
+    igdbId: number;
+    name: string;
+    coverImage?: string | null;
+    description: string;
+    releaseDate: Date | null;
+    aggregatedRating: number | null;
+    screenshots?: Screenshot[];
+    genres?: Genre[];
+  };
   status: string;
   platform: string;
   acquisitionType: string;
