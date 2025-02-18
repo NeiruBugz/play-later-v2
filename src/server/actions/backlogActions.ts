@@ -8,8 +8,8 @@ import {
   CreateBacklogItemInput,
 } from '@/domain/use-cases/backlog/createBacklogItem';
 import { GetUniquePlatformsForUser } from '@/domain/use-cases/backlog/getUniquePlatforms';
-import { PrismaBacklogRepository } from '@/infrastructure/repositories/PrismaBacklogRepository';
-import { PrismaGameRepository } from '@/infrastructure/repositories/PrismaGameRepository';
+import { PrismaBacklogRepository } from '@/infra/repositories/PrismaBacklogRepository';
+import { PrismaGameRepository } from '@/infra/repositories/PrismaGameRepository';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 

@@ -1,23 +1,53 @@
 import { Filters } from '@/app/(app)/collection/_components/filters';
-import { getUserGamesWithGroupedBacklogAction } from '@/server/actions/gameActions';
 import { Box, Flex, Heading } from '@chakra-ui/react';
 import { Suspense } from 'react';
 import { CollectionPagination } from './_components/collection-pagination';
 import { GameWithBacklogItemsList } from '@/components/game/game-with-backlog-items-list';
+import { getUserGamesWithGroupedBacklog } from '@/features/collection/collection-actions';
+import { z } from 'zod';
+
+const collectionPageSearchParamsSchema = z
+  .object({
+    platform: z.string().optional().default(''),
+    status: z.string().optional(),
+    search: z.string().optional(),
+    page: z.string().optional().default('1'),
+  })
+  .transform((params) => ({
+    platform: params.platform,
+    status: params.status,
+    search: params.search,
+    page: Number(params.page),
+  }));
+
+type CollectionPageSearchParams = z.infer<
+  typeof collectionPageSearchParamsSchema
+>;
 
 export default async function CollectionPage({
-  searchParams,
+  searchParams: searchParamsPromise,
 }: {
   searchParams: Promise<Record<string, string>>;
 }) {
-  const awaitedParams = await searchParams;
+  const resolvedSearchParams = await searchParamsPromise;
 
-  const { collection, count } = await getUserGamesWithGroupedBacklogAction({
-    platform: awaitedParams.platform,
-    status: awaitedParams.status,
-    search: awaitedParams.search,
-    page: Number(awaitedParams.page) || 1,
-  });
+  const parsedSearchParams =
+    collectionPageSearchParamsSchema.safeParse(resolvedSearchParams);
+
+  let filterParams: CollectionPageSearchParams;
+
+  if (parsedSearchParams.success) {
+    filterParams = parsedSearchParams.data;
+  } else {
+    console.warn(
+      'Invalid search params, using defaults:',
+      parsedSearchParams.error,
+    );
+    filterParams = collectionPageSearchParamsSchema.parse({});
+  }
+
+  const { collection, count } =
+    await getUserGamesWithGroupedBacklog(filterParams);
 
   return (
     <Box>

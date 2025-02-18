@@ -2,26 +2,10 @@
 
 import { getServerUserId } from '@/domain/auth/auth-service';
 import { GetGameById } from '@/domain/use-cases/game/getGameById';
-import { GetUserGamesWithGroupedBacklog } from '@/domain/use-cases/game/getUserGamesWithGroupedBacklog';
 import { GetUserWishlistedGamesGroupedBacklog } from '@/domain/use-cases/game/getUserWishlistedGamesGroupedBacklog';
-import { IGDBClient } from '@/infrastructure/external-apis/igdb/client';
-import { PrismaGameRepository } from '@/infrastructure/repositories/PrismaGameRepository';
+import { IGDBClient } from '@/infra/external-apis/igdb/client';
+import { PrismaGameRepository } from '@/infra/repositories/PrismaGameRepository';
 import { redirect } from 'next/navigation';
-
-export async function getUserGamesWithGroupedBacklogAction(
-  params: Record<string, string | number>,
-) {
-  const userId = await getServerUserId();
-  if (!userId) {
-    console.error('Unable to find authenticated user');
-    redirect('/');
-  }
-
-  const repository = new PrismaGameRepository();
-  const useCase = new GetUserGamesWithGroupedBacklog(repository);
-
-  return await useCase.execute(userId, params);
-}
 
 export async function getUserWishlistedGamesGroupedBacklog(pageParam: string) {
   const userId = await getServerUserId();

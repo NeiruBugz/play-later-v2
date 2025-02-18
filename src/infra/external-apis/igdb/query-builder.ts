@@ -1,12 +1,12 @@
 export class QueryBuilder {
-  private query: string = "";
+  private query: string = '';
 
   fields(fields: string[]): this {
-    this.query += `fields ${fields.join(", ")};`;
+    this.query += `fields ${fields.join(', ')};`;
     return this;
   }
 
-  sort(field: string, order: "asc" | "desc" = "asc"): this {
+  sort(field: string, order: 'asc' | 'desc' = 'asc'): this {
     this.query += `sort ${field} ${order};`;
     return this;
   }

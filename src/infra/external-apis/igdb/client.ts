@@ -1,12 +1,12 @@
-import { IGDBClientInterface } from "@/domain/external-apis/igdb-client";
-import { QueryBuilder } from "@/infrastructure/external-apis/igdb/query-builder";
+import { IGDBClientInterface } from '@/domain/external-apis/igdb-client';
+import { QueryBuilder } from '@/infrastructure/external-apis/igdb/query-builder';
 import {
   getTimeStamp,
   asError,
   normalizeTitle,
   normalizeString,
-} from "@/infrastructure/external-apis/igdb/utils";
-import { API_URL, TOKEN_URL } from "@/shared/config/igdb.config";
+} from '@/infrastructure/external-apis/igdb/utils';
+import { API_URL, TOKEN_URL } from '@/shared/config/igdb.config';
 import {
   TwitchTokenResponse,
   RatedGameResponse,
@@ -20,8 +20,8 @@ import {
   RequestOptions,
   Event,
   PlatformWithReleaseDate,
-} from "@/shared/types/igdb.types";
-import { env } from "../../../../env.mjs";
+} from '@/shared/types/igdb.types';
+import { env } from '../../../../env.mjs';
 
 export class IGDBClient implements IGDBClientInterface {
   private token: TwitchTokenResponse | null = null;
@@ -29,7 +29,7 @@ export class IGDBClient implements IGDBClientInterface {
 
   private async fetchToken(): Promise<TwitchTokenResponse | void> {
     try {
-      const res = await fetch(TOKEN_URL, { cache: "no-store", method: "POST" });
+      const res = await fetch(TOKEN_URL, { cache: 'no-store', method: 'POST' });
       if (!res.ok) {
         throw new Error(`Failed to fetch token: ${res.statusText}`);
       }
@@ -55,17 +55,17 @@ export class IGDBClient implements IGDBClientInterface {
       const accessToken = await this.getToken();
 
       if (!accessToken) {
-        this.handleError(new Error("Unauthorized: No valid token available."));
+        this.handleError(new Error('Unauthorized: No valid token available.'));
         return;
       }
 
       const response = await fetch(`${API_URL}${options.resource}`, {
         headers: {
-          Accept: "application/json",
+          Accept: 'application/json',
           Authorization: `Bearer ${accessToken}`,
-          "Client-ID": env.IGDB_CLIENT_ID,
+          'Client-ID': env.IGDB_CLIENT_ID,
         },
-        method: "POST",
+        method: 'POST',
         body: options.body,
       });
 
@@ -90,64 +90,64 @@ export class IGDBClient implements IGDBClientInterface {
   // Implement the methods from IGDBClientInterface
   // -------------------------------
   async getEventLogo(
-    id: Event["event_logo"],
+    id: Event['event_logo'],
   ): Promise<
     | Array<{ height: number; id: number; image_id: string; width: number }>
     | undefined
   > {
     const query = new QueryBuilder()
-      .fields(["width", "height", "image_id"])
+      .fields(['width', 'height', 'image_id'])
       .where(`id = (${id})`)
       .build();
 
     return this.request({
       body: query,
-      resource: "/event_logos",
+      resource: '/event_logos',
     });
   }
 
   async getGamesByRating(): Promise<RatedGameResponse[] | undefined> {
     const query = new QueryBuilder()
-      .fields(["name", "cover.image_id"])
-      .sort("aggregated_rating", "desc")
+      .fields(['name', 'cover.image_id'])
+      .sort('aggregated_rating', 'desc')
       .where(
-        "aggregated_rating_count > 20 & aggregated_rating != null & rating != null & category = 0",
+        'aggregated_rating_count > 20 & aggregated_rating != null & rating != null & category = 0',
       )
       .limit(12)
       .build();
 
     return this.request<RatedGameResponse[]>({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
   }
 
   async getEvents(): Promise<UpcomingEventsResponse | undefined> {
     const query = new QueryBuilder()
       .fields([
-        "checksum",
-        "created_at",
-        "description",
-        "end_time",
-        "event_logo",
-        "event_networks",
-        "games",
-        "live_stream_url",
-        "name",
-        "slug",
-        "start_time",
-        "time_zone",
-        "updated_at",
-        "videos",
+        'checksum',
+        'created_at',
+        'description',
+        'end_time',
+        'event_logo',
+        'event_networks',
+        'games',
+        'live_stream_url',
+        'name',
+        'slug',
+        'start_time',
+        'time_zone',
+        'updated_at',
+        'videos',
       ])
-      .sort("start_time", "asc")
+      .sort('start_time', 'asc')
       .where(`start_time >= ${getTimeStamp()}`)
       .limit(10)
       .build();
 
     return this.request<UpcomingEventsResponse>({
       body: query,
-      resource: "/events",
+      resource: '/events',
     });
   }
 
@@ -157,36 +157,36 @@ export class IGDBClient implements IGDBClientInterface {
     if (!gameId) return;
     const query = new QueryBuilder()
       .fields([
-        "name",
-        "summary",
-        "aggregated_rating",
-        "cover.image_id",
-        "genres.name",
-        "screenshots.image_id",
-        "release_dates.platform.name",
-        "release_dates.human",
-        "involved_companies.developer",
-        "involved_companies.publisher",
-        "involved_companies.company.name",
-        "game_modes.name",
-        "game_engines.name",
-        "player_perspectives.name",
-        "themes.name",
-        "external_games.category",
-        "external_games.name",
-        "external_games.url",
-        "similar_games.name",
-        "similar_games.cover.image_id",
-        "websites.url",
-        "websites.category",
-        "websites.trusted",
+        'name',
+        'summary',
+        'aggregated_rating',
+        'cover.image_id',
+        'genres.name',
+        'screenshots.image_id',
+        'release_dates.platform.name',
+        'release_dates.human',
+        'involved_companies.developer',
+        'involved_companies.publisher',
+        'involved_companies.company.name',
+        'game_modes.name',
+        'game_engines.name',
+        'player_perspectives.name',
+        'themes.name',
+        'external_games.category',
+        'external_games.name',
+        'external_games.url',
+        'similar_games.name',
+        'similar_games.cover.image_id',
+        'websites.url',
+        'websites.category',
+        'websites.trusted',
       ])
       .where(`id = (${gameId})`)
       .build();
 
     const response = await this.request<FullGameInfoResponse[]>({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
 
     return response && response.length ? response[0] : undefined;
@@ -194,19 +194,19 @@ export class IGDBClient implements IGDBClientInterface {
 
   async getGameScreenshots(
     gameId: number | null | undefined,
-  ): Promise<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }> {
+  ): Promise<{ id: number; screenshots: FullGameInfoResponse['screenshots'] }> {
     if (!gameId) return { id: 0, screenshots: [] };
 
     const query = new QueryBuilder()
-      .fields(["screenshots.image_id"])
+      .fields(['screenshots.image_id'])
       .where(`id = (${gameId})`)
       .build();
 
     const response = await this.request<
-      Array<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }>
+      Array<{ id: number; screenshots: FullGameInfoResponse['screenshots'] }>
     >({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
 
     return response && response[0] ? response[0] : { id: 0, screenshots: [] };
@@ -218,7 +218,7 @@ export class IGDBClient implements IGDBClientInterface {
     if (!gameId) return { id: null, aggregated_rating: null };
 
     const query = new QueryBuilder()
-      .fields(["aggregated_rating"])
+      .fields(['aggregated_rating'])
       .where(`id = (${gameId})`)
       .build();
 
@@ -226,7 +226,7 @@ export class IGDBClient implements IGDBClientInterface {
       Array<{ id: number; aggregated_rating: number }>
     >({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
 
     return response && response[0]
@@ -234,19 +234,17 @@ export class IGDBClient implements IGDBClientInterface {
       : { id: null, aggregated_rating: null };
   }
 
-  async getSimilarGames(
-    gameId: number | null | undefined,
-  ): Promise<{
+  async getSimilarGames(gameId: number | null | undefined): Promise<{
     id: number | null;
-    similar_games: FullGameInfoResponse["similar_games"];
+    similar_games: FullGameInfoResponse['similar_games'];
   }> {
     if (!gameId) return { id: null, similar_games: [] };
 
     const query = new QueryBuilder()
       .fields([
-        "genres.name",
-        "similar_games.name",
-        "similar_games.cover.image_id",
+        'genres.name',
+        'similar_games.name',
+        'similar_games.cover.image_id',
       ])
       .where(`id = (${gameId})`)
       .build();
@@ -254,11 +252,11 @@ export class IGDBClient implements IGDBClientInterface {
     const response = await this.request<
       Array<{
         id: number;
-        similar_games: FullGameInfoResponse["similar_games"];
+        similar_games: FullGameInfoResponse['similar_games'];
       }>
     >({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
 
     return response && response[0]
@@ -272,7 +270,7 @@ export class IGDBClient implements IGDBClientInterface {
     if (!gameId) return [];
 
     const query = new QueryBuilder()
-      .fields(["genres.name"])
+      .fields(['genres.name'])
       .where(`id = (${gameId})`)
       .build();
 
@@ -280,7 +278,7 @@ export class IGDBClient implements IGDBClientInterface {
       Array<GenresResponse> | Array<{ id: null; genres: [] }>
     >({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
 
     return response || [];
@@ -293,19 +291,19 @@ export class IGDBClient implements IGDBClientInterface {
 
     const query = new QueryBuilder()
       .fields([
-        "name",
-        "cover.image_id",
-        "first_release_date",
-        "release_dates.platform.name",
-        "release_dates.human",
+        'name',
+        'cover.image_id',
+        'first_release_date',
+        'release_dates.platform.name',
+        'release_dates.human',
       ])
-      .sort("first_release_date", "asc")
-      .where(`id = (${ids.join(",")})`)
+      .sort('first_release_date', 'asc')
+      .where(`id = (${ids.join(',')})`)
       .build();
 
     const result = await this.request<UpcomingReleaseResponse[] | []>({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
 
     if (!result) {
@@ -315,13 +313,13 @@ export class IGDBClient implements IGDBClientInterface {
     return result;
   }
 
-  async getPlatforms(): Promise<Omit<PlatformWithReleaseDate, "human">[]> {
-    const query = new QueryBuilder().fields(["name"]).build();
+  async getPlatforms(): Promise<Omit<PlatformWithReleaseDate, 'human'>[]> {
+    const query = new QueryBuilder().fields(['name']).build();
     const result = await this.request<
-      Omit<PlatformWithReleaseDate, "human">[] | []
+      Omit<PlatformWithReleaseDate, 'human'>[] | []
     >({
       body: query,
-      resource: "/platforms",
+      resource: '/platforms',
     });
 
     if (!result) {
@@ -331,7 +329,7 @@ export class IGDBClient implements IGDBClientInterface {
   }
 
   async search({
-    name = "",
+    name = '',
     fields,
   }: {
     name: null | string;
@@ -339,30 +337,30 @@ export class IGDBClient implements IGDBClientInterface {
   }): Promise<SearchResponse[] | undefined> {
     if (!name) return;
 
-    let filters = "";
+    let filters = '';
     if (fields && Object.values(fields).length !== 0) {
       const filterConditions = Object.entries(fields)
         .map(([key, value]) => {
           if (!value) return;
-          const fieldName = key === "platform" ? "platforms" : key;
+          const fieldName = key === 'platform' ? 'platforms' : key;
           return Array.isArray(value)
-            ? `${fieldName}=(${value.join(",")})`
+            ? `${fieldName}=(${value.join(',')})`
             : `${fieldName} = (${value})`;
         })
         .filter(Boolean)
-        .join(" & ");
+        .join(' & ');
       if (filterConditions) filters = ` & ${filterConditions}`;
     }
 
     const query = new QueryBuilder()
       .fields([
-        "name",
-        "summary",
-        "platforms.name",
-        "release_dates.human",
-        "first_release_date",
-        "category",
-        "cover.image_id",
+        'name',
+        'summary',
+        'platforms.name',
+        'release_dates.human',
+        'first_release_date',
+        'category',
+        'cover.image_id',
       ])
       .where(`cover.image_id != null ${filters}`)
       .search(normalizeTitle(normalizeString(name)))
@@ -371,28 +369,28 @@ export class IGDBClient implements IGDBClientInterface {
 
     return this.request<SearchResponse[]>({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
   }
 
   async getArtworks(gameId: number): Promise<Artwork[] | undefined> {
     const query = new QueryBuilder()
       .fields([
-        "alpha_channel",
-        "animated",
-        "checksum",
-        "game",
-        "height",
-        "image_id",
-        "url",
-        "width",
+        'alpha_channel',
+        'animated',
+        'checksum',
+        'game',
+        'height',
+        'image_id',
+        'url',
+        'width',
       ])
       .where(`game = ${gameId}`)
       .build();
 
     return this.request<Artwork[] | undefined>({
       body: query,
-      resource: "/artworks",
+      resource: '/artworks',
     });
   }
 
@@ -400,14 +398,14 @@ export class IGDBClient implements IGDBClientInterface {
     platformName: string,
   ): Promise<{ platformId: Array<{ id: number; name: string }> } | undefined> {
     const query = new QueryBuilder()
-      .fields(["id", "name"])
+      .fields(['id', 'name'])
       .search(platformName)
       .limit(1)
       .build();
 
     return this.request({
       body: query,
-      resource: "/platforms",
+      resource: '/platforms',
     });
   }
 
@@ -415,13 +413,13 @@ export class IGDBClient implements IGDBClientInterface {
     gameName: string,
   ): Promise<IgdbGameResponseItem[] | undefined> {
     const query = new QueryBuilder()
-      .fields(["name", "cover.url", "cover.image_id", "version_title"])
+      .fields(['name', 'cover.url', 'cover.image_id', 'version_title'])
       .search(gameName)
       .build();
 
     return this.request<IgdbGameResponseItem[]>({
       body: query,
-      resource: "/games",
+      resource: '/games',
     });
   }
 }

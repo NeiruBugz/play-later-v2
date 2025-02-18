@@ -1,5 +1,5 @@
-import { env } from "../../../env.mjs";
-import { PrismaClient } from "@prisma/client";
+import { env } from '../../../env.mjs';
+import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -9,20 +9,20 @@ const prismaFactory = () => {
   const prisma = new PrismaClient({
     log: [
       {
-        emit: "event",
-        level: "query",
+        emit: 'event',
+        level: 'query',
       },
       {
-        emit: "stdout",
-        level: "error",
+        emit: 'stdout',
+        level: 'error',
       },
       {
-        emit: "stdout",
-        level: "info",
+        emit: 'stdout',
+        level: 'info',
       },
       {
-        emit: "stdout",
-        level: "warn",
+        emit: 'stdout',
+        level: 'warn',
       },
     ],
   });
@@ -38,4 +38,4 @@ const prismaFactory = () => {
 
 export const prisma = globalForPrisma.prisma ?? prismaFactory();
 
-if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;

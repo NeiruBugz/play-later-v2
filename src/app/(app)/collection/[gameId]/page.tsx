@@ -1,4 +1,3 @@
-import { getGameById } from '@/server/actions/gameActions';
 import {
   Badge,
   Heading,
@@ -12,29 +11,36 @@ import { z } from 'zod';
 import Image from 'next/image';
 import { IMAGE_API, IMAGE_SIZES } from '@/shared/config/igdb.image.config';
 import { LibraryEntries } from '@/app/(app)/collection/[gameId]/_components/library-entries';
-const gamePageParamsSchema = z.object({ gameId: z.string() });
+import { findGameByIdWithUsersBacklog } from '@/features/collection/collection-actions';
 
+const gamePageParamsSchema = z.object({ gameId: z.string() });
 type GamePageParams = z.infer<typeof gamePageParamsSchema>;
 
-export default async function GamePage(props: {
+export default async function GamePage({
+  params,
+}: {
   params: Promise<GamePageParams>;
 }) {
-  const { success, data } = gamePageParamsSchema.safeParse(await props.params);
+  const resolvedParams = await params;
+  const result = gamePageParamsSchema.safeParse(resolvedParams);
 
-  if (!success) {
+  if (!result.success) {
+    console.error('Invalid gameId parameter:', result.error);
     redirect('/');
   }
 
-  const gameData = await getGameById(data.gameId);
+  const { gameId } = result.data;
+  const gameData = await findGameByIdWithUsersBacklog(gameId);
 
   if (!gameData?.id) {
+    console.warn(`Game with id ${gameId} not found`);
     return notFound();
   }
 
   return (
     <>
       <Flex justify="space-between">
-        {gameData?.coverImage ? (
+        {gameData.coverImage && (
           <ChakraImage asChild rounded="sm" shadow="md">
             <Image
               src={`${IMAGE_API}/${IMAGE_SIZES['hd']}/${gameData.coverImage}.webp`}
@@ -43,17 +49,17 @@ export default async function GamePage(props: {
               height={300}
             />
           </ChakraImage>
-        ) : null}
+        )}
         <LibraryEntries
-          gameId={gameData?.id || ''}
-          backlogItems={gameData?.backlogItems || []}
+          gameId={gameData.id}
+          backlogItems={gameData.backlogItems || []}
         />
       </Flex>
-      <Heading>{gameData?.title}</Heading>
-      <Text>{gameData?.description}</Text>
-      {gameData?.releaseDate ? (
+      <Heading>{gameData.title}</Heading>
+      <Text>{gameData.description}</Text>
+      {gameData.releaseDate && (
         <Badge>{format(gameData.releaseDate, 'MMM dd, yyyy')}</Badge>
-      ) : null}
+      )}
     </>
   );
 }

@@ -4,7 +4,7 @@ import {
   GameRepository,
   GameWithBacklogItems,
 } from '@/domain/repositories/GameRepository';
-import { prisma } from '@/infrastructure/prisma/client';
+import { prisma } from '@/infra/prisma/client';
 import { BacklogItemStatus, Genre, Prisma, Screenshot } from '@prisma/client';
 
 export class PrismaGameRepository implements GameRepository {

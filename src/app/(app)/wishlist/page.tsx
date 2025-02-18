@@ -1,4 +1,3 @@
-import { getUserWishlistedGamesGroupedBacklog } from '@/server/actions/gameActions';
 import {
   Box,
   EmptyState,
@@ -11,6 +10,7 @@ import { Suspense } from 'react';
 import { CollectionPagination } from '../collection/_components/collection-pagination';
 import Link from 'next/link';
 import { GameWithBacklogItemsList } from '@/components/game/game-with-backlog-items-list';
+import { getUserWishlistedGamesGroupedBacklog } from '@/features/wishlist/wishlist-actions';
 
 export default async function WishlistPage({
   searchParams,
