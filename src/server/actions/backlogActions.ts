@@ -16,7 +16,8 @@ import { redirect } from 'next/navigation';
 export async function createBacklogItemAction(input: CreateBacklogItemInput) {
   const repo = new PrismaBacklogRepository();
   const useCase = new CreateBacklogItem(repo);
-  return await useCase.execute(input);
+  await useCase.execute(input);
+  revalidatePath(`/collection/${input.gameId}`);
 }
 
 export async function getUniqueUserPlatforms() {

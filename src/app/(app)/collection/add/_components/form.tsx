@@ -17,6 +17,7 @@ import {
   NativeSelectRoot,
   NativeSelectField,
   ProgressCircle,
+  NativeSelectIndicator,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { parse } from 'date-fns';
@@ -232,6 +233,7 @@ export function Form() {
               <option value="PLAYED">Played</option>
               <option value="WISHLIST">Wishlist</option>
             </NativeSelectField>
+            <NativeSelectIndicator />
           </NativeSelectRoot>
         </Field.Root>
         <Field.Root>
@@ -246,6 +248,7 @@ export function Form() {
               <option value="xbox">Xbox</option>
               <option value="playstation">PlayStation</option>
             </NativeSelectField>
+            <NativeSelectIndicator />
           </NativeSelectRoot>
         </Field.Root>
         <Field.Root>
@@ -260,6 +263,7 @@ export function Form() {
               <option value="PHYSICAL">Physical</option>
               <option value="SUBSCRIPTION">Subscription</option>
             </NativeSelectField>
+            <NativeSelectIndicator />
           </NativeSelectRoot>
         </Field.Root>
         <Button colorScheme="blue" onClick={handleSubmit} alignSelf="start">

@@ -149,8 +149,8 @@ export class PrismaGameRepository implements GameRepository {
     pageParam: string,
   ) {
     const page = Number(pageParam);
-    const skip = ((page || 1) - 1) * 24;
-    const take = 24;
+    const skip = ((page || 1) - 1) * 21;
+    const take = 21;
 
     const [games, totalGames] = await Promise.all([
       prisma.game.findMany({

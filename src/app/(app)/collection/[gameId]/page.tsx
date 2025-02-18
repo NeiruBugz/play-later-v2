@@ -1,10 +1,17 @@
 import { getGameById } from '@/server/actions/gameActions';
-import { Badge, Heading, Text, Image as ChakraImage } from '@chakra-ui/react';
+import {
+  Badge,
+  Heading,
+  Text,
+  Image as ChakraImage,
+  Flex,
+} from '@chakra-ui/react';
 import { format } from 'date-fns';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
 import Image from 'next/image';
 import { IMAGE_API, IMAGE_SIZES } from '@/shared/config/igdb.image.config';
+import { LibraryEntries } from '@/app/(app)/collection/[gameId]/_components/library-entries';
 const gamePageParamsSchema = z.object({ gameId: z.string() });
 
 type GamePageParams = z.infer<typeof gamePageParamsSchema>;
@@ -20,18 +27,28 @@ export default async function GamePage(props: {
 
   const gameData = await getGameById(data.gameId);
 
+  if (!gameData?.id) {
+    return notFound();
+  }
+
   return (
     <>
-      {gameData?.coverImage ? (
-        <ChakraImage asChild rounded="sm" shadow="md">
-          <Image
-            src={`${IMAGE_API}/${IMAGE_SIZES['hd']}/${gameData.coverImage}.webp`}
-            alt={`${gameData.title} cover art`}
-            width={200}
-            height={300}
-          />
-        </ChakraImage>
-      ) : null}
+      <Flex justify="space-between">
+        {gameData?.coverImage ? (
+          <ChakraImage asChild rounded="sm" shadow="md">
+            <Image
+              src={`${IMAGE_API}/${IMAGE_SIZES['hd']}/${gameData.coverImage}.webp`}
+              alt={`${gameData.title} cover art`}
+              width={200}
+              height={300}
+            />
+          </ChakraImage>
+        ) : null}
+        <LibraryEntries
+          gameId={gameData?.id || ''}
+          backlogItems={gameData?.backlogItems || []}
+        />
+      </Flex>
       <Heading>{gameData?.title}</Heading>
       <Text>{gameData?.description}</Text>
       {gameData?.releaseDate ? (

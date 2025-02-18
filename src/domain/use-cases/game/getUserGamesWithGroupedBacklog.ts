@@ -4,7 +4,7 @@ import type {
   GameWithBacklogItems,
 } from '../../repositories/GameRepository';
 
-const ITEMS_PER_PAGE = 24;
+const ITEMS_PER_PAGE = 21;
 
 const FilterParamsSchema = z.object({
   platform: z.string().optional().default(''),
