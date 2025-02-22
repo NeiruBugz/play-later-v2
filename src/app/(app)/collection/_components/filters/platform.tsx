@@ -8,7 +8,12 @@ import {
   SelectValueText,
 } from '@/components/ui/select';
 import { normalizeString } from '@/lib/normalize-string';
-import { createListCollection } from '@chakra-ui/react';
+import {
+  createListCollection,
+  NativeSelectField,
+  NativeSelectIndicator,
+  NativeSelectRoot,
+} from '@chakra-ui/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useTransition } from 'react';
 
@@ -60,25 +65,43 @@ export function PlatformFilter({
   );
 
   return (
-    <SelectRoot
-      collection={options}
-      disabled={pending}
-      value={[currentPlatform]}
-      onValueChange={(e) => onPlatformSelect(e.value)}
-      flexShrink={0}
-      maxW="400px"
-    >
-      <SelectTrigger>
-        <SelectValueText placeholder="Select platform" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem item={{ value: 'all', label: 'All' }}>All</SelectItem>
-        {options.items.map((option) => (
-          <SelectItem item={option} key={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </SelectRoot>
+    <>
+      <SelectRoot
+        collection={options}
+        disabled={pending}
+        value={[currentPlatform]}
+        onValueChange={(e) => onPlatformSelect(e.value)}
+        flexShrink={0}
+        maxW="400px"
+        hideBelow="md"
+      >
+        <SelectTrigger>
+          <SelectValueText placeholder="Select platform" />
+        </SelectTrigger>
+        <SelectContent zIndex={100}>
+          <SelectItem item={{ value: 'all', label: 'All' }}>All</SelectItem>
+          {options.items.map((option) => (
+            <SelectItem item={option} key={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </SelectRoot>
+      <NativeSelectRoot hideFrom="md">
+        <NativeSelectField
+          placeholder="Select platform"
+          value={currentPlatform}
+          onChange={(e) => onPlatformSelect([e.target.value])}
+        >
+          <option value="all">All</option>
+          {options.items.map((option) => (
+            <option value={option.value} key={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </NativeSelectField>
+        <NativeSelectIndicator />
+      </NativeSelectRoot>
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { CollectionPagination } from './_components/collection-pagination';
 import { GameWithBacklogItemsList } from '@/components/game/game-with-backlog-items-list';
 import { getUserGamesWithGroupedBacklog } from '@/features/collection/collection-actions';
 import { z } from 'zod';
+import { DrawerFilter } from '@/app/(app)/collection/_components/drawer-filter';
 
 const collectionPageSearchParamsSchema = z
   .object({
@@ -51,7 +52,10 @@ export default async function CollectionPage({
 
   return (
     <Box>
-      <Heading as="h2">Collection</Heading>
+      <Flex gap={2} align="center">
+        <Heading as="h2">Collection</Heading>
+        <DrawerFilter />
+      </Flex>
       <Suspense fallback={'Loading...'}>
         <Filters />
       </Suspense>

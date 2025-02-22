@@ -9,7 +9,7 @@ export async function Filters() {
   const uniquePlatforms = await getUniqueUserPlatforms();
 
   return (
-    <Box my={2}>
+    <Box my={2} hideBelow="md">
       <Flex>
         <StatusFilter />
       </Flex>
