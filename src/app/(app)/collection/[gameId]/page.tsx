@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { IMAGE_API, IMAGE_SIZES } from '@/shared/config/igdb.image.config';
 import { LibraryEntries } from '@/app/(app)/collection/[gameId]/_components/library-entries';
 import { findGameByIdWithUsersBacklog } from '@/features/collection/collection-actions';
+import { IoCalendarOutline } from 'react-icons/io5';
 
 const gamePageParamsSchema = z.object({ gameId: z.string() });
 type GamePageParams = z.infer<typeof gamePageParamsSchema>;
@@ -58,7 +59,10 @@ export default async function GamePage({
       <Heading>{gameData.title}</Heading>
       <Text>{gameData.description}</Text>
       {gameData.releaseDate && (
-        <Badge>{format(gameData.releaseDate, 'MMM dd, yyyy')}</Badge>
+        <Badge variant="surface" size="md">
+          <IoCalendarOutline />
+          Released at: {format(gameData.releaseDate, 'MMM dd, yyyy')}
+        </Badge>
       )}
     </>
   );

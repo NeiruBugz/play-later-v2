@@ -8,7 +8,7 @@ import {
 import {
   getIGDBGameData,
   searchGamesAction,
-} from '@/server/actions/gameActions';
+} from '@/server/actions/igdb-actions';
 import type { SearchResponse } from '@/shared/types/igdb.types';
 import {
   Box,

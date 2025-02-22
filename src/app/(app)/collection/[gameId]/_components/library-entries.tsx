@@ -1,7 +1,8 @@
 import { AddLibraryEntry } from '@/app/(app)/collection/[gameId]/_components/add-library-entry';
 import { BacklogItem } from '@/domain/entities/BacklogItem';
 import { normalizeString } from '@/lib/normalize-string';
-import { Card, Flex, Text } from '@chakra-ui/react';
+import { Button, Card, Flex, HStack, Text } from '@chakra-ui/react';
+import { IoPencilOutline, IoTrashBinOutline } from 'react-icons/io5';
 
 export function LibraryEntries({
   backlogItems,
@@ -34,6 +35,7 @@ export function LibraryEntries({
               key={backlogItem.id}
               borderBottom="1px dashed"
               gap={10}
+              alignItems="center"
               justify="space-between"
               my={2}
               _first={{
@@ -42,6 +44,14 @@ export function LibraryEntries({
             >
               <Text>{normalizeString(backlogItem.platform)}</Text>
               <Text>{backlogItem.acquisitionType}</Text>
+              <HStack gap={1} alignItems="center">
+                <Button size="xs" variant="outline">
+                  <IoPencilOutline />
+                </Button>
+                <Button size="xs" variant="outline">
+                  <IoTrashBinOutline />
+                </Button>
+              </HStack>
             </Flex>
           );
         })}

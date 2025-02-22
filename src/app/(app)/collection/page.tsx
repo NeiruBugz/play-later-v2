@@ -52,7 +52,9 @@ export default async function CollectionPage({
   return (
     <Box>
       <Heading as="h2">Collection</Heading>
-      <Filters />
+      <Suspense fallback={'Loading...'}>
+        <Filters />
+      </Suspense>
       <Suspense fallback={'Loading...'}>
         <GameWithBacklogItemsList collection={collection} />
       </Suspense>
