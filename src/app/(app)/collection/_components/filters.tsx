@@ -1,9 +1,9 @@
-import { Box, Flex } from "@chakra-ui/react";
-import { PlatformFilter } from "./filters/platform";
-import { getUniqueUserPlatforms } from "@/server/actions/backlogActions";
-import { StatusFilter } from "@/app/(app)/collection/_components/filters/status";
-import { Search } from "@/app/(app)/collection/_components/filters/search";
-import { ClearFilters } from "@/app/(app)/collection/_components/filters/clear";
+import { Box, Flex } from '@chakra-ui/react';
+import { PlatformFilter } from './filters/platform';
+import { StatusFilter } from '@/app/(app)/collection/_components/filters/status';
+import { Search } from '@/app/(app)/collection/_components/filters/search';
+import { ClearFilters } from '@/app/(app)/collection/_components/filters/clear';
+import { getUniqueUserPlatforms } from '@/features/collection/collection-utilitary-actions';
 
 export async function Filters() {
   const uniquePlatforms = await getUniqueUserPlatforms();

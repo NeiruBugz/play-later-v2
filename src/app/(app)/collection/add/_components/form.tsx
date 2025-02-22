@@ -1,7 +1,10 @@
 'use client';
 
 import { InputGroup } from '@/components/ui/input-group';
-import { addGameToBacklogAction } from '@/server/actions/backlogActions';
+import {
+  AcquisitionType,
+  BacklogItemStatus,
+} from '@/domain/entities/BacklogItem';
 import {
   getIGDBGameData,
   searchGamesAction,
@@ -16,7 +19,6 @@ import {
   Field,
   NativeSelectRoot,
   NativeSelectField,
-  ProgressCircle,
   NativeSelectIndicator,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
@@ -25,17 +27,8 @@ import { useSession } from 'next-auth/react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
-
-function IndeterminateSpinner() {
-  return (
-    <ProgressCircle.Root size="sm" value={null}>
-      <ProgressCircle.Circle css={{ '--thickness': '4px' }}>
-        <ProgressCircle.Track />
-        <ProgressCircle.Range />
-      </ProgressCircle.Circle>
-    </ProgressCircle.Root>
-  );
-}
+import { createBacklogItemWithGame } from '@/features/collection/create-backlog-item-with-game';
+import { IndeterminateSpinner } from '@/components/ui/indereminate-spinner';
 
 export function Form() {
   const { data } = useSession();
@@ -128,8 +121,7 @@ export function Form() {
             new Date(),
           )
         : null;
-      await addGameToBacklogAction({
-        userId: data.user.id,
+      await createBacklogItemWithGame({
         igdbGame: {
           igdbId: selectedGame.id,
           name: selectedGame.name,
@@ -140,9 +132,9 @@ export function Form() {
           screenshots: igdbFullGameResponse?.screenshots,
           genres: igdbFullGameResponse?.genres,
         },
-        status,
+        status: status as BacklogItemStatus,
         platform,
-        acquisitionType,
+        acquisitionType: acquisitionType as AcquisitionType,
       });
     } catch (error) {
       console.error('Error adding game to backlog:', error);

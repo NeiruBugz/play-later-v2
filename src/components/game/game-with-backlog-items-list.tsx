@@ -3,7 +3,7 @@ import { IMAGE_API, IMAGE_SIZES } from '@/shared/config/igdb.image.config';
 import { Box, Card, HStack, Image as ChakraImage } from '@chakra-ui/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { GameWithBacklogItems } from '@/domain/repositories/GameRepository';
+import { GameWithBacklogItems } from '@/shared/types/backlog.types';
 
 function GameCard({ game }: { game: Game }) {
   return (

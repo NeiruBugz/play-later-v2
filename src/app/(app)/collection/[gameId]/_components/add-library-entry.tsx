@@ -16,8 +16,6 @@ import {
   AcquisitionType,
   BacklogItemStatus,
 } from '@/domain/entities/BacklogItem';
-import { CreateBacklogItemInput } from '@/domain/use-cases/backlog/createBacklogItem';
-import { createBacklogItemAction } from '@/server/actions/backlogActions';
 import {
   Button,
   Field,
@@ -28,6 +26,7 @@ import {
 } from '@chakra-ui/react';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
+import { createBacklogItem } from '@/features/collection/create-backlog-item';
 
 export function AddLibraryEntry({ gameId }: { gameId: string }) {
   const [status, setStatus] = useState('');
@@ -40,7 +39,8 @@ export function AddLibraryEntry({ gameId }: { gameId: string }) {
     if (!data?.user?.id) {
       return;
     }
-    const input: CreateBacklogItemInput = {
+
+    const input = {
       userId: data?.user?.id,
       gameId,
       status: status ? (status as BacklogItemStatus) : 'TO_PLAY',
@@ -51,7 +51,7 @@ export function AddLibraryEntry({ gameId }: { gameId: string }) {
     };
 
     try {
-      await createBacklogItemAction(input);
+      await createBacklogItem(input);
       setOpen(false);
     } catch (error) {
       console.error(error);

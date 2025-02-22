@@ -1,7 +1,7 @@
 import { getServerUserId } from '@/domain/auth/auth-service';
-import { GameWithBacklogItems } from '@/domain/repositories/GameRepository';
 import { prisma } from '@/infra/prisma/client';
 import { redirect } from 'next/navigation';
+import { GameWithBacklogItems } from '@/shared/types/backlog.types';
 
 export async function getUserWishlistedGamesGroupedBacklog(pageParam: string) {
   const userId = await getServerUserId();

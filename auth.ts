@@ -1,7 +1,7 @@
-import { prisma } from "@/infrastructure/prisma/client";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
+import { prisma } from '@/infra/prisma/client';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import NextAuth from 'next-auth';
+import Google from 'next-auth/providers/google';
 
 export const { auth, handlers, signIn } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -25,6 +25,6 @@ export const { auth, handlers, signIn } = NextAuth({
   providers: [Google],
   session: {
     maxAge: 24 * 60 * 60, // 1 day
-    strategy: "jwt",
+    strategy: 'jwt',
   },
 });

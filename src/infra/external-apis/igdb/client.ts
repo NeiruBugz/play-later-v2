@@ -1,11 +1,11 @@
 import { IGDBClientInterface } from '@/domain/external-apis/igdb-client';
-import { QueryBuilder } from '@/infrastructure/external-apis/igdb/query-builder';
+import { QueryBuilder } from '@/infra/external-apis/igdb/query-builder';
 import {
   getTimeStamp,
   asError,
   normalizeTitle,
   normalizeString,
-} from '@/infrastructure/external-apis/igdb/utils';
+} from '@/infra/external-apis/igdb/utils';
 import { API_URL, TOKEN_URL } from '@/shared/config/igdb.config';
 import {
   TwitchTokenResponse,

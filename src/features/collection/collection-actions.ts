@@ -1,9 +1,11 @@
+'use server';
+
 import { getServerUserId } from '@/domain/auth/auth-service';
-import { GameWithBacklogItems } from '@/domain/repositories/GameRepository';
 import { prisma } from '@/infra/prisma/client';
 import { BacklogItemStatus, Prisma } from '@prisma/client';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
+import { GameWithBacklogItems } from '@/shared/types/backlog.types';
 
 const ITEMS_PER_PAGE = 21;
 
