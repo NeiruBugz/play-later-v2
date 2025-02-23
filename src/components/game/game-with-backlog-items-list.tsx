@@ -1,28 +1,6 @@
-import { Game } from '@/domain/entities/Game';
-import { IMAGE_API, IMAGE_SIZES } from '@/shared/config/igdb.image.config';
-import { Box, Card, HStack, Image as ChakraImage } from '@chakra-ui/react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { Box, HStack } from '@chakra-ui/react';
 import { GameWithBacklogItems } from '@/shared/types/backlog.types';
-
-function GameCard({ game }: { game: Game }) {
-  return (
-    <Card.Root width="140px" height="fit-content" minH="184px">
-      <Link href={`/collection/${game.id}`}>
-        {game.coverImage ? (
-          <ChakraImage asChild>
-            <Image
-              src={`${IMAGE_API}/${IMAGE_SIZES['hd']}/${game.coverImage}.webp`}
-              alt={`${game.title} cover art`}
-              width={140}
-              height={210}
-            />
-          </ChakraImage>
-        ) : null}
-      </Link>
-    </Card.Root>
-  );
-}
+import { GameCard } from '@/components/game/game-card';
 
 export function GameWithBacklogItemsList(props: {
   collection: GameWithBacklogItems[];

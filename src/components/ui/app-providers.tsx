@@ -9,6 +9,7 @@ import {
 import { ColorModeProvider, type ColorModeProviderProps } from './color-mode';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
+import { Toaster } from '@/components/ui/toaster';
 
 const config = defineConfig({});
 
@@ -21,6 +22,7 @@ export function Provider(props: ColorModeProviderProps) {
       <QueryClientProvider client={queryClient}>
         <ChakraProvider value={system}>
           <ColorModeProvider {...props} />
+          <Toaster />
         </ChakraProvider>
       </QueryClientProvider>
     </SessionProvider>

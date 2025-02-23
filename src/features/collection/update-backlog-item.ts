@@ -27,15 +27,22 @@ export const updateBacklogItem = nextSafeActionClient
       redirect('/');
     }
 
-    await prisma.backlogItem.update({
-      where: { id, userId },
-      data: {
-        ...parsedInput,
-        updatedAt: new Date(),
-      },
-    });
+    try {
+      await prisma.backlogItem.update({
+        where: { id, userId },
+        data: {
+          ...parsedInput,
+          updatedAt: new Date(),
+        },
+      });
 
-    revalidatePath('/collection');
-    revalidatePath(`/collection/${gameId}`);
-    revalidatePath('/wishlist');
+      revalidatePath('/collection');
+      revalidatePath(`/collection/${gameId}`);
+      revalidatePath('/wishlist');
+
+      return { success: true };
+    } catch (error) {
+      console.error(error);
+      return { success: false };
+    }
   });

@@ -29,6 +29,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
 import { createBacklogItemWithGame } from '@/features/collection/create-backlog-item-with-game';
 import { IndeterminateSpinner } from '@/components/ui/indereminate-spinner';
+import { toaster } from '@/components/ui/toaster';
 
 export function Form() {
   const { data } = useSession();
@@ -136,8 +137,16 @@ export function Form() {
         platform,
         acquisitionType: acquisitionType as AcquisitionType,
       });
+      toaster.create({
+        type: 'success',
+        title: `Successfully added ${selectedGame.name} to collection`,
+      });
     } catch (error) {
       console.error('Error adding game to backlog:', error);
+      toaster.create({
+        title: 'Failed to add a game to collection',
+        type: 'error',
+      });
     } finally {
       setSelectedGame(null);
       setSearchQuery('');
