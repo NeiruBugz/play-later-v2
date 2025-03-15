@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { nextSafeActionClient } from '@/shared/lib/next-safe-action-client';
 import { redirect } from 'next/navigation';
 import { getServerUserId } from '@/shared/lib/auth-service';
+import { logger } from '@/shared/lib/logger';
 
 const updateBacklogItemSchema = z.object({
   id: z.string(),
@@ -17,18 +18,34 @@ const updateBacklogItemSchema = z.object({
 
 export const updateBacklogItem = nextSafeActionClient
   .schema(updateBacklogItemSchema)
-  .action(async ({ parsedInput }) => {
-    const { id, gameId } = parsedInput;
+  .action(async (input) => {
+    logger.info('Update backlog item action called', {
+      context: 'updateBacklogItem',
+      data: { input },
+    });
+
+    const { parsedInput } = input;
+    const { id, gameId, status } = parsedInput;
+
+    logger.debug('Parsed input', {
+      context: 'updateBacklogItem',
+      data: { parsedInput },
+    });
 
     const userId = await getServerUserId();
 
     if (!userId) {
-      console.error('No user found');
+      logger.error('No user found', null, { context: 'updateBacklogItem' });
       redirect('/');
     }
 
+    logger.info(`Processing backlog item update`, {
+      context: 'updateBacklogItem',
+      data: { userId, id, gameId, status },
+    });
+
     try {
-      await prisma.backlogItem.update({
+      const updatedItem = await prisma.backlogItem.update({
         where: { id, userId },
         data: {
           ...parsedInput,
@@ -36,13 +53,26 @@ export const updateBacklogItem = nextSafeActionClient
         },
       });
 
+      logger.info('Successfully updated backlog item', {
+        context: 'updateBacklogItem',
+        data: { updatedItem },
+      });
+
       revalidatePath('/collection');
       revalidatePath(`/collection/${gameId}`);
       revalidatePath('/wishlist');
+      logger.debug('Revalidated paths', { context: 'updateBacklogItem' });
 
       return { success: true };
     } catch (error) {
-      console.error(error);
-      return { success: false };
+      logger.error('Failed to update backlog item', error, {
+        context: 'updateBacklogItem',
+        data: { id, gameId, status },
+      });
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
     }
   });

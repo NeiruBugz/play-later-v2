@@ -12,6 +12,8 @@ function GamesTable({
   sortField,
   sortDirection,
   onSort,
+  steamId,
+  onImportCompleted,
 }: {
   games: SteamGame[];
   selectedGameIds: number[];
@@ -19,6 +21,8 @@ function GamesTable({
   sortField: SortField;
   sortDirection: SortDirection;
   onSort: (field: SortField) => void;
+  steamId: string;
+  onImportCompleted?: () => void;
 }) {
   return (
     <Box borderWidth="1px" borderRadius="md" overflow="hidden" boxShadow="sm">
@@ -36,6 +40,8 @@ function GamesTable({
                 game={game}
                 isSelected={false}
                 onSelect={() => {}}
+                steamId={steamId}
+                onImportCompleted={onImportCompleted}
               />
             ))}
           </Box>

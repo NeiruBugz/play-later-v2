@@ -21,9 +21,15 @@ export function UpdateBacklogItem({
   backlogItemList: Game['backlogItems'];
 }) {
   const params = useSearchParams();
-  const currentItem = backlogItemList?.find(
-    (item) => item.status === (params.get('status') as BacklogItemStatus),
-  );
+  // Get the first backlog item if available, or use the one matching the status param
+  const statusParam = params.get('status') as BacklogItemStatus | null;
+
+  const currentItem = backlogItemList?.length
+    ? statusParam
+      ? backlogItemList.find((item) => item.status === statusParam) ||
+        backlogItemList[0]
+      : backlogItemList[0]
+    : null;
 
   const onStatusUpdate = useCallback(
     async (status: BacklogItemStatus) => {
@@ -39,7 +45,9 @@ export function UpdateBacklogItem({
           acquisitionType: currentItem.acquisitionType,
           platform: currentItem.platform as string,
         };
+
         await updateBacklogItem(input);
+
         toaster.create({
           title: 'Status updated',
           type: 'success',

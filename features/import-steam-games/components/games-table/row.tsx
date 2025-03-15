@@ -5,6 +5,7 @@ import { SteamGame } from '../../types';
 import { formatPlaytime, getSteamImageUrl } from '@/shared/external-apis/steam';
 import { FiInfo } from 'react-icons/fi';
 import { Tooltip } from '@/shared/components/ui/tooltip';
+import { SingleImportButton } from '../single-import-button';
 
 function GameRow({
   game,
@@ -12,10 +13,14 @@ function GameRow({
   isSelected,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSelect,
+  steamId,
+  onImportCompleted,
 }: {
   game: SteamGame;
   isSelected: boolean;
   onSelect: (appid: number) => void;
+  steamId: string;
+  onImportCompleted?: () => void;
 }) {
   const [imageError, setImageError] = useState(false);
 
@@ -163,7 +168,14 @@ function GameRow({
         </Text>
       </Box>
       <Box as="td" p="3">
-        {getStatusBadge()}
+        <Flex align="center" justify="space-between">
+          {getStatusBadge()}
+          <SingleImportButton
+            steamId={steamId}
+            game={game}
+            onImportCompleted={onImportCompleted}
+          />
+        </Flex>
       </Box>
     </Box>
   );

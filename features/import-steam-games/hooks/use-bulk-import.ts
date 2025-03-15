@@ -5,6 +5,8 @@ import {
   getBulkImportStatus,
   getImportJobs,
   getFailedImports,
+  getSkippedImports,
+  importSingleGame,
 } from '../actions/bulk-import';
 import { JobStatus } from '@prisma/client';
 
@@ -122,4 +124,77 @@ export function useFailedImports(jobId: string | null) {
     },
     enabled: !!jobId,
   });
+}
+
+/**
+ * Hook for fetching skipped imports for a specific job
+ */
+export function useSkippedImports(jobId: string | null) {
+  return useQuery({
+    queryKey: ['skippedImports', jobId],
+    queryFn: async () => {
+      if (!jobId) return [];
+      const result = await getSkippedImports({ jobId });
+      if (!result || !result.data || !result.data.success) {
+        return [];
+      }
+      return result.data.skippedImports;
+    },
+    enabled: !!jobId,
+  });
+}
+
+/**
+ * Hook for importing a single game from Steam
+ */
+export function useSingleGameImport() {
+  const [isImporting, setIsImporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // Import a single game
+  const importGame = async (steamId: string, appid: number) => {
+    setIsImporting(true);
+    setError(null);
+
+    try {
+      const result = await importSingleGame({ steamId, appid });
+
+      if (result && result.data && result.data.success) {
+        // Store the job ID if returned
+        if (result.data.jobId) {
+          setCurrentJobId(result.data.jobId);
+        }
+
+        // Invalidate queries to refresh the data
+        queryClient.invalidateQueries({ queryKey: ['steamImportJobs'] });
+        queryClient.invalidateQueries({ queryKey: ['backlog'] });
+        queryClient.invalidateQueries({ queryKey: ['steamGames'] });
+        return result.data;
+      } else {
+        const errorMessage = result?.data?.error || 'Failed to import game';
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
+    } catch (error) {
+      console.error('Error importing game:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const clearError = () => setError(null);
+
+  return {
+    importGame,
+    isImporting,
+    error,
+    clearError,
+    currentJobId,
+  };
 }

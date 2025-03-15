@@ -437,6 +437,24 @@ export class IGDBClient implements IGDBClientInterface {
     first_release_date?: number;
     genres?: Array<{ id: number; name: string }>;
   } | null> {
+    // Try basic game search like in the add game
+    const basicSearch = await this.search({ name: gameName });
+
+    if (basicSearch && basicSearch.length > 0) {
+      const exactMatch = basicSearch.find(
+        (game) =>
+          normalizeTitle(normalizeString(game.name)) ===
+          normalizeTitle(normalizeString(gameName)),
+      );
+
+      if (exactMatch) {
+        return exactMatch;
+      }
+
+      // If no exact match, return the first result (most relevant)
+      return basicSearch[0];
+    }
+
     // First try a direct search with the exact name
     const exactQuery = new QueryBuilder()
       .fields([

@@ -12,6 +12,7 @@ import {
   Alert,
   Input,
   Tabs,
+  Badge,
 } from '@chakra-ui/react';
 import { SteamIdInput } from '@/features/import-steam-games/components/steam-id-input';
 import { SortDirection, SortField } from '@/features/import-steam-games/types';
@@ -99,6 +100,7 @@ export function SteamImport() {
   const [sortField, setSortField] = useState<SortField>('playtime_forever');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showOnlyNotImported, setShowOnlyNotImported] = useState(false);
   const [debouncedSearchTerm] = useDebounceValue(searchTerm, 300);
   const [currentImportJobId, setCurrentImportJobId] = useState<string | null>(
     null,
@@ -133,6 +135,12 @@ export function SteamImport() {
   // Filter games based on search term
   const filteredGames = activeQuery.data?.games
     ? activeQuery.data.games.filter((game) => {
+        // First apply the not-imported filter if active
+        if (showOnlyNotImported && game.alreadyInBacklog) {
+          return false;
+        }
+
+        // Then apply the search filter
         if (!debouncedSearchTerm) return true;
 
         // Check if the main game name matches
@@ -154,6 +162,11 @@ export function SteamImport() {
         return false;
       })
     : [];
+
+  // Calculate the count of not imported games
+  const notImportedCount = activeQuery.data?.games
+    ? activeQuery.data.games.filter((game) => !game.alreadyInBacklog).length
+    : 0;
 
   // Add keyboard shortcut for search
   useEffect(() => {
@@ -188,6 +201,7 @@ export function SteamImport() {
     setShowGameList(true);
     setPage(1);
     setSearchTerm(''); // Reset search term when viewing games
+    setShowOnlyNotImported(false); // Reset filter when viewing games
   };
 
   const handleSort = (field: SortField) => {
@@ -209,6 +223,17 @@ export function SteamImport() {
 
   const handleImportStarted = (jobId: string) => {
     setCurrentImportJobId(jobId);
+  };
+
+  // Add a handler for the filter toggle
+  const handleFilterToggle = () => {
+    setShowOnlyNotImported(!showOnlyNotImported);
+  };
+
+  // Add a handler for import completion
+  const handleImportCompleted = () => {
+    // Refresh the game list
+    activeQuery.refetch();
   };
 
   const renderImportContent = () => (
@@ -254,7 +279,7 @@ export function SteamImport() {
 
           {/* Always show search input regardless of loading state */}
           <Box mb={4}>
-            <Flex gap={2} align="center">
+            <Flex gap={2} align="center" wrap="wrap">
               <Box flex="1">
                 <InputGroup
                   w="100%"
@@ -282,16 +307,32 @@ export function SteamImport() {
                   />
                 </InputGroup>
               </Box>
-              {searchTerm && (
+              <Flex gap={2}>
+                {searchTerm && (
+                  <Button
+                    size="sm"
+                    onClick={() => setSearchTerm('')}
+                    variant="outline"
+                    colorPalette="blue"
+                  >
+                    Show All Games
+                  </Button>
+                )}
                 <Button
                   size="sm"
-                  onClick={() => setSearchTerm('')}
-                  variant="outline"
-                  colorPalette="blue"
+                  onClick={handleFilterToggle}
+                  variant={showOnlyNotImported ? 'solid' : 'outline'}
+                  colorPalette="orange"
                 >
-                  Show All Games
+                  {showOnlyNotImported && (
+                    <Box as="span" mr={1} fontSize="1.2em">
+                      ✓
+                    </Box>
+                  )}
+                  Not Imported Only{' '}
+                  {notImportedCount > 0 && `(${notImportedCount})`}
                 </Button>
-              )}
+              </Flex>
             </Flex>
             <Text fontSize="xs" color="gray.500" mt={1} ml={1}>
               Search also looks in related games
@@ -311,7 +352,7 @@ export function SteamImport() {
                 borderRadius="md"
                 bg="blue.50"
               >
-                <Flex align="center" gap={2}>
+                <Flex align="center" gap={2} wrap="wrap">
                   <Text fontWeight="medium">
                     {debouncedSearchTerm ? (
                       <>
@@ -322,13 +363,19 @@ export function SteamImport() {
                     ) : (
                       <>
                         Showing {filteredGames.length} games
-                        {activeQuery.data.totalPages > 1 && (
-                          <Text as="span" fontStyle="italic">
-                            {' '}
-                            (page {activeQuery.data.currentPage} of{' '}
-                            {activeQuery.data.totalPages})
-                          </Text>
+                        {showOnlyNotImported && (
+                          <Badge ml={1} colorPalette="orange" borderRadius="sm">
+                            Not Imported Only
+                          </Badge>
                         )}
+                        {activeQuery.data.totalPages > 1 &&
+                          !showOnlyNotImported && (
+                            <Text as="span" fontStyle="italic">
+                              {' '}
+                              (page {activeQuery.data.currentPage} of{' '}
+                              {activeQuery.data.totalPages})
+                            </Text>
+                          )}
                       </>
                     )}
                     {activeQuery.data.games.some(
@@ -345,11 +392,13 @@ export function SteamImport() {
 
               <GamesTable
                 games={filteredGames}
+                steamId={steamId}
                 selectedGameIds={[]}
                 onSelectGame={() => {}}
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSort={handleSort}
+                onImportCompleted={handleImportCompleted}
               />
               {filteredGames.length === 0 && debouncedSearchTerm && (
                 <Box
@@ -381,6 +430,7 @@ export function SteamImport() {
                   onPageChange={(newPage) => {
                     setPage(newPage);
                     setSearchTerm(''); // Reset search when changing pages
+                    setShowOnlyNotImported(false); // Reset filter when changing pages
                   }}
                   isLoading={activeQuery.isLoading}
                 />
