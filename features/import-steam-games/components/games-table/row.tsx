@@ -82,24 +82,7 @@ function GameRow({
           px={2}
           borderRadius="sm"
         >
-          IN BACKLOG
-        </Badge>
-      );
-    }
-
-    if (hasPlaytime) {
-      return (
-        <Badge
-          colorPalette="purple"
-          textTransform="uppercase"
-          fontWeight="bold"
-          fontSize="xs"
-          letterSpacing="0.5px"
-          py={1}
-          px={2}
-          borderRadius="sm"
-        >
-          PLAYED
+          IMPORTED
         </Badge>
       );
     }
@@ -115,7 +98,7 @@ function GameRow({
         px={2}
         borderRadius="sm"
       >
-        NOT PLAYED
+        NOT IMPORTED
       </Badge>
     );
   };

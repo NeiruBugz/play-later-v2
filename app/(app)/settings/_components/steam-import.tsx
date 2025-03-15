@@ -8,10 +8,10 @@ import {
   Flex,
   Heading,
   Text,
-  HStack,
   VStack,
   Alert,
   Input,
+  Tabs,
 } from '@chakra-ui/react';
 import { SteamIdInput } from '@/features/import-steam-games/components/steam-id-input';
 import { SortDirection, SortField } from '@/features/import-steam-games/types';
@@ -21,6 +21,10 @@ import { useGetSteamGames } from '@/features/import-steam-games/hooks/use-get-st
 import { Skeleton, SkeletonText } from '@/shared/components/ui/skeleton';
 import { FiSearch } from 'react-icons/fi';
 import { InputGroup } from '@/shared/components/ui/input-group';
+import { useDebounceValue } from 'usehooks-ts';
+import { BulkImportButton } from '@/features/import-steam-games/components/bulk-import-button';
+import { ImportHistory } from '@/features/import-steam-games/components/import-history';
+import { ImportProgress } from '@/features/import-steam-games/components/import-progress';
 
 // Error Message Component
 function ErrorMessage({ error }: { error: unknown }) {
@@ -88,19 +92,6 @@ function GamesSkeleton() {
   );
 }
 
-// Pagination Skeleton Component
-function PaginationSkeleton() {
-  return (
-    <Flex justify="space-between" align="center" mt="4">
-      <Skeleton height="20px" width="120px" />
-      <HStack gap="2">
-        <Skeleton height="32px" width="80px" />
-        <Skeleton height="32px" width="80px" />
-      </HStack>
-    </Flex>
-  );
-}
-
 export function SteamImport() {
   const [steamId, setSteamId] = useState('');
   const [page, setPage] = useState(1);
@@ -108,6 +99,10 @@ export function SteamImport() {
   const [sortField, setSortField] = useState<SortField>('playtime_forever');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm] = useDebounceValue(searchTerm, 300);
+  const [currentImportJobId, setCurrentImportJobId] = useState<string | null>(
+    null,
+  );
   const searchInputRef = useRef<HTMLInputElement>(null);
   const pageSize = 20;
 
@@ -126,29 +121,33 @@ export function SteamImport() {
     steamId,
     page: 1,
     pageSize,
-    showGameList: showGameList && !!searchTerm,
+    showGameList: showGameList && !!debouncedSearchTerm,
     sortField,
     sortDirection,
     fetchAllPages: true,
   });
 
   // Determine which query to use based on whether we're searching
-  const activeQuery = searchTerm ? searchQuery : gamesQuery;
+  const activeQuery = debouncedSearchTerm ? searchQuery : gamesQuery;
 
   // Filter games based on search term
   const filteredGames = activeQuery.data?.games
     ? activeQuery.data.games.filter((game) => {
-        if (!searchTerm) return true;
+        if (!debouncedSearchTerm) return true;
 
         // Check if the main game name matches
-        if (game.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+        if (
+          game.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        ) {
           return true;
         }
 
         // Check if any related games match
         if ('relatedGames' in game && game.relatedGames) {
           return game.relatedGames.some((relatedGame) =>
-            relatedGame.name.toLowerCase().includes(searchTerm.toLowerCase()),
+            relatedGame.name
+              .toLowerCase()
+              .includes(debouncedSearchTerm.toLowerCase()),
           );
         }
 
@@ -208,188 +207,228 @@ export function SteamImport() {
     setSearchTerm(e.target.value);
   };
 
-  return (
-    <Box>
-      <VStack gap={6} align="stretch">
+  const handleImportStarted = (jobId: string) => {
+    setCurrentImportJobId(jobId);
+  };
+
+  const renderImportContent = () => (
+    <VStack gap={6} align="stretch">
+      <Box>
+        <Heading as="h2" size="md" mb={4}>
+          View Your Steam Games
+        </Heading>
+        <Text mb={4}>Enter your Steam ID to view your games.</Text>
+
+        <SteamIdInput
+          steamId={steamId}
+          setSteamId={setSteamId}
+          onViewGames={handleShowGameList}
+          isLoading={gamesQuery.isLoading}
+        />
+      </Box>
+
+      {showGameList && (
         <Box>
-          <Heading as="h2" size="md" mb={4}>
-            View Your Steam Games
-          </Heading>
-          <Text mb={4}>Enter your Steam ID to view your games.</Text>
+          <Flex
+            justify="space-between"
+            mb={4}
+            wrap="wrap"
+            gap={2}
+            align="center"
+          >
+            <Heading as="h3" size="sm">
+              Your Steam Games
+            </Heading>
+            <BulkImportButton
+              steamId={steamId}
+              onImportStarted={handleImportStarted}
+              disabled={activeQuery.isLoading || activeQuery.isError}
+            />
+          </Flex>
 
-          <SteamIdInput
-            steamId={steamId}
-            setSteamId={setSteamId}
-            onViewGames={handleShowGameList}
-            isLoading={gamesQuery.isLoading}
-          />
-        </Box>
+          {currentImportJobId && (
+            <Box mb={4} position="relative" zIndex="1">
+              <ImportProgress jobId={currentImportJobId} />
+            </Box>
+          )}
 
-        {showGameList && (
-          <Box>
-            <Flex justify="space-between" mb={4} wrap="wrap" gap={2}>
-              <Heading as="h3" size="sm">
-                Your Steam Games
-              </Heading>
+          {/* Always show search input regardless of loading state */}
+          <Box mb={4}>
+            <Flex gap={2} align="center">
+              <Box flex="1">
+                <InputGroup
+                  w="100%"
+                  startElement={<FiSearch color="gray.400" />}
+                  endElement={
+                    searchTerm ? (
+                      <Button
+                        p={0}
+                        size="xs"
+                        onClick={() => setSearchTerm('')}
+                        variant="ghost"
+                      >
+                        ✕
+                      </Button>
+                    ) : null
+                  }
+                >
+                  <Input
+                    ref={searchInputRef}
+                    placeholder="Search games... (Ctrl+F)"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    borderRadius="md"
+                    w="100%"
+                  />
+                </InputGroup>
+              </Box>
+              {searchTerm && (
+                <Button
+                  size="sm"
+                  onClick={() => setSearchTerm('')}
+                  variant="outline"
+                  colorScheme="blue"
+                >
+                  Show All Games
+                </Button>
+              )}
             </Flex>
+            <Text fontSize="xs" color="gray.500" mt={1} ml={1}>
+              Search also looks in related games
+            </Text>
+          </Box>
 
-            {activeQuery.isLoading ? (
-              <>
-                <GamesSkeleton />
-                <PaginationSkeleton />
-              </>
-            ) : activeQuery.isError ? (
-              <ErrorMessage error={activeQuery.error} />
-            ) : activeQuery.data?.games && activeQuery.data.games.length > 0 ? (
-              <>
+          {activeQuery.isLoading ? (
+            <GamesSkeleton />
+          ) : activeQuery.isError ? (
+            <ErrorMessage error={activeQuery.error} />
+          ) : activeQuery.data?.games && activeQuery.data.games.length > 0 ? (
+            <>
+              <Box
+                mb={4}
+                p={3}
+                borderWidth="1px"
+                borderRadius="md"
+                bg="blue.50"
+              >
+                <Flex align="center" gap={2}>
+                  <Text fontWeight="medium">
+                    {debouncedSearchTerm ? (
+                      <>
+                        Showing {filteredGames.length} of{' '}
+                        {activeQuery.data.games.length} games matching &ldquo;
+                        {debouncedSearchTerm}&rdquo;
+                      </>
+                    ) : (
+                      <>
+                        Showing {filteredGames.length} games
+                        {activeQuery.data.totalPages > 1 && (
+                          <Text as="span" fontStyle="italic">
+                            {' '}
+                            (page {activeQuery.data.currentPage} of{' '}
+                            {activeQuery.data.totalPages})
+                          </Text>
+                        )}
+                      </>
+                    )}
+                    {activeQuery.data.games.some(
+                      (game) => 'relatedGames' in game && game.relatedGames,
+                    ) && (
+                      <Text as="span" fontStyle="italic">
+                        {' '}
+                        (related games have been grouped together)
+                      </Text>
+                    )}
+                  </Text>
+                </Flex>
+              </Box>
+
+              <GamesTable
+                games={filteredGames}
+                selectedGameIds={[]}
+                onSelectGame={() => {}}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              {filteredGames.length === 0 && debouncedSearchTerm && (
                 <Box
-                  mb={4}
-                  p={3}
+                  p={6}
                   borderWidth="1px"
                   borderRadius="md"
-                  bg="blue.50"
+                  textAlign="center"
+                  mt={4}
                 >
-                  <Flex align="center" gap={2}>
-                    <Text fontWeight="medium">
-                      {searchTerm ? (
-                        <>
-                          Showing {filteredGames.length} of{' '}
-                          {activeQuery.data.games.length} games matching &ldquo;
-                          {searchTerm}&rdquo;
-                        </>
-                      ) : (
-                        <>
-                          Showing {filteredGames.length} games
-                          {activeQuery.data.totalPages > 1 && (
-                            <Text as="span" fontStyle="italic">
-                              {' '}
-                              (page {activeQuery.data.currentPage} of{' '}
-                              {activeQuery.data.totalPages})
-                            </Text>
-                          )}
-                        </>
-                      )}
-                      {activeQuery.data.games.some(
-                        (game) => 'relatedGames' in game && game.relatedGames,
-                      ) && (
-                        <Text as="span" fontStyle="italic">
-                          {' '}
-                          (related games have been grouped together)
-                        </Text>
-                      )}
-                    </Text>
-                  </Flex>
-                </Box>
-
-                <Box mb={4}>
-                  <Flex gap={2} align="center">
-                    <Box flex="1">
-                      <InputGroup
-                        w="100%"
-                        startElement={<FiSearch color="gray.400" />}
-                        endElement={
-                          searchTerm ? (
-                            <Button
-                              p={0}
-                              size="xs"
-                              onClick={() => setSearchTerm('')}
-                              variant="ghost"
-                            >
-                              ✕
-                            </Button>
-                          ) : null
-                        }
-                      >
-                        <Input
-                          ref={searchInputRef}
-                          placeholder="Search games... (Ctrl+F)"
-                          value={searchTerm}
-                          onChange={handleSearch}
-                          borderRadius="md"
-                          w="100%"
-                        />
-                      </InputGroup>
-                    </Box>
-                    {searchTerm && (
-                      <Button
-                        size="sm"
-                        onClick={() => setSearchTerm('')}
-                        variant="outline"
-                        colorScheme="blue"
-                      >
-                        Show All Games
-                      </Button>
-                    )}
-                  </Flex>
-                  <Text fontSize="xs" color="gray.500" mt={1} ml={1}>
-                    Search also looks in related games
+                  <Text fontSize="lg" mb={3}>
+                    No games found matching &ldquo;{debouncedSearchTerm}
+                    &rdquo;
                   </Text>
-                </Box>
-
-                <GamesTable
-                  games={filteredGames}
-                  selectedGameIds={[]}
-                  onSelectGame={() => {}}
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                />
-                {filteredGames.length === 0 && searchTerm && (
-                  <Box
-                    p={6}
-                    borderWidth="1px"
-                    borderRadius="md"
-                    textAlign="center"
-                    mt={4}
+                  <Button
+                    onClick={() => setSearchTerm('')}
+                    size="sm"
+                    colorScheme="blue"
+                    variant="outline"
                   >
-                    <Text fontSize="lg" mb={3}>
-                      No games found matching &ldquo;{searchTerm}&rdquo;
-                    </Text>
-                    <Button
-                      onClick={() => setSearchTerm('')}
-                      size="sm"
-                      colorScheme="blue"
-                      variant="outline"
-                    >
-                      Clear search
-                    </Button>
-                  </Box>
-                )}
-                {/* Only show pagination when no search term is active */}
-                {activeQuery.data.totalPages > 1 && !searchTerm && (
-                  <Pagination
-                    currentPage={activeQuery.data.currentPage}
-                    totalPages={activeQuery.data.totalPages}
-                    onPageChange={(newPage) => {
-                      setPage(newPage);
-                      setSearchTerm(''); // Reset search when changing pages
-                    }}
-                    isLoading={activeQuery.isLoading}
-                  />
-                )}
-              </>
-            ) : (
-              <Box p={6} borderWidth="1px" borderRadius="md" textAlign="center">
-                <Text fontSize="lg" mb={3}>
-                  No games found for this Steam ID
-                </Text>
-                <Text color="gray.500" mb={4}>
-                  Make sure your Steam profile is public and you have games in
-                  your library.
-                </Text>
-                <Button
-                  onClick={() => setShowGameList(false)}
-                  size="sm"
-                  colorScheme="blue"
-                  variant="outline"
-                >
-                  Try a different Steam ID
-                </Button>
-              </Box>
-            )}
+                    Clear search
+                  </Button>
+                </Box>
+              )}
+              {/* Only show pagination when no search term is active */}
+              {activeQuery.data.totalPages > 1 && !debouncedSearchTerm && (
+                <Pagination
+                  currentPage={activeQuery.data.currentPage}
+                  totalPages={activeQuery.data.totalPages}
+                  onPageChange={(newPage) => {
+                    setPage(newPage);
+                    setSearchTerm(''); // Reset search when changing pages
+                  }}
+                  isLoading={activeQuery.isLoading}
+                />
+              )}
+            </>
+          ) : (
+            <Box p={6} borderWidth="1px" borderRadius="md" textAlign="center">
+              <Text fontSize="lg" mb={3}>
+                No games found for this Steam ID
+              </Text>
+              <Text color="gray.500" mb={4}>
+                Make sure your Steam profile is public and you have games in
+                your library.
+              </Text>
+              <Button
+                onClick={() => setShowGameList(false)}
+                size="sm"
+                colorScheme="blue"
+                variant="outline"
+              >
+                Try a different Steam ID
+              </Button>
+            </Box>
+          )}
+        </Box>
+      )}
+    </VStack>
+  );
+
+  return (
+    <Box>
+      <Tabs.Root defaultValue="import" variant="line">
+        <Tabs.List>
+          <Tabs.Trigger value="import">Import Games</Tabs.Trigger>
+          <Tabs.Trigger value="history">Import History</Tabs.Trigger>
+          <Tabs.Indicator />
+        </Tabs.List>
+
+        <Tabs.Content value="import" pt={4}>
+          {renderImportContent()}
+        </Tabs.Content>
+
+        <Tabs.Content value="history" pt={4}>
+          <Box>
+            <ImportHistory />
           </Box>
-        )}
-      </VStack>
+        </Tabs.Content>
+      </Tabs.Root>
     </Box>
   );
 }
