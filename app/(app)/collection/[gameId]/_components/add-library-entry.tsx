@@ -1,5 +1,6 @@
 'use client';
 
+import { createBacklogItem } from '@/features/backlog/actions/create-backlog-item';
 import {
   DialogRoot,
   DialogBackdrop,
@@ -11,11 +12,11 @@ import {
   DialogBody,
   DialogFooter,
   DialogActionTrigger,
-} from '../../../../../shared/components/ui/dialog';
+} from '@/shared/components/ui/dialog';
 import {
   AcquisitionType,
   BacklogItemStatus,
-} from '../../../../../shared/types/entities/BacklogItem';
+} from '@/shared/types/entities/BacklogItem';
 import {
   Button,
   Field,
@@ -26,7 +27,6 @@ import {
 } from '@chakra-ui/react';
 import { useSession } from 'next-auth/react';
 import { useState } from 'react';
-import { createBacklogItem } from '../../../../../features/collection/create-backlog-item';
 
 export function AddLibraryEntry({ gameId }: { gameId: string }) {
   const [status, setStatus] = useState('');

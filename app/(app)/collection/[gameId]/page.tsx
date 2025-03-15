@@ -11,8 +11,8 @@ import { z } from 'zod';
 import Image from 'next/image';
 import { IMAGE_API, IMAGE_SIZES } from '@/shared/config/igdb.image.config';
 import { LibraryEntries } from './_components/library-entries';
-import { findGameByIdWithUsersBacklog } from '../../../../features/collection/collection-actions';
 import { IoCalendarOutline } from 'react-icons/io5';
+import { findGameByIdWithUsersBacklog } from '@/features/backlog/actions/backlog-actions';
 
 const gamePageParamsSchema = z.object({ gameId: z.string() });
 type GamePageParams = z.infer<typeof gamePageParamsSchema>;

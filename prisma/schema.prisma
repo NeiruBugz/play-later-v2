@@ -61,9 +61,11 @@ model User {
   backlogItems         BacklogItem[]
   reviews              Review[]
   ignoredImportedGames IgnoredImportedGames[]
+  steamImportJobs      SteamImportJob[]
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
   deleted              Boolean                @default(false)
+  FailedImport         FailedImport[]
 }
 
 // ----- Application Models ------//
@@ -183,4 +185,57 @@ enum AcquisitionType {
   PHYSICAL
   DIGITAL
   SUBSCRIPTION
+}
+
+// Model for tracking Steam import jobs
+model SteamImportJob {
+  id             String    @id @default(cuid())
+  userId         String
+  steamId        String
+  status         JobStatus @default(PENDING)
+  totalGames     Int       @default(0)
+  processedGames Int       @default(0)
+  importedGames  Int?
+  skippedGames   Int?
+  failedGames    Int?      @default(0)
+  error          String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  failedImports FailedImport[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// Model for tracking failed Steam game imports
+model FailedImport {
+  id               String   @id @default(cuid())
+  userId           String
+  steamImportJobId String?
+  steamAppId       Int
+  gameName         String
+  reason           String
+  errorMessage     String?
+  playtime         Int      @default(0)
+  attemptedAt      DateTime @default(now())
+
+  // Relations
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  steamImportJob SteamImportJob? @relation(fields: [steamImportJobId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([steamImportJobId])
+  @@index([steamAppId])
 }

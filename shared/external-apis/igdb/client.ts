@@ -422,4 +422,101 @@ export class IGDBClient implements IGDBClientInterface {
       resource: '/games',
     });
   }
+
+  /**
+   * Fetch game data for Steam import
+   * This method is specifically designed for matching Steam games with IGDB entries
+   * @param gameName The normalized game name from Steam
+   * @returns Game data from IGDB or null if no match found
+   */
+  async getGameForSteamImport(gameName: string): Promise<{
+    id: number;
+    name: string;
+    summary?: string;
+    cover?: { image_id: string };
+    first_release_date?: number;
+    genres?: Array<{ id: number; name: string }>;
+  } | null> {
+    // First try a direct search with the exact name
+    const exactQuery = new QueryBuilder()
+      .fields([
+        'id',
+        'name',
+        'summary',
+        'cover.image_id',
+        'first_release_date',
+        'genres.name',
+        'genres.id',
+        'alternative_names.name',
+      ])
+      .search(normalizeTitle(normalizeString(gameName)))
+      .where('category = (0,2,4,8,9,10) & version_parent = null')
+      .limit(5) // Get more results to find better matches
+      .build();
+
+    const exactResults = await this.request<
+      Array<{
+        id: number;
+        name: string;
+        summary?: string;
+        cover?: { image_id: string };
+        first_release_date?: number;
+        genres?: Array<{ id: number; name: string }>;
+        alternative_names?: Array<{ name: string }>;
+      }>
+    >({
+      body: exactQuery,
+      resource: '/games',
+    });
+
+    // If we have exact results, try to find the best match
+    if (exactResults && exactResults.length > 0) {
+      // First, check for exact title match
+      const exactMatch = exactResults.find(
+        (game) =>
+          normalizeTitle(normalizeString(game.name)) ===
+          normalizeTitle(normalizeString(gameName)),
+      );
+
+      if (exactMatch) {
+        return exactMatch;
+      }
+
+      // If no exact match, return the first result (most relevant)
+      return exactResults[0];
+    }
+
+    // If no results from exact search, try a more fuzzy search
+    const fuzzyQuery = new QueryBuilder()
+      .fields([
+        'id',
+        'name',
+        'summary',
+        'cover.image_id',
+        'first_release_date',
+        'genres.name',
+        'genres.id',
+      ])
+      .where(
+        `name ~ *"${normalizeTitle(normalizeString(gameName))}"* & category = (0,2,4,8,9,10) & version_parent = null`,
+      )
+      .limit(1)
+      .build();
+
+    const fuzzyResults = await this.request<
+      Array<{
+        id: number;
+        name: string;
+        summary?: string;
+        cover?: { image_id: string };
+        first_release_date?: number;
+        genres?: Array<{ id: number; name: string }>;
+      }>
+    >({
+      body: fuzzyQuery,
+      resource: '/games',
+    });
+
+    return fuzzyResults && fuzzyResults.length > 0 ? fuzzyResults[0] : null;
+  }
 }

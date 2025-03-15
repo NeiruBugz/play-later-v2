@@ -45,4 +45,17 @@ export interface IGDBClientInterface {
     platformName: string,
   ): Promise<{ platformId: Array<{ id: number; name: string }> } | undefined>;
   getGameByName(gameName: string): Promise<IgdbGameResponseItem[] | undefined>;
+  /**
+   * Fetch game data for Steam import
+   * @param gameName The normalized game name from Steam
+   */
+  getGameForSteamImport(gameName: string): Promise<{
+    id: number;
+    name: string;
+    summary?: string;
+    cover?: { image_id: string };
+    first_release_date?: number;
+    genres?: Array<{ id: number; name: string }>;
+    alternative_names?: Array<{ name: string }>;
+  } | null>;
 }
