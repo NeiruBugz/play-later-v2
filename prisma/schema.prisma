@@ -27,6 +27,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -35,6 +36,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -53,11 +56,14 @@ model User {
   image                String?
   username             String?
   steamProfileURL      String?
-  Account              Account[]
-  Session              Session[]
-  BacklogItem          BacklogItem[]
-  Review               Review[]
-  IgnoredImportedGames IgnoredImportedGames[]
+  accounts             Account[]
+  sessions             Session[]
+  backlogItems         BacklogItem[]
+  reviews              Review[]
+  ignoredImportedGames IgnoredImportedGames[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  deleted              Boolean                @default(false)
 }
 
 // ----- Application Models ------//
@@ -66,7 +72,7 @@ model Game {
   igdbId           Int           @unique
   hltbId           String?       @unique
   title            String
-  description      String?
+  description      String?       @db.Text
   coverImage       String?
   releaseDate      DateTime?
   mainStory        Int?
@@ -74,16 +80,17 @@ model Game {
   completionist    Int?
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
-  backlogItems     BacklogItem[] @relation("GameBacklogItems")
-  Review           Review[]
+  backlogItems     BacklogItem[]
+  reviews          Review[]
   steamAppId       Int?
-  genres           Genre[]
   aggregatedRating Float?
   screenshots      Screenshot[]
+  genres           GameGenre[]
+  deleted          Boolean       @default(false)
 }
 
 model BacklogItem {
-  id              Int               @id @default(autoincrement())
+  id              String            @id @default(cuid())
   status          BacklogItemStatus @default(TO_PLAY)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -91,44 +98,77 @@ model BacklogItem {
   userId          String
   acquisitionType AcquisitionType   @default(DIGITAL)
   gameId          String
-  game            Game              @relation("GameBacklogItems", fields: [gameId], references: [id], onDelete: Cascade)
-  User            User              @relation(fields: [userId], references: [id])
+  game            Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   startedAt       DateTime?
   completedAt     DateTime?
+
+  @@index([userId])
+  @@index([gameId])
+  @@index([status])
 }
 
 model Review {
-  id          Int      @id @default(autoincrement())
-  rating      Int      @default(0) // Rating from 0 to 10
-  content     String? // Optional review text
+  id          String   @id @default(cuid())
+  rating      Int      @default(0) @db.SmallInt
+  content     String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   completedOn String?
   userId      String
   gameId      String
-  User        User     @relation(fields: [userId], references: [id])
-  Game        Game     @relation(fields: [gameId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([userId])
+  @@index([gameId])
 }
 
 model IgnoredImportedGames {
-  id     String @id @default(cuid())
-  name   String
-  userId String
-  User   User   @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Genre {
-  id     Int     @id
-  name   String
-  Game   Game?   @relation(fields: [gameId], references: [id])
-  gameId String?
+  id        Int         @id
+  name      String
+  games     GameGenre[]
+  createdAt DateTime    @default(now())
+}
+
+model GameGenre {
+  gameId    String
+  genreId   Int
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  genre     Genre    @relation(fields: [genreId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([gameId, genreId])
+  @@index([gameId])
+  @@index([genreId])
 }
 
 model Screenshot {
-  id       Int     @id
-  image_id String
-  Game     Game?   @relation(fields: [gameId], references: [id])
-  gameId   String?
+  id        String   @id @default(cuid())
+  imageId   String
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([gameId])
+}
+
+model Platform {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum BacklogItemStatus {
