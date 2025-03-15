@@ -15,9 +15,24 @@ import { formatDistanceToNow } from 'date-fns';
 import { useEffect } from 'react';
 
 interface ImportProgressProps {
+  /** The ID of the import job to display progress for */
   jobId: string;
 }
 
+/**
+ * ImportProgress Component
+ *
+ * Displays the progress of a Steam game import job, including:
+ * - Current status (pending, processing, completed, failed)
+ * - Progress bar for ongoing imports
+ * - Statistics about imported, skipped, and failed games
+ * - Timestamps for when the job started and completed
+ * - Error messages if applicable
+ * - Visual indicator for "New Games Only" imports
+ *
+ * @param props Component props
+ * @returns React component
+ */
 export function ImportProgress({ jobId }: ImportProgressProps) {
   const jobQuery = useImportJobStatus(jobId);
 
@@ -114,7 +129,7 @@ export function ImportProgress({ jobId }: ImportProgressProps) {
           <StatusBadge status={job.status} />
           {job.importNewOnly && (
             <Badge
-              colorScheme="blue"
+              colorPalette="blue"
               variant="subtle"
               borderRadius="full"
               px={2}
@@ -218,6 +233,14 @@ export function ImportProgress({ jobId }: ImportProgressProps) {
   );
 }
 
+/**
+ * StatusBadge Component
+ *
+ * Displays a colored badge representing the current status of an import job
+ *
+ * @param props Component props
+ * @returns React component
+ */
 function StatusBadge({ status }: { status: string }) {
   let color;
   switch (status) {
@@ -239,7 +262,7 @@ function StatusBadge({ status }: { status: string }) {
 
   return (
     <Badge
-      colorScheme={color}
+      colorPalette={color}
       variant="subtle"
       px={2}
       py={0.5}

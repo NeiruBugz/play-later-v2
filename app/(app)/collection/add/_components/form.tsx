@@ -184,7 +184,7 @@ export function Form() {
         />
 
         <Button
-          colorScheme="blue"
+          colorPalette="blue"
           onClick={handleSubmit}
           alignSelf="start"
           disabled={!isFormValid}

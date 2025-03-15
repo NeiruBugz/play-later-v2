@@ -8,11 +8,26 @@ import { toaster } from '@/shared/components/ui/toaster';
 import { Tooltip } from '@/shared/components/ui/tooltip';
 
 interface BulkImportButtonProps {
+  /** The Steam ID to import games from */
   steamId: string;
+  /** Callback function called when an import job is started, with the job ID */
   onImportStarted?: (jobId: string) => void;
+  /** Whether the import buttons should be disabled */
   disabled?: boolean;
 }
 
+/**
+ * BulkImportButton Component
+ *
+ * Provides buttons for importing games from Steam:
+ * - "Import New Only" button: Imports only games that aren't already in the user's backlog
+ * - "Import All" button: Imports all games from the user's Steam library
+ *
+ * Both buttons include tooltips explaining their functionality and handle loading states.
+ *
+ * @param props Component props
+ * @returns React component
+ */
 export function BulkImportButton({
   steamId,
   onImportStarted,
@@ -21,6 +36,11 @@ export function BulkImportButton({
   const { startImport, isImporting } = useBulkImport();
   const [isLoading, setIsLoading] = useState(false);
 
+  /**
+   * Handles the import process when a button is clicked
+   *
+   * @param newOnly Whether to import only new games (true) or all games (false)
+   */
   const handleImport = async (newOnly: boolean) => {
     if (!steamId.trim()) {
       toaster.create({
@@ -65,7 +85,7 @@ export function BulkImportButton({
         showArrow
       >
         <Button
-          colorScheme="blue"
+          colorPalette="blue"
           variant="outline"
           onClick={() => handleImport(true)}
           loading={isLoading || isImporting}
@@ -73,7 +93,7 @@ export function BulkImportButton({
           disabled={disabled || isLoading || isImporting || !steamId.trim()}
           size="sm"
         >
-          <FiPlus />
+          <FiPlus style={{ marginRight: '8px' }} />
           Import New Only
         </Button>
       </Tooltip>
@@ -83,14 +103,14 @@ export function BulkImportButton({
         showArrow
       >
         <Button
-          colorScheme="blue"
+          colorPalette="blue"
           onClick={() => handleImport(false)}
           loading={isLoading || isImporting}
           loadingText="Starting import..."
           disabled={disabled || isLoading || isImporting || !steamId.trim()}
           size="sm"
         >
-          <FiDownload />
+          <FiDownload style={{ marginRight: '8px' }} />
           Import All
         </Button>
       </Tooltip>

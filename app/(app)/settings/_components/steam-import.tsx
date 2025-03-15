@@ -287,7 +287,7 @@ export function SteamImport() {
                   size="sm"
                   onClick={() => setSearchTerm('')}
                   variant="outline"
-                  colorScheme="blue"
+                  colorPalette="blue"
                 >
                   Show All Games
                 </Button>
@@ -366,7 +366,7 @@ export function SteamImport() {
                   <Button
                     onClick={() => setSearchTerm('')}
                     size="sm"
-                    colorScheme="blue"
+                    colorPalette="blue"
                     variant="outline"
                   >
                     Clear search
@@ -398,7 +398,7 @@ export function SteamImport() {
               <Button
                 onClick={() => setShowGameList(false)}
                 size="sm"
-                colorScheme="blue"
+                colorPalette="blue"
                 variant="outline"
               >
                 Try a different Steam ID

@@ -53,7 +53,7 @@ function SteamIdInput({
         <Button
           onClick={onViewGames}
           disabled={isLoading || steamId.trim().length === 0}
-          colorScheme="blue"
+          colorPalette="blue"
         >
           {isLoading ? (
             <Flex align="center" gap="2">

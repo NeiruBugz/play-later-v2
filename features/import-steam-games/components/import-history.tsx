@@ -28,6 +28,15 @@ import {
 import { formatDistanceToNow, format } from 'date-fns';
 import { ImportProgress } from './import-progress';
 
+/**
+ * ImportHistory Component
+ *
+ * Displays a history of all Steam import jobs for the current user.
+ * Each job is displayed in an accordion with details about the import process.
+ * Users can view detailed information about failed imports for each job.
+ *
+ * @returns React component
+ */
 export function ImportHistory() {
   const { data: jobs, isLoading, isError } = useImportJobs();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
@@ -110,6 +119,14 @@ export function ImportHistory() {
   );
 }
 
+/**
+ * StatusBadge Component
+ *
+ * Displays a colored badge representing the current status of an import job
+ *
+ * @param props Component props containing the status string
+ * @returns React component
+ */
 function StatusBadge({ status }: { status: string }) {
   let color;
   switch (status) {
@@ -144,11 +161,24 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 interface FailedImportsDialogProps {
+  /** Whether the dialog is open */
   open: boolean;
+  /** Callback for when the open state changes */
   onOpenChange: (open: boolean) => void;
+  /** The ID of the import job to show failed imports for */
   jobId: string | null;
 }
 
+/**
+ * FailedImportsDialog Component
+ *
+ * Displays a modal dialog with a table of failed imports for a specific job.
+ * Shows details about each failed import including the game name, reason for failure,
+ * and when the import was attempted.
+ *
+ * @param props Component props
+ * @returns React component
+ */
 function FailedImportsDialog({
   open,
   onOpenChange,

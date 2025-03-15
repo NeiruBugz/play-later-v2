@@ -73,7 +73,7 @@ function Pagination({
           disabled={currentPage === 1 || isLoading}
           size="sm"
           variant="outline"
-          colorScheme="blue"
+          colorPalette="blue"
         >
           {isLoading ? <Spinner size="xs" mr="2" /> : null}
           Previous
@@ -88,7 +88,7 @@ function Pagination({
                 disabled={isLoading}
                 size="sm"
                 variant={currentPage === i + 1 ? 'solid' : 'outline'}
-                colorScheme={currentPage === i + 1 ? 'blue' : 'gray'}
+                colorPalette={currentPage === i + 1 ? 'blue' : 'gray'}
               >
                 {i + 1}
               </Button>
@@ -106,7 +106,7 @@ function Pagination({
                   disabled={isLoading}
                   size="sm"
                   variant={currentPage === page ? 'solid' : 'outline'}
-                  colorScheme={currentPage === page ? 'blue' : 'gray'}
+                  colorPalette={currentPage === page ? 'blue' : 'gray'}
                 >
                   {page}
                 </Button>
@@ -118,7 +118,7 @@ function Pagination({
           disabled={currentPage === totalPages || isLoading}
           size="sm"
           variant="outline"
-          colorScheme="blue"
+          colorPalette="blue"
         >
           Next
           {isLoading ? <Spinner size="xs" ml="2" /> : null}

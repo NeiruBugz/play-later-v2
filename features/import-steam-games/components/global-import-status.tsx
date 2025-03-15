@@ -81,7 +81,7 @@ function ActiveJobIndicator({ jobId }: { jobId: string }) {
         <Text fontWeight="medium" mb={1}>
           Steam Import
         </Text>
-        <Progress.Root size="sm" colorScheme="blue">
+        <Progress.Root size="sm" colorPalette="blue">
           <Progress.Track>
             <Progress.Range />
           </Progress.Track>
@@ -100,14 +100,14 @@ function ActiveJobIndicator({ jobId }: { jobId: string }) {
     <Box>
       <Flex justify="space-between" align="center" mb={1}>
         <Text fontWeight="medium">Steam Import</Text>
-        <Badge colorScheme="blue" variant="subtle">
+        <Badge colorPalette="blue" variant="subtle">
           {job.status.toLowerCase()}
         </Badge>
       </Flex>
       <Progress.Root
         value={progress}
         size="sm"
-        colorScheme="blue"
+        colorPalette="blue"
         striped
         animated
       >

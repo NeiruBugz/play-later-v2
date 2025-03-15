@@ -91,7 +91,7 @@ function MyComponent() {
       <Text fontSize="lg" fontWeight="bold">
         Hello World
       </Text>
-      <Button colorScheme="blue" mt={4}>
+      <Button colorPalette="blue" mt={4}>
         Click Me
       </Button>
     </Box>
