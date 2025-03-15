@@ -7,13 +7,7 @@ import { UpdateBacklogItem } from './update-backlog-item';
 
 export function GameCard({ game }: { game: Game }) {
   return (
-    <Card.Root
-      width="140px"
-      height="fit-content"
-      minH="184px"
-      position="relative"
-      className="group"
-    >
+    <Card.Root variant="gameCard" className="group">
       <Flex
         position="absolute"
         right="2"

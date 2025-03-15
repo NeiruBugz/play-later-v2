@@ -102,6 +102,10 @@ export async function findGameByIdWithUsersBacklog(gameId: string) {
 
   return prisma.game.findUnique({
     where: { id: gameId },
-    include: { backlogItems: { where: { userId } } },
+    include: {
+      backlogItems: { where: { userId } },
+      genres: { include: { genre: true } },
+      screenshots: true,
+    },
   });
 }

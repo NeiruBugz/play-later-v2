@@ -758,6 +758,19 @@ async function processGame(
           : null,
         igdbId: igdbGame.id,
         steamAppId: game.appid,
+        // Add genres if available
+        genres: igdbGame.genres
+          ? {
+              create: igdbGame.genres.map((genre) => ({
+                genre: {
+                  connectOrCreate: {
+                    where: { id: genre.id },
+                    create: { id: genre.id, name: genre.name },
+                  },
+                },
+              })),
+            }
+          : undefined,
       },
     });
 

@@ -2,10 +2,10 @@
 
 import { toaster } from '@/shared/components/ui/toaster';
 import { Tooltip } from '@/shared/components/ui/tooltip';
+import { StatusButton } from '@/shared/components/ui/status-button';
 import { BacklogItemStatus } from '@/shared/types/entities/BacklogItem';
 import { Game } from '@/shared/types/entities/Game';
 import { updateBacklogItem } from '@/features/backlog/actions/update-backlog-item';
-import { Button } from '@chakra-ui/react';
 import { useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 import {
@@ -64,40 +64,40 @@ export function UpdateBacklogItem({
   return (
     <>
       <Tooltip content="Mark as completed">
-        <Button
-          size="xs"
+        <StatusButton
+          status="completed"
           hidden={currentStatus === 'COMPLETED'}
           onClick={() => onStatusUpdate('COMPLETED')}
         >
           <IoCheckmarkDoneOutline size={8} />
-        </Button>
+        </StatusButton>
       </Tooltip>
       <Tooltip content="Move to backlog">
-        <Button
-          size="xs"
+        <StatusButton
+          status="backlog"
           hidden={currentStatus === 'TO_PLAY'}
           onClick={() => onStatusUpdate('TO_PLAY')}
         >
           <IoLibrarySharp size={8} />
-        </Button>
+        </StatusButton>
       </Tooltip>
       <Tooltip content="Mark as played">
-        <Button
-          size="xs"
+        <StatusButton
+          status="played"
           hidden={currentStatus === 'PLAYED'}
           onClick={() => onStatusUpdate('PLAYED')}
         >
           <IoCheckmarkCircleOutline size={8} />
-        </Button>
+        </StatusButton>
       </Tooltip>
       <Tooltip content="Start playing">
-        <Button
-          size="xs"
+        <StatusButton
+          status="playing"
           hidden={currentStatus === 'PLAYING'}
           onClick={() => onStatusUpdate('PLAYING')}
         >
           <IoPlayOutline size={8} />
-        </Button>
+        </StatusButton>
       </Tooltip>
     </>
   );
