@@ -2,9 +2,6 @@ import '@testing-library/jest-dom';
 import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
-// Make vi available globally
-globalThis.vi = vi;
-
 // Automatically cleanup after each test
 afterEach(() => {
   cleanup();
