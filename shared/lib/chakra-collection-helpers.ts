@@ -32,6 +32,7 @@ export const platformCollection = createListCollection({
     { value: 'pc', label: 'PC' },
     { value: 'xbox', label: 'Xbox' },
     { value: 'playstation', label: 'PlayStation' },
+    { value: 'nintendo', label: 'Nintendo' },
   ],
 });
 

@@ -1,9 +1,20 @@
-import { IndeterminateSpinner } from '../../../../../shared/components/ui/indereminate-spinner';
-import { InputGroup } from '../../../../../shared/components/ui/input-group';
+import { IndeterminateSpinner } from '../../../shared/components/ui/indereminate-spinner';
+import { InputGroup } from '../../../shared/components/ui/input-group';
 import { SearchResponse } from '@/shared/types/igdb.types';
 import { Field, Input, List } from '@chakra-ui/react';
 import { useState, useRef, useEffect } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
+
+type GameSearchProps = {
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  setSelectedGame: (game: SearchResponse | null) => void;
+  isGameSelected: React.MutableRefObject<boolean>;
+  isFetchingSuggestions: boolean;
+  isFetchingGameData: boolean;
+  suggestions: SearchResponse[] | undefined;
+  selectedGame: SearchResponse | null;
+};
 
 function GameSearch({
   searchQuery,
@@ -13,16 +24,7 @@ function GameSearch({
   isFetchingSuggestions,
   isFetchingGameData,
   suggestions,
-}: {
-  searchQuery: string;
-  setSearchQuery: (value: string) => void;
-  selectedGame: SearchResponse | null;
-  setSelectedGame: (game: SearchResponse | null) => void;
-  isGameSelected: React.MutableRefObject<boolean>;
-  isFetchingSuggestions: boolean;
-  isFetchingGameData: boolean;
-  suggestions: SearchResponse[] | undefined;
-}) {
+}: GameSearchProps) {
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const suggestionRefs = useRef<(HTMLLIElement | null)[]>([]);
 

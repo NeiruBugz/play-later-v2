@@ -4,8 +4,17 @@ import {
   SelectTrigger,
   SelectValueText,
   SelectItem,
-} from '../../../../../shared/components/ui/select';
+} from '../../../shared/components/ui/select';
 import { ListCollection, Field } from '@chakra-ui/react';
+
+type SelectFieldProps<T extends { value: string; label: string }> = {
+  label: string;
+  collection: ListCollection<T>;
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder: string;
+  isDisabled?: boolean;
+};
 
 function SelectField<T extends { value: string; label: string }>({
   label,
@@ -13,15 +22,10 @@ function SelectField<T extends { value: string; label: string }>({
   value,
   onChange,
   placeholder,
-}: {
-  label: string;
-  collection: ListCollection<T>;
-  value: string[];
-  onChange: (value: string[]) => void;
-  placeholder: string;
-}) {
+  isDisabled,
+}: SelectFieldProps<T>) {
   return (
-    <Field.Root>
+    <Field.Root disabled={isDisabled}>
       <Field.Label>{label}</Field.Label>
       <SelectRoot
         collection={collection}
