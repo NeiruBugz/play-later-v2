@@ -10,10 +10,16 @@ import {
   IoLibrary,
   IoLibraryOutline,
   IoMenuOutline,
+  IoStatsChartOutline,
 } from 'react-icons/io5';
 import { ColorModeButton } from '@/shared/components/ui/color-mode';
 
 const linksConfig = [
+  {
+    href: '/dashboard',
+    label: 'Dashboard',
+    icon: <IoStatsChartOutline />,
+  },
   {
     href: '/collection?status=PLAYING&page=1',
     label: 'Collection',

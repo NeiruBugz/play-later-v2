@@ -26,6 +26,7 @@ async function performBacklogItemUpdate(
     data: {
       ...updateData,
       updatedAt: new Date(),
+      completedAt: updateData.status === 'COMPLETED' ? new Date() : undefined,
     },
   });
 }

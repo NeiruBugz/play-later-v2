@@ -142,12 +142,13 @@ function GameRow({
               <Tooltip content={getRelatedGamesTooltipContent()}>
                 <Flex align="center" ml="2">
                   <Icon
-                    as={FiInfo}
                     color="blue.500"
                     boxSize="4"
                     cursor="help"
                     _hover={{ color: 'blue.600' }}
-                  />
+                  >
+                    <FiInfo />
+                  </Icon>
                 </Flex>
               </Tooltip>
             )}
