@@ -15,30 +15,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { useEffect } from 'react';
 
 interface ImportProgressProps {
-  /** The ID of the import job to display progress for */
   jobId: string;
 }
 
-/**
- * ImportProgress Component
- *
- * Displays the progress of a Steam game import job, including:
- * - Current status (pending, processing, completed, failed)
- * - Progress bar for ongoing imports
- * - Statistics about imported, skipped, and failed games
- * - Timestamps for when the job started and completed
- * - Error messages if applicable
- * - Visual indicator for "New Games Only" imports
- *
- * @param props Component props
- * @returns React component
- */
 export function ImportProgress({ jobId }: ImportProgressProps) {
   const jobQuery = useImportJobStatus(jobId);
 
-  // Add global styles for animations
   useEffect(() => {
-    // Create a style element
     const styleEl = document.createElement('style');
     styleEl.textContent = `
       @keyframes loading {
@@ -51,10 +34,8 @@ export function ImportProgress({ jobId }: ImportProgressProps) {
       }
     `;
 
-    // Add it to the document head
     document.head.appendChild(styleEl);
 
-    // Clean up on unmount
     return () => {
       document.head.removeChild(styleEl);
     };

@@ -17,7 +17,7 @@ import { ClearFilters } from './filters/clear';
 import { getUniqueUserPlatforms } from '@/features/backlog/actions/backlog-utility-actions';
 
 export async function DrawerFilter() {
-  const uniquePlatforms = await getUniqueUserPlatforms();
+  const uniquePlatforms = await getUniqueUserPlatforms({});
   return (
     <DrawerRoot placement="bottom" size="lg">
       <DrawerBackdrop />
@@ -34,7 +34,9 @@ export async function DrawerFilter() {
         <DrawerBody>
           <Flex direction="column" gap={3} mb="200px">
             <StatusFilter />
-            <PlatformFilter platformOptions={uniquePlatforms} />
+            {uniquePlatforms?.data ? (
+              <PlatformFilter platformOptions={uniquePlatforms.data} />
+            ) : null}
             <Search />
             <ClearFilters />
           </Flex>

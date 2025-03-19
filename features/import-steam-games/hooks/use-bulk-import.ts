@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  startBulkImport,
-  getBulkImportStatus,
-  getImportJobs,
-  getFailedImports,
-  getSkippedImports,
-  importSingleGame,
-} from '../actions/bulk-import';
+import { getFailedImports, getSkippedImports } from '../actions/bulk-import';
 import { JobStatus } from '@prisma/client';
+import { startBulkImport } from '@/features/import-steam-games/actions/start-bulk-import';
+import { getBulkImportStatus } from '@/features/import-steam-games/actions/get-import-status';
+import { getImportJobs } from '@/features/import-steam-games/actions/jobs';
+import { importSingleGame } from '@/features/import-steam-games/actions/import-single-game';
 
 /**
  * Hook for starting a bulk import job

@@ -1,5 +1,5 @@
 import { Filters } from './_components/filters';
-import { Box, Flex, Heading } from '@chakra-ui/react';
+import { Box, Flex, Heading, Text } from '@chakra-ui/react';
 import { Suspense } from 'react';
 import { CollectionPagination } from './_components/collection-pagination';
 import { GameWithBacklogItemsList } from '@/shared/components/game/game-with-backlog-items-list';
@@ -47,8 +47,24 @@ export default async function CollectionPage({
     filterParams = collectionPageSearchParamsSchema.parse({});
   }
 
-  const { collection, count } =
-    await getUserGamesWithGroupedBacklog(filterParams);
+  const actionResult = await getUserGamesWithGroupedBacklog({
+    platform: filterParams.platform,
+    status: filterParams.status,
+    search: filterParams.search,
+    page: filterParams.page,
+  });
+
+  if (!actionResult || !actionResult.data) {
+    console.error('Failed to fetch collection data');
+    return (
+      <Box>
+        <Heading as="h2">Collection</Heading>
+        <Text>Failed to load collection data. Please try again later.</Text>
+      </Box>
+    );
+  }
+
+  const { collection, count } = actionResult.data;
 
   return (
     <Box>

@@ -2,7 +2,7 @@ import { Screenshot } from './Screenshot';
 import type { BacklogItem } from './BacklogItem';
 import { Genre } from './Genre';
 
-export interface Game {
+export type Game = {
   id: string;
   igdbId: number;
   hltbId: string | null;
@@ -20,4 +20,4 @@ export interface Game {
   screenshots?: Screenshot[];
   genres?: Genre[];
   aggregatedRating: number | null;
-}
+};

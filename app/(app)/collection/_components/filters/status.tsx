@@ -1,7 +1,10 @@
 'use client';
 
-import { BacklogItemStatus } from '../../../../../shared/types/entities/BacklogItem';
-import { BacklogStatusMapper } from '../../../../../shared/lib/enum-mappers';
+import { BacklogItemStatus } from '@/shared/types/entities/BacklogItem';
+import {
+  BacklogStatusMap,
+  BACKLOG_ITEM_STATUS,
+} from '@/shared/lib/status-maps';
 import { Button, Wrap } from '@chakra-ui/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
@@ -42,7 +45,7 @@ export function StatusFilter() {
       >
         All
       </Button>
-      {Object.keys(BacklogStatusMapper)
+      {Object.keys(BACKLOG_ITEM_STATUS)
         .filter((key) => key !== 'WISHLIST')
         .map((key) => (
           <Button
@@ -52,7 +55,7 @@ export function StatusFilter() {
             size="xs"
             variant="outline"
           >
-            {BacklogStatusMapper[key as BacklogItemStatus]}
+            {BacklogStatusMap[key as BacklogItemStatus]}
           </Button>
         ))}
     </Wrap>

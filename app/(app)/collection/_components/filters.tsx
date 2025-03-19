@@ -6,7 +6,7 @@ import { ClearFilters } from './filters/clear';
 import { getUniqueUserPlatforms } from '@/features/backlog/actions/backlog-utility-actions';
 
 export async function Filters() {
-  const uniquePlatforms = await getUniqueUserPlatforms();
+  const uniquePlatforms = await getUniqueUserPlatforms({});
 
   return (
     <Box my={2} hideBelow="md">
@@ -14,7 +14,9 @@ export async function Filters() {
         <StatusFilter />
       </Flex>
       <Flex gap={2} align="center" my={2}>
-        <PlatformFilter platformOptions={uniquePlatforms} />
+        {uniquePlatforms?.data ? (
+          <PlatformFilter platformOptions={uniquePlatforms.data} />
+        ) : null}
         <Search />
         <ClearFilters />
       </Flex>

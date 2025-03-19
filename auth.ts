@@ -1,27 +1,27 @@
 import { prisma } from './prisma/client';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import NextAuth from 'next-auth';
-import Google from 'next-auth/providers/google';
 import { JWT } from 'next-auth/jwt';
+import Google from 'next-auth/providers/google';
 
 // Define the extended JWT type with our custom properties
-interface ExtendedJWT extends JWT {
+export type ExtendedJWT = JWT & {
   id?: string;
   accessToken?: string;
   refreshToken?: string;
   accessTokenExpires?: number;
   error?: string;
-}
+};
 
 // Define the response type from Google's token endpoint
-interface GoogleRefreshTokenResponse {
+export type GoogleRefreshTokenResponse = {
   access_token: string;
   expires_in: number;
-  refresh_token?: string;
   scope: string;
   token_type: string;
   id_token?: string;
-}
+  refresh_token?: string;
+};
 
 export const { auth, handlers, signIn } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -69,40 +69,58 @@ export const { auth, handlers, signIn } = NextAuth({
   },
 });
 
+function buildTokenRefreshUrl(refreshToken: string): string {
+  return (
+    'https://oauth2.googleapis.com/token?' +
+    new URLSearchParams({
+      client_id: process.env.AUTH_GOOGLE_ID!,
+      client_secret: process.env.AUTH_GOOGLE_SECRET!,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    })
+  );
+}
+
+async function fetchRefreshedTokens(
+  url: string,
+): Promise<GoogleRefreshTokenResponse> {
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    method: 'POST',
+  });
+
+  const refreshedTokens: GoogleRefreshTokenResponse = await response.json();
+
+  if (!response.ok) {
+    throw refreshedTokens;
+  }
+
+  return refreshedTokens;
+}
+
+function updateTokenWithRefreshedData(
+  token: ExtendedJWT,
+  refreshedTokens: GoogleRefreshTokenResponse,
+): ExtendedJWT {
+  return {
+    ...token,
+    accessToken: refreshedTokens.access_token,
+    accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+    refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+  };
+}
+
 async function refreshAccessToken(token: ExtendedJWT): Promise<ExtendedJWT> {
   try {
     if (!token.refreshToken) {
       throw new Error('No refresh token available');
     }
 
-    const url =
-      'https://oauth2.googleapis.com/token?' +
-      new URLSearchParams({
-        client_id: process.env.AUTH_GOOGLE_ID!,
-        client_secret: process.env.AUTH_GOOGLE_SECRET!,
-        grant_type: 'refresh_token',
-        refresh_token: token.refreshToken,
-      });
-
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      method: 'POST',
-    });
-
-    const refreshedTokens: GoogleRefreshTokenResponse = await response.json();
-
-    if (!response.ok) {
-      throw refreshedTokens;
-    }
-
-    return {
-      ...token,
-      accessToken: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-    };
+    const url = buildTokenRefreshUrl(token.refreshToken);
+    const refreshedTokens = await fetchRefreshedTokens(url);
+    return updateTokenWithRefreshedData(token, refreshedTokens);
   } catch (error) {
     console.error('Error refreshing access token', error);
     return {

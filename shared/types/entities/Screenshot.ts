@@ -1,4 +1,5 @@
-export interface Screenshot {
-  id: number;
-  image_id: string;
-}
+export type Screenshot = {
+  id: string;
+  url: string;
+  gameId: string;
+};

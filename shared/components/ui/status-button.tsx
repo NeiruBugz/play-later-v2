@@ -5,10 +5,11 @@ import { forwardRef } from 'react';
 
 export type StatusType = 'playing' | 'completed' | 'backlog' | 'played';
 
-export interface StatusButtonProps
-  extends React.ComponentPropsWithoutRef<typeof Button> {
+export type StatusButtonProps = React.ComponentPropsWithoutRef<
+  typeof Button
+> & {
   status: StatusType;
-}
+};
 
 export const StatusButton = forwardRef<HTMLButtonElement, StatusButtonProps>(
   function StatusButton({ status, children, ...props }, ref) {

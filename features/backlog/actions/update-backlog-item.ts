@@ -16,6 +16,26 @@ const updateBacklogItemSchema = z.object({
   gameId: z.string(),
 });
 
+async function performBacklogItemUpdate(
+  id: string,
+  userId: string,
+  updateData: z.infer<typeof updateBacklogItemSchema>,
+) {
+  return prisma.backlogItem.update({
+    where: { id, userId },
+    data: {
+      ...updateData,
+      updatedAt: new Date(),
+    },
+  });
+}
+
+async function revalidateRelatedPaths(gameId: string) {
+  revalidatePath('/collection');
+  revalidatePath(`/collection/${gameId}`);
+  revalidatePath('/wishlist');
+}
+
 export const updateBacklogItem = nextSafeActionClient
   .schema(updateBacklogItemSchema)
   .action(async (input) => {
@@ -25,7 +45,7 @@ export const updateBacklogItem = nextSafeActionClient
     });
 
     const { parsedInput } = input;
-    const { id, gameId, status } = parsedInput;
+    const { id, gameId } = parsedInput;
 
     logger.debug('Parsed input', {
       context: 'updateBacklogItem',
@@ -41,33 +61,29 @@ export const updateBacklogItem = nextSafeActionClient
 
     logger.info(`Processing backlog item update`, {
       context: 'updateBacklogItem',
-      data: { userId, id, gameId, status },
+      data: { userId, id, gameId },
     });
 
     try {
-      const updatedItem = await prisma.backlogItem.update({
-        where: { id, userId },
-        data: {
-          ...parsedInput,
-          updatedAt: new Date(),
-        },
-      });
+      const updatedItem = await performBacklogItemUpdate(
+        id,
+        userId,
+        parsedInput,
+      );
 
       logger.info('Successfully updated backlog item', {
         context: 'updateBacklogItem',
         data: { updatedItem },
       });
 
-      revalidatePath('/collection');
-      revalidatePath(`/collection/${gameId}`);
-      revalidatePath('/wishlist');
+      await revalidateRelatedPaths(gameId);
       logger.debug('Revalidated paths', { context: 'updateBacklogItem' });
 
       return { success: true };
     } catch (error) {
       logger.error('Failed to update backlog item', error, {
         context: 'updateBacklogItem',
-        data: { id, gameId, status },
+        data: { id, gameId },
       });
 
       return {

@@ -152,17 +152,24 @@ export default async function GamePage({
   params: Promise<GamePageParams>;
 }) {
   const resolvedParams = await params;
-  const result = gamePageParamsSchema.safeParse(resolvedParams);
+  const paramsResult = gamePageParamsSchema.safeParse(resolvedParams);
 
-  if (!result.success) {
-    console.error('Invalid gameId parameter:', result.error);
+  if (!paramsResult.success) {
+    console.error('Invalid gameId parameter:', paramsResult.error);
     redirect('/');
   }
 
-  const { gameId } = result.data;
-  const gameData = await findGameByIdWithUsersBacklog(gameId);
+  const { gameId } = paramsResult.data;
+  const gameResult = await findGameByIdWithUsersBacklog({ gameId });
 
-  if (!gameData?.id) {
+  if (!gameResult || !gameResult.data) {
+    console.warn(`Failed to fetch game with id ${gameId}`);
+    return notFound();
+  }
+
+  const gameData = gameResult.data;
+
+  if (!gameData.id) {
     console.warn(`Game with id ${gameId} not found`);
     return notFound();
   }

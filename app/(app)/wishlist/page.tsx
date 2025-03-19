@@ -5,6 +5,7 @@ import {
   Heading,
   VStack,
   Link as ChakraLink,
+  Text,
 } from '@chakra-ui/react';
 import { Suspense } from 'react';
 import { CollectionPagination } from '../collection/_components/collection-pagination';
@@ -18,9 +19,21 @@ export default async function WishlistPage({
   searchParams: Promise<Record<string, string>>;
 }) {
   const awaitedParams = await searchParams;
-  const { wishlistedGames, count } = await getUserWishlistedGamesGroupedBacklog(
-    awaitedParams.page,
-  );
+  const actionResult = await getUserWishlistedGamesGroupedBacklog({
+    page: awaitedParams.page,
+  });
+
+  if (!actionResult || !actionResult.data) {
+    console.error('Failed to fetch wishlist data');
+    return (
+      <Box>
+        <Heading as="h2">Wishlist</Heading>
+        <Text>Failed to load wishlist data. Please try again later.</Text>
+      </Box>
+    );
+  }
+
+  const { wishlistedGames, count } = actionResult.data;
 
   if (count === 0) {
     return (

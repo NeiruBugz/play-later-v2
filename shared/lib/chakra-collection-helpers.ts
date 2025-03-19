@@ -1,19 +1,10 @@
 import { createListCollection } from '@chakra-ui/react';
-import { AcquisitionStatusMapper, BacklogStatusMapper } from './enum-mappers';
-
-export const BACKLOG_ITEM_STATUS = {
-  TO_PLAY: 'TO_PLAY',
-  PLAYED: 'PLAYED',
-  PLAYING: 'PLAYING',
-  COMPLETED: 'COMPLETED',
-  WISHLIST: 'WISHLIST',
-} as const;
-
-export const ACQUISITION_TYPE = {
-  PHYSICAL: 'PHYSICAL',
-  DIGITAL: 'DIGITAL',
-  SUBSCRIPTION: 'SUBSCRIPTION',
-} as const;
+import {
+  ACQUISITION_TYPE,
+  BACKLOG_ITEM_STATUS,
+  BacklogStatusMap,
+  AcquisitionTypeMap,
+} from './status-maps';
 
 export function enumToCollectionItems<T extends string>(
   enumObj: Record<string, T>,
@@ -33,7 +24,7 @@ export function formatEnumValue(value: string): string {
 }
 
 export const statusCollection = createListCollection({
-  items: enumToCollectionItems(BACKLOG_ITEM_STATUS, BacklogStatusMapper),
+  items: enumToCollectionItems(BACKLOG_ITEM_STATUS, BacklogStatusMap),
 });
 
 export const platformCollection = createListCollection({
@@ -45,5 +36,5 @@ export const platformCollection = createListCollection({
 });
 
 export const acquisitionTypeCollection = createListCollection({
-  items: enumToCollectionItems(ACQUISITION_TYPE, AcquisitionStatusMapper),
+  items: enumToCollectionItems(ACQUISITION_TYPE, AcquisitionTypeMap),
 });

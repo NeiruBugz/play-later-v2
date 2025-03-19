@@ -9,26 +9,13 @@ import { Tooltip } from '@/shared/components/ui/tooltip';
 import { SteamGame } from '../types';
 
 interface SingleImportButtonProps {
-  /** The Steam ID to import the game from */
   steamId: string;
-  /** The game object to import */
   game: SteamGame;
-  /** Whether the button should be disabled */
   disabled?: boolean;
-  /** Optional callback function called when an import is completed */
   onImportCompleted?: () => void;
-  /** Whether to show as an icon button (default) or a text button */
   variant?: 'icon' | 'text';
 }
 
-/**
- * SingleImportButton Component
- *
- * Provides a button for importing a single game from Steam
- *
- * @param props Component props
- * @returns React component
- */
 export function SingleImportButton({
   steamId,
   game,

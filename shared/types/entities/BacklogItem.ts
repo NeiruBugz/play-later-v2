@@ -6,7 +6,7 @@ export type BacklogItemStatus =
   | 'WISHLIST';
 export type AcquisitionType = 'PHYSICAL' | 'DIGITAL' | 'SUBSCRIPTION';
 
-export interface BacklogItem {
+export type BacklogItem = {
   id: string;
   status: BacklogItemStatus;
   platform: string | null;
@@ -17,4 +17,4 @@ export interface BacklogItem {
   updatedAt?: Date;
   startedAt?: Date | null;
   completedAt?: Date | null;
-}
+};

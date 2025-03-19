@@ -12,6 +12,31 @@ const deleteBacklogItemSchema = z.object({
   gameId: z.string(),
 });
 
+async function verifyBacklogItemOwnership(id: string, userId: string) {
+  const backlogItem = await prisma.backlogItem.findUnique({
+    where: { id },
+    select: { userId: true },
+  });
+
+  if (!backlogItem || backlogItem.userId !== userId) {
+    return false;
+  }
+
+  return true;
+}
+
+async function deleteBacklogItemById(id: string) {
+  return prisma.backlogItem.delete({
+    where: { id },
+  });
+}
+
+async function revalidateRelatedPaths(gameId: string) {
+  revalidatePath('/collection');
+  revalidatePath(`/collection/${gameId}`);
+  revalidatePath('/wishlist');
+}
+
 export const deleteBacklogItem = nextSafeActionClient
   .schema(deleteBacklogItemSchema)
   .action(async ({ parsedInput }) => {
@@ -26,12 +51,9 @@ export const deleteBacklogItem = nextSafeActionClient
 
     try {
       // First check if the backlog item belongs to the user
-      const backlogItem = await prisma.backlogItem.findUnique({
-        where: { id },
-        select: { userId: true },
-      });
+      const isOwner = await verifyBacklogItemOwnership(id, userId);
 
-      if (!backlogItem || backlogItem.userId !== userId) {
+      if (!isOwner) {
         return {
           success: false,
           error:
@@ -40,14 +62,10 @@ export const deleteBacklogItem = nextSafeActionClient
       }
 
       // Delete the backlog item
-      await prisma.backlogItem.delete({
-        where: { id },
-      });
+      await deleteBacklogItemById(id);
 
       // Revalidate relevant paths
-      revalidatePath('/collection');
-      revalidatePath(`/collection/${gameId}`);
-      revalidatePath('/wishlist');
+      await revalidateRelatedPaths(gameId);
 
       return { success: true };
     } catch (error) {

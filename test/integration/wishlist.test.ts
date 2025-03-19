@@ -32,7 +32,7 @@ describe('Wishlist Actions', () => {
   it('redirects to home if user is not authenticated', async () => {
     mockGetServerUserId.mockResolvedValue(null);
 
-    await getUserWishlistedGamesGroupedBacklog('1');
+    await getUserWishlistedGamesGroupedBacklog({ page: '1' });
 
     expect(mockRedirect).toHaveBeenCalledWith('/');
   });
@@ -59,7 +59,7 @@ describe('Wishlist Actions', () => {
     mockFindMany.mockResolvedValue(mockGames);
     mockCount.mockResolvedValue(2);
 
-    const result = await getUserWishlistedGamesGroupedBacklog('1');
+    const result = await getUserWishlistedGamesGroupedBacklog({ page: '1' });
 
     expect(mockFindMany).toHaveBeenCalledWith({
       where: {
@@ -78,7 +78,7 @@ describe('Wishlist Actions', () => {
       },
     });
 
-    expect(result).toEqual({
+    expect(result?.data).toEqual({
       wishlistedGames: mockGames.map((game) => ({
         game,
         backlogItems: game.backlogItems,
@@ -94,7 +94,7 @@ describe('Wishlist Actions', () => {
     mockFindMany.mockResolvedValue([]);
     mockCount.mockResolvedValue(0);
 
-    await getUserWishlistedGamesGroupedBacklog('2');
+    await getUserWishlistedGamesGroupedBacklog({ page: '2' });
 
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
