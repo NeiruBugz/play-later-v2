@@ -11,6 +11,7 @@ import {
   IoLibraryOutline,
   IoMenuOutline,
 } from 'react-icons/io5';
+import { ColorModeButton } from '@/shared/components/ui/color-mode';
 
 const linksConfig = [
   {
@@ -64,7 +65,7 @@ export function AppHeader() {
         </HStack>
       </Flex>
       <Flex gap={2} align="center">
-        <Button variant="plain" asChild size="sm" colorPalette="blue">
+        <Button variant="plain" asChild size="sm">
           <Link asChild>
             <NextLink href="/collection/add">Add game</NextLink>
           </Link>
@@ -74,6 +75,7 @@ export function AppHeader() {
             <UserAvatar />
           </Suspense>
         </UserMenu>
+        <ColorModeButton />
       </Flex>
     </Flex>
   );

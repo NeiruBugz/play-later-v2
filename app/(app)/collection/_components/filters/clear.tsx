@@ -15,15 +15,15 @@ export function ClearFilters() {
     paramsToUpdate.delete('platform');
     paramsToUpdate.delete('search');
     paramsToUpdate.delete('page');
-    paramsToUpdate.set('status', 'PLAYING');
     if (page) {
       paramsToUpdate.set('page', page);
     }
     router.replace(`/collection?${paramsToUpdate.toString()}`);
   }, [params, router]);
 
-  if (params.size === 0 || (params.get('page') && params.size === 1))
+  if (!params.get('platform') && !params.get('search')) {
     return null;
+  }
 
   return (
     <Button

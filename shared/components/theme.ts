@@ -9,12 +9,15 @@ import {
 
 // Define our custom theme configuration
 const customConfig = defineConfig({
+  globalCss: {
+    html: {
+      colorPalette: 'gray',
+    },
+  },
   theme: {
     tokens: {
       colors: {
         // Base colors
-        purple: { value: '#6B46C1' },
-        teal: { value: '#319795' },
         slate: {
           50: { value: '#F7FAFC' },
           100: { value: '#EDF2F7' },
