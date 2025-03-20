@@ -7,32 +7,11 @@ import {
   Box,
   Image,
 } from '@chakra-ui/react';
-import { prisma } from '@/prisma/client';
+import { getUpcomingGames } from '@/features/dashboard/actions/get-upcoming-games';
 import { IMAGE_API, IMAGE_SIZES } from '@/shared/config/igdb.image.config';
 
-export default async function ComingSoonWidget({
-  userId,
-}: {
-  userId?: string;
-}) {
-  // Get upcoming games from wishlist (games with status WISHLIST and release date in the future)
-  const upcomingGames = await prisma.game.findMany({
-    where: {
-      backlogItems: {
-        some: {
-          userId,
-          status: 'WISHLIST',
-        },
-      },
-      releaseDate: {
-        gt: new Date(),
-      },
-    },
-    orderBy: {
-      releaseDate: 'asc',
-    },
-    take: 3,
-  });
+export default async function ComingSoonWidget() {
+  const upcomingGames = await getUpcomingGames();
 
   return (
     <Card.Root p={4} height="full">

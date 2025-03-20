@@ -17,7 +17,6 @@ import EventsWidget from '@/app/(app)/dashboard/widgets/events';
 import GamingGoalsWidget from '@/app/(app)/dashboard/widgets/gaming-goals';
 import RecentActivityWidget from '@/app/(app)/dashboard/widgets/recent-activity';
 import RecommendationsWidget from '@/app/(app)/dashboard/widgets/recommendations';
-import TimePlayedWidget from '@/app/(app)/dashboard/widgets/time-played';
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -48,22 +47,17 @@ export default async function DashboardPage() {
 
         <GridItem colSpan={{ base: 1, md: 1, lg: 1 }}>
           <Suspense fallback={<LoadingCard />}>
-            <CollectionStatsWidget userId={session.user?.id} />
+            <CollectionStatsWidget />
           </Suspense>
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1, lg: 1 }}>
           <Suspense fallback={<LoadingCard />}>
-            <ComingSoonWidget userId={session.user?.id} />
+            <ComingSoonWidget />
           </Suspense>
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1, lg: 2 }}>
           <Suspense fallback={<LoadingCard />}>
             <RecentActivityWidget userId={session.user?.id} />
-          </Suspense>
-        </GridItem>
-        <GridItem colSpan={{ base: 1, md: 1, lg: 1 }}>
-          <Suspense fallback={<LoadingCard />}>
-            <TimePlayedWidget userId={session.user?.id} />
           </Suspense>
         </GridItem>
         <GridItem colSpan={{ base: 1, md: 1, lg: 1 }}>

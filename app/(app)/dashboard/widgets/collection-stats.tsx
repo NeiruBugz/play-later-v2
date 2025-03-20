@@ -1,66 +1,16 @@
-import { prisma } from '@/prisma/client';
+import {
+  collectBacklogStatistics,
+  collectGenreStatistics,
+} from '@/features/dashboard/actions/collect-statistics';
 import { Card, Heading, Text, VStack, Flex, Separator } from '@chakra-ui/react';
 
-export default async function CollectionStatsWidget({
-  userId,
-}: {
-  userId?: string;
-}) {
-  // Get counts of games by status
-  const backlogItemCounts = await prisma.backlogItem.groupBy({
-    by: ['status'],
-    where: {
-      userId,
-    },
-    _count: {
-      status: true,
-    },
-  });
+export default async function CollectionStatsWidget() {
+  const [backlogStats, topGenres] = await Promise.all([
+    collectBacklogStatistics(),
+    collectGenreStatistics(),
+  ]);
 
-  // Calculate total count
-  const totalGames = backlogItemCounts.reduce(
-    (acc, curr) => acc + curr._count.status,
-    0,
-  );
-
-  // Create a map of status to count
-  const statusCounts = backlogItemCounts.reduce(
-    (acc, curr) => {
-      acc[curr.status] = curr._count.status;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
-
-  // Get counts by genre
-  const genreCounts = await prisma.genre.findMany({
-    select: {
-      name: true,
-      games: {
-        where: {
-          game: {
-            backlogItems: {
-              some: {
-                userId,
-              },
-            },
-          },
-        },
-        select: {
-          gameId: true,
-        },
-      },
-    },
-  });
-
-  // Find top 3 genres
-  const topGenres = genreCounts
-    .map((genre) => ({
-      name: genre.name,
-      count: genre.games.length,
-    }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 3);
+  const { totalGames, statusCounts } = backlogStats;
 
   return (
     <Card.Root p={4} height="full">

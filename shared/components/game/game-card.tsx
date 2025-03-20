@@ -31,6 +31,9 @@ export function GameCard({ game }: { game: Game }) {
       position="relative"
       overflow="hidden"
       transition="all 0.3s ease"
+      minW="148px"
+      height="210px"
+      maxW="148px"
       _hover={{
         transform: 'translateY(-4px)',
         boxShadow: 'lg',
@@ -50,7 +53,13 @@ export function GameCard({ game }: { game: Game }) {
         <UpdateBacklogItem backlogItemList={game.backlogItems} />
       </Flex>
       <Link href={`/collection/${game.id}`}>
-        <Box position="relative" width="148px" height="210px" overflow="hidden">
+        <Box
+          position="relative"
+          minW="148px"
+          height="210px"
+          maxW="148px"
+          overflow="hidden"
+        >
           {/* Dark gradient overlay for text readability */}
           <Box
             position="absolute"
