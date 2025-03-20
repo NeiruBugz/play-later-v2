@@ -62,7 +62,12 @@ export const { auth, handlers, signIn } = NextAuth({
       };
     },
   },
-  providers: [Google],
+  providers: [
+    Google({
+      // Google requires "offline" access_type to provide a `refresh_token`
+      authorization: { params: { access_type: 'offline', prompt: 'consent' } },
+    }),
+  ],
   session: {
     maxAge: 24 * 60 * 60, // 1 day
     strategy: 'jwt',
@@ -125,7 +130,21 @@ async function refreshAccessToken(token: ExtendedJWT): Promise<ExtendedJWT> {
     console.error('Error refreshing access token', error);
     return {
       ...token,
-      error: 'RefreshAccessTokenError',
+      error: 'RefreshTokenError',
     };
+  }
+}
+declare module 'next-auth' {
+  interface Session {
+    error?: 'RefreshTokenError';
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    access_token: string;
+    expires_at: number;
+    refresh_token?: string;
+    error?: 'RefreshTokenError';
   }
 }

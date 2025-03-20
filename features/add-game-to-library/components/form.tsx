@@ -68,7 +68,8 @@ export function Form() {
 
   const handleSubmit = useCallback(() => {
     submitForm(formValid);
-  }, [submitForm, formValid]);
+    setSearchQuery('');
+  }, [submitForm, formValid, setSearchQuery]);
 
   return (
     <Box>
