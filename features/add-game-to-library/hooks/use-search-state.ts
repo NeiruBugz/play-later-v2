@@ -6,12 +6,10 @@ import {
   useState,
 } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
-import {
-  FormAction,
-  formActions,
-} from '../../../app/(app)/collection/add/_components/form-reducer';
+import { formActions } from '../../../app/(app)/collection/add/_components/form-reducer';
 import { SearchResponse } from '@/shared/types/igdb.types';
 import { useGetSuggestions } from './use-get-suggestions';
+import { FormAction } from '@/features/add-game-to-library/types/form';
 
 type UseSearchStateProps = {
   dispatch: Dispatch<FormAction>;

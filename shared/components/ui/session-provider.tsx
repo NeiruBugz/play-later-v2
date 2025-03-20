@@ -6,7 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { Session } from 'next-auth';
 
 interface ExtendedSession extends Session {
-  error?: string;
+  error?: 'RefreshTokenError';
   user: Session['user'] & {
     id?: string;
   };
@@ -16,7 +16,7 @@ function RefreshTokenHandler() {
   const { data: session } = useSession();
 
   useEffect(() => {
-    if ((session as ExtendedSession)?.error === 'RefreshAccessTokenError') {
+    if ((session as ExtendedSession)?.error === 'RefreshTokenError') {
       signOut({ callbackUrl: '/' });
     }
   }, [session]);

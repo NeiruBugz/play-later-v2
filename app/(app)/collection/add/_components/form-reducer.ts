@@ -1,3 +1,7 @@
+import {
+  FormState,
+  FormAction,
+} from '@/features/add-game-to-library/types/form';
 import { SearchResponse } from '@/shared/types/igdb.types';
 
 export const initialFormState: FormState = {

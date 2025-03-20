@@ -10,7 +10,7 @@ export type ExtendedJWT = JWT & {
   accessToken?: string;
   refreshToken?: string;
   accessTokenExpires?: number;
-  error?: string;
+  error?: 'RefreshTokenError';
 };
 
 // Define the response type from Google's token endpoint
