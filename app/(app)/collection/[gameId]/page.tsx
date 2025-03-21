@@ -30,122 +30,14 @@ import {
   IoStarOutline,
   IoTimeOutline,
   IoLogoSteam,
-  IoGlobeOutline,
   IoTrophyOutline,
 } from 'react-icons/io5';
 import { findGameByIdWithUsersBacklog } from '@/features/backlog/actions/backlog-actions';
-import { getIGDBGameData } from '@/shared/external-apis/igdb/igdb-actions';
 import { Suspense } from 'react';
+import { AdditionalGameInfo } from '@/app/(app)/collection/[gameId]/_components/additional-info';
 
 const gamePageParamsSchema = z.object({ gameId: z.string() });
 type GamePageParams = z.infer<typeof gamePageParamsSchema>;
-
-// Component to display additional IGDB data
-async function AdditionalGameInfo({ igdbId }: { igdbId: number }) {
-  try {
-    const igdbData = await getIGDBGameData(igdbId);
-
-    if (!igdbData) {
-      return null;
-    }
-
-    // Extract developers and publishers
-    const developers =
-      igdbData.involved_companies
-        ?.filter((company) => company.developer)
-        .map((company) => company.company.name) || [];
-
-    const publishers =
-      igdbData.involved_companies
-        ?.filter((company) => company.publisher)
-        .map((company) => company.company.name) || [];
-
-    // Extract websites
-    const websites = igdbData.websites || [];
-    const officialSite = websites.find((site) => site.category === 1);
-
-    return (
-      <VStack gap={6} align="stretch">
-        {(developers.length > 0 || publishers.length > 0) && (
-          <Box>
-            <Text fontWeight="bold" mb={2}>
-              Companies
-            </Text>
-            {developers.length > 0 && (
-              <Box mb={2}>
-                <Text fontSize="sm" color="gray.600">
-                  Developer{developers.length > 1 ? 's' : ''}
-                </Text>
-                <Text>{developers.join(', ')}</Text>
-              </Box>
-            )}
-            {publishers.length > 0 && (
-              <Box>
-                <Text fontSize="sm" color="gray.600">
-                  Publisher{publishers.length > 1 ? 's' : ''}
-                </Text>
-                <Text>{publishers.join(', ')}</Text>
-              </Box>
-            )}
-          </Box>
-        )}
-
-        {igdbData.game_modes && igdbData.game_modes.length > 0 && (
-          <Box>
-            <Text fontWeight="bold" mb={2}>
-              Game Modes
-            </Text>
-            <HStack gap={2} flexWrap="wrap">
-              {igdbData.game_modes.map((mode) => (
-                <Tag.Root
-                  key={mode.name}
-                  size="md"
-                  variant="subtle"
-                  colorPalette="teal"
-                >
-                  <Tag.Label>{mode.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-            </HStack>
-          </Box>
-        )}
-
-        {igdbData.themes && igdbData.themes.length > 0 && (
-          <Box>
-            <Text fontWeight="bold" mb={2}>
-              Themes
-            </Text>
-            <HStack gap={2} flexWrap="wrap">
-              {igdbData.themes.map((theme) => (
-                <Tag.Root
-                  key={theme.name}
-                  size="md"
-                  variant="subtle"
-                  colorPalette="orange"
-                >
-                  <Tag.Label>{theme.name}</Tag.Label>
-                </Tag.Root>
-              ))}
-            </HStack>
-          </Box>
-        )}
-
-        {officialSite && (
-          <Box>
-            <Button asChild variant="outline" size="sm">
-              <Link href={officialSite.url} target="_blank">
-                <IoGlobeOutline /> Official Website
-              </Link>
-            </Button>
-          </Box>
-        )}
-      </VStack>
-    );
-  } catch (error) {
-    console.error('Error fetching IGDB data:', error);
-    return null;
-  }
-}
 
 export default async function GamePage({
   params,
@@ -305,6 +197,16 @@ export default async function GamePage({
                 </StatGroup>
               </Box>
             )}
+
+            {/* Additional IGDB data */}
+            {gameData.igdbId && (
+              <Suspense fallback={<Skeleton height="200px" />}>
+                <AdditionalGameInfo
+                  igdbId={gameData.igdbId}
+                  steamStoreUrl={steamStoreUrl}
+                />
+              </Suspense>
+            )}
           </VStack>
         </GridItem>
 
@@ -375,13 +277,6 @@ export default async function GamePage({
               </Text>
               <Text>{gameData.description}</Text>
             </Box>
-
-            {/* Additional IGDB data */}
-            {gameData.igdbId && (
-              <Suspense fallback={<Skeleton height="200px" />}>
-                <AdditionalGameInfo igdbId={gameData.igdbId} />
-              </Suspense>
-            )}
 
             {gameData.screenshots && gameData.screenshots.length > 0 && (
               <Box>

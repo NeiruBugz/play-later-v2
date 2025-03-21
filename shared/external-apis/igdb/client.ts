@@ -357,11 +357,28 @@ export class IGDBClient implements IGDBClientInterface {
       .fields([
         'name',
         'summary',
-        'platforms.name',
+        'aggregated_rating',
+        'cover.image_id',
+        'genres.name',
+        'screenshots.image_id',
+        'release_dates.platform.name',
         'release_dates.human',
         'first_release_date',
-        'category',
-        'cover.image_id',
+        'involved_companies.developer',
+        'involved_companies.publisher',
+        'involved_companies.company.name',
+        'game_modes.name',
+        'game_engines.name',
+        'player_perspectives.name',
+        'themes.name',
+        'external_games.category',
+        'external_games.name',
+        'external_games.url',
+        'similar_games.name',
+        'similar_games.cover.image_id',
+        'websites.url',
+        'websites.category',
+        'websites.trusted',
       ])
       .where(`cover.image_id != null ${filters}`)
       .search(normalizeTitle(normalizeString(name)))
@@ -437,9 +454,33 @@ export class IGDBClient implements IGDBClientInterface {
     cover?: { image_id: string };
     first_release_date?: number;
     genres?: Array<{ id: number; name: string }>;
+    alternative_names?: Array<{ name: string }>;
+    aggregated_rating?: number;
+    screenshots?: Array<{ image_id: string }>;
+    involved_companies?: Array<{
+      developer: boolean;
+      publisher: boolean;
+      company: { name: string };
+    }>;
+    game_modes?: Array<{ name: string }>;
+    game_engines?: Array<{ name: string }>;
+    player_perspectives?: Array<{ name: string }>;
+    themes?: Array<{ name: string }>;
+    external_games?: Array<{
+      category: number;
+      name: string;
+      url: string;
+    }>;
+    websites?: Array<{
+      url: string;
+      category: number;
+      trusted: boolean;
+    }>;
   } | null> {
     // Try basic game search like in the add game
     const basicSearch = await this.search({ name: gameName });
+
+    let matchedGameId: number | null = null;
 
     if (basicSearch && basicSearch.length > 0) {
       const exactMatch = basicSearch.find(
@@ -449,24 +490,113 @@ export class IGDBClient implements IGDBClientInterface {
       );
 
       if (exactMatch) {
-        return exactMatch;
+        matchedGameId = exactMatch.id;
+      } else {
+        // If no exact match, use the first result (most relevant)
+        matchedGameId = basicSearch[0].id;
       }
 
-      // If no exact match, return the first result (most relevant)
-      return basicSearch[0];
+      // If we found a match, fetch complete game data
+      if (matchedGameId) {
+        const completeQuery = new QueryBuilder()
+          .fields([
+            'id',
+            'name',
+            'summary',
+            'aggregated_rating',
+            'cover.image_id',
+            'genres.name',
+            'genres.id',
+            'screenshots.image_id',
+            'first_release_date',
+            'alternative_names.name',
+            'involved_companies.developer',
+            'involved_companies.publisher',
+            'involved_companies.company.name',
+            'game_modes.name',
+            'game_engines.name',
+            'player_perspectives.name',
+            'themes.name',
+            'external_games.category',
+            'external_games.name',
+            'external_games.url',
+            'websites.url',
+            'websites.category',
+            'websites.trusted',
+          ])
+          .where(`id = ${matchedGameId}`)
+          .build();
+
+        const completeResults = await this.request<
+          Array<{
+            id: number;
+            name: string;
+            summary?: string;
+            cover?: { image_id: string };
+            first_release_date?: number;
+            genres?: Array<{ id: number; name: string }>;
+            alternative_names?: Array<{ name: string }>;
+            aggregated_rating?: number;
+            screenshots?: Array<{ image_id: string }>;
+            involved_companies?: Array<{
+              developer: boolean;
+              publisher: boolean;
+              company: { name: string };
+            }>;
+            game_modes?: Array<{ name: string }>;
+            game_engines?: Array<{ name: string }>;
+            player_perspectives?: Array<{ name: string }>;
+            themes?: Array<{ name: string }>;
+            external_games?: Array<{
+              category: number;
+              name: string;
+              url: string;
+            }>;
+            websites?: Array<{
+              url: string;
+              category: number;
+              trusted: boolean;
+            }>;
+          }>
+        >({
+          body: completeQuery,
+          resource: '/games',
+        });
+
+        if (completeResults && completeResults.length > 0) {
+          return completeResults[0];
+        }
+      }
     }
 
+    // If no match found in basic search or failed to get complete data,
+    // continue with exact and fuzzy searches as before
     // First try a direct search with the exact name
     const exactQuery = new QueryBuilder()
       .fields([
         'id',
         'name',
         'summary',
+        'aggregated_rating',
         'cover.image_id',
-        'first_release_date',
         'genres.name',
         'genres.id',
+        'screenshots.image_id',
+        'first_release_date',
         'alternative_names.name',
+        'involved_companies.developer',
+        'involved_companies.publisher',
+        'involved_companies.company.name',
+        'game_modes.name',
+        'game_engines.name',
+        'player_perspectives.name',
+        'themes.name',
+        'external_games.category',
+        'external_games.name',
+        'external_games.url',
+        'websites.url',
+        'websites.category',
+        'websites.trusted',
       ])
       .search(normalizeTitle(normalizeString(gameName)))
       .where('category = (0,2,4,8,9,10) & version_parent = null')
@@ -511,10 +641,26 @@ export class IGDBClient implements IGDBClientInterface {
         'id',
         'name',
         'summary',
+        'aggregated_rating',
         'cover.image_id',
-        'first_release_date',
         'genres.name',
         'genres.id',
+        'screenshots.image_id',
+        'first_release_date',
+        'alternative_names.name',
+        'involved_companies.developer',
+        'involved_companies.publisher',
+        'involved_companies.company.name',
+        'game_modes.name',
+        'game_engines.name',
+        'player_perspectives.name',
+        'themes.name',
+        'external_games.category',
+        'external_games.name',
+        'external_games.url',
+        'websites.url',
+        'websites.category',
+        'websites.trusted',
       ])
       .where(
         `name ~ *"${normalizeTitle(normalizeString(gameName))}"* & category = (0,2,4,8,9,10) & version_parent = null`,

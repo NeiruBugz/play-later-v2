@@ -718,6 +718,15 @@ async function processGame(
           : null,
         igdbId: igdbGame.id,
         steamAppId: game.appid,
+        aggregatedRating: igdbGame.aggregated_rating || null,
+        // Add screenshots if available
+        screenshots: igdbGame.screenshots
+          ? {
+              create: igdbGame.screenshots.map((screenshot) => ({
+                imageId: screenshot.image_id,
+              })),
+            }
+          : undefined,
         // Add genres if available
         genres: igdbGame.genres
           ? {

@@ -34,7 +34,7 @@ export function MismatchCorrection({
   currentTitle,
 }: MismatchCorrectionProps) {
   const disclosure = useDisclosure();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(currentTitle);
   const [debouncedQuery] = useDebounceValue(searchQuery, 300);
   const isGameSelected = useRef(false);
   const [selectedGame, setSelectedGame] = useState<SearchResponse | null>(null);

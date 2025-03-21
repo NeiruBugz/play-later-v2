@@ -57,5 +57,26 @@ export interface IGDBClientInterface {
     first_release_date?: number;
     genres?: Array<{ id: number; name: string }>;
     alternative_names?: Array<{ name: string }>;
+    aggregated_rating?: number;
+    screenshots?: Array<{ image_id: string }>;
+    involved_companies?: Array<{
+      developer: boolean;
+      publisher: boolean;
+      company: { name: string };
+    }>;
+    game_modes?: Array<{ name: string }>;
+    game_engines?: Array<{ name: string }>;
+    player_perspectives?: Array<{ name: string }>;
+    themes?: Array<{ name: string }>;
+    external_games?: Array<{
+      category: number;
+      name: string;
+      url: string;
+    }>;
+    websites?: Array<{
+      url: string;
+      category: number;
+      trusted: boolean;
+    }>;
   } | null>;
 }

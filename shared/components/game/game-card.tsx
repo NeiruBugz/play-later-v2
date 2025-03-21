@@ -17,6 +17,7 @@ import {
   IoCheckmarkDoneOutline,
   IoCheckmarkCircleOutline,
   IoGiftOutline,
+  IoStar,
 } from 'react-icons/io5';
 
 export function GameCard({ game }: { game: Game }) {
@@ -132,7 +133,7 @@ export function GameCard({ game }: { game: Game }) {
         </Box>
 
         {/* Rating Badge - Always visible */}
-        {/* {game.aggregatedRating && (
+        {game.aggregatedRating && (
           <Badge
             position="absolute"
             top="2"
@@ -148,7 +149,7 @@ export function GameCard({ game }: { game: Game }) {
             <IoStar style={{ marginRight: '2px' }} />
             {Math.round(game.aggregatedRating)}
           </Badge>
-        )} */}
+        )}
 
         {/* Status Indicator - Bottom of card */}
         {backlogItem && (
@@ -177,12 +178,12 @@ export function GameCard({ game }: { game: Game }) {
   );
 }
 
-// function getRatingColor(rating: number): string {
-//   if (rating >= 85) return 'green';
-//   if (rating >= 70) return 'blue';
-//   if (rating >= 50) return 'yellow';
-//   return 'red';
-// }
+function getRatingColor(rating: number): string {
+  if (rating >= 85) return 'green';
+  if (rating >= 70) return 'blue';
+  if (rating >= 50) return 'yellow';
+  return 'red';
+}
 
 function getStatusColor(status: string): string {
   switch (status) {
