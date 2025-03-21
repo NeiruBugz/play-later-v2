@@ -6,6 +6,11 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const prismaFactory = () => {
+  // Add timeout parameters to the connection URL
+  const url = new URL(env.POSTGRES_PRISMA_URL);
+  url.searchParams.set('connect_timeout', '20');
+  url.searchParams.set('pool_timeout', '20');
+
   const prisma = new PrismaClient({
     log: [
       {
@@ -25,6 +30,11 @@ const prismaFactory = () => {
         level: 'warn',
       },
     ],
+    datasources: {
+      db: {
+        url: url.toString(),
+      },
+    },
   });
 
   // prisma.$on("query", (e) => {
