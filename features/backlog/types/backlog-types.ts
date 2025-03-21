@@ -5,6 +5,7 @@ export const FilterParamsSchema = z.object({
   status: z.string().optional(),
   search: z.string().optional(),
   page: z.number().optional().default(1),
+  sort: z.string().optional().default('dateAdded_desc'),
 });
 
 export type GetUserGamesWithGroupedBacklogInput = z.infer<

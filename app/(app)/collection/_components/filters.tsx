@@ -3,6 +3,7 @@ import { PlatformFilter } from './filters/platform';
 import { StatusFilter } from './filters/status';
 import { Search } from './filters/search';
 import { ClearFilters } from './filters/clear';
+import { SortFilter } from './filters/sort';
 import { getUniqueUserPlatforms } from '@/features/backlog/actions/backlog-utility-actions';
 
 export async function Filters() {
@@ -14,6 +15,7 @@ export async function Filters() {
         <StatusFilter />
       </Flex>
       <Flex gap={2} align="center" my={2}>
+        <SortFilter />
         {uniquePlatforms?.data ? (
           <PlatformFilter platformOptions={uniquePlatforms.data} />
         ) : null}

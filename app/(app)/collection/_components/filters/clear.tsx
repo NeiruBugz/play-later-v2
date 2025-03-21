@@ -1,41 +1,31 @@
 'use client';
 
-import { Box, Button } from '@chakra-ui/react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
-import { LuX } from 'react-icons/lu';
+import { Button } from '@chakra-ui/react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export function ClearFilters() {
   const router = useRouter();
-  const params = useSearchParams();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const onClearFilters = useCallback(() => {
-    const paramsToUpdate = new URLSearchParams(params);
-    const page = params.get('page');
-    paramsToUpdate.delete('platform');
-    paramsToUpdate.delete('search');
-    paramsToUpdate.delete('page');
-    if (page) {
-      paramsToUpdate.set('page', page);
-    }
-    router.replace(`/collection?${paramsToUpdate.toString()}`);
-  }, [params, router]);
+  const hasFilters =
+    searchParams.has('platform') ||
+    searchParams.has('status') ||
+    searchParams.has('search') ||
+    (searchParams.has('sort') && searchParams.get('sort') !== 'dateAdded_desc');
 
-  if (!params.get('platform') && !params.get('search')) {
-    return null;
-  }
+  const handleClearFilters = () => {
+    const params = new URLSearchParams();
+    params.set('page', '1');
+    params.set('sort', 'dateAdded_desc'); // Reset to default sort
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  if (!hasFilters) return null;
 
   return (
-    <Button
-      colorPalette="blue"
-      variant="outline"
-      onClick={onClearFilters}
-      type="button"
-      aria-label="Clear filters"
-      size="sm"
-    >
-      <LuX />
-      <Box flex="1">Clear filters</Box>
+    <Button size="sm" variant="ghost" onClick={handleClearFilters}>
+      Clear Filters
     </Button>
   );
 }

@@ -13,12 +13,14 @@ const collectionPageSearchParamsSchema = z
     status: z.string().optional(),
     search: z.string().optional(),
     page: z.string().optional().default('1'),
+    sort: z.string().optional().default('dateAdded_desc'),
   })
   .transform((params) => ({
     platform: params.platform,
     status: params.status,
     search: params.search,
     page: Number(params.page),
+    sort: params.sort,
   }));
 
 type CollectionPageSearchParams = z.infer<
@@ -52,6 +54,7 @@ export default async function CollectionPage({
     status: filterParams.status,
     search: filterParams.search,
     page: filterParams.page,
+    sort: filterParams.sort,
   });
 
   if (!actionResult || !actionResult.data) {

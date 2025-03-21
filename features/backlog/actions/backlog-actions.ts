@@ -44,14 +44,26 @@ async function fetchGamesWithFilter(
   backlogFilter: Prisma.BacklogItemWhereInput,
   skip: number,
   take: number,
+  sort: string,
 ): Promise<Array<Game & { backlogItems: BacklogItem[] }>> {
+  let orderBy: Prisma.GameOrderByWithRelationInput = { createdAt: 'desc' };
+  if (sort) {
+    const [field, direction] = sort.split('_');
+    if (field === 'title') {
+      orderBy = { title: direction as Prisma.SortOrder };
+    } else if (field === 'releaseDate') {
+      orderBy = { releaseDate: direction as Prisma.SortOrder };
+    } else if (field === 'rating') {
+      orderBy = { aggregatedRating: direction as Prisma.SortOrder };
+    }
+  }
   return prisma.game.findMany({
     where: {
       backlogItems: {
         some: backlogFilter,
       },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy,
     take,
     skip,
     include: {
@@ -101,7 +113,7 @@ export const getUserGamesWithGroupedBacklog = nextSafeActionClient
     const take = ITEMS_PER_PAGE;
 
     const [games, count] = await Promise.all([
-      fetchGamesWithFilter(backlogFilter, skip, take),
+      fetchGamesWithFilter(backlogFilter, skip, take, filterParams.sort),
       countGamesWithFilter(backlogFilter),
     ]);
 
