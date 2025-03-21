@@ -162,7 +162,7 @@ function GameRow({
         >
           {formatPlaytime(playtime)}
           {hasRelatedGames && (
-            <Text fontSize="xs" color="gray.500" mt="1">
+            <Text as="span" fontSize="xs" color="gray.500" mt="1">
               Combined from {game.relatedGames!.length} titles
             </Text>
           )}

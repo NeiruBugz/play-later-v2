@@ -16,7 +16,7 @@ export function UserMenu({ children }: PropsWithChildren) {
         </Button>
       </MenuTrigger>
       <MenuContent>
-        <MenuItem value="settings" asChild disabled>
+        <MenuItem value="settings" asChild>
           <Link href="/settings">
             <LuSettings />
             <Box flex="1">Settings</Box>
