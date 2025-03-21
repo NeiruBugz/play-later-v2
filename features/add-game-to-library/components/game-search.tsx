@@ -151,9 +151,13 @@ function GameSearch({
                           )}
                         {game.release_dates && (
                           <Text fontSize="sm" color="gray.600" display="inline">
-                            {game.release_dates
-                              .map((date) => date.platform.name)
-                              .join(', ')}
+                            {Array.from(
+                              new Set(
+                                game.release_dates.map(
+                                  (date) => date.platform.name,
+                                ),
+                              ),
+                            ).join(', ')}
                           </Text>
                         )}
                       </Box>
