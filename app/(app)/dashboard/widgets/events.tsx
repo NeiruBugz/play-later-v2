@@ -188,7 +188,7 @@ function renderEmptyState() {
 }
 
 function EventTypeBadge({ type }: { type: GameEvent['type'] }) {
-  const colorScheme = {
+  const colorPalette = {
     UPDATE: 'blue',
     DLC: 'purple',
     SALE: 'green',
@@ -196,7 +196,7 @@ function EventTypeBadge({ type }: { type: GameEvent['type'] }) {
   }[type];
 
   return (
-    <Badge colorScheme={colorScheme} fontSize="10px">
+    <Badge colorPalette={colorPalette} fontSize="10px">
       {type}
     </Badge>
   );

@@ -165,6 +165,7 @@ export class IGDBClient implements IGDBClientInterface {
         'screenshots.image_id',
         'release_dates.platform.name',
         'release_dates.human',
+        'first_release_date',
         'involved_companies.developer',
         'involved_companies.publisher',
         'involved_companies.company.name',

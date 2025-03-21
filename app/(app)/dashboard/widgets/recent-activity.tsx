@@ -223,7 +223,7 @@ export default async function RecentActivityWidget({
                       activity.metadata?.rating && (
                         <Badge
                           ml={1}
-                          colorScheme="yellow"
+                          colorPalette="yellow"
                           fontSize="10px"
                           verticalAlign="middle"
                         >

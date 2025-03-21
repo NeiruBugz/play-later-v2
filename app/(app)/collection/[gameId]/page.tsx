@@ -23,6 +23,7 @@ import { z } from 'zod';
 import Image from 'next/image';
 import { IMAGE_API, IMAGE_SIZES } from '@/shared/config/igdb.image.config';
 import { LibraryEntries } from './_components/library-entries';
+import { MismatchCorrection } from './_components/mismatch-correction';
 import {
   IoCalendarOutline,
   IoGameControllerOutline,
@@ -100,7 +101,7 @@ async function AdditionalGameInfo({ igdbId }: { igdbId: number }) {
                   key={mode.name}
                   size="md"
                   variant="subtle"
-                  colorScheme="teal"
+                  colorPalette="teal"
                 >
                   <Tag.Label>{mode.name}</Tag.Label>
                 </Tag.Root>
@@ -120,7 +121,7 @@ async function AdditionalGameInfo({ igdbId }: { igdbId: number }) {
                   key={theme.name}
                   size="md"
                   variant="subtle"
-                  colorScheme="orange"
+                  colorPalette="orange"
                 >
                   <Tag.Label>{theme.name}</Tag.Label>
                 </Tag.Root>
@@ -260,7 +261,7 @@ export default async function GamePage({
             {steamStoreUrl && (
               <Button
                 asChild
-                colorScheme="gray"
+                colorPalette="gray"
                 variant="solid"
                 size="md"
                 width="100%"
@@ -269,6 +270,16 @@ export default async function GamePage({
                   <IoLogoSteam /> View on Steam
                 </Link>
               </Button>
+            )}
+
+            {/* Add mismatch correction button if game has Steam ID */}
+            {gameData.steamAppId && (
+              <MismatchCorrection
+                gameId={gameData.id}
+                steamAppId={gameData.steamAppId}
+                steamTitle={gameData.title}
+                currentTitle={gameData.title}
+              />
             )}
 
             <LibraryEntries
@@ -309,7 +320,7 @@ export default async function GamePage({
                 {gameData.releaseDate && (
                   <Badge
                     variant="subtle"
-                    colorScheme="blue"
+                    colorPalette="blue"
                     p={2}
                     borderRadius="md"
                   >
@@ -325,7 +336,7 @@ export default async function GamePage({
                 {gameData.aggregatedRating && (
                   <Badge
                     variant="subtle"
-                    colorScheme="yellow"
+                    colorPalette="yellow"
                     p={2}
                     borderRadius="md"
                   >
@@ -349,7 +360,7 @@ export default async function GamePage({
                       key={genre.genre.name}
                       size="md"
                       variant="subtle"
-                      colorScheme="purple"
+                      colorPalette="purple"
                     >
                       <Tag.Label>{genre.genre.name}</Tag.Label>
                     </Tag.Root>

@@ -71,21 +71,21 @@ export default async function GamingGoalsWidget({
           label="Completion Rate"
           value={`${completionRate}%`}
           progress={completionRate}
-          colorScheme="purple"
+          colorPalette="purple"
         />
 
         <GoalItem
           label={`Games This Year (${completedThisYear}/${yearlyGoal})`}
           value={`${yearlyProgress}%`}
           progress={yearlyProgress}
-          colorScheme="green"
+          colorPalette="green"
         />
 
         <GoalItem
           label="In Progress"
           value={counts.PLAYING || 0}
           progress={Math.min(((counts.PLAYING || 0) / 3) * 100, 100)} // Target: 3 games in progress
-          colorScheme="orange"
+          colorPalette="orange"
           hidePercentage
         />
 
@@ -93,7 +93,7 @@ export default async function GamingGoalsWidget({
           label="Backlog Growth"
           value={backlogGrowth ? `${backlogGrowth}%` : 'N/A'}
           progress={backlogGrowth > 100 ? 100 : backlogGrowth}
-          colorScheme="red"
+          colorPalette="red"
         />
       </VStack>
     </Card.Root>
@@ -104,13 +104,13 @@ function GoalItem({
   label,
   value,
   progress,
-  colorScheme = 'blue',
+  colorPalette = 'blue',
   hidePercentage = false,
 }: {
   label: string;
   value: string | number;
   progress: number;
-  colorScheme?: string;
+  colorPalette?: string;
   hidePercentage?: boolean;
 }) {
   return (
@@ -123,7 +123,7 @@ function GoalItem({
       </Flex>
       <Progress.Root
         value={progress}
-        colorPalette={colorScheme}
+        colorPalette={colorPalette}
         size="sm"
         borderRadius="full"
       >

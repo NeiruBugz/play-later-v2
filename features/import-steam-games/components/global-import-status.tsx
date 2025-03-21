@@ -7,8 +7,8 @@ import {
   Progress,
   Flex,
   Badge,
-  Drawer,
   useDisclosure,
+  Dialog,
 } from '@chakra-ui/react';
 import { useImportJobs, useImportJobStatus } from '../hooks/use-bulk-import';
 import { ImportProgress } from './import-progress';
@@ -58,16 +58,20 @@ export function GlobalImportStatus() {
         <ActiveJobIndicator jobId={activeJobId} />
       </Box>
 
-      <Drawer.Root open={open} onOpenChange={onClose} size="md">
-        <Drawer.Backdrop />
-        <Drawer.Content>
-          <Drawer.CloseTrigger />
-          <Drawer.Header>Import Status</Drawer.Header>
-          <Drawer.Body>
-            {activeJobId && <ImportProgress jobId={activeJobId} />}
-          </Drawer.Body>
-        </Drawer.Content>
-      </Drawer.Root>
+      <Dialog.Root open={open} onOpenChange={onClose} size="md">
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Dialog.CloseTrigger />
+            <Dialog.Header>
+              <Dialog.Title>Import Status</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              {activeJobId && <ImportProgress jobId={activeJobId} />}
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </>
   );
 }

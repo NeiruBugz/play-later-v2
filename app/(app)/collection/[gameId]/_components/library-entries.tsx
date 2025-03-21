@@ -139,7 +139,7 @@ export function LibraryEntries({
                     <Flex gap={3} alignItems="center" justify="space-between">
                       <VStack align="start" gap={1}>
                         <Badge
-                          colorScheme={statusColor}
+                          colorPalette={statusColor}
                           variant="subtle"
                           display="flex"
                           alignItems="center"
@@ -168,7 +168,7 @@ export function LibraryEntries({
                           <Button
                             size="sm"
                             variant="ghost"
-                            colorScheme="blue"
+                            colorPalette="blue"
                             aria-label="Edit entry"
                           >
                             <IoPencilOutline />
@@ -178,7 +178,7 @@ export function LibraryEntries({
                           <Button
                             size="sm"
                             variant="ghost"
-                            colorScheme="red"
+                            colorPalette="red"
                             aria-label="Remove entry"
                             loading={isDeleting === backlogItem.id}
                             onClick={() => handleDelete(backlogItem.id)}

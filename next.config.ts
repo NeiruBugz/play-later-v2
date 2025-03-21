@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ['@chakra-ui/react'],
+    viewTransition: true,
   },
   productionBrowserSourceMaps: true,
 };

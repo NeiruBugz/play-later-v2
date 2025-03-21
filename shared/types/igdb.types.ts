@@ -121,6 +121,7 @@ export type FullGameInfoResponse = {
   summary: string;
   themes: Theme[];
   websites: Website[];
+  first_release_date: number;
 };
 
 export type SearchResponse = {

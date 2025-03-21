@@ -131,7 +131,7 @@ export function EditLibraryEntry({
         <Button
           size="sm"
           variant="ghost"
-          colorScheme="blue"
+          colorPalette="blue"
           aria-label="Edit entry"
         >
           <IoPencilOutline />
@@ -231,7 +231,7 @@ export function EditLibraryEntry({
             <Button
               onClick={handleSubmit}
               size="md"
-              colorScheme="blue"
+              colorPalette="blue"
               loading={isSubmitting}
               loadingText="Updating..."
               disabled={!platform}

@@ -179,7 +179,7 @@ export default async function RecommendationsWidget({
                     {game.mainStory ? `~${game.mainStory}h` : 'Time unknown'}
                   </Text>
                   <Link href={`/collection/${game.id}`}>
-                    <Button size="xs" colorScheme="green" variant="ghost">
+                    <Button size="xs" colorPalette="green" variant="ghost">
                       <IoPlayOutline />
                       Play
                     </Button>

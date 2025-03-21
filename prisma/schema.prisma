@@ -66,6 +66,7 @@ model User {
   updatedAt            DateTime               @updatedAt
   deleted              Boolean                @default(false)
   FailedImport         FailedImport[]
+  gameMatches          GameMatch[]
 }
 
 // ----- Application Models ------//
@@ -89,6 +90,7 @@ model Game {
   screenshots      Screenshot[]
   genres           GameGenre[]
   deleted          Boolean       @default(false)
+  gameMatches      GameMatch[]
 }
 
 model BacklogItem {
@@ -239,4 +241,38 @@ model FailedImport {
   @@index([userId])
   @@index([steamImportJobId])
   @@index([steamAppId])
+}
+
+// Model for game matches and potential mismatches
+model GameMatch {
+  id          String    @id @default(cuid())
+  gameId      String    // IGDB game ID
+  steamAppId  Int       // Steam App ID
+  steamTitle  String    // Steam game title
+  confidence  Float     // Match confidence score
+  isVerified  Boolean   @default(false) // Whether this match has been manually verified
+  verifiedBy  String?   // User ID who verified the match
+  verifiedAt  DateTime? // When the match was verified
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  status      MatchStatus @default(UNVERIFIED)
+  notes       String?   @db.Text // Optional notes about the match/mismatch
+  
+  // Relations
+  game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  verifier    User?     @relation(fields: [verifiedBy], references: [id], onDelete: SetNull)
+
+  @@unique([gameId, steamAppId])
+  @@index([steamAppId])
+  @@index([gameId])
+  @@index([verifiedBy])
+  @@index([status])
+}
+
+enum MatchStatus {
+  UNVERIFIED      // Initial state
+  VERIFIED        // Manually verified as correct
+  CORRECTED       // Was incorrect but has been fixed
+  NEEDS_REVIEW    // Flagged for review
+  IGNORED         // User chose to ignore this match
 }

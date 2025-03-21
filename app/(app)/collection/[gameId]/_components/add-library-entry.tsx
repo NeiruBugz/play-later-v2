@@ -112,7 +112,7 @@ export function AddLibraryEntry({ gameId }: { gameId: string }) {
     <DialogRoot placement="center" open={open} onOpenChange={handleOpenChange}>
       <DialogBackdrop />
       <DialogTrigger asChild>
-        <Button variant="solid" colorScheme="blue" size="md" width="100%">
+        <Button variant="solid" colorPalette="blue" size="md" width="100%">
           <Flex align="center" gap={2}>
             <IoAddCircleOutline />
             <span>Add to collection</span>
@@ -213,7 +213,7 @@ export function AddLibraryEntry({ gameId }: { gameId: string }) {
             <Button
               onClick={handleSubmit}
               size="md"
-              colorScheme="blue"
+              colorPalette="blue"
               loading={isSubmitting}
               loadingText="Adding..."
               disabled={!platform}
