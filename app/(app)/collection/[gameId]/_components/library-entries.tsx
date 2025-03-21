@@ -15,8 +15,6 @@ import {
   Box,
 } from '@chakra-ui/react';
 import {
-  IoPencilOutline,
-  IoTrashBinOutline,
   IoGameControllerOutline,
   IoCheckmarkCircleOutline,
   IoHourglassOutline,
@@ -25,6 +23,7 @@ import {
 import { useState } from 'react';
 import { toaster } from '@/shared/components/ui/toaster';
 import { Tooltip } from '@/shared/components/ui/tooltip';
+import { LuPencil, LuTrash } from 'react-icons/lu';
 
 // Status icon mapping
 const StatusIcon = ({ status }: { status: string }) => {
@@ -126,7 +125,7 @@ export function LibraryEntries({
                 return (
                   <Box
                     key={backlogItem.id}
-                    p={3}
+                    p={2}
                     borderRadius="md"
                     borderWidth="1px"
                     borderColor="gray.200"
@@ -135,9 +134,10 @@ export function LibraryEntries({
                       bg: 'gray.50',
                     }}
                     transition="all 0.2s"
+                    overflow="hidden"
                   >
-                    <Flex gap={3} alignItems="center" justify="space-between">
-                      <VStack align="start" gap={1}>
+                    <Flex gap={2} alignItems="center" width="100%">
+                      <HStack gap={2} align="center" flex="1" minWidth="0">
                         <Badge
                           colorPalette={statusColor}
                           variant="subtle"
@@ -145,33 +145,28 @@ export function LibraryEntries({
                           alignItems="center"
                           gap={1}
                           px={2}
-                          py={1}
+                          py={0.5}
                           borderRadius="md"
+                          whiteSpace="nowrap"
                         >
                           <StatusIcon status={backlogItem.status} />
                           <Text>{getStatusName(backlogItem.status)}</Text>
                         </Badge>
+                        <Text fontWeight="medium" fontSize="sm" maxLines={1}>
+                          {normalizeString(backlogItem.platform)}
+                        </Text>
+                      </HStack>
 
-                        <HStack gap={2}>
-                          <Text fontWeight="medium">
-                            {normalizeString(backlogItem.platform)}
-                          </Text>
-                          <Text color="gray.500">•</Text>
-                          <Text color="gray.500">
-                            {backlogItem.acquisitionType}
-                          </Text>
-                        </HStack>
-                      </VStack>
-
-                      <HStack gap={2}>
+                      <HStack gap={1} flexShrink={0}>
                         <Tooltip content="Edit entry">
                           <Button
                             size="sm"
                             variant="ghost"
                             colorPalette="blue"
                             aria-label="Edit entry"
+                            padding={1}
                           >
-                            <IoPencilOutline />
+                            <LuPencil />
                           </Button>
                         </Tooltip>
                         <Tooltip content="Remove entry">
@@ -182,8 +177,9 @@ export function LibraryEntries({
                             aria-label="Remove entry"
                             loading={isDeleting === backlogItem.id}
                             onClick={() => handleDelete(backlogItem.id)}
+                            padding={1}
                           >
-                            <IoTrashBinOutline />
+                            <LuTrash />
                           </Button>
                         </Tooltip>
                       </HStack>
