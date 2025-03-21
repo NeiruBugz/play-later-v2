@@ -1,7 +1,7 @@
 import { IndeterminateSpinner } from '../../../shared/components/ui/indereminate-spinner';
 import { InputGroup } from '../../../shared/components/ui/input-group';
 import { SearchResponse } from '@/shared/types/igdb.types';
-import { Field, Input, List } from '@chakra-ui/react';
+import { Field, Input, List, HStack, Image, Text, Box } from '@chakra-ui/react';
 import { useState, useRef, useEffect } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 
@@ -122,8 +122,43 @@ function GameSearch({
                     }
                   }}
                 >
-                  {game.name} (
-                  {game.release_dates?.[0]?.human?.slice(-4) || 'TBA'})
+                  <HStack gap={3} alignItems="flex-start">
+                    {game.cover?.image_id && (
+                      <Image
+                        src={`https://images.igdb.com/igdb/image/upload/t_cover_small/${game.cover.image_id}.jpg`}
+                        alt={game.name}
+                        boxSize="50px"
+                        objectFit="cover"
+                        borderRadius="md"
+                      />
+                    )}
+                    <Box flex="1">
+                      <Text fontWeight="medium">{game.name}</Text>
+                      <Box marginTop={1}>
+                        <Text fontSize="sm" color="gray.600" display="inline">
+                          {game.release_dates?.[0]?.human?.slice(-4) || 'TBA'}
+                        </Text>
+                        {game.release_dates &&
+                          game.release_dates.length > 0 && (
+                            <Text
+                              fontSize="sm"
+                              color="gray.500"
+                              display="inline"
+                              mx={2}
+                            >
+                              •
+                            </Text>
+                          )}
+                        {game.release_dates && (
+                          <Text fontSize="sm" color="gray.600" display="inline">
+                            {game.release_dates
+                              .map((date) => date.platform.name)
+                              .join(', ')}
+                          </Text>
+                        )}
+                      </Box>
+                    </Box>
+                  </HStack>
                 </List.Item>
               ))}
             </List.Root>

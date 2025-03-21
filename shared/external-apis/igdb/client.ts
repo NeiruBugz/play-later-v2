@@ -477,8 +477,13 @@ export class IGDBClient implements IGDBClientInterface {
       trusted: boolean;
     }>;
   } | null> {
-    // Try basic game search like in the add game
-    const basicSearch = await this.search({ name: gameName });
+    // Try basic game search with PC platform filter
+    const basicSearch = await this.search({
+      name: gameName,
+      fields: {
+        platform: '6', // Filter for PC platform
+      },
+    });
 
     let matchedGameId: number | null = null;
 
@@ -570,7 +575,7 @@ export class IGDBClient implements IGDBClientInterface {
     }
 
     // If no match found in basic search or failed to get complete data,
-    // continue with exact and fuzzy searches as before
+    // continue with exact and fuzzy searches as before, but with platform filter
     // First try a direct search with the exact name
     const exactQuery = new QueryBuilder()
       .fields([
@@ -599,8 +604,10 @@ export class IGDBClient implements IGDBClientInterface {
         'websites.trusted',
       ])
       .search(normalizeTitle(normalizeString(gameName)))
-      .where('category = (0,2,4,8,9,10) & version_parent = null')
-      .limit(5) // Get more results to find better matches
+      .where(
+        'category = (0,2,4,8,9,10) & version_parent = null & platforms = (6)',
+      ) // Added PC platform filter
+      .limit(5)
       .build();
 
     const exactResults = await this.request<
@@ -635,7 +642,7 @@ export class IGDBClient implements IGDBClientInterface {
       return exactResults[0];
     }
 
-    // If no results from exact search, try a more fuzzy search
+    // If no results from exact search, try a more fuzzy search with platform filter
     const fuzzyQuery = new QueryBuilder()
       .fields([
         'id',
@@ -663,7 +670,7 @@ export class IGDBClient implements IGDBClientInterface {
         'websites.trusted',
       ])
       .where(
-        `name ~ *"${normalizeTitle(normalizeString(gameName))}"* & category = (0,2,4,8,9,10) & version_parent = null`,
+        `name ~ *"${normalizeTitle(normalizeString(gameName))}"* & category = (0,2,4,8,9,10) & version_parent = null & platforms = (6)`, // Added PC platform filter
       )
       .limit(1)
       .build();
