@@ -1,28 +1,39 @@
 import { prisma } from "@/shared/lib/db";
-import { revalidatePath } from "next/cache";
-import { CreateReviewInput } from "./types";
+import { DatabaseError } from "../shared/errors";
+import { failure, Result, wrapWithResult } from "../shared/result";
+import { validateWithZod } from "../shared/validation";
+import { CreateReviewInput, CreateReviewSchema } from "./types";
 
 export const ReviewService = {
-  getAll: async (gameId: string) => {
-    try {
-      return prisma.review.findMany({
-        where: {
-          gameId,
-        },
-        include: {
-          User: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-    } catch (e) {
-      console.error(e);
-      return [];
+  getAll: async (gameId: string): Promise<Result<any[], DatabaseError>> => {
+    if (!gameId) {
+      return failure(new DatabaseError("Game ID is required"));
     }
+
+    return wrapWithResult(async () => {
+      const reviews = await prisma.review.findMany({
+        where: { gameId },
+        include: { User: true },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return reviews;
+    }, "Failed to fetch reviews");
   },
-  create: async (payload: CreateReviewInput) => {
-    try {
+
+  create: async (
+    input: CreateReviewInput,
+    userId: string
+  ): Promise<Result<void, Error>> => {
+    // Validate input
+    const validationResult = validateWithZod(CreateReviewSchema, input);
+    if (validationResult.isFailure) {
+      return validationResult;
+    }
+
+    const payload = validationResult.value;
+
+    return wrapWithResult(async () => {
       await prisma.review.create({
         data: {
           rating: payload.rating,
@@ -30,7 +41,7 @@ export const ReviewService = {
           completedOn: payload.completedOn,
           User: {
             connect: {
-              id: payload.userId,
+              id: userId,
             },
           },
           Game: {
@@ -41,9 +52,8 @@ export const ReviewService = {
         },
       });
 
-      revalidatePath(`/game/${payload.gameId}`);
-    } catch (e) {
-      console.error(e);
-    }
+      // Return void as we don't need to return any data
+      return;
+    }, "Failed to create review");
   },
 };

@@ -15,19 +15,24 @@ import { cn, playingOnPlatforms } from "@/shared/lib";
 import { StarIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { useFormState } from "react-dom";
 import { createReviewAction } from "../server-actions/action";
 
 export function AddReviewForm({ gameId }: { gameId: string }) {
   const session = useSession();
   const [ratingValue, setRatingValue] = useState(0);
-  const createReview = createReviewAction.bind(
-    null,
-    { message: "", type: "success" },
-    ratingValue
+  const [state, formAction] = useFormState(
+    (prevState: any, formData: FormData) =>
+      createReviewAction(
+        { message: "", type: "success" },
+        ratingValue,
+        formData
+      ),
+    { message: "", type: "success" }
   );
 
   return (
-    <form action={createReview}>
+    <form action={formAction}>
       <HiddenInput name="userId" value={session.data?.user?.id} />
       <HiddenInput name="gameId" value={gameId} />
       <HiddenInput name="rating" value={ratingValue} />

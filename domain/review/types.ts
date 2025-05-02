@@ -1,9 +1,21 @@
-type CreateReviewInput = {
-  gameId: string;
-  userId: string;
-  rating: number;
-  content?: string;
-  completedOn?: string;
-};
+import { z } from "zod";
 
-export type { CreateReviewInput };
+export const CreateReviewSchema = z.object({
+  gameId: z.string().min(1),
+  userId: z.string().min(1),
+  rating: z.number().min(1).max(10),
+  content: z.string().optional(),
+  completedOn: z.string().optional(),
+});
+
+export type CreateReviewInput = z.infer<typeof CreateReviewSchema>;
+
+export const ReviewIncludeUser = z.object({
+  User: z.object({
+    id: z.string(),
+    name: z.string().nullable(),
+    image: z.string().nullable(),
+  }),
+});
+
+export type ReviewWithUser = z.infer<typeof ReviewIncludeUser>;

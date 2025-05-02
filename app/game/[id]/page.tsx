@@ -158,7 +158,13 @@ export default async function GamePage(props: GenericPageProps) {
                 </Suspense>
               </div>
               <Suspense fallback={"Loading..."}>
-                <GameStats rating={igdbData?.aggregated_rating.toFixed(1)} />
+                {igdbData?.aggregated_rating ? (
+                  <GameStats rating={igdbData?.aggregated_rating.toFixed(1)} />
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    No rating available
+                  </div>
+                )}
               </Suspense>
               <Suspense fallback={"Loading..."}>
                 <SimilarGames similarGames={igdbData?.similar_games} />

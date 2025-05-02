@@ -12,6 +12,7 @@ import {
   AlertDialogTrigger,
 } from "@/shared/components/alert-dialog";
 import { TrashIcon } from "lucide-react";
+import { useFormState } from "react-dom";
 import { deleteBacklogItemAction } from "../server-actions/action";
 
 export function DeleteBacklogItem({
@@ -19,11 +20,12 @@ export function DeleteBacklogItem({
 }: {
   backlogItemId: number;
 }) {
-  const deleteBacklogItem = deleteBacklogItemAction.bind(
-    null,
-    { message: "" },
-    backlogItemId
+  const [state, formAction] = useFormState(
+    (prevState: any, formData: FormData) =>
+      deleteBacklogItemAction({ message: "" }, backlogItemId, formData),
+    { message: "" }
   );
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -42,7 +44,7 @@ export function DeleteBacklogItem({
             className="group bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
             asChild
           >
-            <form action={deleteBacklogItem}>
+            <form action={formAction}>
               <Button variant="ghost" className="group-hover:bg-transparent">
                 Delete
               </Button>

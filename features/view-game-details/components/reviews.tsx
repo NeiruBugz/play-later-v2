@@ -9,15 +9,19 @@ export async function Reviews({
   gameId: string;
   gameTitle: string;
 }) {
-  const reviewList = await ReviewService.getAll(gameId);
+  const reviewsResult = await ReviewService.getAll(gameId);
 
-  if (!reviewList) {
+  // Handle possible failure
+  if (reviewsResult.isFailure) {
+    console.error("Failed to fetch reviews:", reviewsResult.error);
     return (
       <div className="py-12 text-center text-muted-foreground">
-        No reviews yet. Be the first to write a review!
+        Failed to load reviews. Please try again later.
       </div>
     );
   }
+
+  const reviewList = reviewsResult.value;
 
   return (
     <div className="border-b py-4">

@@ -1,7 +1,10 @@
 import { getServerUserId } from "@/auth";
 import { BacklogItemService } from "@/domain/backlog-item/service";
 import { GameService } from "@/domain/game/service";
+import { GameInput } from "@/domain/game/types";
 import { prisma } from "@/shared/lib/db";
+import { RevalidationService } from "@/shared/ui/revalidation";
+import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
 import type { AddGameToBacklogInput } from "../types";
 
 export async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
@@ -16,7 +19,7 @@ export async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
     try {
       const existingGame = await prisma.game.findUnique({
         where: {
-          igdbId: game.igdbId,
+          igdbId: Number(game.igdbId),
         },
       });
 
@@ -25,25 +28,51 @@ export async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
       if (existingGame) {
         savedGame = existingGame;
       } else {
-        const createdGameResponse = await GameService.create({ game });
-        if (createdGameResponse?.createdGame) {
-          savedGame = createdGameResponse?.createdGame;
-        } else {
-          throw new Error("Failed to create game");
+        const gameInput: GameInput = {
+          igdbId: String(game.igdbId),
+          title: game.title,
+          coverImage: game.coverImage,
+          hltbId: game.hltbId,
+          mainExtra: game.mainExtra,
+          mainStory: game.mainStory,
+          completionist: game.completionist,
+          releaseDate: game.releaseDate
+            ? new Date(game.releaseDate).toISOString()
+            : null,
+          description: game.description,
+        };
+
+        const createdGameResult = await GameService.create({ game: gameInput });
+        if (createdGameResult.isFailure) {
+          throw new Error(
+            `Failed to create game: ${createdGameResult.error.message}`
+          );
         }
+
+        savedGame = createdGameResult.value.createdGame;
       }
 
       if (savedGame) {
-        try {
-          await BacklogItemService.create({
-            gameId: savedGame.id,
+        const backlogItemResult = await BacklogItemService.create(
+          {
+            backlogItem: {
+              ...backlogItem,
+              backlogStatus: backlogItem.backlogStatus as BacklogItemStatus,
+              acquisitionType: backlogItem.acquisitionType as AcquisitionType,
+            },
             userId,
-            backlogItem,
-          });
-        } catch (error) {
-          console.error("Error creating backlog item:", error);
-          throw new Error("Failed to create backlog item.");
+            gameId: savedGame.id,
+          },
+          userId
+        );
+
+        if (backlogItemResult.isFailure) {
+          throw new Error(
+            `Failed to create backlog item: ${backlogItemResult.error.message}`
+          );
         }
+
+        RevalidationService.revalidateCollection();
       } else {
         throw new Error("Failed to save game.");
       }
