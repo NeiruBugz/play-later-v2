@@ -3,11 +3,12 @@ import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config = {
   content: [
-    "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
     "./slices/**/*.{ts,tsx}",
+    "./features/**/*.{ts,tsx}",
+    "./shared/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {

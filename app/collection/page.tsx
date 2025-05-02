@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { CollectionList } from "@/slices/collection/widgets";
-import { Header } from "@/src/widgets/header";
+import { CollectionList } from "@/features/view-collection";
+import { Header } from "@/shared/components/header";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 

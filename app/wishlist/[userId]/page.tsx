@@ -1,8 +1,8 @@
-import { BacklogItemCard } from "@/slices/shared/widgets/backlog-item-card";
-import { getUserInfo } from "@/slices/user/api/get-user-info";
-import { GenericPageProps } from "@/src/shared/types";
-import { Header } from "@/src/widgets/header";
-import { getWishlistedItems } from "slices/backlog/api";
+import { getUserInfo } from "@/features/manage-user-info/server-actions/get-user-info";
+import { getWishlistedItems } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
+import { BacklogItemCard } from "@/shared/components/backlog-item-card";
+import { Header } from "@/shared/components/header";
+import { GenericPageProps } from "@/shared/types";
 
 export default async function SharedWishlistPage(props: GenericPageProps) {
   const [user, wishlistedItems] = await Promise.all([

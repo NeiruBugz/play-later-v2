@@ -1,18 +1,24 @@
-import { AddToCollectionModal } from "@/components/game/add-to-collection-modal";
-import { GameStats } from "@/src/page-slices/game";
-import { Artwork } from "@/src/page-slices/game/ui/artwork";
-import igdbApi from "@/src/shared/api/igdb";
-import { cn, getUniquePlatforms } from "@/src/shared/lib";
-import { platformToColorBadge } from "@/src/shared/lib/platform-to-color";
-import { GenericPageProps } from "@/src/shared/types";
-import { Button } from "@/src/shared/ui";
-import { Badge } from "@/src/shared/ui/badge";
-import { IgdbImage } from "@/src/shared/ui/igdb-image";
-import { Skeleton } from "@/src/shared/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/shared/ui/tabs";
-import { GameScreenshots } from "@/src/widgets/game-screenshots";
-import { Header } from "@/src/widgets/header";
-import { SimilarGames } from "@/src/widgets/similar-games";
+import { AddToCollectionModal } from "@/features/add-game";
+import {
+  Artwork,
+  GameScreenshots,
+  GameStats,
+} from "@/features/view-game-details";
+import { Button } from "@/shared/components";
+import { Badge } from "@/shared/components/badge";
+import { Header } from "@/shared/components/header";
+import { IgdbImage } from "@/shared/components/igdb-image";
+import { Skeleton } from "@/shared/components/skeleton";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/tabs";
+import { cn, getUniquePlatforms } from "@/shared/lib";
+import igdbApi from "@/shared/lib/igdb";
+import { platformToColorBadge } from "@/shared/lib/platform-to-color";
+import { GenericPageProps } from "@/shared/types";
 import { Heart } from "lucide-react";
 import { Suspense } from "react";
 
@@ -127,9 +133,6 @@ export default async function ExternalGamePage(props: GenericPageProps) {
             <div className="w-full space-y-8 lg:w-80">
               <Suspense fallback={"Loading..."}>
                 <GameStats />
-              </Suspense>
-              <Suspense fallback={"Loading..."}>
-                <SimilarGames igdbId={igdbData.id} />
               </Suspense>
             </div>
           </div>

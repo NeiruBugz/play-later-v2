@@ -1,0 +1,32 @@
+"use server";
+
+import { ReviewService } from "@/domain/review/service";
+import { z } from "zod";
+
+const CreateReviewSchema = z.object({
+  gameId: z.string(),
+  userId: z.string(),
+  rating: z.number().min(1).max(10),
+  content: z.string().optional(),
+  completedOn: z.string().optional(),
+});
+
+export async function createReviewAction(
+  prevState: { message: string; type: "error" | "success" },
+  rating: number,
+  input: FormData
+) {
+  const parsedInput = CreateReviewSchema.safeParse({
+    gameId: input.get("gameId"),
+    userId: input.get("userId"),
+    rating: rating,
+    content: input.get("content"),
+    completedOn: input.get("completedOn"),
+  });
+
+  if (!parsedInput.success) {
+    return;
+  }
+
+  await ReviewService.create(parsedInput.data);
+}

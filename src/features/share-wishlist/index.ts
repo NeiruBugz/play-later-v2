@@ -1,1 +1,0 @@
-export { ShareWishlist } from './ui'

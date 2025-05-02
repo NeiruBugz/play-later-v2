@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
-import { BacklogCount } from "@/slices/dashboard/widgets/backlog-count";
-import { CurrentlyPlaying } from "@/slices/dashboard/widgets/currently-playing";
-import { UpcomingReleases } from "@/slices/dashboard/widgets/upcoming-releases";
-import { FeatureCard } from "@/slices/landing/widgets/feature-card";
-import { SignIn } from "@/src/features/sign-in";
-import { Header } from "@/src/widgets/header";
+import { BacklogCount } from "@/features/dashboard/components/backlog-count";
+import { CurrentlyPlaying } from "@/features/dashboard/components/currently-playing";
+import { UpcomingReleases } from "@/features/dashboard/components/upcoming-releases";
+import { FeatureCard } from "@/features/landing";
+import { SignIn } from "@/features/sign-in";
+import { Header } from "@/shared/components/header";
 import {
   BarChart3,
   Gamepad2,

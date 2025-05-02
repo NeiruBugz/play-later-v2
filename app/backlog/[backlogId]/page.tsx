@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
-import { getUserInfo } from "@/slices/user/api/get-user-info";
-import { BacklogStatusMapper, normalizeString } from "@/src/shared/lib";
-import { IgdbImage } from "@/src/shared/ui/igdb-image";
-import { Header } from "@/src/widgets/header";
+import { getUserInfo } from "@/features/manage-user-info/server-actions/get-user-info";
+import { getUsersBacklog } from "@/features/view-backlogs/server-actions/get-users-backlog";
+import { Header } from "@/shared/components/header";
+import { IgdbImage } from "@/shared/components/igdb-image";
+import { BacklogStatusMapper, normalizeString } from "@/shared/lib";
 import { redirect } from "next/navigation";
-import { getUsersBacklog } from "slices/backlog/api";
 
 export default async function UsersBacklogPage(props: {
   params: Promise<Record<string, string>>;
