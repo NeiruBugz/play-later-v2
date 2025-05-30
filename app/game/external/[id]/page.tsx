@@ -33,12 +33,12 @@ export default async function ExternalGamePage(props: GenericPageProps) {
   const uniquePlatforms = getUniquePlatforms(igdbData?.release_dates);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen">
       <Header />
       <Suspense fallback={"Loading..."}>
         <div className="relative flex min-h-[60vh] w-full justify-center overflow-hidden">
           <Artwork igdbId={igdbData.id} gameTitle={igdbData.name} />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+          <div className="absolute inset-0" />
           <div className="absolute bottom-0 left-0 right-0 p-8">
             <div className="container flex flex-col items-end gap-6 md:flex-row">
               <IgdbImage

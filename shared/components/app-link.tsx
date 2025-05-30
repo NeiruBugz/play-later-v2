@@ -16,9 +16,12 @@ const AppLink = memo(function AppLink({
   return (
     <Link
       href={href}
-      className={cn("cursor-pointer text-base text-white hover:underline", {
-        "font-medium": href.includes(pathname),
-      })}
+      className={cn(
+        "cursor-pointer text-base text-foreground hover:underline",
+        {
+          "font-medium": href.includes(pathname),
+        }
+      )}
     >
       {label}
     </Link>

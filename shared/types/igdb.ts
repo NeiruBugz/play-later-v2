@@ -68,6 +68,8 @@ type SimilarGame = {
   cover: GameCover;
   id: number;
   name: string;
+  release_dates: ReleaseDate[];
+  first_release_date: number;
 };
 
 type Theme = {
@@ -121,6 +123,8 @@ export type FullGameInfoResponse = {
   summary: string;
   themes: Theme[];
   websites: Website[];
+  franchise: any;
+  franchises: number[];
 };
 
 export type SearchResponse = {
@@ -181,3 +185,47 @@ export type IgdbGameResponseItem = {
     url: string;
   };
 };
+
+export type TimeToBeatsResponse = {
+  id: number;
+  hastily: number;
+  normally: number;
+  completely: number;
+  count: number;
+};
+
+export type Expansion = {
+  id: number;
+  name: string;
+  cover: {
+    image_id: string;
+    id: number;
+    url: string;
+  };
+  release_dates: ReleaseDate[];
+};
+
+export type DLCAndExpansionListResponse = {
+  id: number;
+  expansions: Expansion[];
+};
+
+export type FranchiseGamesResponse = {
+  id: number;
+  name: string;
+  games: Array<{
+    id: number;
+    name: string;
+    cover: {
+      image_id: string;
+      id: number;
+      url: string;
+    };
+    game_type: number;
+  }>;
+};
+
+export enum GAME_TYPE {
+  MAIN_GAME = 0,
+  EXPANDED_GAME = 10,
+}

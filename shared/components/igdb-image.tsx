@@ -19,14 +19,23 @@ function IgdbImage({
   coverImageId,
   ...rest
 }: IgdbImageProps) {
+  const src = coverImageId
+    ? `${IMAGE_API}/${IMAGE_SIZES[igdbSrcSize]}/${coverImageId}.webp`
+    : undefined;
+
+  if (!src) {
+    return;
+  }
+
+  const dimensions = !rest.fill
+    ? {
+        width: rest.width || NEXT_IMAGE_SIZES[igdbImageSize].width,
+        height: rest.height || NEXT_IMAGE_SIZES[igdbImageSize].height,
+      }
+    : {};
+
   return (
-    <Image
-      src={`${IMAGE_API}/${IMAGE_SIZES[igdbSrcSize]}/${coverImageId}.webp`}
-      alt={`${gameTitle} cover art`}
-      width={rest.width || NEXT_IMAGE_SIZES[igdbImageSize].width}
-      height={rest.height || NEXT_IMAGE_SIZES[igdbImageSize].height}
-      {...rest}
-    />
+    <Image src={src} alt={`${gameTitle} cover art`} {...dimensions} {...rest} />
   );
 }
 

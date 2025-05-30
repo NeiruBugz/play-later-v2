@@ -1,3 +1,4 @@
+import { Button } from "@/shared/components";
 import {
   Avatar,
   AvatarFallback,
@@ -7,7 +8,7 @@ import { Card, CardContent, CardHeader } from "@/shared/components/card";
 import { cn, normalizeString } from "@/shared/lib";
 import type { Review, User } from "@prisma/client";
 import { format } from "date-fns";
-import { StarIcon } from "lucide-react";
+import { Flag, Star, StarIcon, ThumbsUp } from "lucide-react";
 
 const getFirstTwoLiterals = (name: string | null | undefined) => {
   if (!name) {
@@ -21,43 +22,57 @@ const getFirstTwoLiterals = (name: string | null | undefined) => {
 
 export function Review({ review }: { review: Review & { User: User } }) {
   return (
-    <Card className="h-fit w-full max-w-full md:max-w-md">
-      <CardHeader className="flex-wrap bg-muted/20 p-3 md:p-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <Avatar className="h-12 w-12 rounded border">
-            <AvatarImage src={review.User.image ?? ""} className="rounded" />
-            <AvatarFallback className="rounded">
+    <div key={review.id} className="space-y-3 rounded-lg border p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Avatar>
+            <AvatarImage
+              src={review.User.image || "/placeholder.svg"}
+              alt={review.User.name || ""}
+            />
+            <AvatarFallback>
               {getFirstTwoLiterals(review.User.name)}
             </AvatarFallback>
           </Avatar>
-          <div className="grid gap-1">
-            <div className="font-semibold">
-              {review.User.username ?? review.User.name}&nbsp;
-              <span className="font-normal">on</span>&nbsp;
-              {normalizeString(review.completedOn)}
-            </div>
-            <div className="flex items-center gap-0.5 text-sm">
-              {Array.from({ length: 10 }, (_, i) => (
-                <StarIcon
-                  className={cn("h-4 w-4", {
-                    "fill-primary": i + 1 <= review.rating,
-                    "fill-muted stroke-muted-foreground": i + 1 > review.rating,
-                  })}
-                  key={i}
-                />
-              ))}
+          <div>
+            <p className="font-medium">{review.User.name}</p>
+            <div className="flex items-center gap-2">
+              <div className="flex">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
+                  <Star
+                    key={star}
+                    className={`h-3 w-3 ${review.rating >= star ? "fill-primary text-primary" : "text-muted-foreground"}`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {format(review.createdAt, "dd.MM.yyyy, hh:mm")}
+              </span>
             </div>
           </div>
-          <div className="ml-auto text-xs text-muted-foreground">
-            {format(review.createdAt, "dd.MM.yyyy")}
-          </div>
         </div>
-      </CardHeader>
-      <CardContent className="p-3 md:p-6">
-        <div className="grid gap-4 text-sm leading-loose">
-          <p>{review.content}</p>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <p className="text-sm">{review.content}</p>
+
+      {/* <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`flex items-center gap-1 text-xs ${review.isLiked ? "text-primary" : ""}`}
+        >
+          <ThumbsUp className="h-3 w-3" />
+          <span>Helpful ({review.likes})</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-1 text-xs"
+        >
+          <Flag className="h-3 w-3" />
+          <span>Report</span>
+        </Button>
+      </div> */}
+    </div>
   );
 }

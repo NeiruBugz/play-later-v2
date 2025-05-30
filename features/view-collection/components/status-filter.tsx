@@ -1,8 +1,6 @@
 "use client";
 
-import { Button } from "@/shared/components";
-import { BacklogStatusMapper } from "@/shared/lib";
-import { BacklogItemStatus } from "@prisma/client";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/tabs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
@@ -33,28 +31,19 @@ export function StatusFilter() {
   );
 
   return (
-    <div className="flex flex-wrap gap-1">
-      <Button
-        onClick={() => onStatusSelect("All")}
-        disabled={!currentStatusParam}
-        size="sm"
-        variant="outline"
-      >
-        All
-      </Button>
-      {Object.keys(BacklogItemStatus)
-        .filter((key) => key !== "WISHLIST")
-        .map((key) => (
-          <Button
-            key={key}
-            onClick={() => onStatusSelect(key)}
-            disabled={currentStatusParam === key}
-            size="sm"
-            variant="outline"
-          >
-            {BacklogStatusMapper[key as unknown as BacklogItemStatus]}
-          </Button>
-        ))}
-    </div>
+    <Tabs
+      defaultValue={currentStatusParam || "All"}
+      value={currentStatusParam || "All"}
+      onValueChange={(value) => onStatusSelect(value)}
+      className="w-full sm:w-auto"
+    >
+      <TabsList className="grid w-full grid-cols-5 sm:w-auto">
+        <TabsTrigger value="All">All</TabsTrigger>
+        <TabsTrigger value="TO_PLAY">Backlog</TabsTrigger>
+        <TabsTrigger value="PLAYED">Played</TabsTrigger>
+        <TabsTrigger value="PLAYING">Playing</TabsTrigger>
+        <TabsTrigger value="COMPLETED">Completed</TabsTrigger>
+      </TabsList>
+    </Tabs>
   );
 }

@@ -46,7 +46,7 @@ export default async function ChangelogPage() {
               </div>
 
               <div className="relative hidden sm:flex sm:w-[100px]">
-                <div className="absolute left-0.5 top-0.5 h-full w-0.5 bg-slate-200"></div>
+                <div className="absolute left-0.5 top-0.5 h-full w-0.5"></div>
                 <div className="sticky left-0 top-[102px] mt-1.5 h-1.5 w-1.5 rounded-full bg-white"></div>
               </div>
 

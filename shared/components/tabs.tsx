@@ -1,6 +1,8 @@
-import { cn } from "@/shared/lib/tailwind-merge";
+"use client";
+
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 import * as React from "react";
+import { cn } from "../lib";
 
 const Tabs = TabsPrimitive.Root;
 

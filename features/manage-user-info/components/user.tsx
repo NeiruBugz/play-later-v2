@@ -31,14 +31,14 @@ const User = memo(function User() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="w-9 cursor-pointer rounded">
+        <Avatar className="size-8 cursor-pointer rounded">
           {session.data.user.image ? (
             <AvatarImage
               src={session.data.user.image ?? ""}
               alt={session.data.user.email ?? ""}
             />
           ) : null}
-          <AvatarFallback className="size-9 cursor-pointer rounded px-2 py-1">
+          <AvatarFallback className="size-8 cursor-pointer rounded">
             {getFirstTwoLiterals(session.data.user.name)}
           </AvatarFallback>
         </Avatar>

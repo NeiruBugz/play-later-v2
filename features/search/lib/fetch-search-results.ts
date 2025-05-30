@@ -16,7 +16,6 @@ const fetchSearchResults = async (
   if (res.status !== 200) {
     throw new Error("Network response was not ok");
   }
-  console.log(res.data);
 
   return res.data.response;
 };

@@ -5,10 +5,8 @@ const config = {
   content: [
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-    "./slices/**/*.{ts,tsx}",
     "./features/**/*.{ts,tsx}",
-    "./shared/**/*.{ts,tsx}",
+    "./shared/components/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -31,7 +29,7 @@ const config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "hsl(var(--gray-900))",
+        background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",

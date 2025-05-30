@@ -1,4 +1,5 @@
 import { User } from "@/features/manage-user-info/components/user";
+import { ThemeToggle } from "@/features/theme-toggle/components/theme-toggle";
 import { AddGameLink } from "@/shared/components/add-game-link";
 import { AppLink } from "@/shared/components/app-link";
 import {
@@ -32,7 +33,7 @@ const linksConfig = [
 
 const Header = memo(function Header() {
   return (
-    <header className="fixed top-0 z-20 mb-[60px] w-full bg-gradient-to-b from-gray-900 via-gray-900/60 to-transparent py-3">
+    <header className="fixed top-0 z-20 w-full bg-background py-3 shadow-sm">
       <div className="container flex w-full items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="block md:hidden">
@@ -54,9 +55,7 @@ const Header = memo(function Header() {
           <Link href="/">
             <h1 className="mr-4 flex items-center font-bold md:text-lg xl:text-xl">
               <GamepadIcon className="mr-2 size-6 text-green-500" />
-              <span className="bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
-                PlayLater
-              </span>
+              <span className="">PlayLater</span>
             </h1>
           </Link>
           <div className="hidden items-center gap-3 md:flex">
@@ -68,6 +67,7 @@ const Header = memo(function Header() {
         <div className="flex items-center gap-4">
           <AddGameLink />
           <User />
+          <ThemeToggle />
         </div>
       </div>
     </header>

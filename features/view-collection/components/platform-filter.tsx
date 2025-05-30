@@ -48,10 +48,7 @@ export function PlatformFilter({
       value={params.get("platform") ?? ""}
       disabled={pending}
     >
-      <SelectTrigger
-        className="h-8 gap-1 md:max-w-[260px]"
-        aria-label="platforms"
-      >
+      <SelectTrigger className="h-9 gap-1" aria-label="platforms">
         <SelectValue placeholder="Platform" />
       </SelectTrigger>
       <SelectContent>

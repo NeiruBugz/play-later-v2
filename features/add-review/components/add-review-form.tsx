@@ -14,14 +14,13 @@ import { Textarea } from "@/shared/components/textarea";
 import { cn, playingOnPlatforms } from "@/shared/lib";
 import { StarIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
-import { useFormState } from "react-dom";
+import { useActionState, useState } from "react";
 import { createReviewAction } from "../server-actions/action";
 
 export function AddReviewForm({ gameId }: { gameId: string }) {
   const session = useSession();
   const [ratingValue, setRatingValue] = useState(0);
-  const [state, formAction] = useFormState(
+  const [state, formAction] = useActionState(
     (prevState: any, formData: FormData) =>
       createReviewAction(
         { message: "", type: "success" },

@@ -10,10 +10,10 @@ export async function AddGameLink() {
   }
 
   return (
-    <Link href="/collection/add-game">
-      <Button className="bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700">
+    <Button className="h-8" asChild>
+      <Link href="/collection/add-game" prefetch>
         Add Game
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   );
 }

@@ -21,7 +21,12 @@ export async function getGame(id: string) {
       mainStory: true,
       mainExtra: true,
       completionist: true,
-      backlogItems: true,
+      releaseDate: true,
+      backlogItems: {
+        orderBy: {
+          updatedAt: "desc",
+        },
+      },
       Review: true,
     },
   });

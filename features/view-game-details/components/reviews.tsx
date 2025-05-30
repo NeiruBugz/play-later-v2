@@ -1,5 +1,5 @@
 import { ReviewService } from "@/domain/review/service";
-import { AddReviewDialog } from "@/features/add-review/components/add-review-dialog";
+import { ReviewForm } from "@/features/add-review/components";
 import { Review } from "./review";
 
 export async function Reviews({
@@ -24,15 +24,13 @@ export async function Reviews({
   const reviewList = reviewsResult.value;
 
   return (
-    <div className="border-b py-4">
-      <h3 className="scroll-m-20 text-xl font-semibold tracking-tight">
-        Reviews
-      </h3>
-      <div className="flex flex-col items-start gap-4 md:flex-row">
-        <div className="mt-2 min-w-full md:min-w-[270px]">
-          <AddReviewDialog gameId={gameId} gameTitle={gameTitle} />
+    <div className="space-y-6">
+      <ReviewForm gameId={gameId} />
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">User Reviews</h3>
         </div>
-        <ul className="flex max-h-[300px] flex-wrap justify-evenly gap-4 overflow-auto md:max-h-[600px]">
+        <div className="space-y-6">
           {reviewList.length ? (
             reviewList.map((review) => {
               return <Review review={review} key={review.id} />;
@@ -42,7 +40,7 @@ export async function Reviews({
               No reviews yet. Be the first to write a review!
             </div>
           )}
-        </ul>
+        </div>
       </div>
     </div>
   );

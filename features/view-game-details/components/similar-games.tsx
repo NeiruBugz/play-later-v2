@@ -8,40 +8,37 @@ export async function SimilarGames({
 }: {
   similarGames?: FullGameInfoResponse["similar_games"];
 }) {
+  if (!similarGames?.length) {
+    return null;
+  }
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-medium">Similar Games</h2>
-      <div className="grid max-h-[300px] gap-4 overflow-scroll">
-        {similarGames && similarGames.length
-          ? similarGames.map((similarGame) => (
-              <Link
-                href={`/game/external/${similarGame.id}`}
-                key={similarGame.id}
-              >
-                <Card className="overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="flex gap-4 p-4">
-                      {similarGame.cover?.image_id ? (
-                        <IgdbImage
-                          width={60}
-                          height={80}
-                          className="rounded"
-                          gameTitle={similarGame.name}
-                          coverImageId={similarGame.cover.image_id}
-                          igdbSrcSize={"thumb"}
-                          igdbImageSize={"hd"}
-                        />
-                      ) : null}
-                      <div className="space-y-1">
-                        <div className="font-medium">{similarGame.name}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))
-          : null}
-      </div>
+    <div className="h-[200px] space-y-3 overflow-y-auto">
+      {similarGames.map((game) => (
+        <Link
+          href={`/game/external/${game.id}`}
+          key={game.id}
+          className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted"
+        >
+          {game.cover?.image_id ? (
+            <IgdbImage
+              width={50}
+              height={75}
+              className="rounded border"
+              gameTitle={game.name}
+              coverImageId={game.cover.image_id}
+              igdbSrcSize={"thumb"}
+              igdbImageSize={"hd"}
+            />
+          ) : null}
+          <div>
+            <p className="text-sm font-medium">{game.name}</p>
+            {/* <p className="text-xs text-muted-foreground">
+                {game..}
+              </p> */}
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }

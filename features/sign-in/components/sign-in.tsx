@@ -17,8 +17,6 @@ export function SignIn({ variant }: { variant: "default" | "start" }) {
         size="lg"
         className={cn({
           "bg-white text-green-900 hover:bg-gray-200": variant === "default",
-          "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:bg-green-700":
-            variant === "start",
         })}
       >
         Sign In with Google

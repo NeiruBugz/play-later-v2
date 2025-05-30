@@ -1,33 +1,16 @@
 import { IgdbImage } from "@/shared/components/igdb-image";
 import igdbApi from "@/shared/lib/igdb";
+import { use } from "react";
+import { ScreenshotCarousel } from "./screenshot-carousel";
 
-export async function GameScreenshots({
+export function GameScreenshots({
   gameId,
   gameName,
 }: {
   gameId: number | null | undefined;
   gameName: string;
 }) {
-  const { screenshots } = await igdbApi.getGameScreenshots(gameId);
+  const { screenshots } = use(igdbApi.getGameScreenshots(gameId));
 
-  if (!screenshots || screenshots.length === 0) {
-    return <div>Screenshots not found</div>;
-  }
-
-  return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      {screenshots && screenshots
-        ? screenshots?.map((i) => (
-            <IgdbImage
-              key={i.id}
-              className="w-full rounded-lg"
-              gameTitle={gameName}
-              coverImageId={i.image_id}
-              igdbSrcSize={"hd"}
-              igdbImageSize={"c-big"}
-            />
-          ))
-        : null}
-    </div>
-  );
+  return <ScreenshotCarousel screenshots={screenshots} gameName={gameName} />;
 }

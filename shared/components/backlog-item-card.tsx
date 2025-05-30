@@ -72,7 +72,7 @@ export function BacklogItemCard({
             className="object-cover transition-transform group-hover:scale-105"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="absolute inset-0 to-transparent" />
         </div>
       </Link>
     );
@@ -99,7 +99,7 @@ export function BacklogItemCard({
             className="object-cover transition-transform group-hover:scale-105"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="absolute inset-0 to-transparent" />
 
           <div
             className={cn(

@@ -2,13 +2,16 @@ import { env } from "@/env.mjs";
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import {
   Artwork,
+  DLCAndExpansionListResponse,
   Event,
+  FranchiseGamesResponse,
   FullGameInfoResponse,
   GenresResponse,
   IgdbGameResponseItem,
   RatedGameResponse,
   RequestOptions,
   SearchResponse,
+  TimeToBeatsResponse,
   TwitchTokenResponse,
   UpcomingEventsResponse,
   UpcomingReleaseResponse,
@@ -121,7 +124,9 @@ const igdbApi = {
 
       if (!response.ok) {
         console.error(response);
-        throw new Error(`IGDB API error: ${response.statusText}`);
+        throw new Error(
+          `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
+        );
       }
 
       return await response.json();
@@ -224,9 +229,15 @@ const igdbApi = {
         "external_games.url",
         "similar_games.name",
         "similar_games.cover.image_id",
+        "similar_games.release_dates.human",
+        "similar_games.first_release_date",
         "websites.url",
         "websites.category",
         "websites.trusted",
+        "franchise",
+        "franchises",
+        "game_type",
+        "game_type.type",
       ])
       .where(`id = (${gameId})`)
       .build();
@@ -498,6 +509,59 @@ const igdbApi = {
     return this.request<IgdbGameResponseItem[]>({
       body: query,
       resource: "/games",
+    });
+  },
+  async getGameTimeToBeats(
+    gameId: number
+  ): Promise<TimeToBeatsResponse[] | undefined> {
+    const query = new QueryBuilder()
+      .fields(["hastily", "normally", "completely", "count"])
+      .where(`game_id = ${gameId}`)
+      .build();
+
+    return this.request<TimeToBeatsResponse[]>({
+      body: query,
+      resource: "/game_time_to_beats",
+    });
+  },
+
+  async getGameDLCsAndExpansions(
+    gameId: number
+  ): Promise<DLCAndExpansionListResponse[] | undefined> {
+    const query = new QueryBuilder()
+      .fields([
+        "expansions",
+        "expansions.name",
+        "expansions.cover.url",
+        "expansions.cover.image_id",
+        "expansions.release_dates",
+      ])
+      .where(`id = ${gameId}`)
+      .build();
+
+    return this.request<DLCAndExpansionListResponse[]>({
+      body: query,
+      resource: "/games",
+    });
+  },
+
+  async getGameFranchiseGames(
+    franchiseId: number
+  ): Promise<FranchiseGamesResponse[] | undefined> {
+    const query = new QueryBuilder()
+      .fields([
+        "name",
+        "id",
+        "games.name",
+        "games.cover.image_id",
+        "games.game_type",
+      ])
+      .where(`id = ${franchiseId}`)
+      .build();
+
+    return this.request<FranchiseGamesResponse[]>({
+      body: query,
+      resource: "/franchises",
     });
   },
 };

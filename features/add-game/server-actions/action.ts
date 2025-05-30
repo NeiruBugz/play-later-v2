@@ -1,6 +1,7 @@
 "use server";
 
 import type { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { format, fromUnixTime } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { validateCreateGameAction } from "../lib/validation";
 import type { AddGameToBacklogInput } from "../types";
@@ -16,14 +17,15 @@ export async function createGameAction(
     return { message: "Failed to save game", isError: true };
   }
 
+  const releaseDate = parsedPayload.data.releaseDate
+    ? fromUnixTime(parsedPayload.data.releaseDate)
+    : null;
   const preparedPayload = {
     game: {
       igdbId: parsedPayload.data.igdbId,
       title: parsedPayload.data.title,
       description: parsedPayload.data.description ?? "",
-      releaseDate: parsedPayload.data.releaseDate
-        ? new Date(parsedPayload.data.releaseDate * 1000)
-        : null,
+      releaseDate,
       coverImage: parsedPayload.data.coverImage,
       hltbId: parsedPayload.data.hltbId,
       mainStory: parsedPayload.data.mainStory,

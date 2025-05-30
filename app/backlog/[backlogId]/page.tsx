@@ -42,7 +42,7 @@ export default async function UsersBacklogPage(props: {
                 igdbSrcSize={"hd"}
                 igdbImageSize={"hd"}
               />
-              <div className="absolute hidden h-full w-40 flex-col items-center justify-center gap-2 rounded bg-slate-400/95 group-hover:flex">
+              <div className="absolute hidden h-full w-40 flex-col items-center justify-center gap-2 rounded group-hover:flex">
                 <span className="text-center text-sm font-medium text-white">
                   {backlogItem.game.title}
                 </span>

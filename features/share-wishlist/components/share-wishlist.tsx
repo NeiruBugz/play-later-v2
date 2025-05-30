@@ -38,10 +38,7 @@ export function ShareWishlist() {
   }, [copy, session?.data?.user, toast]);
 
   return (
-    <Button
-      onClick={onCopy}
-      className="bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:bg-green-700"
-    >
+    <Button onClick={onCopy} className="text-white">
       <ShareIcon className="mr-2 size-4" /> Share wishlist
     </Button>
   );

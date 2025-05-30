@@ -19,9 +19,9 @@ export default async function Page() {
 
   if (!session?.user) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white">
+      <div className="min-h-screen text-white">
         <section className="relative flex h-screen items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-[url('/placeholder.svg?height=1080&width=1920')] bg-cover bg-center opacity-20"></div>
+          {/* <div className="absolute inset-0 bg-[url('/placeholder.svg?height=1080&width=1920')] bg-cover bg-center opacity-20"></div> */}
           <div className="relative z-10 space-y-6 px-4 text-center">
             <h1 className="text-5xl font-extrabold tracking-tight md:text-7xl">
               <span className="bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
@@ -85,7 +85,7 @@ export default async function Page() {
           </div>
         </section>
 
-        <section className="bg-gradient-to-r from-green-900 to-emerald-900 px-4 py-20">
+        <section className="px-4 py-20">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
             <h2 className="text-3xl font-bold md:text-4xl">
               Ready to Conquer Your Backlog?

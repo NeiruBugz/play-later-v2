@@ -35,19 +35,21 @@ const fontSans = FontSans({
   variable: "--font-sans",
 });
 
-export default function RootLayout(props: {
-  children: React.ReactNode;
-  modal: React.ReactNode;
-}) {
+export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "relative min-h-screen bg-gray-900 font-sans antialiased",
+          "relative min-h-screen font-sans antialiased",
           fontSans.variable
         )}
       >
-        <Providers attribute="class" defaultTheme="system" enableSystem>
+        <Providers
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {props.children}
         </Providers>
       </body>

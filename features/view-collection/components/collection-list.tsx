@@ -42,9 +42,6 @@ export async function CollectionList({
   if (collection.length === 0 && Object.keys(params).length !== 0) {
     return (
       <div>
-        <Suspense fallback={<CollectionFiltersSkeleton />}>
-          <CollectionFilters />
-        </Suspense>
         <div>No matches found</div>
       </div>
     );
@@ -52,9 +49,6 @@ export async function CollectionList({
 
   return (
     <div>
-      <Suspense fallback={<CollectionFiltersSkeleton />}>
-        <CollectionFilters />
-      </Suspense>
       <GridView backlogItems={collection} />
       <div className="my-3 flex items-center justify-center">
         <Pagination totalCount={count} />
