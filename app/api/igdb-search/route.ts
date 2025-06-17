@@ -1,4 +1,4 @@
-import igdbApi from "@/src/shared/api/igdb";
+import igdbApi from "@/shared/lib/igdb";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

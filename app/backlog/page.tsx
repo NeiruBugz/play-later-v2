@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { BacklogList } from "@/slices/backlog/widgets/backlog-list";
-import { Header } from "@/src/widgets/header";
+import { Header } from "@/shared/components/header";
+import { BacklogList } from "@/features/view-backlogs/components/backlog-list";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 

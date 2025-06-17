@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
-import { ShareWishlist } from "@/src/features/share-wishlist";
-import { Header } from "@/src/widgets/header";
-import { WishlistedList } from "@/src/widgets/wishlisted-list";
+import { ShareWishlist } from "@/features/share-wishlist";
+import { Header } from "@/shared/components/header";
+import { WishlistedList } from "@/features/view-wishlist/components/wishlisted-list";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 

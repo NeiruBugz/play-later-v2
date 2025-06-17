@@ -1,9 +1,8 @@
 import Providers from "@/providers";
 import type { Metadata, Viewport } from "next";
 import { Inter as FontSans } from "next/font/google";
-import "@/src/shared/globals.css";
-import { SendFeedbackForm } from "@/src/features/send-feedback/ui/send-feedback-form";
-import { cn } from "@/src/shared/lib";
+import "@/shared/globals.css";
+import { cn } from "@/shared/lib";
 
 export const viewport: Viewport = {
   themeColor: [
@@ -36,21 +35,22 @@ const fontSans = FontSans({
   variable: "--font-sans",
 });
 
-export default function RootLayout(props: {
-  children: React.ReactNode;
-  modal: React.ReactNode;
-}) {
+export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "relative min-h-screen bg-gray-900 font-sans antialiased",
+          "relative min-h-screen font-sans antialiased",
           fontSans.variable
         )}
       >
-        <Providers attribute="class" defaultTheme="system" enableSystem>
+        <Providers
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {props.children}
-          <SendFeedbackForm />
         </Providers>
       </body>
     </html>

@@ -1,5 +1,5 @@
-import { prisma } from "@/src/shared/api/db";
-import { sessionErrorHandler } from "@/src/shared/lib";
+import { sessionErrorHandler } from "@/shared/lib";
+import { prisma } from "@/shared/lib/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";

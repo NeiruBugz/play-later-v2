@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+## Next.js ruleset
+
+- use "use client" directive least as possible
+- use kebab-case for file naming
+- prefer Server Actions over API Routes
+- keep project structure feature-centric

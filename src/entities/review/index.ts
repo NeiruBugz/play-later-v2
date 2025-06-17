@@ -1,1 +1,0 @@
-export { getReviews } from './model'

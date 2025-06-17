@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
-import { getUserInfo } from "@/slices/user/api/get-user-info";
-import { BacklogStatusMapper, normalizeString } from "@/src/shared/lib";
-import { IgdbImage } from "@/src/shared/ui/igdb-image";
-import { Header } from "@/src/widgets/header";
+import { getUserInfo } from "@/features/manage-user-info/server-actions/get-user-info";
+import { getUsersBacklog } from "@/features/view-backlogs/server-actions/get-users-backlog";
+import { Header } from "@/shared/components/header";
+import { IgdbImage } from "@/shared/components/igdb-image";
+import { BacklogStatusMapper, normalizeString } from "@/shared/lib";
 import { redirect } from "next/navigation";
-import { getUsersBacklog } from "slices/backlog/api";
 
 export default async function UsersBacklogPage(props: {
   params: Promise<Record<string, string>>;
@@ -42,7 +42,7 @@ export default async function UsersBacklogPage(props: {
                 igdbSrcSize={"hd"}
                 igdbImageSize={"hd"}
               />
-              <div className="absolute hidden h-full w-40 flex-col items-center justify-center gap-2 rounded bg-slate-400/95 group-hover:flex">
+              <div className="absolute hidden h-full w-40 flex-col items-center justify-center gap-2 rounded group-hover:flex">
                 <span className="text-center text-sm font-medium text-white">
                   {backlogItem.game.title}
                 </span>

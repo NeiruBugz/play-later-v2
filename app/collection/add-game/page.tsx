@@ -1,3 +1,4 @@
+import { AddGameForm } from "@/features/add-game";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -5,9 +6,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/src/shared/ui/breadcrumb";
-import { AddGameForm } from "@/src/widgets/add-game-form";
-import { Header } from "@/src/widgets/header";
+} from "@/shared/components/breadcrumb";
+import { Header } from "@/shared/components/header";
 
 export default function AddGamePage() {
   return (

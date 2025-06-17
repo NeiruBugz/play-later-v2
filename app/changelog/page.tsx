@@ -1,4 +1,4 @@
-import { Header } from "@/src/widgets/header";
+import { Header } from "@/shared/components/header";
 import { format } from "date-fns";
 import { unstable_noStore } from "next/cache";
 import Markdown from "react-markdown";
@@ -31,7 +31,7 @@ export default async function ChangelogPage() {
           <div className="text-lg font-semibold">No changelogs found</div>
         )}
 
-        <ul className="flex flex-col text-foreground list-disc">
+        <ul className="flex list-disc flex-col text-foreground">
           {changelogs.map((changelog) => (
             <li
               key={changelog.id}
@@ -46,7 +46,7 @@ export default async function ChangelogPage() {
               </div>
 
               <div className="relative hidden sm:flex sm:w-[100px]">
-                <div className="absolute left-0.5 top-0.5 h-full w-0.5 bg-slate-200"></div>
+                <div className="absolute left-0.5 top-0.5 h-full w-0.5"></div>
                 <div className="sticky left-0 top-[102px] mt-1.5 h-1.5 w-1.5 rounded-full bg-white"></div>
               </div>
 
@@ -55,9 +55,7 @@ export default async function ChangelogPage() {
                   <div className="flex flex-col gap-4">
                     <h2 className="text-4xl">{changelog.title}</h2>
 
-                    <Markdown className="prose">
-                      {changelog.post}
-                    </Markdown>
+                    <Markdown className="prose">{changelog.post}</Markdown>
                   </div>
                 </div>
               </div>
