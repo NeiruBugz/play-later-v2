@@ -8,7 +8,12 @@ export async function BacklogList() {
   if (backlogs.length === 0) {
     return (
       <>
-        <h1 className="text-3xl font-bold">No other backlogs found</h1>
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+          No other backlogs found
+        </h4>
+        <p className="leading-7 [&:not(:first-child)]:mt-6">
+          We&apos;re not showing backlogs from users without a username
+        </p>
       </>
     );
   }
@@ -20,7 +25,7 @@ export async function BacklogList() {
           <Link
             key={backlog.user.id}
             className="w-fit text-lg font-medium"
-            href={`/backlog/${backlog.user.id}`}
+            href={`/backlog/${backlog.user.username}`}
           >
             <div className="relative h-full w-fit min-w-[270px] rounded-md border p-3">
               <p className="text-lg font-medium">

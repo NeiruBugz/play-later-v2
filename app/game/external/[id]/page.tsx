@@ -49,7 +49,14 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                 className="rounded-md shadow-md"
               />
               <div className="mb-4 flex-1">
-                <h1 className="mb-4 text-3xl font-bold text-white drop-shadow-md md:text-4xl lg:text-5xl">
+                <h1
+                  className={cn(
+                    "mb-4 text-3xl font-bold text-white drop-shadow-md md:text-4xl lg:text-5xl",
+                    {
+                      "text-foreground": !igdbData.cover.image_id,
+                    }
+                  )}
+                >
                   {igdbData.name}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4">

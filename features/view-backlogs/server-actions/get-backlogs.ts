@@ -13,7 +13,10 @@ export async function getBacklogs(): Promise<UserWithBacklogItems[]> {
 
   try {
     const userGames = await prisma.backlogItem.findMany({
-      where: { userId: { not: userId } },
+      where: {
+        userId: { not: userId },
+        User: { username: { not: null } },
+      },
       include: { game: true, User: true },
       orderBy: { createdAt: "asc" },
     });

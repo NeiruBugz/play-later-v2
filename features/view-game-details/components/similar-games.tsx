@@ -1,7 +1,5 @@
-import { Card, CardContent } from "@/shared/components/card";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { FullGameInfoResponse } from "@/shared/types";
-import Link from "next/link";
 
 export async function SimilarGames({
   similarGames,
@@ -15,8 +13,7 @@ export async function SimilarGames({
   return (
     <div className="h-[200px] space-y-3 overflow-y-auto">
       {similarGames.map((game) => (
-        <Link
-          href={`/game/external/${game.id}`}
+        <div
           key={game.id}
           className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted"
         >
@@ -37,7 +34,7 @@ export async function SimilarGames({
                 {game..}
               </p> */}
           </div>
-        </Link>
+        </div>
       ))}
     </div>
   );

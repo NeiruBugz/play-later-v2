@@ -46,7 +46,7 @@ const User = memo(function User() {
       <DropdownMenuContent>
         <DropdownMenuItem>
           <Settings />
-          <Link href={`/user/${session.data.user.id}`}>Settings</Link>
+          <Link href={`/user/settings`}>Settings</Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
           <ExitIcon />

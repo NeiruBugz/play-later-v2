@@ -1,4 +1,5 @@
 import { getServerUserId } from "@/auth";
+import { getUserByUsername } from "@/features/manage-user-info/server-actions/get-user-by-username";
 import { prisma } from "@/shared/lib/db";
 import { BacklogItemStatus, type BacklogItem, type Game } from "@prisma/client";
 
@@ -13,6 +14,47 @@ export async function getWishlistedItems(id?: string) {
     const wishlisted = await prisma.backlogItem.findMany({
       where: {
         userId: userId,
+        status: BacklogItemStatus.WISHLIST,
+      },
+      include: {
+        game: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    const groupedGames = wishlisted.reduce(
+      (acc: Record<string, GameWithBacklogItems>, item) => {
+        const { game, ...backlogItem } = item;
+        if (!acc[game.id]) {
+          acc[game.id] = { game, backlogItems: [] };
+        }
+        acc[game.id].backlogItems.push(backlogItem);
+        return acc;
+      },
+      {}
+    );
+
+    return Object.values(groupedGames);
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+}
+
+export async function getWishlistedItemsByUsername(username: string) {
+  try {
+    const user = await getUserByUsername(username);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const wishlisted = await prisma.backlogItem.findMany({
+      where: {
+        User: {
+          username: username,
+        },
         status: BacklogItemStatus.WISHLIST,
       },
       include: {
