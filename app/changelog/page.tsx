@@ -20,11 +20,12 @@ export default async function ChangelogPage() {
   return (
     <>
       <Header />
-      <div className="container mx-auto max-w-5xl">
-        <div className="mb-8 flex flex-row justify-between">
-          <h1 className="text-neutral-12 my-12 text-[28px] font-bold leading-[34px] tracking-[-0.416px]">
-            Your Changelog
-          </h1>
+      <div className="container overflow-hidden px-4 py-8 pt-[60px]">
+        <div className="mb-8 mt-4 flex flex-col gap-4">
+          <h1 className="text-3xl font-bold tracking-tight">Changelog</h1>
+          <p className="text-muted-foreground">
+            View the changelog for the project
+          </p>
         </div>
 
         {changelogs.length === 0 && (

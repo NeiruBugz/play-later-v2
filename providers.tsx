@@ -1,6 +1,6 @@
 "use client";
 
-import { Toaster } from "@/shared/components/toaster";
+import { Toaster } from "@/shared/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
 import {

@@ -1,3 +1,5 @@
+"use server";
+
 import { getServerUserId } from "@/auth";
 import { prisma } from "@/shared/lib/db";
 

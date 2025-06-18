@@ -11,13 +11,13 @@ import {
 } from "@/shared/components";
 import { HiddenInput } from "@/shared/components/hidden-input";
 import { Label } from "@/shared/components/label";
-import { useToast } from "@/shared/components/use-toast";
 import { BacklogStatusMapper, cn, playingOnPlatforms } from "@/shared/lib";
 import { BacklogItemStatus } from "@prisma/client";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useActionState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { createBacklogItemAction } from "../server-actions/action";
 
 function parseDate(dateString?: Date | null) {
@@ -44,16 +44,17 @@ export function CreateBacklogItemForm({ gameId }: { gameId: string }) {
     message: "",
   });
 
-  const { toast } = useToast();
-
   useEffect(() => {
     if (state.message === "Success") {
-      toast({
-        title: "Success!",
+      toast.success("Success!", {
         description: "Backlog item created successfully",
       });
+    } else if (state.message === "Error") {
+      toast.error("Error!", {
+        description: "Failed to create backlog item",
+      });
     }
-  }, [state.message, toast]);
+  }, [state.message]);
 
   return (
     <form className="mb-4 flex flex-col gap-3" action={formAction}>

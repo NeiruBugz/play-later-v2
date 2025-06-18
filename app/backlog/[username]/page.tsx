@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { getUserInfo } from "@/features/manage-user-info/server-actions/get-user-info";
 import { getUsersBacklog } from "@/features/view-backlogs/server-actions/get-users-backlog";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
@@ -10,9 +9,9 @@ export default async function UsersBacklogPage(props: {
   params: Promise<Record<string, string>>;
   searchParams: Promise<URLSearchParams>;
 }) {
-  const [userGamesList, user, session] = await Promise.all([
-    getUsersBacklog({ backlogId: (await props.params).backlogId }),
-    getUserInfo((await props.params).backlogId),
+  const awaitedParams = await props.params;
+  const [userGamesList, session] = await Promise.all([
+    getUsersBacklog({ username: awaitedParams.username }),
     auth(),
   ]);
 
@@ -25,7 +24,7 @@ export default async function UsersBacklogPage(props: {
       <Header />
       <div className="container pt-[60px]">
         <h1 className="font-bold md:text-xl xl:text-2xl">
-          {user?.username ?? user?.name}&apos;s Backlog
+          {awaitedParams.username}&apos;s Backlog
         </h1>
         <ul className="mt-2 flex flex-wrap justify-evenly gap-2">
           {userGamesList.map((backlogItem) => (

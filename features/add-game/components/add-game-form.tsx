@@ -11,7 +11,6 @@ import {
 import { HiddenInput } from "@/shared/components/hidden-input";
 import { Label } from "@/shared/components/label";
 import { RadioGroup, RadioGroupItem } from "@/shared/components/radio-group";
-import { useToast } from "@/shared/components/use-toast";
 import {
   AcquisitionStatusMapper,
   BacklogStatusMapper,
@@ -28,9 +27,18 @@ import {
   useState,
 } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { createGameAction } from "../server-actions/action";
 import type { BacklogItemFormValues, GameFormValues } from "../types";
 import { GamePicker } from "./game-picker";
+
+const DEFAULT_PLATFORM_LIST: SearchResponse["platforms"] = [
+  { id: 9999, name: "PC" },
+  { id: 9998, name: "PlayStation" },
+  { id: 9997, name: "Xbox" },
+  { id: 9996, name: "Nintendo" },
+  { id: 9995, name: "Other" },
+];
 
 export const initialFormValues: BacklogItemFormValues = {
   backlogStatus: BacklogItemStatus.TO_PLAY,
@@ -85,7 +93,6 @@ export function AddGameForm() {
     message: "",
     isError: false,
   });
-  const { toast } = useToast();
 
   const updateFormValues = useCallback((newValues: Partial<GameFormValues>) => {
     setGameValues((prevState) => ({ ...prevState, ...newValues }));
@@ -103,13 +110,17 @@ export function AddGameForm() {
     if (state.message) {
       onFormReset();
 
-      toast({
-        title: "Add Game",
-        description: state.message,
-        variant: state.isError ? "destructive" : "default",
-      });
+      if (state.isError) {
+        toast.error("Add Game", {
+          description: state.message,
+        });
+      } else {
+        toast.success("Add Game", {
+          description: state.message,
+        });
+      }
     }
-  }, [state.isError, state.message, toast, onFormReset]);
+  }, [state.isError, state.message, onFormReset]);
 
   const onGameSelect = useCallback(
     (game?: SearchResponse) => {
@@ -129,7 +140,7 @@ export function AddGameForm() {
         releaseDate: game.first_release_date,
         description: game.summary,
       });
-      setPlatformOptions(game.platforms);
+      setPlatformOptions(game.platforms ?? DEFAULT_PLATFORM_LIST);
     },
     [updateFormValues]
   );

@@ -1,22 +1,24 @@
-import { getUserInfo } from "@/features/manage-user-info/server-actions/get-user-info";
-import { getWishlistedItems } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
+import { getUserByUsername } from "@/features/manage-user-info/server-actions/get-user-by-username";
+import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Header } from "@/shared/components/header";
 import { GenericPageProps } from "@/shared/types";
 
 export default async function SharedWishlistPage(props: GenericPageProps) {
   const [user, wishlistedItems] = await Promise.all([
-    getUserInfo((await props.params).userId),
-    getWishlistedItems((await props.params).userId),
+    getUserByUsername((await props.params).username),
+    getWishlistedItemsByUsername((await props.params).username),
   ]);
 
   return (
     <div>
       <Header />
-      <div className="container mx-auto px-4 py-8 pt-[60px] md:px-6 lg:px-8">
-        <h1 className="my-2 font-bold md:text-xl xl:text-2xl">
-          {user?.username || user?.name}&apos;s wishlist
-        </h1>
+      <div className="container overflow-hidden px-4 py-8 pt-[60px]">
+        <div className="mb-8 mt-4 flex flex-col gap-4">
+          <h1 className="text-3xl font-bold tracking-tight">
+            {user?.username || user?.name}&apos;s wishlist
+          </h1>
+        </div>
         <div>
           <ul className="flex flex-wrap justify-center gap-3 md:justify-start">
             {wishlistedItems.map(({ game, backlogItems }) => (
@@ -29,7 +31,6 @@ export default async function SharedWishlistPage(props: GenericPageProps) {
                     igdbId: game.igdbId,
                   }}
                   backlogItems={backlogItems}
-                  isExternalGame
                 />
               </li>
             ))}

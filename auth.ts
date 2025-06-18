@@ -25,8 +25,9 @@ export const { auth, handlers, signIn } = NextAuth({
   },
   providers: [Google],
   session: {
-    maxAge: 24 * 60 * 60, // 1 day
+    maxAge: 7 * 24 * 60 * 60, // 7 days
     strategy: "jwt",
+    updateAge: 24 * 60 * 60, // Rotate every day
   },
 });
 

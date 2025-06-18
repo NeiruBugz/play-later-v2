@@ -1,12 +1,17 @@
+import { getServerUserId } from "@/auth";
 import { EditUserForm } from "@/features/manage-user-info/components/edit-user-form";
 import { getUserInfo } from "@/features/manage-user-info/server-actions/get-user-info";
 import { Header } from "@/shared/components/header";
-import { GenericPageProps } from "@/shared/types";
 import { notFound } from "next/navigation";
 
-export default async function UserPage(props: GenericPageProps) {
-  const params = await props.params;
-  const user = await getUserInfo(params.userId);
+export default async function UserPage() {
+  const userId = await getServerUserId();
+
+  if (!userId) {
+    return notFound();
+  }
+
+  const user = await getUserInfo(userId);
 
   if (!user) {
     return notFound();

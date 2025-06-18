@@ -20,10 +20,12 @@ export function Metadata({
   const firstReleaseDate = fReleaseDate
     ? format(fReleaseDate, "dd.MM.yyyy")
     : releaseDates[0].human;
-  const developer = involvedCompanies.find((company) => company.developer)
-    ?.company.name;
-  const publisher = involvedCompanies.find((company) => company.publisher)
-    ?.company.name;
+  const developer =
+    involvedCompanies?.find((company) => company.developer)?.company.name ??
+    "Unknown";
+  const publisher =
+    involvedCompanies?.find((company) => company.publisher)?.company.name ??
+    "Unknown";
 
   const firstReleaseDateToDate = fReleaseDate
     ? parse(firstReleaseDate, "dd.MM.yyyy", new Date())
