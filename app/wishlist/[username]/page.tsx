@@ -5,9 +5,11 @@ import { Header } from "@/shared/components/header";
 import { GenericPageProps } from "@/shared/types";
 
 export default async function SharedWishlistPage(props: GenericPageProps) {
+  const { username } = await props.params;
+  const decodedUsername = decodeURIComponent(username);
   const [user, wishlistedItems] = await Promise.all([
-    getUserByUsername((await props.params).username),
-    getWishlistedItemsByUsername((await props.params).username),
+    getUserByUsername(decodedUsername),
+    getWishlistedItemsByUsername(decodedUsername),
   ]);
 
   return (

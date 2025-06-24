@@ -47,7 +47,7 @@ export function ShareWishlist() {
     const sharedUrl = "/wishlist";
     const origin = window.location.origin;
 
-    const resultURL = `${origin}${sharedUrl}/${userInfo.username}`;
+    const resultURL = `${origin}${sharedUrl}/${encodeURIComponent(userInfo.username)}`;
     copy(resultURL)
       .then(() =>
         toast.success("Success", {
