@@ -36,8 +36,6 @@ const nextConfig = {
         protocol: "https",
       },
     ],
-  },
-  images: {
     unoptimized: true,
   },
   reactStrictMode: true,

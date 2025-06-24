@@ -1,9 +1,7 @@
 import { AddToCollectionModal } from "@/features/add-game";
-import {
-  Artwork,
-  GameScreenshots,
-  GameStats,
-} from "@/features/view-game-details";
+import { GameScreenshots } from "@/features/view-game-details";
+import { Artwork } from "@/features/view-game-details/components/artwork";
+import { GameStats } from "@/features/view-game-details/components/game-stats";
 import { Button } from "@/shared/components";
 import { Badge } from "@/shared/components/badge";
 import { Header } from "@/shared/components/header";
