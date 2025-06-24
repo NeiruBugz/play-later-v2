@@ -1,4 +1,9 @@
 import { Header } from "@/shared/components/header";
+import {
+  Body,
+  Heading,
+  ResponsiveHeading,
+} from "@/shared/components/typography";
 import { format } from "date-fns";
 import { unstable_noStore } from "next/cache";
 import Markdown from "react-markdown";
@@ -22,10 +27,8 @@ export default async function ChangelogPage() {
       <Header />
       <div className="container overflow-hidden px-4 py-8 pt-[60px]">
         <div className="mb-8 mt-4 flex flex-col gap-4">
-          <h1 className="text-3xl font-bold tracking-tight">Changelog</h1>
-          <p className="text-muted-foreground">
-            View the changelog for the project
-          </p>
+          <ResponsiveHeading level={1}>Changelog</ResponsiveHeading>
+          <Body variant="muted">View the changelog for the project</Body>
         </div>
 
         {changelogs.length === 0 && (
@@ -54,7 +57,9 @@ export default async function ChangelogPage() {
               <div className="w-full pb-16">
                 <div className="space-y-4">
                   <div className="flex flex-col gap-4">
-                    <h2 className="text-4xl">{changelog.title}</h2>
+                    <Heading size="xl" level={2}>
+                      {changelog.title}
+                    </Heading>
 
                     <Markdown className="prose">{changelog.post}</Markdown>
                   </div>

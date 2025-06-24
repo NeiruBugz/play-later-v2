@@ -25,7 +25,13 @@ export function CompleteActionButton({
   game,
   backlogItems,
 }: CompleteActionButtonProps) {
-  const matchingStatusItem = useMatchingBacklogItem({ backlogItems });
+  const latestStatus = backlogItems?.sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  )?.[0]?.status;
+  const matchingStatusItem = useMatchingBacklogItem({
+    backlogItems,
+    status: latestStatus,
+  });
 
   const onClick = useCallback(
     async (event: MouseEvent<HTMLButtonElement>) => {

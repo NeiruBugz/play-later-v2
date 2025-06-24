@@ -5,57 +5,95 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 250 15% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 250 15% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
+    --popover-foreground: 250 15% 11%;
+    --primary: 263 70% 50%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 250 12% 92%;
+    --secondary-foreground: 250 15% 11%;
+    --muted: 250 12% 92%;
+    --muted-foreground: 250 8% 45%;
+    --accent: 270 95% 75%;
+    --accent-foreground: 250 15% 11%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --border: 250 12% 88%;
+    --input: 250 12% 88%;
+    --ring: 263 70% 50%;
+    --radius: 1rem;
+    --chart-1: 263 70% 50%;
+    --chart-2: 270 95% 75%;
+    --chart-3: 310 100% 70%;
+    --chart-4: 190 95% 65%;
+    --chart-5: 120 95% 65%;
+
+    /* Gaming theme colors */
+    --gaming-primary: 263 70% 50%;
+    --gaming-secondary: 270 95% 75%;
+    --gaming-accent: 310 100% 70%;
+    --gaming-neon-green: 120 95% 65%;
+    --gaming-neon-blue: 190 95% 65%;
+    --gaming-gradient-start: 263 70% 50%;
+    --gaming-gradient-end: 310 100% 70%;
+
+    /* Sidebar colors */
+    --sidebar-background: 250 20% 96%;
+    --sidebar-foreground: 250 15% 11%;
+    --sidebar-primary: 263 70% 50%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 270 95% 75%;
+    --sidebar-accent-foreground: 250 15% 11%;
+    --sidebar-border: 250 12% 88%;
+    --sidebar-ring: 263 70% 50%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 250 20% 8%;
+    --foreground: 250 10% 95%;
+    --card: 250 20% 10%;
+    --card-foreground: 250 10% 95%;
+    --popover: 250 20% 10%;
+    --popover-foreground: 250 10% 95%;
+    --primary: 270 95% 75%;
+    --primary-foreground: 250 20% 8%;
+    --secondary: 250 15% 15%;
+    --secondary-foreground: 250 10% 95%;
+    --muted: 250 15% 15%;
+    --muted-foreground: 250 10% 65%;
+    --accent: 263 70% 60%;
+    --accent-foreground: 250 10% 95%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --border: 250 15% 18%;
+    --input: 250 15% 18%;
+    --ring: 270 95% 75%;
+    --chart-1: 270 95% 75%;
+    --chart-2: 263 70% 60%;
+    --chart-3: 310 100% 75%;
+    --chart-4: 190 95% 70%;
+    --chart-5: 120 95% 70%;
+
+    /* Gaming theme colors - dark mode */
+    --gaming-primary: 270 95% 75%;
+    --gaming-secondary: 263 70% 60%;
+    --gaming-accent: 310 100% 75%;
+    --gaming-neon-green: 120 95% 70%;
+    --gaming-neon-blue: 190 95% 70%;
+    --gaming-gradient-start: 270 95% 75%;
+    --gaming-gradient-end: 310 100% 75%;
+
+    /* Sidebar colors - dark mode */
+    --sidebar-background: 250 20% 6%;
+    --sidebar-foreground: 250 10% 95%;
+    --sidebar-primary: 270 95% 75%;
+    --sidebar-primary-foreground: 250 20% 8%;
+    --sidebar-accent: 263 70% 60%;
+    --sidebar-accent-foreground: 250 10% 95%;
+    --sidebar-border: 250 15% 18%;
+    --sidebar-ring: 270 95% 75%;
   }
 }
 
@@ -65,5 +103,111 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Typography Utilities */
+  .display-2xl {
+    @apply text-display-2xl font-display;
+  }
+  .display-xl {
+    @apply text-display-xl font-display;
+  }
+  .display-lg {
+    @apply text-display-lg font-display;
+  }
+
+  .heading-xl {
+    @apply text-heading-xl font-heading;
+  }
+  .heading-lg {
+    @apply text-heading-lg font-heading;
+  }
+  .heading-md {
+    @apply text-heading-md font-heading;
+  }
+  .heading-sm {
+    @apply text-heading-sm font-heading;
+  }
+  .heading-xs {
+    @apply text-heading-xs font-heading;
+  }
+
+  .subheading-xl {
+    @apply text-heading-xl font-subheading;
+  }
+  .subheading-lg {
+    @apply text-heading-lg font-subheading;
+  }
+  .subheading-md {
+    @apply text-heading-md font-subheading;
+  }
+  .subheading-sm {
+    @apply text-heading-sm font-subheading;
+  }
+  .subheading-xs {
+    @apply text-heading-xs font-subheading;
+  }
+
+  .body-lg {
+    @apply text-body-lg font-body;
+  }
+  .body-md {
+    @apply text-body-md font-body;
+  }
+  .body-sm {
+    @apply text-body-sm font-body;
+  }
+  .body-xs {
+    @apply text-body-xs font-body;
+  }
+
+  .caption {
+    @apply text-caption font-caption;
+  }
+  .overline {
+    @apply text-overline font-caption uppercase;
+  }
+
+  .gaming-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gaming-gradient-start)),
+      hsl(var(--gaming-gradient-end))
+    );
+  }
+
+  .gaming-gradient-hover {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gaming-gradient-start) / 0.8),
+      hsl(var(--gaming-gradient-end) / 0.8)
+    );
+  }
+
+  .gaming-border-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gaming-gradient-start)),
+      hsl(var(--gaming-gradient-end))
+    );
+    padding: 2px;
+    border-radius: inherit;
+  }
+
+  .gaming-border-gradient > * {
+    background: hsl(var(--background));
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  .neon-glow {
+    box-shadow:
+      0 0 20px hsl(var(--accent) / 0.3),
+      0 0 40px hsl(var(--accent) / 0.1);
+  }
+
+  .gaming-pill {
+    border-radius: 9999px;
   }
 }

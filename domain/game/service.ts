@@ -36,6 +36,18 @@ export const GameService = {
     }, "Failed to create game");
   },
 
+  isExisting: async (
+    igdbId: string | number
+  ): Promise<Result<boolean, Error>> => {
+    return wrapWithResult(async () => {
+      const game = await prisma.game.findUnique({
+        where: { igdbId: Number(igdbId) },
+      });
+
+      return !!game;
+    }, `Failed to check if game with IGDB ID ${igdbId} exists`);
+  },
+
   findByIgdbId: async (
     igdbId: string | number
   ): Promise<Result<Game | null, DatabaseError>> => {

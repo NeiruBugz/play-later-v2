@@ -12,7 +12,6 @@ export async function updateBacklogItemAction({
   id: number;
   status: BacklogItemStatus;
 }) {
-  // Handle authentication at this level
   const userId = await getServerUserId();
   if (!userId) {
     return {
@@ -37,7 +36,6 @@ export async function updateBacklogItemAction({
       };
     }
 
-    // UI-specific revalidation
     RevalidationService.revalidateCollection();
 
     return {

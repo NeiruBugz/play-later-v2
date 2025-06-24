@@ -10,7 +10,7 @@ import {
   setupAuthMocks,
 } from "../../../../test/setup/auth-mock";
 
-describe("editBacklogItemAction", () => {
+describe(editBacklogItemAction.name, () => {
   beforeEach(() => {
     setupAuthMocks();
     vi.clearAllMocks();

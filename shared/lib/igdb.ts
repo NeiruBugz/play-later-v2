@@ -444,7 +444,6 @@ const igdbApi = {
     const query = new QueryBuilder()
       .fields([
         "name",
-        "summary",
         "platforms.name",
         "release_dates.human",
         "first_release_date",

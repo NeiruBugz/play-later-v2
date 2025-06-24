@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/dropdown-menu";
+import { ResponsiveHeading } from "@/shared/components/typography";
 import { GamepadIcon, MenuIcon } from "lucide-react";
 import Link from "next/link";
 import React, { memo } from "react";
@@ -53,10 +54,13 @@ const Header = memo(function Header() {
             </DropdownMenu>
           </div>
           <Link href="/">
-            <h1 className="mr-4 flex items-center font-bold md:text-lg xl:text-xl">
+            <ResponsiveHeading
+              level={1}
+              className="md:text-heading-sm xl:text-heading-md mr-4 flex items-center"
+            >
               <GamepadIcon className="mr-2 size-6 text-green-500" />
-              <span className="">PlayLater</span>
-            </h1>
+              <span>PlayLater</span>
+            </ResponsiveHeading>
           </Link>
           <div className="hidden items-center gap-3 md:flex">
             {linksConfig.map((link) => {

@@ -22,6 +22,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./tooltip";
+import { Heading } from "./typography";
 
 interface GameCardProps {
   game: Game;
@@ -81,12 +82,14 @@ export function GameCard({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <h3
-                  className="line-clamp-1 cursor-help font-semibold"
+                <Heading
+                  level={3}
+                  size="sm"
+                  className="line-clamp-1 cursor-help"
                   title={game.title}
                 >
                   {game.title}
-                </h3>
+                </Heading>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{game.title}</p>

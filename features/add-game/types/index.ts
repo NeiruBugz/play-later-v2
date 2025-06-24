@@ -11,10 +11,10 @@ export type BacklogItemFormValues = {
 };
 
 export type AddGameToBacklogInput = {
-  game: Omit<Game, "id" | "createdAt" | "updatedAt" | "userId">;
+  game: Pick<Game, "igdbId">;
   backlogItem: {
-    backlogStatus: string;
-    acquisitionType: string;
+    backlogStatus: BacklogItemStatus;
+    acquisitionType: AcquisitionType;
     platform?: string;
   };
 };

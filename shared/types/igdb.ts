@@ -132,7 +132,6 @@ export type SearchResponse = {
   first_release_date: number;
   id: number;
   name: string;
-  summary: string;
   platforms: Array<Platform>;
   release_dates?: ReleaseDate[];
 };

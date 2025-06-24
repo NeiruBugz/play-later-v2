@@ -6,6 +6,11 @@ import { FeatureCard } from "@/features/landing";
 import { SignIn } from "@/features/sign-in";
 import { Header } from "@/shared/components/header";
 import {
+  Body,
+  Display,
+  ResponsiveHeading,
+} from "@/shared/components/typography";
+import {
   BarChart3,
   Gamepad2,
   ListChecks,
@@ -23,15 +28,18 @@ export default async function Page() {
         <section className="relative flex h-screen items-center justify-center overflow-hidden">
           {/* <div className="absolute inset-0 bg-[url('/placeholder.svg?height=1080&width=1920')] bg-cover bg-center opacity-20"></div> */}
           <div className="relative z-10 space-y-6 px-4 text-center">
-            <h1 className="text-5xl font-extrabold tracking-tight md:text-7xl">
+            <Display size="2xl" className="md:text-display-2xl">
               <span className="bg-gradient-to-r from-green-400 to-emerald-600 bg-clip-text text-transparent">
                 PlayLater
               </span>
-            </h1>
-            <p className="mx-auto max-w-2xl text-xl text-gray-300 md:text-2xl">
+            </Display>
+            <Body
+              size="lg"
+              className="md:text-body-lg mx-auto max-w-2xl text-gray-300"
+            >
               Your ultimate game backlog companion. Track, wish, and conquer
               your gaming journey.
-            </p>
+            </Body>
             <SignIn variant="start" />
           </div>
           <div className="absolute bottom-10 left-1/2 -translate-x-1/2 transform animate-bounce">
@@ -53,9 +61,9 @@ export default async function Page() {
         </section>
 
         <section className="px-4 py-20">
-          <h2 className="mb-12 text-center text-3xl font-bold md:text-4xl">
+          <ResponsiveHeading level={2} className="mb-12 text-center">
             Level Up Your Gaming Experience
-          </h2>
+          </ResponsiveHeading>
           <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
               icon={<Gamepad2 className="h-10 w-10 text-green-400" />}
@@ -87,13 +95,13 @@ export default async function Page() {
 
         <section className="px-4 py-20">
           <div className="mx-auto max-w-4xl space-y-8 text-center">
-            <h2 className="text-3xl font-bold md:text-4xl">
+            <ResponsiveHeading level={2}>
               Ready to Conquer Your Backlog?
-            </h2>
-            <p className="text-xl text-gray-300">
+            </ResponsiveHeading>
+            <Body size="lg" className="text-gray-300">
               Join to organize your collections, tracking progress, and
               discovering new adventures.
-            </p>
+            </Body>
             <SignIn variant="default" />
           </div>
         </section>
@@ -110,9 +118,12 @@ export default async function Page() {
     <>
       <Header />
       <section className="container mt-2 pt-[60px]">
-        <h1 className="font-bold md:text-xl xl:text-2xl">
+        <ResponsiveHeading
+          level={1}
+          className="md:text-heading-lg xl:text-heading-xl"
+        >
           Hi, {session.user.name}
-        </h1>
+        </ResponsiveHeading>
         <section className="mt-2 flex max-w-[100vw] grid-cols-3 justify-between">
           <Suspense fallback={"Loading..."}>
             <UpcomingReleases />

@@ -6,6 +6,7 @@ import { StatusFilter } from "@/features/view-collection/components/status-filte
 import { CollectionViewMode } from "@/features/view-collection/components/view-mode";
 import { getUserUniquePlatforms } from "@/features/view-collection/server-actions/get-uniques-platforms";
 import { Header } from "@/shared/components/header";
+import { Body, ResponsiveHeading } from "@/shared/components/typography";
 import { GenericPageProps } from "@/shared/types";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -28,10 +29,10 @@ export default async function CollectionPage(props: {
       <Header />
       <div className="container overflow-hidden px-4 py-8 pt-[60px]">
         <div className="mb-8 mt-4 flex flex-col gap-4">
-          <h1 className="text-3xl font-bold tracking-tight">Your Collection</h1>
-          <p className="text-muted-foreground">
+          <ResponsiveHeading level={1}>Your Collection</ResponsiveHeading>
+          <Body variant="muted">
             Manage and browse through your game library
-          </p>
+          </Body>
         </div>
         <div className="mb-8 flex flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
