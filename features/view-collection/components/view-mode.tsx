@@ -28,23 +28,21 @@ export function CollectionViewMode() {
   );
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1 rounded-lg border p-1">
       <Button
-        variant={currentViewMode === "grid" ? "default" : "outline"}
-        size="icon"
-        className="h-9 w-9"
+        variant={currentViewMode === "grid" ? "default" : "ghost"}
+        size="sm"
+        className="h-8 px-3"
         onClick={() => handleViewModeChange("grid")}
-        disabled
       >
         <Grid3X3 className="h-4 w-4" />
         <span className="sr-only">Grid view</span>
       </Button>
       <Button
-        variant={currentViewMode === "list" ? "default" : "outline"}
-        size="icon"
-        className="h-9 w-9"
+        variant={currentViewMode === "list" ? "default" : "ghost"}
+        size="sm"
+        className="h-8 px-3"
         onClick={() => handleViewModeChange("list")}
-        disabled
       >
         <List className="h-4 w-4" />
         <span className="sr-only">List view</span>

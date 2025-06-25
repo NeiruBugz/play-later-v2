@@ -196,12 +196,12 @@ Caption.displayName = "Caption";
 const responsiveHeadingVariants = cva("font-heading text-foreground", {
   variants: {
     level: {
-      1: "text-heading-lg md:text-heading-xl",
-      2: "text-heading-md md:text-heading-lg",
-      3: "text-heading-sm md:text-heading-md",
-      4: "text-heading-xs md:text-heading-sm",
-      5: "text-body-lg md:text-heading-xs",
-      6: "text-body-md md:text-body-lg font-subheading",
+      1: "text-heading-md sm:text-heading-lg md:text-heading-xl lg:text-display-sm",
+      2: "text-heading-sm sm:text-heading-md md:text-heading-lg lg:text-heading-xl",
+      3: "text-heading-xs sm:text-heading-sm md:text-heading-md lg:text-heading-lg",
+      4: "text-body-lg sm:text-heading-xs md:text-heading-sm lg:text-heading-md",
+      5: "text-body-md sm:text-body-lg md:text-heading-xs lg:text-heading-sm",
+      6: "text-body-sm sm:text-body-md md:text-body-lg lg:text-heading-xs font-subheading",
     },
   },
   defaultVariants: {

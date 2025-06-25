@@ -1,14 +1,31 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/tabs";
+import { Button } from "@/shared/components/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/select";
+import { cn } from "@/shared/lib";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+
+const statusOptions = [
+  { value: "All", label: "All Games", shortLabel: "All", icon: "🎮" },
+  { value: "TO_PLAY", label: "Backlog", shortLabel: "Backlog", icon: "📚" },
+  { value: "PLAYING", label: "Playing", shortLabel: "Playing", icon: "🎯" },
+  { value: "PLAYED", label: "Played", shortLabel: "Played", icon: "✅" },
+  { value: "COMPLETED", label: "Completed", shortLabel: "Done", icon: "🏆" },
+] as const;
 
 export function StatusFilter() {
   const params = useSearchParams();
   const router = useRouter();
 
   const currentStatusParam = params.get("status");
+  const currentValue = currentStatusParam || "All";
 
   const onStatusSelect = useCallback(
     (value: string | null) => {
@@ -30,20 +47,59 @@ export function StatusFilter() {
     [router, params]
   );
 
+  const currentOption = statusOptions.find(
+    (option) => option.value === currentValue
+  );
+
   return (
-    <Tabs
-      defaultValue={currentStatusParam || "All"}
-      value={currentStatusParam || "All"}
-      onValueChange={(value) => onStatusSelect(value)}
-      className="w-full sm:w-auto"
-    >
-      <TabsList className="grid w-full grid-cols-5 sm:w-auto">
-        <TabsTrigger value="All">All</TabsTrigger>
-        <TabsTrigger value="TO_PLAY">Backlog</TabsTrigger>
-        <TabsTrigger value="PLAYED">Played</TabsTrigger>
-        <TabsTrigger value="PLAYING">Playing</TabsTrigger>
-        <TabsTrigger value="COMPLETED">Completed</TabsTrigger>
-      </TabsList>
-    </Tabs>
+    <>
+      {/* Mobile: Dropdown Select - Better UX on touch devices */}
+      <div className="block md:hidden">
+        <Select value={currentValue} onValueChange={onStatusSelect}>
+          <SelectTrigger className="h-10 w-full">
+            <SelectValue>
+              <div className="flex items-center gap-2">
+                <span className="text-sm">{currentOption?.icon}</span>
+                <span className="font-medium">{currentOption?.label}</span>
+              </div>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {statusOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                <div className="flex items-center gap-3 py-1">
+                  <span className="text-sm">{option.icon}</span>
+                  <span>{option.label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Desktop: Pill Buttons - Optimized for mouse interaction */}
+      <div className="hidden items-center gap-2 md:flex">
+        {statusOptions.map((option) => {
+          const isActive = currentValue === option.value;
+          return (
+            <Button
+              key={option.value}
+              variant={isActive ? "default" : "outline"}
+              size="sm"
+              onClick={() => onStatusSelect(option.value)}
+              className={cn(
+                "h-9 px-4 text-sm font-medium transition-all duration-200",
+                "hover:scale-105 active:scale-95",
+                isActive && "shadow-md"
+              )}
+            >
+              <span className="mr-2">{option.icon}</span>
+              <span className="hidden lg:inline">{option.label}</span>
+              <span className="lg:hidden">{option.shortLabel}</span>
+            </Button>
+          );
+        })}
+      </div>
+    </>
   );
 }

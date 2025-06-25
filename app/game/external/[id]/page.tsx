@@ -9,14 +9,15 @@ import { GameStats } from "@/features/view-game-details/components/game-stats";
 import { Metadata } from "@/features/view-game-details/components/metadata";
 import { TimesToBeat } from "@/features/view-game-details/components/times-to-beat";
 import { Button } from "@/shared/components";
+import {
+  AdaptiveTabs,
+  AdaptiveTabsContent,
+  AdaptiveTabsList,
+  AdaptiveTabsTrigger,
+} from "@/shared/components/adaptive-tabs";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/components/tabs";
+import { cn } from "@/shared/lib";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
 import { GenericPageProps } from "@/shared/types";
@@ -26,13 +27,11 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 export default async function ExternalGamePage(props: GenericPageProps) {
-  const id = (await props.params).id;
-  const igdbData = await igdbApi.getGameById(Number(id));
-  const backlogItems = await BacklogItemService.getBacklogItemsForUserByIgdbId(
-    Number(id)
-  );
-
-  console.log(backlogItems);
+  const id = Number((await props.params).id);
+  const [igdbData, backlogItems] = await Promise.all([
+    igdbApi.getGameById(id),
+    BacklogItemService.getBacklogItemsForUserByIgdbId(id),
+  ]);
 
   const isWishlistDisabled = backlogItems.isSuccess
     ? backlogItems.value.some(
@@ -88,7 +87,11 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                     className="flex w-full items-center gap-2"
                     disabled={isWishlistDisabled}
                   >
-                    <Heart className="h-4 w-4" />
+                    <Heart
+                      className={cn("h-4 w-4", {
+                        "fill-foreground": isWishlistDisabled,
+                      })}
+                    />
                     <span>Add to Wishlist</span>
                   </Button>
                 </form>
@@ -116,16 +119,22 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                 </div>
               </div>
 
-              <Tabs defaultValue="about" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="about">About</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                  <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
-                  <TabsTrigger value="achievements" hidden>
-                    WIP: Achievements
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="about" className="space-y-4">
+              <AdaptiveTabs defaultValue="about" className="w-full">
+                <AdaptiveTabsList className="w-fit">
+                  <AdaptiveTabsTrigger value="about" icon="📖">
+                    About
+                  </AdaptiveTabsTrigger>
+                  <AdaptiveTabsTrigger value="reviews" icon="⭐">
+                    Reviews
+                  </AdaptiveTabsTrigger>
+                  <AdaptiveTabsTrigger value="screenshots" icon="🖼️">
+                    Screenshots
+                  </AdaptiveTabsTrigger>
+                  <AdaptiveTabsTrigger value="achievements" icon="🏆" disabled>
+                    Achievements
+                  </AdaptiveTabsTrigger>
+                </AdaptiveTabsList>
+                <AdaptiveTabsContent value="about" className="space-y-4">
                   <About
                     description={
                       igdbData.summary || "No description available."
@@ -134,27 +143,27 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                     genres={igdbData.genres}
                     igdbId={igdbData.id}
                   />
-                </TabsContent>
-                <TabsContent value="reviews">
+                </AdaptiveTabsContent>
+                <AdaptiveTabsContent value="reviews">
                   <div className="py-8 text-center text-muted-foreground">
                     <p>Reviews are not available for external games yet.</p>
                     <p className="mt-2 text-sm">
                       Add this game to your collection to leave a review!
                     </p>
                   </div>
-                </TabsContent>
-                <TabsContent value="screenshots">
+                </AdaptiveTabsContent>
+                <AdaptiveTabsContent value="screenshots">
                   <Suspense fallback={"loading..."}>
                     <GameScreenshots
                       gameId={igdbData.id}
                       gameName={igdbData.name}
                     />
                   </Suspense>
-                </TabsContent>
-                <TabsContent value="achievements">
+                </AdaptiveTabsContent>
+                <AdaptiveTabsContent value="achievements">
                   <Achievements steamAppId={steamAppId} />
-                </TabsContent>
-              </Tabs>
+                </AdaptiveTabsContent>
+              </AdaptiveTabs>
             </div>
             <div className="flex flex-col gap-6">
               <Metadata

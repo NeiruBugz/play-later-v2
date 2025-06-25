@@ -16,9 +16,21 @@ export async function getUpcomingWishlistItems() {
       where: {
         userId,
         status: "WISHLIST",
+        game: {
+          releaseDate: {
+            gte: new Date(),
+          },
+        },
       },
       include: {
-        game: true,
+        game: {
+          select: {
+            igdbId: true,
+            title: true,
+            coverImage: true,
+            releaseDate: true,
+          },
+        },
       },
     });
 

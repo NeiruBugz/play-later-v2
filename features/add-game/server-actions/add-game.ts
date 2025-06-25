@@ -3,6 +3,7 @@ import { getServerUserId } from "@/auth";
 import { BacklogItemService } from "@/domain/backlog-item/service";
 import { GameService } from "@/domain/game/service";
 import type { GameInput } from "@/domain/game/types";
+import { convertReleaseDateToIsoStringDate } from "@/shared/lib/date-functions";
 import { prisma } from "@/shared/lib/db";
 import igdbApi from "@/shared/lib/igdb";
 import type { Game } from "@prisma/client";
@@ -35,6 +36,10 @@ export async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
     } else {
       const gameInfo = await igdbApi.getGameById(game.igdbId);
 
+      const releaseDate = convertReleaseDateToIsoStringDate(
+        gameInfo?.release_dates[0]?.human
+      );
+
       if (!gameInfo) {
         throw new Error(`Game with IGDB ID ${game.igdbId} not found`);
       }
@@ -44,6 +49,7 @@ export async function saveGameAndAddToBacklog(payload: AddGameToBacklogInput) {
         title: gameInfo.name,
         coverImage: gameInfo.cover.image_id,
         description: gameInfo.summary,
+        releaseDate,
       };
       const createdGameResult = await GameService.create({ game: gameInput });
 

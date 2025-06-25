@@ -1,5 +1,4 @@
 import type { GameWithBacklogItems } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
-import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { GameCard } from "./game-card";
 
 export function GridView({
@@ -8,28 +7,16 @@ export function GridView({
   backlogItems: GameWithBacklogItems[];
 }) {
   return (
-    <ul className="grid grid-cols-6 gap-2">
+    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
       {backlogItems.map(({ game, backlogItems }) => (
-        <GameCard
-          key={game.id}
-          game={game}
-          platforms={backlogItems}
-          currentPlatform={backlogItems[0] || undefined}
-          displayMode={"combined"}
-        />
-        // <BacklogItemCard
-        //   key={game.id}
-        //   game={{
-        //     id: game.id,
-        //     title: game.title,
-        //     coverImage: game.coverImage,
-        //     igdbId: game.igdbId,
-        //   }}
-        //   backlogItems={backlogItems}
-        //   hasActions={true}
-        //   isExternalGame={false}
-        //   isFromSharedWishlist={false}
-        // />
+        <li key={game.id}>
+          <GameCard
+            game={game}
+            platforms={backlogItems}
+            currentPlatform={backlogItems[0] || undefined}
+            displayMode={"combined"}
+          />
+        </li>
       ))}
     </ul>
   );

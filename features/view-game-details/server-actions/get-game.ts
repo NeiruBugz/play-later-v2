@@ -22,6 +22,7 @@ export async function getGame(id: string) {
       mainExtra: true,
       completionist: true,
       releaseDate: true,
+      steamAppId: true,
       backlogItems: {
         orderBy: {
           updatedAt: "desc",

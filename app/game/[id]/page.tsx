@@ -10,14 +10,14 @@ import { Franchises } from "@/features/view-game-details/components/franchises";
 import { GameQuickActions } from "@/features/view-game-details/components/game-quick-actions";
 import { Metadata } from "@/features/view-game-details/components/metadata";
 import { TimesToBeat } from "@/features/view-game-details/components/times-to-beat";
+import {
+  AdaptiveTabs,
+  AdaptiveTabsContent,
+  AdaptiveTabsList,
+  AdaptiveTabsTrigger,
+} from "@/shared/components/adaptive-tabs";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/components/tabs";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
 import { GenericPageProps } from "@/shared/types";
@@ -98,38 +98,50 @@ export default async function GamePage(props: GenericPageProps) {
                 </div>
               </div>
 
-              <Tabs defaultValue="about" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="about">About</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                  <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
-                  <TabsTrigger value="achievements" hidden>
-                    WIP: Achievements
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="about" className="space-y-4">
+              <AdaptiveTabs defaultValue="about" className="w-full">
+                <AdaptiveTabsList className="w-fit">
+                  <AdaptiveTabsTrigger value="about" icon="📖">
+                    About
+                  </AdaptiveTabsTrigger>
+                  <AdaptiveTabsTrigger value="reviews" icon="⭐">
+                    Reviews
+                  </AdaptiveTabsTrigger>
+                  <AdaptiveTabsTrigger value="screenshots" icon="🖼️">
+                    Screenshots
+                  </AdaptiveTabsTrigger>
+                  {game.steamAppId ? (
+                    <AdaptiveTabsTrigger
+                      value="achievements"
+                      icon="🏆"
+                      disabled
+                    >
+                      Achievements
+                    </AdaptiveTabsTrigger>
+                  ) : null}
+                </AdaptiveTabsList>
+                <AdaptiveTabsContent value="about" className="space-y-4">
                   <About
                     description={game.description || igdbData.summary}
                     releaseDates={igdbData.release_dates}
                     genres={igdbData.genres}
                     igdbId={game.igdbId}
                   />
-                </TabsContent>
-                <TabsContent value="reviews">
+                </AdaptiveTabsContent>
+                <AdaptiveTabsContent value="reviews">
                   <Reviews gameId={game.id} gameTitle={game.title} />
-                </TabsContent>
-                <TabsContent value="screenshots">
+                </AdaptiveTabsContent>
+                <AdaptiveTabsContent value="screenshots">
                   <Suspense fallback={"loading..."}>
                     <GameScreenshots
                       gameId={igdbData.id}
                       gameName={game.title}
                     />
                   </Suspense>
-                </TabsContent>
-                <TabsContent value="achievements">
+                </AdaptiveTabsContent>
+                <AdaptiveTabsContent value="achievements">
                   <Achievements steamAppId={steamAppId} />
-                </TabsContent>
-              </Tabs>
+                </AdaptiveTabsContent>
+              </AdaptiveTabs>
             </div>
             <div className="flex flex-col gap-6">
               <Metadata
