@@ -22,12 +22,11 @@ import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
 import { GenericPageProps } from "@/shared/types";
 import { Star } from "lucide-react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
-function determineGameType(gameId: unknown) {
-  const isNumeric = typeof gameId === "number";
-
+function determineGameType(gameId: string) {
+  const isNumeric = !isNaN(Number(gameId)) && Number.isInteger(Number(gameId));
   return isNumeric ? "EXTERNAL" : "INTERNAL";
 }
 
@@ -36,8 +35,7 @@ export default async function GamePage(props: GenericPageProps) {
   const gameType = determineGameType(awaitedParams.id);
 
   if (gameType === "EXTERNAL") {
-    // TODO: update logic to handle both internal and external games in one route
-    return;
+    redirect(`/game/external/${awaitedParams.id}`);
   }
 
   const gameResponse = await getGame(awaitedParams.id);
@@ -105,7 +103,7 @@ export default async function GamePage(props: GenericPageProps) {
                   <TabsTrigger value="about">About</TabsTrigger>
                   <TabsTrigger value="reviews">Reviews</TabsTrigger>
                   <TabsTrigger value="screenshots">Screenshots</TabsTrigger>
-                  <TabsTrigger value="achievements">
+                  <TabsTrigger value="achievements" hidden>
                     WIP: Achievements
                   </TabsTrigger>
                 </TabsList>

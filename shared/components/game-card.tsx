@@ -1,20 +1,12 @@
 "use client";
 
 import { BacklogItem, Game } from "@prisma/client";
-import { format } from "date-fns";
-import { ChevronDown, ChevronUp, Star } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { BacklogStatusMapper, normalizeString } from "../lib";
-import { Badge } from "./badge";
+import { getGameUrl } from "../lib";
 import { Button } from "./button";
-import { Card, CardContent, CardFooter, CardHeader } from "./card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./collapsible";
+import { Card, CardFooter, CardHeader } from "./card";
 import { IgdbImage } from "./igdb-image";
 import {
   Tooltip,
@@ -102,7 +94,7 @@ export function GameCard({
 
       <CardFooter className="p-4">
         <Button variant="outline" size="sm" className="w-full" asChild>
-          <Link href={`/game/${game.id}`}>View Details</Link>
+          <Link href={getGameUrl(game.id)}>View Details</Link>
         </Button>
       </CardFooter>
     </Card>

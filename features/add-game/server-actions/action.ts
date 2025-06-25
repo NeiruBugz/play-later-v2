@@ -11,7 +11,7 @@ import { saveGameAndAddToBacklog } from "./add-game";
 export type CreateGameActionResult = {
   success: boolean;
   message: string;
-  data?: { gameTitle: string };
+  data?: { gameTitle: string; gameId: string };
 };
 
 export async function createGameAction(
@@ -47,7 +47,7 @@ export async function createGameAction(
     return {
       success: true,
       message: `"${savedGame.title}" has been added to your collection!`,
-      data: { gameTitle: savedGame.title },
+      data: { gameTitle: savedGame.title, gameId: savedGame.id },
     };
   } catch (error) {
     console.error("Failed to create game:", error);

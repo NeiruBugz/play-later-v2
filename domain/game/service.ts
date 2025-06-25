@@ -38,13 +38,17 @@ export const GameService = {
 
   isExisting: async (
     igdbId: string | number
-  ): Promise<Result<boolean, Error>> => {
+  ): Promise<Result<Game | boolean, Error>> => {
     return wrapWithResult(async () => {
       const game = await prisma.game.findUnique({
         where: { igdbId: Number(igdbId) },
       });
 
-      return !!game;
+      if (!game) {
+        return false;
+      }
+
+      return game;
     }, `Failed to check if game with IGDB ID ${igdbId} exists`);
   },
 

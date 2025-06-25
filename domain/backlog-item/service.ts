@@ -1,5 +1,10 @@
+import { getServerUserId } from "@/auth";
 import { prisma } from "@/shared/lib/db";
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import {
+  AcquisitionType,
+  BacklogItem,
+  BacklogItemStatus,
+} from "@prisma/client";
 import {
   AuthenticationError,
   DatabaseError,
@@ -189,5 +194,23 @@ export const BacklogItemService = {
       // Return void as we don't need to return any data
       return;
     }, "Failed to update backlog item status");
+  },
+
+  getBacklogItemsForUserByIgdbId: async (
+    igdbId: number
+  ): Promise<Result<BacklogItem[], Error>> => {
+    const userId = await getServerUserId();
+
+    if (!userId) {
+      return failure(new AuthenticationError("User not authenticated"));
+    }
+
+    const backlogItems = await prisma.backlogItem.findMany({
+      where: { userId, game: { igdbId } },
+    });
+
+    return wrapWithResult(async () => {
+      return backlogItems;
+    }, "Failed to get backlog items for user by IGDB ID");
   },
 };

@@ -7,3 +7,5 @@ export { normalizeString } from "./string";
 export { playingOnPlatforms } from "./platform-select-options";
 export { getUniquePlatforms } from "./get-unique-platforms";
 export { platformMapper } from "./platform-mapper";
+export { isExternalGameId } from "./is-external-game";
+export { getGameUrl } from "./get-game-url";

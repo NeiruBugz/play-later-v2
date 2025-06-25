@@ -26,13 +26,16 @@ export const BacklogItemSchema = z.object({
       return BacklogItemStatus.TO_PLAY;
     }
   }),
-  acquisitionType: z.string().transform((val) => {
-    try {
-      return AcquisitionTypeSchema.parse(val as AcquisitionType);
-    } catch (e) {
-      return AcquisitionType.DIGITAL;
-    }
-  }),
+  acquisitionType: z
+    .string()
+    .transform((val) => {
+      try {
+        return AcquisitionTypeSchema.parse(val as AcquisitionType);
+      } catch (e) {
+        return AcquisitionType.DIGITAL;
+      }
+    })
+    .optional(),
   platform: z.string().optional(),
   startedAt: z.date().or(z.string().nullable()).optional(),
   completedAt: z.date().or(z.string().nullable()).optional(),
