@@ -11,7 +11,11 @@ import {
 import { Header } from "@/shared/components/header";
 import { notFound } from "next/navigation";
 
-export default async function UserPage() {
+export default async function UserPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; success?: string }>;
+}) {
   const userId = await getServerUserId();
 
   if (!userId) {
@@ -22,6 +26,16 @@ export default async function UserPage() {
 
   if (!user) {
     return notFound();
+  }
+
+  const { error, success } = await searchParams;
+
+  // Show notifications based on URL parameters
+  if (error === "steam_already_connected") {
+    // Show error: "This Steam account is already connected to another user"
+  }
+  if (success === "steam_connected") {
+    // Show success: "Steam account connected successfully!"
   }
 
   return (

@@ -54,6 +54,10 @@ model User {
   image                String?
   username             String?
   steamProfileURL      String?
+  steamId64            String?
+  steamUsername        String?
+  steamAvatar          String?
+  steamConnectedAt     DateTime?
   Account              Account[]
   Session              Session[]
   BacklogItem          BacklogItem[]
