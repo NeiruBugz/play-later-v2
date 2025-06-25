@@ -35,6 +35,10 @@ const nextConfig = {
         hostname: "images.igdb.com",
         protocol: "https",
       },
+      {
+        hostname: "steamcdn-a.akamaihd.net",
+        protocol: "https",
+      },
     ],
     unoptimized: true,
   },

@@ -130,7 +130,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                   <AdaptiveTabsTrigger value="screenshots" icon="🖼️">
                     Screenshots
                   </AdaptiveTabsTrigger>
-                  <AdaptiveTabsTrigger value="achievements" icon="🏆" disabled>
+                  <AdaptiveTabsTrigger value="achievements" icon="🏆">
                     Achievements
                   </AdaptiveTabsTrigger>
                 </AdaptiveTabsList>

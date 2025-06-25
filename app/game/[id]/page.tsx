@@ -109,12 +109,8 @@ export default async function GamePage(props: GenericPageProps) {
                   <AdaptiveTabsTrigger value="screenshots" icon="🖼️">
                     Screenshots
                   </AdaptiveTabsTrigger>
-                  {game.steamAppId ? (
-                    <AdaptiveTabsTrigger
-                      value="achievements"
-                      icon="🏆"
-                      disabled
-                    >
+                  {steamAppId ? (
+                    <AdaptiveTabsTrigger value="achievements" icon="🏆">
                       Achievements
                     </AdaptiveTabsTrigger>
                   ) : null}

@@ -14,8 +14,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(url.toString());
     }
 
-    console.log("steamUser", { steamUser });
-
     const { steamid, profile, username, avatar } = steamUser;
     const existingUser = await UserService.getUserBySteamId(
       applicationUserId,

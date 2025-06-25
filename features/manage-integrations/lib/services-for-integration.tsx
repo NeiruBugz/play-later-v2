@@ -1,5 +1,4 @@
-import { FaSteam, FaXbox } from "react-icons/fa";
-import { SiEpicgames } from "react-icons/si";
+import { FaPlaystation, FaSteam, FaXbox } from "react-icons/fa";
 
 export const servicesForIntegration = [
   {
@@ -17,10 +16,10 @@ export const servicesForIntegration = [
     isDisabled: true,
   },
   {
-    id: "epic-games",
-    name: "Epic Games",
-    description: "Connect your Epic Games account to get your game collection",
-    icon: <SiEpicgames className="text-2xl" />,
+    id: "playstation",
+    name: "Playstation",
+    description: "Connect your Playstation account to get your game collection",
+    icon: <FaPlaystation className="text-2xl" />,
     isDisabled: true,
   },
 ] as const;

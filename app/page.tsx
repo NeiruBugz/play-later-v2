@@ -139,7 +139,7 @@ export default async function Page() {
                 </ResponsiveHeading>
                 <Body size="lg" variant="muted" className="mx-auto max-w-2xl">
                   Take control of your gaming backlog today. Track what you own,
-                  discover what's coming next, and never forget about that
+                  discover what&apos;s coming next, and never forget about that
                   perfect game again.
                 </Body>
                 <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
