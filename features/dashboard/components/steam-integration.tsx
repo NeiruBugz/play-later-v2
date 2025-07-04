@@ -19,10 +19,11 @@ export async function SteamIntegration() {
     where: { id: userId },
     select: {
       steamProfileURL: true,
+      steamConnectedAt: true,
     },
   });
 
-  const isConnected = !!user?.steamProfileURL;
+  const isConnected = !!user?.steamConnectedAt;
 
   return (
     <Card className="h-fit">
@@ -63,7 +64,10 @@ export async function SteamIntegration() {
               <span className="text-sm">Not connected</span>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link href="/user/settings" className="flex items-center gap-2">
+              <Link
+                href="/user/settings?tab=integrations"
+                className="flex items-center gap-2"
+              >
                 <SiSteam className="h-4 w-4" />
                 Connect Steam
               </Link>

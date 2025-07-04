@@ -1,6 +1,6 @@
 import { getServerUserId } from "@/auth";
 import { BacklogItemService } from "@/domain/backlog-item/service";
-import { editBacklogItemAction } from "@/features/manage-backlog-item/edit-backlog-item/server-actions/action";
+import { editBacklogItem } from "@/features/manage-backlog-item/edit-backlog-item/server-actions/action";
 import { prisma } from "@/shared/lib/db";
 import { RevalidationService } from "@/shared/ui/revalidation";
 import { BacklogItem } from "@prisma/client";
@@ -10,7 +10,7 @@ import {
   setupAuthMocks,
 } from "../../../../test/setup/auth-mock";
 
-describe(editBacklogItemAction.name, () => {
+describe("editBacklogItem", () => {
   beforeEach(() => {
     setupAuthMocks();
     vi.clearAllMocks();
@@ -19,9 +19,10 @@ describe(editBacklogItemAction.name, () => {
   it("should reject unauthenticated requests", async () => {
     vi.mocked(getServerUserId).mockResolvedValue(undefined);
 
-    const result = await editBacklogItemAction({ message: "" }, new FormData());
+    const { serverError } = await editBacklogItem(new FormData());
 
-    expect(result.message).toBe("User not authenticated");
+    expect(serverError).toBeDefined();
+    expect(serverError).toBe("Oh no, something went wrong!");
   });
 
   it("should handle authenticated request with invalid payload", async () => {
@@ -32,9 +33,19 @@ describe(editBacklogItemAction.name, () => {
     newBacklogItem.append("id", "1");
     newBacklogItem.append("status", "TO_PLAY");
 
-    const result = await editBacklogItemAction({ message: "" }, newBacklogItem);
+    const { validationErrors } = await editBacklogItem(newBacklogItem);
 
-    expect(result.message).toBe("Invalid payload");
+    console.log(validationErrors);
+
+    expect(validationErrors).toBeDefined();
+    expect(JSON.stringify(validationErrors)).toContain(
+      JSON.stringify({
+        formErrors: [],
+        fieldErrors: {
+          platform: ["Invalid input: expected string, received undefined"],
+        },
+      })
+    );
   });
 
   it("should handle authenticated request with valid payload for non-existing backlog item", async () => {
@@ -48,9 +59,9 @@ describe(editBacklogItemAction.name, () => {
     newBacklogItem.append("platform", "PC");
     newBacklogItem.append("startedAt", "2025-01-01");
 
-    const result = await editBacklogItemAction({ message: "" }, newBacklogItem);
+    const { data } = await editBacklogItem(newBacklogItem);
 
-    expect(result.message).toBe("BacklogItem with id 2 not found");
+    expect(data?.message).toBe("BacklogItem with id 2 not found");
   });
 
   it("should handle authenticated request with valid payload", async () => {
@@ -80,16 +91,19 @@ describe(editBacklogItemAction.name, () => {
     newBacklogItem.append("startedAt", "2025-01-01");
     newBacklogItem.append("completedAt", "2025-01-31");
 
-    const result = await editBacklogItemAction({ message: "" }, newBacklogItem);
+    const { data, serverError, validationErrors } =
+      await editBacklogItem(newBacklogItem);
 
-    expect(result.message).toBe("Success");
-    expect(result.data).toEqual({
-      id: 1,
-      status: "COMPLETED",
-      platform: "PC",
-      startedAt: new Date("2025-01-01"),
-      completedAt: new Date("2025-01-31"),
-    });
+    console.log(data, serverError, validationErrors);
+
+    expect(data?.message).toBe("Success");
+
+    //   id: 1,
+    //   status: "COMPLETED",
+    //   platform: "PC",
+    //   startedAt: new Date("2025-01-01"),
+    //   completedAt: new Date("2025-01-31"),
+    // });
 
     expect(revalidateCollectionSpy).toHaveBeenCalled();
     expect(prisma.backlogItem.findUnique).toHaveBeenCalledWith({

@@ -17,7 +17,9 @@
     "lint-ui": "lint-staged",
     "test": "vitest",
     "test:watch": "vitest watch",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "code-fix": "bun format:write && bun lint:fix",
+    "code-check": "bun format:check && bun lint && bun typecheck"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.2.0",
@@ -69,6 +71,7 @@
     "nanoid": "5.0.7",
     "next": "^15.3.3",
     "next-auth": "^5.0.0-beta.25",
+    "next-safe-action": "^8.0.7",
     "next-themes": "^0.4.6",
     "node-steam-openid": "^2.0.0",
     "react": "19.0.0",
@@ -86,7 +89,8 @@
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "3.1.0",
     "vaul": "^1.1.2",
-    "zod": "^3.25.67"
+    "zod": "^3.25.67",
+    "zod-form-data": "^3.0.0"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "4.2.1",
@@ -97,7 +101,7 @@
     "@types/node-steam-openid": "^1.0.3",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2",
-    "@typescript-eslint/eslint-plugin": "7.14.1",
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
     "@typescript-eslint/parser": "7.14.1",
     "@vitest/coverage-v8": "1.6.0",
     "autoprefixer": "10.4.19",
@@ -105,7 +109,7 @@
     "eslint-config-next": "15.1.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-import-resolver-typescript": "3.6.1",
-    "eslint-plugin-boundaries": "4.2.1",
+    "eslint-plugin-boundaries": "^5.0.1",
     "eslint-plugin-import": "2.29.1",
     "eslint-plugin-tailwindcss": "3.17.3",
     "jsdom": "24.1.0",
@@ -120,9 +124,16 @@
     "vitest": "1.6.0"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "sh -c tsc --noEmit",
-      "eslint --quiet --fix"
+    "**/*.{ts,tsx}": [
+      "tsc-files --noEmit",
+      "vitest related --run"
+    ],
+    "**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ],
+    "**/*.{json,md}": [
+      "prettier --write --ignore-unknown"
     ]
   },
   "overrides": {

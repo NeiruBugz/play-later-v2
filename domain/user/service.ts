@@ -36,4 +36,12 @@ export const UserService = {
       },
     });
   },
+
+  async getUserByUsername(username: string) {
+    const user = await prisma.user.findFirst({
+      where: { username },
+    });
+
+    return user;
+  },
 };

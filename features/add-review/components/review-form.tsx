@@ -1,39 +1,34 @@
 "use client";
 
-import { ReviewService } from "@/domain/review/service";
 import { Button } from "@/shared/components";
 import { Textarea } from "@/shared/components/textarea";
 import { Star } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { createReview } from "../server-actions/create-review";
 
 export function ReviewForm({ gameId }: { gameId: string }) {
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const session = useSession();
 
   const handleSubmitReview = async () => {
     if (rating === 0 || !reviewText.trim()) return;
 
-    const userId = session.data?.user?.id;
-    if (!userId) {
-      return;
-    }
     setIsSubmitting(true);
     try {
       await createReview({
         gameId,
         rating,
-        userId,
         content: reviewText,
       });
       // Reset form
       setRating(0);
       setReviewText("");
+      toast.success("Review submitted successfully");
     } catch (error) {
       console.error("Failed to submit review:", error);
+      toast.error("Failed to submit review");
     } finally {
       setIsSubmitting(false);
     }

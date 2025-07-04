@@ -1,4 +1,3 @@
-import { getUserByUsername } from "@/features/manage-user-info/server-actions/get-user-by-username";
 import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Header } from "@/shared/components/header";
@@ -7,10 +6,7 @@ import { GenericPageProps } from "@/shared/types";
 export default async function SharedWishlistPage(props: GenericPageProps) {
   const { username } = await props.params;
   const decodedUsername = decodeURIComponent(username);
-  const [user, wishlistedItems] = await Promise.all([
-    getUserByUsername(decodedUsername),
-    getWishlistedItemsByUsername(decodedUsername),
-  ]);
+  const wishlistedItems = await getWishlistedItemsByUsername(decodedUsername);
 
   return (
     <div>
@@ -18,7 +14,7 @@ export default async function SharedWishlistPage(props: GenericPageProps) {
       <div className="container overflow-hidden px-4 py-8 pt-[60px]">
         <div className="mb-8 mt-4 flex flex-col gap-4">
           <h1 className="text-3xl font-bold tracking-tight">
-            {user?.username || user?.name}&apos;s wishlist
+            {decodedUsername}&apos;s wishlist
           </h1>
         </div>
         <div>

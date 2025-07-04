@@ -1,1 +1,1 @@
-export { ShareWishlist } from './share-wishlist'
+export { ShareWishlist } from "./share-wishlist";

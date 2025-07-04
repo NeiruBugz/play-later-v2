@@ -13,16 +13,10 @@ import { updateBacklogItemAction } from "../hooks/update-backlog-action";
 import { useMatchingBacklogItem } from "../hooks/use-matching-backlog-item";
 
 type CompleteActionButtonProps = {
-  game: {
-    id: string;
-    title: string;
-    coverImage: string | null;
-  };
   backlogItems?: Omit<BacklogItem, "game">[];
 };
 
 export function CompleteActionButton({
-  game,
   backlogItems,
 }: CompleteActionButtonProps) {
   const latestStatus = backlogItems?.sort(
@@ -45,7 +39,9 @@ export function CompleteActionButton({
           id: matchingStatusItem.id,
           status: "COMPLETED",
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error(e);
+      }
     },
     [matchingStatusItem]
   );

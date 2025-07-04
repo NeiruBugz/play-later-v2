@@ -10,7 +10,6 @@ export function SignIn({ variant }: { variant: "default" | "start" }) {
         "use server";
         await signIn("google");
       }}
-      className="mt-2"
     >
       <Button
         type="submit"

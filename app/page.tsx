@@ -10,7 +10,6 @@ import {
 } from "@/features/dashboard/components";
 import { FeatureCard } from "@/features/landing";
 import { SignIn } from "@/features/sign-in";
-import { Button } from "@/shared/components/button";
 import { Header } from "@/shared/components/header";
 import {
   Body,
@@ -61,7 +60,7 @@ export default async function Page() {
               </Subheading>
             </div>
 
-            <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
+            <div className="align-center flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
               <SignIn variant="start" />
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Sparkles className="h-4 w-4" />

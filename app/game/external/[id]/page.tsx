@@ -77,8 +77,8 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                       backlogStatus: BacklogItemStatus.WISHLIST,
                     });
 
-                    if (result.success) {
-                      redirect(`/game/${result.data?.gameId}`);
+                    if (result?.data) {
+                      redirect(`/game/${result.data.gameId}`);
                     }
                   }}
                 >

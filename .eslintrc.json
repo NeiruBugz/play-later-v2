@@ -1,10 +1,35 @@
 {
-  "extends": ["next/core-web-vitals"],
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:boundaries/recommended"
+  ],
+  "plugins": ["boundaries", "import"],
   "settings": {
     "import/resolver": {
       "typescript": {
         "alwaysTryTypes": true
       }
-    }
+    },
+    "boundaries/elements": [
+      { "type": "app", "pattern": "app/*" },
+      { "type": "features", "pattern": "features/*" },
+      { "type": "domain", "pattern": "domain/*" },
+      { "type": "shared", "pattern": "shared/*" }
+    ]
+  },
+  "rules": {
+    "boundaries/element-types": [
+      "error",
+      {
+        "default": "disallow",
+        "rules": [
+          { "from": "app", "allow": ["features", "shared"] },
+          { "from": "features", "allow": ["domain", "shared"] },
+          { "from": "domain", "allow": ["domain"] },
+          { "from": "shared", "allow": ["shared"] }
+        ]
+      }
+    ]
   }
 }

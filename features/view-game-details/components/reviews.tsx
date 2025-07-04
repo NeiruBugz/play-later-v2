@@ -2,13 +2,7 @@ import { ReviewService } from "@/domain/review/service";
 import { ReviewForm } from "@/features/add-review/components";
 import { Review } from "./review";
 
-export async function Reviews({
-  gameId,
-  gameTitle,
-}: {
-  gameId: string;
-  gameTitle: string;
-}) {
+export async function Reviews({ gameId }: { gameId: string }) {
   const reviewsResult = await ReviewService.getAll(gameId);
 
   // Handle possible failure

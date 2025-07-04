@@ -1,5 +1,5 @@
 import { getServerUserId } from "@/auth";
-import { getUserByUsername } from "@/features/manage-user-info/server-actions/get-user-by-username";
+import { UserService } from "@/domain/user/service";
 import { prisma } from "@/shared/lib/db";
 import { BacklogItemStatus, type BacklogItem, type Game } from "@prisma/client";
 
@@ -45,7 +45,7 @@ export async function getWishlistedItems(id?: string) {
 
 export async function getWishlistedItemsByUsername(username: string) {
   try {
-    const user = await getUserByUsername(username);
+    const user = await UserService.getUserByUsername(username);
     if (!user) {
       throw new Error("User not found");
     }

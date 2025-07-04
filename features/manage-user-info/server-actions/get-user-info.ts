@@ -11,6 +11,14 @@ export async function getUserInfo(userId?: string) {
     }
     const user = await prisma.user.findUnique({
       where: { id: userId ?? serverUserId },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        steamProfileURL: true,
+        steamConnectedAt: true,
+        email: true,
+      },
     });
 
     if (!user) {
