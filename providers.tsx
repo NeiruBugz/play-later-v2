@@ -1,6 +1,5 @@
 "use client";
 
-import { Toaster } from "@/shared/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
 import {
@@ -8,6 +7,8 @@ import {
   type ThemeProviderProps,
 } from "next-themes";
 import { PropsWithChildren, useState } from "react";
+
+import { Toaster } from "@/shared/components/ui/sonner";
 
 export default function Providers({
   children,

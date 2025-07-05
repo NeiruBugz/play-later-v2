@@ -1,12 +1,15 @@
 import "server-only";
+
 import { getServerUserId } from "@/auth";
 import { BacklogItemService } from "@/domain/backlog-item/service";
 import { GameService } from "@/domain/game/service";
 import type { GameInput } from "@/domain/game/types";
+import type { Game } from "@prisma/client";
+
 import { convertReleaseDateToIsoStringDate } from "@/shared/lib/date-functions";
 import { prisma } from "@/shared/lib/db";
 import igdbApi from "@/shared/lib/igdb";
-import type { Game } from "@prisma/client";
+
 import type { AddGameToBacklogInput } from "../types";
 
 async function ensureGameExists(igdbId: number) {

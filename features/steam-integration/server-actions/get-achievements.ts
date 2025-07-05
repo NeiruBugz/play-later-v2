@@ -1,8 +1,10 @@
 "use server";
 
+import { z } from "zod";
+
 import { prisma } from "@/shared/lib/db";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
-import { z } from "zod";
+
 import { enrichAchievements } from "../lib/enrich-achievements";
 import {
   mapAchievementsSchema,
@@ -27,6 +29,7 @@ const getUserAchievementsSchema = z.object({
 export const getUserAchievements = authorizedActionClient
   .metadata({
     actionName: "getUserAchievements",
+    requiresAuth: true,
   })
   .inputSchema(getUserAchievementsSchema)
   .action(async ({ parsedInput: { steamAppId }, ctx: { userId } }) => {

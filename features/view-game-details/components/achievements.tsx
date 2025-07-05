@@ -1,3 +1,7 @@
+import { Clock, Trophy } from "lucide-react";
+import Image from "next/image";
+import { Suspense } from "react";
+
 import {
   EnrichedAchievement,
   getUserAchievements,
@@ -11,9 +15,6 @@ import {
 } from "@/shared/components/card";
 import { Progress } from "@/shared/components/progress";
 import { cn } from "@/shared/lib";
-import { Clock, Trophy } from "lucide-react";
-import Image from "next/image";
-import { Suspense } from "react";
 
 type AchievementsProps = {
   steamAppId?: number;

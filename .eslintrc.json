@@ -2,7 +2,8 @@
   "extends": [
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended",
-    "plugin:boundaries/recommended"
+    "plugin:boundaries/recommended",
+    "plugin:prettier/recommended"
   ],
   "plugins": ["boundaries", "import"],
   "settings": {
@@ -30,6 +31,10 @@
           { "from": "shared", "allow": ["shared"] }
         ]
       }
-    ]
+    ],
+    "import/order": "off",
+    "import/first": "off",
+    "import/newline-after-import": "off",
+    "import/no-duplicates": "off"
   }
 }

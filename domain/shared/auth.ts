@@ -1,4 +1,5 @@
 import { getServerUserId } from "@/auth";
+
 import { AuthenticationError } from "./errors";
 import { failure, Result, success } from "./result";
 

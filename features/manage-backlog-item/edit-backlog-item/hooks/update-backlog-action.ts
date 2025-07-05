@@ -1,14 +1,16 @@
 "use server";
 
 import { BacklogItemService } from "@/domain/backlog-item/service";
-import { authorizedActionClient } from "@/shared/lib/safe-action-client";
-import { RevalidationService } from "@/shared/ui/revalidation";
 import { BacklogItemStatus } from "@prisma/client";
 import { z } from "zod";
+
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+import { RevalidationService } from "@/shared/ui/revalidation";
 
 export const updateBacklogItemAction = authorizedActionClient
   .metadata({
     actionName: "updateBacklogItem",
+    requiresAuth: true,
   })
   .inputSchema(
     z.object({

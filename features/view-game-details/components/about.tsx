@@ -1,6 +1,8 @@
+import { Suspense } from "react";
+
 import { Badge } from "@/shared/components/badge";
 import { FullGameInfoResponse } from "@/shared/types";
-import { Suspense } from "react";
+
 import { Expansions } from "./expansions";
 
 type AboutProps = {

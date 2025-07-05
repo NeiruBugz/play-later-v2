@@ -1,4 +1,6 @@
 import { getServerUserId } from "@/auth";
+import { Monitor } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -8,7 +10,6 @@ import {
 } from "@/shared/components/card";
 import { normalizeString } from "@/shared/lib";
 import { prisma } from "@/shared/lib/db";
-import { Monitor } from "lucide-react";
 
 export async function PlatformBreakdown() {
   const userId = await getServerUserId();

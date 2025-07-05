@@ -1,5 +1,11 @@
 "use client";
 
+import { ExitIcon } from "@radix-ui/react-icons";
+import { Settings } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
+import { memo } from "react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components";
 import {
   DropdownMenu,
@@ -7,11 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/dropdown-menu";
-import { ExitIcon } from "@radix-ui/react-icons";
-import { Settings } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
-import Link from "next/link";
-import { memo } from "react";
 
 const getFirstTwoLiterals = (name: string | null | undefined) => {
   if (!name) {

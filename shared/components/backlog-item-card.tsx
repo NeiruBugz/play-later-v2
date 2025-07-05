@@ -1,11 +1,12 @@
+import type { BacklogItem } from "@prisma/client";
+import Link from "next/link";
+
 import { CompleteActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/complete-action-button";
 import { MoveToBacklogActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/move-to-backlog-action-button";
 import { StartPlayingActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/start-playing-action-button";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { TooltipProvider } from "@/shared/components/tooltip";
 import { cn } from "@/shared/lib";
-import type { BacklogItem } from "@prisma/client";
-import Link from "next/link";
 
 type GameCardProps = {
   game: {
@@ -48,7 +49,6 @@ export function BacklogItemCard({
   game,
   backlogItems,
   isFromSharedWishlist,
-  hasActions = true,
   isExternalGame = false,
   isUpcomingGame = false,
 }: GameCardProps) {
@@ -113,7 +113,7 @@ export function BacklogItemCard({
                 game={game}
                 backlogItems={backlogItems}
               />
-              <CompleteActionButton game={game} backlogItems={backlogItems} />
+              <CompleteActionButton backlogItems={backlogItems} />
               <MoveToBacklogActionButton
                 game={game}
                 backlogItems={backlogItems}

@@ -1,7 +1,8 @@
 import { signIn } from "@/auth";
+import React from "react";
+
 import { Button } from "@/shared/components";
 import { cn } from "@/shared/lib";
-import React from "react";
 
 export function SignIn({ variant }: { variant: "default" | "start" }) {
   return (

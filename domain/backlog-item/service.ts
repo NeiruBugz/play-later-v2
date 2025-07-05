@@ -1,10 +1,12 @@
 import { getServerUserId } from "@/auth";
-import { prisma } from "@/shared/lib/db";
 import {
   AcquisitionType,
   BacklogItem,
   BacklogItemStatus,
 } from "@prisma/client";
+
+import { prisma } from "@/shared/lib/db";
+
 import {
   AuthenticationError,
   DatabaseError,

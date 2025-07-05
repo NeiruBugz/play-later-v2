@@ -1,4 +1,7 @@
 import { getServerUserId } from "@/auth";
+import { formatDistanceToNow } from "date-fns";
+import { Activity, Clock, Star } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -7,8 +10,6 @@ import {
   CardTitle,
 } from "@/shared/components/card";
 import { prisma } from "@/shared/lib/db";
-import { formatDistanceToNow } from "date-fns";
-import { Activity, Clock, Star } from "lucide-react";
 
 export async function RecentActivity() {
   const userId = await getServerUserId();

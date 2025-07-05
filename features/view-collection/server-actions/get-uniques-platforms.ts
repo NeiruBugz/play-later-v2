@@ -1,4 +1,5 @@
 import { getServerUserId } from "@/auth";
+
 import { prisma } from "@/shared/lib/db";
 
 export async function getUserUniquePlatforms(): Promise<(string | null)[]> {

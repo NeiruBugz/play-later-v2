@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
-import { Button } from "@/shared/components";
 import Link from "next/link";
+
+import { Button } from "@/shared/components";
 
 export async function AddGameLink() {
   const session = await auth();

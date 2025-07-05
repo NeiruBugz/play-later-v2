@@ -1,7 +1,5 @@
 "use client";
 
-import { getUserInfo } from "@/features/manage-user-info/server-actions/get-user-info";
-import { Button } from "@/shared/components";
 import { useMutation } from "@tanstack/react-query";
 import { ShareIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -10,13 +8,16 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 
+import { getUserInfo } from "@/features/manage-user-info";
+import { Button } from "@/shared/components";
+
 export function ShareWishlist() {
   const [, copy] = useCopyToClipboard();
   const session = useSession();
   const router = useRouter();
   const { mutateAsync: fetchUserInfo } = useMutation({
     mutationKey: ["get-user-info"],
-    mutationFn: async (userId: string) => await getUserInfo(userId),
+    mutationFn: async (userId: string) => await getUserInfo({ userId }),
   });
 
   const onCopy = useCallback(async () => {
@@ -24,7 +25,16 @@ export function ShareWishlist() {
       return;
     }
 
-    const userInfo = await fetchUserInfo(session.data.user.id);
+    const { data: userInfo, serverError } = await fetchUserInfo(
+      session.data.user.id
+    );
+
+    if (serverError) {
+      toast.error("Error", {
+        description: serverError,
+      });
+      return;
+    }
 
     if (!userInfo) {
       return;

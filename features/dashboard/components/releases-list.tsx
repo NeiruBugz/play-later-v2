@@ -1,9 +1,10 @@
+import { Calendar } from "lucide-react";
+import { cache } from "react";
+
 import { getUpcomingWishlistItems } from "@/features/dashboard/server-actions/get-upcoming-wishlist-items";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Badge } from "@/shared/components/badge";
 import { cn, platformMapper, platformToBackgroundColor } from "@/shared/lib";
-import { Calendar } from "lucide-react";
-import { cache } from "react";
 
 type UpcomingRelease = {
   cover: {

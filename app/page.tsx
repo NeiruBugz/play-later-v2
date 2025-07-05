@@ -1,5 +1,18 @@
 import { auth } from "@/auth";
 import {
+  ArrowDown,
+  BarChart3,
+  Calendar,
+  Gamepad2,
+  Heart,
+  MessageSquare,
+  Share2,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react/";
+import { Suspense } from "react";
+
+import {
   BacklogCount,
   CollectionStats,
   CurrentlyPlaying,
@@ -17,18 +30,6 @@ import {
   ResponsiveHeading,
   Subheading,
 } from "@/shared/components/typography";
-import {
-  ArrowDown,
-  BarChart3,
-  Calendar,
-  Gamepad2,
-  Heart,
-  MessageSquare,
-  Share2,
-  Sparkles,
-  TrendingUp,
-} from "lucide-react";
-import { Suspense } from "react";
 
 export default async function Page() {
   const session = await auth();

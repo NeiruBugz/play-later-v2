@@ -1,5 +1,6 @@
-import { cn } from "@/shared/lib/tailwind-merge";
 import * as React from "react";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {

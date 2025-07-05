@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
+
 import { Button } from "@/shared/components/button";
 import {
   Select,
@@ -9,8 +12,6 @@ import {
   SelectValue,
 } from "@/shared/components/select";
 import { cn } from "@/shared/lib";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 
 const statusOptions = [
   { value: "All", label: "All Games", shortLabel: "All", icon: "🎮" },

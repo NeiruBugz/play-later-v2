@@ -1,6 +1,7 @@
+import { format, isFuture, parse } from "date-fns";
+
 import { Badge } from "@/shared/components/badge";
 import { FullGameInfoResponse } from "@/shared/types";
-import { format, isFuture, parse } from "date-fns";
 
 type MetadataProps = {
   releaseDates: FullGameInfoResponse["release_dates"];

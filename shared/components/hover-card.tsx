@@ -1,8 +1,9 @@
 "use client";
 
-import { cn } from "@/shared/lib/tailwind-merge";
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 import * as React from "react";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const HoverCard = HoverCardPrimitive.Root;
 

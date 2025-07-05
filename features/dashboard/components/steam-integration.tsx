@@ -1,4 +1,8 @@
 import { getServerUserId } from "@/auth";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { SiSteam } from "react-icons/si";
+
 import { Button } from "@/shared/components/button";
 import {
   Card,
@@ -8,9 +12,6 @@ import {
   CardTitle,
 } from "@/shared/components/card";
 import { prisma } from "@/shared/lib/db";
-import { ExternalLink } from "lucide-react";
-import Link from "next/link";
-import { SiSteam } from "react-icons/si";
 
 export async function SteamIntegration() {
   const userId = await getServerUserId();

@@ -1,14 +1,16 @@
 "use server";
 
 import { BacklogItemService } from "@/domain/backlog-item/service";
-import { authorizedActionClient } from "@/shared/lib/safe-action-client";
-import { RevalidationService } from "@/shared/ui/revalidation";
 import { BacklogItemStatus } from "@prisma/client";
 import { zfd } from "zod-form-data";
+
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+import { RevalidationService } from "@/shared/ui/revalidation";
 
 export const createBacklogItem = authorizedActionClient
   .metadata({
     actionName: "createBacklogItem",
+    requiresAuth: true,
   })
   .inputSchema(
     zfd.formData({

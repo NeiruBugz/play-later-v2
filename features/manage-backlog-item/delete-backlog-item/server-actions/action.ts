@@ -1,14 +1,16 @@
 "use server";
 
 import { BacklogItemService } from "@/domain/backlog-item/service";
-import { authorizedActionClient } from "@/shared/lib/safe-action-client";
-import { RevalidationService } from "@/shared/ui/revalidation";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+import { RevalidationService } from "@/shared/ui/revalidation";
 
 export const deleteBacklogItemAction = authorizedActionClient
   .metadata({
     actionName: "deleteBacklogItem",
+    requiresAuth: true,
   })
   .inputSchema(
     zfd.formData({

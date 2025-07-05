@@ -1,8 +1,9 @@
 import { getServerUserId } from "@/auth";
-import { steamAuth } from "@/features/steam-integration/lib/steam-auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+import { steamAuth } from "@/features/steam-integration/lib/steam-auth";
+
+export async function GET() {
   try {
     const userId = await getServerUserId();
     if (!userId) {

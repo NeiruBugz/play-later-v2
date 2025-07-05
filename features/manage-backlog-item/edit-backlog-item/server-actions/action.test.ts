@@ -1,10 +1,12 @@
 import { getServerUserId } from "@/auth";
 import { BacklogItemService } from "@/domain/backlog-item/service";
+import { BacklogItem } from "@prisma/client";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { editBacklogItem } from "@/features/manage-backlog-item/edit-backlog-item/server-actions/action";
 import { prisma } from "@/shared/lib/db";
 import { RevalidationService } from "@/shared/ui/revalidation";
-import { BacklogItem } from "@prisma/client";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   mockAuthenticatedUser,
   setupAuthMocks,
@@ -22,7 +24,9 @@ describe("editBacklogItem", () => {
     const { serverError } = await editBacklogItem(new FormData());
 
     expect(serverError).toBeDefined();
-    expect(serverError).toBe("Oh no, something went wrong!");
+    expect(serverError).toBe(
+      "Authentication required. Please sign in to continue."
+    );
   });
 
   it("should handle authenticated request with invalid payload", async () => {

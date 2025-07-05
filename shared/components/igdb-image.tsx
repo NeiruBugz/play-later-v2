@@ -1,9 +1,10 @@
+import Image, { ImageProps } from "next/image";
+
 import {
   IMAGE_API,
   IMAGE_SIZES,
   NEXT_IMAGE_SIZES,
 } from "@/shared/config/image.config";
-import Image, { ImageProps } from "next/image";
 
 type IgdbImageProps = {
   gameTitle: string;

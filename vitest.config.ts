@@ -7,6 +7,18 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./test/setup/global.ts"],
     globals: true,
+    isolate: true,
+    pool: "threads",
+    testTimeout: 10000,
+    hookTimeout: 10000,
+    // Include both unit and integration tests by default
+    include: ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.next/**",
+      "**/coverage/**",
+    ],
     coverage: {
       all: true,
       exclude: [

@@ -1,9 +1,10 @@
 "use client";
 
-import { cn } from "@/shared/lib/tailwind-merge";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import * as React from "react";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const Dialog = DialogPrimitive.Root;
 

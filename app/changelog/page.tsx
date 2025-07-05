@@ -1,12 +1,13 @@
+import { format } from "date-fns";
+import { unstable_noStore } from "next/cache";
+import Markdown from "react-markdown";
+
 import { Header } from "@/shared/components/header";
 import {
   Body,
   Heading,
   ResponsiveHeading,
 } from "@/shared/components/typography";
-import { format } from "date-fns";
-import { unstable_noStore } from "next/cache";
-import Markdown from "react-markdown";
 
 type ChangeLog = {
   id: string;

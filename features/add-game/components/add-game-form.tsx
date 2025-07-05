@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import { SubmitButton } from "@/features/add-game/components/add-game-form.submit";
 import {
   Select,
@@ -25,11 +31,7 @@ import {
   playingOnPlatforms,
 } from "@/shared/lib";
 import type { SearchResponse } from "@/shared/types";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+
 import { initialFormValues } from "../lib/constants";
 import {
   CreateGameActionSchema,

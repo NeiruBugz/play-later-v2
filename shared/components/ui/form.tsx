@@ -1,5 +1,3 @@
-import { Label } from "@/shared/components/ui/label";
-import { cn } from "@/shared/lib/tailwind-merge";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
@@ -11,6 +9,9 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+
+import { Label } from "@/shared/components/ui/label";
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const Form = FormProvider;
 

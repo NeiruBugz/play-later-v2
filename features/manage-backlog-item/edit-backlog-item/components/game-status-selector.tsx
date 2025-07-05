@@ -1,12 +1,5 @@
 "use client";
 
-import { Button } from "@/shared/components/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/components/dropdown-menu";
 import {
   BookMarked,
   Check,
@@ -17,6 +10,14 @@ import {
   Trophy,
 } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/shared/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/dropdown-menu";
 
 type GameStatus = "backlog" | "playing" | "completed" | "wishlist" | "none";
 

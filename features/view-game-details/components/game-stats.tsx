@@ -1,6 +1,7 @@
-import { Card, CardContent } from "@/shared/components/card";
 import { Review } from "@prisma/client";
 import { Star } from "lucide-react";
+
+import { Card, CardContent } from "@/shared/components/card";
 
 type GameStatsProps = {
   rating?: string;

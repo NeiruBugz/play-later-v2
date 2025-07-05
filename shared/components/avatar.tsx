@@ -1,8 +1,9 @@
 "use client";
 
-import { cn } from "@/shared/lib/tailwind-merge";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import * as React from "react";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,

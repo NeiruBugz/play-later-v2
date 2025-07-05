@@ -1,9 +1,10 @@
+import { BacklogItem } from "@prisma/client";
+
 import { AddReviewDialog } from "@/features/add-review/components";
 import {
   EditGameEntryModal,
   GameStatusSelector,
 } from "@/features/manage-backlog-item/edit-backlog-item";
-import { BacklogItem } from "@prisma/client";
 
 type GameQuickActionsProps = {
   gameId: string;

@@ -1,5 +1,9 @@
 "use client";
 
+import { TrashIcon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { Button } from "@/shared/components";
 import {
   AlertDialog,
@@ -12,9 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/shared/components/alert-dialog";
 import { HiddenInput } from "@/shared/components/hidden-input";
-import { TrashIcon } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
+
 import { deleteBacklogItemAction } from "../server-actions/action";
 
 export function DeleteBacklogItem({

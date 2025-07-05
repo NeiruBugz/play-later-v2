@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/shared/components";
 import {
   ChevronFirst,
   ChevronLast,
@@ -9,6 +8,8 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+
+import { Button } from "@/shared/components";
 
 export function Pagination({ totalCount }: { totalCount: number }) {
   const params = useSearchParams();

@@ -1,7 +1,8 @@
-import { IgdbImage } from "@/shared/components/igdb-image";
-import { FullGameInfoResponse } from "@/shared/types";
 import Link from "next/link";
 import { Suspense } from "react";
+
+import { IgdbImage } from "@/shared/components/igdb-image";
+import { FullGameInfoResponse } from "@/shared/types";
 
 function SimilarGame({
   game,

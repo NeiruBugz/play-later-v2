@@ -1,7 +1,8 @@
 import { getServerUserId } from "@/auth";
 import { UserService } from "@/domain/user/service";
-import { prisma } from "@/shared/lib/db";
 import { BacklogItemStatus, type BacklogItem, type Game } from "@prisma/client";
+
+import { prisma } from "@/shared/lib/db";
 
 type GameWithBacklogItems = {
   game: Game;

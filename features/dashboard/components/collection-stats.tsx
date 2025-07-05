@@ -1,4 +1,6 @@
 import { getServerUserId } from "@/auth";
+import { Library, Star, Trophy } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -7,7 +9,6 @@ import {
   CardTitle,
 } from "@/shared/components/card";
 import { prisma } from "@/shared/lib/db";
-import { Library, Star, Trophy } from "lucide-react";
 
 export async function CollectionStats() {
   const userId = await getServerUserId();

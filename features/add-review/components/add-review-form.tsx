@@ -1,5 +1,11 @@
 "use client";
 
+import { StarIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
+import { toast } from "sonner";
+
 import {
   Button,
   Select,
@@ -12,26 +18,23 @@ import { HiddenInput } from "@/shared/components/hidden-input";
 import { Label } from "@/shared/components/label";
 import { Textarea } from "@/shared/components/textarea";
 import { cn, playingOnPlatforms } from "@/shared/lib";
-import { StarIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useActionState, useState } from "react";
-import { createReviewAction } from "../server-actions/action";
+
+import { createReviewForm } from "../server-actions/create-review";
 
 export function AddReviewForm({ gameId }: { gameId: string }) {
   const session = useSession();
   const [ratingValue, setRatingValue] = useState(0);
-  const [state, formAction] = useActionState(
-    (prevState: any, formData: FormData) =>
-      createReviewAction(
-        { message: "", type: "success" },
-        ratingValue,
-        formData
-      ),
-    { message: "", type: "success" }
-  );
+  const { execute, isExecuting } = useAction(createReviewForm, {
+    onSuccess: () => {
+      toast.success("Review submitted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to submit review");
+    },
+  });
 
   return (
-    <form action={formAction}>
+    <form action={execute}>
       <HiddenInput name="userId" value={session.data?.user?.id} />
       <HiddenInput name="gameId" value={gameId} />
       <HiddenInput name="rating" value={ratingValue} />
@@ -72,7 +75,7 @@ export function AddReviewForm({ gameId }: { gameId: string }) {
           </SelectContent>
         </Select>
       </div>
-      <Button>Submit</Button>
+      <Button disabled={isExecuting}>Submit</Button>
     </form>
   );
 }

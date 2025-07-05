@@ -1,7 +1,8 @@
-import { cn } from "@/shared/lib/tailwind-merge";
 import { ChevronRightIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const Breadcrumb = React.forwardRef<
   HTMLElement,

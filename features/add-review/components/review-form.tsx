@@ -1,10 +1,12 @@
 "use client";
 
-import { Button } from "@/shared/components";
-import { Textarea } from "@/shared/components/textarea";
 import { Star } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+
+import { Button } from "@/shared/components";
+import { Textarea } from "@/shared/components/textarea";
+
 import { createReview } from "../server-actions/create-review";
 
 export function ReviewForm({ gameId }: { gameId: string }) {

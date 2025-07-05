@@ -1,5 +1,6 @@
-import type { SearchResponse } from "@/shared/types";
 import axios from "axios";
+
+import type { SearchResponse } from "@/shared/types";
 
 const fetchSearchResults = async (
   query: string,

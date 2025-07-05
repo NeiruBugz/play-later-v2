@@ -1,10 +1,12 @@
 "use client";
 
-import { Button, Input } from "@/shared/components";
-import { Label } from "@/shared/components/label";
 import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+
+import { Button, Input } from "@/shared/components";
+import { Label } from "@/shared/components/label";
+
 import { editUserAction } from "../server-actions/edit-user-action";
 
 function SubmitButton() {
@@ -19,11 +21,11 @@ function SubmitButton() {
 
 type EditUserFormProps = {
   userInfo: {
-    name: string;
+    name: string | null;
     username: string | null;
     steamProfileURL: string | null;
     steamConnectedAt: Date | null;
-    email: string;
+    email: string | null;
     id: string;
   };
 };

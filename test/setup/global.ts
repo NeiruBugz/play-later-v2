@@ -1,4 +1,5 @@
 import { afterEach, vi } from "vitest";
+
 import { setupAuthMocks } from "./auth-mock";
 
 vi.mock("@/shared/lib/db", () => ({
@@ -46,9 +47,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 process.env.NEXTAUTH_SECRET = "test-secret";
-process.env.POSTGRES_PRISMA_URL = "postgresql://test:test@localhost:5432/test";
+process.env.POSTGRES_PRISMA_URL =
+  "postgresql://postgres:postgres@localhost:6432/test";
 
 declare global {
+  // eslint-disable-next-line no-var
   var testUtils: {
     createMockFormData: (data: Record<string, string>) => FormData;
   };
