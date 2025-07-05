@@ -98,7 +98,7 @@ export function ImportedGamesFilters({
       {/* Top Row: Search and Filter Toggle */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
-        <div className="relative flex-1 max-w-md">
+        <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search games..."
@@ -129,7 +129,7 @@ export function ImportedGamesFilters({
               <span>{totalGames} games</span>
             )}
           </div>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -140,9 +140,12 @@ export function ImportedGamesFilters({
             Filters
             {hasActiveFilters && (
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                {[filters.search && "search", filters.storefront !== "ALL" && "platform"]
-                  .filter(Boolean)
-                  .length}
+                {
+                  [
+                    filters.search && "search",
+                    filters.storefront !== "ALL" && "platform",
+                  ].filter(Boolean).length
+                }
               </Badge>
             )}
           </Button>
@@ -155,7 +158,10 @@ export function ImportedGamesFilters({
           {/* Platform Filter */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Platform</label>
-            <Select value={filters.storefront} onValueChange={handleStorefrontChange}>
+            <Select
+              value={filters.storefront}
+              onValueChange={handleStorefrontChange}
+            >
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue />
               </SelectTrigger>
@@ -189,7 +195,10 @@ export function ImportedGamesFilters({
           {/* Sort Order */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Order</label>
-            <Select value={filters.sortOrder} onValueChange={handleSortOrderChange}>
+            <Select
+              value={filters.sortOrder}
+              onValueChange={handleSortOrderChange}
+            >
               <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue />
               </SelectTrigger>
@@ -205,7 +214,12 @@ export function ImportedGamesFilters({
 
           {/* Clear Filters */}
           {hasActiveFilters && (
-            <Button variant="outline" size="sm" onClick={clearFilters} className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearFilters}
+              className="gap-2"
+            >
               <X className="h-4 w-4" />
               Clear
             </Button>
@@ -214,4 +228,4 @@ export function ImportedGamesFilters({
       )}
     </div>
   );
-} 
+}

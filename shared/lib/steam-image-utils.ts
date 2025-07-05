@@ -13,11 +13,11 @@ export const STEAM_IMAGE_TYPES = {
 /**
  * Constructs Steam store image URLs using app ID
  * These are much higher quality than the 32x32 icons from the API
- * 
+ *
  * @param appId - Steam app ID
  * @param imageType - Type of image to fetch
  * @returns Steam store image URL
- * 
+ *
  * @example
  * buildSteamStoreImageUrl(440, "header")
  * // Returns: "https://steamcdn-a.akamaihd.net/steam/apps/440/header.jpg"
@@ -36,12 +36,12 @@ export function buildSteamStoreImageUrl(
 
 /**
  * Constructs Steam image URLs from app ID and image hash (fallback method)
- * 
+ *
  * @param appId - Steam app ID (can be string or number)
  * @param imageHash - Image hash from Steam API
  * @param type - Type of image (icon or logo) - currently unused but kept for future use
  * @returns Fully constructed Steam image URL
- * 
+ *
  * @example
  * buildSteamImageUrl(440, "e3f595a92552da3d664ad00277fad2107345f7e0")
  * // Returns: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/440/e3f595a92552da3d664ad00277fad2107345f7e0.jpg"
@@ -67,13 +67,13 @@ export function buildSteamImageUrl(
 /**
  * Gets the best available Steam image URL for a game
  * Prioritizes high-quality store images over low-res API icons
- * 
+ *
  * @param appId - Steam app ID (can be string or number)
  * @param iconHash - Icon image hash from Steam API (optional, used as fallback)
  * @param logoHash - Logo image hash from Steam API (optional, used as fallback)
  * @param preferredImageType - Preferred store image type
  * @returns Best available image URL or null if no images available
- * 
+ *
  * @example
  * getSteamGameImageUrl("440", "icon_hash", "logo_hash", "HEADER")
  * // Returns high-quality header image URL
@@ -107,4 +107,4 @@ export function getSteamGameImageUrl(
     console.warn("Failed to build Steam store image URL:", error);
     return null;
   }
-} 
+}

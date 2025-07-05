@@ -8,6 +8,7 @@ import { SearchInput } from "@/features/view-collection/components/search-input"
 import { StatusFilter } from "@/features/view-collection/components/status-filter";
 import { CollectionViewMode } from "@/features/view-collection/components/view-mode";
 import { getUserUniquePlatforms } from "@/features/view-collection/server-actions/get-uniques-platforms";
+import { CollectionNav } from "@/shared/components/collection-nav";
 import { Header } from "@/shared/components/header";
 import { Body, ResponsiveHeading } from "@/shared/components/typography";
 
@@ -34,6 +35,11 @@ export default async function CollectionPage(props: {
             Manage and browse through your game library
           </Body>
         </div>
+
+        <div className="mb-8">
+          <CollectionNav showAddButton={false} />
+        </div>
+
         <div className="mb-8 flex flex-col gap-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <StatusFilter />

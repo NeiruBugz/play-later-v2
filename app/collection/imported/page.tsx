@@ -2,6 +2,15 @@ import { Storefront } from "@prisma/client";
 
 import { ImportedGames } from "@/features/view-imported-games";
 import { getImportedGames } from "@/features/view-imported-games/server-actions/get-imported-games";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/shared/components/breadcrumb";
+import { CollectionNav } from "@/shared/components/collection-nav";
 import { Header } from "@/shared/components/header";
 
 interface SearchParams {
@@ -19,13 +28,15 @@ export default async function ImportedGamesPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  
+
   // Parse and validate search parameters
   const page = parseInt(params.page || "1") || 1;
   const limit = parseInt(params.limit || "20") || 20;
   const search = params.search || undefined;
   const storefront = (params.storefront as Storefront) || undefined;
-  const sortBy = (params.sortBy as "name" | "playtime" | "storefront" | "createdAt") || "name";
+  const sortBy =
+    (params.sortBy as "name" | "playtime" | "storefront" | "createdAt") ||
+    "name";
   const sortOrder = (params.sortOrder as "asc" | "desc") || "asc";
 
   const { data, serverError, validationErrors } = await getImportedGames({
@@ -79,7 +90,9 @@ export default async function ImportedGamesPage({
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-4 text-6xl">🚫</div>
             <h2 className="mb-2 text-xl font-semibold">No data available</h2>
-            <p className="text-muted-foreground">Unable to load imported games</p>
+            <p className="text-muted-foreground">
+              Unable to load imported games
+            </p>
           </div>
         </div>
       </>
@@ -92,6 +105,22 @@ export default async function ImportedGamesPage({
     <>
       <Header />
       <div className="container overflow-hidden px-4 py-8 pt-16">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/collection">Collection</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Imported Games</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="mb-8">
+          <CollectionNav />
+        </div>
+
         <ImportedGames
           initialGames={games}
           initialTotalGames={totalGames}

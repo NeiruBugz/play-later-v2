@@ -8,4 +8,8 @@ export const RevalidationService = {
   revalidateGame: (gameId: string) => {
     revalidatePath(`/game/${gameId}`);
   },
+
+  revalidateImportedGames: () => {
+    revalidatePath("/collection/imported");
+  },
 };

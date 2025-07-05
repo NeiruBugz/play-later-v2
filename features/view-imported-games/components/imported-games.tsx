@@ -164,6 +164,15 @@ export function ImportedGames({
     }
   };
 
+  const handleImportSuccess = useCallback(
+    (gameId: string) => {
+      // Refresh the current page to reflect the imported game removal
+      const currentFilters = { ...filters, search: debouncedSearch };
+      loadGames(currentPage, currentFilters);
+    },
+    [filters, debouncedSearch, currentPage, loadGames]
+  );
+
   useEffect(() => {
     if (debouncedSearch !== lastSearchRef.current) {
       const filtersWithDebouncedSearch = {
@@ -246,7 +255,11 @@ export function ImportedGames({
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {games.map((game) => (
-            <ImportedGameCard key={game.id} game={game} />
+            <ImportedGameCard
+              key={game.id}
+              game={game}
+              onImportSuccess={handleImportSuccess}
+            />
           ))}
         </div>
       )}

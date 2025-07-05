@@ -38,6 +38,7 @@ export const getImportedGames = authorizedActionClient
             mode: "insensitive" as const,
           },
         }),
+        deletedAt: null,
       };
 
       // Build orderBy clause for sorting
