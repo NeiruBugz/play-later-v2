@@ -1,8 +1,9 @@
-import { sessionErrorHandler } from "@/shared/lib";
-import { prisma } from "@/shared/lib/db";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+
+import { sessionErrorHandler } from "@/shared/lib";
+import { prisma } from "@/shared/lib/db";
 
 export const { auth, handlers, signIn } = NextAuth({
   adapter: PrismaAdapter(prisma),

@@ -1,3 +1,6 @@
+import { Clock } from "lucide-react";
+import { Suspense } from "react";
+
 import {
   Card,
   CardContent,
@@ -5,8 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/card";
-import { Clock } from "lucide-react";
-import { Suspense } from "react";
+
 import { ReleasesList } from "./releases-list";
 
 export function UpcomingReleases() {

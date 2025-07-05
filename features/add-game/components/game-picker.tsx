@@ -1,12 +1,13 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { Gamepad2, Search, X } from "lucide-react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+
 import { useIGDBSearch } from "@/features/search";
 import { Button, Input } from "@/shared/components";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { Label } from "@/shared/components/label";
 import { cn } from "@/shared/lib";
 import { SearchResponse } from "@/shared/types";
-import { useQueryClient } from "@tanstack/react-query";
-import { Gamepad2, Search, X } from "lucide-react";
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 type GamePreviewItemProps = {
   game: SearchResponse;

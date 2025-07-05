@@ -1,5 +1,7 @@
-import { prisma } from "@/shared/lib/db";
 import { Game } from "@prisma/client";
+
+import { prisma } from "@/shared/lib/db";
+
 import { DatabaseError, ValidationError } from "../shared/errors";
 import { Result, wrapWithResult } from "../shared/result";
 import { validateWithZod } from "../shared/validation";

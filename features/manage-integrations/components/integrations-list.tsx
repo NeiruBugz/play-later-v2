@@ -1,6 +1,8 @@
 import { getServerUserId } from "@/auth";
-import { prisma } from "@/shared/lib/db";
 import { revalidatePath } from "next/cache";
+
+import { prisma } from "@/shared/lib/db";
+
 import { servicesForIntegration } from "../lib/services-for-integration";
 import { ServiceIntegration } from "./service-integration";
 

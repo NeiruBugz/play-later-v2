@@ -1,8 +1,9 @@
 import { getServerUserId } from "@/auth";
-import { prisma } from "@/shared/lib/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+import { prisma } from "@/shared/lib/db";
+
+export async function POST() {
   try {
     const userId = await getServerUserId();
     if (!userId) {

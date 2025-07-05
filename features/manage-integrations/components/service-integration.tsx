@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@/shared/components";
-import { cn } from "@/shared/lib/tailwind-merge";
 import { ExternalLink, Unlink } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
+
+import { Button } from "@/shared/components";
+import { cn } from "@/shared/lib/tailwind-merge";
 
 type ServiceIntegrationProps = {
   id: string;

@@ -1,8 +1,9 @@
 "use client";
 
-import { cn } from "@/shared/lib/tailwind-merge";
 import { DragHandleDots2Icon } from "@radix-ui/react-icons";
 import * as ResizablePrimitive from "react-resizable-panels";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const ResizablePanelGroup = ({
   className,

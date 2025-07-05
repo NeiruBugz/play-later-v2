@@ -1,3 +1,8 @@
+import { ViewVerticalIcon } from "@radix-ui/react-icons";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, VariantProps } from "class-variance-authority";
+import * as React from "react";
+
 import { Button } from "@/shared/components/button";
 import { Input } from "@/shared/components/input";
 import { Separator } from "@/shared/components/separator";
@@ -11,10 +16,6 @@ import {
 } from "@/shared/components/tooltip";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib";
-import { ViewVerticalIcon } from "@radix-ui/react-icons";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, VariantProps } from "class-variance-authority";
-import * as React from "react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;

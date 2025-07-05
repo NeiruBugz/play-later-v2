@@ -1,26 +1,24 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { BacklogItemService } from "@/domain/backlog-item/service";
-import { RevalidationService } from "@/shared/ui/revalidation";
 import { BacklogItemStatus } from "@prisma/client";
+import { z } from "zod";
 
-export async function updateBacklogItemAction({
-  id,
-  status,
-}: {
-  id: number;
-  status: BacklogItemStatus;
-}) {
-  const userId = await getServerUserId();
-  if (!userId) {
-    return {
-      message: "User not authenticated",
-      success: false,
-    };
-  }
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+import { RevalidationService } from "@/shared/ui/revalidation";
 
-  try {
+export const updateBacklogItemAction = authorizedActionClient
+  .metadata({
+    actionName: "updateBacklogItem",
+    requiresAuth: true,
+  })
+  .inputSchema(
+    z.object({
+      id: z.number(),
+      status: z.nativeEnum(BacklogItemStatus),
+    })
+  )
+  .action(async ({ parsedInput: { id, status }, ctx: { userId } }) => {
     const result = await BacklogItemService.updateStatus(
       {
         id,
@@ -42,11 +40,4 @@ export async function updateBacklogItemAction({
       message: "Status updated successfully",
       success: true,
     };
-  } catch (error) {
-    console.error(error);
-    return {
-      message: "An unexpected error occurred",
-      success: false,
-    };
-  }
-}
+  });

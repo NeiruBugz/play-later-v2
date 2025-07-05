@@ -1,10 +1,11 @@
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+
 import { ShareWishlist } from "@/features/share-wishlist";
 import { WishlistedList } from "@/features/view-wishlist/components/wishlisted-list";
 import { Header } from "@/shared/components/header";
 import { ResponsiveHeading } from "@/shared/components/typography";
-import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function WishlistPage() {
   const session = await auth();

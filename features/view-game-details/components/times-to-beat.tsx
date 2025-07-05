@@ -1,3 +1,6 @@
+import { secondsToHours } from "date-fns";
+import { Clock } from "lucide-react";
+
 import {
   Tooltip,
   TooltipContent,
@@ -5,8 +8,6 @@ import {
   TooltipTrigger,
 } from "@/shared/components/tooltip";
 import igdbApi from "@/shared/lib/igdb";
-import { secondsToHours } from "date-fns";
-import { Clock } from "lucide-react";
 
 export async function TimesToBeat({ igdbId }: { igdbId: number }) {
   const ttb = await igdbApi.getGameTimeToBeats(igdbId);

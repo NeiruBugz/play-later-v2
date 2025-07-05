@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import { SubmitButton } from "@/features/add-game/components/add-game-form.submit";
 import {
   Select,
@@ -25,11 +31,7 @@ import {
   playingOnPlatforms,
 } from "@/shared/lib";
 import type { SearchResponse } from "@/shared/types";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+
 import { initialFormValues } from "../lib/constants";
 import {
   CreateGameActionSchema,
@@ -84,11 +86,17 @@ export function AddGameForm() {
       try {
         const result = await createGameAction(values);
 
-        if (result.success) {
-          toast.success(result.message);
+        if (result?.data) {
+          toast.success(
+            `"${result.data.gameTitle}" has been added to your collection!`
+          );
           onFormReset();
-        } else {
-          toast.error(result.message);
+        } else if (result?.serverError) {
+          toast.error(result.serverError);
+        } else if (result?.validationErrors) {
+          toast.error(
+            "Invalid input data. Please check your form and try again."
+          );
         }
       } catch (error) {
         console.error("Failed to submit form:", error);

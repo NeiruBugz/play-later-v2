@@ -1,18 +1,28 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { validateUpdateUsername } from "../lib/validation";
+import { zfd } from "zod-form-data";
+
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+
 import { updateUserName } from "./update-user-name";
 
-export async function editUserAction(prevState: any, payload: FormData) {
-  const parsedPayload = validateUpdateUsername(payload);
+export const editUserAction = authorizedActionClient
+  .metadata({
+    actionName: "editUser",
+    requiresAuth: true,
+  })
+  .inputSchema(
+    zfd.formData({
+      username: zfd.text(),
+      steamProfileUrl: zfd.text().optional(),
+    })
+  )
+  .action(async ({ parsedInput, ctx: { userId } }) => {
+    await updateUserName({
+      ...parsedInput,
+      id: userId,
+    });
 
-  if (!parsedPayload.success) {
-    return prevState;
-  }
-
-  await updateUserName(parsedPayload.data);
-
-  revalidatePath(`/user/${parsedPayload.data.id}`);
-  return prevState;
-}
+    revalidatePath("/user/settings");
+  });

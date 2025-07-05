@@ -2,33 +2,20 @@
 
 import type { AcquisitionType, BacklogItemStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import type { CreateGameActionInput } from "../lib/validation";
+
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+
 import { CreateGameActionSchema } from "../lib/validation";
 import type { AddGameToBacklogInput } from "../types";
 import { saveGameAndAddToBacklog } from "./add-game";
 
-export type CreateGameActionResult = {
-  success: boolean;
-  message: string;
-  data?: { gameTitle: string; gameId: string };
-};
-
-export async function createGameAction(
-  input: CreateGameActionInput
-): Promise<CreateGameActionResult> {
-  try {
-    const parsedPayload = CreateGameActionSchema.safeParse(input);
-
-    if (!parsedPayload.success) {
-      return {
-        success: false,
-        message: "Invalid input data. Please check your form and try again.",
-      };
-    }
-
-    const { data } = parsedPayload;
-
+export const createGameAction = authorizedActionClient
+  .metadata({
+    actionName: "createGame",
+    requiresAuth: true,
+  })
+  .inputSchema(CreateGameActionSchema)
+  .action(async ({ parsedInput: data }) => {
     const preparedPayload: AddGameToBacklogInput = {
       game: {
         igdbId: data.igdbId,
@@ -45,32 +32,7 @@ export async function createGameAction(
     revalidatePath("/collection");
 
     return {
-      success: true,
-      message: `"${savedGame.title}" has been added to your collection!`,
-      data: { gameTitle: savedGame.title, gameId: savedGame.id },
+      gameTitle: savedGame.title,
+      gameId: savedGame.id,
     };
-  } catch (error) {
-    console.error("Failed to create game:", error);
-
-    if (error instanceof Error) {
-      if (error.message.includes("not authenticated")) {
-        return {
-          success: false,
-          message: "You must be signed in to add games to your collection.",
-        };
-      }
-
-      if (error.message.includes("not found")) {
-        return {
-          success: false,
-          message: "Game not found. Please try selecting a different game.",
-        };
-      }
-    }
-
-    return {
-      success: false,
-      message: "Something went wrong. Please try again later.",
-    };
-  }
-}
+  });

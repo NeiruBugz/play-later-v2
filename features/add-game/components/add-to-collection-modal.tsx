@@ -1,5 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { ListPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import {
   Button,
   Select,
@@ -31,13 +39,7 @@ import {
   cn,
   playingOnPlatforms,
 } from "@/shared/lib";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
-import { ListPlus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+
 import { initialFormValues } from "../lib/constants";
 import {
   CreateGameActionSchema,
@@ -69,16 +71,22 @@ export function AddToCollectionModal({
       try {
         const result = await createGameAction(values);
 
-        if (result.success) {
-          toast.success(result.message);
+        if (result?.data) {
+          toast.success(
+            `"${result.data.gameTitle}" has been added to your collection!`
+          );
           setOpen(false);
           form.reset({
             ...initialFormValues,
             igdbId,
           });
-          router.push(`/game/${result.data?.gameId}`);
-        } else {
-          toast.error(result.message);
+          router.push(`/game/${result.data.gameId}`);
+        } else if (result?.serverError) {
+          toast.error(result.serverError);
+        } else if (result?.validationErrors) {
+          toast.error(
+            "Invalid input data. Please check your form and try again."
+          );
         }
       } catch (error) {
         console.error("Failed to submit form:", error);

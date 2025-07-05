@@ -1,3 +1,7 @@
+import { Star } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
+
 import {
   GameScreenshots,
   getGame,
@@ -21,9 +25,6 @@ import { IgdbImage } from "@/shared/components/igdb-image";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
 import { GenericPageProps } from "@/shared/types";
-import { Star } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
 
 function determineGameType(gameId: string) {
   const isNumeric = !isNaN(Number(gameId)) && Number.isInteger(Number(gameId));
@@ -38,15 +39,12 @@ export default async function GamePage(props: GenericPageProps) {
     redirect(`/game/external/${awaitedParams.id}`);
   }
 
-  const gameResponse = await getGame(awaitedParams.id);
+  const { data: game } = await getGame({ id: awaitedParams.id });
 
-  if (!gameResponse?.game) {
+  if (!game) {
     return notFound();
   }
-
-  const igdbData = await igdbApi.getGameById(gameResponse.game.igdbId);
-
-  const { game } = gameResponse;
+  const igdbData = await igdbApi.getGameById(game.igdbId);
 
   if (!igdbData) {
     return notFound();
@@ -124,7 +122,7 @@ export default async function GamePage(props: GenericPageProps) {
                   />
                 </AdaptiveTabsContent>
                 <AdaptiveTabsContent value="reviews">
-                  <Reviews gameId={game.id} gameTitle={game.title} />
+                  <Reviews gameId={game.id} />
                 </AdaptiveTabsContent>
                 <AdaptiveTabsContent value="screenshots">
                   <Suspense fallback={"loading..."}>

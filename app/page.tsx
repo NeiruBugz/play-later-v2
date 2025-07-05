@@ -1,5 +1,18 @@
 import { auth } from "@/auth";
 import {
+  ArrowDown,
+  BarChart3,
+  Calendar,
+  Gamepad2,
+  Heart,
+  MessageSquare,
+  Share2,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react/";
+import { Suspense } from "react";
+
+import {
   BacklogCount,
   CollectionStats,
   CurrentlyPlaying,
@@ -10,7 +23,6 @@ import {
 } from "@/features/dashboard/components";
 import { FeatureCard } from "@/features/landing";
 import { SignIn } from "@/features/sign-in";
-import { Button } from "@/shared/components/button";
 import { Header } from "@/shared/components/header";
 import {
   Body,
@@ -18,18 +30,6 @@ import {
   ResponsiveHeading,
   Subheading,
 } from "@/shared/components/typography";
-import {
-  ArrowDown,
-  BarChart3,
-  Calendar,
-  Gamepad2,
-  Heart,
-  MessageSquare,
-  Share2,
-  Sparkles,
-  TrendingUp,
-} from "lucide-react";
-import { Suspense } from "react";
 
 export default async function Page() {
   const session = await auth();
@@ -61,7 +61,7 @@ export default async function Page() {
               </Subheading>
             </div>
 
-            <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
+            <div className="align-center flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
               <SignIn variant="start" />
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Sparkles className="h-4 w-4" />

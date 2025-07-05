@@ -1,8 +1,9 @@
 "use client";
 
-import { cn } from "@/shared/lib/tailwind-merge";
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const Drawer = ({
   shouldScaleBackground = true,

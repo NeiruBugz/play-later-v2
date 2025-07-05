@@ -1,3 +1,7 @@
+import type { Review, User } from "@prisma/client";
+import { format } from "date-fns";
+import { Flag, Star, StarIcon, ThumbsUp } from "lucide-react";
+
 import { Button } from "@/shared/components";
 import {
   Avatar,
@@ -6,9 +10,6 @@ import {
 } from "@/shared/components/avatar";
 import { Card, CardContent, CardHeader } from "@/shared/components/card";
 import { cn, normalizeString } from "@/shared/lib";
-import type { Review, User } from "@prisma/client";
-import { format } from "date-fns";
-import { Flag, Star, StarIcon, ThumbsUp } from "lucide-react";
 
 const getFirstTwoLiterals = (name: string | null | undefined) => {
   if (!name) {

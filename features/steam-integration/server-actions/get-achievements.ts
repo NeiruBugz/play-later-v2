@@ -1,12 +1,16 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
+import { z } from "zod";
+
 import { prisma } from "@/shared/lib/db";
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+
+import { enrichAchievements } from "../lib/enrich-achievements";
 import {
-  SteamAchievement,
-  SteamAchievementSchema,
-  steamWebAPI,
-} from "../lib/steam-web-api";
+  mapAchievementsSchema,
+  mapGlobalAchievements,
+} from "../lib/map-achievements";
+import { SteamAchievement, steamWebAPI } from "../lib/steam-web-api";
 
 export interface EnrichedAchievement extends SteamAchievement {
   displayName: string;
@@ -18,20 +22,24 @@ export interface EnrichedAchievement extends SteamAchievement {
   rarity: "common" | "uncommon" | "rare" | "very_rare";
 }
 
-export async function getUserAchievements(steamAppId: number) {
-  try {
-    const userId = await getServerUserId();
-    if (!userId) {
-      return { error: "Not authenticated" };
-    }
+const getUserAchievementsSchema = z.object({
+  steamAppId: z.number(),
+});
 
+export const getUserAchievements = authorizedActionClient
+  .metadata({
+    actionName: "getUserAchievements",
+    requiresAuth: true,
+  })
+  .inputSchema(getUserAchievementsSchema)
+  .action(async ({ parsedInput: { steamAppId }, ctx: { userId } }) => {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { steamId64: true },
     });
 
     if (!user?.steamId64) {
-      return { error: "Steam account not connected" };
+      throw new Error("Steam account not connected");
     }
 
     const [userAchievements, schema, globalStats] = await Promise.all([
@@ -41,42 +49,18 @@ export async function getUserAchievements(steamAppId: number) {
     ]);
 
     if (!userAchievements || !schema) {
-      return { error: "Failed to fetch achievement data" };
+      throw new Error("Failed to fetch achievement data");
     }
 
-    const schemaMap = new Map<string, SteamAchievementSchema>();
-    schema.game.availableGameStats.achievements?.forEach((ach) => {
-      schemaMap.set(ach.name, ach);
-    });
+    const schemaMap = mapAchievementsSchema(schema);
 
-    const globalMap = new Map<string, number>();
-    globalStats?.achievementpercentages.achievements?.forEach((ach) => {
-      globalMap.set(ach.name, ach.percent);
-    });
+    const globalMap = mapGlobalAchievements(globalStats);
 
-    const enrichedAchievements: EnrichedAchievement[] =
-      userAchievements.achievements.map((ach) => {
-        const schemaData = schemaMap.get(ach.apiname);
-        const globalPercent = globalMap.get(ach.apiname);
-
-        let rarity: EnrichedAchievement["rarity"] = "common";
-        if (globalPercent !== undefined) {
-          if (globalPercent < 5) rarity = "very_rare";
-          else if (globalPercent < 15) rarity = "rare";
-          else if (globalPercent < 50) rarity = "uncommon";
-        }
-
-        return {
-          ...ach,
-          displayName: schemaData?.displayName || ach.apiname,
-          description: schemaData?.description || "",
-          icon: schemaData?.icon || "",
-          icongray: schemaData?.icongray || "",
-          hidden: schemaData?.hidden === 1,
-          globalPercent,
-          rarity,
-        };
-      });
+    const enrichedAchievements = enrichAchievements(
+      userAchievements,
+      schemaMap,
+      globalMap
+    );
 
     const totalAchievements = enrichedAchievements.length;
     const unlockedAchievements = enrichedAchievements.filter(
@@ -96,8 +80,4 @@ export async function getUserAchievements(steamAppId: number) {
       },
       gameName: userAchievements.gameName,
     };
-  } catch (error) {
-    console.error("Failed to get user achievements:", error);
-    return { error: "Internal server error" };
-  }
-}
+  });

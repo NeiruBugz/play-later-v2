@@ -9,9 +9,18 @@ import {
 } from "@/shared/components/card";
 
 export async function CurrentlyPlaying() {
-  const currentlyPlayingGames = await getUserGamesWithGroupedBacklog({
-    status: "PLAYING",
-  });
+  const { data: currentlyPlayingGames, serverError } =
+    await getUserGamesWithGroupedBacklog({
+      status: "PLAYING",
+    });
+
+  if (serverError) {
+    return <div>{serverError}</div>;
+  }
+
+  if (!currentlyPlayingGames || currentlyPlayingGames.length === 0) {
+    return <div>No currently playing games</div>;
+  }
 
   return (
     <Card className="h-fit">

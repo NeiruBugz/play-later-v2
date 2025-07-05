@@ -1,5 +1,8 @@
 "use client";
 
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/shared/components";
 import {
   Dialog,
@@ -8,8 +11,6 @@ import {
 } from "@/shared/components/dialog";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { FullGameInfoResponse } from "@/shared/types";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useState } from "react";
 
 export function ScreenshotCarousel({
   screenshots,

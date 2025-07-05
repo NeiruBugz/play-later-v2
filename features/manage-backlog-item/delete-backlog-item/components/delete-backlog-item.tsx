@@ -1,5 +1,9 @@
 "use client";
 
+import { TrashIcon } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import { Button } from "@/shared/components";
 import {
   AlertDialog,
@@ -11,8 +15,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/shared/components/alert-dialog";
-import { TrashIcon } from "lucide-react";
-import { useFormState } from "react-dom";
+import { HiddenInput } from "@/shared/components/hidden-input";
+
 import { deleteBacklogItemAction } from "../server-actions/action";
 
 export function DeleteBacklogItem({
@@ -20,10 +24,16 @@ export function DeleteBacklogItem({
 }: {
   backlogItemId: number;
 }) {
-  const [state, formAction] = useFormState(
-    (prevState: any, formData: FormData) =>
-      deleteBacklogItemAction({ message: "" }, backlogItemId, formData),
-    { message: "" }
+  const { execute } = useAction(
+    () => deleteBacklogItemAction({ id: backlogItemId }),
+    {
+      onSuccess: () => {
+        toast.success("Backlog item deleted");
+      },
+      onError: () => {
+        toast.error("Failed to delete backlog item");
+      },
+    }
   );
 
   return (
@@ -44,7 +54,8 @@ export function DeleteBacklogItem({
             className="group bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"
             asChild
           >
-            <form action={formAction}>
+            <form action={execute}>
+              <HiddenInput name="id" value={backlogItemId} />
               <Button variant="ghost" className="group-hover:bg-transparent">
                 Delete
               </Button>

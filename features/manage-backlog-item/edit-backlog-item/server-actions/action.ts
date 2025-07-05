@@ -1,44 +1,32 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { BacklogItemService } from "@/domain/backlog-item/service";
+import { z } from "zod";
+
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 import { RevalidationService } from "@/shared/ui/revalidation";
-import { validateEditBacklogItem } from "../lib/validation";
 
-type BacklogStatus =
-  | "TO_PLAY"
-  | "PLAYED"
-  | "PLAYING"
-  | "COMPLETED"
-  | "WISHLIST";
+import { editBacklogItemSchema } from "./schema";
 
-export async function editBacklogItemAction(
-  prevState: { message: string },
-  payload: FormData
-) {
-  // Handle authentication at this level
-  const userId = await getServerUserId();
-  if (!userId) {
-    return {
-      message: "User not authenticated",
-    };
-  }
-
-  const parsedPayload = validateEditBacklogItem(payload);
-
-  if (!parsedPayload.success) {
-    return {
-      message: "Invalid payload",
-    };
-  }
-
-  try {
-    const { status, ...restData } = parsedPayload.data;
-    // Cast status to the expected type
+export const editBacklogItem = authorizedActionClient
+  .metadata({
+    actionName: "editBacklogItem",
+    requiresAuth: true,
+  })
+  .inputSchema(editBacklogItemSchema)
+  .outputSchema(
+    z.object({
+      message: z.string(),
+    })
+  )
+  .action(async ({ parsedInput, ctx: { userId } }) => {
     const result = await BacklogItemService.update(
       {
-        ...restData,
-        status: status as BacklogStatus,
+        id: parsedInput.id,
+        status: parsedInput.status,
+        platform: parsedInput.platform,
+        startedAt: parsedInput.startedAt,
+        completedAt: parsedInput.completedAt,
       },
       userId
     );
@@ -49,16 +37,9 @@ export async function editBacklogItemAction(
       };
     }
 
-    // UI-specific revalidation
     RevalidationService.revalidateCollection();
 
     return {
       message: "Success",
-      data: parsedPayload.data,
     };
-  } catch (error) {
-    return {
-      message: "Failed to update backlog item",
-    };
-  }
-}
+  });

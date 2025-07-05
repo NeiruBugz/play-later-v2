@@ -1,4 +1,8 @@
-import { BacklogItemService } from "@/domain/backlog-item/service";
+import { BacklogItemStatus } from "@prisma/client";
+import { Heart, Star } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
+
 import { AddToCollectionModal } from "@/features/add-game";
 import { createGameAction } from "@/features/add-game/server-actions/action";
 import { GameScreenshots, SimilarGames } from "@/features/view-game-details";
@@ -8,6 +12,7 @@ import { Franchises } from "@/features/view-game-details/components/franchises";
 import { GameStats } from "@/features/view-game-details/components/game-stats";
 import { Metadata } from "@/features/view-game-details/components/metadata";
 import { TimesToBeat } from "@/features/view-game-details/components/times-to-beat";
+import { getBacklogItemsByIgdbId } from "@/features/view-game-details/server-actions/get-backlog-items-by-igdb-id";
 import { Button } from "@/shared/components";
 import {
   AdaptiveTabs,
@@ -21,19 +26,15 @@ import { cn } from "@/shared/lib";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
 import { GenericPageProps } from "@/shared/types";
-import { BacklogItemStatus } from "@prisma/client";
-import { Heart, Star } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function ExternalGamePage(props: GenericPageProps) {
   const id = Number((await props.params).id);
-  const [igdbData, backlogItems] = await Promise.all([
+  const [igdbData, { data: backlogItems }] = await Promise.all([
     igdbApi.getGameById(id),
-    BacklogItemService.getBacklogItemsForUserByIgdbId(id),
+    getBacklogItemsByIgdbId({ igdbId: id }),
   ]);
 
-  const isWishlistDisabled = backlogItems.isSuccess
+  const isWishlistDisabled = backlogItems?.isSuccess
     ? backlogItems.value.some(
         (item) => item.status === BacklogItemStatus.WISHLIST
       )
@@ -77,8 +78,8 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                       backlogStatus: BacklogItemStatus.WISHLIST,
                     });
 
-                    if (result.success) {
-                      redirect(`/game/${result.data?.gameId}`);
+                    if (result?.data) {
+                      redirect(`/game/${result.data.gameId}`);
                     }
                   }}
                 >

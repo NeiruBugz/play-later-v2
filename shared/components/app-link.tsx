@@ -1,9 +1,10 @@
 "use client";
 
-import { cn } from "@/shared/lib";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { memo } from "react";
+
+import { cn } from "@/shared/lib";
 
 const AppLink = memo(function AppLink({
   href,

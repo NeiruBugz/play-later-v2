@@ -1,9 +1,10 @@
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+
 import { BacklogList } from "@/features/view-backlogs/components/backlog-list";
 import { Header } from "@/shared/components/header";
 import { Body, ResponsiveHeading } from "@/shared/components/typography";
-import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function BacklogsPage() {
   const session = await auth();

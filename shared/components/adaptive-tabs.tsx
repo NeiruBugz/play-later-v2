@@ -1,8 +1,10 @@
 "use client";
 
-import { cn } from "@/shared/lib";
 import { ChevronDown } from "lucide-react";
 import React, { useState } from "react";
+
+import { cn } from "@/shared/lib";
+
 import { Button } from "./button";
 import {
   DropdownMenu,

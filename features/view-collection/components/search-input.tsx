@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Input } from "@/shared/components";
-import { cn } from "@/shared/lib";
 import { Cross, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
+
+import { Button, Input } from "@/shared/components";
+import { cn } from "@/shared/lib";
 
 export function SearchInput() {
   const params = useSearchParams();

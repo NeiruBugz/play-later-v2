@@ -1,11 +1,12 @@
-import { ButtonProps, buttonVariants } from "@/shared/components/button";
-import { cn } from "@/shared/lib/tailwind-merge";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   DotsHorizontalIcon,
 } from "@radix-ui/react-icons";
 import * as React from "react";
+
+import { ButtonProps, buttonVariants } from "@/shared/components/button";
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav

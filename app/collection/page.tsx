@@ -1,4 +1,7 @@
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+
 import { CollectionList } from "@/features/view-collection";
 import { PlatformFilter } from "@/features/view-collection/components/platform-filter";
 import { SearchInput } from "@/features/view-collection/components/search-input";
@@ -7,9 +10,6 @@ import { CollectionViewMode } from "@/features/view-collection/components/view-m
 import { getUserUniquePlatforms } from "@/features/view-collection/server-actions/get-uniques-platforms";
 import { Header } from "@/shared/components/header";
 import { Body, ResponsiveHeading } from "@/shared/components/typography";
-import { GenericPageProps } from "@/shared/types";
-import { redirect } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function CollectionPage(props: {
   params: Promise<Record<string, string>>;

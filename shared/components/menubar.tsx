@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/shared/lib/tailwind-merge";
 import {
   CheckIcon,
   ChevronRightIcon,
@@ -8,6 +7,8 @@ import {
 } from "@radix-ui/react-icons";
 import * as MenubarPrimitive from "@radix-ui/react-menubar";
 import * as React from "react";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const MenubarMenu = MenubarPrimitive.Menu;
 

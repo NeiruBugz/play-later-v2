@@ -2,6 +2,7 @@ import { Accordion, AccordionItem } from "@/shared/components/accordion";
 import { cn } from "@/shared/lib";
 import igdbApi from "@/shared/lib/igdb";
 import { FranchiseGamesResponse, GAME_TYPE } from "@/shared/types";
+
 import { Franchise } from "./franchise";
 
 type FranchisesProps = {

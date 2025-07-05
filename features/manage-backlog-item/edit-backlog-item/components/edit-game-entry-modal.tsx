@@ -1,5 +1,9 @@
 "use client";
 
+import { BacklogItem } from "@prisma/client";
+import { Edit } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/shared/components/button";
 import {
   Dialog,
@@ -15,9 +19,7 @@ import {
   TabsTrigger,
 } from "@/shared/components/tabs";
 import { BacklogStatusMapper, normalizeString } from "@/shared/lib";
-import { BacklogItem } from "@prisma/client";
-import { Edit } from "lucide-react";
-import { useState } from "react";
+
 import { GameEntryForm } from "./game-entry-form";
 
 interface EditGameEntryModalProps {

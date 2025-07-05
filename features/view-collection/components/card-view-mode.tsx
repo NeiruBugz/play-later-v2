@@ -1,5 +1,9 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
+
 import { Button } from "@/shared/components";
 import {
   DropdownMenu,
@@ -9,9 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/dropdown-menu";
-import { ChevronDown } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 
 export function CardViewMode() {
   const params = useSearchParams();

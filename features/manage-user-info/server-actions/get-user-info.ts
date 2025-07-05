@@ -1,16 +1,28 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
-import { prisma } from "@/shared/lib/db";
+import { z } from "zod";
 
-export async function getUserInfo(userId?: string) {
-  try {
-    const serverUserId = await getServerUserId();
-    if (!serverUserId) {
-      throw new Error("Can't find user");
-    }
+import { prisma } from "@/shared/lib/db";
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+
+export const getUserInfo = authorizedActionClient
+  .metadata({
+    actionName: "getUserInfo",
+    requiresAuth: true,
+  })
+  .inputSchema(z.object({ userId: z.string().optional() }).optional())
+  .action(async ({ ctx: { userId: contextUserId }, parsedInput }) => {
+    const userIdInUse = parsedInput?.userId ?? contextUserId;
     const user = await prisma.user.findUnique({
-      where: { id: userId ?? serverUserId },
+      where: { id: userIdInUse },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        steamProfileURL: true,
+        steamConnectedAt: true,
+        email: true,
+      },
     });
 
     if (!user) {
@@ -18,7 +30,4 @@ export async function getUserInfo(userId?: string) {
     }
 
     return user;
-  } catch (error) {
-    console.error(error);
-  }
-}
+  });

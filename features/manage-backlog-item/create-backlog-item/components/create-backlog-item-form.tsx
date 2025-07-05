@@ -1,5 +1,12 @@
 "use client";
 
+import { BacklogItemStatus } from "@prisma/client";
+import { format } from "date-fns";
+import { useSession } from "next-auth/react";
+import { useAction } from "next-safe-action/hooks";
+import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
+
 import {
   Button,
   Input,
@@ -12,13 +19,8 @@ import {
 import { HiddenInput } from "@/shared/components/hidden-input";
 import { Label } from "@/shared/components/label";
 import { BacklogStatusMapper, cn, playingOnPlatforms } from "@/shared/lib";
-import { BacklogItemStatus } from "@prisma/client";
-import { format } from "date-fns";
-import { useSession } from "next-auth/react";
-import { useActionState, useEffect } from "react";
-import { useFormStatus } from "react-dom";
-import { toast } from "sonner";
-import { createBacklogItemAction } from "../server-actions/action";
+
+import { createBacklogItem } from "../server-actions/action";
 
 function parseDate(dateString?: Date | null) {
   if (!dateString) return "";
@@ -40,24 +42,17 @@ function SubmitEdit() {
 
 export function CreateBacklogItemForm({ gameId }: { gameId: string }) {
   const session = useSession();
-  const [state, formAction] = useActionState(createBacklogItemAction, {
-    message: "",
+  const { execute } = useAction(createBacklogItem, {
+    onSuccess: () => {
+      toast.success("Backlog item created");
+    },
+    onError: () => {
+      toast.error("Failed to create backlog item");
+    },
   });
 
-  useEffect(() => {
-    if (state.message === "Success") {
-      toast.success("Success!", {
-        description: "Backlog item created successfully",
-      });
-    } else if (state.message === "Error") {
-      toast.error("Error!", {
-        description: "Failed to create backlog item",
-      });
-    }
-  }, [state.message]);
-
   return (
-    <form className="mb-4 flex flex-col gap-3" action={formAction}>
+    <form className="mb-4 flex flex-col gap-3" action={execute}>
       <HiddenInput name="gameId" value={gameId} />
       <HiddenInput name="userId" value={session.data?.user?.id} />
       <div className="flex flex-col gap-2">

@@ -1,9 +1,13 @@
-import { getServerUserId } from "@/auth";
-import type { GameWithBacklogItems } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
-import { prisma } from "@/shared/lib/db";
 import { BacklogItemStatus, Prisma } from "@prisma/client";
-import { redirect } from "next/navigation";
-import { validateFilterParams, type FilterParams } from "../lib/validation";
+
+import { prisma } from "@/shared/lib/db";
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+
+import {
+  FilterParamsSchema,
+  validateFilterParams,
+  type FilterParams,
+} from "../lib/validation";
 
 const ITEMS_PER_PAGE = 24;
 const DEFAULT_PAGE = 1;
@@ -67,63 +71,58 @@ const getPaginationParams = (page: number): { skip: number; take: number } => {
 /**
  * Fetches user games with grouped backlog items in a paginated manner.
  */
-export async function getUserGamesWithGroupedBacklogPaginated(
-  params: Record<string, string | number>
-): Promise<{ collection: GameWithBacklogItems[]; count: number }> {
-  try {
-    const userId = await getServerUserId();
+export const getUserGamesWithGroupedBacklogPaginated = authorizedActionClient
+  .metadata({
+    actionName: "getUserGamesWithGroupedBacklogPaginated",
+    requiresAuth: true,
+  })
+  .inputSchema(FilterParamsSchema)
+  .action(async ({ ctx: { userId }, parsedInput }) => {
+    try {
+      const parsedParams = validateFilterParams(parsedInput);
 
-    if (!userId) {
-      console.error("Unable to find authenticated user");
-      redirect("/");
-    }
+      if (!parsedParams.success) {
+        console.error("Invalid filter parameters:", parsedParams.error.errors);
+        return { collection: [], count: 0 };
+      }
 
-    const parsedParams = validateFilterParams(params);
+      const filterParams = parsedParams.data;
+      const backlogItemFilter = buildBacklogItemFilter(userId, filterParams);
 
-    if (!parsedParams.success) {
-      console.error("Invalid filter parameters:", parsedParams.error.errors);
+      const gameFilter = {
+        backlogItems: {
+          some: backlogItemFilter,
+        },
+      };
+
+      const { skip, take } = getPaginationParams(filterParams.page);
+
+      const [games, totalGames] = await prisma.$transaction([
+        prisma.game.findMany({
+          where: gameFilter,
+          orderBy: { title: "asc" },
+          take,
+          skip,
+          include: {
+            backlogItems: {
+              where: backlogItemFilter,
+            },
+          },
+        }),
+        prisma.game.count({
+          where: gameFilter,
+        }),
+      ]);
+
+      return {
+        collection: games.map((game) => ({
+          game,
+          backlogItems: game.backlogItems,
+        })),
+        count: totalGames,
+      };
+    } catch (error) {
+      console.error("Error fetching user game collection:", error);
       return { collection: [], count: 0 };
     }
-
-    const filterParams = parsedParams.data;
-    const backlogItemFilter = buildBacklogItemFilter(userId, filterParams);
-
-    const gameFilter = {
-      backlogItems: {
-        some: backlogItemFilter,
-      },
-    };
-
-    const { skip, take } = getPaginationParams(filterParams.page);
-
-    const [games, totalGames] = await prisma.$transaction([
-      prisma.game.findMany({
-        where: gameFilter,
-        orderBy: { title: "asc" },
-        take,
-        skip,
-        include: {
-          backlogItems: {
-            where: backlogItemFilter,
-          },
-        },
-      }),
-      prisma.game.count({
-        where: gameFilter,
-      }),
-    ]);
-
-    return {
-      collection: games.map((game) => ({
-        game,
-        backlogItems: game.backlogItems,
-      })),
-      count: totalGames,
-    };
-  } catch (error) {
-    console.error("Error fetching user game collection:", error);
-    // Consider throwing the error instead of returning empty results
-    // to allow for consistent error handling at a higher level
-    return { collection: [], count: 0 };
-  }
-}
+  });

@@ -1,4 +1,15 @@
-import { editBacklogItemAction } from "@/features/manage-backlog-item/edit-backlog-item/server-actions/action";
+import { BacklogItem, BacklogItemStatus } from "@prisma/client";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+import { editBacklogItem } from "@/features/manage-backlog-item/edit-backlog-item/server-actions/action";
 import { Button } from "@/shared/components";
 import { Calendar } from "@/shared/components/calendar";
 import { Label } from "@/shared/components/label";
@@ -10,16 +21,6 @@ import {
   SelectValue,
 } from "@/shared/components/select";
 import { BacklogStatusMapper, playingOnPlatforms } from "@/shared/lib";
-import { BacklogItem, BacklogItemStatus } from "@prisma/client";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@radix-ui/react-popover";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useActionState, useState } from "react";
-import { toast } from "sonner";
 
 type GameEntryFormProps = Pick<
   BacklogItem,
@@ -58,7 +59,7 @@ export function GameEntryForm({
       formData.append("completedAt", completionDate.toString());
     }
     try {
-      await editBacklogItemAction({ message: "" }, formData);
+      await editBacklogItem(formData);
       toast.success("Backlog item updated successfully");
     } catch (error) {
       console.error("Error updating backlog item:", error);

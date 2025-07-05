@@ -1,11 +1,16 @@
-import { getBacklogs } from "@/features/view-backlogs/server-actions/get-backlogs";
-import { IgdbImage } from "@/shared/components/igdb-image";
 import Link from "next/link";
 
-export async function BacklogList() {
-  const backlogs = await getBacklogs();
+import { getBacklogs } from "@/features/view-backlogs/server-actions/get-backlogs";
+import { IgdbImage } from "@/shared/components/igdb-image";
 
-  if (backlogs.length === 0) {
+export async function BacklogList() {
+  const { data: backlogs, serverError } = await getBacklogs();
+
+  if (serverError) {
+    return <div>{serverError}</div>;
+  }
+
+  if (!backlogs || backlogs?.length === 0) {
     return (
       <>
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">

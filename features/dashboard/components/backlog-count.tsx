@@ -1,4 +1,7 @@
 import { getServerUserId } from "@/auth";
+import { BacklogItemStatus } from "@prisma/client";
+import { ListIcon } from "lucide-react";
+
 import {
   Card,
   CardContent,
@@ -7,8 +10,6 @@ import {
   CardTitle,
 } from "@/shared/components/card";
 import { prisma } from "@/shared/lib/db";
-import { BacklogItemStatus } from "@prisma/client";
-import { ListIcon } from "lucide-react";
 
 export async function BacklogCount() {
   const userId = await getServerUserId();

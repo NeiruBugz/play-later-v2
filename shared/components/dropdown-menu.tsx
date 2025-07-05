@@ -1,4 +1,3 @@
-import { cn } from "@/shared/lib/tailwind-merge";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import {
   CheckIcon,
@@ -6,6 +5,8 @@ import {
   DotFilledIcon,
 } from "@radix-ui/react-icons";
 import * as React from "react";
+
+import { cn } from "@/shared/lib/tailwind-merge";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 

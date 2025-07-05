@@ -1,7 +1,7 @@
-import { getServerUserId } from "@/auth";
-import { IntegrationsList } from "@/features/manage-integrations/components/integrations-list";
-import { EditUserForm } from "@/features/manage-user-info/components/edit-user-form";
-import { getUserInfo } from "@/features/manage-user-info/server-actions/get-user-info";
+import { notFound } from "next/navigation";
+
+import { IntegrationsList } from "@/features/manage-integrations";
+import { EditUserForm, getUserInfo } from "@/features/manage-user-info";
 import {
   AdaptiveTabs,
   AdaptiveTabsContent,
@@ -9,26 +9,25 @@ import {
   AdaptiveTabsTrigger,
 } from "@/shared/components/adaptive-tabs";
 import { Header } from "@/shared/components/header";
-import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export default async function UserPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; success?: string }>;
+  searchParams: Promise<{ error?: string; success?: string; tab?: string }>;
 }) {
-  const userId = await getServerUserId();
+  const { data: user, serverError } = await getUserInfo(undefined);
 
-  if (!userId) {
-    return notFound();
+  if (serverError) {
+    throw new Error(serverError);
   }
-
-  const user = await getUserInfo(userId);
 
   if (!user) {
     return notFound();
   }
 
-  const { error, success } = await searchParams;
+  const { error, success, tab } = await searchParams;
 
   // Show notifications based on URL parameters
   if (error === "steam_already_connected") {
@@ -43,7 +42,7 @@ export default async function UserPage({
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <div className="container relative px-4 pt-[80px]">
-          <AdaptiveTabs defaultValue="settings" className="w-full">
+          <AdaptiveTabs defaultValue={tab ?? "settings"} className="w-full">
             <AdaptiveTabsList className="w-fit">
               <AdaptiveTabsTrigger value="settings">
                 Settings

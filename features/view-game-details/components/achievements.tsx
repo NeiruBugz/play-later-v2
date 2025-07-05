@@ -1,3 +1,7 @@
+import { Clock, Trophy } from "lucide-react";
+import Image from "next/image";
+import { Suspense } from "react";
+
 import {
   EnrichedAchievement,
   getUserAchievements,
@@ -11,9 +15,6 @@ import {
 } from "@/shared/components/card";
 import { Progress } from "@/shared/components/progress";
 import { cn } from "@/shared/lib";
-import { Clock, Trophy } from "lucide-react";
-import Image from "next/image";
-import { Suspense } from "react";
 
 type AchievementsProps = {
   steamAppId?: number;
@@ -108,14 +109,20 @@ function AchievementCard({
 }
 
 async function AchievementsList({ steamAppId }: { steamAppId: number }) {
-  const result = await getUserAchievements(steamAppId);
+  const { serverError, validationErrors, data } = await getUserAchievements({
+    steamAppId,
+  });
 
-  if ("error" in result) {
+  if (validationErrors) {
+    console.log({ validationErrors });
+  }
+
+  if (serverError) {
     return (
       <div className="py-8 text-center text-muted-foreground">
         <Trophy className="mx-auto mb-4 h-12 w-12 opacity-50" />
-        <p>{result.error}</p>
-        {result.error === "Steam account not connected" && (
+        <p>{serverError}</p>
+        {serverError === "Steam account not connected" && (
           <p className="mt-2 text-sm">
             Connect your Steam account in settings to view achievements.
           </p>
@@ -124,7 +131,11 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
     );
   }
 
-  const { achievements, stats } = result;
+  if (!data) {
+    return;
+  }
+
+  const { achievements, stats } = data;
 
   return (
     <div className="space-y-6">

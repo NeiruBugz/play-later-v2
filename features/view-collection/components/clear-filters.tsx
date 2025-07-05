@@ -1,9 +1,10 @@
 "use client";
 
-import { Button } from "@/shared/components";
 import { XIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+
+import { Button } from "@/shared/components";
 
 export function ClearFilters() {
   const router = useRouter();

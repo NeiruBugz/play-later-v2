@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useTransition } from "react";
+
 import {
   Select,
   SelectContent,
@@ -8,8 +11,6 @@ import {
   SelectValue,
 } from "@/shared/components";
 import { normalizeString } from "@/shared/lib";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useTransition } from "react";
 
 export function PlatformFilter({
   platformOptions,

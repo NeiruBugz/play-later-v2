@@ -1,10 +1,11 @@
-import { Button } from "@/shared/components/button";
-import { cn } from "@/shared/lib/tailwind-merge";
 import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
 import * as React from "react";
+
+import { Button } from "@/shared/components/button";
+import { cn } from "@/shared/lib/tailwind-merge";
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
