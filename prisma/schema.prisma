@@ -1,6 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["tracing"]
 }
 
 datasource db {
@@ -117,6 +116,22 @@ model IgnoredImportedGames {
   name   String
   userId String
   User   User   @relation(fields: [userId], references: [id])
+}
+
+model ImportedGame {
+  id        String @id @default(cuid())
+  name      String
+  storefront Storefront
+  storefrontGameId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+enum Storefront {
+  STEAM
+  PLAYSTATION
+  XBOX
 }
 
 enum BacklogItemStatus {
