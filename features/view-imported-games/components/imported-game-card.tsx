@@ -1,6 +1,7 @@
 "use client";
 
 import { Storefront } from "@prisma/client";
+import { minutesToHours } from "date-fns";
 import { Check, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
@@ -136,7 +137,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
         {game.playtime && game.playtime > 0 && (
           <div className="absolute right-2 top-2">
             <Badge variant="secondary" className="text-xs">
-              {game.playtime} h.
+              {minutesToHours(game.playtime)} h.
             </Badge>
           </div>
         )}
