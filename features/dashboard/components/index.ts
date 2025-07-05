@@ -1,6 +1,7 @@
 export { BacklogCount } from "./backlog-count";
 export { CollectionStats } from "./collection-stats";
 export { CurrentlyPlaying } from "./currently-playing";
+export { ImportedGamesWidget } from "./imported-games-widget";
 export { PlatformBreakdown } from "./platform-breakdown";
 export { RecentActivity } from "./recent-activity";
 export { ReleasesList } from "./releases-list";

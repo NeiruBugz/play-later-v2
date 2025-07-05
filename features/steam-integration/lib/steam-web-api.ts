@@ -44,6 +44,19 @@ export interface SteamGlobalAchievementPercentages {
   };
 }
 
+export interface SteamUserOwnedGames {
+  game_count: number;
+  games: SteamGame[];
+}
+
+export interface SteamGame {
+  appid: number;
+  name: string;
+  playtime_forever: number;
+  img_icon_url?: string;
+  img_logo_url?: string;
+}
+
 export class SteamWebAPI {
   private apiKey: string;
   private baseUrl = "https://api.steampowered.com";
@@ -97,6 +110,22 @@ export class SteamWebAPI {
       return await response.json();
     } catch (error) {
       console.error("Failed to fetch global achievement percentages:", error);
+      return null;
+    }
+  }
+
+  async getUserOwnedGames(
+    steamId: string
+  ): Promise<{ response: SteamUserOwnedGames } | null> {
+    try {
+      const response = await fetch(
+        `${this.baseUrl}/IPlayerService/GetOwnedGames/v1/?key=${this.apiKey}&steamid=${steamId}&include_appinfo=1`
+      );
+
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      console.error("Failed to fetch user owned games:", error);
       return null;
     }
   }

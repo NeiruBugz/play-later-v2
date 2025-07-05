@@ -1,9 +1,11 @@
 "use client";
 
-import { ExternalLink, Unlink } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { ReactNode } from "react";
+import { ExternalLink, RefreshCcw, Unlink } from "lucide-react";
+import { ReactNode, useState } from "react";
+import { toast } from "sonner";
 
+import { getUserOwnedGames } from "@/features/steam-integration/server-actions/get-user-owned-games";
+import { saveSteamGames } from "@/features/steam-integration/server-actions/save-steam-games";
 import { Button } from "@/shared/components";
 import { cn } from "@/shared/lib/tailwind-merge";
 
@@ -30,7 +32,7 @@ export function ServiceIntegration({
   profileUrl,
   onDisconnect,
 }: ServiceIntegrationProps) {
-  const router = useRouter();
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const handleConnect = async () => {
     if (isDisabled) return;
@@ -51,6 +53,54 @@ export function ServiceIntegration({
   const handleViewProfile = () => {
     if (profileUrl) {
       window.open(profileUrl, "_blank");
+    }
+  };
+
+  const handleSyncLibraries = async () => {
+    if (isSyncing) return;
+    if (id === "steam" && connectedUsername) {
+      setIsSyncing(true);
+      try {
+        const { data: ownedGames, serverError: fetchError } =
+          await getUserOwnedGames({
+            steamUsername: connectedUsername,
+          });
+
+        if (fetchError) {
+          toast.error("Failed to fetch Steam games", {
+            description: fetchError,
+          });
+          return;
+        }
+        if (!ownedGames || !Array.isArray(ownedGames)) {
+          toast.error("No games found in your Steam library.");
+          return;
+        }
+
+        const { serverError, validationErrors } = await saveSteamGames({
+          games: ownedGames,
+        });
+
+        console.log({ serverError, validationErrors });
+
+        if (serverError) {
+          toast.error("Failed to import Steam games", {
+            description: serverError,
+          });
+          return;
+        }
+        if (validationErrors) {
+          toast.error("Validation error while importing games.");
+          return;
+        }
+        toast.success("Steam library synced successfully!");
+      } catch {
+        toast.error(
+          "An unexpected error occurred while syncing your Steam library."
+        );
+      } finally {
+        setIsSyncing(false);
+      }
     }
   };
 
@@ -78,6 +128,24 @@ export function ServiceIntegration({
                 <ExternalLink className="h-4 w-4" />
               </Button>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={id !== "steam" || !connectedUsername || isSyncing}
+              onClick={handleSyncLibraries}
+            >
+              {isSyncing ? (
+                <span className="flex items-center">
+                  <RefreshCcw className="mr-1 h-4 w-4 animate-spin" />
+                  Syncing...
+                </span>
+              ) : (
+                <>
+                  <RefreshCcw className="mr-1 h-4 w-4" />
+                  Sync Libraries
+                </>
+              )}
+            </Button>
             <Button
               variant="outline"
               size="sm"

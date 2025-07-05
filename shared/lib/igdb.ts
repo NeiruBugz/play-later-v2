@@ -564,6 +564,30 @@ const igdbApi = {
       resource: "/franchises",
     });
   },
+
+  async getGameBySteamAppId(
+    steamAppId: number
+  ): Promise<{ id: number; name: string } | undefined> {
+    if (!steamAppId) return;
+
+    const steamUrl = `https://store.steampowered.com/app/${steamAppId}`;
+
+    const query = new QueryBuilder()
+      .fields(["name"])
+      .where(`external_games.category = 1 & external_games.url = "${steamUrl}"`)
+      .build();
+
+    const response = await this.request<FullGameInfoResponse[]>({
+      body: query,
+      resource: "/games",
+    });
+
+    if (response?.length) {
+      return response[0];
+    }
+
+    return undefined;
+  },
 };
 
 export default igdbApi;
