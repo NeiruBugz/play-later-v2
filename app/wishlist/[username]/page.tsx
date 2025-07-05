@@ -6,7 +6,20 @@ import { GenericPageProps } from "@/shared/types";
 export default async function SharedWishlistPage(props: GenericPageProps) {
   const { username } = await props.params;
   const decodedUsername = decodeURIComponent(username);
-  const wishlistedItems = await getWishlistedItemsByUsername(decodedUsername);
+  const { data: wishlistedItems, serverError } =
+    await getWishlistedItemsByUsername({ username: decodedUsername });
+
+  if (serverError) {
+    return <div>{serverError}</div>;
+  }
+
+  if (!wishlistedItems || wishlistedItems.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold">No wishlist found</h1>
+      </div>
+    );
+  }
 
   return (
     <div>

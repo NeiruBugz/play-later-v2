@@ -4,7 +4,11 @@ import { getWishlistedItems } from "@/features/view-wishlist/server-actions/get-
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 
 export async function WishlistedList() {
-  const wishlistedItems = await getWishlistedItems();
+  const { data: wishlistedItems, serverError } = await getWishlistedItems();
+
+  if (serverError) {
+    return <div>{serverError}</div>;
+  }
 
   if (!wishlistedItems || wishlistedItems.length === 0) {
     return (
