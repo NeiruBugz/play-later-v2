@@ -1,5 +1,6 @@
 "use server";
 
+import { Storefront } from "@prisma/client";
 import { z } from "zod";
 
 import { prisma } from "@/shared/lib/db";
@@ -13,31 +14,67 @@ export const getImportedGames = authorizedActionClient
   .inputSchema(
     z.object({
       page: z.number().default(1),
-      limit: z.number().default(10),
+      limit: z.number().default(20),
+      search: z.string().optional(),
+      storefront: z.nativeEnum(Storefront).optional(),
+      sortBy: z
+        .enum(["name", "playtime", "storefront", "createdAt"])
+        .default("name"),
+      sortOrder: z.enum(["asc", "desc"]).default("asc"),
     })
   )
-  .action(async ({ ctx: { userId }, parsedInput: { page, limit } }) => {
-    const totalGames = await prisma.importedGame.count({
-      where: { userId },
-    });
+  .action(
+    async ({
+      ctx: { userId },
+      parsedInput: { page, limit, search, storefront, sortBy, sortOrder },
+    }) => {
+      // Build where clause for filtering
+      const where = {
+        userId,
+        ...(storefront && { storefront }),
+        ...(search && {
+          name: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        }),
+      };
 
-    const games = await prisma.importedGame.findMany({
-      where: { userId },
-      skip: (page - 1) * limit,
-      take: limit,
-      select: {
-        id: true,
-        name: true,
-        storefront: true,
-        storefrontGameId: true,
-        playtime: true,
-        img_icon_url: true,
-        img_logo_url: true,
-      },
-      orderBy: {
-        name: "asc",
-      },
-    });
+      // Build orderBy clause for sorting
+      const orderBy = (() => {
+        switch (sortBy) {
+          case "name":
+            return { name: sortOrder };
+          case "playtime":
+            return { playtime: sortOrder };
+          case "storefront":
+            return { storefront: sortOrder };
+          case "createdAt":
+            return { createdAt: sortOrder };
+          default:
+            return { name: sortOrder };
+        }
+      })();
 
-    return { games, totalGames };
-  });
+      const [totalGames, games] = await Promise.all([
+        prisma.importedGame.count({ where }),
+        prisma.importedGame.findMany({
+          where,
+          skip: (page - 1) * limit,
+          take: limit,
+          orderBy,
+          select: {
+            id: true,
+            name: true,
+            storefront: true,
+            storefrontGameId: true,
+            playtime: true,
+            img_icon_url: true,
+            img_logo_url: true,
+          },
+        }),
+      ]);
+
+      return { games, totalGames };
+    }
+  );

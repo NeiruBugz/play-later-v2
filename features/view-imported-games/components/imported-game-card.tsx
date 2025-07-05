@@ -1,3 +1,5 @@
+"use client";
+
 import { Storefront } from "@prisma/client";
 import Image from "next/image";
 import { useState } from "react";
@@ -28,21 +30,6 @@ const storefrontLabels = {
   PLAYSTATION: "PlayStation",
   XBOX: "Xbox",
 };
-
-function formatPlaytime(minutes: number | null): string {
-  if (!minutes || minutes === 0) return "Not played";
-
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-
-  if (hours === 0) {
-    return `${remainingMinutes}m`;
-  } else if (remainingMinutes === 0) {
-    return `${hours}h`;
-  } else {
-    return `${hours}h ${remainingMinutes}m`;
-  }
-}
 
 function getImageUrl(game: ImportedGame): string | null {
   // For Steam games, use high-quality store images (616x353) which work well with 16:9 aspect ratio
@@ -100,7 +87,7 @@ function ImportedGameCard({ game }: { game: ImportedGame }) {
         {game.playtime && game.playtime > 0 && (
           <div className="absolute right-2 top-2">
             <Badge variant="secondary" className="text-xs">
-              {formatPlaytime(game.playtime)}
+              {game.playtime} h.
             </Badge>
           </div>
         )}

@@ -36,7 +36,5 @@ export const getUserOwnedGames = authorizedActionClient
       img_logo_url: game.img_logo_url,
     }));
 
-    console.log(mappedToDomain);
-
     return mappedToDomain;
   });
