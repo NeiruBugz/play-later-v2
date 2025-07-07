@@ -5,7 +5,7 @@ export const CreateReviewFormSchema = zfd.formData({
   gameId: zfd.text(),
   rating: zfd.numeric(),
   content: zfd.text(),
-  completedOn: zfd.text(),
+  completedOn: zfd.text().optional(),
 });
 
 export const CreateReviewSchema = z.object({

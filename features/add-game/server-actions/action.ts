@@ -27,12 +27,12 @@ export const createGameAction = authorizedActionClient
       },
     };
 
-    const savedGame = await saveGameAndAddToBacklog(preparedPayload);
+    const { data: savedGame } = await saveGameAndAddToBacklog(preparedPayload);
 
     revalidatePath("/collection");
 
     return {
-      gameTitle: savedGame.title,
-      gameId: savedGame.id,
+      gameTitle: savedGame?.title,
+      gameId: savedGame?.id,
     };
   });

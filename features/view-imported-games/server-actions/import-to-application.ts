@@ -26,7 +26,7 @@ export const importToApplication = authorizedActionClient
     }
 
     try {
-      const savedGame = await saveGameAndAddToBacklog({
+      const {data: savedGame} = await saveGameAndAddToBacklog({
         game: {
           igdbId: game.id,
         },
@@ -53,9 +53,9 @@ export const importToApplication = authorizedActionClient
 
       return {
         success: true,
-        gameTitle: savedGame.title,
-        gameId: savedGame.id,
-        message: `"${savedGame.title}" has been added to your collection!`,
+        gameTitle: savedGame?.title,
+        gameId: savedGame?.id,
+        message: `"${savedGame?.title}" has been added to your collection!`,
       };
     } catch (error) {
       console.error(error);

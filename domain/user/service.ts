@@ -33,6 +33,7 @@ export const UserService = {
         steamId64: steamId,
         steamUsername: username,
         steamAvatar: avatar,
+        steamConnectedAt: new Date(),
       },
     });
   },

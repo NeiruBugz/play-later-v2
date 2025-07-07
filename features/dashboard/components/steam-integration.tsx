@@ -1,8 +1,8 @@
-import { getServerUserId } from "@/auth";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { SiSteam } from "react-icons/si";
+import { FaSteam } from "react-icons/fa";
 
+import { getSteamIntegrationConnectionState } from "@/features/dashboard/server-actions/get-steam-integration-connection-state";
 import { Button } from "@/shared/components/button";
 import {
   Card,
@@ -11,26 +11,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/card";
-import { prisma } from "@/shared/lib/db";
 
 export async function SteamIntegration() {
-  const userId = await getServerUserId();
+  const { data } = await getSteamIntegrationConnectionState();
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      steamProfileURL: true,
-      steamConnectedAt: true,
-    },
-  });
-
-  const isConnected = !!user?.steamConnectedAt;
+  const isConnected = data?.isConnected;
+  const steamProfileURL = data?.steamProfileURL;
 
   return (
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <SiSteam className="h-5 w-5" />
+          <FaSteam className="h-5 w-5" />
           Steam Integration
         </CardTitle>
         <CardDescription>
@@ -44,10 +36,10 @@ export async function SteamIntegration() {
               <div className="h-2 w-2 rounded-full bg-green-600 dark:bg-green-400"></div>
               <span className="text-sm font-medium">Connected</span>
             </div>
-            {user.steamProfileURL && (
+            {steamProfileURL && (
               <Button variant="outline" size="sm" asChild>
                 <Link
-                  href={user.steamProfileURL}
+                  href={steamProfileURL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"
@@ -69,7 +61,7 @@ export async function SteamIntegration() {
                 href="/user/settings?tab=integrations"
                 className="flex items-center gap-2"
               >
-                <SiSteam className="h-4 w-4" />
+                <FaSteam className="h-4 w-4" />
                 Connect Steam
               </Link>
             </Button>

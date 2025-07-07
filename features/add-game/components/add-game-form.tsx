@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { useAction } from "next-safe-action/hooks";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -54,6 +55,16 @@ export function AddGameForm() {
   const [selectedGame, setSelectedGame] = useState<SearchResponse | undefined>(
     undefined
   );
+  const { execute, isExecuting } = useAction(createGameAction, {
+    onError: (result) => {
+      toast.error(result.error.serverError);
+    },
+    onSuccess: (result) => {
+      toast.success(
+        `"${result.data.gameTitle}" has been added to your collection!`
+      );
+    },
+  });
 
   const form = useForm<CreateGameActionInput>({
     resolver: zodResolver(CreateGameActionSchema),
@@ -84,20 +95,12 @@ export function AddGameForm() {
 
     startTransition(async () => {
       try {
-        const result = await createGameAction(values);
+        execute({
+          ...values,
+          igdbId: selectedGame.id,
+        });
 
-        if (result?.data) {
-          toast.success(
-            `"${result.data.gameTitle}" has been added to your collection!`
-          );
-          onFormReset();
-        } else if (result?.serverError) {
-          toast.error(result.serverError);
-        } else if (result?.validationErrors) {
-          toast.error(
-            "Invalid input data. Please check your form and try again."
-          );
-        }
+        onFormReset();
       } catch (error) {
         console.error("Failed to submit form:", error);
         toast.error("Something went wrong. Please try again.");
@@ -333,7 +336,9 @@ export function AddGameForm() {
               <div className="border-t pt-6">
                 <SubmitButton
                   onFormReset={onFormReset}
-                  isDisabled={selectedGame === undefined || isLoading}
+                  isDisabled={
+                    selectedGame === undefined || isLoading || isExecuting
+                  }
                   isLoading={isLoading}
                 />
               </div>

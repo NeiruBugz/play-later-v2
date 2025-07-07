@@ -18,6 +18,11 @@ export function About({
   genres,
   igdbId,
 }: AboutProps) {
+  const releaseDatesToUniquePlatforms = new Set(
+    releaseDates.map((date) => date.platform.name)
+  );
+  const uniqueReleaseDates = Array.from(releaseDatesToUniquePlatforms);
+
   return (
     <>
       <p className="text-muted-foreground">{description}</p>
@@ -25,10 +30,10 @@ export function About({
         <div>
           <h3 className="mb-2 font-medium">Available on</h3>
           <div className="flex flex-wrap gap-2">
-            {releaseDates &&
-              releaseDates.map((releaseDate) => (
-                <Badge key={releaseDate.id} variant="outline">
-                  {releaseDate.platform.name}
+            {uniqueReleaseDates &&
+              uniqueReleaseDates.map((platform) => (
+                <Badge key={platform} variant="outline">
+                  {platform}
                 </Badge>
               ))}
           </div>

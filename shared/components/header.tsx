@@ -1,11 +1,4 @@
-import {
-  GamepadIcon,
-  Heart,
-  Library,
-  ListChecks,
-  MenuIcon,
-  Plus,
-} from "lucide-react";
+import { GamepadIcon, Library, ListChecks, MenuIcon, Plus } from "lucide-react";
 import Link from "next/link";
 import React, { memo } from "react";
 
@@ -26,12 +19,6 @@ const linksConfig = [
     label: "Collection",
     icon: Library,
     mobileLabel: "Collection",
-  },
-  {
-    href: "/wishlist",
-    label: "Wishlist",
-    icon: Heart,
-    mobileLabel: "Wishlist",
   },
   {
     href: "/backlog",

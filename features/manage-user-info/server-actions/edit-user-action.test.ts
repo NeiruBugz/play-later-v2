@@ -40,7 +40,6 @@ describe("editUserAction", () => {
     const testUserId = "test-user-id";
     vi.mocked(getServerUserId).mockResolvedValue(testUserId);
 
-    // Mock the prisma update to resolve successfully
     vi.mocked(prisma.user.update).mockResolvedValue({
       id: testUserId,
       username: "test",

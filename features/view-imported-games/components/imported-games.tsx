@@ -136,7 +136,6 @@ export function ImportedGames({
             setGames(result.data.games);
             setTotalGames(result.data.totalGames);
             setCurrentPage(page);
-            // Update the last search ref when we successfully load
             lastSearchRef.current = filtersToUse.search;
           }
         } catch (error) {
@@ -164,14 +163,10 @@ export function ImportedGames({
     }
   };
 
-  const handleImportSuccess = useCallback(
-    (gameId: string) => {
-      // Refresh the current page to reflect the imported game removal
-      const currentFilters = { ...filters, search: debouncedSearch };
-      loadGames(currentPage, currentFilters);
-    },
-    [filters, debouncedSearch, currentPage, loadGames]
-  );
+  const handleImportSuccess = useCallback(() => {
+    const currentFilters = { ...filters, search: debouncedSearch };
+    loadGames(currentPage, currentFilters);
+  }, [filters, debouncedSearch, currentPage, loadGames]);
 
   useEffect(() => {
     if (debouncedSearch !== lastSearchRef.current) {
@@ -196,15 +191,6 @@ export function ImportedGames({
 
     return (
       <div className="space-y-6">
-        <div>
-          <Heading level={1} className="mb-1">
-            Imported Games
-          </Heading>
-          <p className="text-muted-foreground">
-            Manage your imported game library
-          </p>
-        </div>
-
         <ImportedGamesFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}
@@ -231,16 +217,6 @@ export function ImportedGames({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <Heading level={1} className="mb-1">
-          Imported Games
-        </Heading>
-        <p className="text-muted-foreground">
-          Manage your imported game library
-        </p>
-      </div>
-
       {/* Filters */}
       <ImportedGamesFilters
         filters={filters}

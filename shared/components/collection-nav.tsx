@@ -4,6 +4,7 @@ import { Download, Heart, Library, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ShareWishlist } from "@/features/share-wishlist";
 import { Button } from "@/shared/components/button";
 import { cn } from "@/shared/lib";
 
@@ -21,7 +22,7 @@ const collectionNavItems = [
     description: "Games from connected services",
   },
   {
-    href: "/wishlist",
+    href: "/collection/wishlist",
     label: "Wishlist",
     icon: Heart,
     description: "Games you want to play",
@@ -30,14 +31,20 @@ const collectionNavItems = [
 
 interface CollectionNavProps {
   showAddButton?: boolean;
+  showShareWishlist?: boolean;
 }
 
-export function CollectionNav({ showAddButton = true }: CollectionNavProps) {
+export function CollectionNav({
+  showAddButton = true,
+  showShareWishlist = false,
+}: CollectionNavProps) {
   const pathname = usePathname();
+
+  const isWishlist = pathname.startsWith("/collection/wishlist");
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <nav className="flex gap-1 rounded-lg bg-muted p-1">
+      <nav className="flex w-fit gap-1 rounded-lg bg-muted p-1">
         {collectionNavItems.map((item) => {
           const IconComponent = item.icon;
           const isActive =
@@ -75,6 +82,7 @@ export function CollectionNav({ showAddButton = true }: CollectionNavProps) {
           </Link>
         </Button>
       )}
+      {(showShareWishlist || isWishlist) && <ShareWishlist />}
     </div>
   );
 }

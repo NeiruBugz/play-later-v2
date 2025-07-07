@@ -2,16 +2,6 @@ import { Storefront } from "@prisma/client";
 
 import { ImportedGames } from "@/features/view-imported-games";
 import { getImportedGames } from "@/features/view-imported-games/server-actions/get-imported-games";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/shared/components/breadcrumb";
-import { CollectionNav } from "@/shared/components/collection-nav";
-import { Header } from "@/shared/components/header";
 
 interface SearchParams {
   page?: string;
@@ -51,7 +41,6 @@ export default async function ImportedGamesPage({
   if (serverError) {
     return (
       <>
-        <Header />
         <div className="container overflow-hidden px-4 py-8 pt-16">
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-4 text-6xl">❌</div>
@@ -68,7 +57,6 @@ export default async function ImportedGamesPage({
   if (validationErrors) {
     return (
       <>
-        <Header />
         <div className="container overflow-hidden px-4 py-8 pt-16">
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-4 text-6xl">⚠️</div>
@@ -85,7 +73,6 @@ export default async function ImportedGamesPage({
   if (!data) {
     return (
       <>
-        <Header />
         <div className="container overflow-hidden px-4 py-8 pt-16">
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="mb-4 text-6xl">🚫</div>
@@ -103,31 +90,12 @@ export default async function ImportedGamesPage({
 
   return (
     <>
-      <Header />
-      <div className="container overflow-hidden px-4 py-8 pt-16">
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/collection">Collection</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Imported Games</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <div className="mb-8">
-          <CollectionNav />
-        </div>
-
-        <ImportedGames
-          initialGames={games}
-          initialTotalGames={totalGames}
-          initialPage={page}
-          limit={limit}
-        />
-      </div>
+      <ImportedGames
+        initialGames={games}
+        initialTotalGames={totalGames}
+        initialPage={page}
+        limit={limit}
+      />
     </>
   );
 }
