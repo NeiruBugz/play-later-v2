@@ -5,8 +5,7 @@ import { minutesToHours } from "date-fns";
 import { Check, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { FaPlaystation, FaSteam, FaXbox } from "react-icons/fa";
 import { toast } from "sonner";
 
@@ -66,7 +65,7 @@ function getImageUrl(game: ImportedGame): string | null {
 function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
   const [imageError, setImageError] = useState(false);
   const [imported, setImported] = useState(false);
-  const router = useRouter();
+  const [, startTransition] = useTransition();
   const imageUrl = getImageUrl(game);
 
   const { execute, isExecuting } = useAction(importToApplication, {
@@ -74,13 +73,12 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
       if (data) {
         setImported(true);
         toast.success(data.message);
-        onImportSuccess?.(data.gameId);
-
-        // Optionally navigate to the game details page
-        // router.push(`/game/${data.gameId}`);
-
-        // Refresh the page to update the list
-        router.refresh();
+        if (onImportSuccess && data.gameId) {
+          const gameId = data.gameId;
+          startTransition(() => {
+            onImportSuccess(gameId);
+          });
+        }
       }
     },
     onError: ({ error }) => {
@@ -133,7 +131,6 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
           </Badge>
         </div>
 
-        {/* Playtime Badge */}
         {game.playtime && game.playtime > 0 && (
           <div className="absolute right-2 top-2">
             <Badge variant="secondary" className="text-xs">
@@ -142,7 +139,6 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
           </div>
         )}
 
-        {/* Success overlay */}
         {imported && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-white">

@@ -10,6 +10,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { editBacklogItem } from "@/features/manage-backlog-item/edit-backlog-item/server-actions/action";
+import { createBacklogItem } from "@/features/manage-backlog-item/edit-backlog-item/server-actions/create-backlog-item";
 import { Button } from "@/shared/components";
 import { Calendar } from "@/shared/components/calendar";
 import { Label } from "@/shared/components/label";
@@ -25,7 +26,9 @@ import { BacklogStatusMapper, playingOnPlatforms } from "@/shared/lib";
 type GameEntryFormProps = Pick<
   BacklogItem,
   "startedAt" | "completedAt" | "platform" | "status" | "id"
->;
+> & {
+  gameId?: string;
+};
 
 const isValidStatus = (value: string): value is BacklogItemStatus => {
   return Object.values(BacklogItemStatus).includes(value as BacklogItemStatus);
@@ -37,6 +40,7 @@ export function GameEntryForm({
   platform,
   completedAt,
   id,
+  gameId,
 }: GameEntryFormProps) {
   const [playStatus, setPlayStatus] = useState(status);
   const [entryPlatform, setEntryPlatform] = useState(platform || "");
@@ -59,7 +63,14 @@ export function GameEntryForm({
       formData.append("completedAt", completionDate.toString());
     }
     try {
-      await editBacklogItem(formData);
+      if (id === 0) {
+        if (gameId) {
+          formData.append("gameId", gameId);
+        }
+        await createBacklogItem(formData);
+      } else {
+        await editBacklogItem(formData);
+      }
       toast.success("Backlog item updated successfully");
     } catch (error) {
       console.error("Error updating backlog item:", error);

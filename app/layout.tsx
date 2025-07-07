@@ -25,6 +25,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://playlater.vercel.app"),
   title: {
     default: "PlayLater",
     template: "%s - PlayLater",
@@ -64,7 +65,6 @@ export const metadata: Metadata = {
     ],
     shortcut: "/favicon.ico",
   },
-  manifest: "/site.webmanifest",
   openGraph: {
     type: "website",
     locale: "en_US",

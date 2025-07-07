@@ -9,8 +9,8 @@ import {
   CardTitle,
 } from "@/shared/components/card";
 
-import { ReleasesList } from "./releases-list";
 import { ReleasesListSkeleton } from "./dashboard-skeletons";
+import { ReleasesList } from "./releases-list";
 
 export function UpcomingReleases() {
   return (

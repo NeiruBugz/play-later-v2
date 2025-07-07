@@ -1,8 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/shared/components/card";
+import { Card, CardContent, CardHeader } from "@/shared/components/card";
 import { Skeleton } from "@/shared/components/skeleton";
 
 export function BacklogCountSkeleton() {
@@ -223,4 +219,4 @@ export function ReleasesListSkeleton() {
       ))}
     </div>
   );
-} 
+}

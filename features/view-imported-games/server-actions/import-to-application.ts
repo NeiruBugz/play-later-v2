@@ -26,7 +26,7 @@ export const importToApplication = authorizedActionClient
     }
 
     try {
-      const {data: savedGame} = await saveGameAndAddToBacklog({
+      const { data: savedGame } = await saveGameAndAddToBacklog({
         game: {
           igdbId: game.id,
         },

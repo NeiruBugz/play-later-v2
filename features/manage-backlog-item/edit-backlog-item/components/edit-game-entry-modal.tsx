@@ -40,7 +40,7 @@ export function EditGameEntryModal({ backlogItems }: EditGameEntryModalProps) {
         Edit entries
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-full max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit Game Entry</DialogTitle>
           </DialogHeader>
@@ -52,6 +52,7 @@ export function EditGameEntryModal({ backlogItems }: EditGameEntryModalProps) {
                   {BacklogStatusMapper[backlogItem.status]}
                 </TabsTrigger>
               ))}
+              <TabsTrigger value="new">New</TabsTrigger>
             </TabsList>
             {backlogItems?.map((backlogItem, index) => (
               <TabsContent value={index.toString()} key={backlogItem.id}>
@@ -64,6 +65,16 @@ export function EditGameEntryModal({ backlogItems }: EditGameEntryModalProps) {
                 />
               </TabsContent>
             ))}
+            <TabsContent value="new">
+              <GameEntryForm
+                platform={""}
+                id={0}
+                status={"TO_PLAY"}
+                startedAt={null}
+                completedAt={null}
+                gameId={backlogItems?.[0]?.gameId}
+              />
+            </TabsContent>
           </Tabs>
 
           <DialogFooter>

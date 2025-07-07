@@ -46,3 +46,32 @@ export const editBacklogItemSchema = zfd.formData({
     })
     .optional(),
 });
+
+export const createBacklogItemSchema = zfd.formData({
+  gameId: zfd.text(),
+  platform: zfd.text(),
+  status: zfd.text().transform((value) => {
+    if (!BacklogStatus.safeParse(value).success) {
+      throw new Error("Invalid status");
+    }
+    return value as BacklogItemStatus;
+  }),
+  startedAt: zfd
+    .text()
+    .transform((value) => {
+      if (!optionalDateSchema.safeParse(value).success) {
+        throw new Error("Invalid startedAt");
+      }
+      return new Date(value);
+    })
+    .optional(),
+  completedAt: zfd
+    .text()
+    .transform((value) => {
+      if (!optionalDateSchema.safeParse(value).success) {
+        throw new Error("Invalid startedAt");
+      }
+      return new Date(value);
+    })
+    .optional(),
+});
