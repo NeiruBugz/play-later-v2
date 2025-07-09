@@ -1,8 +1,12 @@
 import "server-only";
 
-import { prisma } from "@/shared/lib/db";
+import type { Prisma } from "@prisma/client";
 
-import { CreateGameInput } from "./types";
+import { convertReleaseDateToIsoStringDate } from "@/shared/lib/date-functions";
+import { prisma } from "@/shared/lib/db";
+import igdbApi from "@/shared/lib/igdb";
+
+import { CreateGameInput, GameInput } from "./types";
 
 export async function createGame({ game }: CreateGameInput) {
   const createdGame = await prisma.game.create({
@@ -65,4 +69,83 @@ export async function findManyByIgdbIds({
   }
 
   return games;
+}
+
+export async function findGameById({ id }: { id: string }) {
+  return await prisma.game.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      title: true,
+      igdbId: true,
+      description: true,
+      coverImage: true,
+      mainStory: true,
+      mainExtra: true,
+      completionist: true,
+      releaseDate: true,
+      steamAppId: true,
+      backlogItems: {
+        orderBy: {
+          updatedAt: "desc",
+        },
+      },
+      Review: true,
+    },
+  });
+}
+
+export async function findGamesWithBacklogItemsPaginated({
+  where,
+  page,
+  itemsPerPage = 24,
+}: {
+  where: Prisma.GameWhereInput;
+  page: number;
+  itemsPerPage?: number;
+}) {
+  const skip = Math.max((page || 1) - 1, 0) * itemsPerPage;
+
+  return await prisma.$transaction([
+    prisma.game.findMany({
+      where,
+      orderBy: { title: "asc" },
+      take: itemsPerPage,
+      skip,
+      include: {
+        backlogItems: {
+          where: where.backlogItems?.some,
+        },
+      },
+    }),
+    prisma.game.count({ where }),
+  ]);
+}
+
+export async function findOrCreateGameByIgdbId({ igdbId }: { igdbId: number }) {
+  try {
+    return await findGameByIgdbId({ igdbId });
+  } catch {
+    const gameInfo = await igdbApi.getGameById(igdbId);
+
+    if (!gameInfo) {
+      throw new Error(`Game with IGDB ID ${igdbId} not found`);
+    }
+
+    const releaseDate = convertReleaseDateToIsoStringDate(
+      gameInfo?.release_dates[0]?.human
+    );
+
+    const gameInput: GameInput = {
+      igdbId: String(igdbId),
+      title: gameInfo.name,
+      coverImage: gameInfo.cover.image_id,
+      description: gameInfo.summary,
+      releaseDate,
+    };
+
+    return await createGame({ game: gameInput });
+  }
 }

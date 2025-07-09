@@ -55,3 +55,13 @@ export type UserWithBacklogItemsResponse = {
   user: User;
   backlogItems: (BacklogItem & { game: Game })[];
 };
+
+export type AddGameToUserBacklogInput = {
+  userId: string;
+  igdbId: number;
+  backlogItem: {
+    status: BacklogItemStatus;
+    platform?: string;
+    acquisitionType: AcquisitionType;
+  };
+};

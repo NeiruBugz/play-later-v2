@@ -5,6 +5,7 @@ import { prisma } from "@/shared/lib/db";
 import {
   GetUserBySteamIdInput,
   GetUserByUsernameInput,
+  UpdateUserDataInput,
   UpdateUserSteamDataInput,
 } from "./types";
 
@@ -70,8 +71,9 @@ export async function getUserSteamData({ userId }: { userId: string }) {
     where: { id: userId },
     select: {
       steamId64: true,
-      steamConnectedAt: true,
+      steamUsername: true,
       steamProfileURL: true,
+      steamConnectedAt: true,
     },
   });
 }
@@ -86,6 +88,46 @@ export async function getUserInfo({ userId }: { userId: string }) {
       steamProfileURL: true,
       steamConnectedAt: true,
       email: true,
+    },
+  });
+}
+
+export async function updateUserData({
+  userId,
+  username,
+  steamProfileUrl,
+}: UpdateUserDataInput) {
+  return await prisma.user.update({
+    where: { id: userId },
+    data: {
+      username,
+      steamProfileURL: steamProfileUrl,
+    },
+  });
+}
+
+export async function getUserSteamId({
+  steamUsername,
+  userId,
+}: {
+  steamUsername: string;
+  userId: string;
+}) {
+  return prisma.user.findUnique({
+    where: { steamUsername, id: userId },
+    select: { steamId64: true },
+  });
+}
+
+export async function disconnectSteam({ userId }: { userId: string }) {
+  return await prisma.user.update({
+    where: { id: userId },
+    data: {
+      steamId64: null,
+      steamUsername: null,
+      steamProfileURL: null,
+      steamAvatar: null,
+      steamConnectedAt: null,
     },
   });
 }

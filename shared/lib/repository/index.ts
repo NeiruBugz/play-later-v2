@@ -13,6 +13,10 @@ export {
   getBacklogByUsername,
   getWishlistedItemsByUsername,
   findWishlistItemsForUser,
+  findUpcomingWishlistItems,
+  findCurrentlyPlayingGames,
+  buildCollectionFilter,
+  addGameToUserBacklog,
 } from "./backlog/backlog-repository";
 
 export {
@@ -28,6 +32,9 @@ export {
   updateUserSteamData,
   getUserSteamData,
   getUserInfo,
+  updateUserData,
+  getUserSteamId,
+  disconnectSteam,
 } from "./user/user-repository";
 
 export {
@@ -35,6 +42,8 @@ export {
   isGameExisting,
   findGameByIgdbId,
   findManyByIgdbIds,
+  findGameById,
+  findGamesWithBacklogItemsPaginated,
 } from "./game/game-repository";
 
 export {
@@ -43,4 +52,5 @@ export {
   getFilteredImportedGames,
   findByStorefrontGameId,
   softDeleteImportedGame,
+  createManyImportedGames,
 } from "./imported-game/imported-game-repository";

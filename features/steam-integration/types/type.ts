@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export interface SteamAchievement {
   apiname: string;
   achieved: number;
@@ -64,3 +66,17 @@ export interface EnrichedAchievement extends SteamAchievement {
   globalPercent?: number;
   rarity: "common" | "uncommon" | "rare" | "very_rare";
 }
+
+export const SteamGameSchema = z.object({
+  name: z.string(),
+  storefrontGameId: z.string(),
+  playtime: z.number(),
+  img_icon_url: z.string().optional(),
+  img_logo_url: z.string().optional(),
+});
+
+export const SaveManySteamGamesInput = z.object({
+  games: z.array(SteamGameSchema),
+});
+
+export type SaveManySteamGamesInput = z.infer<typeof SaveManySteamGamesInput>;

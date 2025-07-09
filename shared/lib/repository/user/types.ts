@@ -13,3 +13,9 @@ export type UpdateUserSteamDataInput = {
 export type GetUserByUsernameInput = {
   username: string;
 };
+
+export type UpdateUserDataInput = {
+  userId: string;
+  username: string | null;
+  steamProfileUrl: string | null;
+};

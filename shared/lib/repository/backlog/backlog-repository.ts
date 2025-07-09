@@ -1,10 +1,12 @@
 import "server-only";
 
-import { BacklogItemStatus } from "@prisma/client";
+import { BacklogItemStatus, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/db";
+import { findOrCreateGameByIgdbId } from "@/shared/lib/repository/game/game-repository";
 
 import type {
+  AddGameToUserBacklogInput,
   CreateBacklogItemInput,
   DeleteBacklogItemInput,
   GetBacklogCountInput,
@@ -248,5 +250,114 @@ export async function findWishlistItemsForUser({ userId }: { userId: string }) {
     orderBy: {
       createdAt: "asc",
     },
+  });
+}
+
+export async function findUpcomingWishlistItems({
+  userId,
+}: {
+  userId: string;
+}) {
+  return await prisma.backlogItem.findMany({
+    where: {
+      userId,
+      status: BacklogItemStatus.WISHLIST,
+      game: {
+        releaseDate: {
+          gte: new Date(),
+        },
+      },
+    },
+    include: {
+      game: {
+        select: {
+          igdbId: true,
+          title: true,
+          coverImage: true,
+          releaseDate: true,
+        },
+      },
+    },
+  });
+}
+
+export async function findCurrentlyPlayingGames({
+  userId,
+}: {
+  userId: string;
+}) {
+  return await prisma.backlogItem.findMany({
+    where: {
+      userId,
+      status: BacklogItemStatus.PLAYING,
+    },
+    include: {
+      game: {
+        select: {
+          id: true,
+          title: true,
+          igdbId: true,
+          coverImage: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+export function buildCollectionFilter({
+  userId,
+  platform,
+  status,
+  search,
+}: {
+  userId: string;
+  platform?: string;
+  status?: string;
+  search?: string;
+}): {
+  gameFilter: Prisma.GameWhereInput;
+  backlogFilter: Prisma.BacklogItemWhereInput;
+} {
+  const backlogFilter: Prisma.BacklogItemWhereInput = {
+    userId,
+    platform: platform || undefined,
+    status:
+      !status || status === ""
+        ? { not: BacklogItemStatus.WISHLIST }
+        : {
+            equals: status as BacklogItemStatus,
+            not: BacklogItemStatus.WISHLIST,
+          },
+  };
+
+  const gameFilter: Prisma.GameWhereInput = {
+    backlogItems: { some: backlogFilter },
+    ...(search && {
+      title: {
+        contains: search,
+        mode: "insensitive",
+      },
+    }),
+  };
+
+  return { gameFilter, backlogFilter };
+}
+
+export async function addGameToUserBacklog({
+  userId,
+  igdbId,
+  backlogItem,
+}: AddGameToUserBacklogInput) {
+  return await prisma.$transaction(async () => {
+    const game = await findOrCreateGameByIgdbId({ igdbId });
+
+    await createBacklogItem({
+      backlogItem,
+      userId,
+      gameId: game.id,
+    });
+
+    return game;
   });
 }

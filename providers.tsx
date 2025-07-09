@@ -6,15 +6,16 @@ import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from "next-themes";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren } from "react";
 
 import { Toaster } from "@/shared/components/ui/sonner";
+
+const queryClient = new QueryClient();
 
 export default function Providers({
   children,
   ...props
 }: PropsWithChildren<ThemeProviderProps>) {
-  const [queryClient] = useState(() => new QueryClient());
   return (
     <NextThemesProvider {...props}>
       <SessionProvider>

@@ -2,7 +2,10 @@ import "server-only";
 
 import { prisma } from "@/shared/lib/db";
 
-import type { GetFilteredImportedGamesInput } from "./types";
+import type {
+  CreateManyImportedGamesInput,
+  GetFilteredImportedGamesInput,
+} from "./types";
 
 export async function softDeleteImportedGame({ id }: { id: string }) {
   return prisma.importedGame.update({
@@ -55,5 +58,13 @@ export async function findByStorefrontGameId({
 }) {
   return prisma.importedGame.findFirst({
     where: { storefrontGameId },
+  });
+}
+
+export async function createManyImportedGames({
+  games,
+}: CreateManyImportedGamesInput) {
+  return prisma.importedGame.createMany({
+    data: games,
   });
 }

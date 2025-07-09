@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { prisma } from "@/shared/lib/db";
+import { getUserSteamData } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 import { enrichAchievements } from "../lib/enrich-achievements";
@@ -23,10 +23,7 @@ export const getUserAchievements = authorizedActionClient
   })
   .inputSchema(getUserAchievementsSchema)
   .action(async ({ parsedInput: { steamAppId }, ctx: { userId } }) => {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { steamId64: true },
-    });
+    const user = await getUserSteamData({ userId });
 
     if (!user?.steamId64) {
       throw new Error("Steam account not connected");

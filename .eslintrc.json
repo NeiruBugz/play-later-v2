@@ -3,9 +3,10 @@
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended",
     "plugin:boundaries/recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:@tanstack/eslint-plugin-query/recommended"
   ],
-  "plugins": ["boundaries", "import"],
+  "plugins": ["boundaries", "import", "@tanstack/query"],
   "settings": {
     "import/resolver": {
       "typescript": {

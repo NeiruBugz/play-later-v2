@@ -2,7 +2,7 @@ import { BacklogItemStatus } from "@prisma/client";
 import { CalendarDays, Monitor } from "lucide-react";
 import Link from "next/link";
 
-import type { GameWithBacklogItems } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
+import { GameWithBacklogItems } from "@/features/view-wishlist/types";
 import { cn, getGameUrl } from "@/shared/lib";
 
 import { Badge } from "./badge";

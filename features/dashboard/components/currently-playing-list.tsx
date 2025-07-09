@@ -1,13 +1,10 @@
 import { cache } from "react";
 
-import { getUserGamesWithGroupedBacklog } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
+import { getCurrentlyPlayingGamesInBacklog } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 
 const getCurrentlyPlayingGames = cache(
-  async () =>
-    await getUserGamesWithGroupedBacklog({
-      status: "PLAYING",
-    })
+  async () => await getCurrentlyPlayingGamesInBacklog()
 );
 
 export async function CurrentlyPlayingList() {
