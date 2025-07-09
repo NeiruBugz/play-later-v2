@@ -17,7 +17,7 @@ export default async function UserPage({
 }: {
   searchParams: Promise<{ error?: string; success?: string; tab?: string }>;
 }) {
-  const { data: user, serverError } = await getUserInfo(undefined);
+  const { data: user, serverError } = await getUserInfo();
 
   if (serverError) {
     throw new Error(serverError);
@@ -40,7 +40,7 @@ export default async function UserPage({
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen flex-col bg-background">
-        <Header />
+        <Header authorized={true} />
         <div className="container relative px-4 pt-[80px]">
           <AdaptiveTabs defaultValue={tab ?? "settings"} className="w-full">
             <AdaptiveTabsList className="w-fit">

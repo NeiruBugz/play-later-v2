@@ -3,7 +3,10 @@
 import { Storefront } from "@prisma/client";
 import { z } from "zod";
 
-import { prisma } from "@/shared/lib/db";
+import {
+  getFilteredImportedGames,
+  getFilteredImportedGamesCount,
+} from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 export const getImportedGames = authorizedActionClient
@@ -58,21 +61,12 @@ export const getImportedGames = authorizedActionClient
       })();
 
       const [totalGames, games] = await Promise.all([
-        prisma.importedGame.count({ where }),
-        prisma.importedGame.findMany({
-          where,
-          skip: (page - 1) * limit,
-          take: limit,
+        getFilteredImportedGamesCount({ whereClause: where }),
+        getFilteredImportedGames({
+          whereClause: where,
+          page,
+          limit,
           orderBy,
-          select: {
-            id: true,
-            name: true,
-            storefront: true,
-            storefrontGameId: true,
-            playtime: true,
-            img_icon_url: true,
-            img_logo_url: true,
-          },
         }),
       ]);
 

@@ -38,7 +38,7 @@ import {
   CreateGameActionSchema,
   type CreateGameActionInput,
 } from "../lib/validation";
-import { createGameAction } from "../server-actions/action";
+import { createGameAction } from "../server-actions/create-game-action";
 import { GamePicker } from "./game-picker";
 
 const radioGroupContainerStyles =

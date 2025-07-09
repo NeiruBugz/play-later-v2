@@ -3,9 +3,9 @@ import Image from "next/image";
 import { Suspense } from "react";
 
 import {
-  EnrichedAchievement,
   getUserAchievements,
-} from "@/features/steam-integration/server-actions/get-achievements";
+  type EnrichedAchievement,
+} from "@/features/steam-integration";
 import { Badge } from "@/shared/components/badge";
 import {
   Card,
@@ -42,7 +42,6 @@ function AchievementCard({
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          {/* Achievement Icon */}
           <div className="relative">
             <Image
               src={isUnlocked ? achievement.icon : achievement.icongray}
@@ -61,7 +60,6 @@ function AchievementCard({
             )}
           </div>
 
-          {/* Achievement Details */}
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div>
@@ -78,7 +76,6 @@ function AchievementCard({
                 </p>
               </div>
 
-              {/* Badges */}
               <div className="flex flex-col gap-1">
                 {achievement.globalPercent !== undefined && (
                   <Badge
@@ -91,7 +88,6 @@ function AchievementCard({
               </div>
             </div>
 
-            {/* Unlock Info */}
             {isUnlocked && achievement.unlocktime > 0 && (
               <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
@@ -139,7 +135,6 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
 
   return (
     <div className="space-y-6">
-      {/* Achievement Stats */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -186,7 +181,6 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
         </CardContent>
       </Card>
 
-      {/* Achievement List */}
       <div className="h-[400px] space-y-3 overflow-y-auto">
         {achievements.map((achievement) => (
           <AchievementCard

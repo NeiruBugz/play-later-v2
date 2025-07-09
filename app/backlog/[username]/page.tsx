@@ -11,8 +11,10 @@ export default async function UsersBacklogPage(props: {
   searchParams: Promise<URLSearchParams>;
 }) {
   const awaitedParams = await props.params;
-  const [userGamesList, session] = await Promise.all([
-    getUsersBacklog({ username: awaitedParams.username }),
+  const [{ data: userGamesList }, session] = await Promise.all([
+    await getUsersBacklog({
+      username: awaitedParams.username,
+    }),
     auth(),
   ]);
 
@@ -22,13 +24,13 @@ export default async function UsersBacklogPage(props: {
 
   return (
     <>
-      <Header />
+      <Header authorized={session !== null} />
       <div className="container pt-[60px]">
         <h1 className="font-bold md:text-xl xl:text-2xl">
           {awaitedParams.username}&apos;s Backlog
         </h1>
         <ul className="mt-2 flex flex-wrap justify-evenly gap-2">
-          {userGamesList.map((backlogItem) => (
+          {userGamesList?.map((backlogItem) => (
             <li
               key={backlogItem.id}
               className="group relative flex max-w-[160px] flex-col items-center gap-1.5 rounded border bg-background shadow"

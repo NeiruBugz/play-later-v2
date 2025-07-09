@@ -1,6 +1,7 @@
-import { getServerUserId } from "@/auth";
+import { BacklogItemStatus } from "@prisma/client";
 import { Library, Star, Trophy } from "lucide-react";
 
+import { getBacklogItemsCount } from "@/features/dashboard/server-actions/get-backlog-items-count";
 import {
   Card,
   CardContent,
@@ -8,32 +9,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/card";
-import { prisma } from "@/shared/lib/db";
+
+import { getAggregatedReviewRatings } from "../server-actions/get-aggregated-review-ratings";
 
 export async function CollectionStats() {
-  const userId = await getServerUserId();
+  const [totalGamesResult, completedGamesResult, averageRatingResult] =
+    await Promise.all([
+      getBacklogItemsCount({}),
+      getBacklogItemsCount({
+        status: BacklogItemStatus.COMPLETED,
+      }),
+      getAggregatedReviewRatings(),
+    ]);
 
-  const [totalGames, completedGames, averageRating] = await Promise.all([
-    prisma.backlogItem.count({
-      where: { userId },
-    }),
-    prisma.backlogItem.count({
-      where: {
-        userId,
-        status: "COMPLETED",
-      },
-    }),
-    prisma.review.aggregate({
-      where: { userId },
-      _avg: { rating: true },
-    }),
-  ]);
+  const { data: averageRatingData } = averageRatingResult;
+
+  const totalGames = totalGamesResult.data ?? 0;
+  const completedGames = completedGamesResult.data ?? 0;
+  const averageRating = averageRatingData?._avg.rating ?? 0;
 
   const completionRate =
     totalGames > 0 ? Math.round((completedGames / totalGames) * 100) : 0;
-  const avgRating = averageRating._avg.rating
-    ? Math.round(averageRating._avg.rating * 10) / 10
-    : 0;
+  const avgRating = averageRating ? Math.round(averageRating * 10) / 10 : 0;
 
   return (
     <Card className="h-fit">

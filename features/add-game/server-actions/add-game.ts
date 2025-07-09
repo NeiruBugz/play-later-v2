@@ -1,24 +1,27 @@
 import "server-only";
 
-import { BacklogItemService } from "@/domain/backlog-item/service";
-import { GameService } from "@/domain/game/service";
-import type { GameInput } from "@/domain/game/types";
 import { AcquisitionType, BacklogItemStatus, type Game } from "@prisma/client";
 import { z } from "zod";
 
 import { convertReleaseDateToIsoStringDate } from "@/shared/lib/date-functions";
 import { prisma } from "@/shared/lib/db";
 import igdbApi from "@/shared/lib/igdb";
+import {
+  createBacklogItem,
+  createGame,
+  findGameByIgdbId,
+} from "@/shared/lib/repository";
+import { GameInput } from "@/shared/lib/repository/game/types";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 async function ensureGameExists(igdbId: number) {
-  const existingGame = await GameService.findByIgdbId(igdbId);
+  const existingGame = await findGameByIgdbId({ igdbId });
 
-  if (existingGame.isSuccess && existingGame.value) {
-    return existingGame.value;
+  if (!existingGame) {
+    return null;
   }
 
-  return null;
+  return existingGame;
 }
 
 export const saveGameAndAddToBacklog = authorizedActionClient
@@ -65,32 +68,27 @@ export const saveGameAndAddToBacklog = authorizedActionClient
           description: gameInfo.summary,
           releaseDate,
         };
-        const createdGameResult = await GameService.create({ game: gameInput });
+        const createdGameResult = await createGame({ game: gameInput });
 
-        if (createdGameResult.isFailure) {
-          throw new Error(
-            `Failed to create game: ${createdGameResult.error.message}`
-          );
+        if (!createdGameResult) {
+          throw new Error(`Failed to create game`);
         }
 
-        savedGame = createdGameResult.value.createdGame;
+        savedGame = createdGameResult;
       }
 
-      const backlogItemResult = await BacklogItemService.create(
-        {
-          backlogItem: {
-            ...backlogItem,
-          },
-          userId,
-          gameId: savedGame.id,
+      const backlogItemResult = await createBacklogItem({
+        backlogItem: {
+          status: backlogItem.backlogStatus,
+          acquisitionType: backlogItem.acquisitionType,
+          platform: backlogItem.platform,
         },
-        userId
-      );
+        userId,
+        gameId: savedGame.id,
+      });
 
-      if (backlogItemResult.isFailure) {
-        throw new Error(
-          `Failed to create backlog item: ${backlogItemResult.error.message}`
-        );
+      if (!backlogItemResult) {
+        throw new Error(`Failed to create backlog item`);
       }
 
       return savedGame;

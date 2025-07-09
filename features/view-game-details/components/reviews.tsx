@@ -1,15 +1,14 @@
-import { ReviewService } from "@/domain/review/service";
-
 import { ReviewForm } from "@/features/add-review/components";
 
+import { getReviews } from "../server-actions/get-reviews";
 import { Review } from "./review";
 
 export async function Reviews({ gameId }: { gameId: string }) {
-  const reviewsResult = await ReviewService.getAll(gameId);
+  const reviewsResult = await getReviews({ gameId });
 
   // Handle possible failure
-  if (reviewsResult.isFailure) {
-    console.error("Failed to fetch reviews:", reviewsResult.error);
+  if (reviewsResult.serverError || !reviewsResult.data) {
+    console.error("Failed to fetch reviews:");
     return (
       <div className="py-12 text-center text-muted-foreground">
         Failed to load reviews. Please try again later.
@@ -17,7 +16,7 @@ export async function Reviews({ gameId }: { gameId: string }) {
     );
   }
 
-  const reviewList = reviewsResult.value;
+  const reviewList = reviewsResult.data;
 
   return (
     <div className="space-y-6">

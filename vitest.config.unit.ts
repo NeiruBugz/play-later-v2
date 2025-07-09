@@ -5,6 +5,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "jsdom",
+    environmentMatchGlobs: [["**/*.server-action.test.ts", "node"]],
     setupFiles: ["./test/setup/global.ts"], // Uses mocked Prisma
     globals: true,
     isolate: true,

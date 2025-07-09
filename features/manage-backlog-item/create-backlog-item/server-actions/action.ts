@@ -1,9 +1,9 @@
 "use server";
 
-import { BacklogItemService } from "@/domain/backlog-item/service";
 import { BacklogItemStatus } from "@prisma/client";
 import { zfd } from "zod-form-data";
 
+import { createBacklogItem as createBacklogItemCommand } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 import { RevalidationService } from "@/shared/ui/revalidation";
 
@@ -22,25 +22,25 @@ export const createBacklogItem = authorizedActionClient
     })
   )
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    const backlogCreateResult = await BacklogItemService.create(
-      {
-        backlogItem: {
-          backlogStatus: parsedInput.status as BacklogItemStatus,
-          platform: parsedInput.platform,
-          startedAt: parsedInput.startedAt,
-          completedAt: parsedInput.completedAt,
-          acquisitionType: "DIGITAL",
-        },
-        userId,
-        gameId: parsedInput.gameId,
+    const backlogItem = await createBacklogItemCommand({
+      backlogItem: {
+        status: parsedInput.status as BacklogItemStatus,
+        platform: parsedInput.platform,
+        startedAt: parsedInput.startedAt
+          ? new Date(parsedInput.startedAt)
+          : undefined,
+        completedAt: parsedInput.completedAt
+          ? new Date(parsedInput.completedAt)
+          : undefined,
+        acquisitionType: "DIGITAL",
       },
-      userId
-    );
+      userId,
+      gameId: parsedInput.gameId,
+    });
 
-    if (backlogCreateResult.isFailure) {
+    if (!backlogItem) {
       return {
-        message:
-          backlogCreateResult.error.message || "Failed to create backlog item",
+        message: "Failed to create backlog item",
       };
     }
 

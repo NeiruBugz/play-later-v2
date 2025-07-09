@@ -1,46 +1,18 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import { ShareIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 
-import { getUserInfo } from "@/features/manage-user-info";
 import { Button } from "@/shared/components";
 
-export function ShareWishlist() {
+export function ShareWishlist({ userName }: { userName?: string | null }) {
   const [, copy] = useCopyToClipboard();
-  const session = useSession();
   const router = useRouter();
-  const { mutateAsync: fetchUserInfo } = useMutation({
-    mutationKey: ["get-user-info"],
-    mutationFn: async (userId: string) => await getUserInfo({ userId }),
-  });
 
-  const onCopy = useCallback(async () => {
-    if (!session?.data?.user?.id) {
-      return;
-    }
-
-    const { data: userInfo, serverError } = await fetchUserInfo(
-      session.data.user.id
-    );
-
-    if (serverError) {
-      toast.error("Error", {
-        description: serverError,
-      });
-      return;
-    }
-
-    if (!userInfo) {
-      return;
-    }
-
-    if (!userInfo.username) {
+  const onCopy = async () => {
+    if (!userName) {
       toast.info("Username not set", {
         description: "Please set a username to share your wishlist",
         position: "top-right",
@@ -56,20 +28,21 @@ export function ShareWishlist() {
 
     const sharedUrl = "/wishlist";
     const origin = window.location.origin;
+    const encodedUsername = encodeURIComponent(userName);
 
-    const resultURL = `${origin}${sharedUrl}/${encodeURIComponent(userInfo.username)}`;
-    copy(resultURL)
-      .then(() =>
-        toast.success("Success", {
-          description: "Wishlist link copied to clipboard",
-        })
-      )
-      .catch((e) => {
-        toast.error("Error", {
-          description: e.message,
-        });
+    const resultURL = `${origin}${sharedUrl}/${encodedUsername}`;
+
+    try {
+      await copy(resultURL);
+      toast.success("Success", {
+        description: "Wishlist link copied to clipboard",
       });
-  }, [copy, session?.data?.user, fetchUserInfo, router]);
+    } catch (e) {
+      toast.error("Error", {
+        description: e instanceof Error ? e.message : "Failed to copy",
+      });
+    }
+  };
 
   return (
     <Button onClick={onCopy} className="text-white">

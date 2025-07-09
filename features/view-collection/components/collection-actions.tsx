@@ -15,7 +15,7 @@ export function CollectionActions() {
     isExecuting,
   } = useAction(getImportedGamesCount);
 
-  const importedCount = result?.data?.count ?? 0;
+  const importedCount = result?.data ?? 0;
 
   return (
     <div className="flex flex-wrap gap-2">

@@ -1,9 +1,9 @@
 "use server";
 
-import { BacklogItemService } from "@/domain/backlog-item/service";
 import { BacklogItemStatus } from "@prisma/client";
 import { z } from "zod";
 
+import { updateBacklogItem } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 import { RevalidationService } from "@/shared/ui/revalidation";
 
@@ -19,25 +19,20 @@ export const updateBacklogItemAction = authorizedActionClient
     })
   )
   .action(async ({ parsedInput: { id, status }, ctx: { userId } }) => {
-    const result = await BacklogItemService.updateStatus(
-      {
+    const result = await updateBacklogItem({
+      userId,
+      backlogItem: {
         id,
-        status: status as unknown as BacklogItemStatus,
+        status,
       },
-      userId
-    );
+    });
 
-    if (result.isFailure) {
+    if (!result) {
       return {
-        message: result.error.message || "Failed to update backlog item status",
+        message: "Failed to update backlog item status",
         success: false,
       };
     }
 
     RevalidationService.revalidateCollection();
-
-    return {
-      message: "Status updated successfully",
-      success: true,
-    };
   });

@@ -12,7 +12,7 @@ import { SearchInput } from "./search-input";
 import { StatusFilter } from "./status-filter";
 
 export async function CollectionFilters() {
-  const uniquePlatforms = await getUserUniquePlatforms();
+  const { data: uniquePlatforms } = await getUserUniquePlatforms();
 
   return (
     <>
@@ -20,7 +20,7 @@ export async function CollectionFilters() {
         <StatusFilter />
       </div>
       <div className="my-4 hidden flex-wrap gap-2 md:flex md:flex-nowrap">
-        <PlatformFilter platformOptions={uniquePlatforms} />
+        <PlatformFilter platformOptions={uniquePlatforms || []} />
         <SearchInput />
         <ClearFilters />
       </div>
@@ -35,7 +35,7 @@ export async function CollectionFilters() {
             <div className="my-3 flex flex-col flex-wrap items-center justify-center md:flex-nowrap md:justify-between">
               <SearchInput />
               <div className="my-4 flex flex-grow justify-center gap-2 md:flex-nowrap">
-                <PlatformFilter platformOptions={uniquePlatforms} />
+                <PlatformFilter platformOptions={uniquePlatforms || []} />
               </div>
             </div>
           </DrawerContent>

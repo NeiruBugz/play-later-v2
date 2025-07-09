@@ -22,7 +22,9 @@ const safeActionClient = createSafeActionClient({
       return error.message;
     }
 
-    console.error("Action error:", error.message);
+    if (error.message) {
+      return error.message;
+    }
 
     return "Oh no, something went wrong!";
   },

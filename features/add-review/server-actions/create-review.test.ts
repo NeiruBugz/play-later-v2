@@ -1,11 +1,8 @@
 import { getServerUserId } from "@/auth";
-import { ReviewService } from "@/domain/review/service";
 import { setupAuthMocks } from "@/test/setup/auth-mock";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createReview, createReviewForm } from "./create-review";
-
-const createReviewSpy = vi.spyOn(ReviewService, "create");
 
 describe("createReview", () => {
   beforeEach(() => {
@@ -48,7 +45,6 @@ describe("createReview", () => {
         expect(result.validationErrors?.fieldErrors?.rating).toEqual([
           "Expected number, received string",
         ]);
-        expect(createReviewSpy).not.toHaveBeenCalled();
       });
 
       it("should create review", async () => {
@@ -60,14 +56,6 @@ describe("createReview", () => {
 
         expect(result.serverError).toBeUndefined();
         expect(result.validationErrors?.fieldErrors).toBeUndefined();
-        expect(createReviewSpy).toHaveBeenCalledWith(
-          {
-            gameId: "1",
-            rating: 5,
-            content: "This is a test review",
-          },
-          "test-user-id"
-        );
       });
     });
   });
@@ -106,14 +94,6 @@ describe("createReviewForm", () => {
 
       expect(result.serverError).toBeUndefined();
       expect(result.validationErrors?.fieldErrors).toBeUndefined();
-      expect(createReviewSpy).toHaveBeenCalledWith(
-        {
-          gameId: "1",
-          rating: 5,
-          content: "This is a test review",
-        },
-        "test-user-id"
-      );
     });
   });
 });

@@ -1,19 +1,28 @@
 import { z } from "zod";
+import { zfd } from "zod-form-data";
 
-const CreateReviewSchema = z.object({
-  gameId: z.string(),
-  userId: z.string(),
+export const CreateReviewFormSchema = zfd.formData({
+  gameId: zfd.text(),
+  rating: zfd.numeric(),
+  content: zfd.text(),
+  completedOn: zfd.text().optional(),
+});
+
+export const CreateReviewSchema = z.object({
+  gameId: z.string().min(1),
   rating: z.number().min(1).max(10),
   content: z.string().optional(),
   completedOn: z.string().optional(),
 });
 
-export const validateCreateReview = (formData: FormData) => {
-  return CreateReviewSchema.safeParse({
-    gameId: formData.get("gameId"),
-    userId: formData.get("userId"),
-    rating: Number(formData.get("rating")),
-    content: formData.get("content"),
-    completedOn: formData.get("completedOn"),
-  });
-};
+export type CreateReviewInput = z.infer<typeof CreateReviewSchema>;
+
+export const ReviewIncludeUser = z.object({
+  User: z.object({
+    id: z.string(),
+    name: z.string().nullable(),
+    image: z.string().nullable(),
+  }),
+});
+
+export type ReviewWithUser = z.infer<typeof ReviewIncludeUser>;

@@ -5,7 +5,7 @@ export default function Loader() {
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen flex-col bg-background">
-        <Header />
+        <Header authorized={true} />
         <div className="container relative z-10 px-4 pt-[80px]">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[300px_1fr_250px]">
             {/* Left Column - Game Cover and Actions */}

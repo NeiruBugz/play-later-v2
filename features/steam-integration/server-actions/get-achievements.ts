@@ -10,17 +10,7 @@ import {
   mapAchievementsSchema,
   mapGlobalAchievements,
 } from "../lib/map-achievements";
-import { SteamAchievement, steamWebAPI } from "../lib/steam-web-api";
-
-export interface EnrichedAchievement extends SteamAchievement {
-  displayName: string;
-  description: string;
-  icon: string;
-  icongray: string;
-  hidden: boolean;
-  globalPercent?: number;
-  rarity: "common" | "uncommon" | "rare" | "very_rare";
-}
+import { steamWebAPI } from "../lib/steam-web-api";
 
 const getUserAchievementsSchema = z.object({
   steamAppId: z.number(),
@@ -47,6 +37,10 @@ export const getUserAchievements = authorizedActionClient
       steamWebAPI.getGameAchievementSchema(steamAppId),
       steamWebAPI.getGlobalAchievementPercentages(steamAppId),
     ]);
+
+    if (!schema?.game?.availableGameStats?.achievements?.length) {
+      throw new Error("This game does not have any achievements");
+    }
 
     if (!userAchievements || !schema) {
       throw new Error("Failed to fetch achievement data");
