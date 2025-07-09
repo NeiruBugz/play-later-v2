@@ -4,14 +4,14 @@ import React, { memo } from "react";
 
 import { User } from "@/features/manage-user-info/components/user";
 import { ThemeToggle } from "@/features/theme-toggle/components/theme-toggle";
-import { Button } from "@/shared/components/button";
+import { ResponsiveHeading } from "@/shared/components/typography";
+import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/shared/components/dropdown-menu";
-import { ResponsiveHeading } from "@/shared/components/typography";
+} from "@/shared/components/ui/dropdown-menu";
 import { cn } from "@/shared/lib";
 
 const linksConfig = [

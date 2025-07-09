@@ -4,7 +4,7 @@ import { Grid3X3, List } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-import { Button } from "@/shared/components";
+import { Button } from "@/shared/components/ui/button";
 
 export function CollectionViewMode() {
   const params = useSearchParams();

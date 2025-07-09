@@ -1,5 +1,5 @@
 import { Header } from "@/shared/components/header";
-import { Skeleton } from "@/shared/components/skeleton";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 export default function Loader() {
   return (

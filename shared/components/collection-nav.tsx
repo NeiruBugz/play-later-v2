@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { ShareWishlist } from "@/features/share-wishlist";
-import { Button } from "@/shared/components/button";
+import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib";
 
 const collectionNavItems = [

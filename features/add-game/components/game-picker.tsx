@@ -3,9 +3,10 @@ import { Gamepad2, Search, X } from "lucide-react";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { useIGDBSearch } from "@/features/search";
-import { Button, Input } from "@/shared/components";
 import { IgdbImage } from "@/shared/components/igdb-image";
-import { Label } from "@/shared/components/label";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/shared/lib";
 import { SearchResponse } from "@/shared/types";
 

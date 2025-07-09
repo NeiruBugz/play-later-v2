@@ -4,8 +4,9 @@ import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
-import { Button, Input } from "@/shared/components";
-import { Label } from "@/shared/components/label";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 
 import { editUserAction } from "../server-actions/edit-user-action";
 

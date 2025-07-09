@@ -1,9 +1,9 @@
 import { Game } from "@prisma/client";
 import Link from "next/link";
 
-import { Button } from "@/shared/components";
 import { IgdbImage } from "@/shared/components/igdb-image";
-import { Skeleton } from "@/shared/components/skeleton";
+import { Button } from "@/shared/components/ui/button";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { FranchiseGamesResponse } from "@/shared/types";
 
 export function FranchiseGameSkeleton() {

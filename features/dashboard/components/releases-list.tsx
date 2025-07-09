@@ -3,7 +3,7 @@ import { cache } from "react";
 
 import { getUpcomingWishlistItems } from "@/features/dashboard/server-actions/get-upcoming-wishlist-items";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
-import { Badge } from "@/shared/components/badge";
+import { Badge } from "@/shared/components/ui/badge";
 import { cn, platformMapper, platformToBackgroundColor } from "@/shared/lib";
 
 type UpcomingRelease = {

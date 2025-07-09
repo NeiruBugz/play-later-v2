@@ -19,7 +19,7 @@ import {
   AdaptiveTabsContent,
   AdaptiveTabsList,
   AdaptiveTabsTrigger,
-} from "@/shared/components/adaptive-tabs";
+} from "@/shared/components";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";

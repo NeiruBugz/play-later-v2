@@ -8,14 +8,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { SubmitButton } from "@/features/add-game/components/add-game-form.submit";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components";
-import { RadioGroup, RadioGroupItem } from "@/shared/components/radio-group";
 import { Body, Heading } from "@/shared/components/typography";
 import {
   Form,
@@ -25,6 +17,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 import {
   AcquisitionStatusMapper,
   BacklogStatusMapper,

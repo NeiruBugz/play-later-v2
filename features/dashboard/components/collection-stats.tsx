@@ -8,7 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
+} from "@/shared/components/ui/card";
 
 import { getAggregatedReviewRatings } from "../server-actions/get-aggregated-review-ratings";
 

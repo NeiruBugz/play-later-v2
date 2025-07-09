@@ -6,14 +6,14 @@ import {
   getUserAchievements,
   type EnrichedAchievement,
 } from "@/features/steam-integration";
-import { Badge } from "@/shared/components/badge";
+import { Badge } from "@/shared/components/ui/badge";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
-import { Progress } from "@/shared/components/progress";
+} from "@/shared/components/ui/card";
+import { Progress } from "@/shared/components/ui/progress";
 import { cn } from "@/shared/lib";
 
 type AchievementsProps = {

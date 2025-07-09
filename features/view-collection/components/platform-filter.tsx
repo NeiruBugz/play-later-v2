@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components";
+} from "@/shared/components/ui/select";
 import { normalizeString } from "@/shared/lib";
 
 export function PlatformFilter({

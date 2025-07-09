@@ -4,16 +4,16 @@ import { Storefront } from "@prisma/client";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
-import { Badge } from "@/shared/components/badge";
-import { Button } from "@/shared/components/button";
-import { Input } from "@/shared/components/input";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/select";
+} from "@/shared/components/ui/select";
 
 export interface ImportedGamesFilters {
   search: string;

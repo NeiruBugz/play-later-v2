@@ -1,15 +1,15 @@
 import { BacklogItemStatus } from "@prisma/client";
 import { CalendarDays, ListIcon, TrendingUp, Trophy } from "lucide-react";
 
-import { Badge } from "@/shared/components/badge";
+import { Badge } from "@/shared/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
-import { Progress } from "@/shared/components/progress";
+} from "@/shared/components/ui/card";
+import { Progress } from "@/shared/components/ui/progress";
 
 import { getBacklogItemsCount } from "../server-actions/get-backlog-items-count";
 

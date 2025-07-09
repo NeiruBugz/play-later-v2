@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
+} from "@/shared/components/ui/card";
 
 import { getRecentCompletedBacklogItems } from "../server-actions/get-recent-completed-backlog-items";
 import { getRecentReviews } from "../server-actions/get-recent-reviews";

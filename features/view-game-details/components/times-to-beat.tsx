@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/shared/components/tooltip";
+} from "@/shared/components/ui/tooltip";
 import igdbApi from "@/shared/lib/igdb";
 
 export async function TimesToBeat({ igdbId }: { igdbId: number }) {

@@ -6,17 +6,17 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { HiddenInput } from "@/shared/components/hidden-input";
+import { Button } from "@/shared/components/ui/button";
+import { Label } from "@/shared/components/ui/label";
 import {
-  Button,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components";
-import { HiddenInput } from "@/shared/components/hidden-input";
-import { Label } from "@/shared/components/label";
-import { Textarea } from "@/shared/components/textarea";
+} from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { cn, playingOnPlatforms } from "@/shared/lib";
 
 import { createReviewForm } from "../server-actions/create-review";

@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
+} from "@/shared/components/ui/card";
 
 import { ReleasesListSkeleton } from "./dashboard-skeletons";
 import { ReleasesList } from "./releases-list";

@@ -5,14 +5,14 @@ import React, { useState } from "react";
 
 import { cn } from "@/shared/lib";
 
-import { Button } from "./button";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
+} from "./ui/dropdown-menu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface AdaptiveTabsProps {
   defaultValue: string;

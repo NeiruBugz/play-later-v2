@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCopyToClipboard } from "usehooks-ts";
 
-import { Button } from "@/shared/components";
+import { Button } from "@/shared/components/ui/button";
 
 export function ShareWishlist({ userName }: { userName?: string | null }) {
   const [, copy] = useCopyToClipboard();

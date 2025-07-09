@@ -1,6 +1,6 @@
 import { Star } from "lucide-react";
 
-import { Button } from "@/shared/components";
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/shared/components/dialog";
+} from "@/shared/components/ui/dialog";
 
 import { AddReviewForm } from "./add-review-form";
 

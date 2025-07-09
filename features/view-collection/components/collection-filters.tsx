@@ -1,9 +1,9 @@
-import { Button } from "@/shared/components";
+import { Button } from "@/shared/components/ui/button";
 import {
   Drawer,
   DrawerContent,
   DrawerTrigger,
-} from "@/shared/components/drawer";
+} from "@/shared/components/ui/drawer";
 
 import { getUserUniquePlatforms } from "../server-actions/get-uniques-platforms";
 import { ClearFilters } from "./clear-filters";

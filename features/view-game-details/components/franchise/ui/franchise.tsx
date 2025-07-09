@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import {
   AccordionContent,
   AccordionTrigger,
-} from "@/shared/components/accordion";
+} from "@/shared/components/ui/accordion";
 
 import type { FranchiseProps } from "../types";
 import { FranchiseGamesGrid } from "./franchise-games-grid";

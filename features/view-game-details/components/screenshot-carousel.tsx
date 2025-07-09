@@ -3,13 +3,13 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@/shared/components";
+import { IgdbImage } from "@/shared/components/igdb-image";
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
-} from "@/shared/components/dialog";
-import { IgdbImage } from "@/shared/components/igdb-image";
+} from "@/shared/components/ui/dialog";
 import { FullGameInfoResponse } from "@/shared/types";
 
 export function ScreenshotCarousel({

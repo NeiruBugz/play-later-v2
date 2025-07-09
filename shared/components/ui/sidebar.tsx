@@ -3,17 +3,17 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, VariantProps } from "class-variance-authority";
 import * as React from "react";
 
-import { Button } from "@/shared/components/button";
-import { Input } from "@/shared/components/input";
-import { Separator } from "@/shared/components/separator";
-import { Sheet, SheetContent } from "@/shared/components/sheet";
-import { Skeleton } from "@/shared/components/skeleton";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Separator } from "@/shared/components/ui/separator";
+import { Sheet, SheetContent } from "@/shared/components/ui/sheet";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/shared/components/tooltip";
+} from "@/shared/components/ui/tooltip";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib";
 

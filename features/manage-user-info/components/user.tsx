@@ -6,13 +6,17 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { memo } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/shared/components/dropdown-menu";
+} from "@/shared/components/ui/dropdown-menu";
 
 const getFirstTwoLiterals = (name: string | null | undefined) => {
   if (!name) {

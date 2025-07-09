@@ -6,7 +6,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/shared/components/avatar";
+} from "@/shared/components/ui/avatar";
 
 const getFirstTwoLiterals = (name: string | null | undefined) => {
   if (!name) {

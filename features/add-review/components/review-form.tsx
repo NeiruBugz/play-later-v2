@@ -4,8 +4,8 @@ import { Star } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/shared/components";
-import { Textarea } from "@/shared/components/textarea";
+import { Button } from "@/shared/components/ui/button";
+import { Textarea } from "@/shared/components/ui/textarea";
 
 import { createReview } from "../server-actions/create-review";
 

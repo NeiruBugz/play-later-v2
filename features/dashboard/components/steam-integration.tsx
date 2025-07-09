@@ -3,14 +3,14 @@ import Link from "next/link";
 import { FaSteam } from "react-icons/fa";
 
 import { getSteamIntegrationConnectionState } from "@/features/dashboard/server-actions/get-steam-integration-connection-state";
-import { Button } from "@/shared/components/button";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
+} from "@/shared/components/ui/card";
 
 export async function SteamIntegration() {
   const { data } = await getSteamIntegrationConnectionState();

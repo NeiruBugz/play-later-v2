@@ -15,7 +15,6 @@ import {
   SimilarGames,
   TimesToBeat,
 } from "@/features/view-game-details";
-import { Button } from "@/shared/components";
 import {
   AdaptiveTabs,
   AdaptiveTabsContent,
@@ -24,6 +23,7 @@ import {
 } from "@/shared/components/adaptive-tabs";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
+import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";

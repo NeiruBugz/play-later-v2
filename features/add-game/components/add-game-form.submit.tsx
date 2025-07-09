@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react";
 import { useFormStatus } from "react-dom";
 
-import { Button } from "@/shared/components";
+import { Button } from "@/shared/components/ui/button";
 
 type SubmitButtonProps = {
   onFormReset: () => void;

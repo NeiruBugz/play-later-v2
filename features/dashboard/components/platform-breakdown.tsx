@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
+} from "@/shared/components/ui/card";
 import { normalizeString } from "@/shared/lib";
 
 import { getAcquisitionTypeBreakdown } from "../server-actions/get-acquisition-type-breakdown";
