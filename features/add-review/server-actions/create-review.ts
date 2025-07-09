@@ -1,13 +1,11 @@
 "use server";
 
-import { ReviewService } from "@/domain/review/service";
-import {
-  CreateReviewFormSchema,
-  CreateReviewSchema,
-} from "@/domain/review/types";
 import { revalidatePath } from "next/cache";
 
+import { createReview as createReviewCommand } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+
+import { CreateReviewFormSchema, CreateReviewSchema } from "../lib/validation";
 
 export const createReviewForm = authorizedActionClient
   .metadata({
@@ -16,7 +14,17 @@ export const createReviewForm = authorizedActionClient
   })
   .inputSchema(CreateReviewFormSchema)
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    await ReviewService.create(parsedInput, userId);
+    await createReviewCommand({
+      userId,
+      gameId: parsedInput.gameId,
+      review: {
+        rating: parsedInput.rating,
+        content: parsedInput.content,
+        completedOn: parsedInput.completedOn
+          ? new Date(parsedInput.completedOn)
+          : undefined,
+      },
+    });
     revalidatePath(`/game/${parsedInput.gameId}`);
   });
 
@@ -27,6 +35,16 @@ export const createReview = authorizedActionClient
   })
   .inputSchema(CreateReviewSchema)
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    await ReviewService.create(parsedInput, userId);
+    await createReviewCommand({
+      userId,
+      gameId: parsedInput.gameId,
+      review: {
+        rating: parsedInput.rating,
+        content: parsedInput.content || "",
+        completedOn: parsedInput.completedOn
+          ? new Date(parsedInput.completedOn)
+          : undefined,
+      },
+    });
     revalidatePath(`/game/${parsedInput.gameId}`);
   });

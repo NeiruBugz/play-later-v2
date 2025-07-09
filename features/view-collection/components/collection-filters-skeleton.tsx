@@ -1,4 +1,4 @@
-import { Skeleton } from "@/shared/components/skeleton";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 export function CollectionFiltersSkeleton() {
   return (

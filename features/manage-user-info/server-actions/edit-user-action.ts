@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { zfd } from "zod-form-data";
 
+import { updateUserData } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
-
-import { updateUserName } from "./update-user-name";
 
 export const editUserAction = authorizedActionClient
   .metadata({
@@ -19,9 +18,10 @@ export const editUserAction = authorizedActionClient
     })
   )
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    await updateUserName({
-      ...parsedInput,
-      id: userId,
+    await updateUserData({
+      username: parsedInput.username,
+      steamProfileUrl: parsedInput.steamProfileUrl || null,
+      userId,
     });
 
     revalidatePath("/user/settings");

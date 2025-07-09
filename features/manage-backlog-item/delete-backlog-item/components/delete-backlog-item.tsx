@@ -4,7 +4,7 @@ import { TrashIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
-import { Button } from "@/shared/components";
+import { HiddenInput } from "@/shared/components/hidden-input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,8 +14,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/shared/components/alert-dialog";
-import { HiddenInput } from "@/shared/components/hidden-input";
+} from "@/shared/components/ui/alert-dialog";
+import { Button } from "@/shared/components/ui/button";
 
 import { deleteBacklogItemAction } from "../server-actions/action";
 

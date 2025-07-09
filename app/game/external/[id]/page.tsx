@@ -3,17 +3,18 @@ import { Heart, Star } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { AddToCollectionModal } from "@/features/add-game";
-import { createGameAction } from "@/features/add-game/server-actions/action";
-import { GameScreenshots, SimilarGames } from "@/features/view-game-details";
-import { About } from "@/features/view-game-details/components/about";
-import { Achievements } from "@/features/view-game-details/components/achievements";
-import { Franchises } from "@/features/view-game-details/components/franchises";
-import { GameStats } from "@/features/view-game-details/components/game-stats";
-import { Metadata } from "@/features/view-game-details/components/metadata";
-import { TimesToBeat } from "@/features/view-game-details/components/times-to-beat";
-import { getBacklogItemsByIgdbId } from "@/features/view-game-details/server-actions/get-backlog-items-by-igdb-id";
-import { Button } from "@/shared/components";
+import { AddToCollectionModal, createGameAction } from "@/features/add-game";
+import {
+  About,
+  Achievements,
+  Franchises,
+  GameScreenshots,
+  GameStats,
+  getBacklogItemsByIgdbId,
+  Metadata,
+  SimilarGames,
+  TimesToBeat,
+} from "@/features/view-game-details";
 import {
   AdaptiveTabs,
   AdaptiveTabsContent,
@@ -22,6 +23,7 @@ import {
 } from "@/shared/components/adaptive-tabs";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
+import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
@@ -34,10 +36,8 @@ export default async function ExternalGamePage(props: GenericPageProps) {
     getBacklogItemsByIgdbId({ igdbId: id }),
   ]);
 
-  const isWishlistDisabled = backlogItems?.isSuccess
-    ? backlogItems.value.some(
-        (item) => item.status === BacklogItemStatus.WISHLIST
-      )
+  const isWishlistDisabled = backlogItems
+    ? backlogItems.some((item) => item.status === BacklogItemStatus.WISHLIST)
     : false;
 
   if (!igdbData) {
@@ -54,7 +54,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen flex-col bg-background">
-        <Header />
+        <Header authorized={true} />
         <div className="container relative z-10 px-4 pt-[80px]">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[300px_1fr_250px]">
             <div className="flex flex-col gap-4">

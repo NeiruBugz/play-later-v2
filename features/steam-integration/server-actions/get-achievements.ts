@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { prisma } from "@/shared/lib/db";
+import { getUserSteamData } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 import { enrichAchievements } from "../lib/enrich-achievements";
@@ -10,17 +10,7 @@ import {
   mapAchievementsSchema,
   mapGlobalAchievements,
 } from "../lib/map-achievements";
-import { SteamAchievement, steamWebAPI } from "../lib/steam-web-api";
-
-export interface EnrichedAchievement extends SteamAchievement {
-  displayName: string;
-  description: string;
-  icon: string;
-  icongray: string;
-  hidden: boolean;
-  globalPercent?: number;
-  rarity: "common" | "uncommon" | "rare" | "very_rare";
-}
+import { steamWebAPI } from "../lib/steam-web-api";
 
 const getUserAchievementsSchema = z.object({
   steamAppId: z.number(),
@@ -33,10 +23,7 @@ export const getUserAchievements = authorizedActionClient
   })
   .inputSchema(getUserAchievementsSchema)
   .action(async ({ parsedInput: { steamAppId }, ctx: { userId } }) => {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { steamId64: true },
-    });
+    const user = await getUserSteamData({ userId });
 
     if (!user?.steamId64) {
       throw new Error("Steam account not connected");
@@ -47,6 +34,10 @@ export const getUserAchievements = authorizedActionClient
       steamWebAPI.getGameAchievementSchema(steamAppId),
       steamWebAPI.getGlobalAchievementPercentages(steamAppId),
     ]);
+
+    if (!schema?.game?.availableGameStats?.achievements?.length) {
+      throw new Error("This game does not have any achievements");
+    }
 
     if (!userAchievements || !schema) {
       throw new Error("Failed to fetch achievement data");

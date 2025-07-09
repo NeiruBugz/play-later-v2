@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { ShareWishlist } from "@/features/share-wishlist";
-import { Button } from "@/shared/components/button";
+import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib";
 
 const collectionNavItems = [
@@ -32,11 +32,13 @@ const collectionNavItems = [
 interface CollectionNavProps {
   showAddButton?: boolean;
   showShareWishlist?: boolean;
+  userName?: string | null;
 }
 
 export function CollectionNav({
   showAddButton = true,
   showShareWishlist = false,
+  userName,
 }: CollectionNavProps) {
   const pathname = usePathname();
 
@@ -82,7 +84,9 @@ export function CollectionNav({
           </Link>
         </Button>
       )}
-      {(showShareWishlist || isWishlist) && <ShareWishlist />}
+      {(showShareWishlist || isWishlist) && (
+        <ShareWishlist userName={userName} />
+      )}
     </div>
   );
 }

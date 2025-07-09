@@ -1,62 +1,20 @@
-import { BacklogItemStatus, type BacklogItem, type Game } from "@prisma/client";
-import { z } from "zod";
+"use server";
 
-import { prisma } from "@/shared/lib/db";
+import { findCurrentlyPlayingGames } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
-export type GameWithBacklogItems = {
-  game: Game;
-  backlogItems: Omit<BacklogItem, "game">[];
-  totalMainStoryHours?: number;
-};
+import { groupBacklogItemsByGame } from "../lib/group-backlog-items-by-game";
 
-const FilterParamsSchema = z.object({
-  platform: z.string().optional().default(""),
-  status: z.union([z.nativeEnum(BacklogItemStatus), z.string()]).optional(),
-  search: z.string().optional(),
-});
-
-export const getUserGamesWithGroupedBacklog = authorizedActionClient
+export const getCurrentlyPlayingGamesInBacklog = authorizedActionClient
   .metadata({
-    actionName: "getUserGamesWithGroupedBacklog",
+    actionName: "getCurrentlyPlayingGamesInBacklog",
     requiresAuth: true,
   })
-  .inputSchema(FilterParamsSchema)
-  .action(async ({ ctx: { userId }, parsedInput: params }) => {
-    const { platform, status, search } = FilterParamsSchema.parse(params);
-
-    try {
-      const userGames = await prisma.backlogItem.findMany({
-        where: {
-          userId,
-          platform: platform || undefined,
-          status: (status as unknown as BacklogItemStatus) || undefined,
-          game: search
-            ? {
-                title: {
-                  contains: search,
-                  mode: "insensitive",
-                },
-              }
-            : undefined,
-        },
-        include: { game: true },
-        orderBy: { createdAt: "asc" },
-      });
-
-      // Group backlog items by game ID using a Map
-      const groupedGames = new Map<string, GameWithBacklogItems>();
-
-      userGames.forEach(({ game, ...backlogItem }) => {
-        if (!groupedGames.has(game.id)) {
-          groupedGames.set(game.id, { game, backlogItems: [] });
-        }
-        groupedGames.get(game.id)!.backlogItems.push(backlogItem);
-      });
-
-      return Array.from(groupedGames.values());
-    } catch (e) {
-      console.error("Error fetching user game collection:", e);
+  .action(async ({ ctx: { userId } }) => {
+    const userGames = await findCurrentlyPlayingGames({ userId });
+    if (userGames.length === 0) {
       return [];
     }
+
+    return groupBacklogItemsByGame(userGames);
   });

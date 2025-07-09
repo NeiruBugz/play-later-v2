@@ -5,7 +5,7 @@ import { CompleteActionButton } from "@/features/manage-backlog-item/edit-backlo
 import { MoveToBacklogActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/move-to-backlog-action-button";
 import { StartPlayingActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/start-playing-action-button";
 import { IgdbImage } from "@/shared/components/igdb-image";
-import { TooltipProvider } from "@/shared/components/tooltip";
+import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { cn } from "@/shared/lib";
 
 type GameCardProps = {

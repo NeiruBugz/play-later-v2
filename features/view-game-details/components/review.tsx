@@ -1,15 +1,12 @@
-import type { Review, User } from "@prisma/client";
+import type { Review } from "@prisma/client";
 import { format } from "date-fns";
-import { Flag, Star, StarIcon, ThumbsUp } from "lucide-react";
+import { Star } from "lucide-react";
 
-import { Button } from "@/shared/components";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/shared/components/avatar";
-import { Card, CardContent, CardHeader } from "@/shared/components/card";
-import { cn, normalizeString } from "@/shared/lib";
+} from "@/shared/components/ui/avatar";
 
 const getFirstTwoLiterals = (name: string | null | undefined) => {
   if (!name) {
@@ -21,7 +18,17 @@ const getFirstTwoLiterals = (name: string | null | undefined) => {
   return firstName.charAt(0).toUpperCase() + lastName?.charAt(0).toUpperCase();
 };
 
-export function Review({ review }: { review: Review & { User: User } }) {
+export function Review({
+  review,
+}: {
+  review: Review & {
+    User: {
+      name: string | null;
+      image: string | null;
+      username: string | null;
+    };
+  };
+}) {
   return (
     <div key={review.id} className="space-y-3 rounded-lg border p-4">
       <div className="flex items-center justify-between">

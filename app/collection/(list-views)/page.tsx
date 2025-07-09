@@ -19,7 +19,7 @@ export default async function CollectionPage(props: {
     redirect("/");
   }
 
-  const uniquePlatforms = await getUserUniquePlatforms();
+  const { data: uniquePlatforms } = await getUserUniquePlatforms();
   const awaitedSearchParams = await props.searchParams;
 
   return (
@@ -34,7 +34,7 @@ export default async function CollectionPage(props: {
             <SearchInput />
           </div>
           <div className="flex flex-wrap gap-2">
-            <PlatformFilter platformOptions={uniquePlatforms} />
+            <PlatformFilter platformOptions={uniquePlatforms || []} />
             {/* <CardViewMode /> */}
           </div>
         </div>

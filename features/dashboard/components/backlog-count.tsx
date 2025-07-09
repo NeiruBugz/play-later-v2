@@ -1,48 +1,40 @@
-import { getServerUserId } from "@/auth";
 import { BacklogItemStatus } from "@prisma/client";
 import { CalendarDays, ListIcon, TrendingUp, Trophy } from "lucide-react";
 
-import { Badge } from "@/shared/components/badge";
+import { Badge } from "@/shared/components/ui/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
-import { Progress } from "@/shared/components/progress";
-import { prisma } from "@/shared/lib/db";
+} from "@/shared/components/ui/card";
+import { Progress } from "@/shared/components/ui/progress";
+
+import { getBacklogItemsCount } from "../server-actions/get-backlog-items-count";
 
 export async function BacklogCount() {
-  const userId = await getServerUserId();
+  const [
+    backlogCountResult,
+    totalGamesResult,
+    completedGamesResult,
+    recentlyAddedCountResult,
+  ] = await Promise.all([
+    getBacklogItemsCount({ status: BacklogItemStatus.TO_PLAY }),
+    getBacklogItemsCount({}),
+    getBacklogItemsCount({ status: BacklogItemStatus.COMPLETED }),
+    getBacklogItemsCount({
+      status: BacklogItemStatus.TO_PLAY,
+      gteClause: {
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      },
+    }),
+  ]);
 
-  const [backlogCount, totalGames, completedGames, recentlyAddedCount] =
-    await Promise.all([
-      prisma.backlogItem.count({
-        where: {
-          userId,
-          status: BacklogItemStatus.TO_PLAY,
-        },
-      }),
-      prisma.backlogItem.count({
-        where: { userId },
-      }),
-      prisma.backlogItem.count({
-        where: {
-          userId,
-          status: BacklogItemStatus.COMPLETED,
-        },
-      }),
-      prisma.backlogItem.count({
-        where: {
-          userId,
-          status: BacklogItemStatus.TO_PLAY,
-          createdAt: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
-          },
-        },
-      }),
-    ]);
+  const backlogCount = backlogCountResult.data ?? 0;
+  const totalGames = totalGamesResult.data ?? 0;
+  const completedGames = completedGamesResult.data ?? 0;
+  const recentlyAddedCount = recentlyAddedCountResult.data ?? 0;
 
   const completionProgress =
     totalGames > 0 ? (completedGames / totalGames) * 100 : 0;

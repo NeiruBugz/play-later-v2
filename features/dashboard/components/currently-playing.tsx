@@ -7,7 +7,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
+} from "@/shared/components/ui/card";
 
 import { CurrentlyPlayingList } from "./currently-playing-list";
 import { CurrentlyPlayingListSkeleton } from "./dashboard-skeletons";

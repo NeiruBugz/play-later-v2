@@ -1,10 +1,10 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-import { UserService } from "@/domain/user/service";
 import { NextRequest, NextResponse } from "next/server";
 
 import { steamAuth } from "@/features/steam-integration/lib/steam-auth";
+import { getUserBySteamId, updateUserSteamData } from "@/shared/lib/repository";
 
 async function callbackHandler(request: NextRequest) {
   try {
@@ -18,10 +18,10 @@ async function callbackHandler(request: NextRequest) {
     }
 
     const { steamid, username, avatar } = steamUser;
-    const existingUser = await UserService.getUserBySteamId(
-      applicationUserId,
-      steamid
-    );
+    const existingUser = await getUserBySteamId({
+      userId: applicationUserId,
+      steamId: steamid,
+    });
 
     if (existingUser) {
       const url = new URL("/user/settings", request.url);
@@ -29,7 +29,7 @@ async function callbackHandler(request: NextRequest) {
       return NextResponse.redirect(url.toString());
     }
 
-    await UserService.updateUserSteamData({
+    await updateUserSteamData({
       userId: applicationUserId,
       steamId: steamid,
       username,

@@ -9,7 +9,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-import { Button } from "@/shared/components";
+import { Button } from "@/shared/components/ui/button";
 
 export function Pagination({ totalCount }: { totalCount: number }) {
   const params = useSearchParams();

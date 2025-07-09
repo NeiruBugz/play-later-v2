@@ -3,23 +3,23 @@ import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import {
+  About,
+  Achievements,
+  Franchises,
+  GameQuickActions,
   GameScreenshots,
   getGame,
+  Metadata,
   Reviews,
   SimilarGames,
+  TimesToBeat,
 } from "@/features/view-game-details";
-import { About } from "@/features/view-game-details/components/about";
-import { Achievements } from "@/features/view-game-details/components/achievements";
-import { Franchises } from "@/features/view-game-details/components/franchises";
-import { GameQuickActions } from "@/features/view-game-details/components/game-quick-actions";
-import { Metadata } from "@/features/view-game-details/components/metadata";
-import { TimesToBeat } from "@/features/view-game-details/components/times-to-beat";
 import {
   AdaptiveTabs,
   AdaptiveTabsContent,
   AdaptiveTabsList,
   AdaptiveTabsTrigger,
-} from "@/shared/components/adaptive-tabs";
+} from "@/shared/components";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
@@ -61,7 +61,7 @@ export default async function GamePage(props: GenericPageProps) {
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen flex-col bg-background">
-        <Header />
+        <Header authorized={true} />
         <div className="container relative z-10 px-4 pt-[80px]">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[300px_1fr_250px]">
             <div className="flex flex-col gap-4">

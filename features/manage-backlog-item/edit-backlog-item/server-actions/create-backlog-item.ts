@@ -1,8 +1,8 @@
 "use server";
 
-import { BacklogItemService } from "@/domain/backlog-item/service";
 import { AcquisitionType } from "@prisma/client";
 
+import { createBacklogItem as createBacklogItemCommand } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 import { RevalidationService } from "@/shared/ui/revalidation";
 
@@ -15,30 +15,23 @@ export const createBacklogItem = authorizedActionClient
   })
   .inputSchema(createBacklogItemSchema)
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    const result = await BacklogItemService.create(
-      {
-        gameId: parsedInput.gameId,
-        userId,
-        backlogItem: {
-          platform: parsedInput.platform,
-          backlogStatus: parsedInput.status,
-          startedAt: parsedInput.startedAt,
-          completedAt: parsedInput.completedAt,
-          acquisitionType: AcquisitionType.DIGITAL,
-        },
+    const result = await createBacklogItemCommand({
+      gameId: parsedInput.gameId,
+      userId,
+      backlogItem: {
+        platform: parsedInput.platform,
+        status: parsedInput.status,
+        startedAt: parsedInput.startedAt,
+        completedAt: parsedInput.completedAt,
+        acquisitionType: AcquisitionType.DIGITAL,
       },
-      userId
-    );
+    });
 
-    if (result.isFailure) {
+    if (!result) {
       return {
-        message: result.error.message || "Failed to create backlog item",
+        message: "Failed to create backlog item",
       };
     }
 
     RevalidationService.revalidateGame(parsedInput.gameId);
-
-    return {
-      message: "Backlog item created successfully",
-    };
   });

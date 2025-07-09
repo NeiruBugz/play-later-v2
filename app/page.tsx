@@ -183,7 +183,7 @@ export default async function Page() {
 
   return (
     <>
-      <Header />
+      <Header authorized={session !== null} />
       <section className="container mt-2 pt-16">
         <ResponsiveHeading
           level={1}

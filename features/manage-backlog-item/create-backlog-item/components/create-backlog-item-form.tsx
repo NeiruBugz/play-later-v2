@@ -7,17 +7,17 @@ import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
+import { HiddenInput } from "@/shared/components/hidden-input";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import {
-  Button,
-  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components";
-import { HiddenInput } from "@/shared/components/hidden-input";
-import { Label } from "@/shared/components/label";
+} from "@/shared/components/ui/select";
 import { BacklogStatusMapper, cn, playingOnPlatforms } from "@/shared/lib";
 
 import { createBacklogItem } from "../server-actions/action";

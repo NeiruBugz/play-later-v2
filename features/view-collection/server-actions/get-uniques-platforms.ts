@@ -1,24 +1,14 @@
-import { getServerUserId } from "@/auth";
+"use server";
 
-import { prisma } from "@/shared/lib/db";
+import { getUniquePlatforms as getUniquePlatformsCommand } from "@/shared/lib/repository";
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
-export async function getUserUniquePlatforms(): Promise<(string | null)[]> {
-  const userId = await getServerUserId();
-
-  try {
-    const platforms = await prisma.backlogItem.findMany({
-      where: {
-        userId: userId,
-      },
-      select: {
-        platform: true,
-      },
-      distinct: ["platform"],
-    });
-
+export const getUserUniquePlatforms = authorizedActionClient
+  .metadata({
+    actionName: "get-user-unique-platforms",
+    requiresAuth: true,
+  })
+  .action(async ({ ctx: { userId } }) => {
+    const platforms = await getUniquePlatformsCommand({ userId });
     return platforms.map((item) => item.platform).filter(Boolean);
-  } catch (error) {
-    console.error("Error fetching user game collection:", error);
-    return [];
-  }
-}
+  });

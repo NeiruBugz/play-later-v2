@@ -4,7 +4,8 @@ import { Cross, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 
-import { Button, Input } from "@/shared/components";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import { cn } from "@/shared/lib";
 
 export function SearchInput() {

@@ -1,61 +1,13 @@
+import "server-only";
+
 import { env } from "@/env.mjs";
 
-export interface SteamAchievement {
-  apiname: string;
-  achieved: number;
-  unlocktime: number;
-  name?: string;
-  description?: string;
-}
-
-export interface SteamAchievementSchema {
-  name: string;
-  defaultvalue: number;
-  displayName: string;
-  hidden: number;
-  description: string;
-  icon: string;
-  icongray: string;
-}
-
-export interface SteamPlayerAchievements {
-  steamID: string;
-  gameName: string;
-  achievements: SteamAchievement[];
-  success: boolean;
-}
-
-export interface SteamGameSchema {
-  game: {
-    gameName: string;
-    gameVersion: string;
-    availableGameStats: {
-      achievements: SteamAchievementSchema[];
-    };
-  };
-}
-
-export interface SteamGlobalAchievementPercentages {
-  achievementpercentages: {
-    achievements: Array<{
-      name: string;
-      percent: number;
-    }>;
-  };
-}
-
-export interface SteamUserOwnedGames {
-  game_count: number;
-  games: SteamGame[];
-}
-
-export interface SteamGame {
-  appid: number;
-  name: string;
-  playtime_forever: number;
-  img_icon_url?: string;
-  img_logo_url?: string;
-}
+import type {
+  SteamGameSchema,
+  SteamGlobalAchievementPercentages,
+  SteamPlayerAchievements,
+  SteamUserOwnedGames,
+} from "../types/type";
 
 export class SteamWebAPI {
   private apiKey: string;

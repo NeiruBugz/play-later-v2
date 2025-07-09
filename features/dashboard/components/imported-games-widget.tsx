@@ -1,14 +1,14 @@
 import { Download, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/shared/components/button";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
-import { Skeleton } from "@/shared/components/skeleton";
+} from "@/shared/components/ui/card";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 interface ImportedGamesWidgetProps {
   count: number;

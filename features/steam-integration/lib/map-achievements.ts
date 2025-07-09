@@ -3,7 +3,7 @@ import type {
   SteamAchievementSchema,
   SteamGameSchema,
   SteamGlobalAchievementPercentages,
-} from "@/features/steam-integration/lib/steam-web-api";
+} from "../types/type";
 
 export interface EnrichedAchievement extends SteamAchievement {
   displayName: string;

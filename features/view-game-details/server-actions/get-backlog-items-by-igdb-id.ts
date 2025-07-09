@@ -1,7 +1,8 @@
-import { wrapWithResult } from "@/domain/shared/result";
+"use server";
+
 import { z } from "zod";
 
-import { prisma } from "@/shared/lib/db";
+import { getBacklogItemsForUserByIgdbId } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 export const getBacklogItemsByIgdbId = authorizedActionClient
@@ -15,11 +16,9 @@ export const getBacklogItemsByIgdbId = authorizedActionClient
     })
   )
   .action(async ({ ctx: { userId }, parsedInput }) => {
-    const backlogItems = await prisma.backlogItem.findMany({
-      where: { userId, game: { igdbId: parsedInput.igdbId } },
+    const backlogItems = await getBacklogItemsForUserByIgdbId({
+      userId,
+      igdbId: parsedInput.igdbId,
     });
-
-    return wrapWithResult(async () => {
-      return backlogItems;
-    }, "Failed to get backlog items for user by IGDB ID");
+    return backlogItems;
   });

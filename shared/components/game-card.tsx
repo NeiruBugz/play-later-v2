@@ -6,17 +6,17 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { cn, getGameUrl, normalizeString } from "../lib";
-import { Badge } from "./badge";
-import { Button } from "./button";
-import { Card, CardFooter, CardHeader } from "./card";
 import { IgdbImage } from "./igdb-image";
+import { Heading } from "./typography";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Card, CardFooter, CardHeader } from "./ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./tooltip";
-import { Heading } from "./typography";
+} from "./ui/tooltip";
 
 interface GameCardProps {
   game: Game;

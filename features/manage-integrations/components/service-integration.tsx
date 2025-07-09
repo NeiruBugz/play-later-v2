@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { getUserOwnedGames } from "@/features/steam-integration/server-actions/get-user-owned-games";
 import { saveSteamGames } from "@/features/steam-integration/server-actions/save-steam-games";
-import { Button } from "@/shared/components";
+import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/tailwind-merge";
 
 type ServiceIntegrationProps = {

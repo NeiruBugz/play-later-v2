@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { prisma } from "@/shared/lib/db";
+import { getManyBacklogItems } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 export const getBacklogItems = authorizedActionClient
@@ -11,9 +11,9 @@ export const getBacklogItems = authorizedActionClient
   .inputSchema(z.object({ gameId: z.string() }))
   .action(async ({ ctx: { userId }, parsedInput: { gameId } }) => {
     try {
-      return await prisma.backlogItem.findMany({
-        where: { gameId, userId },
-        orderBy: { createdAt: "asc" },
+      return await getManyBacklogItems({
+        userId,
+        gameId,
       });
     } catch (e) {
       console.error("Error fetching backlog items for game:", e);

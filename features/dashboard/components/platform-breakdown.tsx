@@ -1,50 +1,22 @@
-import { getServerUserId } from "@/auth";
 import { Monitor } from "lucide-react";
 
+import { getPlatformBreakdown } from "@/features/dashboard/server-actions/get-platform-breakdown";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
+} from "@/shared/components/ui/card";
 import { normalizeString } from "@/shared/lib";
-import { prisma } from "@/shared/lib/db";
+
+import { getAcquisitionTypeBreakdown } from "../server-actions/get-acquisition-type-breakdown";
 
 export async function PlatformBreakdown() {
-  const userId = await getServerUserId();
-
-  const [platformStats, acquisitionStats] = await Promise.all([
-    prisma.backlogItem.groupBy({
-      by: ["platform"],
-      where: {
-        userId,
-        platform: { not: null },
-      },
-      _count: true,
-      orderBy: {
-        _count: {
-          platform: "desc",
-        },
-      },
-      take: 5,
-    }),
-    prisma.backlogItem.groupBy({
-      by: ["acquisitionType"],
-      where: { userId },
-      _count: true,
-    }),
+  const [platformStatsResult, acquisitionStatsResult] = await Promise.all([
+    getPlatformBreakdown(),
+    getAcquisitionTypeBreakdown(),
   ]);
-
-  const topPlatforms = platformStats.filter((stat) => stat.platform !== null);
-  const acquisitionBreakdown = acquisitionStats.map((stat) => ({
-    type: stat.acquisitionType,
-    count: stat._count,
-    percentage: Math.round(
-      (stat._count / acquisitionStats.reduce((acc, s) => acc + s._count, 0)) *
-        100
-    ),
-  }));
 
   return (
     <Card className="h-fit">
@@ -56,11 +28,11 @@ export async function PlatformBreakdown() {
         <CardDescription>Your collection breakdown</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {topPlatforms.length > 0 && (
+        {platformStatsResult?.data && platformStatsResult?.data?.length > 0 && (
           <div>
             <h4 className="mb-2 text-sm font-medium">Top Platforms</h4>
             <div className="space-y-2">
-              {topPlatforms.map((platform) => (
+              {platformStatsResult?.data?.map((platform) => (
                 <div
                   key={platform.platform}
                   className="flex items-center justify-between"
@@ -75,29 +47,30 @@ export async function PlatformBreakdown() {
           </div>
         )}
 
-        {acquisitionBreakdown.length > 0 && (
-          <div>
-            <h4 className="mb-2 text-sm font-medium">Acquisition Type</h4>
-            <div className="space-y-2">
-              {acquisitionBreakdown.map((acquisition) => (
-                <div
-                  key={acquisition.type}
-                  className="flex items-center justify-between"
-                >
-                  <span className="text-sm capitalize text-muted-foreground">
-                    {acquisition.type.toLowerCase()}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      {acquisition.percentage}%
+        {acquisitionStatsResult?.data &&
+          acquisitionStatsResult?.data?.length > 0 && (
+            <div>
+              <h4 className="mb-2 text-sm font-medium">Acquisition Type</h4>
+              <div className="space-y-2">
+                {acquisitionStatsResult?.data?.map((acquisition) => (
+                  <div
+                    key={acquisition.type}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="text-sm capitalize text-muted-foreground">
+                      {acquisition.type.toLowerCase()}
                     </span>
-                    <span className="font-semibold">{acquisition.count}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {acquisition.percentage}%
+                      </span>
+                      <span className="font-semibold">{acquisition.count}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </CardContent>
     </Card>
   );

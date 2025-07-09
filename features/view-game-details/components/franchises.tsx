@@ -1,4 +1,4 @@
-import { Accordion, AccordionItem } from "@/shared/components/accordion";
+import { Accordion, AccordionItem } from "@/shared/components/ui/accordion";
 import { cn } from "@/shared/lib";
 import igdbApi from "@/shared/lib/igdb";
 import { FranchiseGamesResponse, GAME_TYPE } from "@/shared/types";

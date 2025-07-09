@@ -1,4 +1,3 @@
-import { getServerUserId } from "@/auth";
 import { formatDistanceToNow } from "date-fns";
 import { Activity, Clock, Star } from "lucide-react";
 
@@ -8,48 +7,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
-import { prisma } from "@/shared/lib/db";
+} from "@/shared/components/ui/card";
+
+import { getRecentCompletedBacklogItems } from "../server-actions/get-recent-completed-backlog-items";
+import { getRecentReviews } from "../server-actions/get-recent-reviews";
 
 export async function RecentActivity() {
-  const userId = await getServerUserId();
-
   const [recentlyCompleted, recentReviews] = await Promise.all([
-    prisma.backlogItem.findMany({
-      where: {
-        userId,
-        status: "COMPLETED",
-        completedAt: { not: null },
-      },
-      include: {
-        game: {
-          select: {
-            title: true,
-          },
-        },
-      },
-      orderBy: {
-        completedAt: "desc",
-      },
-      take: 3,
-    }),
-    prisma.review.findMany({
-      where: { userId },
-      include: {
-        Game: {
-          select: {
-            title: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 2,
-    }),
+    getRecentCompletedBacklogItems(),
+    getRecentReviews(),
   ]);
 
-  const hasActivity = recentlyCompleted.length > 0 || recentReviews.length > 0;
+  const hasActivity =
+    (recentlyCompleted?.data?.length && recentlyCompleted?.data?.length > 0) ||
+    (recentReviews?.data?.length && recentReviews?.data?.length > 0);
 
   return (
     <Card className="h-fit">
@@ -65,7 +36,7 @@ export async function RecentActivity() {
           <p className="text-sm text-muted-foreground">No recent activity</p>
         ) : (
           <>
-            {recentlyCompleted.map((item) => (
+            {recentlyCompleted.data?.map((item) => (
               <div key={item.id} className="flex items-start gap-3">
                 <div className="rounded-full bg-green-100 p-1 dark:bg-green-900">
                   <Clock className="h-3 w-3 text-green-600 dark:text-green-400" />
@@ -83,7 +54,7 @@ export async function RecentActivity() {
                 </div>
               </div>
             ))}
-            {recentReviews.map((review) => (
+            {recentReviews.data?.map((review) => (
               <div key={review.id} className="flex items-start gap-3">
                 <div className="rounded-full bg-yellow-100 p-1 dark:bg-yellow-900">
                   <Star className="h-3 w-3 text-yellow-600 dark:text-yellow-400" />

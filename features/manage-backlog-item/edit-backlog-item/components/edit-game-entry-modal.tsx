@@ -4,20 +4,20 @@ import { BacklogItem } from "@prisma/client";
 import { Edit } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@/shared/components/button";
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/components/dialog";
+} from "@/shared/components/ui/dialog";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/shared/components/tabs";
+} from "@/shared/components/ui/tabs";
 import { BacklogStatusMapper, normalizeString } from "@/shared/lib";
 
 import { GameEntryForm } from "./game-entry-form";

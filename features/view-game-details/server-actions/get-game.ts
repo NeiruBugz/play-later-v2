@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { prisma } from "@/shared/lib/db";
+import { findGameById } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 export const getGame = authorizedActionClient
@@ -14,29 +14,7 @@ export const getGame = authorizedActionClient
     })
   )
   .action(async ({ parsedInput }) => {
-    const game = await prisma.game.findUnique({
-      where: {
-        id: parsedInput.id,
-      },
-      select: {
-        id: true,
-        title: true,
-        igdbId: true,
-        description: true,
-        coverImage: true,
-        mainStory: true,
-        mainExtra: true,
-        completionist: true,
-        releaseDate: true,
-        steamAppId: true,
-        backlogItems: {
-          orderBy: {
-            updatedAt: "desc",
-          },
-        },
-        Review: true,
-      },
-    });
+    const game = await findGameById({ id: parsedInput.id });
 
     return game;
   });

@@ -1,8 +1,8 @@
-import { EnrichedAchievement } from "@/features/steam-integration/lib/map-achievements";
-import {
+import type {
+  EnrichedAchievement,
   SteamAchievementSchema,
   SteamPlayerAchievements,
-} from "@/features/steam-integration/lib/steam-web-api";
+} from "../types/type";
 
 export const enrichAchievements = (
   userAchievements: SteamPlayerAchievements,

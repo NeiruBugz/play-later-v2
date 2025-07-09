@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { prisma } from "@/shared/lib/db";
+import { getUserSteamId } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 export const getSteamIdForUser = authorizedActionClient
@@ -16,10 +16,7 @@ export const getSteamIdForUser = authorizedActionClient
     })
   )
   .action(async ({ parsedInput: { steamUsername }, ctx: { userId } }) => {
-    const steamId = await prisma.user.findUnique({
-      where: { steamUsername, id: userId },
-      select: { steamId64: true },
-    });
+    const steamId = await getUserSteamId({ steamUsername, userId });
 
     return steamId?.steamId64;
   });

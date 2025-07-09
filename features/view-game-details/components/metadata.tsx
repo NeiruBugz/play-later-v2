@@ -1,6 +1,6 @@
 import { format, isFuture, parse } from "date-fns";
 
-import { Badge } from "@/shared/components/badge";
+import { Badge } from "@/shared/components/ui/badge";
 import { FullGameInfoResponse } from "@/shared/types";
 
 type MetadataProps = {

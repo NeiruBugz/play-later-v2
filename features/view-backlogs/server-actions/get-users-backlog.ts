@@ -1,14 +1,19 @@
-import { prisma } from "@/shared/lib/db";
+"use server";
 
-export async function getUsersBacklog({ username }: { username: string }) {
-  try {
-    return await prisma.backlogItem.findMany({
-      where: { User: { username: username } },
-      include: { game: true },
-      orderBy: { createdAt: "asc" },
-    });
-  } catch (e) {
-    console.error("Error fetching user's backlog items:", e);
-    return [];
-  }
-}
+import { z } from "zod";
+
+import { getBacklogByUsername } from "@/shared/lib/repository";
+import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+
+export const getUsersBacklog = authorizedActionClient
+  .metadata({
+    actionName: "getUsersBacklog",
+    requiresAuth: true,
+  })
+  .inputSchema(z.object({ username: z.string() }))
+  .action(async ({ ctx: { userId }, parsedInput }) => {
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+    return await getBacklogByUsername({ username: parsedInput.username });
+  });

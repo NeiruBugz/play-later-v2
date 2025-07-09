@@ -1,7 +1,7 @@
 import { Review } from "@prisma/client";
 import { Star } from "lucide-react";
 
-import { Card, CardContent } from "@/shared/components/card";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 type GameStatsProps = {
   rating?: string;

@@ -1,9 +1,12 @@
+import { auth } from "@/auth";
+
 import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Header } from "@/shared/components/header";
 import { GenericPageProps } from "@/shared/types";
 
 export default async function SharedWishlistPage(props: GenericPageProps) {
+  const session = await auth();
   const { username } = await props.params;
   const decodedUsername = decodeURIComponent(username);
   const { data: wishlistedItems, serverError } =
@@ -21,9 +24,11 @@ export default async function SharedWishlistPage(props: GenericPageProps) {
     );
   }
 
+  console.log("session", session);
+
   return (
     <div>
-      <Header />
+      <Header authorized={session !== null} />
       <div className="container overflow-hidden px-4 py-8 pt-[60px]">
         <div className="mb-8 mt-4 flex flex-col gap-4">
           <h1 className="text-3xl font-bold tracking-tight">
@@ -42,6 +47,7 @@ export default async function SharedWishlistPage(props: GenericPageProps) {
                     igdbId: game.igdbId,
                   }}
                   backlogItems={backlogItems}
+                  isFromSharedWishlist={true}
                 />
               </li>
             ))}

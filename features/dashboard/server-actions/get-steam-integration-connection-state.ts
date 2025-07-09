@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/shared/lib/db";
+import { getUserSteamData } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 export const getSteamIntegrationConnectionState = authorizedActionClient
@@ -9,14 +9,7 @@ export const getSteamIntegrationConnectionState = authorizedActionClient
     requiresAuth: true,
   })
   .action(async ({ ctx: { userId } }) => {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        steamId64: true,
-        steamConnectedAt: true,
-        steamProfileURL: true,
-      },
-    });
+    const user = await getUserSteamData({ userId });
 
     return {
       isConnected: !!user?.steamConnectedAt || !!user?.steamId64,

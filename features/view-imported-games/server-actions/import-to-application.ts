@@ -2,8 +2,11 @@
 
 import { saveGameAndAddToBacklog } from "@/features/add-game/server-actions/add-game";
 import { importToApplicationSchema } from "@/features/view-imported-games/validation/import-to-application.schema";
-import { prisma } from "@/shared/lib/db";
 import igdbApi from "@/shared/lib/igdb";
+import {
+  findByStorefrontGameId,
+  softDeleteImportedGame,
+} from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 import { RevalidationService } from "@/shared/ui/revalidation";
 
@@ -14,12 +17,12 @@ export const importToApplication = authorizedActionClient
   })
   .inputSchema(importToApplicationSchema)
   .action(async ({ parsedInput: { steamAppId, playtime } }) => {
-    const game = await igdbApi.getGameBySteamAppId(steamAppId);
-    const importedGame = await prisma.importedGame.findFirst({
-      where: {
+    const [game, importedGame] = await Promise.all([
+      igdbApi.getGameBySteamAppId(steamAppId),
+      findByStorefrontGameId({
         storefrontGameId: steamAppId.toString(),
-      },
-    });
+      }),
+    ]);
 
     if (!game) {
       throw new Error("Game not found in IGDB database");
@@ -38,14 +41,7 @@ export const importToApplication = authorizedActionClient
       });
 
       if (importedGame) {
-        await prisma.importedGame.update({
-          where: {
-            id: importedGame.id,
-          },
-          data: {
-            deletedAt: new Date(),
-          },
-        });
+        await softDeleteImportedGame({ id: importedGame.id });
       }
 
       RevalidationService.revalidateImportedGames();

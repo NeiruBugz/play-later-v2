@@ -1,8 +1,8 @@
 "use server";
 
-import { BacklogItemService } from "@/domain/backlog-item/service";
 import { z } from "zod";
 
+import { updateBacklogItem } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 import { RevalidationService } from "@/shared/ui/revalidation";
 
@@ -15,31 +15,29 @@ export const editBacklogItem = authorizedActionClient
   })
   .inputSchema(editBacklogItemSchema)
   .outputSchema(
-    z.object({
-      message: z.string(),
-    })
+    z
+      .object({
+        message: z.string().optional(),
+      })
+      .optional()
   )
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    const result = await BacklogItemService.update(
-      {
+    const result = await updateBacklogItem({
+      userId,
+      backlogItem: {
         id: parsedInput.id,
         status: parsedInput.status,
         platform: parsedInput.platform,
         startedAt: parsedInput.startedAt,
         completedAt: parsedInput.completedAt,
       },
-      userId
-    );
+    });
 
-    if (result.isFailure) {
+    if (!result) {
       return {
-        message: result.error.message || "Failed to update backlog item",
+        message: "Failed to update backlog item",
       };
     }
 
     RevalidationService.revalidateCollection();
-
-    return {
-      message: "Success",
-    };
   });

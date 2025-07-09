@@ -12,10 +12,10 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/shared/components/button";
-import { Card, CardContent, CardHeader } from "@/shared/components/card";
-import { Skeleton } from "@/shared/components/skeleton";
 import { Heading } from "@/shared/components/typography";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 import { getImportedGames } from "../server-actions/get-imported-games";
 import { ImportedGameCard } from "./imported-game-card";

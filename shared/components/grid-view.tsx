@@ -1,4 +1,4 @@
-import type { GameWithBacklogItems } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
+import { GameWithBacklogItems } from "@/features/view-wishlist/types";
 
 import { GameCard } from "./game-card";
 

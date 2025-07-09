@@ -1,10 +1,10 @@
+import { Body } from "@/shared/components/typography";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/shared/components/card";
-import { Body } from "@/shared/components/typography";
+} from "@/shared/components/ui/card";
 
 export function FeatureCard({
   icon,

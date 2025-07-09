@@ -10,10 +10,10 @@ import { FaPlaystation, FaSteam, FaXbox } from "react-icons/fa";
 import { toast } from "sonner";
 
 import { importToApplication } from "@/features/view-imported-games/server-actions/import-to-application";
-import { Button } from "@/shared/components";
-import { Badge } from "@/shared/components/badge";
-import { Card, CardContent, CardHeader } from "@/shared/components/card";
 import { Heading } from "@/shared/components/typography";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { cn, getSteamGameImageUrl } from "@/shared/lib";
 
 interface ImportedGame {
