@@ -5,6 +5,16 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "jsdom",
+    environmentMatchGlobs: [
+      [
+        "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "node",
+      ],
+      [
+        "**/server-actions/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "node",
+      ],
+    ],
     setupFiles: ["./test/setup/global.ts"],
     globals: true,
     isolate: true,

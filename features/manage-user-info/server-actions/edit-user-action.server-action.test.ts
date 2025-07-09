@@ -1,18 +1,18 @@
 import { getServerUserId } from "@/auth";
-import { setupAuthMocks } from "@/test/setup/auth-mock";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/shared/lib/db";
 
 import { editUserAction } from "./edit-user-action";
 
+const mockGetServerUserId = vi.mocked(getServerUserId);
+
 describe("editUserAction", () => {
   beforeEach(() => {
-    setupAuthMocks();
     vi.clearAllMocks();
   });
-  it("should autnehtication error", async () => {
-    vi.mocked(getServerUserId).mockResolvedValue(undefined);
+  it("should throw authentication error", async () => {
+    mockGetServerUserId.mockResolvedValue(undefined);
     const result = await editUserAction({
       username: "test",
     });
@@ -23,7 +23,7 @@ describe("editUserAction", () => {
   });
 
   it("should throw validation error for invalid input", async () => {
-    vi.mocked(getServerUserId).mockResolvedValue("test-user-id");
+    mockGetServerUserId.mockResolvedValue("test-user-id");
     const result = await editUserAction({
       username: 123,
     });
@@ -38,7 +38,7 @@ describe("editUserAction", () => {
 
   it("should update user name", async () => {
     const testUserId = "test-user-id";
-    vi.mocked(getServerUserId).mockResolvedValue(testUserId);
+    mockGetServerUserId.mockResolvedValue(testUserId);
 
     vi.mocked(prisma.user.update).mockResolvedValue({
       id: testUserId,
@@ -63,7 +63,39 @@ describe("editUserAction", () => {
 
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: testUserId },
-      data: { username: "test" },
+      data: { username: "test", steamProfileURL: null },
+    });
+  });
+
+  it("should update user steam profile url", async () => {
+    const testUserId = "test-user-id";
+    mockGetServerUserId.mockResolvedValue(testUserId);
+
+    vi.mocked(prisma.user.update).mockResolvedValue({
+      id: testUserId,
+      username: "test",
+      email: "test@example.com",
+      name: "Test User",
+      emailVerified: null,
+      image: null,
+      steamProfileURL: null,
+      steamId64: null,
+      steamUsername: null,
+      steamAvatar: null,
+      steamConnectedAt: null,
+    });
+
+    const result = await editUserAction({
+      username: "test",
+      steamProfileUrl: "steam://profile/1234567890",
+    });
+
+    expect(result.serverError).toBeUndefined();
+    expect(result.validationErrors).toBeUndefined();
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: testUserId },
+      data: { username: "test", steamProfileURL: "steam://profile/1234567890" },
     });
   });
 });

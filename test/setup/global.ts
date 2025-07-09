@@ -1,6 +1,7 @@
 import { afterEach, vi } from "vitest";
 
-import { setupAuthMocks } from "./auth-mock";
+// Mock server-only module for both jsdom and node environments
+vi.mock("server-only", () => ({}));
 
 vi.mock("@/shared/lib/db", () => ({
   prisma: {
@@ -29,7 +30,16 @@ vi.mock("@/shared/lib/db", () => ({
     },
   },
 }));
-setupAuthMocks();
+
+// Create mock functions that can be imported and reconfigured in tests
+const mockAuth = vi.fn();
+const mockGetServerUserId = vi.fn().mockResolvedValue(undefined);
+
+// Mock auth for both environments
+vi.mock("@/auth", () => ({
+  auth: mockAuth,
+  getServerUserId: mockGetServerUserId,
+}));
 
 // Mock Next.js functions
 vi.mock("next/cache", () => ({
