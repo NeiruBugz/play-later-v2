@@ -10,3 +10,8 @@ pre-commit:
       stage_fixed: true
     typecheck:
       run: bun typecheck
+
+commit-msg:
+  commands:
+    commitlint:
+      run: bunx commitlint --edit {1}
