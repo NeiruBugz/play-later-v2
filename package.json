@@ -105,6 +105,7 @@
     "eslint-plugin-tailwindcss": "3.17.3",
     "jsdom": "24.1.0",
     "knip": "5.21.2",
+    "lefthook": "^1.12.2",
     "lint-staged": "15.2.7",
     "nanoid": "^5.1.5",
     "postcss": "8.4.38",
