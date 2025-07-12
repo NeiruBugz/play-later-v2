@@ -1,5 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -98,6 +98,11 @@ model BacklogItem {
   User            User              @relation(fields: [userId], references: [id])
   startedAt       DateTime?
   completedAt     DateTime?
+
+  @@index([userId, status])
+  @@index([userId, platform])
+  @@index([userId, createdAt])
+  @@index([gameId])
 }
 
 model Review {
@@ -121,18 +126,21 @@ model IgnoredImportedGames {
 }
 
 model ImportedGame {
-  id        String @id @default(cuid())
-  name      String
-  storefront Storefront
+  id               String     @id @default(cuid())
+  name             String
+  storefront       Storefront
   storefrontGameId String?
-  playtime Int? @default(0)
-  img_icon_url String?
-  img_logo_url String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-  userId    String
-  User      User   @relation(fields: [userId], references: [id])
+  playtime         Int?       @default(0)
+  img_icon_url     String?
+  img_logo_url     String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  deletedAt        DateTime?
+  userId           String
+  User             User       @relation(fields: [userId], references: [id])
+
+  @@index([userId, deletedAt])
+  @@index([storefrontGameId])
 }
 
 enum Storefront {
