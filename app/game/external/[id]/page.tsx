@@ -27,7 +27,9 @@ import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
-import { GenericPageProps } from "@/shared/types";
+import { type GenericPageProps } from "@/shared/types";
+
+const RATING_DIVISOR = 10;
 
 export default async function ExternalGamePage(props: GenericPageProps) {
   const id = Number((await props.params).id);
@@ -45,9 +47,8 @@ export default async function ExternalGamePage(props: GenericPageProps) {
   }
 
   const steamAppId = getSteamAppIdFromUrl(
-    igdbData.external_games?.find(
-      (external) =>
-        external && external.url && external.url.includes("steampowered.com")
+    igdbData.external_games.find((external) =>
+      external.url.includes("steampowered.com")
     )?.url
   );
 
@@ -61,7 +62,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
               <div className="overflow-hidden rounded-lg border shadow-lg">
                 <IgdbImage
                   gameTitle={igdbData.name}
-                  coverImageId={igdbData.cover?.image_id}
+                  coverImageId={igdbData.cover.image_id}
                   igdbSrcSize={"hd"}
                   igdbImageSize={"c-big"}
                   className="h-auto w-full"
@@ -78,7 +79,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                       backlogStatus: BacklogItemStatus.WISHLIST,
                     });
 
-                    if (result?.data) {
+                    if (result.data) {
                       redirect(`/game/${result.data.gameId}`);
                     }
                   }}
@@ -107,10 +108,10 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                 <h1 className="text-4xl font-bold">{igdbData.name}</h1>
                 <div className="mt-2 flex items-center gap-2">
                   <div className="flex items-center gap-1">
-                    <Star className="h-5 w-5 fill-primary text-primary" />
+                    <Star className="size-5 fill-primary text-primary" />
                     <span className="font-medium">
                       {igdbData.aggregated_rating
-                        ? `${(igdbData.aggregated_rating / 10).toFixed(1)}/10`
+                        ? `${(igdbData.aggregated_rating / RATING_DIVISOR).toFixed(1)}/10`
                         : "No rating"}
                     </span>
                   </div>
@@ -184,7 +185,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                 <GameStats
                   rating={
                     igdbData.aggregated_rating
-                      ? `${(igdbData.aggregated_rating / 10).toFixed(1)}/10`
+                      ? `${(igdbData.aggregated_rating / RATING_DIVISOR).toFixed(1)}/10`
                       : undefined
                   }
                 />
@@ -194,7 +195,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
           <Suspense fallback={"Loading franchises list..."}>
             <Franchises
               igdbId={igdbData.id}
-              franchisesIdList={igdbData.franchises || []}
+              franchisesIdList={igdbData.franchises}
             />
           </Suspense>
         </div>

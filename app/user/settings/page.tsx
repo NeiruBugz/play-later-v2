@@ -19,7 +19,7 @@ export default async function UserPage({
 }) {
   const { data: user, serverError } = await getUserInfo();
 
-  if (serverError) {
+  if (serverError != null) {
     throw new Error(serverError);
   }
 

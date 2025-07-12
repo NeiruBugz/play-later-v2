@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Header } from "@/shared/components/header";
-import { GenericPageProps } from "@/shared/types";
+import { type GenericPageProps } from "@/shared/types";
 
 export default async function SharedWishlistPage(props: GenericPageProps) {
   const session = await auth();
@@ -12,7 +12,7 @@ export default async function SharedWishlistPage(props: GenericPageProps) {
   const { data: wishlistedItems, serverError } =
     await getWishlistedItemsByUsername({ username: decodedUsername });
 
-  if (serverError) {
+  if (serverError != null) {
     return <div>{serverError}</div>;
   }
 
@@ -23,8 +23,6 @@ export default async function SharedWishlistPage(props: GenericPageProps) {
       </div>
     );
   }
-
-  console.log("session", session);
 
   return (
     <div>

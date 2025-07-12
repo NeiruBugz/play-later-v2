@@ -6,7 +6,7 @@ import { updateUserSteamData } from "@/shared/lib/repository";
 export async function POST() {
   try {
     const userId = await getServerUserId();
-    if (!userId) {
+    if (userId == null || userId === "") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -18,8 +18,7 @@ export async function POST() {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Steam disconnect error:", error);
+  } catch (_) {
     return NextResponse.json(
       { error: "Failed to disconnect Steam" },
       { status: 500 }

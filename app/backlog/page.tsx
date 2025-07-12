@@ -13,7 +13,7 @@ export default async function BacklogsPage() {
   }
   return (
     <>
-      <Header authorized={session !== null} />
+      <Header authorized />
       <div className="container overflow-hidden px-4 py-8 pt-[60px]">
         <div className="mb-8 mt-4 flex flex-col gap-4">
           <ResponsiveHeading level={1}>Backlogs</ResponsiveHeading>
