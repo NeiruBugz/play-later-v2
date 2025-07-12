@@ -45,16 +45,19 @@ jobs:
         if: steps.check-migrations.outputs.has-migrations == 'true'
         run: bun prisma migrate status
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
       
       - name: Run database migrations
         if: steps.check-migrations.outputs.has-migrations == 'true'
         run: bun prisma migrate deploy
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
       
       - name: Generate Prisma client
         if: steps.check-migrations.outputs.has-migrations == 'true'
         run: bun prisma generate
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}

@@ -109,6 +109,9 @@ jobs:
       - name: Validate Prisma schema
         if: steps.check-migrations.outputs.has-changes == 'true'
         run: bun prisma validate
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
       
       - name: Check for schema drift
         if: steps.check-migrations.outputs.has-changes == 'true'
@@ -124,6 +127,9 @@ jobs:
           else
             echo "✅ No schema drift detected"
           fi
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
       
       - name: Check for destructive migrations
         if: steps.check-migrations.outputs.has-changes == 'true'
