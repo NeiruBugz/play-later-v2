@@ -1,7 +1,0 @@
-dist/*
-.cache
-public
-node_modules
-*.esm.js
-tailwind.config.ts
-postcss.config.js

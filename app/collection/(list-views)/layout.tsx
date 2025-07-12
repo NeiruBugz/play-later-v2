@@ -1,4 +1,3 @@
-import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 
 import { getUserInfo } from "@/features/manage-user-info";
@@ -11,10 +10,9 @@ export default async function CollectionLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
   const userResult = await getUserInfo();
 
-  if (!userResult.data) {
+  if (userResult.data == null) {
     notFound();
   }
 
@@ -22,7 +20,7 @@ export default async function CollectionLayout({
 
   return (
     <>
-      <Header authorized={session?.user !== null} />
+      <Header authorized />
       <div className="container overflow-hidden px-4 py-8 pt-16">
         <div className="mb-8 mt-4 flex flex-col gap-4">
           <ResponsiveHeading level={1}>Your Collection</ResponsiveHeading>

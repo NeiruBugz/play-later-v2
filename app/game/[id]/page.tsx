@@ -24,7 +24,7 @@ import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
-import { GenericPageProps } from "@/shared/types";
+import { type GenericPageProps } from "@/shared/types";
 
 function determineGameType(gameId: string) {
   const isNumeric = !isNaN(Number(gameId)) && Number.isInteger(Number(gameId));
@@ -50,11 +50,9 @@ export default async function GamePage(props: GenericPageProps) {
     return notFound();
   }
 
-  // We'll use it later for gathering user's achievements
   const steamAppId = getSteamAppIdFromUrl(
-    igdbData.external_games.find(
-      (external) =>
-        external && external.url && external.url.includes("steampowered.com")
+    igdbData.external_games.find((external) =>
+      external.url.includes("steampowered.com")
     )?.url
   );
 
@@ -87,7 +85,7 @@ export default async function GamePage(props: GenericPageProps) {
                 <h1 className="text-4xl font-bold">{game.title}</h1>
                 <div className="mt-2 flex items-center gap-2">
                   <div className="flex items-center gap-1">
-                    <Star className="h-5 w-5 fill-primary text-primary" />
+                    <Star className="size-5 fill-primary text-primary" />
                     <span className="font-medium">4/5</span>
                   </div>
                   <Suspense>
@@ -107,7 +105,7 @@ export default async function GamePage(props: GenericPageProps) {
                   <AdaptiveTabsTrigger value="screenshots" icon="🖼️">
                     Screenshots
                   </AdaptiveTabsTrigger>
-                  {steamAppId ? (
+                  {steamAppId !== undefined ? (
                     <AdaptiveTabsTrigger value="achievements" icon="🏆">
                       Achievements
                     </AdaptiveTabsTrigger>
@@ -115,7 +113,7 @@ export default async function GamePage(props: GenericPageProps) {
                 </AdaptiveTabsList>
                 <AdaptiveTabsContent value="about" className="space-y-4">
                   <About
-                    description={game.description || igdbData.summary}
+                    description={game.description ?? igdbData.summary}
                     releaseDates={igdbData.release_dates}
                     genres={igdbData.genres}
                     igdbId={game.igdbId}

@@ -24,7 +24,7 @@ export default async function UsersBacklogPage(props: {
 
   return (
     <>
-      <Header authorized={session !== null} />
+      <Header authorized />
       <div className="container pt-[60px]">
         <h1 className="font-bold md:text-xl xl:text-2xl">
           {awaitedParams.username}&apos;s Backlog
@@ -48,7 +48,7 @@ export default async function UsersBacklogPage(props: {
                 <span className="text-center text-sm font-medium text-white">
                   {backlogItem.game.title}
                 </span>
-                <span className="text-center text-sm font-medium text-foreground text-white">
+                <span className="text-center text-sm font-medium text-foreground">
                   {BacklogStatusMapper[backlogItem.status]} |{" "}
                   {normalizeString(backlogItem.platform)}
                 </span>

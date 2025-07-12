@@ -12,13 +12,18 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.error(error);
   }, [error]);
+
+  const handleReset = () => {
+    reset();
+  };
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">
       <h2>Something went wrong!</h2>
-      <Button onClick={() => reset()}>Try again</Button>
+      <Button onClick={handleReset}>Try again</Button>
     </div>
   );
 }

@@ -10,10 +10,8 @@ export default async function WishlistPage() {
     redirect("/");
   }
   return (
-    <>
-      <Suspense fallback={"Loading..."}>
-        <WishlistedList />
-      </Suspense>
-    </>
+    <Suspense fallback={"Loading..."}>
+      <WishlistedList />
+    </Suspense>
   );
 }

@@ -6,7 +6,7 @@ import { steamAuth } from "@/features/steam-integration/lib/steam-auth";
 export async function GET() {
   try {
     const userId = await getServerUserId();
-    if (!userId) {
+    if (userId == null || userId === "") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -16,8 +16,7 @@ export async function GET() {
     url.searchParams.set("state", userId);
 
     return NextResponse.redirect(url.toString());
-  } catch (error) {
-    console.error("Steam connect error:", error);
+  } catch (_) {
     return NextResponse.json(
       { error: "Failed to connect to Steam" },
       { status: 500 }

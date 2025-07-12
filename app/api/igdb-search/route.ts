@@ -7,11 +7,11 @@ export async function GET(request: Request) {
   const query = searchParams.get("q");
   const platforms = searchParams.get("platforms");
 
-  if (query && query !== "undefined") {
+  if (query != null && query !== "undefined") {
     const response = await igdbApi.search({
       name: query,
       fields: {
-        platforms: platforms || "",
+        platforms: platforms ?? "",
       },
     });
     return NextResponse.json({ response });
