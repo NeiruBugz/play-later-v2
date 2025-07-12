@@ -1,11 +1,12 @@
 "use client";
 
-import { Star } from "lucide-react";
+import { StarIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/shared/components/ui/button";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { cn } from "@/shared/lib";
 
 import { createReview } from "../server-actions/create-review";
 
@@ -15,7 +16,7 @@ export function ReviewForm({ gameId }: { gameId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmitReview = async () => {
-    if (rating === 0 || !reviewText.trim()) return;
+    if (rating === 0) return;
 
     setIsSubmitting(true);
     try {
@@ -24,7 +25,6 @@ export function ReviewForm({ gameId }: { gameId: string }) {
         rating,
         content: reviewText,
       });
-      // Reset form
       setRating(0);
       setReviewText("");
       toast.success("Review submitted successfully");
@@ -35,6 +35,7 @@ export function ReviewForm({ gameId }: { gameId: string }) {
       setIsSubmitting(false);
     }
   };
+
   return (
     <div className="space-y-4">
       <h3 className="font-medium">Write a Review</h3>
@@ -45,9 +46,14 @@ export function ReviewForm({ gameId }: { gameId: string }) {
             type="button"
             onClick={() => setRating(star)}
             className="focus:outline-none"
+            aria-label={`Set rating to ${star}`}
+            name="rating"
           >
-            <Star
-              className={`h-6 w-6 ${rating >= star ? "fill-primary text-primary" : "text-muted-foreground"}`}
+            <StarIcon
+              className={cn("size-6 cursor-pointer hover:fill-primary/50", {
+                "fill-primary": star <= rating,
+                "fill-muted stroke-muted-foreground": star > rating,
+              })}
             />
           </button>
         ))}
@@ -60,7 +66,7 @@ export function ReviewForm({ gameId }: { gameId: string }) {
       />
       <Button
         onClick={handleSubmitReview}
-        disabled={rating === 0 || !reviewText.trim() || isSubmitting}
+        disabled={rating === 0 || isSubmitting}
       >
         Submit Review
       </Button>

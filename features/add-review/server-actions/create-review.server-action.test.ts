@@ -89,7 +89,11 @@ describe("createReviewForm", () => {
   describe("when user is not authenticated", () => {
     it("should throw authentication error", async () => {
       mockGetServerUserId.mockResolvedValue(undefined);
-      const result = await createReviewForm(reviewFormData);
+      const result = await createReviewForm({
+        gameId: "1",
+        rating: 5,
+        content: "This is a test review",
+      });
 
       expect(result.serverError).toBe(
         "Authentication required. Please sign in to continue."
@@ -114,7 +118,11 @@ describe("createReviewForm", () => {
         gameId: "1",
       });
 
-      const result = await createReviewForm(reviewFormData);
+      const result = await createReviewForm({
+        gameId: "1",
+        rating: 5,
+        content: "This is a test review",
+      });
 
       expect(result.serverError).toBeUndefined();
       expect(result.validationErrors?.fieldErrors).toBeUndefined();

@@ -24,29 +24,53 @@ export function AddReviewForm({ gameId }: { gameId: string }) {
   const [ratingValue, setRatingValue] = useState(0);
   const { execute, isExecuting } = useAction(createReviewForm, {
     onSuccess: () => {
+      setRatingValue(0);
       toast.success("Review submitted successfully");
     },
-    onError: () => {
+    onError: (error) => {
+      console.log(error);
       toast.error("Failed to submit review");
     },
   });
 
+  const isFormDisabled = isExecuting || ratingValue === 0;
+
+  const executeWithTransform = (formData: FormData) => {
+    const input = {
+      gameId,
+      rating: ratingValue,
+      content: formData.get("content") as string,
+      completedOn: formData.get("completedOn") as string,
+    };
+    execute(input);
+  };
+
   return (
-    <form action={execute}>
+    <form action={executeWithTransform}>
       <HiddenInput name="gameId" value={gameId} />
-      <HiddenInput name="rating" value={ratingValue} />
       <div className="mb-4 flex flex-col gap-2">
         <Label htmlFor="rating">Rating</Label>
+        <HiddenInput
+          name="rating"
+          value={ratingValue}
+          aria-label="rating-value"
+        />
         <div className="flex items-center gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
-            <StarIcon
+            <button
+              type="button"
               key={value}
               onClick={() => setRatingValue(value)}
-              className={cn("size-5 cursor-pointer hover:fill-primary/50", {
-                "fill-primary": value <= ratingValue,
-                "fill-muted stroke-muted-foreground": value > ratingValue,
-              })}
-            />
+              aria-label={`Set rating to ${value}`}
+              name="rating"
+            >
+              <StarIcon
+                className={cn("size-5 cursor-pointer hover:fill-primary/50", {
+                  "fill-primary": value <= ratingValue,
+                  "fill-muted stroke-muted-foreground": value > ratingValue,
+                })}
+              />
+            </button>
           ))}
         </div>
       </div>
@@ -72,7 +96,7 @@ export function AddReviewForm({ gameId }: { gameId: string }) {
           </SelectContent>
         </Select>
       </div>
-      <Button disabled={isExecuting}>Submit</Button>
+      <Button disabled={isFormDisabled}>Submit</Button>
     </form>
   );
 }

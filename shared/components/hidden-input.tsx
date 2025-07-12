@@ -1,17 +1,23 @@
-import type { HTMLAttributes } from "react";
+import type { InputHTMLAttributes } from "react";
 
-type HiddenInputProps = {
+type HiddenInputProps = Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "type" | "className"
+> & {
   name: string;
-  value: HTMLAttributes<HTMLInputElement>["defaultValue"] | null | undefined;
+  value:
+    | InputHTMLAttributes<HTMLInputElement>["defaultValue"]
+    | null
+    | undefined;
 };
 
-export function HiddenInput({ name, value }: HiddenInputProps) {
+export function HiddenInput({ value, ...props }: HiddenInputProps) {
   return (
     <input
       type="text"
       className="sr-only"
-      name={name}
       defaultValue={value ?? ""}
+      {...props}
     />
   );
 }

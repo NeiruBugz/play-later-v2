@@ -14,8 +14,6 @@ export default async function CollectionLayout({
   const session = await auth();
   const userResult = await getUserInfo();
 
-  console.log(userResult);
-
   if (!userResult.data) {
     notFound();
   }

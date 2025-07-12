@@ -3,7 +3,7 @@ export type CreateReviewInput = {
   gameId: string;
   review: {
     rating: number;
-    content: string;
-    completedOn: Date | undefined;
+    content?: string;
+    completedOn: string | undefined;
   };
 };
