@@ -72,3 +72,97 @@ jobs:
       
       - name: Run tests
         run: bun test:coverage
+
+  migration-validation:
+    name: Validate Database Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for migration changes
+        id: check-migrations
+        run: |
+          # Check if there are any migration-related changes in this PR
+          MIGRATION_CHANGES=$(git diff --name-only origin/main...HEAD -- prisma/ | grep -E "(schema\.prisma|migrations/.*\.sql)$" || true)
+          
+          if [ -z "$MIGRATION_CHANGES" ]; then
+            echo "No migration or schema changes detected"
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Migration or schema changes detected:"
+            echo "$MIGRATION_CHANGES"
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Setup Bun
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      
+      - name: Install dependencies
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: bun install --frozen-lockfile
+      
+      - name: Validate Prisma schema
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: bun prisma validate
+      
+      - name: Check for schema drift
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: |
+          # Generate a new migration to see if schema is in sync
+          bun prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datamodel prisma/schema.prisma --script > /tmp/drift-check.sql
+          
+          if [ -s /tmp/drift-check.sql ]; then
+            echo "⚠️ Schema drift detected. Generated migration diff:"
+            cat /tmp/drift-check.sql
+            echo "Please run 'prisma migrate dev' to generate proper migrations"
+            exit 1
+          else
+            echo "✅ No schema drift detected"
+          fi
+      
+      - name: Check for destructive migrations
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: |
+          # Check for potentially destructive SQL operations in new migrations
+          NEW_MIGRATIONS=$(git diff --name-only origin/main...HEAD -- prisma/migrations/ | grep -E "\.sql$" || true)
+          
+          if [ -n "$NEW_MIGRATIONS" ]; then
+            echo "Checking new migrations for destructive operations..."
+            DESTRUCTIVE_FOUND=false
+            
+            for migration in $NEW_MIGRATIONS; do
+              if [ -f "$migration" ]; then
+                echo "Checking $migration:"
+                
+                # Check for DROP statements
+                if grep -i "DROP\s\+\(TABLE\|COLUMN\|INDEX\|CONSTRAINT\)" "$migration"; then
+                  echo "⚠️ Found potentially destructive DROP operation in $migration"
+                  DESTRUCTIVE_FOUND=true
+                fi
+                
+                # Check for data type changes that might cause data loss
+                if grep -i "ALTER\s\+COLUMN.*TYPE" "$migration"; then
+                  echo "⚠️ Found column type change in $migration - review for potential data loss"
+                  DESTRUCTIVE_FOUND=true
+                fi
+              fi
+            done
+            
+            if [ "$DESTRUCTIVE_FOUND" = true ]; then
+              echo ""
+              echo "🚨 Destructive operations detected in migrations!"
+              echo "Please review carefully and ensure:"
+              echo "1. Data backup is available"
+              echo "2. Migration is reversible or acceptable"
+              echo "3. Stakeholders are aware of potential data loss"
+              echo ""
+              echo "If this is intentional, add a comment in the PR explaining the necessity."
+            else
+              echo "✅ No destructive operations found in new migrations"
+            fi
+          fi

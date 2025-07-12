@@ -1,0 +1,60 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  migrate:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      
+      - name: Check for new migrations
+        id: check-migrations
+        run: |
+          # Check if there are any new migration files in this push
+          NEW_MIGRATIONS=$(git diff --name-only HEAD~1 HEAD -- prisma/migrations/ | grep -E "\.sql$" || true)
+          
+          if [ -z "$NEW_MIGRATIONS" ]; then
+            echo "No new migration files detected"
+            echo "has-migrations=false" >> $GITHUB_OUTPUT
+          else
+            echo "New migration files detected:"
+            echo "$NEW_MIGRATIONS"
+            echo "has-migrations=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Setup Bun
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      
+      - name: Install dependencies
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        run: bun install --frozen-lockfile
+      
+      - name: Check migration status
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        run: bun prisma migrate status
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      
+      - name: Run database migrations
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        run: bun prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      
+      - name: Generate Prisma client
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        run: bun prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
