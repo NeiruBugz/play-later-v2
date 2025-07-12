@@ -1,4 +1,4 @@
-import { endOfYear, format, parse, parseISO } from "date-fns";
+import { format, parse, parseISO } from "date-fns";
 
 export function isoToReadable(iso: string) {
   return format(parseISO(iso), "yyyy");
@@ -23,7 +23,7 @@ export function convertReleaseDateToIsoStringDate(
     const yearMatch = releaseDate.match(/\b(\d{4})\b/);
     if (yearMatch) {
       const year = parseInt(yearMatch[1], 10);
-      const yearEndDate = endOfYear(new Date(year, 0, 1));
+      const yearEndDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
       return yearEndDate.toISOString();
     }
   }
