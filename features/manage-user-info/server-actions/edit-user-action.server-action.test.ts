@@ -1,7 +1,7 @@
 import { getServerUserId } from "@/auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { prisma } from "@/shared/lib/db";
+import { updateUserData as updateUserDataRepository } from "@/shared/lib/repository";
 
 import { editUserAction } from "./edit-user-action";
 
@@ -40,7 +40,7 @@ describe("editUserAction", () => {
     const testUserId = "test-user-id";
     mockGetServerUserId.mockResolvedValue(testUserId);
 
-    vi.mocked(prisma.user.update).mockResolvedValue({
+    vi.mocked(updateUserDataRepository).mockResolvedValue({
       id: testUserId,
       username: "test",
       email: "test@example.com",
@@ -61,9 +61,10 @@ describe("editUserAction", () => {
     expect(result.serverError).toBeUndefined();
     expect(result.validationErrors).toBeUndefined();
 
-    expect(prisma.user.update).toHaveBeenCalledWith({
-      where: { id: testUserId },
-      data: { username: "test", steamProfileURL: null },
+    expect(updateUserDataRepository).toHaveBeenCalledWith({
+      userId: testUserId,
+      username: "test",
+      steamProfileUrl: null,
     });
   });
 
@@ -71,7 +72,7 @@ describe("editUserAction", () => {
     const testUserId = "test-user-id";
     mockGetServerUserId.mockResolvedValue(testUserId);
 
-    vi.mocked(prisma.user.update).mockResolvedValue({
+    vi.mocked(updateUserDataRepository).mockResolvedValue({
       id: testUserId,
       username: "test",
       email: "test@example.com",
@@ -93,9 +94,10 @@ describe("editUserAction", () => {
     expect(result.serverError).toBeUndefined();
     expect(result.validationErrors).toBeUndefined();
 
-    expect(prisma.user.update).toHaveBeenCalledWith({
-      where: { id: testUserId },
-      data: { username: "test", steamProfileURL: "steam://profile/1234567890" },
+    expect(updateUserDataRepository).toHaveBeenCalledWith({
+      userId: testUserId,
+      username: "test",
+      steamProfileUrl: "steam://profile/1234567890",
     });
   });
 });

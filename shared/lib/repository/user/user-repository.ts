@@ -97,6 +97,7 @@ export async function updateUserData({
   username,
   steamProfileUrl,
 }: UpdateUserDataInput) {
+  console.log("updateUserData", userId, username, steamProfileUrl);
   return await prisma.user.update({
     where: { id: userId },
     data: {

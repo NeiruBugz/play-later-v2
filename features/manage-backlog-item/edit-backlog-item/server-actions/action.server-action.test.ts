@@ -1,9 +1,8 @@
 import { getServerUserId } from "@/auth";
-import { BacklogItem } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { editBacklogItem } from "@/features/manage-backlog-item/edit-backlog-item/server-actions/action";
-import { prisma } from "@/shared/lib/db";
+import { updateBacklogItem as updateBacklogItemRepository } from "@/shared/lib/repository";
 import { RevalidationService } from "@/shared/ui/revalidation";
 
 const mockAuthenticatedUser = {
@@ -53,7 +52,9 @@ describe("editBacklogItem", () => {
 
   it("should handle authenticated request with valid payload for non-existing backlog item", async () => {
     mockGetServerUserId.mockResolvedValue(mockAuthenticatedUser.id);
-    vi.mocked(prisma.backlogItem.findUnique).mockResolvedValue(null);
+    vi.mocked(updateBacklogItemRepository).mockRejectedValue(
+      new Error("Backlog item not found")
+    );
 
     const newBacklogItem = new FormData();
 
@@ -74,18 +75,7 @@ describe("editBacklogItem", () => {
     );
     mockGetServerUserId.mockResolvedValue(mockAuthenticatedUser.id);
 
-    vi.mocked(prisma.backlogItem.findUnique).mockResolvedValue({
-      id: 1,
-      userId: mockAuthenticatedUser.id,
-      gameId: "1",
-      status: "TO_PLAY",
-      platform: "PC",
-      startedAt: new Date("2025-01-01"),
-      completedAt: null,
-      createdAt: new Date(),
-    } as BacklogItem);
-
-    vi.mocked(prisma.backlogItem.update).mockResolvedValue({
+    vi.mocked(updateBacklogItemRepository).mockResolvedValue({
       id: 1,
       userId: mockAuthenticatedUser.id,
       gameId: "1",
@@ -109,19 +99,16 @@ describe("editBacklogItem", () => {
     await editBacklogItem(newBacklogItem);
 
     expect(revalidateCollectionSpy).toHaveBeenCalled();
-    expect(prisma.backlogItem.findUnique).toHaveBeenCalledWith({
-      where: { id: 1, userId: mockAuthenticatedUser.id },
-    });
 
-    expect(prisma.backlogItem.update).toHaveBeenCalledWith({
-      data: {
-        completedAt: new Date("2025-01-31"),
+    expect(updateBacklogItemRepository).toHaveBeenCalledWith({
+      backlogItem: {
         id: 1,
+        status: "COMPLETED",
         platform: "PC",
         startedAt: new Date("2025-01-01"),
-        status: "COMPLETED",
+        completedAt: new Date("2025-01-31"),
       },
-      where: { id: 1 },
+      userId: mockAuthenticatedUser.id,
     });
   });
 });
