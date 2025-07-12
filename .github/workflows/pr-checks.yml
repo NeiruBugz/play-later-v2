@@ -109,18 +109,29 @@ jobs:
       - name: Validate Prisma schema
         if: steps.check-migrations.outputs.has-changes == 'true'
         run: bun prisma validate
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
       
       - name: Check for schema drift
         if: steps.check-migrations.outputs.has-changes == 'true'
         run: |
-          # Generate a new migration to see if schema is in sync
-          bun prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datamodel prisma/schema.prisma --script > /tmp/drift-check.sql
+          # Check if there are new migration files in this PR
+          NEW_MIGRATIONS=$(git diff --name-only origin/main...HEAD -- prisma/migrations/ | grep -E "\.sql$" || true)
+          SCHEMA_CHANGES=$(git diff --name-only origin/main...HEAD -- prisma/schema.prisma || true)
           
-          if [ -s /tmp/drift-check.sql ]; then
-            echo "⚠️ Schema drift detected. Generated migration diff:"
-            cat /tmp/drift-check.sql
-            echo "Please run 'prisma migrate dev' to generate proper migrations"
+          if [ -n "$SCHEMA_CHANGES" ] && [ -z "$NEW_MIGRATIONS" ]; then
+            echo "⚠️ Schema changes detected but no new migration files found"
+            echo "Schema was modified but migrations weren't generated"
+            echo "Please run 'bun prisma migrate dev --name descriptive_name' to generate migrations"
             exit 1
+          elif [ -n "$SCHEMA_CHANGES" ] && [ -n "$NEW_MIGRATIONS" ]; then
+            echo "✅ Schema changes detected with corresponding migration files"
+            echo "Schema changes: $SCHEMA_CHANGES"
+            echo "New migrations: $NEW_MIGRATIONS"
+          elif [ -n "$NEW_MIGRATIONS" ] && [ -z "$SCHEMA_CHANGES" ]; then
+            echo "ℹ️ Migration files added without schema changes (manual migrations)"
+            echo "New migrations: $NEW_MIGRATIONS"
           else
             echo "✅ No schema drift detected"
           fi
