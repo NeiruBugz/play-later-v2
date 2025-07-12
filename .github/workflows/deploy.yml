@@ -43,7 +43,9 @@ jobs:
       
       - name: Check migration status
         if: steps.check-migrations.outputs.has-migrations == 'true'
-        run: bun prisma migrate status
+        run: |
+          echo "Checking current migration status..."
+          bun prisma migrate status || echo "Found pending migrations - will apply them next"
         env:
           POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
