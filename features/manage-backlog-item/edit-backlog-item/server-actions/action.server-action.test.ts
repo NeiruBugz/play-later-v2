@@ -1,5 +1,3 @@
-// @vitest-environment node
-
 import { getServerUserId } from "@/auth";
 import { BacklogItem } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -14,12 +12,11 @@ const mockAuthenticatedUser = {
   name: "Test User",
 };
 
-// Type the mocked function properly
-const mockGetServerUserId = vi.mocked(getServerUserId);
-
 describe("editBacklogItem", () => {
+  let mockGetServerUserId: ReturnType<typeof vi.mocked<typeof getServerUserId>>;
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetServerUserId = vi.mocked(getServerUserId);
   });
 
   it("should reject unauthenticated requests", async () => {

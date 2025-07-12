@@ -5,11 +5,11 @@ import { prisma } from "@/shared/lib/db";
 
 import { editUserAction } from "./edit-user-action";
 
-const mockGetServerUserId = vi.mocked(getServerUserId);
-
 describe("editUserAction", () => {
+  let mockGetServerUserId: ReturnType<typeof vi.mocked<typeof getServerUserId>>;
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetServerUserId = vi.mocked(getServerUserId);
   });
   it("should throw authentication error", async () => {
     mockGetServerUserId.mockResolvedValue(undefined);

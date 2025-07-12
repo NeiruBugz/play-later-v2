@@ -8,4 +8,10 @@ describe("convertReleaseDateToIsoStringDate", () => {
     const result = convertReleaseDateToIsoStringDate(releaseDate);
     expect(result).toBe("2024-12-31T19:59:59.999Z");
   });
+
+  it("should return null if the release date is undefined", () => {
+    const releaseDate = undefined;
+    const result = convertReleaseDateToIsoStringDate(releaseDate);
+    expect(result).toBeNull();
+  });
 });

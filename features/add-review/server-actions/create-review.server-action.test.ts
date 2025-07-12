@@ -5,11 +5,11 @@ import { prisma } from "@/shared/lib/db";
 
 import { createReview, createReviewForm } from "./create-review";
 
-const mockGetServerUserId = vi.mocked(getServerUserId);
-
 describe("createReview", () => {
+  let mockGetServerUserId: ReturnType<typeof vi.mocked<typeof getServerUserId>>;
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetServerUserId = vi.mocked(getServerUserId);
   });
 
   describe("when user is not authenticated", () => {
@@ -75,6 +75,7 @@ describe("createReview", () => {
 
 describe("createReviewForm", () => {
   let reviewFormData: FormData;
+  let mockGetServerUserId: ReturnType<typeof vi.mocked<typeof getServerUserId>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -82,6 +83,7 @@ describe("createReviewForm", () => {
     reviewFormData.append("gameId", "1");
     reviewFormData.append("rating", "5");
     reviewFormData.append("content", "This is a test review");
+    mockGetServerUserId = vi.mocked(getServerUserId);
   });
 
   describe("when user is not authenticated", () => {

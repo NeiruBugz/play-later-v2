@@ -1,7 +1,6 @@
 "use client";
 
 import { StarIcon } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -22,7 +21,6 @@ import { cn, playingOnPlatforms } from "@/shared/lib";
 import { createReviewForm } from "../server-actions/create-review";
 
 export function AddReviewForm({ gameId }: { gameId: string }) {
-  const session = useSession();
   const [ratingValue, setRatingValue] = useState(0);
   const { execute, isExecuting } = useAction(createReviewForm, {
     onSuccess: () => {
@@ -35,7 +33,6 @@ export function AddReviewForm({ gameId }: { gameId: string }) {
 
   return (
     <form action={execute}>
-      <HiddenInput name="userId" value={session.data?.user?.id} />
       <HiddenInput name="gameId" value={gameId} />
       <HiddenInput name="rating" value={ratingValue} />
       <div className="mb-4 flex flex-col gap-2">
