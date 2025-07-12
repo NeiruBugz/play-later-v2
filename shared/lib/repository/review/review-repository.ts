@@ -29,7 +29,7 @@ export async function createReview({
     data: {
       content: review.content,
       rating: review.rating,
-      completedOn: review.completedOn?.toISOString() || undefined,
+      completedOn: review.completedOn,
       createdAt: new Date(),
       updatedAt: new Date(),
       User: { connect: { id: userId } },

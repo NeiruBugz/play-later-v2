@@ -20,8 +20,11 @@ export function mockAuth(user = mockAuthenticatedUser) {
 }
 
 export function setupAuthMocks() {
-  vi.mock("@/auth", () => ({
-    auth: mockAuth(),
-    getServerUserId: vi.fn().mockResolvedValue(mockAuthenticatedUser.id),
-  }));
+  // Check if vi is available (jsdom environment)
+  if (typeof vi !== "undefined") {
+    vi.mock("@/auth", () => ({
+      auth: mockAuth(),
+      getServerUserId: vi.fn().mockResolvedValue(mockAuthenticatedUser.id),
+    }));
+  }
 }

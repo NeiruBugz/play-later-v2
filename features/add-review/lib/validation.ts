@@ -1,12 +1,4 @@
 import { z } from "zod";
-import { zfd } from "zod-form-data";
-
-export const CreateReviewFormSchema = zfd.formData({
-  gameId: zfd.text(),
-  rating: zfd.numeric(),
-  content: zfd.text(),
-  completedOn: zfd.text().optional(),
-});
 
 export const CreateReviewSchema = z.object({
   gameId: z.string().min(1),

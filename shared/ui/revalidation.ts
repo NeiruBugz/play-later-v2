@@ -12,4 +12,8 @@ export const RevalidationService = {
   revalidateImportedGames: () => {
     revalidatePath("/collection/imported");
   },
+
+  revalidateUserSettings: () => {
+    revalidatePath("/user/settings");
+  },
 };

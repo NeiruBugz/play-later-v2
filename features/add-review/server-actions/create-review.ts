@@ -5,14 +5,14 @@ import { revalidatePath } from "next/cache";
 import { createReview as createReviewCommand } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
-import { CreateReviewFormSchema, CreateReviewSchema } from "../lib/validation";
+import { CreateReviewSchema } from "../lib/validation";
 
 export const createReviewForm = authorizedActionClient
   .metadata({
     actionName: "createReviewForm",
     requiresAuth: true,
   })
-  .inputSchema(CreateReviewFormSchema)
+  .inputSchema(CreateReviewSchema)
   .action(async ({ parsedInput, ctx: { userId } }) => {
     await createReviewCommand({
       userId,
@@ -20,9 +20,7 @@ export const createReviewForm = authorizedActionClient
       review: {
         rating: parsedInput.rating,
         content: parsedInput.content,
-        completedOn: parsedInput.completedOn
-          ? new Date(parsedInput.completedOn)
-          : undefined,
+        completedOn: parsedInput.completedOn,
       },
     });
     revalidatePath(`/game/${parsedInput.gameId}`);
@@ -40,10 +38,8 @@ export const createReview = authorizedActionClient
       gameId: parsedInput.gameId,
       review: {
         rating: parsedInput.rating,
-        content: parsedInput.content || "",
-        completedOn: parsedInput.completedOn
-          ? new Date(parsedInput.completedOn)
-          : undefined,
+        content: parsedInput.content,
+        completedOn: parsedInput.completedOn,
       },
     });
     revalidatePath(`/game/${parsedInput.gameId}`);

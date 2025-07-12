@@ -1,18 +1,20 @@
 import { getServerUserId } from "@/auth";
-import { setupAuthMocks } from "@/test/setup/auth-mock";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { prisma } from "@/shared/lib/db";
 
 import { createReview, createReviewForm } from "./create-review";
 
 describe("createReview", () => {
+  let mockGetServerUserId: ReturnType<typeof vi.mocked<typeof getServerUserId>>;
   beforeEach(() => {
-    setupAuthMocks();
     vi.clearAllMocks();
+    mockGetServerUserId = vi.mocked(getServerUserId);
   });
 
   describe("when user is not authenticated", () => {
     it("should throw authentication error", async () => {
-      vi.mocked(getServerUserId).mockResolvedValue(undefined);
+      mockGetServerUserId.mockResolvedValue(undefined);
       const result = await createReview({
         gameId: "1",
         rating: 0,
@@ -27,7 +29,7 @@ describe("createReview", () => {
 
   describe("when user is authenticated", () => {
     beforeEach(() => {
-      vi.mocked(getServerUserId).mockResolvedValue("test-user-id");
+      mockGetServerUserId.mockResolvedValue("test-user-id");
     });
 
     describe("when review input is invalid", () => {
@@ -48,6 +50,16 @@ describe("createReview", () => {
       });
 
       it("should create review", async () => {
+        vi.mocked(prisma.review.create).mockResolvedValue({
+          id: 1,
+          rating: 5,
+          content: "This is a test review",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          completedOn: null,
+          userId: "test-user-id",
+          gameId: "1",
+        });
         const result = await createReview({
           gameId: "1",
           rating: 5,
@@ -63,20 +75,25 @@ describe("createReview", () => {
 
 describe("createReviewForm", () => {
   let reviewFormData: FormData;
+  let mockGetServerUserId: ReturnType<typeof vi.mocked<typeof getServerUserId>>;
 
   beforeEach(() => {
-    setupAuthMocks();
     vi.clearAllMocks();
     reviewFormData = new FormData();
     reviewFormData.append("gameId", "1");
     reviewFormData.append("rating", "5");
     reviewFormData.append("content", "This is a test review");
+    mockGetServerUserId = vi.mocked(getServerUserId);
   });
 
   describe("when user is not authenticated", () => {
     it("should throw authentication error", async () => {
-      vi.mocked(getServerUserId).mockResolvedValue(undefined);
-      const result = await createReviewForm(reviewFormData);
+      mockGetServerUserId.mockResolvedValue(undefined);
+      const result = await createReviewForm({
+        gameId: "1",
+        rating: 5,
+        content: "This is a test review",
+      });
 
       expect(result.serverError).toBe(
         "Authentication required. Please sign in to continue."
@@ -86,11 +103,26 @@ describe("createReviewForm", () => {
 
   describe("when user is authenticated", () => {
     beforeEach(() => {
-      vi.mocked(getServerUserId).mockResolvedValue("test-user-id");
+      mockGetServerUserId.mockResolvedValue("test-user-id");
     });
 
     it("should create review", async () => {
-      const result = await createReviewForm(reviewFormData);
+      vi.mocked(prisma.review.create).mockResolvedValue({
+        id: 1,
+        rating: 5,
+        content: "This is a test review",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        completedOn: null,
+        userId: "test-user-id",
+        gameId: "1",
+      });
+
+      const result = await createReviewForm({
+        gameId: "1",
+        rating: 5,
+        content: "This is a test review",
+      });
 
       expect(result.serverError).toBeUndefined();
       expect(result.validationErrors?.fieldErrors).toBeUndefined();
