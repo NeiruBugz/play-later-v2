@@ -23,7 +23,7 @@ type ExternalGame = {
   category: number;
   id: number;
   name: string;
-  url: string;
+  url?: string;
 };
 
 type GameEngine = {
@@ -132,7 +132,7 @@ export type SearchResponse = {
   first_release_date: number;
   id: number;
   name: string;
-  platforms: Array<Platform>;
+  platforms: Platform[];
   release_dates?: ReleaseDate[];
 };
 

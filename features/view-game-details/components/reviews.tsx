@@ -6,9 +6,7 @@ import { Review } from "./review";
 export async function Reviews({ gameId }: { gameId: string }) {
   const reviewsResult = await getReviews({ gameId });
 
-  // Handle possible failure
-  if (reviewsResult.serverError || !reviewsResult.data) {
-    console.error("Failed to fetch reviews:");
+  if (reviewsResult.serverError !== undefined || !reviewsResult.data) {
     return (
       <div className="py-12 text-center text-muted-foreground">
         Failed to load reviews. Please try again later.

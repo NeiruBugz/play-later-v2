@@ -1,5 +1,5 @@
 import { ImportedGames } from "@/features/view-imported-games";
-import { getImportedGames } from "@/features/view-imported-games/server-actions/get-imported-games";
+import { getImportedGames } from "@/features/view-imported-games/server-actions";
 import { SearchParamsSchema } from "@/features/view-imported-games/validation/search-params-schema";
 
 type SearchParams = {

@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 
-import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
+import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Header } from "@/shared/components/header";
 import { type GenericPageProps } from "@/shared/types";

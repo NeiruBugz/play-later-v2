@@ -3,11 +3,13 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { CollectionList } from "@/features/view-collection";
-import { PlatformFilter } from "@/features/view-collection/components/platform-filter";
-import { SearchInput } from "@/features/view-collection/components/search-input";
-import { StatusFilter } from "@/features/view-collection/components/status-filter";
-import { CollectionViewMode } from "@/features/view-collection/components/view-mode";
-import { getUserUniquePlatforms } from "@/features/view-collection/server-actions/get-uniques-platforms";
+import {
+  CollectionViewMode,
+  PlatformFilter,
+  SearchInput,
+  StatusFilter,
+} from "@/features/view-collection/components";
+import { getUserUniquePlatforms } from "@/features/view-collection/server-actions";
 
 export default async function CollectionPage(props: {
   params: Promise<Record<string, string>>;

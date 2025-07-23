@@ -15,6 +15,7 @@ import {
   SimilarGames,
   TimesToBeat,
 } from "@/features/view-game-details";
+import { findSteamAppId } from "@/features/view-game-details/lib/find-steam-app-id";
 import {
   AdaptiveTabs,
   AdaptiveTabsContent,
@@ -25,7 +26,6 @@ import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib";
-import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
 import igdbApi from "@/shared/lib/igdb";
 import { type GenericPageProps } from "@/shared/types";
 
@@ -46,11 +46,7 @@ export default async function ExternalGamePage(props: GenericPageProps) {
     return notFound();
   }
 
-  const steamAppId = getSteamAppIdFromUrl(
-    igdbData.external_games.find((external) =>
-      external.url.includes("steampowered.com")
-    )?.url
-  );
+  const steamAppId = findSteamAppId(igdbData.external_games);
 
   return (
     <div className="min-h-screen">
@@ -162,9 +158,11 @@ export default async function ExternalGamePage(props: GenericPageProps) {
                     />
                   </Suspense>
                 </AdaptiveTabsContent>
-                <AdaptiveTabsContent value="achievements">
-                  <Achievements steamAppId={steamAppId} />
-                </AdaptiveTabsContent>
+                {steamAppId !== null && (
+                  <AdaptiveTabsContent value="achievements">
+                    <Achievements steamAppId={steamAppId} />
+                  </AdaptiveTabsContent>
+                )}
               </AdaptiveTabs>
             </div>
             <div className="flex flex-col gap-6">

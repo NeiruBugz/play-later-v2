@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-import { getUsersBacklog } from "@/features/view-backlogs/server-actions/get-users-backlog";
+import { getUsersBacklog } from "@/features/view-backlogs/server-actions";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { BacklogStatusMapper, normalizeString } from "@/shared/lib";

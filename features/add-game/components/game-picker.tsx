@@ -1,14 +1,20 @@
+"use client";
+
 import { useQueryClient } from "@tanstack/react-query";
 import { Gamepad2, Search, X } from "lucide-react";
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 
-import { useIGDBSearch } from "@/features/search";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { useIGDBSearch } from "@/shared/hooks/use-igdb-search";
 import { cn } from "@/shared/lib";
-import { SearchResponse } from "@/shared/types";
+import { type SearchResponse } from "@/shared/types";
+
+const YEAR_SLICE_LENGTH = -4;
+const MIN_QUERY_LENGTH = 3;
+const INPUT_BLUR_TIMEOUT_MS = 200;
 
 type GamePreviewItemProps = {
   game: SearchResponse;
@@ -16,9 +22,25 @@ type GamePreviewItemProps = {
   repickGame?: () => void;
 };
 
+function ReleaseDate({ releaseDate }: { releaseDate: string | undefined }) {
+  if (releaseDate === undefined) {
+    return null;
+  }
+
+  return (
+    <span className="shrink-0 text-sm text-muted-foreground">
+      ({releaseDate})
+    </span>
+  );
+}
+
 function GamePreviewItem({ game, type }: GamePreviewItemProps) {
+  const firstReleaseDate =
+    type === "listitem"
+      ? game.release_dates?.[0].human.slice(YEAR_SLICE_LENGTH)
+      : game.release_dates?.[0].human;
+
   if (type === "listitem") {
-    const firstReleaseDate = game.release_dates?.[0].human.slice(-4);
     return (
       <div className="flex w-full items-center gap-3">
         <div className="shrink-0">
@@ -36,51 +58,40 @@ function GamePreviewItem({ game, type }: GamePreviewItemProps) {
             <span className="truncate font-medium text-foreground">
               {game.name}
             </span>
-            {firstReleaseDate && (
-              <span className="shrink-0 text-sm text-muted-foreground">
-                ({firstReleaseDate})
-              </span>
-            )}
+            <ReleaseDate releaseDate={firstReleaseDate} />
           </div>
         </div>
       </div>
     );
   }
 
-  if (type === "block") {
-    const firstReleaseDate = game.release_dates?.[0].human;
-    return (
-      <div className="flex items-center gap-4">
-        <div className="shrink-0">
-          <IgdbImage
-            alt={`${game.name} cover art`}
-            className="rounded-lg shadow-sm"
-            gameTitle={game.name}
-            coverImageId={game.cover.image_id}
-            igdbSrcSize={"hd"}
-            igdbImageSize={"micro"}
-          />
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <h3 className="truncate text-lg font-semibold text-foreground">
-            {game.name}
-          </h3>
-          {firstReleaseDate && (
-            <p className="text-sm text-muted-foreground">
-              Release date: {firstReleaseDate}
-            </p>
-          )}
-        </div>
+  return (
+    <div className="flex items-center gap-4">
+      <div className="shrink-0">
+        <IgdbImage
+          alt={`${game.name} cover art`}
+          className="rounded-lg shadow-sm"
+          gameTitle={game.name}
+          coverImageId={game.cover.image_id}
+          igdbSrcSize={"hd"}
+          igdbImageSize={"micro"}
+        />
       </div>
-    );
-  }
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <h3 className="truncate text-lg font-semibold text-foreground">
+          {game.name}
+        </h3>
+        <ReleaseDate releaseDate={firstReleaseDate} />
+      </div>
+    </div>
+  );
 }
 
 function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center p-4">
       <div className="flex items-center gap-2 text-muted-foreground">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
         <span className="text-sm">Searching games...</span>
       </div>
     </div>
@@ -90,7 +101,7 @@ function LoadingSpinner() {
 function EmptyState({ searchValue }: { searchValue: string }) {
   return (
     <div className="flex flex-col items-center justify-center p-6 text-center">
-      <Gamepad2 className="mb-3 h-8 w-8 text-muted-foreground/50" />
+      <Gamepad2 className="mb-3 size-8 text-muted-foreground/50" />
       <h4 className="mb-1 text-sm font-medium text-muted-foreground">
         No games found
       </h4>
@@ -102,16 +113,16 @@ function EmptyState({ searchValue }: { searchValue: string }) {
 }
 
 type GamePickerProps = {
-  onGameSelect: (game: SearchResponse) => void;
-  clearSelection: () => void;
+  onGameSelectAction: (game: SearchResponse) => void;
+  clearSelectionAction: () => void;
   selectedGame?: SearchResponse;
   disabled?: boolean;
 };
 
 export function GamePicker({
-  onGameSelect,
+  onGameSelectAction,
   selectedGame,
-  clearSelection,
+  clearSelectionAction,
   disabled = false,
 }: GamePickerProps) {
   const [searchValue, setSearchValue] = useState<string>("");
@@ -119,41 +130,31 @@ export function GamePicker({
   const { data, isFetching } = useIGDBSearch(searchValue);
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!searchValue || searchValue?.length < 3) {
-      return;
-    }
-  }, [searchValue]);
+  const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const {
+      currentTarget: { value },
+    } = event;
+    void queryClient.cancelQueries({ queryKey: ["search", searchValue] });
+    setSearchValue(value);
+  };
 
-  const onInputChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const {
-        currentTarget: { value },
-      } = event;
-      queryClient.cancelQueries({ queryKey: ["search", searchValue] });
-      setSearchValue(value);
-    },
-    [queryClient, searchValue]
-  );
-
-  const onListItemClick = useCallback(
-    (game: SearchResponse) => {
-      onGameSelect(game);
-      setSearchValue("");
-      setIsInputFocused(false);
-      queryClient.invalidateQueries({ queryKey: ["search", searchValue] });
-    },
-    [onGameSelect, queryClient, searchValue]
-  );
-
-  const clearSearch = useCallback(() => {
+  const onListItemClick = (game: SearchResponse) => {
+    onGameSelectAction(game);
     setSearchValue("");
     setIsInputFocused(false);
-    queryClient.cancelQueries({ queryKey: ["search", searchValue] });
-  }, [queryClient, searchValue]);
+    void queryClient.invalidateQueries({
+      queryKey: ["search", searchValue],
+    });
+  };
+
+  const clearSearch = () => {
+    setSearchValue("");
+    setIsInputFocused(false);
+    void queryClient.cancelQueries({ queryKey: ["search", searchValue] });
+  };
 
   const isPopoverOpen = useMemo(() => {
-    if (!searchValue || searchValue.length < 3) {
+    if (!searchValue || searchValue.length < MIN_QUERY_LENGTH) {
       return false;
     }
 
@@ -164,9 +165,18 @@ export function GamePicker({
     return data !== undefined;
   }, [isFetching, data, searchValue]);
 
+  const onInputBlur = () => {
+    setTimeout(() => {
+      setIsInputFocused(false);
+    }, INPUT_BLUR_TIMEOUT_MS);
+  };
+
   const showResults = data && data.length > 0;
   const showEmptyState =
-    data && data.length === 0 && !isFetching && searchValue.length >= 3;
+    data &&
+    data.length === 0 &&
+    !isFetching &&
+    searchValue.length >= MIN_QUERY_LENGTH;
 
   if (selectedGame) {
     return (
@@ -174,8 +184,8 @@ export function GamePicker({
         <Label className="text-base font-medium">Selected Game</Label>
         <div className="relative rounded-lg border-2 border-primary/20 bg-accent/50 p-4">
           <div className="absolute -right-2 -top-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
-              <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+            <div className="flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+              <svg className="size-3" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -189,17 +199,17 @@ export function GamePicker({
               <GamePreviewItem
                 game={selectedGame}
                 type="block"
-                repickGame={clearSelection}
+                repickGame={clearSelectionAction}
               />
             </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={clearSelection}
+              onClick={clearSelectionAction}
               className="shrink-0"
               disabled={disabled}
             >
-              <X className="mr-1 h-4 w-4" />
+              <X className="mr-1 size-4" />
               Change
             </Button>
           </div>
@@ -215,11 +225,13 @@ export function GamePicker({
       </Label>
       <div className="relative">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             autoComplete="off"
-            onFocus={() => setIsInputFocused(true)}
-            onBlur={() => setTimeout(() => setIsInputFocused(false), 200)}
+            onFocus={() => {
+              setIsInputFocused(true);
+            }}
+            onBlur={onInputBlur}
             value={searchValue}
             placeholder="Type at least 3 characters to search..."
             onChange={onInputChange}
@@ -235,12 +247,12 @@ export function GamePicker({
             <Button
               variant="ghost"
               size="sm"
-              className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 p-0 hover:bg-muted"
+              className="absolute right-1 top-1/2 size-8 -translate-y-1/2 p-0 hover:bg-muted"
               onClick={clearSearch}
               type="button"
               disabled={disabled}
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
             </Button>
           )}
         </div>
@@ -256,15 +268,17 @@ export function GamePicker({
         >
           {isFetching && <LoadingSpinner />}
 
-          {showResults && (
+          {showResults === true && (
             <div className="max-h-80 overflow-y-auto">
               <ul className="divide-y divide-border">
-                {data.map((searchItem, index) => (
+                {data.map((searchItem) => (
                   <li key={searchItem.id}>
                     <button
                       type="button"
                       className="w-full p-3 text-left transition-colors duration-150 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none"
-                      onClick={() => onListItemClick(searchItem)}
+                      onClick={() => {
+                        onListItemClick(searchItem);
+                      }}
                     >
                       <GamePreviewItem type="listitem" game={searchItem} />
                     </button>
@@ -274,7 +288,7 @@ export function GamePicker({
             </div>
           )}
 
-          {showEmptyState && <EmptyState searchValue={searchValue} />}
+          {showEmptyState === true && <EmptyState searchValue={searchValue} />}
         </div>
       </div>
 

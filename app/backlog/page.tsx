@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { BacklogList } from "@/features/view-backlogs/components/backlog-list";
+import { BacklogList } from "@/features/view-backlogs/components";
 import { Header } from "@/shared/components/header";
 import { Body, ResponsiveHeading } from "@/shared/components/typography";
 

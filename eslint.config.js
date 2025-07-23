@@ -1,22 +1,22 @@
+import { fixupPluginRules } from "@eslint/compat";
 import js from "@eslint/js";
+import nextPlugin from "@next/eslint-plugin-next";
+import * as tanstackQueryPlugin from "@tanstack/eslint-plugin-query";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsparser from "@typescript-eslint/parser";
-import nextPlugin from "@next/eslint-plugin-next";
-import reactPlugin from "eslint-plugin-react";
-import reactHooksPlugin from "eslint-plugin-react-hooks";
-import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
-import * as tanstackQueryPlugin from "@tanstack/eslint-plugin-query";
+import prettierConfig from "eslint-config-prettier";
 import boundariesPlugin from "eslint-plugin-boundaries";
 import importPlugin from "eslint-plugin-import";
+import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
+import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 import tailwindcssPlugin from "eslint-plugin-tailwindcss";
-import prettierConfig from "eslint-config-prettier";
-import { fixupPluginRules } from "@eslint/compat";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   // Base ESLint recommended rules
   js.configs.recommended,
-  
+
   // Global configuration
   {
     languageOptions: {
@@ -36,6 +36,10 @@ export default [
         Buffer: "readonly",
         __dirname: "readonly",
         __filename: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
       },
     },
     settings: {
@@ -68,7 +72,7 @@ export default [
       ...tseslint.configs.recommended.rules,
       ...tseslint.configs["recommended-type-checked"].rules,
       ...tseslint.configs.strict.rules,
-      
+
       // Stricter TypeScript rules
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -94,7 +98,7 @@ export default [
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/array-type": ["error", { default: "array-simple" }],
       "@typescript-eslint/prefer-string-starts-ends-with": "error",
-      
+
       // Additional strict TypeScript rules
       "@typescript-eslint/no-confusing-void-expression": "error",
       "@typescript-eslint/no-meaningless-void-operator": "error",
@@ -128,11 +132,11 @@ export default [
       ...reactPlugin.configs.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
       ...nextPlugin.configs.recommended.rules,
-      
+
       // React best practices
       "react-hooks/exhaustive-deps": "error",
       "react-hooks/rules-of-hooks": "error",
-      
+
       // Popular React rules
       "react/react-in-jsx-scope": "off", // Not needed in React 17+
       "react/jsx-uses-react": "off", // Not needed in React 17+
@@ -175,7 +179,7 @@ export default [
     },
     rules: {
       ...jsxA11yPlugin.configs.recommended.rules,
-      
+
       // Popular accessibility rules
       "jsx-a11y/alt-text": "error",
       "jsx-a11y/anchor-has-content": "error",
@@ -255,10 +259,10 @@ export default [
       "import/no-self-import": "error",
       "import/no-useless-path-segments": "error",
       "import/consistent-type-specifier-style": ["error", "prefer-inline"],
-      
+
       // Disable conflicting rules (handled by prettier-plugin-sort-imports)
       "import/order": "off",
-      "import/first": "off", 
+      "import/first": "off",
       "import/newline-after-import": "off",
     },
   },
@@ -300,10 +304,10 @@ export default [
       "array-callback-return": "error",
       "block-scoped-var": "error",
       "consistent-return": "error",
-      "curly": ["error", "all"],
+      curly: ["error", "all"],
       "default-case-last": "error",
       "dot-notation": "error",
-      "eqeqeq": ["error", "always", { null: "ignore" }],
+      eqeqeq: ["error", "always", { null: "ignore" }],
       "no-alert": "error",
       "no-console": "warn",
       "no-else-return": "error",
@@ -350,18 +354,39 @@ export default [
           },
         },
       ],
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/features/*/components/*"],
+              message:
+                "Import components through feature public interface only",
+            },
+            {
+              group: ["@/features/*/server-actions/*"],
+              message:
+                "Import server actions through feature public interface only",
+            },
+          ],
+        },
+      ],
       "prefer-object-spread": "error",
       "prefer-rest-params": "error",
       "prefer-spread": "error",
       "prefer-template": "error",
-      "radix": "error",
-      "yoda": "error",
+      radix: "error",
+      yoda: "error",
     },
   },
 
   // Test files configuration
   {
-    files: ["**/*.test.{js,jsx,ts,tsx}", "**/*.spec.{js,jsx,ts,tsx}", "**/test/**"],
+    files: [
+      "**/*.test.{js,jsx,ts,tsx}",
+      "**/*.spec.{js,jsx,ts,tsx}",
+      "**/test/**",
+    ],
     rules: {
       "no-magic-numbers": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
