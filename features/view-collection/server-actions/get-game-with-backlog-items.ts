@@ -38,7 +38,6 @@ export const getUserGamesWithGroupedBacklogPaginated = authorizedActionClient
         count: totalGames,
       };
     } catch (error) {
-      console.error("Error fetching user game collection:", error);
-      throw new Error("Failed to fetch user game collection");
+      throw new Error("Failed to fetch user game collection", { cause: error });
     }
   });

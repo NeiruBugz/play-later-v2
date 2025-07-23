@@ -7,7 +7,6 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { SubmitButton } from "@/features/add-game/components/add-game-form.submit";
 import { Body, Heading } from "@/shared/components/typography";
 import {
   Form,
@@ -31,7 +30,7 @@ import {
   cn,
   playingOnPlatforms,
 } from "@/shared/lib";
-import type { SearchResponse } from "@/shared/types";
+import { type SearchResponse } from "@/shared/types";
 
 import { initialFormValues } from "../lib/constants";
 import {
@@ -39,6 +38,7 @@ import {
   type CreateGameActionInput,
 } from "../lib/validation";
 import { createGameAction } from "../server-actions/create-game-action";
+import { SubmitButton } from "./add-game-form.submit";
 import { GamePicker } from "./game-picker";
 
 const radioGroupContainerStyles =
@@ -93,7 +93,7 @@ export function AddGameForm() {
       return;
     }
 
-    startTransition(async () => {
+    startTransition(() => {
       try {
         execute({
           ...values,
@@ -101,8 +101,7 @@ export function AddGameForm() {
         });
 
         onFormReset();
-      } catch (error) {
-        console.error("Failed to submit form:", error);
+      } catch (_) {
         toast.error("Something went wrong. Please try again.");
       }
     });
@@ -125,8 +124,12 @@ export function AddGameForm() {
         </div>
 
         <GamePicker
-          clearSelection={() => onGameSelect(undefined)}
-          onGameSelect={(game) => onGameSelect(game)}
+          clearSelectionAction={() => {
+            onGameSelect(undefined);
+          }}
+          onGameSelectAction={(game) => {
+            onGameSelect(game);
+          }}
           selectedGame={selectedGame}
           disabled={isLoading}
         />
@@ -140,7 +143,7 @@ export function AddGameForm() {
             <div className="space-y-3 text-center">
               <div className="text-muted-foreground">
                 <svg
-                  className="mx-auto h-12 w-12 text-muted-foreground/50"
+                  className="mx-auto size-12 text-muted-foreground/50"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -166,7 +169,10 @@ export function AddGameForm() {
         ) : (
           // Actual form when game is selected
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form
+              onSubmit={() => form.handleSubmit(onSubmit)}
+              className="space-y-8"
+            >
               {/* Platform Selection */}
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -336,9 +342,7 @@ export function AddGameForm() {
               <div className="border-t pt-6">
                 <SubmitButton
                   onFormReset={onFormReset}
-                  isDisabled={
-                    selectedGame === undefined || isLoading || isExecuting
-                  }
+                  isDisabled={isLoading || isExecuting}
                   isLoading={isLoading}
                 />
               </div>
