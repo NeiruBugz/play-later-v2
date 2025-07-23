@@ -18,7 +18,7 @@ export async function CollectionList({
     page: Number(params.page) || 1,
   });
 
-  if (serverError) {
+  if (serverError !== undefined) {
     return <div>{serverError}</div>;
   }
 

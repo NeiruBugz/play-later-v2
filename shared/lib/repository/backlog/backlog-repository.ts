@@ -321,7 +321,7 @@ export function buildCollectionFilter({
 } {
   const backlogFilter: Prisma.BacklogItemWhereInput = {
     userId,
-    platform: platform ?? undefined,
+    platform: platform === "" ? undefined : platform,
     status:
       status != null && status !== ""
         ? { not: BacklogItemStatus.WISHLIST }

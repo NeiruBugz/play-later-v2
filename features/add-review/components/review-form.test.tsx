@@ -37,7 +37,6 @@ describe("ReviewForm", () => {
   });
 
   it("should display form", () => {
-    screen.debug();
     expect(elements.getReviewHeading()).toBeVisible();
     expect(elements.getAllRatingButtons()).toHaveLength(10);
     expect(elements.getReviewTextarea()).toBeVisible();

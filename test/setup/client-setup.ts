@@ -1,6 +1,9 @@
 import "@testing-library/jest-dom";
 
-import { vi } from "vitest";
+import { searchResponseFixture } from "@/test/fixtures/search";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
 vi.mock("next-auth/react", () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -20,7 +23,7 @@ vi.mock("next-auth/react", () => ({
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: vi.fn().mockImplementation((query) => ({
+  value: vi.fn().mockImplementation((query: string) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -45,3 +48,32 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+
+export const server = setupServer(
+  http.get("/api/igdb-search", async ({ request }: { request: Request }) => {
+    const url = new URL(request.url);
+    const query = url.searchParams.get("q") ?? "";
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+
+    if (query.includes("sdasdass") || query.length === 0) {
+      return HttpResponse.json({ response: [] });
+    }
+
+    return HttpResponse.json(searchResponseFixture);
+  })
+);
+
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: "error" });
+});
+
+afterEach(() => {
+  server.resetHandlers();
+});
+
+afterAll(() => {
+  server.close();
+});

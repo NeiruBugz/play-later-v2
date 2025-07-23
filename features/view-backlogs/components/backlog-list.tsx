@@ -1,16 +1,20 @@
 import Link from "next/link";
 
-import { getBacklogs } from "@/features/view-backlogs/server-actions/get-backlogs";
 import { IgdbImage } from "@/shared/components/igdb-image";
+
+import { getBacklogs } from "../server-actions";
+
+const MAX_BACKLOG_ITEMS_PER_USER_CARD = 3;
+const GAME_CARD_SIZE = 90;
 
 export async function BacklogList() {
   const { data: backlogs, serverError } = await getBacklogs();
 
-  if (serverError) {
+  if (serverError !== undefined) {
     return <div>{serverError}</div>;
   }
 
-  if (!backlogs || backlogs?.length === 0) {
+  if (!backlogs || backlogs.length === 0) {
     return (
       <>
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
@@ -38,8 +42,8 @@ export async function BacklogList() {
               </p>
               <div className="relative mt-2 h-[90px] w-full">
                 {backlog.backlogItems.map((backlogItem, index) => {
-                  if (index >= 3) {
-                    return;
+                  if (index >= MAX_BACKLOG_ITEMS_PER_USER_CARD) {
+                    return null;
                   }
 
                   return (
@@ -47,14 +51,14 @@ export async function BacklogList() {
                       className="absolute top-0"
                       key={backlogItem.id}
                       style={{
-                        left: (index / 2) * 90,
+                        left: (index / 2) * GAME_CARD_SIZE,
                         zIndex: index,
                       }}
                     >
                       <div className="group relative w-fit cursor-pointer rounded-xl border bg-background text-white shadow-md transition-all hover:shadow-xl">
                         <div className="flex size-[90px] items-center justify-center">
                           <IgdbImage
-                            className="h-full w-full rounded-xl object-cover"
+                            className="size-full rounded-xl object-cover"
                             style={{
                               maxWidth: "100%",
                             }}
@@ -68,16 +72,16 @@ export async function BacklogList() {
                     </div>
                   );
                 })}
-                {backlog.backlogItems.length - 3 > 0 ? (
+                {backlog.backlogItems.length - MAX_BACKLOG_ITEMS_PER_USER_CARD >
+                0 ? (
                   <div className="absolute left-[135px] top-0 z-10 flex size-[92px] items-center justify-center rounded-xl bg-slate-200/85">
                     <span className="text-xl font-bold">
                       +&nbsp;
-                      {backlog.backlogItems.length - 3}
+                      {backlog.backlogItems.length -
+                        MAX_BACKLOG_ITEMS_PER_USER_CARD}
                     </span>
                   </div>
-                ) : (
-                  <></>
-                )}
+                ) : null}
               </div>
             </div>
           </Link>

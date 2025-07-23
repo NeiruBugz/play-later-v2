@@ -387,6 +387,12 @@ export default [
       "**/*.spec.{js,jsx,ts,tsx}",
       "**/test/**",
     ],
+    languageOptions: {
+      globals: {
+        window: "writable",
+        global: "writable",
+      },
+    },
     rules: {
       "no-magic-numbers": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
