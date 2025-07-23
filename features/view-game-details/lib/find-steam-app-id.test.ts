@@ -26,21 +26,21 @@ describe("findSteamAppId", () => {
   });
 
   it("should return null if no steam url is found", () => {
-    const steamAppId = findSteamAppId([
-      {
-        id: 1,
-        category: 1,
-        name: "Test",
-        url: "https://www.google.com",
-      },
-    ]);
-    expect(steamAppId).toBeNull();
+    expect(() =>
+      findSteamAppId([
+        {
+          id: 1,
+          category: 1,
+          name: "Test",
+          url: "https://www.google.com",
+        },
+      ])
+    ).toThrow("Could not extract app id from Steam URL");
   });
 
   it("should return null if the url is undefined", () => {
-    const steamAppId = findSteamAppId([
-      { id: 1, category: 1, name: "Test", url: undefined },
-    ]);
-    expect(steamAppId).toBeNull();
+    expect(() =>
+      findSteamAppId([{ id: 1, category: 1, name: "Test", url: undefined }])
+    ).toThrowError();
   });
 });
