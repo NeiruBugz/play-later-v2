@@ -15,14 +15,14 @@ export function SubmitButton({
   isLoading = false,
 }: SubmitButtonProps) {
   const { pending } = useFormStatus();
-  const isButtonDisabled = isDisabled || pending || isLoading;
+  const isButtonDisabled = isDisabled === true || pending || isLoading;
 
   return (
     <>
       <Button className="mr-2 mt-2" type="submit" disabled={isButtonDisabled}>
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 size-4 animate-spin" />
             Adding to collection...
           </>
         ) : (

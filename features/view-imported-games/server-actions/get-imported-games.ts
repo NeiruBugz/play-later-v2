@@ -35,7 +35,7 @@ export const getImportedGames = authorizedActionClient
       const where = {
         userId,
         ...(storefront && { storefront }),
-        ...(search && {
+        ...(search != null && {
           name: {
             contains: search,
             mode: "insensitive" as const,

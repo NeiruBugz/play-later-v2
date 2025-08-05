@@ -1,12 +1,12 @@
 "use server";
 
-import type { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { type AcquisitionType, type BacklogItemStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 import { CreateGameActionSchema } from "../lib/validation";
-import type { AddGameToBacklogInput } from "../types";
+import { type AddGameToBacklogInput } from "../types";
 import { saveGameAndAddToBacklog } from "./add-game";
 
 export const createGameAction = authorizedActionClient

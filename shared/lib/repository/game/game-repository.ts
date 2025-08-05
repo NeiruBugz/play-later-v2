@@ -1,12 +1,12 @@
 import "server-only";
 
-import type { Prisma } from "@prisma/client";
+import { type Prisma } from "@prisma/client";
 
 import { convertReleaseDateToIsoStringDate } from "@/shared/lib/date-functions";
 import { prisma } from "@/shared/lib/db";
 import igdbApi from "@/shared/lib/igdb";
 
-import { CreateGameInput, GameInput } from "./types";
+import { type CreateGameInput, type GameInput } from "./types";
 
 export async function createGame({ game }: CreateGameInput) {
   const createdGame = await prisma.game.create({
@@ -15,17 +15,17 @@ export async function createGame({ game }: CreateGameInput) {
       title: game.title,
       coverImage: game.coverImage,
       hltbId: game.hltbId === "" ? null : game.hltbId,
-      mainExtra: game.mainExtra ? Number(game.mainExtra) : null,
-      mainStory: game.mainStory ? Number(game.mainStory) : null,
-      completionist: game.completionist ? Number(game.completionist) : null,
-      releaseDate: game.releaseDate ? new Date(game.releaseDate) : null,
+      mainExtra: game.mainExtra !== null ? Number(game.mainExtra) : null,
+      mainStory: game.mainStory !== null ? Number(game.mainStory) : null,
+      completionist:
+        game.completionist !== null ? Number(game.completionist) : null,
+      releaseDate:
+        game.releaseDate !== undefined && game.releaseDate !== null
+          ? new Date(game.releaseDate)
+          : null,
       description: game.description,
     },
   });
-
-  if (!createdGame) {
-    throw new Error("Failed to create game");
-  }
 
   return createdGame;
 }
@@ -57,14 +57,14 @@ export async function findGameByIgdbId({
 export async function findManyByIgdbIds({
   igdbIds,
 }: {
-  igdbIds: (number | string)[];
+  igdbIds: Array<number | string>;
 }) {
   const numericIds = igdbIds.map((id) => Number(id)).filter((id) => !isNaN(id));
   const games = await prisma.game.findMany({
     where: { igdbId: { in: numericIds } },
   });
 
-  if (!games) {
+  if (games.length === 0) {
     throw new Error("Failed to find games");
   }
 
@@ -72,7 +72,7 @@ export async function findManyByIgdbIds({
 }
 
 export async function findGameById({ id }: { id: string }) {
-  return await prisma.game.findUnique({
+  return prisma.game.findUnique({
     where: {
       id,
     },
@@ -108,7 +108,7 @@ export async function findGamesWithBacklogItemsPaginated({
 }) {
   const skip = Math.max((page || 1) - 1, 0) * itemsPerPage;
 
-  return await prisma.$transaction([
+  return prisma.$transaction([
     prisma.game.findMany({
       where,
       orderBy: { title: "asc" },
@@ -135,7 +135,7 @@ export async function findOrCreateGameByIgdbId({ igdbId }: { igdbId: number }) {
     }
 
     const releaseDate = convertReleaseDateToIsoStringDate(
-      gameInfo?.release_dates[0]?.human
+      gameInfo.release_dates[0]?.human
     );
 
     const gameInput: GameInput = {
@@ -146,6 +146,6 @@ export async function findOrCreateGameByIgdbId({ igdbId }: { igdbId: number }) {
       releaseDate,
     };
 
-    return await createGame({ game: gameInput });
+    return createGame({ game: gameInput });
   }
 }

@@ -1,4 +1,4 @@
-import { BacklogItem } from "@prisma/client";
+import { type BacklogItem } from "@prisma/client";
 
 import { AddReviewDialog } from "@/features/add-review/components";
 import {
