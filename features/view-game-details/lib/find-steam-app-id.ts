@@ -8,29 +8,23 @@ export function findSteamAppId(
     return null;
   }
 
-  try {
-    const externalGameWithSteamUrl = external_games.find((external) => {
-      if (external.url !== undefined) {
-        return external.url.includes("steampowered.com");
-      }
-
-      return false;
-    });
-
-    if (!externalGameWithSteamUrl) {
-      throw new Error("No Steam URL found");
+  const externalGameWithSteamUrl = external_games.find((external) => {
+    if (external.url !== undefined) {
+      return external.url.includes("steampowered.com");
     }
 
-    const steamAppId = getSteamAppIdFromUrl(externalGameWithSteamUrl.url);
+    return false;
+  });
 
-    if (steamAppId === undefined) {
-      throw new Error("Could not extract app ID from URL");
-    }
-
-    return steamAppId;
-  } catch (error) {
-    throw new Error("Could not extract app id from Steam URL", {
-      cause: error,
-    });
+  if (!externalGameWithSteamUrl) {
+    return null;
   }
+
+  const steamAppId = getSteamAppIdFromUrl(externalGameWithSteamUrl.url);
+
+  if (steamAppId === undefined) {
+    return null;
+  }
+
+  return steamAppId;
 }

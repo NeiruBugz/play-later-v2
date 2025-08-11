@@ -1,15 +1,18 @@
+// Play Later v2 – Prisma schema
+// Authentication models (NextAuth) and core app models for games/backlog/reviews/imports.
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
+  // Postgres connection (pooled + non-pooled for migrations/introspection)
   provider  = "postgresql"
   url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 // ----- NextAuth Authorization Models ------//
-
+/// Linked OAuth/OIDC account for a `User` (managed by NextAuth)
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -29,6 +32,7 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+/// Active session for a `User` (managed by NextAuth)
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -37,6 +41,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+/// Email verification / magic link token (managed by NextAuth)
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -45,6 +50,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+/// Application user record enriched with optional Steam fields
 model User {
   id                   String                 @id @default(cuid())
   name                 String?
@@ -62,11 +68,13 @@ model User {
   BacklogItem          BacklogItem[]
   Review               Review[]
   IgnoredImportedGames IgnoredImportedGames[]
+  GamingGoals          GamingGoal[]
 
   ImportedGame ImportedGame[]
 }
 
 // ----- Application Models ------//
+/// Canonical game entity sourced primarily from IGDB and optionally HLTB/Steam
 model Game {
   id            String        @id @default(cuid())
   igdbId        Int           @unique
@@ -85,6 +93,7 @@ model Game {
   steamAppId    Int?
 }
 
+/// A user's backlog entry for a specific `Game`
 model BacklogItem {
   id              Int               @id @default(autoincrement())
   status          BacklogItemStatus @default(TO_PLAY)
@@ -99,12 +108,17 @@ model BacklogItem {
   startedAt       DateTime?
   completedAt     DateTime?
 
+  // Composite index used by dashboards and lists filtered by status
   @@index([userId, status])
+  // Composite index to filter by platform
   @@index([userId, platform])
+  // Composite index to sort/filter by recency
   @@index([userId, createdAt])
+  // Index to efficiently lookup items by game
   @@index([gameId])
 }
 
+/// A user-authored review for a `Game`
 model Review {
   id          Int      @id @default(autoincrement())
   rating      Int      @default(0) // Rating from 0 to 10
@@ -118,6 +132,7 @@ model Review {
   Game        Game     @relation(fields: [gameId], references: [id])
 }
 
+/// Names intentionally excluded from import for a `User`
 model IgnoredImportedGames {
   id     String @id @default(cuid())
   name   String
@@ -125,6 +140,7 @@ model IgnoredImportedGames {
   User   User   @relation(fields: [userId], references: [id])
 }
 
+/// A game imported from an external storefront (e.g., Steam)
 model ImportedGame {
   id               String     @id @default(cuid())
   name             String
@@ -139,16 +155,45 @@ model ImportedGame {
   userId           String
   User             User       @relation(fields: [userId], references: [id])
 
+  // Supports querying a user's active vs deleted import entries
   @@index([userId, deletedAt])
+  // Supports fast lookups by storefront id
   @@index([storefrontGameId])
 }
 
+/// A user's gaming goal (e.g., "Complete 5 RPGs this year")
+model GamingGoal {
+  id           String           @id @default(cuid())
+  title        String
+  description  String?
+  type         GamingGoalType
+  targetValue  Int
+  currentValue Int              @default(0)
+  status       GamingGoalStatus @default(ACTIVE)
+  deadline     DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  completedAt  DateTime?
+  userId       String
+  User         User             @relation(fields: [userId], references: [id])
+
+  // Optional filters for specific goal types
+  targetGenre    String[]
+  targetPlatform String?
+  targetStatus   BacklogItemStatus[]
+
+  @@index([userId, status])
+  @@index([userId, deadline])
+}
+
+/// External storefront sources supported by the app
 enum Storefront {
   STEAM
   PLAYSTATION
   XBOX
 }
 
+/// Valid states of a backlog item
 enum BacklogItemStatus {
   TO_PLAY
   PLAYED
@@ -157,8 +202,29 @@ enum BacklogItemStatus {
   WISHLIST
 }
 
+/// How the user acquired a game
 enum AcquisitionType {
   PHYSICAL
   DIGITAL
   SUBSCRIPTION
+}
+
+/// Types of gaming goals users can set
+enum GamingGoalType {
+  COMPLETE_GAMES    // Complete X games
+  COMPLETE_GENRE    // Complete X games of specific genre
+  COMPLETE_PLATFORM // Complete X games on specific platform
+  REDUCE_BACKLOG    // Reduce backlog by X games
+  PLAY_TIME         // Play for X hours
+  STREAK            // Maintain playing streak for X days
+  CUSTOM            // User-defined goal
+}
+
+/// Status of a gaming goal
+enum GamingGoalStatus {
+  ACTIVE    // Currently tracking
+  COMPLETED // Successfully completed
+  PAUSED    // Temporarily paused
+  CANCELLED // User cancelled
+  FAILED    // Missed deadline
 }

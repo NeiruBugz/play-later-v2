@@ -2,20 +2,20 @@ import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import {
-  Artwork,
-  DLCAndExpansionListResponse,
-  Event,
-  FranchiseGamesResponse,
-  FullGameInfoResponse,
-  GenresResponse,
-  IgdbGameResponseItem,
-  RatedGameResponse,
-  RequestOptions,
-  SearchResponse,
-  TimeToBeatsResponse,
-  TwitchTokenResponse,
-  UpcomingEventsResponse,
-  UpcomingReleaseResponse,
+  type Artwork,
+  type DLCAndExpansionListResponse,
+  type Event,
+  type FranchiseGamesResponse,
+  type FullGameInfoResponse,
+  type GenresResponse,
+  type IgdbGameResponseItem,
+  type RatedGameResponse,
+  type RequestOptions,
+  type SearchResponse,
+  type TimeToBeatsResponse,
+  type TwitchTokenResponse,
+  type UpcomingEventsResponse,
+  type UpcomingReleaseResponse,
 } from "@/shared/types";
 
 const asError = (thrown: unknown): Error => {
@@ -145,7 +145,7 @@ const igdbApi = {
   async getEventLogo(
     id: Event["event_logo"]
   ): Promise<
-    | { height: number; id: number; image_id: string; width: number }[]
+    | Array<{ height: number; id: number; image_id: string; width: number }>
     | undefined
   > {
     const query = new QueryBuilder()
@@ -299,7 +299,7 @@ const igdbApi = {
       resource: "/games",
     });
 
-    if (!response || !response[0]) {
+    if (!response?.[0]) {
       return { id: null, aggregated_rating: null };
     }
 
@@ -346,7 +346,7 @@ const igdbApi = {
   },
   async getGameGenres(
     gameId: number | null | undefined
-  ): Promise<Array<GenresResponse> | Array<{ id: null; genres: [] }>> {
+  ): Promise<GenresResponse[] | Array<{ id: null; genres: [] }>> {
     if (!gameId) return [];
 
     const query = new QueryBuilder()
@@ -355,7 +355,7 @@ const igdbApi = {
       .build();
 
     const response = await this.request<
-      Array<GenresResponse> | Array<{ id: null; genres: [] }>
+      GenresResponse[] | Array<{ id: null; genres: [] }>
     >({
       body: query,
       resource: "/games",

@@ -19,25 +19,25 @@ import {
 } from "@/shared/components/ui/dropdown-menu";
 
 const getFirstTwoLiterals = (name: string | null | undefined) => {
-  if (!name) {
+  if (name == null || name === "undefined" || name === "") {
     return "U";
   }
 
   const [firstName, lastName] = name.split(" ");
 
-  return firstName.charAt(0).toUpperCase() + lastName?.charAt(0).toUpperCase();
+  return firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
 };
 
-const User = memo(function User() {
+const User = memo(() => {
   const session = useSession();
 
-  if (!session.data || !session.data.user) return null;
+  if (!session.data?.user) return null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="size-8 cursor-pointer rounded">
-          {session.data.user.image ? (
+          {session.data.user.image != null ? (
             <AvatarImage
               src={session.data.user.image ?? ""}
               alt={session.data.user.email ?? ""}
@@ -53,7 +53,12 @@ const User = memo(function User() {
           <Settings />
           <Link href={`/user/settings`}>Settings</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={() => {
+            void signOut();
+          }}
+          className="cursor-pointer"
+        >
           <ExitIcon />
           Log out
         </DropdownMenuItem>
