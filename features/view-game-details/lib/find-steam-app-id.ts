@@ -1,21 +1,22 @@
+import { type ExternalGame, type Game } from "igdb-api-types";
+
 import { getSteamAppIdFromUrl } from "@/shared/lib/get-steam-app-id-from-url";
-import { type FullGameInfoResponse } from "@/shared/types";
+
+const isExternalGame = (
+  external: number | ExternalGame
+): external is ExternalGame => typeof external === "object";
 
 export function findSteamAppId(
-  external_games: FullGameInfoResponse["external_games"] | undefined
+  external_games: Game["external_games"] | undefined
 ) {
   if (!external_games || external_games.length === 0) {
     return null;
   }
 
   try {
-    const externalGameWithSteamUrl = external_games.find((external) => {
-      if (external.url !== undefined) {
-        return external.url.includes("steampowered.com");
-      }
-
-      return false;
-    });
+    const externalGameWithSteamUrl = external_games
+      .filter(isExternalGame)
+      .find((external) => external.url?.includes("steampowered.com") ?? false);
 
     if (!externalGameWithSteamUrl) {
       throw new Error("No Steam URL found");

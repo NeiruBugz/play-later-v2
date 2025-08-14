@@ -87,6 +87,7 @@
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-tailwindcss": "3.17.3",
         "husky": "^9.1.7",
+        "igdb-api-types": "^0.2.0",
         "jsdom": "24.1.0",
         "knip": "5.21.2",
         "lefthook": "^1.12.2",
@@ -1125,6 +1126,8 @@
     "iconv-lite": ["iconv-lite@0.6.3", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3.0.0" } }, "sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw=="],
 
     "identity-function": ["identity-function@1.0.0", "", {}, "sha512-kNrgUK0qI+9qLTBidsH85HjDLpZfrrS0ElquKKe/fJFdB3D7VeKdXXEvOPDUHSHOzdZKCAAaQIWWyp0l2yq6pw=="],
+
+    "igdb-api-types": ["igdb-api-types@0.2.0", "", {}, "sha512-FeavoSQ1jQ6htJs8uqnJA4aB+Z9j3efG8NMDNrnEJ+LJrWkyDQ2U90XjgaA+l+kM4FzfnUlsWzyUTuhTsUoxqQ=="],
 
     "ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
 
