@@ -9,7 +9,7 @@ A comprehensive game backlogging application that helps you track your gaming co
 ## ✨ Features
 
 - **Game Collection Management**: Track your owned games with custom statuses (backlog, playing, completed, wishlist)
-- **Steam Integration**: Import your Steam library and sync game data
+- **Steam Integration**: Import your Steam library and sync game data with OAuth authentication
 - **Game Reviews**: Write and share reviews with ratings for games you've played
 - **Backlog Organization**: Organize your gaming backlog with filtering and search capabilities
 - **Game Discovery**: Browse and discover new games with detailed information from IGDB
@@ -17,6 +17,8 @@ A comprehensive game backlogging application that helps you track your gaming co
 - **Wishlist Management**: Keep track of games you want to play in the future
 - **Achievement Tracking**: View Steam achievements for your games
 - **Social Features**: Share your wishlist and view other users' backlogs
+- **Franchise Support**: Browse game franchises and related titles
+- **Import Management**: Review and selectively import games from Steam before adding to collection
 
 ## 🛠️ Tech Stack
 
@@ -28,8 +30,8 @@ A comprehensive game backlogging application that helps you track your gaming co
 
 ### Database & ORM
 
-- **[Prisma](https://prisma.io)** - Type-safe database ORM
-- **[PostgreSQL](https://www.postgresql.org/)** - Primary database
+- **[Prisma](https://prisma.io)** - Type-safe database ORM with migrations
+- **[PostgreSQL](https://www.postgresql.org/)** - Primary database with optimized indexes
 
 ### UI & Styling
 
@@ -52,10 +54,12 @@ A comprehensive game backlogging application that helps you track your gaming co
 
 ### Development Tools
 
-- **[Vitest](https://vitest.dev/)** - Testing framework
-- **[ESLint](https://eslint.org/)** - Code linting
-- **[Prettier](https://prettier.io/)** - Code formatting
+- **[Vitest](https://vitest.dev/)** - Testing framework with coverage reporting
+- **[ESLint](https://eslint.org/)** - Code linting with TypeScript support
+- **[Prettier](https://prettier.io/)** - Code formatting with import sorting
 - **[Bun](https://bun.sh/)** - Package manager and runtime
+- **[Commitlint](https://commitlint.js.org/)** - Conventional commit message validation
+- **[Lefthook](https://github.com/evilmartians/lefthook)** - Git hooks management
 
 ## 📁 Project Structure
 
@@ -63,17 +67,29 @@ A comprehensive game backlogging application that helps you track your gaming co
 ├── app/                    # Next.js App Router pages
 ├── features/              # Feature-specific code (components, server actions, types)
 │   ├── add-game/          # Game addition functionality
-│   ├── dashboard/         # User dashboard
+│   ├── add-review/        # Review creation and management
+│   ├── dashboard/         # User dashboard with stats and widgets
+│   ├── landing/           # Landing page components
+│   ├── manage-backlog-item/# Backlog item CRUD operations
+│   ├── manage-integrations/# Steam and other service integrations
+│   ├── manage-user-info/  # User profile management
+│   ├── share-wishlist/    # Wishlist sharing functionality
+│   ├── sign-in/           # Authentication components
 │   ├── steam-integration/ # Steam API integration
+│   ├── theme-toggle/      # Dark/light theme switching
+│   ├── view-backlogs/     # Browse user backlogs
 │   ├── view-collection/   # Collection management
-│   └── ...
+│   ├── view-game-details/ # Game detail pages with metadata
+│   ├── view-imported-games/# Steam import review and management
+│   └── view-wishlist/     # Wishlist viewing and management
 ├── shared/               # Shared utilities and components
-│   ├── components/       # Reusable UI components
+│   ├── components/       # Reusable UI components (shadcn/ui)
 │   ├── lib/             # Shared utilities and repositories
-│   │   └── repository/  # Data access layer
+│   │   └── repository/  # Data access layer with type-safe operations
 │   └── types/           # Shared type definitions
 ├── prisma/              # Database schema and migrations
-└── test/                # Test setup and utilities
+├── test/                # Test setup and utilities
+└── documentation/       # Project documentation and AI tool reports
 ```
 
 ## 🚀 Getting Started
@@ -104,12 +120,16 @@ bun install
 
 ```bash
 cp .env.example .env.local
+# Edit .env.local with your database URL, NextAuth secret, and API keys
 ```
 
-4. Configure your database and run migrations:
+4. Set up your PostgreSQL database and run migrations:
 
 ```bash
+# Generate Prisma client and apply migrations
 bun postinstall
+# or manually:
+npx prisma migrate dev
 ```
 
 5. Start the development server:
@@ -124,34 +144,17 @@ Visit [http://localhost:6060](http://localhost:6060) to see the application.
 
 ### Running Tests
 
+This project uses Vitest as the testing framework. All test commands should use `bun run` to ensure Vitest is used as the test runner:
+
 ```bash
 # Run all tests
-bun test
-
-# Run unit tests (fast, mocked database)
-bun test:unit
-
-# Run integration tests (real database)
-bun test:integration
+bun run test
 
 # Run tests with coverage
-bun test:coverage
+bun run test:coverage
 
 # Watch mode
-bun test:unit:watch
-bun test:integration:watch
-```
-
-### Test Database Setup
-
-For integration tests, start the test database:
-
-```bash
-# Start test database
-bun test:db:setup
-
-# Stop test database
-bun test:db:teardown
+bun run test:watch
 ```
 
 ## 🔧 Development Commands
@@ -187,12 +190,14 @@ The application uses a repository pattern for data access, providing a clean sep
 
 ### Key Features Architecture
 
-- **Authentication**: NextAuth.js with Prisma adapter
-- **Database**: PostgreSQL with Prisma ORM
-- **Steam Integration**: OAuth flow with Steam Web API
-- **Game Data**: IGDB API for comprehensive game metadata
-- **UI Components**: shadcn/ui built on Radix UI primitives
+- **Authentication**: NextAuth.js v5 with Prisma adapter and Steam OpenID
+- **Database**: PostgreSQL with Prisma ORM and performance-optimized indexes
+- **Steam Integration**: OAuth flow with Steam Web API for library imports
+- **Game Data**: IGDB API for comprehensive game metadata and franchise information
+- **UI Components**: shadcn/ui built on Radix UI primitives with dark/light theme support
 - **State Management**: React Server Components with TanStack Query for client state
+- **Data Layer**: Repository pattern for clean separation of business logic and data access
+- **Testing**: Vitest with MSW for API mocking and comprehensive test coverage
 
 ## 🤝 Contributing
 
