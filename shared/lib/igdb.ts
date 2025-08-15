@@ -2,20 +2,20 @@ import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import {
-  Artwork,
-  DLCAndExpansionListResponse,
-  Event,
-  FranchiseGamesResponse,
-  FullGameInfoResponse,
-  GenresResponse,
-  IgdbGameResponseItem,
-  RatedGameResponse,
-  RequestOptions,
-  SearchResponse,
-  TimeToBeatsResponse,
-  TwitchTokenResponse,
-  UpcomingEventsResponse,
-  UpcomingReleaseResponse,
+  type Artwork,
+  type DLCAndExpansionListResponse,
+  type Event,
+  type FranchiseGamesResponse,
+  type FullGameInfoResponse,
+  type GenresResponse,
+  type IgdbGameResponseItem,
+  type RatedGameResponse,
+  type RequestOptions,
+  type SearchResponse,
+  type TimeToBeatsResponse,
+  type TwitchTokenResponse,
+  type UpcomingEventsResponse,
+  type UpcomingReleaseResponse,
 } from "@/shared/types";
 
 const asError = (thrown: unknown): Error => {
@@ -27,12 +27,18 @@ const asError = (thrown: unknown): Error => {
   }
 };
 
-const getTimeStamp = (): number => Math.floor(Date.now() / 1000);
+const MILLISECONDS_TO_SECONDS = 1000;
+const TOP_RATED_GAMES_LIMIT = 12;
+const UPCOMING_EVENTS_LIMIT = 10;
+const SEARCH_RESULTS_LIMIT = 100;
+
+const getTimeStamp = (): number =>
+  Math.floor(Date.now() / MILLISECONDS_TO_SECONDS);
 
 function normalizeString(input: string): string {
   return input
     .toLowerCase()
-    .replace(/[:\-]/g, "")
+    .replace(/[:-]/g, "")
     .replace(/\bthe\b/g, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -81,18 +87,24 @@ const igdbApi = {
   token: null as TwitchTokenResponse | null,
   tokenExpiry: 0 as number,
 
-  async fetchToken(): Promise<TwitchTokenResponse | void> {
+  async fetchToken(): Promise<TwitchTokenResponse | undefined> {
     try {
-      const res = await fetch(TOKEN_URL, { cache: "no-store", method: "POST" });
+      const res = await globalThis.fetch(TOKEN_URL, {
+        cache: "no-store",
+        method: "POST",
+      });
       if (!res.ok) {
         throw new Error(`Failed to fetch token: ${res.statusText}`);
       }
-      const token: TwitchTokenResponse = await res.json();
+      const token = (await res.json()) as unknown as TwitchTokenResponse;
       this.token = token;
-      this.tokenExpiry = getTimeStamp() + token.expires_in - 60;
+      const SAFETY_MARGIN_SECONDS = 60;
+      this.tokenExpiry =
+        getTimeStamp() + token.expires_in - SAFETY_MARGIN_SECONDS;
       return token;
     } catch (thrown) {
       this.handleError(thrown);
+      return undefined;
     }
   },
 
@@ -108,15 +120,16 @@ const igdbApi = {
     try {
       const accessToken = await this.getToken();
 
-      if (!accessToken) {
+      if (accessToken === undefined) {
         this.handleError(new Error("Unauthorized: No valid token available."));
-        return;
+        return undefined;
       }
 
-      const response = await fetch(`${API_URL}${options.resource}`, {
+      const response = await globalThis.fetch(`${API_URL}${options.resource}`, {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${accessToken}`,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
           "Client-ID": env.IGDB_CLIENT_ID,
         },
         method: "POST",
@@ -124,28 +137,32 @@ const igdbApi = {
       });
 
       if (!response.ok) {
+        // eslint-disable-next-line no-console
         console.error(response);
         throw new Error(
           `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
         );
       }
 
-      return await response.json();
+      return (await response.json()) as unknown as T;
     } catch (thrown) {
       this.handleError(thrown);
+      return undefined;
     }
   },
 
   handleError(thrown: unknown): void {
     const error = asError(thrown);
+    // eslint-disable-next-line no-console
     console.error(`${error.name}: ${error.message}`);
-    if (error.stack) console.error(error.stack);
+    // eslint-disable-next-line no-console
+    if (error.stack !== undefined) console.error(error.stack);
   },
 
   async getEventLogo(
     id: Event["event_logo"]
   ): Promise<
-    | { height: number; id: number; image_id: string; width: number }[]
+    | Array<{ height: number; id: number; image_id: string; width: number }>
     | undefined
   > {
     const query = new QueryBuilder()
@@ -166,7 +183,7 @@ const igdbApi = {
       .where(
         "aggregated_rating_count > 20 & aggregated_rating != null & rating != null & category = 0"
       )
-      .limit(12)
+      .limit(TOP_RATED_GAMES_LIMIT)
       .build();
 
     return this.request<RatedGameResponse[]>({
@@ -195,7 +212,7 @@ const igdbApi = {
       ])
       .sort("start_time", "asc")
       .where(`start_time >= ${getTimeStamp()}`)
-      .limit(10)
+      .limit(UPCOMING_EVENTS_LIMIT)
       .build();
 
     return this.request<UpcomingEventsResponse>({
@@ -207,7 +224,7 @@ const igdbApi = {
   async getGameById(
     gameId: number | null
   ): Promise<FullGameInfoResponse | undefined> {
-    if (!gameId) return;
+    if (gameId === null) return undefined;
     const query = new QueryBuilder()
       .fields([
         "name",
@@ -248,7 +265,7 @@ const igdbApi = {
       resource: "/games",
     });
 
-    if (response?.length) {
+    if (response !== undefined && response.length > 0) {
       return response[0];
     }
 
@@ -258,7 +275,8 @@ const igdbApi = {
   async getGameScreenshots(
     gameId: number | null | undefined
   ): Promise<{ id: number; screenshots: FullGameInfoResponse["screenshots"] }> {
-    if (!gameId) return { id: 0, screenshots: [] };
+    if (gameId === null || gameId === undefined)
+      return { id: 0, screenshots: [] };
 
     const query = new QueryBuilder()
       .fields(["screenshots.image_id"])
@@ -272,7 +290,7 @@ const igdbApi = {
       resource: "/games",
     });
 
-    if (!response || (response !== undefined && !response[0])) {
+    if (response?.[0] === undefined) {
       return { id: 0, screenshots: [] };
     }
 
@@ -285,7 +303,9 @@ const igdbApi = {
     | { id: number; aggregated_rating: number }
     | { id: null; aggregated_rating: null }
   > {
-    if (!gameId) return { id: null, aggregated_rating: null };
+    if (gameId === null || gameId === undefined) {
+      return { id: null, aggregated_rating: null };
+    }
 
     const query = new QueryBuilder()
       .fields(["aggregated_rating"])
@@ -299,7 +319,7 @@ const igdbApi = {
       resource: "/games",
     });
 
-    if (!response || !response[0]) {
+    if (!response?.[0]) {
       return { id: null, aggregated_rating: null };
     }
 
@@ -312,7 +332,7 @@ const igdbApi = {
     | { id: number; similar_games: FullGameInfoResponse["similar_games"] }
     | { id: null; similar_games: [] }
   > {
-    if (!gameId) {
+    if (gameId === null || gameId === undefined) {
       return { id: null, similar_games: [] };
     }
 
@@ -335,7 +355,7 @@ const igdbApi = {
       resource: "/games",
     });
 
-    if (!response || (response !== undefined && response[0] === undefined)) {
+    if (response?.[0] === undefined) {
       return {
         id: null,
         similar_games: [],
@@ -346,8 +366,10 @@ const igdbApi = {
   },
   async getGameGenres(
     gameId: number | null | undefined
-  ): Promise<Array<GenresResponse> | Array<{ id: null; genres: [] }>> {
-    if (!gameId) return [];
+  ): Promise<GenresResponse[] | Array<{ id: null; genres: [] }>> {
+    if (gameId === null || gameId === undefined) {
+      return [];
+    }
 
     const query = new QueryBuilder()
       .fields(["genres.name"])
@@ -355,7 +377,7 @@ const igdbApi = {
       .build();
 
     const response = await this.request<
-      Array<GenresResponse> | Array<{ id: null; genres: [] }>
+      GenresResponse[] | Array<{ id: null; genres: [] }>
     >({
       body: query,
       resource: "/games",
@@ -371,7 +393,7 @@ const igdbApi = {
   async getNextMonthReleases(
     ids: number[]
   ): Promise<UpcomingReleaseResponse[] | []> {
-    if (!ids || ids.length === 0) {
+    if (ids.length === 0) {
       return [];
     }
 
@@ -392,7 +414,7 @@ const igdbApi = {
       resource: "/games",
     });
 
-    if (!response) {
+    if (response === undefined) {
       return [];
     }
 
@@ -414,9 +436,9 @@ const igdbApi = {
     name: null | string;
     fields?: Record<string, string>;
   }): Promise<SearchResponse[] | undefined> {
-    if (!name) return;
-
-    console.log("IGDB API::Search for: ", { name, fields });
+    if (name === null) {
+      return undefined;
+    }
 
     let filters = "";
 
@@ -424,7 +446,7 @@ const igdbApi = {
       const filterConditions = Object.entries(fields)
         .map(([key, value]) => {
           if (!value) {
-            return;
+            return null;
           }
 
           const fieldName = key === "platform" ? "platforms" : key;
@@ -434,7 +456,7 @@ const igdbApi = {
           }
           return `${fieldName} = (${value})`;
         })
-        .filter((condition) => condition)
+        .filter((condition): condition is string => condition !== null)
         .join(" & ");
 
       if (filterConditions) {
@@ -453,10 +475,8 @@ const igdbApi = {
       ])
       .where(`cover.image_id != null ${filters}`)
       .search(normalizeTitle(normalizeString(name)))
-      .limit(100)
+      .limit(SEARCH_RESULTS_LIMIT)
       .build();
-
-    console.log({ query });
 
     return this.request<SearchResponse[]>({
       body: query,
@@ -568,13 +588,14 @@ const igdbApi = {
   async getGameBySteamAppId(
     steamAppId: number
   ): Promise<{ id: number; name: string } | undefined> {
-    if (!steamAppId) return;
+    if (!steamAppId) return undefined;
 
     const steamUrl = `https://store.steampowered.com/app/${steamAppId}`;
 
     const query = new QueryBuilder()
       .fields(["name"])
       .where(`external_games.category = 1 & external_games.url = "${steamUrl}"`)
+      .limit(1)
       .build();
 
     const response = await this.request<FullGameInfoResponse[]>({
@@ -582,7 +603,7 @@ const igdbApi = {
       resource: "/games",
     });
 
-    if (response?.length) {
+    if (response?.[0] !== undefined) {
       return response[0];
     }
 
