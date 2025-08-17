@@ -56,15 +56,17 @@ export function Pagination({ totalCount }: { totalCount: number }) {
           onClick={onGoToFirst}
           disabled={currentPage === 1}
         >
-          <ChevronFirst className="h-4 w-4" />
+          <ChevronFirst className="size-4" />
         </Button>
         <Button
           variant="outline"
           size="icon"
           disabled={!currentPage || currentPage === 1}
-          onClick={() => onPageChange("prev")}
+          onClick={() => {
+            onPageChange("prev");
+          }}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="size-4" />
         </Button>
 
         <span className="text-sm font-medium">
@@ -74,10 +76,12 @@ export function Pagination({ totalCount }: { totalCount: number }) {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => onPageChange("next")}
+          onClick={() => {
+            onPageChange("next");
+          }}
           disabled={currentPage >= totalPages}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="size-4" />
         </Button>
         <Button
           variant="outline"
@@ -85,7 +89,7 @@ export function Pagination({ totalCount }: { totalCount: number }) {
           onClick={onGoToLast}
           disabled={currentPage >= totalPages}
         >
-          <ChevronLast className="h-4 w-4" />
+          <ChevronLast className="size-4" />
         </Button>
       </div>
     </div>

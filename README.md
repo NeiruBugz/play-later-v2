@@ -2,6 +2,18 @@
 
 A comprehensive game backlogging application that helps you track your gaming collection, manage your backlog, and discover new games to play.
 
+## Reasoning behind the project
+
+I'm in love with video games and it's a big part of my life. I also love to buy games... and probably never play them. So, I've searched for some backlog tool, where I can track my collection of games, track what I have in wishlist, what I haven't played yet and so on. I've found [Backloggd](https://backloggd.com/), but it doesn't fit all my needs, despite that it's a great tool.
+
+But I'm a Software Engineer, so I can build my own tool to cover all my needs for this problem and I've decided to build this. The project has a rich history, several refactoring and technological stack migrations and now you're here.
+
+## History:
+
+- Very first version is [React SPA](https://github.com/NeiruBugz/backlog-app) with [Nest.js Backend](https://github.com/NeiruBugz/backlog-app-nest)
+- [Next iteration](https://github.com/NeiruBugz/play-later) was built with Next.js, Firebase
+- **You're here** Next.js application, with Prisma, IGDB and Steam integration
+
 ## 🚀 Deployment
 
 [PlayLater](https://play-later.vercel.com)

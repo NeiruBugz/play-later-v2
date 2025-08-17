@@ -68,6 +68,7 @@ export default [
     plugins: {
       "@typescript-eslint": tseslint,
     },
+    ignores: ["shared/components/ui/**/*.tsx"],
     rules: {
       ...tseslint.configs.recommended.rules,
       ...tseslint.configs["recommended-type-checked"].rules,

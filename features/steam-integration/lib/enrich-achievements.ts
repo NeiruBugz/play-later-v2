@@ -1,7 +1,7 @@
-import type {
-  EnrichedAchievement,
-  SteamAchievementSchema,
-  SteamPlayerAchievements,
+import {
+  type EnrichedAchievement,
+  type SteamAchievementSchema,
+  type SteamPlayerAchievements,
 } from "../types/type";
 
 export const enrichAchievements = (

@@ -44,7 +44,9 @@ export function ReviewForm({ gameId }: { gameId: string }) {
           <button
             key={star}
             type="button"
-            onClick={() => setRating(star)}
+            onClick={() => {
+              setRating(star);
+            }}
             className="focus:outline-none"
             aria-label={`Set rating to ${star}`}
             name="rating"
@@ -61,7 +63,9 @@ export function ReviewForm({ gameId }: { gameId: string }) {
       <Textarea
         placeholder="Share your thoughts about this game..."
         value={reviewText}
-        onChange={(e) => setReviewText(e.target.value)}
+        onChange={(e) => {
+          setReviewText(e.target.value);
+        }}
         className="min-h-[100px]"
       />
       <Button

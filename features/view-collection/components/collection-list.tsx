@@ -1,43 +1,77 @@
+"use client";
+
 import Link from "next/link";
 
+import { FilterParamsSchema } from "@/features/view-collection/lib/validation";
 import { GridView } from "@/shared/components/grid-view";
 import { ListView } from "@/shared/components/list-view";
 
-import { getUserGamesWithGroupedBacklogPaginated } from "../server-actions/get-game-with-backlog-items";
+import { useGetCollection } from "../hooks/use-get-collection";
 import { Pagination } from "./pagination";
 
-export async function CollectionList({
-  params,
-}: {
-  params: Record<string, string>;
-}) {
-  const { data, serverError } = await getUserGamesWithGroupedBacklogPaginated({
-    platform: params.platform,
-    status: params.status,
-    search: params.search,
+export function CollectionList({ params }: { params: Record<string, string> }) {
+  const validatedParams = FilterParamsSchema.safeParse({
+    platform: params.platform || "",
+    status: params.status || "",
+    search: params.search || "",
     page: Number(params.page) || 1,
   });
 
-  if (serverError !== undefined) {
-    return <div>{serverError}</div>;
+  const filterParams = validatedParams.success
+    ? validatedParams.data
+    : {
+        platform: "",
+        status: "",
+        search: "",
+        page: 1,
+      };
+
+  const { data, isLoading, isError } = useGetCollection(filterParams);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="space-y-4 text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-muted-foreground">Loading your collection...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="space-y-4 text-center">
+          <h2 className="text-2xl font-semibold text-destructive">
+            Something went wrong
+          </h2>
+          <p className="text-muted-foreground">
+            Failed to load your collection. Please try refreshing the page.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (!data) {
-    <div className="flex flex-col items-center justify-center py-12">
-      <div className="space-y-4 text-center">
-        <h1 className="text-3xl font-bold">Your collection is empty</h1>
-        <p className="text-muted-foreground">
-          Start{" "}
-          <Link
-            href="/collection/add-game"
-            className="font-semibold text-primary underline hover:no-underline"
-          >
-            adding games
-          </Link>{" "}
-          to your collection to get started
-        </p>
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="space-y-4 text-center">
+          <h1 className="text-3xl font-bold">Your collection is empty</h1>
+          <p className="text-muted-foreground">
+            Start{" "}
+            <Link
+              href="/collection/add-game"
+              className="font-semibold text-primary underline hover:no-underline"
+            >
+              adding games
+            </Link>{" "}
+            to your collection to get started
+          </p>
+        </div>
       </div>
-    </div>;
+    );
   }
 
   const viewMode = params.viewMode || "grid";
@@ -80,14 +114,12 @@ export async function CollectionList({
 
   return (
     <div className="space-y-6">
-      {/* Results */}
       {viewMode === "list" ? (
         <ListView backlogItems={data.collection} />
       ) : (
         <GridView backlogItems={data.collection} />
       )}
 
-      {/* Pagination */}
       <div className="flex items-center justify-center">
         <Pagination totalCount={data.count} />
       </div>

@@ -34,18 +34,22 @@ export function CollectionViewMode() {
         variant={currentViewMode === "grid" ? "default" : "ghost"}
         size="sm"
         className="h-8 px-3"
-        onClick={() => handleViewModeChange("grid")}
+        onClick={() => {
+          handleViewModeChange("grid");
+        }}
       >
-        <Grid3X3 className="h-4 w-4" />
+        <Grid3X3 className="size-4" />
         <span className="sr-only">Grid view</span>
       </Button>
       <Button
         variant={currentViewMode === "list" ? "default" : "ghost"}
         size="sm"
         className="h-8 px-3"
-        onClick={() => handleViewModeChange("list")}
+        onClick={() => {
+          handleViewModeChange("list");
+        }}
       >
-        <List className="h-4 w-4" />
+        <List className="size-4" />
         <span className="sr-only">List view</span>
       </Button>
     </div>

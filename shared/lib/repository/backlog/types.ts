@@ -1,10 +1,10 @@
 import {
-  User,
   type AcquisitionType,
   type BacklogItem,
   type BacklogItemStatus,
   type Game,
   type Prisma,
+  type User,
 } from "@prisma/client";
 
 export type CreateBacklogItemInput = {
@@ -53,7 +53,7 @@ export type GetBacklogCountInput = {
 
 export type UserWithBacklogItemsResponse = {
   user: User;
-  backlogItems: (BacklogItem & { game: Game })[];
+  backlogItems: Array<BacklogItem & { game: Game }>;
 };
 
 export type AddGameToUserBacklogInput = {

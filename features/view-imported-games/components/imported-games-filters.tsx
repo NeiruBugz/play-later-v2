@@ -1,6 +1,6 @@
 "use client";
 
-import { Storefront } from "@prisma/client";
+import { type Storefront } from "@prisma/client";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
@@ -15,19 +15,19 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 
-export interface ImportedGamesFilters {
+export type ImportedGamesFilters = {
   search: string;
   storefront: Storefront | "ALL";
   sortBy: "name" | "playtime" | "storefront" | "createdAt";
   sortOrder: "asc" | "desc";
-}
+};
 
-interface ImportedGamesFiltersProps {
+type ImportedGamesFiltersProps = {
   filters: ImportedGamesFilters;
   onFiltersChange: (filters: ImportedGamesFilters) => void;
   totalGames: number;
   filteredGames: number;
-}
+};
 
 const storefrontOptions = [
   { value: "ALL", label: "All Platforms" },
@@ -99,21 +99,25 @@ export function ImportedGamesFilters({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
         <div className="relative max-w-md flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search games..."
             value={filters.search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => {
+              handleSearchChange(e.target.value);
+            }}
             className="pl-10"
           />
           {filters.search && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleSearchChange("")}
-              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+              onClick={() => {
+                handleSearchChange("");
+              }}
+              className="absolute right-1 top-1/2 size-7 -translate-y-1/2 p-0"
             >
-              <X className="h-3 w-3" />
+              <X className="size-3" />
             </Button>
           )}
         </div>
@@ -133,10 +137,12 @@ export function ImportedGamesFilters({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={() => {
+              setShowFilters(!showFilters);
+            }}
             className="gap-2"
           >
-            <SlidersHorizontal className="h-4 w-4" />
+            <SlidersHorizontal className="size-4" />
             Filters
             {hasActiveFilters && (
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
@@ -220,7 +226,7 @@ export function ImportedGamesFilters({
               onClick={clearFilters}
               className="gap-2"
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
               Clear
             </Button>
           )}

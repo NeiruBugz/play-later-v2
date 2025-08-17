@@ -1,4 +1,8 @@
-import { AcquisitionType, BacklogItemStatus, type Game } from "@prisma/client";
+import {
+  type AcquisitionType,
+  type BacklogItemStatus,
+  type Game,
+} from "@prisma/client";
 
 export type GameFormValues =
   | Partial<Omit<Game, "releaseDate"> & { releaseDate: number }>

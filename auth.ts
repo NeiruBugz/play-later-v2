@@ -36,7 +36,7 @@ export const getServerUserId = async () => {
   try {
     const session = await auth();
 
-    if (!session || !session.user || !session.user.id) {
+    if (!session?.user?.id) {
       sessionErrorHandler();
       return;
     }

@@ -22,7 +22,7 @@ export async function PlatformBreakdown() {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <Monitor className="h-5 w-5" />
+          <Monitor className="size-5" />
           Platform & Format
         </CardTitle>
         <CardDescription>Your collection breakdown</CardDescription>

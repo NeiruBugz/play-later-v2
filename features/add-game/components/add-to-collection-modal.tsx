@@ -233,7 +233,9 @@ export function AddToCollectionModal({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                }}
                 disabled={isLoading}
               >
                 Cancel

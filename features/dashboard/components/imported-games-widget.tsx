@@ -10,10 +10,10 @@ import {
 } from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
-interface ImportedGamesWidgetProps {
+type ImportedGamesWidgetProps = {
   count: number;
   isLoading?: boolean;
-}
+};
 
 export function ImportedGamesWidget({
   count,
@@ -24,7 +24,7 @@ export function ImportedGamesWidget({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Imported Games</CardTitle>
-          <Download className="h-4 w-4 text-muted-foreground" />
+          <Download className="size-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <Skeleton className="h-7 w-16" />
@@ -39,7 +39,7 @@ export function ImportedGamesWidget({
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Imported Games</CardTitle>
-          <Download className="h-4 w-4 text-muted-foreground" />
+          <Download className="size-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">0</div>
@@ -48,7 +48,7 @@ export function ImportedGamesWidget({
           </p>
           <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
             <Link href="/user/settings?tab=integrations">
-              <ExternalLink className="mr-2 h-3 w-3" />
+              <ExternalLink className="mr-2 size-3" />
               Connect Services
             </Link>
           </Button>
@@ -62,7 +62,7 @@ export function ImportedGamesWidget({
       <Link href="/collection/imported">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Imported Games</CardTitle>
-          <Download className="h-4 w-4 text-muted-foreground" />
+          <Download className="size-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{count}</div>
@@ -71,7 +71,7 @@ export function ImportedGamesWidget({
           </p>
           <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
             <span>
-              <ExternalLink className="mr-2 h-3 w-3" />
+              <ExternalLink className="mr-2 size-3" />
               View Imported Games
             </span>
           </Button>

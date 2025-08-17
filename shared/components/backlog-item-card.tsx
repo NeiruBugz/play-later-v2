@@ -1,4 +1,4 @@
-import type { BacklogItem } from "@prisma/client";
+import { type BacklogItem } from "@prisma/client";
 import Link from "next/link";
 
 import { CompleteActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/complete-action-button";
@@ -15,7 +15,7 @@ type GameCardProps = {
     coverImage: string | null;
     igdbId: number;
   };
-  backlogItems?: Omit<BacklogItem, "game">[];
+  backlogItems?: Array<Omit<BacklogItem, "game">>;
   isFromSharedWishlist?: boolean;
   hasActions?: boolean;
   isExternalGame?: boolean;
@@ -27,7 +27,7 @@ const isNewCard = true;
 function SharedWishlistCard({ game }: Pick<GameCardProps, "game">) {
   return (
     <div className="group relative w-full max-w-[300px] cursor-pointer overflow-hidden rounded shadow-lg hover:border hover:shadow-xl">
-      <div className="absolute top-0 z-10 hidden h-[208px] w-full flex-grow flex-col items-center justify-center rounded bg-slate-400 opacity-0 transition-opacity ease-in-out group-hover:flex group-hover:opacity-95">
+      <div className="absolute top-0 z-10 hidden h-[208px] w-full grow flex-col items-center justify-center rounded bg-slate-400 opacity-0 transition-opacity ease-in-out group-hover:flex group-hover:opacity-95">
         <p className="text-center text-[16px] font-bold text-white">
           {game.title}
         </p>
@@ -52,6 +52,7 @@ export function BacklogItemCard({
   isExternalGame = false,
   isUpcomingGame = false,
 }: GameCardProps) {
+  console.log({ game });
   if (isUpcomingGame) {
     return (
       <Link

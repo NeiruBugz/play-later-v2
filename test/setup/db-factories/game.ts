@@ -1,14 +1,14 @@
-import { BacklogItem, Game, Review } from "@prisma/client";
+import { type BacklogItem, type Game, type Review } from "@prisma/client";
 
 import { testDataBase } from "../database";
 
-export interface GameFactoryOptions {
+export type GameFactoryOptions = {
   title?: string;
   igdbId?: number;
   description?: string;
   coverImage?: string;
   steamAppId?: number;
-}
+};
 
 export const createGame = async (
   options: GameFactoryOptions = {}
@@ -24,18 +24,18 @@ export const createGame = async (
     ...options,
   };
 
-  return await testDataBase.game.create({
+  return testDataBase.game.create({
     data: defaultData,
   });
 };
 
-export interface BacklogItemFactoryOptions {
+export type BacklogItemFactoryOptions = {
   userId: string;
   gameId: string;
   status?: "TO_PLAY" | "PLAYING" | "COMPLETED" | "WISHLIST";
   platform?: string;
   acquisitionType?: "DIGITAL" | "PHYSICAL" | "SUBSCRIPTION";
-}
+};
 
 export const createBacklogItem = async (
   options: BacklogItemFactoryOptions
@@ -47,18 +47,18 @@ export const createBacklogItem = async (
     ...options,
   };
 
-  return await testDataBase.backlogItem.create({
+  return testDataBase.backlogItem.create({
     data: defaultData,
   });
 };
 
-export interface ReviewFactoryOptions {
+export type ReviewFactoryOptions = {
   userId: string;
   gameId: string;
   rating?: number;
   content?: string;
   completedOn?: string;
-}
+};
 
 export const createReview = async (
   options: ReviewFactoryOptions
@@ -70,7 +70,7 @@ export const createReview = async (
     ...options,
   };
 
-  return await testDataBase.review.create({
+  return testDataBase.review.create({
     data: defaultData,
   });
 };

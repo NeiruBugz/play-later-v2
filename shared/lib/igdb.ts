@@ -165,9 +165,16 @@ const igdbApi = {
     | Array<{ height: number; id: number; image_id: string; width: number }>
     | undefined
   > {
+    if (id === undefined) return undefined;
+    let queryId: number = 0;
+    if (typeof id === "object") {
+      queryId = id.id;
+    } else {
+      queryId = id;
+    }
     const query = new QueryBuilder()
       .fields(["width", "height", "image_id"])
-      .where(`id = (${id})`)
+      .where(`id = (${queryId})`)
       .build();
 
     return this.request({

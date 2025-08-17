@@ -1,16 +1,16 @@
-import { Game } from "@prisma/client";
+import { type Game } from "@prisma/client";
 import Link from "next/link";
 
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { Button } from "@/shared/components/ui/button";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { FranchiseGamesResponse } from "@/shared/types";
+import { type FranchiseGamesResponse } from "@/shared/types";
 
 export function FranchiseGameSkeleton() {
   return (
     <div className="group">
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg border">
-        <Skeleton className="h-full w-full" />
+        <Skeleton className="size-full" />
       </div>
       <Skeleton className="mt-2 h-4 w-3/4" />
     </div>

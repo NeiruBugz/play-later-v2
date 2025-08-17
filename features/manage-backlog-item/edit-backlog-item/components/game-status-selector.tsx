@@ -21,13 +21,12 @@ import {
 
 type GameStatus = "backlog" | "playing" | "completed" | "wishlist" | "none";
 
-interface GameStatusSelectorProps {
+type GameStatusSelectorProps = {
   gameId: string;
   initialStatus?: GameStatus;
-}
+};
 
 export function GameStatusSelector({
-  gameId,
   initialStatus = "none",
 }: GameStatusSelectorProps) {
   const [status, setStatus] = useState<GameStatus>(initialStatus);
@@ -99,19 +98,19 @@ export function GameStatusSelector({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[200px]">
         <DropdownMenuItem onClick={() => handleStatusChange("backlog")}>
-          <BookMarked className="mr-2 h-4 w-4" />
+          <BookMarked className="mr-2 size-4" />
           <span>Add to Backlog</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleStatusChange("playing")}>
-          <Clock className="mr-2 h-4 w-4" />
+          <Clock className="mr-2 size-4" />
           <span>Playing</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleStatusChange("completed")}>
-          <Check className="mr-2 h-4 w-4" />
+          <Check className="mr-2 size-4" />
           <span>Completed</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleStatusChange("wishlist")}>
-          <Heart className="mr-2 h-4 w-4" />
+          <Heart className="mr-2 size-4" />
           <span>Add to Wishlist</span>
         </DropdownMenuItem>
         {status !== "none" && (

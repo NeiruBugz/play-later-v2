@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { type User } from "@prisma/client";
 
 import { testDataBase } from "../database";
 
@@ -23,7 +23,7 @@ export const createUser = async (
     ...options,
   };
 
-  return await testDataBase.user.create({
+  return testDataBase.user.create({
     data: defaultData,
   });
 };

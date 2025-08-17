@@ -1,11 +1,13 @@
 "use client";
 
 import { ExternalLink, RefreshCcw, Unlink } from "lucide-react";
-import { ReactNode, useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
-import { getUserOwnedGames } from "@/features/steam-integration/server-actions/get-user-owned-games";
-import { saveSteamGames } from "@/features/steam-integration/server-actions/save-steam-games";
+import {
+  getUserOwnedGames,
+  saveSteamGames,
+} from "@/features/steam-integration/server-actions";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/tailwind-merge";
 
@@ -125,7 +127,7 @@ export function ServiceIntegration({
           <>
             {profileUrl && (
               <Button variant="ghost" size="sm" onClick={handleViewProfile}>
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="size-4" />
               </Button>
             )}
             <Button
@@ -136,12 +138,12 @@ export function ServiceIntegration({
             >
               {isSyncing ? (
                 <span className="flex items-center">
-                  <RefreshCcw className="mr-1 h-4 w-4 animate-spin" />
+                  <RefreshCcw className="mr-1 size-4 animate-spin" />
                   Syncing...
                 </span>
               ) : (
                 <>
-                  <RefreshCcw className="mr-1 h-4 w-4" />
+                  <RefreshCcw className="mr-1 size-4" />
                   Sync Libraries
                 </>
               )}
@@ -152,7 +154,7 @@ export function ServiceIntegration({
               onClick={handleDisconnect}
               className="text-destructive hover:text-destructive"
             >
-              <Unlink className="mr-1 h-4 w-4" />
+              <Unlink className="mr-1 size-4" />
               Disconnect
             </Button>
           </>

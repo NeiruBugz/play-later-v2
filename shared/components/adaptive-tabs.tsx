@@ -14,26 +14,26 @@ import {
 } from "./ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
-interface AdaptiveTabsProps {
+type AdaptiveTabsProps = {
   defaultValue: string;
   value?: string;
   onValueChange?: (value: string) => void;
   className?: string;
   children: React.ReactNode;
-}
+};
 
-interface AdaptiveTabsListProps {
+type AdaptiveTabsListProps = {
   className?: string;
   children: React.ReactNode;
-}
+};
 
-interface AdaptiveTabsTriggerProps {
+type AdaptiveTabsTriggerProps = {
   value: string;
   className?: string;
   children: React.ReactNode;
   icon?: React.ReactNode;
   disabled?: boolean;
-}
+};
 
 const AdaptiveTabsContext = React.createContext<{
   currentValue: string;
@@ -143,14 +143,16 @@ export function AdaptiveTabsList({
                 )}
                 <span>{currentTrigger?.label || "Select tab"}</span>
               </div>
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56">
             {triggers.map((trigger) => (
               <DropdownMenuItem
                 key={trigger.value}
-                onClick={() => onValueChange(trigger.value)}
+                onClick={() => {
+                  onValueChange(trigger.value);
+                }}
                 disabled={trigger.disabled}
                 className="flex items-center gap-3"
               >

@@ -2,10 +2,10 @@ import "server-only";
 
 import { prisma } from "@/shared/lib/db";
 
-import { CreateReviewInput } from "./types";
+import { type CreateReviewInput } from "./types";
 
 export async function getAllReviewsForGame({ gameId }: { gameId: string }) {
-  return await prisma.review.findMany({
+  return prisma.review.findMany({
     where: { gameId },
     include: {
       User: {
@@ -37,10 +37,6 @@ export async function createReview({
     },
   });
 
-  if (!result) {
-    throw new Error("Failed to create review");
-  }
-
   return result;
 }
 
@@ -49,7 +45,7 @@ export async function aggregateReviewsRatingsForUser({
 }: {
   userId: string;
 }) {
-  return await prisma.review.aggregate({
+  return prisma.review.aggregate({
     where: { userId },
     _avg: { rating: true },
   });

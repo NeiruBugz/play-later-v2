@@ -7,11 +7,11 @@ type ExpansionsProps = {
 export async function Expansions({ igdbId }: ExpansionsProps) {
   const dlcAndExpansionList = await igdbApi.getGameDLCsAndExpansions(igdbId);
 
-  if (!dlcAndExpansionList || !dlcAndExpansionList[0]) {
+  if (!dlcAndExpansionList?.[0]) {
     return null;
   }
 
-  const expansions = dlcAndExpansionList[0].expansions;
+  const { expansions } = dlcAndExpansionList[0];
 
   if (!expansions) {
     return null;

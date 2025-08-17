@@ -36,7 +36,7 @@ export async function CollectionStats() {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <Library className="h-5 w-5" />
+          <Library className="size-5" />
           Collection Stats
         </CardTitle>
         <CardDescription>Your gaming journey at a glance</CardDescription>
@@ -48,7 +48,7 @@ export async function CollectionStats() {
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-yellow-500" />
+            <Trophy className="size-4 text-yellow-500" />
             <span className="text-sm text-muted-foreground">
               Completion Rate
             </span>
@@ -58,7 +58,7 @@ export async function CollectionStats() {
         {avgRating > 0 && (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-yellow-500" />
+              <Star className="size-4 text-yellow-500" />
               <span className="text-sm text-muted-foreground">Avg Rating</span>
             </div>
             <span className="font-semibold">{avgRating}/10</span>

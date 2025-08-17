@@ -18,11 +18,17 @@ export const getUserGamesWithGroupedBacklogPaginated = authorizedActionClient
   })
   .inputSchema(FilterParamsSchema)
   .action(async ({ ctx: { userId }, parsedInput }) => {
+    console.log(
+      "getUserGamesWithGroupedBacklogPaginated::parsedInput:",
+      parsedInput
+    );
     try {
       const { gameFilter } = buildCollectionFilter({
         userId,
         ...parsedInput,
       });
+
+      console.log("getUserGamesWithGroupedBacklogPaginated::gameFilter:");
 
       const [games, totalGames] = await findGamesWithBacklogItemsPaginated({
         where: gameFilter,

@@ -34,7 +34,7 @@ export async function CollectionFilters() {
           <DrawerContent className="py-4">
             <div className="my-3 flex flex-col flex-wrap items-center justify-center md:flex-nowrap md:justify-between">
               <SearchInput />
-              <div className="my-4 flex flex-grow justify-center gap-2 md:flex-nowrap">
+              <div className="my-4 flex grow justify-center gap-2 md:flex-nowrap">
                 <PlatformFilter platformOptions={uniquePlatforms || []} />
               </div>
             </div>

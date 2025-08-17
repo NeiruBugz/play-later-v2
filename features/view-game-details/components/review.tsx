@@ -1,4 +1,4 @@
-import type { Review } from "@prisma/client";
+import { type Review } from "@prisma/client";
 import { format } from "date-fns";
 import { Star } from "lucide-react";
 
@@ -49,7 +49,7 @@ export function Review({
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
                   <Star
                     key={star}
-                    className={`h-3 w-3 ${review.rating >= star ? "fill-primary text-primary" : "text-muted-foreground"}`}
+                    className={`size-3 ${review.rating >= star ? "fill-primary text-primary" : "text-muted-foreground"}`}
                   />
                 ))}
               </div>

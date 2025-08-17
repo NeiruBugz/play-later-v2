@@ -15,7 +15,7 @@ import { normalizeString } from "@/shared/lib";
 export function PlatformFilter({
   platformOptions,
 }: {
-  platformOptions: (string | null)[];
+  platformOptions: Array<string | null>;
 }) {
   const params = useSearchParams();
   const router = useRouter();

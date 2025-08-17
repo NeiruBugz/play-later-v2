@@ -4,7 +4,7 @@ export function platformMapper(platformName: string): string {
   }
 
   if (platformName.toLowerCase().includes("playstation")) {
-    const [console, version] = platformName.split(" ");
+    const [, version] = platformName.split(" ");
 
     return `PS${version}`;
   }

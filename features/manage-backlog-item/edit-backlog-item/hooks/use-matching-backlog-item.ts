@@ -1,13 +1,13 @@
 "use client";
 
-import { BacklogItem } from "@prisma/client";
+import { type BacklogItem } from "@prisma/client";
 import { useSearchParams } from "next/navigation";
 
 export function useMatchingBacklogItem({
   backlogItems,
   status,
 }: {
-  backlogItems?: Omit<BacklogItem, "game">[];
+  backlogItems?: Array<Omit<BacklogItem, "game">>;
   status?: string;
 }) {
   const params = useSearchParams();

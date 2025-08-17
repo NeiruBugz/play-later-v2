@@ -67,7 +67,7 @@ export const cleanupDatabase = async () => {
 
 export const resetTestDatabase = async () => {
   if (testDataBase) {
-    const tables = await testDataBase.$queryRaw<{ table_name: string }[]>`
+    const tables = await testDataBase.$queryRaw<Array<{ table_name: string }>>`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public' 

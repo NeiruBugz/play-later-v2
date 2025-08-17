@@ -37,7 +37,6 @@ export default async function CollectionPage(props: {
           </div>
           <div className="flex flex-wrap gap-2">
             <PlatformFilter platformOptions={uniquePlatforms ?? []} />
-            {/* <CardViewMode /> */}
           </div>
         </div>
       </div>

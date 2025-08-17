@@ -16,9 +16,9 @@ export async function GET() {
     url.searchParams.set("state", userId);
 
     return NextResponse.redirect(url.toString());
-  } catch (_) {
+  } catch (error) {
     return NextResponse.json(
-      { error: "Failed to connect to Steam" },
+      { error: "Failed to connect to Steam", cause: error },
       { status: 500 }
     );
   }

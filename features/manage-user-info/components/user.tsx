@@ -28,10 +28,10 @@ const getFirstTwoLiterals = (name: string | null | undefined) => {
   return firstName.charAt(0).toUpperCase() + lastName?.charAt(0).toUpperCase();
 };
 
-const User = memo(function User() {
+const User = memo(() => {
   const session = useSession();
 
-  if (!session.data || !session.data.user) return null;
+  if (!session.data?.user) return null;
 
   return (
     <DropdownMenu>

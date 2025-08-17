@@ -50,7 +50,13 @@ export default async function GamePage(props: GenericPageProps) {
     return notFound();
   }
 
-  const steamAppId = findSteamAppId(igdbData.external_games);
+  let steamAppId: number | null = null;
+  try {
+    steamAppId = findSteamAppId(igdbData.external_games);
+  } catch (error) {
+    console.warn("Failed to find Steam app ID:", error);
+    steamAppId = null;
+  }
 
   return (
     <div className="min-h-screen">

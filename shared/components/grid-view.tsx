@@ -1,4 +1,4 @@
-import { GameWithBacklogItems } from "@/features/view-wishlist/types";
+import { type GameWithBacklogItems } from "@/features/view-wishlist/types";
 
 import { GameCard } from "./game-card";
 

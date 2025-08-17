@@ -6,7 +6,7 @@ export function BacklogCountSkeleton() {
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-5" />
+          <Skeleton className="size-5" />
           <Skeleton className="h-6 w-32" />
         </div>
         <Skeleton className="h-4 w-48" />
@@ -40,7 +40,7 @@ export function CollectionStatsSkeleton() {
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-5" />
+          <Skeleton className="size-5" />
           <Skeleton className="h-6 w-40" />
         </div>
         <Skeleton className="h-4 w-56" />
@@ -66,7 +66,7 @@ export function CurrentlyPlayingSkeleton() {
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-5" />
+          <Skeleton className="size-5" />
           <Skeleton className="h-6 w-36" />
         </div>
         <Skeleton className="h-4 w-48" />
@@ -74,7 +74,7 @@ export function CurrentlyPlayingSkeleton() {
       <CardContent>
         <div className="flex w-full max-w-[420px] justify-start gap-3 overflow-x-auto">
           {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="flex-shrink-0 space-y-2">
+            <div key={i} className="shrink-0 space-y-2">
               <Skeleton className="h-40 w-28 rounded-lg" />
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-3 w-20" />
@@ -91,7 +91,7 @@ export function UpcomingReleasesSkeleton() {
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-5" />
+          <Skeleton className="size-5" />
           <Skeleton className="h-6 w-40" />
         </div>
         <Skeleton className="h-4 w-52" />
@@ -100,7 +100,7 @@ export function UpcomingReleasesSkeleton() {
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
-              <Skeleton className="h-12 w-12 rounded-lg" />
+              <Skeleton className="size-12 rounded-lg" />
               <div className="flex-1 space-y-1">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-3 w-24" />
@@ -119,7 +119,7 @@ export function RecentActivitySkeleton() {
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-5" />
+          <Skeleton className="size-5" />
           <Skeleton className="h-6 w-32" />
         </div>
         <Skeleton className="h-4 w-40" />
@@ -128,7 +128,7 @@ export function RecentActivitySkeleton() {
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-2">
-              <Skeleton className="h-3 w-3 rounded-full" />
+              <Skeleton className="size-3 rounded-full" />
               <Skeleton className="h-4 w-full max-w-48" />
               <Skeleton className="h-3 w-12" />
             </div>
@@ -144,7 +144,7 @@ export function PlatformBreakdownSkeleton() {
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-5" />
+          <Skeleton className="size-5" />
           <Skeleton className="h-6 w-36" />
         </div>
         <Skeleton className="h-4 w-44" />
@@ -154,7 +154,7 @@ export function PlatformBreakdownSkeleton() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Skeleton className="h-4 w-4" />
+                <Skeleton className="size-4" />
                 <Skeleton className="h-4 w-16" />
               </div>
               <Skeleton className="h-4 w-8" />
@@ -171,7 +171,7 @@ export function SteamIntegrationSkeleton() {
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-5 w-5" />
+          <Skeleton className="size-5" />
           <Skeleton className="h-6 w-32" />
         </div>
         <Skeleton className="h-4 w-48" />
@@ -194,7 +194,7 @@ export function CurrentlyPlayingListSkeleton() {
   return (
     <div className="flex w-full max-w-[420px] justify-start gap-3 overflow-x-auto">
       {Array.from({ length: 2 }).map((_, i) => (
-        <div key={i} className="flex-shrink-0 space-y-2">
+        <div key={i} className="shrink-0 space-y-2">
           <Skeleton className="h-40 w-28 rounded-lg" />
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-3 w-20" />
@@ -209,7 +209,7 @@ export function ReleasesListSkeleton() {
     <div className="space-y-3">
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="flex items-center gap-3">
-          <Skeleton className="h-12 w-12 rounded-lg" />
+          <Skeleton className="size-12 rounded-lg" />
           <div className="flex-1 space-y-1">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-3 w-24" />

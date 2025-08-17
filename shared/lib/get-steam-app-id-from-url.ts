@@ -8,7 +8,7 @@ const steamAppUrlSchema = z
   })
   .transform((url) => {
     const match = url.match(/\/app\/(\d+)/i);
-    if (!match || !match[1]) {
+    if (match?.[1] == null) {
       throw new Error("Could not extract app ID from URL");
     }
 

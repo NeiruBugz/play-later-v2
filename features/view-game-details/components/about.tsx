@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { Badge } from "@/shared/components/ui/badge";
-import { FullGameInfoResponse } from "@/shared/types";
+import { type FullGameInfoResponse } from "@/shared/types";
 
 import { Expansions } from "./expansions";
 

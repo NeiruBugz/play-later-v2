@@ -1,4 +1,4 @@
-import type { UpcomingReleaseResponse } from "@/shared/types";
+import { type UpcomingReleaseResponse } from "@/shared/types";
 
 export const getUpcomingWishlistGamesWithBacklogId = (
   wishlistedGames: Array<{ id: number; game: { igdbId: number | null } }>,

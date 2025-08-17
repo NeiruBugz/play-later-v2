@@ -1,11 +1,11 @@
-import type {
-  SteamAchievement,
-  SteamAchievementSchema,
-  SteamGameSchema,
-  SteamGlobalAchievementPercentages,
+import {
+  type SteamAchievement,
+  type SteamAchievementSchema,
+  type SteamGameSchema,
+  type SteamGlobalAchievementPercentages,
 } from "../types/type";
 
-export interface EnrichedAchievement extends SteamAchievement {
+export type EnrichedAchievement = {
   displayName: string;
   description: string;
   icon: string;
@@ -13,7 +13,7 @@ export interface EnrichedAchievement extends SteamAchievement {
   hidden: boolean;
   globalPercent?: number;
   rarity: "common" | "uncommon" | "rare" | "very_rare";
-}
+} & SteamAchievement;
 
 export const mapAchievementsSchema = (schema: SteamGameSchema) => {
   const schemaMap = new Map<string, SteamAchievementSchema>();

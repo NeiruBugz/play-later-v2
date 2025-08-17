@@ -1,6 +1,6 @@
 "use server";
 
-import { BacklogItemStatus } from "@prisma/client";
+import { type BacklogItemStatus } from "@prisma/client";
 import { zfd } from "zod-form-data";
 
 import { createBacklogItem as createBacklogItemCommand } from "@/shared/lib/repository";

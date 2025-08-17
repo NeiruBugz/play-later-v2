@@ -41,7 +41,7 @@ export function CardViewMode() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="gap-1">
           <span>View Mode</span>
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
@@ -49,13 +49,17 @@ export function CardViewMode() {
         <DropdownMenuSeparator />
         <DropdownMenuCheckboxItem
           checked={displayMode === "combined"}
-          onCheckedChange={() => handleDisplayModeChange("combined")}
+          onCheckedChange={() => {
+            handleDisplayModeChange("combined");
+          }}
         >
           Combined (Group by Game)
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={displayMode === "separate"}
-          onCheckedChange={() => handleDisplayModeChange("separate")}
+          onCheckedChange={() => {
+            handleDisplayModeChange("separate");
+          }}
         >
           Separate (One Entry Per Platform)
         </DropdownMenuCheckboxItem>

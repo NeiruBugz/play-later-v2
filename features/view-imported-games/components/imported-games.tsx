@@ -1,6 +1,6 @@
 "use client";
 
-import { Storefront } from "@prisma/client";
+import { type Storefront } from "@prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   useCallback,
@@ -24,7 +24,7 @@ import {
   type ImportedGamesFilters as FiltersType,
 } from "./imported-games-filters";
 
-interface ImportedGame {
+type ImportedGame = {
   id: string;
   name: string;
   storefront: Storefront;
@@ -32,14 +32,14 @@ interface ImportedGame {
   playtime: number | null;
   img_icon_url: string | null;
   img_logo_url: string | null;
-}
+};
 
-interface ImportedGamesProps {
+type ImportedGamesProps = {
   initialGames: ImportedGame[];
   initialTotalGames: number;
   initialPage?: number;
   limit?: number;
-}
+};
 
 type OptimisticAction =
   | { type: "REMOVE_GAME"; gameId: string }
@@ -81,7 +81,7 @@ function ImportedGamesSkeleton() {
       {Array.from({ length: 10 }).map((_, i) => (
         <Card key={i} className="h-full overflow-hidden">
           <div className="aspect-[16/9]">
-            <Skeleton className="h-full w-full" />
+            <Skeleton className="size-full" />
           </div>
           <CardHeader className="p-3 pb-2">
             <Skeleton className="h-4 w-3/4" />

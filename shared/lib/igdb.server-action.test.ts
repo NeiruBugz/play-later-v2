@@ -282,7 +282,6 @@ describe("igdbApi", () => {
         themes: [],
         websites: [],
         external_games: [],
-        franchise: null,
         franchises: [],
       };
       setupMockRequest([mockGame]);
@@ -635,7 +634,6 @@ describe("igdbApi", () => {
           themes: [],
           websites: [],
           external_games: [],
-          franchise: null,
           franchises: [],
         },
       ];

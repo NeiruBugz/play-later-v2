@@ -1,4 +1,4 @@
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { type AcquisitionType, type BacklogItemStatus } from "@prisma/client";
 
 export const BacklogStatusMapper: Record<BacklogItemStatus, string> = {
   COMPLETED: "Completed",

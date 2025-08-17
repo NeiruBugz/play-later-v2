@@ -18,11 +18,10 @@ const displayVariants = cva("font-display text-foreground", {
   },
 });
 
-export interface DisplayProps
-  extends React.HTMLAttributes<HTMLHeadingElement>,
-    VariantProps<typeof displayVariants> {
+export type DisplayProps = {
   asChild?: boolean;
-}
+} & React.HTMLAttributes<HTMLHeadingElement> &
+  VariantProps<typeof displayVariants>;
 
 const Display = React.forwardRef<HTMLHeadingElement, DisplayProps>(
   ({ className, size, asChild = false, ...props }, ref) => {
@@ -63,11 +62,10 @@ const headingVariants = cva("font-heading text-foreground", {
   },
 });
 
-export interface HeadingProps
-  extends React.HTMLAttributes<HTMLHeadingElement>,
-    VariantProps<typeof headingVariants> {
+export type HeadingProps = {
   asChild?: boolean;
-}
+} & React.HTMLAttributes<HTMLHeadingElement> &
+  VariantProps<typeof headingVariants>;
 
 const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
   ({ className, size, level = 1, asChild = false, ...props }, ref) => {
@@ -99,11 +97,10 @@ const subheadingVariants = cva("font-subheading text-muted-foreground", {
   },
 });
 
-export interface SubheadingProps
-  extends React.HTMLAttributes<HTMLParagraphElement>,
-    VariantProps<typeof subheadingVariants> {
+export type SubheadingProps = {
   asChild?: boolean;
-}
+} & React.HTMLAttributes<HTMLParagraphElement> &
+  VariantProps<typeof subheadingVariants>;
 
 const Subheading = React.forwardRef<HTMLParagraphElement, SubheadingProps>(
   ({ className, size, asChild = false, ...props }, ref) => {
@@ -140,11 +137,10 @@ const bodyVariants = cva("font-body text-foreground", {
   },
 });
 
-export interface BodyProps
-  extends React.HTMLAttributes<HTMLParagraphElement>,
-    VariantProps<typeof bodyVariants> {
+export type BodyProps = {
   asChild?: boolean;
-}
+} & React.HTMLAttributes<HTMLParagraphElement> &
+  VariantProps<typeof bodyVariants>;
 
 const Body = React.forwardRef<HTMLParagraphElement, BodyProps>(
   ({ className, size, variant, asChild = false, ...props }, ref) => {
@@ -165,7 +161,7 @@ const captionVariants = cva("font-caption", {
   variants: {
     variant: {
       default: "text-caption text-muted-foreground",
-      overline: "text-overline text-muted-foreground uppercase",
+      overline: "text-overline uppercase text-muted-foreground",
     },
   },
   defaultVariants: {
@@ -173,11 +169,10 @@ const captionVariants = cva("font-caption", {
   },
 });
 
-export interface CaptionProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof captionVariants> {
+export type CaptionProps = {
   asChild?: boolean;
-}
+} & React.HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof captionVariants>;
 
 const Caption = React.forwardRef<HTMLSpanElement, CaptionProps>(
   ({ className, variant, asChild = false, ...props }, ref) => {
@@ -197,12 +192,12 @@ Caption.displayName = "Caption";
 const responsiveHeadingVariants = cva("font-heading text-foreground", {
   variants: {
     level: {
-      1: "text-heading-md sm:text-heading-lg md:text-heading-xl lg:text-display-sm",
+      1: "lg:text-display-sm text-heading-md sm:text-heading-lg md:text-heading-xl",
       2: "text-heading-sm sm:text-heading-md md:text-heading-lg lg:text-heading-xl",
       3: "text-heading-xs sm:text-heading-sm md:text-heading-md lg:text-heading-lg",
       4: "text-body-lg sm:text-heading-xs md:text-heading-sm lg:text-heading-md",
       5: "text-body-md sm:text-body-lg md:text-heading-xs lg:text-heading-sm",
-      6: "text-body-sm sm:text-body-md md:text-body-lg lg:text-heading-xs font-subheading",
+      6: "text-body-sm font-subheading sm:text-body-md md:text-body-lg lg:text-heading-xs",
     },
   },
   defaultVariants: {
@@ -210,12 +205,11 @@ const responsiveHeadingVariants = cva("font-heading text-foreground", {
   },
 });
 
-export interface ResponsiveHeadingProps
-  extends React.HTMLAttributes<HTMLHeadingElement>,
-    VariantProps<typeof responsiveHeadingVariants> {
+export type ResponsiveHeadingProps = {
   level?: 1 | 2 | 3 | 4 | 5 | 6;
   asChild?: boolean;
-}
+} & React.HTMLAttributes<HTMLHeadingElement> &
+  VariantProps<typeof responsiveHeadingVariants>;
 
 const ResponsiveHeading = React.forwardRef<
   HTMLHeadingElement,

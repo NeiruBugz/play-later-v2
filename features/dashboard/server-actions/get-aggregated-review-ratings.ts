@@ -9,5 +9,5 @@ export const getAggregatedReviewRatings = authorizedActionClient
     requiresAuth: true,
   })
   .action(async ({ ctx: { userId } }) => {
-    return await aggregateReviewsRatingsForUser({ userId });
+    return aggregateReviewsRatingsForUser({ userId });
   });

@@ -29,7 +29,7 @@ const linksConfig = [
   },
 ] as const;
 
-const Header = memo(function Header({ authorized }: { authorized: boolean }) {
+const Header = memo(({ authorized }: { authorized: boolean }) => {
   return (
     <header className="fixed top-0 z-20 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center">
@@ -37,8 +37,8 @@ const Header = memo(function Header({ authorized }: { authorized: boolean }) {
           <div className={cn("mr-4 flex md:hidden")}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MenuIcon className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="size-8">
+                  <MenuIcon className="size-4" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -51,7 +51,7 @@ const Header = memo(function Header({ authorized }: { authorized: boolean }) {
                         href={link.href}
                         className="flex items-center gap-2"
                       >
-                        <IconComponent className="h-4 w-4" />
+                        <IconComponent className="size-4" />
                         {link.mobileLabel}
                       </Link>
                     </DropdownMenuItem>
@@ -64,7 +64,7 @@ const Header = memo(function Header({ authorized }: { authorized: boolean }) {
 
         <div className="mr-4 flex items-center space-x-2 lg:mr-6">
           <Link href="/" className="flex items-center space-x-2">
-            <GamepadIcon className="h-5 w-5 text-green-500 sm:h-6 sm:w-6" />
+            <GamepadIcon className="size-5 text-green-500 sm:size-6" />
             <ResponsiveHeading
               level={1}
               className="hidden font-bold sm:inline-block lg:text-heading-sm"
@@ -88,7 +88,7 @@ const Header = memo(function Header({ authorized }: { authorized: boolean }) {
                   className="h-8 px-2 lg:px-3"
                 >
                   <Link href={link.href} className="flex items-center gap-2">
-                    <IconComponent className="h-4 w-4" />
+                    <IconComponent className="size-4" />
                     <span className="hidden lg:inline">{link.label}</span>
                   </Link>
                 </Button>
@@ -104,7 +104,7 @@ const Header = memo(function Header({ authorized }: { authorized: boolean }) {
                 href="/collection/add-game"
                 className="flex items-center gap-2"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="size-4" />
                 <span className="hidden sm:inline">Add Game</span>
               </Link>
             </Button>

@@ -1,4 +1,4 @@
-import type { Game } from "@prisma/client";
+import { type Game } from "@prisma/client";
 
 export const getExistingGamesMap = (existingGamesResult: Game[]) => {
   const existingGamesMap = new Map();

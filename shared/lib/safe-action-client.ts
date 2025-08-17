@@ -35,7 +35,7 @@ const authorizedActionClient = safeActionClient.use(
     if (metadata.requiresAuth) {
       const userId = await getServerUserId();
 
-      if (!userId) {
+      if (userId === undefined) {
         throw new AuthenticationError(
           "Authentication required. Please sign in to continue."
         );

@@ -6,7 +6,7 @@ import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from "next-themes";
-import { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { Toaster } from "@/shared/components/ui/sonner";
 

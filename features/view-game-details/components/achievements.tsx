@@ -55,7 +55,7 @@ function AchievementCard({
             />
             {isUnlocked && (
               <div className="absolute -right-1 -top-1 rounded-full bg-green-500 p-1">
-                <Trophy className="h-3 w-3 text-white" />
+                <Trophy className="size-3 text-white" />
               </div>
             )}
           </div>
@@ -90,7 +90,7 @@ function AchievementCard({
 
             {isUnlocked && achievement.unlocktime > 0 && (
               <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
+                <Clock className="size-3" />
                 <span>
                   Unlocked{" "}
                   {new Date(achievement.unlocktime * 1000).toLocaleDateString()}
@@ -116,7 +116,7 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
   if (serverError) {
     return (
       <div className="py-8 text-center text-muted-foreground">
-        <Trophy className="mx-auto mb-4 h-12 w-12 opacity-50" />
+        <Trophy className="mx-auto mb-4 size-12 opacity-50" />
         <p>{serverError}</p>
         {serverError === "Steam account not connected" && (
           <p className="mt-2 text-sm">
@@ -138,7 +138,7 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5" />
+            <Trophy className="size-5" />
             Achievement Progress
           </CardTitle>
         </CardHeader>
@@ -197,7 +197,7 @@ export function Achievements({ steamAppId }: AchievementsProps) {
   if (!steamAppId) {
     return (
       <div className="py-8 text-center text-muted-foreground">
-        <Trophy className="mx-auto mb-4 h-12 w-12 opacity-50" />
+        <Trophy className="mx-auto mb-4 size-12 opacity-50" />
         <p>No Steam App ID found for this game</p>
         <p className="mt-2 text-sm">
           Achievement data is not available for this game.

@@ -1,0 +1,41 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:boundaries/recommended",
+    "plugin:prettier/recommended",
+    "plugin:@tanstack/eslint-plugin-query/recommended"
+  ],
+  "plugins": ["boundaries", "import", "@tanstack/query"],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    },
+    "boundaries/elements": [
+      { "type": "app", "pattern": "app/*" },
+      { "type": "features", "pattern": "features/*" },
+      { "type": "domain", "pattern": "domain/*" },
+      { "type": "shared", "pattern": "shared/*" }
+    ]
+  },
+  "rules": {
+    "boundaries/element-types": [
+      "error",
+      {
+        "default": "disallow",
+        "rules": [
+          { "from": "app", "allow": ["features", "shared"] },
+          { "from": "features", "allow": ["domain", "shared"] },
+          { "from": "domain", "allow": ["domain"] },
+          { "from": "shared", "allow": ["shared"] }
+        ]
+      }
+    ],
+    "import/order": "off",
+    "import/first": "off",
+    "import/newline-after-import": "off",
+    "import/no-duplicates": "off"
+  }
+}
