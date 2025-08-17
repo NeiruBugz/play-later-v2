@@ -14,3 +14,12 @@ export {
 
 export { IgdbService } from "./igdb/igdb-service";
 export { GameSearchService } from "./igdb/game-search-service";
+
+export {
+  type CollectionParams,
+  type CollectionItem,
+  type CollectionResult,
+  type ICollectionService,
+} from "./collection/types";
+
+export { CollectionService } from "./collection/collection-service";
