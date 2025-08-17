@@ -245,7 +245,10 @@ describe("getReviews server action", () => {
       expect(result[0]).toHaveProperty("gameId", mockGameId);
       expect(result[0]).toHaveProperty("userId", "detailed-reviewer");
       expect(result[0]).toHaveProperty("rating", 4);
-      expect(result[0]).toHaveProperty("content", "Detailed review with all fields populated");
+      expect(result[0]).toHaveProperty(
+        "content",
+        "Detailed review with all fields populated"
+      );
       expect(result[0]).toHaveProperty("createdAt");
       expect(result[0]).toHaveProperty("updatedAt");
 

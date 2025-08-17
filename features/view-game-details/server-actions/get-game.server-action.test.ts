@@ -248,7 +248,10 @@ describe("getGame server action", () => {
       expect(result).toHaveProperty("mainExtra", 40);
       expect(result).toHaveProperty("mainStory", 25);
       expect(result).toHaveProperty("completionist", 60);
-      expect(result).toHaveProperty("description", "A complete game with all fields populated");
+      expect(result).toHaveProperty(
+        "description",
+        "A complete game with all fields populated"
+      );
     });
   });
 });

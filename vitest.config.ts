@@ -23,6 +23,11 @@ export default defineConfig({
         "**/node_modules/**",
         "**/*.config.*",
         "test/**",
+        "app/**",
+        "coverage/**",
+        "domain/**",
+        "env.mjs",
+        "auth.ts",
       ],
       reporter: ["text", "json", "html"],
       thresholds: {

@@ -20,9 +20,14 @@ describe("FilterParamsSchema", () => {
     });
 
     it("should accept valid platform strings", () => {
-      const platforms = ["PC", "PlayStation 5", "Xbox Series X", "Nintendo Switch"];
+      const platforms = [
+        "PC",
+        "PlayStation 5",
+        "Xbox Series X",
+        "Nintendo Switch",
+      ];
 
-      platforms.forEach(platform => {
+      platforms.forEach((platform) => {
         const result = FilterParamsSchema.safeParse({
           platform,
           status: "PLAYING",
@@ -76,7 +81,7 @@ describe("FilterParamsSchema", () => {
         "WISHLIST",
       ];
 
-      validStatuses.forEach(status => {
+      validStatuses.forEach((status) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
           status,
@@ -108,7 +113,7 @@ describe("FilterParamsSchema", () => {
     it("should accept arbitrary string values for status", () => {
       const customStatuses = ["all", "custom", "any"];
 
-      customStatuses.forEach(status => {
+      customStatuses.forEach((status) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
           status,
@@ -161,7 +166,7 @@ describe("FilterParamsSchema", () => {
         "2024",
       ];
 
-      searchTerms.forEach(search => {
+      searchTerms.forEach((search) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
           status: "PLAYING",
@@ -195,12 +200,12 @@ describe("FilterParamsSchema", () => {
         "Assassin's Creed",
         "Game with (parentheses)",
         "Game with 'quotes'",
-        "Game with \"double quotes\"",
+        'Game with "double quotes"',
         "Game with & ampersand",
         "Game with 100% completion",
       ];
 
-      searchTerms.forEach(search => {
+      searchTerms.forEach((search) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
           status: "PLAYING",
@@ -235,7 +240,7 @@ describe("FilterParamsSchema", () => {
     it("should accept valid positive page numbers", () => {
       const validPages = [1, 2, 5, 10, 100, 999];
 
-      validPages.forEach(page => {
+      validPages.forEach((page) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
           status: "PLAYING",
@@ -294,7 +299,7 @@ describe("FilterParamsSchema", () => {
     it("should reject non-number page values", () => {
       const invalidPages = ["abc", "1.5", true, null, {}, []];
 
-      invalidPages.forEach(page => {
+      invalidPages.forEach((page) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
           status: "PLAYING",
@@ -365,16 +370,9 @@ describe("FilterParamsSchema", () => {
     });
 
     it("should reject completely invalid input", () => {
-      const invalidInputs = [
-        null,
-        undefined,
-        "string",
-        123,
-        [],
-        true,
-      ];
+      const invalidInputs = [null, undefined, "string", 123, [], true];
 
-      invalidInputs.forEach(input => {
+      invalidInputs.forEach((input) => {
         const result = FilterParamsSchema.safeParse(input);
         expect(result.success).toBe(false);
       });

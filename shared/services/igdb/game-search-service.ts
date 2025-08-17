@@ -1,9 +1,16 @@
 import igdbApi from "@/shared/lib/igdb";
 
 import { BaseService, type ServiceResponse } from "../types";
-import type { GameSearchParams, GameSearchResult, IIgdbService } from "./types";
+import type {
+  GameSearchParams,
+  GameSearchResult,
+  IGameSearchService,
+} from "./types";
 
-export class GameSearchService extends BaseService implements IIgdbService {
+export class GameSearchService
+  extends BaseService
+  implements IGameSearchService
+{
   async searchGames(
     params: GameSearchParams
   ): Promise<ServiceResponse<GameSearchResult>> {

@@ -23,7 +23,9 @@ describe("getBacklogItemsByIgdbId server action", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetBacklogItemsForUserByIgdbId = vi.mocked(getBacklogItemsForUserByIgdbId);
+    mockGetBacklogItemsForUserByIgdbId = vi.mocked(
+      getBacklogItemsForUserByIgdbId
+    );
   });
 
   describe("authentication", () => {
@@ -461,9 +463,9 @@ describe("getBacklogItemsByIgdbId server action", () => {
       expect(result).toHaveLength(4);
       expect(result.map((item: any) => item.status)).toEqual([
         "BACKLOG",
-        "PLAYING", 
+        "PLAYING",
         "COMPLETED",
-        "WISHLIST"
+        "WISHLIST",
       ]);
     });
   });

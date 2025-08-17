@@ -5,6 +5,10 @@ export { type ServiceResponse, type ServiceError, BaseService } from "./types";
 export {
   type GameSearchParams,
   type GameSearchResult,
+  type GameDetailsParams,
+  type GameDetailsResult,
+  type PlatformsResult,
+  type IGameSearchService,
   type IIgdbService,
 } from "./igdb/types";
 
