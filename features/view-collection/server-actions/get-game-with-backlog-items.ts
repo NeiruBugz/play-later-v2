@@ -1,15 +1,11 @@
 "use server";
 
-import {
-  buildCollectionFilter,
-  findGamesWithBacklogItemsPaginated,
-} from "@/shared/lib/repository";
+import { CollectionService } from "@/shared/services";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 import { FilterParamsSchema } from "../lib/validation";
 
-const ITEMS_PER_PAGE = 24;
-const DEFAULT_PAGE = 1;
+const collectionService = new CollectionService();
 
 export const getUserGamesWithGroupedBacklogPaginated = authorizedActionClient
   .metadata({
@@ -18,32 +14,17 @@ export const getUserGamesWithGroupedBacklogPaginated = authorizedActionClient
   })
   .inputSchema(FilterParamsSchema)
   .action(async ({ ctx: { userId }, parsedInput }) => {
-    console.log(
-      "getUserGamesWithGroupedBacklogPaginated::parsedInput:",
-      parsedInput
-    );
-    try {
-      const { gameFilter } = buildCollectionFilter({
-        userId,
-        ...parsedInput,
-      });
+    const result = await collectionService.getCollection({
+      userId,
+      platform: parsedInput.platform,
+      status: parsedInput.status,
+      search: parsedInput.search,
+      page: parsedInput.page,
+    });
 
-      console.log("getUserGamesWithGroupedBacklogPaginated::gameFilter:");
-
-      const [games, totalGames] = await findGamesWithBacklogItemsPaginated({
-        where: gameFilter,
-        page: parsedInput.page || DEFAULT_PAGE,
-        itemsPerPage: ITEMS_PER_PAGE,
-      });
-
-      return {
-        collection: games.map((game) => ({
-          game,
-          backlogItems: game.backlogItems,
-        })),
-        count: totalGames,
-      };
-    } catch (error) {
-      throw new Error("Failed to fetch user game collection", { cause: error });
+    if (!result.success) {
+      throw new Error(result.error || "Failed to fetch user game collection");
     }
+
+    return result.data;
   });
