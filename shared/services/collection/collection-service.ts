@@ -1,11 +1,57 @@
+import {
+  buildCollectionFilter,
+  findGamesWithBacklogItemsPaginated,
+} from "@/shared/lib/repository";
 import { BaseService } from "../types";
 import type { CollectionParams, ICollectionService, CollectionResult } from "./types";
 import type { ServiceResponse } from "../types";
 
+const ITEMS_PER_PAGE = 24;
+const DEFAULT_PAGE = 1;
+
 export class CollectionService extends BaseService implements ICollectionService {
-  // Basic service structure - implementation will be added in next step
   async getCollection(params: CollectionParams): Promise<ServiceResponse<CollectionResult>> {
-    // TODO: Implement in next commit
-    throw new Error("Not implemented yet");
+    try {
+      // Validate required parameters
+      if (!params.userId) {
+        return this.createErrorResponse({
+          message: "User ID is required",
+          code: "INVALID_INPUT",
+        });
+      }
+
+      // Build collection filter using existing repository logic
+      const { gameFilter } = buildCollectionFilter({
+        userId: params.userId,
+        platform: params.platform,
+        status: params.status,
+        search: params.search,
+      });
+
+      // Fetch paginated games with backlog items
+      const [games, totalGames] = await findGamesWithBacklogItemsPaginated({
+        where: gameFilter,
+        page: params.page || DEFAULT_PAGE,
+        itemsPerPage: ITEMS_PER_PAGE,
+      });
+
+      // Transform the data to match the expected format
+      const collection = games.map((game) => ({
+        game,
+        backlogItems: game.backlogItems,
+      }));
+
+      return this.createSuccessResponse({
+        collection,
+        count: totalGames,
+      });
+    } catch (error) {
+      const serviceError = this.handleError(error);
+      return this.createErrorResponse({
+        message: "Failed to fetch user game collection",
+        code: "FETCH_FAILED",
+        cause: serviceError.cause,
+      });
+    }
   }
 }

@@ -1,41 +1,21 @@
+import type { Game, BacklogItem } from "@prisma/client";
 import type { FilterParams } from "@/features/view-collection/lib/validation";
 import type { BaseService, ServiceResponse } from "../types";
 
 // Collection Service specific types
-export interface CollectionParams extends FilterParams {
+export interface CollectionParams extends Omit<FilterParams, 'page'> {
   userId: string;
+  page?: number;
 }
 
+// Type representing the game with its backlog items as returned by the repository
+export type GameWithBacklogItems = Game & {
+  backlogItems: BacklogItem[];
+};
+
 export interface CollectionItem {
-  game: {
-    id: number;
-    igdbId: number | null;
-    name: string;
-    cover: {
-      id: number;
-      image_id: string;
-    } | null;
-    platforms: {
-      id: number;
-      name: string;
-    }[];
-    backlogItems: {
-      id: string;
-      userId: string;
-      status: string;
-      platform: string | null;
-      createdAt: Date;
-      updatedAt: Date;
-    }[];
-  };
-  backlogItems: {
-    id: string;
-    userId: string;
-    status: string;
-    platform: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }[];
+  game: GameWithBacklogItems;
+  backlogItems: BacklogItem[];
 }
 
 export interface CollectionResult {
