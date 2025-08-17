@@ -6,11 +6,11 @@ import type {
   GameDetailsResult,
   GameSearchParams,
   GameSearchResult,
-  IIgdbService,
+  IgdbService as IgdbServiceInterface,
   PlatformsResult,
 } from "./types";
 
-export class IgdbService extends BaseService implements IIgdbService {
+export class IgdbService extends BaseService implements IgdbServiceInterface {
   async searchGames(
     params: GameSearchParams
   ): Promise<ServiceResponse<GameSearchResult>> {

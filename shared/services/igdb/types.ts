@@ -28,13 +28,13 @@ export interface PlatformsResult {
   platforms: Array<{ id: number; name: string }>;
 }
 
-export interface IGameSearchService extends BaseService {
+export interface GameSearchService extends BaseService {
   searchGames(
     params: GameSearchParams
   ): Promise<ServiceResponse<GameSearchResult>>;
 }
 
-export interface IIgdbService extends BaseService {
+export interface IgdbService extends BaseService {
   searchGames(
     params: GameSearchParams
   ): Promise<ServiceResponse<GameSearchResult>>;

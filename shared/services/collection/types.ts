@@ -25,7 +25,7 @@ export interface CollectionResult {
   count: number;
 }
 
-export interface ICollectionService extends BaseService {
+export interface CollectionService extends BaseService {
   getCollection(
     params: CollectionParams
   ): Promise<ServiceResponse<CollectionResult>>;

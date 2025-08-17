@@ -4,12 +4,12 @@ import { BaseService, type ServiceResponse } from "../types";
 import type {
   GameSearchParams,
   GameSearchResult,
-  IGameSearchService,
+  GameSearchService as GameSearchServiceInterface,
 } from "./types";
 
 export class GameSearchService
   extends BaseService
-  implements IGameSearchService
+  implements GameSearchServiceInterface
 {
   async searchGames(
     params: GameSearchParams

@@ -7,7 +7,7 @@ import { BaseService, type ServiceResponse } from "../types";
 import type {
   CollectionParams,
   CollectionResult,
-  ICollectionService,
+  CollectionService as CollectionServiceInterface,
 } from "./types";
 
 const ITEMS_PER_PAGE = 24;
@@ -15,7 +15,7 @@ const DEFAULT_PAGE = 1;
 
 export class CollectionService
   extends BaseService
-  implements ICollectionService
+  implements CollectionServiceInterface
 {
   async getCollection(
     params: CollectionParams

@@ -8,8 +8,8 @@ export {
   type GameDetailsParams,
   type GameDetailsResult,
   type PlatformsResult,
-  type IGameSearchService,
-  type IIgdbService,
+  type GameSearchService as GameSearchServiceInterface,
+  type IgdbService as IgdbServiceInterface,
 } from "./igdb/types";
 
 export { IgdbService } from "./igdb/igdb-service";
@@ -19,7 +19,7 @@ export {
   type CollectionParams,
   type CollectionItem,
   type CollectionResult,
-  type ICollectionService,
+  type CollectionService as CollectionServiceInterface,
   type GameWithBacklogItems,
 } from "./collection/types";
 
