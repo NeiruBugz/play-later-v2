@@ -1,9 +1,11 @@
-import type { Game, BacklogItem } from "@prisma/client";
+import type { BacklogItem, Game } from "@prisma/client";
+
 import type { FilterParams } from "@/features/view-collection/lib/validation";
+
 import type { BaseService, ServiceResponse } from "../types";
 
 // Collection Service specific types
-export interface CollectionParams extends Omit<FilterParams, 'page'> {
+export interface CollectionParams extends Omit<FilterParams, "page"> {
   userId: string;
   page?: number;
 }
@@ -24,5 +26,7 @@ export interface CollectionResult {
 }
 
 export interface ICollectionService extends BaseService {
-  getCollection(params: CollectionParams): Promise<ServiceResponse<CollectionResult>>;
+  getCollection(
+    params: CollectionParams
+  ): Promise<ServiceResponse<CollectionResult>>;
 }

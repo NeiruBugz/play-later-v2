@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import igdbApi from "@/shared/lib/igdb";
 import type { SearchResponse } from "@/shared/types";
+
 import { GameSearchService } from "./game-search-service";
 
 // Mock the IGDB API
@@ -8,8 +11,6 @@ vi.mock("@/shared/lib/igdb", () => ({
     search: vi.fn(),
   },
 }));
-
-import igdbApi from "@/shared/lib/igdb";
 
 describe("GameSearchService", () => {
   let service: GameSearchService;

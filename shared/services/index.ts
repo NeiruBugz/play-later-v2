@@ -1,10 +1,6 @@
 // Service layer exports
 
-export {
-  type ServiceResponse,
-  type ServiceError,
-  BaseService,
-} from "./types";
+export { type ServiceResponse, type ServiceError, BaseService } from "./types";
 
 export {
   type GameSearchParams,

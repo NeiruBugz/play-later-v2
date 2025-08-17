@@ -1,4 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import {
+  buildCollectionFilter,
+  findGamesWithBacklogItemsPaginated,
+} from "@/shared/lib/repository";
+
 import { CollectionService } from "./collection-service";
 
 // Mock the repository functions
@@ -6,11 +12,6 @@ vi.mock("@/shared/lib/repository", () => ({
   buildCollectionFilter: vi.fn(),
   findGamesWithBacklogItemsPaginated: vi.fn(),
 }));
-
-import {
-  buildCollectionFilter,
-  findGamesWithBacklogItemsPaginated,
-} from "@/shared/lib/repository";
 
 describe("CollectionService", () => {
   let service: CollectionService;
@@ -21,7 +22,9 @@ describe("CollectionService", () => {
     vi.clearAllMocks();
     service = new CollectionService();
     mockBuildCollectionFilter = vi.mocked(buildCollectionFilter);
-    mockFindGamesWithBacklogItemsPaginated = vi.mocked(findGamesWithBacklogItemsPaginated);
+    mockFindGamesWithBacklogItemsPaginated = vi.mocked(
+      findGamesWithBacklogItemsPaginated
+    );
   });
 
   describe("getCollection", () => {
@@ -144,7 +147,9 @@ describe("CollectionService", () => {
       expect(result.success).toBe(true);
       expect(result.data?.collection).toHaveLength(2);
       expect(result.data?.collection[0].game).toEqual(mockGames[0]);
-      expect(result.data?.collection[0].backlogItems).toEqual(mockGames[0].backlogItems);
+      expect(result.data?.collection[0].backlogItems).toEqual(
+        mockGames[0].backlogItems
+      );
       expect(result.data?.count).toBe(2);
     });
 
@@ -272,7 +277,7 @@ describe("CollectionService", () => {
     it("should handle findGamesWithBacklogItemsPaginated errors", async () => {
       const mockGameFilter = { userId: "test-user-id" };
       mockBuildCollectionFilter.mockReturnValue({ gameFilter: mockGameFilter });
-      
+
       const repositoryError = new Error("Query execution failed");
       mockFindGamesWithBacklogItemsPaginated.mockRejectedValue(repositoryError);
 

@@ -2,15 +2,24 @@ import {
   buildCollectionFilter,
   findGamesWithBacklogItemsPaginated,
 } from "@/shared/lib/repository";
-import { BaseService } from "../types";
-import type { CollectionParams, ICollectionService, CollectionResult } from "./types";
-import type { ServiceResponse } from "../types";
+
+import { BaseService, type ServiceResponse } from "../types";
+import type {
+  CollectionParams,
+  CollectionResult,
+  ICollectionService,
+} from "./types";
 
 const ITEMS_PER_PAGE = 24;
 const DEFAULT_PAGE = 1;
 
-export class CollectionService extends BaseService implements ICollectionService {
-  async getCollection(params: CollectionParams): Promise<ServiceResponse<CollectionResult>> {
+export class CollectionService
+  extends BaseService
+  implements ICollectionService
+{
+  async getCollection(
+    params: CollectionParams
+  ): Promise<ServiceResponse<CollectionResult>> {
     try {
       // Validate required parameters
       if (!params.userId) {

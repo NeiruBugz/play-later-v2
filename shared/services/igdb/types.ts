@@ -1,4 +1,5 @@
 import type { SearchResponse } from "@/shared/types";
+
 import type { BaseService, ServiceResponse } from "../types";
 
 // IGDB Service specific types
@@ -16,5 +17,7 @@ export interface GameSearchResult {
 }
 
 export interface IIgdbService extends BaseService {
-  searchGames(params: GameSearchParams): Promise<ServiceResponse<GameSearchResult>>;
+  searchGames(
+    params: GameSearchParams
+  ): Promise<ServiceResponse<GameSearchResult>>;
 }

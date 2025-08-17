@@ -1,13 +1,19 @@
 import igdbApi from "@/shared/lib/igdb";
-import { BaseService } from "../types";
+
+import { BaseService, type ServiceResponse } from "../types";
 import type { GameSearchParams, GameSearchResult, IIgdbService } from "./types";
-import type { ServiceResponse } from "../types";
 
 export class GameSearchService extends BaseService implements IIgdbService {
-  async searchGames(params: GameSearchParams): Promise<ServiceResponse<GameSearchResult>> {
+  async searchGames(
+    params: GameSearchParams
+  ): Promise<ServiceResponse<GameSearchResult>> {
     try {
       // Validate input
-      if (!params.name || params.name.trim() === "" || params.name === "undefined") {
+      if (
+        !params.name ||
+        params.name.trim() === "" ||
+        params.name === "undefined"
+      ) {
         return this.createErrorResponse({
           message: "Search query is required and cannot be empty",
           code: "INVALID_INPUT",

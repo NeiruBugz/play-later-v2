@@ -1,7 +1,7 @@
 "use server";
 
-import { CollectionService } from "@/shared/services";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+import { CollectionService } from "@/shared/services";
 
 import { FilterParamsSchema } from "../lib/validation";
 
