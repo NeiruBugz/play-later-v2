@@ -1,5 +1,5 @@
 import { getServerUserId } from "@/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { FilterParamsSchema } from "@/features/view-collection/lib/validation";
 import { CollectionService } from "@/shared/services";
@@ -21,10 +21,10 @@ export async function GET(request: NextRequest) {
 
     // Validate request parameters
     const parsedInput = FilterParamsSchema.safeParse({
-      platform: searchParams.get("platform") || "",
-      status: searchParams.get("status") || "",
-      search: searchParams.get("search") || "",
-      page: Number(searchParams.get("page")) || 1,
+      platform: searchParams.get("platform") ?? "",
+      status: searchParams.get("status") ?? "",
+      search: searchParams.get("search") ?? "",
+      page: Number(searchParams.get("page")) ?? 1,
     });
 
     if (!parsedInput.success) {

@@ -69,7 +69,7 @@ export type HeadingProps = {
 
 const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
   ({ className, size, level = 1, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : (`h${level}` as any);
+    const Comp = asChild ? Slot : (`h${level}` as string);
     return (
       <Comp
         className={cn(headingVariants({ size, className }))}
@@ -215,7 +215,7 @@ const ResponsiveHeading = React.forwardRef<
   HTMLHeadingElement,
   ResponsiveHeadingProps
 >(({ className, level = 1, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? Slot : (`h${level}` as any);
+  const Comp = asChild ? Slot : (`h${level}` as string);
   return (
     <Comp
       className={cn(responsiveHeadingVariants({ level, className }))}

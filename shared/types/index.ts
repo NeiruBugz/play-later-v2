@@ -1,5 +1,6 @@
 export * from "./igdb";
 export * from "./ui";
+export * from "./collection";
 export { type SteamAppInfo } from "./steam";
 
 // Re-export core IGDB types from igdb-api-types for convenience

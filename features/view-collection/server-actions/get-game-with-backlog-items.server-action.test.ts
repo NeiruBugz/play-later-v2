@@ -122,7 +122,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
 
         if (!result.success) {
           throw new Error(
-            result.error || "Failed to fetch user game collection"
+            result.error ?? "Failed to fetch user game collection"
           );
         }
 
@@ -179,7 +179,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
 
         if (!result.success) {
           throw new Error(
-            result.error || "Failed to fetch user game collection"
+            result.error ?? "Failed to fetch user game collection"
           );
         }
 
@@ -223,7 +223,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
 
         if (!result.success) {
           throw new Error(
-            result.error || "Failed to fetch user game collection"
+            result.error ?? "Failed to fetch user game collection"
           );
         }
 
@@ -267,7 +267,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
 
         if (!result.success) {
           throw new Error(
-            result.error || "Failed to fetch user game collection"
+            result.error ?? "Failed to fetch user game collection"
           );
         }
 
@@ -305,7 +305,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
 
         if (!result.success) {
           throw new Error(
-            result.error || "Failed to fetch user game collection"
+            result.error ?? "Failed to fetch user game collection"
           );
         }
 
@@ -354,7 +354,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
 
         if (!result.success) {
           throw new Error(
-            result.error || "Failed to fetch user game collection"
+            result.error ?? "Failed to fetch user game collection"
           );
         }
 
@@ -412,7 +412,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
 
         if (!result.success) {
           throw new Error(
-            result.error || "Failed to fetch user game collection"
+            result.error ?? "Failed to fetch user game collection"
           );
         }
 

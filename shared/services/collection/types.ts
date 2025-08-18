@@ -1,6 +1,6 @@
 import type { BacklogItem, Game } from "@prisma/client";
 
-import type { FilterParams } from "@/features/view-collection/lib/validation";
+import type { FilterParams } from "@/shared/types/collection";
 
 import type { BaseService, ServiceResponse } from "../types";
 

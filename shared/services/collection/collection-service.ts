@@ -40,7 +40,7 @@ export class CollectionService
       // Fetch paginated games with backlog items
       const [games, totalGames] = await findGamesWithBacklogItemsPaginated({
         where: gameFilter,
-        page: params.page || DEFAULT_PAGE,
+        page: params.page ?? DEFAULT_PAGE,
         itemsPerPage: ITEMS_PER_PAGE,
       });
 

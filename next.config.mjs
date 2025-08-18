@@ -1,5 +1,8 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  eslint: {
+    dirs: ['app', 'features', 'shared', 'test', '.'], // Include all relevant directories and root
+  },
   async headers() {
     return [
       {

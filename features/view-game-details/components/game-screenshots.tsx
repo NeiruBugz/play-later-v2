@@ -1,6 +1,5 @@
 import { use } from "react";
 
-import { IgdbImage } from "@/shared/components/igdb-image";
 import igdbApi from "@/shared/lib/igdb";
 
 import { ScreenshotCarousel } from "./screenshot-carousel";

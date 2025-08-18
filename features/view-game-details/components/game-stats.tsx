@@ -7,7 +7,7 @@ type GameStatsProps = {
   rating?: string;
 };
 
-const calculateAverageScore = (reviews: Review[]) => {
+const _calculateAverageScore = (reviews: Review[]) => {
   if (reviews.length === 0) {
     return 0;
   }
@@ -27,7 +27,7 @@ export async function GameStats({ rating }: GameStatsProps) {
             <Star className="size-6 fill-yellow-400 text-yellow-400" />
           </div>
           <div className="text-2xl font-medium">
-            {rating || "No rating yet"}
+            {rating ?? "No rating yet"}
           </div>
           <div className="text-sm text-muted-foreground">Aggregated Rating</div>
         </div>

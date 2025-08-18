@@ -1,4 +1,3 @@
-import { type BacklogItemStatus } from "@prisma/client";
 import { CalendarDays, Monitor } from "lucide-react";
 import Link from "next/link";
 

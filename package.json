@@ -10,6 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
+    "eslint": "bunx eslint .",
+    "eslint:fix": "bunx eslint . --fix",
     "preview": "next build && next start -p 6060",
     "typecheck": "tsc --noEmit",
     "format:write": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
@@ -90,17 +92,17 @@
     "@types/node-steam-openid": "^1.0.3",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2",
-    "@typescript-eslint/eslint-plugin": "^8.36.0",
-    "@typescript-eslint/parser": "8.36.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
     "@vitejs/plugin-react": "^4.6.0",
     "@vitest/coverage-v8": "^3.2.4",
     "autoprefixer": "10.4.19",
     "eslint": "8.57.1",
     "eslint-config-next": "15.1.0",
     "eslint-config-prettier": "^10.1.5",
-    "eslint-import-resolver-typescript": "3.6.1",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-boundaries": "^5.0.1",
-    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-prettier": "^5.5.1",
     "eslint-plugin-react": "^7.37.5",
@@ -124,26 +126,8 @@
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },
-  "lint-staged": {
-    "**/*.{ts,tsx}": [
-      "tsc-files --noEmit",
-      "vitest related --run"
-    ],
-    "**/*.{js,jsx,ts,tsx}": [
-      "ESLINT_USE_FLAT_CONFIG=false eslint --fix",
-      "prettier --write --ignore-unknown"
-    ],
-    "**/*.{json,md}": [
-      "prettier --write --ignore-unknown"
-    ]
-  },
   "overrides": {
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.2"
-  },
-  "knip": {
-    "ignore": [
-      "test/**"
-    ]
   }
 }

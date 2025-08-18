@@ -12,7 +12,7 @@ import { Toaster } from "@/shared/components/ui/sonner";
 
 const queryClient = new QueryClient();
 
-export default function Providers({
+export function Providers({
   children,
   ...props
 }: PropsWithChildren<ThemeProviderProps>) {

@@ -18,7 +18,7 @@ export function CardViewMode() {
   const params = useSearchParams();
   const router = useRouter();
 
-  const displayMode = params.get("cardMode") || "combined";
+  const displayMode = params.get("cardMode") ?? "combined";
 
   const handleDisplayModeChange = useCallback(
     (value: string | null) => {

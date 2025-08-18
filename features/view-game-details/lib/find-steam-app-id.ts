@@ -7,14 +7,14 @@ const isExternalGame = (
 ): external is ExternalGame => typeof external === "object";
 
 export function findSteamAppId(
-  external_games: Game["external_games"] | undefined
+  externalGames: Game["external_games"] | undefined
 ) {
-  if (!external_games || external_games.length === 0) {
+  if (!externalGames || externalGames.length === 0) {
     return null;
   }
 
   try {
-    const externalGameWithSteamUrl = external_games
+    const externalGameWithSteamUrl = externalGames
       .filter(isExternalGame)
       .find((external) => external.url?.includes("steampowered.com") ?? false);
 

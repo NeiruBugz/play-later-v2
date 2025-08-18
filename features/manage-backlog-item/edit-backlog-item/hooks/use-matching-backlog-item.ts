@@ -11,7 +11,7 @@ export function useMatchingBacklogItem({
   status?: string;
 }) {
   const params = useSearchParams();
-  const statusFilter = params.get("status") || status;
+  const statusFilter = params.get("status") ?? status;
   const matchingStatusItem = backlogItems?.find(
     (item) => (item.status as unknown as string) === statusFilter
   );

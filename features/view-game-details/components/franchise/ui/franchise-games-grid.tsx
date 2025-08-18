@@ -19,7 +19,7 @@ export async function FranchiseGamesGrid({
           return null;
         }
 
-        const existingGame = existingGamesMap.get(game.id) || null;
+        const existingGame = existingGamesMap.get(game.id) ?? null;
 
         return (
           <FranchiseGame

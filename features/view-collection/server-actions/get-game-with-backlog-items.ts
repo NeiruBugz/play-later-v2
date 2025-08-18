@@ -23,7 +23,7 @@ export const getUserGamesWithGroupedBacklogPaginated = authorizedActionClient
     });
 
     if (!result.success) {
-      throw new Error(result.error || "Failed to fetch user game collection");
+      throw new Error(result.error ?? "Failed to fetch user game collection");
     }
 
     return result.data;

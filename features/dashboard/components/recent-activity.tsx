@@ -19,7 +19,7 @@ export async function RecentActivity() {
   ]);
 
   const hasActivity =
-    (recentlyCompleted?.data?.length && recentlyCompleted?.data?.length > 0) ||
+    (recentlyCompleted?.data?.length && recentlyCompleted?.data?.length > 0) ??
     (recentReviews?.data?.length && recentReviews?.data?.length > 0);
 
   return (

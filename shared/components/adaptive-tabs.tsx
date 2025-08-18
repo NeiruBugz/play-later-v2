@@ -1,7 +1,14 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import React, { useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { cn } from "@/shared/lib";
 
@@ -35,7 +42,7 @@ type AdaptiveTabsTriggerProps = {
   disabled?: boolean;
 };
 
-const AdaptiveTabsContext = React.createContext<{
+const AdaptiveTabsContext = createContext<{
   currentValue: string;
   onValueChange: (value: string) => void;
   triggers: Array<{
@@ -75,14 +82,17 @@ export function AdaptiveTabs({
   >([]);
 
   const currentValue = value ?? internalValue;
-  const handleValueChange = (newValue: string) => {
-    if (!value) {
-      setInternalValue(newValue);
-    }
-    onValueChange?.(newValue);
-  };
+  const handleValueChange = useCallback(
+    (newValue: string) => {
+      if (!value) {
+        setInternalValue(newValue);
+      }
+      onValueChange?.(newValue);
+    },
+    [value, onValueChange]
+  );
 
-  const registerTrigger = React.useCallback(
+  const registerTrigger = useCallback(
     (trigger: {
       value: string;
       label: string;
@@ -98,7 +108,7 @@ export function AdaptiveTabs({
     []
   );
 
-  const contextValue = React.useMemo(
+  const contextValue = useMemo(
     () => ({
       currentValue,
       onValueChange: handleValueChange,
@@ -126,7 +136,7 @@ export function AdaptiveTabsList({
   children,
 }: AdaptiveTabsListProps) {
   const { currentValue, onValueChange, triggers } =
-    React.useContext(AdaptiveTabsContext);
+    useContext(AdaptiveTabsContext);
 
   const currentTrigger = triggers.find((t) => t.value === currentValue);
 
@@ -141,7 +151,7 @@ export function AdaptiveTabsList({
                 {currentTrigger?.icon && (
                   <span className="text-sm">{currentTrigger.icon}</span>
                 )}
-                <span>{currentTrigger?.label || "Select tab"}</span>
+                <span>{currentTrigger?.label ?? "Select tab"}</span>
               </div>
               <ChevronDown className="size-4" />
             </Button>
@@ -181,9 +191,9 @@ export function AdaptiveTabsTrigger({
   icon,
   disabled = false,
 }: AdaptiveTabsTriggerProps) {
-  const { registerTrigger } = React.useContext(AdaptiveTabsContext);
+  const { registerTrigger } = useContext(AdaptiveTabsContext);
 
-  React.useEffect(() => {
+  useEffect(() => {
     registerTrigger({
       value,
       label: typeof children === "string" ? children : value,

@@ -26,7 +26,7 @@ export function StatusFilter() {
   const router = useRouter();
 
   const currentStatusParam = params.get("status");
-  const currentValue = currentStatusParam || "All";
+  const currentValue = currentStatusParam ?? "All";
 
   const onStatusSelect = useCallback(
     (value: string | null) => {

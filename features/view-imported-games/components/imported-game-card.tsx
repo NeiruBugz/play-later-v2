@@ -59,7 +59,7 @@ function getImageUrl(game: ImportedGame): string | null {
     );
   }
 
-  return game.img_logo_url || game.img_icon_url;
+  return game.img_logo_url ?? game.img_icon_url;
 }
 
 function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
@@ -82,7 +82,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
       }
     },
     onError: ({ error }) => {
-      toast.error(error.serverError || "Failed to import game to collection");
+      toast.error(error.serverError ?? "Failed to import game to collection");
     },
   });
 
@@ -93,7 +93,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
 
     execute({
       steamAppId: game.storefrontGameId,
-      playtime: game.playtime || undefined,
+      playtime: game.playtime ?? undefined,
     });
   };
 

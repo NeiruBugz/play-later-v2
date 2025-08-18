@@ -14,8 +14,7 @@ export function GridView({
           <GameCard
             game={game}
             platforms={backlogItems}
-            currentPlatform={backlogItems[0] || undefined}
-            displayMode={"combined"}
+            currentPlatform={backlogItems[0] ?? undefined}
           />
         </li>
       ))}

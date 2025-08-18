@@ -1,4 +1,4 @@
-import Providers from "@/providers";
+import { Providers } from "@/providers";
 import { type Metadata, type Viewport } from "next";
 import { Inter as FontSans } from "next/font/google";
 
@@ -90,9 +90,9 @@ export const metadata: Metadata = {
   category: "entertainment",
 };
 
-type RootLayoutProps = {
+interface RootLayoutProps {
   readonly children: React.ReactNode;
-};
+}
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (

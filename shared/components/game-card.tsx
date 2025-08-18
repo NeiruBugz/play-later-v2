@@ -2,7 +2,6 @@
 
 import { type BacklogItem, type Game } from "@prisma/client";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { cn, getGameUrl, normalizeString } from "../lib";
@@ -10,7 +9,7 @@ import { IgdbImage } from "./igdb-image";
 import { Heading } from "./typography";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Card, CardFooter, CardHeader } from "./ui/card";
+import { Card, CardHeader } from "./ui/card";
 import {
   Tooltip,
   TooltipContent,
@@ -21,7 +20,6 @@ import {
 type GameCardProps = {
   game: Game;
   platforms?: BacklogItem[];
-  displayMode: "combined" | "separate";
   currentPlatform?: BacklogItem;
 };
 
@@ -41,17 +39,10 @@ const statusLabels = {
   WISHLIST: "Wishlist",
 };
 
-export function GameCard({
-  game,
-  platforms,
-  displayMode,
-  currentPlatform,
-}: GameCardProps) {
-  const params = useSearchParams();
-  const cardViewMode = params.get("cardMode") || "combined";
+export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const primaryPlatform = currentPlatform || platforms?.[0];
-  const status = primaryPlatform?.status || "TO_PLAY";
+  const primaryPlatform = currentPlatform ?? platforms?.[0];
+  const status = primaryPlatform?.status ?? "TO_PLAY";
 
   return (
     <Card

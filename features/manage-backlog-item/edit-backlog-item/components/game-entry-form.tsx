@@ -43,12 +43,12 @@ export function GameEntryForm({
   gameId,
 }: GameEntryFormProps) {
   const [playStatus, setPlayStatus] = useState(status);
-  const [entryPlatform, setEntryPlatform] = useState(platform || "");
+  const [entryPlatform, setEntryPlatform] = useState(platform ?? "");
   const [startDate, setStartDate] = useState<Date | undefined>(
-    startedAt || undefined
+    startedAt ?? undefined
   );
   const [completionDate, setCompletionDate] = useState<Date | undefined>(
-    completedAt || undefined
+    completedAt ?? undefined
   );
 
   const onSubmit = async () => {

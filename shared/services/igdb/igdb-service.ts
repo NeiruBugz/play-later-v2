@@ -61,7 +61,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       const game = await igdbApi.getGameById(params.gameId);
 
       return this.createSuccessResponse({
-        game: game || null,
+        game: game ?? null,
       });
     } catch (error) {
       return this.createErrorResponse({

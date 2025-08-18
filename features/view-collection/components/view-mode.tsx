@@ -10,7 +10,7 @@ export function CollectionViewMode() {
   const params = useSearchParams();
   const router = useRouter();
 
-  const currentViewMode = params.get("viewMode") || "grid";
+  const currentViewMode = params.get("viewMode") ?? "grid";
 
   const handleViewModeChange = useCallback(
     (value: string | null) => {

@@ -17,9 +17,9 @@ export const saveSteamGames = authorizedActionClient
     const mappedGames = games.map((game) => ({
       name: game.name,
       storefront: Storefront.STEAM,
-      playtime: game.playtime || 0,
-      img_icon_url: game.img_icon_url || "",
-      img_logo_url: game.img_logo_url || "",
+      playtime: game.playtime ?? 0,
+      img_icon_url: game.img_icon_url ?? "",
+      img_logo_url: game.img_logo_url ?? "",
       storefrontGameId: game.storefrontGameId,
       userId,
     }));

@@ -2,11 +2,11 @@ pre-commit:
   commands:
     prettier:
       glob: "*.{js,jsx,ts,tsx,json,css,md}"
-      run: bun format --write {staged_files}
+      run: bun format:write {staged_files}
       stage_fixed: true
     eslint:
       glob: "*.{js,jsx,ts,tsx}"
-      run: bun lint --fix {staged_files}
+      run: bunx eslint --fix {staged_files}
       stage_fixed: true
     typecheck:
       run: bun typecheck

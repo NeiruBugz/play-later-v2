@@ -22,10 +22,10 @@ export const enrichAchievements = (
 
     return {
       ...ach,
-      displayName: schemaData?.displayName || ach.apiname,
-      description: schemaData?.description || "",
-      icon: schemaData?.icon || "",
-      icongray: schemaData?.icongray || "",
+      displayName: schemaData?.displayName ?? ach.apiname,
+      description: schemaData?.description ?? "",
+      icon: schemaData?.icon ?? "",
+      icongray: schemaData?.icongray ?? "",
       hidden: schemaData?.hidden === 1,
       globalPercent,
       rarity,

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { FilterParams } from "@/features/view-collection/lib/validation";
+import type { FilterParams } from "@/features/view-collection/lib/validation";
 
 const fetchCollection = async (params: FilterParams) => {
   const queryParams = new URLSearchParams();

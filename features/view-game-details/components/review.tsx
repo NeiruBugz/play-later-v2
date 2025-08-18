@@ -35,8 +35,8 @@ export function Review({
         <div className="flex items-center gap-2">
           <Avatar>
             <AvatarImage
-              src={review.User.image || "/placeholder.svg"}
-              alt={review.User.name || ""}
+              src={review.User.image ?? "/placeholder.svg"}
+              alt={review.User.name ?? ""}
             />
             <AvatarFallback>
               {getFirstTwoLiterals(review.User.name)}

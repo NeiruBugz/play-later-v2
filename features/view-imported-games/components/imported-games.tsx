@@ -108,7 +108,7 @@ export function ImportedGames({
   const searchParams = useSearchParams();
 
   const [filters, setFilters] = useState<FiltersType>({
-    search: searchParams.get("search") || "",
+    search: searchParams.get("search") ?? "",
     storefront: (searchParams.get("storefront") as Storefront) || "ALL",
     sortBy: (searchParams.get("sortBy") as FiltersType["sortBy"]) || "name",
     sortOrder:
