@@ -188,6 +188,160 @@ const Caption = React.forwardRef<HTMLSpanElement, CaptionProps>(
 );
 Caption.displayName = "Caption";
 
+// Gaming Typography Variants
+const gamingHeadingVariants = cva("font-heading text-foreground", {
+  variants: {
+    size: {
+      xl: "text-heading-xl",
+      lg: "text-heading-lg",
+      md: "text-heading-md",
+      sm: "text-heading-sm",
+      xs: "text-heading-xs",
+    },
+    variant: {
+      default: "text-foreground",
+      neon: "neon-text text-gaming-primary",
+      gradient: "bg-gaming-gradient bg-clip-text text-transparent",
+      glitch: "text-gaming-accent animate-neon-flicker",
+    },
+    weight: {
+      normal: "font-normal",
+      medium: "font-medium",
+      semibold: "font-semibold",
+      bold: "font-bold",
+      extrabold: "font-extrabold",
+    },
+  },
+  defaultVariants: {
+    size: "lg",
+    variant: "default",
+    weight: "semibold",
+  },
+});
+
+export type GamingHeadingProps = {
+  asChild?: boolean;
+  level?: 1 | 2 | 3 | 4 | 5 | 6;
+} & React.HTMLAttributes<HTMLHeadingElement> &
+  VariantProps<typeof gamingHeadingVariants>;
+
+const GamingHeading = React.forwardRef<HTMLHeadingElement, GamingHeadingProps>(
+  (
+    { className, size, variant, weight, level = 1, asChild = false, ...props },
+    ref
+  ) => {
+    const Comp = asChild ? Slot : (`h${level}` as string);
+    return (
+      <Comp
+        className={cn(
+          gamingHeadingVariants({ size, variant, weight, className })
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+GamingHeading.displayName = "GamingHeading";
+
+// Gaming Body Text Variants
+const gamingBodyVariants = cva("font-body", {
+  variants: {
+    size: {
+      lg: "text-body-lg",
+      md: "text-body-md",
+      sm: "text-body-sm",
+      xs: "text-body-xs",
+    },
+    variant: {
+      default: "text-foreground",
+      muted: "text-muted-foreground",
+      accent: "text-gaming-accent",
+      success: "text-gaming-neon-green",
+      warning: "text-yellow-500",
+      error: "text-destructive",
+    },
+    emphasis: {
+      none: "",
+      subtle: "font-medium",
+      strong: "font-semibold text-gaming-primary",
+      neon: "font-bold text-gaming-primary animate-gaming-pulse",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+    variant: "default",
+    emphasis: "none",
+  },
+});
+
+export type GamingBodyProps = {
+  asChild?: boolean;
+} & React.HTMLAttributes<HTMLParagraphElement> &
+  VariantProps<typeof gamingBodyVariants>;
+
+const GamingBody = React.forwardRef<HTMLParagraphElement, GamingBodyProps>(
+  ({ className, size, variant, emphasis, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "p";
+    return (
+      <Comp
+        className={cn(
+          gamingBodyVariants({ size, variant, emphasis, className })
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+GamingBody.displayName = "GamingBody";
+
+// Gaming Badge Text
+const gamingBadgeVariants = cva(
+  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary/10 text-primary",
+        secondary: "bg-secondary text-secondary-foreground",
+        accent:
+          "bg-gaming-primary/20 text-gaming-primary border border-gaming-primary/30",
+        neon: "bg-gaming-primary/10 text-gaming-primary border border-gaming-primary/50 shadow-gaming-hover animate-gaming-pulse",
+        platform: "bg-gradient-to-r text-white font-semibold shadow-sm",
+        status: "font-medium",
+      },
+      size: {
+        sm: "px-2 py-1 text-xs",
+        md: "px-2.5 py-0.5 text-xs",
+        lg: "px-3 py-1 text-sm",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "md",
+    },
+  }
+);
+
+export type GamingBadgeProps = {
+  asChild?: boolean;
+} & React.HTMLAttributes<HTMLSpanElement> &
+  VariantProps<typeof gamingBadgeVariants>;
+
+const GamingBadge = React.forwardRef<HTMLSpanElement, GamingBadgeProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "span";
+    return (
+      <Comp
+        className={cn(gamingBadgeVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+GamingBadge.displayName = "GamingBadge";
+
 // Responsive Heading Component (automatically adjusts size based on screen)
 const responsiveHeadingVariants = cva("font-heading text-foreground", {
   variants: {
@@ -233,10 +387,16 @@ export {
   Body,
   Caption,
   ResponsiveHeading,
+  GamingHeading,
+  GamingBody,
+  GamingBadge,
   displayVariants,
   headingVariants,
   subheadingVariants,
   bodyVariants,
   captionVariants,
   responsiveHeadingVariants,
+  gamingHeadingVariants,
+  gamingBodyVariants,
+  gamingBadgeVariants,
 };

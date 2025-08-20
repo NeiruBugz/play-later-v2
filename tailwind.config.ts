@@ -13,6 +13,13 @@ const config = {
   theme: {
     fontFamily: {
       sans: ["var(--font-sans)", ...fontFamily.sans],
+      // Gaming-specific font families
+      display: ["var(--font-sans)", ...fontFamily.sans],
+      heading: ["var(--font-sans)", ...fontFamily.sans],
+      subheading: ["var(--font-sans)", ...fontFamily.sans],
+      body: ["var(--font-sans)", ...fontFamily.sans],
+      caption: ["var(--font-sans)", ...fontFamily.sans],
+      mono: [...fontFamily.mono],
     },
     container: {
       center: true,

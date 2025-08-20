@@ -109,65 +109,65 @@
 @layer utilities {
   /* Typography Utilities */
   .display-2xl {
-    @apply text-display-2xl font-display;
+    @apply font-display text-display-2xl;
   }
   .display-xl {
-    @apply text-display-xl font-display;
+    @apply font-display text-display-xl;
   }
   .display-lg {
-    @apply text-display-lg font-display;
+    @apply font-display text-display-lg;
   }
 
   .heading-xl {
-    @apply text-heading-xl font-heading;
+    @apply font-heading text-heading-xl;
   }
   .heading-lg {
-    @apply text-heading-lg font-heading;
+    @apply font-heading text-heading-lg;
   }
   .heading-md {
-    @apply text-heading-md font-heading;
+    @apply font-heading text-heading-md;
   }
   .heading-sm {
-    @apply text-heading-sm font-heading;
+    @apply font-heading text-heading-sm;
   }
   .heading-xs {
-    @apply text-heading-xs font-heading;
+    @apply font-heading text-heading-xs;
   }
 
   .subheading-xl {
-    @apply text-heading-xl font-subheading;
+    @apply font-subheading text-heading-xl;
   }
   .subheading-lg {
-    @apply text-heading-lg font-subheading;
+    @apply font-subheading text-heading-lg;
   }
   .subheading-md {
-    @apply text-heading-md font-subheading;
+    @apply font-subheading text-heading-md;
   }
   .subheading-sm {
-    @apply text-heading-sm font-subheading;
+    @apply font-subheading text-heading-sm;
   }
   .subheading-xs {
-    @apply text-heading-xs font-subheading;
+    @apply font-subheading text-heading-xs;
   }
 
   .body-lg {
-    @apply text-body-lg font-body;
+    @apply font-body text-body-lg;
   }
   .body-md {
-    @apply text-body-md font-body;
+    @apply font-body text-body-md;
   }
   .body-sm {
-    @apply text-body-sm font-body;
+    @apply font-body text-body-sm;
   }
   .body-xs {
-    @apply text-body-xs font-body;
+    @apply font-body text-body-xs;
   }
 
   .caption {
-    @apply text-caption font-caption;
+    @apply font-caption text-caption;
   }
   .overline {
-    @apply text-overline font-caption uppercase;
+    @apply font-caption text-overline uppercase;
   }
 
   /* Gaming Gradients */
@@ -546,5 +546,117 @@
   .gaming-button-hover:active {
     transform: translateY(1px);
     box-shadow: 0 2px 10px hsl(var(--gaming-primary) / 0.3);
+  }
+
+  /* Gaming Typography Utilities */
+  .text-gaming-gradient {
+    @apply bg-gaming-gradient bg-clip-text text-transparent;
+  }
+
+  .text-gaming-neon {
+    @apply text-gaming-primary;
+    text-shadow:
+      0 0 10px hsl(var(--gaming-primary) / 0.8),
+      0 0 20px hsl(var(--gaming-primary) / 0.4),
+      0 0 30px hsl(var(--gaming-primary) / 0.2);
+  }
+
+  .text-gaming-glow {
+    @apply text-gaming-accent;
+    text-shadow: 0 0 10px hsl(var(--gaming-accent) / 0.6);
+  }
+
+  /* Gaming Text Effects */
+  .text-gaming-highlight {
+    @apply relative;
+    background: linear-gradient(
+      135deg,
+      transparent 30%,
+      hsl(var(--gaming-primary) / 0.1) 50%,
+      transparent 70%
+    );
+    background-size: 200% 200%;
+    animation: shimmer 2s infinite;
+  }
+
+  .text-gaming-underline {
+    @apply relative;
+  }
+
+  .text-gaming-underline::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--gaming-primary)),
+      hsl(var(--gaming-accent))
+    );
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .text-gaming-underline:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* Platform-specific text colors */
+  .text-nintendo {
+    color: #e60012;
+  }
+
+  .text-playstation {
+    color: #0070d1;
+  }
+
+  .text-xbox {
+    color: #107c10;
+  }
+
+  .text-pc {
+    color: #1b2838;
+  }
+
+  /* Status text colors */
+  .text-status-backlog {
+    @apply text-muted-foreground;
+  }
+
+  .text-status-playing {
+    @apply text-gaming-accent;
+  }
+
+  .text-status-completed {
+    @apply text-gaming-neon-green;
+  }
+
+  .text-status-paused {
+    @apply text-yellow-500;
+  }
+
+  .text-status-dropped {
+    @apply text-destructive;
+  }
+
+  /* Typography responsive scaling */
+  @media (max-width: 640px) {
+    .text-gaming-responsive {
+      font-size: clamp(0.875rem, 4vw, 1.125rem);
+    }
+  }
+
+  @media (min-width: 641px) and (max-width: 768px) {
+    .text-gaming-responsive {
+      font-size: clamp(1rem, 3vw, 1.25rem);
+    }
+  }
+
+  @media (min-width: 769px) {
+    .text-gaming-responsive {
+      font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+    }
   }
 }
