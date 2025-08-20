@@ -144,14 +144,25 @@ const config = {
           "linear-gradient(135deg, hsl(var(--gaming-gradient-start)), hsl(var(--gaming-gradient-end)))",
         "gaming-gradient-hover":
           "linear-gradient(135deg, hsl(var(--gaming-gradient-start) / 0.8), hsl(var(--gaming-gradient-end) / 0.8))",
+        "gaming-gradient-vertical":
+          "linear-gradient(180deg, hsl(var(--gaming-gradient-start)), hsl(var(--gaming-gradient-end)))",
+        "gaming-gradient-radial":
+          "radial-gradient(ellipse at center, hsl(var(--gaming-gradient-start)), hsl(var(--gaming-gradient-end)))",
         "radial-gaming":
           "radial-gradient(circle at center, hsl(var(--gaming-primary) / 0.1), transparent)",
+        "platform-nintendo": "linear-gradient(135deg, #e60012, #ff4757)",
+        "platform-playstation": "linear-gradient(135deg, #0070d1, #4834d4)",
+        "platform-xbox": "linear-gradient(135deg, #107c10, #26c726)",
+        "platform-pc": "linear-gradient(135deg, #1b2838, #4b79a1)",
       },
       boxShadow: {
         neon: "0 0 20px hsl(var(--accent) / 0.3), 0 0 40px hsl(var(--accent) / 0.1)",
         "neon-strong":
-          "0 0 30px hsl(var(--accent) / 0.5), 0 0 60px hsl(var(--accent) / 0.2)",
+          "0 0 30px hsl(var(--accent) / 0.5), 0 0 60px hsl(var(--accent) / 0.2), 0 0 90px hsl(var(--accent) / 0.1)",
+        "neon-gaming":
+          "0 0 20px hsl(var(--gaming-primary) / 0.4), 0 0 40px hsl(var(--gaming-primary) / 0.2), 0 0 60px hsl(var(--gaming-primary) / 0.1)",
         gaming: "0 4px 20px hsl(var(--gaming-primary) / 0.3)",
+        "gaming-hover": "0 0 20px hsl(var(--gaming-primary) / 0.5)",
       },
       keyframes: {
         "accordion-down": {
@@ -188,12 +199,17 @@ const config = {
             transform: "translateY(-4px)",
           },
         },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "pulse-neon": "pulse-neon 2s ease-in-out infinite",
         float: "float 3s ease-in-out infinite",
+        shimmer: "shimmer 2s infinite ease-in-out",
       },
     },
   },

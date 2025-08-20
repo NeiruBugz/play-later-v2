@@ -170,6 +170,7 @@
     @apply text-overline font-caption uppercase;
   }
 
+  /* Gaming Gradients */
   .gaming-gradient {
     background: linear-gradient(
       135deg,
@@ -186,6 +187,23 @@
     );
   }
 
+  .gaming-gradient-vertical {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--gaming-gradient-start)),
+      hsl(var(--gaming-gradient-end))
+    );
+  }
+
+  .gaming-gradient-radial {
+    background: radial-gradient(
+      ellipse at center,
+      hsl(var(--gaming-gradient-start)),
+      hsl(var(--gaming-gradient-end))
+    );
+  }
+
+  /* Gaming Border Effects */
   .gaming-border-gradient {
     background: linear-gradient(
       135deg,
@@ -201,13 +219,133 @@
     border-radius: calc(var(--radius) - 2px);
   }
 
+  .gaming-border-neon {
+    border: 1px solid hsl(var(--gaming-primary) / 0.8);
+    box-shadow:
+      inset 0 0 10px hsl(var(--gaming-primary) / 0.1),
+      0 0 10px hsl(var(--gaming-primary) / 0.2);
+  }
+
+  /* Enhanced Neon Effects */
   .neon-glow {
     box-shadow:
       0 0 20px hsl(var(--accent) / 0.3),
       0 0 40px hsl(var(--accent) / 0.1);
   }
 
+  .neon-glow-strong {
+    box-shadow:
+      0 0 30px hsl(var(--accent) / 0.5),
+      0 0 60px hsl(var(--accent) / 0.2),
+      0 0 90px hsl(var(--accent) / 0.1);
+  }
+
+  .neon-glow-gaming {
+    box-shadow:
+      0 0 20px hsl(var(--gaming-primary) / 0.4),
+      0 0 40px hsl(var(--gaming-primary) / 0.2),
+      0 0 60px hsl(var(--gaming-primary) / 0.1);
+  }
+
+  .neon-text {
+    text-shadow:
+      0 0 10px hsl(var(--gaming-primary) / 0.8),
+      0 0 20px hsl(var(--gaming-primary) / 0.4),
+      0 0 30px hsl(var(--gaming-primary) / 0.2);
+  }
+
+  /* Gaming UI Elements */
   .gaming-pill {
     border-radius: 9999px;
+  }
+
+  .gaming-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    transition: all 0.3s ease;
+  }
+
+  .gaming-card:hover {
+    border-color: hsl(var(--gaming-primary) / 0.5);
+    box-shadow: 0 0 20px hsl(var(--gaming-primary) / 0.1);
+    transform: translateY(-2px);
+  }
+
+  .gaming-button {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gaming-primary)),
+      hsl(var(--gaming-secondary))
+    );
+    border: none;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gaming-button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  .gaming-button:hover::before {
+    left: 100%;
+  }
+
+  .gaming-button:hover {
+    box-shadow: 0 0 20px hsl(var(--gaming-primary) / 0.5);
+    transform: translateY(-1px);
+  }
+
+  /* Platform-specific Effects */
+  .platform-nintendo {
+    background: linear-gradient(135deg, #e60012, #ff4757);
+  }
+
+  .platform-playstation {
+    background: linear-gradient(135deg, #0070d1, #4834d4);
+  }
+
+  .platform-xbox {
+    background: linear-gradient(135deg, #107c10, #26c726);
+  }
+
+  .platform-pc {
+    background: linear-gradient(135deg, #1b2838, #4b79a1);
+  }
+
+  /* Loading and Animation States */
+  .gaming-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--gaming-primary) / 0.1) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite ease-in-out;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 }
