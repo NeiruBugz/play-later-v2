@@ -4,18 +4,12 @@ import { type BacklogItem, type Game } from "@prisma/client";
 import Link from "next/link";
 import { useState } from "react";
 
-import { cn, getGameUrl, normalizeString } from "../lib";
+import { cn, getGameUrl } from "../lib";
 import { IgdbImage } from "./igdb-image";
-import { Heading } from "./typography";
+import { Caption } from "./typography";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Card, CardHeader } from "./ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Card } from "./ui/card";
 
 type GameCardProps = {
   game: Game;
@@ -46,7 +40,7 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
 
   return (
     <Card
-      className="group h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+      className="group h-full overflow-hidden rounded-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
       onMouseEnter={() => {
         setIsHovered(true);
       }}
@@ -64,7 +58,6 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
           className={`object-cover transition-transform duration-500 ${isHovered ? "scale-110" : "scale-100"}`}
         />
 
-        {/* Status Badge */}
         <div className="absolute left-2 top-2">
           <Badge
             variant="secondary"
@@ -74,7 +67,6 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
           </Badge>
         </div>
 
-        {/* Multiple Platforms Indicator */}
         {platforms && platforms.length > 1 && (
           <div className="absolute right-2 top-2">
             <Badge variant="secondary" className="text-xs">
@@ -83,11 +75,16 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
           </div>
         )}
 
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="absolute inset-0 transition-opacity duration-300 group-hover:bg-slate-900/50 group-hover:opacity-100" />
 
-        {/* Hover Actions */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <Caption
+            variant="default"
+            className="line-clamp-2 text-center text-sm font-medium leading-tight text-white"
+            title={game.title}
+          >
+            {game.title}
+          </Caption>
           <Link href={getGameUrl(game.id)}>
             <Button variant="secondary" size="sm">
               View Details
@@ -95,33 +92,6 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
           </Link>
         </div>
       </div>
-
-      <CardHeader className="flex-1 p-3 pb-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Heading
-                level={3}
-                size="sm"
-                className="line-clamp-2 cursor-help text-sm font-medium leading-tight"
-                title={game.title}
-              >
-                {game.title}
-              </Heading>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{game.title}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {/* Platform Info */}
-        {primaryPlatform?.platform && (
-          <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
-            {normalizeString(primaryPlatform.platform)}
-          </p>
-        )}
-      </CardHeader>
 
       {/* Footer only visible on non-hover for cleaner look */}
     </Card>

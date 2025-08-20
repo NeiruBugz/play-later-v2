@@ -10,7 +10,7 @@ import type {
   CollectionService as CollectionServiceInterface,
 } from "./types";
 
-const ITEMS_PER_PAGE = 24;
+const ITEMS_PER_PAGE = 21;
 const DEFAULT_PAGE = 1;
 
 export class CollectionService

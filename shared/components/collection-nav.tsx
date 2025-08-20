@@ -46,7 +46,7 @@ const collectionNavVariants = cva(
         glass: "bg-background/80 backdrop-blur-lg border border-white/10",
         minimal: "bg-gaming-primary/3 border border-gaming-primary/8",
         clean: "bg-background border border-gaming-primary/6 shadow-sm",
-        editorial: "bg-background border border-border/30",
+        editorial: "bg-slate-400/30 border border-border/30",
       },
       size: {
         sm: "text-xs",
@@ -72,7 +72,7 @@ const collectionNavItemVariants = cva(
         neon: "hover:bg-gaming-primary/30 hover:text-gaming-primary hover:shadow-neon",
         minimal: "hover:bg-gaming-primary/8 hover:text-gaming-primary/90",
         clean: "hover:bg-gaming-primary/5 hover:text-gaming-primary/80",
-        editorial: "hover:bg-muted/60 hover:text-foreground",
+        editorial: "hover:bg-slate-400/60 hover:text-slate-900",
       },
       active: {
         true: "",

@@ -581,8 +581,10 @@ const igdbApi = {
         "games.name",
         "games.cover.image_id",
         "games.game_type",
+        "games.first_release_date",
       ])
       .where(`id = ${franchiseId}`)
+      .sort("first_release_date", "desc")
       .build();
 
     return this.request<FranchiseGamesResponse[]>({
