@@ -88,9 +88,11 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
 
         {/* Hover Actions */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <Button variant="secondary" size="sm" asChild>
-            <Link href={getGameUrl(game.id)}>View Details</Link>
-          </Button>
+          <Link href={getGameUrl(game.id)}>
+            <Button variant="secondary" size="sm">
+              View Details
+            </Button>
+          </Link>
         </div>
       </div>
 

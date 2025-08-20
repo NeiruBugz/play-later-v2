@@ -55,34 +55,32 @@ export function CollectionNav({
               : pathname.startsWith(item.href);
 
           return (
-            <Button
-              key={item.href}
-              variant={isActive ? "default" : "ghost"}
-              size="sm"
-              asChild
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-background text-foreground shadow-sm"
-                  : "hover:bg-background/60"
-              )}
-            >
-              <Link href={item.href} title={item.description}>
+            <Link key={item.href} href={item.href} title={item.description}>
+              <Button
+                variant={isActive ? "default" : "ghost"}
+                size="sm"
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-background text-foreground shadow-sm"
+                    : "hover:bg-background/60"
+                )}
+              >
                 <IconComponent className="size-4" />
                 <span className="hidden sm:inline">{item.label}</span>
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           );
         })}
       </nav>
 
       {showAddButton && (
-        <Button asChild className="flex items-center gap-2">
-          <Link href="/collection/add-game">
+        <Link href="/collection/add-game">
+          <Button className="flex items-center gap-2">
             <Plus className="size-4" />
             Add Game
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       )}
       {(showShareWishlist || isWishlist) && (
         <ShareWishlist userName={userName} />

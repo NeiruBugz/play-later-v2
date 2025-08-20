@@ -72,9 +72,11 @@ export function ListView({
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={getGameUrl(game.id)}>View Details</Link>
-                  </Button>
+                  <Link href={getGameUrl(game.id)}>
+                    <Button variant="outline" size="sm">
+                      View Details
+                    </Button>
+                  </Link>
                 </div>
               </div>
 

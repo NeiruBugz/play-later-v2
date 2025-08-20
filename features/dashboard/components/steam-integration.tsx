@@ -37,17 +37,20 @@ export async function SteamIntegration() {
               <span className="text-sm font-medium">Connected</span>
             </div>
             {steamProfileURL && (
-              <Button variant="outline" size="sm" asChild>
-                <Link
-                  href={steamProfileURL}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <Link
+                href={steamProfileURL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="flex items-center gap-2"
                 >
                   <ExternalLink className="size-4" />
                   View Profile
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             )}
           </div>
         ) : (
@@ -56,15 +59,16 @@ export async function SteamIntegration() {
               <div className="size-2 rounded-full bg-muted-foreground" />
               <span className="text-sm">Not connected</span>
             </div>
-            <Button variant="outline" size="sm" asChild>
-              <Link
-                href="/user/settings?tab=integrations"
+            <Link href="/user/settings?tab=integrations">
+              <Button
+                variant="outline"
+                size="sm"
                 className="flex items-center gap-2"
               >
                 <FaSteam className="size-4" />
                 Connect Steam
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         )}
       </CardContent>

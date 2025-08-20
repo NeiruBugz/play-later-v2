@@ -49,9 +49,11 @@ export function FranchiseGame({
         )}
 
         <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button asChild variant="secondary" size="sm">
-            <Link href={gameLink}>View Details</Link>
-          </Button>
+          <Link href={gameLink}>
+            <Button variant="secondary" size="sm">
+              View Details
+            </Button>
+          </Link>
         </div>
       </div>
       <h3 className="mt-2 truncate text-sm font-medium">{game.name}</h3>
