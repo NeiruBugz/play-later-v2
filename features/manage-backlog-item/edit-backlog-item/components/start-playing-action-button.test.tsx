@@ -43,6 +43,12 @@ const actions = {
 };
 
 describe("StartPlayingActionButton", () => {
+  const mockGame = {
+    id: "game-1",
+    title: "Test Game",
+    coverImage: "https://example.com/cover.jpg",
+  };
+
   const mockBacklogItem = {
     id: 1,
     userId: "user-1",
@@ -70,7 +76,10 @@ describe("StartPlayingActionButton", () => {
     it("should render the start playing button", () => {
       // Act
       renderWithTestProviders(
-        <StartPlayingActionButton backlogItems={[mockBacklogItem]} />
+        <StartPlayingActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Assert
@@ -80,9 +89,12 @@ describe("StartPlayingActionButton", () => {
 
     it("should call updateBacklogItemAction when clicked", async () => {
       // Arrange
-      mockUpdateBacklogItemAction.mockResolvedValue(undefined);
+      mockUpdateBacklogItemAction.mockResolvedValue({ data: undefined });
       renderWithTestProviders(
-        <StartPlayingActionButton backlogItems={[mockBacklogItem]} />
+        <StartPlayingActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Act
@@ -101,7 +113,10 @@ describe("StartPlayingActionButton", () => {
       const error = new Error("Network error");
       mockUpdateBacklogItemAction.mockRejectedValue(error);
       renderWithTestProviders(
-        <StartPlayingActionButton backlogItems={[mockBacklogItem]} />
+        <StartPlayingActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Act
@@ -128,7 +143,10 @@ describe("StartPlayingActionButton", () => {
     it("should not render the button", () => {
       // Act
       renderWithTestProviders(
-        <StartPlayingActionButton backlogItems={[mockBacklogItem]} />
+        <StartPlayingActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Assert
@@ -144,7 +162,9 @@ describe("StartPlayingActionButton", () => {
 
     it("should render button but clicking should not call action", async () => {
       // Act
-      renderWithTestProviders(<StartPlayingActionButton backlogItems={[]} />);
+      renderWithTestProviders(
+        <StartPlayingActionButton game={mockGame} backlogItems={[]} />
+      );
 
       // Assert - button should still render (component only hides for PLAYING status)
       expect(elements.getStartPlayingButton()).toBeInTheDocument();
@@ -164,7 +184,7 @@ describe("StartPlayingActionButton", () => {
     it("should render button but clicking should not call action", async () => {
       // Act
       renderWithTestProviders(
-        <StartPlayingActionButton backlogItems={undefined} />
+        <StartPlayingActionButton game={mockGame} backlogItems={undefined} />
       );
 
       // Assert - button should still render

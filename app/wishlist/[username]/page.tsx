@@ -3,9 +3,10 @@ import { auth } from "@/auth";
 import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Header } from "@/shared/components/header";
-import { type GenericPageProps } from "@/shared/types";
 
-export default async function SharedWishlistPage(props: GenericPageProps) {
+export default async function SharedWishlistPage(
+  props: PageProps<"/wishlist/[username]">
+) {
   const session = await auth();
   const { username } = await props.params;
   const decodedUsername = decodeURIComponent(username);

@@ -43,6 +43,12 @@ const actions = {
 };
 
 describe("MoveToBacklogActionButton", () => {
+  const mockGame = {
+    id: "game-1",
+    title: "Test Game",
+    coverImage: "https://example.com/cover.jpg",
+  };
+
   const mockBacklogItem = {
     id: 1,
     userId: "user-1",
@@ -70,7 +76,10 @@ describe("MoveToBacklogActionButton", () => {
     it("should render the move to backlog button", () => {
       // Act
       renderWithTestProviders(
-        <MoveToBacklogActionButton backlogItems={[mockBacklogItem]} />
+        <MoveToBacklogActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Assert
@@ -80,9 +89,12 @@ describe("MoveToBacklogActionButton", () => {
 
     it("should call updateBacklogItemAction when clicked", async () => {
       // Arrange
-      mockUpdateBacklogItemAction.mockResolvedValue(undefined);
+      mockUpdateBacklogItemAction.mockResolvedValue({ data: undefined });
       renderWithTestProviders(
-        <MoveToBacklogActionButton backlogItems={[mockBacklogItem]} />
+        <MoveToBacklogActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Act
@@ -101,7 +113,10 @@ describe("MoveToBacklogActionButton", () => {
       const error = new Error("Network error");
       mockUpdateBacklogItemAction.mockRejectedValue(error);
       renderWithTestProviders(
-        <MoveToBacklogActionButton backlogItems={[mockBacklogItem]} />
+        <MoveToBacklogActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Act
@@ -128,7 +143,10 @@ describe("MoveToBacklogActionButton", () => {
     it("should not render the button", () => {
       // Act
       renderWithTestProviders(
-        <MoveToBacklogActionButton backlogItems={[mockBacklogItem]} />
+        <MoveToBacklogActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Assert
@@ -148,9 +166,12 @@ describe("MoveToBacklogActionButton", () => {
 
     it("should render the button and allow moving to backlog", async () => {
       // Arrange
-      mockUpdateBacklogItemAction.mockResolvedValue(undefined);
+      mockUpdateBacklogItemAction.mockResolvedValue({ data: undefined });
       renderWithTestProviders(
-        <MoveToBacklogActionButton backlogItems={[mockBacklogItem]} />
+        <MoveToBacklogActionButton
+          game={mockGame}
+          backlogItems={[mockBacklogItem]}
+        />
       );
 
       // Act
@@ -172,7 +193,9 @@ describe("MoveToBacklogActionButton", () => {
 
     it("should render button but clicking should not call action", async () => {
       // Act
-      renderWithTestProviders(<MoveToBacklogActionButton backlogItems={[]} />);
+      renderWithTestProviders(
+        <MoveToBacklogActionButton game={mockGame} backlogItems={[]} />
+      );
 
       // Assert - button should still render (component only hides for TO_PLAY status)
       expect(elements.getMoveToBacklogButton()).toBeInTheDocument();
@@ -192,7 +215,7 @@ describe("MoveToBacklogActionButton", () => {
     it("should render button but clicking should not call action", async () => {
       // Act
       renderWithTestProviders(
-        <MoveToBacklogActionButton backlogItems={undefined} />
+        <MoveToBacklogActionButton game={mockGame} backlogItems={undefined} />
       );
 
       // Assert - button should still render

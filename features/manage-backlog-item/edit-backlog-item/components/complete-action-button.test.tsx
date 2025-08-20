@@ -80,7 +80,7 @@ describe("CompleteActionButton", () => {
 
     it("should call updateBacklogItemAction when clicked", async () => {
       // Arrange
-      mockUpdateBacklogItemAction.mockResolvedValue(undefined);
+      mockUpdateBacklogItemAction.mockResolvedValue({ data: undefined });
       renderWithTestProviders(
         <CompleteActionButton backlogItems={[mockBacklogItem]} />
       );

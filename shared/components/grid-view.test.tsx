@@ -3,6 +3,8 @@ import { BacklogItemStatus } from "@prisma/client";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { GameWithBacklogItems } from "@/features/view-wishlist/types";
+
 import { GridView } from "./grid-view";
 
 const elements = {
@@ -13,20 +15,22 @@ const elements = {
 };
 
 describe("GridView", () => {
-  const mockGameWithBacklogItems = [
+  const mockGameWithBacklogItems: GameWithBacklogItems[] = [
     {
       game: {
         id: "game-1",
         title: "Test Game 1",
         coverImage: "https://example.com/cover1.jpg",
         igdbId: 12345,
-        summary: "Test game summary",
-        aggregatedRating: 85,
-        totalRatingCount: 100,
+        description: "Test game description",
         releaseDate: new Date("2024-01-01"),
         createdAt: new Date(),
         updatedAt: new Date(),
-        slug: "test-game-1",
+        hltbId: null,
+        mainStory: null,
+        mainExtra: null,
+        completionist: null,
+        steamAppId: null,
       },
       backlogItems: [
         {
@@ -49,13 +53,15 @@ describe("GridView", () => {
         title: "Test Game 2",
         coverImage: "https://example.com/cover2.jpg",
         igdbId: 67890,
-        summary: "Another test game",
-        aggregatedRating: 90,
-        totalRatingCount: 200,
+        description: "Another test game",
         releaseDate: new Date("2024-02-01"),
         createdAt: new Date(),
         updatedAt: new Date(),
-        slug: "test-game-2",
+        hltbId: null,
+        mainStory: null,
+        mainExtra: null,
+        completionist: null,
+        steamAppId: null,
       },
       backlogItems: [
         {
@@ -165,13 +171,15 @@ describe("GridView", () => {
           title: "Multi-Platform Game",
           coverImage: "https://example.com/multi.jpg",
           igdbId: 99999,
-          summary: "Game on multiple platforms",
-          aggregatedRating: 95,
-          totalRatingCount: 300,
+          description: "Game on multiple platforms",
           releaseDate: new Date("2024-03-01"),
           createdAt: new Date(),
           updatedAt: new Date(),
-          slug: "multi-platform-game",
+          hltbId: null,
+          mainStory: null,
+          mainExtra: null,
+          completionist: null,
+          steamAppId: null,
         },
         backlogItems: [
           {
@@ -225,13 +233,15 @@ describe("GridView", () => {
           title: "Game Without Backlog",
           coverImage: "https://example.com/empty.jpg",
           igdbId: 11111,
-          summary: "Game without backlog items",
-          aggregatedRating: 80,
-          totalRatingCount: 50,
+          description: "Game without backlog items",
           releaseDate: new Date("2024-04-01"),
           createdAt: new Date(),
           updatedAt: new Date(),
-          slug: "game-without-backlog",
+          hltbId: null,
+          mainStory: null,
+          mainExtra: null,
+          completionist: null,
+          steamAppId: null,
         },
         backlogItems: [],
       },

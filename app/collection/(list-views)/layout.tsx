@@ -5,11 +5,11 @@ import { CollectionNav } from "@/shared/components/collection-nav";
 import { Header } from "@/shared/components/header";
 import { Body, ResponsiveHeading } from "@/shared/components/typography";
 
-export default async function CollectionLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function CollectionLayout(
+  props: LayoutProps<"/collection">
+) {
+  const { children } = props;
+
   const userResult = await getUserInfo();
 
   if (userResult.data == null) {

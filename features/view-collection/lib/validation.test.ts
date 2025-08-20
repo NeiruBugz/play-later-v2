@@ -296,21 +296,6 @@ describe("FilterParamsSchema", () => {
       }
     });
 
-    it("should reject non-number page values", () => {
-      const invalidPages = ["abc", "1.5", true, null, {}, []];
-
-      invalidPages.forEach((page) => {
-        const result = FilterParamsSchema.safeParse({
-          platform: "",
-          status: "PLAYING",
-          search: "",
-          page,
-        });
-
-        expect(result.success).toBe(false);
-      });
-    });
-
     it("should handle decimal numbers as page (should fail)", () => {
       const result = FilterParamsSchema.safeParse({
         platform: "",

@@ -90,11 +90,8 @@ export const metadata: Metadata = {
   category: "entertainment",
 };
 
-interface RootLayoutProps {
-  readonly children: React.ReactNode;
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout(props: LayoutProps<"/">) {
+  const { children } = props;
   return (
     <html lang="en" suppressHydrationWarning className={fontSans.variable}>
       <body

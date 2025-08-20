@@ -6,7 +6,7 @@ export const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),
   status: z.union([z.nativeEnum(BacklogItemStatus), z.string()]).optional(),
   search: z.string().optional().default(""),
-  page: z.number().optional().default(1),
+  page: z.coerce.number().optional().default(1),
 });
 
 export type FilterParams = z.infer<typeof FilterParamsSchema>;

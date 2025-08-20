@@ -9,12 +9,16 @@ import { ListView } from "@/shared/components/list-view";
 import { useGetCollection } from "../hooks/use-get-collection";
 import { Pagination } from "./pagination";
 
-export function CollectionList({ params }: { params: Record<string, string> }) {
+export function CollectionList(props: {
+  params: Record<string, string | string[] | undefined>;
+}) {
+  const { params } = props;
+
   const validatedParams = FilterParamsSchema.safeParse({
     platform: params.platform || "",
     status: params.status || "",
     search: params.search || "",
-    page: Number(params.page) || 1,
+    page: params.page,
   });
 
   const filterParams = validatedParams.success

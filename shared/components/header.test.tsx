@@ -99,7 +99,7 @@ describe("Header", () => {
       // Assert
       const mobileButton = elements.getMobileMenuButton();
       expect(mobileButton).toBeInTheDocument();
-      expect(mobileButton.closest("div")).toHaveClass(
+      expect(mobileButton?.closest("div")).toHaveClass(
         "mr-4",
         "flex",
         "md:hidden"

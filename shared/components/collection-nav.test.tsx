@@ -411,7 +411,7 @@ describe("CollectionNav", () => {
       // Assert
       const nav = elements.getNavContainer();
       expect(nav).toBeInTheDocument();
-      expect(nav.tagName.toLowerCase()).toBe("nav");
+      expect(nav?.tagName.toLowerCase()).toBe("nav");
     });
 
     it("should have descriptive title attributes", () => {
