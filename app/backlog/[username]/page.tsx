@@ -6,10 +6,9 @@ import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { BacklogStatusMapper, normalizeString } from "@/shared/lib";
 
-export default async function UsersBacklogPage(props: {
-  params: Promise<Record<string, string>>;
-  searchParams: Promise<URLSearchParams>;
-}) {
+export default async function UsersBacklogPage(
+  props: PageProps<"/backlog/[username]">
+) {
   const awaitedParams = await props.params;
   const [{ data: userGamesList }, session] = await Promise.all([
     await getUsersBacklog({

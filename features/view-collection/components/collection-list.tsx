@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FilterParamsSchema } from "@/features/view-collection/lib/validation";
 import { GridView } from "@/shared/components/grid-view";
 import { ListView } from "@/shared/components/list-view";
 
@@ -9,13 +10,15 @@ import { Pagination } from "./pagination";
 export async function CollectionList({
   params,
 }: {
-  params: Record<string, string>;
+  params: Record<string, string | string[] | undefined>;
 }) {
+  const parsedParams = FilterParamsSchema.parse(params);
+
   const { data, serverError } = await getUserGamesWithGroupedBacklogPaginated({
-    platform: params.platform,
-    status: params.status,
-    search: params.search,
-    page: Number(params.page) || 1,
+    platform: parsedParams.platform,
+    status: parsedParams.status,
+    search: parsedParams.search,
+    page: parsedParams.page,
   });
 
   if (serverError !== undefined) {

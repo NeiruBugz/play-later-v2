@@ -24,14 +24,13 @@ import {
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import igdbApi from "@/shared/lib/igdb";
-import { type GenericPageProps } from "@/shared/types";
 
 function determineGameType(gameId: string) {
   const isNumeric = !isNaN(Number(gameId)) && Number.isInteger(Number(gameId));
   return isNumeric ? "EXTERNAL" : "INTERNAL";
 }
 
-export default async function GamePage(props: GenericPageProps) {
+export default async function GamePage(props: PageProps<"/game/[id]">) {
   const awaitedParams = await props.params;
   const gameType = determineGameType(awaitedParams.id);
 

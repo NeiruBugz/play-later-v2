@@ -1,8 +1,7 @@
 "use client";
 
-import { BacklogItem, Game } from "@prisma/client";
+import { type BacklogItem, type Game } from "@prisma/client";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { cn, getGameUrl, normalizeString } from "../lib";
@@ -10,7 +9,7 @@ import { IgdbImage } from "./igdb-image";
 import { Heading } from "./typography";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Card, CardFooter, CardHeader } from "./ui/card";
+import { Card, CardHeader } from "./ui/card";
 import {
   Tooltip,
   TooltipContent,
@@ -18,12 +17,11 @@ import {
   TooltipTrigger,
 } from "./ui/tooltip";
 
-interface GameCardProps {
+type GameCardProps = {
   game: Game;
   platforms?: BacklogItem[];
-  displayMode: "combined" | "separate";
   currentPlatform?: BacklogItem;
-}
+};
 
 const statusColors = {
   TO_PLAY: "bg-yellow-500 text-white",
@@ -41,14 +39,7 @@ const statusLabels = {
   WISHLIST: "Wishlist",
 };
 
-export function GameCard({
-  game,
-  platforms,
-  displayMode,
-  currentPlatform,
-}: GameCardProps) {
-  const params = useSearchParams();
-  const cardViewMode = params.get("cardMode") || "combined";
+export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const primaryPlatform = currentPlatform || platforms?.[0];
   const status = primaryPlatform?.status || "TO_PLAY";
@@ -56,8 +47,12 @@ export function GameCard({
   return (
     <Card
       className="group h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => {
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+      }}
     >
       <div className="relative aspect-[3/4] overflow-hidden">
         <IgdbImage
