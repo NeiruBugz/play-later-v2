@@ -22,6 +22,49 @@ const config = {
       },
     },
     extend: {
+      // Spacing Scale - Gaming-focused spacing system
+      spacing: {
+        // Micro spacing for tight layouts
+        "0.5": "0.125rem", // 2px
+        "1.5": "0.375rem", // 6px
+        "2.5": "0.625rem", // 10px
+        "3.5": "0.875rem", // 14px
+
+        // Component spacing
+        "4.5": "1.125rem", // 18px
+        "5.5": "1.375rem", // 22px
+        "6.5": "1.625rem", // 26px
+        "7.5": "1.875rem", // 30px
+
+        // Layout spacing
+        "8.5": "2.125rem", // 34px
+        "9.5": "2.375rem", // 38px
+        "11": "2.75rem", // 44px
+        "13": "3.25rem", // 52px
+        "15": "3.75rem", // 60px
+        "17": "4.25rem", // 68px
+        "19": "4.75rem", // 76px
+        "21": "5.25rem", // 84px
+        "23": "5.75rem", // 92px
+
+        // Large layout spacing
+        "26": "6.5rem", // 104px
+        "28": "7rem", // 112px
+        "30": "7.5rem", // 120px
+        "32": "8rem", // 128px
+        "36": "9rem", // 144px
+        "40": "10rem", // 160px
+        "44": "11rem", // 176px
+        "48": "12rem", // 192px
+        "52": "13rem", // 208px
+        "56": "14rem", // 224px
+        "60": "15rem", // 240px
+        "64": "16rem", // 256px
+        "72": "18rem", // 288px
+        "80": "20rem", // 320px
+        "96": "24rem", // 384px
+      },
+
       // Typography Scale - Unified font sizes with responsive behavior
       fontSize: {
         // Display sizes for hero sections

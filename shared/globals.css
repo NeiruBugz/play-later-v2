@@ -348,4 +348,71 @@
       background-position: 200% 0;
     }
   }
+
+  /* Gaming-specific spacing utilities */
+  .gaming-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .gaming-section {
+    @apply py-8 sm:py-12 lg:py-16;
+  }
+
+  .gaming-card-spacing {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  .gaming-gap-xs {
+    @apply gap-2 sm:gap-3;
+  }
+
+  .gaming-gap-sm {
+    @apply gap-3 sm:gap-4;
+  }
+
+  .gaming-gap-md {
+    @apply gap-4 sm:gap-6;
+  }
+
+  .gaming-gap-lg {
+    @apply gap-6 sm:gap-8;
+  }
+
+  .gaming-gap-xl {
+    @apply gap-8 sm:gap-12;
+  }
+
+  /* Component-specific spacing */
+  .game-grid {
+    @apply grid gap-4 sm:gap-6;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  @media (min-width: 768px) {
+    .game-grid {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+  }
+
+  .game-list {
+    @apply space-y-3 sm:space-y-4;
+  }
+
+  /* Mobile-first responsive spacing */
+  .mobile-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .mobile-margin {
+    @apply mx-4 sm:mx-6 lg:mx-8;
+  }
+
+  /* Gaming UI spacing patterns */
+  .gaming-header-spacing {
+    @apply px-4 py-4 sm:px-6 lg:px-8;
+  }
+
+  .gaming-content-spacing {
+    @apply px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12;
+  }
 }
