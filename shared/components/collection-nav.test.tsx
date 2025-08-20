@@ -2,7 +2,7 @@ import { renderWithTestProviders } from "@/test/utils/test-provider";
 import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CollectionNav } from "./collection-nav";
+import { EditorialCollectionNav as CollectionNav } from "./collection-nav";
 
 // Mock Next.js navigation
 const mockPathname = vi.fn();
@@ -288,9 +288,7 @@ describe("CollectionNav", () => {
       mockPathname.mockReturnValue("/collection");
 
       // Act
-      renderWithTestProviders(
-        <CollectionNav showShareWishlist={true} userName="testuser" />
-      );
+      renderWithTestProviders(<CollectionNav userName="testuser" />);
 
       // Assert
       expect(elements.getShareWishlistComponent()).toBeInTheDocument();
@@ -304,9 +302,7 @@ describe("CollectionNav", () => {
       mockPathname.mockReturnValue("/collection/wishlist");
 
       // Act
-      renderWithTestProviders(
-        <CollectionNav showShareWishlist={false} userName="testuser" />
-      );
+      renderWithTestProviders(<CollectionNav userName="testuser" />);
 
       // Assert
       expect(elements.getShareWishlistComponent()).toBeInTheDocument();

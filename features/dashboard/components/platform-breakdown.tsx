@@ -1,6 +1,7 @@
 import { Monitor } from "lucide-react";
 
 import { getPlatformBreakdown } from "@/features/dashboard/server-actions/get-platform-breakdown";
+import { Body, Caption, Heading } from "@/shared/components/typography";
 import {
   Card,
   CardContent,
@@ -22,7 +23,7 @@ export async function PlatformBreakdown() {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <Monitor className="size-5" />
+          <Monitor />
           Platform & Format
         </CardTitle>
         <CardDescription>Your collection breakdown</CardDescription>
@@ -30,17 +31,21 @@ export async function PlatformBreakdown() {
       <CardContent className="space-y-4">
         {platformStatsResult?.data && platformStatsResult?.data?.length > 0 && (
           <div>
-            <h4 className="mb-2 text-sm font-medium">Top Platforms</h4>
+            <Heading asChild className="mb-2">
+              <h4>Top Platforms</h4>
+            </Heading>
             <div className="space-y-2">
               {platformStatsResult?.data?.map((platform) => (
                 <div
                   key={platform.platform}
                   className="flex items-center justify-between"
                 >
-                  <span className="text-sm text-muted-foreground">
+                  <Body size="sm" variant="muted">
                     {normalizeString(platform.platform)}
-                  </span>
-                  <span className="font-semibold">{platform._count}</span>
+                  </Body>
+                  <Body size="sm" className="font-semibold">
+                    {platform._count}
+                  </Body>
                 </div>
               ))}
             </div>
@@ -50,21 +55,23 @@ export async function PlatformBreakdown() {
         {acquisitionStatsResult?.data &&
           acquisitionStatsResult?.data?.length > 0 && (
             <div>
-              <h4 className="mb-2 text-sm font-medium">Acquisition Type</h4>
+              <Heading asChild className="mb-2">
+                <h4>Acquisition Type</h4>
+              </Heading>
               <div className="space-y-2">
                 {acquisitionStatsResult?.data?.map((acquisition) => (
                   <div
                     key={acquisition.type}
                     className="flex items-center justify-between"
                   >
-                    <span className="text-sm capitalize text-muted-foreground">
+                    <Body size="sm" variant="muted" className="capitalize">
                       {acquisition.type.toLowerCase()}
-                    </span>
+                    </Body>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {acquisition.percentage}%
-                      </span>
-                      <span className="font-semibold">{acquisition.count}</span>
+                      <Caption>{acquisition.percentage}%</Caption>
+                      <Body size="sm" className="font-semibold">
+                        {acquisition.count}
+                      </Body>
                     </div>
                   </div>
                 ))}

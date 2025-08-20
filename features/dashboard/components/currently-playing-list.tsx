@@ -1,7 +1,9 @@
+import { BacklogItem, Game } from "@prisma/client";
 import { cache } from "react";
 
 import { getCurrentlyPlayingGamesInBacklog } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
-import { BacklogItemCard } from "@/shared/components/backlog-item-card";
+import { GameCard } from "@/shared/components/game-card";
+import { Body } from "@/shared/components/typography";
 
 const getCurrentlyPlayingGames = cache(async () =>
   getCurrentlyPlayingGamesInBacklog()
@@ -12,32 +14,25 @@ export async function CurrentlyPlayingList() {
     await getCurrentlyPlayingGames();
 
   if (serverError) {
-    return <div>{serverError}</div>;
+    return <Body variant="muted">Couldn&apos;t load games.</Body>;
   }
 
   return (
-    <div className="flex w-full max-w-[420px] justify-start gap-3 overflow-x-auto">
+    <div className="flex w-full gap-3 overflow-x-auto pb-2">
       {currentlyPlayingGames?.length ? (
         currentlyPlayingGames.map((playingItem) => {
           const { game, backlogItems } = playingItem;
           return (
-            <BacklogItemCard
-              key={game.id}
-              hasActions={false}
-              game={{
-                id: game.id,
-                title: game.title,
-                coverImage: game.coverImage,
-                igdbId: game.igdbId,
-              }}
-              backlogItems={backlogItems}
-            />
+            <div key={game.id} className="w-40 shrink-0">
+              <GameCard
+                game={game as unknown as Game}
+                backlogItem={backlogItems[0] as unknown as BacklogItem}
+              />
+            </div>
           );
         })
       ) : (
-        <div className="flex flex-col items-center justify-center gap-3">
-          <p>No currently playing games</p>
-        </div>
+        <Body variant="muted">No currently playing games.</Body>
       )}
     </div>
   );

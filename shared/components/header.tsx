@@ -15,7 +15,7 @@ import React, { memo } from "react";
 
 import { User } from "@/features/manage-user-info/components/user";
 import { ThemeToggle } from "@/features/theme-toggle/components/theme-toggle";
-import { GamingHeading } from "@/shared/components/typography";
+import { Heading } from "@/shared/components/typography";
 import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
@@ -181,7 +181,7 @@ const Header = memo(
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-8 hover:bg-gaming-primary/10 hover:text-gaming-primary"
+                    className="hover:bg-gaming-primary/10 hover:text-gaming-primary size-8"
                   >
                     <MenuIcon className="size-4" />
                     <span className="sr-only">Toggle menu</span>
@@ -189,7 +189,7 @@ const Header = memo(
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="w-56 border-gaming-primary/20 bg-gaming-primary/5 backdrop-blur-md"
+                  className="border-gaming-primary/20 bg-gaming-primary/5 w-56 backdrop-blur-md"
                 >
                   {linksConfig.map((link) => {
                     const IconComponent = link.icon;
@@ -200,7 +200,7 @@ const Header = memo(
                         className={cn(
                           "focus:bg-gaming-primary/20 focus:text-gaming-primary",
                           isActive &&
-                            "bg-gaming-primary/10 font-medium text-gaming-primary"
+                            "bg-gaming-primary/10 text-gaming-primary font-medium"
                         )}
                       >
                         <Link
@@ -242,12 +242,12 @@ const Header = memo(
                   )}
                 />
                 {(logoVariant === "gaming" || logoVariant === "neon") && (
-                  <Zap className="absolute -right-1 -top-1 size-3 animate-pulse text-gaming-accent opacity-60" />
+                  <Zap className="text-gaming-accent absolute -right-1 -top-1 size-3 animate-pulse opacity-60" />
                 )}
               </div>
               {variant === "editorial" ? (
                 <>
-                  <div className="hidden font-heading text-lg font-semibold tracking-tight text-foreground sm:inline-block lg:text-xl">
+                  <div className="font-heading hidden text-lg font-semibold tracking-tight text-foreground sm:inline-block lg:text-xl">
                     PlayLater
                   </div>
                   <div className="font-heading text-base font-semibold tracking-tight text-foreground sm:hidden">
@@ -256,35 +256,17 @@ const Header = memo(
                 </>
               ) : (
                 <>
-                  <GamingHeading
+                  <Heading
                     level={1}
-                    variant={
-                      logoVariant === "neon"
-                        ? "neon"
-                        : logoVariant === "gaming"
-                          ? "gradient"
-                          : "default"
-                    }
-                    size="sm"
-                    className="hidden font-bold sm:inline-block lg:text-heading-md"
+                    size="3xl"
+                    className="lg:text-heading-md hidden font-bold sm:inline-block"
                   >
                     PlayLater
-                  </GamingHeading>
+                  </Heading>
                   <div className="sm:hidden">
-                    <GamingHeading
-                      level={1}
-                      variant={
-                        logoVariant === "neon"
-                          ? "neon"
-                          : logoVariant === "gaming"
-                            ? "gradient"
-                            : "default"
-                      }
-                      size="xs"
-                      weight="bold"
-                    >
+                    <Heading level={1} size="2xl">
                       PL
-                    </GamingHeading>
+                    </Heading>
                   </div>
                 </>
               )}
@@ -330,15 +312,15 @@ const Header = memo(
                             variant: isActive ? "active" : "gaming",
                             size: "sm",
                           }),
-                          "group relative hover:scale-105 hover:bg-gaming-primary/10"
+                          "hover:bg-gaming-primary/10 group relative hover:scale-105"
                         )}
                       >
                         <IconComponent className="size-4" />
                         <span className="hidden lg:inline">{link.label}</span>
                         {isActive && (
-                          <div className="absolute -bottom-1 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-gaming-primary" />
+                          <div className="bg-gaming-primary absolute -bottom-1 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full" />
                         )}
-                        <div className="absolute inset-0 rounded-md bg-gaming-primary/0 transition-all duration-200 group-hover:bg-gaming-primary/5" />
+                        <div className="bg-gaming-primary/0 group-hover:bg-gaming-primary/5 absolute inset-0 rounded-md transition-all duration-200" />
                       </Button>
                     )}
                   </Link>
@@ -352,13 +334,12 @@ const Header = memo(
             <div className="flex flex-1 items-center justify-end space-x-2">
               <Link href="/collection/add-game">
                 <Button
-                  variant={variant === "editorial" ? "default" : "gaming"}
                   size="sm"
                   className={cn(
                     "flex h-8 items-center gap-2 transition-all duration-200",
                     variant === "editorial"
                       ? "hover:opacity-90"
-                      : "hover:scale-105 hover:shadow-gaming-hover"
+                      : "hover:shadow-gaming-hover hover:scale-105"
                   )}
                 >
                   <Plus className="size-4" />
@@ -376,7 +357,7 @@ const Header = memo(
 
         {/* Gaming accent line */}
         {(variant === "gaming" || variant === "neon") && (
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gaming-primary to-transparent opacity-50" />
+          <div className="via-gaming-primary absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent to-transparent opacity-50" />
         )}
       </header>
     );

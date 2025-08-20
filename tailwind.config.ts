@@ -3,6 +3,7 @@ import animate from "tailwindcss-animate";
 import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config = {
+  darkMode: ["class"],
   content: [
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
@@ -11,16 +12,6 @@ const config = {
   ],
   prefix: "",
   theme: {
-    fontFamily: {
-      sans: ["var(--font-sans)", ...fontFamily.sans],
-      // Gaming-specific font families
-      display: ["var(--font-sans)", ...fontFamily.sans],
-      heading: ["var(--font-sans)", ...fontFamily.sans],
-      subheading: ["var(--font-sans)", ...fontFamily.sans],
-      body: ["var(--font-sans)", ...fontFamily.sans],
-      caption: ["var(--font-sans)", ...fontFamily.sans],
-      mono: [...fontFamily.mono],
-    },
     container: {
       center: true,
       padding: "2rem",
@@ -29,153 +20,10 @@ const config = {
       },
     },
     extend: {
-      // Spacing Scale - Gaming-focused spacing system
-      spacing: {
-        // Micro spacing for tight layouts
-        "0.5": "0.125rem", // 2px
-        "1.5": "0.375rem", // 6px
-        "2.5": "0.625rem", // 10px
-        "3.5": "0.875rem", // 14px
-
-        // Component spacing
-        "4.5": "1.125rem", // 18px
-        "5.5": "1.375rem", // 22px
-        "6.5": "1.625rem", // 26px
-        "7.5": "1.875rem", // 30px
-
-        // Layout spacing
-        "8.5": "2.125rem", // 34px
-        "9.5": "2.375rem", // 38px
-        "11": "2.75rem", // 44px
-        "13": "3.25rem", // 52px
-        "15": "3.75rem", // 60px
-        "17": "4.25rem", // 68px
-        "19": "4.75rem", // 76px
-        "21": "5.25rem", // 84px
-        "23": "5.75rem", // 92px
-
-        // Large layout spacing
-        "26": "6.5rem", // 104px
-        "28": "7rem", // 112px
-        "30": "7.5rem", // 120px
-        "32": "8rem", // 128px
-        "36": "9rem", // 144px
-        "40": "10rem", // 160px
-        "44": "11rem", // 176px
-        "48": "12rem", // 192px
-        "52": "13rem", // 208px
-        "56": "14rem", // 224px
-        "60": "15rem", // 240px
-        "64": "16rem", // 256px
-        "72": "18rem", // 288px
-        "80": "20rem", // 320px
-        "96": "24rem", // 384px
+      fontFamily: {
+        sans: ["var(--font-sans)", ...fontFamily.sans],
       },
-
-      // Typography Scale - Unified font sizes with responsive behavior
-      fontSize: {
-        // Display sizes for hero sections
-        "display-2xl": [
-          "4.5rem",
-          { lineHeight: "1", letterSpacing: "-0.02em" },
-        ], // 72px
-        "display-xl": [
-          "3.75rem",
-          { lineHeight: "1.1", letterSpacing: "-0.02em" },
-        ], // 60px
-        "display-lg": ["3rem", { lineHeight: "1.1", letterSpacing: "-0.02em" }], // 48px
-
-        // Heading sizes
-        "heading-xl": [
-          "2.25rem",
-          { lineHeight: "1.2", letterSpacing: "-0.01em" },
-        ], // 36px
-        "heading-lg": [
-          "1.875rem",
-          { lineHeight: "1.3", letterSpacing: "-0.01em" },
-        ], // 30px
-        "heading-md": [
-          "1.5rem",
-          { lineHeight: "1.3", letterSpacing: "-0.01em" },
-        ], // 24px
-        "heading-sm": [
-          "1.25rem",
-          { lineHeight: "1.4", letterSpacing: "-0.01em" },
-        ], // 20px
-        "heading-xs": [
-          "1.125rem",
-          { lineHeight: "1.4", letterSpacing: "-0.01em" },
-        ], // 18px
-
-        // Body text sizes
-        "body-lg": ["1.125rem", { lineHeight: "1.6" }], // 18px
-        "body-md": ["1rem", { lineHeight: "1.6" }], // 16px
-        "body-sm": ["0.875rem", { lineHeight: "1.5" }], // 14px
-        "body-xs": ["0.75rem", { lineHeight: "1.5" }], // 12px
-
-        // Caption and small text
-        caption: ["0.75rem", { lineHeight: "1.4", letterSpacing: "0.01em" }], // 12px
-        overline: ["0.75rem", { lineHeight: "1.3", letterSpacing: "0.08em" }], // 12px
-      },
-
-      // Font weights
-      fontWeight: {
-        display: "800", // For display text
-        heading: "700", // For headings
-        subheading: "600", // For subheadings
-        body: "400", // For body text
-        caption: "500", // For captions
-      },
-
       colors: {
-        gaming: {
-          primary: "hsl(var(--gaming-primary))",
-          secondary: "hsl(var(--gaming-secondary))",
-          accent: "hsl(var(--gaming-accent))",
-          "neon-green": "hsl(var(--gaming-neon-green))",
-          "neon-blue": "hsl(var(--gaming-neon-blue))",
-        },
-        // Platform colors
-        playstation: {
-          DEFAULT: "hsl(var(--platform-playstation))",
-          dark: "hsl(var(--platform-playstation-dark))",
-          light: "hsl(var(--platform-playstation-light))",
-        },
-        xbox: {
-          DEFAULT: "hsl(var(--platform-xbox))",
-          dark: "hsl(var(--platform-xbox-dark))",
-          light: "hsl(var(--platform-xbox-light))",
-        },
-        nintendo: {
-          DEFAULT: "hsl(var(--platform-nintendo))",
-          dark: "hsl(var(--platform-nintendo-dark))",
-          light: "hsl(var(--platform-nintendo-light))",
-        },
-        steam: {
-          DEFAULT: "hsl(var(--platform-steam))",
-          dark: "hsl(var(--platform-steam-dark))",
-          light: "hsl(var(--platform-steam-light))",
-        },
-        pc: {
-          DEFAULT: "hsl(var(--platform-pc))",
-          dark: "hsl(var(--platform-pc-dark))",
-          light: "hsl(var(--platform-pc-light))",
-        },
-        mobile: {
-          DEFAULT: "hsl(var(--platform-mobile))",
-          dark: "hsl(var(--platform-mobile-dark))",
-          light: "hsl(var(--platform-mobile-light))",
-        },
-        epic: {
-          DEFAULT: "hsl(var(--platform-epic))",
-          dark: "hsl(var(--platform-epic-dark))",
-          light: "hsl(var(--platform-epic-light))",
-        },
-        gog: {
-          DEFAULT: "hsl(var(--platform-gog))",
-          dark: "hsl(var(--platform-gog-dark))",
-          light: "hsl(var(--platform-gog-light))",
-        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -209,197 +57,25 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        pill: "9999px",
-      },
-      backgroundImage: {
-        "gaming-gradient":
-          "linear-gradient(135deg, hsl(var(--gaming-gradient-start)), hsl(var(--gaming-gradient-end)))",
-        "gaming-gradient-hover":
-          "linear-gradient(135deg, hsl(var(--gaming-gradient-start) / 0.8), hsl(var(--gaming-gradient-end) / 0.8))",
-        "gaming-gradient-vertical":
-          "linear-gradient(180deg, hsl(var(--gaming-gradient-start)), hsl(var(--gaming-gradient-end)))",
-        "gaming-gradient-radial":
-          "radial-gradient(ellipse at center, hsl(var(--gaming-gradient-start)), hsl(var(--gaming-gradient-end)))",
-        "radial-gaming":
-          "radial-gradient(circle at center, hsl(var(--gaming-primary) / 0.1), transparent)",
-        "platform-nintendo": "linear-gradient(135deg, #e60012, #ff4757)",
-        "platform-playstation": "linear-gradient(135deg, #0070d1, #4834d4)",
-        "platform-xbox": "linear-gradient(135deg, #107c10, #26c726)",
-        "platform-pc": "linear-gradient(135deg, #1b2838, #4b79a1)",
-      },
-      boxShadow: {
-        neon: "0 0 20px hsl(var(--accent) / 0.3), 0 0 40px hsl(var(--accent) / 0.1)",
-        "neon-strong":
-          "0 0 30px hsl(var(--accent) / 0.5), 0 0 60px hsl(var(--accent) / 0.2), 0 0 90px hsl(var(--accent) / 0.1)",
-        "neon-gaming":
-          "0 0 20px hsl(var(--gaming-primary) / 0.4), 0 0 40px hsl(var(--gaming-primary) / 0.2), 0 0 60px hsl(var(--gaming-primary) / 0.1)",
-        gaming: "0 4px 20px hsl(var(--gaming-primary) / 0.3)",
-        "gaming-hover": "0 0 20px hsl(var(--gaming-primary) / 0.5)",
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
-        },
-        "pulse-neon": {
-          "0%, 100%": {
-            boxShadow:
-              "0 0 20px hsl(var(--accent) / 0.3), 0 0 40px hsl(var(--accent) / 0.1)",
-          },
-          "50%": {
-            boxShadow:
-              "0 0 30px hsl(var(--accent) / 0.5), 0 0 60px hsl(var(--accent) / 0.2)",
-          },
-        },
-        float: {
-          "0%, 100%": {
-            transform: "translateY(0px)",
-          },
-          "50%": {
-            transform: "translateY(-4px)",
-          },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        // Gaming-specific animations
-        "bounce-subtle": {
-          "0%, 100%": {
-            transform: "translateY(0)",
-            animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)",
-          },
-          "50%": {
-            transform: "translateY(-8px)",
-            animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)",
-          },
-        },
-        "scale-in": {
-          "0%": {
-            transform: "scale(0.95)",
-            opacity: "0",
-          },
-          "100%": {
-            transform: "scale(1)",
-            opacity: "1",
-          },
-        },
-        "slide-up": {
-          "0%": {
-            transform: "translateY(10px)",
-            opacity: "0",
-          },
-          "100%": {
-            transform: "translateY(0)",
-            opacity: "1",
-          },
-        },
-        "slide-down": {
-          "0%": {
-            transform: "translateY(-10px)",
-            opacity: "0",
-          },
-          "100%": {
-            transform: "translateY(0)",
-            opacity: "1",
-          },
-        },
-        "fade-in": {
-          "0%": { opacity: "0" },
-          "100%": { opacity: "1" },
-        },
-        "fade-in-up": {
-          "0%": {
-            opacity: "0",
-            transform: "translateY(20px)",
-          },
-          "100%": {
-            opacity: "1",
-            transform: "translateY(0)",
-          },
-        },
-        "gaming-pulse": {
-          "0%, 100%": {
-            boxShadow: "0 0 20px hsl(var(--gaming-primary) / 0.4)",
-            transform: "scale(1)",
-          },
-          "50%": {
-            boxShadow: "0 0 30px hsl(var(--gaming-primary) / 0.6)",
-            transform: "scale(1.05)",
-          },
-        },
-        "neon-flicker": {
-          "0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%": {
-            textShadow:
-              "0 0 10px hsl(var(--gaming-primary) / 0.8), 0 0 20px hsl(var(--gaming-primary) / 0.4)",
-            opacity: "1",
-          },
-          "20%, 24%, 55%": {
-            textShadow: "none",
-            opacity: "0.8",
-          },
-        },
-        "rotate-slow": {
-          "0%": { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(360deg)" },
-        },
-        wiggle: {
-          "0%, 100%": { transform: "rotate(-3deg)" },
-          "50%": { transform: "rotate(3deg)" },
-        },
-        heartbeat: {
-          "0%": { transform: "scale(1)" },
-          "14%": { transform: "scale(1.15)" },
-          "28%": { transform: "scale(1)" },
-          "42%": { transform: "scale(1.15)" },
-          "70%": { transform: "scale(1)" },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-neon": "pulse-neon 2s ease-in-out infinite",
-        float: "float 3s ease-in-out infinite",
-        shimmer: "shimmer 2s infinite ease-in-out",
-        // Gaming animations
-        "bounce-subtle": "bounce-subtle 1s infinite",
-        "scale-in": "scale-in 0.3s ease-out",
-        "slide-up": "slide-up 0.3s ease-out",
-        "slide-down": "slide-down 0.3s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
-        "fade-in-up": "fade-in-up 0.5s ease-out",
-        "gaming-pulse": "gaming-pulse 2s ease-in-out infinite",
-        "neon-flicker": "neon-flicker 1.5s ease-in-out infinite",
-        "rotate-slow": "rotate-slow 3s linear infinite",
-        wiggle: "wiggle 1s ease-in-out infinite",
-        heartbeat: "heartbeat 2s ease-in-out infinite",
       },
     },
   },

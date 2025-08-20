@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getUserInfo } from "@/features/manage-user-info";
 import { EditorialCollectionNav } from "@/shared/components/collection-nav";
 import { EditorialHeader } from "@/shared/components/header";
-import { Body, ResponsiveHeading } from "@/shared/components/typography";
+import { Body, Heading } from "@/shared/components/typography";
 
 export default async function CollectionLayout(
   props: LayoutProps<"/collection">
@@ -22,8 +22,10 @@ export default async function CollectionLayout(
     <>
       <EditorialHeader authorized />
       <div className="container overflow-hidden px-4 py-8 pt-16">
-        <div className="mb-8 mt-4 flex flex-col gap-4">
-          <ResponsiveHeading level={1}>Your Collection</ResponsiveHeading>
+        <div className="mb-8 mt-4 flex flex-col gap-2">
+          <Heading level={1} size="3xl">
+            Your Collection
+          </Heading>
           <Body variant="muted">
             Manage and browse through your game library
           </Body>

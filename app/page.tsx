@@ -1,180 +1,103 @@
 import { auth } from "@/auth";
-import {
-  ArrowDown,
-  BarChart3,
-  Calendar,
-  Gamepad2,
-  Heart,
-  MessageSquare,
-  Share2,
-  Sparkles,
-  TrendingUp,
-} from "lucide-react/";
-import { Suspense } from "react";
+import { ArrowRight, Gamepad2 } from "lucide-react/";
 
-import {
-  BacklogCount,
-  BacklogCountSkeleton,
-  CollectionStats,
-  CollectionStatsSkeleton,
-  CurrentlyPlaying,
-  CurrentlyPlayingSkeleton,
-  PlatformBreakdown,
-  PlatformBreakdownSkeleton,
-  RecentActivity,
-  RecentActivitySkeleton,
-  SteamIntegration,
-  SteamIntegrationSkeleton,
-  UpcomingReleases,
-  UpcomingReleasesSkeleton,
-} from "@/features/dashboard/components";
-import { FeatureCard } from "@/features/landing";
+import { Dashboard } from "@/features/dashboard/components/dashboard";
 import { SignIn } from "@/features/sign-in";
 import { EditorialHeader } from "@/shared/components/header";
-import {
-  Body,
-  Display,
-  ResponsiveHeading,
-  Subheading,
-} from "@/shared/components/typography";
+import { Heading } from "@/shared/components/typography";
 
 export default async function Page() {
   const session = await auth();
 
   if (session?.user == null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-        {/* Hero Section */}
-        <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
-          {/* Animated background elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -right-40 -top-40 size-80 animate-pulse rounded-full bg-gradient-to-br from-primary/20 via-emerald-500/10 to-transparent blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 size-80 animate-pulse rounded-full bg-gradient-to-tr from-blue-500/10 via-purple-500/10 to-transparent blur-3xl delay-1000" />
-          </div>
-
-          <div className="relative z-10 mx-auto max-w-4xl space-y-8 text-center">
-            <div className="space-y-4">
-              <Display size="2xl" className="sm:text-display-2xl">
-                <span className="animate-gradient bg-300% bg-pos-0 bg-gradient-to-r from-primary via-emerald-500 to-primary bg-clip-text text-transparent">
-                  PlayLater
-                </span>
-              </Display>
-              <Subheading
-                size="lg"
-                className="mx-auto max-w-3xl leading-relaxed"
-              >
-                Your ultimate game backlog companion. Track progress, organize
-                collections, and never lose sight of your next gaming adventure.
-              </Subheading>
+      <div className="flex min-h-screen flex-col">
+        {/* Header */}
+        <header className="container py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Gamepad2 className="size-6 text-primary" />
+              <span className="text-lg font-semibold">PlayLater</span>
             </div>
+            <SignIn />
+          </div>
+        </header>
 
-            <div className="align-center flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
-              <SignIn variant="start" />
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Sparkles className="size-4" />
-                <span>Free to use • No credit card required</span>
+        {/* Hero Section */}
+        <main className="flex flex-1 items-center">
+          <section className="container py-24 sm:py-32">
+            <div className="mx-auto max-w-4xl space-y-6 text-center">
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
+                Track Your Games, Master Your Backlog.
+              </h1>
+              <p className="mx-auto max-w-2xl text-muted-foreground md:text-xl">
+                PlayLater is the ultimate companion for gamers. Organize your
+                collection, track your progress, and discover your next favorite
+                game.
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <SignIn />
+                <a
+                  href="#features"
+                  className="inline-flex items-center gap-2 text-lg font-medium"
+                >
+                  Learn More <ArrowRight className="size-4" />
+                </a>
               </div>
             </div>
-          </div>
-
-          {/* Scroll indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-            <ArrowDown className="size-6 text-muted-foreground" />
-          </div>
-        </section>
+          </section>
+        </main>
 
         {/* Features Section */}
-        <section className="relative px-4 py-24">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-16 space-y-4 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
-                <TrendingUp className="size-4" />
-                Features that work today
-              </div>
-              <ResponsiveHeading level={2} className="text-center">
-                Everything you need to manage your gaming life
-              </ResponsiveHeading>
-              <Subheading className="mx-auto max-w-2xl">
-                Built-in tools to help you stay organized and make the most of
-                your gaming time, available right now.
-              </Subheading>
+        <section id="features" className="bg-muted/50 py-24 sm:py-32">
+          <div className="container">
+            <div className="mx-auto mb-12 max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
+                Everything a Gamer Needs
+              </h2>
+              <p className="mt-4 text-muted-foreground md:text-lg">
+                All the essential tools to manage your gaming life, beautifully
+                designed and easy to use.
+              </p>
             </div>
-
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              <FeatureCard
-                icon={<Gamepad2 className="size-8 text-primary" />}
-                title="Smart Collection Management"
-                description="Track your games across multiple platforms. Organize by status: backlog, playing, completed, or wishlisted. Add acquisition types and platforms."
-              />
-              <FeatureCard
-                icon={<Heart className="size-8 text-pink-500" />}
-                title="Wishlist & Release Tracking"
-                description="Build your wishlist and get notified about upcoming releases. Share your wishlist with friends and family via unique shareable links."
-              />
-              <FeatureCard
-                icon={<BarChart3 className="size-8 text-purple-500" />}
-                title="Personal Analytics Dashboard"
-                description="Track completion rates, platform breakdowns, and collection statistics. See your recent activity and gaming milestones at a glance."
-              />
-              <FeatureCard
-                icon={<MessageSquare className="size-8 text-blue-500" />}
-                title="Game Reviews & Ratings"
-                description="Rate and review games you've played. Share your thoughts with a 10-point rating system and detailed reviews visible to other users."
-              />
-              <FeatureCard
-                icon={<Calendar className="size-8 text-emerald-500" />}
-                title="IGDB Game Database"
-                description="Access comprehensive game information powered by IGDB. Rich metadata, release dates, screenshots, and detailed game information."
-              />
-              <FeatureCard
-                icon={<Share2 className="size-8 text-orange-500" />}
-                title="Social Sharing Features"
-                description="Share your wishlist publicly with friends and family. Perfect for gift ideas, game recommendations, and discovering new titles together."
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="relative px-4 py-24">
-          <div className="mx-auto max-w-4xl">
-            <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/10 via-emerald-500/10 to-primary/10 p-12 text-center backdrop-blur-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5" />
-              <div className="relative space-y-6">
-                <ResponsiveHeading level={2} className="text-center">
-                  Stop losing track of great games
-                </ResponsiveHeading>
-                <Body size="lg" variant="muted" className="mx-auto max-w-2xl">
-                  Take control of your gaming backlog today. Track what you own,
-                  discover what&apos;s coming next, and never forget about that
-                  perfect game again.
-                </Body>
-                <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-                  <SignIn variant="default" />
-                  <Body size="sm" variant="muted">
-                    Start organizing in under 30 seconds
-                  </Body>
-                </div>
+              {/* Feature 1 */}
+              <div className="rounded-lg border bg-card p-6">
+                <h3 className="mb-2 text-xl font-semibold">
+                  Smart Collections
+                </h3>
+                <p className="text-muted-foreground">
+                  Organize your games by status—backlog, playing, completed, or
+                  wishlisted. See your entire library at a glance.
+                </p>
+              </div>
+              {/* Feature 2 */}
+              <div className="rounded-lg border bg-card p-6">
+                <h3 className="mb-2 text-xl font-semibold">
+                  Personal Dashboard
+                </h3>
+                <p className="text-muted-foreground">
+                  Get insights into your gaming habits with stats on completion
+                  rates, platform breakdowns, and recent activity.
+                </p>
+              </div>
+              {/* Feature 3 */}
+              <div className="rounded-lg border bg-card p-6">
+                <h3 className="mb-2 text-xl font-semibold">IGDB Integration</h3>
+                <p className="text-muted-foreground">
+                  Access a massive database of games for rich metadata, artwork,
+                  and release dates, all automatically fetched.
+                </p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-border/40 px-4 py-12">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <div className="flex items-center gap-2">
-                <Gamepad2 className="size-6 text-primary" />
-                <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-lg font-semibold text-transparent">
-                  PlayLater
-                </span>
-              </div>
-              <Body size="sm" variant="muted">
-                © {new Date().getFullYear()} PlayLater. Built for gamers, by
-                gamers.
-              </Body>
-            </div>
+        <footer className="container py-8">
+          <div className="text-center text-sm text-muted-foreground">
+            © {new Date().getFullYear()} PlayLater. Built for gamers, by
+            gamers.
           </div>
         </footer>
       </div>
@@ -185,54 +108,10 @@ export default async function Page() {
     <>
       <EditorialHeader authorized />
       <section className="container mt-2 pt-16">
-        <ResponsiveHeading
-          level={1}
-          className="md:text-heading-lg xl:text-heading-xl"
-        >
+        <Heading level={1} size="3xl">
           Hi, {session.user.name}
-        </ResponsiveHeading>
-
-        {/* Main dashboard grid - adaptive layout */}
-        <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {/* Primary widgets - always visible */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Suspense fallback={<CurrentlyPlayingSkeleton />}>
-              <CurrentlyPlaying />
-            </Suspense>
-          </div>
-
-          <div className="sm:col-span-2 lg:col-span-1">
-            <Suspense fallback={<UpcomingReleasesSkeleton />}>
-              <UpcomingReleases />
-            </Suspense>
-          </div>
-
-          {/* Stats widgets */}
-          <Suspense fallback={<BacklogCountSkeleton />}>
-            <BacklogCount />
-          </Suspense>
-
-          <Suspense fallback={<CollectionStatsSkeleton />}>
-            <CollectionStats />
-          </Suspense>
-
-          {/* Additional adaptive widgets */}
-          <div className="xl:col-span-1">
-            <Suspense fallback={<RecentActivitySkeleton />}>
-              <RecentActivity />
-            </Suspense>
-          </div>
-
-          <div className="sm:col-span-2 lg:col-span-1 xl:col-span-1">
-            <Suspense fallback={<PlatformBreakdownSkeleton />}>
-              <PlatformBreakdown />
-            </Suspense>
-          </div>
-
-          <Suspense fallback={<SteamIntegrationSkeleton />}>
-            <SteamIntegration />
-          </Suspense>
-        </section>
+        </Heading>
+        <Dashboard />
       </section>
     </>
   );

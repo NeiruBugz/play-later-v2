@@ -154,7 +154,6 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
       <CardHeader className="p-3 pb-2">
         <Heading
           level={3}
-          size="sm"
           className="line-clamp-2 text-sm font-medium leading-tight"
           title={game.name}
         >

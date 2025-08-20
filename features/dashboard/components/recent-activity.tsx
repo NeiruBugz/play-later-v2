@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
-import { Activity, Clock, Star } from "lucide-react";
+import { Activity, CheckCircle2, Star } from "lucide-react";
 
+import { Body, Caption } from "@/shared/components/typography";
 import {
   Card,
   CardContent,
@@ -19,53 +20,51 @@ export async function RecentActivity() {
   ]);
 
   const hasActivity =
-    (recentlyCompleted?.data?.length && recentlyCompleted?.data?.length > 0) ??
+    (recentlyCompleted?.data?.length && recentlyCompleted?.data?.length > 0) ||
     (recentReviews?.data?.length && recentReviews?.data?.length > 0);
 
   return (
-    <Card className="h-fit">
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-3">
-          <Activity className="size-5" />
+        <CardTitle className="flex items-center gap-2">
+          <Activity />
           Recent Activity
         </CardTitle>
         <CardDescription>Your latest gaming milestones</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {!hasActivity ? (
-          <p className="text-sm text-muted-foreground">No recent activity</p>
+          <Body size="sm" variant="muted">
+            No recent activity.
+          </Body>
         ) : (
           <>
             {recentlyCompleted.data?.map((item) => (
               <div key={item.id} className="flex items-start gap-3">
-                <div className="rounded-full bg-green-100 p-1 dark:bg-green-900">
-                  <Clock className="size-3 text-green-600 dark:text-green-400" />
-                </div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm font-medium">
+                <CheckCircle2 className="mt-1 size-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Body size="sm" className="font-medium leading-tight">
                     Completed {item.game.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
+                  </Body>
+                  <Caption>
                     {item.completedAt &&
                       formatDistanceToNow(item.completedAt, {
                         addSuffix: true,
                       })}
-                  </p>
+                  </Caption>
                 </div>
               </div>
             ))}
             {recentReviews.data?.map((review) => (
               <div key={review.id} className="flex items-start gap-3">
-                <div className="rounded-full bg-yellow-100 p-1 dark:bg-yellow-900">
-                  <Star className="size-3 text-yellow-600 dark:text-yellow-400" />
-                </div>
-                <div className="flex-1 space-y-1">
-                  <p className="text-sm font-medium">
+                <Star className="mt-1 size-4 text-muted-foreground" />
+                <div className="flex-1">
+                  <Body size="sm" className="font-medium leading-tight">
                     Reviewed {review.Game.title} ({review.rating}/10)
-                  </p>
-                  <p className="text-xs text-muted-foreground">
+                  </Body>
+                  <Caption>
                     {formatDistanceToNow(review.createdAt, { addSuffix: true })}
-                  </p>
+                  </Caption>
                 </div>
               </div>
             ))}
