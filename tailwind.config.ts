@@ -128,16 +128,53 @@ const config = {
       },
 
       colors: {
-        nintendo: "#e60012",
-        playstation: "#0070d1",
-        xbox: "#107c10",
-        pc: "#1b2838",
         gaming: {
           primary: "hsl(var(--gaming-primary))",
           secondary: "hsl(var(--gaming-secondary))",
           accent: "hsl(var(--gaming-accent))",
           "neon-green": "hsl(var(--gaming-neon-green))",
           "neon-blue": "hsl(var(--gaming-neon-blue))",
+        },
+        // Platform colors
+        playstation: {
+          DEFAULT: "hsl(var(--platform-playstation))",
+          dark: "hsl(var(--platform-playstation-dark))",
+          light: "hsl(var(--platform-playstation-light))",
+        },
+        xbox: {
+          DEFAULT: "hsl(var(--platform-xbox))",
+          dark: "hsl(var(--platform-xbox-dark))",
+          light: "hsl(var(--platform-xbox-light))",
+        },
+        nintendo: {
+          DEFAULT: "hsl(var(--platform-nintendo))",
+          dark: "hsl(var(--platform-nintendo-dark))",
+          light: "hsl(var(--platform-nintendo-light))",
+        },
+        steam: {
+          DEFAULT: "hsl(var(--platform-steam))",
+          dark: "hsl(var(--platform-steam-dark))",
+          light: "hsl(var(--platform-steam-light))",
+        },
+        pc: {
+          DEFAULT: "hsl(var(--platform-pc))",
+          dark: "hsl(var(--platform-pc-dark))",
+          light: "hsl(var(--platform-pc-light))",
+        },
+        mobile: {
+          DEFAULT: "hsl(var(--platform-mobile))",
+          dark: "hsl(var(--platform-mobile-dark))",
+          light: "hsl(var(--platform-mobile-light))",
+        },
+        epic: {
+          DEFAULT: "hsl(var(--platform-epic))",
+          dark: "hsl(var(--platform-epic-dark))",
+          light: "hsl(var(--platform-epic-light))",
+        },
+        gog: {
+          DEFAULT: "hsl(var(--platform-gog))",
+          dark: "hsl(var(--platform-gog-dark))",
+          light: "hsl(var(--platform-gog-light))",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

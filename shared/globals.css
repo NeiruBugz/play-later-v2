@@ -39,6 +39,39 @@
     --gaming-gradient-start: 263 85% 48%;
     --gaming-gradient-end: 310 100% 65%;
 
+    /* Platform-specific colors - Light mode */
+    --platform-playstation: 213 84% 44%; /* #0070d1 */
+    --platform-playstation-dark: 213 84% 35%;
+    --platform-playstation-light: 213 84% 65%;
+
+    --platform-xbox: 107 100% 22%; /* #107c10 */
+    --platform-xbox-dark: 107 100% 18%;
+    --platform-xbox-light: 107 100% 35%;
+
+    --platform-nintendo: 0 91% 45%; /* #e60012 */
+    --platform-nintendo-dark: 0 91% 35%;
+    --platform-nintendo-light: 0 91% 65%;
+
+    --platform-steam: 211 56% 39%; /* #1b2838 */
+    --platform-steam-dark: 211 56% 25%;
+    --platform-steam-light: 211 56% 55%;
+
+    --platform-pc: 220 13% 18%; /* #2c2c34 */
+    --platform-pc-dark: 220 13% 12%;
+    --platform-pc-light: 220 13% 35%;
+
+    --platform-mobile: 45 100% 51%; /* #ff8c00 */
+    --platform-mobile-dark: 45 100% 40%;
+    --platform-mobile-light: 45 100% 65%;
+
+    --platform-epic: 0 0% 13%; /* #212121 */
+    --platform-epic-dark: 0 0% 8%;
+    --platform-epic-light: 0 0% 25%;
+
+    --platform-gog: 271 81% 56%; /* #8a2be2 */
+    --platform-gog-dark: 271 81% 45%;
+    --platform-gog-light: 271 81% 70%;
+
     /* Sidebar colors */
     --sidebar-background: 250 20% 98%;
     --sidebar-foreground: 250 15% 8%;
@@ -84,6 +117,39 @@
     --gaming-neon-blue: 190 95% 72%;
     --gaming-gradient-start: 270 100% 78%;
     --gaming-gradient-end: 310 100% 78%;
+
+    /* Platform-specific colors - Dark mode */
+    --platform-playstation: 213 84% 60%; /* Brighter for dark mode */
+    --platform-playstation-dark: 213 84% 45%;
+    --platform-playstation-light: 213 84% 75%;
+
+    --platform-xbox: 107 100% 40%; /* Brighter for dark mode */
+    --platform-xbox-dark: 107 100% 25%;
+    --platform-xbox-light: 107 100% 55%;
+
+    --platform-nintendo: 0 91% 65%; /* Brighter for dark mode */
+    --platform-nintendo-dark: 0 91% 50%;
+    --platform-nintendo-light: 0 91% 80%;
+
+    --platform-steam: 211 56% 65%; /* Much brighter for dark mode */
+    --platform-steam-dark: 211 56% 45%;
+    --platform-steam-light: 211 56% 80%;
+
+    --platform-pc: 220 13% 65%; /* Much brighter for dark mode */
+    --platform-pc-dark: 220 13% 45%;
+    --platform-pc-light: 220 13% 80%;
+
+    --platform-mobile: 45 100% 65%; /* Brighter for dark mode */
+    --platform-mobile-dark: 45 100% 50%;
+    --platform-mobile-light: 45 100% 80%;
+
+    --platform-epic: 0 0% 75%; /* Much brighter for dark mode */
+    --platform-epic-dark: 0 0% 55%;
+    --platform-epic-light: 0 0% 85%;
+
+    --platform-gog: 271 81% 75%; /* Brighter for dark mode */
+    --platform-gog-dark: 271 81% 60%;
+    --platform-gog-light: 271 81% 85%;
 
     /* Sidebar colors - Enhanced Dark Mode */
     --sidebar-background: 250 20% 4%;
