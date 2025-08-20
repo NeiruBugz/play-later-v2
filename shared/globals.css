@@ -5,95 +5,95 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 250 15% 11%;
+    --foreground: 250 15% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 250 15% 11%;
+    --card-foreground: 250 15% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 250 15% 11%;
-    --primary: 263 70% 50%;
+    --popover-foreground: 250 15% 8%;
+    --primary: 263 85% 48%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 250 12% 92%;
-    --secondary-foreground: 250 15% 11%;
-    --muted: 250 12% 92%;
-    --muted-foreground: 250 8% 45%;
-    --accent: 270 95% 75%;
-    --accent-foreground: 250 15% 11%;
-    --destructive: 0 84% 60%;
+    --secondary: 250 12% 95%;
+    --secondary-foreground: 250 15% 8%;
+    --muted: 250 12% 95%;
+    --muted-foreground: 250 10% 40%;
+    --accent: 270 100% 68%;
+    --accent-foreground: 250 15% 8%;
+    --destructive: 0 90% 55%;
     --destructive-foreground: 0 0% 98%;
-    --border: 250 12% 88%;
-    --input: 250 12% 88%;
-    --ring: 263 70% 50%;
+    --border: 250 12% 85%;
+    --input: 250 12% 85%;
+    --ring: 263 85% 48%;
     --radius: 1rem;
-    --chart-1: 263 70% 50%;
-    --chart-2: 270 95% 75%;
-    --chart-3: 310 100% 70%;
-    --chart-4: 190 95% 65%;
-    --chart-5: 120 95% 65%;
+    --chart-1: 263 85% 48%;
+    --chart-2: 270 100% 68%;
+    --chart-3: 310 100% 65%;
+    --chart-4: 190 95% 58%;
+    --chart-5: 120 95% 58%;
 
-    /* Gaming theme colors */
-    --gaming-primary: 263 70% 50%;
-    --gaming-secondary: 270 95% 75%;
-    --gaming-accent: 310 100% 70%;
-    --gaming-neon-green: 120 95% 65%;
-    --gaming-neon-blue: 190 95% 65%;
-    --gaming-gradient-start: 263 70% 50%;
-    --gaming-gradient-end: 310 100% 70%;
+    /* Gaming theme colors - Enhanced */
+    --gaming-primary: 263 85% 48%;
+    --gaming-secondary: 270 100% 68%;
+    --gaming-accent: 310 100% 65%;
+    --gaming-neon-green: 120 95% 58%;
+    --gaming-neon-blue: 190 95% 58%;
+    --gaming-gradient-start: 263 85% 48%;
+    --gaming-gradient-end: 310 100% 65%;
 
     /* Sidebar colors */
-    --sidebar-background: 250 20% 96%;
-    --sidebar-foreground: 250 15% 11%;
-    --sidebar-primary: 263 70% 50%;
+    --sidebar-background: 250 20% 98%;
+    --sidebar-foreground: 250 15% 8%;
+    --sidebar-primary: 263 85% 48%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 270 95% 75%;
-    --sidebar-accent-foreground: 250 15% 11%;
-    --sidebar-border: 250 12% 88%;
-    --sidebar-ring: 263 70% 50%;
+    --sidebar-accent: 270 100% 68%;
+    --sidebar-accent-foreground: 250 15% 8%;
+    --sidebar-border: 250 12% 85%;
+    --sidebar-ring: 263 85% 48%;
   }
 
   .dark {
-    --background: 250 20% 8%;
-    --foreground: 250 10% 95%;
-    --card: 250 20% 10%;
-    --card-foreground: 250 10% 95%;
-    --popover: 250 20% 10%;
-    --popover-foreground: 250 10% 95%;
-    --primary: 270 95% 75%;
-    --primary-foreground: 250 20% 8%;
-    --secondary: 250 15% 15%;
-    --secondary-foreground: 250 10% 95%;
-    --muted: 250 15% 15%;
-    --muted-foreground: 250 10% 65%;
-    --accent: 263 70% 60%;
-    --accent-foreground: 250 10% 95%;
-    --destructive: 0 75% 55%;
+    --background: 250 20% 6%;
+    --foreground: 250 10% 98%;
+    --card: 250 20% 8%;
+    --card-foreground: 250 10% 98%;
+    --popover: 250 20% 8%;
+    --popover-foreground: 250 10% 98%;
+    --primary: 270 100% 78%;
+    --primary-foreground: 250 20% 6%;
+    --secondary: 250 15% 12%;
+    --secondary-foreground: 250 10% 98%;
+    --muted: 250 15% 12%;
+    --muted-foreground: 250 10% 70%;
+    --accent: 263 85% 65%;
+    --accent-foreground: 250 10% 98%;
+    --destructive: 0 85% 62%;
     --destructive-foreground: 0 0% 98%;
-    --border: 250 15% 18%;
-    --input: 250 15% 18%;
-    --ring: 270 95% 75%;
-    --chart-1: 270 95% 75%;
-    --chart-2: 263 70% 60%;
-    --chart-3: 310 100% 75%;
-    --chart-4: 190 95% 70%;
-    --chart-5: 120 95% 70%;
+    --border: 250 15% 20%;
+    --input: 250 15% 20%;
+    --ring: 270 100% 78%;
+    --chart-1: 270 100% 78%;
+    --chart-2: 263 85% 65%;
+    --chart-3: 310 100% 78%;
+    --chart-4: 190 95% 72%;
+    --chart-5: 120 95% 72%;
 
-    /* Gaming theme colors - dark mode */
-    --gaming-primary: 270 95% 75%;
-    --gaming-secondary: 263 70% 60%;
-    --gaming-accent: 310 100% 75%;
-    --gaming-neon-green: 120 95% 70%;
-    --gaming-neon-blue: 190 95% 70%;
-    --gaming-gradient-start: 270 95% 75%;
-    --gaming-gradient-end: 310 100% 75%;
+    /* Gaming theme colors - Enhanced Dark Mode */
+    --gaming-primary: 270 100% 78%;
+    --gaming-secondary: 263 85% 65%;
+    --gaming-accent: 310 100% 78%;
+    --gaming-neon-green: 120 95% 72%;
+    --gaming-neon-blue: 190 95% 72%;
+    --gaming-gradient-start: 270 100% 78%;
+    --gaming-gradient-end: 310 100% 78%;
 
-    /* Sidebar colors - dark mode */
-    --sidebar-background: 250 20% 6%;
-    --sidebar-foreground: 250 10% 95%;
-    --sidebar-primary: 270 95% 75%;
-    --sidebar-primary-foreground: 250 20% 8%;
-    --sidebar-accent: 263 70% 60%;
-    --sidebar-accent-foreground: 250 10% 95%;
-    --sidebar-border: 250 15% 18%;
-    --sidebar-ring: 270 95% 75%;
+    /* Sidebar colors - Enhanced Dark Mode */
+    --sidebar-background: 250 20% 4%;
+    --sidebar-foreground: 250 10% 98%;
+    --sidebar-primary: 270 100% 78%;
+    --sidebar-primary-foreground: 250 20% 6%;
+    --sidebar-accent: 263 85% 65%;
+    --sidebar-accent-foreground: 250 10% 98%;
+    --sidebar-border: 250 15% 20%;
+    --sidebar-ring: 270 100% 78%;
   }
 }
 
