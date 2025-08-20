@@ -319,10 +319,6 @@ export function buildCollectionFilter({
   gameFilter: Prisma.GameWhereInput;
   backlogFilter: Prisma.BacklogItemWhereInput;
 } {
-  console.log("buildCollectionFilter::platform:", platform);
-  console.log("buildCollectionFilter::status:", status);
-  console.log("buildCollectionFilter::search:", search);
-
   const backlogFilter: Prisma.BacklogItemWhereInput = {
     userId,
     platform: platform === "" ? undefined : platform,

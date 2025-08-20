@@ -22,8 +22,6 @@ type GameCardProps = {
   isUpcomingGame?: boolean;
 };
 
-const isNewCard = true;
-
 function SharedWishlistCard({ game }: Pick<GameCardProps, "game">) {
   return (
     <div className="group relative w-full max-w-[300px] cursor-pointer overflow-hidden rounded shadow-lg hover:border hover:shadow-xl">
@@ -52,7 +50,6 @@ export function BacklogItemCard({
   isExternalGame = false,
   isUpcomingGame = false,
 }: GameCardProps) {
-  console.log({ game });
   if (isUpcomingGame) {
     return (
       <Link

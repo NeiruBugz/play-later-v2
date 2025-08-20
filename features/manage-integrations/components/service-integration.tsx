@@ -83,8 +83,6 @@ export function ServiceIntegration({
           games: ownedGames,
         });
 
-        console.log({ serverError, validationErrors });
-
         if (serverError) {
           toast.error("Failed to import Steam games", {
             description: serverError,
