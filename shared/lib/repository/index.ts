@@ -53,4 +53,5 @@ export {
   findByStorefrontGameId,
   softDeleteImportedGame,
   createManyImportedGames,
+  upsertManyImportedGames,
 } from "./imported-game/imported-game-repository";
