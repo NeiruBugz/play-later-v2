@@ -1,6 +1,5 @@
 "use server";
 
-import { saveGameAndAddToBacklog } from "@/features/add-game/server-actions/add-game";
 import { importToApplicationSchema } from "@/features/view-imported-games/validation/import-to-application.schema";
 import igdbApi from "@/shared/lib/igdb";
 import {
@@ -8,6 +7,7 @@ import {
   softDeleteImportedGame,
 } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
+import { addGameToCollection } from "@/shared/services/game-management";
 import { RevalidationService } from "@/shared/ui/revalidation";
 
 export const importToApplication = authorizedActionClient
@@ -29,7 +29,7 @@ export const importToApplication = authorizedActionClient
     }
 
     try {
-      const { data: savedGame } = await saveGameAndAddToBacklog({
+      const { data: savedGame } = await addGameToCollection({
         game: {
           igdbId: game.id,
         },
