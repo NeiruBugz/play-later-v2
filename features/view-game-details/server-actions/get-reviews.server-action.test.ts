@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAllReviewsForGame } from "@/shared/lib/repository";
 
-import { getReviews } from "./get-reviews";
-
 // Mock the repository function
 vi.mock("@/shared/lib/repository", () => ({
   getAllReviewsForGame: vi.fn(),
@@ -17,6 +15,18 @@ vi.mock("@/shared/lib/safe-action-client", () => ({
     action: vi.fn(),
   },
 }));
+
+type MockActionParams = {
+  parsedInput: { gameId: string };
+};
+
+type MockReview = {
+  id: string;
+  rating: number;
+  content: string;
+  gameId: string;
+  userId: string;
+};
 
 describe("getReviews server action", () => {
   let mockGetAllReviewsForGame: ReturnType<typeof vi.fn>;
@@ -67,7 +77,7 @@ describe("getReviews server action", () => {
       mockGetAllReviewsForGame.mockResolvedValue(mockReviews);
 
       // Create a mock action function that simulates what the server action does
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         return await mockGetAllReviewsForGame({ gameId: parsedInput.gameId });
       };
 
@@ -88,7 +98,7 @@ describe("getReviews server action", () => {
 
       mockGetAllReviewsForGame.mockResolvedValue([]);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         return await mockGetAllReviewsForGame({ gameId: parsedInput.gameId });
       };
 
@@ -110,7 +120,7 @@ describe("getReviews server action", () => {
 
       mockGetAllReviewsForGame.mockRejectedValue(repositoryError);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         return await mockGetAllReviewsForGame({ gameId: parsedInput.gameId });
       };
 
@@ -139,7 +149,7 @@ describe("getReviews server action", () => {
 
       mockGetAllReviewsForGame.mockResolvedValue(mockReviews);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         return await mockGetAllReviewsForGame({ gameId: parsedInput.gameId });
       };
 
@@ -170,7 +180,7 @@ describe("getReviews server action", () => {
 
       mockGetAllReviewsForGame.mockResolvedValue(mockReviews);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         return await mockGetAllReviewsForGame({ gameId: parsedInput.gameId });
       };
 
@@ -190,7 +200,7 @@ describe("getReviews server action", () => {
 
       mockGetAllReviewsForGame.mockResolvedValue([]);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         return await mockGetAllReviewsForGame({ gameId: parsedInput.gameId });
       };
 
@@ -232,7 +242,7 @@ describe("getReviews server action", () => {
 
       mockGetAllReviewsForGame.mockResolvedValue(mockReviews);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         return await mockGetAllReviewsForGame({ gameId: parsedInput.gameId });
       };
 
@@ -290,7 +300,7 @@ describe("getReviews server action", () => {
 
       mockGetAllReviewsForGame.mockResolvedValue(mockReviews);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         return await mockGetAllReviewsForGame({ gameId: parsedInput.gameId });
       };
 
@@ -299,7 +309,7 @@ describe("getReviews server action", () => {
       });
 
       expect(result).toHaveLength(3);
-      expect(result.map((r: any) => r.rating)).toEqual([1, 3, 5]);
+      expect(result.map((r: MockReview) => r.rating)).toEqual([1, 3, 5]);
     });
   });
 });

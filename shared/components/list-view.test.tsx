@@ -259,7 +259,6 @@ describe("ListView", () => {
 
       // Assert
       // Should not show Monitor icon or platform text when platform is null
-      const monitorIcons = document.querySelectorAll("svg");
       const platformText = screen.queryByText("null");
       expect(platformText).not.toBeInTheDocument();
     });

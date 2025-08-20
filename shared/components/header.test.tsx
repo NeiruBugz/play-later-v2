@@ -1,6 +1,5 @@
 import { renderWithTestProviders } from "@/test/utils/test-provider";
 import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { Header } from "./header";
@@ -36,16 +35,6 @@ const elements = {
   queryAddGameButton: () => screen.queryByRole("link", { name: /Add Game/ }),
   queryUserComponent: () => screen.queryByTestId("user-component"),
   queryThemeToggle: () => screen.queryByTestId("theme-toggle"),
-};
-
-const actions = {
-  clickMobileMenuButton: async () => {
-    const user = userEvent.setup();
-    const button = elements.getMobileMenuButton();
-    if (button) {
-      await user.click(button);
-    }
-  },
 };
 
 describe("Header", () => {

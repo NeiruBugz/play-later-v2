@@ -12,7 +12,6 @@ export function ClearFilters() {
 
   const onClearFilters = useCallback(() => {
     const paramsToUpdate = new URLSearchParams(params);
-    const _viewMode = params.get("viewMode");
     const page = params.get("page");
     paramsToUpdate.delete("platform");
     paramsToUpdate.delete("search");

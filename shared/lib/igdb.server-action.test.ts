@@ -146,11 +146,11 @@ describe("igdbApi", () => {
 
         expect.objectContaining({
           method: "POST",
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
           headers: expect.objectContaining({
             Accept: "application/json",
             Authorization: "Bearer test-token",
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
             "Client-ID": expect.any(String),
           }),
           body: "fields name;",
@@ -677,11 +677,11 @@ describe("igdbApi", () => {
 
       expect.objectContaining({
         method: "POST",
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         headers: expect.objectContaining({
           Accept: "application/json",
           Authorization: "Bearer test-token",
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
           "Client-ID": expect.any(String),
         }),
         body: bodyMatcher,

@@ -1,6 +1,4 @@
 import {
-  type Artwork as _Artwork,
-  type Game as _Game,
   type Company,
   type Cover,
   type Event,
@@ -151,6 +149,6 @@ export type FranchiseGamesResponse = {
 
 export enum GAME_TYPE {
   MAIN_GAME = 0,
-  // eslint-disable-next-line no-magic-numbers
+
   EXPANDED_GAME = 10,
 }

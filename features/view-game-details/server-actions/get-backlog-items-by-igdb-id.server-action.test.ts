@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getBacklogItemsForUserByIgdbId } from "@/shared/lib/repository";
 
-import { getBacklogItemsByIgdbId } from "./get-backlog-items-by-igdb-id";
-
 // Mock the repository function
 vi.mock("@/shared/lib/repository", () => ({
   getBacklogItemsForUserByIgdbId: vi.fn(),
@@ -17,6 +15,18 @@ vi.mock("@/shared/lib/safe-action-client", () => ({
     action: vi.fn(),
   },
 }));
+
+type MockActionParams = {
+  ctx: { userId: string };
+  parsedInput: { igdbId: number };
+};
+
+type MockBacklogItem = {
+  id: string;
+  status: string;
+  gameId: string;
+  userId: string;
+};
 
 describe("getBacklogItemsByIgdbId server action", () => {
   let mockGetBacklogItemsForUserByIgdbId: ReturnType<typeof vi.fn>;
@@ -76,7 +86,10 @@ describe("getBacklogItemsByIgdbId server action", () => {
       mockGetBacklogItemsForUserByIgdbId.mockResolvedValue(mockBacklogItems);
 
       // Create a mock action function that simulates what the server action does
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -104,7 +117,10 @@ describe("getBacklogItemsByIgdbId server action", () => {
 
       mockGetBacklogItemsForUserByIgdbId.mockResolvedValue([]);
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -133,7 +149,10 @@ describe("getBacklogItemsByIgdbId server action", () => {
 
       mockGetBacklogItemsForUserByIgdbId.mockRejectedValue(repositoryError);
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -171,7 +190,10 @@ describe("getBacklogItemsByIgdbId server action", () => {
 
       mockGetBacklogItemsForUserByIgdbId.mockResolvedValue(mockBacklogItems);
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -227,7 +249,10 @@ describe("getBacklogItemsByIgdbId server action", () => {
         },
       ];
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -278,7 +303,10 @@ describe("getBacklogItemsByIgdbId server action", () => {
 
       mockGetBacklogItemsForUserByIgdbId.mockResolvedValue(mockBacklogItems);
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -302,11 +330,14 @@ describe("getBacklogItemsByIgdbId server action", () => {
     it("should handle small IGDB IDs", async () => {
       const mockUserId = "test-user";
       const mockIgdbId = 1; // Minimal IGDB ID
-      const mockBacklogItems: any[] = [];
+      const mockBacklogItems: MockBacklogItem[] = [];
 
       mockGetBacklogItemsForUserByIgdbId.mockResolvedValue(mockBacklogItems);
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -361,7 +392,10 @@ describe("getBacklogItemsByIgdbId server action", () => {
 
       mockGetBacklogItemsForUserByIgdbId.mockResolvedValue(mockBacklogItems);
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -447,7 +481,10 @@ describe("getBacklogItemsByIgdbId server action", () => {
 
       mockGetBacklogItemsForUserByIgdbId.mockResolvedValue(mockBacklogItems);
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const backlogItems = await mockGetBacklogItemsForUserByIgdbId({
           userId: ctx.userId,
           igdbId: parsedInput.igdbId,
@@ -461,7 +498,7 @@ describe("getBacklogItemsByIgdbId server action", () => {
       });
 
       expect(result).toHaveLength(4);
-      expect(result.map((item: any) => item.status)).toEqual([
+      expect(result.map((item: MockBacklogItem) => item.status)).toEqual([
         "BACKLOG",
         "PLAYING",
         "COMPLETED",

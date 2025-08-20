@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CollectionService } from "@/shared/services";
 
-import { getUserGamesWithGroupedBacklogPaginated } from "./get-game-with-backlog-items";
-
 // Mock the CollectionService
 vi.mock("@/shared/services", () => ({
   CollectionService: vi.fn(),
@@ -25,6 +23,16 @@ vi.mock("../lib/validation", () => ({
   },
 }));
 
+type MockActionParams = {
+  ctx: { userId: string };
+  parsedInput: {
+    platform?: string;
+    status?: string;
+    search?: string;
+    page?: number;
+  };
+};
+
 describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
   let mockCollectionService: {
     getCollection: ReturnType<typeof vi.fn>;
@@ -39,7 +47,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
     };
 
     vi.mocked(CollectionService).mockImplementation(
-      () => mockCollectionService as any
+      () => mockCollectionService as unknown as CollectionService
     );
   });
 
@@ -111,7 +119,10 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
       );
 
       // Create a mock action function that simulates what the server action does
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const result = await mockCollectionService.getCollection({
           userId: ctx.userId,
           platform: parsedInput.platform,
@@ -168,7 +179,10 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
         mockServiceResponse
       );
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const result = await mockCollectionService.getCollection({
           userId: ctx.userId,
           platform: parsedInput.platform,
@@ -212,7 +226,10 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
         mockServiceResponse
       );
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const result = await mockCollectionService.getCollection({
           userId: ctx.userId,
           platform: parsedInput.platform,
@@ -256,7 +273,10 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
         mockServiceResponse
       );
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const result = await mockCollectionService.getCollection({
           userId: ctx.userId,
           platform: parsedInput.platform,
@@ -294,7 +314,10 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
       const serviceError = new Error("Database connection failed");
       mockCollectionService.getCollection.mockRejectedValue(serviceError);
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const result = await mockCollectionService.getCollection({
           userId: ctx.userId,
           platform: parsedInput.platform,
@@ -343,7 +366,10 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
         mockServiceResponse
       );
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const result = await mockCollectionService.getCollection({
           userId: ctx.userId,
           platform: parsedInput.platform,
@@ -401,7 +427,10 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
         mockServiceResponse
       );
 
-      const mockActionFunction = async ({ ctx, parsedInput }: any) => {
+      const mockActionFunction = async ({
+        ctx,
+        parsedInput,
+      }: MockActionParams) => {
         const result = await mockCollectionService.getCollection({
           userId: ctx.userId,
           platform: parsedInput.platform,

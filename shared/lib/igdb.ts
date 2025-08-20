@@ -129,7 +129,7 @@ const igdbApi = {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${accessToken}`,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+
           "Client-ID": env.IGDB_CLIENT_ID,
         },
         method: "POST",
@@ -137,7 +137,6 @@ const igdbApi = {
       });
 
       if (!response.ok) {
-        // eslint-disable-next-line no-console
         console.error(response);
         throw new Error(
           `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
@@ -153,9 +152,9 @@ const igdbApi = {
 
   handleError(thrown: unknown): void {
     const error = asError(thrown);
-    // eslint-disable-next-line no-console
+
     console.error(`${error.name}: ${error.message}`);
-    // eslint-disable-next-line no-console
+
     if (error.stack !== undefined) console.error(error.stack);
   },
 
@@ -618,5 +617,4 @@ const igdbApi = {
   },
 };
 
-// eslint-disable-next-line import/no-default-export
 export default igdbApi;

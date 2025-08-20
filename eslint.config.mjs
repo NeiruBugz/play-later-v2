@@ -18,6 +18,13 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "test/setup/**",
+      "commitlint.config.js",
+      "prettier.config.js",
+      "postcss.config.js",
+      "next.config.mjs",
+      "eslint.config.mjs",
+      "tailwind.config.ts",
     ],
   },
 ];

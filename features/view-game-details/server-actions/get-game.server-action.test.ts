@@ -2,8 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { findGameById } from "@/shared/lib/repository";
 
-import { getGame } from "./get-game";
-
 // Mock the repository function
 vi.mock("@/shared/lib/repository", () => ({
   findGameById: vi.fn(),
@@ -17,6 +15,10 @@ vi.mock("@/shared/lib/safe-action-client", () => ({
     action: vi.fn(),
   },
 }));
+
+type MockActionParams = {
+  parsedInput: { id: string };
+};
 
 describe("getGame server action", () => {
   let mockFindGameById: ReturnType<typeof vi.fn>;
@@ -61,7 +63,7 @@ describe("getGame server action", () => {
       mockFindGameById.mockResolvedValue(mockGame);
 
       // Create a mock action function that simulates what the server action does
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         const game = await mockFindGameById({ id: parsedInput.id });
         return game;
       };
@@ -82,7 +84,7 @@ describe("getGame server action", () => {
 
       mockFindGameById.mockResolvedValue(null);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         const game = await mockFindGameById({ id: parsedInput.id });
         return game;
       };
@@ -104,7 +106,7 @@ describe("getGame server action", () => {
 
       mockFindGameById.mockRejectedValue(repositoryError);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         const game = await mockFindGameById({ id: parsedInput.id });
         return game;
       };
@@ -137,7 +139,7 @@ describe("getGame server action", () => {
 
       mockFindGameById.mockResolvedValue(mockGame);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         const game = await mockFindGameById({ id: parsedInput.id });
         return game;
       };
@@ -172,7 +174,7 @@ describe("getGame server action", () => {
 
       mockFindGameById.mockResolvedValue(mockGame);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         const game = await mockFindGameById({ id: parsedInput.id });
         return game;
       };
@@ -193,7 +195,7 @@ describe("getGame server action", () => {
 
       mockFindGameById.mockResolvedValue(null);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         const game = await mockFindGameById({ id: parsedInput.id });
         return game;
       };
@@ -230,7 +232,7 @@ describe("getGame server action", () => {
 
       mockFindGameById.mockResolvedValue(mockGame);
 
-      const mockActionFunction = async ({ parsedInput }: any) => {
+      const mockActionFunction = async ({ parsedInput }: MockActionParams) => {
         const game = await mockFindGameById({ id: parsedInput.id });
         return game;
       };
