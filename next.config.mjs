@@ -43,6 +43,7 @@ const nextConfig = {
     unoptimized: true,
   },
   reactStrictMode: true,
+  typedRoutes: true,
 };
 
 export default nextConfig;
