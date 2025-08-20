@@ -512,13 +512,16 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-all duration-200 ease-out hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
         default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
+        gaming:
+          "hover:bg-gaming-primary/20 hover:text-gaming-primary hover:shadow-gaming data-[active=true]:bg-gaming-primary/30 data-[active=true]:text-gaming-primary data-[active=true]:shadow-gaming",
+        neon: "hover:bg-gaming-primary/30 hover:text-gaming-primary hover:shadow-neon data-[active=true]:bg-gaming-primary/40 data-[active=true]:text-gaming-primary data-[active=true]:shadow-neon-strong",
       },
       size: {
         default: "h-8 text-sm",
@@ -533,13 +536,15 @@ const sidebarMenuButtonVariants = cva(
   }
 );
 
+export type SidebarMenuButtonProps = React.ComponentProps<"button"> & {
+  asChild?: boolean;
+  isActive?: boolean;
+  tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+} & VariantProps<typeof sidebarMenuButtonVariants>;
+
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<"button"> & {
-    asChild?: boolean;
-    isActive?: boolean;
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-  } & VariantProps<typeof sidebarMenuButtonVariants>
+  SidebarMenuButtonProps
 >(
   (
     {
@@ -735,6 +740,80 @@ const SidebarMenuSubButton = React.forwardRef<
 });
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
 
+// Gaming Sidebar Presets
+export const GamingSidebarMenuButton = React.forwardRef<
+  HTMLButtonElement,
+  Omit<SidebarMenuButtonProps, "variant">
+>((props, ref) => <SidebarMenuButton {...props} variant="gaming" ref={ref} />);
+GamingSidebarMenuButton.displayName = "GamingSidebarMenuButton";
+
+export const NeonSidebarMenuButton = React.forwardRef<
+  HTMLButtonElement,
+  Omit<SidebarMenuButtonProps, "variant">
+>((props, ref) => <SidebarMenuButton {...props} variant="neon" ref={ref} />);
+NeonSidebarMenuButton.displayName = "NeonSidebarMenuButton";
+
+// Enhanced Sidebar Trigger with Gaming Variants
+const sidebarTriggerVariants = cva("transition-all duration-200 ease-out", {
+  variants: {
+    variant: {
+      default: "hover:bg-accent hover:text-accent-foreground",
+      gaming:
+        "hover:bg-gaming-primary/20 hover:text-gaming-primary hover:shadow-gaming",
+      neon: "hover:bg-gaming-primary/30 hover:text-gaming-primary hover:shadow-neon",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+export type SidebarTriggerProps = React.ComponentProps<typeof Button> & {
+  variant?: VariantProps<typeof sidebarTriggerVariants>["variant"];
+};
+
+const EnhancedSidebarTrigger = React.forwardRef<
+  React.ElementRef<typeof Button>,
+  SidebarTriggerProps
+>(({ className, onClick, variant, ...props }, ref) => {
+  const { toggleSidebar } = useSidebar();
+
+  return (
+    <Button
+      ref={ref}
+      data-sidebar="trigger"
+      variant="ghost"
+      size="icon"
+      className={cn("h-7 w-7", sidebarTriggerVariants({ variant }), className)}
+      onClick={(event) => {
+        onClick?.(event);
+        toggleSidebar();
+      }}
+      {...props}
+    >
+      <ViewVerticalIcon />
+      <span className="sr-only">Toggle Sidebar</span>
+    </Button>
+  );
+});
+EnhancedSidebarTrigger.displayName = "EnhancedSidebarTrigger";
+
+export const GamingSidebarTrigger = React.forwardRef<
+  React.ElementRef<typeof Button>,
+  Omit<SidebarTriggerProps, "variant">
+>((props, ref) => (
+  <EnhancedSidebarTrigger {...props} variant="gaming" ref={ref} />
+));
+GamingSidebarTrigger.displayName = "GamingSidebarTrigger";
+
+export const NeonSidebarTrigger = React.forwardRef<
+  React.ElementRef<typeof Button>,
+  Omit<SidebarTriggerProps, "variant">
+>((props, ref) => (
+  <EnhancedSidebarTrigger {...props} variant="neon" ref={ref} />
+));
+NeonSidebarTrigger.displayName = "NeonSidebarTrigger";
+
 export {
   Sidebar,
   SidebarContent,
@@ -759,5 +838,8 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  EnhancedSidebarTrigger,
   useSidebar,
+  sidebarMenuButtonVariants,
+  sidebarTriggerVariants,
 };

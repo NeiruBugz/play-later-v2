@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { getUserInfo } from "@/features/manage-user-info";
-import { CollectionNav } from "@/shared/components/collection-nav";
-import { Header } from "@/shared/components/header";
+import { EditorialCollectionNav } from "@/shared/components/collection-nav";
+import { EditorialHeader } from "@/shared/components/header";
 import { Body, ResponsiveHeading } from "@/shared/components/typography";
 
 export default async function CollectionLayout(
@@ -20,7 +20,7 @@ export default async function CollectionLayout(
 
   return (
     <>
-      <Header authorized />
+      <EditorialHeader authorized />
       <div className="container overflow-hidden px-4 py-8 pt-16">
         <div className="mb-8 mt-4 flex flex-col gap-4">
           <ResponsiveHeading level={1}>Your Collection</ResponsiveHeading>
@@ -29,7 +29,10 @@ export default async function CollectionLayout(
           </Body>
         </div>
         <div className="mb-8">
-          <CollectionNav showAddButton={false} userName={userData.username} />
+          <EditorialCollectionNav
+            showAddButton={false}
+            userName={userData.username}
+          />
         </div>
         {children}
       </div>

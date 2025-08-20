@@ -9,7 +9,7 @@ import {
   AdaptiveTabsList,
   AdaptiveTabsTrigger,
 } from "@/shared/components/adaptive-tabs";
-import { Header } from "@/shared/components/header";
+import { EditorialHeader } from "@/shared/components/header";
 
 const TabsSchema = z.object({
   tab: z.enum(["settings", "integrations"]).optional(),
@@ -36,7 +36,7 @@ export default async function UserPage(props: PageProps<"/user/settings">) {
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen flex-col bg-background">
-        <Header authorized={true} />
+        <EditorialHeader authorized={true} />
         <div className="container relative px-4 pt-[80px]">
           <AdaptiveTabs
             defaultValue={parsedTab.tab ?? "settings"}

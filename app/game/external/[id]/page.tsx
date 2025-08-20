@@ -22,7 +22,7 @@ import {
   AdaptiveTabsList,
   AdaptiveTabsTrigger,
 } from "@/shared/components/adaptive-tabs";
-import { Header } from "@/shared/components/header";
+import { EditorialHeader } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib";
@@ -52,7 +52,7 @@ export default async function ExternalGamePage(
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen flex-col bg-background">
-        <Header authorized={true} />
+        <EditorialHeader authorized={true} />
         <div className="container relative z-10 px-4 pt-[80px]">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[300px_1fr_250px]">
             <div className="flex flex-col gap-4">

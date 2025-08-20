@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 
 import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
-import { Header } from "@/shared/components/header";
+import { EditorialHeader } from "@/shared/components/header";
 
 export default async function SharedWishlistPage(
   props: PageProps<"/wishlist/[username]">
@@ -27,7 +27,7 @@ export default async function SharedWishlistPage(
 
   return (
     <div>
-      <Header authorized={session !== null} />
+      <EditorialHeader authorized={session !== null} />
       <div className="container overflow-hidden px-4 py-8 pt-[60px]">
         <div className="mb-8 mt-4 flex flex-col gap-4">
           <h1 className="text-3xl font-bold tracking-tight">

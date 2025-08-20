@@ -129,6 +129,7 @@ const bodyVariants = cva("font-body text-foreground", {
       default: "text-foreground",
       muted: "text-muted-foreground",
       accent: "text-accent-foreground",
+      editorial: "text-foreground/90 leading-relaxed",
     },
   },
   defaultVariants: {
@@ -203,6 +204,7 @@ const gamingHeadingVariants = cva("font-heading text-foreground", {
       neon: "neon-text text-gaming-primary",
       gradient: "bg-gaming-gradient bg-clip-text text-transparent",
       glitch: "text-gaming-accent animate-neon-flicker",
+      editorial: "text-foreground tracking-tight",
     },
     weight: {
       normal: "font-normal",
@@ -400,3 +402,15 @@ export {
   gamingBodyVariants,
   gamingBadgeVariants,
 };
+
+// Editorial Typography Presets
+export const EditorialHeading = React.forwardRef<
+  HTMLHeadingElement,
+  GamingHeadingProps
+>((props, ref) => <GamingHeading {...props} variant="editorial" ref={ref} />);
+EditorialHeading.displayName = "EditorialHeading";
+
+export const EditorialBody = React.forwardRef<HTMLParagraphElement, BodyProps>(
+  (props, ref) => <Body {...props} variant="editorial" ref={ref} />
+);
+EditorialBody.displayName = "EditorialBody";

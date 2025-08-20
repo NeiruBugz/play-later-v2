@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 import { getUsersBacklog } from "@/features/view-backlogs/server-actions";
-import { Header } from "@/shared/components/header";
+import { EditorialHeader } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import { BacklogStatusMapper, normalizeString } from "@/shared/lib";
 
@@ -23,7 +23,7 @@ export default async function UsersBacklogPage(
 
   return (
     <>
-      <Header authorized />
+      <EditorialHeader authorized />
       <div className="container pt-[60px]">
         <h1 className="font-bold md:text-xl xl:text-2xl">
           {awaitedParams.username}&apos;s Backlog

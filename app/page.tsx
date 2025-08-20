@@ -30,7 +30,7 @@ import {
 } from "@/features/dashboard/components";
 import { FeatureCard } from "@/features/landing";
 import { SignIn } from "@/features/sign-in";
-import { Header } from "@/shared/components/header";
+import { EditorialHeader } from "@/shared/components/header";
 import {
   Body,
   Display,
@@ -183,7 +183,7 @@ export default async function Page() {
 
   return (
     <>
-      <Header authorized />
+      <EditorialHeader authorized />
       <section className="container mt-2 pt-16">
         <ResponsiveHeading
           level={1}
