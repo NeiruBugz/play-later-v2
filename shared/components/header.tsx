@@ -46,10 +46,10 @@ const Header = memo(({ authorized }: { authorized: boolean }) => {
                 {linksConfig.map((link) => {
                   const IconComponent = link.icon;
                   return (
-                    <DropdownMenuItem key={link.href} asChild>
+                    <DropdownMenuItem key={link.href}>
                       <Link
                         href={link.href}
-                        className="flex items-center gap-2"
+                        className="flex w-full items-center gap-2"
                       >
                         <IconComponent className="size-4" />
                         {link.mobileLabel}
@@ -80,18 +80,16 @@ const Header = memo(({ authorized }: { authorized: boolean }) => {
             {linksConfig.map((link) => {
               const IconComponent = link.icon;
               return (
-                <Button
-                  key={link.href}
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="h-8 px-2 lg:px-3"
-                >
-                  <Link href={link.href} className="flex items-center gap-2">
+                <Link key={link.href} href={link.href}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex h-8 items-center gap-2 px-2 lg:px-3"
+                  >
                     <IconComponent className="size-4" />
                     <span className="hidden lg:inline">{link.label}</span>
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               );
             })}
           </nav>
@@ -99,15 +97,16 @@ const Header = memo(({ authorized }: { authorized: boolean }) => {
 
         {authorized ? (
           <div className="flex flex-1 items-center justify-end space-x-2">
-            <Button variant="default" size="sm" asChild className="h-8">
-              <Link
-                href="/collection/add-game"
-                className="flex items-center gap-2"
+            <Link href="/collection/add-game">
+              <Button
+                variant="default"
+                size="sm"
+                className="flex h-8 items-center gap-2"
               >
                 <Plus className="size-4" />
                 <span className="hidden sm:inline">Add Game</span>
-              </Link>
-            </Button>
+              </Button>
+            </Link>
 
             <User />
 
