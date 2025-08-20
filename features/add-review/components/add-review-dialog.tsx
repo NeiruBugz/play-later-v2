@@ -23,7 +23,7 @@ export function AddReviewDialog({
     <Dialog>
       <DialogTrigger asChild>
         <Button className="flex items-center gap-2">
-          <Star className="size-4" />
+          <Star className="size-4 text-muted-foreground" />
           <span>Write a Review</span>
         </Button>
       </DialogTrigger>

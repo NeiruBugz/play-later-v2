@@ -6,6 +6,7 @@ import {
   getUserAchievements,
   type EnrichedAchievement,
 } from "@/features/steam-integration";
+import { Body, Caption, Heading } from "@/shared/components/typography";
 import { Badge } from "@/shared/components/ui/badge";
 import {
   Card,
@@ -26,17 +27,26 @@ function AchievementCard({
   achievement: EnrichedAchievement;
 }) {
   const isUnlocked = achievement.achieved === 1;
-  const rarityColors = {
-    common: "bg-gray-100 text-gray-800",
-    uncommon: "bg-green-100 text-green-800",
-    rare: "bg-blue-100 text-blue-800",
-    very_rare: "bg-purple-100 text-purple-800",
+
+  const getRarityBadgeVariant = (rarity: string) => {
+    switch (rarity) {
+      case "common":
+        return "outline";
+      case "uncommon":
+        return "secondary";
+      case "rare":
+        return "default";
+      case "very_rare":
+        return "primary";
+      default:
+        return "outline";
+    }
   };
 
   return (
     <Card
       className={cn(
-        "transition-all duration-200",
+        "rounded-lg transition-all duration-200",
         isUnlocked ? "bg-background" : "bg-muted/30"
       )}
     >
@@ -54,8 +64,8 @@ function AchievementCard({
               height={48}
             />
             {isUnlocked && (
-              <div className="absolute -right-1 -top-1 rounded-full bg-green-500 p-1">
-                <Trophy className="size-3 text-white" />
+              <div className="bg-success absolute -right-1 -top-1 rounded-full p-1">
+                <Trophy className="text-success-foreground size-3" />
               </div>
             )}
           </div>
@@ -63,25 +73,21 @@ function AchievementCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h4
+                <Body
+                  size="sm"
                   className={cn(
-                    "text-sm font-medium",
+                    "font-medium",
                     isUnlocked ? "text-foreground" : "text-muted-foreground"
                   )}
                 >
                   {achievement.displayName}
-                </h4>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {achievement.description}
-                </p>
+                </Body>
+                <Caption className="mt-1">{achievement.description}</Caption>
               </div>
 
               <div className="flex flex-col gap-1">
                 {achievement.globalPercent !== undefined && (
-                  <Badge
-                    variant="secondary"
-                    className={cn("text-xs", rarityColors[achievement.rarity])}
-                  >
+                  <Badge className="text-xs">
                     {achievement.globalPercent.toFixed(1)}%
                   </Badge>
                 )}
@@ -89,13 +95,13 @@ function AchievementCard({
             </div>
 
             {isUnlocked && achievement.unlocktime > 0 && (
-              <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+              <Caption className="mt-2 flex items-center gap-1">
                 <Clock className="size-3" />
                 <span>
                   Unlocked{" "}
                   {new Date(achievement.unlocktime * 1000).toLocaleDateString()}
                 </span>
-              </div>
+              </Caption>
             )}
           </div>
         </div>
@@ -115,13 +121,13 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
 
   if (serverError) {
     return (
-      <div className="py-8 text-center text-muted-foreground">
-        <Trophy className="mx-auto mb-4 size-12 opacity-50" />
-        <p>{serverError}</p>
+      <div className="py-8 text-center">
+        <Trophy className="mx-auto mb-4 size-12 text-muted-foreground opacity-50" />
+        <Body variant="muted">{serverError}</Body>
         {serverError === "Steam account not connected" && (
-          <p className="mt-2 text-sm">
+          <Body size="sm" variant="muted" className="mt-2">
             Connect your Steam account in settings to view achievements.
-          </p>
+          </Body>
         )}
       </div>
     );
@@ -135,10 +141,10 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="rounded-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="size-5" />
+            <Trophy />
             Achievement Progress
           </CardTitle>
         </CardHeader>
@@ -146,35 +152,35 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
           <div className="space-y-4">
             <div>
               <div className="mb-2 flex justify-between text-sm">
-                <span>Progress</span>
-                <span>
+                <Body size="sm">Progress</Body>
+                <Body size="sm">
                   {stats.unlocked}/{stats.total}
-                </span>
+                </Body>
               </div>
               <Progress value={stats.completionPercentage} className="h-2" />
-              <p className="mt-1 text-xs text-muted-foreground">
+              <Caption className="mt-1">
                 {stats.completionPercentage}% complete
-              </p>
+              </Caption>
             </div>
 
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-2xl font-bold text-green-600">
+                <Heading size="xl" className="text-success">
                   {stats.unlocked}
-                </p>
-                <p className="text-xs text-muted-foreground">Unlocked</p>
+                </Heading>
+                <Caption>Unlocked</Caption>
               </div>
               <div>
-                <p className="text-2xl font-bold text-muted-foreground">
+                <Heading size="xl" className="text-muted-foreground">
                   {stats.total - stats.unlocked}
-                </p>
-                <p className="text-xs text-muted-foreground">Remaining</p>
+                </Heading>
+                <Caption>Remaining</Caption>
               </div>
               <div>
-                <p className="text-2xl font-bold text-blue-600">
+                <Heading size="xl" className="text-info">
                   {stats.completionPercentage}%
-                </p>
-                <p className="text-xs text-muted-foreground">Complete</p>
+                </Heading>
+                <Caption>Complete</Caption>
               </div>
             </div>
           </div>
@@ -196,12 +202,12 @@ async function AchievementsList({ steamAppId }: { steamAppId: number }) {
 export function Achievements({ steamAppId }: AchievementsProps) {
   if (!steamAppId) {
     return (
-      <div className="py-8 text-center text-muted-foreground">
-        <Trophy className="mx-auto mb-4 size-12 opacity-50" />
-        <p>No Steam App ID found for this game</p>
-        <p className="mt-2 text-sm">
+      <div className="py-8 text-center">
+        <Trophy className="mx-auto mb-4 size-12 text-muted-foreground opacity-50" />
+        <Body variant="muted">No Steam App ID found for this game</Body>
+        <Body size="sm" variant="muted" className="mt-2">
           Achievement data is not available for this game.
-        </p>
+        </Body>
       </div>
     );
   }

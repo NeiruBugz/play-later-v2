@@ -9,6 +9,7 @@ import {
 import { type PropsWithChildren } from "react";
 
 import { Toaster } from "@/shared/components/ui/sonner";
+import { TooltipProvider } from "@/shared/components/ui/tooltip";
 
 const queryClient = new QueryClient();
 
@@ -20,8 +21,10 @@ export function Providers({
     <NextThemesProvider {...props}>
       <SessionProvider>
         <QueryClientProvider client={queryClient}>
-          {children}
-          <Toaster />
+          <TooltipProvider>
+            {children}
+            <Toaster />
+          </TooltipProvider>
         </QueryClientProvider>
       </SessionProvider>
     </NextThemesProvider>

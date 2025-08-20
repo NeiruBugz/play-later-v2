@@ -36,31 +36,26 @@ export function GameStatusSelector({
     backlog: {
       label: "In Backlog",
       icon: BookMarked,
-      color: "bg-green-500",
       variant: "default" as const,
     },
     playing: {
       label: "Playing",
       icon: Clock,
-      color: "bg-blue-500",
       variant: "default" as const,
     },
     completed: {
       label: "Completed",
       icon: Trophy,
-      color: "bg-purple-500",
       variant: "default" as const,
     },
     wishlist: {
       label: "In Wishlist",
       icon: Heart,
-      color: "bg-red-500",
       variant: "default" as const,
     },
     none: {
       label: "Add to...",
       icon: Plus,
-      color: "",
       variant: "outline" as const,
     },
   };
@@ -90,27 +85,27 @@ export function GameStatusSelector({
           disabled={isUpdating}
         >
           <div className="flex items-center gap-2">
-            <Icon size={16} />
+            <Icon className="size-4 text-muted-foreground" />
             <span>{currentStatus.label}</span>
           </div>
-          <ChevronDown size={16} />
+          <ChevronDown className="size-4 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[200px]">
         <DropdownMenuItem onClick={() => handleStatusChange("backlog")}>
-          <BookMarked className="mr-2 size-4" />
+          <BookMarked className="mr-2 size-4 text-muted-foreground" />
           <span>Add to Backlog</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleStatusChange("playing")}>
-          <Clock className="mr-2 size-4" />
+          <Clock className="mr-2 size-4 text-muted-foreground" />
           <span>Playing</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleStatusChange("completed")}>
-          <Check className="mr-2 size-4" />
+          <Check className="mr-2 size-4 text-muted-foreground" />
           <span>Completed</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleStatusChange("wishlist")}>
-          <Heart className="mr-2 size-4" />
+          <Heart className="mr-2 size-4 text-muted-foreground" />
           <span>Add to Wishlist</span>
         </DropdownMenuItem>
         {status !== "none" && (

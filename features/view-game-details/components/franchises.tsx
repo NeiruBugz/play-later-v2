@@ -1,3 +1,4 @@
+import { Heading } from "@/shared/components/typography";
 import { Accordion, AccordionItem } from "@/shared/components/ui/accordion";
 import { cn } from "@/shared/lib";
 import igdbApi from "@/shared/lib/igdb";
@@ -27,7 +28,9 @@ export async function Franchises({
         hidden: !allFranchises || allFranchises.length === 0,
       })}
     >
-      <h2 className="mb-4 text-2xl font-bold">From the Same Series</h2>
+      <Heading level={2} size="2xl" className="mb-4">
+        From the Same Series
+      </Heading>
       <Accordion type="single" collapsible>
         {allFranchises.flat().map((franchiseEntry) => {
           if (

@@ -4,7 +4,6 @@ export { Achievements } from "./components/achievements";
 export { Franchises } from "./components/franchises";
 export { GameQuickActions } from "./components/game-quick-actions";
 export { GameScreenshots } from "./components/game-screenshots";
-export { Metadata } from "./components/metadata";
 export { Reviews } from "./components/reviews";
 export { SimilarGames } from "./components/similar-games";
 export { TimesToBeat } from "./components/times-to-beat";

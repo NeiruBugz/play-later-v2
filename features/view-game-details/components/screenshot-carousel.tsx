@@ -59,7 +59,7 @@ export function ScreenshotCarousel({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 z-50 bg-black/50 text-white hover:bg-black/70"
+                  className="absolute right-2 top-2 z-50 bg-card/50 text-foreground hover:bg-card/70"
                   onClick={() => {
                     setOpen(false);
                   }}
@@ -79,7 +79,7 @@ export function ScreenshotCarousel({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute left-2 top-1/2 z-50 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+                  className="absolute left-2 top-1/2 z-50 -translate-y-1/2 bg-card/50 text-foreground hover:bg-card/70"
                   onClick={handlePrevious}
                 >
                   <ChevronLeft className="size-6" />
@@ -87,7 +87,7 @@ export function ScreenshotCarousel({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 z-50 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+                  className="absolute right-2 top-1/2 z-50 -translate-y-1/2 bg-card/50 text-foreground hover:bg-card/70"
                   onClick={handleNext}
                 >
                   <ChevronRight className="size-6" />

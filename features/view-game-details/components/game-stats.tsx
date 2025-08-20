@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 
+import { Body, Caption, Heading } from "@/shared/components/typography";
 import { Card, CardContent } from "@/shared/components/ui/card";
 
 type GameStatsProps = {
@@ -12,12 +13,12 @@ export async function GameStats({ rating }: GameStatsProps) {
       <CardContent className="pt-6">
         <div className="space-y-2 text-center">
           <div className="flex justify-center">
-            <Star className="size-6 fill-yellow-400 text-yellow-400" />
+            <Star className="size-6 text-yellow-500" />
           </div>
-          <div className="text-2xl font-medium">
+          <Heading size="xl" className="font-medium">
             {rating ?? "No rating yet"}
-          </div>
-          <div className="text-sm text-muted-foreground">Aggregated Rating</div>
+          </Heading>
+          <Caption>Aggregated Rating</Caption>
         </div>
       </CardContent>
     </Card>

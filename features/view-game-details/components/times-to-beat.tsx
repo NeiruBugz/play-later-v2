@@ -1,6 +1,7 @@
 import { secondsToHours } from "date-fns";
 import { Clock } from "lucide-react";
 
+import { Body, Caption } from "@/shared/components/typography";
 import {
   Tooltip,
   TooltipContent,
@@ -26,20 +27,22 @@ export async function TimesToBeat({ igdbId }: { igdbId: number }) {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 text-muted-foreground">
             <Clock className="size-4" />
-            <span>
+            <Body size="sm">
               {secondsToHours(current.normally)} hours{" "}
-              <span className="text-xs">
+              <Caption size="sm">
                 (based on {current.count} submissions)
-              </span>
-            </span>
+              </Caption>
+            </Body>
           </div>
         </TooltipTrigger>
         <TooltipContent>
           <div>
-            <p>Hastily: {secondsToHours(current.hastily)} h.</p>
-            <p>Completionist: {secondsToHours(current.completely)} h.</p>
+            <Body size="sm">Hastily: {secondsToHours(current.hastily)} h.</Body>
+            <Body size="sm">
+              Completionist: {secondsToHours(current.completely)} h.
+            </Body>
           </div>
         </TooltipContent>
       </Tooltip>

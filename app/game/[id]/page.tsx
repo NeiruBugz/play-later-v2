@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Book, Image, Star, Trophy } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -9,7 +9,6 @@ import {
   GameQuickActions,
   GameScreenshots,
   getGame,
-  Metadata,
   Reviews,
   SimilarGames,
   TimesToBeat,
@@ -20,9 +19,10 @@ import {
   AdaptiveTabsContent,
   AdaptiveTabsList,
   AdaptiveTabsTrigger,
-} from "@/shared/components";
+} from "@/shared/components/adaptive-tabs";
 import { EditorialHeader } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
+import { Body, Heading } from "@/shared/components/typography";
 import igdbApi from "@/shared/lib/igdb";
 
 function determineGameType(gameId: string) {
@@ -57,14 +57,17 @@ export default async function GamePage(props: PageProps<"/game/[id]">) {
     steamAppId = null;
   }
 
+  const description = game.description ?? igdbData.summary;
+
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen flex-col bg-background">
         <EditorialHeader authorized={true} />
-        <div className="container relative z-10 px-4 pt-[80px]">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-[300px_1fr_250px]">
+        <div className="container relative z-10 py-8 pt-16">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[300px_1fr]">
+            {/* Left Column: Cover and Quick Actions */}
             <div className="flex flex-col gap-4">
-              <div className="overflow-hidden rounded-lg border shadow-lg">
+              <div className="overflow-hidden rounded-lg">
                 <IgdbImage
                   gameTitle={game.title}
                   coverImageId={game.coverImage}
@@ -81,13 +84,17 @@ export default async function GamePage(props: PageProps<"/game/[id]">) {
                 gameType={gameType}
               />
             </div>
+
+            {/* Main Content Column */}
             <div className="flex flex-col gap-6">
               <div>
-                <h1 className="text-4xl font-bold">{game.title}</h1>
+                <Heading level={1} size="3xl">
+                  {game.title}
+                </Heading>
                 <div className="mt-2 flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="size-5 fill-primary text-primary" />
-                    <span className="font-medium">4/5</span>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Star className="size-4" />
+                    <Body size="sm">4/5</Body>
                   </div>
                   <Suspense>
                     <TimesToBeat igdbId={game.igdbId} />
@@ -95,29 +102,38 @@ export default async function GamePage(props: PageProps<"/game/[id]">) {
                 </div>
               </div>
 
+              {description && (
+                <Body variant="muted" className="leading-relaxed">
+                  {description}
+                </Body>
+              )}
+
               <AdaptiveTabs defaultValue="about" className="w-full">
                 <AdaptiveTabsList className="w-fit">
-                  <AdaptiveTabsTrigger value="about" icon="📖">
+                  <AdaptiveTabsTrigger value="about" icon={<Book />}>
                     About
                   </AdaptiveTabsTrigger>
-                  <AdaptiveTabsTrigger value="reviews" icon="⭐">
+                  <AdaptiveTabsTrigger value="reviews" icon={<Star />}>
                     Reviews
                   </AdaptiveTabsTrigger>
-                  <AdaptiveTabsTrigger value="screenshots" icon="🖼️">
+                  <AdaptiveTabsTrigger value="screenshots" icon={<Image />}>
                     Screenshots
                   </AdaptiveTabsTrigger>
                   {steamAppId !== null ? (
-                    <AdaptiveTabsTrigger value="achievements" icon="🏆">
+                    <AdaptiveTabsTrigger value="achievements" icon={<Trophy />}>
                       Achievements
                     </AdaptiveTabsTrigger>
                   ) : null}
                 </AdaptiveTabsList>
                 <AdaptiveTabsContent value="about" className="space-y-4">
                   <About
-                    description={game.description ?? igdbData.summary}
                     releaseDates={igdbData.release_dates}
                     genres={igdbData.genres}
-                    igdbId={game.igdbId}
+                    igdbId={igdbData.id}
+                    involvedCompanies={igdbData.involved_companies}
+                    aggregatedRating={igdbData.aggregated_rating}
+                    themes={igdbData.themes}
+                    firstReleaseDate={game.releaseDate}
                   />
                 </AdaptiveTabsContent>
                 <AdaptiveTabsContent value="reviews">
@@ -138,73 +154,15 @@ export default async function GamePage(props: PageProps<"/game/[id]">) {
                 )}
               </AdaptiveTabs>
             </div>
-            <div className="flex flex-col gap-6">
-              <Metadata
-                firstReleaseDate={game.releaseDate}
-                releaseDates={igdbData.release_dates}
-                involvedCompanies={igdbData.involved_companies}
-                aggregatedRating={igdbData.aggregated_rating}
-                themes={igdbData.themes}
-              />
 
+            {/* Right Sidebar Column */}
+            <div className="flex flex-col gap-6 lg:col-start-1 lg:row-start-2 lg:w-[250px]">
               <div>
-                <h3 className="mb-3 font-medium">Similar Games</h3>
+                <Heading level={3} size="lg" className="mb-3">
+                  Similar Games
+                </Heading>
                 <SimilarGames similarGames={igdbData.similar_games} />
               </div>
-
-              {/* {game.userStats && (
-                <div className="rounded-lg border p-4">
-                  <h3 className="mb-3 font-medium">Community Stats</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Playing</span>
-                        <span className="font-medium">
-                          {game.userStats.playing}
-                        </span>
-                      </div>
-                      <Progress
-                        value={
-                          (game.userStats.playing / game.userStats.total) * 100
-                        }
-                        className="mt-1 h-2"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Completed</span>
-                        <span className="font-medium">
-                          {game.userStats.completed}
-                        </span>
-                      </div>
-                      <Progress
-                        value={
-                          (game.userStats.completed / game.userStats.total) *
-                          100
-                        }
-                        className="mt-1 h-2"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          Backlogged
-                        </span>
-                        <span className="font-medium">
-                          {game.userStats.backlogged}
-                        </span>
-                      </div>
-                      <Progress
-                        value={
-                          (game.userStats.backlogged / game.userStats.total) *
-                          100
-                        }
-                        className="mt-1 h-2"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )} */}
             </div>
           </div>
           <Suspense fallback={"Loading franchises list..."}>
