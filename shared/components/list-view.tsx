@@ -1,8 +1,7 @@
-import { BacklogItemStatus } from "@prisma/client";
 import { CalendarDays, Monitor } from "lucide-react";
 import Link from "next/link";
 
-import { GameWithBacklogItems } from "@/features/view-wishlist/types";
+import { type GameWithBacklogItems } from "@/features/view-wishlist/types";
 import { cn, getGameUrl } from "@/shared/lib";
 
 import { IgdbImage } from "./igdb-image";
@@ -44,7 +43,7 @@ export function ListView({
             className="group flex items-center gap-4 rounded-lg border bg-card p-4 transition-all hover:shadow-md"
           >
             {/* Game Cover */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div className="relative h-20 w-16 overflow-hidden rounded-md border">
                 <IgdbImage
                   gameTitle={game.title}
@@ -82,17 +81,14 @@ export function ListView({
               {/* Metadata */}
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 {/* Status */}
-                <Badge
-                  variant="secondary"
-                  className={cn(statusColors[status as BacklogItemStatus])}
-                >
-                  {statusLabels[status as BacklogItemStatus]}
+                <Badge variant="secondary" className={cn(statusColors[status])}>
+                  {statusLabels[status]}
                 </Badge>
 
                 {/* Platform */}
                 {primaryPlatform?.platform && (
                   <div className="flex items-center gap-1">
-                    <Monitor className="h-3 w-3" />
+                    <Monitor className="size-3" />
                     <span>{primaryPlatform.platform}</span>
                   </div>
                 )}
@@ -100,7 +96,7 @@ export function ListView({
                 {/* Release Date */}
                 {game.releaseDate && (
                   <div className="flex items-center gap-1">
-                    <CalendarDays className="h-3 w-3" />
+                    <CalendarDays className="size-3" />
                     <span>
                       {new Date(game.releaseDate).toLocaleDateString()}
                     </span>

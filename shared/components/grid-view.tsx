@@ -1,4 +1,4 @@
-import { GameWithBacklogItems } from "@/features/view-wishlist/types";
+import { type GameWithBacklogItems } from "@/features/view-wishlist/types";
 
 import { GameCard } from "./game-card";
 
@@ -14,8 +14,7 @@ export function GridView({
           <GameCard
             game={game}
             platforms={backlogItems}
-            currentPlatform={backlogItems[0] || undefined}
-            displayMode={"combined"}
+            currentPlatform={backlogItems[0]}
           />
         </li>
       ))}

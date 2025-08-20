@@ -1,14 +1,14 @@
 import { z } from "zod";
 
-export interface SteamAchievement {
+export type SteamAchievement = {
   apiname: string;
   achieved: number;
   unlocktime: number;
   name?: string;
   description?: string;
-}
+};
 
-export interface SteamAchievementSchema {
+export type SteamAchievementSchema = {
   name: string;
   defaultvalue: number;
   displayName: string;
@@ -16,16 +16,16 @@ export interface SteamAchievementSchema {
   description: string;
   icon: string;
   icongray: string;
-}
+};
 
-export interface SteamPlayerAchievements {
+export type SteamPlayerAchievements = {
   steamID: string;
   gameName: string;
   achievements: SteamAchievement[];
   success: boolean;
-}
+};
 
-export interface SteamGameSchema {
+export type SteamGameSchema = {
   game: {
     gameName: string;
     gameVersion: string;
@@ -33,31 +33,31 @@ export interface SteamGameSchema {
       achievements: SteamAchievementSchema[];
     };
   };
-}
+};
 
-export interface SteamGlobalAchievementPercentages {
+export type SteamGlobalAchievementPercentages = {
   achievementpercentages: {
     achievements: Array<{
       name: string;
       percent: number;
     }>;
   };
-}
+};
 
-export interface SteamUserOwnedGames {
+export type SteamUserOwnedGames = {
   game_count: number;
   games: SteamGame[];
-}
+};
 
-export interface SteamGame {
+export type SteamGame = {
   appid: number;
   name: string;
   playtime_forever: number;
   img_icon_url?: string;
   img_logo_url?: string;
-}
+};
 
-export interface EnrichedAchievement extends SteamAchievement {
+export type EnrichedAchievement = {
   displayName: string;
   description: string;
   icon: string;
@@ -65,7 +65,7 @@ export interface EnrichedAchievement extends SteamAchievement {
   hidden: boolean;
   globalPercent?: number;
   rarity: "common" | "uncommon" | "rare" | "very_rare";
-}
+} & SteamAchievement;
 
 export const SteamGameSchema = z.object({
   name: z.string(),

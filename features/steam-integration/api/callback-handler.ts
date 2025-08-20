@@ -1,7 +1,7 @@
 "use server";
 
 import { getServerUserId } from "@/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { steamAuth } from "@/features/steam-integration/lib/steam-auth";
 import { getUserBySteamId, updateUserSteamData } from "@/shared/lib/repository";

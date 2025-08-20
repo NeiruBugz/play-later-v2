@@ -1,4 +1,4 @@
-import { BacklogItem, BacklogItemStatus } from "@prisma/client";
+import { BacklogItemStatus, type BacklogItem } from "@prisma/client";
 import {
   Popover,
   PopoverContent,
@@ -43,12 +43,12 @@ export function GameEntryForm({
   gameId,
 }: GameEntryFormProps) {
   const [playStatus, setPlayStatus] = useState(status);
-  const [entryPlatform, setEntryPlatform] = useState(platform || "");
+  const [entryPlatform, setEntryPlatform] = useState(platform ?? "");
   const [startDate, setStartDate] = useState<Date | undefined>(
-    startedAt || undefined
+    startedAt ?? undefined
   );
   const [completionDate, setCompletionDate] = useState<Date | undefined>(
-    completedAt || undefined
+    completedAt ?? undefined
   );
 
   const onSubmit = async () => {
@@ -133,7 +133,7 @@ export function GameEntryForm({
                 variant="outline"
                 className="justify-start text-left font-normal"
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 size-4" />
                 {startDate ? format(startDate, "PPP") : "Pick a date"}
               </Button>
             </PopoverTrigger>
@@ -156,7 +156,7 @@ export function GameEntryForm({
                 variant="outline"
                 className="justify-start text-left font-normal"
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 size-4" />
                 {completionDate ? format(completionDate, "PPP") : "Pick a date"}
               </Button>
             </PopoverTrigger>

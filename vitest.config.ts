@@ -23,6 +23,11 @@ export default defineConfig({
         "**/node_modules/**",
         "**/*.config.*",
         "test/**",
+        "app/**",
+        "coverage/**",
+        "domain/**",
+        "env.mjs",
+        "auth.ts",
       ],
       reporter: ["text", "json", "html"],
       thresholds: {
@@ -51,6 +56,7 @@ export default defineConfig({
             // Exclude server-action tests from client project
             "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/server-actions/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/lib/igdb.integration.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
         },
       },
@@ -62,6 +68,7 @@ export default defineConfig({
           include: [
             "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/server-actions/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/lib/igdb.integration.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
           exclude: [
             "**/node_modules/**",

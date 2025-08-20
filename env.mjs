@@ -21,21 +21,27 @@ export const env = createEnv({
     STEAM_API_KEY: process.env.STEAM_API_KEY,
   },
   server: {
-    AUTH_GOOGLE_ID: z.string(),
-    AUTH_GOOGLE_SECRET: z.string(),
-    AUTH_SECRET: z.string(),
-    AUTH_URL: z.string().url().optional(),
-    IGDB_CLIENT_ID: z.string(),
-    IGDB_CLIENT_SECRET: z.string(),
+    AUTH_GOOGLE_ID: z.string({ message: "AUTH_GOOGLE_ID is required" }),
+    AUTH_GOOGLE_SECRET: z.string({ message: "AUTH_GOOGLE_SECRET is required" }),
+    AUTH_SECRET: z.string({ message: "AUTH_SECRET is required" }),
+    AUTH_URL: z.string().url({ message: "AUTH_URL is required" }).optional(),
+    IGDB_CLIENT_ID: z.string({ message: "IGDB_CLIENT_ID is required" }),
+    IGDB_CLIENT_SECRET: z.string({ message: "IGDB_CLIENT_SECRET is required" }),
     NODE_ENV: z.enum(["development", "test", "production"]),
-    POSTGRES_DATABASE: z.string(),
-    POSTGRES_HOST: z.string(),
-    POSTGRES_PASSWORD: z.string(),
-    POSTGRES_PRISMA_URL: z.string().url(),
-    POSTGRES_URL: z.string().url(),
-    POSTGRES_URL_NO_SSL: z.string().url(),
-    POSTGRES_URL_NON_POOLING: z.string().url(),
-    POSTGRES_USER: z.string(),
-    STEAM_API_KEY: z.string(),
+    POSTGRES_DATABASE: z.string({ message: "POSTGRES_DATABASE is required" }),
+    POSTGRES_HOST: z.string({ message: "POSTGRES_HOST is required" }),
+    POSTGRES_PASSWORD: z.string({ message: "POSTGRES_PASSWORD is required" }),
+    POSTGRES_PRISMA_URL: z
+      .string()
+      .url({ message: "POSTGRES_PRISMA_URL is required" }),
+    POSTGRES_URL: z.string().url({ message: "POSTGRES_URL is required" }),
+    POSTGRES_URL_NO_SSL: z
+      .string()
+      .url({ message: "POSTGRES_URL_NO_SSL is required" }),
+    POSTGRES_URL_NON_POOLING: z
+      .string()
+      .url({ message: "POSTGRES_URL_NON_POOLING is required" }),
+    POSTGRES_USER: z.string({ message: "POSTGRES_USER is required" }),
+    STEAM_API_KEY: z.string({ message: "STEAM_API_KEY is required" }),
   },
 });

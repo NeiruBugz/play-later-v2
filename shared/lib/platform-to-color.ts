@@ -10,6 +10,8 @@ export function platformToBackgroundColor(platform: string) {
   if (platform.toLowerCase().includes("nintendo")) {
     return "bg-nintendo";
   }
+
+  return "bg-primary";
 }
 
 export function platformToColorBadge(platform: string) {

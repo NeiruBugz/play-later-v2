@@ -1,4 +1,5 @@
-import Image, { ImageProps } from "next/image";
+import Image, { type ImageProps } from "next/image";
+import { memo } from "react";
 
 import {
   IMAGE_API,
@@ -8,7 +9,7 @@ import {
 
 type IgdbImageProps = {
   gameTitle: string;
-  coverImageId: string | null;
+  coverImageId: string | null | undefined;
   igdbSrcSize: keyof typeof IMAGE_SIZES;
   igdbImageSize: keyof typeof IMAGE_SIZES;
 } & Partial<ImageProps>;
@@ -20,24 +21,29 @@ function IgdbImage({
   coverImageId,
   ...rest
 }: IgdbImageProps) {
-  const src = coverImageId
-    ? `${IMAGE_API}/${IMAGE_SIZES[igdbSrcSize]}/${coverImageId}.webp`
-    : undefined;
+  const src =
+    coverImageId !== null && coverImageId !== undefined
+      ? `${IMAGE_API}/${IMAGE_SIZES[igdbSrcSize]}/${coverImageId}.webp`
+      : undefined;
 
-  if (!src) {
-    return;
+  if (src === undefined) {
+    return null;
   }
 
-  const dimensions = !rest.fill
-    ? {
-        width: rest.width || NEXT_IMAGE_SIZES[igdbImageSize].width,
-        height: rest.height || NEXT_IMAGE_SIZES[igdbImageSize].height,
-      }
-    : {};
+  const dimensions =
+    rest.fill === undefined || !rest.fill
+      ? {
+          width: rest.width ?? NEXT_IMAGE_SIZES[igdbImageSize].width,
+          height: rest.height ?? NEXT_IMAGE_SIZES[igdbImageSize].height,
+        }
+      : {};
 
   return (
     <Image src={src} alt={`${gameTitle} cover art`} {...dimensions} {...rest} />
   );
 }
 
-export { IgdbImage };
+const MemoizedIgdbImage = memo(IgdbImage);
+
+MemoizedIgdbImage.displayName = "IgdbImage";
+export { MemoizedIgdbImage as IgdbImage };

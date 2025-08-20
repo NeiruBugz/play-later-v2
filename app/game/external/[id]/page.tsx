@@ -27,11 +27,12 @@ import { IgdbImage } from "@/shared/components/igdb-image";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib";
 import igdbApi from "@/shared/lib/igdb";
-import { type GenericPageProps } from "@/shared/types";
 
 const RATING_DIVISOR = 10;
 
-export default async function ExternalGamePage(props: GenericPageProps) {
+export default async function ExternalGamePage(
+  props: PageProps<"/game/external/[id]">
+) {
   const id = Number((await props.params).id);
   const [igdbData, { data: backlogItems }] = await Promise.all([
     igdbApi.getGameById(id),

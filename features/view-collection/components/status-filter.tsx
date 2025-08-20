@@ -26,7 +26,7 @@ export function StatusFilter() {
   const router = useRouter();
 
   const currentStatusParam = params.get("status");
-  const currentValue = currentStatusParam || "All";
+  const currentValue = currentStatusParam ?? "All";
 
   const onStatusSelect = useCallback(
     (value: string | null) => {
@@ -87,7 +87,9 @@ export function StatusFilter() {
               key={option.value}
               variant={isActive ? "default" : "outline"}
               size="sm"
-              onClick={() => onStatusSelect(option.value)}
+              onClick={() => {
+                onStatusSelect(option.value);
+              }}
               className={cn(
                 "h-9 px-4 text-sm font-medium transition-all duration-200",
                 "hover:scale-105 active:scale-95",

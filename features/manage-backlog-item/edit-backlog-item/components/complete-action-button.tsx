@@ -1,6 +1,6 @@
 "use client";
 
-import { BacklogItem } from "@prisma/client";
+import { type BacklogItem } from "@prisma/client";
 import { Check } from "lucide-react";
 import { useCallback, type MouseEvent } from "react";
 
@@ -15,7 +15,7 @@ import { updateBacklogItemAction } from "../hooks/update-backlog-action";
 import { useMatchingBacklogItem } from "../hooks/use-matching-backlog-item";
 
 type CompleteActionButtonProps = {
-  backlogItems?: Omit<BacklogItem, "game">[];
+  backlogItems?: Array<Omit<BacklogItem, "game">>;
 };
 
 export function CompleteActionButton({
@@ -58,10 +58,10 @@ export function CompleteActionButton({
         <Button
           variant="secondary"
           size="icon"
-          className="h-7 w-7"
+          className="size-7"
           onClick={onClick}
         >
-          <Check className="h-3 w-3" />
+          <Check className="size-3" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>

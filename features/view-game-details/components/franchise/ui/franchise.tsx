@@ -5,7 +5,7 @@ import {
   AccordionTrigger,
 } from "@/shared/components/ui/accordion";
 
-import type { FranchiseProps } from "../types";
+import { type FranchiseProps } from "../types";
 import { FranchiseGamesGrid } from "./franchise-games-grid";
 import { FranchiseGamesSkeleton } from "./franchise-games-skeleton";
 

@@ -18,10 +18,14 @@ The View Collection feature serves as the core interface for users to browse, fi
 ### Data Flow
 
 ```
-Next.js Page → CollectionList → Server Actions → Repository Layer → Prisma → PostgreSQL
-                     ↓
+Next.js Page → CollectionList → Client Hook → API Route → Service Layer → Repository Layer → Prisma → PostgreSQL
+                     ↓                                           ↑
               CollectionFilters → URL State Management → Client Navigation
+                     ↓
+              Server Actions → Service Layer (alternative path)
 ```
+
+**Service Layer Integration**: The feature now includes a service layer (`CollectionService`) that abstracts business logic from both API routes and server actions, providing better testability and separation of concerns.
 
 ### Component Hierarchy
 
@@ -65,12 +69,12 @@ CollectionFilters (Server Component)
 
 - **Purpose**: Fetches paginated user collection with filtering
 - **Pattern**: `authorizedActionClient` with metadata and input schema validation
+- **Service Integration**: Now delegates to `CollectionService` for business logic
 - **Key Features**:
-  - Uses `buildCollectionFilter()` for complex query building
-  - Implements pagination with 24 items per page default
-  - Maps data to consistent structure with game and backlogItems
+  - Type-safe input validation with FilterParamsSchema
+  - User authentication and authorization
   - Error handling with descriptive messages
-- **Repository Integration**: Calls `findGamesWithBacklogItemsPaginated()`
+- **Migration Path**: Will be updated to use service layer for better testability
 
 #### `/server-actions/get-uniques-platforms.ts` (Lines 1-15)
 
@@ -301,15 +305,49 @@ describe("Collection Filtering", () => {
 });
 ```
 
+## Service Layer Architecture
+
+### Collection Service (`shared/services/collection/`)
+
+The view-collection feature now includes a dedicated service layer that abstracts business logic from HTTP concerns.
+
+#### **CollectionService** (`collection-service.ts`)
+
+- **Purpose**: Encapsulates all collection-related business logic
+- **Key Features**:
+  - Input validation with proper error responses
+  - Integration with repository layer for data access
+  - Type-safe operations using Prisma types
+  - Comprehensive error handling with service-specific error codes
+- **API**: Single `getCollection()` method that accepts `CollectionParams`
+- **Testing**: Comprehensive unit test coverage with mocked dependencies
+
+#### **Type Definitions** (`types.ts`)
+
+- **CollectionParams**: Extends FilterParams with required userId
+- **GameWithBacklogItems**: Proper Prisma type for games with related backlog items
+- **CollectionItem**: Service response format matching existing API contracts
+- **CollectionResult**: Complete service response with collection and count
+
+#### **Benefits of Service Layer**
+
+1. **Testability**: Business logic can be unit tested in isolation
+2. **Reusability**: Same logic used by both API routes and server actions
+3. **Type Safety**: Strong TypeScript integration with Prisma types
+4. **Separation of Concerns**: HTTP handling separated from business logic
+5. **Error Handling**: Consistent error responses across all consumers
+
 ## Development Guidelines
 
 ### Adding New Filters
 
 1. **Update Validation Schema** (`/lib/validation.ts`): Add new parameter to `FilterParamsSchema`
-2. **Extend Repository Filter** (`buildCollectionFilter()`): Add database filtering logic
-3. **Create Filter Component**: Follow existing patterns with URL state management
-4. **Update CollectionFilters**: Add component to responsive layout
-5. **Test Integration**: Ensure all combinations work correctly
+2. **Update Service Types** (`shared/services/collection/types.ts`): Extend CollectionParams if needed
+3. **Extend Repository Filter** (`buildCollectionFilter()`): Add database filtering logic
+4. **Update Service Tests**: Add test cases for new filter logic
+5. **Create Filter Component**: Follow existing patterns with URL state management
+6. **Update CollectionFilters**: Add component to responsive layout
+7. **Test Integration**: Ensure all combinations work correctly
 
 ### Performance Considerations
 

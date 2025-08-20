@@ -10,7 +10,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/shared/components/ui/dialog";
-import { FullGameInfoResponse } from "@/shared/types";
+import { type FullGameInfoResponse } from "@/shared/types";
 
 export function ScreenshotCarousel({
   screenshots,
@@ -60,9 +60,11 @@ export function ScreenshotCarousel({
                   variant="ghost"
                   size="icon"
                   className="absolute right-2 top-2 z-50 bg-black/50 text-white hover:bg-black/70"
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    setOpen(false);
+                  }}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="size-4" />
                 </Button>
                 <div className="relative aspect-video">
                   <IgdbImage
@@ -80,7 +82,7 @@ export function ScreenshotCarousel({
                   className="absolute left-2 top-1/2 z-50 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
                   onClick={handlePrevious}
                 >
-                  <ChevronLeft className="h-6 w-6" />
+                  <ChevronLeft className="size-6" />
                 </Button>
                 <Button
                   variant="ghost"
@@ -88,7 +90,7 @@ export function ScreenshotCarousel({
                   className="absolute right-2 top-1/2 z-50 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
                   onClick={handleNext}
                 >
-                  <ChevronRight className="h-6 w-6" />
+                  <ChevronRight className="size-6" />
                 </Button>
               </div>
             </DialogContent>

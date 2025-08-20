@@ -15,5 +15,5 @@ export const getUsersBacklog = authorizedActionClient
     if (!userId) {
       throw new Error("User not authenticated");
     }
-    return await getBacklogByUsername({ username: parsedInput.username });
+    return getBacklogByUsername({ username: parsedInput.username });
   });

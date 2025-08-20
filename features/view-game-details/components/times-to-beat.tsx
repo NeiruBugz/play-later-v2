@@ -18,7 +18,7 @@ export async function TimesToBeat({ igdbId }: { igdbId: number }) {
 
   const [current] = ttb;
 
-  if (!current || !current.normally) {
+  if (!current?.normally) {
     return null;
   }
 
@@ -27,7 +27,7 @@ export async function TimesToBeat({ igdbId }: { igdbId: number }) {
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
+            <Clock className="size-4" />
             <span>
               {secondsToHours(current.normally)} hours{" "}
               <span className="text-xs">

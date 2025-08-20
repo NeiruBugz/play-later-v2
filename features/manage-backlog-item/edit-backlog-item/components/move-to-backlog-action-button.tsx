@@ -1,6 +1,6 @@
 "use client";
 
-import { BacklogItem } from "@prisma/client";
+import { type BacklogItem } from "@prisma/client";
 import { RotateCcw } from "lucide-react";
 import { useCallback, type MouseEvent } from "react";
 
@@ -20,7 +20,7 @@ type MoveToBacklogActionButtonProps = {
     title: string;
     coverImage: string | null;
   };
-  backlogItems?: Omit<BacklogItem, "game">[];
+  backlogItems?: Array<Omit<BacklogItem, "game">>;
 };
 
 export function MoveToBacklogActionButton({
@@ -46,7 +46,9 @@ export function MoveToBacklogActionButton({
           id: matchingStatusItem.id,
           status: "TO_PLAY",
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error("Failed to move to backlog:", e);
+      }
     },
     [matchingStatusItem]
   );
@@ -61,10 +63,10 @@ export function MoveToBacklogActionButton({
         <Button
           variant="secondary"
           size="icon"
-          className="h-7 w-7"
+          className="size-7"
           onClick={onClick}
         >
-          <RotateCcw className="h-3 w-3" />
+          <RotateCcw className="size-3" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>

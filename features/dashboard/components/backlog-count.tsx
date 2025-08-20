@@ -70,7 +70,7 @@ export async function BacklogCount() {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <ListIcon className="h-5 w-5" />
+          <ListIcon className="size-5" />
           Games in backlog
         </CardTitle>
         <CardDescription>
@@ -99,13 +99,13 @@ export async function BacklogCount() {
           <div className="flex flex-col items-end gap-2">
             {completedGames > 0 && (
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <Trophy className="h-3 w-3 text-yellow-500" />
+                <Trophy className="size-3 text-yellow-500" />
                 <span>{completedGames} completed</span>
               </div>
             )}
             {recentlyAddedCount > 0 && (
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <TrendingUp className="h-3 w-3 text-green-500" />
+                <TrendingUp className="size-3 text-green-500" />
                 <span>+{recentlyAddedCount} this week</span>
               </div>
             )}
@@ -127,7 +127,7 @@ export async function BacklogCount() {
         {backlogCount > 0 && (
           <div className="mt-4 rounded-lg bg-muted/30 p-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <CalendarDays className="h-4 w-4" />
+              <CalendarDays className="size-4" />
               <span>
                 At 1 game per week, you&apos;ll clear your backlog in{" "}
                 <span className="font-medium text-foreground">

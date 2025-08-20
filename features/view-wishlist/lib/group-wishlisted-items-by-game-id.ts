@@ -1,4 +1,4 @@
-import type { BacklogItemWithGame, GameWithBacklogItems } from "../types";
+import { type BacklogItemWithGame, type GameWithBacklogItems } from "../types";
 
 export function groupWishlistedItemsByGameId({
   wishlisted,

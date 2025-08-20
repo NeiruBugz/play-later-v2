@@ -29,11 +29,11 @@ const collectionNavItems = [
   },
 ] as const;
 
-interface CollectionNavProps {
+type CollectionNavProps = {
   showAddButton?: boolean;
   showShareWishlist?: boolean;
   userName?: string | null;
-}
+};
 
 export function CollectionNav({
   showAddButton = true,
@@ -68,7 +68,7 @@ export function CollectionNav({
               )}
             >
               <Link href={item.href} title={item.description}>
-                <IconComponent className="h-4 w-4" />
+                <IconComponent className="size-4" />
                 <span className="hidden sm:inline">{item.label}</span>
               </Link>
             </Button>
@@ -79,7 +79,7 @@ export function CollectionNav({
       {showAddButton && (
         <Button asChild className="flex items-center gap-2">
           <Link href="/collection/add-game">
-            <Plus className="h-4 w-4" />
+            <Plus className="size-4" />
             Add Game
           </Link>
         </Button>

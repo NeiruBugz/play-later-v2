@@ -3,10 +3,10 @@ import "server-only";
 import { prisma } from "@/shared/lib/db";
 
 import {
-  GetUserBySteamIdInput,
-  GetUserByUsernameInput,
-  UpdateUserDataInput,
-  UpdateUserSteamDataInput,
+  type GetUserBySteamIdInput,
+  type GetUserByUsernameInput,
+  type UpdateUserDataInput,
+  type UpdateUserSteamDataInput,
 } from "./types";
 
 export async function getUserBySteamId({
@@ -41,7 +41,7 @@ export async function updateUserSteamData({
     throw new Error("User not found");
   }
 
-  return await prisma.user.update({
+  return prisma.user.update({
     where: { id: userId },
     data: {
       steamId64: steamId,
@@ -97,8 +97,7 @@ export async function updateUserData({
   username,
   steamProfileUrl,
 }: UpdateUserDataInput) {
-  console.log("updateUserData", userId, username, steamProfileUrl);
-  return await prisma.user.update({
+  return prisma.user.update({
     where: { id: userId },
     data: {
       username,
@@ -121,7 +120,7 @@ export async function getUserSteamId({
 }
 
 export async function disconnectSteam({ userId }: { userId: string }) {
-  return await prisma.user.update({
+  return prisma.user.update({
     where: { id: userId },
     data: {
       steamId64: null,

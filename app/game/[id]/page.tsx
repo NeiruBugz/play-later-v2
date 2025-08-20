@@ -24,14 +24,13 @@ import {
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
 import igdbApi from "@/shared/lib/igdb";
-import { type GenericPageProps } from "@/shared/types";
 
 function determineGameType(gameId: string) {
   const isNumeric = !isNaN(Number(gameId)) && Number.isInteger(Number(gameId));
   return isNumeric ? "EXTERNAL" : "INTERNAL";
 }
 
-export default async function GamePage(props: GenericPageProps) {
+export default async function GamePage(props: PageProps<"/game/[id]">) {
   const awaitedParams = await props.params;
   const gameType = determineGameType(awaitedParams.id);
 
@@ -50,7 +49,13 @@ export default async function GamePage(props: GenericPageProps) {
     return notFound();
   }
 
-  const steamAppId = findSteamAppId(igdbData.external_games);
+  let steamAppId: number | null = null;
+  try {
+    steamAppId = findSteamAppId(igdbData.external_games);
+  } catch (error) {
+    console.warn("Failed to find Steam app ID:", error);
+    steamAppId = null;
+  }
 
   return (
     <div className="min-h-screen">

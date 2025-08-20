@@ -1,5 +1,5 @@
 export function normalizeString(value: string | null | undefined) {
-  if (!value || value.length === 0) {
+  if (value === null || value === undefined || value.length === 0) {
     return value;
   }
 

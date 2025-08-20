@@ -1,6 +1,6 @@
 "use client";
 
-import { Storefront } from "@prisma/client";
+import { type Storefront } from "@prisma/client";
 import { minutesToHours } from "date-fns";
 import { Check, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -16,7 +16,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { cn, getSteamGameImageUrl } from "@/shared/lib";
 
-interface ImportedGame {
+type ImportedGame = {
   id: string;
   name: string;
   storefront: Storefront;
@@ -24,12 +24,12 @@ interface ImportedGame {
   playtime: number | null;
   img_icon_url: string | null;
   img_logo_url: string | null;
-}
+};
 
-interface ImportedGameCardProps {
+type ImportedGameCardProps = {
   game: ImportedGame;
   onImportSuccess?: (gameId: string) => void;
-}
+};
 
 const storefrontColors = {
   STEAM: "bg-blue-600 text-white",
@@ -59,7 +59,7 @@ function getImageUrl(game: ImportedGame): string | null {
     );
   }
 
-  return game.img_logo_url || game.img_icon_url;
+  return game.img_logo_url ?? game.img_icon_url;
 }
 
 function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
@@ -74,7 +74,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
         setImported(true);
         toast.success(data.message);
         if (onImportSuccess && data.gameId) {
-          const gameId = data.gameId;
+          const { gameId } = data;
           startTransition(() => {
             onImportSuccess(gameId);
           });
@@ -82,7 +82,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
       }
     },
     onError: ({ error }) => {
-      toast.error(error.serverError || "Failed to import game to collection");
+      toast.error(error.serverError ?? "Failed to import game to collection");
     },
   });
 
@@ -93,7 +93,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
 
     execute({
       steamAppId: game.storefrontGameId,
-      playtime: game.playtime || undefined,
+      playtime: game.playtime ?? undefined,
     });
   };
 
@@ -108,7 +108,9 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
             alt={game.name}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
-            onError={() => setImageError(true)}
+            onError={() => {
+              setImageError(true);
+            }}
           />
         ) : (
           <div className="flex h-full items-center justify-center">
@@ -142,7 +144,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
         {imported && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-white">
-              <Check className="h-4 w-4" />
+              <Check className="size-4" />
               <span className="text-sm font-medium">Added to Collection</span>
             </div>
           </div>
@@ -174,12 +176,12 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
           >
             {isExecuting ? (
               <>
-                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                <Loader2 className="mr-2 size-3 animate-spin" />
                 Adding...
               </>
             ) : imported ? (
               <>
-                <Check className="mr-2 h-3 w-3" />
+                <Check className="mr-2 size-3" />
                 Added
               </>
             ) : (

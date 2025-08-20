@@ -1,42 +1,25 @@
-type Platform = {
-  id: number;
-  name: string;
-};
+import {
+  type Company,
+  type Cover,
+  type Event,
+  type ExternalGame,
+  type Franchise,
+  type GameEngine,
+  type GameMode,
+  type Genre,
+  type Platform,
+  type PlayerPerspective,
+  type Screenshot,
+  type Theme,
+  type Website,
+} from "igdb-api-types";
 
-type Company = {
-  id: number;
-  name: string;
-};
+// Core IGDB entity types now imported from igdb-api-types:
+// Platform, Company, Cover (GameCover), ExternalGame, GameEngine, GameMode, Genre,
+// PlayerPerspective, Screenshot, Theme, Website, Event, Artwork
 
 type PlatformWithReleaseDate = {
   human: string;
-  id: number;
-  name: string;
-};
-
-type GameCover = {
-  id: number;
-  image_id: string;
-};
-
-type ExternalGame = {
-  category: number;
-  id: number;
-  name: string;
-  url?: string;
-};
-
-type GameEngine = {
-  id: number;
-  name: string;
-};
-
-type GameMode = {
-  id: number;
-  name: string;
-};
-
-type Genre = {
   id: number;
   name: string;
 };
@@ -48,40 +31,18 @@ type InvolvedCompany = {
   publisher: boolean;
 };
 
-type PlayerPerspective = {
-  id: number;
-  name: string;
-};
-
 type ReleaseDate = {
   human: string;
   id: number;
   platform: PlatformWithReleaseDate;
 };
 
-type Screenshot = {
-  id: number;
-  image_id: string;
-};
-
 type SimilarGame = {
-  cover: GameCover;
+  cover: Cover;
   id: number;
   name: string;
   release_dates: ReleaseDate[];
   first_release_date: number;
-};
-
-type Theme = {
-  id: number;
-  name: string;
-};
-
-type Website = {
-  category: number;
-  id: number;
-  trusted: boolean;
-  url: string;
 };
 
 export type RequestOptions = {
@@ -96,7 +57,7 @@ export type TwitchTokenResponse = {
 };
 
 export type RatedGameResponse = {
-  cover: GameCover;
+  cover: Cover;
   id: number;
   name: string;
 };
@@ -108,7 +69,7 @@ export type GenresResponse = {
 
 export type FullGameInfoResponse = {
   aggregated_rating: number;
-  cover: GameCover;
+  cover: Cover;
   external_games: ExternalGame[];
   game_engines: GameEngine[];
   game_modes: GameMode[];
@@ -123,12 +84,12 @@ export type FullGameInfoResponse = {
   summary: string;
   themes: Theme[];
   websites: Website[];
-  franchise: any;
+  franchise?: Franchise;
   franchises: number[];
 };
 
 export type SearchResponse = {
-  cover: GameCover;
+  cover: Cover;
   first_release_date: number;
   id: number;
   name: string;
@@ -137,52 +98,22 @@ export type SearchResponse = {
 };
 
 export type UpcomingReleaseResponse = {
-  cover: GameCover;
+  cover: Cover;
   first_release_date: number;
   id: number;
   name: string;
   release_dates: ReleaseDate[];
 };
 
-export type Event = {
-  checksum: string;
-  created_at: number;
-  description?: string;
-  end_time: number;
-  event_logo: number;
-  event_networks: number[];
-  id: number;
-  live_stream_url?: string;
-  name: string;
-  slug: string;
-  start_time: number;
-  time_zone: string;
-  updated_at: number;
-};
+// Event and Artwork now imported from igdb-api-types
 
 export type UpcomingEventsResponse = Event[];
-
-export type Artwork = {
-  id: number;
-  alpha_channel: boolean;
-  animated: boolean;
-  game: number;
-  height: number;
-  image_id: string;
-  url: string;
-  width: number;
-  checksum: string;
-};
 
 export type IgdbGameResponseItem = {
   name: string;
   version_title: string;
   id: number;
-  cover: {
-    image_id: string;
-    id: number;
-    url: string;
-  };
+  cover: Cover;
 };
 
 export type TimeToBeatsResponse = {
@@ -196,11 +127,7 @@ export type TimeToBeatsResponse = {
 export type Expansion = {
   id: number;
   name: string;
-  cover: {
-    image_id: string;
-    id: number;
-    url: string;
-  };
+  cover: Cover;
   release_dates: ReleaseDate[];
 };
 
@@ -215,16 +142,13 @@ export type FranchiseGamesResponse = {
   games: Array<{
     id: number;
     name: string;
-    cover: {
-      image_id: string;
-      id: number;
-      url: string;
-    };
+    cover: Cover;
     game_type: number;
   }>;
 };
 
 export enum GAME_TYPE {
   MAIN_GAME = 0,
+
   EXPANDED_GAME = 10,
 }

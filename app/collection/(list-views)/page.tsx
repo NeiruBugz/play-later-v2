@@ -11,10 +11,7 @@ import {
 } from "@/features/view-collection/components";
 import { getUserUniquePlatforms } from "@/features/view-collection/server-actions";
 
-export default async function CollectionPage(props: {
-  params: Promise<Record<string, string>>;
-  searchParams: Promise<Record<string, string>>;
-}) {
+export default async function CollectionPage(props: PageProps<"/collection">) {
   const session = await auth();
 
   if (!session) {
@@ -37,7 +34,6 @@ export default async function CollectionPage(props: {
           </div>
           <div className="flex flex-wrap gap-2">
             <PlatformFilter platformOptions={uniquePlatforms ?? []} />
-            {/* <CardViewMode /> */}
           </div>
         </div>
       </div>

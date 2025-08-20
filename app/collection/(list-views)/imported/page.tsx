@@ -2,14 +2,14 @@ import { ImportedGames } from "@/features/view-imported-games";
 import { getImportedGames } from "@/features/view-imported-games/server-actions";
 import { SearchParamsSchema } from "@/features/view-imported-games/validation/search-params-schema";
 
-type SearchParams = {
+interface SearchParams {
   page?: string;
   limit?: string;
   search?: string;
   storefront?: string;
   sortBy?: string;
   sortOrder?: string;
-};
+}
 
 export default async function ImportedGamesPage({
   searchParams,

@@ -2,9 +2,9 @@ import "server-only";
 
 import { prisma } from "@/shared/lib/db";
 
-import type {
-  CreateManyImportedGamesInput,
-  GetFilteredImportedGamesInput,
+import {
+  type CreateManyImportedGamesInput,
+  type GetFilteredImportedGamesInput,
 } from "./types";
 
 export async function softDeleteImportedGame({ id }: { id: string }) {

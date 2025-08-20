@@ -18,9 +18,9 @@ export async function POST() {
     });
 
     return NextResponse.json({ success: true });
-  } catch (_) {
+  } catch (error) {
     return NextResponse.json(
-      { error: "Failed to disconnect Steam" },
+      { error: "Failed to disconnect Steam", cause: error },
       { status: 500 }
     );
   }

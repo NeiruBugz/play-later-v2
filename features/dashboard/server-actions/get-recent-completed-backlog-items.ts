@@ -9,5 +9,5 @@ export const getRecentCompletedBacklogItems = authorizedActionClient
     requiresAuth: true,
   })
   .action(async ({ ctx: { userId } }) => {
-    return await getRecentlyCompletedBacklogItemsCommand({ userId });
+    return getRecentlyCompletedBacklogItemsCommand({ userId });
   });

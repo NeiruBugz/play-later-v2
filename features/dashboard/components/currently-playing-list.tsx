@@ -3,8 +3,8 @@ import { cache } from "react";
 import { getCurrentlyPlayingGamesInBacklog } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 
-const getCurrentlyPlayingGames = cache(
-  async () => await getCurrentlyPlayingGamesInBacklog()
+const getCurrentlyPlayingGames = cache(async () =>
+  getCurrentlyPlayingGamesInBacklog()
 );
 
 export async function CurrentlyPlayingList() {

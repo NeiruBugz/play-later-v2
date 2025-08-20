@@ -1,7 +1,7 @@
 import { Accordion, AccordionItem } from "@/shared/components/ui/accordion";
 import { cn } from "@/shared/lib";
 import igdbApi from "@/shared/lib/igdb";
-import { FranchiseGamesResponse, GAME_TYPE } from "@/shared/types";
+import { GAME_TYPE, type FranchiseGamesResponse } from "@/shared/types";
 
 import { Franchise } from "./franchise";
 
@@ -14,7 +14,7 @@ export async function Franchises({
   igdbId,
   franchisesIdList,
 }: FranchisesProps) {
-  let allFranchises: (FranchiseGamesResponse[] | undefined)[] = [];
+  let allFranchises: Array<FranchiseGamesResponse[] | undefined> = [];
   if (franchisesIdList && Array.isArray(franchisesIdList)) {
     const promises = franchisesIdList.map((id) =>
       igdbApi.getGameFranchiseGames(id)

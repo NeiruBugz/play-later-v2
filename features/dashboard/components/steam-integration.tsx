@@ -22,7 +22,7 @@ export async function SteamIntegration() {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <FaSteam className="h-5 w-5" />
+          <FaSteam className="size-5" />
           Steam Integration
         </CardTitle>
         <CardDescription>
@@ -33,7 +33,7 @@ export async function SteamIntegration() {
         {isConnected ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <div className="h-2 w-2 rounded-full bg-green-600 dark:bg-green-400"></div>
+              <div className="size-2 rounded-full bg-green-600 dark:bg-green-400" />
               <span className="text-sm font-medium">Connected</span>
             </div>
             {steamProfileURL && (
@@ -44,7 +44,7 @@ export async function SteamIntegration() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-2"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="size-4" />
                   View Profile
                 </Link>
               </Button>
@@ -53,7 +53,7 @@ export async function SteamIntegration() {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-muted-foreground">
-              <div className="h-2 w-2 rounded-full bg-muted-foreground"></div>
+              <div className="size-2 rounded-full bg-muted-foreground" />
               <span className="text-sm">Not connected</span>
             </div>
             <Button variant="outline" size="sm" asChild>
@@ -61,7 +61,7 @@ export async function SteamIntegration() {
                 href="/user/settings?tab=integrations"
                 className="flex items-center gap-2"
               >
-                <FaSteam className="h-4 w-4" />
+                <FaSteam className="size-4" />
                 Connect Steam
               </Link>
             </Button>

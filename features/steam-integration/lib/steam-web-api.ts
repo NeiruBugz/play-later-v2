@@ -2,16 +2,16 @@ import "server-only";
 
 import { env } from "@/env.mjs";
 
-import type {
-  SteamGameSchema,
-  SteamGlobalAchievementPercentages,
-  SteamPlayerAchievements,
-  SteamUserOwnedGames,
+import {
+  type SteamGameSchema,
+  type SteamGlobalAchievementPercentages,
+  type SteamPlayerAchievements,
+  type SteamUserOwnedGames,
 } from "../types/type";
 
 export class SteamWebAPI {
-  private apiKey: string;
-  private baseUrl = "https://api.steampowered.com";
+  private readonly apiKey: string;
+  private readonly baseUrl = "https://api.steampowered.com";
 
   constructor() {
     this.apiKey = env.STEAM_API_KEY;

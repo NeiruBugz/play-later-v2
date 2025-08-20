@@ -1,6 +1,3 @@
-/**
- * Steam image types and their dimensions
- */
 export const STEAM_IMAGE_TYPES = {
   HEADER: "header", // 460x215 - Good for card headers
   CAPSULE_616: "capsule_616x353", // 616x353 - High quality
@@ -23,10 +20,10 @@ export const STEAM_IMAGE_TYPES = {
  * // Returns: "https://steamcdn-a.akamaihd.net/steam/apps/440/header.jpg"
  */
 export function buildSteamStoreImageUrl(
-  appId: string | number,
+  appId: string | number | null | undefined,
   imageType: keyof typeof STEAM_IMAGE_TYPES = "HEADER"
 ): string {
-  if (!appId) {
+  if (appId === null || appId === undefined) {
     throw new Error("App ID is required");
   }
 
@@ -47,11 +44,15 @@ export function buildSteamStoreImageUrl(
  * // Returns: "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/440/e3f595a92552da3d664ad00277fad2107345f7e0.jpg"
  */
 export function buildSteamImageUrl(
-  appId: string | number,
-  imageHash: string,
-  type: "icon" | "logo" = "icon"
+  appId: string | number | null | undefined,
+  imageHash: string | null | undefined
 ): string {
-  if (!imageHash || !appId) {
+  if (
+    appId === null ||
+    appId === undefined ||
+    imageHash === null ||
+    imageHash === undefined
+  ) {
     throw new Error("App ID and image hash are required");
   }
 
@@ -79,32 +80,31 @@ export function buildSteamImageUrl(
  * // Returns high-quality header image URL
  */
 export function getSteamGameImageUrl(
-  appId: string | number,
+  appId: string | number | null | undefined,
   iconHash?: string | null,
   logoHash?: string | null,
   preferredImageType: keyof typeof STEAM_IMAGE_TYPES = "HEADER"
 ): string | null {
-  if (!appId) return null;
+  if (appId === null || appId === undefined) return null;
 
   try {
-    // Always prefer high-quality store images over low-res API icons
     return buildSteamStoreImageUrl(appId, preferredImageType);
   } catch (error) {
-    // Fallback to API-provided images if store images fail
     try {
-      // Prefer logo over icon as secondary fallback
-      if (logoHash) {
-        return buildSteamImageUrl(appId, logoHash, "logo");
+      if (logoHash !== undefined) {
+        return buildSteamImageUrl(appId, logoHash);
       }
 
-      if (iconHash) {
-        return buildSteamImageUrl(appId, iconHash, "icon");
+      if (iconHash !== undefined) {
+        return buildSteamImageUrl(appId, iconHash);
       }
     } catch (fallbackError) {
-      console.warn("Failed to build Steam image URL:", fallbackError);
+      throw new Error("Failed to build Steam image URL", {
+        cause: fallbackError,
+      });
     }
-
-    console.warn("Failed to build Steam store image URL:", error);
-    return null;
+    throw new Error("Failed to build Steam image URL", {
+      cause: error,
+    });
   }
 }

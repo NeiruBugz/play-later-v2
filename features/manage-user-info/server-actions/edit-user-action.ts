@@ -20,7 +20,7 @@ export const editUserAction = authorizedActionClient
   .action(async ({ parsedInput, ctx: { userId } }) => {
     await updateUserData({
       username: parsedInput.username,
-      steamProfileUrl: parsedInput.steamProfileUrl || null,
+      steamProfileUrl: parsedInput.steamProfileUrl ?? null,
       userId,
     });
 

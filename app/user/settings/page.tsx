@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { z } from "zod";
 
 import { IntegrationsList } from "@/features/manage-integrations";
 import { EditUserForm, getUserInfo } from "@/features/manage-user-info";
@@ -10,13 +11,14 @@ import {
 } from "@/shared/components/adaptive-tabs";
 import { Header } from "@/shared/components/header";
 
+const TabsSchema = z.object({
+  tab: z.enum(["settings", "integrations"]).optional(),
+});
+
 export const dynamic = "force-dynamic";
 
-export default async function UserPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; success?: string; tab?: string }>;
-}) {
+export default async function UserPage(props: PageProps<"/user/settings">) {
+  const searchParams = await props.searchParams;
   const { data: user, serverError } = await getUserInfo();
 
   if (serverError != null) {
@@ -27,22 +29,19 @@ export default async function UserPage({
     return notFound();
   }
 
-  const { error, success, tab } = await searchParams;
+  const { tab } = searchParams;
 
-  // Show notifications based on URL parameters
-  if (error === "steam_already_connected") {
-    // Show error: "This Steam account is already connected to another user"
-  }
-  if (success === "steam_connected") {
-    // Show success: "Steam account connected successfully!"
-  }
+  const parsedTab = TabsSchema.parse({ tab });
 
   return (
     <div className="min-h-screen">
       <div className="flex min-h-screen flex-col bg-background">
         <Header authorized={true} />
         <div className="container relative px-4 pt-[80px]">
-          <AdaptiveTabs defaultValue={tab ?? "settings"} className="w-full">
+          <AdaptiveTabs
+            defaultValue={parsedTab.tab ?? "settings"}
+            className="w-full"
+          >
             <AdaptiveTabsList className="w-fit">
               <AdaptiveTabsTrigger value="settings">
                 Settings

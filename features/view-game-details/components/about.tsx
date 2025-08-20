@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { Badge } from "@/shared/components/ui/badge";
-import { FullGameInfoResponse } from "@/shared/types";
+import { type FullGameInfoResponse } from "@/shared/types";
 
 import { Expansions } from "./expansions";
 
@@ -30,20 +30,18 @@ export function About({
         <div>
           <h3 className="mb-2 font-medium">Available on</h3>
           <div className="flex flex-wrap gap-2">
-            {uniqueReleaseDates &&
-              uniqueReleaseDates.map((platform) => (
-                <Badge key={platform} variant="outline">
-                  {platform}
-                </Badge>
-              ))}
+            {uniqueReleaseDates?.map((platform) => (
+              <Badge key={platform} variant="outline">
+                {platform}
+              </Badge>
+            ))}
           </div>
         </div>
 
         <div>
           <h3 className="mb-2 font-medium">Genres</h3>
           <div className="flex flex-wrap gap-2">
-            {genres &&
-              genres.map((genre) => <Badge key={genre.id}>{genre.name}</Badge>)}
+            {genres?.map((genre) => <Badge key={genre.id}>{genre.name}</Badge>)}
           </div>
         </div>
       </div>

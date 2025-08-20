@@ -1,4 +1,4 @@
-import { BacklogItemStatus } from "@prisma/client";
+import { type BacklogItemStatus } from "@prisma/client";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 

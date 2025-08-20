@@ -20,7 +20,7 @@ export async function CollectionFilters() {
         <StatusFilter />
       </div>
       <div className="my-4 hidden flex-wrap gap-2 md:flex md:flex-nowrap">
-        <PlatformFilter platformOptions={uniquePlatforms || []} />
+        <PlatformFilter platformOptions={uniquePlatforms ?? []} />
         <SearchInput />
         <ClearFilters />
       </div>
@@ -34,8 +34,8 @@ export async function CollectionFilters() {
           <DrawerContent className="py-4">
             <div className="my-3 flex flex-col flex-wrap items-center justify-center md:flex-nowrap md:justify-between">
               <SearchInput />
-              <div className="my-4 flex flex-grow justify-center gap-2 md:flex-nowrap">
-                <PlatformFilter platformOptions={uniquePlatforms || []} />
+              <div className="my-4 flex grow justify-center gap-2 md:flex-nowrap">
+                <PlatformFilter platformOptions={uniquePlatforms ?? []} />
               </div>
             </div>
           </DrawerContent>

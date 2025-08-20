@@ -76,7 +76,6 @@ beforeAll(() => {
 });
 
 declare global {
-  // eslint-disable-next-line no-var
   var testUtils: {
     createMockFormData: (data: Record<string, string>) => FormData;
   };

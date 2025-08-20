@@ -9,5 +9,5 @@ export const getRecentReviews = authorizedActionClient
     requiresAuth: true,
   })
   .action(async ({ ctx: { userId } }) => {
-    return await getRecentReviewsCommand({ userId });
+    return getRecentReviewsCommand({ userId });
   });

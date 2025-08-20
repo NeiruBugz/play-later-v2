@@ -1,4 +1,5 @@
-export const sessionErrorHandler = () => {
-  console.error("No authorization");
-  throw new Error("No authorization");
+export const sessionErrorHandler = (error?: Error) => {
+  throw new Error("No authorization", {
+    cause: error,
+  });
 };

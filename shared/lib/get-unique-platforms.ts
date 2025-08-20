@@ -1,27 +1,34 @@
-import { FullGameInfoResponse } from "@/shared/types";
+import { type Game, type Platform, type ReleaseDate } from "igdb-api-types";
+
+const isReleaseDate = (value: number | ReleaseDate): value is ReleaseDate =>
+  typeof value === "object";
+
+const isPlatform = (value: number | Platform): value is Platform =>
+  typeof value === "object";
 
 export function getUniquePlatforms(
-  releaseDates: FullGameInfoResponse["release_dates"] | undefined
-) {
-  if (!releaseDates || !releaseDates.length) {
+  releaseDates: Game["release_dates"] | undefined
+): string[] {
+  if (!releaseDates || releaseDates.length === 0) {
     return [];
   }
 
-  return releaseDates
-    .filter(
-      (record, index, self) =>
-        index ===
-        self.findIndex((r) => r.platform.name === record.platform.name)
-    )
-    .sort((a, b) => {
-      const titleA = a.platform.name.toUpperCase();
-      const titleB = b.platform.name.toUpperCase();
-      if (titleA < titleB) {
-        return -1;
-      }
-      if (titleA > titleB) {
-        return 1;
-      }
-      return 0;
-    });
+  const platformNames: string[] = [];
+  for (const releaseDate of releaseDates) {
+    if (!isReleaseDate(releaseDate)) {
+      continue;
+    }
+
+    const { platform } = releaseDate;
+    if (platform === undefined || !isPlatform(platform)) {
+      continue;
+    }
+
+    const { name } = platform;
+    if (typeof name === "string" && name !== "") {
+      platformNames.push(name);
+    }
+  }
+
+  return [...new Set(platformNames)].sort((a, b) => a.localeCompare(b));
 }

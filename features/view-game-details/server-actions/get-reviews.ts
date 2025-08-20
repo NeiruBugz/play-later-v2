@@ -16,5 +16,5 @@ export const getReviews = authorizedActionClient
     })
   )
   .action(async ({ parsedInput }) => {
-    return await getAllReviewsForGame({ gameId: parsedInput.gameId });
+    return getAllReviewsForGame({ gameId: parsedInput.gameId });
   });

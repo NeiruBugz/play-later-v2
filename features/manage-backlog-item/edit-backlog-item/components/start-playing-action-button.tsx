@@ -1,8 +1,8 @@
 "use client";
 
-import { BacklogItem } from "@prisma/client";
+import { type BacklogItem } from "@prisma/client";
 import { Play } from "lucide-react";
-import { MouseEvent, useCallback } from "react";
+import { useCallback, type MouseEvent } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -20,10 +20,9 @@ type StartPlayingActionButtonProps = {
     title: string;
     coverImage: string | null;
   };
-  backlogItems?: Omit<BacklogItem, "game">[];
+  backlogItems?: Array<Omit<BacklogItem, "game">>;
 };
 export function StartPlayingActionButton({
-  game,
   backlogItems,
 }: StartPlayingActionButtonProps) {
   const latestStatus = backlogItems?.sort(
@@ -46,7 +45,9 @@ export function StartPlayingActionButton({
           id: matchingStatusItem.id,
           status: "PLAYING",
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error("Failed to start playing:", e);
+      }
     },
     [matchingStatusItem]
   );
@@ -61,10 +62,10 @@ export function StartPlayingActionButton({
         <Button
           variant="secondary"
           size="icon"
-          className="h-7 w-7"
+          className="size-7"
           onClick={onClick}
         >
-          <Play className="h-3 w-3" />
+          <Play className="size-3" />
         </Button>
       </TooltipTrigger>
       <TooltipContent>

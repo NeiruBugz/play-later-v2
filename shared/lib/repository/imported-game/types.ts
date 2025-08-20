@@ -1,4 +1,4 @@
-import type { Prisma, Storefront } from "@prisma/client";
+import { type Prisma, type Storefront } from "@prisma/client";
 
 export type GetFilteredImportedGamesInput = {
   whereClause: Prisma.ImportedGameWhereInput;
@@ -18,5 +18,5 @@ type SteamGame = {
 };
 
 export type CreateManyImportedGamesInput = {
-  games: Array<SteamGame>;
+  games: SteamGame[];
 };

@@ -1,5 +1,8 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  eslint: {
+    dirs: ['app', 'features', 'shared', 'test', '.'], // Include all relevant directories and root
+  },
   async headers() {
     return [
       {
@@ -43,6 +46,7 @@ const nextConfig = {
     unoptimized: true,
   },
   reactStrictMode: true,
+  typedRoutes: true,
 };
 
 export default nextConfig;

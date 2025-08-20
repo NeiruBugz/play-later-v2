@@ -21,7 +21,7 @@ export function FeatureCard({
 
       <CardHeader className="relative">
         <CardTitle className="flex items-start gap-4 text-lg font-semibold">
-          <div className="flex-shrink-0 rounded-lg bg-background/80 p-2 ring-1 ring-border/50 transition-all duration-300 group-hover:bg-primary/5 group-hover:ring-primary/20">
+          <div className="shrink-0 rounded-lg bg-background/80 p-2 ring-1 ring-border/50 transition-all duration-300 group-hover:bg-primary/5 group-hover:ring-primary/20">
             {icon}
           </div>
           <span className="leading-tight">{title}</span>

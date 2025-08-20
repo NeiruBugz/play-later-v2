@@ -1,7 +1,7 @@
 import { Calendar } from "lucide-react";
 import { cache } from "react";
 
-import { getUpcomingWishlistItems } from "@/features/dashboard/server-actions/get-upcoming-wishlist-items";
+import { getUpcomingWishlistItems } from "@/features/dashboard/server-actions";
 import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn, platformMapper, platformToBackgroundColor } from "@/shared/lib";
@@ -9,7 +9,7 @@ import { cn, platformMapper, platformToBackgroundColor } from "@/shared/lib";
 type UpcomingRelease = {
   cover: {
     id: number;
-    image_id: string;
+    image_id?: string;
   };
   id: number;
   name: string;
@@ -27,7 +27,7 @@ const Release = ({
   index: number;
   release: UpcomingRelease;
 }) => {
-  const date = release.release_dates?.[0];
+  const date = release.release_dates[0];
 
   return (
     <div className="group relative">
@@ -36,7 +36,7 @@ const Release = ({
           game={{
             id: String(release.id),
             title: release.name,
-            coverImage: release.cover.image_id,
+            coverImage: release.cover.image_id ?? null,
             igdbId: release.id,
           }}
           backlogItems={[]}
@@ -49,7 +49,7 @@ const Release = ({
         <h3 className="my-1 text-base font-semibold text-white">
           {release.name}
         </h3>
-        <Badge className="flex h-fit w-fit flex-shrink-0 items-center gap-1">
+        <Badge className="flex size-fit shrink-0 items-center gap-1">
           <Calendar className="size-3.5" />
           <p>{date.human}</p>
         </Badge>
@@ -72,14 +72,14 @@ const Release = ({
   );
 };
 
-const getReleases = cache(async () => await getUpcomingWishlistItems());
+const getReleases = cache(async () => getUpcomingWishlistItems());
 
 export async function ReleasesList() {
   const { data: releases } = await getReleases();
 
   return (
     <div className="flex w-full max-w-[420px] justify-start gap-3 overflow-x-auto">
-      {releases?.length ? (
+      {releases?.length !== undefined && releases.length > 0 ? (
         releases.map((release, index) => (
           <Release
             gameId={release.gameId}

@@ -1,6 +1,6 @@
-import type { BacklogItem } from "@prisma/client";
+import { type BacklogItem } from "@prisma/client";
 
-import type { GameWithBacklogItems } from "../types";
+import { type GameWithBacklogItems } from "../types";
 
 export const groupBacklogItemsByGame = (
   userGames: Array<

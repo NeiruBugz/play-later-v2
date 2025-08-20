@@ -7,6 +7,8 @@ import {
 } from "next-themes";
 import { type PropsWithChildren } from "react";
 
+import { TooltipProvider } from "@/shared/components/ui/tooltip";
+
 const queryClient = new QueryClient();
 
 export default function TestProviders({
@@ -17,7 +19,7 @@ export default function TestProviders({
     <NextThemesProvider {...props}>
       <SessionProvider>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <TooltipProvider>{children}</TooltipProvider>
         </QueryClientProvider>
       </SessionProvider>
     </NextThemesProvider>

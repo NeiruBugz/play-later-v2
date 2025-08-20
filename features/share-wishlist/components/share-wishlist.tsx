@@ -27,7 +27,7 @@ export function ShareWishlist({ userName }: { userName?: string | null }) {
     }
 
     const sharedUrl = "/wishlist";
-    const origin = window.location.origin;
+    const { origin } = window.location;
     const encodedUsername = encodeURIComponent(userName);
 
     const resultURL = `${origin}${sharedUrl}/${encodedUsername}`;

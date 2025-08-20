@@ -129,7 +129,7 @@ export function AddToCollectionModal({
                       <Select
                         name={field.name}
                         onValueChange={field.onChange}
-                        value={field.value || ""}
+                        value={field.value ?? ""}
                         disabled={isLoading}
                       >
                         <FormControl>
@@ -169,7 +169,7 @@ export function AddToCollectionModal({
                       <Select
                         name={field.name}
                         onValueChange={field.onChange}
-                        value={field.value || ""}
+                        value={field.value ?? ""}
                         disabled={isLoading}
                       >
                         <FormControl>
@@ -206,7 +206,7 @@ export function AddToCollectionModal({
                       <Select
                         name={field.name}
                         onValueChange={field.onChange}
-                        value={field.value || ""}
+                        value={field.value ?? ""}
                         disabled={isLoading}
                       >
                         <FormControl>
@@ -233,7 +233,9 @@ export function AddToCollectionModal({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                }}
                 disabled={isLoading}
               >
                 Cancel

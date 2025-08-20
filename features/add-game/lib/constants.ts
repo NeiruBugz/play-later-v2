@@ -1,7 +1,7 @@
 import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
 
-import type { BacklogItemFormValues } from "@/features/add-game/types";
-import type { SearchResponse } from "@/shared/types";
+import { type BacklogItemFormValues } from "@/features/add-game/types";
+import { type SearchResponse } from "@/shared/types";
 
 export const DEFAULT_PLATFORM_LIST: SearchResponse["platforms"] = [
   { id: 9999, name: "PC" },

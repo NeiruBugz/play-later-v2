@@ -60,7 +60,9 @@ export function AddReviewForm({ gameId }: { gameId: string }) {
             <button
               type="button"
               key={value}
-              onClick={() => setRatingValue(value)}
+              onClick={() => {
+                setRatingValue(value);
+              }}
               aria-label={`Set rating to ${value}`}
               name="rating"
             >

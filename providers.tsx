@@ -6,13 +6,13 @@ import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from "next-themes";
-import { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { Toaster } from "@/shared/components/ui/sonner";
 
 const queryClient = new QueryClient();
 
-export default function Providers({
+export function Providers({
   children,
   ...props
 }: PropsWithChildren<ThemeProviderProps>) {

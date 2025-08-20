@@ -1,4 +1,4 @@
-import type { FranchiseGamesResponse } from "@/shared/types";
+import { type FranchiseGamesResponse } from "@/shared/types";
 
 export type FranchiseProps = {
   name: string;

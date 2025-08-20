@@ -1,6 +1,6 @@
 "use client";
 
-import { BacklogItem } from "@prisma/client";
+import { type BacklogItem } from "@prisma/client";
 import { Edit } from "lucide-react";
 import { useState } from "react";
 
@@ -22,9 +22,9 @@ import { BacklogStatusMapper, normalizeString } from "@/shared/lib";
 
 import { GameEntryForm } from "./game-entry-form";
 
-interface EditGameEntryModalProps {
+type EditGameEntryModalProps = {
   backlogItems?: BacklogItem[];
-}
+};
 
 export function EditGameEntryModal({ backlogItems }: EditGameEntryModalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,7 +34,9 @@ export function EditGameEntryModal({ backlogItems }: EditGameEntryModalProps) {
       <Button
         variant="outline"
         className="flex items-center gap-2"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true);
+        }}
       >
         <Edit size={16} />
         Edit entries
@@ -78,7 +80,12 @@ export function EditGameEntryModal({ backlogItems }: EditGameEntryModalProps) {
           </Tabs>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsOpen(false);
+              }}
+            >
               Cancel
             </Button>
           </DialogFooter>

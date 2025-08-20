@@ -322,13 +322,7 @@ export function buildCollectionFilter({
   const backlogFilter: Prisma.BacklogItemWhereInput = {
     userId,
     platform: platform === "" ? undefined : platform,
-    status:
-      status != null && status !== ""
-        ? { not: BacklogItemStatus.WISHLIST }
-        : {
-            equals: status as BacklogItemStatus,
-            not: BacklogItemStatus.WISHLIST,
-          },
+    status: status === "" ? undefined : (status as BacklogItemStatus),
   };
 
   const gameFilter: Prisma.GameWhereInput = {
