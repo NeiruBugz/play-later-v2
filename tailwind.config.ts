@@ -246,6 +246,97 @@ const config = {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        // Gaming-specific animations
+        "bounce-subtle": {
+          "0%, 100%": {
+            transform: "translateY(0)",
+            animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)",
+          },
+          "50%": {
+            transform: "translateY(-8px)",
+            animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)",
+          },
+        },
+        "scale-in": {
+          "0%": {
+            transform: "scale(0.95)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "scale(1)",
+            opacity: "1",
+          },
+        },
+        "slide-up": {
+          "0%": {
+            transform: "translateY(10px)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "translateY(0)",
+            opacity: "1",
+          },
+        },
+        "slide-down": {
+          "0%": {
+            transform: "translateY(-10px)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "translateY(0)",
+            opacity: "1",
+          },
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "fade-in-up": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(20px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        "gaming-pulse": {
+          "0%, 100%": {
+            boxShadow: "0 0 20px hsl(var(--gaming-primary) / 0.4)",
+            transform: "scale(1)",
+          },
+          "50%": {
+            boxShadow: "0 0 30px hsl(var(--gaming-primary) / 0.6)",
+            transform: "scale(1.05)",
+          },
+        },
+        "neon-flicker": {
+          "0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%": {
+            textShadow:
+              "0 0 10px hsl(var(--gaming-primary) / 0.8), 0 0 20px hsl(var(--gaming-primary) / 0.4)",
+            opacity: "1",
+          },
+          "20%, 24%, 55%": {
+            textShadow: "none",
+            opacity: "0.8",
+          },
+        },
+        "rotate-slow": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        wiggle: {
+          "0%, 100%": { transform: "rotate(-3deg)" },
+          "50%": { transform: "rotate(3deg)" },
+        },
+        heartbeat: {
+          "0%": { transform: "scale(1)" },
+          "14%": { transform: "scale(1.15)" },
+          "28%": { transform: "scale(1)" },
+          "42%": { transform: "scale(1.15)" },
+          "70%": { transform: "scale(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -253,6 +344,18 @@ const config = {
         "pulse-neon": "pulse-neon 2s ease-in-out infinite",
         float: "float 3s ease-in-out infinite",
         shimmer: "shimmer 2s infinite ease-in-out",
+        // Gaming animations
+        "bounce-subtle": "bounce-subtle 1s infinite",
+        "scale-in": "scale-in 0.3s ease-out",
+        "slide-up": "slide-up 0.3s ease-out",
+        "slide-down": "slide-down 0.3s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "fade-in-up": "fade-in-up 0.5s ease-out",
+        "gaming-pulse": "gaming-pulse 2s ease-in-out infinite",
+        "neon-flicker": "neon-flicker 1.5s ease-in-out infinite",
+        "rotate-slow": "rotate-slow 3s linear infinite",
+        wiggle: "wiggle 1s ease-in-out infinite",
+        heartbeat: "heartbeat 2s ease-in-out infinite",
       },
     },
   },
