@@ -8,9 +8,9 @@ import { Button } from "@/shared/components/ui/button";
 const statusOptions = [
   { value: "All", label: "All" },
   { value: "TO_PLAY", label: "Backlog" },
+  { value: "PLAYED", label: "Played" },
   { value: "PLAYING", label: "Playing" },
   { value: "COMPLETED", label: "Completed" },
-  { value: "DROPPED", label: "Dropped" },
 ] as const;
 
 export function StatusFilter() {

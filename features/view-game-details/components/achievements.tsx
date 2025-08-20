@@ -18,7 +18,7 @@ import { Progress } from "@/shared/components/ui/progress";
 import { cn } from "@/shared/lib";
 
 type AchievementsProps = {
-  steamAppId?: number;
+  steamAppId?: number | null;
 };
 
 function AchievementCard({
@@ -27,21 +27,6 @@ function AchievementCard({
   achievement: EnrichedAchievement;
 }) {
   const isUnlocked = achievement.achieved === 1;
-
-  const getRarityBadgeVariant = (rarity: string) => {
-    switch (rarity) {
-      case "common":
-        return "outline";
-      case "uncommon":
-        return "secondary";
-      case "rare":
-        return "default";
-      case "very_rare":
-        return "primary";
-      default:
-        return "outline";
-    }
-  };
 
   return (
     <Card

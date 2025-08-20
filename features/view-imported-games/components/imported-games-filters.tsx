@@ -1,9 +1,10 @@
 "use client";
 
 import { type Storefront } from "@prisma/client";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Filter, Search, X } from "lucide-react";
 import { useState } from "react";
 
+import { Body, Caption } from "@/shared/components/typography";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -95,18 +96,18 @@ export function ImportedGamesFilters({
 
   return (
     <div className="space-y-4">
-      {/* Top Row: Search and Filter Toggle */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* Search and Results Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}
         <div className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search games..."
+            placeholder="Search imported games..."
             value={filters.search}
             onChange={(e) => {
               handleSearchChange(e.target.value);
             }}
-            className="pl-10"
+            className="pl-10 pr-10"
           />
           {filters.search && (
             <Button
@@ -115,37 +116,37 @@ export function ImportedGamesFilters({
               onClick={() => {
                 handleSearchChange("");
               }}
-              className="absolute right-1 top-1/2 size-7 -translate-y-1/2 p-0"
+              className="absolute right-1 top-1/2 size-7 -translate-y-1/2 p-0 hover:bg-transparent"
             >
               <X className="size-3" />
             </Button>
           )}
         </div>
 
-        {/* Filter Toggle & Results Count */}
-        <div className="flex items-center gap-3">
-          <div className="text-sm text-muted-foreground">
+        {/* Results and Filter Toggle */}
+        <div className="flex items-center gap-4">
+          <Caption>
             {isFiltered ? (
-              <span>
+              <>
                 {filteredGames} of {totalGames} games
-              </span>
+              </>
             ) : (
-              <span>{totalGames} games</span>
+              <>{totalGames} games</>
             )}
-          </div>
+          </Caption>
 
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => {
               setShowFilters(!showFilters);
             }}
             className="gap-2"
           >
-            <SlidersHorizontal className="size-4" />
-            Filters
+            <Filter className="size-4" />
+            <Body size="sm">Filters</Body>
             {hasActiveFilters && (
-              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+              <Badge variant="secondary" className="h-5 px-1.5 text-xs">
                 {
                   [
                     filters.search && "search",
@@ -158,78 +159,82 @@ export function ImportedGamesFilters({
         </div>
       </div>
 
-      {/* Expanded Filters */}
+      {/* Filter Panel */}
       {showFilters && (
-        <div className="flex flex-col gap-3 rounded-lg border bg-muted/50 p-4 sm:flex-row sm:items-end">
-          {/* Platform Filter */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Platform</label>
-            <Select
-              value={filters.storefront}
-              onValueChange={handleStorefrontChange}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {storefrontOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="rounded-lg border bg-muted/30 p-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Platform Filter */}
+            <div className="space-y-2">
+              <Caption className="font-medium">Platform</Caption>
+              <Select
+                value={filters.storefront}
+                onValueChange={handleStorefrontChange}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {storefrontOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Sort By */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Sort by</label>
-            <Select value={filters.sortBy} onValueChange={handleSortByChange}>
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {/* Sort By */}
+            <div className="space-y-2">
+              <Caption className="font-medium">Sort by</Caption>
+              <Select value={filters.sortBy} onValueChange={handleSortByChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Sort Order */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Order</label>
-            <Select
-              value={filters.sortOrder}
-              onValueChange={handleSortOrderChange}
-            >
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOrderOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {/* Sort Order */}
+            <div className="space-y-2">
+              <Caption className="font-medium">Order</Caption>
+              <Select
+                value={filters.sortOrder}
+                onValueChange={handleSortOrderChange}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOrderOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Clear Filters */}
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearFilters}
-              className="gap-2"
-            >
-              <X className="size-4" />
-              Clear
-            </Button>
-          )}
+            {/* Clear Filters */}
+            <div className="flex items-end">
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="w-full gap-2"
+                >
+                  <X className="size-4" />
+                  <Body size="sm">Clear Filters</Body>
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -48,7 +48,13 @@ export default async function ExternalGamePage(
     return notFound();
   }
 
-  const steamAppId = findSteamAppId(igdbData.external_games);
+  let steamAppId: number | null = null;
+  try {
+    steamAppId = findSteamAppId(igdbData.external_games);
+  } catch (error) {
+    console.warn("Failed to find Steam app ID:", error);
+    steamAppId = null;
+  }
 
   const description = igdbData.summary || "No description available.";
 
@@ -175,11 +181,9 @@ export default async function ExternalGamePage(
                     />
                   </Suspense>
                 </AdaptiveTabsContent>
-                {steamAppId !== null && (
-                  <AdaptiveTabsContent value="achievements">
-                    <Achievements steamAppId={steamAppId} />
-                  </AdaptiveTabsContent>
-                )}
+                <AdaptiveTabsContent value="achievements">
+                  <Achievements steamAppId={steamAppId} />
+                </AdaptiveTabsContent>
               </AdaptiveTabs>
             </div>
 

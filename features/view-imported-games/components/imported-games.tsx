@@ -12,9 +12,8 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import { Heading } from "@/shared/components/typography";
+import { Body, Heading } from "@/shared/components/typography";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
 import { getImportedGames } from "../server-actions/get-imported-games";
@@ -77,22 +76,19 @@ function optimisticReducer(
 
 function ImportedGamesSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {Array.from({ length: 10 }).map((_, i) => (
-        <Card key={i} className="h-full overflow-hidden">
-          <div className="aspect-[16/9]">
+    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8">
+      {Array.from({ length: 16 }).map((_, i) => (
+        <div key={i} className="overflow-hidden rounded-md border bg-card">
+          <div className="aspect-[2/3]">
             <Skeleton className="size-full" />
           </div>
-          <CardHeader className="p-3 pb-2">
-            <Skeleton className="h-4 w-3/4" />
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            <div className="flex justify-between">
-              <Skeleton className="h-3 w-12" />
-              <Skeleton className="h-3 w-16" />
+          <div className="flex flex-col p-2">
+            <div className="mb-2 h-8">
+              <Skeleton className="h-3 w-3/4" />
             </div>
-          </CardContent>
-        </Card>
+            <Skeleton className="h-7 w-full" />
+          </div>
+        </div>
       ))}
     </div>
   );
@@ -102,7 +98,7 @@ export function ImportedGames({
   initialGames,
   initialTotalGames,
   initialPage = 1,
-  limit = 20,
+  limit = 18,
 }: ImportedGamesProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -255,18 +251,18 @@ export function ImportedGames({
           filteredGames={0}
         />
 
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="mb-4 text-6xl">{hasActiveFilters ? "🔍" : "📦"}</div>
-          <Heading level={2} className="mb-2">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="mb-6 text-5xl">{hasActiveFilters ? "🔍" : "📦"}</div>
+          <Heading level={2} size="xl" className="mb-3">
             {hasActiveFilters
               ? "No games match your filters"
               : "No imported games found"}
           </Heading>
-          <p className="text-muted-foreground">
+          <Body variant="muted" className="max-w-md">
             {hasActiveFilters
               ? "Try adjusting your search or filters to find games"
               : "Connect your gaming accounts to import your library"}
-          </p>
+          </Body>
         </div>
       </div>
     );
@@ -289,7 +285,7 @@ export function ImportedGames({
         )}
 
         <div
-          className={`grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ${
+          className={`grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 ${
             isSearchPending ? "opacity-70 transition-opacity duration-200" : ""
           }`}
         >

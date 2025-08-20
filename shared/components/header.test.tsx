@@ -13,6 +13,11 @@ vi.mock("@/features/theme-toggle/components/theme-toggle", () => ({
   ThemeToggle: () => <div data-testid="theme-toggle">Theme Toggle</div>,
 }));
 
+const mockPathname = vi.fn();
+vi.mock("next/navigation", () => ({
+  usePathname: () => mockPathname(),
+}));
+
 const elements = {
   getHeader: () => screen.getByRole("banner"),
   getLogo: () => screen.getByRole("link", { name: /PlayLater|PL/ }),

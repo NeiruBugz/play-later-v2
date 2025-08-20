@@ -1,8 +1,7 @@
 "use client";
 
 import { type Storefront } from "@prisma/client";
-import { minutesToHours } from "date-fns";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Plus } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import { useState, useTransition } from "react";
@@ -10,10 +9,9 @@ import { FaPlaystation, FaSteam, FaXbox } from "react-icons/fa";
 import { toast } from "sonner";
 
 import { importToApplication } from "@/features/view-imported-games/server-actions/import-to-application";
-import { Heading } from "@/shared/components/typography";
+import { Body, Caption } from "@/shared/components/typography";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { cn, getSteamGameImageUrl } from "@/shared/lib";
 
 type ImportedGame = {
@@ -32,9 +30,9 @@ type ImportedGameCardProps = {
 };
 
 const storefrontColors = {
-  STEAM: "bg-blue-600 text-white",
-  PLAYSTATION: "bg-blue-800 text-white",
-  XBOX: "bg-green-600 text-white",
+  STEAM: "bg-blue-600 text-white border-blue-600",
+  PLAYSTATION: "bg-indigo-600 text-white border-indigo-600",
+  XBOX: "bg-green-600 text-white border-green-600",
 };
 
 const storefrontLabels = {
@@ -44,9 +42,9 @@ const storefrontLabels = {
 };
 
 const storefrontIcons = {
-  STEAM: <FaSteam />,
-  PLAYSTATION: <FaPlaystation />,
-  XBOX: <FaXbox />,
+  STEAM: <FaSteam className="size-3" />,
+  PLAYSTATION: <FaPlaystation className="size-3" />,
+  XBOX: <FaXbox className="size-3" />,
 };
 
 function getImageUrl(game: ImportedGame): string | null {
@@ -55,7 +53,7 @@ function getImageUrl(game: ImportedGame): string | null {
       game.storefrontGameId,
       game.img_icon_url,
       game.img_logo_url,
-      "CAPSULE_616"
+      "LIBRARY_600"
     );
   }
 
@@ -100,14 +98,15 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
   const isDisabled = !game.storefrontGameId || imported || isExecuting;
 
   return (
-    <Card className="group h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
-      <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+    <div className="group relative overflow-hidden rounded-md border bg-card transition-all duration-200 hover:border-muted-foreground/20 hover:shadow-sm">
+      {/* Game Image */}
+      <div className="relative aspect-[2/3] overflow-hidden bg-muted">
         {imageUrl && !imageError ? (
           <Image
             src={imageUrl}
             alt={game.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
             onError={() => {
               setImageError(true);
             }}
@@ -115,81 +114,92 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
         ) : (
           <div className="flex h-full items-center justify-center">
             <div className="text-center text-muted-foreground">
-              <div className="mb-2 text-4xl">🎮</div>
-              <p className="text-sm">No image</p>
+              <div className="mb-1 text-2xl">🎮</div>
+              <Caption size="xs">No image</Caption>
             </div>
           </div>
         )}
 
-        <div className="absolute left-2 top-2">
+        {/* Platform Badge */}
+        <div className="absolute left-1.5 top-1.5">
           <Badge
-            variant="secondary"
             className={cn(
-              "text-xs font-medium",
+              "flex items-center gap-1 border px-1.5 py-0.5 text-xs font-medium",
               storefrontColors[game.storefront]
             )}
           >
-            {storefrontLabels[game.storefront]}
+            {storefrontIcons[game.storefront]}
+            <span className="hidden sm:inline">
+              {storefrontLabels[game.storefront]}
+            </span>
           </Badge>
         </div>
 
+        {/* Playtime Badge */}
         {game.playtime && game.playtime > 0 && (
-          <div className="absolute right-2 top-2">
-            <Badge variant="secondary" className="text-xs">
-              {minutesToHours(game.playtime)} h.
+          <div className="absolute right-1.5 top-1.5">
+            <Badge variant="secondary" className="px-1.5 py-0.5 text-xs">
+              {Math.round(game.playtime / 60)}h
             </Badge>
           </div>
         )}
 
+        {/* Import Success Overlay */}
         {imported && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-white">
-              <Check className="size-4" />
-              <span className="text-sm font-medium">Added to Collection</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="flex items-center gap-2 rounded-md bg-green-600 px-2 py-1.5 text-white">
+              <Check className="size-3" />
+              <Caption size="xs" className="font-medium text-white">
+                Added
+              </Caption>
             </div>
           </div>
         )}
       </div>
 
-      <CardHeader className="p-3 pb-2">
-        <Heading
-          level={3}
-          className="line-clamp-2 text-sm font-medium leading-tight"
-          title={game.name}
-        >
-          {game.name}
-        </Heading>
-      </CardHeader>
-
-      <CardContent className="p-3 pt-0">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          {storefrontIcons[game.storefront]}
-          <Button
-            size="sm"
-            onClick={handleAddToCollection}
-            disabled={isDisabled}
-            className={cn(
-              "transition-all duration-200",
-              imported && "bg-green-600 hover:bg-green-700"
-            )}
+      {/* Game Info */}
+      <div className="flex flex-col p-2">
+        <div className="mb-2 h-8">
+          <Body
+            size="xs"
+            className="line-clamp-2 font-medium leading-tight"
+            title={game.name}
           >
-            {isExecuting ? (
-              <>
-                <Loader2 className="mr-2 size-3 animate-spin" />
-                Adding...
-              </>
-            ) : imported ? (
-              <>
-                <Check className="mr-2 size-3" />
-                Added
-              </>
-            ) : (
-              "Add to collection"
-            )}
-          </Button>
+            {game.name}
+          </Body>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Action Button */}
+        <Button
+          size="sm"
+          variant={imported ? "secondary" : "default"}
+          onClick={handleAddToCollection}
+          disabled={isDisabled}
+          className={cn(
+            "h-7 w-full justify-center text-xs transition-all duration-200",
+            imported &&
+              "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30"
+          )}
+        >
+          {isExecuting ? (
+            <>
+              <Loader2 className="mr-1 size-3 animate-spin" />
+              Adding...
+            </>
+          ) : imported ? (
+            <>
+              <Check className="mr-1 size-3" />
+              Added
+            </>
+          ) : (
+            <>
+              <Plus className="mr-1 size-3" />
+              Add
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }
 
