@@ -8,6 +8,11 @@ export { ReleasesList } from "./releases-list";
 export { SteamIntegration } from "./steam-integration";
 export { UpcomingReleases } from "./upcoming-releases";
 
+// Stat Cards
+export { TotalGamesCard } from "./stat-cards/total-games-card";
+export { CompletionRateCard } from "./stat-cards/completion-rate-card";
+export { AverageRatingCard } from "./stat-cards/average-rating-card";
+
 // Skeleton components
 export {
   BacklogCountSkeleton,

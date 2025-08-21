@@ -3,7 +3,7 @@ import { z } from "zod";
 
 const DEFAULT_PAGINATION_PARAMETERS = {
   PAGE: { min: 1, default: 1 },
-  LIMIT: { min: 1, max: 100, default: 20 },
+  LIMIT: { min: 1, max: 100, default: 24 },
   SORT_BY: { default: "name" },
   SORT_ORDER: { default: "asc" },
 };

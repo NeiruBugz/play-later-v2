@@ -70,7 +70,7 @@ const EmptyState = ({
 **Issue**: Hard-coded values for pagination and display:
 
 ```typescript
-const ITEMS_PER_PAGE = 24;
+const ITEMS_PER_PAGE = 21;
 const DEFAULT_PAGE = 1;
 ```
 

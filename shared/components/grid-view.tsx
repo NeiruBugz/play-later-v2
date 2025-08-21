@@ -13,8 +13,7 @@ export function GridView({
         <li key={game.id}>
           <GameCard
             game={game}
-            platforms={backlogItems}
-            currentPlatform={backlogItems[0]}
+            backlogItem={backlogItems[0]} // Pass the primary backlog item
           />
         </li>
       ))}

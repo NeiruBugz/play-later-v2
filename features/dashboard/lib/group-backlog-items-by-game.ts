@@ -3,9 +3,7 @@ import { type BacklogItem } from "@prisma/client";
 import { type GameWithBacklogItems } from "../types";
 
 export const groupBacklogItemsByGame = (
-  userGames: Array<
-    { game: GameWithBacklogItems["game"] } & Omit<BacklogItem, "game">
-  >
+  userGames: Array<BacklogItem & { game: GameWithBacklogItems["game"] }>
 ): GameWithBacklogItems[] => {
   const groupedGames = new Map<string, GameWithBacklogItems>();
 

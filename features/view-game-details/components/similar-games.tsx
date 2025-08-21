@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { IgdbImage } from "@/shared/components/igdb-image";
+import { Body } from "@/shared/components/typography";
 import { type FullGameInfoResponse } from "@/shared/types";
 
 function SimilarGame({
@@ -23,7 +24,9 @@ function SimilarGame({
           />
         ) : null}
         <div>
-          <p className="text-sm font-medium">{game.name}</p>
+          <Body size="sm" className="font-medium">
+            {game.name}
+          </Body>
           {/* <p className="text-xs text-muted-foreground">
                 {game..}
               </p> */}

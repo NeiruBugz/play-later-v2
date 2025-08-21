@@ -2,7 +2,7 @@
 
 import { Storefront } from "@prisma/client";
 
-import { createManyImportedGames } from "@/shared/lib/repository";
+import { upsertManyImportedGames } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 import { SaveManySteamGamesInput } from "../types/type";
@@ -25,7 +25,7 @@ export const saveSteamGames = authorizedActionClient
     }));
 
     try {
-      const importedGames = await createManyImportedGames({
+      const importedGames = await upsertManyImportedGames({
         games: mappedGames,
       });
 

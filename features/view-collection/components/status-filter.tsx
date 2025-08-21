@@ -4,36 +4,23 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 import { Button } from "@/shared/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
-import { cn } from "@/shared/lib";
 
 const statusOptions = [
-  { value: "All", label: "All Games", shortLabel: "All", icon: "🎮" },
-  { value: "TO_PLAY", label: "Backlog", shortLabel: "Backlog", icon: "📚" },
-  { value: "PLAYING", label: "Playing", shortLabel: "Playing", icon: "🎯" },
-  { value: "PLAYED", label: "Played", shortLabel: "Played", icon: "✅" },
-  { value: "COMPLETED", label: "Completed", shortLabel: "Done", icon: "🏆" },
+  { value: "All", label: "All" },
+  { value: "TO_PLAY", label: "Backlog" },
+  { value: "PLAYED", label: "Played" },
+  { value: "PLAYING", label: "Playing" },
+  { value: "COMPLETED", label: "Completed" },
 ] as const;
 
 export function StatusFilter() {
   const params = useSearchParams();
   const router = useRouter();
 
-  const currentStatusParam = params.get("status");
-  const currentValue = currentStatusParam ?? "All";
+  const currentStatus = params.get("status") ?? "All";
 
   const onStatusSelect = useCallback(
-    (value: string | null) => {
-      if (!value) {
-        return;
-      }
-
+    (value: string) => {
       const paramsToUpdate = new URLSearchParams(params);
 
       if (value === "All") {
@@ -48,61 +35,21 @@ export function StatusFilter() {
     [router, params]
   );
 
-  const currentOption = statusOptions.find(
-    (option) => option.value === currentValue
-  );
-
   return (
-    <>
-      {/* Mobile: Dropdown Select - Better UX on touch devices */}
-      <div className="block md:hidden">
-        <Select value={currentValue} onValueChange={onStatusSelect}>
-          <SelectTrigger className="h-10 w-full">
-            <SelectValue>
-              <div className="flex items-center gap-2">
-                <span className="text-sm">{currentOption?.icon}</span>
-                <span className="font-medium">{currentOption?.label}</span>
-              </div>
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                <div className="flex items-center gap-3 py-1">
-                  <span className="text-sm">{option.icon}</span>
-                  <span>{option.label}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Desktop: Pill Buttons - Optimized for mouse interaction */}
-      <div className="hidden items-center gap-2 md:flex">
-        {statusOptions.map((option) => {
-          const isActive = currentValue === option.value;
-          return (
-            <Button
-              key={option.value}
-              variant={isActive ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                onStatusSelect(option.value);
-              }}
-              className={cn(
-                "h-9 px-4 text-sm font-medium transition-all duration-200",
-                "hover:scale-105 active:scale-95",
-                isActive && "shadow-md"
-              )}
-            >
-              <span className="mr-2">{option.icon}</span>
-              <span className="hidden lg:inline">{option.label}</span>
-              <span className="lg:hidden">{option.shortLabel}</span>
-            </Button>
-          );
-        })}
-      </div>
-    </>
+    <div className="flex flex-wrap items-center gap-2">
+      {statusOptions.map((option) => {
+        const isActive = currentStatus === option.value;
+        return (
+          <Button
+            key={option.value}
+            variant={isActive ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => onStatusSelect(option.value)}
+          >
+            {option.label}
+          </Button>
+        );
+      })}
+    </div>
   );
 }

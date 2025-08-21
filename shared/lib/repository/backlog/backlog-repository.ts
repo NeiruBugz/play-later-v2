@@ -292,14 +292,7 @@ export async function findCurrentlyPlayingGames({
       status: BacklogItemStatus.PLAYING,
     },
     include: {
-      game: {
-        select: {
-          id: true,
-          title: true,
-          igdbId: true,
-          coverImage: true,
-        },
-      },
+      game: true,
     },
     orderBy: { createdAt: "asc" },
   });

@@ -3,6 +3,7 @@
 import { Download, Heart, Library, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import React, { memo } from "react";
 
 import { ShareWishlist } from "@/features/share-wishlist";
 import { Button } from "@/shared/components/ui/button";
@@ -13,80 +14,93 @@ const collectionNavItems = [
     href: "/collection",
     label: "My Games",
     icon: Library,
-    description: "Your game collection",
   },
   {
     href: "/collection/imported",
     label: "Imported",
     icon: Download,
-    description: "Games from connected services",
   },
   {
     href: "/collection/wishlist",
     label: "Wishlist",
     icon: Heart,
-    description: "Games you want to play",
   },
 ] as const;
 
-type CollectionNavProps = {
+export type CollectionNavProps = {
   showAddButton?: boolean;
-  showShareWishlist?: boolean;
   userName?: string | null;
+  className?: string;
 };
 
-export function CollectionNav({
-  showAddButton = true,
-  showShareWishlist = false,
-  userName,
-}: CollectionNavProps) {
-  const pathname = usePathname();
+const CollectionNav = memo(
+  ({ showAddButton = true, userName, className }: CollectionNavProps) => {
+    const pathname = usePathname() ?? "";
+    const isWishlist = pathname.startsWith("/collection/wishlist");
 
-  const isWishlist = pathname.startsWith("/collection/wishlist");
+    const getActiveItem = (href: string) => {
+      if (!pathname) return false;
+      if (href === "/collection") {
+        return (
+          pathname === "/collection" ||
+          (pathname.startsWith("/collection") &&
+            !pathname.startsWith("/collection/imported") &&
+            !pathname.startsWith("/collection/wishlist") &&
+            !pathname.startsWith("/collection/add-game"))
+        );
+      }
+      return pathname.startsWith(href);
+    };
 
-  return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <nav className="flex w-fit gap-1 rounded-lg bg-muted p-1">
-        {collectionNavItems.map((item) => {
-          const IconComponent = item.icon;
-          const isActive =
-            item.href === "/collection"
-              ? pathname === "/collection"
-              : pathname.startsWith(item.href);
+    return (
+      <div
+        className={cn(
+          "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
+          className
+        )}
+      >
+        <nav className="flex items-center gap-2 rounded-md bg-muted p-1">
+          {collectionNavItems.map((item) => {
+            const IconComponent = item.icon;
+            const isActive = getActiveItem(item.href);
 
-          return (
-            <Button
-              key={item.href}
-              variant={isActive ? "default" : "ghost"}
-              size="sm"
-              asChild
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-background text-foreground shadow-sm"
-                  : "hover:bg-background/60"
-              )}
-            >
-              <Link href={item.href} title={item.description}>
-                <IconComponent className="size-4" />
-                <span className="hidden sm:inline">{item.label}</span>
+            return (
+              <Link key={item.href} href={item.href} title={item.label}>
+                <Button
+                  variant={isActive ? "default" : "ghost"}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <IconComponent className="size-4" />
+                  <span className="hidden sm:inline">{item.label}</span>
+                </Button>
               </Link>
-            </Button>
-          );
-        })}
-      </nav>
+            );
+          })}
+        </nav>
 
-      {showAddButton && (
-        <Button asChild className="flex items-center gap-2">
-          <Link href="/collection/add-game">
-            <Plus className="size-4" />
-            Add Game
-          </Link>
-        </Button>
-      )}
-      {(showShareWishlist || isWishlist) && (
-        <ShareWishlist userName={userName} />
-      )}
-    </div>
-  );
-}
+        <div className="flex items-center gap-2">
+          {showAddButton && (
+            <Link href="/collection/add-game">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Plus className="size-4" />
+                <span className="hidden sm:inline">Add Game</span>
+                <span className="sm:hidden">Add</span>
+              </Button>
+            </Link>
+          )}
+          {isWishlist && <ShareWishlist userName={userName} />}
+        </div>
+      </div>
+    );
+  }
+);
+
+CollectionNav.displayName = "CollectionNav";
+
+// We now only export one clean component.
+export { CollectionNav as EditorialCollectionNav };

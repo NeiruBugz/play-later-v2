@@ -17,7 +17,7 @@ export const getImportedGames = authorizedActionClient
   .inputSchema(
     z.object({
       page: z.number().default(1),
-      limit: z.number().default(20),
+      limit: z.number().default(18),
       search: z.string().optional(),
       storefront: z.nativeEnum(Storefront).optional(),
       sortBy: z

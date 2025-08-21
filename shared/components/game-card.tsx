@@ -2,126 +2,88 @@
 
 import { type BacklogItem, type Game } from "@prisma/client";
 import Link from "next/link";
-import { useState } from "react";
 
-import { cn, getGameUrl, normalizeString } from "../lib";
+import { CompleteActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/complete-action-button";
+import { MoveToBacklogActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/move-to-backlog-action-button";
+import { StartPlayingActionButton } from "@/features/manage-backlog-item/edit-backlog-item/components/start-playing-action-button";
+
+import { getGameUrl } from "../lib";
 import { IgdbImage } from "./igdb-image";
-import { Heading } from "./typography";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Card, CardHeader } from "./ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Card } from "./ui/card";
 
 type GameCardProps = {
   game: Game;
-  platforms?: BacklogItem[];
-  currentPlatform?: BacklogItem;
+  backlogItem?: BacklogItem;
+  showQuickActions?: boolean;
 };
 
-const statusColors = {
-  TO_PLAY: "bg-yellow-500 text-white",
-  PLAYING: "bg-green-500 text-white",
-  PLAYED: "bg-blue-500 text-white",
-  COMPLETED: "bg-purple-500 text-white",
-  WISHLIST: "bg-pink-500 text-white",
+const statusStyles: Record<string, { dot: string; label: string }> = {
+  PLAYING: { dot: "bg-green-500", label: "Playing" },
+  COMPLETED: { dot: "bg-blue-500", label: "Completed" },
+  TO_PLAY: { dot: "bg-yellow-500", label: "Backlog" },
+  DROPPED: { dot: "bg-red-500", label: "Dropped" },
+  WISHLIST: { dot: "bg-purple-500", label: "Wishlist" },
 };
 
-const statusLabels = {
-  TO_PLAY: "Backlog",
-  PLAYING: "Playing",
-  PLAYED: "Played",
-  COMPLETED: "Completed",
-  WISHLIST: "Wishlist",
-};
+export function GameCard({
+  game,
+  backlogItem,
+  showQuickActions,
+}: GameCardProps) {
+  const status = backlogItem?.status ?? "TO_PLAY";
+  const style = statusStyles[status] || statusStyles.TO_PLAY;
 
-export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const primaryPlatform = currentPlatform ?? platforms?.[0];
-  const status = primaryPlatform?.status ?? "TO_PLAY";
+  const showActions = showQuickActions === true && backlogItem !== undefined;
 
   return (
-    <Card
-      className="group h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-      onMouseEnter={() => {
-        setIsHovered(true);
-      }}
-      onMouseLeave={() => {
-        setIsHovered(false);
-      }}
-    >
-      <div className="relative aspect-[3/4] overflow-hidden">
+    <Link href={getGameUrl(game.id)} className="group block">
+      <Card className="relative aspect-[3/4] overflow-hidden rounded-lg transition-all duration-200 ease-in-out group-hover:scale-105 group-hover:shadow-lg">
         <IgdbImage
           gameTitle={game.title}
           coverImageId={game.coverImage}
           igdbSrcSize={"hd"}
           igdbImageSize={"c-big"}
           fill
-          className={`object-cover transition-transform duration-500 ${isHovered ? "scale-110" : "scale-100"}`}
+          className="object-cover"
         />
 
-        {/* Status Badge */}
-        <div className="absolute left-2 top-2">
-          <Badge
-            variant="secondary"
-            className={cn("text-xs font-medium", statusColors[status])}
-          >
-            {statusLabels[status]}
-          </Badge>
-        </div>
+        {/* Hover Content */}
+        <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
+          {/* Top-right actions placeholder */}
+          {showActions && (
+            <div className="flex flex-col items-end gap-1 p-2 text-right">
+              {status === "TO_PLAY" && (
+                <StartPlayingActionButton
+                  game={game}
+                  backlogItems={[backlogItem]}
+                />
+              )}
+              {status === "PLAYING" && (
+                <CompleteActionButton backlogItems={[backlogItem]} />
+              )}
+              {status !== "TO_PLAY" && status !== "PLAYING" && (
+                <MoveToBacklogActionButton
+                  game={game}
+                  backlogItems={[backlogItem]}
+                />
+              )}
+            </div>
+          )}
 
-        {/* Multiple Platforms Indicator */}
-        {platforms && platforms.length > 1 && (
-          <div className="absolute right-2 top-2">
-            <Badge variant="secondary" className="text-xs">
-              +{platforms.length - 1}
-            </Badge>
+          {/* Bottom information */}
+          <div className="p-3 text-white">
+            <h3 className="truncate text-base font-semibold" title={game.title}>
+              {game.title}
+            </h3>
+            <div className="mt-1 flex items-center gap-2">
+              <span
+                className={`inline-block size-2 rounded-full ${style.dot}`}
+              />
+              <span className="text-xs text-white/80">{style.label}</span>
+            </div>
           </div>
-        )}
-
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-        {/* Hover Actions */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <Button variant="secondary" size="sm" asChild>
-            <Link href={getGameUrl(game.id)}>View Details</Link>
-          </Button>
         </div>
-      </div>
-
-      <CardHeader className="flex-1 p-3 pb-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Heading
-                level={3}
-                size="sm"
-                className="line-clamp-2 cursor-help text-sm font-medium leading-tight"
-                title={game.title}
-              >
-                {game.title}
-              </Heading>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{game.title}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {/* Platform Info */}
-        {primaryPlatform?.platform && (
-          <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
-            {normalizeString(primaryPlatform.platform)}
-          </p>
-        )}
-      </CardHeader>
-
-      {/* Footer only visible on non-hover for cleaner look */}
-    </Card>
+      </Card>
+    </Link>
   );
 }

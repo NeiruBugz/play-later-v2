@@ -2,6 +2,7 @@ import { BacklogItemStatus } from "@prisma/client";
 import { Library, Star, Trophy } from "lucide-react";
 
 import { getBacklogItemsCount } from "@/features/dashboard/server-actions/get-backlog-items-count";
+import { Body } from "@/shared/components/typography";
 import {
   Card,
   CardContent,
@@ -33,35 +34,41 @@ export async function CollectionStats() {
   const avgRating = averageRating ? Math.round(averageRating * 10) / 10 : 0;
 
   return (
-    <Card className="h-fit">
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-3">
-          <Library className="size-5" />
+        <CardTitle className="flex items-center gap-2">
+          <Library />
           Collection Stats
         </CardTitle>
         <CardDescription>Your gaming journey at a glance</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Total Games</span>
-          <span className="font-semibold">{totalGames}</span>
+          <Body size="sm" variant="muted">
+            Total Games
+          </Body>
+          <Body size="sm" className="font-semibold">
+            {totalGames}
+          </Body>
         </div>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy className="size-4 text-yellow-500" />
-            <span className="text-sm text-muted-foreground">
-              Completion Rate
-            </span>
-          </div>
-          <span className="font-semibold">{completionRate}%</span>
+          <Body size="sm" variant="muted" className="flex items-center gap-2">
+            <Trophy className="text-muted-foreground" />
+            Completion Rate
+          </Body>
+          <Body size="sm" className="font-semibold">
+            {completionRate}%
+          </Body>
         </div>
         {avgRating > 0 && (
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Star className="size-4 text-yellow-500" />
-              <span className="text-sm text-muted-foreground">Avg Rating</span>
-            </div>
-            <span className="font-semibold">{avgRating}/10</span>
+            <Body size="sm" variant="muted" className="flex items-center gap-2">
+              <Star className="text-muted-foreground" />
+              Avg. Rating
+            </Body>
+            <Body size="sm" className="font-semibold">
+              {avgRating}/10
+            </Body>
           </div>
         )}
       </CardContent>

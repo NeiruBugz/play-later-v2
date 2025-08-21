@@ -1,50 +1,39 @@
 import Link from "next/link";
 
 import { getWishlistedItems } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
-import { BacklogItemCard } from "@/shared/components/backlog-item-card";
+import { GridView } from "@/shared/components/grid-view";
+import { Body, Heading } from "@/shared/components/typography";
 
 export async function WishlistedList() {
   const { data: wishlistedItems, serverError } = await getWishlistedItems();
 
   if (serverError) {
-    return <div>{serverError}</div>;
+    return (
+      <Body variant="muted">
+        Failed to load wishlist. Please try again later.
+      </Body>
+    );
   }
 
   if (!wishlistedItems || wishlistedItems.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center">
-        <h1 className="text-3xl font-bold">Your wishlist is empty</h1>
-        <p className="text-gray-500">
+      <div className="flex flex-col items-center justify-center text-center">
+        <Heading level={1} size="2xl">
+          Your wishlist is empty
+        </Heading>
+        <Body variant="muted" className="mt-2">
           Start{" "}
           <Link
             href="/collection/add-game"
-            className="hover:font-bolder cursor-pointer font-bold underline"
+            className="font-semibold text-primary underline hover:no-underline"
           >
             adding
           </Link>{" "}
           games to your wishlist
-        </p>
+        </Body>
       </div>
     );
   }
 
-  return (
-    <div>
-      <ul className="flex flex-wrap justify-center gap-3 md:justify-start">
-        {wishlistedItems.map(({ game, backlogItems }) => (
-          <li key={game.id}>
-            <BacklogItemCard
-              game={{
-                id: game.id,
-                title: game.title,
-                coverImage: game.coverImage,
-                igdbId: game.igdbId,
-              }}
-              backlogItems={backlogItems}
-            />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  return <GridView backlogItems={wishlistedItems} />;
 }

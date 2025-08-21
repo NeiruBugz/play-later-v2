@@ -38,8 +38,8 @@ export function EditGameEntryModal({ backlogItems }: EditGameEntryModalProps) {
           setIsOpen(true);
         }}
       >
-        <Edit size={16} />
-        Edit entries
+        <Edit className="size-4 text-muted-foreground" />
+        <span>Edit entries</span>
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="w-full max-w-2xl">

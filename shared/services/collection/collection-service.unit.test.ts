@@ -68,7 +68,7 @@ describe("CollectionService", () => {
       expect(mockFindGamesWithBacklogItemsPaginated).toHaveBeenCalledWith({
         where: mockGameFilter,
         page: 1,
-        itemsPerPage: 24,
+        itemsPerPage: 21,
       });
     });
 
@@ -232,7 +232,7 @@ describe("CollectionService", () => {
       expect(mockFindGamesWithBacklogItemsPaginated).toHaveBeenCalledWith({
         where: mockGameFilter,
         page: 1, // default page
-        itemsPerPage: 24,
+        itemsPerPage: 21,
       });
     });
 
@@ -252,7 +252,7 @@ describe("CollectionService", () => {
       expect(mockFindGamesWithBacklogItemsPaginated).toHaveBeenCalledWith({
         where: mockGameFilter,
         page: 3,
-        itemsPerPage: 24,
+        itemsPerPage: 21,
       });
     });
 

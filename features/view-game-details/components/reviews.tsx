@@ -1,4 +1,5 @@
 import { ReviewForm } from "@/features/add-review/components";
+import { Body, Heading } from "@/shared/components/typography";
 
 import { getReviews } from "../server-actions/get-reviews";
 import { Review } from "./review";
@@ -8,9 +9,9 @@ export async function Reviews({ gameId }: { gameId: string }) {
 
   if (reviewsResult.serverError !== undefined || !reviewsResult.data) {
     return (
-      <div className="py-12 text-center text-muted-foreground">
+      <Body variant="muted" className="py-12 text-center">
         Failed to load reviews. Please try again later.
-      </div>
+      </Body>
     );
   }
 
@@ -21,7 +22,9 @@ export async function Reviews({ gameId }: { gameId: string }) {
       <ReviewForm gameId={gameId} />
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-medium">User Reviews</h3>
+          <Heading level={3} size="md">
+            User Reviews
+          </Heading>
         </div>
         <div className="space-y-6">
           {reviewList.length ? (
@@ -29,9 +32,9 @@ export async function Reviews({ gameId }: { gameId: string }) {
               return <Review review={review} key={review.id} />;
             })
           ) : (
-            <div className="py-1 text-center text-muted-foreground">
+            <Body variant="muted" className="py-1 text-center">
               No reviews yet. Be the first to write a review!
-            </div>
+            </Body>
           )}
         </div>
       </div>

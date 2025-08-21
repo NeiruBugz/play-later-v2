@@ -107,7 +107,7 @@ const useOptimisticUpdates = () => {
 ```typescript
 const DEBOUNCE_DELAY = 300;
 const TRANSITION_TIMEOUT = 500;
-const ITEMS_PER_PAGE = 24;
+const ITEMS_PER_PAGE = 21;
 ```
 
 **Recommendation**: Extract to configuration:
@@ -116,7 +116,7 @@ const ITEMS_PER_PAGE = 24;
 const IMPORTED_GAMES_CONFIG = {
   DEBOUNCE_DELAY: 300,
   TRANSITION_TIMEOUT: 500,
-  ITEMS_PER_PAGE: 24,
+  ITEMS_PER_PAGE: 21,
   MAX_SEARCH_LENGTH: 100,
 } as const;
 ```

@@ -46,7 +46,7 @@ export function ImportedGamesWidget({
           <p className="text-xs text-muted-foreground">
             Connect services to import games
           </p>
-          <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
+          <Button asChild variant="outline" size="sm" className="mt-3 w-full">
             <Link href="/user/settings?tab=integrations">
               <ExternalLink className="mr-2 size-3" />
               Connect Services
@@ -69,12 +69,10 @@ export function ImportedGamesWidget({
           <p className="text-xs text-muted-foreground">
             {count === 1 ? "Game ready to add" : "Games ready to add"}
           </p>
-          <Button variant="outline" size="sm" className="mt-3 w-full" asChild>
-            <span>
-              <ExternalLink className="mr-2 size-3" />
-              View Imported Games
-            </span>
-          </Button>
+          <div className="mt-3 flex w-full items-center justify-center rounded border border-input bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+            <ExternalLink className="mr-2 size-3" />
+            View Imported Games
+          </div>
         </CardContent>
       </Link>
     </Card>
