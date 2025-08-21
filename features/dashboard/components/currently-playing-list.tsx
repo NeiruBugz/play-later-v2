@@ -1,7 +1,7 @@
-import { BacklogItem, Game } from "@prisma/client";
 import { cache } from "react";
 
 import { getCurrentlyPlayingGamesInBacklog } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
+import { type GameWithBacklogItems } from "@/features/dashboard/types";
 import { GameCard } from "@/shared/components/game-card";
 import { Body } from "@/shared/components/typography";
 
@@ -25,8 +25,10 @@ export async function CurrentlyPlayingList() {
           return (
             <div key={game.id} className="w-40 shrink-0">
               <GameCard
-                game={game as unknown as Game}
-                backlogItem={backlogItems[0] as unknown as BacklogItem}
+                game={game}
+                backlogItem={
+                  backlogItems.length > 0 ? backlogItems[0] : undefined
+                }
               />
             </div>
           );

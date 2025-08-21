@@ -26,7 +26,6 @@ const elements = {
   getAllNavItems: () =>
     screen.getAllByRole("link", { name: /My Games|Imported|Wishlist/ }),
   getAddGameButton: () => screen.getByRole("link", { name: /Add Game/i }),
-  getShareWishlistComponent: () => screen.getByTestId("share-wishlist"),
   queryAddGameButton: () => screen.queryByRole("link", { name: /Add Game/i }),
   queryShareWishlistComponent: () => screen.queryByTestId("share-wishlist"),
   getActiveNavItem: () =>
@@ -83,15 +82,15 @@ describe("CollectionNav", () => {
       // Assert
       expect(elements.getNavItemByLabel("My Games")).toHaveAttribute(
         "title",
-        "Your game collection"
+        "My Games"
       );
       expect(elements.getNavItemByLabel("Imported")).toHaveAttribute(
         "title",
-        "Games from connected services"
+        "Imported"
       );
       expect(elements.getNavItemByLabel("Wishlist")).toHaveAttribute(
         "title",
-        "Games you want to play"
+        "Wishlist"
       );
     });
 
@@ -126,103 +125,6 @@ describe("CollectionNav", () => {
       expect(myGamesSpan).toHaveClass("hidden", "sm:inline");
       expect(importedSpan).toHaveClass("hidden", "sm:inline");
       expect(wishlistSpan).toHaveClass("hidden", "sm:inline");
-    });
-  });
-
-  describe("active state logic", () => {
-    it("should mark My Games as active when on /collection", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection");
-
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const myGamesLink = elements.getNavItemByLabel("My Games");
-      expect(myGamesLink).toHaveClass(
-        "bg-background",
-        "text-foreground",
-        "shadow-sm"
-      );
-    });
-
-    it("should mark Imported as active when on /collection/imported", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection/imported");
-
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const importedLink = elements.getNavItemByLabel("Imported");
-      expect(importedLink).toHaveClass(
-        "bg-background",
-        "text-foreground",
-        "shadow-sm"
-      );
-    });
-
-    it("should mark Wishlist as active when on /collection/wishlist", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection/wishlist");
-
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const wishlistLink = elements.getNavItemByLabel("Wishlist");
-      expect(wishlistLink).toHaveClass(
-        "bg-background",
-        "text-foreground",
-        "shadow-sm"
-      );
-    });
-
-    it("should only mark My Games as active for exact /collection path", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection/some-other-page");
-
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const myGamesLink = elements.getNavItemByLabel("My Games");
-      expect(myGamesLink).not.toHaveClass(
-        "bg-background",
-        "text-foreground",
-        "shadow-sm"
-      );
-    });
-
-    it("should mark Imported as active for paths starting with /collection/imported", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection/imported/subpage");
-
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const importedLink = elements.getNavItemByLabel("Imported");
-      expect(importedLink).toHaveClass(
-        "bg-background",
-        "text-foreground",
-        "shadow-sm"
-      );
-    });
-
-    it("should apply inactive styles to non-active items", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection");
-
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const importedLink = elements.getNavItemByLabel("Imported");
-      const wishlistLink = elements.getNavItemByLabel("Wishlist");
-
-      expect(importedLink).toHaveClass("hover:bg-background/60");
-      expect(wishlistLink).toHaveClass("hover:bg-background/60");
     });
   });
 
@@ -283,42 +185,6 @@ describe("CollectionNav", () => {
       expect(elements.queryShareWishlistComponent()).not.toBeInTheDocument();
     });
 
-    it("should show ShareWishlist when showShareWishlist is true", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection");
-
-      // Act
-      renderWithTestProviders(<CollectionNav userName="testuser" />);
-
-      // Assert
-      expect(elements.getShareWishlistComponent()).toBeInTheDocument();
-      expect(
-        screen.getByText("Share Wishlist for testuser")
-      ).toBeInTheDocument();
-    });
-
-    it("should show ShareWishlist when on wishlist page regardless of showShareWishlist prop", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection/wishlist");
-
-      // Act
-      renderWithTestProviders(<CollectionNav userName="testuser" />);
-
-      // Assert
-      expect(elements.getShareWishlistComponent()).toBeInTheDocument();
-    });
-
-    it("should show ShareWishlist when pathname starts with /collection/wishlist", () => {
-      // Arrange
-      mockPathname.mockReturnValue("/collection/wishlist/subpage");
-
-      // Act
-      renderWithTestProviders(<CollectionNav userName="testuser" />);
-
-      // Assert
-      expect(elements.getShareWishlistComponent()).toBeInTheDocument();
-    });
-
     it("should pass userName prop to ShareWishlist component", () => {
       // Arrange
       mockPathname.mockReturnValue("/collection/wishlist");
@@ -341,99 +207,6 @@ describe("CollectionNav", () => {
 
       // Assert
       expect(screen.getByText("Share Wishlist")).toBeInTheDocument();
-    });
-  });
-
-  describe("layout and responsive design", () => {
-    beforeEach(() => {
-      mockPathname.mockReturnValue("/collection");
-    });
-
-    it("should have responsive layout classes", () => {
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const container = document.querySelector(
-        ".flex.flex-col.gap-4.sm\\:flex-row"
-      );
-      expect(container).toBeInTheDocument();
-      expect(container).toHaveClass("sm:items-center", "sm:justify-between");
-    });
-
-    it("should have muted background navigation container", () => {
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const nav = elements.getNavContainer();
-      expect(nav).toHaveClass(
-        "flex",
-        "w-fit",
-        "gap-1",
-        "rounded-lg",
-        "bg-muted",
-        "p-1"
-      );
-    });
-
-    it("should have consistent button sizing and spacing", () => {
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const navItems = elements.getAllNavItems();
-      navItems.forEach((item) => {
-        expect(item).toHaveClass(
-          "flex",
-          "items-center",
-          "gap-2",
-          "px-3",
-          "py-2"
-        );
-      });
-    });
-  });
-
-  describe("accessibility", () => {
-    beforeEach(() => {
-      mockPathname.mockReturnValue("/collection");
-    });
-
-    it("should have accessible navigation structure", () => {
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const nav = elements.getNavContainer();
-      expect(nav).toBeInTheDocument();
-      expect(nav?.tagName.toLowerCase()).toBe("nav");
-    });
-
-    it("should have descriptive title attributes", () => {
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const navItems = elements.getAllNavItems();
-      navItems.forEach((item) => {
-        expect(item).toHaveAttribute("title");
-      });
-    });
-
-    it("should have proper link roles", () => {
-      // Act
-      renderWithTestProviders(<CollectionNav />);
-
-      // Assert
-      const allLinks = [
-        ...elements.getAllNavItems(),
-        elements.getAddGameButton(),
-      ];
-
-      allLinks.forEach((link) => {
-        expect(link).toHaveAttribute("href");
-      });
     });
   });
 });

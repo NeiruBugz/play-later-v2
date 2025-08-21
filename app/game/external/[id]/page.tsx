@@ -1,5 +1,5 @@
 import { BacklogItemStatus } from "@prisma/client";
-import { Book, Heart, Image, Star, Trophy } from "lucide-react";
+import { Book, Heart, Image as ImageIcon, Star, Trophy } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -146,7 +146,7 @@ export default async function ExternalGamePage(
                   <AdaptiveTabsTrigger value="reviews" icon={<Star />}>
                     Reviews
                   </AdaptiveTabsTrigger>
-                  <AdaptiveTabsTrigger value="screenshots" icon={<Image />}>
+                  <AdaptiveTabsTrigger value="screenshots" icon={<ImageIcon />}>
                     Screenshots
                   </AdaptiveTabsTrigger>
                   <AdaptiveTabsTrigger value="achievements" icon={<Trophy />}>

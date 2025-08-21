@@ -1,4 +1,4 @@
-import { Book, Image, Star, Trophy } from "lucide-react";
+import { Book, Image as ImageIcon, Star, Trophy } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -116,14 +116,12 @@ export default async function GamePage(props: PageProps<"/game/[id]">) {
                   <AdaptiveTabsTrigger value="reviews" icon={<Star />}>
                     Reviews
                   </AdaptiveTabsTrigger>
-                  <AdaptiveTabsTrigger value="screenshots" icon={<Image />}>
+                  <AdaptiveTabsTrigger value="screenshots" icon={<ImageIcon />}>
                     Screenshots
                   </AdaptiveTabsTrigger>
-                  {steamAppId !== null ? (
-                    <AdaptiveTabsTrigger value="achievements" icon={<Trophy />}>
-                      Achievements
-                    </AdaptiveTabsTrigger>
-                  ) : null}
+                  <AdaptiveTabsTrigger value="achievements" icon={<Trophy />}>
+                    Achievements
+                  </AdaptiveTabsTrigger>
                 </AdaptiveTabsList>
                 <AdaptiveTabsContent value="about" className="space-y-4">
                   <About

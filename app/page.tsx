@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { ArrowRight, Gamepad2 } from "lucide-react/";
+import { ArrowRight, Gamepad2 } from "lucide-react";
 
 import { Dashboard } from "@/features/dashboard/components/dashboard";
 import { SignIn } from "@/features/sign-in";
