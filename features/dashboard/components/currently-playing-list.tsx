@@ -1,7 +1,6 @@
 import { cache } from "react";
 
 import { getCurrentlyPlayingGamesInBacklog } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
-import { type GameWithBacklogItems } from "@/features/dashboard/types";
 import { GameCard } from "@/shared/components/game-card";
 import { Body } from "@/shared/components/typography";
 

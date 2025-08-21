@@ -1,6 +1,6 @@
 import { Star } from "lucide-react";
 
-import { Body, Caption, Heading } from "@/shared/components/typography";
+import { Caption, Heading } from "@/shared/components/typography";
 import { Card, CardContent } from "@/shared/components/ui/card";
 
 type GameStatsProps = {

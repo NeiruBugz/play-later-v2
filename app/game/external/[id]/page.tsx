@@ -11,7 +11,6 @@ import {
   GameScreenshots,
   GameStats,
   getBacklogItemsByIgdbId,
-  Reviews,
   SimilarGames,
   TimesToBeat,
 } from "@/features/view-game-details";
