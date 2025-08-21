@@ -1,5 +1,7 @@
 import "server-only";
 
+import { ImportedGame } from "@prisma/client";
+
 import { prisma } from "@/shared/lib/db";
 
 import {
@@ -72,10 +74,23 @@ export async function createManyImportedGames({
 export async function upsertManyImportedGames({
   games,
 }: CreateManyImportedGamesInput) {
-  // First, find existing games for this user
-  const userId = games[0]?.userId;
+  // Validate that games array is not empty
+  if (!games || games.length === 0) {
+    throw new Error("Games array cannot be empty");
+  }
+
+  // Get userId from first game and validate it exists
+  const userId = games[0].userId;
   if (!userId) {
     throw new Error("UserId is required");
+  }
+
+  // Validate that all games belong to the same user
+  const allGamesBelongToSameUser = games.every(
+    (game) => game.userId === userId
+  );
+  if (!allGamesBelongToSameUser) {
+    throw new Error("All games in the batch must belong to the same user");
   }
 
   const storefrontGameIds = games
@@ -114,19 +129,28 @@ export async function upsertManyImportedGames({
     // Update existing games
     for (const game of gamesToUpdate) {
       if (game.storefrontGameId) {
+        // Construct update data, conditionally including image fields
+        const updateData: Partial<ImportedGame> = {
+          name: game.name,
+          playtime: game.playtime,
+          deletedAt: null, // Restore if it was soft deleted
+          updatedAt: new Date(),
+        };
+
+        // Only include image fields if they have truthy values
+        if (game.img_icon_url) {
+          updateData.img_icon_url = game.img_icon_url;
+        }
+        if (game.img_logo_url) {
+          updateData.img_logo_url = game.img_logo_url;
+        }
+
         const updated = await tx.importedGame.updateMany({
           where: {
             userId,
             storefrontGameId: game.storefrontGameId,
           },
-          data: {
-            name: game.name,
-            playtime: game.playtime,
-            img_icon_url: game.img_icon_url,
-            img_logo_url: game.img_logo_url,
-            deletedAt: null, // Restore if it was soft deleted
-            updatedAt: new Date(),
-          },
+          data: updateData,
         });
         results.push(updated);
       }
