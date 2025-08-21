@@ -35,10 +35,11 @@ export type CollectionNavProps = {
 
 const CollectionNav = memo(
   ({ showAddButton = true, userName, className }: CollectionNavProps) => {
-    const pathname = usePathname();
+    const pathname = usePathname() ?? "";
     const isWishlist = pathname.startsWith("/collection/wishlist");
 
     const getActiveItem = (href: string) => {
+      if (!pathname) return false;
       if (href === "/collection") {
         return (
           pathname === "/collection" ||

@@ -135,7 +135,7 @@ const Header = memo(
     showScrollEffect = true,
     className,
   }: HeaderProps) => {
-    const pathname = usePathname();
+    const pathname = usePathname() ?? "";
     const [isScrolled, setIsScrolled] = React.useState(false);
 
     // Handle scroll effect
@@ -153,6 +153,7 @@ const Header = memo(
 
     // Determine active navigation item
     const getActiveItem = (href: string) => {
+      if (!pathname) return false;
       if (href.includes("/collection")) {
         return pathname.startsWith("/collection");
       }
