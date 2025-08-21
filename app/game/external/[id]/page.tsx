@@ -9,7 +9,6 @@ import {
   Achievements,
   Franchises,
   GameScreenshots,
-  GameStats,
   getBacklogItemsByIgdbId,
   SimilarGames,
   TimesToBeat,
@@ -188,15 +187,6 @@ export default async function ExternalGamePage(
 
             {/* Right Sidebar Column */}
             <div className="flex flex-col gap-6 lg:col-start-1 lg:row-start-2 lg:w-[250px]">
-              <Suspense fallback={"Loading..."}>
-                <GameStats
-                  rating={
-                    igdbData.aggregated_rating
-                      ? `${(igdbData.aggregated_rating / RATING_DIVISOR).toFixed(1)}/10`
-                      : undefined
-                  }
-                />
-              </Suspense>
               <div>
                 <Heading level={3} size="lg" className="mb-3">
                   Similar Games

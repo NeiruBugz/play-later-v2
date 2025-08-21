@@ -103,14 +103,14 @@ export function About({
         </div>
 
         {aggregatedRating && (
-          <div>
+          <div className="flex flex-col gap-2">
             <Caption size="sm">Aggregated Rating</Caption>
             <div
-              className={`inline-flex h-8 items-center justify-center rounded bg-muted px-2`}
+              className={`inline-flex h-8 w-fit items-center justify-center rounded bg-muted px-2`}
             >
               <Body
                 size="sm"
-                className={`font-bold ${getRatingColorClass(aggregatedRating)}`}
+                className={`w-fit font-bold ${getRatingColorClass(aggregatedRating)}`}
               >
                 {aggregatedRating.toFixed(1)}
               </Body>
