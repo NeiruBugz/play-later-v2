@@ -10,7 +10,6 @@ import { StartPlayingActionButton } from "@/features/manage-backlog-item/edit-ba
 import { getGameUrl } from "../lib";
 import { IgdbImage } from "./igdb-image";
 import { Card } from "./ui/card";
-import { TooltipProvider } from "./ui/tooltip"; // Import TooltipProvider
 
 type GameCardProps = {
   game: Game;
@@ -34,7 +33,7 @@ export function GameCard({
   const status = backlogItem?.status ?? "TO_PLAY";
   const style = statusStyles[status] || statusStyles.TO_PLAY;
 
-  const showActions = backlogItem !== undefined;
+  const showActions = showQuickActions === true && backlogItem !== undefined;
 
   return (
     <Link href={getGameUrl(game.id)} className="group block">

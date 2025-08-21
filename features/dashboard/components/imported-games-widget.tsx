@@ -46,12 +46,12 @@ export function ImportedGamesWidget({
           <p className="text-xs text-muted-foreground">
             Connect services to import games
           </p>
-          <Link href="/user/settings?tab=integrations">
-            <Button variant="outline" size="sm" className="mt-3 w-full">
+          <Button asChild variant="outline" size="sm" className="mt-3 w-full">
+            <Link href="/user/settings?tab=integrations">
               <ExternalLink className="mr-2 size-3" />
               Connect Services
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     );

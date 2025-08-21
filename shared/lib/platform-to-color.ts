@@ -217,54 +217,54 @@ export function platformToBorderColor(
   switch (platformKey) {
     case "playstation":
       return variant === "dark"
-        ? "border-playstation-dark"
+        ? "border-blue-700"
         : variant === "light"
-          ? "border-playstation-light"
-          : "border-playstation";
+          ? "border-blue-200"
+          : "border-blue-500";
     case "xbox":
       return variant === "dark"
-        ? "border-xbox-dark"
+        ? "border-green-700"
         : variant === "light"
-          ? "border-xbox-light"
-          : "border-xbox";
+          ? "border-green-200"
+          : "border-green-500";
     case "nintendo":
       return variant === "dark"
-        ? "border-nintendo-dark"
+        ? "border-red-700"
         : variant === "light"
-          ? "border-nintendo-light"
-          : "border-nintendo";
+          ? "border-red-200"
+          : "border-red-500";
     case "steam":
       return variant === "dark"
-        ? "border-steam-dark"
+        ? "border-slate-700"
         : variant === "light"
-          ? "border-steam-light"
-          : "border-steam";
+          ? "border-slate-200"
+          : "border-slate-500";
     case "pc":
       return variant === "dark"
-        ? "border-pc-dark"
+        ? "border-gray-700"
         : variant === "light"
-          ? "border-pc-light"
-          : "border-pc";
+          ? "border-gray-200"
+          : "border-gray-500";
     case "mobile":
       return variant === "dark"
-        ? "border-mobile-dark"
+        ? "border-purple-700"
         : variant === "light"
-          ? "border-mobile-light"
-          : "border-mobile";
+          ? "border-purple-200"
+          : "border-purple-500";
     case "epic":
       return variant === "dark"
-        ? "border-epic-dark"
+        ? "border-orange-700"
         : variant === "light"
-          ? "border-epic-light"
-          : "border-epic";
+          ? "border-orange-200"
+          : "border-orange-500";
     case "gog":
       return variant === "dark"
-        ? "border-gog-dark"
+        ? "border-indigo-700"
         : variant === "light"
-          ? "border-gog-light"
-          : "border-gog";
+          ? "border-indigo-200"
+          : "border-indigo-500";
     default:
-      return "border-gaming-primary";
+      return "border-neutral-300";
   }
 }
 
@@ -282,23 +282,23 @@ export function platformToGradientBadge(platform: string): string {
 
   switch (platformKey) {
     case "playstation":
-      return "bg-gradient-to-r from-playstation-dark to-playstation-light text-white";
+      return "bg-gradient-to-r from-blue-600 to-blue-400 text-white";
     case "xbox":
-      return "bg-gradient-to-r from-xbox-dark to-xbox-light text-white";
+      return "bg-gradient-to-r from-green-600 to-green-400 text-white";
     case "nintendo":
-      return "bg-gradient-to-r from-nintendo-dark to-nintendo-light text-white";
+      return "bg-gradient-to-r from-red-600 to-red-400 text-white";
     case "steam":
-      return "bg-gradient-to-r from-steam-dark to-steam-light text-white";
+      return "bg-gradient-to-r from-gray-700 to-gray-500 text-white";
     case "pc":
-      return "bg-gradient-to-r from-pc-dark to-pc-light text-white";
+      return "bg-gradient-to-r from-slate-700 to-slate-500 text-white";
     case "mobile":
-      return "bg-gradient-to-r from-mobile-dark to-mobile-light text-white";
+      return "bg-gradient-to-r from-purple-600 to-purple-400 text-white";
     case "epic":
-      return "bg-gradient-to-r from-epic-dark to-epic-light text-white";
+      return "bg-gradient-to-r from-indigo-600 to-indigo-400 text-white";
     case "gog":
-      return "bg-gradient-to-r from-gog-dark to-gog-light text-white";
+      return "bg-gradient-to-r from-rose-600 to-rose-400 text-white";
     default:
-      return "bg-gaming-gradient text-white";
+      return "bg-gradient-to-r from-gray-700 to-gray-500 text-white";
   }
 }
 

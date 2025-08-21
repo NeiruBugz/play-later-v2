@@ -25,7 +25,7 @@ export async function ReleasesList() {
           <GameCard
             game={
               {
-                id: String(release.id),
+                id: release.gameId,
                 title: release.name,
                 coverImage: release.cover?.image_id ?? null,
                 igdbId: release.id,
