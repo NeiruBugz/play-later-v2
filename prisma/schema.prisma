@@ -139,6 +139,7 @@ model ImportedGame {
   userId           String
   User             User       @relation(fields: [userId], references: [id])
 
+  @@unique([userId, storefrontGameId])
   @@index([userId, deletedAt])
   @@index([storefrontGameId])
 }
