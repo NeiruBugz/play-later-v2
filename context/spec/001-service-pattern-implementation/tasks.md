@@ -9,12 +9,12 @@
 
 ## **Slice 2: Complete GameManagementService Implementation**
 
-- [ ] Create `shared/services/game-management/actions/` directory structure
-- [ ] Move existing `add-to-collection.ts` to new actions directory
-- [ ] Create `shared/services/game-management/service.ts` with business logic extending BaseService
-- [ ] Add `types.ts` file for GameManagementService-specific types
-- [ ] Create comprehensive unit tests for GameManagementService
-- [ ] Update imports in features to reference new service location
+- [x] Create `shared/services/game-management/actions/` directory structure
+- [x] Move existing `add-to-collection.ts` to new actions directory
+- [x] Create `shared/services/game-management/service.ts` with business logic extending BaseService
+- [x] Add `types.ts` file for GameManagementService-specific types
+- [x] Create comprehensive unit tests for GameManagementService
+- [x] Update imports in features to reference new service location
 
 ## **Slice 3: Implement UserService with Core User Operations**
 
