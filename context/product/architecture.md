@@ -4,105 +4,46 @@
 
 ## 1. Application & Technology Stack
 
-- **Frontend Framework:** Next.js 15 with App Router
-- **UI Library:** React 19 with TypeScript
-- **UI Components:** shadcn/ui built on Radix UI primitives
-- **Styling:** Tailwind CSS with tailwindcss-animate
-- **State Management:** React Server Components + TanStack Query for client state
-- **Form Handling:** React Hook Form with Zod validation
-- **Package Manager:** Bun (development and runtime)
+- **Package Manager:** Bun (high-performance package management and script execution)
+- **Full-Stack Framework:** Next.js 15 with App Router (server-side rendering, server actions, optimized performance)
+- **Frontend Framework:** React 19 with TypeScript (modern React features with type safety)
+- **Styling & UI:** Tailwind CSS + shadcn/ui components (consistent design system)
+- **Server-Side Logic:** Hybrid approach - Server Actions for mutations, Route Handlers for read operations (leveraging Next.js caching)
+- **Form Management:** React Hook Form with Zod validation (type-safe form handling)
+- **State Management:** TanStack Query for client-side data fetching and caching
 
 ---
 
-## 2. Backend & Server Architecture
+## 2. Data & Persistence
 
-- **Backend Framework:** Next.js App Router with Server Actions
-- **API Architecture:** Type-safe server actions using next-safe-action
-- **Data Access Pattern:** Repository Pattern with Prisma ORM
-- **Runtime Validation:** Zod schemas for type-safe data validation
-- **Session Management:** NextAuth.js v5 with JWT strategy
-- **File Structure:** Feature-based architecture with shared utilities
+- **Primary Database:** PostgreSQL with Prisma ORM (relational data for users, games, backlog items, reviews, Steam integrations)
+- **Database Migrations:** Prisma migrations (version-controlled schema changes)
+- **Caching Strategy:** Next.js built-in Route Handler caching (no additional caching layer initially)
 
 ---
 
-## 3. Data & Persistence
+## 3. Infrastructure & Deployment
 
-- **Primary Database:** PostgreSQL (Neon Database - managed service)
-- **ORM:** Prisma Client with type-safe database access
-- **Local Development:** Docker Compose with PostgreSQL 14.5-alpine
-- **Data Modeling:** Code-first approach with Prisma schema
-- **Migrations:** Prisma Migrate for database schema evolution
-- **Connection Pooling:** Built-in Neon connection pooling
+- **Current Hosting:** Vercel (Next.js optimized deployment) + Neon Database (PostgreSQL)
+- **Planned Migration:** AWS ECS Fargate (containerized Next.js app) + AWS RDS PostgreSQL (managed database)
+- **Environment Management:** Separate development/production environments with environment variables
+- **Deployment:** Automated CI/CD through Vercel (current) / AWS deployment pipeline (planned)
 
 ---
 
-## 4. Infrastructure & Deployment
+## 4. External Services & APIs
 
-- **Cloud Provider:** Vercel (serverless deployment)
-- **Hosting Environment:** Vercel Edge Runtime + Node.js functions
-- **Database Hosting:** Neon Database (PostgreSQL as a Service)
-- **Build System:** Next.js with Turbopack (development)
-- **Environment Management:** Vercel environment variables
-- **Domain & SSL:** Managed by Vercel platform
-
----
-
-## 5. External Services & APIs
-
-- **Primary Authentication:** Google OAuth 2.0 (via NextAuth.js)
-- **Steam Integration:** Steam OpenID for account linking + Steam Web API
-- **Game Metadata:** IGDB API (Internet Game Database)
-- **Image Sources:** Direct links from IGDB CDN and Steam CDN
-- **Email Provider:** None (OAuth-only authentication)
+- **Primary Authentication:** NextAuth.js v5 with Google OAuth (user sign-up and login)
+- **Steam Integration:** Steam OpenID (secondary account linking for Steam library import)
+- **Game Metadata:** IGDB API (game information, covers, similar games discovery)
+- **Steam Data:** Steam Web API (library imports, achievement tracking with rarity analysis)
+- **Future Platform APIs:** Xbox Live API, PlayStation Network API (planned for Phase 3 multi-platform integration)
 
 ---
 
-## 6. Security & Compliance
+## 5. Observability & Monitoring
 
-- **Authentication Strategy:** OAuth 2.0 with Google + Steam OpenID linking
-- **Session Security:** JWT tokens with 7-day expiration, daily rotation
-- **API Security:** Type-safe server actions with Zod validation
-- **HTTP Security:** Security headers (X-Frame-Options, CSP, Referrer Policy)
-- **Database Security:** Connection strings via environment variables
-- **CORS Policy:** Next.js default CORS with specific image domain allowlist
-
----
-
-## 7. Development & Quality Assurance
-
-- **Testing Framework:** Vitest with separate unit/integration configurations
-- **Code Quality:** ESLint with TypeScript, Prettier for formatting
-- **Type Safety:** End-to-end TypeScript with strict configuration
-- **Git Workflow:** Conventional Commits with commitlint
-- **Database Testing:** Separate test database with Docker setup
-- **Coverage:** Vitest coverage reports with configurable thresholds
-
----
-
-## 8. Observability & Monitoring
-
-- **Logging:** Vercel Function Logs (built-in platform logging)
-- **Error Tracking:** Console-based error logging (no external service)
-- **Performance Monitoring:** Vercel Analytics (basic performance metrics)
-- **Uptime Monitoring:** Vercel platform monitoring
-- **Database Monitoring:** Neon Database built-in monitoring dashboard
-
----
-
-## 9. Data Flow & Integration Patterns
-
-- **User Authentication Flow:** Google OAuth → NextAuth.js → Prisma User Creation
-- **Steam Integration Flow:** Steam OpenID → Link to existing user → Import library via Steam Web API
-- **Game Data Flow:** IGDB API → Local caching → User collection management
-- **Review System Flow:** User input → Zod validation → Prisma storage → Community display
-- **Wishlist Sharing:** Generate unique URLs → Public read-only access → Social sharing
-
----
-
-## 10. Scalability & Performance Considerations
-
-- **Database Indexing:** Strategic indexes on user queries (userId, status, platform, gameId)
-- **API Rate Limiting:** Dependent on external service limits (IGDB, Steam)
-- **Image Optimization:** Next.js Image component with remote pattern allowlist
-- **Caching Strategy:** Browser caching for static assets, no server-side caching implemented
-- **Database Connections:** Neon's built-in connection pooling for serverless functions
+- **Development Monitoring:** Next.js built-in development tools and console logging
+- **Production Logging:** CloudWatch integration (when migrated to AWS ECS/RDS)
+- **Error Handling:** Custom error boundaries and server action error responses
+- **Performance Monitoring:** Next.js built-in performance metrics and Core Web Vitals tracking

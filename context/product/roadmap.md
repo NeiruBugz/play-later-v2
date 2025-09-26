@@ -1,175 +1,82 @@
 # Product Roadmap: PlayLater
 
-_This roadmap outlines our strategic direction based on user needs and gaming community feedback. It focuses on the "what" and "why," not the technical "how."_
+_This roadmap outlines our strategic direction based on customer needs and business goals. It focuses on the "what" and "why," not the technical "how."_
 
 ---
 
-## ✅ Completed (Foundation Phase - 2024-Q3 2025)
+### Phase 1 ✅ **COMPLETED - Core Foundation**
 
-_The core foundation that makes PlayLater functional and valuable._
+_The essential features that form the core foundation of the product._
 
-- [x] **User Account & Authentication System**
+- [x] **User Account Essentials**
 
-  - [x] **Steam OAuth Integration:** Seamless sign-in using Steam OpenID, providing secure entry point and automatic user profile creation.
-  - [x] **User Profile Management:** Enable users to view and manage their profile information, Steam connection status, and account settings.
+  - [x] **Seamless Sign-Up & Login:** Users can create accounts and sign in securely (`features/sign-in`)
+  - [x] **Basic Profile Management:** Users can view and update profile information (`features/manage-user-info`)
 
-- [x] **Core Game Collection Management**
+- [x] **Core Game Library Management**
 
-  - [x] **Steam Library Import:** Automatic import of user's entire Steam library with game metadata, playtime, and achievement data.
-  - [x] **Manual Game Addition:** Allow users to add games from any platform manually with custom metadata.
-  - [x] **Status Tracking System:** Enable users to categorize games as Backlog, Playing, Completed, or Wishlist with timestamps.
-  - [x] **Platform & Acquisition Tracking:** Track where games were acquired (Digital, Physical, Subscription) and on which platform.
+  - [x] **Manual Game Adding:** Users can search and add games to their backlog using IGDB integration (`features/add-game`)
+  - [x] **Game Status Tracking:** Users can organize games by status (Want to Play, Currently Playing, Completed, etc.) (`features/manage-backlog-item`)
+  - [x] **Collection Viewing:** Users can browse, filter, and manage their game collections (`features/view-collection`)
+  - [x] **Game Information Display:** Rich game details with IGDB metadata (`features/view-game-details`)
 
-- [x] **Game Database & Metadata**
+- [x] **Steam Integration V1**
 
-  - [x] **IGDB Integration:** Rich game information including descriptions, release dates, screenshots, and genre data.
-  - [x] **Game Details Pages:** Comprehensive game pages with metadata, user reviews, and collection management options.
+  - [x] **Steam Authentication:** Secure OAuth flow using Steam OpenID (`features/steam-integration`)
+  - [x] **Steam Library Import:** Users can import their Steam game libraries (`features/view-imported-games`)
+  - [x] **Achievement Tracking:** Display Steam achievements with rarity analysis (`features/steam-integration`)
 
-- [x] **Review & Rating System**
-
-  - [x] **User Reviews:** Community-driven review system with 10-point rating scale and detailed written reviews.
-  - [x] **Review Discovery:** Browse and read reviews from other users to make informed gaming decisions.
-
-- [x] **Analytics Dashboard**
-
-  - [x] **Collection Statistics:** Visual breakdown of collection size, completion rates, and platform distribution.
-  - [x] **Recent Activity Tracking:** Timeline of recently played, completed, and added games.
-  - [x] **Gaming Progress Insights:** Completion statistics and backlog trends over time.
-
-- [x] **Wishlist Management**
-  - [x] **Personal Wishlist:** Organize future game purchases with priority and notes.
-  - [x] **Public Wishlist Sharing:** Generate shareable URLs for friends and family to view wishlists for gift ideas.
+- [x] **Review System**
+  - [x] **User Reviews:** Users can write and rate completed games (`features/add-review`)
+  - [x] **Review Management:** Users can manage their written reviews
 
 ---
 
-### Q4 2025: API Architecture Foundation
+### Phase 2 🚧 **IN PROGRESS - User Experience Enhancement**
 
-_Establishing proper API architecture for mobile support and external integrations._
+_Building on the solid foundation to improve user engagement and discovery._
 
-- [ ] **API Architecture Decision & Implementation**
+- [ ] **Technical Architecture Enhancement** ⭐ _HIGH PRIORITY_
 
-  - [ ] **Architecture Assessment:** Evaluate hybrid approach (Route Handlers + Server Actions) vs. full Route Handlers migration.
-  - [ ] **REST API Design:** Design comprehensive REST API endpoints for all core functionality (authentication, collection management, reviews, Steam integration).
-  - [ ] **API Implementation:** Implement chosen approach with proper error handling, validation, and documentation.
-  - [ ] **Authentication Strategy:** Implement API authentication (JWT tokens, API keys) for external consumers while maintaining web session auth.
+  - [ ] **Service Pattern Implementation:** Introduce service layer architecture for better code organization and testability
+  - [ ] **Hybrid Architecture Migration:** Implement hybrid approach leveraging both Server Actions and Route Handlers for optimal caching and performance
 
-- [ ] **API Documentation & Testing**
-  - [ ] **OpenAPI Specification:** Create comprehensive API documentation with OpenAPI/Swagger specs.
-  - [ ] **API Testing Suite:** Implement comprehensive API tests covering all endpoints and error scenarios.
-  - [ ] **Rate Limiting & Security:** Implement proper rate limiting, CORS policies, and security measures for API endpoints.
+- [ ] **Enhanced Collection Features**
 
----
+  - [ ] **Custom Lists and Collections:** Allow users to create curated game lists for different purposes (favorites, recommendations, genre-specific, etc.)
+  - [ ] **Wishlist Management:** Enhanced wishlist functionality with priority ordering (`features/view-wishlist`, `features/share-wishlist` exist)
+  - [ ] **Gaming Goals:** Personal goal setting and progress tracking (`features/gaming-goals` exists)
 
-### Q1 2026: Social Features Foundation
+- [ ] **Improved User Experience**
 
-_Building community engagement and user-to-user interactions (dependent on API architecture completion)._
+  - [ ] **Dashboard Enhancement:** Comprehensive user dashboard with statistics and recommendations (`features/dashboard` exists)
+  - [ ] **Theme Customization:** Dark/light theme toggle and personalization (`features/theme-toggle` exists)
+  - [ ] **Game Discovery Enhancement:** Improved similar game suggestions and filtering options
 
-- [ ] **User Following System**
-
-  - [ ] **Follow/Unfollow Users:** Allow users to follow other gamers to see their activity and reviews.
-  - [ ] **Follower/Following Lists:** Display user connections and discover new gamers through mutual connections.
-
-- [ ] **Enhanced Review Interactions**
-
-  - [ ] **Review Likes & Reactions:** Enable users to like, agree, or react to helpful reviews.
-  - [ ] **Review Comments:** Allow threaded discussions on game reviews for deeper community engagement.
-
-- [ ] **Activity Feed**
-  - [ ] **Personal Activity Stream:** Show recent activities from followed users (completions, reviews, new additions).
-  - [ ] **Community Highlights:** Surface popular reviews and trending games within the user's network.
+- [ ] **Platform Integration Expansion**
+  - [ ] **Multi-Platform Support:** Begin integration with additional gaming platforms beyond Steam
+  - [ ] **Cross-Platform Game Matching:** Help users identify games they own across different platforms
 
 ---
 
-### Q1 2026: Platform Integration Research & Social Expansion
+### Phase 3 🔮 **PLANNED - Social Features (Goodreads/Letterboxd Model)**
 
-_Expanding social features while researching additional platform integrations._
+_Features planned for future consideration. Their priority and scope may be refined based on user feedback from earlier phases._
 
-- [ ] **Advanced Social Features**
+- [ ] **Social Features Foundation**
 
-  - [ ] **User Profiles Enhancement:** Public profile pages showing collection highlights, favorite games, and recent activity.
-  - [ ] **Game Recommendation Engine:** AI-powered suggestions based on followed users' preferences and completion patterns.
-  - [ ] **Collection Comparison:** Compare libraries and completion progress with friends.
+  - [ ] **User Following System:** Allow users to follow other gamers and see their activity and reviews
+  - [ ] **Review Interactions:** Enable likes, comments, and sharing of user reviews to build community engagement
+  - [ ] **Social Feeds:** Create activity feeds showing what games friends are playing and reviewing
+  - [ ] **Community Recommendations:** User-generated recommendation lists and discovery
 
-- [ ] **Platform Integration Research**
+- [ ] **Multi-Platform Integration**
 
-  - [ ] **PlayStation API Investigation:** Research Sony's developer program and API access requirements for library imports.
-  - [ ] **Xbox/Microsoft Store Research:** Investigate Xbox Game Pass and Microsoft Store integration possibilities.
-  - [ ] **Epic Games Store Analysis:** Explore Epic's developer resources for potential library integration.
-
-- [ ] **Community Features V1**
-  - [ ] **Game Discussion Threads:** Enable discussions around specific games with spoiler management.
-  - [ ] **Collection Showcases:** Allow users to create themed collections (e.g., "Best Indies of 2025") to share with community.
-
----
-
-### Q2 2026: Platform Integration Implementation
-
-_Based on Q1 research, implement the most feasible platform integrations._
-
-- [ ] **First Additional Platform Integration**
-
-  - [ ] **PlayStation Integration (if feasible):** Automatic library import from PlayStation Network with trophy tracking.
-  - [ ] **Alternative Platform (if PlayStation unavailable):** Epic Games Store or GOG integration based on research findings.
-
-- [ ] **Enhanced Multi-Platform Management**
-
-  - [ ] **Cross-Platform Game Linking:** Connect the same game across different platforms to avoid duplicates.
-  - [ ] **Platform-Specific Features:** Achievement/trophy tracking per platform with unified progress view.
-
-- [ ] **Import & Migration Tools**
-  - [ ] **Bulk Import Improvements:** Enhanced tools for importing large libraries with conflict resolution.
-  - [ ] **Data Export:** Allow users to export their collection data for backup or migration purposes.
-
----
-
-### Q3 2026: Mobile Strategy & Advanced Features
-
-_Expanding accessibility and adding power-user features._
-
-- [ ] **Mobile-First Improvements**
-
-  - [ ] **Mobile Web Optimization:** Enhanced responsive design for mobile browsers with touch-optimized interactions.
-  - [ ] **Progressive Web App (PWA):** Enable installation and offline functionality for mobile users.
-
-- [ ] **REST API Development**
-
-  - [ ] **Public API V1:** Create endpoints for third-party developers and potential mobile app development.
-  - [ ] **Developer Documentation:** Comprehensive API docs for community developers.
-
-- [ ] **Advanced Analytics**
-  - [ ] **Gaming Insights Dashboard:** Deeper analytics on gaming habits, completion patterns, and time investment.
-  - [ ] **Personalized Reports:** Monthly/yearly gaming summaries with achievements and milestones.
-
----
-
-### Q4 2026 & Beyond: Ecosystem Growth
-
-_Features planned for future consideration. Priority and scope may be refined based on user feedback and platform API availability._
-
-- [ ] **Native Mobile Application**
-
-  - [ ] **iOS/Android Apps:** Native mobile applications with full feature parity and mobile-specific optimizations.
-  - [ ] **Offline Mode:** Basic collection browsing and status updates without internet connection.
-
-- [ ] **Additional Platform Integrations**
-
-  - [ ] **Nintendo eShop Integration:** Connect Nintendo Account for Switch game tracking (pending API availability).
-  - [ ] **Retro Gaming Support:** Integration with emulation platforms and retro game databases.
-  - [ ] **PC Launcher Support:** GOG Galaxy, Epic Games, Ubisoft Connect, EA App integrations.
-
-- [ ] **Community & Discovery**
-
-  - [ ] **Gaming Groups:** Create interest-based groups around genres, franchises, or gaming styles.
-  - [ ] **Curator System:** Allow experienced users to curate game recommendations and collections.
-  - [ ] **Events & Challenges:** Community gaming challenges and events (e.g., "Indie Game Month").
-
-- [ ] **Infrastructure & Scalability**
-
-  - [ ] **AWS Migration:** Migrate from Vercel to AWS infrastructure for better control and scalability (timeline TBD).
-  - [ ] **Microservices Architecture:** Break down monolithic structure into specialized services for better maintainability.
-  - [ ] **Advanced Caching:** Implement Redis caching layer for improved performance.
+  - [ ] **Xbox Integration:** Connect Xbox Live accounts to import game libraries and achievement data
+  - [ ] **PlayStation Integration:** Connect PlayStation Network accounts for library and trophy sync
+  - [ ] **PC Storefronts:** Add support for Epic Games Store, GOG, and other major PC gaming platforms
 
 - [ ] **Advanced Features**
-  - [ ] **Gaming Time Tracking:** Automatic playtime tracking across platforms with productivity insights.
-  - [ ] **Price Tracking & Alerts:** Monitor game prices across platforms and alert users to sales.
-  - [ ] **Monetization Exploration:** Investigate potential premium features while maintaining core functionality free.
+  - [ ] **Enhanced Achievement Tracking:** Cross-platform achievement/trophy progress sync and comparison
+  - [ ] **Mobile Application:** Create a companion mobile app for on-the-go backlog management
+  - [ ] **Advanced Analytics:** Personal gaming statistics, insights, and progress tracking

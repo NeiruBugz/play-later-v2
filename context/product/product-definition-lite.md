@@ -1,19 +1,22 @@
-# PlayLater - Product Definition (Lite)
+# PlayLater - Product Summary
 
-## Vision
+## Project Vision
 
-Eliminate gaming choice paralysis by providing a unified platform where gamers can organize, track, and make informed decisions about their gaming libraries across all platforms.
+Help gamers reduce analysis paralysis and actually play and complete games from their ever-growing libraries, rather than just buying them and leaving them unplayed.
 
 ## Target Audience
 
-Multi-platform gamers overwhelmed by accumulated games across PC, PlayStation, Xbox, Nintendo, and emulation platforms - from casual Steam sale collectors to subscription service users struggling with decision paralysis.
+Every gamer who struggles with backlog management - from casual to hardcore players who have accumulated large game libraries through sales, bundles, and subscription services.
 
 ## Core Features
 
-- **Steam Integration**: Automatic library import with OAuth and achievement tracking
-- **Multi-Platform Collection Management**: Track games across platforms with status tracking (Backlog/Playing/Completed/Wishlist)
-- **IGDB Game Database**: Rich metadata, screenshots, and detailed game information
-- **Review & Rating System**: Community reviews with 10-point rating scale
-- **Wishlist Sharing**: Public wishlists for gift recommendations
-- **Analytics Dashboard**: Collection statistics and completion insights
-- **Platform Tracking**: Track acquisition types (Digital/Physical/Subscription) and platforms
+- **Manual Game Library Management** - Add/remove games with status tracking
+- **User Reviews and Ratings** - Share detailed game reviews with the community
+- **Custom Lists and Collections** - Create curated game lists for different purposes
+- **Steam Integration** - Optional library import for convenience
+- **Game Discovery** - Browse similar games via IGDB integration
+- **Game Status Tracking** - Organize by Want to Play, Currently Playing, Completed, etc.
+
+## Key User Persona
+
+**"Alex the Overwhelmed Gamer"** - Works full-time with limited gaming time, owns 200+ games from sales/bundles, wants to make meaningful progress but gets overwhelmed choosing what to play next.
