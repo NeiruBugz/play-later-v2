@@ -1,4 +1,3 @@
-import { getServerUserId } from "@/auth";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { FilterParamsSchema } from "@/features/view-collection/lib/validation";
@@ -10,16 +9,6 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
   try {
-    // Get authenticated user ID
-    const userId = await getServerUserId();
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    // Validate request parameters
     const parsedInput = FilterParamsSchema.safeParse({
       platform: searchParams.get("platform") ?? "",
       status: searchParams.get("status") ?? "",
@@ -37,9 +26,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Call service layer
     const result = await collectionService.getCollection({
-      userId,
       platform: parsedInput.data.platform,
       status: parsedInput.data.status,
       search: parsedInput.data.search,

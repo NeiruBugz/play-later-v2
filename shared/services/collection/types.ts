@@ -6,7 +6,6 @@ import type { BaseService, ServiceResponse } from "../types";
 
 // Collection Service specific types
 export interface CollectionParams extends Omit<FilterParams, "page"> {
-  userId: string;
   page?: number;
 }
 

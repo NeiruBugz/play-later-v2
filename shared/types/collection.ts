@@ -1,7 +1,6 @@
 import { BacklogItemStatus } from "@prisma/client";
 import { z } from "zod";
 
-// Collection filter parameters schema and types
 export const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),
   status: z.union([z.nativeEnum(BacklogItemStatus), z.string()]).optional(),
