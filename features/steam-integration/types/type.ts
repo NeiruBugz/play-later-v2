@@ -55,6 +55,7 @@ export type SteamGame = {
   playtime_forever: number;
   img_icon_url?: string;
   img_logo_url?: string;
+  rtime_last_played?: number;
 };
 
 export type EnrichedAchievement = {
@@ -73,6 +74,7 @@ export const SteamGameSchema = z.object({
   playtime: z.number(),
   img_icon_url: z.string().optional(),
   img_logo_url: z.string().optional(),
+  last_played: z.number().optional(),
 });
 
 export const SaveManySteamGamesInput = z.object({

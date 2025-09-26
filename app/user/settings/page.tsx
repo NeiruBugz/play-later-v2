@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 
 import { IntegrationsList } from "@/features/manage-integrations";
-import { EditUserForm, getUserInfo } from "@/features/manage-user-info";
+import { EditUserForm } from "@/features/manage-user-info";
 import {
   AdaptiveTabs,
   AdaptiveTabsContent,
@@ -10,6 +10,7 @@ import {
   AdaptiveTabsTrigger,
 } from "@/shared/components/adaptive-tabs";
 import { Header } from "@/shared/components/header";
+import { UserService } from "@/shared/services/user";
 
 const TabsSchema = z.object({
   tab: z.enum(["settings", "integrations"]).optional(),
@@ -19,13 +20,16 @@ export const dynamic = "force-dynamic";
 
 export default async function UserPage(props: PageProps<"/user/settings">) {
   const searchParams = await props.searchParams;
-  const { data: user, serverError } = await getUserInfo();
 
-  if (serverError != null) {
-    throw new Error(serverError);
+  // Use UserService instead of direct server action
+  const userService = new UserService();
+  const userResult = await userService.getUserInfo();
+
+  if (!userResult.success) {
+    throw new Error(userResult.error || "Failed to fetch user information");
   }
 
-  if (!user) {
+  if (!userResult.data) {
     return notFound();
   }
 
@@ -51,7 +55,7 @@ export default async function UserPage(props: PageProps<"/user/settings">) {
               </AdaptiveTabsTrigger>
             </AdaptiveTabsList>
             <AdaptiveTabsContent value="settings" className="space-y-4">
-              <EditUserForm userInfo={user} />
+              <EditUserForm userInfo={userResult.data} />
             </AdaptiveTabsContent>
             <AdaptiveTabsContent value="integrations">
               <IntegrationsList />

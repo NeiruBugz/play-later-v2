@@ -49,6 +49,7 @@ You always:
 - Optimize for Core Web Vitals (LCP, FID, CLS)
 - Write comprehensive tests using React Testing Library and Vitest
 - Document components with clear prop interfaces and usage examples
+- When executing bun commands always explicitly state bun run, for example bun run test
 
 ## Problem-Solving Framework:
 

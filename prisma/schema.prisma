@@ -131,6 +131,7 @@ model ImportedGame {
   storefront       Storefront
   storefrontGameId String?
   playtime         Int?       @default(0)
+  last_played      Int?       @default(0)
   img_icon_url     String?
   img_logo_url     String?
   createdAt        DateTime   @default(now())

@@ -14,6 +14,7 @@ type SteamGame = {
   img_icon_url: string;
   img_logo_url: string;
   storefrontGameId: string;
+  last_played?: number;
   userId: string;
 };
 

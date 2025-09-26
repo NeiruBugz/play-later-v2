@@ -21,7 +21,7 @@ export const getImportedGames = authorizedActionClient
       search: z.string().optional(),
       storefront: z.nativeEnum(Storefront).optional(),
       sortBy: z
-        .enum(["name", "playtime", "storefront", "createdAt"])
+        .enum(["name", "playtime", "storefront", "createdAt", "last_played"])
         .default("name"),
       sortOrder: z.enum(["asc", "desc"]).default("asc"),
     })
@@ -55,6 +55,8 @@ export const getImportedGames = authorizedActionClient
             return { storefront: sortOrder };
           case "createdAt":
             return { createdAt: sortOrder };
+          case "last_played":
+            return { last_played: sortOrder };
           default:
             return { name: sortOrder };
         }

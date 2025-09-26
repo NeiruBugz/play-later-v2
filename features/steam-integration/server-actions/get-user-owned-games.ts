@@ -34,6 +34,7 @@ export const getUserOwnedGames = authorizedActionClient
       playtime: game.playtime_forever,
       img_icon_url: game.img_icon_url,
       img_logo_url: game.img_logo_url,
+      last_played: game.rtime_last_played,
     }));
 
     return mappedToDomain;

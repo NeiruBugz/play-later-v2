@@ -1,18 +1,19 @@
 import { notFound } from "next/navigation";
 
-import { getUserInfo } from "@/features/manage-user-info";
 import { CollectionNav } from "@/shared/components/collection-nav";
 import { Header } from "@/shared/components/header";
 import { Body, ResponsiveHeading } from "@/shared/components/typography";
+import { UserService } from "@/shared/services/user";
 
 export default async function CollectionLayout(
   props: LayoutProps<"/collection">
 ) {
   const { children } = props;
 
-  const userResult = await getUserInfo();
+  const userService = new UserService();
+  const userResult = await userService.getUserInfo();
 
-  if (userResult.data == null) {
+  if (!userResult.success || userResult.data == null) {
     notFound();
   }
 

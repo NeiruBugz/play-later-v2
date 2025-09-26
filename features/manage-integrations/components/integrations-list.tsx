@@ -1,25 +1,27 @@
 import { revalidatePath } from "next/cache";
 
+import { UserService } from "@/shared/services/user";
+
 import { servicesForIntegration } from "../lib/services-for-integration";
-import { getSteamUserData } from "../server-actions/get-steam-user-data";
-import { removeSteamDataFromUser } from "../server-actions/remove-steam-data-from-user";
 import { ServiceIntegration } from "./service-integration";
 
 export async function IntegrationsList() {
-  const user = await getSteamUserData();
+  const userService = new UserService();
+  const userResult = await userService.getSteamUserData();
 
   const handleSteamDisconnect = async () => {
     "use server";
 
-    await removeSteamDataFromUser();
+    const userService = new UserService();
+    await userService.disconnectSteam();
     revalidatePath("/user/settings");
   };
 
-  if (!user) {
+  if (!userResult.success || !userResult.data) {
     return null;
   }
 
-  const { data: userData } = user;
+  const userData = userResult.data;
 
   return (
     <div className="flex flex-col gap-4">

@@ -6,7 +6,7 @@ import { zfd } from "zod-form-data";
 import { updateUserData } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
-export const editUserAction = authorizedActionClient
+export const updateUserProfile = authorizedActionClient
   .metadata({
     actionName: "editUser",
     requiresAuth: true,

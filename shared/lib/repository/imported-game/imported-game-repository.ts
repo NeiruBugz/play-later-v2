@@ -47,6 +47,7 @@ export async function getFilteredImportedGames({
       playtime: true,
       img_icon_url: true,
       img_logo_url: true,
+      last_played: true,
     },
   });
 }

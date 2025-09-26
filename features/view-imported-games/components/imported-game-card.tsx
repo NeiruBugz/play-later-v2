@@ -1,7 +1,7 @@
 "use client";
 
 import { type Storefront } from "@prisma/client";
-import { minutesToHours } from "date-fns";
+import { format, fromUnixTime, minutesToHours } from "date-fns";
 import { Check, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
@@ -24,6 +24,7 @@ type ImportedGame = {
   playtime: number | null;
   img_icon_url: string | null;
   img_logo_url: string | null;
+  last_played: number | null;
 };
 
 type ImportedGameCardProps = {
@@ -60,6 +61,14 @@ function getImageUrl(game: ImportedGame): string | null {
   }
 
   return game.img_logo_url ?? game.img_icon_url;
+}
+
+function convertLastPlayedToHumanDate(lastPlayed: number) {
+  if (!lastPlayed || lastPlayed === 0) {
+    return "-";
+  }
+  const date = fromUnixTime(lastPlayed);
+  return format(date, "dd.MM.yyyy");
 }
 
 function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
@@ -121,7 +130,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
           </div>
         )}
 
-        <div className="absolute left-2 top-2">
+        <div className="absolute left-2 top-2 flex items-center gap-4">
           <Badge
             variant="secondary"
             className={cn(
@@ -129,17 +138,16 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
               storefrontColors[game.storefront]
             )}
           >
+            {storefrontIcons[game.storefront]}&nbsp;
             {storefrontLabels[game.storefront]}
           </Badge>
-        </div>
 
-        {game.playtime && game.playtime > 0 && (
-          <div className="absolute right-2 top-2">
-            <Badge variant="secondary" className="text-xs">
+          {game.playtime && game.playtime > 0 && (
+            <Badge variant="secondary" className="text-xs font-medium">
               {minutesToHours(game.playtime)} h.
             </Badge>
-          </div>
-        )}
+          )}
+        </div>
 
         {imported && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -163,8 +171,7 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
       </CardHeader>
 
       <CardContent className="p-3 pt-0">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          {storefrontIcons[game.storefront]}
+        <div className="align-center flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
           <Button
             size="sm"
             onClick={handleAddToCollection}
@@ -188,6 +195,13 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
               "Add to collection"
             )}
           </Button>
+          {game.last_played ? (
+            <span>
+              Last played: {convertLastPlayedToHumanDate(game.last_played)}
+            </span>
+          ) : (
+            <span>Last played: not played yet</span>
+          )}
         </div>
       </CardContent>
     </Card>

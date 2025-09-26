@@ -3,8 +3,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { FilterParamsSchema } from "@/features/view-collection/lib/validation";
 import { CollectionService } from "@/shared/services";
 
-const collectionService = new CollectionService();
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
@@ -25,6 +23,7 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+    const collectionService = new CollectionService();
 
     const result = await collectionService.getCollection({
       platform: parsedInput.data.platform,

@@ -1,7 +1,7 @@
 // Game Management Service Exports
 
 // Service class for business logic and orchestration
-export { GameManagementService } from "./service";
+export { GameManagementService } from "./game-management-service";
 
 // Server actions for direct usage (backward compatibility)
 export { addGameToCollection } from "./actions/add-to-collection";

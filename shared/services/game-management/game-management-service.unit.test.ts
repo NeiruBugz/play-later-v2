@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addGameToCollection } from "./actions/add-to-collection";
 import { removeGameFromCollection } from "./actions/remove-from-collection";
-import { GameManagementService } from "./service";
+import { GameManagementService } from "./game-management-service";
 import type {
   AddToCollectionParams,
   RemoveFromCollectionParams,
