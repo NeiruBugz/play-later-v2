@@ -41,6 +41,7 @@ const sortOptions = [
   { value: "playtime", label: "Playtime" },
   { value: "storefront", label: "Platform" },
   { value: "createdAt", label: "Date Added" },
+  { value: "last_played", label: "Last time played" },
 ] as const;
 
 const sortOrderOptions = [

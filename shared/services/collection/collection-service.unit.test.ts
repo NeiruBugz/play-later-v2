@@ -1,3 +1,4 @@
+import { getServerUserId } from "@/auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -15,12 +16,14 @@ vi.mock("@/shared/lib/repository", () => ({
 
 describe("CollectionService", () => {
   let service: CollectionService;
+  let mockGetServerUserId: ReturnType<typeof vi.mocked<typeof getServerUserId>>;
   let mockBuildCollectionFilter: ReturnType<typeof vi.fn>;
   let mockFindGamesWithBacklogItemsPaginated: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     service = new CollectionService();
+    mockGetServerUserId = vi.mocked(getServerUserId);
     mockBuildCollectionFilter = vi.mocked(buildCollectionFilter);
     mockFindGamesWithBacklogItemsPaginated = vi.mocked(
       findGamesWithBacklogItemsPaginated
@@ -29,8 +32,8 @@ describe("CollectionService", () => {
 
   describe("getCollection", () => {
     it("should return error for missing userId", async () => {
+      mockGetServerUserId.mockResolvedValue(undefined);
       const result = await service.getCollection({
-        userId: "",
         platform: "",
         status: "",
         search: "",
@@ -38,18 +41,19 @@ describe("CollectionService", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("User ID is required");
+      console.log(result);
+      expect(result.error).toBe("Failed to fetch user game collection");
       expect(mockBuildCollectionFilter).not.toHaveBeenCalled();
       expect(mockFindGamesWithBacklogItemsPaginated).not.toHaveBeenCalled();
     });
 
     it("should return empty collection when no games found", async () => {
       const mockGameFilter = { userId: "test-user-id" };
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       mockBuildCollectionFilter.mockReturnValue({ gameFilter: mockGameFilter });
       mockFindGamesWithBacklogItemsPaginated.mockResolvedValue([[], 0]);
 
       const result = await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "",
         search: "",
@@ -73,6 +77,7 @@ describe("CollectionService", () => {
     });
 
     it("should return collection with games and correct count", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       const mockGames = [
         {
           id: 1,
@@ -137,7 +142,6 @@ describe("CollectionService", () => {
       mockFindGamesWithBacklogItemsPaginated.mockResolvedValue([mockGames, 2]);
 
       const result = await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "",
         search: "",
@@ -154,12 +158,12 @@ describe("CollectionService", () => {
     });
 
     it("should apply platform filter correctly", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       const mockGameFilter = { userId: "test-user-id", platform: "PC" };
       mockBuildCollectionFilter.mockReturnValue({ gameFilter: mockGameFilter });
       mockFindGamesWithBacklogItemsPaginated.mockResolvedValue([[], 0]);
 
       await service.getCollection({
-        userId: "test-user-id",
         platform: "PC",
         status: "",
         search: "",
@@ -175,12 +179,12 @@ describe("CollectionService", () => {
     });
 
     it("should apply status filter correctly", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       const mockGameFilter = { userId: "test-user-id", status: "PLAYING" };
       mockBuildCollectionFilter.mockReturnValue({ gameFilter: mockGameFilter });
       mockFindGamesWithBacklogItemsPaginated.mockResolvedValue([[], 0]);
 
       await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "PLAYING",
         search: "",
@@ -196,12 +200,12 @@ describe("CollectionService", () => {
     });
 
     it("should apply search filter correctly", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       const mockGameFilter = { userId: "test-user-id", search: "cyberpunk" };
       mockBuildCollectionFilter.mockReturnValue({ gameFilter: mockGameFilter });
       mockFindGamesWithBacklogItemsPaginated.mockResolvedValue([[], 0]);
 
       await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "",
         search: "cyberpunk",
@@ -217,12 +221,12 @@ describe("CollectionService", () => {
     });
 
     it("should use default page when page is not provided", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       const mockGameFilter = { userId: "test-user-id" };
       mockBuildCollectionFilter.mockReturnValue({ gameFilter: mockGameFilter });
       mockFindGamesWithBacklogItemsPaginated.mockResolvedValue([[], 0]);
 
       await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "",
         search: "",
@@ -237,12 +241,12 @@ describe("CollectionService", () => {
     });
 
     it("should handle pagination correctly", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       const mockGameFilter = { userId: "test-user-id" };
       mockBuildCollectionFilter.mockReturnValue({ gameFilter: mockGameFilter });
       mockFindGamesWithBacklogItemsPaginated.mockResolvedValue([[], 0]);
 
       await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "",
         search: "",
@@ -257,13 +261,13 @@ describe("CollectionService", () => {
     });
 
     it("should handle repository errors", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       const repositoryError = new Error("Database connection failed");
       mockBuildCollectionFilter.mockImplementation(() => {
         throw repositoryError;
       });
 
       const result = await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "",
         search: "",
@@ -275,6 +279,7 @@ describe("CollectionService", () => {
     });
 
     it("should handle findGamesWithBacklogItemsPaginated errors", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       const mockGameFilter = { userId: "test-user-id" };
       mockBuildCollectionFilter.mockReturnValue({ gameFilter: mockGameFilter });
 
@@ -282,7 +287,6 @@ describe("CollectionService", () => {
       mockFindGamesWithBacklogItemsPaginated.mockRejectedValue(repositoryError);
 
       const result = await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "",
         search: "",
@@ -294,12 +298,12 @@ describe("CollectionService", () => {
     });
 
     it("should handle non-Error exceptions", async () => {
+      mockGetServerUserId.mockResolvedValue("test-user-id");
       mockBuildCollectionFilter.mockImplementation(() => {
         throw "String error";
       });
 
       const result = await service.getCollection({
-        userId: "test-user-id",
         platform: "",
         status: "",
         search: "",

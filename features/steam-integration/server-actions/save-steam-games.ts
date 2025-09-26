@@ -21,6 +21,7 @@ export const saveSteamGames = authorizedActionClient
       img_icon_url: game.img_icon_url ?? "",
       img_logo_url: game.img_logo_url ?? "",
       storefrontGameId: game.storefrontGameId,
+      last_played: game.last_played,
       userId,
     }));
 

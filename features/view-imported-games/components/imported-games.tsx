@@ -32,6 +32,7 @@ type ImportedGame = {
   playtime: number | null;
   img_icon_url: string | null;
   img_logo_url: string | null;
+  last_played: number | null;
 };
 
 type ImportedGamesProps = {

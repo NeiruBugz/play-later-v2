@@ -20,10 +20,6 @@ export async function getUserBySteamId({
     },
   });
 
-  if (!user) {
-    throw new Error("User not found");
-  }
-
   return user;
 }
 
@@ -70,9 +66,11 @@ export async function getUserSteamData({ userId }: { userId: string }) {
   return prisma.user.findUnique({
     where: { id: userId },
     select: {
+      id: true,
       steamId64: true,
       steamUsername: true,
       steamProfileURL: true,
+      steamAvatar: true,
       steamConnectedAt: true,
     },
   });
@@ -128,6 +126,14 @@ export async function disconnectSteam({ userId }: { userId: string }) {
       steamProfileURL: null,
       steamAvatar: null,
       steamConnectedAt: null,
+    },
+    select: {
+      id: true,
+      steamId64: true,
+      steamUsername: true,
+      steamProfileURL: true,
+      steamAvatar: true,
+      steamConnectedAt: true,
     },
   });
 }

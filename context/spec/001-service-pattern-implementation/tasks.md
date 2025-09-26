@@ -2,19 +2,19 @@
 
 ## **Slice 1: Enhance BaseService with Authentication Methods**
 
-- [ ] Add `getCurrentUserId()` and `getCurrentUserIdOptional()` methods to BaseService
-- [ ] Update BaseService imports to include authentication utilities
-- [ ] Add unit tests for new BaseService authentication methods
-- [ ] Verify existing CollectionService and IgdbService still work with enhanced BaseService
+- [x] Add `getCurrentUserId()` and `getCurrentUserIdOptional()` methods to BaseService
+- [x] Update BaseService imports to include authentication utilities
+- [x] Add unit tests for new BaseService authentication methods
+- [x] Verify existing CollectionService and IgdbService still work with enhanced BaseService
 
 ## **Slice 2: Complete GameManagementService Implementation**
 
-- [ ] Create `shared/services/game-management/actions/` directory structure
-- [ ] Move existing `add-to-collection.ts` to new actions directory
-- [ ] Create `shared/services/game-management/service.ts` with business logic extending BaseService
-- [ ] Add `types.ts` file for GameManagementService-specific types
-- [ ] Create comprehensive unit tests for GameManagementService
-- [ ] Update imports in features to reference new service location
+- [x] Create `shared/services/game-management/actions/` directory structure
+- [x] Move existing `add-to-collection.ts` to new actions directory
+- [x] Create `shared/services/game-management/service.ts` with business logic extending BaseService
+- [x] Add `types.ts` file for GameManagementService-specific types
+- [x] Create comprehensive unit tests for GameManagementService
+- [x] Update imports in features to reference new service location
 
 ## **Slice 3: Implement UserService with Core User Operations**
 

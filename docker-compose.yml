@@ -1,3 +1,5 @@
+name: "play-later-postgres"
+
 services:
   postgres-db:
     image: postgres:14.5-alpine
@@ -23,3 +25,13 @@ services:
       - "6432:5432"
     volumes:
       - ./.local-data/pg:/var/packages/postgresql/data
+
+  pga:
+    image: "dpage/pgadmin4"
+    depends_on:
+      - postgres-db
+    ports:
+      - "9090:90"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@playlater.app
+      PGADMIN_DEFAULT_PASSWORD: playlater

@@ -1,15 +1,15 @@
 "use server";
 
-import { disconnectSteam } from "@/shared/lib/repository";
+import { disconnectSteam as disconnectSteamRepo } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
-export const removeSteamDataFromUser = authorizedActionClient
+export const disconnectSteam = authorizedActionClient
   .metadata({
     actionName: "removeSteamDataFromUser",
     requiresAuth: true,
   })
   .action(async ({ ctx: { userId } }) => {
-    const user = await disconnectSteam({ userId });
+    const user = await disconnectSteamRepo({ userId });
 
     return user;
   });

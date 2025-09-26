@@ -21,7 +21,7 @@ export const SearchParamsSchema = z.object({
   search: z.string().optional(),
   storefront: z.nativeEnum(Storefront).optional(),
   sortBy: z
-    .enum(["name", "playtime", "storefront", "createdAt"])
+    .enum(["name", "playtime", "storefront", "createdAt", "last_played"])
     .default("name"),
   sortOrder: z.enum(["asc", "desc"]).default("asc"),
 });

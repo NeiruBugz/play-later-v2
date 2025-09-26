@@ -13,9 +13,8 @@ export const getUserGamesWithGroupedBacklogPaginated = authorizedActionClient
     requiresAuth: true,
   })
   .inputSchema(FilterParamsSchema)
-  .action(async ({ ctx: { userId }, parsedInput }) => {
+  .action(async ({ parsedInput }) => {
     const result = await collectionService.getCollection({
-      userId,
       platform: parsedInput.platform,
       status: parsedInput.status,
       search: parsedInput.search,

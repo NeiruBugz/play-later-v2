@@ -7,8 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-
-import { editUserAction } from "../server-actions/edit-user-action";
+import { updateUserProfile } from "@/shared/services/user/actions";
 
 function SubmitButton() {
   const status = useFormStatus();
@@ -32,7 +31,7 @@ type EditUserFormProps = {
 };
 
 export function EditUserForm({ userInfo }: EditUserFormProps) {
-  const { execute } = useAction(editUserAction, {
+  const { execute } = useAction(updateUserProfile, {
     onSuccess: () => {
       toast.success("User updated");
     },

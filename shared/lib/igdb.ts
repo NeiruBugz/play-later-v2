@@ -89,8 +89,7 @@ const igdbApi = {
 
   async fetchToken(): Promise<TwitchTokenResponse | undefined> {
     try {
-      const res = await globalThis.fetch(TOKEN_URL, {
-        cache: "no-store",
+      const res = await fetch(TOKEN_URL, {
         method: "POST",
       });
       if (!res.ok) {
@@ -125,11 +124,10 @@ const igdbApi = {
         return undefined;
       }
 
-      const response = await globalThis.fetch(`${API_URL}${options.resource}`, {
+      const response = await fetch(`${API_URL}${options.resource}`, {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${accessToken}`,
-
           "Client-ID": env.IGDB_CLIENT_ID,
         },
         method: "POST",
@@ -248,7 +246,7 @@ const igdbApi = {
         "game_engines.name",
         "player_perspectives.name",
         "themes.name",
-        "external_games.category",
+        "external_games.external_game_source",
         "external_games.name",
         "external_games.url",
         "similar_games.name",
@@ -264,6 +262,7 @@ const igdbApi = {
         "game_type.type",
       ])
       .where(`id = (${gameId})`)
+      .limit(1)
       .build();
 
     const response = await this.request<FullGameInfoResponse[]>({
@@ -600,8 +599,9 @@ const igdbApi = {
 
     const query = new QueryBuilder()
       .fields(["name"])
-      .where(`external_games.category = 1 & external_games.url = "${steamUrl}"`)
-      .limit(1)
+      .where(
+        `external_games.external_game_source = 1 & external_games.url = "${steamUrl}"`
+      )
       .build();
 
     const response = await this.request<FullGameInfoResponse[]>({
