@@ -2,10 +2,10 @@
 
 ## **Slice 1: Enhance BaseService with Authentication Methods**
 
-- [ ] Add `getCurrentUserId()` and `getCurrentUserIdOptional()` methods to BaseService
-- [ ] Update BaseService imports to include authentication utilities
-- [ ] Add unit tests for new BaseService authentication methods
-- [ ] Verify existing CollectionService and IgdbService still work with enhanced BaseService
+- [x] Add `getCurrentUserId()` and `getCurrentUserIdOptional()` methods to BaseService
+- [x] Update BaseService imports to include authentication utilities
+- [x] Add unit tests for new BaseService authentication methods
+- [x] Verify existing CollectionService and IgdbService still work with enhanced BaseService
 
 ## **Slice 2: Complete GameManagementService Implementation**
 
