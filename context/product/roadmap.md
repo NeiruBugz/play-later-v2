@@ -1,175 +1,212 @@
-# Product Roadmap: PlayLater
+# Product Roadmap: SavePoint
 
-_This roadmap outlines our strategic direction based on user needs and gaming community feedback. It focuses on the "what" and "why," not the technical "how."_
-
----
-
-## ✅ Completed (Foundation Phase - 2024-Q3 2025)
-
-_The core foundation that makes PlayLater functional and valuable._
-
-- [x] **User Account & Authentication System**
-
-  - [x] **Steam OAuth Integration:** Seamless sign-in using Steam OpenID, providing secure entry point and automatic user profile creation.
-  - [x] **User Profile Management:** Enable users to view and manage their profile information, Steam connection status, and account settings.
-
-- [x] **Core Game Collection Management**
-
-  - [x] **Steam Library Import:** Automatic import of user's entire Steam library with game metadata, playtime, and achievement data.
-  - [x] **Manual Game Addition:** Allow users to add games from any platform manually with custom metadata.
-  - [x] **Status Tracking System:** Enable users to categorize games as Backlog, Playing, Completed, or Wishlist with timestamps.
-  - [x] **Platform & Acquisition Tracking:** Track where games were acquired (Digital, Physical, Subscription) and on which platform.
-
-- [x] **Game Database & Metadata**
-
-  - [x] **IGDB Integration:** Rich game information including descriptions, release dates, screenshots, and genre data.
-  - [x] **Game Details Pages:** Comprehensive game pages with metadata, user reviews, and collection management options.
-
-- [x] **Review & Rating System**
-
-  - [x] **User Reviews:** Community-driven review system with 10-point rating scale and detailed written reviews.
-  - [x] **Review Discovery:** Browse and read reviews from other users to make informed gaming decisions.
-
-- [x] **Analytics Dashboard**
-
-  - [x] **Collection Statistics:** Visual breakdown of collection size, completion rates, and platform distribution.
-  - [x] **Recent Activity Tracking:** Timeline of recently played, completed, and added games.
-  - [x] **Gaming Progress Insights:** Completion statistics and backlog trends over time.
-
-- [x] **Wishlist Management**
-  - [x] **Personal Wishlist:** Organize future game purchases with priority and notes.
-  - [x] **Public Wishlist Sharing:** Generate shareable URLs for friends and family to view wishlists for gift ideas.
+_This roadmap outlines our strategic direction based on the revised product vision. SavePoint is a gaming journal and library curator—not a backlog manager. It focuses on intentional curation, memorable experiences, and warm reflection._
 
 ---
 
-### Q4 2025: API Architecture Foundation
+### Phase 1 ✅ **COMPLETED - Core Foundation**
 
-_Establishing proper API architecture for mobile support and external integrations._
+_The essential features that form the core foundation of the product._
 
-- [ ] **API Architecture Decision & Implementation**
+- [x] **User Account Essentials**
 
-  - [ ] **Architecture Assessment:** Evaluate hybrid approach (Route Handlers + Server Actions) vs. full Route Handlers migration.
-  - [ ] **REST API Design:** Design comprehensive REST API endpoints for all core functionality (authentication, collection management, reviews, Steam integration).
-  - [ ] **API Implementation:** Implement chosen approach with proper error handling, validation, and documentation.
-  - [ ] **Authentication Strategy:** Implement API authentication (JWT tokens, API keys) for external consumers while maintaining web session auth.
+  - [x] **Seamless Sign-Up & Login:** Users can create accounts and sign in securely (`features/sign-in`)
+  - [x] **Basic Profile Management:** Users can view and update profile information (`features/manage-user-info`)
 
-- [ ] **API Documentation & Testing**
-  - [ ] **OpenAPI Specification:** Create comprehensive API documentation with OpenAPI/Swagger specs.
-  - [ ] **API Testing Suite:** Implement comprehensive API tests covering all endpoints and error scenarios.
-  - [ ] **Rate Limiting & Security:** Implement proper rate limiting, CORS policies, and security measures for API endpoints.
+- [x] **Core Game Library Management**
 
----
+  - [x] **Manual Game Adding:** Users can search and add games to their library using IGDB integration (`features/add-game`)
+  - [x] **Game Status Tracking:** Users can organize games by status (Want to Play, Currently Playing, Completed, etc.) (`features/manage-backlog-item`)
+  - [x] **Collection Viewing:** Users can browse, filter, and manage their game collections (`features/view-collection`)
+  - [x] **Game Information Display:** Rich game details with IGDB metadata (`features/view-game-details`)
 
-### Q1 2026: Social Features Foundation
+- [x] **Steam Integration V1**
 
-_Building community engagement and user-to-user interactions (dependent on API architecture completion)._
+  - [x] **Steam Authentication:** Secure OAuth flow using Steam OpenID (`features/steam-integration`)
+  - [x] **Steam Library Import:** Users can import their Steam game libraries (`features/view-imported-games`)
+  - [x] **Achievement Tracking:** Display Steam achievements with rarity analysis (`features/steam-integration`)
 
-- [ ] **User Following System**
-
-  - [ ] **Follow/Unfollow Users:** Allow users to follow other gamers to see their activity and reviews.
-  - [ ] **Follower/Following Lists:** Display user connections and discover new gamers through mutual connections.
-
-- [ ] **Enhanced Review Interactions**
-
-  - [ ] **Review Likes & Reactions:** Enable users to like, agree, or react to helpful reviews.
-  - [ ] **Review Comments:** Allow threaded discussions on game reviews for deeper community engagement.
-
-- [ ] **Activity Feed**
-  - [ ] **Personal Activity Stream:** Show recent activities from followed users (completions, reviews, new additions).
-  - [ ] **Community Highlights:** Surface popular reviews and trending games within the user's network.
+- [x] **Review System**
+  - [x] **User Reviews:** Users can write and rate completed games (`features/add-review`)
+  - [x] **Review Management:** Users can manage their written reviews
 
 ---
 
-### Q1 2026: Platform Integration Research & Social Expansion
+### Phase 2 🚧 **IN PROGRESS - Vision Transformation & Architecture**
 
-_Expanding social features while researching additional platform integrations._
+_Critical phase to align the product with the SavePoint vision: gaming journal, library curation, and intentional experiences._
 
-- [ ] **Advanced Social Features**
+- [ ] **Vision Transformation (SavePoint Rebrand)** ⭐ _HIGHEST PRIORITY_
 
-  - [ ] **User Profiles Enhancement:** Public profile pages showing collection highlights, favorite games, and recent activity.
-  - [ ] **Game Recommendation Engine:** AI-powered suggestions based on followed users' preferences and completion patterns.
-  - [ ] **Collection Comparison:** Compare libraries and completion progress with friends.
+  - [ ] **Database Schema Migration:**
+    - [ ] Rename `BacklogItem` model to `LibraryItem` (reflects curation, not burden)
+    - [ ] Update `BacklogItemStatus` enum values to match new journey-focused language:
+      - `TO_PLAY` → `CURIOUS_ABOUT` or `WAITING`
+      - `PLAYING` → `CURRENTLY_EXPLORING`
+      - `PLAYED` → `TOOK_A_BREAK` or `PAUSED`
+      - `COMPLETED` → `EXPERIENCED`
+      - Add `REVISITING` status for games being replayed
+    - [ ] Consider renaming `Review` model to `JournalEntry` or `GameReflection`
+    - [ ] Add fields to support richer journaling (mood tags, play session notes, etc.)
+  - [ ] **UI/UX Language Revision:**
+    - [ ] Replace "backlog" terminology across the entire application
+    - [ ] Update navigation labels, page titles, and CTAs to reflect warmth and curation
+    - [ ] Revise empty states and onboarding copy to emphasize journey and discovery
+    - [ ] Update status labels in UI components to match new enum values
+    - [ ] Change tone from productivity/guilt to curiosity/memory
+  - [ ] **Homepage Redesign:**
+    - [ ] Redesign landing page to emphasize "gaming journal" and "library curator" positioning
+    - [ ] Create warm, inviting hero section that celebrates gaming as meaningful experiences
+    - [ ] Highlight journaling and curation as core value propositions
+    - [ ] Update marketing copy to reflect patient gamer persona
 
-- [ ] **Platform Integration Research**
+- [ ] **Gaming Journal Feature** ⭐ _HIGHEST PRIORITY_
 
-  - [ ] **PlayStation API Investigation:** Research Sony's developer program and API access requirements for library imports.
-  - [ ] **Xbox/Microsoft Store Research:** Investigate Xbox Game Pass and Microsoft Store integration possibilities.
-  - [ ] **Epic Games Store Analysis:** Explore Epic's developer resources for potential library integration.
+  - [ ] **Journal Entry System:**
+    - [ ] Design journal entry UI/UX (rich text editor, timestamps, mood indicators)
+    - [ ] Create journal entry creation and editing flows
+    - [ ] Link journal entries to games and library items
+    - [ ] Support multiple entries per game (ongoing journaling throughout play)
+  - [ ] **Gaming Memories Timeline:**
+    - [ ] Build chronological timeline view of all journal entries
+    - [ ] Filter by game, date range, or mood/tags
+    - [ ] Display entry previews with associated game covers
+  - [ ] **Journal Entry Types:**
+    - [ ] Reflection entries (post-completion thoughts)
+    - [ ] Session notes (quick thoughts during gameplay)
+    - [ ] Milestone entries (key moments in a game journey)
 
-- [ ] **Community Features V1**
-  - [ ] **Game Discussion Threads:** Enable discussions around specific games with spoiler management.
-  - [ ] **Collection Showcases:** Allow users to create themed collections (e.g., "Best Indies of 2025") to share with community.
+- [ ] **Technical Architecture Enhancement**
+
+  - [ ] **Service Pattern Implementation:** Introduce service layer architecture for better code organization and testability
+  - [ ] **Hybrid Architecture Migration:** Implement hybrid approach leveraging both Server Actions and Route Handlers for optimal caching and performance
+
+- [ ] **Enhanced Collection Features**
+
+  - [ ] **Custom Lists and Collections:** Allow users to create curated game collections ("Cozy Winter Games," "Games That Made Me Cry")
+  - [ ] **Wishlist Management:** Enhanced wishlist functionality with priority ordering (`features/view-wishlist`, `features/share-wishlist` exist)
+  - [ ] **Gaming Goals:** Personal goal setting and progress tracking - optional for users who want it (`features/gaming-goals` exists)
+
+- [ ] **Improved User Experience**
+  - [ ] **Dashboard Enhancement:** Comprehensive user dashboard with recent journal entries, currently exploring games, and gentle prompts (`features/dashboard` exists)
+  - [ ] **Theme Customization:** Dark/light theme toggle and personalization (`features/theme-toggle` exists)
+  - [ ] **Game Discovery Enhancement:** Improved similar game suggestions and mood-based filtering
 
 ---
 
-### Q2 2026: Platform Integration Implementation
+### Phase 3 🔮 **PLANNED - Community & Platform Expansion**
 
-_Based on Q1 research, implement the most feasible platform integrations._
+_Building on the solid journal foundation to foster community and expand platform support._
 
-- [ ] **First Additional Platform Integration**
+- [ ] **Community Reflections & Social Features**
 
-  - [ ] **PlayStation Integration (if feasible):** Automatic library import from PlayStation Network with trophy tracking.
-  - [ ] **Alternative Platform (if PlayStation unavailable):** Epic Games Store or GOG integration based on research findings.
+  - [ ] **Public Journal Entries:** Allow users to share journal entries publicly (opt-in)
+  - [ ] **User Following System:** Follow other patient gamers and see their gaming journeys
+  - [ ] **Reflection Interactions:** Enable likes, thoughtful comments on shared journal entries
+  - [ ] **Community Collections:** Discover curated collections created by other users
+  - [ ] **Activity Feeds:** See what worlds your followed users are exploring
 
-- [ ] **Enhanced Multi-Platform Management**
+- [ ] **Platform Integration Expansion**
 
-  - [ ] **Cross-Platform Game Linking:** Connect the same game across different platforms to avoid duplicates.
-  - [ ] **Platform-Specific Features:** Achievement/trophy tracking per platform with unified progress view.
+  - [ ] **Multi-Platform Support:** Begin integration with additional gaming platforms beyond Steam
+  - [ ] **Xbox Integration:** Connect Xbox Live accounts to import game libraries
+  - [ ] **PlayStation Integration:** Connect PlayStation Network accounts for library sync
+  - [ ] **PC Storefronts:** Add support for Epic Games Store, GOG, and other major PC gaming platforms
+  - [ ] **Cross-Platform Game Matching:** Help users identify games they own across different platforms
 
-- [ ] **Import & Migration Tools**
-  - [ ] **Bulk Import Improvements:** Enhanced tools for importing large libraries with conflict resolution.
-  - [ ] **Data Export:** Allow users to export their collection data for backup or migration purposes.
+- [ ] **Advanced Journal Features**
 
----
+  - [ ] **Screenshot & Media Uploads:** Attach screenshots or videos to journal entries
+  - [ ] **Mood-Based Game Recommendations:** "I want something cozy tonight" discovery
+  - [ ] **Journal Entry Templates:** Pre-made prompts to help users reflect ("What surprised you most?")
+  - [ ] **Reading Challenges Equivalent:** Optional goals like "Journal 12 gaming experiences this year" (for users who want structure)
 
-### Q3 2026: Mobile Strategy & Advanced Features
-
-_Expanding accessibility and adding power-user features._
-
-- [ ] **Mobile-First Improvements**
-
-  - [ ] **Mobile Web Optimization:** Enhanced responsive design for mobile browsers with touch-optimized interactions.
-  - [ ] **Progressive Web App (PWA):** Enable installation and offline functionality for mobile users.
-
-- [ ] **REST API Development**
-
-  - [ ] **Public API V1:** Create endpoints for third-party developers and potential mobile app development.
-  - [ ] **Developer Documentation:** Comprehensive API docs for community developers.
-
-- [ ] **Advanced Analytics**
-  - [ ] **Gaming Insights Dashboard:** Deeper analytics on gaming habits, completion patterns, and time investment.
-  - [ ] **Personalized Reports:** Monthly/yearly gaming summaries with achievements and milestones.
+- [ ] **Mobile & Accessibility**
+  - [ ] **Mobile Application:** Companion app for journaling on-the-go and quick library browsing
+  - [ ] **Voice Journaling:** Dictate journal entries while playing (accessibility + convenience)
+  - [ ] **Advanced Analytics (Optional):** Personal gaming insights for users who want them—never forced
 
 ---
 
-### Q4 2026 & Beyond: Ecosystem Growth
+## Migration Notes
 
-_Features planned for future consideration. Priority and scope may be refined based on user feedback and platform API availability._
+### Immediate Technical Debt (Phase 2)
 
-- [ ] **Native Mobile Application**
+1. **Database Migration Strategy:**
 
-  - [ ] **iOS/Android Apps:** Native mobile applications with full feature parity and mobile-specific optimizations.
-  - [ ] **Offline Mode:** Basic collection browsing and status updates without internet connection.
+   - Create migration scripts to rename tables and columns
+   - Update all repository layer code to use new naming
+   - Ensure backward compatibility during transition
 
-- [ ] **Additional Platform Integrations**
+2. **Codebase Language Audit:**
 
-  - [ ] **Nintendo eShop Integration:** Connect Nintendo Account for Switch game tracking (pending API availability).
-  - [ ] **Retro Gaming Support:** Integration with emulation platforms and retro game databases.
-  - [ ] **PC Launcher Support:** GOG Galaxy, Epic Games, Ubisoft Connect, EA App integrations.
+   - Run comprehensive search for "backlog" across codebase
+   - Update all component names, variables, and comments
+   - Update test descriptions and factory names
 
-- [ ] **Community & Discovery**
+3. **Feature Directory Restructuring:**
+   - Consider renaming feature directories:
+     - `features/manage-backlog-item` → `features/manage-library-item`
+     - `features/add-review` → `features/add-journal-entry`
+   - Maintain git history through proper renames
 
-  - [ ] **Gaming Groups:** Create interest-based groups around genres, franchises, or gaming styles.
-  - [ ] **Curator System:** Allow experienced users to curate game recommendations and collections.
-  - [ ] **Events & Challenges:** Community gaming challenges and events (e.g., "Indie Game Month").
+### Success Metrics Alignment
 
-- [ ] **Infrastructure & Scalability**
+Track these metrics to validate the vision transformation:
 
-  - [ ] **AWS Migration:** Migrate from Vercel to AWS infrastructure for better control and scalability (timeline TBD).
-  - [ ] **Microservices Architecture:** Break down monolithic structure into specialized services for better maintainability.
-  - [ ] **Advanced Caching:** Implement Redis caching layer for improved performance.
+- **Before (Backlog Manager):** Completion rate, time spent choosing games
+- **After (Gaming Journal):** Journal entries written, timeline revisits, intentional play sessions, community engagement on reflections
 
-- [ ] **Advanced Features**
-  - [ ] **Gaming Time Tracking:** Automatic playtime tracking across platforms with productivity insights.
-  - [ ] **Price Tracking & Alerts:** Monitor game prices across platforms and alert users to sales.
-  - [ ] **Monetization Exploration:** Investigate potential premium features while maintaining core functionality free.
+---
+
+## Decided Approaches
+
+### Dual Feature Strategy: Reviews + Journal Entries
+
+**Decision:** Implement BOTH as distinct features serving different purposes:
+
+- **Reviews** (public, community-facing)
+
+  - Rating + text content
+  - Discoverable by other users
+  - Social engagement (likes, comments in Phase 3)
+  - One review per game per user
+  - Focus: Sharing opinions and recommendations with the community
+
+- **Journal Entries** (private by default, optionally shareable)
+  - Rich text with mood tags, session notes, timestamps
+  - Multiple entries per game (ongoing journaling throughout play)
+  - Privacy controls: private, friends-only, or public
+  - Focus: Personal reflection and memory preservation
+
+**Implementation Impact:**
+
+- Keep existing `Review` model for public reviews
+- Create new `JournalEntry` model with richer schema
+- Update UI to clearly distinguish between the two features
+- Game detail pages show both community reviews and user's personal journal entries
+
+### Migration Strategy
+
+**Decision:** Aggressive migration without backward compatibility concerns
+
+Since there are no existing users:
+
+- Rename database tables and columns directly (no gradual migration needed)
+- Update all codebase terminology in a single refactor
+- No need for data migration scripts or dual naming support
+- Can make breaking changes freely to align with SavePoint vision
+
+### Achievement Tracking Philosophy
+
+**Decision:** Keep achievement tracking with reframing and user control
+
+**Reframe as:** "Remembering what you did in that world" rather than completion pressure
+
+**Implementation:**
+
+- Achievement tracking remains in Steam integration feature
+- Add user setting: "Show achievement tracking" (toggle on/off)
+- Update achievement UI language to emphasize memories, not completion
+- Avoid progress bars and completion percentages in prominent positions
+- Focus on interesting/rare achievements rather than 100% completion
