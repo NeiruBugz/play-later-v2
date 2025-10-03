@@ -166,7 +166,6 @@ type ServiceIntegrationProps = {
 ### Core Components
 
 1. **`/components/integrations-list.tsx`**
-
    - Server component for data fetching and SSR
    - Handles Steam user data retrieval
    - Manages server action for disconnection
@@ -181,14 +180,12 @@ type ServiceIntegrationProps = {
 ### Configuration & Data Access
 
 3. **`/lib/services-for-integration.tsx`**
-
    - Central platform configuration
    - Icon definitions using react-icons
    - Platform availability flags
    - Extensible for future platforms
 
 4. **`/server-actions/get-steam-user-data.ts`**
-
    - Fetches connected Steam account information
    - Uses `getUserSteamData` repository function
    - Returns user's Steam ID, username, profile URL, connection timestamp
@@ -201,7 +198,6 @@ type ServiceIntegrationProps = {
 ### External Dependencies
 
 6. **Steam Integration Feature** (`/features/steam-integration/`)
-
    - `getUserOwnedGames` - Steam Web API integration
    - `saveSteamGames` - Imported games storage
    - Type definitions for Steam data structures
@@ -254,13 +250,11 @@ lib/__tests__/services-for-integration.unit.test.ts
 #### Test Scenarios
 
 1. **Component Rendering**
-
    - ServiceIntegration states (connected/disconnected/disabled)
    - Loading states during sync operations
    - Error handling and toast notifications
 
 2. **Server Actions**
-
    - Authenticated user data retrieval
    - Steam disconnection with database updates
    - Error handling for missing users
@@ -363,17 +357,17 @@ Update `ServiceIntegration` component to handle new platform logic in:
 
 ```bash
 # Run the application
-bun dev
+pnpmdev
 
 # Type checking
-bun typecheck
+pnpmtypecheck
 
 # Code quality
-bun code-check
-bun code-fix
+pnpmcode-check
+pnpmcode-fix
 
 # Testing (when tests are added)
-bun run test features/manage-integrations
+pnpmrun test features/manage-integrations
 ```
 
 ### Related Features to Explore

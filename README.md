@@ -109,7 +109,7 @@ cd play-later-v2
 2. Install dependencies:
 
 ```bash
-bun install
+pnpminstall
 ```
 
 3. Set up environment variables:
@@ -121,13 +121,13 @@ cp .env.example .env.local
 4. Configure your database and run migrations:
 
 ```bash
-bun postinstall
+pnpmpostinstall
 ```
 
 5. Start the development server:
 
 ```bash
-bun dev
+pnpmdev
 ```
 
 Visit [http://localhost:6060](http://localhost:6060) to see the application.
@@ -138,20 +138,20 @@ Visit [http://localhost:6060](http://localhost:6060) to see the application.
 
 ```bash
 # Run all tests
-bun run test
+pnpmrun test
 
 # Run unit tests (fast, mocked database)
-bun run test:unit
+pnpmrun test:unit
 
 # Run integration tests (real database)
-bun run test:integration
+pnpmrun test:integration
 
 # Run tests with coverage
-bun run test:coverage
+pnpmrun test:coverage
 
 # Watch mode
-bun run test:unit:watch
-bun run test:integration:watch
+pnpmrun test:unit:watch
+pnpmrun test:integration:watch
 ```
 
 ### Test Database Setup
@@ -160,10 +160,10 @@ For integration tests, start the test database:
 
 ```bash
 # Start test database
-bun run test:db:setup
+pnpmrun test:db:setup
 
 # Stop test database
-bun run test:db:teardown
+pnpmrun test:db:teardown
 ```
 
 ## 🔧 Development Commands
@@ -171,22 +171,22 @@ bun run test:db:teardown
 ### Core Development
 
 ```bash
-bun dev          # Start development server on port 6060
-bun build        # Build the application
-bun start        # Start production server
-bun preview      # Build and start production server
+pnpmdev          # Start development server on port 6060
+pnpmbuild        # Build the application
+pnpmstart        # Start production server
+pnpmpreview      # Build and start production server
 ```
 
 ### Code Quality
 
 ```bash
-bun lint         # Run ESLint
-bun lint:fix     # Fix ESLint errors
-bun typecheck    # TypeScript type checking
-bun format:write # Format code with Prettier
-bun format:check # Check code formatting
-bun code-fix     # Run format:write and lint:fix
-bun code-check   # Run format:check, lint, and typecheck
+pnpmlint         # Run ESLint
+pnpmlint:fix     # Fix ESLint errors
+pnpmtypecheck    # TypeScript type checking
+pnpmformat:write # Format code with Prettier
+pnpmformat:check # Check code formatting
+pnpmcode-fix     # Run format:write and lint:fix
+pnpmcode-check   # Run format:check, lint, and typecheck
 ```
 
 ## 🏗️ Architecture
@@ -211,8 +211,8 @@ The application uses a repository pattern for data access, providing a clean sep
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and add tests
-4. Run the test suite: `bun run test`
-5. Run code quality checks: `bun code-check`
+4. Run the test suite: `pnpmrun test`
+5. Run code quality checks: `pnpmcode-check`
 6. Commit your changes using conventional commits (see examples below)
 7. Push to the branch: `git push origin feature/amazing-feature`
 8. Open a Pull Request

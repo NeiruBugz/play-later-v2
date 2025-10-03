@@ -192,13 +192,11 @@ export type BacklogItemWithGame = BacklogItem & {
 ### Type Safety Patterns
 
 1. **Server Action Type Safety**:
-
    - Uses `authorizedActionClient` and `publicActionClient` from shared safe-action library
    - Input validation with Zod schemas for public actions
    - Automatic type inference for action contexts
 
 2. **Database Type Safety**:
-
    - Leverages Prisma generated types (`BacklogItem`, `Game`)
    - Type-safe repository functions with explicit return types
    - Proper handling of optional/nullable fields
@@ -213,7 +211,6 @@ export type BacklogItemWithGame = BacklogItem & {
 ### Primary Files
 
 1. **`components/wishlisted-list.tsx`** - Main Display Component
-
    - **Lines 6-7**: Server action integration and data fetching
    - **Lines 9-11**: Error handling for server failures
    - **Lines 13-29**: Empty state handling with navigation links
@@ -221,14 +218,12 @@ export type BacklogItemWithGame = BacklogItem & {
    - **Responsibility**: Render personal wishlist with proper state handling
 
 2. **`server-actions/get-wishlisted-items.ts`** - Data Access Layer
-
    - **Lines 14-30**: Authenticated wishlist fetching with error handling
    - **Lines 32-51**: Public wishlist fetching with username validation
    - **Lines 23, 44**: Data transformation via grouping utility
    - **Responsibility**: Bridge between UI and data layer with proper authorization
 
 3. **`lib/group-wishlisted-items-by-game-id.ts`** - Data Processing
-
    - **Lines 8-18**: Efficient grouping algorithm using reduce
    - **Lines 10-14**: Game aggregation logic with backlog item collection
    - **Responsibility**: Transform flat data structure for optimal UI rendering
@@ -241,7 +236,6 @@ export type BacklogItemWithGame = BacklogItem & {
 ### Integration Files
 
 5. **Route Handlers**:
-
    - `/app/collection/(list-views)/wishlist/page.tsx` - Personal wishlist page
    - `/app/wishlist/[username]/page.tsx` - Public shared wishlist page
 
@@ -308,19 +302,16 @@ describe("Wishlist Server Actions", () => {
 ### Internal Feature Dependencies
 
 1. **Authentication System** (`/auth`):
-
    - Personal wishlist access requires valid session
    - Public wishlist access is unrestricted
    - User context provided via server action clients
 
 2. **Backlog Management** (`/features/manage-backlog-item`):
-
    - Status transitions from WISHLIST to other states
    - Action buttons in BacklogItemCard for status changes
    - Integration with backlog item CRUD operations
 
 3. **Add Game Feature** (`/features/add-game`):
-
    - Empty state navigation to game addition flow
    - New games can be added directly to wishlist status
    - Seamless workflow for wishlist population
@@ -333,13 +324,11 @@ describe("Wishlist Server Actions", () => {
 ### External Service Dependencies
 
 1. **Database Layer** (Prisma/PostgreSQL):
-
    - BacklogItem table with WISHLIST status filtering
    - User table for username-based public access
    - Game table for metadata and cover images
 
 2. **IGDB Integration**:
-
    - Game cover images via IgdbImage component
    - Game metadata synchronization
    - Platform information display
@@ -410,7 +399,7 @@ export const getWishlistedItems = authorizedActionClient
 
 ```bash
 # Run development server to test wishlist functionality
-bun dev
+pnpmdev
 
 # View personal wishlist (requires authentication)
 # Navigate to: http://localhost:6060/collection/wishlist
@@ -423,23 +412,23 @@ bun dev
 
 ```bash
 # Type check wishlist feature files
-bun typecheck
+pnpmtypecheck
 
 # Lint wishlist feature
-bun lint features/view-wishlist
+pnpmlint features/view-wishlist
 
 # Format wishlist feature
-bun format:write features/view-wishlist
+pnpmformat:write features/view-wishlist
 ```
 
 ### Testing (When Implemented)
 
 ```bash
 # Run wishlist-specific unit tests
-bun run test features/view-wishlist
+pnpmrun test features/view-wishlist
 
 # Run integration tests affecting wishlist functionality
-bun run test:integration --grep="wishlist"
+pnpmrun test:integration --grep="wishlist"
 ```
 
 ## Future Enhancement Opportunities

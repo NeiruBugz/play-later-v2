@@ -89,13 +89,11 @@ Static Content → React Components → UI Rendering
 ### Integration Points
 
 1. **Authentication Flow** (line 72 in `/app/page.tsx`):
-
    - Integrates with `SignIn` component from `/features/sign-in`
    - Conditional rendering based on authentication state
    - Multiple CTA placements for conversion optimization
 
 2. **Shared Component System**:
-
    - **Typography Components**: `Display`, `Subheading`, `Body`, `ResponsiveHeading`
    - **UI Components**: shadcn/ui `Card` system for consistent styling
    - **Icon System**: Lucide React icons for visual consistency
@@ -280,26 +278,26 @@ The landing page includes comprehensive SEO optimization:
 
 ```bash
 # Run component-specific tests (when implemented)
-bun run test features/landing
+pnpmrun test features/landing
 
 # Visual regression testing
-bun run test:visual landing
+pnpmrun test:visual landing
 
 # Accessibility testing
-bun run test:a11y landing
+pnpmrun test:a11y landing
 ```
 
 ### Development Workflow
 
 ```bash
 # Start development server
-bun dev
+pnpmdev
 
 # Check code quality
-bun code-check
+pnpmcode-check
 
 # Format and lint
-bun code-fix
+pnpmcode-fix
 ```
 
 ---

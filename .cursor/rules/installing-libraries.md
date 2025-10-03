@@ -15,7 +15,7 @@ yarn add -D @typescript-eslint/eslint-plugin
 npm install --save-dev @typescript-eslint/eslint-plugin
 
 # bun
-bun add -D @typescript-eslint/eslint-plugin
+pnpmadd -D @typescript-eslint/eslint-plugin
 ```
 
 This will ensure you're always using the latest version.

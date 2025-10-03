@@ -165,8 +165,8 @@ Each phase is atomic and can be rolled back:
 git revert HEAD
 
 # Verify rollback success
-bun run test
-bun run lint
+pnpmrun test
+pnpmrun lint
 ```
 
 ### Validation Checkpoints
@@ -175,10 +175,10 @@ After each commit:
 
 ```bash
 # Required validation sequence
-bun run test                    # All tests pass
-bun run lint                    # Check boundary violations
-bun run typecheck               # No TypeScript errors
-bun run build                   # Successful build
+pnpmrun test                    # All tests pass
+pnpmrun lint                    # Check boundary violations
+pnpmrun typecheck               # No TypeScript errors
+pnpmrun build                   # Successful build
 ```
 
 ## Future Enhancements

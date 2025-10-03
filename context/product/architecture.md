@@ -10,7 +10,7 @@
 - **Styling:** Tailwind CSS with tailwindcss-animate
 - **State Management:** React Server Components + TanStack Query for client state
 - **Form Handling:** React Hook Form with Zod validation
-- **Package Manager:** Bun (development and runtime)
+- **Package Manager:** pnpm(development and runtime)
 
 ---
 
@@ -18,10 +18,48 @@
 
 - **Backend Framework:** Next.js App Router with Server Actions
 - **API Architecture:** Type-safe server actions using next-safe-action
+- **Business Logic Layer:** Service Layer Pattern (in migration - see [Spec 003](../spec/003-architecture-standardization/))
 - **Data Access Pattern:** Repository Pattern with Prisma ORM
 - **Runtime Validation:** Zod schemas for type-safe data validation
 - **Session Management:** NextAuth.js v5 with JWT strategy
 - **File Structure:** Feature-based architecture with shared utilities
+
+### Layered Architecture (Target State)
+
+The application follows a three-tier architecture pattern:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   UI Layer                          │
+│  (Server/Client Components, Server Actions)         │
+│  - Request/response handling                        │
+│  - Input sanitization                               │
+│  - Calls service layer                              │
+└─────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────┐
+│                Service Layer                        │
+│         (Domain Business Logic)                     │
+│  - Business validation                              │
+│  - Data transformation                              │
+│  - Repository composition                           │
+│  - Transaction management                           │
+└─────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────┐
+│              Repository Layer                       │
+│            (Data Access Only)                       │
+│  - Database queries (Prisma)                        │
+│  - Type-safe operations                             │
+│  - No business logic                                │
+└─────────────────────────────────────────────────────┘
+```
+
+**Current Status:** In transition to full service layer adoption
+
+- **Complete:** CollectionService (view-collection feature)
+- **In Progress:** Architecture standardization across all features
+- **Reference:** See [Architecture Standardization Spec](../spec/003-architecture-standardization/)
 
 ---
 
@@ -106,3 +144,136 @@
 - **Image Optimization:** Next.js Image component with remote pattern allowlist
 - **Caching Strategy:** Browser caching for static assets, no server-side caching implemented
 - **Database Connections:** Neon's built-in connection pooling for serverless functions
+
+---
+
+## 11. Service Layer Architecture
+
+### Overview
+
+The service layer encapsulates business logic between the UI layer (server actions) and the repository layer (data access). This provides a clean separation of concerns and enables comprehensive testing of business logic.
+
+**Status:** In active migration - see [Architecture Standardization Spec](../spec/003-architecture-standardization/)
+
+### Service Layer Structure
+
+```
+shared/services/
+├── library/                    # Library item operations
+│   ├── library-service.ts     # Service implementation
+│   ├── library-service.test.ts # Unit tests
+│   ├── types.ts               # Service-specific types
+│   └── index.ts               # Public exports
+├── game/                       # Game operations
+├── review/                     # Review management
+├── user/                       # User operations
+├── journal/                    # Journal entries
+└── index.ts                    # Barrel exports
+```
+
+### Service Responsibilities
+
+**Services SHOULD:**
+
+- ✅ Contain business logic and domain rules
+- ✅ Validate input data (beyond basic type checking)
+- ✅ Transform data between layers
+- ✅ Compose multiple repository calls
+- ✅ Handle transactions and error scenarios
+- ✅ Return consistent response formats
+
+**Services SHOULD NOT:**
+
+- ❌ Handle HTTP concerns (request/response)
+- ❌ Contain UI logic
+- ❌ Directly access database (use repositories)
+- ❌ Have side effects without explicit intent
+
+### Service Integration Pattern
+
+```typescript
+// Service Layer (Business Logic)
+export class LibraryService {
+  async createLibraryItem(input: CreateInput): Promise<ServiceResult> {
+    // Validation, transformation, repository calls
+    const item = await createLibraryItem({ ... });
+    return { success: true, data: { item } };
+  }
+}
+
+// Server Action (Thin Wrapper)
+export const createLibraryItemAction = authorizedActionClient
+  .inputSchema(schema)
+  .action(async ({ parsedInput, ctx: { userId } }) => {
+    const result = await libraryService.createLibraryItem({
+      userId,
+      ...parsedInput
+    });
+
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  });
+```
+
+### Core Services
+
+1. **LibraryService** (`shared/services/library/`)
+   - Library item CRUD operations
+   - Status management and filtering
+   - Multi-platform support
+
+2. **GameService** (`shared/services/game/`)
+   - Game CRUD operations
+   - IGDB integration wrapper
+   - Search functionality
+
+3. **ReviewService** (`shared/services/review/`)
+   - Review CRUD operations
+   - Rating aggregation
+
+4. **UserService** (`shared/services/user/`)
+   - User profile operations
+   - Steam integration management
+
+5. **JournalService** (`shared/services/journal/`)
+   - Journal entry CRUD
+   - Mood and session tracking
+
+### Testing Strategy
+
+**Service Layer Testing:**
+
+- > 90% unit test coverage requirement
+- Mocked repository dependencies
+- Comprehensive error scenario coverage
+- Business logic validation
+
+**Integration Testing:**
+
+- Server actions with real services
+- Service composition testing
+- End-to-end flow validation
+
+### Migration Status
+
+**Implemented:**
+
+- ✅ CollectionService (view-collection feature)
+- ✅ Architecture specification complete
+
+**In Progress:**
+
+- 🔄 Core services implementation (LibraryService, GameService, etc.)
+- 🔄 Feature-by-feature migration
+
+**Target Completion:** 6-7 weeks from start date
+
+**Documentation:**
+
+- [Architecture Standardization Spec](../spec/003-architecture-standardization/) - Complete specification
+- [Functional Spec](../spec/003-architecture-standardization/functional-spec.md) - Business requirements
+- [Technical Spec](../spec/003-architecture-standardization/technical-considerations.md) - Implementation details
+- [Task List](../spec/003-architecture-standardization/tasks.md) - Execution plan

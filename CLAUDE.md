@@ -6,35 +6,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Core Development
 
-- `bun dev` - Start development server on port 6060 with Turbopack
-- `bun build` - Build the application
-- `bun start` - Start production server
-- `bun preview` - Build and start production server on port 6060
+- `pnpmdev` - Start development server on port 6060 with Turbopack
+- `pnpmbuild` - Build the application
+- `pnpmstart` - Start production server
+- `pnpmpreview` - Build and start production server on port 6060
 
 ### Code Quality
 
-- `bun lint` - Run ESLint
-- `bun lint:fix` - Run ESLint with auto-fix
-- `bun typecheck` - Run TypeScript type checking
-- `bun format:write` - Format code with Prettier
-- `bun format:check` - Check code formatting
-- `bun code-fix` - Run format:write and lint:fix together
-- `bun code-check` - Run format:check, lint, and typecheck together
+- `pnpmlint` - Run ESLint
+- `pnpmlint:fix` - Run ESLint with auto-fix
+- `pnpmtypecheck` - Run TypeScript type checking
+- `pnpmformat:write` - Format code with Prettier
+- `pnpmformat:check` - Check code formatting
+- `pnpmcode-fix` - Run format:write and lint:fix together
+- `pnpmcode-check` - Run format:check, lint, and typecheck together
 
 ### Testing
 
-- `bun run test` - Run all tests (unit and integration)
-- `bun run test:unit` - Run unit tests with mocked Prisma (fast)
-- `bun run test:integration` - Run integration tests with real database
-- `bun run test:unit:watch` - Watch unit tests
-- `bun run test:integration:watch` - Watch integration tests
-- `bun run test:coverage` - Run tests with coverage report
-- `bun run test:db:setup` - Start test database with Docker
-- `bun run test:db:teardown` - Stop test database
+- `pnpmrun test` - Run all tests (unit and integration)
+- `pnpmrun test:unit` - Run unit tests with mocked Prisma (fast)
+- `pnpmrun test:integration` - Run integration tests with real database
+- `pnpmrun test:unit:watch` - Watch unit tests
+- `pnpmrun test:integration:watch` - Watch integration tests
+- `pnpmrun test:coverage` - Run tests with coverage report
+- `pnpmrun test:db:setup` - Start test database with Docker
+- `pnpmrun test:db:teardown` - Stop test database
 
 ### Database
 
-- `bun postinstall` - Generate Prisma client (runs automatically after install)
+- `pnpmpostinstall` - Generate Prisma client (runs automatically after install)
 
 ## Architecture Overview
 

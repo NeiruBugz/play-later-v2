@@ -37,20 +37,17 @@ ReviewForm (Standalone form)
 #### Components (`/components/`)
 
 - **`add-review-dialog.tsx`** (Lines 1-44): Modal wrapper component
-
   - Renders shadcn/ui Dialog with trigger button
   - Displays game title and contextual description
   - Contains AddReviewForm for actual review submission
 
 - **`add-review-form.tsx`** (Lines 1-102): Primary form with next-safe-action integration
-
   - Uses `useAction` hook for type-safe server actions
   - Implements 10-star rating with visual feedback
   - Includes platform selection dropdown
   - Form validation and submission handling
 
 - **`review-form.tsx`** (Lines 1-75): Simplified standalone form
-
   - Direct server action calls without next-safe-action
   - Minimal form interface for embedded contexts
   - Client-side state management with useState
@@ -141,7 +138,6 @@ The feature includes comprehensive testing across all layers:
 #### Component Tests
 
 - **`add-review-dialog.test.tsx`**: Dialog behavior and form integration
-
   - Dialog rendering with correct title/description (Lines 48-54)
   - Rating button interactions and state management (Lines 60-67)
   - Form submission flow validation (Lines 69-83)
@@ -197,26 +193,26 @@ The feature includes comprehensive testing across all layers:
 
 ```bash
 # Run all review-related tests
-bun run test add-review
+pnpmrun test add-review
 
 # Watch mode for component tests
-bun run test:unit:watch add-review
+pnpmrun test:unit:watch add-review
 
 # Coverage for review feature
-bun run test:coverage --testNamePattern="add-review|review"
+pnpmrun test:coverage --testNamePattern="add-review|review"
 ```
 
 ### Development Workflow
 
 ```bash
 # Start development server
-bun dev
+pnpmdev
 
 # Run type checking
-bun typecheck
+pnpmtypecheck
 
 # Format and lint
-bun code-fix
+pnpmcode-fix
 ```
 
 ## Usage Examples

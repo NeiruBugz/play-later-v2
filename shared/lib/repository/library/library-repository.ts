@@ -24,16 +24,8 @@ export async function createLibraryItem({
   return prisma.libraryItem.create({
     data: {
       ...libraryItem,
-      User: {
-        connect: {
-          id: userId,
-        },
-      },
-      game: {
-        connect: {
-          id: gameId,
-        },
-      },
+      User: { connect: { id: userId } },
+      game: { connect: { id: gameId } },
     },
   });
 }
@@ -43,21 +35,14 @@ export async function deleteLibraryItem({
   userId,
 }: DeleteLibraryItemInput) {
   const item = await prisma.libraryItem.findUnique({
-    where: {
-      id: libraryItemId,
-      userId,
-    },
+    where: { id: libraryItemId, userId },
   });
 
   if (!item) {
     throw new Error("Library item not found");
   }
 
-  return prisma.libraryItem.delete({
-    where: {
-      id: libraryItemId,
-    },
-  });
+  return prisma.libraryItem.delete({ where: { id: libraryItemId } });
 }
 
 export async function updateLibraryItem({
@@ -65,10 +50,7 @@ export async function updateLibraryItem({
   libraryItem,
 }: UpdateLibraryItemInput) {
   const item = await prisma.libraryItem.findUnique({
-    where: {
-      id: libraryItem.id,
-      userId,
-    },
+    where: { id: libraryItem.id, userId },
   });
 
   if (!item) {
@@ -76,12 +58,8 @@ export async function updateLibraryItem({
   }
 
   return prisma.libraryItem.update({
-    where: {
-      id: libraryItem.id,
-    },
-    data: {
-      ...libraryItem,
-    },
+    where: { id: libraryItem.id },
+    data: { ...libraryItem },
   });
 }
 
@@ -90,12 +68,7 @@ export async function getLibraryItemsForUserByIgdbId({
   igdbId,
 }: GetLibraryItemsForUserByIgdbIdInput) {
   const items = await prisma.libraryItem.findMany({
-    where: {
-      userId,
-      game: {
-        igdbId,
-      },
-    },
+    where: { userId, game: { igdbId } },
   });
   return items;
 }
@@ -115,24 +88,15 @@ export async function getLibraryCount({
   status,
   gteClause,
 }: GetLibraryCountInput) {
-  return prisma.libraryItem.count({
-    where: { userId, status, ...gteClause },
-  });
+  return prisma.libraryItem.count({ where: { userId, status, ...gteClause } });
 }
 
 export async function getPlatformBreakdown({ userId }: { userId: string }) {
   return prisma.libraryItem.groupBy({
     by: ["platform"],
-    where: {
-      userId,
-      platform: { not: null },
-    },
+    where: { userId, platform: { not: null } },
     _count: true,
-    orderBy: {
-      _count: {
-        platform: "desc",
-      },
-    },
+    orderBy: { _count: { platform: "desc" } },
     take: 5,
   });
 }
@@ -155,20 +119,9 @@ export async function getRecentlyCompletedLibraryItems({
   userId: string;
 }) {
   return prisma.libraryItem.findMany({
-    where: {
-      userId,
-      status: LibraryItemStatus.EXPERIENCED,
-    },
-    include: {
-      game: {
-        select: {
-          title: true,
-        },
-      },
-    },
-    orderBy: {
-      completedAt: "desc",
-    },
+    where: { userId, status: LibraryItemStatus.EXPERIENCED },
+    include: { game: { select: { title: true } } },
+    orderBy: { completedAt: "desc" },
     take: 3,
   });
 }
@@ -183,10 +136,7 @@ export async function getUniquePlatforms({ userId }: { userId: string }) {
 
 export async function getOtherUsersLibraries({ userId }: { userId: string }) {
   const userGames = await prisma.libraryItem.findMany({
-    where: {
-      userId: { not: userId },
-      User: { username: { not: null } },
-    },
+    where: { userId: { not: userId }, User: { username: { not: null } } },
     include: { game: true, User: true },
     orderBy: { createdAt: "asc" },
   });
@@ -207,15 +157,7 @@ export async function getOtherUsersLibraries({ userId }: { userId: string }) {
 export async function getLibraryByUsername({ username }: { username: string }) {
   return prisma.libraryItem.findMany({
     where: { User: { username } },
-    include: {
-      game: {
-        select: {
-          id: true,
-          title: true,
-          coverImage: true,
-        },
-      },
-    },
+    include: { game: { select: { id: true, title: true, coverImage: true } } },
     orderBy: { createdAt: "asc" },
   });
 }
@@ -226,30 +168,17 @@ export async function getWishlistedItemsByUsername({
   username: string;
 }) {
   return prisma.libraryItem.findMany({
-    where: {
-      User: {
-        username,
-      },
-      status: LibraryItemStatus.WISHLIST,
-    },
-    include: {
-      game: true,
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
+    where: { User: { username }, status: LibraryItemStatus.WISHLIST },
+    include: { game: true },
+    orderBy: { createdAt: "asc" },
   });
 }
 
 export async function findWishlistItemsForUser({ userId }: { userId: string }) {
   return prisma.libraryItem.findMany({
     where: { userId, status: LibraryItemStatus.WISHLIST },
-    include: {
-      game: true,
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
+    include: { game: true },
+    orderBy: { createdAt: "asc" },
   });
 }
 
@@ -262,11 +191,7 @@ export async function findUpcomingWishlistItems({
     where: {
       userId,
       status: LibraryItemStatus.WISHLIST,
-      game: {
-        releaseDate: {
-          gte: new Date(),
-        },
-      },
+      game: { releaseDate: { gte: new Date() } },
     },
     include: {
       game: {
@@ -287,18 +212,10 @@ export async function findCurrentlyPlayingGames({
   userId: string;
 }) {
   return prisma.libraryItem.findMany({
-    where: {
-      userId,
-      status: LibraryItemStatus.CURRENTLY_EXPLORING,
-    },
+    where: { userId, status: LibraryItemStatus.CURRENTLY_EXPLORING },
     include: {
       game: {
-        select: {
-          id: true,
-          title: true,
-          igdbId: true,
-          coverImage: true,
-        },
+        select: { id: true, title: true, igdbId: true, coverImage: true },
       },
     },
     orderBy: { createdAt: "asc" },
@@ -327,12 +244,7 @@ export function buildCollectionFilter({
 
   const gameFilter: Prisma.GameWhereInput = {
     libraryItems: { some: libraryFilter },
-    ...(search != null && {
-      title: {
-        contains: search,
-        mode: "insensitive",
-      },
-    }),
+    ...(search != null && { title: { contains: search, mode: "insensitive" } }),
   };
 
   return { gameFilter, libraryFilter };
@@ -346,11 +258,7 @@ export async function addGameToUserLibrary({
   return prisma.$transaction(async () => {
     const game = await findOrCreateGameByIgdbId({ igdbId });
 
-    await createLibraryItem({
-      libraryItem,
-      userId,
-      gameId: game.id,
-    });
+    await createLibraryItem({ libraryItem, userId, gameId: game.id });
 
     return game;
   });

@@ -486,8 +486,8 @@ grep -r "import.*BacklogItem" --include="*.ts" --include="*.tsx"
 
 **Mitigation**:
 
-1. Use TypeScript compiler to catch type errors: `bun typecheck`
-2. Run comprehensive test suite: `bun run test`
+1. Use TypeScript compiler to catch type errors: `pnpmtypecheck`
+2. Run comprehensive test suite: `pnpmrun test`
 3. Use IDE/editor find-and-replace with regex to ensure complete coverage
 4. Create a checklist of all affected areas (see Implementation Checklist below)
 
@@ -510,7 +510,7 @@ grep -r "import.*BacklogItem" --include="*.ts" --include="*.tsx"
 **Mitigation**:
 
 1. Update all imports simultaneously using automated tools
-2. Run build process to detect cycles: `bun build`
+2. Run build process to detect cycles: `pnpmbuild`
 3. Use TypeScript path aliases to maintain clean import structure
 
 #### Risk 4: Test Failures
@@ -531,7 +531,7 @@ grep -r "import.*BacklogItem" --include="*.ts" --include="*.tsx"
 **Mitigation**:
 
 1. Clear Next.js cache: `rm -rf .next`
-2. Regenerate Prisma client: `bun prisma generate`
+2. Regenerate Prisma client: `pnpmprisma generate`
 3. Restart development server after schema changes
 4. Clear browser cache for client-side issues
 
@@ -547,20 +547,20 @@ grep -r "import.*BacklogItem" --include="*.ts" --include="*.tsx"
 
    ```bash
    # Start test database
-   bun run test:db:setup
+   pnpmrun test:db:setup
 
    # Run migration
-   bun prisma migrate dev --name savepoint_vision_migration
+   pnpmprisma migrate dev --name savepoint_vision_migration
 
    # Verify schema
-   bun prisma db pull
-   bun prisma studio  # Visual inspection
+   pnpmprisma db pull
+   pnpmprisma studio  # Visual inspection
    ```
 
 2. **Migration Dry Run**:
    ```bash
    # Generate SQL without applying
-   bun prisma migrate diff \
+   pnpmprisma migrate diff \
      --from-schema-datamodel prisma/schema.prisma \
      --to-schema-datamodel prisma/schema-new.prisma \
      --script > migration-preview.sql
@@ -572,7 +572,7 @@ grep -r "import.*BacklogItem" --include="*.ts" --include="*.tsx"
 
 ```bash
 # TypeScript compilation
-bun typecheck
+pnpmtypecheck
 
 # No TypeScript errors should exist
 ```
@@ -581,18 +581,18 @@ bun typecheck
 
 ```bash
 # Run all unit tests
-bun run test:unit
+pnpmrun test:unit
 
 # Target specific test suites
-bun run test:unit shared/lib/repository/library
-bun run test:unit features/manage-library-item
+pnpmrun test:unit shared/lib/repository/library
+pnpmrun test:unit features/manage-library-item
 ```
 
 **Integration Test Execution**:
 
 ```bash
 # Run integration tests with test database
-bun run test:integration
+pnpmrun test:integration
 
 # Verify database operations work correctly
 ```
@@ -654,10 +654,10 @@ bun run test:integration
   - [ ] Create `JournalMood` enum
   - [ ] Create `JournalVisibility` enum
   - [ ] Update User and Game relations
-- [ ] Generate migration: `bun prisma migrate dev --name savepoint_vision_migration`
+- [ ] Generate migration: `pnpmprisma migrate dev --name savepoint_vision_migration`
 - [ ] Test migration on local Docker database
-- [ ] Verify schema with `bun prisma studio`
-- [ ] Regenerate Prisma client: `bun prisma generate`
+- [ ] Verify schema with `pnpmprisma studio`
+- [ ] Regenerate Prisma client: `pnpmprisma generate`
 
 ### 5.3 Repository Layer Refactoring
 
@@ -703,21 +703,21 @@ bun run test:integration
   - [ ] Replace `BacklogItemStatus` → `LibraryItemStatus`
   - [ ] Update enum values in test assertions
   - [ ] Update mock data with new types
-- [ ] Run test suite: `bun run test`
+- [ ] Run test suite: `pnpmrun test`
 - [ ] Fix any failing tests
 
 ### 5.7 Type Safety Verification
 
-- [ ] Run TypeScript compiler: `bun typecheck`
+- [ ] Run TypeScript compiler: `pnpmtypecheck`
 - [ ] Fix all TypeScript errors
-- [ ] Run ESLint: `bun lint`
+- [ ] Run ESLint: `pnpmlint`
 - [ ] Fix linting issues
-- [ ] Run Prettier: `bun format:check`
+- [ ] Run Prettier: `pnpmformat:check`
 
 ### 5.8 Final Verification
 
-- [ ] Run full test suite: `bun run test`
-- [ ] Start dev server: `bun dev`
+- [ ] Run full test suite: `pnpmrun test`
+- [ ] Start dev server: `pnpmdev`
 - [ ] Manually test critical flows:
   - [ ] Add game to library
   - [ ] Update game status
@@ -748,7 +748,7 @@ Since there are no production users, rollback is simplified but still important 
 
 ```bash
 # Roll back last migration
-bun prisma migrate reset
+pnpmprisma migrate reset
 
 # Or manually restore from backup
 psql -U username -d database_name < backup.sql
@@ -770,13 +770,13 @@ git reset --hard origin/main
 
 ```bash
 # Regenerate Prisma client from schema
-bun prisma generate
+pnpmprisma generate
 
 # Clear Next.js build cache
 rm -rf .next
 
 # Restart development server
-bun dev
+pnpmdev
 ```
 
 ---
@@ -788,31 +788,26 @@ bun dev
 **Breakdown**:
 
 1. **Prisma Schema & Migration** (2-3 hours)
-
    - Update schema
    - Create migration
    - Test migration locally
 
 2. **Repository Layer Refactoring** (2-3 hours)
-
    - Rename directories and files
    - Update all methods
    - Create journal repository
 
 3. **Feature Directory Refactoring** (3-4 hours)
-
    - Rename directories
    - Update components
    - Update server actions
 
 4. **Shared Code & Components** (2-3 hours)
-
    - Update enum mappers
    - Rename components
    - Update types and services
 
 5. **Test Updates** (2-3 hours)
-
    - Update test factories
    - Fix failing tests
    - Add new tests for journal feature
@@ -829,13 +824,11 @@ bun dev
 ### 8.1 Immediate Follow-Up
 
 1. **Create Journal Entry UI Components**:
-
    - Rich text editor integration
    - Journal entry form
    - Timeline view component
 
 2. **Update API Documentation**:
-
    - Document new LibraryItem types
    - Document JournalEntry endpoints (when created)
 
@@ -847,14 +840,12 @@ bun dev
 ### 8.2 Future Enhancements
 
 1. **Journal Feature Implementation**:
-
    - Create server actions for journal CRUD
    - Build journal timeline UI
    - Implement privacy controls
    - Add mood indicators
 
 2. **UI/UX Language Revision**:
-
    - Update all user-facing text
    - Revise empty states
    - Update tooltips and help text

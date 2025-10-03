@@ -16,28 +16,20 @@ export const setupDatabase = async () => {
     // Use Docker to run PostgreSQL commands
     execSync(
       `docker exec play-later-postgres dropdb --if-exists -U postgres ${testDatabaseName}`,
-      {
-        stdio: "ignore",
-      }
+      { stdio: "ignore" }
     );
     execSync(
       `docker exec play-later-postgres createdb -U postgres ${testDatabaseName}`,
-      {
-        stdio: "ignore",
-      }
+      { stdio: "ignore" }
     );
 
-    execSync("bun prisma migrate deploy", {
+    execSync("pnpmprisma migrate deploy", {
       stdio: "ignore",
       env: { ...process.env, POSTGRES_PRISMA_URL: databaseUrl },
     });
 
     testDataBase = new PrismaClient({
-      datasources: {
-        db: {
-          url: databaseUrl,
-        },
-      },
+      datasources: { db: { url: databaseUrl } },
     });
 
     await testDataBase.$connect();
