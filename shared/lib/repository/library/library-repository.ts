@@ -154,6 +154,58 @@ export async function getOtherUsersLibraries({ userId }: { userId: string }) {
   return Object.values(groupedByUser);
 }
 
+export async function getOtherUsersLibrariesPaginated({
+  userId,
+  page = 1,
+  itemsPerPage = 24,
+  search,
+}: {
+  userId: string;
+  page?: number;
+  itemsPerPage?: number;
+  search?: string;
+}) {
+  const skip = Math.max((page || 1) - 1, 0) * itemsPerPage;
+  const userWhere: Prisma.UserWhereInput = {
+    id: { not: userId },
+    username: { not: null },
+    ...(search
+      ? {
+          OR: [
+            { username: { contains: search, mode: "insensitive" } },
+            { name: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+
+  const [users, total] = await prisma.$transaction([
+    prisma.user.findMany({
+      where: userWhere,
+      orderBy: { username: "asc" },
+      skip,
+      take: itemsPerPage,
+      include: {
+        _count: { select: { LibraryItem: true } },
+        LibraryItem: {
+          include: { game: true },
+          orderBy: { createdAt: "asc" },
+          take: 3,
+        },
+      },
+    }),
+    prisma.user.count({ where: userWhere }),
+  ]);
+
+  const result = users.map((u) => ({
+    user: u,
+    previewItems: u.LibraryItem,
+    totalCount: u._count.LibraryItem,
+  }));
+
+  return { users: result, count: total };
+}
+
 export async function getLibraryByUsername({ username }: { username: string }) {
   return prisma.libraryItem.findMany({
     where: { User: { username } },

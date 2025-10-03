@@ -4,10 +4,13 @@ import Link from "next/link";
 
 import { FilterParamsSchema } from "@/features/view-collection/lib/validation";
 import { GridView } from "@/shared/components/grid-view";
-import { ListView } from "@/shared/components/list-view";
+import { EmptyState } from "@/shared/components/list/empty-state";
+import { ErrorState } from "@/shared/components/list/error-state";
+import { Pagination } from "@/shared/components/list/pagination";
+import { GridSkeleton } from "@/shared/components";
 
 import { useGetCollection } from "../hooks/use-get-collection";
-import { Pagination } from "./pagination";
+// removed local pagination in favor of shared pagination
 
 export function CollectionList(props: {
   params: Record<string, string | string[] | undefined>;
@@ -33,100 +36,60 @@ export function CollectionList(props: {
   const { data, isLoading, isError } = useGetCollection(filterParams);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="space-y-4 text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-muted-foreground">Loading your collection...</p>
-        </div>
-      </div>
-    );
+    return <GridSkeleton count={12} />;
   }
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="space-y-4 text-center">
-          <h2 className="text-2xl font-semibold text-destructive">
-            Something went wrong
-          </h2>
-          <p className="text-muted-foreground">
-            Failed to load your collection. Please try refreshing the page.
-          </p>
-        </div>
-      </div>
+      <ErrorState message="Failed to load your collection. Please try refreshing." />
     );
   }
 
   if (!data) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="space-y-4 text-center">
-          <h1 className="text-3xl font-bold">Your collection is empty</h1>
-          <p className="text-muted-foreground">
-            Start{" "}
-            <Link
-              href="/collection/add-game"
-              className="font-semibold text-primary underline hover:no-underline"
-            >
-              adding games
-            </Link>{" "}
-            to your collection to get started
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        title="Your collection is empty"
+        description={
+          (
+            <>
+              Start <Link href="/collection/add-game" className="font-semibold text-primary underline hover:no-underline">adding games</Link> to your collection to get started
+            </>
+          ) as unknown as string
+        }
+      />
     );
   }
 
-  const viewMode = params.viewMode || "grid";
+  // Grid-only view; view mode has been removed
 
   if (
     !data?.collection ||
     (data.collection.length === 0 && Object.keys(params).length === 0)
   ) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="space-y-4 text-center">
-          <h1 className="text-3xl font-bold">Your collection is empty</h1>
-          <p className="text-muted-foreground">
-            Start{" "}
-            <Link
-              href="/collection/add-game"
-              className="font-semibold text-primary underline hover:no-underline"
-            >
-              adding games
-            </Link>{" "}
-            to your collection to get started
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        title="Your collection is empty"
+        description={
+          (
+            <>
+              Start <Link href="/collection/add-game" className="font-semibold text-primary underline hover:no-underline">adding games</Link> to your collection to get started
+            </>
+          ) as unknown as string
+        }
+      />
     );
   }
 
   if (data.collection.length === 0 && Object.keys(params).length !== 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="space-y-4 text-center">
-          <h2 className="text-2xl font-semibold">No games found</h2>
-          <p className="text-muted-foreground">
-            Try adjusting your filters or search terms
-          </p>
-        </div>
-      </div>
+      <EmptyState title="No games found" description="Try adjusting your filters or search terms" />
     );
   }
 
   return (
     <div className="space-y-6">
-      {viewMode === "list" ? (
-        <ListView libraryItems={data.collection} />
-      ) : (
-        <GridView libraryItems={data.collection} />
-      )}
-
-      <div className="flex items-center justify-center">
-        <Pagination totalCount={data.count} />
-      </div>
+      <GridView libraryItems={data.collection} />
+      <Pagination total={data.count} pageSize={24} basePath="/collection" />
     </div>
   );
 }

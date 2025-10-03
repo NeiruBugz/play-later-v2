@@ -1,1 +1,5 @@
-export { getWishlistedItemsByUsername } from "./get-wishlisted-items";
+export {
+  getWishlistedItemsByUsername,
+  getWishlistedGamesByUsername,
+  getWishlistedGames,
+} from "./get-wishlisted-items";

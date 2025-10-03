@@ -5,12 +5,16 @@ import { Suspense } from "react";
 import { BacklogList } from "@/features/view-backlogs/components";
 import { Header } from "@/shared/components/header";
 import { Body, ResponsiveHeading } from "@/shared/components/typography";
+import { Toolbar, ListSearchInput, Pagination, GridSkeleton } from "@/shared/components";
 
-export default async function BacklogsPage() {
+export default async function BacklogsPage(
+  props: PageProps<"/backlog">
+) {
   const session = await auth();
   if (!session) {
     redirect("/");
   }
+  const awaitedSearchParams = await props.searchParams;
   return (
     <>
       <Header authorized />
@@ -19,8 +23,9 @@ export default async function BacklogsPage() {
           <ResponsiveHeading level={1}>Backlogs</ResponsiveHeading>
           <Body variant="muted">Browse through other users&apos; backlogs</Body>
         </div>
-        <Suspense fallback="Loading...">
-          <BacklogList />
+        <Toolbar searchSlot={<ListSearchInput placeholder="Search users..." />} />
+        <Suspense fallback={<GridSkeleton count={12} />}>
+          <BacklogList params={awaitedSearchParams} />
         </Suspense>
       </div>
     </>

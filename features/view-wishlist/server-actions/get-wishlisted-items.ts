@@ -4,6 +4,7 @@ import {
   findWishlistItemsForUser,
   getWishlistedItemsByUsername as getWishlistedItemsByUsernameCommand,
 } from "@/shared/lib/repository";
+import { findGamesWithLibraryItemsPaginated } from "@/shared/lib/repository/game/game-repository";
 import {
   authorizedActionClient,
   publicActionClient,
@@ -49,3 +50,71 @@ export const getWishlistedItemsByUsername = publicActionClient
       return [];
     }
   });
+
+// New: paginated, searchable personal wishlist
+export const getWishlistedGames = authorizedActionClient
+  .metadata({ actionName: "getWishlistedGames", requiresAuth: true })
+  .inputSchema(
+    z.object({
+      page: z.number().int().min(1).default(1),
+      limit: z.number().int().min(1).max(100).default(24),
+      search: z.string().optional(),
+    })
+  )
+  .action(async ({ ctx: { userId }, parsedInput: { page, limit, search } }) => {
+    try {
+      const where = {
+        title: search ? { contains: search, mode: "insensitive" as const } : undefined,
+        libraryItems: {
+          some: { userId, status: "WISHLIST" },
+        },
+      };
+
+      const [games, total] = await findGamesWithLibraryItemsPaginated({
+        where,
+        page,
+        itemsPerPage: limit,
+      });
+
+      const items = games.map((game) => ({ game, libraryItems: game.libraryItems }));
+      return { items, count: total };
+    } catch (e) {
+      console.error(e);
+      return { items: [], count: 0 };
+    }
+  });
+
+// New: paginated, searchable shared wishlist by username
+export const getWishlistedGamesByUsername = publicActionClient
+  .metadata({ actionName: "getWishlistedGamesByUsername", requiresAuth: false })
+  .inputSchema(
+    z.object({
+      username: z.string(),
+      page: z.number().int().min(1).default(1),
+      limit: z.number().int().min(1).max(100).default(24),
+      search: z.string().optional(),
+    })
+  )
+  .action(
+    async ({ parsedInput: { username, page, limit, search } }) => {
+      try {
+        const where = {
+          title: search ? { contains: search, mode: "insensitive" as const } : undefined,
+          libraryItems: {
+            some: { status: "WISHLIST", User: { username } },
+          },
+        };
+
+        const [games, total] = await findGamesWithLibraryItemsPaginated({
+          where,
+          page,
+          itemsPerPage: limit,
+        });
+        const items = games.map((game) => ({ game, libraryItems: game.libraryItems }));
+        return { items, count: total };
+      } catch (e) {
+        console.error(e);
+        return { items: [], count: 0 };
+      }
+    }
+  );

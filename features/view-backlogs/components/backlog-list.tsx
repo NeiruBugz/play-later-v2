@@ -1,57 +1,55 @@
-import { type Game, type LibraryItem } from "@prisma/client";
 import Link from "next/link";
 
+import { EmptyState, ErrorState, ListPagination } from "@/shared/components";
 import { IgdbImage } from "@/shared/components/igdb-image";
-import { type UserWithLibraryItemsResponse } from "@/shared/lib/repository/library/types";
 
 import { getBacklogs } from "../server-actions";
 
 const MAX_LIBRARY_ITEMS_PER_USER_CARD = 3;
 const GAME_CARD_SIZE = 90;
 
-export async function BacklogList() {
-  const { data: backlogs, serverError } = await getBacklogs();
+export async function BacklogList(props: {
+  params: Record<string, string | string[] | undefined>;
+}) {
+  const { params } = props;
+  const page = Number(params.page ?? 1) || 1;
+  const search = (params.search as string) || undefined;
 
-  if (serverError !== undefined) {
-    return <div>{serverError}</div>;
+  const { data, serverError } = await getBacklogs({ page, limit: 24, search });
+
+  if (serverError) {
+    return <ErrorState message={serverError} />;
   }
 
-  if (!backlogs || backlogs.length === 0) {
+  const users = data?.users ?? [];
+  const count = data?.count ?? 0;
+
+  if (!users.length) {
     return (
-      <>
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          No other backlogs found
-        </h4>
-        <p className="leading-7 [&:not(:first-child)]:mt-6">
-          We&apos;re not showing backlogs from users without a username
-        </p>
-      </>
+      <EmptyState
+        title="No other backlogs found"
+        description="We don't show backlogs from users without a username"
+      />
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {backlogs.map((backlog: UserWithLibraryItemsResponse) => {
-        return (
-          <Link
-            key={backlog.user.id}
-            className="w-fit text-lg font-medium"
-            href={`/backlog/${backlog.user.username}`}
-          >
-            <div className="relative h-full w-fit min-w-[270px] rounded-md border p-3">
-              <p className="text-lg font-medium">
-                {backlog.user.username ?? backlog.user.name}&apos;s backlog
-              </p>
-              <div className="relative mt-2 h-[90px] w-full">
-                {backlog.libraryItems.map(
-                  (
-                    libraryItem: LibraryItem & { game: Game },
-                    index: number
-                  ) => {
-                    if (index >= MAX_LIBRARY_ITEMS_PER_USER_CARD) {
-                      return null;
-                    }
-
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {users.map((backlog) => {
+          return (
+            <Link
+              key={backlog.user.id}
+              className="w-fit text-lg font-medium"
+              href={`/backlog/${backlog.user.username}`}
+            >
+              <div className="relative h-full w-fit min-w-[270px] rounded-md border p-3">
+                <p className="text-lg font-medium">
+                  {backlog.user.username ?? backlog.user.name}&apos;s backlog
+                </p>
+                <div className="relative mt-2 h-[90px] w-full">
+                  {backlog.previewItems.map((libraryItem, index: number) => {
+                    if (index >= MAX_LIBRARY_ITEMS_PER_USER_CARD) return null;
                     return (
                       <div
                         className="absolute top-0"
@@ -65,9 +63,7 @@ export async function BacklogList() {
                           <div className="flex size-[90px] items-center justify-center">
                             <IgdbImage
                               className="size-full rounded-xl object-cover"
-                              style={{
-                                maxWidth: "100%",
-                              }}
+                              style={{ maxWidth: "100%" }}
                               gameTitle={libraryItem.game.title}
                               coverImageId={libraryItem.game.coverImage}
                               igdbSrcSize={"hd"}
@@ -77,23 +73,23 @@ export async function BacklogList() {
                         </div>
                       </div>
                     );
-                  }
-                )}
-                {backlog.libraryItems.length - MAX_LIBRARY_ITEMS_PER_USER_CARD >
-                0 ? (
-                  <div className="absolute left-[135px] top-0 z-10 flex size-[92px] items-center justify-center rounded-xl bg-slate-200/85">
-                    <span className="text-xl font-bold">
-                      +&nbsp;
-                      {backlog.libraryItems.length -
-                        MAX_LIBRARY_ITEMS_PER_USER_CARD}
-                    </span>
-                  </div>
-                ) : null}
+                  })}
+                  {backlog.totalCount - MAX_LIBRARY_ITEMS_PER_USER_CARD > 0 ? (
+                    <div className="absolute left-[135px] top-0 z-10 flex size-[92px] items-center justify-center rounded-xl bg-slate-200/85">
+                      <span className="text-xl font-bold">
+                        +&nbsp;{backlog.totalCount - MAX_LIBRARY_ITEMS_PER_USER_CARD}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          </Link>
-        );
-      })}
+            </Link>
+          );
+        })}
+      </div>
+      <div className="flex justify-center">
+        <ListPagination total={count} pageSize={24} basePath="/backlog" />
+      </div>
     </div>
   );
 }

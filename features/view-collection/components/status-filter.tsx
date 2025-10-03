@@ -41,12 +41,6 @@ const statusOptions = [
     icon: "✅",
   },
   {
-    value: "WISHLIST",
-    label: LibraryStatusMapper.WISHLIST,
-    shortLabel: "Wishlist",
-    icon: "⭐",
-  },
-  {
     value: "REVISITING",
     label: LibraryStatusMapper.REVISITING,
     shortLabel: "Revisit",

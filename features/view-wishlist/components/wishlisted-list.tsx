@@ -1,37 +1,52 @@
 import Link from "next/link";
 
-import { getWishlistedItems } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
+import { getWishlistedGames } from "@/features/view-wishlist/server-actions";
+import { EmptyState, ErrorState, Pagination } from "@/shared/components";
 import { LibraryItemCard } from "@/shared/components/library-item-card";
 
-export async function WishlistedList() {
-  const { data: wishlistedItems, serverError } = await getWishlistedItems();
+export async function WishlistedList(props: {
+  params: Record<string, string | string[] | undefined>;
+}) {
+  const { params } = props;
+  const page = Number(params.page ?? 1) || 1;
+  const search = (params.search as string) || undefined;
+
+  const { data, serverError } = await getWishlistedGames({ page, limit: 24, search });
 
   if (serverError) {
-    return <div>{serverError}</div>;
+    return <ErrorState message={serverError} />;
   }
 
-  if (!wishlistedItems || wishlistedItems.length === 0) {
+  const items = data?.items ?? [];
+  const count = data?.count ?? 0;
+
+  if (!items.length) {
     return (
-      <div className="flex flex-col items-center justify-center">
-        <h1 className="text-3xl font-bold">Your wishlist is empty</h1>
-        <p className="text-gray-500">
-          Start{" "}
-          <Link
-            href="/collection/add-game"
-            className="hover:font-bolder cursor-pointer font-bold underline"
-          >
-            adding
-          </Link>{" "}
-          games to your wishlist
-        </p>
-      </div>
+      <EmptyState
+        title="Your wishlist is empty"
+        description={
+          (
+            <>
+              Start
+              {" "}
+              <Link
+                href="/collection/add-game"
+                className="font-semibold text-primary underline hover:no-underline"
+              >
+                adding
+              </Link>
+              {" "}games to your wishlist
+            </>
+          )
+        }
+      />
     );
   }
 
   return (
-    <div>
-      <ul className="flex flex-wrap justify-center gap-3 md:justify-start">
-        {wishlistedItems.map(({ game, libraryItems }) => (
+    <div className="space-y-6">
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+        {items.map(({ game, libraryItems }) => (
           <li key={game.id}>
             <LibraryItemCard
               game={{
@@ -45,6 +60,7 @@ export async function WishlistedList() {
           </li>
         ))}
       </ul>
+      <Pagination total={count} pageSize={24} basePath="/collection/wishlist" />
     </div>
   );
 }

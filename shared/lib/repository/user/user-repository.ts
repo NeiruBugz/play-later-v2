@@ -20,10 +20,6 @@ export async function getUserBySteamId({
     },
   });
 
-  if (!user) {
-    throw new Error("User not found");
-  }
-
   return user;
 }
 
@@ -45,7 +41,7 @@ export async function updateUserSteamData({
     where: { id: userId },
     data: {
       steamId64: steamId,
-      username,
+      steamUsername: username,
       steamAvatar: avatar,
     },
   });

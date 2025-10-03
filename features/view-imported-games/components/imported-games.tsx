@@ -13,16 +13,13 @@ import {
 import { toast } from "sonner";
 
 import { Heading } from "@/shared/components/typography";
-import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
-import { Skeleton } from "@/shared/components/ui/skeleton";
+// no-op
+import { GridSkeleton } from "@/shared/components";
+import { Pagination, Toolbar, ListSearchInput } from "@/shared/components";
 
 import { getImportedGames } from "../server-actions/get-imported-games";
 import { ImportedGameCard } from "./imported-game-card";
-import {
-  ImportedGamesFilters,
-  type ImportedGamesFilters as FiltersType,
-} from "./imported-games-filters";
+import { ImportedGamesFilterPanel, type ImportedGamesFilters as FiltersType } from "./imported-games-filter-panel";
 
 type ImportedGame = {
   id: string;
@@ -75,34 +72,13 @@ function optimisticReducer(
   }
 }
 
-function ImportedGamesSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {Array.from({ length: 10 }).map((_, i) => (
-        <Card key={i} className="h-full overflow-hidden">
-          <div className="aspect-[16/9]">
-            <Skeleton className="size-full" />
-          </div>
-          <CardHeader className="p-3 pb-2">
-            <Skeleton className="h-4 w-3/4" />
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            <div className="flex justify-between">
-              <Skeleton className="h-3 w-12" />
-              <Skeleton className="h-3 w-16" />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
+// Use shared grid skeleton for consistency
 
 export function ImportedGames({
   initialGames,
   initialTotalGames,
   initialPage = 1,
-  limit = 20,
+  limit = 24,
 }: ImportedGamesProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -248,11 +224,15 @@ export function ImportedGames({
 
     return (
       <div className="space-y-6">
-        <ImportedGamesFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          totalGames={initialTotalGames}
-          filteredGames={0}
+        <Toolbar
+          searchSlot={<ListSearchInput placeholder="Search imported games..." />}
+          filtersPanel={
+            <ImportedGamesFilterPanel
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+            />
+          }
+          resultsText={`${initialTotalGames} games`}
         />
 
         <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -274,17 +254,31 @@ export function ImportedGames({
 
   return (
     <div className="space-y-6">
-      <ImportedGamesFilters
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        totalGames={initialTotalGames}
-        filteredGames={totalGames}
+      <Toolbar
+        searchSlot={<ListSearchInput placeholder="Search imported games..." />}
+        filtersPanel={
+          <ImportedGamesFilterPanel
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+          />
+        }
+        resultsText={
+          totalGames === initialTotalGames
+            ? `${totalGames} games`
+            : `${totalGames} of ${initialTotalGames} games`
+        }
+        hasActiveFilters={
+          !!filters.search || filters.storefront !== "ALL" || filters.sortBy !== "name" || filters.sortOrder !== "asc"
+        }
+        activeFiltersCount={
+          [filters.search && "s", filters.storefront !== "ALL" && "p"].filter(Boolean).length
+        }
       />
 
       <div className="relative">
         {isPending && !isSearchPending && (
           <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-sm">
-            <ImportedGamesSkeleton />
+            <GridSkeleton count={10} />
           </div>
         )}
 
@@ -303,55 +297,7 @@ export function ImportedGames({
         </div>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => loadPage(currentPage - 1)}
-            disabled={currentPage <= 1 || isPending}
-          >
-            Previous
-          </Button>
-
-          <div className="flex items-center space-x-1">
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNum: number;
-              if (totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (currentPage <= 3) {
-                pageNum = i + 1;
-              } else if (currentPage >= totalPages - 2) {
-                pageNum = totalPages - 4 + i;
-              } else {
-                pageNum = currentPage - 2 + i;
-              }
-
-              return (
-                <Button
-                  key={pageNum}
-                  variant={currentPage === pageNum ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => loadPage(pageNum)}
-                  disabled={isPending}
-                  className="w-8"
-                >
-                  {pageNum}
-                </Button>
-              );
-            })}
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => loadPage(currentPage + 1)}
-            disabled={currentPage >= totalPages || isPending}
-          >
-            Next
-          </Button>
-        </div>
-      )}
+      <Pagination total={totalGames} pageSize={limit} />
     </div>
   );
 }
