@@ -41,7 +41,9 @@ export function About({
         <div>
           <h3 className="mb-2 font-medium">Genres</h3>
           <div className="flex flex-wrap gap-2">
-            {genres?.map((genre) => <Badge key={genre.id}>{genre.name}</Badge>)}
+            {genres?.map((genre) => (
+              <Badge key={genre.id}>{genre.name}</Badge>
+            ))}
           </div>
         </div>
       </div>

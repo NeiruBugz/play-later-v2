@@ -24,7 +24,7 @@ export const env = createEnv({
     AUTH_GOOGLE_ID: z.string({ message: "AUTH_GOOGLE_ID is required" }),
     AUTH_GOOGLE_SECRET: z.string({ message: "AUTH_GOOGLE_SECRET is required" }),
     AUTH_SECRET: z.string({ message: "AUTH_SECRET is required" }),
-    AUTH_URL: z.string().url({ message: "AUTH_URL is required" }).optional(),
+    AUTH_URL: z.string().url({ message: "AUTH_URL is required" }),
     IGDB_CLIENT_ID: z.string({ message: "IGDB_CLIENT_ID is required" }),
     IGDB_CLIENT_SECRET: z.string({ message: "IGDB_CLIENT_SECRET is required" }),
     NODE_ENV: z.enum(["development", "test", "production"]),
