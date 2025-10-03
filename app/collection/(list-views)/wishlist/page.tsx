@@ -4,6 +4,8 @@ import { Suspense } from "react";
 
 import { WishlistedList } from "@/features/view-wishlist/components";
 
+export const dynamic = "force-dynamic";
+
 export default async function WishlistPage() {
   const session = await auth();
   if (!session) {

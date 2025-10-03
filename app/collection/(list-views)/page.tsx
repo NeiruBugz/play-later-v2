@@ -11,6 +11,8 @@ import {
 } from "@/features/view-collection/components";
 import { getUserUniquePlatforms } from "@/features/view-collection/server-actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function CollectionPage(props: PageProps<"/collection">) {
   const session = await auth();
 
