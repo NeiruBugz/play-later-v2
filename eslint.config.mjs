@@ -10,7 +10,9 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...compat.config({
+    extends: ["plugin:@next/next/core-web-vitals", "next/typescript"],
+  }),
   {
     ignores: [
       "node_modules/**",
@@ -20,9 +22,9 @@ const eslintConfig = [
       "coverage/**",
       "next-env.d.ts",
       "test/setup/**",
-      "commitlint.config.js",
-      "prettier.config.js",
-      "postcss.config.js",
+      "commitlint.config.mjs",
+      "prettier.config.mjs",
+      "postcss.config.mjs",
       "next.config.mjs",
       "eslint.config.mjs",
       "tailwind.config.ts",
