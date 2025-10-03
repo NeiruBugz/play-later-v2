@@ -12,13 +12,46 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { cn } from "@/shared/lib";
+import { LibraryStatusMapper } from "@/shared/lib/enum-mappers";
 
 const statusOptions = [
   { value: "All", label: "All Games", shortLabel: "All", icon: "🎮" },
-  { value: "TO_PLAY", label: "Backlog", shortLabel: "Backlog", icon: "📚" },
-  { value: "PLAYING", label: "Playing", shortLabel: "Playing", icon: "🎯" },
-  { value: "PLAYED", label: "Played", shortLabel: "Played", icon: "✅" },
-  { value: "COMPLETED", label: "Completed", shortLabel: "Done", icon: "🏆" },
+  {
+    value: "CURIOUS_ABOUT",
+    label: LibraryStatusMapper.CURIOUS_ABOUT,
+    shortLabel: "Curious",
+    icon: "📚",
+  },
+  {
+    value: "CURRENTLY_EXPLORING",
+    label: LibraryStatusMapper.CURRENTLY_EXPLORING,
+    shortLabel: "Exploring",
+    icon: "🎯",
+  },
+  {
+    value: "TOOK_A_BREAK",
+    label: LibraryStatusMapper.TOOK_A_BREAK,
+    shortLabel: "Break",
+    icon: "⏸️",
+  },
+  {
+    value: "EXPERIENCED",
+    label: LibraryStatusMapper.EXPERIENCED,
+    shortLabel: "Done",
+    icon: "✅",
+  },
+  {
+    value: "WISHLIST",
+    label: LibraryStatusMapper.WISHLIST,
+    shortLabel: "Wishlist",
+    icon: "⭐",
+  },
+  {
+    value: "REVISITING",
+    label: LibraryStatusMapper.REVISITING,
+    shortLabel: "Revisit",
+    icon: "🔄",
+  },
 ] as const;
 
 export function StatusFilter() {

@@ -33,8 +33,8 @@ export const importToApplication = authorizedActionClient
         game: {
           igdbId: game.id,
         },
-        backlogItem: {
-          backlogStatus: playtime ? "PLAYED" : "TO_PLAY",
+        libraryItem: {
+          libraryItemStatus: playtime ? "EXPERIENCED" : "CURIOUS_ABOUT",
           acquisitionType: "DIGITAL",
           platform: "pc",
         },

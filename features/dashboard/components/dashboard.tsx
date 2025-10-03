@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 
 import {
-  BacklogCount,
-  BacklogCountSkeleton,
   CollectionStats,
   CollectionStatsSkeleton,
   CurrentlyPlaying,
   CurrentlyPlayingSkeleton,
+  LibraryCount,
+  LibraryCountSkeleton,
   PlatformBreakdown,
   PlatformBreakdownSkeleton,
   RecentActivity,
@@ -34,8 +34,8 @@ export function Dashboard() {
       </div>
 
       {/* Stats widgets */}
-      <Suspense fallback={<BacklogCountSkeleton />}>
-        <BacklogCount />
+      <Suspense fallback={<LibraryCountSkeleton />}>
+        <LibraryCount />
       </Suspense>
 
       <Suspense fallback={<CollectionStatsSkeleton />}>

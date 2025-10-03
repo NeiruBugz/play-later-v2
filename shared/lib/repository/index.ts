@@ -1,23 +1,23 @@
 export {
-  createBacklogItem,
-  deleteBacklogItem,
-  updateBacklogItem,
-  getBacklogItemsForUserByIgdbId,
-  getManyBacklogItems,
-  getBacklogCount,
+  createLibraryItem,
+  deleteLibraryItem,
+  updateLibraryItem,
+  getLibraryItemsForUserByIgdbId,
+  getManyLibraryItems,
+  getLibraryCount,
   getPlatformBreakdown,
   getAcquisitionTypeBreakdown,
-  getRecentlyCompletedBacklogItems,
+  getRecentlyCompletedLibraryItems,
   getUniquePlatforms,
-  getOtherUsersBacklogs,
-  getBacklogByUsername,
+  getOtherUsersLibraries,
+  getLibraryByUsername,
   getWishlistedItemsByUsername,
   findWishlistItemsForUser,
   findUpcomingWishlistItems,
   findCurrentlyPlayingGames,
   buildCollectionFilter,
-  addGameToUserBacklog,
-} from "./backlog/backlog-repository";
+  addGameToUserLibrary,
+} from "./library/library-repository";
 
 export {
   createReview,
@@ -43,7 +43,7 @@ export {
   findGameByIgdbId,
   findManyByIgdbIds,
   findGameById,
-  findGamesWithBacklogItemsPaginated,
+  findGamesWithLibraryItemsPaginated,
 } from "./game/game-repository";
 
 export {
@@ -54,3 +54,13 @@ export {
   softDeleteImportedGame,
   createManyImportedGames,
 } from "./imported-game/imported-game-repository";
+
+export {
+  createJournalEntry,
+  getJournalEntriesForUser,
+  getJournalEntriesByGame,
+  getJournalEntryById,
+  updateJournalEntry,
+  deleteJournalEntry,
+  makeJournalEntryPublic,
+} from "./journal/journal-repository";

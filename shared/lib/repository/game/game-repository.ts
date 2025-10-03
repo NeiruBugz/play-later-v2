@@ -87,7 +87,7 @@ export async function findGameById({ id }: { id: string }) {
       completionist: true,
       releaseDate: true,
       steamAppId: true,
-      backlogItems: {
+      libraryItems: {
         orderBy: {
           updatedAt: "desc",
         },
@@ -97,7 +97,7 @@ export async function findGameById({ id }: { id: string }) {
   });
 }
 
-export async function findGamesWithBacklogItemsPaginated({
+export async function findGamesWithLibraryItemsPaginated({
   where,
   page,
   itemsPerPage = 24,
@@ -115,8 +115,8 @@ export async function findGamesWithBacklogItemsPaginated({
       take: itemsPerPage,
       skip,
       include: {
-        backlogItems: {
-          where: where.backlogItems?.some,
+        libraryItems: {
+          where: where.libraryItems?.some,
         },
       },
     }),

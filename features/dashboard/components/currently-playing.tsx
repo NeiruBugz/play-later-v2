@@ -17,9 +17,9 @@ export function CurrentlyPlaying() {
     <Card className="h-fit">
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
-          <User /> Currently playing
+          <User /> Currently Exploring
         </CardTitle>
-        <CardDescription>Games you&apos;re actively playing</CardDescription>
+        <CardDescription>Games you&apos;re actively exploring</CardDescription>
       </CardHeader>
       <CardContent>
         <Suspense fallback={<CurrentlyPlayingListSkeleton />}>

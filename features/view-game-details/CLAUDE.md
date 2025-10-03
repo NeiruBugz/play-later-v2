@@ -14,7 +14,7 @@ The View Game Details feature serves as the comprehensive game information hub f
 - Show Steam achievements for authenticated users
 - Display franchise relationships and related games
 - Support external platform integration (Steam store links, official websites)
-- Allow backlog management directly from game pages
+- Allow library management directly from game pages
 
 ### Key Business Value
 
@@ -56,7 +56,7 @@ view-game-details/
 ├── server-actions/          # Business logic layer
 │   ├── get-game.ts          # Main game data fetching
 │   ├── get-reviews.ts       # User reviews retrieval
-│   └── get-backlog-items-by-igdb-id.ts  # User backlog status
+│   └── get-library-items-by-igdb-id.ts  # User library status
 └── index.ts                 # Feature exports
 ```
 
@@ -150,12 +150,12 @@ Next.js Page/Component
 Server Actions (view-game-details/server-actions/)
 ├── getGame (get-game.ts)
 ├── getReviews (get-reviews.ts)
-└── getBacklogItemsByIgdbId (get-backlog-items-by-igdb-id.ts)
+└── getLibraryItemsByIgdbId (get-library-items-by-igdb-id.ts)
        ↓
 Repository Layer (shared/lib/repository/)
 ├── findGameById
 ├── getAllReviewsForGame
-└── getBacklogItemsForUserByIgdbId
+└── getLibraryItemsForUserByIgdbId
        ↓
 Prisma ORM → PostgreSQL
 ```
@@ -195,21 +195,21 @@ export const getReviews = authorizedActionClient
   });
 ```
 
-#### `getBacklogItemsByIgdbId` (lines 8-24)
+#### `getLibraryItemsByIgdbId` (lines 8-24)
 
 ```typescript
-export const getBacklogItemsByIgdbId = authorizedActionClient
+export const getLibraryItemsByIgdbId = authorizedActionClient
   .metadata({
-    actionName: "getBacklogItemsByIgdbId",
+    actionName: "getLibraryItemsByIgdbId",
     requiresAuth: true,
   })
   .inputSchema(z.object({ igdbId: z.number() }))
   .action(async ({ ctx: { userId }, parsedInput }) => {
-    const backlogItems = await getBacklogItemsForUserByIgdbId({
+    const libraryItems = await getLibraryItemsForUserByIgdbId({
       userId,
       igdbId: parsedInput.igdbId,
     });
-    return backlogItems;
+    return libraryItems;
   });
 ```
 
@@ -300,7 +300,7 @@ GameTabs (Main Container)
 ### Integration Components
 
 - **`external-game-actions.tsx`**: Integration with add-game feature
-- **`game-quick-actions.tsx`**: Integration with manage-backlog-item feature
+- **`game-quick-actions.tsx`**: Integration with manage-library-item feature
 
 ## Testing Strategy
 
@@ -349,12 +349,12 @@ describe("findSteamAppId", () => {
 
 - **`@/features/add-game`**: AddToCollectionModal, AddToWishlistFromExternalPage
 - **`@/features/add-review`**: ReviewForm, AddReviewDialog
-- **`@/features/manage-backlog-item`**: EditGameEntryModal, GameStatusSelector
+- **`@/features/manage-library-item`**: EditGameEntryModal, GameStatusSelector
 - **`@/features/steam-integration`**: getUserAchievements, EnrichedAchievement types
 
 ### Shared Library Dependencies
 
-- **Repository Layer**: `findGameById`, `getAllReviewsForGame`, `getBacklogItemsForUserByIgdbId`
+- **Repository Layer**: `findGameById`, `getAllReviewsForGame`, `getLibraryItemsForUserByIgdbId`
 - **Safe Action Client**: `authorizedActionClient` for type-safe server actions
 - **UI Components**: AdaptiveTabs, Badge, Card, Progress from shadcn/ui
 - **IGDB Integration**: Game metadata and images

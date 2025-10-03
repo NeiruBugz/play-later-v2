@@ -280,13 +280,13 @@ The landing page includes comprehensive SEO optimization:
 
 ```bash
 # Run component-specific tests (when implemented)
-bun test features/landing
+bun run test features/landing
 
 # Visual regression testing
-bun test:visual landing
+bun run test:visual landing
 
 # Accessibility testing
-bun test:a11y landing
+bun run test:a11y landing
 ```
 
 ### Development Workflow

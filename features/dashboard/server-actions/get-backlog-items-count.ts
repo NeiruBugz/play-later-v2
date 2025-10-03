@@ -1,20 +1,20 @@
 "use server";
 
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
-import { getBacklogCount } from "@/shared/lib/repository";
+import { getLibraryCount } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
-export const getBacklogItemsCount = authorizedActionClient
+export const getLibraryItemsCount = authorizedActionClient
   .metadata({
-    actionName: "getBacklogItemsCount",
+    actionName: "getLibraryItemsCount",
     requiresAuth: true,
   })
   .inputSchema(
     z
       .object({
-        status: z.nativeEnum(BacklogItemStatus).optional(),
+        status: z.nativeEnum(LibraryItemStatus).optional(),
         gteClause: z
           .object({
             createdAt: z.date(),
@@ -25,11 +25,11 @@ export const getBacklogItemsCount = authorizedActionClient
   )
   .action(async ({ parsedInput, ctx: { userId } }) => {
     if (!parsedInput?.status) {
-      return getBacklogCount({ userId });
+      return getLibraryCount({ userId });
     }
 
     if (!parsedInput.gteClause?.createdAt) {
-      return getBacklogCount({
+      return getLibraryCount({
         userId,
         status: parsedInput.status,
         gteClause: {
@@ -38,5 +38,5 @@ export const getBacklogItemsCount = authorizedActionClient
       });
     }
 
-    return getBacklogCount({ userId, status: parsedInput.status });
+    return getLibraryCount({ userId, status: parsedInput.status });
   });

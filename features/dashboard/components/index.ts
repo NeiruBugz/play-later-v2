@@ -1,4 +1,4 @@
-export { BacklogCount } from "./backlog-count";
+export { LibraryCount } from "./backlog-count";
 export { CollectionStats } from "./collection-stats";
 export { CurrentlyPlaying } from "./currently-playing";
 export { ImportedGamesWidget } from "./imported-games-widget";
@@ -10,7 +10,7 @@ export { UpcomingReleases } from "./upcoming-releases";
 
 // Skeleton components
 export {
-  BacklogCountSkeleton,
+  LibraryCountSkeleton,
   CollectionStatsSkeleton,
   CurrentlyPlayingSkeleton,
   CurrentlyPlayingListSkeleton,

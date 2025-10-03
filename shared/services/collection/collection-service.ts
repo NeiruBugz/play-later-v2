@@ -1,6 +1,6 @@
 import {
   buildCollectionFilter,
-  findGamesWithBacklogItemsPaginated,
+  findGamesWithLibraryItemsPaginated,
 } from "@/shared/lib/repository";
 
 import { BaseService, type ServiceResponse } from "../types";
@@ -38,7 +38,7 @@ export class CollectionService
       });
 
       // Fetch paginated games with backlog items
-      const [games, totalGames] = await findGamesWithBacklogItemsPaginated({
+      const [games, totalGames] = await findGamesWithLibraryItemsPaginated({
         where: gameFilter,
         page: params.page ?? DEFAULT_PAGE,
         itemsPerPage: ITEMS_PER_PAGE,
@@ -47,7 +47,7 @@ export class CollectionService
       // Transform the data to match the expected format
       const collection = games.map((game) => ({
         game,
-        backlogItems: game.backlogItems,
+        libraryItems: game.libraryItems,
       }));
 
       return this.createSuccessResponse({

@@ -1,4 +1,4 @@
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
 import { FilterParamsSchema, validateFilterParams } from "./validation";
@@ -8,7 +8,7 @@ describe("FilterParamsSchema", () => {
     it("should accept empty string as platform", () => {
       const result = FilterParamsSchema.safeParse({
         platform: "",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "",
         page: 1,
       });
@@ -30,7 +30,7 @@ describe("FilterParamsSchema", () => {
       platforms.forEach((platform) => {
         const result = FilterParamsSchema.safeParse({
           platform,
-          status: "PLAYING",
+          status: "CURRENTLY_EXPLORING",
           search: "",
           page: 1,
         });
@@ -44,7 +44,7 @@ describe("FilterParamsSchema", () => {
 
     it("should default platform to empty string when not provided", () => {
       const result = FilterParamsSchema.safeParse({
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "",
         page: 1,
       });
@@ -59,7 +59,7 @@ describe("FilterParamsSchema", () => {
       const platform = "PlayStation®5";
       const result = FilterParamsSchema.safeParse({
         platform,
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "",
         page: 1,
       });
@@ -72,13 +72,14 @@ describe("FilterParamsSchema", () => {
   });
 
   describe("status validation", () => {
-    it("should accept valid BacklogItemStatus enum values", () => {
-      const validStatuses: BacklogItemStatus[] = [
-        "TO_PLAY",
-        "PLAYED",
-        "PLAYING",
-        "COMPLETED",
+    it("should accept valid LibraryItemStatus enum values", () => {
+      const validStatuses: LibraryItemStatus[] = [
+        "CURIOUS_ABOUT",
+        "CURRENTLY_EXPLORING",
+        "TOOK_A_BREAK",
+        "EXPERIENCED",
         "WISHLIST",
+        "REVISITING",
       ];
 
       validStatuses.forEach((status) => {
@@ -146,7 +147,7 @@ describe("FilterParamsSchema", () => {
     it("should accept empty string as search", () => {
       const result = FilterParamsSchema.safeParse({
         platform: "",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "",
         page: 1,
       });
@@ -169,7 +170,7 @@ describe("FilterParamsSchema", () => {
       searchTerms.forEach((search) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
-          status: "PLAYING",
+          status: "CURRENTLY_EXPLORING",
           search,
           page: 1,
         });
@@ -184,7 +185,7 @@ describe("FilterParamsSchema", () => {
     it("should default search to empty string when not provided", () => {
       const result = FilterParamsSchema.safeParse({
         platform: "",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         page: 1,
       });
 
@@ -208,7 +209,7 @@ describe("FilterParamsSchema", () => {
       searchTerms.forEach((search) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
-          status: "PLAYING",
+          status: "CURRENTLY_EXPLORING",
           search,
           page: 1,
         });
@@ -224,7 +225,7 @@ describe("FilterParamsSchema", () => {
       const longSearch = "a".repeat(1000);
       const result = FilterParamsSchema.safeParse({
         platform: "",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: longSearch,
         page: 1,
       });
@@ -243,7 +244,7 @@ describe("FilterParamsSchema", () => {
       validPages.forEach((page) => {
         const result = FilterParamsSchema.safeParse({
           platform: "",
-          status: "PLAYING",
+          status: "CURRENTLY_EXPLORING",
           search: "",
           page,
         });
@@ -258,7 +259,7 @@ describe("FilterParamsSchema", () => {
     it("should default page to 1 when not provided", () => {
       const result = FilterParamsSchema.safeParse({
         platform: "",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "",
       });
 
@@ -271,7 +272,7 @@ describe("FilterParamsSchema", () => {
     it("should accept zero as page number", () => {
       const result = FilterParamsSchema.safeParse({
         platform: "",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "",
         page: 0,
       });
@@ -285,7 +286,7 @@ describe("FilterParamsSchema", () => {
     it("should accept negative page numbers", () => {
       const result = FilterParamsSchema.safeParse({
         platform: "",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "",
         page: -1,
       });
@@ -299,7 +300,7 @@ describe("FilterParamsSchema", () => {
     it("should handle decimal numbers as page (should fail)", () => {
       const result = FilterParamsSchema.safeParse({
         platform: "",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "",
         page: 1.5,
       });
@@ -315,7 +316,7 @@ describe("FilterParamsSchema", () => {
     it("should validate complete valid filter params", () => {
       const validParams = {
         platform: "PC",
-        status: BacklogItemStatus.PLAYING,
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
         search: "cyberpunk 2077",
         page: 2,
       };
@@ -345,7 +346,7 @@ describe("FilterParamsSchema", () => {
     it("should handle mixed valid and invalid fields", () => {
       const mixedParams = {
         platform: "PC",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "valid search",
         page: "invalid", // This should cause failure
       };
@@ -370,7 +371,7 @@ describe("validateFilterParams", () => {
     it("should validate complete filter params", () => {
       const params = {
         platform: "PC",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "cyberpunk",
         page: "2",
       };
@@ -381,7 +382,7 @@ describe("validateFilterParams", () => {
       if (result.success) {
         expect(result.data).toEqual({
           platform: "PC",
-          status: "PLAYING",
+          status: "CURRENTLY_EXPLORING",
           search: "cyberpunk",
           page: 2,
         });
@@ -538,7 +539,7 @@ describe("validateFilterParams", () => {
     it("should handle URL search params format", () => {
       const urlParams = {
         platform: "PlayStation 5",
-        status: "COMPLETED",
+        status: "EXPERIENCED",
         search: "The Last of Us",
         page: "3",
       };
@@ -549,7 +550,7 @@ describe("validateFilterParams", () => {
       if (result.success) {
         expect(result.data).toEqual({
           platform: "PlayStation 5",
-          status: "COMPLETED",
+          status: "EXPERIENCED",
           search: "The Last of Us",
           page: 3,
         });
@@ -601,7 +602,7 @@ describe("validateFilterParams", () => {
     it("should handle mixed string and number inputs", () => {
       const mixedParams = {
         platform: "Xbox Series X",
-        status: BacklogItemStatus.PLAYING,
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
         search: "halo infinite",
         page: 2,
       };
@@ -612,7 +613,7 @@ describe("validateFilterParams", () => {
       if (result.success) {
         expect(result.data).toEqual({
           platform: "Xbox Series X",
-          status: "PLAYING",
+          status: "CURRENTLY_EXPLORING",
           search: "halo infinite",
           page: 2,
         });

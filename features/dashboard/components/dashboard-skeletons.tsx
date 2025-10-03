@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
-export function BacklogCountSkeleton() {
+export function LibraryCountSkeleton() {
   return (
     <Card className="h-fit">
       <CardHeader>

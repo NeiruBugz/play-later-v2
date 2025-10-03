@@ -1,10 +1,10 @@
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
 // Collection filter parameters schema and types
 export const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),
-  status: z.union([z.nativeEnum(BacklogItemStatus), z.string()]).optional(),
+  status: z.union([z.nativeEnum(LibraryItemStatus), z.string()]).optional(),
   search: z.string().optional().default(""),
   page: z.coerce.number().optional().default(1),
 });

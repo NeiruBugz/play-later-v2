@@ -1,17 +1,11 @@
 import { Providers } from "@/providers";
 import { type Metadata, type Viewport } from "next";
-import { Inter as FontSans } from "next/font/google";
 
 import { cn } from "@/shared/lib";
 
 import "@/shared/globals.css";
 
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-  preload: true,
-});
+import { fontMono, fontSans, fontSerif } from "@/shared/config/fonts";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -93,10 +87,14 @@ export const metadata: Metadata = {
 export default function RootLayout(props: LayoutProps<"/">) {
   const { children } = props;
   return (
-    <html lang="en" suppressHydrationWarning className={fontSans.variable}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(fontSans.variable, fontSerif.variable, fontMono.variable)}
+    >
       <body
         className={cn(
-          "relative min-h-screen bg-background font-sans antialiased",
+          "relative min-h-screen bg-background antialiased",
           "selection:bg-primary/20 selection:text-primary-foreground"
         )}
       >

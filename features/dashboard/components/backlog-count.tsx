@@ -1,4 +1,4 @@
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { CalendarDays, ListIcon, TrendingUp, Trophy } from "lucide-react";
 
 import { Badge } from "@/shared/components/ui/badge";
@@ -11,52 +11,52 @@ import {
 } from "@/shared/components/ui/card";
 import { Progress } from "@/shared/components/ui/progress";
 
-import { getBacklogItemsCount } from "../server-actions/get-backlog-items-count";
+import { getLibraryItemsCount } from "../server-actions/get-backlog-items-count";
 
-export async function BacklogCount() {
+export async function LibraryCount() {
   const [
-    backlogCountResult,
+    curiousAboutCountResult,
     totalGamesResult,
-    completedGamesResult,
+    experiencedGamesResult,
     recentlyAddedCountResult,
   ] = await Promise.all([
-    getBacklogItemsCount({ status: BacklogItemStatus.TO_PLAY }),
-    getBacklogItemsCount({}),
-    getBacklogItemsCount({ status: BacklogItemStatus.COMPLETED }),
-    getBacklogItemsCount({
-      status: BacklogItemStatus.TO_PLAY,
+    getLibraryItemsCount({ status: LibraryItemStatus.CURIOUS_ABOUT }),
+    getLibraryItemsCount({}),
+    getLibraryItemsCount({ status: LibraryItemStatus.EXPERIENCED }),
+    getLibraryItemsCount({
+      status: LibraryItemStatus.CURIOUS_ABOUT,
       gteClause: {
         createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
       },
     }),
   ]);
 
-  const backlogCount = backlogCountResult.data ?? 0;
+  const curiousAboutCount = curiousAboutCountResult.data ?? 0;
   const totalGames = totalGamesResult.data ?? 0;
-  const completedGames = completedGamesResult.data ?? 0;
+  const experiencedGames = experiencedGamesResult.data ?? 0;
   const recentlyAddedCount = recentlyAddedCountResult.data ?? 0;
 
   const completionProgress =
-    totalGames > 0 ? (completedGames / totalGames) * 100 : 0;
-  const backlogProgress =
-    totalGames > 0 ? (backlogCount / totalGames) * 100 : 0;
+    totalGames > 0 ? (experiencedGames / totalGames) * 100 : 0;
+  const curiousAboutProgress =
+    totalGames > 0 ? (curiousAboutCount / totalGames) * 100 : 0;
 
   const getMotivationalMessage = (count: number) => {
-    if (count === 0) return "Your backlog is clear! Time to add some games.";
-    if (count <= 5) return "A manageable backlog - you're doing great!";
+    if (count === 0) return "Your library is clear! Time to add some games.";
+    if (count <= 5) return "A manageable list - you're doing great!";
     if (count <= 15) return "Getting serious about gaming!";
     if (count <= 30) return "Quite the collection building up!";
-    return "Epic backlog - one game at a time!";
+    return "Epic library - one game at a time!";
   };
 
-  const getBacklogColor = (count: number) => {
+  const getCuriousAboutColor = (count: number) => {
     if (count === 0) return "text-green-600 dark:text-green-400";
     if (count <= 10) return "text-blue-600 dark:text-blue-400";
     if (count <= 25) return "text-yellow-600 dark:text-yellow-400";
     return "text-orange-600 dark:text-orange-400";
   };
 
-  const getBacklogBadgeColor = (count: number) => {
+  const getCuriousAboutBadgeColor = (count: number) => {
     if (count === 0)
       return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
     if (count <= 10)
@@ -71,36 +71,36 @@ export async function BacklogCount() {
       <CardHeader>
         <CardTitle className="flex items-center gap-3">
           <ListIcon className="size-5" />
-          Games in backlog
+          Games you&apos;re curious about
         </CardTitle>
         <CardDescription>
-          {getMotivationalMessage(backlogCount)}
+          {getMotivationalMessage(curiousAboutCount)}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <div
-              className={`text-3xl font-bold ${getBacklogColor(backlogCount)}`}
+              className={`text-3xl font-bold ${getCuriousAboutColor(curiousAboutCount)}`}
             >
-              {backlogCount}
+              {curiousAboutCount}
             </div>
             <div className="flex items-center gap-2">
               <Badge
                 variant="outline"
-                className={getBacklogBadgeColor(backlogCount)}
+                className={getCuriousAboutBadgeColor(curiousAboutCount)}
               >
-                {backlogCount === 0
+                {curiousAboutCount === 0
                   ? "Clear"
-                  : `${Math.round(backlogProgress)}% of collection`}
+                  : `${Math.round(curiousAboutProgress)}% of collection`}
               </Badge>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
-            {completedGames > 0 && (
+            {experiencedGames > 0 && (
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Trophy className="size-3 text-yellow-500" />
-                <span>{completedGames} completed</span>
+                <span>{experiencedGames} experienced</span>
               </div>
             )}
             {recentlyAddedCount > 0 && (
@@ -117,21 +117,21 @@ export async function BacklogCount() {
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Progress</span>
               <span className="font-medium">
-                {Math.round(completionProgress)}% complete
+                {Math.round(completionProgress)}% experienced
               </span>
             </div>
             <Progress value={completionProgress} className="h-2" />
           </div>
         )}
 
-        {backlogCount > 0 && (
+        {curiousAboutCount > 0 && (
           <div className="mt-4 rounded-lg bg-muted/30 p-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CalendarDays className="size-4" />
               <span>
-                At 1 game per week, you&apos;ll clear your backlog in{" "}
+                At 1 game per week, you&apos;ll explore them all in{" "}
                 <span className="font-medium text-foreground">
-                  {Math.ceil(backlogCount / 1)} weeks
+                  {Math.ceil(curiousAboutCount / 1)} weeks
                 </span>
               </span>
             </div>

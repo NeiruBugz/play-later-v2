@@ -77,7 +77,7 @@ export default async function GamePage(props: PageProps<"/game/[id]">) {
               <GameQuickActions
                 gameId={game.id}
                 gameTitle={game.title}
-                backlogItems={game.backlogItems}
+                libraryItems={game.libraryItems}
                 gameType={gameType}
               />
             </div>

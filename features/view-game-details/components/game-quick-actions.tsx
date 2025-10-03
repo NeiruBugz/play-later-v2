@@ -1,29 +1,29 @@
-import { type BacklogItem } from "@prisma/client";
+import { type LibraryItem } from "@prisma/client";
 
 import { AddReviewDialog } from "@/features/add-review/components";
 import {
   EditGameEntryModal,
   GameStatusSelector,
-} from "@/features/manage-backlog-item/edit-backlog-item";
+} from "@/features/manage-library-item/edit-library-item";
 
 type GameQuickActionsProps = {
   gameId: string;
   gameTitle: string;
-  backlogItems?: BacklogItem[];
+  libraryItems?: LibraryItem[];
   gameType: "EXTERNAL" | "INTERNAL";
 };
 
 export function GameQuickActions({
   gameId,
   gameTitle,
-  backlogItems,
+  libraryItems,
   gameType,
 }: GameQuickActionsProps) {
   return (
     <div className="flex flex-col gap-2">
       {gameType === "EXTERNAL" ? <GameStatusSelector gameId={gameId} /> : null}
 
-      <EditGameEntryModal backlogItems={backlogItems} />
+      <EditGameEntryModal libraryItems={libraryItems} />
 
       <AddReviewDialog gameId={gameId} gameTitle={gameTitle} />
     </div>

@@ -1,11 +1,11 @@
 "use client";
 
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 import { type UseFormReturn } from "react-hook-form";
 
 import { Body, Heading } from "@/shared/components/typography";
 import { Form } from "@/shared/components/ui/form";
-import { AcquisitionStatusMapper, BacklogStatusMapper } from "@/shared/lib";
+import { AcquisitionStatusMapper, LibraryStatusMapper } from "@/shared/lib";
 
 import { type CreateGameActionInput } from "../lib/validation";
 import { SubmitButton } from "./add-game-form.submit";
@@ -48,15 +48,15 @@ export function GameConfigurationForm({
           <PlatformSelector control={form.control} disabled={isLoading} />
         </div>
 
-        {/* Backlog Status */}
+        {/* Library Status */}
         <div className="space-y-4">
           <RadioGroupField
             control={form.control}
-            name="backlogStatus"
-            label="Backlog status"
+            name="libraryItemStatus"
+            label="Library status"
             description="What's your current status with this game?"
-            options={Object.keys(BacklogItemStatus)}
-            mapper={BacklogStatusMapper}
+            options={Object.keys(LibraryItemStatus)}
+            mapper={LibraryStatusMapper}
             disabled={isLoading}
           />
         </div>

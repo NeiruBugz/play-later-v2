@@ -119,9 +119,9 @@ export function CollectionList(props: {
   return (
     <div className="space-y-6">
       {viewMode === "list" ? (
-        <ListView backlogItems={data.collection} />
+        <ListView libraryItems={data.collection} />
       ) : (
-        <GridView backlogItems={data.collection} />
+        <GridView libraryItems={data.collection} />
       )}
 
       <div className="flex items-center justify-center">

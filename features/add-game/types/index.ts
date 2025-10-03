@@ -1,23 +1,23 @@
 import {
   type AcquisitionType,
-  type BacklogItemStatus,
   type Game,
+  type LibraryItemStatus,
 } from "@prisma/client";
 
 export type GameFormValues =
   | Partial<Omit<Game, "releaseDate"> & { releaseDate: number }>
   | undefined;
 
-export type BacklogItemFormValues = {
-  backlogStatus: BacklogItemStatus;
+export type LibraryItemFormValues = {
+  libraryItemStatus: LibraryItemStatus;
   acquisitionType: AcquisitionType;
   platform?: string;
 };
 
-export type AddGameToBacklogInput = {
+export type AddGameToLibraryInput = {
   game: Pick<Game, "igdbId">;
-  backlogItem: {
-    backlogStatus: BacklogItemStatus;
+  libraryItem: {
+    libraryItemStatus: LibraryItemStatus;
     acquisitionType: AcquisitionType;
     platform?: string;
   };

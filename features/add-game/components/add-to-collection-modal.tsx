@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 import { ListPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -35,8 +35,8 @@ import {
 } from "@/shared/components/ui/select";
 import {
   AcquisitionStatusMapper,
-  BacklogStatusMapper,
   cn,
+  LibraryStatusMapper,
   playingOnPlatforms,
 } from "@/shared/lib";
 
@@ -156,7 +156,7 @@ export function AddToCollectionModal({
 
               <FormField
                 control={form.control}
-                name="backlogStatus"
+                name="libraryItemStatus"
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between gap-4">
@@ -178,9 +178,9 @@ export function AddToCollectionModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.keys(BacklogItemStatus).map((key) => (
+                          {Object.keys(LibraryItemStatus).map((key) => (
                             <SelectItem value={key} key={key}>
-                              {BacklogStatusMapper[key as BacklogItemStatus]}
+                              {LibraryStatusMapper[key as LibraryItemStatus]}
                             </SelectItem>
                           ))}
                         </SelectContent>

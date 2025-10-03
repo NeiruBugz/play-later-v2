@@ -4,96 +4,121 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 250 15% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 250 15% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 250 15% 11%;
-    --primary: 263 70% 50%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 250 12% 92%;
-    --secondary-foreground: 250 15% 11%;
-    --muted: 250 12% 92%;
-    --muted-foreground: 250 8% 45%;
-    --accent: 270 95% 75%;
-    --accent-foreground: 250 15% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 250 12% 88%;
-    --input: 250 12% 88%;
-    --ring: 263 70% 50%;
-    --radius: 1rem;
-    --chart-1: 263 70% 50%;
-    --chart-2: 270 95% 75%;
-    --chart-3: 310 100% 70%;
-    --chart-4: 190 95% 65%;
-    --chart-5: 120 95% 65%;
-
-    /* Gaming theme colors */
-    --gaming-primary: 263 70% 50%;
-    --gaming-secondary: 270 95% 75%;
-    --gaming-accent: 310 100% 70%;
-    --gaming-neon-green: 120 95% 65%;
-    --gaming-neon-blue: 190 95% 65%;
-    --gaming-gradient-start: 263 70% 50%;
-    --gaming-gradient-end: 310 100% 70%;
-
-    /* Sidebar colors */
-    --sidebar-background: 250 20% 96%;
-    --sidebar-foreground: 250 15% 11%;
-    --sidebar-primary: 263 70% 50%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 270 95% 75%;
-    --sidebar-accent-foreground: 250 15% 11%;
-    --sidebar-border: 250 12% 88%;
-    --sidebar-ring: 263 70% 50%;
+    --background: 32.7273 25.5814% 91.5686%;
+    --foreground: 26.6667 11.3924% 15.4902%;
+    --card: 33.75 20.5128% 84.7059%;
+    --card-foreground: 26.6667 11.3924% 15.4902%;
+    --popover: 25.7143 53.8462% 97.451%;
+    --popover-foreground: 26.6667 11.3924% 15.4902%;
+    --primary: 30 33.871% 48.6275%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 31.1111 21.9512% 75.8824%;
+    --secondary-foreground: 26.6667 11.3924% 15.4902%;
+    --muted: 31.5789 20.8791% 82.1569%;
+    --muted-foreground: 28.5714 10.0478% 40.9804%;
+    --accent: 23.2258 18.5629% 67.2549%;
+    --accent-foreground: 26.6667 11.3924% 15.4902%;
+    --destructive: 0 60.2151% 63.5294%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 31.7647 13.3858% 75.098%;
+    --input: 33.75 15.6863% 80%;
+    --ring: 30 33.871% 48.6275%;
+    --chart-1: 30 33.871% 48.6275%;
+    --chart-2: 34.9091 43.3071% 75.098%;
+    --chart-3: 30 35.1064% 36.8627%;
+    --chart-4: 32.4 28.0899% 65.098%;
+    --chart-5: 30.9091 37.0787% 65.098%;
+    --sidebar: 33.75 15.6863% 80%;
+    --sidebar-foreground: 26.6667 11.3924% 15.4902%;
+    --sidebar-primary: 27.8873 33.9713% 40.9804%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 31.3043 30.3965% 55.4902%;
+    --sidebar-accent-foreground: 26.6667 11.3924% 15.4902%;
+    --sidebar-border: 31.7647 13.3858% 75.098%;
+    --sidebar-ring: 27.8873 33.9713% 40.9804%;
+    --font-sans: "Roboto", "Inter", sans-serif;
+    --font-serif: "Merriweather", serif;
+    --font-mono: "DM Mono", monospace;
+    --radius: 0.25rem;
+    --shadow-x: 0rem;
+    --shadow-y: 0.2rem;
+    --shadow-blur: 0.75rem;
+    --shadow-spread: 0rem;
+    --shadow-opacity: 0.08;
+    --shadow-color: #000000;
+    --shadow-2xs: 0rem 0.2rem 0.75rem 0rem hsl(0 0% 0% / 0.04);
+    --shadow-xs: 0rem 0.2rem 0.75rem 0rem hsl(0 0% 0% / 0.04);
+    --shadow-sm: 0rem 0.2rem 0.75rem 0rem hsl(0 0% 0% / 0.08),
+      0rem 1px 2px -1px hsl(0 0% 0% / 0.08);
+    --shadow: 0rem 0.2rem 0.75rem 0rem hsl(0 0% 0% / 0.08),
+      0rem 1px 2px -1px hsl(0 0% 0% / 0.08);
+    --shadow-md: 0rem 0.2rem 0.75rem 0rem hsl(0 0% 0% / 0.08),
+      0rem 2px 4px -1px hsl(0 0% 0% / 0.08);
+    --shadow-lg: 0rem 0.2rem 0.75rem 0rem hsl(0 0% 0% / 0.08),
+      0rem 4px 6px -1px hsl(0 0% 0% / 0.08);
+    --shadow-xl: 0rem 0.2rem 0.75rem 0rem hsl(0 0% 0% / 0.08),
+      0rem 8px 10px -1px hsl(0 0% 0% / 0.08);
+    --shadow-2xl: 0rem 0.2rem 0.75rem 0rem hsl(0 0% 0% / 0.2);
+    --tracking-normal: 0em;
+    --spacing: 0.25rem;
   }
 
   .dark {
-    --background: 250 20% 8%;
-    --foreground: 250 10% 95%;
-    --card: 250 20% 10%;
-    --card-foreground: 250 10% 95%;
-    --popover: 250 20% 10%;
-    --popover-foreground: 250 10% 95%;
-    --primary: 270 95% 75%;
-    --primary-foreground: 250 20% 8%;
-    --secondary: 250 15% 15%;
-    --secondary-foreground: 250 10% 95%;
-    --muted: 250 15% 15%;
-    --muted-foreground: 250 10% 65%;
-    --accent: 263 70% 60%;
-    --accent-foreground: 250 10% 95%;
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 250 15% 18%;
-    --input: 250 15% 18%;
-    --ring: 270 95% 75%;
-    --chart-1: 270 95% 75%;
-    --chart-2: 263 70% 60%;
-    --chart-3: 310 100% 75%;
-    --chart-4: 190 95% 70%;
-    --chart-5: 120 95% 70%;
-
-    /* Gaming theme colors - dark mode */
-    --gaming-primary: 270 95% 75%;
-    --gaming-secondary: 263 70% 60%;
-    --gaming-accent: 310 100% 75%;
-    --gaming-neon-green: 120 95% 70%;
-    --gaming-neon-blue: 190 95% 70%;
-    --gaming-gradient-start: 270 95% 75%;
-    --gaming-gradient-end: 310 100% 75%;
-
-    /* Sidebar colors - dark mode */
-    --sidebar-background: 250 20% 6%;
-    --sidebar-foreground: 250 10% 95%;
-    --sidebar-primary: 270 95% 75%;
-    --sidebar-primary-foreground: 250 20% 8%;
-    --sidebar-accent: 263 70% 60%;
-    --sidebar-accent-foreground: 250 10% 95%;
-    --sidebar-border: 250 15% 18%;
-    --sidebar-ring: 270 95% 75%;
+    --background: 30 11.1111% 14.1176%;
+    --foreground: 38.1818 16.9231% 87.2549%;
+    --card: 30 11.5385% 20.3922%;
+    --card-foreground: 38.1818 16.9231% 87.2549%;
+    --popover: 30 14.2857% 10.9804%;
+    --popover-foreground: 38.1818 16.9231% 87.2549%;
+    --primary: 30 33.871% 48.6275%;
+    --primary-foreground: 30 16% 9.8039%;
+    --secondary: 28.5714 10.4478% 39.4118%;
+    --secondary-foreground: 38.1818 16.9231% 87.2549%;
+    --muted: 27.6923 9.2199% 27.6471%;
+    --muted-foreground: 26.6667 10.4651% 66.2745%;
+    --accent: 25.7143 8.046% 34.1176%;
+    --accent-foreground: 38.1818 16.9231% 87.2549%;
+    --destructive: 0 34.4978% 44.902%;
+    --destructive-foreground: 38.1818 16.9231% 87.2549%;
+    --border: 25.7143 8.046% 34.1176%;
+    --input: 27.6923 9.2199% 27.6471%;
+    --ring: 30 33.871% 48.6275%;
+    --chart-1: 30 33.871% 48.6275%;
+    --chart-2: 31.8367 26.4865% 36.2745%;
+    --chart-3: 31.3043 30.3965% 55.4902%;
+    --chart-4: 27.5 20.1681% 46.6667%;
+    --chart-5: 30.9091 22.1477% 29.2157%;
+    --sidebar: 30 11.5385% 20.3922%;
+    --sidebar-foreground: 38.1818 16.9231% 87.2549%;
+    --sidebar-primary: 27.8873 33.9713% 40.9804%;
+    --sidebar-primary-foreground: 30 11.1111% 14.1176%;
+    --sidebar-accent: 30 35.1064% 36.8627%;
+    --sidebar-accent-foreground: 38.1818 16.9231% 87.2549%;
+    --sidebar-border: 27.6923 9.2199% 27.6471%;
+    --sidebar-ring: 27.8873 33.9713% 40.9804%;
+    --font-sans: "Roboto", "Inter", sans-serif;
+    --font-serif: "Merriweather", serif;
+    --font-mono: "DM Mono", monospace;
+    --radius: 0.25rem;
+    --shadow-x: 0rem;
+    --shadow-y: 0.3rem;
+    --shadow-blur: 1rem;
+    --shadow-spread: 0rem;
+    --shadow-opacity: 0.2;
+    --shadow-color: #000000;
+    --shadow-2xs: 0rem 0.3rem 1rem 0rem hsl(0 0% 0% / 0.1);
+    --shadow-xs: 0rem 0.3rem 1rem 0rem hsl(0 0% 0% / 0.1);
+    --shadow-sm: 0rem 0.3rem 1rem 0rem hsl(0 0% 0% / 0.2),
+      0rem 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow: 0rem 0.3rem 1rem 0rem hsl(0 0% 0% / 0.2),
+      0rem 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0rem 0.3rem 1rem 0rem hsl(0 0% 0% / 0.2),
+      0rem 2px 4px -1px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0rem 0.3rem 1rem 0rem hsl(0 0% 0% / 0.2),
+      0rem 4px 6px -1px hsl(0 0% 0% / 0.2);
+    --shadow-xl: 0rem 0.3rem 1rem 0rem hsl(0 0% 0% / 0.2),
+      0rem 8px 10px -1px hsl(0 0% 0% / 0.2);
+    --shadow-2xl: 0rem 0.3rem 1rem 0rem hsl(0 0% 0% / 0.5);
   }
 }
 
@@ -168,46 +193,5 @@
   }
   .overline {
     @apply text-overline font-caption uppercase;
-  }
-
-  .gaming-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--gaming-gradient-start)),
-      hsl(var(--gaming-gradient-end))
-    );
-  }
-
-  .gaming-gradient-hover {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--gaming-gradient-start) / 0.8),
-      hsl(var(--gaming-gradient-end) / 0.8)
-    );
-  }
-
-  .gaming-border-gradient {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--gaming-gradient-start)),
-      hsl(var(--gaming-gradient-end))
-    );
-    padding: 2px;
-    border-radius: inherit;
-  }
-
-  .gaming-border-gradient > * {
-    background: hsl(var(--background));
-    border-radius: calc(var(--radius) - 2px);
-  }
-
-  .neon-glow {
-    box-shadow:
-      0 0 20px hsl(var(--accent) / 0.3),
-      0 0 40px hsl(var(--accent) / 0.1);
-  }
-
-  .gaming-pill {
-    border-radius: 9999px;
   }
 }

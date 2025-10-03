@@ -1,17 +1,17 @@
-import { type BacklogItemWithGame, type GameWithBacklogItems } from "../types";
+import { type GameWithLibraryItems, type LibraryItemWithGame } from "../types";
 
 export function groupWishlistedItemsByGameId({
   wishlisted,
 }: {
-  wishlisted: BacklogItemWithGame[];
+  wishlisted: LibraryItemWithGame[];
 }) {
   return wishlisted.reduce(
-    (acc: Record<string, GameWithBacklogItems>, item) => {
-      const { game, ...backlogItem } = item;
+    (acc: Record<string, GameWithLibraryItems>, item) => {
+      const { game, ...libraryItem } = item;
       if (!acc[game.id]) {
-        acc[game.id] = { game, backlogItems: [] };
+        acc[game.id] = { game, libraryItems: [] };
       }
-      acc[game.id].backlogItems.push(backlogItem);
+      acc[game.id].libraryItems.push(libraryItem);
       return acc;
     },
     {}

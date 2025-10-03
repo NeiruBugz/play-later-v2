@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
 
 import { getWishlistedItemsByUsername } from "@/features/view-wishlist/server-actions";
-import { BacklogItemCard } from "@/shared/components/backlog-item-card";
 import { Header } from "@/shared/components/header";
+import { LibraryItemCard } from "@/shared/components/library-item-card";
 
 export default async function SharedWishlistPage(
   props: PageProps<"/wishlist/[username]">
@@ -36,16 +36,16 @@ export default async function SharedWishlistPage(
         </div>
         <div>
           <ul className="flex flex-wrap justify-center gap-3 md:justify-start">
-            {wishlistedItems.map(({ game, backlogItems }) => (
+            {wishlistedItems.map(({ game, libraryItems }) => (
               <li key={game.id}>
-                <BacklogItemCard
+                <LibraryItemCard
                   game={{
                     id: String(game.igdbId),
                     title: game.title,
                     coverImage: game.coverImage,
                     igdbId: game.igdbId,
                   }}
-                  backlogItems={backlogItems}
+                  libraryItems={libraryItems}
                   isFromSharedWishlist={true}
                 />
               </li>

@@ -1,11 +1,12 @@
-import { type AcquisitionType, type BacklogItemStatus } from "@prisma/client";
+import { type AcquisitionType, type LibraryItemStatus } from "@prisma/client";
 
-export const BacklogStatusMapper: Record<BacklogItemStatus, string> = {
-  COMPLETED: "Completed",
-  PLAYED: "Played",
-  PLAYING: "Playing",
-  TO_PLAY: "Backlog",
+export const LibraryStatusMapper: Record<LibraryItemStatus, string> = {
+  CURIOUS_ABOUT: "Curious About",
+  CURRENTLY_EXPLORING: "Currently Exploring",
+  TOOK_A_BREAK: "Took a Break",
+  EXPERIENCED: "Experienced",
   WISHLIST: "Wishlist",
+  REVISITING: "Revisiting",
 };
 
 export const AcquisitionStatusMapper: Record<AcquisitionType, string> = {

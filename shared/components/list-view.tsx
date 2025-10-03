@@ -1,41 +1,37 @@
+import { type LibraryItemStatus } from "@prisma/client";
 import { CalendarDays, Monitor } from "lucide-react";
 import Link from "next/link";
 
-import { type GameWithBacklogItems } from "@/features/view-wishlist/types";
+import { type GameWithLibraryItems } from "@/features/view-wishlist/types";
 import { cn, getGameUrl } from "@/shared/lib";
+import { LibraryStatusMapper } from "@/shared/lib/enum-mappers";
 
 import { IgdbImage } from "./igdb-image";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 
-const statusColors = {
-  TO_PLAY:
+const statusColors: Record<LibraryItemStatus, string> = {
+  CURIOUS_ABOUT:
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-  PLAYING: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  PLAYED: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  COMPLETED:
+  CURRENTLY_EXPLORING:
+    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  TOOK_A_BREAK: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  EXPERIENCED:
     "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
   WISHLIST: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
-};
-
-const statusLabels = {
-  TO_PLAY: "Backlog",
-  PLAYING: "Playing",
-  PLAYED: "Played",
-  COMPLETED: "Completed",
-  WISHLIST: "Wishlist",
+  REVISITING: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300",
 };
 
 export function ListView({
-  backlogItems,
+  libraryItems,
 }: {
-  backlogItems: GameWithBacklogItems[];
+  libraryItems: GameWithLibraryItems[];
 }) {
   return (
     <div className="space-y-3">
-      {backlogItems.map(({ game, backlogItems }) => {
-        const primaryPlatform = backlogItems[0];
-        const status = primaryPlatform?.status || "TO_PLAY";
+      {libraryItems.map(({ game, libraryItems }) => {
+        const primaryPlatform = libraryItems[0];
+        const status = primaryPlatform?.status || "CURIOUS_ABOUT";
 
         return (
           <div
@@ -82,7 +78,7 @@ export function ListView({
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 {/* Status */}
                 <Badge variant="secondary" className={cn(statusColors[status])}>
-                  {statusLabels[status]}
+                  {LibraryStatusMapper[status]}
                 </Badge>
 
                 {/* Platform */}
@@ -104,9 +100,9 @@ export function ListView({
                 )}
 
                 {/* Multiple Platforms Indicator */}
-                {backlogItems.length > 1 && (
+                {libraryItems.length > 1 && (
                   <Badge variant="outline" className="text-xs">
-                    +{backlogItems.length - 1} more
+                    +{libraryItems.length - 1} more
                   </Badge>
                 )}
               </div>

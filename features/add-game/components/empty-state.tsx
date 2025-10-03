@@ -27,7 +27,7 @@ export function EmptyState() {
         </Heading>
         <Body size="sm" variant="muted" className="mx-auto max-w-sm">
           Once you choose a game, you&apos;ll be able to set your platform
-          preference, backlog status, and how you acquired the game.
+          preference, library status, and how you acquired the game.
         </Body>
       </div>
     </div>

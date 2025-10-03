@@ -9,12 +9,12 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 
-import { getRecentCompletedBacklogItems } from "../server-actions/get-recent-completed-backlog-items";
+import { getRecentCompletedLibraryItems } from "../server-actions/get-recent-completed-backlog-items";
 import { getRecentReviews } from "../server-actions/get-recent-reviews";
 
 export async function RecentActivity() {
   const [recentlyCompleted, recentReviews] = await Promise.all([
-    getRecentCompletedBacklogItems(),
+    getRecentCompletedLibraryItems(),
     getRecentReviews(),
   ]);
 
@@ -43,7 +43,7 @@ export async function RecentActivity() {
                 </div>
                 <div className="flex-1 space-y-1">
                   <p className="text-sm font-medium">
-                    Completed {item.game.title}
+                    Experienced {item.game.title}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {item.completedAt &&

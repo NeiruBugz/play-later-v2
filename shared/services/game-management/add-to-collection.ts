@@ -1,9 +1,9 @@
 import "server-only";
 
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
-import { addGameToUserBacklog } from "@/shared/lib/repository";
+import { addGameToUserLibrary } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 /**
@@ -28,23 +28,23 @@ export const addGameToCollection = authorizedActionClient
       game: z.object({
         igdbId: z.number(),
       }),
-      backlogItem: z.object({
-        backlogStatus: z.nativeEnum(BacklogItemStatus),
+      libraryItem: z.object({
+        libraryItemStatus: z.nativeEnum(LibraryItemStatus),
         acquisitionType: z.nativeEnum(AcquisitionType),
         platform: z.string().optional(),
       }),
     })
   )
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    const { game, backlogItem } = parsedInput;
+    const { game, libraryItem } = parsedInput;
 
-    const savedGame = await addGameToUserBacklog({
+    const savedGame = await addGameToUserLibrary({
       userId,
       igdbId: game.igdbId,
-      backlogItem: {
-        status: backlogItem.backlogStatus,
-        platform: backlogItem.platform,
-        acquisitionType: backlogItem.acquisitionType,
+      libraryItem: {
+        status: libraryItem.libraryItemStatus,
+        platform: libraryItem.platform,
+        acquisitionType: libraryItem.acquisitionType,
       },
     });
 

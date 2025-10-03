@@ -13,7 +13,7 @@ vi.mock("@/shared/lib/db", () => ({
       update: vi.fn(),
       delete: vi.fn(),
     },
-    backlogItem: {
+    libraryItem: {
       create: vi.fn(),
       findUnique: vi.fn(),
       findMany: vi.fn(),
@@ -52,18 +52,18 @@ vi.mock("next/navigation", () => ({
 
 // Add the repository mocks that were in individual test files
 vi.mock("@/shared/lib/repository", () => ({
-  createBacklogItem: vi.fn(),
-  deleteBacklogItem: vi.fn(),
-  updateBacklogItem: vi.fn(),
-  getManyBacklogItems: vi.fn(),
-  getOtherUsersBacklogs: vi.fn(),
+  createLibraryItem: vi.fn(),
+  deleteLibraryItem: vi.fn(),
+  updateLibraryItem: vi.fn(),
+  getManyLibraryItems: vi.fn(),
+  getOtherUsersLibraryItems: vi.fn(),
   updateUserData: vi.fn(),
   createReview: vi.fn(),
 }));
 
 // Add the add-game mock
 vi.mock("@/features/add-game/server-actions/add-game", () => ({
-  saveGameAndAddToBacklog: vi.fn(),
+  saveGameAndAddToLibrary: vi.fn(),
 }));
 
 // Set up environment variables before any modules load

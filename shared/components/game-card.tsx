@@ -1,10 +1,14 @@
 "use client";
 
-import { type BacklogItem, type Game } from "@prisma/client";
+import {
+  type Game,
+  type LibraryItem,
+  type LibraryItemStatus,
+} from "@prisma/client";
 import Link from "next/link";
 import { useState } from "react";
 
-import { cn, getGameUrl, normalizeString } from "../lib";
+import { cn, getGameUrl, LibraryStatusMapper, normalizeString } from "../lib";
 import { IgdbImage } from "./igdb-image";
 import { Heading } from "./typography";
 import { Badge } from "./ui/badge";
@@ -19,30 +23,23 @@ import {
 
 type GameCardProps = {
   game: Game;
-  platforms?: BacklogItem[];
-  currentPlatform?: BacklogItem;
+  platforms?: LibraryItem[];
+  currentPlatform?: LibraryItem;
 };
 
-const statusColors = {
-  TO_PLAY: "bg-yellow-500 text-white",
-  PLAYING: "bg-green-500 text-white",
-  PLAYED: "bg-blue-500 text-white",
-  COMPLETED: "bg-purple-500 text-white",
+const statusColors: Record<LibraryItemStatus, string> = {
+  CURIOUS_ABOUT: "bg-yellow-500 text-white",
+  CURRENTLY_EXPLORING: "bg-green-500 text-white",
+  TOOK_A_BREAK: "bg-orange-500 text-white",
+  EXPERIENCED: "bg-purple-500 text-white",
   WISHLIST: "bg-pink-500 text-white",
-};
-
-const statusLabels = {
-  TO_PLAY: "Backlog",
-  PLAYING: "Playing",
-  PLAYED: "Played",
-  COMPLETED: "Completed",
-  WISHLIST: "Wishlist",
+  REVISITING: "bg-blue-500 text-white",
 };
 
 export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const primaryPlatform = currentPlatform ?? platforms?.[0];
-  const status = primaryPlatform?.status ?? "TO_PLAY";
+  const status = primaryPlatform?.status ?? "CURIOUS_ABOUT";
 
   return (
     <Card
@@ -70,7 +67,7 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
             variant="secondary"
             className={cn("text-xs font-medium", statusColors[status])}
           >
-            {statusLabels[status]}
+            {LibraryStatusMapper[status]}
           </Badge>
         </div>
 

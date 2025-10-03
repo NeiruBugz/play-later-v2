@@ -1,6 +1,6 @@
 "use server";
 
-import { getOtherUsersBacklogs } from "@/shared/lib/repository";
+import { getOtherUsersLibraries } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 export const getBacklogs = authorizedActionClient
@@ -9,5 +9,5 @@ export const getBacklogs = authorizedActionClient
     requiresAuth: true,
   })
   .action(async ({ ctx: { userId } }) => {
-    return getOtherUsersBacklogs({ userId });
+    return getOtherUsersLibraries({ userId });
   });

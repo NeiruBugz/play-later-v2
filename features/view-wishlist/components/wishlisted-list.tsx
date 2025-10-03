@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { getWishlistedItems } from "@/features/view-wishlist/server-actions/get-wishlisted-items";
-import { BacklogItemCard } from "@/shared/components/backlog-item-card";
+import { LibraryItemCard } from "@/shared/components/library-item-card";
 
 export async function WishlistedList() {
   const { data: wishlistedItems, serverError } = await getWishlistedItems();
@@ -31,16 +31,16 @@ export async function WishlistedList() {
   return (
     <div>
       <ul className="flex flex-wrap justify-center gap-3 md:justify-start">
-        {wishlistedItems.map(({ game, backlogItems }) => (
+        {wishlistedItems.map(({ game, libraryItems }) => (
           <li key={game.id}>
-            <BacklogItemCard
+            <LibraryItemCard
               game={{
                 id: game.id,
                 title: game.title,
                 coverImage: game.coverImage,
                 igdbId: game.igdbId,
               }}
-              backlogItems={backlogItems}
+              libraryItems={libraryItems}
             />
           </li>
         ))}

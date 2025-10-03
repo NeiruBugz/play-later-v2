@@ -106,7 +106,7 @@ model LibraryItem {
   @@index([userId, platform])
   @@index([userId, createdAt])
   @@index([gameId])
-  @@map("BacklogItem")
+  @@map("LibraryItem")
 }
 
 model Review {

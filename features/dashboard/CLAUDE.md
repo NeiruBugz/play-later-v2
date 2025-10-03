@@ -7,7 +7,7 @@ The Dashboard feature serves as the central gaming analytics and overview hub fo
 ### Primary Purpose
 
 - **Gaming Analytics Hub**: Centralized view of user's gaming statistics and progress
-- **Motivational Engagement**: Encourage backlog completion through progress visualization
+- **Journey Visualization**: Encourage gaming exploration through progress visualization
 - **Quick Navigation**: Provide easy access to key features and recent activities
 - **External Integration**: Display Steam integration status and upcoming game releases
 
@@ -41,9 +41,9 @@ The dashboard follows a **widget-based architecture** where each component is se
 
 **Purpose**: Displays overall collection metrics and achievements
 
-- **Data Sources**: BacklogItem counts, Review ratings aggregation
+- **Data Sources**: LibraryItem counts, Review ratings aggregation
 - **Server Actions**:
-  - `getBacklogItemsCount()` (lines 18, 19-22)
+  - `getLibraryItemsCount()` (lines 18, 19-22)
   - `getAggregatedReviewRatings()` (line 22)
 - **Key Features**:
   - Total games count
@@ -51,28 +51,28 @@ The dashboard follows a **widget-based architecture** where each component is se
   - Average rating display (only when ratings exist)
 - **UI Pattern**: Card layout with icon headers and key-value pairs
 
-#### 2. BacklogCount (`components/backlog-count.tsx`)
+#### 2. LibraryCount (`components/backlog-count.tsx`)
 
-**Purpose**: Core backlog management widget with motivational messaging
+**Purpose**: Core library management widget with motivational messaging
 
-- **Data Sources**: Backlog items filtered by status and date ranges
-- **Server Actions**: Multiple parallel `getBacklogItemsCount()` calls (lines 17-32)
+- **Data Sources**: Library items filtered by status and date ranges
+- **Server Actions**: Multiple parallel `getLibraryItemsCount()` calls (lines 17-32)
 - **Key Features**:
-  - Motivational messaging based on backlog size (lines 44-50)
+  - Motivational messaging based on library size (lines 44-50)
   - Color-coded status indicators (lines 52-67)
-  - Progress visualization with completion rates
-  - Time-to-completion estimation (lines 132-136)
+  - Progress visualization with experience rates
+  - Journey timeline estimation (lines 132-136)
 - **Business Logic**:
   - Motivational messaging system encourages engagement
-  - Visual progress indicators drive completion behavior
+  - Visual progress indicators drive exploration behavior
 
 #### 3. RecentActivity (`components/recent-activity.tsx`)
 
 **Purpose**: Timeline of recent gaming milestones and achievements
 
-- **Data Sources**: Recently completed games and user reviews
+- **Data Sources**: Recently experienced games and user reviews
 - **Server Actions**:
-  - `getRecentCompletedBacklogItems()` (line 17)
+  - `getRecentCompletedLibraryItems()` (line 17)
   - `getRecentReviews()` (line 18)
 - **Key Features**:
   - Chronological activity feed with relative timestamps
@@ -141,10 +141,10 @@ All server actions follow the `authorizedActionClient` pattern with:
 
 ### Key Server Actions
 
-#### `getBacklogItemsCount()` (`server-actions/get-backlog-items-count.ts`)
+#### `getLibraryItemsCount()` (`server-actions/get-backlog-items-count.ts`)
 
 - **Input Schema**: Optional status filter and date range (lines 14-25)
-- **Repository Integration**: Calls `getBacklogCount()` with user context
+- **Repository Integration**: Calls `getLibraryCount()` with user context
 - **Flexibility**: Supports multiple filter combinations for different use cases
 
 #### `getAggregatedReviewRatings()` (`server-actions/get-aggregated-review-ratings.ts`)
@@ -153,9 +153,9 @@ All server actions follow the `authorizedActionClient` pattern with:
 - **Repository Call**: `aggregateReviewsRatingsForUser()`
 - **Usage**: Powers average rating display in CollectionStats
 
-#### `getRecentCompletedBacklogItems()` (`server-actions/get-recent-completed-backlog-items.ts`)
+#### `getRecentCompletedLibraryItems()` (`server-actions/get-recent-completed-backlog-items.ts`)
 
-- **Purpose**: Retrieves recently completed games for activity feed
+- **Purpose**: Retrieves recently experienced games for activity feed
 - **Repository Integration**: Direct pass-through to repository layer
 - **Data Flow**: User ID → Repository → Recent completions with game metadata
 
@@ -169,14 +169,14 @@ All server actions follow the `authorizedActionClient` pattern with:
 
 ### Data Transformation Helpers
 
-#### `groupBacklogItemsByGame()` (`lib/group-backlog-items-by-game.ts`)
+#### `groupLibraryItemsByGame()` (`lib/group-backlog-items-by-game.ts`)
 
-- **Purpose**: Aggregates multiple backlog items per game into single objects
+- **Purpose**: Aggregates multiple library items per game into single objects
 - **Pattern**: Uses Map for efficient grouping by game ID
-- **Type Safety**: Returns strongly typed `GameWithBacklogItems[]`
+- **Type Safety**: Returns strongly typed `GameWithLibraryItems[]`
 - **Use Case**: Supports multiple platform ownership of same game
 
-#### `getUpcomingWishlistGamesWithBacklogId()` (`lib/get-upcoming-wishlist-games-with-backlogId.ts`)
+#### `getUpcomingWishlistGamesWithLibraryId()` (`lib/get-upcoming-wishlist-games-with-backlogId.ts`)
 
 - **Purpose**: Connects IGDB release data with user's wishlist items
 - **Integration Point**: Bridges external API data with internal game references
@@ -188,9 +188,9 @@ All server actions follow the `authorizedActionClient` pattern with:
 ### Core Type Definitions (`types/index.ts`)
 
 ```typescript
-export type GameWithBacklogItems = {
+export type GameWithLibraryItems = {
   game: Pick<Game, "id" | "title" | "igdbId" | "coverImage">;
-  backlogItems: Omit<BacklogItem, "game">[];
+  libraryItems: Omit<LibraryItem, "game">[];
   totalMainStoryHours?: number;
 };
 ```
@@ -198,7 +198,7 @@ export type GameWithBacklogItems = {
 **Design Principles**:
 
 - **Selective Field Access**: Uses `Pick` to limit game fields to essential data
-- **Relationship Modeling**: Omits circular references in backlog items
+- **Relationship Modeling**: Omits circular references in library items
 - **Optional Enhancement**: Includes optional metadata like completion time
 - **Performance Optimization**: Reduces data transfer by selecting minimal fields
 
@@ -252,7 +252,7 @@ export type GameWithBacklogItems = {
 ### Widget Prioritization
 
 1. **Primary Widgets**: CurrentlyPlaying, UpcomingReleases (larger spans)
-2. **Stats Widgets**: BacklogCount, CollectionStats (single spans)
+2. **Stats Widgets**: LibraryCount, CollectionStats (single spans)
 3. **Additional Widgets**: RecentActivity, PlatformBreakdown, SteamIntegration
 
 ## Performance Optimizations
@@ -360,13 +360,13 @@ export type GameWithBacklogItems = {
 
 - `/features/dashboard/components/index.ts` - Component exports
 - `/features/dashboard/components/collection-stats.tsx` - Collection overview widget
-- `/features/dashboard/components/backlog-count.tsx` - Core backlog management with motivation
+- `/features/dashboard/components/backlog-count.tsx` - Core library management with motivation
 - `/features/dashboard/components/recent-activity.tsx` - Activity timeline
 - `/features/dashboard/components/dashboard-skeletons.tsx` - Loading state components
 
 ### Server Actions
 
-- `/features/dashboard/server-actions/get-backlog-items-count.ts` - Flexible backlog counting
+- `/features/dashboard/server-actions/get-backlog-items-count.ts` - Flexible library item counting
 - `/features/dashboard/server-actions/get-aggregated-review-ratings.ts` - Rating statistics
 - `/features/dashboard/server-actions/get-platform-breakdown.ts` - Platform analytics
 

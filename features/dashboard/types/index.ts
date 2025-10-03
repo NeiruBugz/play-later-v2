@@ -1,7 +1,7 @@
-import { type BacklogItem, type Game } from "@prisma/client";
+import { type Game, type LibraryItem } from "@prisma/client";
 
-export type GameWithBacklogItems = {
+export type GameWithLibraryItems = {
   game: Pick<Game, "id" | "title" | "igdbId" | "coverImage">;
-  backlogItems: Array<Omit<BacklogItem, "game">>;
+  libraryItems: Array<Omit<LibraryItem, "game">>;
   totalMainStoryHours?: number;
 };

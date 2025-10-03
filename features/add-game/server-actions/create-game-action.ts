@@ -1,13 +1,13 @@
 "use server";
 
-import { type AcquisitionType, type BacklogItemStatus } from "@prisma/client";
+import { type AcquisitionType, type LibraryItemStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 import { CreateGameActionSchema } from "../lib/validation";
-import { type AddGameToBacklogInput } from "../types";
-import { saveGameAndAddToBacklog } from "./add-game";
+import { type AddGameToLibraryInput } from "../types";
+import { saveGameAndAddToLibrary } from "./add-game";
 
 export const createGameAction = authorizedActionClient
   .metadata({
@@ -16,18 +16,18 @@ export const createGameAction = authorizedActionClient
   })
   .inputSchema(CreateGameActionSchema)
   .action(async ({ parsedInput: data }) => {
-    const preparedPayload: AddGameToBacklogInput = {
+    const preparedPayload: AddGameToLibraryInput = {
       game: {
         igdbId: data.igdbId,
       },
-      backlogItem: {
+      libraryItem: {
         acquisitionType: data.acquisitionType as AcquisitionType,
-        backlogStatus: data.backlogStatus as BacklogItemStatus,
+        libraryItemStatus: data.libraryItemStatus as LibraryItemStatus,
         platform: data.platform,
       },
     };
 
-    const { data: savedGame } = await saveGameAndAddToBacklog(preparedPayload);
+    const { data: savedGame } = await saveGameAndAddToLibrary(preparedPayload);
 
     revalidatePath("/collection");
 

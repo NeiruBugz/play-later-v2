@@ -138,20 +138,20 @@ Visit [http://localhost:6060](http://localhost:6060) to see the application.
 
 ```bash
 # Run all tests
-bun test
+bun run test
 
 # Run unit tests (fast, mocked database)
-bun test:unit
+bun run test:unit
 
 # Run integration tests (real database)
-bun test:integration
+bun run test:integration
 
 # Run tests with coverage
-bun test:coverage
+bun run test:coverage
 
 # Watch mode
-bun test:unit:watch
-bun test:integration:watch
+bun run test:unit:watch
+bun run test:integration:watch
 ```
 
 ### Test Database Setup
@@ -160,10 +160,10 @@ For integration tests, start the test database:
 
 ```bash
 # Start test database
-bun test:db:setup
+bun run test:db:setup
 
 # Stop test database
-bun test:db:teardown
+bun run test:db:teardown
 ```
 
 ## 🔧 Development Commands
@@ -211,7 +211,7 @@ The application uses a repository pattern for data access, providing a clean sep
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and add tests
-4. Run the test suite: `bun test`
+4. Run the test suite: `bun run test`
 5. Run code quality checks: `bun code-check`
 6. Commit your changes using conventional commits (see examples below)
 7. Push to the branch: `git push origin feature/amazing-feature`

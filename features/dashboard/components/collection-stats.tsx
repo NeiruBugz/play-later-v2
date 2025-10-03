@@ -1,7 +1,7 @@
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { Library, Star, Trophy } from "lucide-react";
 
-import { getBacklogItemsCount } from "@/features/dashboard/server-actions/get-backlog-items-count";
+import { getLibraryItemsCount } from "@/features/dashboard/server-actions/get-backlog-items-count";
 import {
   Card,
   CardContent,
@@ -13,11 +13,11 @@ import {
 import { getAggregatedReviewRatings } from "../server-actions/get-aggregated-review-ratings";
 
 export async function CollectionStats() {
-  const [totalGamesResult, completedGamesResult, averageRatingResult] =
+  const [totalGamesResult, experiencedGamesResult, averageRatingResult] =
     await Promise.all([
-      getBacklogItemsCount({}),
-      getBacklogItemsCount({
-        status: BacklogItemStatus.COMPLETED,
+      getLibraryItemsCount({}),
+      getLibraryItemsCount({
+        status: LibraryItemStatus.EXPERIENCED,
       }),
       getAggregatedReviewRatings(),
     ]);
@@ -25,11 +25,11 @@ export async function CollectionStats() {
   const { data: averageRatingData } = averageRatingResult;
 
   const totalGames = totalGamesResult.data ?? 0;
-  const completedGames = completedGamesResult.data ?? 0;
+  const experiencedGames = experiencedGamesResult.data ?? 0;
   const averageRating = averageRatingData?._avg.rating ?? 0;
 
   const completionRate =
-    totalGames > 0 ? Math.round((completedGames / totalGames) * 100) : 0;
+    totalGames > 0 ? Math.round((experiencedGames / totalGames) * 100) : 0;
   const avgRating = averageRating ? Math.round(averageRating * 10) / 10 : 0;
 
   return (
@@ -50,7 +50,7 @@ export async function CollectionStats() {
           <div className="flex items-center gap-2">
             <Trophy className="size-4 text-yellow-500" />
             <span className="text-sm text-muted-foreground">
-              Completion Rate
+              Experienced Rate
             </span>
           </div>
           <span className="font-semibold">{completionRate}%</span>

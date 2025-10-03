@@ -4,13 +4,13 @@ This documentation provides comprehensive guidance for working with the Add Game
 
 ## Feature Overview
 
-The Add Game feature enables users to search for video games using the IGDB database and add them to their personal game collection with customizable metadata including platform, backlog status, and acquisition type.
+The Add Game feature enables users to search for video games using the IGDB database and add them to their personal game collection with customizable metadata including platform, library status, and acquisition type.
 
 ### Core Functionality
 
 - **Game Search**: Real-time search integration with IGDB API (minimum 3 characters)
 - **Game Selection**: Visual game picker with cover art and release dates
-- **Collection Configuration**: Platform, backlog status, and acquisition type selection
+- **Collection Configuration**: Platform, library status, and acquisition type selection
 - **Multiple Entry Points**: Full form, modal quick-add, and external page integration
 - **Data Validation**: Comprehensive input validation with Zod schemas
 
@@ -63,7 +63,7 @@ features/add-game/
 
 - Game search integration with `GamePicker` (lines 127-132)
 - Platform selection dropdown (lines 182-221)
-- Backlog status radio group (lines 226-275)
+- Library status radio group (lines 226-275)
 - Acquisition type radio group (lines 280-332)
 - Form validation and error handling (lines 58-67)
 - Loading states and disabled controls (lines 54, 111)
@@ -128,11 +128,11 @@ features/add-game/
 
 - Requires authentication (lines 12-16)
 - Input validation with `CreateGameActionSchema` (line 17)
-- Calls `saveGameAndAddToBacklog` for business logic (line 30)
+- Calls `saveGameAndAddToLibrary` for business logic (line 30)
 - Cache revalidation for `/collection` path (line 32)
 - Returns game title and ID for UI feedback (lines 34-37)
 
-#### saveGameAndAddToBacklog (`/server-actions/add-game.ts`)
+#### saveGameAndAddToLibrary (`/server-actions/add-game.ts`)
 
 **Purpose**: Core business logic for adding games to user collections.
 
@@ -141,7 +141,7 @@ features/add-game/
 - Direct repository layer integration (lines 29-37)
 - User scoped operations with `userId` from context (line 26)
 - Comprehensive input validation (lines 14-25)
-- Calls `addGameToUserBacklog` repository function (line 29)
+- Calls `addGameToUserLibrary` repository function (line 29)
 
 ## TypeScript Patterns
 
@@ -153,18 +153,18 @@ export type GameFormValues =
   | Partial<Omit<Game, "releaseDate"> & { releaseDate: number }>
   | undefined;
 
-// Backlog item configuration (lines 7-11)
-export type BacklogItemFormValues = {
-  backlogStatus: BacklogItemStatus;
+// Library item configuration (lines 7-11)
+export type LibraryItemFormValues = {
+  libraryStatus: LibraryItemStatus;
   acquisitionType: AcquisitionType;
   platform?: string;
 };
 
 // Server action input type (lines 13-20)
-export type AddGameToBacklogInput = {
+export type AddGameToLibraryInput = {
   game: Pick<Game, "igdbId">;
-  backlogItem: {
-    backlogStatus: BacklogItemStatus;
+  libraryItem: {
+    libraryStatus: LibraryItemStatus;
     acquisitionType: AcquisitionType;
     platform?: string;
   };
@@ -176,7 +176,7 @@ export type AddGameToBacklogInput = {
 ```typescript
 // Zod schema for server action validation (lines 4-9)
 export const CreateGameActionSchema = z.object({
-  backlogStatus: z.nativeEnum(BacklogItemStatus).optional(),
+  libraryStatus: z.nativeEnum(LibraryItemStatus).optional(),
   igdbId: z.number(),
   platform: z.string().optional(),
   acquisitionType: z.nativeEnum(AcquisitionType).optional(),
@@ -197,8 +197,8 @@ export const DEFAULT_PLATFORM_LIST: SearchResponse["platforms"] = [
 ];
 
 // Form default values (lines 14-18)
-export const initialFormValues: BacklogItemFormValues = {
-  backlogStatus: BacklogItemStatus.TO_PLAY,
+export const initialFormValues: LibraryItemFormValues = {
+  libraryStatus: LibraryItemStatus.CURIOUS_ABOUT,
   acquisitionType: AcquisitionType.DIGITAL,
   platform: "",
 };
@@ -211,8 +211,8 @@ export const initialFormValues: BacklogItemFormValues = {
 ```
 User enters search → GamePicker queries IGDB → Results displayed
 User selects game → AddGameForm populated → User configures metadata
-User submits form → createGameAction validation → saveGameAndAddToBacklog
-Repository layer → addGameToUserBacklog → Database persistence
+User submits form → createGameAction validation → saveGameAndAddToLibrary
+Repository layer → addGameToUserLibrary → Database persistence
 Success response → UI feedback → Cache revalidation
 ```
 
@@ -228,7 +228,7 @@ The feature integrates with the search module (`features/search`) through:
 
 Uses the repository pattern through `shared/lib/repository`:
 
-- `addGameToUserBacklog` for game and backlog item creation
+- `addGameToUserLibrary` for game and library item creation
 - User-scoped operations with authentication context
 - Database transaction handling for consistency
 
@@ -282,7 +282,7 @@ describe("createGameAction", () => {
 
 2. **Repository Layer**
 
-   - `addGameToUserBacklog` from `shared/lib/repository/backlog`
+   - `addGameToUserLibrary` from `shared/lib/repository/library`
    - User authentication context
    - Database transaction management
 

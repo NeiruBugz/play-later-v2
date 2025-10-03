@@ -1,4 +1,4 @@
-import type { BacklogItem, Game } from "@prisma/client";
+import type { Game, LibraryItem } from "@prisma/client";
 
 import type { FilterParams } from "@/shared/types/collection";
 
@@ -10,14 +10,14 @@ export interface CollectionParams extends Omit<FilterParams, "page"> {
   page?: number;
 }
 
-// Type representing the game with its backlog items as returned by the repository
-export type GameWithBacklogItems = Game & {
-  backlogItems: BacklogItem[];
+// Type representing the game with its library items as returned by the repository
+export type GameWithLibraryItems = Game & {
+  libraryItems: LibraryItem[];
 };
 
 export interface CollectionItem {
-  game: GameWithBacklogItems;
-  backlogItems: BacklogItem[];
+  game: GameWithLibraryItems;
+  libraryItems: LibraryItem[];
 }
 
 export interface CollectionResult {

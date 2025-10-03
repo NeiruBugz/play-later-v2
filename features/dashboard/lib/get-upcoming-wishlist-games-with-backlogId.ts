@@ -1,18 +1,18 @@
 import { type UpcomingReleaseResponse } from "@/shared/types";
 
-export const getUpcomingWishlistGamesWithBacklogId = (
+export const getUpcomingWishlistGamesWithLibraryId = (
   wishlistedGames: Array<{ id: number; game: { igdbId: number | null } }>,
   releases: UpcomingReleaseResponse[]
 ): Array<{ gameId: number } & UpcomingReleaseResponse> => {
   return releases
     .map((release) => {
-      const backlogItem = wishlistedGames.find(
+      const libraryItem = wishlistedGames.find(
         (item) => item.game.igdbId === release.id
       );
-      if (!backlogItem) return null;
+      if (!libraryItem) return null;
       return {
         ...release,
-        gameId: backlogItem.id,
+        gameId: libraryItem.id,
       };
     })
     .filter(

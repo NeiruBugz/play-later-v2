@@ -16,7 +16,7 @@ import { cn } from "@/shared/lib";
 
 const linksConfig = [
   {
-    href: "/collection?status=PLAYING&page=1",
+    href: "/collection?status=CURRENTLY_EXPLORING&page=1",
     label: "Collection",
     icon: Library,
     mobileLabel: "Collection",

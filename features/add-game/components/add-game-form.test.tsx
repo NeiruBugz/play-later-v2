@@ -6,12 +6,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { AddGameForm } from "./add-game-form";
 
-const BACKLOG_STATUS = [
-  "Backlog",
-  "Played",
-  "Playing",
-  "Completed",
+const LIBRARY_STATUS = [
+  "Curious About",
+  "Currently Exploring",
+  "Took a Break",
+  "Experienced",
   "Wishlist",
+  "Revisiting",
 ];
 
 const ACQUISITION_TYPE = ["Physical", "Digital", "Subscription service"];
@@ -25,7 +26,7 @@ const elements = {
   getEmptyStateHeading: () => screen.getByText("Select a game to continue"),
   getEmptyStateDescription: () =>
     screen.getByText(
-      "Once you choose a game, you'll be able to set your platform preference, backlog status, and how you acquired the game."
+      "Once you choose a game, you'll be able to set your platform preference, library status, and how you acquired the game."
     ),
   getGameSelectorInputLabel: () => screen.getByText("Search for a game"),
   getGameSelectorInput: () =>
@@ -169,10 +170,10 @@ describe("AddGameForm", () => {
       });
       expect(elements.getFormDescription()).toBeVisible();
       expect(elements.getPlatformSelectTrigger()).toBeVisible();
-      BACKLOG_STATUS.forEach((status) => {
+      LIBRARY_STATUS.forEach((status) => {
         expect(elements.getStatusRadioGroupButton(status)).toBeVisible();
       });
-      expect(elements.getStatusRadioGroupButton("Backlog")).toBeChecked();
+      expect(elements.getStatusRadioGroupButton("Curious About")).toBeChecked();
       ACQUISITION_TYPE.forEach((type) => {
         expect(elements.getAcquisitionTypeRadioGroupButton(type)).toBeVisible();
       });
@@ -184,14 +185,14 @@ describe("AddGameForm", () => {
     });
 
     describe("when user changes form fields", () => {
-      it("should change backlog status", async () => {
-        const newStatus = "Completed";
+      it("should change library status", async () => {
+        const newStatus = "Experienced";
         await actions.changeStatus(newStatus);
 
         await waitFor(() => {
           expect(elements.getStatusRadioGroupButton(newStatus)).toBeChecked();
           expect(
-            elements.getStatusRadioGroupButton("Backlog")
+            elements.getStatusRadioGroupButton("Curious About")
           ).not.toBeChecked();
         });
       });
@@ -213,7 +214,7 @@ describe("AddGameForm", () => {
 
     describe("when user resets form after changes", () => {
       beforeEach(async () => {
-        await actions.changeStatus("Completed");
+        await actions.changeStatus("Experienced");
         await actions.changeAcquisitionType("Physical");
       });
 

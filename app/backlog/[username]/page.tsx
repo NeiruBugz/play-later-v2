@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getUsersBacklog } from "@/features/view-backlogs/server-actions";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
-import { BacklogStatusMapper, normalizeString } from "@/shared/lib";
+import { LibraryStatusMapper, normalizeString } from "@/shared/lib";
 
 export default async function UsersBacklogPage(
   props: PageProps<"/backlog/[username]">
@@ -29,27 +29,27 @@ export default async function UsersBacklogPage(
           {awaitedParams.username}&apos;s Backlog
         </h1>
         <ul className="mt-2 flex flex-wrap justify-evenly gap-2">
-          {userGamesList?.map((backlogItem) => (
+          {userGamesList?.map((libraryItem) => (
             <li
-              key={backlogItem.id}
+              key={libraryItem.id}
               className="group relative flex max-w-[160px] flex-col items-center gap-1.5 rounded border bg-background shadow"
             >
               <IgdbImage
                 width={160}
                 height={160}
                 className="object-cover"
-                gameTitle={backlogItem.game.title}
-                coverImageId={backlogItem.game.coverImage}
+                gameTitle={libraryItem.game.title}
+                coverImageId={libraryItem.game.coverImage}
                 igdbSrcSize={"hd"}
                 igdbImageSize={"hd"}
               />
               <div className="absolute hidden h-full w-40 flex-col items-center justify-center gap-2 rounded group-hover:flex">
                 <span className="text-center text-sm font-medium text-white">
-                  {backlogItem.game.title}
+                  {libraryItem.game.title}
                 </span>
                 <span className="text-center text-sm font-medium text-foreground">
-                  {BacklogStatusMapper[backlogItem.status]} |{" "}
-                  {normalizeString(backlogItem.platform)}
+                  {LibraryStatusMapper[libraryItem.status]} |{" "}
+                  {normalizeString(libraryItem.platform)}
                 </span>
               </div>
             </li>

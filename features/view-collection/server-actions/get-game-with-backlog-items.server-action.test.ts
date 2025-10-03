@@ -70,7 +70,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
       const mockUserId = "test-user-123";
       const mockInput = {
         platform: "PC",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "cyberpunk",
         page: 2,
       };
@@ -94,14 +94,14 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
                 createdAt: new Date(),
                 updatedAt: new Date(),
               },
-              backlogItems: [
+              libraryItems: [
                 {
                   id: 1,
                   userId: mockUserId,
-                  status: "PLAYING" as const,
+                  status: "CURRENTLY_EXPLORING" as const,
                   platform: "PC",
                   gameId: "1",
-                  acquisitionType: "PURCHASED" as const,
+                  acquisitionType: "DIGITAL" as const,
                   startedAt: null,
                   completedAt: null,
                   createdAt: new Date(),
@@ -148,7 +148,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
       expect(mockCollectionService.getCollection).toHaveBeenCalledWith({
         userId: mockUserId,
         platform: "PC",
-        status: "PLAYING",
+        status: "CURRENTLY_EXPLORING",
         search: "cyberpunk",
         page: 2,
       });
@@ -410,7 +410,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
       const mockUserId = "test-user-123";
       const mockInput = {
         platform: "PlayStation 5",
-        status: "COMPLETED",
+        status: "EXPERIENCED",
         search: "action game",
         page: 5,
       };
@@ -456,7 +456,7 @@ describe("getUserGamesWithGroupedBacklogPaginated server action", () => {
       expect(mockCollectionService.getCollection).toHaveBeenCalledWith({
         userId: mockUserId,
         platform: "PlayStation 5",
-        status: "COMPLETED",
+        status: "EXPERIENCED",
         search: "action game",
         page: 5,
       });

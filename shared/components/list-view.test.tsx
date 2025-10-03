@@ -1,5 +1,5 @@
 import { renderWithTestProviders } from "@/test/utils/test-provider";
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
@@ -24,7 +24,7 @@ const elements = {
 };
 
 describe("ListView", () => {
-  const mockGameWithBacklogItems = [
+  const mockGameWithLibraryItems = [
     {
       game: {
         id: "game-1",
@@ -41,13 +41,13 @@ describe("ListView", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      backlogItems: [
+      libraryItems: [
         {
           id: 1,
           userId: "user-1",
           gameId: "game-1",
           platform: "PC",
-          status: BacklogItemStatus.PLAYING,
+          status: LibraryItemStatus.CURRENTLY_EXPLORING,
           acquisitionType: "DIGITAL" as const,
           startedAt: new Date("2024-01-01"),
           completedAt: null,
@@ -73,13 +73,13 @@ describe("ListView", () => {
         completionist: null,
         steamAppId: null,
       },
-      backlogItems: [
+      libraryItems: [
         {
           id: 2,
           userId: "user-1",
           gameId: "game-2",
           platform: "PlayStation",
-          status: BacklogItemStatus.COMPLETED,
+          status: LibraryItemStatus.EXPERIENCED,
           acquisitionType: "PHYSICAL" as const,
           startedAt: new Date("2024-01-01"),
           completedAt: new Date("2024-01-31"),
@@ -94,7 +94,7 @@ describe("ListView", () => {
     it("should render a container with proper spacing", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -106,7 +106,7 @@ describe("ListView", () => {
     it("should render all games with their titles", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -121,7 +121,7 @@ describe("ListView", () => {
     it("should display game descriptions when available", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -135,7 +135,7 @@ describe("ListView", () => {
     it("should render View Details buttons with correct links", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -152,16 +152,16 @@ describe("ListView", () => {
     it("should display correct status badges", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
-      expect(screen.getByText("Playing")).toBeInTheDocument();
-      expect(screen.getByText("Completed")).toBeInTheDocument();
+      expect(screen.getByText("Currently Exploring")).toBeInTheDocument();
+      expect(screen.getByText("Experienced")).toBeInTheDocument();
     });
 
-    it("should default to Backlog status when no backlog items exist", () => {
-      const gameWithNoBacklogItems = [
+    it("should default to Curious About status when no library items exist", () => {
+      const gameWithNoLibraryItems = [
         {
           game: {
             id: "game-empty",
@@ -178,28 +178,28 @@ describe("ListView", () => {
             completionist: null,
             steamAppId: null,
           },
-          backlogItems: [],
+          libraryItems: [],
         },
       ];
 
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={gameWithNoBacklogItems} />
+        <ListView libraryItems={gameWithNoLibraryItems} />
       );
 
       // Assert
-      expect(screen.getByText("Backlog")).toBeInTheDocument();
+      expect(screen.getByText("Curious About")).toBeInTheDocument();
     });
 
     it("should apply correct status colors to badges", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
-      const playingBadge = screen.getByText("Playing");
-      const completedBadge = screen.getByText("Completed");
+      const playingBadge = screen.getByText("Currently Exploring");
+      const completedBadge = screen.getByText("Experienced");
 
       // Check that badges have the status-specific classes
       expect(playingBadge).toHaveClass("bg-green-100", "text-green-800");
@@ -211,7 +211,7 @@ describe("ListView", () => {
     it("should display platform information when available", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -237,13 +237,13 @@ describe("ListView", () => {
             completionist: null,
             steamAppId: null,
           },
-          backlogItems: [
+          libraryItems: [
             {
               id: 3,
               userId: "user-1",
               gameId: "game-no-platform",
               platform: null,
-              status: BacklogItemStatus.TO_PLAY,
+              status: LibraryItemStatus.CURIOUS_ABOUT,
               acquisitionType: "DIGITAL" as const,
               startedAt: null,
               completedAt: null,
@@ -255,7 +255,7 @@ describe("ListView", () => {
       ];
 
       // Act
-      renderWithTestProviders(<ListView backlogItems={gameWithNoPlatform} />);
+      renderWithTestProviders(<ListView libraryItems={gameWithNoPlatform} />);
 
       // Assert
       // Should not show Monitor icon or platform text when platform is null
@@ -268,7 +268,7 @@ describe("ListView", () => {
     it("should display formatted release dates when available", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -280,7 +280,7 @@ describe("ListView", () => {
       // Game 2 has null release date, so calendar icon shouldn't appear for it
       // We can check this by ensuring only one calendar icon exists
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Only one game has a release date
@@ -292,7 +292,7 @@ describe("ListView", () => {
   });
 
   describe("multi-platform indicator", () => {
-    it("should show multi-platform badge when game has multiple backlog items", () => {
+    it("should show multi-platform badge when game has multiple library items", () => {
       const gameWithMultiplePlatforms = [
         {
           game: {
@@ -310,13 +310,13 @@ describe("ListView", () => {
             completionist: null,
             steamAppId: null,
           },
-          backlogItems: [
+          libraryItems: [
             {
               id: 4,
               userId: "user-1",
               gameId: "game-multi",
               platform: "PC",
-              status: BacklogItemStatus.COMPLETED,
+              status: LibraryItemStatus.EXPERIENCED,
               acquisitionType: "DIGITAL" as const,
               startedAt: new Date("2024-01-01"),
               completedAt: new Date("2024-01-31"),
@@ -328,7 +328,7 @@ describe("ListView", () => {
               userId: "user-1",
               gameId: "game-multi",
               platform: "PlayStation",
-              status: BacklogItemStatus.TO_PLAY,
+              status: LibraryItemStatus.CURIOUS_ABOUT,
               acquisitionType: "PHYSICAL" as const,
               startedAt: null,
               completedAt: null,
@@ -340,7 +340,7 @@ describe("ListView", () => {
               userId: "user-1",
               gameId: "game-multi",
               platform: "Xbox",
-              status: BacklogItemStatus.WISHLIST,
+              status: LibraryItemStatus.WISHLIST,
               acquisitionType: "DIGITAL" as const,
               startedAt: null,
               completedAt: null,
@@ -353,7 +353,7 @@ describe("ListView", () => {
 
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={gameWithMultiplePlatforms} />
+        <ListView libraryItems={gameWithMultiplePlatforms} />
       );
 
       // Assert
@@ -363,7 +363,7 @@ describe("ListView", () => {
     it("should not show multi-platform badge for single platform games", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -372,10 +372,10 @@ describe("ListView", () => {
     });
   });
 
-  describe("when backlog items array is empty", () => {
+  describe("when library items array is empty", () => {
     it("should render empty container", () => {
       // Act
-      renderWithTestProviders(<ListView backlogItems={[]} />);
+      renderWithTestProviders(<ListView libraryItems={[]} />);
 
       // Assert
       const container = document.querySelector(".space-y-3");
@@ -388,7 +388,7 @@ describe("ListView", () => {
     it("should have responsive layout classes", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -407,7 +407,7 @@ describe("ListView", () => {
     it("should render IGDB images with correct props", () => {
       // Act
       renderWithTestProviders(
-        <ListView backlogItems={mockGameWithBacklogItems} />
+        <ListView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert

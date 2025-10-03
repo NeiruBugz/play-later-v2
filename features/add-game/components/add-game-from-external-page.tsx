@@ -1,4 +1,4 @@
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { Heart } from "lucide-react";
 import { redirect } from "next/navigation";
 
@@ -22,7 +22,7 @@ export function AddToWishlistFromExternalPage({
         "use server";
         const result = await createGameAction({
           igdbId,
-          backlogStatus: BacklogItemStatus.WISHLIST,
+          libraryItemStatus: LibraryItemStatus.WISHLIST,
         });
 
         if (result.data) {

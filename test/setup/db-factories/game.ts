@@ -1,4 +1,4 @@
-import { type BacklogItem, type Game, type Review } from "@prisma/client";
+import { type Game, type LibraryItem, type Review } from "@prisma/client";
 
 import { testDataBase } from "../database";
 
@@ -29,25 +29,31 @@ export const createGame = async (
   });
 };
 
-export type BacklogItemFactoryOptions = {
+export type LibraryItemFactoryOptions = {
   userId: string;
   gameId: string;
-  status?: "TO_PLAY" | "PLAYING" | "COMPLETED" | "WISHLIST";
+  status?:
+    | "CURIOUS_ABOUT"
+    | "CURRENTLY_EXPLORING"
+    | "TOOK_A_BREAK"
+    | "EXPERIENCED"
+    | "WISHLIST"
+    | "REVISITING";
   platform?: string;
   acquisitionType?: "DIGITAL" | "PHYSICAL" | "SUBSCRIPTION";
 };
 
-export const createBacklogItem = async (
-  options: BacklogItemFactoryOptions
-): Promise<BacklogItem> => {
+export const createLibraryItem = async (
+  options: LibraryItemFactoryOptions
+): Promise<LibraryItem> => {
   const defaultData = {
-    status: "TO_PLAY" as const,
+    status: "CURIOUS_ABOUT" as const,
     platform: "PC",
     acquisitionType: "DIGITAL" as const,
     ...options,
   };
 
-  return testDataBase.backlogItem.create({
+  return testDataBase.libraryItem.create({
     data: defaultData,
   });
 };

@@ -20,7 +20,7 @@ export {
   type CollectionItem,
   type CollectionResult,
   type CollectionService as CollectionServiceInterface,
-  type GameWithBacklogItems,
+  type GameWithLibraryItems,
 } from "./collection/types";
 
 export { CollectionService } from "./collection/collection-service";

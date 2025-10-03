@@ -3,11 +3,11 @@
 import { findCurrentlyPlayingGames } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
-import { groupBacklogItemsByGame } from "../lib/group-backlog-items-by-game";
+import { groupLibraryItemsByGame } from "../lib/group-backlog-items-by-game";
 
-export const getCurrentlyPlayingGamesInBacklog = authorizedActionClient
+export const getCurrentlyExploringGames = authorizedActionClient
   .metadata({
-    actionName: "getCurrentlyPlayingGamesInBacklog",
+    actionName: "getCurrentlyExploringGames",
     requiresAuth: true,
   })
   .action(async ({ ctx: { userId } }) => {
@@ -16,5 +16,5 @@ export const getCurrentlyPlayingGamesInBacklog = authorizedActionClient
       return [];
     }
 
-    return groupBacklogItemsByGame(userGames);
+    return groupLibraryItemsByGame(userGames);
   });

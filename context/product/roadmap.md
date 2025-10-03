@@ -36,18 +36,18 @@ _The essential features that form the core foundation of the product._
 
 _Critical phase to align the product with the SavePoint vision: gaming journal, library curation, and intentional experiences._
 
-- [ ] **Vision Transformation (SavePoint Rebrand)** ⭐ _HIGHEST PRIORITY_
+- [x] **Vision Transformation (SavePoint Rebrand)** ⭐ _HIGHEST PRIORITY_ ✅ **COMPLETED 2025-10-02**
 
-  - [ ] **Database Schema Migration:**
-    - [ ] Rename `BacklogItem` model to `LibraryItem` (reflects curation, not burden)
-    - [ ] Update `BacklogItemStatus` enum values to match new journey-focused language:
-      - `TO_PLAY` → `CURIOUS_ABOUT` or `WAITING`
+  - [x] **Database Schema Migration:**
+    - [x] Rename `BacklogItem` model to `LibraryItem` (reflects curation, not burden)
+    - [x] Update `BacklogItemStatus` enum values to match new journey-focused language:
+      - `TO_PLAY` → `CURIOUS_ABOUT`
       - `PLAYING` → `CURRENTLY_EXPLORING`
-      - `PLAYED` → `TOOK_A_BREAK` or `PAUSED`
+      - `PLAYED` → `TOOK_A_BREAK`
       - `COMPLETED` → `EXPERIENCED`
       - Add `REVISITING` status for games being replayed
-    - [ ] Consider renaming `Review` model to `JournalEntry` or `GameReflection`
-    - [ ] Add fields to support richer journaling (mood tags, play session notes, etc.)
+    - [x] Create new `JournalEntry` model separate from `Review`
+    - [x] Add fields to support richer journaling (mood tags, play session notes, visibility controls)
   - [ ] **UI/UX Language Revision:**
     - [ ] Replace "backlog" terminology across the entire application
     - [ ] Update navigation labels, page titles, and CTAs to reflect warmth and curation

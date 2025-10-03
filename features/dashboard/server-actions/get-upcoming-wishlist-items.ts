@@ -4,7 +4,7 @@ import igdbApi from "@/shared/lib/igdb";
 import { findUpcomingWishlistItems } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
-import { getUpcomingWishlistGamesWithBacklogId } from "../lib/get-upcoming-wishlist-games-with-backlogId";
+import { getUpcomingWishlistGamesWithLibraryId } from "../lib/get-upcoming-wishlist-games-with-backlogId";
 
 export const getUpcomingWishlistItems = authorizedActionClient
   .metadata({
@@ -38,7 +38,7 @@ export const getUpcomingWishlistItems = authorizedActionClient
       return [];
     }
 
-    const games = getUpcomingWishlistGamesWithBacklogId(
+    const games = getUpcomingWishlistGamesWithLibraryId(
       wishlistedGames,
       upcomingReleases
     );

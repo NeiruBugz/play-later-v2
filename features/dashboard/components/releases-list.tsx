@@ -2,7 +2,7 @@ import { Calendar } from "lucide-react";
 import { cache } from "react";
 
 import { getUpcomingWishlistItems } from "@/features/dashboard/server-actions";
-import { BacklogItemCard } from "@/shared/components/backlog-item-card";
+import { LibraryItemCard } from "@/shared/components/library-item-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn, platformMapper, platformToBackgroundColor } from "@/shared/lib";
 
@@ -32,14 +32,14 @@ const Release = ({
   return (
     <div className="group relative">
       <div>
-        <BacklogItemCard
+        <LibraryItemCard
           game={{
             id: String(release.id),
             title: release.name,
             coverImage: release.cover.image_id ?? null,
             igdbId: release.id,
           }}
-          backlogItems={[]}
+          libraryItems={[]}
           hasActions={false}
           isExternalGame
           isUpcomingGame

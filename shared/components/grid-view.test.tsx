@@ -1,9 +1,9 @@
 import { renderWithTestProviders } from "@/test/utils/test-provider";
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { GameWithBacklogItems } from "@/features/view-wishlist/types";
+import { GameWithLibraryItems } from "@/features/view-wishlist/types";
 
 import { GridView } from "./grid-view";
 
@@ -15,7 +15,7 @@ const elements = {
 };
 
 describe("GridView", () => {
-  const mockGameWithBacklogItems: GameWithBacklogItems[] = [
+  const mockGameWithLibraryItems: GameWithLibraryItems[] = [
     {
       game: {
         id: "game-1",
@@ -32,13 +32,13 @@ describe("GridView", () => {
         completionist: null,
         steamAppId: null,
       },
-      backlogItems: [
+      libraryItems: [
         {
           id: 1,
           userId: "user-1",
           gameId: "game-1",
           platform: "PC",
-          status: BacklogItemStatus.TO_PLAY,
+          status: LibraryItemStatus.CURIOUS_ABOUT,
           acquisitionType: "DIGITAL" as const,
           startedAt: null,
           completedAt: null,
@@ -63,13 +63,13 @@ describe("GridView", () => {
         completionist: null,
         steamAppId: null,
       },
-      backlogItems: [
+      libraryItems: [
         {
           id: 2,
           userId: "user-1",
           gameId: "game-2",
           platform: "PlayStation",
-          status: BacklogItemStatus.PLAYING,
+          status: LibraryItemStatus.CURRENTLY_EXPLORING,
           acquisitionType: "PHYSICAL" as const,
           startedAt: new Date("2024-01-15"),
           completedAt: null,
@@ -84,7 +84,7 @@ describe("GridView", () => {
     it("should render a grid container with correct CSS classes", () => {
       // Act
       renderWithTestProviders(
-        <GridView backlogItems={mockGameWithBacklogItems} />
+        <GridView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -105,7 +105,7 @@ describe("GridView", () => {
     it("should render all games as game cards", () => {
       // Act
       renderWithTestProviders(
-        <GridView backlogItems={mockGameWithBacklogItems} />
+        <GridView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -118,7 +118,7 @@ describe("GridView", () => {
     it("should pass correct props to GameCard components", () => {
       // Act
       renderWithTestProviders(
-        <GridView backlogItems={mockGameWithBacklogItems} />
+        <GridView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -139,7 +139,7 @@ describe("GridView", () => {
     it("should use game id as the key for list items", () => {
       // Act
       renderWithTestProviders(
-        <GridView backlogItems={mockGameWithBacklogItems} />
+        <GridView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert
@@ -151,10 +151,10 @@ describe("GridView", () => {
     });
   });
 
-  describe("when backlog items array is empty", () => {
+  describe("when library items array is empty", () => {
     it("should render an empty grid", () => {
       // Act
-      renderWithTestProviders(<GridView backlogItems={[]} />);
+      renderWithTestProviders(<GridView libraryItems={[]} />);
 
       // Assert
       const gridContainer = elements.getGridContainer();
@@ -163,8 +163,8 @@ describe("GridView", () => {
     });
   });
 
-  describe("when games have multiple backlog items", () => {
-    const gameWithMultipleBacklogItems = [
+  describe("when games have multiple library items", () => {
+    const gameWithMultipleLibraryItems = [
       {
         game: {
           id: "game-multi",
@@ -181,13 +181,13 @@ describe("GridView", () => {
           completionist: null,
           steamAppId: null,
         },
-        backlogItems: [
+        libraryItems: [
           {
             id: 3,
             userId: "user-1",
             gameId: "game-multi",
             platform: "PC",
-            status: BacklogItemStatus.COMPLETED,
+            status: LibraryItemStatus.EXPERIENCED,
             acquisitionType: "DIGITAL" as const,
             startedAt: new Date("2024-01-01"),
             completedAt: new Date("2024-01-31"),
@@ -199,7 +199,7 @@ describe("GridView", () => {
             userId: "user-1",
             gameId: "game-multi",
             platform: "PlayStation",
-            status: BacklogItemStatus.TO_PLAY,
+            status: LibraryItemStatus.CURIOUS_ABOUT,
             acquisitionType: "PHYSICAL" as const,
             startedAt: null,
             completedAt: null,
@@ -210,30 +210,30 @@ describe("GridView", () => {
       },
     ];
 
-    it("should use the first backlog item as currentPlatform", () => {
+    it("should use the first library item as currentPlatform", () => {
       // Act
       renderWithTestProviders(
-        <GridView backlogItems={gameWithMultipleBacklogItems} />
+        <GridView libraryItems={gameWithMultipleLibraryItems} />
       );
 
       // Assert
       expect(
         elements.getGameCardByTitle("Multi-Platform Game")
       ).toBeInTheDocument();
-      // The component passes backlogItems[0] as currentPlatform
+      // The component passes libraryItems[0] as currentPlatform
       // We can't directly test the prop, but we can verify the game renders
     });
   });
 
-  describe("when games have no backlog items", () => {
-    const gameWithNoBacklogItems = [
+  describe("when games have no library items", () => {
+    const gameWithNoLibraryItems = [
       {
         game: {
           id: "game-empty",
-          title: "Game Without Backlog",
+          title: "Game Without Library Items",
           coverImage: "https://example.com/empty.jpg",
           igdbId: 11111,
-          description: "Game without backlog items",
+          description: "Game without library items",
           releaseDate: new Date("2024-04-01"),
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -243,19 +243,19 @@ describe("GridView", () => {
           completionist: null,
           steamAppId: null,
         },
-        backlogItems: [],
+        libraryItems: [],
       },
     ];
 
-    it("should handle games with empty backlog items array", () => {
+    it("should handle games with empty library items array", () => {
       // Act
       renderWithTestProviders(
-        <GridView backlogItems={gameWithNoBacklogItems} />
+        <GridView libraryItems={gameWithNoLibraryItems} />
       );
 
       // Assert
       expect(
-        elements.getGameCardByTitle("Game Without Backlog")
+        elements.getGameCardByTitle("Game Without Library Items")
       ).toBeInTheDocument();
       // currentPlatform will be undefined, which should be handled by GameCard
     });
@@ -265,7 +265,7 @@ describe("GridView", () => {
     it("should have responsive grid classes for different screen sizes", () => {
       // Act
       renderWithTestProviders(
-        <GridView backlogItems={mockGameWithBacklogItems} />
+        <GridView libraryItems={mockGameWithLibraryItems} />
       );
 
       // Assert

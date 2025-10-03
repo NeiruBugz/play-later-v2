@@ -1,19 +1,19 @@
-import { type BacklogItem } from "@prisma/client";
+import { type LibraryItem } from "@prisma/client";
 
-import { type GameWithBacklogItems } from "../types";
+import { type GameWithLibraryItems } from "../types";
 
-export const groupBacklogItemsByGame = (
+export const groupLibraryItemsByGame = (
   userGames: Array<
-    { game: GameWithBacklogItems["game"] } & Omit<BacklogItem, "game">
+    { game: GameWithLibraryItems["game"] } & Omit<LibraryItem, "game">
   >
-): GameWithBacklogItems[] => {
-  const groupedGames = new Map<string, GameWithBacklogItems>();
+): GameWithLibraryItems[] => {
+  const groupedGames = new Map<string, GameWithLibraryItems>();
 
-  userGames.forEach(({ game, ...backlogItem }) => {
+  userGames.forEach(({ game, ...libraryItem }) => {
     if (!groupedGames.has(game.id)) {
-      groupedGames.set(game.id, { game, backlogItems: [] });
+      groupedGames.set(game.id, { game, libraryItems: [] });
     }
-    groupedGames.get(game.id)!.backlogItems.push(backlogItem);
+    groupedGames.get(game.id)!.libraryItems.push(libraryItem);
   });
 
   if (groupedGames.size === 0) {

@@ -1,18 +1,18 @@
-# View Backlogs Feature - CLAUDE.md
+# View Libraries Feature - CLAUDE.md
 
-This document provides comprehensive guidance for working with the View Backlogs feature module, which enables social discovery of user game backlogs.
+This document provides comprehensive guidance for working with the View Libraries feature module, which enables social discovery of user game libraries.
 
 ## Feature Overview
 
 ### Purpose
 
-The View Backlogs feature implements social discovery functionality, allowing authenticated users to browse and view other users' game backlogs. This promotes community engagement, game discovery, and peer-to-peer recommendations within the gaming platform.
+The View Libraries feature implements social discovery functionality, allowing authenticated users to browse and view other users' game libraries. This promotes community engagement, game discovery, and peer-to-peer recommendations within the gaming platform.
 
 ### Core Functionality
 
-- **Backlog Discovery**: Browse preview cards of all public backlogs from users with usernames
-- **Detailed Backlog View**: View complete backlog collections for specific users
-- **Privacy Control**: Username-based visibility system (only users with usernames have discoverable backlogs)
+- **Library Discovery**: Browse preview cards of all public libraries from users with usernames
+- **Detailed Library View**: View complete library collections for specific users
+- **Privacy Control**: Username-based visibility system (only users with usernames have discoverable libraries)
 - **Social Game Discovery**: Discover new games through other users' collections
 
 ## Architecture Overview
@@ -22,8 +22,8 @@ The View Backlogs feature implements social discovery functionality, allowing au
 ```
 Next.js App Router → Feature Server Actions → Repository Layer → Prisma → PostgreSQL
 
-/app/backlog/page.tsx → getBacklogs() → getOtherUsersBacklogs() → Prisma queries
-/app/backlog/[username]/page.tsx → getUsersBacklog() → getBacklogByUsername() → Prisma queries
+/app/backlog/page.tsx → getBacklogs() → getOtherUsersLibraries() → Prisma queries
+/app/backlog/[username]/page.tsx → getUsersBacklog() → getLibraryByUsername() → Prisma queries
 ```
 
 ### Directory Structure
@@ -33,8 +33,8 @@ features/view-backlogs/
 ├── components/
 │   └── backlog-list.tsx           # Main discovery interface component
 ├── server-actions/
-│   ├── get-backlogs.ts            # Fetch all public backlogs
-│   └── get-users-backlog.ts       # Fetch specific user's backlog
+│   ├── get-backlogs.ts            # Fetch all public libraries
+│   └── get-users-backlog.ts       # Fetch specific user's library
 ├── PRD.md                         # Product requirements document
 └── clean-code-review.md           # Code quality assessment
 ```
@@ -43,12 +43,12 @@ features/view-backlogs/
 
 ### BacklogList Component (`components/backlog-list.tsx`)
 
-**Primary Component**: Server-side React component for backlog discovery interface
+**Primary Component**: Server-side React component for library discovery interface
 
 **Key Features**:
 
-- Fetches and displays all public backlogs using `getBacklogs()` server action (line 7)
-- Renders responsive grid layout with backlog preview cards (line 27)
+- Fetches and displays all public libraries using `getBacklogs()` server action (line 7)
+- Renders responsive grid layout with library preview cards (line 27)
 - Shows first 3 game covers in overlapping card design (lines 40-70)
 - Displays "+X more" indicator for additional games (lines 71-77)
 - Handles empty states with helpful messaging (lines 13-24)
@@ -61,32 +61,32 @@ features/view-backlogs/
 
 **Navigation Integration**:
 
-- Links to detailed backlog views via `/backlog/[username]` routes (lines 30-34)
-- Displays username or fallback name as backlog identifier (line 36-38)
+- Links to detailed library views via `/backlog/[username]` routes (lines 30-34)
+- Displays username or fallback name as library identifier (line 36-38)
 
 ## Server Actions
 
 ### getBacklogs (`server-actions/get-backlogs.ts`)
 
-**Purpose**: Fetches all public backlogs excluding current user
+**Purpose**: Fetches all public libraries excluding current user
 
 **Implementation**:
 
 - Uses `authorizedActionClient` for authentication (lines 6-11)
 - Requires user authentication (`requiresAuth: true`)
-- Calls `getOtherUsersBacklogs({ userId })` repository function (line 12)
+- Calls `getOtherUsersLibraries({ userId })` repository function (line 12)
 
-**Data Structure**: Returns array of `UserWithBacklogItemsResponse` objects
+**Data Structure**: Returns array of `UserWithLibraryItemsResponse` objects
 
 ### getUsersBacklog (`server-actions/get-users-backlog.ts`)
 
-**Purpose**: Fetches specific user's complete backlog by username
+**Purpose**: Fetches specific user's complete library by username
 
 **Implementation**:
 
 - Zod schema validation for username parameter (line 13)
 - Authentication check with error handling (lines 15-17)
-- Calls `getBacklogByUsername({ username })` repository function (line 18)
+- Calls `getLibraryByUsername({ username })` repository function (line 18)
 
 **Input Validation**:
 
@@ -96,18 +96,18 @@ z.object({ username: z.string() });
 
 ## Repository Layer Integration
 
-### getOtherUsersBacklogs (`shared/lib/repository/backlog/backlog-repository.ts` lines 184-205)
+### getOtherUsersLibraries (`shared/lib/repository/library/library-repository.ts` lines 184-205)
 
 **Query Strategy**:
 
 - Excludes current user: `userId: { not: userId }` (line 187)
-- Filters for public backlogs: `User: { username: { not: null } }` (line 188)
+- Filters for public libraries: `User: { username: { not: null } }` (line 188)
 - Includes related data: `include: { game: true, User: true }` (line 190)
 - Groups results by user ID using reduce function (lines 194-202)
 
-**Privacy Model**: Only users with usernames have discoverable backlogs
+**Privacy Model**: Only users with usernames have discoverable libraries
 
-### getBacklogByUsername (`shared/lib/repository/backlog/backlog-repository.ts` lines 207-221)
+### getLibraryByUsername (`shared/lib/repository/library/library-repository.ts` lines 207-221)
 
 **Query Strategy**:
 
@@ -120,10 +120,10 @@ z.object({ username: z.string() });
 ### Type Definitions
 
 ```typescript
-// From shared/lib/repository/backlog/types.ts
-export type UserWithBacklogItemsResponse = {
+// From shared/lib/repository/library/types.ts
+export type UserWithLibraryItemsResponse = {
   user: User;
-  backlogItems: (BacklogItem & { game: Game })[];
+  libraryItems: (LibraryItem & { game: Game })[];
 };
 ```
 
@@ -139,7 +139,7 @@ export type UserWithBacklogItemsResponse = {
 ### Discovery Page (`/app/backlog/page.tsx`)
 
 **Route**: `/backlog`
-**Purpose**: Main backlog discovery interface
+**Purpose**: Main library discovery interface
 
 **Key Features**:
 
@@ -147,15 +147,15 @@ export type UserWithBacklogItemsResponse = {
 - Suspense boundary for loading states (line 22)
 - Responsive typography and layout (lines 18-21)
 
-### User Backlog Page (`/app/backlog/[username]/page.tsx`)
+### User Library Page (`/app/backlog/[username]/page.tsx`)
 
 **Route**: `/backlog/[username]`
-**Purpose**: Detailed individual backlog view
+**Purpose**: Detailed individual library view
 
 **Implementation**:
 
 - Dynamic route parameter handling (lines 13-16)
-- Parallel data fetching: user backlog and session (lines 14-19)
+- Parallel data fetching: user library and session (lines 14-19)
 - Game grid with hover interactions (lines 32-57)
 - Status and platform information display (lines 47-54)
 
@@ -180,9 +180,9 @@ export type UserWithBacklogItemsResponse = {
 ### Core Entities
 
 ```typescript
-BacklogItem {
+LibraryItem {
   id: number
-  status: BacklogItemStatus
+  status: LibraryItemStatus
   platform: string?
   userId: string
   gameId: string
@@ -192,7 +192,7 @@ BacklogItem {
 
 User {
   id: string
-  username: string?  // Controls backlog visibility
+  username: string?  // Controls library visibility
   name: string?
 }
 
@@ -206,9 +206,9 @@ Game {
 
 ### Privacy Logic
 
-- **Public Backlogs**: Users with `username !== null`
-- **Private Backlogs**: Users with `username === null` (default)
-- **Discovery Exclusion**: Current user's backlog never appears in discovery
+- **Public Libraries**: Users with `username !== null`
+- **Private Libraries**: Users with `username === null` (default)
+- **Discovery Exclusion**: Current user's library never appears in discovery
 
 ## Testing Strategy
 
@@ -243,17 +243,17 @@ features/view-backlogs/
 1. **`components/backlog-list.tsx`** (89 lines)
 
    - Main discovery interface
-   - Card-based backlog previews
+   - Card-based library previews
    - Responsive grid layout
 
 2. **`server-actions/get-backlogs.ts`** (14 lines)
 
-   - Public backlog fetching
+   - Public library fetching
    - Authentication enforcement
    - Repository integration
 
 3. **`server-actions/get-users-backlog.ts`** (20 lines)
-   - Individual backlog fetching
+   - Individual library fetching
    - Username validation
    - Error handling
 
@@ -266,22 +266,22 @@ features/view-backlogs/
    - Layout and typography
 
 5. **`/app/backlog/[username]/page.tsx`** (63 lines)
-   - Detailed backlog view
+   - Detailed library view
    - Dynamic routing
    - Game grid display
 
 ### Repository Functions
 
-6. **`shared/lib/repository/backlog/backlog-repository.ts`**
-   - `getOtherUsersBacklogs()` (lines 184-205)
-   - `getBacklogByUsername()` (lines 207-221)
+6. **`shared/lib/repository/library/library-repository.ts`**
+   - `getOtherUsersLibraries()` (lines 184-205)
+   - `getLibraryByUsername()` (lines 207-221)
 
 ## Integration Points
 
 ### With Other Features
 
 - **Authentication**: Requires authenticated users for all access
-- **User Management**: Username setting controls backlog visibility
+- **User Management**: Username setting controls library visibility
 - **Game Management**: Displays game metadata and covers
 - **IGDB Integration**: Game cover images and metadata
 - **Navigation**: Integrated with main app navigation
@@ -342,15 +342,15 @@ features/view-backlogs/
 ### High Priority
 
 - Search and filtering in discovery interface
-- User following and backlog subscriptions
-- Backlog comparison tools
+- User following and library subscriptions
+- Library comparison tools
 - Enhanced social interactions
 
 ### Medium Priority
 
 - Personalized recommendations
 - Genre-based categorization
-- Direct backlog sharing links
+- Direct library sharing links
 - Performance optimizations for large datasets
 
 ---

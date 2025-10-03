@@ -1,6 +1,6 @@
-import { AcquisitionType, BacklogItemStatus } from "@prisma/client";
+import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 
-import { type BacklogItemFormValues } from "@/features/add-game/types";
+import { type LibraryItemFormValues } from "@/features/add-game/types";
 import { type SearchResponse } from "@/shared/types";
 
 export const DEFAULT_PLATFORM_LIST: SearchResponse["platforms"] = [
@@ -11,8 +11,8 @@ export const DEFAULT_PLATFORM_LIST: SearchResponse["platforms"] = [
   { id: 9995, name: "Other" },
 ];
 
-export const initialFormValues: BacklogItemFormValues = {
-  backlogStatus: BacklogItemStatus.TO_PLAY,
+export const initialFormValues: LibraryItemFormValues = {
+  libraryItemStatus: LibraryItemStatus.CURIOUS_ABOUT,
   acquisitionType: AcquisitionType.DIGITAL,
   platform: "",
 };

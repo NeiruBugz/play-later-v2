@@ -1,10 +1,10 @@
-import { type BacklogItem, type Game } from "@prisma/client";
+import { type Game, type LibraryItem } from "@prisma/client";
 
-export type GameWithBacklogItems = {
+export type GameWithLibraryItems = {
   game: Game;
-  backlogItems: Array<Omit<BacklogItem, "game">>;
+  libraryItems: Array<Omit<LibraryItem, "game">>;
 };
 
-export type BacklogItemWithGame = BacklogItem & {
+export type LibraryItemWithGame = LibraryItem & {
   game: Game;
 };

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { getBacklogByUsername } from "@/shared/lib/repository";
+import { getLibraryByUsername } from "@/shared/lib/repository";
 import { authorizedActionClient } from "@/shared/lib/safe-action-client";
 
 export const getUsersBacklog = authorizedActionClient
@@ -15,5 +15,5 @@ export const getUsersBacklog = authorizedActionClient
     if (!userId) {
       throw new Error("User not authenticated");
     }
-    return getBacklogByUsername({ username: parsedInput.username });
+    return getLibraryByUsername({ username: parsedInput.username });
   });

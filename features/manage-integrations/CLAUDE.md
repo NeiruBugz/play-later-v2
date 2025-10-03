@@ -373,7 +373,7 @@ bun code-check
 bun code-fix
 
 # Testing (when tests are added)
-bun test features/manage-integrations
+bun run test features/manage-integrations
 ```
 
 ### Related Features to Explore

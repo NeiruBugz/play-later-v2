@@ -10,4 +10,4 @@ export { SimilarGames } from "./components/similar-games";
 export { TimesToBeat } from "./components/times-to-beat";
 export { GameStats } from "./components/game-stats";
 
-export { getBacklogItemsByIgdbId } from "./server-actions/get-backlog-items-by-igdb-id";
+export { getLibraryItemsByIgdbId } from "./server-actions/get-library-items-by-igdb-id";

@@ -1,4 +1,4 @@
-import { BacklogItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@prisma/client";
 import { Heart, Star } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -10,7 +10,7 @@ import {
   Franchises,
   GameScreenshots,
   GameStats,
-  getBacklogItemsByIgdbId,
+  getLibraryItemsByIgdbId,
   Metadata,
   SimilarGames,
   TimesToBeat,
@@ -34,13 +34,13 @@ export default async function ExternalGamePage(
   props: PageProps<"/game/external/[id]">
 ) {
   const id = Number((await props.params).id);
-  const [igdbData, { data: backlogItems }] = await Promise.all([
+  const [igdbData, { data: libraryItems }] = await Promise.all([
     igdbApi.getGameById(id),
-    getBacklogItemsByIgdbId({ igdbId: id }),
+    getLibraryItemsByIgdbId({ igdbId: id }),
   ]);
 
-  const isWishlistDisabled = backlogItems
-    ? backlogItems.some((item) => item.status === BacklogItemStatus.WISHLIST)
+  const isWishlistDisabled = libraryItems
+    ? libraryItems.some((item) => item.status === LibraryItemStatus.WISHLIST)
     : false;
 
   if (!igdbData) {
@@ -73,7 +73,7 @@ export default async function ExternalGamePage(
                     "use server";
                     const result = await createGameAction({
                       igdbId: igdbData.id,
-                      backlogStatus: BacklogItemStatus.WISHLIST,
+                      libraryItemStatus: LibraryItemStatus.WISHLIST,
                     });
 
                     if (result.data) {

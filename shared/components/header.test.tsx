@@ -110,7 +110,7 @@ describe("Header", () => {
       expect(collectionLink).toBeInTheDocument();
       expect(collectionLink).toHaveAttribute(
         "href",
-        "/collection?status=PLAYING&page=1"
+        "/collection?status=CURRENTLY_EXPLORING&page=1"
       );
 
       expect(backlogsLink).toBeInTheDocument();

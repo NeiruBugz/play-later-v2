@@ -197,13 +197,13 @@ The feature includes comprehensive testing across all layers:
 
 ```bash
 # Run all review-related tests
-bun test add-review
+bun run test add-review
 
 # Watch mode for component tests
-bun test:unit:watch add-review
+bun run test:unit:watch add-review
 
 # Coverage for review feature
-bun test:coverage --testNamePattern="add-review|review"
+bun run test:coverage --testNamePattern="add-review|review"
 ```
 
 ### Development Workflow

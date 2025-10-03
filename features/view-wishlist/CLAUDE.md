@@ -436,10 +436,10 @@ bun format:write features/view-wishlist
 
 ```bash
 # Run wishlist-specific unit tests
-bun test features/view-wishlist
+bun run test features/view-wishlist
 
 # Run integration tests affecting wishlist functionality
-bun test:integration --grep="wishlist"
+bun run test:integration --grep="wishlist"
 ```
 
 ## Future Enhancement Opportunities

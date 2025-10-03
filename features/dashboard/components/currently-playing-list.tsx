@@ -1,10 +1,10 @@
 import { cache } from "react";
 
-import { getCurrentlyPlayingGamesInBacklog } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
-import { BacklogItemCard } from "@/shared/components/backlog-item-card";
+import { getCurrentlyExploringGames } from "@/features/dashboard/server-actions/get-user-games-with-grouped-backlog";
+import { LibraryItemCard } from "@/shared/components/library-item-card";
 
 const getCurrentlyPlayingGames = cache(async () =>
-  getCurrentlyPlayingGamesInBacklog()
+  getCurrentlyExploringGames()
 );
 
 export async function CurrentlyPlayingList() {
@@ -19,9 +19,9 @@ export async function CurrentlyPlayingList() {
     <div className="flex w-full max-w-[420px] justify-start gap-3 overflow-x-auto">
       {currentlyPlayingGames?.length ? (
         currentlyPlayingGames.map((playingItem) => {
-          const { game, backlogItems } = playingItem;
+          const { game, libraryItems } = playingItem;
           return (
-            <BacklogItemCard
+            <LibraryItemCard
               key={game.id}
               hasActions={false}
               game={{
@@ -30,13 +30,13 @@ export async function CurrentlyPlayingList() {
                 coverImage: game.coverImage,
                 igdbId: game.igdbId,
               }}
-              backlogItems={backlogItems}
+              libraryItems={libraryItems}
             />
           );
         })
       ) : (
         <div className="flex flex-col items-center justify-center gap-3">
-          <p>No currently playing games</p>
+          <p>No currently exploring games</p>
         </div>
       )}
     </div>

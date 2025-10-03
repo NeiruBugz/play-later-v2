@@ -7,4 +7,4 @@ import { addGameToCollection } from "@/shared/services/game-management";
  * This maintains the existing API for the add-game feature while
  * using the centralized business logic from shared services.
  */
-export const saveGameAndAddToBacklog = addGameToCollection;
+export const saveGameAndAddToLibrary = addGameToCollection;

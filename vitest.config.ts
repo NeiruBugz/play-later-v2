@@ -57,6 +57,8 @@ export default defineConfig({
             "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/server-actions/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/shared/lib/igdb.integration.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/services/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/lib/repository/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
         },
       },
@@ -69,6 +71,8 @@ export default defineConfig({
             "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/server-actions/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/shared/lib/igdb.integration.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/services/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/lib/repository/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
           exclude: [
             "**/node_modules/**",
