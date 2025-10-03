@@ -11,16 +11,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Check code formatting
-        run: bun format:check
+        run: pnpm format:check
 
   lint:
     name: ESLint
@@ -28,16 +34,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run ESLint
-        run: bun lint
+        run: pnpm lint
 
   typecheck:
     name: TypeScript Type Check
@@ -45,19 +57,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Route typings
-        run: bunx next typegen
+        run: pnpm next typegen
 
       - name: Run TypeScript type checking
-        run: bun typecheck
+        run: pnpm typecheck
 
   test:
     name: Test
@@ -65,16 +83,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: bun run test
+        run: pnpm test
 
   migration-validation:
     name: Validate Database Migrations
@@ -99,19 +123,26 @@ jobs:
             echo "has-changes=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Setup Bun
+      - name: Setup pnpm
         if: steps.check-migrations.outputs.has-changes == 'true'
-        uses: oven-sh/setup-bun@v1
+        uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: 10
+
+      - name: Setup Node.js
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
         if: steps.check-migrations.outputs.has-changes == 'true'
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Validate Prisma schema
         if: steps.check-migrations.outputs.has-changes == 'true'
-        run: bun prisma validate
+        run: pnpm prisma validate
         env:
           POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
@@ -126,7 +157,7 @@ jobs:
           if [ -n "$SCHEMA_CHANGES" ] && [ -z "$NEW_MIGRATIONS" ]; then
             echo "⚠️ Schema changes detected but no new migration files found"
             echo "Schema was modified but migrations weren't generated"
-            echo "Please run 'bun prisma migrate dev --name descriptive_name' to generate migrations"
+            echo "Please run 'pnpm prisma migrate dev --name descriptive_name' to generate migrations"
             exit 1
           elif [ -n "$SCHEMA_CHANGES" ] && [ -n "$NEW_MIGRATIONS" ]; then
             echo "✅ Schema changes detected with corresponding migration files"

@@ -17,10 +17,10 @@
     "knip": "knip",
     "lint-ui": "lint-staged",
     "test": "vitest run",
-    "test:watch": "bunx vitest watch",
-    "test:coverage": "bunx vitest run --coverage",
-    "code-fix": "bun format:write && bun lint:fix",
-    "code-check": "bun format:check && bun lint && bun typecheck",
+    "test:watch": "pnpm vitest watch",
+    "test:coverage": "pnpm vitest run --coverage",
+    "code-fix": "pnpm format:write && pnpm lint:fix",
+    "code-check": "pnpm format:check && pnpm lint && pnpm typecheck",
     "commitlint": "commitlint --edit"
   },
   "dependencies": {
