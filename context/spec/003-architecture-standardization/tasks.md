@@ -10,55 +10,46 @@
 
 ### Slice 1: Architecture Documentation & Standards
 
-- [ ] **Update architecture documentation**
-  - [ ] Update `context/product/architecture.md`: Add section "11. Service Layer Architecture"
-  - [ ] Add service layer diagram showing three-tier architecture
-  - [ ] Document service responsibilities and boundaries
-  - [ ] Add service naming conventions and file organization
-  - [ ] Document when to use service layer vs direct repository calls
-  - [ ] Include service composition patterns and best practices
+- [x] **Update architecture documentation**
+  - [x] Update `context/product/architecture.md`: Add section "11. Service Layer Architecture"
+  - [x] Add service layer diagram showing three-tier architecture
+  - [x] Document service responsibilities and boundaries
+  - [x] Add service naming conventions and file organization
+  - [x] Document when to use service layer vs direct repository calls
+  - [x] Include service composition patterns and best practices
 
-- [ ] **Create service layer guide**
-  - [ ] Create `context/product/service-layer-guide.md`
-  - [ ] Document standard service class structure
-  - [ ] Include complete code examples for each service type
-  - [ ] Add error handling patterns
-  - [ ] Document testing approach for services
-  - [ ] Include service composition examples
-  - [ ] Add troubleshooting section
+- [x] **Create service layer guide**
+  - [x] Create `context/product/service-layer-guide.md`
+  - [x] Document standard service class structure
+  - [x] Include complete code examples for each service type
+  - [x] Add error handling patterns
+  - [x] Document testing approach for services
+  - [x] Include service composition examples
+  - [x] Add troubleshooting section
 
-- [ ] **Create migration guide**
-  - [ ] Create `context/product/migration-guide.md`
-  - [ ] Document step-by-step migration process
-  - [ ] Include before/after code examples
-  - [ ] Add checklist for feature refactoring
-  - [ ] Document testing requirements
-  - [ ] Include rollback procedures
+- [x] **Create migration guide**
+  - [x] Create `context/product/migration-guide.md`
+  - [x] Document step-by-step migration process
+  - [x] Include before/after code examples
+  - [x] Add checklist for feature refactoring
+  - [x] Document testing requirements
+  - [x] Include rollback procedures
 
 ### Slice 2: Service Layer Infrastructure
 
-- [ ] **Create service template**
-  - [ ] Create directory: `shared/services/_template/`
-  - [ ] Create `_template/service-template.ts` with boilerplate service class
-  - [ ] Create `_template/types-template.ts` with standard type patterns
-  - [ ] Create `_template/service-template.test.ts` with test examples
-  - [ ] Create `_template/index-template.ts` with export pattern
-  - [ ] Add README.md in template explaining usage
+- [x] **Set up testing infrastructure**
+  - [x] Create `test/helpers/service-test-helpers.ts` with common mock utilities
+  - [x] Create repository mock factory patterns
+  - [x] Add service test utilities (mock builders, assertion helpers)
+  - [x] Update `test/setup/vitest.config.ts` if needed
 
-- [ ] **Set up testing infrastructure**
-  - [ ] Create `test/helpers/service-test-helpers.ts` with common mock utilities
-  - [ ] Create repository mock factory patterns
-  - [ ] Add service test utilities (mock builders, assertion helpers)
-  - [ ] Update `test/setup/vitest.config.ts` if needed
-  - [ ] Document testing patterns in template
-
-- [ ] **Create shared types**
-  - [ ] Create `shared/services/types.ts`
-  - [ ] Add `ServiceResult<T>` generic type
-  - [ ] Add `PaginatedResult<T>` type
-  - [ ] Add common error types
-  - [ ] Add service input/output base types
-  - [ ] Export from `shared/services/index.ts`
+- [x] **Create shared types**
+  - [x] Create `shared/services/types.ts`
+  - [x] Add `ServiceResult<T>` generic type
+  - [x] Add `PaginatedResult<T>` type
+  - [x] Add common error types
+  - [x] Add service input/output base types
+  - [x] Export from `shared/services/index.ts`
 
 ---
 
@@ -66,65 +57,65 @@
 
 ### Slice 3: LibraryService Implementation
 
-- [ ] **Create LibraryService foundation**
-  - [ ] Create directory: `shared/services/library/`
-  - [ ] Create `library/types.ts` with all service input/output types
-  - [ ] Create `library/library-service.ts` class skeleton
-  - [ ] Add constructor with repository dependency
-  - [ ] Export from `library/index.ts`
+- [x] **Create LibraryService foundation**
+  - [x] Create directory: `shared/services/library/`
+  - [x] Create `library/types.ts` with all service input/output types
+  - [x] Create `library/library-service.ts` class skeleton
+  - [x] Add constructor with repository dependency
+  - [x] Export from `library/index.ts`
 
-- [ ] **Implement LibraryService methods**
-  - [ ] Implement `getLibraryItems(input)` method
-  - [ ] Implement `createLibraryItem(input)` method
-  - [ ] Implement `updateLibraryItem(input)` method
-  - [ ] Implement `deleteLibraryItem(id, userId)` method
-  - [ ] Implement `getLibraryItemCount(userId, filters)` method
-  - [ ] Add private helper methods for validation and transformation
+- [x] **Implement LibraryService methods**
+  - [x] Implement `getLibraryItems(input)` method
+  - [x] Implement `createLibraryItem(input)` method
+  - [x] Implement `updateLibraryItem(input)` method
+  - [x] Implement `deleteLibraryItem(id, userId)` method
+  - [x] Implement `getLibraryItemCount(userId, filters)` method
+  - [x] Add private helper methods for validation and transformation
 
-- [ ] **Test LibraryService**
-  - [ ] Create `library/library-service.test.ts`
-  - [ ] Mock all repository dependencies
-  - [ ] Test all public methods with valid input
-  - [ ] Test validation error scenarios
-  - [ ] Test repository error handling
-  - [ ] Test business logic edge cases
-  - [ ] Achieve >90% coverage: `pnpmrun test shared/services/library`
+- [x] **Test LibraryService**
+  - [x] Create `library/library-service.test.ts`
+  - [x] Mock all repository dependencies
+  - [x] Test all public methods with valid input
+  - [x] Test validation error scenarios
+  - [x] Test repository error handling
+  - [x] Test business logic edge cases
+  - [x] Achieve >90% coverage: `pnpmrun test shared/services/library`
 
-- [ ] **Document LibraryService**
-  - [ ] Add JSDoc comments to all public methods
-  - [ ] Document input/output types
-  - [ ] Add usage examples in comments
-  - [ ] Update service index exports
+- [x] **Document LibraryService**
+  - [x] Add JSDoc comments to all public methods
+  - [x] Document input/output types
+  - [x] Add usage examples in comments
+  - [x] Update service index exports
 
 ### Slice 4: GameService Implementation
 
-- [ ] **Create GameService foundation**
-  - [ ] Create directory: `shared/services/game/`
-  - [ ] Create `game/types.ts` with service types
-  - [ ] Create `game/game-service.ts` class skeleton
-  - [ ] Add repository dependencies
-  - [ ] Export from `game/index.ts`
+- [x] **Create GameService foundation**
+  - [x] Create directory: `shared/services/game/`
+  - [x] Create `game/types.ts` with service types
+  - [x] Create `game/game-service.ts` class skeleton
+  - [x] Add repository dependencies
+  - [x] Export from `game/index.ts`
 
-- [ ] **Implement GameService methods**
-  - [ ] Implement `getGame(id)` method
-  - [ ] Implement `searchGames(query, filters)` method
-  - [ ] Implement `createGame(input)` method
-  - [ ] Implement `updateGame(id, input)` method
-  - [ ] Implement `getGameWithLibraryItems(gameId, userId)` method
-  - [ ] Add IGDB integration wrapper methods
+- [x] **Implement GameService methods**
+  - [x] Implement `getGame(id)` method
+  - [x] Implement `searchGames(query, filters)` method
+  - [x] Implement `createGame(input)` method
+  - [x] Implement `updateGame(id, input)` method
+  - [x] Implement `getGameWithLibraryItems(gameId, userId)` method
+  - [x] Add IGDB integration wrapper methods
 
-- [ ] **Test GameService**
-  - [ ] Create `game/game-service.test.ts`
-  - [ ] Mock repository and IGDB dependencies
-  - [ ] Test all CRUD methods
-  - [ ] Test search functionality
-  - [ ] Test error scenarios
-  - [ ] Achieve >90% coverage
+- [x] **Test GameService**
+  - [x] Create `game/game-service.test.ts`
+  - [x] Mock repository and IGDB dependencies
+  - [x] Test all CRUD methods
+  - [x] Test search functionality
+  - [x] Test error scenarios
+  - [x] Achieve >90% coverage
 
-- [ ] **Document GameService**
-  - [ ] Add JSDoc comments
-  - [ ] Document IGDB integration
-  - [ ] Add usage examples
+- [x] **Document GameService**
+  - [x] Add JSDoc comments
+  - [x] Document IGDB integration
+  - [x] Add usage examples
 
 ### Slice 5: ReviewService, UserService, JournalService
 

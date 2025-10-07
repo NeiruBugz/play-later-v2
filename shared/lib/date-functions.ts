@@ -12,6 +12,9 @@ export function isoToReadable(iso: string) {
   return format(parseISO(iso), "yyyy");
 }
 
+export const getTimeStamp = (): number =>
+  Math.floor(Date.now() / MILLISECONDS_TO_SECONDS);
+
 export function convertUnixToHumanReadable(unixTimestamp: number) {
   const date = new Date(unixTimestamp * MILLISECONDS_TO_SECONDS);
   return format(date, "MMM dd, yyyy");

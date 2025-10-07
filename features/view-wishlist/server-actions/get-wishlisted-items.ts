@@ -1,3 +1,4 @@
+import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
 import {
@@ -64,9 +65,11 @@ export const getWishlistedGames = authorizedActionClient
   .action(async ({ ctx: { userId }, parsedInput: { page, limit, search } }) => {
     try {
       const where = {
-        title: search ? { contains: search, mode: "insensitive" as const } : undefined,
+        title: search
+          ? { contains: search, mode: "insensitive" as const }
+          : undefined,
         libraryItems: {
-          some: { userId, status: "WISHLIST" },
+          some: { userId, status: LibraryItemStatus.WISHLIST },
         },
       };
 
@@ -76,7 +79,10 @@ export const getWishlistedGames = authorizedActionClient
         itemsPerPage: limit,
       });
 
-      const items = games.map((game) => ({ game, libraryItems: game.libraryItems }));
+      const items = games.map((game) => ({
+        game,
+        libraryItems: game.libraryItems,
+      }));
       return { items, count: total };
     } catch (e) {
       console.error(e);
@@ -95,26 +101,29 @@ export const getWishlistedGamesByUsername = publicActionClient
       search: z.string().optional(),
     })
   )
-  .action(
-    async ({ parsedInput: { username, page, limit, search } }) => {
-      try {
-        const where = {
-          title: search ? { contains: search, mode: "insensitive" as const } : undefined,
-          libraryItems: {
-            some: { status: "WISHLIST", User: { username } },
-          },
-        };
+  .action(async ({ parsedInput: { username, page, limit, search } }) => {
+    try {
+      const where = {
+        title: search
+          ? { contains: search, mode: "insensitive" as const }
+          : undefined,
+        libraryItems: {
+          some: { status: LibraryItemStatus.WISHLIST, User: { username } },
+        },
+      };
 
-        const [games, total] = await findGamesWithLibraryItemsPaginated({
-          where,
-          page,
-          itemsPerPage: limit,
-        });
-        const items = games.map((game) => ({ game, libraryItems: game.libraryItems }));
-        return { items, count: total };
-      } catch (e) {
-        console.error(e);
-        return { items: [], count: 0 };
-      }
+      const [games, total] = await findGamesWithLibraryItemsPaginated({
+        where,
+        page,
+        itemsPerPage: limit,
+      });
+      const items = games.map((game) => ({
+        game,
+        libraryItems: game.libraryItems,
+      }));
+      return { items, count: total };
+    } catch (e) {
+      console.error(e);
+      return { items: [], count: 0 };
     }
-  );
+  });

@@ -44,7 +44,12 @@ export async function GET(
       return NextResponse.json({ error: result.error }, { status: statusCode });
     }
 
-    return NextResponse.json(result.data);
+    if (!result.data?.game) {
+      const statusCode = result.error?.includes("Invalid") ? 400 : 500;
+      return NextResponse.json({ error: result.error }, { status: statusCode });
+    }
+
+    return NextResponse.json(result.data.game);
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to get game details", cause: error },

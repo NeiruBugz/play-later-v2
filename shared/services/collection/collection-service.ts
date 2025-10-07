@@ -55,12 +55,7 @@ export class CollectionService
         count: totalGames,
       });
     } catch (error) {
-      const serviceError = this.handleError(error);
-      return this.createErrorResponse({
-        message: "Failed to fetch user game collection",
-        code: "FETCH_FAILED",
-        cause: serviceError.cause,
-      });
+      return this.handleError(error, "Failed to fetch user game collection");
     }
   }
 }

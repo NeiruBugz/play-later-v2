@@ -23,7 +23,7 @@ import {
 } from "@/shared/components";
 import { Header } from "@/shared/components/header";
 import { IgdbImage } from "@/shared/components/igdb-image";
-import igdbApi from "@/shared/lib/igdb";
+import { IgdbService } from "@/shared/services";
 
 function determineGameType(gameId: string) {
   const isNumeric = !isNaN(Number(gameId)) && Number.isInteger(Number(gameId));
@@ -43,7 +43,17 @@ export default async function GamePage(props: PageProps<"/game/[id]">) {
   if (!game) {
     return notFound();
   }
-  const igdbData = await igdbApi.getGameById(game.igdbId);
+
+  const igdbService = new IgdbService();
+  const igdbResponse = await igdbService.getGameDetails({
+    gameId: game.igdbId,
+  });
+
+  if (!igdbResponse.success || !igdbResponse.data) {
+    return notFound();
+  }
+
+  const igdbData = igdbResponse.data.game;
 
   if (!igdbData) {
     return notFound();

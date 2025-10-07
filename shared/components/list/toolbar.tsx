@@ -40,7 +40,7 @@ export function Toolbar({
               size="sm"
               onClick={() => setOpen((v) => !v)}
               className="gap-2"
-           >
+            >
               <SlidersHorizontal className="size-4" />
               Filters
               {hasActiveFilters && activeFiltersCount > 0 && (
@@ -59,4 +59,3 @@ export function Toolbar({
     </div>
   );
 }
-

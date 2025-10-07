@@ -11,7 +11,11 @@ export async function WishlistedList(props: {
   const page = Number(params.page ?? 1) || 1;
   const search = (params.search as string) || undefined;
 
-  const { data, serverError } = await getWishlistedGames({ page, limit: 24, search });
+  const { data, serverError } = await getWishlistedGames({
+    page,
+    limit: 24,
+    search,
+  });
 
   if (serverError) {
     return <ErrorState message={serverError} />;
@@ -25,19 +29,16 @@ export async function WishlistedList(props: {
       <EmptyState
         title="Your wishlist is empty"
         description={
-          (
-            <>
-              Start
-              {" "}
-              <Link
-                href="/collection/add-game"
-                className="font-semibold text-primary underline hover:no-underline"
-              >
-                adding
-              </Link>
-              {" "}games to your wishlist
-            </>
-          )
+          <>
+            Start{" "}
+            <Link
+              href="/collection/add-game"
+              className="font-semibold text-primary underline hover:no-underline"
+            >
+              adding
+            </Link>{" "}
+            games to your wishlist
+          </>
         }
       />
     );

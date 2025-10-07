@@ -135,7 +135,7 @@ describe("GameSearchService", () => {
       const result = await service.searchGames({ name: "test" });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Failed to search games");
+      expect(result.error).toBe("IGDB API is down");
       expect(mockSearch).toHaveBeenCalledWith({
         name: "test",
         fields: { platforms: "" },

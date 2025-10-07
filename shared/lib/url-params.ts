@@ -34,4 +34,3 @@ export function updateListParams(
   });
   return next;
 }
-

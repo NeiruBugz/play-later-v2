@@ -3,13 +3,14 @@
 import Link from "next/link";
 
 import { FilterParamsSchema } from "@/features/view-collection/lib/validation";
+import { GridSkeleton } from "@/shared/components";
 import { GridView } from "@/shared/components/grid-view";
 import { EmptyState } from "@/shared/components/list/empty-state";
 import { ErrorState } from "@/shared/components/list/error-state";
 import { Pagination } from "@/shared/components/list/pagination";
-import { GridSkeleton } from "@/shared/components";
 
 import { useGetCollection } from "../hooks/use-get-collection";
+
 // removed local pagination in favor of shared pagination
 
 export function CollectionList(props: {
@@ -52,7 +53,14 @@ export function CollectionList(props: {
         description={
           (
             <>
-              Start <Link href="/collection/add-game" className="font-semibold text-primary underline hover:no-underline">adding games</Link> to your collection to get started
+              Start{" "}
+              <Link
+                href="/collection/add-game"
+                className="font-semibold text-primary underline hover:no-underline"
+              >
+                adding games
+              </Link>{" "}
+              to your collection to get started
             </>
           ) as unknown as string
         }
@@ -72,7 +80,14 @@ export function CollectionList(props: {
         description={
           (
             <>
-              Start <Link href="/collection/add-game" className="font-semibold text-primary underline hover:no-underline">adding games</Link> to your collection to get started
+              Start{" "}
+              <Link
+                href="/collection/add-game"
+                className="font-semibold text-primary underline hover:no-underline"
+              >
+                adding games
+              </Link>{" "}
+              to your collection to get started
             </>
           ) as unknown as string
         }
@@ -82,7 +97,10 @@ export function CollectionList(props: {
 
   if (data.collection.length === 0 && Object.keys(params).length !== 0) {
     return (
-      <EmptyState title="No games found" description="Try adjusting your filters or search terms" />
+      <EmptyState
+        title="No games found"
+        description="Try adjusting your filters or search terms"
+      />
     );
   }
 

@@ -1,0 +1,3 @@
+export const TOP_RATED_GAMES_LIMIT = 12;
+export const UPCOMING_EVENTS_LIMIT = 10;
+export const SEARCH_RESULTS_LIMIT = 100;

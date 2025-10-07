@@ -6,8 +6,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 
@@ -105,4 +105,3 @@ export function Pagination({
     </div>
   );
 }
-

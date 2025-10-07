@@ -12,14 +12,21 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import { Heading } from "@/shared/components/typography";
 // no-op
-import { GridSkeleton } from "@/shared/components";
-import { Pagination, Toolbar, ListSearchInput } from "@/shared/components";
+import {
+  GridSkeleton,
+  ListSearchInput,
+  Pagination,
+  Toolbar,
+} from "@/shared/components";
+import { Heading } from "@/shared/components/typography";
 
 import { getImportedGames } from "../server-actions/get-imported-games";
 import { ImportedGameCard } from "./imported-game-card";
-import { ImportedGamesFilterPanel, type ImportedGamesFilters as FiltersType } from "./imported-games-filter-panel";
+import {
+  ImportedGamesFilterPanel,
+  type ImportedGamesFilters as FiltersType,
+} from "./imported-games-filter-panel";
 
 type ImportedGame = {
   id: string;
@@ -208,13 +215,7 @@ export function ImportedGames({
     }
   }, [debouncedSearch, filters, loadGames]);
 
-  const loadPage = async (page: number) => {
-    const currentFilters = { ...filters, search: debouncedSearch };
-    updateURL(currentFilters, page);
-    loadGames(page, currentFilters);
-  };
-
-  const totalPages = Math.ceil(totalGames / limit);
+  // Removed unused loadPage and totalPages - pagination is handled by PaginationControls component
 
   // Use optimistic games for removal, but regular games for search to avoid conflicts
   const displayGames = optimisticGames;
@@ -225,7 +226,9 @@ export function ImportedGames({
     return (
       <div className="space-y-6">
         <Toolbar
-          searchSlot={<ListSearchInput placeholder="Search imported games..." />}
+          searchSlot={
+            <ListSearchInput placeholder="Search imported games..." />
+          }
           filtersPanel={
             <ImportedGamesFilterPanel
               filters={filters}
@@ -268,10 +271,15 @@ export function ImportedGames({
             : `${totalGames} of ${initialTotalGames} games`
         }
         hasActiveFilters={
-          !!filters.search || filters.storefront !== "ALL" || filters.sortBy !== "name" || filters.sortOrder !== "asc"
+          !!filters.search ||
+          filters.storefront !== "ALL" ||
+          filters.sortBy !== "name" ||
+          filters.sortOrder !== "asc"
         }
         activeFiltersCount={
-          [filters.search && "s", filters.storefront !== "ALL" && "p"].filter(Boolean).length
+          [filters.search && "s", filters.storefront !== "ALL" && "p"].filter(
+            Boolean
+          ).length
         }
       />
 

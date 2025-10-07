@@ -82,11 +82,14 @@ export async function findGameById({ id }: { id: string }) {
       igdbId: true,
       description: true,
       coverImage: true,
+      hltbId: true,
       mainStory: true,
       mainExtra: true,
       completionist: true,
       releaseDate: true,
       steamAppId: true,
+      createdAt: true,
+      updatedAt: true,
       libraryItems: {
         orderBy: {
           updatedAt: "desc",
@@ -148,4 +151,19 @@ export async function findOrCreateGameByIgdbId({ igdbId }: { igdbId: number }) {
 
     return createGame({ game: gameInput });
   }
+}
+
+export async function updateGame({
+  id,
+  data,
+}: {
+  id: string;
+  data: Prisma.GameUpdateInput;
+}) {
+  const game = await prisma.game.update({
+    where: { id },
+    data,
+  });
+
+  return game;
 }

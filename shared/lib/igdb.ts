@@ -1,6 +1,14 @@
 import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
+import { getTimeStamp } from "@/shared/lib/date-functions";
+import { normalizeGameTitle, normalizeString } from "@/shared/lib/string";
+import {
+  SEARCH_RESULTS_LIMIT,
+  TOP_RATED_GAMES_LIMIT,
+  UPCOMING_EVENTS_LIMIT,
+} from "@/shared/services/igdb/constants";
+import { QueryBuilder } from "@/shared/services/igdb/query-builder";
 import {
   type Artwork,
   type DLCAndExpansionListResponse,
@@ -17,71 +25,6 @@ import {
   type UpcomingEventsResponse,
   type UpcomingReleaseResponse,
 } from "@/shared/types";
-
-const asError = (thrown: unknown): Error => {
-  if (thrown instanceof Error) return thrown;
-  try {
-    return new Error(JSON.stringify(thrown));
-  } catch {
-    return new Error(String(thrown));
-  }
-};
-
-const MILLISECONDS_TO_SECONDS = 1000;
-const TOP_RATED_GAMES_LIMIT = 12;
-const UPCOMING_EVENTS_LIMIT = 10;
-const SEARCH_RESULTS_LIMIT = 100;
-
-const getTimeStamp = (): number =>
-  Math.floor(Date.now() / MILLISECONDS_TO_SECONDS);
-
-function normalizeString(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[:-]/g, "")
-    .replace(/\bthe\b/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function normalizeTitle(input: string): string {
-  const specialCharsRegex =
-    /[\u2122\u00A9\u00AE\u0024\u20AC\u00A3\u00A5\u2022\u2026]/g;
-  return input.replace(specialCharsRegex, "").toLowerCase().trim();
-}
-
-class QueryBuilder {
-  private query: string = "";
-
-  fields(fields: string[]): this {
-    this.query += `fields ${fields.join(", ")};`;
-    return this;
-  }
-
-  sort(field: string, order: "asc" | "desc" = "asc"): this {
-    this.query += `sort ${field} ${order};`;
-    return this;
-  }
-
-  where(condition: string): this {
-    this.query += `where ${condition};`;
-    return this;
-  }
-
-  limit(count: number): this {
-    this.query += `limit ${count};`;
-    return this;
-  }
-
-  search(term: string): this {
-    this.query += `search "${term}";`;
-    return this;
-  }
-
-  build(): string {
-    return this.query.trim();
-  }
-}
 
 const igdbApi = {
   token: null as TwitchTokenResponse | null,
@@ -150,12 +93,17 @@ const igdbApi = {
     }
   },
 
-  handleError(thrown: unknown): void {
-    const error = asError(thrown);
-
-    console.error(`${error.name}: ${error.message}`);
-
-    if (error.stack !== undefined) console.error(error.stack);
+  handleError(thrown: unknown): Error | void {
+    if (thrown instanceof Error) {
+      console.error(`${thrown.name}: ${thrown.message}`);
+      if (thrown.stack !== undefined) console.error(thrown.stack);
+      return;
+    }
+    try {
+      return new Error(JSON.stringify(thrown));
+    } catch {
+      return new Error(String(thrown));
+    }
   },
 
   async getEventLogo(
@@ -370,6 +318,7 @@ const igdbApi = {
 
     return response[0];
   },
+
   async getGameGenres(
     gameId: number | null | undefined
   ): Promise<GenresResponse[] | Array<{ id: null; genres: [] }>> {
@@ -426,6 +375,7 @@ const igdbApi = {
 
     return response;
   },
+
   async getPlatforms() {
     const query = new QueryBuilder().fields(["name"]).build();
 
@@ -480,7 +430,7 @@ const igdbApi = {
         "cover.image_id",
       ])
       .where(`cover.image_id != null ${filters}`)
-      .search(normalizeTitle(normalizeString(name)))
+      .search(normalizeGameTitle(normalizeString(name)))
       .limit(SEARCH_RESULTS_LIMIT)
       .build();
 
@@ -510,6 +460,7 @@ const igdbApi = {
       resource: "/artworks",
     });
   },
+
   async getPlatformId(
     platformName: string
   ): Promise<{ platformId: Array<{ id: number; name: string }> } | undefined> {
@@ -524,6 +475,7 @@ const igdbApi = {
       resource: "/platforms",
     });
   },
+
   async getGameByName(
     gameName: string
   ): Promise<IgdbGameResponseItem[] | undefined> {

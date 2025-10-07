@@ -23,4 +23,3 @@ export function GridSkeleton({ count = 12 }: { count?: number }) {
     </div>
   );
 }
-

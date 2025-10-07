@@ -18,5 +18,10 @@ export const getBacklogs = authorizedActionClient
     })
   )
   .action(async ({ ctx: { userId }, parsedInput: { page, limit, search } }) => {
-    return getOtherUsersLibrariesPaginated({ userId, page, itemsPerPage: limit, search });
+    return getOtherUsersLibrariesPaginated({
+      userId,
+      page,
+      itemsPerPage: limit,
+      search,
+    });
   });

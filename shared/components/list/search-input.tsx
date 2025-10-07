@@ -4,8 +4,8 @@ import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 
 type ListSearchInputProps = {
   paramKey?: string;
@@ -57,4 +57,3 @@ export function ListSearchInput({
     </div>
   );
 }
-

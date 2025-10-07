@@ -20,10 +20,13 @@ describe("url-params helpers", () => {
 
   it("updates params by setting and deleting keys", () => {
     const sp = new URLSearchParams("page=2&search=foo");
-    const next = updateListParams(sp, { page: 1, search: "", sort: "createdAt" });
+    const next = updateListParams(sp, {
+      page: 1,
+      search: "",
+      sort: "createdAt",
+    });
     expect(next.get("page")).toBe("1");
     expect(next.get("search")).toBeNull();
     expect(next.get("sort")).toBe("createdAt");
   });
 });
-

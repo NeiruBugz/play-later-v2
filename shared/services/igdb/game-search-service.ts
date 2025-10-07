@@ -48,12 +48,7 @@ export class GameSearchService
         count: response.length,
       });
     } catch (error) {
-      const serviceError = this.handleError(error);
-      return this.createErrorResponse({
-        message: "Failed to search games",
-        code: "SEARCH_FAILED",
-        cause: serviceError.cause,
-      });
+      return this.handleError(error, "Failed to search games");
     }
   }
 }

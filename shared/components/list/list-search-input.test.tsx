@@ -2,14 +2,14 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { ListSearchInput } from "./search-input";
+
 const replaceMock = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
   useSearchParams: () => new URLSearchParams("page=3"),
   usePathname: () => "/collection/wishlist",
 }));
-
-import { ListSearchInput } from "./search-input";
 
 describe("ListSearchInput", () => {
   it("updates search param and resets page", () => {
@@ -19,4 +19,3 @@ describe("ListSearchInput", () => {
     expect(replaceMock).toHaveBeenCalledWith("?search=metroid");
   });
 });
-

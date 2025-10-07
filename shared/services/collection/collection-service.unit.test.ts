@@ -274,7 +274,7 @@ describe("CollectionService", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Failed to fetch user game collection");
+      expect(result.error).toBe("Database connection failed");
     });
 
     it("should handle findGamesWithLibraryItemsPaginated errors", async () => {
@@ -293,7 +293,7 @@ describe("CollectionService", () => {
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Failed to fetch user game collection");
+      expect(result.error).toBe("Query execution failed");
     });
 
     it("should handle non-Error exceptions", async () => {

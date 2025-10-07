@@ -3,7 +3,7 @@ export { cn } from "./tailwind-merge";
 export { isoToReadable, convertUnixToHumanReadable } from "./date-functions";
 export { LibraryStatusMapper, AcquisitionStatusMapper } from "./enum-mappers";
 export { platformToBackgroundColor } from "./platform-to-color";
-export { normalizeString } from "./string";
+export { capitalizeString as normalizeString } from "./string";
 export { playingOnPlatforms } from "./platform-select-options";
 export { getUniquePlatforms } from "./get-unique-platforms";
 export { platformMapper } from "./platform-mapper";

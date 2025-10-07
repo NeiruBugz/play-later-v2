@@ -10,6 +10,7 @@ export {
   getRecentlyCompletedLibraryItems,
   getUniquePlatforms,
   getOtherUsersLibraries,
+  getOtherUsersLibrariesPaginated,
   getLibraryByUsername,
   getWishlistedItemsByUsername,
   findWishlistItemsForUser,

@@ -8,7 +8,7 @@ import { GridSkeleton, ListSearchInput, Toolbar } from "@/shared/components";
 export const dynamic = "force-dynamic";
 
 export default async function WishlistPage(
-  props: PageProps<"/collection/(list-views)/wishlist">
+  props: PageProps<"/collection/wishlist">
 ) {
   const session = await auth();
   if (!session) {

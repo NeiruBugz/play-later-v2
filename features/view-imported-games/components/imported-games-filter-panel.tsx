@@ -44,10 +44,16 @@ const sortOrderOptions = [
 
 export function ImportedGamesFilterPanel({ filters, onFiltersChange }: Props) {
   const handleStorefrontChange = (storefront: string) => {
-    onFiltersChange({ ...filters, storefront: storefront as Storefront | "ALL" });
+    onFiltersChange({
+      ...filters,
+      storefront: storefront as Storefront | "ALL",
+    });
   };
   const handleSortByChange = (sortBy: string) => {
-    onFiltersChange({ ...filters, sortBy: sortBy as Props["filters"]["sortBy"] });
+    onFiltersChange({
+      ...filters,
+      sortBy: sortBy as Props["filters"]["sortBy"],
+    });
   };
   const handleSortOrderChange = (sortOrder: string) => {
     onFiltersChange({
@@ -57,7 +63,12 @@ export function ImportedGamesFilterPanel({ filters, onFiltersChange }: Props) {
   };
 
   const clearFilters = () => {
-    onFiltersChange({ search: "", storefront: "ALL", sortBy: "name", sortOrder: "asc" });
+    onFiltersChange({
+      search: "",
+      storefront: "ALL",
+      sortBy: "name",
+      sortOrder: "asc",
+    });
   };
 
   const hasActiveFilters = filters.storefront !== "ALL";
@@ -66,7 +77,10 @@ export function ImportedGamesFilterPanel({ filters, onFiltersChange }: Props) {
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
       <div className="space-y-2">
         <label className="text-sm font-medium">Platform</label>
-        <Select value={filters.storefront} onValueChange={handleStorefrontChange}>
+        <Select
+          value={filters.storefront}
+          onValueChange={handleStorefrontChange}
+        >
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue />
           </SelectTrigger>
@@ -120,4 +134,3 @@ export function ImportedGamesFilterPanel({ filters, onFiltersChange }: Props) {
     </div>
   );
 }
-

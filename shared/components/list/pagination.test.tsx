@@ -2,14 +2,14 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { Pagination } from "./pagination";
+
 const replaceMock = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
   useSearchParams: () => new URLSearchParams("search=doom&page=3"),
   usePathname: () => "/backlog",
 }));
-
-import { Pagination } from "./pagination";
 
 describe("Pagination", () => {
   it("renders and updates page via router.replace", () => {
@@ -20,4 +20,3 @@ describe("Pagination", () => {
     expect(replaceMock).toHaveBeenCalledWith("/backlog?search=doom&page=1");
   });
 });
-

@@ -1,9 +1,6 @@
 import { auth } from "@/auth";
 
-import {
-  getWishlistedGamesByUsername,
-} from "@/features/view-wishlist/server-actions";
-import { Header } from "@/shared/components/header";
+import { getWishlistedGamesByUsername } from "@/features/view-wishlist/server-actions";
 import {
   EmptyState,
   ErrorState,
@@ -11,6 +8,7 @@ import {
   Pagination,
   Toolbar,
 } from "@/shared/components";
+import { Header } from "@/shared/components/header";
 import { LibraryItemCard } from "@/shared/components/library-item-card";
 
 export default async function SharedWishlistPage(
@@ -48,7 +46,9 @@ export default async function SharedWishlistPage(
           </h1>
         </div>
 
-        <Toolbar searchSlot={<ListSearchInput placeholder="Search wishlist..." />} />
+        <Toolbar
+          searchSlot={<ListSearchInput placeholder="Search wishlist..." />}
+        />
 
         {items.length === 0 ? (
           <EmptyState title="No wishlist found" />

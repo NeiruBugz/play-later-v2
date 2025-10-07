@@ -175,7 +175,8 @@ shared/services/
 
 **Services SHOULD:**
 
-- ✅ Contain business logic and domain rules
+- ✅ Contain ALL business logic and domain rules
+- ✅ Be the ONLY layer that calls repositories
 - ✅ Validate input data (beyond basic type checking)
 - ✅ Transform data between layers
 - ✅ Compose multiple repository calls
@@ -189,25 +190,202 @@ shared/services/
 - ❌ Directly access database (use repositories)
 - ❌ Have side effects without explicit intent
 
-### Service Integration Pattern
+### Zod-First Validation Strategy
+
+The PlayLater architecture enforces a clear separation between input validation and business validation:
+
+**Zod Schemas (Server Actions)** validate:
+
+- ✅ Input shape and type (required fields, types, formats)
+- ✅ Sanitization (trim strings, normalize data)
+- ✅ Type coercion (string → number, string → date)
+- ✅ Basic constraints (min/max length, email format, regex patterns)
+
+**Services (Business Logic)** validate:
+
+- ✅ Business rules (can user perform this action?)
+- ✅ Cross-entity validation (does resource already exist?)
+- ✅ State validation (valid state transitions?)
+- ✅ Authorization checks (does resource belong to user?)
+- ❌ **NEVER** validate input shape (Zod already did this)
+
+**Why This Separation Matters:**
+
+1. **Type Safety**: Zod's `z.infer<>` provides compile-time type checking
+2. **Single Responsibility**: Each layer has a clear, focused purpose
+3. **Testability**: Services can assume valid inputs, focusing tests on business logic
+4. **Reusability**: Services work with any consumer (actions, API routes, jobs)
+5. **Performance**: Validation happens once at the boundary, not in every service
+
+**Example:**
 
 ```typescript
-// Service Layer (Business Logic)
-export class LibraryService {
-  async createLibraryItem(input: CreateInput): Promise<ServiceResult> {
-    // Validation, transformation, repository calls
-    const item = await createLibraryItem({ ... });
-    return { success: true, data: { item } };
+// ❌ WRONG: Service validates input shape
+class LibraryService {
+  async createItem(input: CreateInput) {
+    if (!input.userId || typeof input.userId !== "string") {
+      return this.error("Invalid userId"); // DON'T DO THIS
+    }
+    if (!input.gameId) {
+      return this.error("gameId required"); // DON'T DO THIS
+    }
+    // ...
   }
 }
 
-// Server Action (Thin Wrapper)
+// ✅ RIGHT: Zod validates input, service validates business rules
+// features/library/lib/validation.ts
+const CreateLibraryItemSchema = z.object({
+  gameId: z.string().min(1),
+  platform: z.string().optional(),
+  status: z.nativeEnum(LibraryItemStatus).optional(),
+});
+
+// features/library/server-actions/create-library-item-action.ts
 export const createLibraryItemAction = authorizedActionClient
-  .inputSchema(schema)
+  .inputSchema(CreateLibraryItemSchema) // Zod validates here
   .action(async ({ parsedInput, ctx: { userId } }) => {
-    const result = await libraryService.createLibraryItem({
+    // Input is already validated and typed!
+    return await libraryService.createItem({
       userId,
-      ...parsedInput
+      ...parsedInput,
+    });
+  });
+
+// shared/services/library/library-service.ts
+class LibraryService {
+  async createItem(input: CreateInput) {
+    // Input is already validated - skip to business logic
+
+    // Business validation: Check duplicates
+    const exists = await this.repo.findByUserAndGame(
+      input.userId,
+      input.gameId
+    );
+    if (exists) {
+      return this.error("Game already in library", ServiceErrorCode.CONFLICT);
+    }
+
+    // Business logic
+    const item = await this.repo.create(input);
+    return this.success({ item });
+  }
+}
+```
+
+### Strict Layer Boundaries
+
+**CRITICAL ARCHITECTURAL RULE:**
+
+The service layer is the ONLY layer that may call repository functions. Server actions, API routes, and all other consumer code MUST call services exclusively. Direct repository access from any consumer code violates the architecture and is strictly prohibited.
+
+**Layer Access Rules:**
+
+```
+✅ ALLOWED:
+  UI Components → Server Actions → Services → Repositories → Database
+
+❌ FORBIDDEN:
+  Server Actions → Repositories (bypass service layer)
+  UI Components → Repositories (bypass service and action layers)
+  Server Actions → Database (bypass service and repository layers)
+```
+
+**Import Restrictions:**
+
+- ✅ Services MAY import from `@/shared/lib/repository`
+- ❌ Server actions MUST NOT import from `@/shared/lib/repository`
+- ❌ Components MUST NOT import from `@/shared/lib/repository`
+- ❌ Any feature code MUST NOT import from `@/shared/lib/repository`
+
+**Enforcement and Verification:**
+
+To verify compliance with layer boundaries:
+
+```bash
+# Check for illegal repository imports in features
+grep -r "from '@/shared/lib/repository'" features/
+
+# Expected result: NO matches (all repository calls should be in services)
+```
+
+If this command returns any results, those files are violating the architecture and must be refactored to use services instead.
+
+**Why This Matters:**
+
+1. **Testability**: Business logic in services can be unit tested with mocked repositories
+2. **Reusability**: Same business logic works across server actions, API routes, and background jobs
+3. **Consistency**: All data operations follow the same validation and error handling patterns
+4. **Maintainability**: Changes to business logic happen in one place (service layer)
+5. **Type Safety**: Service interfaces provide clear contracts between layers
+
+### Service Integration Pattern
+
+**Server Actions as Thin Wrappers:**
+
+Server actions should contain MINIMAL logic and delegate ALL business operations to services:
+
+```typescript
+// ✅ CORRECT: Zod Schema (Input Validation)
+// features/library/lib/validation.ts
+import { LibraryItemStatus } from "@prisma/client";
+import { z } from "zod";
+
+// ✅ CORRECT: Service Layer (Business Logic ONLY)
+// shared/services/library/library-service.ts
+import { createLibraryItem, findByUserAndGame } from "@/shared/lib/repository";
+import { LibraryService } from "@/shared/services";
+
+import { CreateLibraryItemSchema } from "../lib/validation";
+
+export const CreateLibraryItemSchema = z.object({
+  gameId: z.string().min(1),
+  platform: z.string().optional(),
+  status: z.nativeEnum(LibraryItemStatus).optional(),
+});
+
+export type CreateLibraryItemInput = z.infer<typeof CreateLibraryItemSchema>;
+
+export class LibraryService {
+  async createItem(
+    input: CreateLibraryItemInput & { userId: string }
+  ): Promise<ServiceResult<{ item: LibraryItem }>> {
+    // NO input shape validation - Zod already did this!
+
+    // 1. Business validation: Check for duplicates
+    const exists = await findByUserAndGame(input.userId, input.gameId);
+    if (exists) {
+      return this.error("Game already in library", ServiceErrorCode.CONFLICT);
+    }
+
+    // 2. Business logic: Create with defaults
+    const item = await createLibraryItem({
+      userId: input.userId,
+      gameId: input.gameId,
+      status: input.status ?? LibraryItemStatus.CURIOUS_ABOUT,
+      platform: input.platform,
+      acquisitionType: AcquisitionType.DIGITAL,
+    });
+
+    // 3. Return standardized response
+    return this.success({ item });
+  }
+}
+
+// ✅ CORRECT: Server Action (Thin Wrapper - Zod + Service Call)
+// features/library/server-actions/create-library-item-action.ts
+("use server");
+
+const libraryService = new LibraryService();
+
+export const createLibraryItemAction = authorizedActionClient
+  .metadata({ actionName: "createLibraryItem" })
+  .inputSchema(CreateLibraryItemSchema) // Zod validates input shape
+  .action(async ({ parsedInput, ctx: { userId } }) => {
+    // Input is pre-validated and typed by Zod
+    const result = await libraryService.createItem({
+      userId,
+      ...parsedInput,
     });
 
     if (!result.success) {
@@ -217,6 +395,21 @@ export const createLibraryItemAction = authorizedActionClient
     return result.data;
   });
 ```
+
+**What Server Actions Should Do:**
+
+1. ✅ Define Zod schemas for input validation
+2. ✅ Call the appropriate service method
+3. ✅ Handle service errors (throw or return)
+4. ✅ Return service data to client
+
+**What Server Actions Should NOT Do:**
+
+1. ❌ Import from `@/shared/lib/repository`
+2. ❌ Contain business logic (that's in services)
+3. ❌ Call repository functions directly
+4. ❌ Validate business rules (that's in services)
+5. ❌ Duplicate input validation (Zod does this)
 
 ### Core Services
 
