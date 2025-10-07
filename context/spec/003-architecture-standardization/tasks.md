@@ -119,33 +119,33 @@
 
 ### Slice 5: ReviewService, UserService, JournalService
 
-- [ ] **Create ReviewService**
-  - [ ] Create `shared/services/review/` directory
-  - [ ] Implement `review-service.ts` with CRUD methods
-  - [ ] Create `types.ts` and tests
-  - [ ] Test with >90% coverage
-  - [ ] Document API
+- [x] **Create ReviewService**
+  - [x] Create `shared/services/review/` directory
+  - [x] Implement `review-service.ts` with CRUD methods
+  - [x] Create `types.ts` and tests
+  - [x] Test with >90% coverage
+  - [x] Document API
 
-- [ ] **Create UserService**
-  - [ ] Create `shared/services/user/` directory
-  - [ ] Implement `user-service.ts` with user operations
-  - [ ] Add Steam integration methods
-  - [ ] Create types and tests
-  - [ ] Test with >90% coverage
-  - [ ] Document API
+- [x] **Create UserService**
+  - [x] Create `shared/services/user/` directory
+  - [x] Implement `user-service.ts` with user operations
+  - [x] Add Steam integration methods
+  - [x] Create types and tests
+  - [x] Test with >90% coverage
+  - [x] Document API
 
-- [ ] **Create JournalService**
-  - [ ] Create `shared/services/journal/` directory
-  - [ ] Implement `journal-service.ts` with CRUD methods
-  - [ ] Add mood and session tracking logic
-  - [ ] Create types and tests
-  - [ ] Test with >90% coverage
-  - [ ] Document API
+- [x] **Create JournalService**
+  - [x] Create `shared/services/journal/` directory
+  - [x] Implement `journal-service.ts` with CRUD methods
+  - [x] Add mood and session tracking logic
+  - [x] Create types and tests
+  - [x] Test with >90% coverage
+  - [x] Document API
 
-- [ ] **Update shared services index**
-  - [ ] Update `shared/services/index.ts` to export all services
-  - [ ] Verify clean imports: `import { LibraryService } from '@/shared/services'`
-  - [ ] Run typecheck: `pnpmtypecheck`
+- [x] **Update shared services index**
+  - [x] Update `shared/services/index.ts` to export all services
+  - [x] Verify clean imports: `import { LibraryService } from '@/shared/services'`
+  - [x] Run typecheck: `pnpmtypecheck`
 
 ---
 

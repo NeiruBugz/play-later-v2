@@ -94,3 +94,63 @@ export {
 } from "./game/types";
 
 export { GameService } from "./game/game-service";
+
+// ============================================================================
+// Review Service (Review Management)
+// ============================================================================
+
+export {
+  type GetReviewsInput,
+  type CreateReviewInput,
+  type UpdateReviewInput,
+  type DeleteReviewInput,
+  type GetAggregatedRatingInput,
+  type ReviewData,
+  type GetReviewsResult,
+  type CreateReviewResult,
+  type UpdateReviewResult,
+  type DeleteReviewResult,
+  type GetAggregatedRatingResult,
+} from "./review/types";
+
+export { ReviewService } from "./review/review-service";
+
+// ============================================================================
+// User Service (User Management)
+// ============================================================================
+
+export {
+  type GetUserInput,
+  type UpdateUserInput,
+  type GetSteamIntegrationInput,
+  type DisconnectSteamInput,
+  type UserData,
+  type SteamIntegrationData,
+  type GetUserResult,
+  type UpdateUserResult,
+  type GetSteamIntegrationResult,
+  type DisconnectSteamResult,
+} from "./user/types";
+
+export { UserService } from "./user/user-service";
+
+// ============================================================================
+// Journal Service (Journal Entry Management)
+// ============================================================================
+
+export {
+  type GetJournalEntriesInput,
+  type CreateJournalEntryInput,
+  type UpdateJournalEntryInput,
+  type DeleteJournalEntryInput,
+  type GetJournalStatsInput,
+  type JournalEntryData,
+  type JournalStatsData,
+  type GetJournalEntriesResult,
+  type CreateJournalEntryResult,
+  type UpdateJournalEntryResult,
+  type DeleteJournalEntryResult,
+  type GetJournalStatsResult,
+} from "./journal/types";
+
+export { JournalService } from "./journal/journal-service";
