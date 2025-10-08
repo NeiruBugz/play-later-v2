@@ -23,3 +23,20 @@ services:
       - "6432:5432"
     volumes:
       - ./.local-data/pg:/var/packages/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: play-later-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_SERVER_JSON_FILE: "/pgadmin4/servers.json"
+    ports:
+      - "5050:80"
+    volumes:
+      - ./.local-data/pgadmin:/var/lib/pgadmin
+      - ./.docker/pgadmin/servers.json:/pgadmin4/servers.json
+      - ./.docker/pgadmin/pgpass:/pgpass
+    depends_on:
+      - postgres-db

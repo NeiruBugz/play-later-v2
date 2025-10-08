@@ -50,3 +50,5 @@ dumps/
 .local-data/
 
 *.tsbuildinfo
+
+.docker/
