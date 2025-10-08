@@ -1,192 +1,354 @@
-# Architecture Standardization - Task List
+# Architecture Standardization - Updated Task List
 
-**Status**: Ready for Implementation
-**Estimated Time**: 80-110 hours (6-7 weeks)
-**Strategy**: Vertical slicing - each phase keeps the application in a working state
+**Date**: 2025-10-08
+**Status**: Ready for Implementation (Post-Audit)
+**Estimated Time**: 90-120 hours (7-9 weeks)
+**Strategy**: Standardization first, then vertical service migration
 
----
+**Key Changes from Original:**
 
-## Phase 1: Foundation & Documentation (Week 1, 15-20 hours)
-
-### Slice 1: Architecture Documentation & Standards
-
-- [x] **Update architecture documentation**
-  - [x] Update `context/product/architecture.md`: Add section "11. Service Layer Architecture"
-  - [x] Add service layer diagram showing three-tier architecture
-  - [x] Document service responsibilities and boundaries
-  - [x] Add service naming conventions and file organization
-  - [x] Document when to use service layer vs direct repository calls
-  - [x] Include service composition patterns and best practices
-
-- [x] **Create service layer guide**
-  - [x] Create `context/product/service-layer-guide.md`
-  - [x] Document standard service class structure
-  - [x] Include complete code examples for each service type
-  - [x] Add error handling patterns
-  - [x] Document testing approach for services
-  - [x] Include service composition examples
-  - [x] Add troubleshooting section
-
-- [x] **Create migration guide**
-  - [x] Create `context/product/migration-guide.md`
-  - [x] Document step-by-step migration process
-  - [x] Include before/after code examples
-  - [x] Add checklist for feature refactoring
-  - [x] Document testing requirements
-  - [x] Include rollback procedures
-
-### Slice 2: Service Layer Infrastructure
-
-- [x] **Set up testing infrastructure**
-  - [x] Create `test/helpers/service-test-helpers.ts` with common mock utilities
-  - [x] Create repository mock factory patterns
-  - [x] Add service test utilities (mock builders, assertion helpers)
-  - [x] Update `test/setup/vitest.config.ts` if needed
-
-- [x] **Create shared types**
-  - [x] Create `shared/services/types.ts`
-  - [x] Add `ServiceResult<T>` generic type
-  - [x] Add `PaginatedResult<T>` type
-  - [x] Add common error types
-  - [x] Add service input/output base types
-  - [x] Export from `shared/services/index.ts`
+- Added Phase 0 for structural standardization
+- Reorganized feature migration based on complexity
+- Acknowledged two-pattern architecture (Server Actions + React Query)
+- Added service layer integration to all patterns
 
 ---
 
-## Phase 2: Core Services Implementation (Week 2-3, 25-35 hours)
+## Phase 0: Feature Structure Standardization (Week 1, 15-20 hours)
 
-### Slice 3: LibraryService Implementation
+**Goal**: Establish consistent feature structure before service migration
 
-- [x] **Create LibraryService foundation**
-  - [x] Create directory: `shared/services/library/`
-  - [x] Create `library/types.ts` with all service input/output types
-  - [x] Create `library/library-service.ts` class skeleton
-  - [x] Add constructor with repository dependency
-  - [x] Export from `library/index.ts`
+### Slice 0.1: Create Standardization Guidelines
 
-- [x] **Implement LibraryService methods**
-  - [x] Implement `getLibraryItems(input)` method
-  - [x] Implement `createLibraryItem(input)` method
-  - [x] Implement `updateLibraryItem(input)` method
-  - [x] Implement `deleteLibraryItem(id, userId)` method
-  - [x] Implement `getLibraryItemCount(userId, filters)` method
-  - [x] Add private helper methods for validation and transformation
+- [ ] **Document standard feature structure**
+  - [ ] Create `context/spec/003-architecture-standardization/feature-structure-standard.md`
+  - [ ] Define directory conventions (`/lib`, `/components`, `/server-actions`, etc.)
+  - [ ] Document validation location (`/lib/validation.ts`, NOT `/validation/`)
+  - [ ] Specify types organization (`types.ts` file, NOT `/types/` directory unless >5 definitions)
+  - [ ] Include checklist for feature compliance
 
-- [x] **Test LibraryService**
-  - [x] Create `library/library-service.test.ts`
-  - [x] Mock all repository dependencies
-  - [x] Test all public methods with valid input
-  - [x] Test validation error scenarios
-  - [x] Test repository error handling
-  - [x] Test business logic edge cases
-  - [x] Achieve >90% coverage: `pnpmrun test shared/services/library`
+- [ ] **Document two-pattern architecture**
+  - [ ] Update `context/product/architecture.md` with Pattern 1 (Server Actions) and Pattern 2 (API Routes + React Query)
+  - [ ] Create decision tree for pattern selection
+  - [ ] Add examples for both patterns
+  - [ ] Document when each pattern is appropriate
+  - [ ] Update migration guide with both patterns
 
-- [x] **Document LibraryService**
-  - [x] Add JSDoc comments to all public methods
-  - [x] Document input/output types
-  - [x] Add usage examples in comments
-  - [x] Update service index exports
+- [ ] **Create feature audit checklist**
+  - [ ] Create automated script to check feature structure compliance
+  - [ ] Include checks for: validation location, types organization, proper exports
+  - [ ] Generate compliance report for all features
 
-### Slice 4: GameService Implementation
+### Slice 0.2: Refactor `manage-library-item` Structure
 
-- [x] **Create GameService foundation**
-  - [x] Create directory: `shared/services/game/`
-  - [x] Create `game/types.ts` with service types
-  - [x] Create `game/game-service.ts` class skeleton
-  - [x] Add repository dependencies
-  - [x] Export from `game/index.ts`
+**Current Issue**: Nested sub-features create deep import paths and inconsistency
 
-- [x] **Implement GameService methods**
-  - [x] Implement `getGame(id)` method
-  - [x] Implement `searchGames(query, filters)` method
-  - [x] Implement `createGame(input)` method
-  - [x] Implement `updateGame(id, input)` method
-  - [x] Implement `getGameWithLibraryItems(gameId, userId)` method
-  - [x] Add IGDB integration wrapper methods
+- [ ] **Plan the refactor**
+  - [ ] Document current structure and all dependencies
+  - [ ] Design flat structure with shared validation
+  - [ ] Identify shared types and utilities
+  - [ ] Plan import path updates
 
-- [x] **Test GameService**
-  - [x] Create `game/game-service.test.ts`
-  - [x] Mock repository and IGDB dependencies
-  - [x] Test all CRUD methods
-  - [x] Test search functionality
-  - [x] Test error scenarios
-  - [x] Achieve >90% coverage
+- [ ] **Execute the refactor**
+  - [ ] Create new flat structure:
+    ```
+    manage-library-item/
+    ├── components/
+    │   ├── create-library-item-form.tsx
+    │   ├── edit-library-item-form.tsx
+    │   └── delete-library-item-dialog.tsx
+    ├── server-actions/
+    │   ├── create-library-item.ts
+    │   ├── edit-library-item.ts
+    │   ├── delete-library-item.ts
+    │   └── index.ts
+    ├── lib/
+    │   └── validation.ts (consolidate all schemas)
+    ├── types.ts
+    ├── index.ts
+    ├── CLAUDE.md
+    └── PRD.md
+    ```
+  - [ ] Move components from sub-features to `/components`
+  - [ ] Move server actions from sub-features to `/server-actions`
+  - [ ] Consolidate validation schemas to `/lib/validation.ts`
+  - [ ] Create shared `types.ts`
+  - [ ] Update all imports throughout codebase
+  - [ ] Update exports in `index.ts`
 
-- [x] **Document GameService**
-  - [x] Add JSDoc comments
-  - [x] Document IGDB integration
-  - [x] Add usage examples
+- [ ] **Test the refactor**
+  - [ ] Run tests: `pnpm run test features/manage-library-item`
+  - [ ] Manual test: Create library item via UI
+  - [ ] Manual test: Edit library item status
+  - [ ] Manual test: Delete library item
+  - [ ] Verify no regressions
 
-### Slice 5: ReviewService, UserService, JournalService
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with new structure
+  - [ ] Document the refactor reasoning
+  - [ ] Update any references in other docs
 
-- [x] **Create ReviewService**
-  - [x] Create `shared/services/review/` directory
-  - [x] Implement `review-service.ts` with CRUD methods
-  - [x] Create `types.ts` and tests
-  - [x] Test with >90% coverage
-  - [x] Document API
+### Slice 0.3: Standardize `view-imported-games` Structure
 
-- [x] **Create UserService**
-  - [x] Create `shared/services/user/` directory
-  - [x] Implement `user-service.ts` with user operations
-  - [x] Add Steam integration methods
-  - [x] Create types and tests
-  - [x] Test with >90% coverage
-  - [x] Document API
+**Current Issue**: Uses `/validation/` instead of `/lib/validation.ts`
 
-- [x] **Create JournalService**
-  - [x] Create `shared/services/journal/` directory
-  - [x] Implement `journal-service.ts` with CRUD methods
-  - [x] Add mood and session tracking logic
-  - [x] Create types and tests
-  - [x] Test with >90% coverage
-  - [x] Document API
+- [ ] **Move validation to standard location**
+  - [ ] Create `/features/view-imported-games/lib/validation.ts`
+  - [ ] Move `search-params-schema.ts` contents to new file
+  - [ ] Update import in `/app/api/imported-games/route.ts`
+  - [ ] Update import in hooks
+  - [ ] Delete old `/validation` directory
+  - [ ] Run tests: `pnpm run test features/view-imported-games`
 
-- [x] **Update shared services index**
-  - [x] Update `shared/services/index.ts` to export all services
-  - [x] Verify clean imports: `import { LibraryService } from '@/shared/services'`
-  - [x] Run typecheck: `pnpmtypecheck`
+- [ ] **Verify React Query pattern compliance**
+  - [ ] Document as Pattern 2 example
+  - [ ] Ensure `/hooks` directory follows conventions
+  - [ ] Verify API route structure is standard
+  - [ ] Add to architecture docs as reference implementation
+
+### Slice 0.4: Flatten `/types/` Directories
+
+**Current Issue**: Some features use `/types/` directory for small type sets
+
+**Features to refactor**: `add-game`, `dashboard`, `gaming-goals`, `steam-integration`, `view-wishlist`
+
+- [ ] **`add-game` types**
+  - [ ] Count type definitions in `/types/` directory
+  - [ ] If <5 definitions, create flat `types.ts` file
+  - [ ] Move all type definitions to `types.ts`
+  - [ ] Update imports throughout feature
+  - [ ] Delete `/types/` directory
+  - [ ] Run tests
+
+- [ ] **`dashboard` types**
+  - [ ] Count type definitions in `/types/` directory
+  - [ ] If <5 definitions, create flat `types.ts` file
+  - [ ] Move all type definitions to `types.ts`
+  - [ ] Update imports throughout feature
+  - [ ] Delete `/types/` directory
+  - [ ] Run tests
+
+- [ ] **`steam-integration` types**
+  - [ ] Count type definitions in `/types/` directory
+  - [ ] If <5 definitions, create flat `types.ts` file
+  - [ ] Move all type definitions to `types.ts`
+  - [ ] Update imports throughout feature
+  - [ ] Delete `/types/` directory
+  - [ ] Run tests
+
+- [ ] **`view-wishlist` types**
+  - [ ] Count type definitions in `/types/` directory
+  - [ ] If <5 definitions, create flat `types.ts` file
+  - [ ] Move all type definitions to `types.ts`
+  - [ ] Update imports throughout feature
+  - [ ] Delete `/types/` directory
+  - [ ] Run tests
+
+- [ ] **`gaming-goals` types** (may skip if feature incomplete)
+  - [ ] Evaluate feature status
+  - [ ] If active, follow same process as above
+  - [ ] If incomplete, document for future work
+
+### Slice 0.5: Add Missing Validation Files
+
+**Current Issue**: `view-backlogs` missing validation
+
+- [ ] **Add validation to `view-backlogs`**
+  - [ ] Review server actions to identify validation needs
+  - [ ] Create `/features/view-backlogs/lib/validation.ts`
+  - [ ] Add Zod schemas for server action inputs
+  - [ ] Update server actions to use validation
+  - [ ] Add tests for validation
+  - [ ] Run tests: `pnpm run test features/view-backlogs`
+
+### Slice 0.6: Verification & Documentation
+
+- [ ] **Run full compliance check**
+  - [ ] Run automated feature structure checker (from Slice 0.1)
+  - [ ] Generate compliance report
+  - [ ] Verify all features pass standardization checks
+  - [ ] Fix any remaining issues
+
+- [ ] **Update all documentation**
+  - [ ] Update main `CLAUDE.md` with standardization notes
+  - [ ] Update architecture docs with standard structure
+  - [ ] Document migration learnings
+  - [ ] Create "before/after" examples
+
+- [ ] **Code quality checks**
+  - [ ] Run: `pnpm typecheck`
+  - [ ] Run: `pnpm lint`
+  - [ ] Run: `pnpm test`
+  - [ ] Fix any errors
 
 ---
 
-## Phase 3: Feature Migration (Week 4-6, 35-50 hours)
+## Phase 1: Foundation & Documentation (Week 2, 10-15 hours)
 
-### Slice 6: Refactor manage-library-item Feature
+**Note**: Slices 1-2 from original plan already completed ✅
 
-- [ ] **Extract business logic to service**
-  - [ ] Identify business logic in `create-library-item/server-actions/action.ts`
-  - [ ] Verify LibraryService has equivalent methods
-  - [ ] Identify business logic in `edit-library-item/server-actions/action.ts`
-  - [ ] Identify business logic in `delete-library-item/server-actions/action.ts`
+### Slice 1.1: Update Architecture Documentation for Two Patterns
 
-- [ ] **Update create-library-item**
-  - [ ] Update `create-library-item/server-actions/action.ts`
+- [ ] **Document Pattern 1: Server Actions (Default)**
+  - [ ] Update `context/product/architecture.md`
+  - [ ] Add flow diagram: Page → Server Action → Service → Repository → DB
+  - [ ] Document use cases (forms, mutations, server-rendered pages)
+  - [ ] Add code examples with service layer integration
+  - [ ] Document pros/cons
+
+- [ ] **Document Pattern 2: API Routes + React Query (Advanced)**
+  - [ ] Add to `context/product/architecture.md`
+  - [ ] Add flow diagram: Page → React Query → API Route → Service → Repository → DB
+  - [ ] Document use cases (complex filtering, caching, optimistic updates)
+  - [ ] Reference `view-imported-games/REFACTOR.md`
+  - [ ] Add code examples with service layer integration
+  - [ ] Document pros/cons
+
+- [ ] **Create pattern decision tree**
+  - [ ] Document criteria for choosing Pattern 1 vs Pattern 2
+  - [ ] Include flowchart or decision matrix
+  - [ ] Add real examples from codebase
+  - [ ] Include performance considerations
+
+### Slice 1.2: Update Migration Guide
+
+- [ ] **Update `context/product/migration-guide.md`**
+  - [ ] Add section for Pattern 1 migration (Server Actions → Service Layer)
+  - [ ] Add section for Pattern 2 migration (API Routes → Service Layer)
+  - [ ] Include step-by-step process for both patterns
+  - [ ] Add testing requirements for both patterns
+  - [ ] Include rollback procedures
+  - [ ] Add troubleshooting guide
+
+---
+
+## Phase 2: Core Services Implementation ✅ (Already Complete)
+
+**Note**: Slices 3-5 from original plan already completed:
+
+- ✅ LibraryService implemented and tested
+- ✅ GameService implemented and tested
+- ✅ ReviewService, UserService, JournalService implemented and tested
+
+No additional work needed in this phase.
+
+---
+
+## Phase 3: Feature Migration to Service Layer (Week 3-7, 40-60 hours)
+
+**Strategy**: Start with easiest features to establish patterns, then tackle complex ones
+
+### Slice 3.1: Simple Migrations (Pattern 1) - Week 3
+
+**Goal**: Establish service layer integration pattern with simple features
+
+#### Feature 1: `add-review` (1-2 days)
+
+- [ ] **Review current implementation**
+  - [ ] Document current server action flow
+  - [ ] Identify direct repository calls
+  - [ ] Verify ReviewService has needed methods
+
+- [ ] **Migrate to ReviewService**
+  - [ ] Update `server-actions/create-review.ts`
+  - [ ] Import ReviewService: `import { ReviewService } from '@/shared/services'`
+  - [ ] Replace repository calls with service calls
+  - [ ] Keep validation in `/lib/validation.ts` (feature-specific)
+  - [ ] Simplify server action to thin wrapper
+
+- [ ] **Update tests**
+  - [ ] Update `create-review.server-action.test.ts`
+  - [ ] Mock ReviewService instead of repository
+  - [ ] Test service integration
+  - [ ] Run tests: `pnpm run test features/add-review`
+  - [ ] Verify >80% coverage
+
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
+  - [ ] Add service integration examples
+  - [ ] Document any learnings
+
+#### Feature 2: `manage-user-info` (1-2 days)
+
+- [ ] **Review current implementation**
+  - [ ] Document current server action flow
+  - [ ] Identify direct repository calls
+  - [ ] Verify UserService has needed methods
+
+- [ ] **Migrate to UserService**
+  - [ ] Update `server-actions/edit-user-action.ts`
+  - [ ] Update `server-actions/get-user-info.ts`
+  - [ ] Import UserService
+  - [ ] Replace repository calls with service calls
+  - [ ] Simplify to thin wrappers
+
+- [ ] **Update tests**
+  - [ ] Update `edit-user-action.server-action.test.ts`
+  - [ ] Mock UserService instead of repository
+  - [ ] Test service integration
+  - [ ] Run tests: `pnpm run test features/manage-user-info`
+  - [ ] Verify >80% coverage
+
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
+
+#### Feature 3: `view-wishlist` (1-2 days)
+
+- [ ] **Review current implementation**
+  - [ ] Document current server action flow
+  - [ ] Identify direct repository calls
+  - [ ] Verify LibraryService has needed methods
+
+- [ ] **Migrate to LibraryService**
+  - [ ] Update `server-actions/get-wishlisted-items.ts`
   - [ ] Import LibraryService
   - [ ] Replace repository calls with service calls
-  - [ ] Simplify to thin wrapper pattern
-  - [ ] Keep validation schemas in feature's `lib/validation.ts`
-  - [ ] Update tests: `create-library-item/server-actions/action.test.ts`
-  - [ ] Run tests: `pnpmrun test features/manage-library-item/create-library-item`
+  - [ ] Simplify to thin wrapper
 
-- [ ] **Update edit-library-item**
-  - [ ] Update `edit-library-item/server-actions/action.ts`
-  - [ ] Replace repository calls with LibraryService.updateLibraryItem
-  - [ ] Update all related server actions in edit-library-item
+- [ ] **Update tests**
+  - [ ] Add/update tests for server actions
+  - [ ] Mock LibraryService
+  - [ ] Run tests: `pnpm run test features/view-wishlist`
+  - [ ] Verify >80% coverage
+
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
+
+**Week 3 Deliverable**: 3 features using service layer, pattern established ✅
+
+### Slice 3.2: Medium Migrations (Pattern 1) - Week 4-5
+
+**Goal**: Apply service layer pattern to more complex features
+
+#### Feature 4: `manage-library-item` (3-4 days)
+
+**Note**: Structure already refactored in Phase 0
+
+- [ ] **Review refactored structure**
+  - [ ] Verify flat structure is in place
+  - [ ] Confirm all tests passing post-refactor
+  - [ ] Document current server action flows
+
+- [ ] **Migrate create operation**
+  - [ ] Update `server-actions/create-library-item.ts`
+  - [ ] Import LibraryService
+  - [ ] Replace repository calls with `libraryService.createLibraryItem()`
+  - [ ] Keep feature-specific validation in `/lib/validation.ts`
   - [ ] Update tests
-  - [ ] Run tests: `pnpmrun test features/manage-library-item/edit-library-item`
+  - [ ] Run tests: `pnpm run test features/manage-library-item`
 
-- [ ] **Update delete-library-item**
-  - [ ] Update `delete-library-item/server-actions/action.ts`
-  - [ ] Replace repository calls with LibraryService.deleteLibraryItem
+- [ ] **Migrate edit operation**
+  - [ ] Update `server-actions/edit-library-item.ts`
+  - [ ] Replace repository calls with `libraryService.updateLibraryItem()`
+  - [ ] Handle multiple item operations (if any)
   - [ ] Update tests
-  - [ ] Run tests: `pnpmrun test features/manage-library-item/delete-library-item`
+  - [ ] Run tests
 
-- [ ] **Standardize feature structure**
-  - [ ] Ensure consistent `/lib/validation.ts` location
-  - [ ] Move any misplaced files to standard locations
-  - [ ] Update feature exports in `index.ts`
-  - [ ] Update `CLAUDE.md` to reflect service layer usage
-  - [ ] Run full feature tests: `pnpmrun test features/manage-library-item`
+- [ ] **Migrate delete operation**
+  - [ ] Update `server-actions/delete-library-item.ts`
+  - [ ] Replace repository calls with `libraryService.deleteLibraryItem()`
+  - [ ] Update tests
+  - [ ] Run tests
 
 - [ ] **Integration testing**
   - [ ] Manual test: Create library item via UI
@@ -195,342 +357,563 @@
   - [ ] Verify all operations work correctly
   - [ ] Check browser console for errors
 
-### Slice 7: Refactor add-game Feature
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer integration
+  - [ ] Document consolidated structure benefits
+  - [ ] Add service usage examples
 
-- [ ] **Extract business logic**
-  - [ ] Identify logic in `server-actions/create-game-action.ts`
-  - [ ] Identify logic in `server-actions/add-game.ts`
-  - [ ] Verify GameService and LibraryService have needed methods
+#### Feature 5: `view-game-details` (2-3 days)
 
-- [ ] **Update server actions**
-  - [ ] Update `server-actions/create-game-action.ts`
-  - [ ] Import GameService and LibraryService
-  - [ ] Replace repository calls with service calls
-  - [ ] Simplify business logic to service layer
-  - [ ] Update `server-actions/add-game.ts`
+- [ ] **Review current implementation**
+  - [ ] Document current server action flows
+  - [ ] Identify all repository calls
+  - [ ] Map to GameService and ReviewService methods
 
-- [ ] **Update and test**
-  - [ ] Update tests: `server-actions/create-game-action.test.ts`
-  - [ ] Run tests: `pnpmrun test features/add-game`
-  - [ ] Ensure validation remains in `lib/validation.ts`
-  - [ ] Update `CLAUDE.md` documentation
+- [ ] **Migrate game retrieval**
+  - [ ] Update `server-actions/get-game.ts`
+  - [ ] Import GameService
+  - [ ] Replace repository calls with `gameService.getGame()`
+  - [ ] Update tests: `get-game.server-action.test.ts`
+
+- [ ] **Migrate reviews retrieval**
+  - [ ] Update `server-actions/get-reviews.ts`
+  - [ ] Import ReviewService
+  - [ ] Replace repository calls with `reviewService.getReviews()`
+  - [ ] Update tests: `get-reviews.server-action.test.ts`
+
+- [ ] **Migrate library items retrieval**
+  - [ ] Update `server-actions/get-library-items-by-igdb-id.ts`
+  - [ ] Import LibraryService
+  - [ ] Replace repository calls with service method
+  - [ ] Update tests: `get-library-items-by-igdb-id.server-action.test.ts`
 
 - [ ] **Integration testing**
-  - [ ] Manual test: Search for game
-  - [ ] Manual test: Add game to library
+  - [ ] Manual test: View game details page
+  - [ ] Verify all data loads correctly
+  - [ ] Check for console errors
+  - [ ] Test with various game IDs
+
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
+  - [ ] Document service composition pattern
+
+#### Feature 6: `dashboard` (3-4 days)
+
+**Note**: Most complex due to multiple services and many server actions
+
+- [ ] **Audit all server actions**
+  - [ ] List all server actions in dashboard
+  - [ ] Map each to appropriate service(s)
+  - [ ] Identify service composition needs
+
+- [ ] **Migrate library-related actions**
+  - [ ] Update `get-backlog-items-count.ts` → LibraryService
+  - [ ] Update `get-recent-completed-backlog-items.ts` → LibraryService
+  - [ ] Update `get-platform-breakdown.ts` → LibraryService
+  - [ ] Update `get-acquisition-type-breakdown.ts` → LibraryService
+  - [ ] Update `get-user-games-with-grouped-backlog.ts` → LibraryService
+
+- [ ] **Migrate review-related actions**
+  - [ ] Update `get-aggregated-review-ratings.ts` → ReviewService
+  - [ ] Update `get-recent-reviews.ts` → ReviewService
+
+- [ ] **Migrate wishlist actions**
+  - [ ] Update `get-upcoming-wishlist-items.ts` → LibraryService + GameService
+
+- [ ] **Migrate integration actions**
+  - [ ] Update `get-steam-integration-connection-state.ts` → UserService
+
+- [ ] **Test all migrations**
+  - [ ] Run tests: `pnpm run test features/dashboard`
+  - [ ] Verify all tests passing
+  - [ ] Check coverage >80%
+
+- [ ] **Integration testing**
+  - [ ] Manual test: View dashboard
+  - [ ] Verify all widgets load correctly
+  - [ ] Check stats accuracy
+  - [ ] Verify no console errors
+  - [ ] Test loading states
+
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
+  - [ ] Document service composition examples
+  - [ ] Add notes on multiple service coordination
+
+**Week 4-5 Deliverable**: 6 features using service layer, complex patterns established ✅
+
+### Slice 3.3: Complex Migrations (Pattern 1) - Week 6
+
+**Goal**: Handle most complex feature migrations
+
+#### Feature 7: `add-game` (4-5 days)
+
+**Note**: Complex due to IGDB integration, game creation + backlog addition
+
+- [ ] **Review current implementation**
+  - [ ] Document `server-actions/create-game-action.ts` flow
+  - [ ] Document `server-actions/add-game.ts` flow
+  - [ ] Identify IGDB integration points
+  - [ ] Map to GameService and LibraryService methods
+
+- [ ] **Migrate game creation**
+  - [ ] Update `server-actions/create-game-action.ts`
+  - [ ] Import GameService and LibraryService
+  - [ ] Replace IGDB calls with `gameService.searchGames()` or similar
+  - [ ] Replace game creation with `gameService.createGame()`
+  - [ ] Update tests: `create-game-action.server-action.test.ts`
+
+- [ ] **Migrate add-to-backlog operation**
+  - [ ] Update `server-actions/add-game.ts`
+  - [ ] Use service composition: GameService + LibraryService
+  - [ ] Ensure transaction-like behavior via services
+  - [ ] Handle IGDB enrichment through GameService
+
+- [ ] **Test migration**
+  - [ ] Run tests: `pnpm run test features/add-game`
+  - [ ] Verify >80% coverage
+  - [ ] Test IGDB integration mocks
+
+- [ ] **Integration testing**
+  - [ ] Manual test: Search for game via IGDB
+  - [ ] Manual test: Add game to collection
   - [ ] Manual test: Quick add via modal
-  - [ ] Verify IGDB integration works
-  - [ ] Check default status is CURIOUS_ABOUT
+  - [ ] Verify default status is CURIOUS_ABOUT
+  - [ ] Check for console errors
 
-### Slice 8: Refactor dashboard Feature
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
+  - [ ] Document IGDB integration through services
+  - [ ] Add service composition examples
 
-- [ ] **Identify service dependencies**
-  - [ ] Review `server-actions/get-backlog-items-count.ts`
-  - [ ] Review `server-actions/get-aggregated-review-ratings.ts`
-  - [ ] Review `server-actions/get-recent-completed-backlog-items.ts`
-  - [ ] Review all dashboard server actions
+#### Feature 8: `steam-integration` (4-5 days)
 
-- [ ] **Update server actions**
-  - [ ] Update `get-backlog-items-count.ts` to use LibraryService
-  - [ ] Update `get-aggregated-review-ratings.ts` to use ReviewService
-  - [ ] Update `get-recent-completed-backlog-items.ts` to use LibraryService
-  - [ ] Update `get-platform-breakdown.ts` to use LibraryService
-  - [ ] Update `get-acquisition-type-breakdown.ts` to use LibraryService
-  - [ ] Update all remaining dashboard server actions
+**Note**: Complex due to external API, bulk operations, multiple services
 
-- [ ] **Simplify business logic**
-  - [ ] Move aggregation logic to services
-  - [ ] Extract filtering logic to services
-  - [ ] Simplify server actions to thin wrappers
-  - [ ] Update tests for all server actions
+- [ ] **Review current implementation**
+  - [ ] Document all server actions
+  - [ ] Identify Steam API integration points
+  - [ ] Identify bulk import operations
+  - [ ] Map to GameService, LibraryService, and UserService
 
-- [ ] **Test and document**
-  - [ ] Run tests: `pnpmrun test features/dashboard`
+- [ ] **Migrate Steam connection operations**
+  - [ ] Update `server-actions/get-steam-id-for-user.ts` → UserService
+  - [ ] Keep external API routes (`/api/steam/*`) as-is (integration layer)
+
+- [ ] **Migrate game fetching**
+  - [ ] Update `server-actions/get-user-owned-games.ts`
+  - [ ] Keep Steam API calls (external integration)
+  - [ ] Use GameService for IGDB enrichment
+
+- [ ] **Migrate bulk game import**
+  - [ ] Update `server-actions/save-steam-games.ts`
+  - [ ] Use GameService for game creation
+  - [ ] Use LibraryService for backlog additions
+  - [ ] Optimize for bulk operations
+  - [ ] Consider transaction handling
+
+- [ ] **Migrate achievements**
+  - [ ] Update `server-actions/get-achievements.ts`
+  - [ ] Keep Steam API calls (external data)
+  - [ ] Use GameService for game data correlation
+
+- [ ] **Test migration**
+  - [ ] Run tests: `pnpm run test features/steam-integration`
+  - [ ] Verify bulk operation handling
+  - [ ] Test external API mocks
+
+- [ ] **Integration testing**
+  - [ ] Manual test: Connect Steam account
+  - [ ] Manual test: Import Steam library
+  - [ ] Manual test: View achievements
+  - [ ] Verify bulk import performance
+  - [ ] Check for console errors
+
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
+  - [ ] Document bulk operation patterns
+  - [ ] Add external API integration notes
+
+**Week 6 Deliverable**: 8 features using service layer, all complex patterns handled ✅
+
+### Slice 3.4: Evaluate Pattern 2 Migration (Week 7)
+
+**Goal**: Decide on `view-collection` architecture and finalize remaining features
+
+#### Feature 9: `view-collection` - Architecture Decision
+
+**Context**: This feature has complex filtering/sorting, similar to `view-imported-games`
+
+- [ ] **Evaluate for Pattern 2 (API Routes + React Query)**
+  - [ ] Review current implementation
+  - [ ] Assess filtering/searching complexity
+  - [ ] Evaluate caching benefits
+  - [ ] Compare with `view-imported-games` use case
+  - [ ] **Decision**: Keep Server Actions (Pattern 1) OR migrate to React Query (Pattern 2)
+
+**If Pattern 1 (Server Actions):**
+
+- [ ] **Migrate to service layer**
+  - [ ] Update `server-actions/get-game-with-backlog-items.ts` → LibraryService
+  - [ ] Update `server-actions/get-uniques-platforms.ts` → LibraryService
+  - [ ] Update tests: `get-game-with-backlog-items.server-action.test.ts`
+  - [ ] Verify filtering performance
+
+**If Pattern 2 (React Query):**
+
+- [ ] **Create API route**
+  - [ ] Create `/app/api/collection/route.ts` (or update existing)
+  - [ ] Move server action logic to API route
+  - [ ] Integrate with service layer
+  - [ ] Add request validation
+
+- [ ] **Create React Query hook**
+  - [ ] Create `/features/view-collection/hooks/use-collection.ts`
+  - [ ] Implement query with filtering/sorting
+  - [ ] Configure caching strategy
+  - [ ] Export types
+
+- [ ] **Update components**
+  - [ ] Refactor to use React Query hook
+  - [ ] Simplify state management
+  - [ ] Add loading/error states
+  - [ ] Implement optimistic updates if needed
+
+- [ ] **Test migration**
+  - [ ] Create hook tests
+  - [ ] Create API route tests
+  - [ ] Update component tests
+
+**Common tasks regardless of decision:**
+
+- [ ] **Integration testing**
+  - [ ] Manual test: View collection page
+  - [ ] Test filtering by platform
+  - [ ] Test search functionality
+  - [ ] Test sorting options
+  - [ ] Verify pagination works
+  - [ ] Check performance
+
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with chosen pattern
+  - [ ] Document reasoning for pattern choice
+  - [ ] Add service layer integration details
+
+#### Feature 10: `view-imported-games` - Add Service Layer
+
+**Note**: Feature already uses Pattern 2 (React Query), just needs service layer integration
+
+- [ ] **Update API route to use service layer**
+  - [ ] Update `/app/api/imported-games/route.ts`
+  - [ ] Import GameService (or create ImportedGameService if needed)
+  - [ ] Replace direct repository calls with service calls
+  - [ ] Keep validation and request handling logic
+
+- [ ] **Consider creating ImportedGameService**
+  - [ ] Evaluate if imported games need separate service
+  - [ ] OR use existing GameService/LibraryService
+  - [ ] **Decision**: Create new service OR use existing
+
+- [ ] **Test migration**
+  - [ ] Update/create API route tests
+  - [ ] Mock service layer
+  - [ ] Run tests: `pnpm run test features/view-imported-games`
+  - [ ] Verify React Query functionality still works
+
+- [ ] **Update documentation**
+  - [ ] Update `REFACTOR.md` with service layer integration
   - [ ] Update `CLAUDE.md` with service usage
-  - [ ] Manual test: View dashboard, verify all stats correct
+  - [ ] Document as Pattern 2 reference implementation
 
-### Slice 9: Refactor view-game-details Feature
+#### Feature 11: `view-backlogs` (1-2 days)
 
-- [ ] **Review existing implementation**
-  - [ ] Check `server-actions/get-game.ts`
-  - [ ] Check `server-actions/get-reviews.ts`
-  - [ ] Check `server-actions/get-library-items-by-igdb-id.ts`
-
-- [ ] **Update to use services**
-  - [ ] Update `get-game.ts` to use GameService
-  - [ ] Update `get-reviews.ts` to use ReviewService
-  - [ ] Update `get-library-items-by-igdb-id.ts` to use LibraryService
-  - [ ] Simplify all server actions
-
-- [ ] **Test and document**
-  - [ ] Update tests: `server-actions/*.test.ts`
-  - [ ] Run tests: `pnpmrun test features/view-game-details`
-  - [ ] Update `CLAUDE.md`
-  - [ ] Manual test: View game details page, verify all data loads
-
-### Slice 10: Refactor view-collection Feature
-
-- [ ] **Verify existing service layer**
-  - [ ] Review `shared/services/collection/collection-service.ts`
-  - [ ] Check if it follows new standards
-  - [ ] Update if necessary to match LibraryService patterns
-
-- [ ] **Update server actions (if needed)**
-  - [ ] Verify `server-actions/get-game-with-backlog-items.ts` uses service correctly
-  - [ ] Verify `server-actions/get-uniques-platforms.ts` uses service
-  - [ ] Update to use LibraryService if not already
-
-- [ ] **Standardize structure**
-  - [ ] Ensure validation is in `lib/validation.ts`
-  - [ ] Check directory structure matches standard
-  - [ ] Update `CLAUDE.md` if needed
-  - [ ] Run tests: `pnpmrun test features/view-collection`
-
-### Slice 11: Refactor Remaining Features
-
-- [ ] **Refactor steam-integration**
-  - [ ] Update to use GameService and LibraryService
-  - [ ] Update server actions
+- [ ] **Migrate to service layer**
+  - [ ] Update `server-actions/get-users-backlog.ts` → LibraryService
+  - [ ] Update `server-actions/get-backlogs.ts` → LibraryService
   - [ ] Update tests
-  - [ ] Update `CLAUDE.md`
 
-- [ ] **Refactor view-imported-games**
-  - [ ] Update to use GameService
-  - [ ] Move validation to `lib/validation.ts` (currently in separate `/validation`)
-  - [ ] Update server actions
+- [ ] **Integration testing**
+  - [ ] Manual test: View personal backlog
+  - [ ] Manual test: View shared backlog
+  - [ ] Verify public sharing works
+
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
+
+#### Feature 12: `manage-integrations` (1-2 days)
+
+- [ ] **Migrate to service layer**
+  - [ ] Update `server-actions/get-steam-user-data.ts` → UserService
+  - [ ] Update `server-actions/remove-steam-data-from-user.ts` → UserService
   - [ ] Update tests
-  - [ ] Update `CLAUDE.md`
 
-- [ ] **Refactor view-wishlist**
-  - [ ] Update to use LibraryService
-  - [ ] Update server actions
-  - [ ] Update tests
-  - [ ] Update `CLAUDE.md`
+- [ ] **Integration testing**
+  - [ ] Manual test: View integrations page
+  - [ ] Manual test: Disconnect Steam
+  - [ ] Verify connection status updates
 
-- [ ] **Refactor share-wishlist**
-  - [ ] Update to use LibraryService
-  - [ ] Update server actions
-  - [ ] Update tests
-  - [ ] Update `CLAUDE.md`
+- [ ] **Update documentation**
+  - [ ] Update `CLAUDE.md` with service layer usage
 
-- [ ] **Refactor manage-integrations**
-  - [ ] Update to use UserService
-  - [ ] Update Steam integration actions
-  - [ ] Update tests
-  - [ ] Update `CLAUDE.md`
-
-- [ ] **Refactor manage-user-info**
-  - [ ] Update to use UserService
-  - [ ] Update server actions
-  - [ ] Update tests
-  - [ ] Update `CLAUDE.md`
-
-- [ ] **Refactor add-review**
-  - [ ] Update to use ReviewService
-  - [ ] Update server actions
-  - [ ] Update tests
-  - [ ] Update `CLAUDE.md`
-
-- [ ] **Verify no direct repository calls**
-  - [ ] Run codebase search: `grep -r "from '@/shared/lib/repository'" features/`
-  - [ ] Ensure all imports are from services, not repositories
-  - [ ] Fix any remaining direct repository calls
+**Week 7 Deliverable**: All features using service layer ✅
 
 ---
 
-## Phase 4: Testing & Quality Assurance (Week 7, 15-20 hours)
+## Phase 4: Testing & Quality Assurance (Week 8, 15-20 hours)
 
-### Slice 12: Comprehensive Testing
+**Goal**: Comprehensive testing and quality verification
 
-- [ ] **Service layer testing**
+### Slice 4.1: Service Layer Testing
+
+- [ ] **Verify service test coverage**
+  - [ ] Run: `pnpm run test:coverage shared/services`
   - [ ] Verify all services have >90% coverage
-  - [ ] Run: `pnpmrun test:coverage shared/services`
-  - [ ] Add missing tests for uncovered code paths
-  - [ ] Ensure all error scenarios are tested
+  - [ ] Add tests for any uncovered code paths
+  - [ ] Test all error scenarios
+  - [ ] Test all edge cases
 
-- [ ] **Integration testing**
-  - [ ] Run full test suite: `pnpmrun test`
+### Slice 4.2: Feature Testing
+
+- [ ] **Run all feature tests**
+  - [ ] Run: `pnpm run test`
   - [ ] Verify all tests pass
-  - [ ] Check overall coverage: `pnpmrun test:coverage`
+  - [ ] Check overall coverage: `pnpm run test:coverage`
   - [ ] Ensure >80% overall coverage
+  - [ ] Fix any failing tests
 
-- [ ] **End-to-end testing**
-  - [ ] Test critical user flow: Add game → Update status → Delete
-  - [ ] Test dashboard: Verify all stats load correctly
-  - [ ] Test collection: Verify filtering and pagination
-  - [ ] Test game details: Verify all data displays
-  - [ ] Test Steam integration: Verify import works
-  - [ ] Check browser console for errors
+- [ ] **Integration testing per feature**
+  - [ ] `add-game`: Add game → Update status → Delete
+  - [ ] `dashboard`: Verify all stats load correctly
+  - [ ] `view-collection`: Verify filtering and pagination
+  - [ ] `view-game-details`: Verify all data displays
+  - [ ] `steam-integration`: Verify import works
+  - [ ] Check browser console for errors in all features
 
-### Slice 13: Code Quality & Standards
+### Slice 4.3: End-to-End Testing
+
+- [ ] **Critical user flows**
+  - [ ] New user onboarding flow
+  - [ ] Search and add game flow
+  - [ ] Update library item status flow
+  - [ ] Create and view review flow
+  - [ ] Steam integration flow
+  - [ ] Public sharing flow (wishlist/backlog)
+
+- [ ] **Performance testing**
+  - [ ] Test dashboard load time
+  - [ ] Test collection page with many items
+  - [ ] Test search/filter performance
+  - [ ] Test bulk operations (Steam import)
+  - [ ] Identify and fix bottlenecks
+
+### Slice 4.4: Code Quality
 
 - [ ] **Type checking**
-  - [ ] Run: `pnpmtypecheck`
+  - [ ] Run: `pnpm typecheck`
   - [ ] Fix any TypeScript errors
   - [ ] Verify zero errors
 
 - [ ] **Linting**
-  - [ ] Run: `pnpmlint`
+  - [ ] Run: `pnpm lint`
   - [ ] Fix any linting errors
-  - [ ] Run: `pnpmlint:fix` for auto-fixable issues
+  - [ ] Run: `pnpm lint:fix` for auto-fixable issues
+  - [ ] Verify clean lint report
 
 - [ ] **Formatting**
-  - [ ] Run: `pnpmformat:check`
-  - [ ] Run: `pnpmformat:write` to fix formatting
+  - [ ] Run: `pnpm format:check`
+  - [ ] Run: `pnpm format:write` to fix formatting
   - [ ] Verify consistent code style
 
 - [ ] **Build verification**
   - [ ] Clear Next.js cache: `rm -rf .next`
-  - [ ] Run: `pnpmbuild`
+  - [ ] Run: `pnpm build`
   - [ ] Verify build succeeds
   - [ ] Check for any build warnings
+  - [ ] Fix any warnings
 
-### Slice 14: Documentation Updates
+---
 
-- [ ] **Update main CLAUDE.md**
-  - [ ] Update architecture section to mention service layer
-  - [ ] Add service layer to data flow diagram
-  - [ ] Reference service layer guide
-  - [ ] Update development practices section
+## Phase 5: Documentation & Deployment (Week 9, 10-15 hours)
 
-- [ ] **Verify feature documentation**
-  - [ ] Check all feature `CLAUDE.md` files updated
+**Goal**: Complete documentation and prepare for deployment
+
+### Slice 5.1: Feature Documentation
+
+- [ ] **Verify all feature CLAUDE.md files**
+  - [ ] Check all features have updated `CLAUDE.md`
   - [ ] Verify service usage is documented
   - [ ] Ensure data flow diagrams are correct
   - [ ] Check code examples are up to date
+  - [ ] Add service layer integration notes
 
-- [ ] **Update architecture documentation**
-  - [ ] Verify `context/product/architecture.md` has service layer section
-  - [ ] Verify `context/product/service-layer-guide.md` is complete
-  - [ ] Verify `context/product/migration-guide.md` is accurate
-  - [ ] Add any missing diagrams or examples
+### Slice 5.2: Architecture Documentation
 
----
+- [ ] **Update main architecture docs**
+  - [ ] Verify `context/product/architecture.md` is complete
+  - [ ] Verify `context/product/service-layer-guide.md` is accurate
+  - [ ] Verify `context/product/migration-guide.md` reflects reality
+  - [ ] Add final diagrams and examples
+  - [ ] Document two-pattern architecture thoroughly
 
-## Phase 5: Final Verification & Cleanup (Week 7-8, 10-15 hours)
+- [ ] **Update main CLAUDE.md**
+  - [ ] Update architecture section with service layer
+  - [ ] Add service layer to data flow diagram
+  - [ ] Reference service layer guide
+  - [ ] Update development practices section
+  - [ ] Document when to use each pattern
 
-### Slice 15: Performance Verification
+- [ ] **Create pattern comparison guide**
+  - [ ] Side-by-side comparison of Pattern 1 vs Pattern 2
+  - [ ] Include code examples for both
+  - [ ] Document performance characteristics
+  - [ ] Add decision flowchart
 
-- [ ] **Benchmark critical paths**
-  - [ ] Measure dashboard load time (before/after)
-  - [ ] Measure collection page load time (before/after)
-  - [ ] Measure library item operations (create/update/delete)
-  - [ ] Ensure no regression (within ±5%)
+### Slice 5.3: Code Audit
 
-- [ ] **Check service overhead**
-  - [ ] Add performance logging to services (dev only)
-  - [ ] Measure average service execution time
-  - [ ] Verify overhead is <10ms per service call
-  - [ ] Remove performance logging before production
+- [ ] **Verify no direct repository calls from features**
+  - [ ] Run: `grep -r "from ['"@]/shared/lib/repository" features/`
+  - [ ] Ensure all imports are from services, not repositories
+  - [ ] Fix any remaining direct repository calls
+  - [ ] Document any intentional exceptions (if any)
 
-### Slice 16: Feature Flag Cleanup
+- [ ] **Verify consistent feature structure**
+  - [ ] Run automated structure checker
+  - [ ] Verify all features follow standard conventions
+  - [ ] Fix any inconsistencies
+  - [ ] Generate final compliance report
 
-- [ ] **If feature flags were used:**
-  - [ ] Verify all features work with service layer
-  - [ ] Remove feature flag configuration
-  - [ ] Delete old code paths
-  - [ ] Clean up conditional logic
+- [ ] **Code cleanup**
+  - [ ] Remove any unused imports
+  - [ ] Remove commented-out code
+  - [ ] Remove TODO comments that were addressed
+  - [ ] Clean up any temporary code
 
-### Slice 17: Final Code Review
+### Slice 5.4: Pre-Deployment Verification
 
-- [ ] **Self-review checklist**
-  - [ ] All features follow standardized structure
-  - [ ] All business logic is in services
-  - [ ] All server actions are thin wrappers
-  - [ ] No direct repository calls from server actions
-  - [ ] All services have comprehensive tests
-  - [ ] Documentation is complete and accurate
+- [ ] **Final quality checks**
+  - [ ] Run: `pnpm run code-check` (if exists)
+  - [ ] Run: `pnpm typecheck`
+  - [ ] Run: `pnpm lint`
+  - [ ] Run: `pnpm test`
+  - [ ] Run: `pnpm build`
+  - [ ] Verify all pass
 
-- [ ] **Prepare for PR**
-  - [ ] Create comprehensive PR description
-  - [ ] List all changed features
-  - [ ] Include migration notes
-  - [ ] Add before/after code examples
-  - [ ] Reference architectural decisions
+- [ ] **Manual testing in dev**
+  - [ ] Test all critical features one final time
+  - [ ] Check for console errors
+  - [ ] Verify no regressions
+  - [ ] Test in different browsers (Chrome, Firefox, Safari)
+  - [ ] Test responsive layouts
 
-### Slice 18: Deployment Preparation
-
-- [ ] **Pre-deployment verification**
-  - [ ] Run all quality checks: `pnpmrun code-check`
-  - [ ] Run full test suite one final time
-  - [ ] Verify build succeeds
-  - [ ] Check no console errors in dev
-  - [ ] Review Vercel deployment configuration
+### Slice 5.5: Deployment Preparation
 
 - [ ] **Create rollback plan**
   - [ ] Document rollback procedure
+  - [ ] Tag current state before deployment
   - [ ] Create rollback script if needed
-  - [ ] Tag current production version
-  - [ ] Prepare rollback communication plan
+  - [ ] Test rollback process
 
-- [ ] **Monitor post-deployment**
-  - [ ] Set up alerts for error rates
-  - [ ] Monitor Vercel function logs
-  - [ ] Check response time metrics
-  - [ ] Monitor user feedback channels
+- [ ] **Deployment checklist**
+  - [ ] Verify environment variables are set
+  - [ ] Check database migration status
+  - [ ] Verify Vercel configuration
+  - [ ] Review deployment settings
+  - [ ] Plan deployment timing (low-traffic period)
 
----
-
-## Notes
-
-### Vertical Slicing Strategy
-
-Each slice represents a complete, testable increment:
-
-- **Phase 1 (Slices 1-2):** Foundation - documentation and infrastructure
-- **Phase 2 (Slices 3-5):** Core services - reusable business logic layer
-- **Phase 3 (Slices 6-11):** Feature migration - incremental adoption
-- **Phase 4 (Slices 12-14):** Quality assurance - comprehensive verification
-- **Phase 5 (Slices 15-18):** Final verification - production readiness
-
-### Rollback Strategy
-
-- Each feature migration is independent
-- Can rollback individual features without affecting others
-- Service layer is additive, not destructive
-- Old repository calls can be restored by reverting PR
-
-### Implementation Philosophy
-
-**After each numbered slice:**
-
-- Application remains in runnable state
-- Tests pass (may be WIP for current slice)
-- No breaking changes to existing features
-- Documentation reflects current state
-
-### Success Criteria
-
-**Per Feature:**
-
-- ✅ Uses service layer for all business logic
-- ✅ Server actions are thin wrappers
-- ✅ Tests updated and passing
-- ✅ Documentation updated
-
-**Overall:**
-
-- ✅ All services have >90% test coverage
-- ✅ Overall codebase has >80% test coverage
-- ✅ Zero TypeScript errors
-- ✅ Zero linting errors
-- ✅ Build succeeds
-- ✅ All features working in production
+- [ ] **Post-deployment monitoring plan**
+  - [ ] Set up error tracking (if not already)
+  - [ ] Prepare monitoring dashboard
+  - [ ] Document what to monitor:
+    - Error rates
+    - Response times
+    - Database query performance
+    - User-reported issues
+  - [ ] Create alert thresholds
 
 ---
 
 ## Progress Tracking
 
-**Week 1:** Foundation ⬜
-**Week 2:** Core Services (Library, Game) ⬜
-**Week 3:** Core Services (Review, User, Journal) ⬜
-**Week 4:** Feature Migration (High Priority) ⬜
-**Week 5:** Feature Migration (Medium Priority) ⬜
-**Week 6:** Feature Migration (Remaining) ⬜
-**Week 7-8:** Testing & Deployment ⬜
+**Week 1**: Feature Standardization ⬜
+**Week 2**: Architecture Documentation Updates ⬜
+**Week 3**: Simple Service Migrations (3 features) ⬜
+**Week 4-5**: Medium Service Migrations (3 features) ⬜
+**Week 6**: Complex Service Migrations (2 features) ⬜
+**Week 7**: Pattern 2 Decisions & Final Migrations (4 features) ⬜
+**Week 8**: Testing & Quality Assurance ⬜
+**Week 9**: Documentation & Deployment Prep ⬜
 
-**Overall Progress:** 0% (0/18 slices completed)
+**Overall Progress:** 0% (0/28 slices completed)
+
+**Phase Progress:**
+
+- Phase 0 (Standardization): 0/6 slices ⬜
+- Phase 1 (Updated Docs): 0/2 slices ⬜
+- Phase 2 (Services): ✅ Complete (from original plan)
+- Phase 3 (Migration): 0/12 features ⬜
+- Phase 4 (Testing): 0/4 slices ⬜
+- Phase 5 (Docs & Deploy): 0/5 slices ⬜
 
 ---
 
-**Next Action:** Start with Slice 1 - Update architecture documentation
+## Key Changes from Original Plan
+
+1. **Added Phase 0**: Feature structure standardization before service migration
+2. **Flatten `manage-library-item`**: Consolidate nested sub-features
+3. **Two-Pattern Architecture**: Acknowledged and documented Server Actions + React Query
+4. **Realistic Estimates**: 90-120 hours instead of 80-110 hours
+5. **Feature Prioritization**: Start with simple features, build to complex
+6. **Pattern 2 Integration**: `view-imported-games` and potentially `view-collection`
+7. **Better Testing**: More emphasis on integration and E2E testing
+
+---
+
+## Success Criteria
+
+### Structural Standardization ✅
+
+- [ ] All features use `/lib/validation.ts` for validation (NOT `/validation/`)
+- [ ] No nested sub-features (flatten `manage-library-item`)
+- [ ] Types in `types.ts` files (flatten `/types/` directories unless >5 definitions)
+- [ ] Consistent directory structure across all features
+- [ ] Automated compliance checker in place
+
+### Service Layer Integration ✅
+
+- [ ] Zero direct repository imports in server actions
+- [ ] Zero direct repository imports in API routes
+- [ ] All server actions call service layer
+- [ ] All API routes call service layer
+- [ ] Services have >90% test coverage
+
+### Architecture Clarity ✅
+
+- [ ] Clear documentation of Pattern 1 (Server Actions)
+- [ ] Clear documentation of Pattern 2 (API Routes + React Query)
+- [ ] Decision tree for pattern selection exists
+- [ ] Both patterns demonstrated in codebase
+- [ ] Updated migration guide for both patterns
+
+### Code Quality ✅
+
+- [ ] All features have passing tests
+- [ ] `pnpm typecheck` passes (zero errors)
+- [ ] `pnpm lint` passes (zero errors)
+- [ ] `pnpm test` passes with >80% coverage
+- [ ] `pnpm build` succeeds (zero errors)
+
+### Feature Quality ✅
+
+- [ ] All 12 features migrated to service layer
+- [ ] All features tested and working
+- [ ] No regressions in functionality
+- [ ] Performance maintained or improved
+- [ ] All documentation updated
+
+---
+
+**Next Action**: Begin Phase 0, Slice 0.1 - Create standardization guidelines
+
+**Document Owner**: Architecture Team
+**Last Updated**: 2025-10-08
+**Status**: Ready for Implementation
