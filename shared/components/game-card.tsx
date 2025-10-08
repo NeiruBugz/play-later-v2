@@ -61,7 +61,6 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
           className={`object-cover transition-transform duration-500 ${isHovered ? "scale-110" : "scale-100"}`}
         />
 
-        {/* Status Badge */}
         <div className="absolute left-2 top-2">
           <Badge
             variant="secondary"
@@ -71,7 +70,6 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
           </Badge>
         </div>
 
-        {/* Multiple Platforms Indicator */}
         {platforms && platforms.length > 1 && (
           <div className="absolute right-2 top-2">
             <Badge variant="secondary" className="text-xs">
@@ -80,10 +78,8 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
           </div>
         )}
 
-        {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-        {/* Hover Actions */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Button variant="secondary" size="sm" asChild>
             <Link href={getGameUrl(game.id)}>View Details</Link>
@@ -110,15 +106,12 @@ export function GameCard({ game, platforms, currentPlatform }: GameCardProps) {
           </Tooltip>
         </TooltipProvider>
 
-        {/* Platform Info */}
         {primaryPlatform?.platform && (
           <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
             {normalizeString(primaryPlatform.platform)}
           </p>
         )}
       </CardHeader>
-
-      {/* Footer only visible on non-hover for cleaner look */}
     </Card>
   );
 }

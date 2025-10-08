@@ -13,7 +13,13 @@ import { importToApplication } from "@/features/view-imported-games/server-actio
 import { Heading } from "@/shared/components/typography";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import { Card, CardHeader } from "@/shared/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
 import { cn, getSteamGameImageUrl } from "@/shared/lib";
 
 type ImportedGame = {
@@ -55,7 +61,7 @@ function getImageUrl(game: ImportedGame): string | null {
       game.storefrontGameId,
       game.img_icon_url,
       game.img_logo_url,
-      "CAPSULE_616"
+      "LIBRARY_600"
     );
   }
 
@@ -63,6 +69,7 @@ function getImageUrl(game: ImportedGame): string | null {
 }
 
 function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imported, setImported] = useState(false);
   const [, startTransition] = useTransition();
@@ -100,20 +107,28 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
   const isDisabled = !game.storefrontGameId || imported || isExecuting;
 
   return (
-    <Card className="group h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
-      <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+    <Card
+      className="group h-full overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+      onMouseEnter={() => {
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+      }}
+    >
+      <div className="relative aspect-[3/4] overflow-hidden">
         {imageUrl && !imageError ? (
           <Image
             src={imageUrl}
             alt={game.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className={`object-cover transition-transform duration-500 ${isHovered ? "scale-110" : "scale-100"}`}
             onError={() => {
               setImageError(true);
             }}
           />
         ) : (
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full items-center justify-center bg-muted">
             <div className="text-center text-muted-foreground">
               <div className="mb-2 text-4xl">🎮</div>
               <p className="text-sm">No image</p>
@@ -129,43 +144,33 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
               storefrontColors[game.storefront]
             )}
           >
+            <span className="mr-1">{storefrontIcons[game.storefront]}</span>
             {storefrontLabels[game.storefront]}
           </Badge>
         </div>
 
-        {game.playtime && game.playtime > 0 && (
+        {game.playtime && game.playtime > 0 ? (
           <div className="absolute right-2 top-2">
             <Badge variant="secondary" className="text-xs">
               {minutesToHours(game.playtime)} h.
             </Badge>
           </div>
-        )}
+        ) : null}
 
         {imported && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-white">
-              <Check className="size-4" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white shadow-lg">
+              <Check className="size-5" />
               <span className="text-sm font-medium">Added to Collection</span>
             </div>
           </div>
         )}
-      </div>
 
-      <CardHeader className="p-3 pb-2">
-        <Heading
-          level={3}
-          size="sm"
-          className="line-clamp-2 text-sm font-medium leading-tight"
-          title={game.name}
-        >
-          {game.name}
-        </Heading>
-      </CardHeader>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-      <CardContent className="p-3 pt-0">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          {storefrontIcons[game.storefront]}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <Button
+            variant="secondary"
             size="sm"
             onClick={handleAddToCollection}
             disabled={isDisabled}
@@ -176,20 +181,44 @@ function ImportedGameCard({ game, onImportSuccess }: ImportedGameCardProps) {
           >
             {isExecuting ? (
               <>
-                <Loader2 className="mr-2 size-3 animate-spin" />
+                <Loader2 className="mr-2 size-4 animate-spin" />
                 Adding...
               </>
             ) : imported ? (
               <>
-                <Check className="mr-2 size-3" />
+                <Check className="mr-2 size-4" />
                 Added
               </>
             ) : (
-              "Add to collection"
+              "Add to Collection"
             )}
           </Button>
         </div>
-      </CardContent>
+      </div>
+
+      <CardHeader className="flex-1 p-3 pb-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Heading
+                level={3}
+                size="sm"
+                className="line-clamp-2 cursor-help text-sm font-medium leading-tight"
+                title={game.name}
+              >
+                {game.name}
+              </Heading>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{game.name}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+          {storefrontLabels[game.storefront]}
+        </p>
+      </CardHeader>
     </Card>
   );
 }

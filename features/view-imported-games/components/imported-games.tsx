@@ -2,17 +2,9 @@
 
 import { type Storefront } from "@prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useOptimistic,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { useCallback, useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-// no-op
 import {
   GridSkeleton,
   ListSearchInput,
@@ -21,49 +13,23 @@ import {
 } from "@/shared/components";
 import { Heading } from "@/shared/components/typography";
 
-import { getImportedGames } from "../server-actions/get-imported-games";
+import {
+  useImportedGames,
+  type ImportedGame,
+} from "../hooks/use-imported-games";
 import { ImportedGameCard } from "./imported-game-card";
 import {
   ImportedGamesFilterPanel,
   type ImportedGamesFilters as FiltersType,
 } from "./imported-games-filter-panel";
 
-type ImportedGame = {
-  id: string;
-  name: string;
-  storefront: Storefront;
-  storefrontGameId: string | null;
-  playtime: number | null;
-  img_icon_url: string | null;
-  img_logo_url: string | null;
-};
-
 type ImportedGamesProps = {
-  initialGames: ImportedGame[];
-  initialTotalGames: number;
-  initialPage?: number;
   limit?: number;
 };
 
 type OptimisticAction =
   | { type: "REMOVE_GAME"; gameId: string }
   | { type: "RESET" };
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-}
 
 function optimisticReducer(
   state: ImportedGame[],
@@ -79,14 +45,7 @@ function optimisticReducer(
   }
 }
 
-// Use shared grid skeleton for consistency
-
-export function ImportedGames({
-  initialGames,
-  initialTotalGames,
-  initialPage = 1,
-  limit = 24,
-}: ImportedGamesProps) {
+export function ImportedGames({ limit = 24 }: ImportedGamesProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -98,20 +57,24 @@ export function ImportedGames({
       (searchParams.get("sortOrder") as FiltersType["sortOrder"]) || "asc",
   });
 
-  const [games, setGames] = useState(initialGames);
-  const [totalGames, setTotalGames] = useState(initialTotalGames);
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [isPending, startTransition] = useTransition();
-  const [isSearchPending, startSearchTransition] = useTransition();
+  const currentPage = Number(searchParams.get("page")) || 1;
 
+  const { data, isLoading, isFetching, error } = useImportedGames({
+    page: currentPage,
+    limit,
+    search: filters.search || undefined,
+    storefront: filters.storefront,
+    sortBy: filters.sortBy,
+    sortOrder: filters.sortOrder,
+  });
+
+  console.log({ filters });
+
+  const [isPending, startTransition] = useTransition();
   const [optimisticGames, addOptimisticUpdate] = useOptimistic(
-    games,
+    data?.games ?? [],
     optimisticReducer
   );
-
-  const debouncedSearch = useDebounce(filters.search, 300);
-  const lastSearchRef = useRef(filters.search);
-  const lastServerSearchRef = useRef("");
 
   const updateURL = useCallback(
     (newFilters: FiltersType, page: number = 1) => {
@@ -131,96 +94,54 @@ export function ImportedGames({
     [router]
   );
 
-  const loadGames = useCallback(
-    async (
-      page: number = 1,
-      filtersToUse: FiltersType,
-      isSearchOnly = false
-    ) => {
-      const transition = isSearchOnly ? startSearchTransition : startTransition;
-
-      transition(async () => {
-        try {
-          const result = await getImportedGames({
-            page,
-            limit,
-            search: filtersToUse.search || undefined,
-            storefront:
-              filtersToUse.storefront !== "ALL"
-                ? filtersToUse.storefront
-                : undefined,
-            sortBy: filtersToUse.sortBy,
-            sortOrder: filtersToUse.sortOrder,
-          });
-
-          if (result?.data) {
-            setGames(result.data.games);
-            setTotalGames(result.data.totalGames);
-            setCurrentPage(page);
-            lastSearchRef.current = filtersToUse.search;
-            lastServerSearchRef.current = filtersToUse.search;
-          }
-        } catch (error) {
-          toast.error("Failed to load imported games", {
-            description:
-              error instanceof Error ? error.message : "Server error",
-          });
-        }
-      });
-    },
-    [limit]
-  );
-
   const handleFiltersChange = (newFilters: FiltersType) => {
     setFilters(newFilters);
-
-    const searchChanged = newFilters.search !== filters.search;
-    const otherFiltersChanged =
-      newFilters.storefront !== filters.storefront ||
-      newFilters.sortBy !== filters.sortBy ||
-      newFilters.sortOrder !== filters.sortOrder;
-
-    if (otherFiltersChanged) {
-      updateURL(newFilters, 1);
-      loadGames(1, newFilters);
-    } else if (searchChanged) {
-      updateURL(newFilters, 1);
-    }
+    updateURL(newFilters, 1);
   };
 
-  const handleImportSuccess = useCallback(
-    (importedGameId: string) => {
-      startTransition(() => {
-        addOptimisticUpdate({ type: "REMOVE_GAME", gameId: importedGameId });
-      });
+  const handleImportSuccess = (importedGameId: string) => {
+    startTransition(() => {
+      addOptimisticUpdate({ type: "REMOVE_GAME", gameId: importedGameId });
+    });
+  };
 
-      setTimeout(() => {
-        const currentFilters = { ...filters, search: debouncedSearch };
-        loadGames(currentPage, currentFilters);
-      }, 500);
-    },
-    [addOptimisticUpdate, filters, debouncedSearch, loadGames, currentPage]
-  );
+  const handleSearchApply = () => {
+    const search = searchParams.get("search");
+    if (!search) return;
+    updateURL({ ...filters, search }, 1);
+  };
 
-  useEffect(() => {
-    if (debouncedSearch !== lastSearchRef.current) {
-      const filtersWithDebouncedSearch = {
-        ...filters,
-        search: debouncedSearch,
-      };
+  if (error) {
+    toast.error("Failed to load imported games", {
+      description: error.message,
+    });
+  }
 
-      if (debouncedSearch !== lastServerSearchRef.current) {
-        loadGames(1, filtersWithDebouncedSearch, true);
-      }
-    }
-  }, [debouncedSearch, filters, loadGames]);
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Toolbar
+          searchSlot={
+            <ListSearchInput placeholder="Search imported games..." />
+          }
+          filtersPanel={
+            <ImportedGamesFilterPanel
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+            />
+          }
+          resultsText="Loading..."
+        />
+        <GridSkeleton count={limit} />
+      </div>
+    );
+  }
 
-  // Removed unused loadPage and totalPages - pagination is handled by PaginationControls component
-
-  // Use optimistic games for removal, but regular games for search to avoid conflicts
+  const totalGames = data?.totalGames ?? 0;
   const displayGames = optimisticGames;
 
-  if (displayGames.length === 0 && !isPending && !isSearchPending) {
+  // Empty state
+  if (displayGames.length === 0 && !isFetching) {
     const hasActiveFilters = filters.search || filters.storefront !== "ALL";
 
     return (
@@ -235,7 +156,7 @@ export function ImportedGames({
               onFiltersChange={handleFiltersChange}
             />
           }
-          resultsText={`${initialTotalGames} games`}
+          resultsText={`${totalGames} games`}
         />
 
         <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -265,11 +186,7 @@ export function ImportedGames({
             onFiltersChange={handleFiltersChange}
           />
         }
-        resultsText={
-          totalGames === initialTotalGames
-            ? `${totalGames} games`
-            : `${totalGames} of ${initialTotalGames} games`
-        }
+        resultsText={`${totalGames} games`}
         hasActiveFilters={
           !!filters.search ||
           filters.storefront !== "ALL" ||
@@ -284,7 +201,7 @@ export function ImportedGames({
       />
 
       <div className="relative">
-        {isPending && !isSearchPending && (
+        {isFetching && !isPending && (
           <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-sm">
             <GridSkeleton count={10} />
           </div>
@@ -292,7 +209,7 @@ export function ImportedGames({
 
         <div
           className={`grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ${
-            isSearchPending ? "opacity-70 transition-opacity duration-200" : ""
+            isFetching ? "opacity-70 transition-opacity duration-200" : ""
           }`}
         >
           {displayGames.map((game) => (
