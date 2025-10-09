@@ -2,24 +2,156 @@
   {
     "id": 1234,
     "name": "Test Game 1234",
-    "summary": "A test game for fixtures.",
-    "aggregated_rating": 82.1,
-    "cover": { "image_id": "co_test_1234" },
-    "genres": [{ "name": "Action" }],
-    "screenshots": [{ "image_id": "sc_test_1" }],
+    "summary": "An epic action-adventure game featuring stunning visuals, deep combat mechanics, and an engaging story. Players will explore vast open worlds, defeat challenging bosses, and uncover ancient mysteries.",
+    "aggregated_rating": 88.5,
+    "cover": {
+      "image_id": "co_test_1234",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co_test_1234.jpg"
+    },
+    "genres": [
+      { "id": 12, "name": "Action" },
+      { "id": 31, "name": "Adventure" },
+      { "id": 5, "name": "RPG" }
+    ],
+    "screenshots": [
+      {
+        "id": 1,
+        "image_id": "sc_test_1",
+        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_1.jpg"
+      },
+      {
+        "id": 2,
+        "image_id": "sc_test_2",
+        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_2.jpg"
+      },
+      {
+        "id": 3,
+        "image_id": "sc_test_3",
+        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_3.jpg"
+      }
+    ],
     "release_dates": [
-      { "platform": { "name": "PC" }, "human": "Jan 01, 2020" }
+      {
+        "id": 1001,
+        "human": "Mar 15, 2020",
+        "platform": {
+          "id": 6,
+          "name": "PC (Microsoft Windows)",
+          "human": "Mar 15, 2020"
+        }
+      },
+      {
+        "id": 1002,
+        "human": "Apr 02, 2020",
+        "platform": {
+          "id": 48,
+          "name": "PlayStation 4",
+          "human": "Apr 02, 2020"
+        }
+      },
+      {
+        "id": 1003,
+        "human": "Apr 02, 2020",
+        "platform": { "id": 49, "name": "Xbox One", "human": "Apr 02, 2020" }
+      }
     ],
     "involved_companies": [
       {
+        "id": 501,
         "developer": true,
         "publisher": false,
-        "company": { "name": "Test Studio" }
+        "company": { "id": 70, "name": "Test Studio Inc." }
+      },
+      {
+        "id": 502,
+        "developer": false,
+        "publisher": true,
+        "company": { "id": 71, "name": "Big Publisher Games" }
       }
     ],
-    "game_modes": [{ "name": "Single player" }],
+    "game_modes": [
+      { "id": 1, "name": "Single player" },
+      { "id": 2, "name": "Multiplayer" },
+      { "id": 3, "name": "Co-operative" }
+    ],
+    "game_engines": [{ "id": 6, "name": "Unreal Engine 5" }],
+    "player_perspectives": [{ "id": 1, "name": "Third person" }],
+    "themes": [
+      { "id": 17, "name": "Fantasy" },
+      { "id": 38, "name": "Open world" }
+    ],
     "websites": [
-      { "url": "https://example.com", "category": 1, "trusted": true }
-    ]
+      {
+        "id": 1,
+        "url": "https://testgame.example.com",
+        "category": 1,
+        "trusted": true
+      },
+      {
+        "id": 2,
+        "url": "https://store.steampowered.com/app/1234",
+        "category": 13,
+        "trusted": true
+      },
+      {
+        "id": 3,
+        "url": "https://twitter.com/testgame",
+        "category": 5,
+        "trusted": true
+      }
+    ],
+    "external_games": [
+      {
+        "id": 1,
+        "category": 1,
+        "name": "Steam",
+        "url": "https://store.steampowered.com/app/1234"
+      },
+      {
+        "id": 2,
+        "category": 26,
+        "name": "GOG",
+        "url": "https://www.gog.com/game/test_game_1234"
+      }
+    ],
+    "similar_games": [
+      {
+        "id": 5000,
+        "name": "Similar Adventure Game",
+        "cover": {
+          "image_id": "co_sim_1",
+          "url": "//images.igdb.com/igdb/image/upload/t_thumb/co_sim_1.jpg"
+        },
+        "release_dates": [
+          {
+            "human": "2019",
+            "id": 5001,
+            "platform": { "id": 6, "name": "PC", "human": "2019" }
+          }
+        ],
+        "first_release_date": 1546300800
+      },
+      {
+        "id": 5001,
+        "name": "Another RPG",
+        "cover": {
+          "image_id": "co_sim_2",
+          "url": "//images.igdb.com/igdb/image/upload/t_thumb/co_sim_2.jpg"
+        },
+        "release_dates": [
+          {
+            "human": "2021",
+            "id": 5002,
+            "platform": { "id": 6, "name": "PC", "human": "2021" }
+          }
+        ],
+        "first_release_date": 1609459200
+      }
+    ],
+    "franchises": [100, 101],
+    "franchise": {
+      "id": 100,
+      "name": "Test Game Franchise"
+    }
   }
 ]

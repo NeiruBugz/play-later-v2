@@ -1,6 +1,33 @@
 [
   {
     "id": 1234,
-    "screenshots": [{ "image_id": "sc_1" }, { "image_id": "sc_2" }]
+    "name": "Test Game 1234",
+    "screenshots": [
+      {
+        "id": 1,
+        "image_id": "sc_test_1",
+        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_1.jpg"
+      },
+      {
+        "id": 2,
+        "image_id": "sc_test_2",
+        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_2.jpg"
+      },
+      {
+        "id": 3,
+        "image_id": "sc_test_3",
+        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_3.jpg"
+      },
+      {
+        "id": 4,
+        "image_id": "sc_test_4",
+        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_4.jpg"
+      },
+      {
+        "id": 5,
+        "image_id": "sc_test_5",
+        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_5.jpg"
+      }
+    ]
   }
 ]

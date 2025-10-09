@@ -9,6 +9,10 @@ export type FetchResponseSpec = {
   json?: JsonLike;
 };
 
+/**
+ * Mock fetch with a sequence of responses
+ * Useful for testing multiple fetch calls
+ */
 export function mockFetchSequence(sequence: FetchResponseSpec[]) {
   const mock = vi.fn();
   sequence.forEach((spec) => {
@@ -23,21 +27,37 @@ export function mockFetchSequence(sequence: FetchResponseSpec[]) {
   return mock;
 }
 
-export function mockFetchSuccess(json: JsonLike) {
-  return mockFetchSequence([{ ok: true, json }]);
+/**
+ * Mock successful fetch with provided data
+ * @param data - The data to return from the mocked fetch
+ */
+export function mockFetchSuccess<T>(data: T) {
+  globalThis.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    statusText: "OK",
+    json: async () => data,
+  });
 }
 
-export function mockFetchError(
-  statusText = "Internal Server Error",
-  status = 500
-) {
-  return mockFetchSequence([{ ok: false, statusText, status }]);
+/**
+ * Mock failed fetch with error status
+ * @param status - HTTP status code (default: 500)
+ * @param statusText - HTTP status text (default: "Internal Server Error")
+ */
+export function mockFetchError(status: number, statusText: string) {
+  globalThis.fetch = vi.fn().mockResolvedValue({
+    ok: false,
+    status,
+    statusText,
+    json: async () => null,
+  });
 }
 
-export function mockTokenFetchFailure(
-  statusText = "Unauthorized",
-  status = 401
-) {
-  // First call fails for token; subsequent calls will not be used
-  return mockFetchSequence([{ ok: false, statusText, status }]);
+/**
+ * Mock token fetch failure (network error)
+ * Used to test token retrieval errors
+ */
+export function mockTokenFetchFailure() {
+  globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 }

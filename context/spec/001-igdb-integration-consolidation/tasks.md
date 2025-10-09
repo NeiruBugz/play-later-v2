@@ -27,20 +27,20 @@ This task list breaks down the IGDB integration consolidation into **17 vertical
 
 Before migrating methods, set up testing infrastructure and remove circular dependency.
 
-- [ ] **Slice 0: Prepare testing infrastructure and remove circular dependency**
-  - [ ] Create `test/fixtures/igdb/` directory
-  - [ ] Create test fixture files:
-    - [ ] `top-rated-games.json`
-    - [ ] `game-details-1234.json`
-    - [ ] `game-search-zelda.json`
-    - [ ] `steam-lookup-success.json`
-    - [ ] `empty-response.json`
-    - [ ] `token-response.json`
-    - [ ] `screenshots-response.json`
-    - [ ] `similar-games-response.json`
-  - [ ] Create `test/utils/igdb-mocks.ts` with mock utilities (`mockFetchSuccess`, `mockFetchError`, `mockTokenFetchFailure`)
-  - [ ] Remove circular dependency: Delete `import igdbApi from "@/shared/lib/igdb"` from [data-access-layer/services/igdb/igdb-service.ts](../../../data-access-layer/services/igdb/igdb-service.ts) (line 5)
-  - [ ] Verify the app still builds: Run `pnpm build`
+- [x] **Slice 0: Prepare testing infrastructure and remove circular dependency**
+  - [x] Create `test/fixtures/igdb/` directory
+  - [x] Create test fixture files:
+    - [x] `top-rated-games.json`
+    - [x] `game-details-1234.json`
+    - [x] `game-search-zelda.json`
+    - [x] `steam-lookup-success.json`
+    - [x] `empty-response.json`
+    - [x] `token-response.json`
+    - [x] `screenshots-response.json`
+    - [x] `similar-games-response.json`
+  - [x] Create `test/utils/igdb-mocks.ts` with mock utilities (`mockFetchSuccess`, `mockFetchError`, `mockTokenFetchFailure`)
+  - [x] Remove circular dependency: Delete `import igdbApi from "@/shared/lib/igdb"` from [data-access-layer/services/igdb/igdb-service.ts](../../../data-access-layer/services/igdb/igdb-service.ts) (line 5)
+  - [x] Verify the app still builds: Run `pnpm build`
 
 ---
 

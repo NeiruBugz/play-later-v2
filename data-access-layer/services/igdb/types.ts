@@ -1,6 +1,6 @@
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
-import type { BaseService, ServiceResponse } from "../types";
+import type { BaseService, ServiceResult } from "../types";
 
 // IGDB Service specific types
 export interface GameSearchParams {
@@ -28,20 +28,14 @@ export interface PlatformsResult {
   platforms: Array<{ id: number; name: string }>;
 }
 
-export interface GameSearchService extends BaseService {
-  searchGames(
-    params: GameSearchParams
-  ): Promise<ServiceResponse<GameSearchResult>>;
-}
-
 export interface IgdbService extends BaseService {
-  searchGames(
+  searchGamesByName(
     params: GameSearchParams
-  ): Promise<ServiceResponse<GameSearchResult>>;
+  ): Promise<ServiceResult<GameSearchResult>>;
 
   getGameDetails(
     params: GameDetailsParams
-  ): Promise<ServiceResponse<GameDetailsResult>>;
+  ): Promise<ServiceResult<GameDetailsResult>>;
 
-  getPlatforms(): Promise<ServiceResponse<PlatformsResult>>;
+  getPlatforms(): Promise<ServiceResult<PlatformsResult>>;
 }

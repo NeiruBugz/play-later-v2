@@ -32,11 +32,12 @@ const igdbApi = {
 
   async fetchToken(): Promise<TwitchTokenResponse | undefined> {
     try {
-      const res = await globalThis.fetch(TOKEN_URL, {
+      const res = await fetch(TOKEN_URL, {
         cache: "no-store",
         method: "POST",
       });
       if (!res.ok) {
+        console.log(res);
         throw new Error(`Failed to fetch token: ${res.statusText}`);
       }
       const token = (await res.json()) as unknown as TwitchTokenResponse;
@@ -68,7 +69,7 @@ const igdbApi = {
         return undefined;
       }
 
-      const response = await globalThis.fetch(`${API_URL}${options.resource}`, {
+      const response = await fetch(`${API_URL}${options.resource}`, {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${accessToken}`,

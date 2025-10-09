@@ -1,14 +1,92 @@
 [
   {
-    "id": 1,
+    "id": 1942,
     "name": "The Legend of Zelda: Breath of the Wild",
-    "cover": { "image_id": "zelda_cover" },
+    "cover": {
+      "image_id": "co1wyc",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1wyc.jpg"
+    },
     "aggregated_rating": 97.5
   },
   {
-    "id": 2,
+    "id": 119171,
     "name": "Elden Ring",
-    "cover": { "image_id": "elden_ring_cover" },
-    "aggregated_rating": 95.0
+    "cover": {
+      "image_id": "co4jni",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co4jni.jpg"
+    },
+    "aggregated_rating": 96.2
+  },
+  {
+    "id": 1020,
+    "name": "Grand Theft Auto V",
+    "cover": {
+      "image_id": "co1r8z",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1r8z.jpg"
+    },
+    "aggregated_rating": 95.8
+  },
+  {
+    "id": 1074,
+    "name": "The Witcher 3: Wild Hunt",
+    "cover": {
+      "image_id": "co1wyy",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1wyy.jpg"
+    },
+    "aggregated_rating": 95.3
+  },
+  {
+    "id": 472,
+    "name": "The Elder Scrolls V: Skyrim",
+    "cover": {
+      "image_id": "co1tx7",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1tx7.jpg"
+    },
+    "aggregated_rating": 94.7
+  },
+  {
+    "id": 121,
+    "name": "Red Dead Redemption 2",
+    "cover": {
+      "image_id": "co1q1f",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1q1f.jpg"
+    },
+    "aggregated_rating": 94.5
+  },
+  {
+    "id": 1877,
+    "name": "Cyberpunk 2077",
+    "cover": {
+      "image_id": "co2vbo",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co2vbo.jpg"
+    },
+    "aggregated_rating": 93.1
+  },
+  {
+    "id": 1036,
+    "name": "Baldur's Gate 3",
+    "cover": {
+      "image_id": "co6x0s",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co6x0s.jpg"
+    },
+    "aggregated_rating": 92.9
+  },
+  {
+    "id": 113,
+    "name": "God of War",
+    "cover": {
+      "image_id": "co1tmu",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1tmu.jpg"
+    },
+    "aggregated_rating": 91.8
+  },
+  {
+    "id": 25076,
+    "name": "Horizon Zero Dawn",
+    "cover": {
+      "image_id": "co1wy6",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1wy6.jpg"
+    },
+    "aggregated_rating": 90.4
   }
 ]

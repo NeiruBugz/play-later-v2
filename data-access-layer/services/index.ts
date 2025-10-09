@@ -33,12 +33,10 @@ export {
   type GameDetailsParams,
   type GameDetailsResult,
   type PlatformsResult,
-  type GameSearchService as GameSearchServiceInterface,
   type IgdbService as IgdbServiceInterface,
 } from "./igdb/types";
 
 export { IgdbService } from "./igdb/igdb-service";
-export { GameSearchService } from "./igdb/game-search-service";
 
 // ============================================================================
 // Collection Service (User Game Collection)

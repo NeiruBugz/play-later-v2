@@ -10,7 +10,7 @@ import {
   type SearchResponse,
 } from "@/shared/types";
 
-import { BaseService, type ServiceResponse } from "../types";
+import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import { SEARCH_RESULTS_LIMIT } from "./constants";
 import { QueryBuilder } from "./query-builder";
 import type {
@@ -34,9 +34,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
   private async requestTwitchToken() {
     try {
-      const res = await globalThis.fetch(TOKEN_URL, {
+      const res = await fetch(TOKEN_URL, {
         method: "POST",
       });
+
       if (!res.ok) {
         throw new Error(`Failed to fetch token: ${res.statusText}`);
       }
@@ -79,7 +80,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         return undefined;
       }
 
-      const response = await globalThis.fetch(`${API_URL}${options.resource}`, {
+      const response = await fetch(`${API_URL}${options.resource}`, {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -103,32 +104,32 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  async searchGames(
+  private buildSearchFilterConditions(
+    fields: Record<string, string | undefined>
+  ): string {
+    return Object.entries(fields)
+      .filter(([, value]) => Boolean(value))
+      .map(([key, value]) => {
+        const fieldName = key === "platform" ? "platforms" : key;
+        return `${fieldName} = (${value})`;
+      })
+      .join(" & ");
+  }
+
+  async searchGamesByName(
     params: GameSearchParams
-  ): Promise<ServiceResponse<GameSearchResult>> {
+  ): Promise<ServiceResult<GameSearchResult>> {
     try {
       if (!params.name || params.name.trim() === "") {
-        return this.createErrorResponse({
-          message: "Game name is required for search",
-          code: "INVALID_INPUT",
-        });
+        return this.error(
+          "Game name is required for search",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
       }
 
-      let filters = "";
       const fields = params.fields ?? {};
-      const filterConditions = Object.entries(fields)
-        .map(([key, value]) => {
-          if (!value) return null;
-          const fieldName = key === "platform" ? "platforms" : key;
-          // value can be a comma-separated list already
-          return `${fieldName} = (${value})`;
-        })
-        .filter((v): v is string => v !== null)
-        .join(" & ");
-
-      if (filterConditions) {
-        filters = ` & ${filterConditions}`;
-      }
+      const filterConditions = this.buildSearchFilterConditions(fields);
+      const filters = filterConditions ? ` & ${filterConditions}` : "";
 
       const query = this.queryBuilder
         .fields([
@@ -150,30 +151,27 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
 
       if (!games) {
-        return this.createErrorResponse({
-          message: "Failed to search games",
-          code: "SEARCH_FAILED",
-        });
+        return this.error("Failed to find games", ServiceErrorCode.NOT_FOUND);
       }
 
-      return this.createSuccessResponse({
+      return this.success({
         games,
         count: games.length,
       });
     } catch (error) {
-      return this.handleError(error, "Failed to search games");
+      return this.handleError(error, "Failed to find games");
     }
   }
 
   async getGameDetails(
     params: GameDetailsParams
-  ): Promise<ServiceResponse<GameDetailsResult>> {
+  ): Promise<ServiceResult<GameDetailsResult>> {
     try {
       if (!params.gameId || params.gameId <= 0) {
-        return this.createErrorResponse({
-          message: "Valid game ID is required",
-          code: "INVALID_INPUT",
-        });
+        return this.error(
+          "Valid game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
       }
 
       const { gameId } = params;
@@ -219,9 +217,9 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/games",
       });
 
-      if (resultGame) {
-        return this.createSuccessResponse({
-          game: resultGame[0] ?? null,
+      if (resultGame && resultGame[0]) {
+        return this.success({
+          game: resultGame[0],
         });
       } else {
         throw new Error("Game not found");
@@ -231,7 +229,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  async getPlatforms(): Promise<ServiceResponse<PlatformsResult>> {
+  async getPlatforms(): Promise<ServiceResult<PlatformsResult>> {
     try {
       const query = this.queryBuilder.fields(["name"]).build();
 
@@ -243,13 +241,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
 
       if (!platforms) {
-        return this.createErrorResponse({
-          message: "Failed to fetch platforms",
-          code: "FETCH_FAILED",
-        });
+        return this.error(
+          "Failed to fetch platforms",
+          ServiceErrorCode.NOT_FOUND
+        );
       }
 
-      return this.createSuccessResponse({
+      return this.success({
         platforms,
       });
     } catch (error) {

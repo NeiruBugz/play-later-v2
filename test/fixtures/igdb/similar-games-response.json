@@ -1,9 +1,80 @@
 [
   {
     "id": 1234,
+    "name": "Test Game 1234",
     "similar_games": [
-      { "name": "Similar Game 1", "cover": { "image_id": "sim1" } },
-      { "name": "Similar Game 2", "cover": { "image_id": "sim2" } }
+      {
+        "id": 5000,
+        "name": "Similar Adventure Game",
+        "cover": {
+          "id": 2001,
+          "image_id": "co_sim_1",
+          "url": "//images.igdb.com/igdb/image/upload/t_thumb/co_sim_1.jpg"
+        },
+        "release_dates": [
+          {
+            "human": "2019",
+            "id": 5001,
+            "platform": { "id": 6, "name": "PC", "human": "2019" }
+          }
+        ],
+        "first_release_date": 1546300800
+      },
+      {
+        "id": 5001,
+        "name": "Another RPG",
+        "cover": {
+          "id": 2002,
+          "image_id": "co_sim_2",
+          "url": "//images.igdb.com/igdb/image/upload/t_thumb/co_sim_2.jpg"
+        },
+        "release_dates": [
+          {
+            "human": "2021",
+            "id": 5002,
+            "platform": { "id": 6, "name": "PC", "human": "2021" }
+          }
+        ],
+        "first_release_date": 1609459200
+      },
+      {
+        "id": 5002,
+        "name": "Epic Quest Chronicles",
+        "cover": {
+          "id": 2003,
+          "image_id": "co_sim_3",
+          "url": "//images.igdb.com/igdb/image/upload/t_thumb/co_sim_3.jpg"
+        },
+        "release_dates": [
+          {
+            "human": "2020",
+            "id": 5003,
+            "platform": { "id": 48, "name": "PlayStation 4", "human": "2020" }
+          }
+        ],
+        "first_release_date": 1577836800
+      },
+      {
+        "id": 5003,
+        "name": "Fantasy Legends",
+        "cover": {
+          "id": 2004,
+          "image_id": "co_sim_4",
+          "url": "//images.igdb.com/igdb/image/upload/t_thumb/co_sim_4.jpg"
+        },
+        "release_dates": [
+          {
+            "human": "2022",
+            "id": 5004,
+            "platform": {
+              "id": 130,
+              "name": "Nintendo Switch",
+              "human": "2022"
+            }
+          }
+        ],
+        "first_release_date": 1640995200
+      }
     ]
   }
 ]

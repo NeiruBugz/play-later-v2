@@ -1,14 +1,42 @@
 [
   {
-    "id": 500,
+    "id": 570,
     "name": "Dota 2",
+    "cover": {
+      "id": 1001,
+      "image_id": "co1rs7",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1rs7.jpg"
+    },
+    "first_release_date": 1373328000,
+    "summary": "A free-to-play multiplayer online battle arena (MOBA) game developed and published by Valve.",
+    "genres": [
+      { "id": 36, "name": "MOBA" },
+      { "id": 15, "name": "Strategy" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)" },
+      { "id": 3, "name": "Linux" },
+      { "id": 14, "name": "Mac" }
+    ],
     "external_games": [
       {
+        "id": 123456,
         "category": 1,
         "name": "Steam",
+        "uid": "570",
         "url": "https://store.steampowered.com/app/570"
       }
     ],
-    "cover": { "image_id": "dota2_cover" }
+    "release_dates": [
+      {
+        "id": 7890,
+        "human": "Jul 09, 2013",
+        "platform": {
+          "id": 6,
+          "name": "PC (Microsoft Windows)",
+          "human": "Jul 09, 2013"
+        }
+      }
+    ]
   }
 ]

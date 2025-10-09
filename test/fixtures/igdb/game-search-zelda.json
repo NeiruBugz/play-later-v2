@@ -1,20 +1,112 @@
 [
   {
-    "id": 102,
-    "name": "The Legend of Zelda: Ocarina of Time",
-    "cover": { "image_id": "zelda_oot_cover" },
-    "platforms": [{ "name": "Nintendo 64" }],
-    "release_dates": [{ "human": "1998" }],
-    "first_release_date": 912470400,
+    "id": 1942,
+    "name": "The Legend of Zelda: Breath of the Wild",
+    "cover": {
+      "image_id": "co1wyc",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1wyc.jpg"
+    },
+    "platforms": [
+      { "id": 130, "name": "Nintendo Switch" },
+      { "id": 41, "name": "Wii U" }
+    ],
+    "release_dates": [
+      {
+        "human": "Mar 03, 2017",
+        "id": 77256,
+        "platform": {
+          "id": 130,
+          "name": "Nintendo Switch",
+          "human": "Mar 03, 2017"
+        }
+      }
+    ],
+    "first_release_date": 1488499200,
     "category": 0
   },
   {
-    "id": 103,
+    "id": 1029,
+    "name": "The Legend of Zelda: Ocarina of Time",
+    "cover": {
+      "image_id": "co1r85",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1r85.jpg"
+    },
+    "platforms": [
+      { "id": 4, "name": "Nintendo 64" },
+      { "id": 5, "name": "GameCube" }
+    ],
+    "release_dates": [
+      {
+        "human": "Nov 21, 1998",
+        "id": 6789,
+        "platform": { "id": 4, "name": "Nintendo 64", "human": "Nov 21, 1998" }
+      }
+    ],
+    "first_release_date": 911606400,
+    "category": 0
+  },
+  {
+    "id": 1034,
     "name": "The Legend of Zelda: Majora's Mask",
-    "cover": { "image_id": "zelda_mm_cover" },
-    "platforms": [{ "name": "Nintendo 64" }],
-    "release_dates": [{ "human": "2000" }],
-    "first_release_date": 967680000,
+    "cover": {
+      "image_id": "co1r87",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1r87.jpg"
+    },
+    "platforms": [
+      { "id": 4, "name": "Nintendo 64" },
+      { "id": 37, "name": "Nintendo 3DS" }
+    ],
+    "release_dates": [
+      {
+        "human": "Oct 26, 2000",
+        "id": 6801,
+        "platform": { "id": 4, "name": "Nintendo 64", "human": "Oct 26, 2000" }
+      }
+    ],
+    "first_release_date": 972518400,
+    "category": 0
+  },
+  {
+    "id": 2909,
+    "name": "The Legend of Zelda: Twilight Princess",
+    "cover": {
+      "image_id": "co20s3",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co20s3.jpg"
+    },
+    "platforms": [
+      { "id": 5, "name": "Wii" },
+      { "id": 21, "name": "GameCube" }
+    ],
+    "release_dates": [
+      {
+        "human": "Nov 19, 2006",
+        "id": 17290,
+        "platform": { "id": 5, "name": "Wii", "human": "Nov 19, 2006" }
+      }
+    ],
+    "first_release_date": 1163894400,
+    "category": 0
+  },
+  {
+    "id": 127393,
+    "name": "The Legend of Zelda: Tears of the Kingdom",
+    "cover": {
+      "image_id": "co5vmg",
+      "url": "//images.igdb.com/igdb/image/upload/t_thumb/co5vmg.jpg"
+    },
+    "platforms": [{ "id": 130, "name": "Nintendo Switch" }],
+    "release_dates": [
+      {
+        "human": "May 12, 2023",
+        "id": 502385,
+        "platform": {
+          "id": 130,
+          "name": "Nintendo Switch",
+          "human": "May 12, 2023"
+        }
+      }
+    ],
+    "first_release_date": 1683849600,
     "category": 0
   }
 ]
