@@ -8,6 +8,10 @@ _This roadmap outlines our strategic direction based on customer needs and busin
 
 _The highest priority features that form the core foundation of SavePoint—enabling users to track their gaming library and begin journaling._
 
+- [ ] **Technical Foundation & Refactoring**
+  - [ ] **IGDB Integration Consolidation:** Refactor IGDB implementation to eliminate duplication between `shared/lib/igdb.ts` and `data-access-layer/services/igdb/igdb-service.ts`. Extract types to `igdb-api-types` package for unified type definitions. Deprecate legacy utility in favor of service layer pattern.
+  - [ ] **Vitest Configuration Restructure:** Refactor test setup to three-project architecture (unit/integration/components) with explicit naming conventions (`.unit.test.ts`, `.integration.test.ts`). Create separate setup files for each test type. Update existing tests to follow new structure.
+
 - [ ] **User Account Essentials**
   - [ ] **Google OAuth Sign-Up & Login:** Allow users to create an account and sign in using Google OAuth as the primary authentication method.
   - [ ] **Credentials-Based Login:** Provide email/password authentication as a secondary option, primarily for testing and development scenarios (E2E tests with Playwright).

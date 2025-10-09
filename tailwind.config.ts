@@ -3,6 +3,7 @@ import animate from "tailwindcss-animate";
 import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config = {
+  darkMode: ["class"],
   content: [
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
@@ -22,61 +23,109 @@ const config = {
       },
     },
     extend: {
-      // Typography Scale - Unified font sizes with responsive behavior
       fontSize: {
-        // Display sizes for hero sections
         "display-2xl": [
           "4.5rem",
-          { lineHeight: "1", letterSpacing: "-0.02em" },
-        ], // 72px
+          {
+            lineHeight: "1",
+            letterSpacing: "-0.02em",
+          },
+        ],
         "display-xl": [
           "3.75rem",
-          { lineHeight: "1.1", letterSpacing: "-0.02em" },
-        ], // 60px
-        "display-lg": ["3rem", { lineHeight: "1.1", letterSpacing: "-0.02em" }], // 48px
-
-        // Heading sizes
+          {
+            lineHeight: "1.1",
+            letterSpacing: "-0.02em",
+          },
+        ],
+        "display-lg": [
+          "3rem",
+          {
+            lineHeight: "1.1",
+            letterSpacing: "-0.02em",
+          },
+        ],
         "heading-xl": [
           "2.25rem",
-          { lineHeight: "1.2", letterSpacing: "-0.01em" },
-        ], // 36px
+          {
+            lineHeight: "1.2",
+            letterSpacing: "-0.01em",
+          },
+        ],
         "heading-lg": [
           "1.875rem",
-          { lineHeight: "1.3", letterSpacing: "-0.01em" },
-        ], // 30px
+          {
+            lineHeight: "1.3",
+            letterSpacing: "-0.01em",
+          },
+        ],
         "heading-md": [
           "1.5rem",
-          { lineHeight: "1.3", letterSpacing: "-0.01em" },
-        ], // 24px
+          {
+            lineHeight: "1.3",
+            letterSpacing: "-0.01em",
+          },
+        ],
         "heading-sm": [
           "1.25rem",
-          { lineHeight: "1.4", letterSpacing: "-0.01em" },
-        ], // 20px
+          {
+            lineHeight: "1.4",
+            letterSpacing: "-0.01em",
+          },
+        ],
         "heading-xs": [
           "1.125rem",
-          { lineHeight: "1.4", letterSpacing: "-0.01em" },
-        ], // 18px
-
-        // Body text sizes
-        "body-lg": ["1.125rem", { lineHeight: "1.6" }], // 18px
-        "body-md": ["1rem", { lineHeight: "1.6" }], // 16px
-        "body-sm": ["0.875rem", { lineHeight: "1.5" }], // 14px
-        "body-xs": ["0.75rem", { lineHeight: "1.5" }], // 12px
-
-        // Caption and small text
-        caption: ["0.75rem", { lineHeight: "1.4", letterSpacing: "0.01em" }], // 12px
-        overline: ["0.75rem", { lineHeight: "1.3", letterSpacing: "0.08em" }], // 12px
+          {
+            lineHeight: "1.4",
+            letterSpacing: "-0.01em",
+          },
+        ],
+        "body-lg": [
+          "1.125rem",
+          {
+            lineHeight: "1.6",
+          },
+        ],
+        "body-md": [
+          "1rem",
+          {
+            lineHeight: "1.6",
+          },
+        ],
+        "body-sm": [
+          "0.875rem",
+          {
+            lineHeight: "1.5",
+          },
+        ],
+        "body-xs": [
+          "0.75rem",
+          {
+            lineHeight: "1.5",
+          },
+        ],
+        caption: [
+          "0.75rem",
+          {
+            lineHeight: "1.4",
+            letterSpacing: "0.01em",
+          },
+        ],
+        overline: [
+          "0.75rem",
+          {
+            lineHeight: "1.3",
+            letterSpacing: "0.08em",
+          },
+        ],
       },
-
-      // Font weights
       fontWeight: {
-        display: "800", // For display text
-        heading: "700", // For headings
-        subheading: "600", // For subheadings
-        body: "400", // For body text
-        caption: "500", // For captions
+        display: "800",
+        heading: "700",
+        subheading: "600",
+        body: "400",
+        caption: "500",
       },
-
       colors: {
         nintendo: "#e60012",
         playstation: "#0070d1",
@@ -131,6 +180,13 @@ const config = {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
         },
       },
       borderRadius: {
@@ -197,7 +253,7 @@ const config = {
       },
     },
   },
-  plugins: [animate],
+  plugins: [animate, require("tailwindcss-animate")],
 } satisfies Config;
 
 export default config;
