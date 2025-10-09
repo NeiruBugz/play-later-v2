@@ -8,8 +8,6 @@ import {
 } from "next-themes";
 import { type PropsWithChildren } from "react";
 
-import { Toaster } from "@/shared/components/ui/sonner";
-
 const queryClient = new QueryClient();
 
 export function Providers({
@@ -21,7 +19,6 @@ export function Providers({
       <SessionProvider>
         <QueryClientProvider client={queryClient}>
           {children}
-          <Toaster />
         </QueryClientProvider>
       </SessionProvider>
     </NextThemesProvider>
