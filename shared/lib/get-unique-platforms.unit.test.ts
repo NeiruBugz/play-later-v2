@@ -28,7 +28,7 @@ describe("getUniquePlatforms", () => {
 
   it("should handle a mix of ReleaseDate objects and number IDs", () => {
     // we want to test the function with an array of mixed types
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const releaseDates: any[] = [
       { id: 1, platform: { id: 1, name: "PC" } },
       12345,

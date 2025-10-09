@@ -51,7 +51,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Add the repository mocks that were in individual test files
-vi.mock("@/shared/lib/repository", () => ({
+vi.mock("@/data-access-layer/repository", () => ({
   createLibraryItem: vi.fn(),
   deleteLibraryItem: vi.fn(),
   updateLibraryItem: vi.fn(),

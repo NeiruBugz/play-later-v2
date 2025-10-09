@@ -1,14 +1,14 @@
+import {
+  SEARCH_RESULTS_LIMIT,
+  TOP_RATED_GAMES_LIMIT,
+  UPCOMING_EVENTS_LIMIT,
+} from "@/data-access-layer/services/igdb/constants";
+import { QueryBuilder } from "@/data-access-layer/services/igdb/query-builder";
 import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import { getTimeStamp } from "@/shared/lib/date-functions";
 import { normalizeGameTitle, normalizeString } from "@/shared/lib/string";
-import {
-  SEARCH_RESULTS_LIMIT,
-  TOP_RATED_GAMES_LIMIT,
-  UPCOMING_EVENTS_LIMIT,
-} from "@/shared/services/igdb/constants";
-import { QueryBuilder } from "@/shared/services/igdb/query-builder";
 import {
   type Artwork,
   type DLCAndExpansionListResponse,

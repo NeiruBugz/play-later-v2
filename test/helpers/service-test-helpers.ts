@@ -16,9 +16,11 @@
  * ```
  */
 
+import {
+  ServiceErrorCode,
+  type ServiceResult,
+} from "@/data-access-layer/services";
 import { expect } from "vitest";
-
-import { ServiceErrorCode, type ServiceResult } from "@/shared/services";
 
 /**
  * Asserts that a service result is successful and contains data.

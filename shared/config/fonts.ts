@@ -1,7 +1,7 @@
 import {
   DM_Mono as FontMono,
   Roboto as FontSans,
-  Merriweather as FontSerif,
+  Playfair_Display as FontSerif,
 } from "next/font/google";
 
 export const fontSans = FontSans({
