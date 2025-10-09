@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1234,
+    "name": "Test Game 1234",
+    "summary": "A test game for fixtures.",
+    "aggregated_rating": 82.1,
+    "cover": { "image_id": "co_test_1234" },
+    "genres": [{ "name": "Action" }],
+    "screenshots": [{ "image_id": "sc_test_1" }],
+    "release_dates": [
+      { "platform": { "name": "PC" }, "human": "Jan 01, 2020" }
+    ],
+    "involved_companies": [
+      {
+        "developer": true,
+        "publisher": false,
+        "company": { "name": "Test Studio" }
+      }
+    ],
+    "game_modes": [{ "name": "Single player" }],
+    "websites": [
+      { "url": "https://example.com", "category": 1, "trusted": true }
+    ]
+  }
+]

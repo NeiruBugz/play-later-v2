@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1234,
+    "similar_games": [
+      { "name": "Similar Game 1", "cover": { "image_id": "sim1" } },
+      { "name": "Similar Game 2", "cover": { "image_id": "sim2" } }
+    ]
+  }
+]

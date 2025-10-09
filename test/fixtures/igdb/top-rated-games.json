@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "The Legend of Zelda: Breath of the Wild",
+    "cover": { "image_id": "zelda_cover" },
+    "aggregated_rating": 97.5
+  },
+  {
+    "id": 2,
+    "name": "Elden Ring",
+    "cover": { "image_id": "elden_ring_cover" },
+    "aggregated_rating": 95.0
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "id": 500,
+    "name": "Dota 2",
+    "external_games": [
+      {
+        "category": 1,
+        "name": "Steam",
+        "url": "https://store.steampowered.com/app/570"
+      }
+    ],
+    "cover": { "image_id": "dota2_cover" }
+  }
+]

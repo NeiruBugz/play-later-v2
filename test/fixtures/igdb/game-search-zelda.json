@@ -1,0 +1,20 @@
+[
+  {
+    "id": 102,
+    "name": "The Legend of Zelda: Ocarina of Time",
+    "cover": { "image_id": "zelda_oot_cover" },
+    "platforms": [{ "name": "Nintendo 64" }],
+    "release_dates": [{ "human": "1998" }],
+    "first_release_date": 912470400,
+    "category": 0
+  },
+  {
+    "id": 103,
+    "name": "The Legend of Zelda: Majora's Mask",
+    "cover": { "image_id": "zelda_mm_cover" },
+    "platforms": [{ "name": "Nintendo 64" }],
+    "release_dates": [{ "human": "2000" }],
+    "first_release_date": 967680000,
+    "category": 0
+  }
+]

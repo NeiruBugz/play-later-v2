@@ -2,14 +2,16 @@ import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import { getTimeStamp } from "@/shared/lib/date-functions";
-import igdbApi from "@/shared/lib/igdb";
+import { normalizeGameTitle, normalizeString } from "@/shared/lib/string";
 import {
   FullGameInfoResponse,
   RequestOptions,
   TwitchTokenResponse,
+  type SearchResponse,
 } from "@/shared/types";
 
 import { BaseService, type ServiceResponse } from "../types";
+import { SEARCH_RESULTS_LIMIT } from "./constants";
 import { QueryBuilder } from "./query-builder";
 import type {
   GameDetailsParams,
@@ -112,9 +114,39 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      const games = await igdbApi.search({
-        name: params.name,
-        fields: params.fields,
+      let filters = "";
+      const fields = params.fields ?? {};
+      const filterConditions = Object.entries(fields)
+        .map(([key, value]) => {
+          if (!value) return null;
+          const fieldName = key === "platform" ? "platforms" : key;
+          // value can be a comma-separated list already
+          return `${fieldName} = (${value})`;
+        })
+        .filter((v): v is string => v !== null)
+        .join(" & ");
+
+      if (filterConditions) {
+        filters = ` & ${filterConditions}`;
+      }
+
+      const query = this.queryBuilder
+        .fields([
+          "name",
+          "platforms.name",
+          "release_dates.human",
+          "first_release_date",
+          "category",
+          "cover.image_id",
+        ])
+        .where(`cover.image_id != null ${filters}`)
+        .search(normalizeGameTitle(normalizeString(params.name)))
+        .limit(SEARCH_RESULTS_LIMIT)
+        .build();
+
+      const games = await this.makeRequest<SearchResponse[]>({
+        body: query,
+        resource: "/games",
       });
 
       if (!games) {
@@ -201,7 +233,14 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
   async getPlatforms(): Promise<ServiceResponse<PlatformsResult>> {
     try {
-      const platforms = await igdbApi.getPlatforms();
+      const query = this.queryBuilder.fields(["name"]).build();
+
+      const platforms = await this.makeRequest<
+        Array<{ id: number; name: string }>
+      >({
+        body: query,
+        resource: "/platforms",
+      });
 
       if (!platforms) {
         return this.createErrorResponse({
@@ -211,7 +250,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
 
       return this.createSuccessResponse({
-        platforms: platforms as Array<{ id: number; name: string }>,
+        platforms,
       });
     } catch (error) {
       return this.handleError(error, "Failed to fetch platforms");
