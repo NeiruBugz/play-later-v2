@@ -41,46 +41,54 @@ export default defineConfig({
     },
     projects: [
       {
+        extends: true,
+        test: {
+          name: "utilities",
+          environment: "node",
+          include: [
+            "**/shared/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+          ],
+          exclude: [
+            "**/node_modules/**",
+            "**/dist/**",
+            "**/.next/**",
+            "**/coverage/**",
+          ],
+        },
+      },
+      {
         plugins: [react()],
         extends: true,
         test: {
           name: "components",
           environment: "jsdom",
           setupFiles: ["./test/setup/client-setup.ts"],
-          include: ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+          include: [
+            "**/features/**/ui/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+          ],
           exclude: [
             "**/node_modules/**",
             "**/dist/**",
             "**/.next/**",
             "**/coverage/**",
-            // Exclude server-action tests from client project
-            "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-            "**/server-actions/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-            "**/shared/lib/igdb.integration.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-            "**/shared/services/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-            "**/shared/lib/repository/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
         },
       },
       {
         extends: true,
         test: {
-          name: "server",
+          name: "backend",
           environment: "node",
           include: [
+            "**/features/**/server-actions/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-            "**/server-actions/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-            "**/shared/lib/igdb.integration.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-            "**/shared/services/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-            "**/shared/lib/repository/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/data-access-layer/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
           exclude: [
             "**/node_modules/**",
             "**/dist/**",
             "**/.next/**",
             "**/coverage/**",
-            // Exclude component tests from server project
-            "**/components/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
         },
       },
