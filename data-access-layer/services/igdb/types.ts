@@ -1,3 +1,5 @@
+import { Screenshot } from "igdb-api-types";
+
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
 import type { BaseService, ServiceResult } from "../types";
@@ -26,6 +28,32 @@ export interface GameDetailsResult {
 
 export interface PlatformsResult {
   platforms: Array<{ id: number; name: string }>;
+}
+
+export interface GetScreenshotsParams {
+  gameId: number;
+}
+
+export interface ScreenshotsResult {
+  id: number;
+  screenshots: Screenshot[];
+}
+
+export interface SearchGamesByNameParams {
+  name: string;
+}
+
+export interface SearchGamesByNameResult {
+  games: Array<{
+    id: number;
+    name: string;
+    version_title?: string;
+    cover?: {
+      id: number;
+      image_id: string;
+      url: string;
+    };
+  }>;
 }
 
 export interface IgdbService extends BaseService {

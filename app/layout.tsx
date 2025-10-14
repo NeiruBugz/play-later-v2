@@ -5,7 +5,34 @@ import { cn } from "@/shared/lib";
 
 import "@/shared/globals.css";
 
-import { fontMono, fontSans, fontSerif } from "@/shared/config/fonts";
+import {
+  DM_Mono as FontMono,
+  Roboto as FontSans,
+  Playfair_Display as FontSerif,
+} from "next/font/google";
+import { Suspense } from "react";
+
+const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+  preload: true,
+});
+
+const fontSerif = FontSerif({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  display: "swap",
+  preload: true,
+});
+
+const fontMono = FontMono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  preload: true,
+  weight: ["300", "400", "500"],
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -20,12 +47,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://playlater.vercel.app"),
-  title: {
-    default: "PlayLater",
-    template: "%s - PlayLater",
-  },
+  title: "SavePoint - Your Personal Gaming Library & Journal",
   description:
-    "PlayLater – Your ultimate game backlog companion. Track, organize, and manage your gaming library with ease.",
+    "Curate your gaming library and journal your experiences. For patient gamers who view games as worlds to explore, not chores to complete.",
   keywords: [
     "game backlog",
     "gaming",
@@ -87,15 +111,12 @@ export const metadata: Metadata = {
 export default function RootLayout(props: LayoutProps<"/">) {
   const { children } = props;
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn(fontSans.variable, fontSerif.variable, fontMono.variable)}
-    >
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "relative min-h-screen bg-background antialiased",
-          "selection:bg-primary/20 selection:text-primary-foreground"
+          "bg-background relative min-h-screen antialiased",
+          "selection:bg-primary/20 selection:text-primary-foreground",
+          `font-sans ${fontSans.variable} ${fontMono.variable} ${fontSerif.variable} antialiased`
         )}
       >
         <Providers
@@ -105,7 +126,7 @@ export default function RootLayout(props: LayoutProps<"/">) {
           disableTransitionOnChange
         >
           <div id="root" className="relative flex min-h-screen flex-col">
-            {children}
+            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
           </div>
         </Providers>
       </body>

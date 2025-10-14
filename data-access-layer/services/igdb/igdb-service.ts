@@ -130,6 +130,9 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       const fields = params.fields ?? {};
       const filterConditions = this.buildSearchFilterConditions(fields);
       const filters = filterConditions ? ` & ${filterConditions}` : "";
+      const normalizedSearchQuery = normalizeGameTitle(
+        normalizeString(params.name)
+      );
 
       const query = this.queryBuilder
         .fields([
@@ -141,7 +144,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           "cover.image_id",
         ])
         .where(`cover.image_id != null ${filters}`)
-        .search(normalizeGameTitle(normalizeString(params.name)))
+        .search(normalizedSearchQuery)
         .limit(SEARCH_RESULTS_LIMIT)
         .build();
 
