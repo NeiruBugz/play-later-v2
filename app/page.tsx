@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { BookOpen, Clock, Heart, Library, Sparkles, Users } from "lucide-react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/shared/components/ui/button";
@@ -78,7 +79,7 @@ export default async function Page() {
                   size="lg"
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
                 >
-                  Start Your Journey
+                  <Link href="/login">Start Your Journey</Link>
                 </Button>
                 <Button
                   size="lg"

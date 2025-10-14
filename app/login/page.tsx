@@ -1,3 +1,5 @@
+import { AuthPageView } from "@/features/auth/ui/auth-page-view";
+
 export default function AuthPage() {
-  return <div>Auth Page</div>;
+  return <AuthPageView />;
 }

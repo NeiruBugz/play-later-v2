@@ -152,3 +152,17 @@ export {
 } from "./journal/types";
 
 export { JournalService } from "./journal/journal-service";
+
+// ============================================================================
+// Auth Service (Authentication)
+// ============================================================================
+
+export {
+  type SignUpInput,
+  type SignInInput,
+  type AuthUserData,
+  type SignUpResult,
+  type SignInResult,
+} from "./auth/types";
+
+export { AuthService } from "./auth/auth-service";
