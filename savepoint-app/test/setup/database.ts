@@ -15,11 +15,11 @@ export const setupDatabase = async () => {
   try {
     // Use Docker to run PostgreSQL commands
     execSync(
-      `docker exec play-later-postgres dropdb --if-exists -U postgres ${testDatabaseName}`,
+      `docker exec savepoint-postgres dropdb --if-exists -U postgres ${testDatabaseName}`,
       { stdio: "ignore" }
     );
     execSync(
-      `docker exec play-later-postgres createdb -U postgres ${testDatabaseName}`,
+      `docker exec savepoint-postgres createdb -U postgres ${testDatabaseName}`,
       { stdio: "ignore" }
     );
 
@@ -48,7 +48,7 @@ export const cleanupDatabase = async () => {
   const dbName = process.env.POSTGRES_PRISMA_URL?.split("/").pop();
   if (dbName) {
     try {
-      execSync(`docker exec play-later-postgres dropdb -U postgres ${dbName}`, {
+      execSync(`docker exec savepoint-postgres dropdb -U postgres ${dbName}`, {
         stdio: "ignore",
       });
     } catch (error) {

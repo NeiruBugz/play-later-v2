@@ -1,11 +1,11 @@
 services:
   postgres-db:
     image: postgres:14.5-alpine
-    container_name: play-later-postgres
+    container_name: savepoint-postgres
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB: "play-later-db"
+      POSTGRES_DB: "savepoint-db"
     healthcheck:
       test:
         [
@@ -26,7 +26,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: play-later-pgadmin
+    container_name: savepoint-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
       PGADMIN_DEFAULT_PASSWORD: "admin"

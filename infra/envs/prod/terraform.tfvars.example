@@ -1,9 +1,9 @@
 region       = "eu-central-1"
-project_name = "play-later"
+project_name = "savepoint"
 environment  = "prod"
 app_url      = "https://app.example.com"
 # Must be globally unique in region. Change to your value.
-domain_prefix = "play-later-prod-abc123"
+domain_prefix = "savepoint-prod-abc123"
 enable_cognito_native = false
 
 # Optional: enable Google as Cognito IdP

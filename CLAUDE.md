@@ -2,11 +2,22 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Current Status
+
+**Recent Changes** (as of Jan 2025):
+- ✅ Monorepo restructuring complete (`savepoint-app/` for main app)
+- ✅ AWS Cognito integration complete (primary auth provider)
+- ✅ Terraform infrastructure setup for dev/prod environments
+- 🚧 Google OAuth being phased out (legacy support maintained)
+- 🚧 Service layer refactoring in progress (eliminating boundary violations)
+
 ## Project Overview
 
 **SavePoint** is a Next.js 15 application for managing video game backlogs with Steam/IGDB integration. The project uses a three-layer architecture: App Router → Service Layer → Repository Layer → Prisma → PostgreSQL.
 
-**Tech Stack**: Next.js 15 (App Router), React 19, TypeScript, Prisma, PostgreSQL, NextAuth v5, TanStack Query, Zod, Vitest, Tailwind CSS, shadcn/ui.
+**Project Structure**: Monorepo with main application in `savepoint-app/` and infrastructure in `infra/` (Terraform for AWS resources)
+
+**Tech Stack**: Next.js 15 (App Router), React 19, TypeScript, Prisma, PostgreSQL, NextAuth v5 (AWS Cognito), TanStack Query, Zod, Vitest, Tailwind CSS, shadcn/ui.
 
 **Development Server**: `http://localhost:6060` (non-standard port)
 
@@ -18,7 +29,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 tree -L 2 -I 'node_modules|.git|.next' --gitignore
 ```
 
-### Key Architecture Layers
+**Monorepo Layout**:
+- `savepoint-app/`: Main Next.js application
+- `infra/`: Terraform infrastructure as code (AWS Cognito, etc.)
+- `context/`: Product documentation and specifications
+- Root: Shared tooling (commitlint, lefthook)
+
+### Key Architecture Layers (within `savepoint-app/`)
 
 **1. App Router (`app/`)**
 
@@ -51,7 +68,7 @@ tree -L 2 -I 'node_modules|.git|.next' --gitignore
 
 ### Import Aliases
 
-All imports use `@/` alias from repository root:
+All imports use `@/` alias from `savepoint-app/` directory:
 
 ```typescript
 import { createGame } from "@/data-access-layer/repository";
@@ -60,7 +77,11 @@ import { GameService } from "@/data-access-layer/services";
 import { cn } from "@/shared/lib/tailwind-merge";
 ```
 
+**Working Directory**: Most development commands should be run from the `savepoint-app/` directory
+
 ## Common Development Commands
+
+**Note**: Run commands from `savepoint-app/` directory (or use `pnpm --filter savepoint <command>` from root)
 
 ### Core Development
 
@@ -106,9 +127,10 @@ pnpm test:coverage    # Run tests with coverage report (≥80% required)
 
 ```bash
 # Start local development database (PostgreSQL on port 6432)
+# Run from repository root
 docker-compose up -d
 
-# Prisma commands
+# Prisma commands (run from savepoint-app/)
 pnpm exec prisma migrate dev      # Create and apply migration
 pnpm exec prisma migrate deploy   # Apply migrations (production)
 pnpm exec prisma db push          # Sync schema without migration (dev only)
@@ -118,7 +140,7 @@ pnpm exec prisma generate         # Regenerate Prisma client
 
 **Database Access**:
 
-- PostgreSQL: `localhost:6432` (user: postgres, pass: postgres, db: play-later-db)
+- PostgreSQL: `localhost:6432` (user: postgres, pass: postgres, db: savepoint-db)
 - pgAdmin: `http://localhost:5050` (email: admin@admin.com, pass: admin)
 
 ## Architecture Guidelines
@@ -277,25 +299,28 @@ type Result<T, E extends Error> =
 # Authentication (NextAuth v5)
 AUTH_SECRET=                    # openssl rand -base64 32
 AUTH_URL=http://localhost:6060
-# Cognito (preferred)
-AUTH_COGNITO_ID=
-AUTH_COGNITO_SECRET=
+
+# AWS Cognito (Primary Auth Provider)
+AUTH_COGNITO_ID=                # Application client ID from AWS Cognito
+AUTH_COGNITO_SECRET=            # Application client secret
 AUTH_COGNITO_ISSUER=            # https://cognito-idp.<region>.amazonaws.com/<userPoolId>
-# Optional: enable Credentials provider for E2E/dev
-AUTH_ENABLE_CREDENTIALS=false
-# (Optional) Google — legacy during migration
+
+# Development/Testing Only
+AUTH_ENABLE_CREDENTIALS=false   # Enable email/password for E2E tests (set to 'true' for local dev)
+
+# Legacy (Optional - Google OAuth being phased out)
 AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
 
 # Database (PostgreSQL)
-POSTGRES_URL=postgresql://postgres:postgres@localhost:6432/play-later-db
+POSTGRES_URL=postgresql://postgres:postgres@localhost:6432/savepoint-db
 POSTGRES_PRISMA_URL=            # For Prisma migrations
 POSTGRES_URL_NO_SSL=            # Non-SSL connection
 POSTGRES_URL_NON_POOLING=       # Direct connection
 POSTGRES_HOST=localhost
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
-POSTGRES_DATABASE=play-later-db
+POSTGRES_DATABASE=savepoint-db
 
 # External APIs
 IGDB_CLIENT_ID=                 # Twitch/IGDB API credentials
@@ -392,6 +417,34 @@ Managed by **lefthook** (configured in `lefthook.yml`):
 - Runs type checking
 - Enforces commit message format
 
+## Infrastructure
+
+### Terraform (AWS)
+
+The `infra/` directory contains Terraform configurations for AWS resources:
+
+```bash
+infra/
+├── modules/           # Reusable Terraform modules
+│   └── cognito/      # AWS Cognito User Pool configuration
+└── envs/             # Environment-specific configurations
+    ├── dev/          # Development environment
+    └── prod/         # Production environment
+```
+
+**Key Resources**:
+- **AWS Cognito User Pools**: Authentication and user management
+- Separate configurations for dev and prod environments
+- Managed through Infrastructure as Code (IaC)
+
+**Common Terraform Commands** (from `infra/envs/{env}/`):
+```bash
+terraform init        # Initialize Terraform
+terraform plan        # Preview changes
+terraform apply       # Apply changes
+terraform destroy     # Tear down resources
+```
+
 ## Key Integrations
 
 ### IGDB (Internet Games Database)
@@ -410,10 +463,14 @@ Managed by **lefthook** (configured in `lefthook.yml`):
 
 ### NextAuth v5 (Beta)
 
-- Configuration: `auth.ts`
-- Providers: Google OAuth, Steam OpenID
+- Configuration: [`auth.ts`](savepoint-app/auth.ts)
+- **Primary Provider**: AWS Cognito (managed via Terraform in `infra/`)
+- **Development Provider**: Credentials (email/password) when `AUTH_ENABLE_CREDENTIALS=true`
+- **Legacy Provider**: Google OAuth (being phased out)
 - Prisma adapter for session management
 - Server-side session access: `getServerUserId()`
+
+**Infrastructure**: Cognito User Pools managed in [`infra/`](infra/) with separate dev/prod environments
 
 ## Common Patterns
 
@@ -451,7 +508,9 @@ features/feature-name/
 
 ### Package Manager
 
-This project uses **pnpm**, not npm or yarn. The `pnpm` commands are used throughout.
+This project uses **pnpm** (version 10), not npm or yarn. The `pnpm` commands are used throughout.
+
+**Monorepo Setup**: Uses pnpm workspaces. The main app is `savepoint` in the `savepoint-app/` directory.
 
 ### Port Configuration
 

@@ -138,7 +138,7 @@ export const addGameToLibrary = authorizedActionClient
 
 - **AWS S3:** Journal screenshot uploads, user profile images
 - **LocalStack:** S3-compatible local storage for development and integration testing
-- Bucket structure: `play-later-{env}/journal-screenshots/{userId}/{entryId}/`
+- Bucket structure: `savepoint-{env}/journal-screenshots/{userId}/{entryId}/`
 - Security: Pre-signed URLs for time-limited upload/download access
 
 **API Integration Patterns:**
@@ -294,7 +294,7 @@ logger.info("Journal entry created", {
 
 - **Scope:** Repository layer, end-to-end service-to-database flows
 - **Environment:** Node with real PostgreSQL (Docker Compose)
-- **Database Strategy:** Isolated test database per suite (`play-later-test-{timestamp}`)
+- **Database Strategy:** Isolated test database per suite (`savepoint-test-{timestamp}`)
 - **Lifecycle:** Database created in `beforeAll`, migrations applied, dropped in `afterAll`
 - **Execution:** Sequential (prevents database conflicts between test suites)
 - **Speed:** Moderate (15s timeout for database operations)
