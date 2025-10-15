@@ -1,7 +1,7 @@
-import { Providers } from "@/providers";
 import { type Metadata, type Viewport } from "next";
 
 import { cn } from "@/shared/lib";
+import { Providers } from "@/shared/providers";
 
 import "@/shared/globals.css";
 
