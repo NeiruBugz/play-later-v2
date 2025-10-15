@@ -12,7 +12,7 @@ import {
 } from "@/shared/types";
 
 import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
-import { SEARCH_RESULTS_LIMIT } from "./constants";
+import { SEARCH_RESULTS_LIMIT, TOP_RATED_GAMES_LIMIT } from "./constants";
 import { QueryBuilder } from "./query-builder";
 import type {
   GameBySteamAppIdResult,
@@ -23,6 +23,7 @@ import type {
   GetGameBySteamAppIdParams,
   IgdbService as IgdbServiceInterface,
   PlatformsResult,
+  TopRatedGamesResult,
 } from "./types";
 
 export class IgdbService extends BaseService implements IgdbServiceInterface {
@@ -394,6 +395,73 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Error fetching game by Steam app ID"
       );
       return this.handleError(error, "Failed to fetch game by Steam app ID");
+    }
+  }
+
+  /**
+   * Get top-rated games from IGDB
+   * Returns games sorted by aggregated rating in descending order
+   *
+   * @returns ServiceResult with array of top-rated games
+   */
+  async getTopRatedGames(): Promise<ServiceResult<TopRatedGamesResult>> {
+    try {
+      this.logger.info("Fetching top-rated games");
+
+      // Build query (migrated from legacy getGamesByRating implementation)
+      const query = new QueryBuilder()
+        .fields(["name", "cover.image_id", "aggregated_rating"])
+        .where(
+          "aggregated_rating_count > 20 & aggregated_rating != null & rating != null & category = 0"
+        )
+        .sort("aggregated_rating", "desc")
+        .limit(TOP_RATED_GAMES_LIMIT)
+        .build();
+
+      // Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          name: string;
+          aggregated_rating?: number;
+          cover?: {
+            image_id: string;
+          };
+        }>
+      >({
+        body: query,
+        resource: "/games",
+      });
+
+      // Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch top-rated games from IGDB API");
+        return this.error(
+          "Failed to fetch top-rated games",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // Handle empty response (not an error, just no results)
+      if (response.length === 0) {
+        this.logger.info("No top-rated games found (empty response)");
+        return this.success({
+          games: [],
+        });
+      }
+
+      this.logger.info(
+        { count: response.length },
+        "Top-rated games fetched successfully"
+      );
+
+      // Return success
+      return this.success({
+        games: response,
+      });
+    } catch (error) {
+      this.logger.error({ error }, "Error fetching top-rated games");
+      return this.handleError(error, "Failed to fetch top-rated games");
     }
   }
 }

@@ -67,6 +67,17 @@ export interface GameBySteamAppIdResult {
   };
 }
 
+export interface TopRatedGamesResult {
+  games: Array<{
+    id: number;
+    name: string;
+    aggregated_rating?: number;
+    cover?: {
+      image_id: string;
+    };
+  }>;
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -81,4 +92,6 @@ export interface IgdbService extends BaseService {
   getGameBySteamAppId(
     params: GetGameBySteamAppIdParams
   ): Promise<ServiceResult<GameBySteamAppIdResult>>;
+
+  getTopRatedGames(): Promise<ServiceResult<TopRatedGamesResult>>;
 }

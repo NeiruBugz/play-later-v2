@@ -91,16 +91,16 @@ Enable Steam library import by migrating Steam app ID lookup.
 
 Display top-rated games on homepage via the service layer.
 
-- [ ] **Slice 3: Display top-rated games on homepage via the service layer**
-  - [ ] Write unit tests for `getTopRatedGames()` method:
-    - [ ] Test: Success case returning games sorted by rating
-    - [ ] Test: Handle empty response gracefully
-    - [ ] Test: `API_ERROR` error for API failure
-    - [ ] Test: `TOKEN_ERROR` error when token fetch fails
-  - [ ] Implement `getTopRatedGames()` in `IgdbService` (no parameters needed)
-  - [ ] Add `TopRatedGamesResult` type to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGamesByRating()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 3: Display top-rated games on homepage via the service layer**
+  - [x] Write unit tests for `getTopRatedGames()` method:
+    - [x] Test: Success case returning games sorted by rating
+    - [x] Test: Handle empty response gracefully
+    - [x] Test: `API_ERROR` error for API failure
+    - [x] Test: `TOKEN_ERROR` error when token fetch fails
+  - [x] Implement `getTopRatedGames()` in `IgdbService` (no parameters needed)
+  - [x] Add `TopRatedGamesResult` type to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGamesByRating()` to use the new service method
+  - [x] Run full test suite
 
 ---
 

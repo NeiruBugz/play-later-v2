@@ -345,4 +345,137 @@ describe("IgdbService", () => {
       });
     });
   });
+
+  describe("getTopRatedGames", () => {
+    describe("Success Cases", () => {
+      it("should return games sorted by rating when API call succeeds", async () => {
+        // Given: IGDB API returns top rated games
+        const mockGames = [
+          {
+            id: 1942,
+            name: "The Legend of Zelda: Breath of the Wild",
+            cover: { image_id: "co1wyc" },
+            aggregated_rating: 97.5,
+          },
+          {
+            id: 119171,
+            name: "Elden Ring",
+            cover: { image_id: "co4jni" },
+            aggregated_rating: 96.2,
+          },
+          {
+            id: 1020,
+            name: "Grand Theft Auto V",
+            cover: { image_id: "co1r8z" },
+            aggregated_rating: 95.8,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockGames,
+        });
+
+        // When: We request top rated games
+        const result = await service.getTopRatedGames();
+
+        // Then: We get successful response with sorted games
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.games).toHaveLength(3);
+          expect(result.data.games[0].name).toBe(
+            "The Legend of Zelda: Breath of the Wild"
+          );
+          expect(result.data.games[0].aggregated_rating).toBe(97.5);
+          expect(result.data.games[1].aggregated_rating).toBe(96.2);
+          expect(result.data.games[2].aggregated_rating).toBe(95.8);
+          // Verify games are sorted by rating descending
+          expect(result.data.games[0].aggregated_rating!).toBeGreaterThan(
+            result.data.games[1].aggregated_rating!
+          );
+          expect(result.data.games[1].aggregated_rating!).toBeGreaterThan(
+            result.data.games[2].aggregated_rating!
+          );
+        }
+      });
+    });
+
+    describe("Edge Cases", () => {
+      it("should handle empty response gracefully", async () => {
+        // Given: IGDB API returns empty array
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We request top rated games
+        const result = await service.getTopRatedGames();
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.games).toEqual([]);
+        }
+      });
+    });
+
+    describe("Error Cases", () => {
+      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+        // Given: Token fetch succeeds but IGDB API fails
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We request top rated games
+        const result = await service.getTopRatedGames();
+
+        // Then: We get error response
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch top-rated games");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We request top rated games
+        const result = await service.getTopRatedGames();
+
+        // Then: We get error response
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
 });
