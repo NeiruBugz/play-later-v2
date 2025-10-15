@@ -192,7 +192,7 @@ const user = await createUser({ username: "specific-name" });
 
 // ❌ Avoid: Manual data creation
 const user = await testDb.user.create({
-  data: { id: "1", email: "test@..." } // Hard to maintain
+  data: { id: "1", email: "test@..." }, // Hard to maintain
 });
 ```
 

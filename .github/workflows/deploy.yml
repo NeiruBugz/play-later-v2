@@ -20,7 +20,7 @@ jobs:
         id: check-migrations
         run: |
           # Check if there are any new migration files in this push
-          NEW_MIGRATIONS=$(git diff --name-only HEAD~1 HEAD -- prisma/migrations/ | grep -E "\.sql$" || true)
+          NEW_MIGRATIONS=$(git diff --name-only HEAD~1 HEAD -- savepoint-app/prisma/migrations/ | grep -E "\.sql$" || true)
           
           if [ -z "$NEW_MIGRATIONS" ]; then
             echo "No new migration files detected"
@@ -46,19 +46,21 @@ jobs:
 
       - name: Install dependencies
         if: steps.check-migrations.outputs.has-migrations == 'true'
+        working-directory: savepoint-app
         run: pnpm install --frozen-lockfile
 
       - name: Check migration status
         if: steps.check-migrations.outputs.has-migrations == 'true'
         run: |
           echo "Checking current migration status..."
-          pnpm prisma migrate status || echo "Found pending migrations - will apply them next"
+          pnpm -C savepoint-app prisma migrate status || echo "Found pending migrations - will apply them next"
         env:
           POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
           POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
 
       - name: Run database migrations
         if: steps.check-migrations.outputs.has-migrations == 'true'
+        working-directory: savepoint-app
         run: pnpm prisma migrate deploy
         env:
           POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
@@ -66,6 +68,7 @@ jobs:
 
       - name: Generate Prisma client
         if: steps.check-migrations.outputs.has-migrations == 'true'
+        working-directory: savepoint-app
         run: pnpm prisma generate
         env:
           POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}

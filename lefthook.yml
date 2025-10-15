@@ -2,16 +2,24 @@ pre-commit:
   commands:
     prettier:
       glob: "*.{js,jsx,ts,tsx,json,css,md}"
-      run: pnpm format:write {staged_files}
+      run: |
+        FILES=$(echo {staged_files} | xargs -n1 | grep '^savepoint-app/' | sed 's@^savepoint-app/@@' | tr '\n' ' ')
+        if [ -n "$FILES" ]; then
+          cd savepoint-app && pnpm exec prettier --write --cache $FILES
+        fi
       stage_fixed: true
     eslint:
       glob: "*.{js,jsx,ts,tsx}"
-      run: pnpm lint:fix {staged_files}
+      run: |
+        FILES=$(echo {staged_files} | xargs -n1 | grep '^savepoint-app/' | sed 's@^savepoint-app/@@' | tr '\n' ' ')
+        if [ -n "$FILES" ]; then
+          cd savepoint-app && pnpm exec eslint --fix $FILES
+        fi
       stage_fixed: true
     typecheck:
-      run: pnpm typecheck
+      run: cd savepoint-app && pnpm typecheck
 
 commit-msg:
   commands:
     commitlint:
-      run: pnpm dlx commitlint --edit {1}
+      run: pnpm exec commitlint --edit {1}
