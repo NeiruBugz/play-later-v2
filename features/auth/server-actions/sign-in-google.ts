@@ -6,5 +6,6 @@ import { signIn } from "@/auth";
  * Sign in with Google OAuth
  */
 export async function signInWithGoogleAction() {
-  await signIn("google", { redirectTo: "/dashboard" });
+  // Google is federated via Cognito Hosted UI
+  await signIn("cognito", { redirectTo: "/dashboard" });
 }

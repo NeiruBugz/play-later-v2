@@ -1,6 +1,6 @@
 # Pino Logger Usage Examples
 
-This document provides practical examples of using the Pino logger in the Play Later application.
+This document provides practical examples of using the Pino logger in the SavePoint application.
 
 ## Basic Service Integration
 

@@ -46,7 +46,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://playlater.vercel.app"),
+  metadataBase: new URL("https://SavePoint.vercel.app"),
   title: "SavePoint - Your Personal Gaming Library & Journal",
   description:
     "Curate your gaming library and journal your experiences. For patient gamers who view games as worlds to explore, not chores to complete.",
@@ -58,9 +58,9 @@ export const metadata: Metadata = {
     "game collection",
     "game management",
   ],
-  authors: [{ name: "PlayLater Team" }],
-  creator: "PlayLater Team",
-  publisher: "PlayLater",
+  authors: [{ name: "SavePoint Team" }],
+  creator: "SavePoint Team",
+  publisher: "SavePoint",
   robots: {
     index: true,
     follow: true,
@@ -86,23 +86,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://playlater.vercel.app",
-    title: "PlayLater",
-    description: "PlayLater – Your ultimate game backlog companion",
-    siteName: "PlayLater",
+    url: "https://SavePoint.vercel.app",
+    title: "SavePoint",
+    description: "SavePoint – Your ultimate game backlog companion",
+    siteName: "SavePoint",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "PlayLater - Game Backlog Manager",
+        alt: "SavePoint - Game Backlog Manager",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PlayLater",
-    description: "PlayLater – Your ultimate game backlog companion",
+    title: "SavePoint",
+    description: "SavePoint – Your ultimate game backlog companion",
     images: ["/og-image.png"],
   },
   category: "entertainment",

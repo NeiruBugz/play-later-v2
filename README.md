@@ -1,4 +1,4 @@
-# Play Later
+# SavePoint
 
 A comprehensive game backlogging application that helps you track your gaming collection, manage your backlog, and discover new games to play.
 
@@ -16,7 +16,7 @@ But I'm a Software Engineer, so I can build my own tool to cover all my needs fo
 
 ## 🚀 Deployment
 
-[PlayLater](https://play-later.vercel.com)
+[SavePoint](https://play-later.vercel.com)
 
 ## ✨ Features
 

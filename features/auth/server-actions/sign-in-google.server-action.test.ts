@@ -16,12 +16,12 @@ describe("signInWithGoogleAction", () => {
     mockSignIn = vi.mocked(authModule.signIn);
   });
 
-  it("should call signIn with google provider and redirect to dashboard", async () => {
+  it("should call signIn with cognito provider and redirect to dashboard", async () => {
     mockSignIn.mockResolvedValue(undefined);
 
     await signInWithGoogleAction();
 
-    expect(mockSignIn).toHaveBeenCalledWith("google", {
+    expect(mockSignIn).toHaveBeenCalledWith("cognito", {
       redirectTo: "/dashboard",
     });
   });

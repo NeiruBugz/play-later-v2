@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Play Later** is a Next.js 15 application for managing video game backlogs with Steam/IGDB integration. The project uses a three-layer architecture: App Router → Service Layer → Repository Layer → Prisma → PostgreSQL.
+**SavePoint** is a Next.js 15 application for managing video game backlogs with Steam/IGDB integration. The project uses a three-layer architecture: App Router → Service Layer → Repository Layer → Prisma → PostgreSQL.
 
 **Tech Stack**: Next.js 15 (App Router), React 19, TypeScript, Prisma, PostgreSQL, NextAuth v5, TanStack Query, Zod, Vitest, Tailwind CSS, shadcn/ui.
 
@@ -277,6 +277,13 @@ type Result<T, E extends Error> =
 # Authentication (NextAuth v5)
 AUTH_SECRET=                    # openssl rand -base64 32
 AUTH_URL=http://localhost:6060
+# Cognito (preferred)
+AUTH_COGNITO_ID=
+AUTH_COGNITO_SECRET=
+AUTH_COGNITO_ISSUER=            # https://cognito-idp.<region>.amazonaws.com/<userPoolId>
+# Optional: enable Credentials provider for E2E/dev
+AUTH_ENABLE_CREDENTIALS=false
+# (Optional) Google — legacy during migration
 AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
 
