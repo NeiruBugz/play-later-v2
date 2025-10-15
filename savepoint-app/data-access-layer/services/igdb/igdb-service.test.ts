@@ -347,7 +347,7 @@ describe("IgdbService", () => {
   });
 
   describe("getTopRatedGames", () => {
-    describe("Success Cases", () => {
+    describe("when service returns", () => {
       it("should return games sorted by rating when API call succeeds", async () => {
         // Given: IGDB API returns top rated games
         const mockGames = [
@@ -406,9 +406,6 @@ describe("IgdbService", () => {
           );
         }
       });
-    });
-
-    describe("Edge Cases", () => {
       it("should handle empty response gracefully", async () => {
         // Given: IGDB API returns empty array
         mockFetch.mockResolvedValueOnce({
@@ -435,7 +432,7 @@ describe("IgdbService", () => {
       });
     });
 
-    describe("Error Cases", () => {
+    describe("when service throws", () => {
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
         // Given: Token fetch succeeds but IGDB API fails
         mockFetch.mockResolvedValueOnce({
@@ -480,7 +477,7 @@ describe("IgdbService", () => {
   });
 
   describe("searchPlatformByName", () => {
-    describe("Success Cases", () => {
+    describe("when service returns", () => {
       it("should return matching platforms when valid platform name is provided", async () => {
         // Given: Valid platform name "PlayStation"
         const params = { platformName: "PlayStation" };
@@ -520,7 +517,7 @@ describe("IgdbService", () => {
       });
     });
 
-    describe("Error Cases", () => {
+    describe("when service throws", () => {
       it("should return VALIDATION_ERROR when platform name is empty", async () => {
         // Given: Empty platform name
         const params = { platformName: "" };
@@ -592,9 +589,7 @@ describe("IgdbService", () => {
           expect(result.error).toContain("Failed to search platforms");
         }
       });
-    });
 
-    describe("Edge Cases", () => {
       it("should return VALIDATION_ERROR when platform name is whitespace only", async () => {
         // Given: Whitespace-only platform name
         const params = { platformName: "   " };
@@ -643,7 +638,7 @@ describe("IgdbService", () => {
   });
 
   describe("getGameScreenshots", () => {
-    describe("Success Cases", () => {
+    describe("when service returns", () => {
       it("should return screenshots when valid game ID is provided", async () => {
         // Given: Valid game ID and IGDB API returns screenshots
         const params = { gameId: 1942 };
@@ -731,7 +726,7 @@ describe("IgdbService", () => {
       });
     });
 
-    describe("Error Cases", () => {
+    describe("when service throws", () => {
       it("should return VALIDATION_ERROR when game ID is null", async () => {
         // Given: Null game ID
         const params = { gameId: null as unknown as number };
@@ -820,9 +815,7 @@ describe("IgdbService", () => {
           expect(result.error).toContain("Failed to fetch game screenshots");
         }
       });
-    });
 
-    describe("Edge Cases", () => {
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
         // Given: Token fetch fails
         const params = { gameId: 1942 };

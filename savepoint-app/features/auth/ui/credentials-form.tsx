@@ -19,29 +19,48 @@ export function CredentialsForm() {
     setError("");
   };
 
+  const handleSignUpAction = async ({
+    email,
+    password,
+    name,
+  }: {
+    email: string;
+    password: string;
+    name?: string;
+  }) => {
+    const result = await signUpAction({ email, password, name });
+    if (!result.success) {
+      setError(result.error);
+      setLoading(false);
+    }
+  };
+
+  const handleSignInAction = async ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => {
+    const result = await signInAction({ email, password });
+    if (!result.success) {
+      setError(result.error);
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (formData: FormData) => {
     setError("");
     setLoading(true);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string | undefined;
 
     try {
-      const email = formData.get("email") as string;
-      const password = formData.get("password") as string;
-      const name = formData.get("name") as string | undefined;
-
       if (mode === "signup") {
-        const result = await signUpAction({ email, password, name });
-        if (!result.success) {
-          setError(result.error);
-          setLoading(false);
-        }
-        // If successful, NextAuth will redirect
+        await handleSignUpAction({ email, password, name });
       } else {
-        const result = await signInAction({ email, password });
-        if (!result.success) {
-          setError(result.error);
-          setLoading(false);
-        }
-        // If successful, NextAuth will redirect
+        await handleSignInAction({ email, password });
       }
     } catch (error) {
       console.log(error);

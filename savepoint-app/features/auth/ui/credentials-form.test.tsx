@@ -242,12 +242,13 @@ describe("CredentialsForm", () => {
     });
 
     it("should display generic error message", async () => {
-      const user = userEvent.setup();
       render(<CredentialsForm />);
 
-      await user.type(elements.getEmailInput(), "test@example.com");
-      await user.type(elements.getPasswordInput(), "password");
-      await user.click(elements.getSignInSubmitButton());
+      await actions.typeInEmailField("test@example.com");
+      await actions.typeInPasswordField("password");
+
+      // Submit the form
+      await actions.clickSignInSubmit();
 
       await waitFor(() => {
         expect(elements.getErrorMessage()).toBeVisible();
@@ -267,14 +268,13 @@ describe("CredentialsForm", () => {
     });
 
     it("should show loading state during form submission", async () => {
-      const user = userEvent.setup();
       render(<CredentialsForm />);
 
-      await user.type(elements.getEmailInput(), "test@example.com");
-      await user.type(elements.getPasswordInput(), "password");
+      await actions.typeInEmailField("test@example.com");
+      await actions.typeInPasswordField("password");
 
       // Submit the form
-      user.click(elements.getSignInSubmitButton());
+      await actions.clickSignInSubmit();
 
       // Check loading state
       await waitFor(() => {
