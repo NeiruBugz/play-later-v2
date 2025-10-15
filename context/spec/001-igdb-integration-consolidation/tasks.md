@@ -48,17 +48,17 @@ Before migrating methods, set up testing infrastructure and remove circular depe
 
 Enable searching games by name through the service layer.
 
-- [ ] **Slice 1: Enable searching games by name through the service layer**
-  - [ ] Write unit tests for `searchGamesByName()` method:
-    - [ ] Test: Success case with valid game name
-    - [ ] Test: `INVALID_INPUT` error for empty name
-    - [ ] Test: `NOT_FOUND` error for no matches
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `searchGamesByName(params: SearchGamesByNameParams)` in `IgdbService`
-  - [ ] Add `SearchGamesByNameParams` and `SearchGamesByNameResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGameByName()` to use the new service method
-  - [ ] Run full test suite to verify no regressions
-  - [ ] Verify app is runnable: `pnpm dev` and manually test game search functionality
+- [x] **Slice 1: Enable searching games by name through the service layer**
+  - [x] Write unit tests for `searchGamesByName()` method:
+    - [x] Test: Success case with valid game name
+    - [x] Test: `INVALID_INPUT` error for empty name
+    - [x] Test: `NOT_FOUND` error for no matches
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `searchGamesByName(params: SearchGamesByNameParams)` in `IgdbService`
+  - [x] Add `SearchGamesByNameParams` and `SearchGamesByNameResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGameByName()` to use the new service method
+  - [x] Run full test suite to verify no regressions
+  - [x] Verify app is runnable: `pnpm dev` and manually test game search functionality
 
 ---
 

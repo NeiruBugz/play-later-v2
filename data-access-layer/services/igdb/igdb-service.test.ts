@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ServiceErrorCode } from "../types";
 import { IgdbService } from "./igdb-service";
 
 vi.mock("@/env.mjs", () => ({
@@ -26,7 +27,7 @@ describe("IgdbService", () => {
 
   describe("searchGamesByName", () => {
     describe("when service throws", () => {
-      it("should handle API errors", async () => {
+      it("should return INTERNAL_ERROR when API throws error", async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -39,10 +40,11 @@ describe("IgdbService", () => {
         expect(result.success).toBe(false);
         if ("error" in result) {
           expect(result.error).toBe("Failed to find games");
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
         }
       });
 
-      it("should return error for empty game name", async () => {
+      it("should return VALIDATION_ERROR for empty game name", async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -55,10 +57,11 @@ describe("IgdbService", () => {
         expect(result.success).toBe(false);
         if ("error" in result) {
           expect(result.error).toBe("Game name is required for search");
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
         }
       });
 
-      it("should return error for whitespace-only game name", async () => {
+      it("should return VALIDATION_ERROR for whitespace-only game name", async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -71,10 +74,11 @@ describe("IgdbService", () => {
         expect(result.success).toBe(false);
         if ("error" in result) {
           expect(result.error).toBe("Game name is required for search");
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
         }
       });
 
-      it("should handle API returning null", async () => {
+      it("should return NOT_FOUND when API returns null", async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -87,10 +91,11 @@ describe("IgdbService", () => {
         expect(result.success).toBe(false);
         if ("error" in result) {
           expect(result.error).toBe("Failed to find games");
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
         }
       });
 
-      it("should handle API returning undefined", async () => {
+      it("should return NOT_FOUND when API returns undefined", async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -103,6 +108,7 @@ describe("IgdbService", () => {
         expect(result.success).toBe(false);
         if ("error" in result) {
           expect(result.error).toBe("Failed to find games");
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
         }
       });
     });
