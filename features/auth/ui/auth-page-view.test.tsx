@@ -14,8 +14,8 @@ vi.mock("./google-sign-in-button", () => ({
 }));
 
 const elements = {
-  getAuthHeading: () => screen.getByText("Play Later"),
-  getAuthSubtitle: () => screen.getByText("Manage your game backlog"),
+  getAuthHeading: () => screen.getByText("SavePoint"),
+  getAuthSubtitle: () => screen.getByText("Manage your gaming experiences"),
   getCredentialsForm: () => screen.getByText("Credentials Form"),
   getSignInWithGoogleButton: () =>
     screen.getByRole("button", { name: "Sign in with Google" }),

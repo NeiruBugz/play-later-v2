@@ -8,9 +8,9 @@ export function AuthPageView() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4 dark:from-gray-900 dark:to-gray-800">
       <Card className="w-full max-w-md p-8">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold">Play Later</h1>
+          <h1 className="font-serif text-3xl font-bold">SavePoint</h1>
           <p className="text-muted-foreground mt-2 text-sm">
-            Manage your game backlog
+            Manage your gaming experiences
           </p>
         </div>
 
