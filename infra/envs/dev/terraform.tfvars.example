@@ -1,0 +1,11 @@
+region       = "eu-central-1"
+project_name = "play-later"
+environment  = "dev"
+app_url      = "http://localhost:6060"
+# Must be globally unique in region. Change to your value.
+domain_prefix = "play-later-dev-abc123"
+enable_cognito_native = false
+
+# Optional: enable Google as Cognito IdP
+# google_client_id     = "..."
+# google_client_secret = "..."

@@ -52,3 +52,21 @@ dumps/
 *.tsbuildinfo
 
 .docker/
+
+# Terraform (infra)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+terraform.tfvars
+*.tfvars
+*.auto.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+*.tfplan
+*.plan
+
+# Note: keep .terraform.lock.hcl committed (provider version lock)
