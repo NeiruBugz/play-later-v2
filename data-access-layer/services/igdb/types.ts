@@ -56,6 +56,17 @@ export interface SearchGamesByNameResult {
   }>;
 }
 
+export interface GetGameBySteamAppIdParams {
+  steamAppId: number;
+}
+
+export interface GameBySteamAppIdResult {
+  game: {
+    id: number;
+    name: string;
+  };
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -66,4 +77,8 @@ export interface IgdbService extends BaseService {
   ): Promise<ServiceResult<GameDetailsResult>>;
 
   getPlatforms(): Promise<ServiceResult<PlatformsResult>>;
+
+  getGameBySteamAppId(
+    params: GetGameBySteamAppIdParams
+  ): Promise<ServiceResult<GameBySteamAppIdResult>>;
 }

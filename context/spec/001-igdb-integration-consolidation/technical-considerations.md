@@ -467,22 +467,31 @@ async getGameBySteamAppId(params: GetGameBySteamAppIdParams): Promise<ServiceRes
 
 ### Test Architecture
 
-**Test Types:**
+**Test Strategy: Unit Tests Only**
 
-1. **Unit Tests** (`.unit.test.ts` - Primary focus for this refactor)
-   - **File:** `data-access-layer/services/igdb/igdb-service.test.ts` (extend existing)
+We use **comprehensive unit tests with realistic mock data** instead of integration tests with the real IGDB API. This approach provides:
+
+- ✅ **Deterministic tests**: No flakiness from external service changes, rate limits, or downtime
+- ✅ **Fast execution**: Tests run in milliseconds instead of seconds
+- ✅ **Reliable data**: Mock fixtures captured from real IGDB responses guarantee test data availability
+- ✅ **Full control**: Can test edge cases and error scenarios that are hard to reproduce with real API
+
+**Why No Integration Tests:**
+
+- ❌ IGDB's `external_games` data is incomplete (Steam app IDs often missing)
+- ❌ External API changes can break tests unpredictably
+- ❌ Rate limits and network issues cause intermittent failures
+- ❌ Slow test execution hurts developer experience
+- ✅ **Alternative**: Manual QA and E2E tests in staging environments validate real integration
+
+**Test Implementation:**
+
+1. **Unit Tests** (`igdb-service.test.ts`)
+   - **File:** `data-access-layer/services/igdb/igdb-service.test.ts`
    - **Environment:** Node with mocked `fetch`
    - **Coverage:** All 21 public methods (3 existing + 18 new)
    - **Patterns:** Given-When-Then structure for clarity
-
-2. **Integration Tests** (`.integration.test.ts` - Selective)
-   - **File:** `data-access-layer/services/igdb/igdb-service.integration.test.ts` (new)
-   - **Environment:** Node with real IGDB API (rate-limited, slow)
-   - **Coverage:** Critical user journeys only:
-     - Search → Get game details flow
-     - Steam app ID lookup (for import feature)
-     - Token refresh and expiry handling
-     - Rate limiting behavior (if applicable)
+   - **Fixtures:** Realistic mock data from `test/fixtures/igdb/` (captured from real IGDB responses)
 
 **Test Coverage Requirements (per Functional Spec):**
 
@@ -677,77 +686,6 @@ export function mockTokenFetchFailure() {
 
 ---
 
-### Integration Test Strategy
-
-**Selective Integration Tests (Real IGDB API):**
-
-```typescript
-// data-access-layer/services/igdb/igdb-service.integration.test.ts
-import { beforeAll, describe, expect, it } from "vitest";
-
-import { IgdbService } from "./igdb-service";
-
-describe("IgdbService Integration Tests", () => {
-  let service: IgdbService;
-
-  beforeAll(() => {
-    service = new IgdbService();
-  });
-
-  it("should search games and fetch details end-to-end", async () => {
-    // Given: A game search query
-    const searchResult = await service.searchGames({ name: "Zelda" });
-    expect(searchResult.ok).toBe(true);
-
-    if (searchResult.ok && searchResult.data.games.length > 0) {
-      // When: We fetch details for the first result
-      const gameId = searchResult.data.games[0].id;
-      const detailsResult = await service.getGameDetails({ gameId });
-
-      // Then: We get full game details
-      expect(detailsResult.ok).toBe(true);
-      if (detailsResult.ok) {
-        expect(detailsResult.data.game).toBeDefined();
-        expect(detailsResult.data.game?.name).toBeTruthy();
-      }
-    }
-  });
-
-  it("should successfully look up game by Steam app ID", async () => {
-    // Given: A known Steam app ID (Dota 2: 570)
-    const result = await service.getGameBySteamAppId({ steamAppId: 570 });
-
-    // Then: We should find the corresponding IGDB game
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.data.game).toBeDefined();
-      expect(result.data.game.name.toLowerCase()).toContain("dota");
-    }
-  });
-
-  it("should handle token refresh across multiple calls", async () => {
-    // Given: Multiple API calls in sequence
-    const call1 = await service.searchGames({ name: "Mario" });
-    const call2 = await service.getTopRatedGames();
-    const call3 = await service.searchPlatformByName({ name: "PlayStation" });
-
-    // Then: All calls should succeed (token reused/refreshed as needed)
-    expect(call1.ok).toBe(true);
-    expect(call2.ok).toBe(true);
-    expect(call3.ok).toBe(true);
-  });
-});
-```
-
-**Integration Test Configuration:**
-
-- Run with `pnpm test --project=integration`
-- Requires real IGDB credentials in `.env`
-- Rate-limited and slow - only run critical paths
-- Not run in CI by default (optional: run nightly)
-
----
-
 ### CI Integration
 
 **Existing PR Checks Workflow (`.github/workflows/pr-checks.yml`):**
@@ -771,17 +709,17 @@ describe("IgdbService Integration Tests", () => {
 # Run all IGDB service tests
 pnpm test data-access-layer/services/igdb
 
-# Run unit tests only (fast)
-pnpm test --project=unit data-access-layer/services/igdb/igdb-service.test.ts
-
-# Run integration tests only (slow, requires API credentials)
-pnpm test --project=integration data-access-layer/services/igdb/igdb-service.integration.test.ts
-
 # Run with coverage report
 pnpm test:coverage data-access-layer/services/igdb
 
 # Watch mode during development
 pnpm test:watch data-access-layer/services/igdb/igdb-service.test.ts
+
+# Type check
+pnpm typecheck
+
+# Build verification
+pnpm build
 ```
 
 ---

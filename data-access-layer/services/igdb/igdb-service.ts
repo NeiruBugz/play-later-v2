@@ -15,10 +15,12 @@ import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import { SEARCH_RESULTS_LIMIT } from "./constants";
 import { QueryBuilder } from "./query-builder";
 import type {
+  GameBySteamAppIdResult,
   GameDetailsParams,
   GameDetailsResult,
   GameSearchParams,
   GameSearchResult,
+  GetGameBySteamAppIdParams,
   IgdbService as IgdbServiceInterface,
   PlatformsResult,
 } from "./types";
@@ -326,6 +328,72 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       return this.handleError(error, "Failed to fetch platforms");
+    }
+  }
+
+  async getGameBySteamAppId(
+    params: GetGameBySteamAppIdParams
+  ): Promise<ServiceResult<GameBySteamAppIdResult>> {
+    try {
+      // 1. Input validation
+      if (!params.steamAppId || params.steamAppId <= 0) {
+        this.logger.warn(
+          { steamAppId: params.steamAppId },
+          "Invalid Steam app ID provided"
+        );
+        return this.error(
+          "Valid Steam app ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { steamAppId } = params;
+
+      this.logger.info({ steamAppId }, "Looking up game by Steam app ID");
+
+      // 2. Build query
+      const steamUrl = `https://store.steampowered.com/app/${steamAppId}`;
+      const query = new QueryBuilder()
+        .fields(["name"])
+        .where(
+          `external_games.category = 1 & external_games.url = "${steamUrl}"`
+        )
+        .limit(1)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{ id: number; name: string }>
+      >({
+        body: query,
+        resource: "/games",
+      });
+
+      // 4. Handle empty response (NOT_FOUND)
+      if (!response || response.length === 0) {
+        this.logger.warn({ steamAppId }, "No IGDB game found for Steam app ID");
+        return this.error(
+          `No IGDB game found for Steam app ID ${steamAppId}`,
+          ServiceErrorCode.NOT_FOUND
+        );
+      }
+
+      // 5. Return success
+      this.logger.info(
+        { steamAppId, gameId: response[0].id, gameName: response[0].name },
+        "Game found by Steam app ID"
+      );
+
+      return this.success({
+        game: response[0],
+      });
+    } catch (error) {
+      // 6. Catch-all error handling
+      this.logger.error(
+        { error, steamAppId: params.steamAppId },
+        "Error fetching game by Steam app ID"
+      );
+      return this.handleError(error, "Failed to fetch game by Steam app ID");
     }
   }
 }

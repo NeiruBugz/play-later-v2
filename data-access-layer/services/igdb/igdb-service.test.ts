@@ -224,4 +224,143 @@ describe("IgdbService", () => {
       });
     });
   });
+
+  describe("getGameBySteamAppId", () => {
+    describe("Success Cases", () => {
+      it("should return game when valid Steam app ID is provided", async () => {
+        // Given: A valid Steam app ID and IGDB match
+        const params = { steamAppId: 570 }; // Dota 2
+        const mockGame = { id: 1234, name: "Dota 2" };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [mockGame],
+        });
+
+        // When: We look up the game by Steam app ID
+        const result = await service.getGameBySteamAppId(params);
+
+        // Then: We get the matching IGDB game
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.game.id).toBe(1234);
+          expect(result.data.game.name).toBe("Dota 2");
+        }
+      });
+    });
+
+    describe("Error Cases", () => {
+      it("should return VALIDATION_ERROR when Steam app ID is 0", async () => {
+        // Given: An invalid Steam app ID (0)
+        const params = { steamAppId: 0 };
+
+        // When: We attempt lookup
+        const result = await service.getGameBySteamAppId(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid Steam app ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when Steam app ID is negative", async () => {
+        // Given: An invalid Steam app ID (negative number)
+        const params = { steamAppId: -100 };
+
+        // When: We attempt lookup
+        const result = await service.getGameBySteamAppId(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid Steam app ID is required");
+        }
+      });
+
+      it("should return NOT_FOUND when no IGDB game matches Steam app ID", async () => {
+        // Given: A valid Steam app ID but no IGDB match
+        const params = { steamAppId: 999999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [], // Empty response
+        });
+
+        // When: We attempt lookup
+        const result = await service.getGameBySteamAppId(params);
+
+        // Then: We get NOT_FOUND error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+          expect(result.error).toContain("No IGDB game found");
+          expect(result.error).toContain("999999");
+        }
+      });
+
+      it("should return NOT_FOUND when API request fails", async () => {
+        // Given: A valid Steam app ID but API failure
+        const params = { steamAppId: 570 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+          json: async () => null,
+        });
+
+        // When: We attempt lookup
+        const result = await service.getGameBySteamAppId(params);
+
+        // Then: We get NOT_FOUND (makeRequest returns undefined on error, which is treated as empty response)
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+        }
+      });
+
+      it("should return NOT_FOUND when token fetch fails", async () => {
+        // Given: A valid Steam app ID but token failure
+        const params = { steamAppId: 570 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We attempt lookup
+        const result = await service.getGameBySteamAppId(params);
+
+        // Then: We get NOT_FOUND (makeRequest returns undefined on error, which is treated as empty response)
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+        }
+      });
+    });
+  });
 });

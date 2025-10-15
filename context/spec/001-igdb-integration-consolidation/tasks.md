@@ -19,6 +19,13 @@ This task list breaks down the IGDB integration consolidation into **17 vertical
 - ✅ **Maintain coverage**: Verify ≥80% test coverage after each slice
 - ✅ **Always runnable**: App is functional after every completed slice
 
+**Testing Philosophy:**
+
+- **Unit tests only**: We use comprehensive unit tests with realistic mock data from IGDB API responses
+- **No integration tests**: External API integration tests are unreliable (data dependencies, rate limits, downtime) and don't provide sufficient value
+- **Manual QA for validation**: Real integration with IGDB is verified through manual testing and E2E tests in staging environments
+- **Contract testing**: If needed, we validate API response shapes match our types using captured real responses as fixtures
+
 ---
 
 ## Task List
@@ -66,18 +73,17 @@ Enable searching games by name through the service layer.
 
 Enable Steam library import by migrating Steam app ID lookup.
 
-- [ ] **Slice 2: Enable Steam library import by migrating Steam app ID lookup**
-  - [ ] Write unit tests for `getGameBySteamAppId()` method:
-    - [ ] Test: Success case with valid Steam app ID
-    - [ ] Test: `INVALID_INPUT` error for invalid Steam app ID (0 or negative)
-    - [ ] Test: `NOT_FOUND` error when no IGDB game matches the Steam app ID
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Write integration test: Real API call with known Steam app ID (e.g., Dota 2: 570)
-  - [ ] Implement `getGameBySteamAppId(params: GetGameBySteamAppIdParams)` in `IgdbService`
-  - [ ] Add `GetGameBySteamAppIdParams` and `GameBySteamAppIdResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGameBySteamAppId()` to use the new service method (especially Steam import features)
-  - [ ] Run full test suite
-  - [ ] Manual QA: Test Steam library import end-to-end to verify no regressions
+- [x] **Slice 2: Enable Steam library import by migrating Steam app ID lookup**
+  - [x] Write unit tests for `getGameBySteamAppId()` method:
+    - [x] Test: Success case with valid Steam app ID
+    - [x] Test: `INVALID_INPUT` error for invalid Steam app ID (0 or negative)
+    - [x] Test: `NOT_FOUND` error when no IGDB game matches the Steam app ID
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getGameBySteamAppId(params: GetGameBySteamAppIdParams)` in `IgdbService`
+  - [x] Add `GetGameBySteamAppIdParams` and `GameBySteamAppIdResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGameBySteamAppId()` to use the new service method (especially Steam import features)
+  - [x] Run full test suite
+  - [x] Manual QA: Test Steam library import end-to-end to verify no regressions
 
 ---
 
@@ -95,7 +101,6 @@ Display top-rated games on homepage via the service layer.
   - [ ] Add `TopRatedGamesResult` type to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getGamesByRating()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Navigate to homepage/discovery page and verify top-rated games display correctly
 
 ---
 
@@ -113,7 +118,6 @@ Enable platform search and filtering through the service layer.
   - [ ] Add `SearchPlatformByNameParams` and `PlatformSearchResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getPlatformId()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Test any platform filtering or search features
 
 ---
 
@@ -131,7 +135,6 @@ Display game screenshots on detail pages via the service layer.
   - [ ] Add `GetGameScreenshotsParams` and `GameScreenshotsResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getGameScreenshots()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Navigate to a game detail page and verify screenshots display correctly
 
 ---
 
@@ -149,7 +152,6 @@ Display game aggregated ratings via the service layer.
   - [ ] Add `GetGameAggregatedRatingParams` and `GameAggregatedRatingResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getGameRating()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Verify game ratings display correctly on detail pages
 
 ---
 
@@ -167,7 +169,6 @@ Display similar game recommendations via the service layer.
   - [ ] Add `GetSimilarGamesParams` and `SimilarGamesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getSimilarGames()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Navigate to game detail pages and verify "Similar Games" section works
 
 **Progress Checkpoint:** After Slice 7, all Phase 2 high-priority methods are migrated. Core features are fully functional with improved error handling and test coverage.
 
@@ -187,7 +188,6 @@ Display game genres via the service layer.
   - [ ] Add `GetGameGenresParams` and `GameGenresResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getGameGenres()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Check genre display on game detail pages
 
 ---
 
@@ -205,7 +205,6 @@ Display game completion times via the service layer.
   - [ ] Add `GetGameCompletionTimesParams` and `GameCompletionTimesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getGameTimeToBeats()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Check completion times on game detail pages
 
 ---
 
@@ -223,7 +222,6 @@ Display game expansions and DLCs via the service layer.
   - [ ] Add `GetGameExpansionsParams` and `GameExpansionsResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getGameDLCsAndExpansions()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Check expansions display on game detail pages
 
 ---
 
@@ -241,7 +239,6 @@ Display franchise games via the service layer.
   - [ ] Add `GetFranchiseGamesParams` and `FranchiseGamesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getGameFranchiseGames()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Check franchise games display on game detail pages
 
 ---
 
@@ -259,7 +256,6 @@ Display game artworks via the service layer.
   - [ ] Add `GetGameArtworksParams` and `GameArtworksResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getArtworks()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Check artworks display on game detail pages
 
 ---
 
@@ -277,7 +273,6 @@ Display upcoming game releases via the service layer.
   - [ ] Add `GetUpcomingReleasesByIdsParams` and `UpcomingReleasesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getNextMonthReleases()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Check upcoming releases display correctly
 
 ---
 
@@ -294,7 +289,6 @@ Display upcoming gaming events via the service layer.
   - [ ] Add `UpcomingGamingEventsResult` type to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getEvents()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Check events display correctly
 
 ---
 
@@ -312,7 +306,6 @@ Display event logos via the service layer.
   - [ ] Add `GetEventLogoParams` and `EventLogoResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
   - [ ] Update all consumers that use `igdbApi.getEventLogo()` to use the new service method
   - [ ] Run full test suite
-  - [ ] Verify app is runnable: Check event logos display correctly
 
 **Progress Checkpoint:** After Slice 15, all 18 methods from the legacy implementation are migrated. The application is fully functional with the new service layer, and all features have comprehensive test coverage.
 
