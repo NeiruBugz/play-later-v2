@@ -457,6 +457,84 @@ This project uses **pnpm**, not npm or yarn. The `pnpm` commands are used throug
 - Uses **Turbopack** for faster builds (`--turbopack` flag in dev/build)
 - React 19 and Next.js 15 are recent versions - check docs for latest patterns
 
+### Logging
+
+The project uses **Pino** for production-grade structured logging.
+
+**Logger Location**: `shared/lib/logger.ts`
+
+**Basic Usage**:
+
+```typescript
+import { createLogger } from "@/shared/lib/logger";
+
+// Create service-specific logger with context
+const logger = createLogger({ service: "GameService" });
+
+// Log at different levels
+logger.debug("Detailed debug info", { gameId: 123 });
+logger.info("Key application event", { action: "game_searched" });
+logger.warn("Warning condition", { issue: "rate_limit_approaching" });
+logger.error({ error: err }, "Error message");
+```
+
+**Log Levels** (in order of severity):
+
+- `fatal`: System crashes (application cannot continue)
+- `error`: Errors requiring attention (but application continues)
+- `warn`: Recoverable issues, deprecations
+- `info`: Key business events (user actions, API calls)
+- `debug`: Detailed debugging information
+- `trace`: Very detailed (function entry/exit)
+- `silent`: Disable logging (tests)
+
+**When to Log**:
+
+| Level   | Use Case                                          | Example                                       |
+| ------- | ------------------------------------------------- | --------------------------------------------- |
+| `info`  | Service method entry/exit with key params         | `"Searching games", { query: "zelda" }`       |
+| `info`  | Successful operations                             | `"Game details fetched", { gameId }`          |
+| `warn`  | Validation failures, missing optional data        | `"Game search with empty name"`               |
+| `error` | Exceptions, API failures, database errors         | `{ error }, "IGDB API request failed"`        |
+| `debug` | Internal state changes, token refreshes           | `"Twitch token acquired"`                     |
+| `debug` | Request/response details (not in production info) | `{ resource, status }, "API request success"` |
+
+**Structured Logging Pattern**:
+
+Always use the pattern: `logger.level({ contextObject }, "message")`
+
+```typescript
+// ✅ Good: Structured data + message
+logger.info({ userId, gameId, action: "added_to_library" }, "Game added");
+
+// ❌ Bad: String interpolation (not searchable)
+logger.info(`User ${userId} added game ${gameId}`);
+```
+
+**Service Integration**:
+
+Services should create a logger in their constructor:
+
+```typescript
+export class GameService extends BaseService {
+  private logger = createLogger({ service: "GameService" });
+
+  async searchGames(query: string) {
+    this.logger.info({ query }, "Searching games");
+    // ... implementation
+  }
+}
+```
+
+**Environment Configuration**:
+
+- **Development**: Pretty-printed colored output with timestamps
+- **Production**: JSON structured logs (for log aggregators like Datadog, CloudWatch)
+- **Test**: Silent mode (no output)
+- **Custom Level**: Set `LOG_LEVEL` env var to override (optional)
+
+**Performance**: Pino is 5-10x faster than alternatives like Winston, with minimal CPU overhead.
+
 ### Boundary Enforcement
 
 - ESLint plugin `eslint-plugin-boundaries` enforces architectural boundaries

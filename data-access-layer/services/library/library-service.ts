@@ -23,6 +23,8 @@ import {
 } from "@/data-access-layer/repository/library/library-repository";
 import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 
+import { createLogger } from "@/shared/lib/logger";
+
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
   CreateLibraryItemInput,
@@ -60,6 +62,8 @@ import type {
  * ```
  */
 export class LibraryService extends BaseService {
+  private logger = createLogger({ service: "LibraryService" });
+
   /**
    * Get library items for a specific game.
    *
@@ -340,7 +344,10 @@ export class LibraryService extends BaseService {
       });
     } catch (error) {
       // For count operations, return 0 on error (fail gracefully)
-      console.error("Failed to get library item count:", error);
+      this.logger.error(
+        { error, userId: input.userId, status: input.status },
+        "Failed to get library item count"
+      );
       return 0;
     }
   }

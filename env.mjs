@@ -9,6 +9,7 @@ export const env = createEnv({
     AUTH_URL: process.env.AUTH_URL,
     IGDB_CLIENT_ID: process.env.IGDB_CLIENT_ID,
     IGDB_CLIENT_SECRET: process.env.IGDB_CLIENT_SECRET,
+    LOG_LEVEL: process.env.LOG_LEVEL,
     NODE_ENV: process.env.NODE_ENV ?? "development",
     POSTGRES_DATABASE: process.env.POSTGRES_DATABASE,
     POSTGRES_HOST: process.env.POSTGRES_HOST,
@@ -27,6 +28,9 @@ export const env = createEnv({
     AUTH_URL: z.string().url({ message: "AUTH_URL is required" }),
     IGDB_CLIENT_ID: z.string({ message: "IGDB_CLIENT_ID is required" }),
     IGDB_CLIENT_SECRET: z.string({ message: "IGDB_CLIENT_SECRET is required" }),
+    LOG_LEVEL: z
+      .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+      .optional(),
     NODE_ENV: z.enum(["development", "test", "production"]),
     POSTGRES_DATABASE: z.string({ message: "POSTGRES_DATABASE is required" }),
     POSTGRES_HOST: z.string({ message: "POSTGRES_HOST is required" }),

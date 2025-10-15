@@ -2,6 +2,7 @@ import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import { getTimeStamp } from "@/shared/lib/date-functions";
+import { createLogger } from "@/shared/lib/logger";
 import { normalizeGameTitle, normalizeString } from "@/shared/lib/string";
 import {
   FullGameInfoResponse,
@@ -26,19 +27,26 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
   private token: TwitchTokenResponse | null = null;
   private tokenExpiry: number = 0;
   private queryBuilder: QueryBuilder;
+  private logger = createLogger({ service: "IgdbService" });
 
   constructor() {
     super();
     this.queryBuilder = new QueryBuilder();
+    this.logger.debug("IgdbService initialized");
   }
 
   private async requestTwitchToken() {
     try {
+      this.logger.debug("Requesting new Twitch access token");
       const res = await fetch(TOKEN_URL, {
         method: "POST",
       });
 
       if (!res.ok) {
+        this.logger.error(
+          { status: res.status, statusText: res.statusText },
+          "Failed to fetch Twitch token"
+        );
         throw new Error(`Failed to fetch token: ${res.statusText}`);
       }
       const token = (await res.json()) as unknown as TwitchTokenResponse;
@@ -46,8 +54,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       const SAFETY_MARGIN_SECONDS = 60;
       this.tokenExpiry =
         getTimeStamp() + token.expires_in - SAFETY_MARGIN_SECONDS;
+      this.logger.info(
+        { expiresIn: token.expires_in },
+        "Twitch access token acquired"
+      );
       return token;
     } catch (thrown) {
+      this.logger.error({ error: thrown }, "Error requesting Twitch token");
       this.handleError(thrown);
     }
   }
@@ -73,9 +86,14 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     options: RequestOptions
   ): Promise<T | undefined> {
     try {
+      this.logger.debug(
+        { resource: options.resource },
+        "Making IGDB API request"
+      );
       const accessToken = await this.getToken();
 
       if (accessToken === undefined) {
+        this.logger.error("No valid access token available for IGDB request");
         this.handleError(new Error("Unauthorized: No valid token available."));
         return undefined;
       }
@@ -91,14 +109,29 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
 
       if (!response.ok) {
-        console.error(response);
+        this.logger.error(
+          {
+            resource: options.resource,
+            status: response.status,
+            statusText: response.statusText,
+          },
+          "IGDB API request failed"
+        );
         throw new Error(
           `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
         );
       }
 
+      this.logger.debug(
+        { resource: options.resource, status: response.status },
+        "IGDB API request successful"
+      );
       return (await response.json()) as unknown as T;
     } catch (thrown) {
+      this.logger.error(
+        { error: thrown, resource: options.resource },
+        "Error making IGDB API request"
+      );
       this.handleError(thrown);
       return undefined;
     }
@@ -121,6 +154,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
   ): Promise<ServiceResult<GameSearchResult>> {
     try {
       if (!params.name || params.name.trim() === "") {
+        this.logger.warn("Game search attempted with empty name");
         return this.error(
           "Game name is required for search",
           ServiceErrorCode.VALIDATION_ERROR
@@ -132,6 +166,15 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       const filters = filterConditions ? ` & ${filterConditions}` : "";
       const normalizedSearchQuery = normalizeGameTitle(
         normalizeString(params.name)
+      );
+
+      this.logger.info(
+        {
+          searchQuery: params.name,
+          normalizedQuery: normalizedSearchQuery,
+          filters: fields,
+        },
+        "Searching games by name"
       );
 
       const query = this.queryBuilder
@@ -154,14 +197,27 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
 
       if (!games) {
+        this.logger.warn(
+          { searchQuery: params.name },
+          "No games found in search"
+        );
         return this.error("Failed to find games", ServiceErrorCode.NOT_FOUND);
       }
+
+      this.logger.info(
+        { searchQuery: params.name, resultCount: games.length },
+        "Game search completed"
+      );
 
       return this.success({
         games,
         count: games.length,
       });
     } catch (error) {
+      this.logger.error(
+        { error, searchQuery: params.name },
+        "Error searching games"
+      );
       return this.handleError(error, "Failed to find games");
     }
   }
@@ -171,6 +227,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
   ): Promise<ServiceResult<GameDetailsResult>> {
     try {
       if (!params.gameId || params.gameId <= 0) {
+        this.logger.warn(
+          { gameId: params.gameId },
+          "Invalid game ID provided for details fetch"
+        );
         return this.error(
           "Valid game ID is required",
           ServiceErrorCode.VALIDATION_ERROR
@@ -178,6 +238,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
 
       const { gameId } = params;
+
+      this.logger.info({ gameId }, "Fetching game details");
 
       const query = this.queryBuilder
         .fields([
@@ -221,13 +283,22 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
 
       if (resultGame && resultGame[0]) {
+        this.logger.info(
+          { gameId, gameName: resultGame[0].name },
+          "Game details fetched successfully"
+        );
         return this.success({
           game: resultGame[0],
         });
       } else {
+        this.logger.warn({ gameId }, "Game not found");
         throw new Error("Game not found");
       }
     } catch (error) {
+      this.logger.error(
+        { error, gameId: params.gameId },
+        "Error fetching game details"
+      );
       return this.handleError(error, "Failed to fetch game details");
     }
   }

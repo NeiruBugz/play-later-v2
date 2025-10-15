@@ -10,6 +10,8 @@
  * @module shared/services/types
  */
 
+import { logger } from "@/shared/lib/logger";
+
 // ============================================================================
 // Service Result Types (Discriminated Union Pattern)
 // ============================================================================
@@ -370,10 +372,15 @@ export abstract class BaseService {
   ): ServiceResult<never> {
     const message = error instanceof Error ? error.message : fallbackMessage;
 
-    // Log the original error for debugging (in production, use proper logging)
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Service error:", error);
-    }
+    // Log the error with structured data
+    logger.error(
+      {
+        error,
+        service: this.constructor.name,
+        message,
+      },
+      "Service error occurred"
+    );
 
     return this.error(message, ServiceErrorCode.INTERNAL_ERROR);
   }

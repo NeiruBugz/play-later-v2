@@ -8,6 +8,7 @@ import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import { getTimeStamp } from "@/shared/lib/date-functions";
+import { createLogger } from "@/shared/lib/logger";
 import { normalizeGameTitle, normalizeString } from "@/shared/lib/string";
 import {
   type Artwork,
@@ -26,18 +27,24 @@ import {
   type UpcomingReleaseResponse,
 } from "@/shared/types";
 
+const logger = createLogger({ service: "LegacyIgdbApi" });
+
 const igdbApi = {
   token: null as TwitchTokenResponse | null,
   tokenExpiry: 0 as number,
 
   async fetchToken(): Promise<TwitchTokenResponse | undefined> {
     try {
+      logger.debug("Fetching Twitch access token");
       const res = await fetch(TOKEN_URL, {
         cache: "no-store",
         method: "POST",
       });
       if (!res.ok) {
-        console.log(res);
+        logger.error(
+          { status: res.status, statusText: res.statusText },
+          "Failed to fetch Twitch token"
+        );
         throw new Error(`Failed to fetch token: ${res.statusText}`);
       }
       const token = (await res.json()) as unknown as TwitchTokenResponse;
@@ -45,6 +52,7 @@ const igdbApi = {
       const SAFETY_MARGIN_SECONDS = 60;
       this.tokenExpiry =
         getTimeStamp() + token.expires_in - SAFETY_MARGIN_SECONDS;
+      logger.info({ expiresIn: token.expires_in }, "Twitch token acquired");
       return token;
     } catch (thrown) {
       this.handleError(thrown);
@@ -62,9 +70,11 @@ const igdbApi = {
 
   async request<T>(options: RequestOptions): Promise<T | undefined> {
     try {
+      logger.debug({ resource: options.resource }, "Making IGDB API request");
       const accessToken = await this.getToken();
 
       if (accessToken === undefined) {
+        logger.error("No valid access token available for IGDB request");
         this.handleError(new Error("Unauthorized: No valid token available."));
         return undefined;
       }
@@ -81,12 +91,23 @@ const igdbApi = {
       });
 
       if (!response.ok) {
-        console.error(response);
+        logger.error(
+          {
+            resource: options.resource,
+            status: response.status,
+            statusText: response.statusText,
+          },
+          "IGDB API request failed"
+        );
         throw new Error(
           `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
         );
       }
 
+      logger.debug(
+        { resource: options.resource, status: response.status },
+        "IGDB API request successful"
+      );
       return (await response.json()) as unknown as T;
     } catch (thrown) {
       this.handleError(thrown);
@@ -96,14 +117,20 @@ const igdbApi = {
 
   handleError(thrown: unknown): Error | void {
     if (thrown instanceof Error) {
-      console.error(`${thrown.name}: ${thrown.message}`);
-      if (thrown.stack !== undefined) console.error(thrown.stack);
+      logger.error(
+        { error: thrown, name: thrown.name, message: thrown.message },
+        "IGDB API error"
+      );
       return;
     }
     try {
-      return new Error(JSON.stringify(thrown));
+      const error = new Error(JSON.stringify(thrown));
+      logger.error({ thrown }, "Unknown IGDB API error");
+      return error;
     } catch {
-      return new Error(String(thrown));
+      const error = new Error(String(thrown));
+      logger.error({ thrown }, "Failed to stringify IGDB API error");
+      return error;
     }
   },
 

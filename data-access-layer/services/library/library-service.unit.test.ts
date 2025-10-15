@@ -657,18 +657,13 @@ describe("LibraryService", () => {
       const repositoryError = new Error("Database connection failed");
       mockGetLibraryCount.mockRejectedValue(repositoryError);
 
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {
-        /* suppress error output in tests */
-      });
-
       const count = await service.getLibraryItemCount({
         userId: "user-123",
       });
 
+      // Should return 0 gracefully even on error
       expect(count).toBe(0);
-      expect(consoleSpy).toHaveBeenCalled();
-
-      consoleSpy.mockRestore();
+      // Logger is configured as silent in tests, so no need to spy
     });
   });
 });

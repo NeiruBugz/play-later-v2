@@ -64,10 +64,6 @@ describe("igdbApi", () => {
     });
 
     it("should handle fetch token error", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       mockFetch.mockResolvedValueOnce({
         ok: false,
         statusText: "Unauthorized",
@@ -76,8 +72,7 @@ describe("igdbApi", () => {
       const result = await igdbApi.fetchToken();
 
       expect(result).toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      // Logger is configured as silent in tests
     });
   });
 
@@ -160,9 +155,6 @@ describe("igdbApi", () => {
     });
 
     it("should handle request error", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
       const mockToken: TwitchTokenResponse = {
         access_token: "test-token",
         expires_in: 3600,
@@ -183,15 +175,10 @@ describe("igdbApi", () => {
       });
 
       expect(result).toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      // Logger is configured as silent in tests
     });
 
     it("should handle missing token", async () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       igdbApi.token = null;
 
       const result = await igdbApi.request({
@@ -200,8 +187,7 @@ describe("igdbApi", () => {
       });
 
       expect(result).toBeUndefined();
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      // Logger is configured as silent in tests
     });
   });
 

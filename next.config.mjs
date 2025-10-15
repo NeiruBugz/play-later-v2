@@ -3,6 +3,9 @@ const nextConfig = {
   eslint: {
     dirs: ['app', 'features', 'shared', 'test', '.'], // Include all relevant directories and root
   },
+  // Externalize Pino packages for server-side rendering
+  // Pino uses worker threads which need to be handled separately in Next.js
+  serverExternalPackages: ['pino', 'pino-pretty'],
   async headers() {
     return [
       {
