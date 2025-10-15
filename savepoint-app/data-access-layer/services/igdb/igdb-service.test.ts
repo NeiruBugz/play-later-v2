@@ -478,4 +478,366 @@ describe("IgdbService", () => {
       });
     });
   });
+
+  describe("searchPlatformByName", () => {
+    describe("Success Cases", () => {
+      it("should return matching platforms when valid platform name is provided", async () => {
+        // Given: Valid platform name "PlayStation"
+        const params = { platformName: "PlayStation" };
+        const mockPlatforms = [
+          { id: 167, name: "PlayStation 5", abbreviation: "PS5" },
+          { id: 48, name: "PlayStation 4", abbreviation: "PS4" },
+          { id: 46, name: "PlayStation Vita", abbreviation: "PSVita" },
+          { id: 9, name: "PlayStation 3", abbreviation: "PS3" },
+          { id: 8, name: "PlayStation 2", abbreviation: "PS2" },
+          { id: 7, name: "PlayStation", abbreviation: "PS1" },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockPlatforms,
+        });
+
+        // When: We search for platforms by name
+        const result = await service.searchPlatformByName(params);
+
+        // Then: We get successful response with matching platforms
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.platforms).toHaveLength(6);
+          expect(result.data.platforms[0].id).toBe(167);
+          expect(result.data.platforms[0].name).toBe("PlayStation 5");
+          expect(result.data.platforms[0].abbreviation).toBe("PS5");
+        }
+      });
+    });
+
+    describe("Error Cases", () => {
+      it("should return VALIDATION_ERROR when platform name is empty", async () => {
+        // Given: Empty platform name
+        const params = { platformName: "" };
+
+        // When: We search for platforms
+        const result = await service.searchPlatformByName(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Platform name is required");
+        }
+      });
+
+      it("should return NOT_FOUND when no platforms match the search", async () => {
+        // Given: Platform name that doesn't exist
+        const params = { platformName: "NonexistentPlatform" };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We search for platforms
+        const result = await service.searchPlatformByName(params);
+
+        // Then: We get NOT_FOUND error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+          expect(result.error).toContain("No platforms found");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+        // Given: Token fetch succeeds but IGDB API fails
+        const params = { platformName: "PlayStation" };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We search for platforms
+        const result = await service.searchPlatformByName(params);
+
+        // Then: We get error response
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to search platforms");
+        }
+      });
+    });
+
+    describe("Edge Cases", () => {
+      it("should return VALIDATION_ERROR when platform name is whitespace only", async () => {
+        // Given: Whitespace-only platform name
+        const params = { platformName: "   " };
+
+        // When: We search for platforms
+        const result = await service.searchPlatformByName(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Platform name is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when platform name is null", async () => {
+        // Given: Null platform name (type coercion)
+        const params = { platformName: null as unknown as string };
+
+        // When: We search for platforms
+        const result = await service.searchPlatformByName(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Platform name is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when platform name is undefined", async () => {
+        // Given: Undefined platform name (type coercion)
+        const params = { platformName: undefined as unknown as string };
+
+        // When: We search for platforms
+        const result = await service.searchPlatformByName(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Platform name is required");
+        }
+      });
+    });
+  });
+
+  describe("getGameScreenshots", () => {
+    describe("Success Cases", () => {
+      it("should return screenshots when valid game ID is provided", async () => {
+        // Given: Valid game ID and IGDB API returns screenshots
+        const params = { gameId: 1942 };
+        const mockScreenshots = [
+          {
+            id: 123456,
+            game: 1942,
+            image_id: "sc_zelda_botw_1",
+            url: "//images.igdb.com/igdb/image/upload/t_screenshot_med/sc_zelda_botw_1.jpg",
+            width: 1920,
+            height: 1080,
+          },
+          {
+            id: 123457,
+            game: 1942,
+            image_id: "sc_zelda_botw_2",
+            url: "//images.igdb.com/igdb/image/upload/t_screenshot_med/sc_zelda_botw_2.jpg",
+            width: 1920,
+            height: 1080,
+          },
+          {
+            id: 123458,
+            game: 1942,
+            image_id: "sc_zelda_botw_3",
+            url: "//images.igdb.com/igdb/image/upload/t_screenshot_med/sc_zelda_botw_3.jpg",
+            width: 1920,
+            height: 1080,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockScreenshots,
+        });
+
+        // When: We request game screenshots
+        const result = await service.getGameScreenshots(params);
+
+        // Then: We get successful response with screenshots
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.screenshots).toHaveLength(3);
+          expect(result.data.screenshots[0].id).toBe(123456);
+          expect(result.data.screenshots[0].image_id).toBe("sc_zelda_botw_1");
+          expect(result.data.screenshots[0].game).toBe(1942);
+          expect(result.data.screenshots[0].url).toContain("screenshot_med");
+          expect(result.data.screenshots[0].width).toBe(1920);
+          expect(result.data.screenshots[0].height).toBe(1080);
+        }
+      });
+
+      it("should handle empty response gracefully (game has no screenshots)", async () => {
+        // Given: Valid game ID but IGDB API returns empty array
+        const params = { gameId: 9999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We request game screenshots
+        const result = await service.getGameScreenshots(params);
+
+        // Then: We get successful response with empty array (NOT an error)
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.screenshots).toEqual([]);
+        }
+      });
+    });
+
+    describe("Error Cases", () => {
+      it("should return VALIDATION_ERROR when game ID is null", async () => {
+        // Given: Null game ID
+        const params = { gameId: null as unknown as number };
+
+        // When: We request game screenshots
+        const result = await service.getGameScreenshots(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is undefined", async () => {
+        // Given: Undefined game ID
+        const params = { gameId: undefined as unknown as number };
+
+        // When: We request game screenshots
+        const result = await service.getGameScreenshots(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is 0", async () => {
+        // Given: Game ID is 0
+        const params = { gameId: 0 };
+
+        // When: We request game screenshots
+        const result = await service.getGameScreenshots(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is negative", async () => {
+        // Given: Negative game ID
+        const params = { gameId: -100 };
+
+        // When: We request game screenshots
+        const result = await service.getGameScreenshots(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+        // Given: Token fetch succeeds but IGDB API fails
+        const params = { gameId: 1942 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We request game screenshots
+        const result = await service.getGameScreenshots(params);
+
+        // Then: We get error response
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch game screenshots");
+        }
+      });
+    });
+
+    describe("Edge Cases", () => {
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        const params = { gameId: 1942 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We request game screenshots
+        const result = await service.getGameScreenshots(params);
+
+        // Then: We get error response
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
 });

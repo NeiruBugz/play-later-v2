@@ -1,5 +1,3 @@
-import { Screenshot } from "igdb-api-types";
-
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
 import type { BaseService, ServiceResult } from "../types";
@@ -30,13 +28,19 @@ export interface PlatformsResult {
   platforms: Array<{ id: number; name: string }>;
 }
 
-export interface GetScreenshotsParams {
+export interface GetGameScreenshotsParams {
   gameId: number;
 }
 
-export interface ScreenshotsResult {
-  id: number;
-  screenshots: Screenshot[];
+export interface GameScreenshotsResult {
+  screenshots: Array<{
+    id: number;
+    game: number;
+    image_id: string;
+    url?: string;
+    width?: number;
+    height?: number;
+  }>;
 }
 
 export interface SearchGamesByNameParams {
@@ -78,6 +82,18 @@ export interface TopRatedGamesResult {
   }>;
 }
 
+export interface SearchPlatformByNameParams {
+  platformName: string;
+}
+
+export interface PlatformSearchResult {
+  platforms: Array<{
+    id: number;
+    name: string;
+    abbreviation?: string;
+  }>;
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -94,4 +110,12 @@ export interface IgdbService extends BaseService {
   ): Promise<ServiceResult<GameBySteamAppIdResult>>;
 
   getTopRatedGames(): Promise<ServiceResult<TopRatedGamesResult>>;
+
+  searchPlatformByName(
+    params: SearchPlatformByNameParams
+  ): Promise<ServiceResult<PlatformSearchResult>>;
+
+  getGameScreenshots(
+    params: GetGameScreenshotsParams
+  ): Promise<ServiceResult<GameScreenshotsResult>>;
 }

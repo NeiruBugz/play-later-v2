@@ -108,16 +108,16 @@ Display top-rated games on homepage via the service layer.
 
 Enable platform search and filtering through the service layer.
 
-- [ ] **Slice 4: Enable platform search and filtering through the service layer**
-  - [ ] Write unit tests for `searchPlatformByName()` method:
-    - [ ] Test: Success case with valid platform name
-    - [ ] Test: `INVALID_INPUT` error for empty name
-    - [ ] Test: `NOT_FOUND` error for no matches
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `searchPlatformByName(params: SearchPlatformByNameParams)` in `IgdbService`
-  - [ ] Add `SearchPlatformByNameParams` and `PlatformSearchResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getPlatformId()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 4: Enable platform search and filtering through the service layer**
+  - [x] Write unit tests for `searchPlatformByName()` method:
+    - [x] Test: Success case with valid platform name
+    - [x] Test: `INVALID_INPUT` error for empty name
+    - [x] Test: `NOT_FOUND` error for no matches
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `searchPlatformByName(params: SearchPlatformByNameParams)` in `IgdbService`
+  - [x] Add `SearchPlatformByNameParams` and `PlatformSearchResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getPlatformId()` to use the new service method
+  - [x] Run full test suite
 
 ---
 
@@ -125,16 +125,16 @@ Enable platform search and filtering through the service layer.
 
 Display game screenshots on detail pages via the service layer.
 
-- [ ] **Slice 5: Display game screenshots on detail pages via the service layer**
-  - [ ] Write unit tests for `getGameScreenshots()` method:
-    - [ ] Test: Success case with valid game ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid game ID
-    - [ ] Test: Handle empty response (game has no screenshots)
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getGameScreenshots(params: GetGameScreenshotsParams)` in `IgdbService`
-  - [ ] Add `GetGameScreenshotsParams` and `GameScreenshotsResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGameScreenshots()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 5: Display game screenshots on detail pages via the service layer**
+  - [x] Write unit tests for `getGameScreenshots()` method:
+    - [x] Test: Success case with valid game ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid game ID
+    - [x] Test: Handle empty response (game has no screenshots)
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getGameScreenshots(params: GetGameScreenshotsParams)` in `IgdbService`
+  - [x] Add `GetGameScreenshotsParams` and `GameScreenshotsResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGameScreenshots()` to use the new service method
+  - [x] Run full test suite
 
 ---
 

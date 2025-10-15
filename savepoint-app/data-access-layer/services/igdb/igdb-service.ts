@@ -18,11 +18,15 @@ import type {
   GameBySteamAppIdResult,
   GameDetailsParams,
   GameDetailsResult,
+  GameScreenshotsResult,
   GameSearchParams,
   GameSearchResult,
   GetGameBySteamAppIdParams,
+  GetGameScreenshotsParams,
   IgdbService as IgdbServiceInterface,
+  PlatformSearchResult,
   PlatformsResult,
+  SearchPlatformByNameParams,
   TopRatedGamesResult,
 } from "./types";
 
@@ -462,6 +466,177 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     } catch (error) {
       this.logger.error({ error }, "Error fetching top-rated games");
       return this.handleError(error, "Failed to fetch top-rated games");
+    }
+  }
+
+  /**
+   * Search for platforms by name
+   * Returns platforms matching the search query
+   *
+   * @param params - Search parameters containing platform name
+   * @returns ServiceResult with array of matching platforms
+   */
+  async searchPlatformByName(
+    params: SearchPlatformByNameParams
+  ): Promise<ServiceResult<PlatformSearchResult>> {
+    try {
+      // 1. Input validation
+      if (!params.platformName || params.platformName.trim() === "") {
+        this.logger.warn(
+          { platformName: params.platformName },
+          "Invalid platform name provided"
+        );
+        return this.error(
+          "Platform name is required for search",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { platformName } = params;
+
+      this.logger.info({ platformName }, "Searching platforms by name");
+
+      // 2. Build query
+      const query = new QueryBuilder()
+        .fields(["id", "name", "abbreviation"])
+        .search(platformName)
+        .limit(10)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          name: string;
+          abbreviation?: string;
+        }>
+      >({
+        body: query,
+        resource: "/platforms",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to search platforms from IGDB API");
+        return this.error(
+          "Failed to search platforms",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response (not an error, just no results)
+      if (response.length === 0) {
+        this.logger.warn(
+          { platformName },
+          "No platforms found matching search"
+        );
+        return this.error(
+          `No platforms found matching "${platformName}"`,
+          ServiceErrorCode.NOT_FOUND
+        );
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { platformName, count: response.length },
+        "Platforms found successfully"
+      );
+
+      return this.success({
+        platforms: response,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, platformName: params.platformName },
+        "Error searching platforms"
+      );
+      return this.handleError(error, "Failed to search platforms");
+    }
+  }
+
+  /**
+   * Get screenshots for a specific game
+   * Returns array of screenshot objects with image IDs and URLs
+   *
+   * @param params - Parameters containing game ID
+   * @returns ServiceResult with array of screenshots
+   */
+  async getGameScreenshots(
+    params: GetGameScreenshotsParams
+  ): Promise<ServiceResult<GameScreenshotsResult>> {
+    try {
+      // 1. Input validation
+      if (!params.gameId || params.gameId <= 0) {
+        this.logger.warn(
+          { gameId: params.gameId },
+          "Invalid game ID provided for screenshots fetch"
+        );
+        return this.error(
+          "Valid game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { gameId } = params;
+
+      this.logger.info({ gameId }, "Fetching game screenshots");
+
+      // 2. Build query
+      const query = new QueryBuilder()
+        .fields(["id", "game", "image_id", "url", "width", "height"])
+        .where(`game = ${gameId}`)
+        .limit(50)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          game: number;
+          image_id: string;
+          url?: string;
+          width?: number;
+          height?: number;
+        }>
+      >({
+        body: query,
+        resource: "/screenshots",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch game screenshots from IGDB API");
+        return this.error(
+          "Failed to fetch game screenshots",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response (NOT an error - games can have zero screenshots)
+      if (response.length === 0) {
+        this.logger.info({ gameId }, "No screenshots found for game");
+        return this.success({
+          screenshots: [],
+        });
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { gameId, count: response.length },
+        "Successfully fetched game screenshots"
+      );
+
+      return this.success({
+        screenshots: response,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, gameId: params.gameId },
+        "Error fetching game screenshots"
+      );
+      return this.handleError(error, "Failed to fetch game screenshots");
     }
   }
 }

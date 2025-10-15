@@ -1,33 +1,26 @@
 [
   {
-    "id": 1234,
-    "name": "Test Game 1234",
-    "screenshots": [
-      {
-        "id": 1,
-        "image_id": "sc_test_1",
-        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_1.jpg"
-      },
-      {
-        "id": 2,
-        "image_id": "sc_test_2",
-        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_2.jpg"
-      },
-      {
-        "id": 3,
-        "image_id": "sc_test_3",
-        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_3.jpg"
-      },
-      {
-        "id": 4,
-        "image_id": "sc_test_4",
-        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_4.jpg"
-      },
-      {
-        "id": 5,
-        "image_id": "sc_test_5",
-        "url": "//images.igdb.com/igdb/image/upload/t_screenshot_big/sc_test_5.jpg"
-      }
-    ]
+    "id": 123456,
+    "game": 1942,
+    "image_id": "sc_zelda_botw_1",
+    "url": "//images.igdb.com/igdb/image/upload/t_screenshot_med/sc_zelda_botw_1.jpg",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "id": 123457,
+    "game": 1942,
+    "image_id": "sc_zelda_botw_2",
+    "url": "//images.igdb.com/igdb/image/upload/t_screenshot_med/sc_zelda_botw_2.jpg",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "id": 123458,
+    "game": 1942,
+    "image_id": "sc_zelda_botw_3",
+    "url": "//images.igdb.com/igdb/image/upload/t_screenshot_med/sc_zelda_botw_3.jpg",
+    "width": 1920,
+    "height": 1080
   }
 ]

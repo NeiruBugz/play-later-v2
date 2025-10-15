@@ -1,0 +1,32 @@
+[
+  {
+    "id": 167,
+    "name": "PlayStation 5",
+    "abbreviation": "PS5"
+  },
+  {
+    "id": 48,
+    "name": "PlayStation 4",
+    "abbreviation": "PS4"
+  },
+  {
+    "id": 46,
+    "name": "PlayStation Vita",
+    "abbreviation": "PSVita"
+  },
+  {
+    "id": 9,
+    "name": "PlayStation 3",
+    "abbreviation": "PS3"
+  },
+  {
+    "id": 8,
+    "name": "PlayStation 2",
+    "abbreviation": "PS2"
+  },
+  {
+    "id": 7,
+    "name": "PlayStation",
+    "abbreviation": "PS1"
+  }
+]
