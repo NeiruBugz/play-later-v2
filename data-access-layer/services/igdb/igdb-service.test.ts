@@ -226,10 +226,9 @@ describe("IgdbService", () => {
   });
 
   describe("getGameBySteamAppId", () => {
-    describe("Success Cases", () => {
+    describe("when service returns", () => {
       it("should return game when valid Steam app ID is provided", async () => {
-        // Given: A valid Steam app ID and IGDB match
-        const params = { steamAppId: 570 }; // Dota 2
+        const params = { steamAppId: 570 };
         const mockGame = { id: 1234, name: "Dota 2" };
 
         mockFetch.mockResolvedValueOnce({
@@ -245,10 +244,8 @@ describe("IgdbService", () => {
           json: async () => [mockGame],
         });
 
-        // When: We look up the game by Steam app ID
         const result = await service.getGameBySteamAppId(params);
 
-        // Then: We get the matching IGDB game
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.game.id).toBe(1234);
@@ -257,15 +254,12 @@ describe("IgdbService", () => {
       });
     });
 
-    describe("Error Cases", () => {
+    describe("when service throws", () => {
       it("should return VALIDATION_ERROR when Steam app ID is 0", async () => {
-        // Given: An invalid Steam app ID (0)
         const params = { steamAppId: 0 };
 
-        // When: We attempt lookup
         const result = await service.getGameBySteamAppId(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -274,13 +268,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when Steam app ID is negative", async () => {
-        // Given: An invalid Steam app ID (negative number)
         const params = { steamAppId: -100 };
 
-        // When: We attempt lookup
         const result = await service.getGameBySteamAppId(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -289,7 +280,6 @@ describe("IgdbService", () => {
       });
 
       it("should return NOT_FOUND when no IGDB game matches Steam app ID", async () => {
-        // Given: A valid Steam app ID but no IGDB match
         const params = { steamAppId: 999999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -302,13 +292,11 @@ describe("IgdbService", () => {
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: async () => [], // Empty response
+          json: async () => [],
         });
 
-        // When: We attempt lookup
         const result = await service.getGameBySteamAppId(params);
 
-        // Then: We get NOT_FOUND error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
@@ -318,7 +306,6 @@ describe("IgdbService", () => {
       });
 
       it("should return NOT_FOUND when API request fails", async () => {
-        // Given: A valid Steam app ID but API failure
         const params = { steamAppId: 570 };
 
         mockFetch.mockResolvedValueOnce({
@@ -336,10 +323,8 @@ describe("IgdbService", () => {
           json: async () => null,
         });
 
-        // When: We attempt lookup
         const result = await service.getGameBySteamAppId(params);
 
-        // Then: We get NOT_FOUND (makeRequest returns undefined on error, which is treated as empty response)
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
@@ -347,15 +332,12 @@ describe("IgdbService", () => {
       });
 
       it("should return NOT_FOUND when token fetch fails", async () => {
-        // Given: A valid Steam app ID but token failure
         const params = { steamAppId: 570 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We attempt lookup
         const result = await service.getGameBySteamAppId(params);
 
-        // Then: We get NOT_FOUND (makeRequest returns undefined on error, which is treated as empty response)
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
