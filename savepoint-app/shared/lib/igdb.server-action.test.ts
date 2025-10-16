@@ -319,21 +319,8 @@ describe("igdbApi", () => {
     });
   });
 
-  describe("getGameRating", () => {
-    it("should fetch game rating", async () => {
-      const mockResponse = [{ id: 123, aggregated_rating: 85 }];
-      setupMockRequest(mockResponse);
-
-      const result = await igdbApi.getGameRating(123);
-
-      expect(result).toEqual(mockResponse[0]);
-    });
-
-    it("should return null values for null gameId", async () => {
-      const result = await igdbApi.getGameRating(null);
-      expect(result).toEqual({ id: null, aggregated_rating: null });
-    });
-  });
+  // Note: getGameRating tests removed - migrated to IgdbService.getGameAggregatedRating
+  // See: data-access-layer/services/igdb/igdb-service.test.ts
 
   describe("getSimilarGames", () => {
     it("should fetch similar games", async () => {

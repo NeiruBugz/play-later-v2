@@ -1,32 +1,32 @@
 # Testing Setup Guide
 
-This directory contains the test setup and configuration for both unit tests (with mocked Prisma) and integration tests (with real database).
+This directory contains the test setup and configuration for unit tests (with mocked Prisma) and integration tests (with real database). Unit tests are the default path and use a global mock for `@/shared/lib`.
 
 ## Quick Start
 
 ### Prerequisites
 
 1. Ensure Docker is running
-2. Start the test database: `npm run test:db:setup`
+2. Start the test database: `pnpm test:db:setup`
 
 ### Running Tests
 
 ```bash
 # Run all tests (default vitest config)
-npm test
+pnpm test
 
 # Run only unit tests (fast, mocked Prisma)
-npm run test:unit
+pnpm test:unit
 
 # Run only integration tests (real database)
-npm run test:integration
+pnpm test:integration
 
 # Watch mode
-npm run test:unit:watch
-npm run test:integration:watch
+pnpm test:unit:watch
+pnpm test:integration:watch
 
 # Coverage
-npm run test:coverage
+pnpm test:coverage
 ```
 
 ## Test Types
@@ -44,7 +44,7 @@ Example:
 // features/example/service.unit.test.ts
 import { vi } from "vitest";
 
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib";
 
 // Prisma is automatically mocked in unit tests
 vi.mocked(prisma.user.create).mockResolvedValue(mockUser);
@@ -127,31 +127,41 @@ const journalEntry = await createJournalEntry({
 const items = await testDb.libraryItem.findMany();
 ```
 
-## Configuration Files
+## Configuration
 
-### `vitest.config.ts` (Default)
+### `vitest.config.ts`
 
-- Mixed unit and integration tests
-- Uses mocked Prisma by default
-- Reasonable balance of speed and coverage
+Vitest is configured with multiple projects:
 
-### `vitest.config.unit.ts`
+- `utilities` (node): tests in `shared/**`, pure utils
+- `components` (jsdom): tests in `features/**/ui/**`
+- `backend` (node): tests in `features/**/server-actions/**` and `data-access-layer/**`
 
-- Fast unit tests only
-- Mocked Prisma client
-- 5s timeouts
-- Thread pool for parallelization
+Common settings:
 
-### `vitest.config.integration.ts`
+- Global setup: `test/setup/global.ts` (mocks `@/shared/lib`, auth, Next APIs)
+- Coverage thresholds: 80% global
 
-- Real database tests
-- 15s timeouts for database operations
-- Fork pool with single fork for DB isolation
-- Sequential execution to prevent DB conflicts
+## Module Mocking Strategy
+
+### Global library mock
+
+The global setup (`test/setup/global.ts`) mocks the `@/shared/lib` barrel to avoid loading real infrastructure (e.g., Prisma client initialization and `env.mjs`). It provides:
+
+- `prisma` with mocked methods (`user`, `game`, `libraryItem`, `review`, `$transaction`)
+- `logger` and `createLogger`
+- `hashPassword`, `verifyPassword`
+- Utility exports required by services (`getTimeStamp`, `normalizeString`, `normalizeGameTitle`, `convertReleaseDateToIsoStringDate`)
+
+Guidelines:
+
+- Import from `@/shared/lib` (barrel) in app code and tests; avoid deep imports like `@/shared/lib/app/db`
+- Prefer relying on the global mock; avoid redefining `vi.mock("@/shared/lib", ...)` inside individual tests unless you need to override specific exports
+- If overriding, spread the actual mocked module to keep other exports intact
 
 ## Environment Variables
 
-The test setup automatically configures:
+The test setup automatically configures minimal env in `beforeAll` of `global.ts`:
 
 - `NEXTAUTH_SECRET`: Test auth secret
 - `POSTGRES_PRISMA_URL`: Test database connection
@@ -251,8 +261,8 @@ The test database uses port `6432` (mapped from container port `5432`). If you h
 
 ### Performance Issues
 
-- Use `npm run test:unit` for fast feedback during development
-- Use `npm run test:integration` before committing
+- Use `pnpm test:unit` for fast feedback during development
+- Use `pnpm test:integration` before committing
 - Consider parallel execution settings in vitest configs
 
 ## Adding New Tests
@@ -263,7 +273,7 @@ The test database uses port `6432` (mapped from container port `5432`). If you h
 // features/new-feature/service.unit.test.ts
 import { describe, expect, it, vi } from "vitest";
 
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib";
 
 describe("NewService Unit Tests", () => {
   it("should validate input", () => {

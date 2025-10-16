@@ -1,6 +1,6 @@
 import "server-only";
 
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib";
 
 import { type CreateReviewInput } from "./types";
 

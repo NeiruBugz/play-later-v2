@@ -7,9 +7,12 @@ import { QueryBuilder } from "@/data-access-layer/services/igdb/query-builder";
 import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
-import { getTimeStamp } from "@/shared/lib/date-functions";
-import { createLogger } from "@/shared/lib/logger";
-import { normalizeGameTitle, normalizeString } from "@/shared/lib/string";
+import {
+  createLogger,
+  getTimeStamp,
+  normalizeGameTitle,
+  normalizeString,
+} from "@/shared/lib";
 import {
   type Artwork,
   type DLCAndExpansionListResponse,

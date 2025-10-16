@@ -4,9 +4,7 @@ import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
 import Credentials from "next-auth/providers/credentials";
 
-import { sessionErrorHandler } from "@/shared/lib";
-import { prisma } from "@/shared/lib/db";
-import { verifyPassword } from "@/shared/lib/password";
+import { prisma, sessionErrorHandler, verifyPassword } from "@/shared/lib";
 
 const enableCredentials =
   process.env.NODE_ENV === "test" ||

@@ -28,6 +28,7 @@ export default defineConfig({
         "domain/**",
         "env.mjs",
         "auth.ts",
+        "**/**/types/**.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       ],
       reporter: ["text", "json", "html"],
       thresholds: {

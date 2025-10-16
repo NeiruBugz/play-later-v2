@@ -14,8 +14,7 @@
 
 import "server-only";
 
-import { prisma } from "@/shared/lib/db";
-import { hashPassword } from "@/shared/lib/password";
+import { hashPassword, prisma } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
 import type {

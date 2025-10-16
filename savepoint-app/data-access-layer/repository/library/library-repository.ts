@@ -3,7 +3,7 @@ import "server-only";
 import { findOrCreateGameByIgdbId } from "@/data-access-layer/repository/game/game-repository";
 import { LibraryItemStatus, type Prisma } from "@prisma/client";
 
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib";
 
 import type {
   AddGameToUserLibraryInput,

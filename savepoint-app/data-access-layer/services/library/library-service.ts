@@ -23,7 +23,7 @@ import {
 } from "@/data-access-layer/repository/library/library-repository";
 import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 
-import { createLogger } from "@/shared/lib/logger";
+import { createLogger } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
 import type {

@@ -10,7 +10,7 @@
  * @module shared/services/types
  */
 
-import { logger } from "@/shared/lib/logger";
+import { logger } from "@/shared/lib";
 
 // ============================================================================
 // Service Result Types (Discriminated Union Pattern)

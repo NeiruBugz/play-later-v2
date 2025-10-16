@@ -30,9 +30,7 @@ vi.mock("@/shared/lib/igdb", () => ({
   },
 }));
 
-vi.mock("@/shared/lib/date-functions", () => ({
-  convertReleaseDateToIsoStringDate: vi.fn((date: string | undefined) => date),
-}));
+// Rely on global mock for '@/shared/lib'
 
 describe("GameService", () => {
   let service: GameService;

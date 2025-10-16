@@ -1,9 +1,12 @@
 import { env } from "@/env.mjs";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
-import { getTimeStamp } from "@/shared/lib/date-functions";
-import { createLogger } from "@/shared/lib/logger";
-import { normalizeGameTitle, normalizeString } from "@/shared/lib/string";
+import {
+  createLogger,
+  getTimeStamp,
+  normalizeGameTitle,
+  normalizeString,
+} from "@/shared/lib";
 import {
   FullGameInfoResponse,
   RequestOptions,
@@ -15,18 +18,28 @@ import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import { SEARCH_RESULTS_LIMIT, TOP_RATED_GAMES_LIMIT } from "./constants";
 import { QueryBuilder } from "./query-builder";
 import type {
+  GameAggregatedRatingResult,
   GameBySteamAppIdResult,
+  GameCompletionTimesResult,
   GameDetailsParams,
   GameDetailsResult,
+  GameExpansionsResult,
+  GameGenresResult,
   GameScreenshotsResult,
   GameSearchParams,
   GameSearchResult,
+  GetGameAggregatedRatingParams,
   GetGameBySteamAppIdParams,
+  GetGameCompletionTimesParams,
+  GetGameExpansionsParams,
+  GetGameGenresParams,
   GetGameScreenshotsParams,
+  GetSimilarGamesParams,
   IgdbService as IgdbServiceInterface,
   PlatformSearchResult,
   PlatformsResult,
   SearchPlatformByNameParams,
+  SimilarGamesResult,
   TopRatedGamesResult,
 } from "./types";
 
@@ -637,6 +650,459 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Error fetching game screenshots"
       );
       return this.handleError(error, "Failed to fetch game screenshots");
+    }
+  }
+
+  /**
+   * Get aggregated rating for a game
+   * Returns rating score and count of ratings from IGDB
+   *
+   * @param params - Parameters containing game ID
+   * @returns ServiceResult with rating data
+   */
+  async getGameAggregatedRating(
+    params: GetGameAggregatedRatingParams
+  ): Promise<ServiceResult<GameAggregatedRatingResult>> {
+    try {
+      // 1. Input validation
+      if (!params.gameId || params.gameId <= 0) {
+        this.logger.warn(
+          { gameId: params.gameId },
+          "Invalid game ID provided for rating fetch"
+        );
+        return this.error(
+          "Valid game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { gameId } = params;
+
+      this.logger.info({ gameId }, "Fetching game aggregated rating");
+
+      // 2. Build query
+      const query = new QueryBuilder()
+        .fields(["id", "aggregated_rating", "aggregated_rating_count"])
+        .where(`id = ${gameId}`)
+        .limit(1)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          aggregated_rating?: number;
+          aggregated_rating_count?: number;
+        }>
+      >({
+        body: query,
+        resource: "/games",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error(
+          "Failed to fetch game aggregated rating from IGDB API"
+        );
+        return this.error(
+          "Failed to fetch game aggregated rating",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response (NOT_FOUND)
+      if (response.length === 0) {
+        this.logger.warn({ gameId }, "No game found with ID");
+        return this.error(
+          `No game found with ID ${gameId}`,
+          ServiceErrorCode.NOT_FOUND
+        );
+      }
+
+      // 6. Return success (handle missing rating gracefully)
+      const game = response[0];
+      this.logger.info(
+        {
+          gameId,
+          rating: game.aggregated_rating,
+          count: game.aggregated_rating_count,
+        },
+        "Successfully fetched game aggregated rating"
+      );
+
+      return this.success({
+        gameId: game.id,
+        rating: game.aggregated_rating,
+        count: game.aggregated_rating_count,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, gameId: params.gameId },
+        "Error fetching game aggregated rating"
+      );
+      return this.handleError(error, "Failed to fetch game aggregated rating");
+    }
+  }
+
+  /**
+   * Get similar games for a specific game
+   * Returns array of IGDB game IDs that are similar to the given game
+   *
+   * @param params - Parameters containing game ID
+   * @returns ServiceResult with array of similar game IDs
+   */
+  async getSimilarGames(
+    params: GetSimilarGamesParams
+  ): Promise<ServiceResult<SimilarGamesResult>> {
+    try {
+      // 1. Input validation
+      if (!params.gameId || params.gameId <= 0) {
+        this.logger.warn(
+          { gameId: params.gameId },
+          "Invalid game ID provided for similar games fetch"
+        );
+        return this.error(
+          "Valid game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { gameId } = params;
+
+      this.logger.info({ gameId }, "Fetching similar games");
+
+      // 2. Build query
+      const query = new QueryBuilder()
+        .fields(["similar_games.*"])
+        .where(`id = ${gameId}`)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          similar_games?: number[];
+        }>
+      >({
+        body: query,
+        resource: "/games",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch similar games from IGDB API");
+        return this.error(
+          "Failed to fetch similar games",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response or missing similar_games field (NOT an error)
+      if (response.length === 0 || !response[0] || !response[0].similar_games) {
+        this.logger.info({ gameId }, "No similar games found for game");
+        return this.success({
+          similarGames: [],
+        });
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { gameId, count: response[0].similar_games.length },
+        "Successfully fetched similar games"
+      );
+
+      return this.success({
+        similarGames: response[0].similar_games,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, gameId: params.gameId },
+        "Error fetching similar games"
+      );
+      return this.handleError(error, "Failed to fetch similar games");
+    }
+  }
+
+  /**
+   * Retrieves the genres for a specific game
+   * @param params - Contains the game ID
+   * @returns ServiceResult with genres array or error
+   */
+  async getGameGenres(
+    params: GetGameGenresParams
+  ): Promise<ServiceResult<GameGenresResult>> {
+    try {
+      // 1. Input validation
+      if (!params.gameId || params.gameId <= 0) {
+        this.logger.warn(
+          { gameId: params.gameId },
+          "Invalid game ID provided for genres fetch"
+        );
+        return this.error(
+          "Valid game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { gameId } = params;
+
+      this.logger.info({ gameId }, "Fetching game genres");
+
+      // 2. Build query using QueryBuilder
+      const query = new QueryBuilder()
+        .fields(["genres.id", "genres.name"])
+        .where(`id = ${gameId}`)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          genres?: Array<{ id: number; name: string }>;
+        }>
+      >({
+        body: query,
+        resource: "/games",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch game genres from IGDB API");
+        return this.error(
+          "Failed to fetch game genres",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response or missing genres field (NOT an error)
+      if (response.length === 0 || !response[0] || !response[0].genres) {
+        this.logger.info({ gameId }, "No genres found for game");
+        return this.success({
+          genres: [],
+        });
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { gameId, count: response[0].genres.length },
+        "Successfully fetched game genres"
+      );
+
+      return this.success({
+        genres: response[0].genres,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, gameId: params.gameId },
+        "Error fetching game genres"
+      );
+      return this.handleError(error, "Failed to fetch game genres");
+    }
+  }
+
+  /**
+   * Get completion times for a specific game
+   * Returns time estimates for completing the game in different ways
+   *
+   * @param params - Parameters containing game ID
+   * @returns ServiceResult with completion time data or null if not available
+   */
+  async getGameCompletionTimes(
+    params: GetGameCompletionTimesParams
+  ): Promise<ServiceResult<GameCompletionTimesResult>> {
+    try {
+      // 1. Input validation
+      if (!params.gameId || params.gameId <= 0) {
+        this.logger.warn(
+          { gameId: params.gameId },
+          "Invalid game ID provided for completion times fetch"
+        );
+        return this.error(
+          "Valid game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { gameId } = params;
+
+      this.logger.info({ gameId }, "Fetching game completion times");
+
+      // 2. Build query (replicate legacy behavior)
+      const query = new QueryBuilder()
+        .fields([
+          "completeness",
+          "created_at",
+          "game",
+          "gameplay_completionist",
+          "gameplay_main",
+          "gameplay_main_extra",
+        ])
+        .where(`game = ${gameId}`)
+        .limit(1)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          game_id?: number;
+          gameplay_main?: number;
+          gameplay_main_extra?: number;
+          gameplay_completionist?: number;
+          completeness?: number;
+          created_at?: number;
+        }>
+      >({
+        body: query,
+        resource: "/game_time_to_beats",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error(
+          "Failed to fetch game completion times from IGDB API"
+        );
+        return this.error(
+          "Failed to fetch game completion times",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response (no completion time data)
+      if (!response || response.length === 0) {
+        this.logger.info({ gameId }, "No completion time data found for game");
+        return this.success({
+          completionTimes: null,
+        });
+      }
+
+      // 6. Return success with first result
+      this.logger.info(
+        { gameId, hasData: true },
+        "Successfully fetched game completion times"
+      );
+
+      return this.success({
+        completionTimes: response[0],
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, gameId: params.gameId },
+        "Error fetching game completion times"
+      );
+      return this.handleError(error, "Failed to fetch game completion times");
+    }
+  }
+
+  /**
+   * Get expansions and DLCs for a specific game
+   * Returns array of expansion/DLC items with details
+   *
+   * @param params - Parameters containing game ID
+   * @returns ServiceResult with expansions array
+   */
+  async getGameExpansions(
+    params: GetGameExpansionsParams
+  ): Promise<ServiceResult<GameExpansionsResult>> {
+    try {
+      // 1. Input validation
+      if (!params.gameId || params.gameId <= 0) {
+        this.logger.warn(
+          { gameId: params.gameId },
+          "Invalid game ID provided for expansions fetch"
+        );
+        return this.error(
+          "Valid game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { gameId } = params;
+
+      this.logger.info({ gameId }, "Fetching game expansions");
+
+      // 2. Build query (replicate legacy logic)
+      const query = new QueryBuilder()
+        .fields([
+          "expansions",
+          "expansions.name",
+          "expansions.cover.url",
+          "expansions.cover.image_id",
+          "expansions.release_dates",
+        ])
+        .where(`id = ${gameId}`)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          expansions?: Array<{
+            id: number;
+            name: string;
+            cover: {
+              id: number;
+              image_id: string;
+              url?: string;
+            };
+            release_dates: Array<{
+              id: number;
+              human: string;
+              platform: {
+                id: number;
+                name: string;
+                human: string;
+              };
+            }>;
+          }>;
+        }>
+      >({
+        body: query,
+        resource: "/games",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch game expansions from IGDB API");
+        return this.error(
+          "Failed to fetch game expansions",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response or missing expansions field (NOT an error)
+      if (
+        !response ||
+        response.length === 0 ||
+        !response[0] ||
+        !response[0].expansions
+      ) {
+        this.logger.info({ gameId }, "No expansions found for game");
+        return this.success({
+          expansions: [],
+        });
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { gameId, count: response[0].expansions.length },
+        "Successfully fetched game expansions"
+      );
+
+      return this.success({
+        expansions: response[0].expansions,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, gameId: params.gameId },
+        "Error fetching game expansions"
+      );
+      return this.handleError(error, "Failed to fetch game expansions");
     }
   }
 }

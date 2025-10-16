@@ -2,7 +2,7 @@ import "server-only";
 
 import type { JournalVisibility } from "@prisma/client";
 
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib";
 
 import type {
   CreateJournalEntryInput,

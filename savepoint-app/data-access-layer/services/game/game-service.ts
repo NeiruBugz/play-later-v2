@@ -29,7 +29,7 @@ import {
 } from "@/data-access-layer/repository/game/game-repository";
 import type { GameInput } from "@/data-access-layer/repository/game/types";
 
-import { convertReleaseDateToIsoStringDate } from "@/shared/lib/date-functions";
+import { convertReleaseDateToIsoStringDate } from "@/shared/lib";
 import igdbApi from "@/shared/lib/igdb";
 
 import { BaseService, ServiceErrorCode } from "../types";

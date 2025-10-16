@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { prisma } from "@/shared/lib/db";
+import { prisma } from "@/shared/lib";
 
 import {
   createJournalEntry,
@@ -14,7 +14,7 @@ import {
 import type { CreateJournalEntryInput, UpdateJournalEntryInput } from "./types";
 
 // Mock prisma client
-vi.mock("@/shared/lib/db", () => ({
+vi.mock("@/shared/lib", () => ({
   prisma: {
     journalEntry: {
       create: vi.fn(),

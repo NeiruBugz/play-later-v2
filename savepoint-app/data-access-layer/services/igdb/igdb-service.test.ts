@@ -833,4 +833,1188 @@ describe("IgdbService", () => {
       });
     });
   });
+
+  describe("getSimilarGames", () => {
+    describe("when service returns", () => {
+      it("should return similar games when valid game ID is provided", async () => {
+        // Given: A valid game ID and mocked similar games response
+        const params = { gameId: 1234 };
+        const mockResponse = [
+          {
+            id: 1234,
+            similar_games: [5000, 5001, 5002, 5003],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get a successful response with similar games
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.similarGames).toBeDefined();
+          expect(Array.isArray(result.data.similarGames)).toBe(true);
+          expect(result.data.similarGames).toEqual([5000, 5001, 5002, 5003]);
+          expect(result.data.similarGames).toHaveLength(4);
+        }
+      });
+
+      it("should handle empty response gracefully (game has no similar games)", async () => {
+        // Given: Valid game ID but no similar games
+        const params = { gameId: 9999 };
+        const mockResponse = [
+          {
+            id: 9999,
+            // No similar_games field
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get successful response with empty array (NOT an error)
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.similarGames).toEqual([]);
+        }
+      });
+
+      it("should handle game not found in response", async () => {
+        // Given: Valid game ID but API returns empty array
+        const params = { gameId: 7777 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.similarGames).toEqual([]);
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when game ID is null", async () => {
+        // Given: Null game ID
+        const params = { gameId: null as unknown as number };
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is undefined", async () => {
+        // Given: Undefined game ID
+        const params = { gameId: undefined as unknown as number };
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is 0", async () => {
+        // Given: Game ID is 0
+        const params = { gameId: 0 };
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is negative", async () => {
+        // Given: Negative game ID
+        const params = { gameId: -100 };
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get validation error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+        // Given: Token fetch succeeds but IGDB API fails
+        const params = { gameId: 1234 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get error response
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch similar games");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        const params = { gameId: 1234 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We request similar games
+        const result = await service.getSimilarGames(params);
+
+        // Then: We get error response
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
+
+  describe("getGameGenres", () => {
+    describe("when service returns", () => {
+      it("should return genres when valid game ID is provided", async () => {
+        // Given: A valid game ID and mocked IGDB response
+        const params = { gameId: 1234 };
+        const mockResponse = [
+          {
+            id: 1234,
+            genres: [
+              { id: 5, name: "Shooter" },
+              { id: 12, name: "Role-playing (RPG)" },
+            ],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request game genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get a successful response with genres
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.genres).toHaveLength(2);
+          expect(result.data.genres[0].id).toBe(5);
+          expect(result.data.genres[0].name).toBe("Shooter");
+          expect(result.data.genres[1].id).toBe(12);
+          expect(result.data.genres[1].name).toBe("Role-playing (RPG)");
+        }
+      });
+
+      it("should handle empty response (game has no genres)", async () => {
+        // Given: Game exists but has no genres
+        const params = { gameId: 1234 };
+        const mockResponse = [{ id: 1234, genres: [] }];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get successful response with empty genres
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.genres).toEqual([]);
+        }
+      });
+
+      it("should handle response without genres field", async () => {
+        // Given: Game exists but response has no genres field
+        const params = { gameId: 1234 };
+        const mockResponse = [{ id: 1234 }];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get successful response with empty genres
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.genres).toEqual([]);
+        }
+      });
+
+      it("should handle API returning empty array (game not found)", async () => {
+        // Given: API returns empty array
+        const params = { gameId: 9999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get successful response with empty genres
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.genres).toEqual([]);
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when game ID is null", async () => {
+        // Given: An invalid game ID (null)
+        const params = { gameId: null as unknown as number };
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is undefined", async () => {
+        // Given: An invalid game ID (undefined)
+        const params = { gameId: undefined as unknown as number };
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is 0", async () => {
+        // Given: An invalid game ID (0)
+        const params = { gameId: 0 };
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is negative", async () => {
+        // Given: An invalid game ID (negative)
+        const params = { gameId: -100 };
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API fails", async () => {
+        // Given: IGDB API returns error
+        const params = { gameId: 1234 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch game genres");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        const params = { gameId: 1234 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We request genres
+        const result = await service.getGameGenres(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
+
+  describe("getGameAggregatedRating", () => {
+    describe("when service returns", () => {
+      it("should return aggregated rating when valid game ID is provided", async () => {
+        // Given: Valid game ID and IGDB API returns rating data
+        const params = { gameId: 1942 };
+        const mockResponse = [
+          {
+            id: 1942,
+            aggregated_rating: 87.5,
+            aggregated_rating_count: 42,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request the game's aggregated rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get a successful response with rating data
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.gameId).toBe(1942);
+          expect(result.data.rating).toBe(87.5);
+          expect(result.data.count).toBe(42);
+        }
+      });
+
+      it("should handle missing rating data gracefully", async () => {
+        // Given: Game exists but has no rating data
+        const params = { gameId: 1234 };
+        const mockResponse = [{ id: 1234 }]; // No rating fields
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get success with undefined rating
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.gameId).toBe(1234);
+          expect(result.data.rating).toBeUndefined();
+          expect(result.data.count).toBeUndefined();
+        }
+      });
+
+      it("should handle rating without count", async () => {
+        // Given: Game has rating but no count
+        const params = { gameId: 5678 };
+        const mockResponse = [
+          {
+            id: 5678,
+            aggregated_rating: 92.3,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get success with rating but no count
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.gameId).toBe(5678);
+          expect(result.data.rating).toBe(92.3);
+          expect(result.data.count).toBeUndefined();
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when game ID is null", async () => {
+        // Given: Null game ID
+        const params = { gameId: null as unknown as number };
+
+        // When: We attempt to get rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is undefined", async () => {
+        // Given: Undefined game ID
+        const params = { gameId: undefined as unknown as number };
+
+        // When: We attempt to get rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is 0", async () => {
+        // Given: Game ID is 0
+        const params = { gameId: 0 };
+
+        // When: We attempt to get rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is negative", async () => {
+        // Given: Negative game ID
+        const params = { gameId: -100 };
+
+        // When: We attempt to get rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return NOT_FOUND when game does not exist", async () => {
+        // Given: Game ID that doesn't exist
+        const params = { gameId: 999999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We request rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get NOT_FOUND error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+          expect(result.error).toContain("No game found with ID");
+          expect(result.error).toContain("999999");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+        // Given: Token fetch succeeds but IGDB API fails
+        const params = { gameId: 1234 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We request rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain(
+            "Failed to fetch game aggregated rating"
+          );
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        const params = { gameId: 1234 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We request rating
+        const result = await service.getGameAggregatedRating(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
+
+  describe("getGameCompletionTimes", () => {
+    describe("when service returns", () => {
+      it("should return completion times when valid game ID is provided", async () => {
+        // Given: A valid game ID and mocked IGDB response
+        const params = { gameId: 1234 };
+        const mockResponse = [
+          {
+            id: 1,
+            game_id: 1234,
+            gameplay_main: 36000,
+            gameplay_main_extra: 54000,
+            gameplay_completionist: 90000,
+            completeness: 85,
+            created_at: 1609459200,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get successful response with completion time data
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.completionTimes).toBeDefined();
+          expect(result.data.completionTimes?.id).toBe(1);
+          expect(result.data.completionTimes?.game_id).toBe(1234);
+          expect(result.data.completionTimes?.gameplay_main).toBe(36000);
+          expect(result.data.completionTimes?.gameplay_main_extra).toBe(54000);
+          expect(result.data.completionTimes?.gameplay_completionist).toBe(
+            90000
+          );
+          expect(result.data.completionTimes?.completeness).toBe(85);
+        }
+      });
+
+      it("should handle missing completion time data gracefully (empty response)", async () => {
+        // Given: Valid game ID but no completion time data in IGDB
+        const params = { gameId: 9999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get successful response with null completion times
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.completionTimes).toBeNull();
+        }
+      });
+
+      it("should handle partial completion time data", async () => {
+        // Given: Completion time data with only main gameplay time
+        const params = { gameId: 1234 };
+        const mockResponse = [
+          {
+            id: 2,
+            game_id: 1234,
+            gameplay_main: 18000,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get successful response with partial data
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.completionTimes).toBeDefined();
+          expect(result.data.completionTimes?.gameplay_main).toBe(18000);
+          expect(
+            result.data.completionTimes?.gameplay_main_extra
+          ).toBeUndefined();
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when game ID is null", async () => {
+        // Given: Invalid game ID (null)
+        const params = { gameId: null as unknown as number };
+
+        // When: We attempt to fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is undefined", async () => {
+        // Given: Invalid game ID (undefined)
+        const params = { gameId: undefined as unknown as number };
+
+        // When: We attempt to fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is 0", async () => {
+        // Given: Invalid game ID (0)
+        const params = { gameId: 0 };
+
+        // When: We attempt to fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is negative", async () => {
+        // Given: Invalid game ID (negative)
+        const params = { gameId: -100 };
+
+        // When: We attempt to fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+        // Given: IGDB API is experiencing errors
+        const params = { gameId: 1234 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We attempt to fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain(
+            "Failed to fetch game completion times"
+          );
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        const params = { gameId: 1234 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We attempt to fetch completion times
+        const result = await service.getGameCompletionTimes(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
+
+  describe("getGameExpansions", () => {
+    describe("when service returns", () => {
+      it("should return expansions when valid game ID is provided", async () => {
+        // Given: A valid game ID and mocked IGDB response with expansions
+        const params = { gameId: 1234 };
+        const mockResponse = [
+          {
+            id: 1234,
+            expansions: [
+              {
+                id: 5000,
+                name: "The Witcher 3: Blood and Wine",
+                cover: {
+                  id: 1,
+                  image_id: "co1abc",
+                  url: "//images.igdb.com/igdb/image/upload/t_thumb/co1abc.jpg",
+                },
+                release_dates: [
+                  {
+                    id: 1,
+                    human: "May 31, 2016",
+                    platform: {
+                      id: 6,
+                      name: "PC (Microsoft Windows)",
+                      human: "May 31, 2016",
+                    },
+                  },
+                ],
+              },
+              {
+                id: 5001,
+                name: "The Witcher 3: Hearts of Stone",
+                cover: {
+                  id: 2,
+                  image_id: "co1xyz",
+                  url: "//images.igdb.com/igdb/image/upload/t_thumb/co1xyz.jpg",
+                },
+                release_dates: [],
+              },
+            ],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request game expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get a successful response with expansions
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.expansions).toHaveLength(2);
+          expect(result.data.expansions[0].id).toBe(5000);
+          expect(result.data.expansions[0].name).toBe(
+            "The Witcher 3: Blood and Wine"
+          );
+          expect(result.data.expansions[0].cover.image_id).toBe("co1abc");
+          expect(result.data.expansions[1].id).toBe(5001);
+          expect(result.data.expansions[1].name).toBe(
+            "The Witcher 3: Hearts of Stone"
+          );
+        }
+      });
+
+      it("should handle empty response (game has no expansions) gracefully", async () => {
+        // Given: Game has no expansions
+        const params = { gameId: 1234 };
+        const mockResponse = [
+          {
+            id: 1234,
+            expansions: [],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.expansions).toEqual([]);
+        }
+      });
+
+      it("should handle response without expansions field", async () => {
+        // Given: API response without expansions field
+        const params = { gameId: 1234 };
+        const mockResponse = [
+          {
+            id: 1234,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.expansions).toEqual([]);
+        }
+      });
+
+      it("should handle API returning empty array (game not found)", async () => {
+        // Given: Game doesn't exist
+        const params = { gameId: 9999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get successful response with empty array (NOT an error)
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.expansions).toEqual([]);
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when game ID is null", async () => {
+        // Given: Invalid game ID (null)
+        const params = { gameId: null as unknown as number };
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is undefined", async () => {
+        // Given: Invalid game ID (undefined)
+        const params = { gameId: undefined as unknown as number };
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is 0", async () => {
+        // Given: Invalid game ID (0)
+        const params = { gameId: 0 };
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is negative", async () => {
+        // Given: Invalid game ID (negative)
+        const params = { gameId: -100 };
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+        // Given: IGDB API error
+        const params = { gameId: 1234 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch game expansions");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        const params = { gameId: 1234 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We request expansions
+        const result = await service.getGameExpansions(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
 });

@@ -94,6 +94,75 @@ export interface PlatformSearchResult {
   }>;
 }
 
+export interface GetGameAggregatedRatingParams {
+  gameId: number;
+}
+
+export interface GameAggregatedRatingResult {
+  gameId: number;
+  rating?: number;
+  count?: number;
+}
+
+export interface GetSimilarGamesParams {
+  gameId: number;
+}
+
+export interface SimilarGamesResult {
+  similarGames: number[]; // Array of IGDB game IDs
+}
+
+export interface GetGameGenresParams {
+  gameId: number;
+}
+
+export interface GameGenresResult {
+  genres: Array<{ id: number; name: string }>;
+}
+
+export interface GetGameCompletionTimesParams {
+  gameId: number;
+}
+
+export interface GameCompletionTimesResult {
+  completionTimes: GameCompletionTimes | null;
+}
+
+export interface GameCompletionTimes {
+  id: number;
+  game_id?: number;
+  gameplay_main?: number;
+  gameplay_main_extra?: number;
+  gameplay_completionist?: number;
+  completeness?: number;
+  created_at?: number;
+}
+
+export interface GetGameExpansionsParams {
+  gameId: number;
+}
+
+export interface GameExpansionsResult {
+  expansions: Array<{
+    id: number;
+    name: string;
+    cover: {
+      id: number;
+      image_id: string;
+      url?: string;
+    };
+    release_dates: Array<{
+      id: number;
+      human: string;
+      platform: {
+        id: number;
+        name: string;
+        human: string;
+      };
+    }>;
+  }>;
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -118,4 +187,24 @@ export interface IgdbService extends BaseService {
   getGameScreenshots(
     params: GetGameScreenshotsParams
   ): Promise<ServiceResult<GameScreenshotsResult>>;
+
+  getGameAggregatedRating(
+    params: GetGameAggregatedRatingParams
+  ): Promise<ServiceResult<GameAggregatedRatingResult>>;
+
+  getSimilarGames(
+    params: GetSimilarGamesParams
+  ): Promise<ServiceResult<SimilarGamesResult>>;
+
+  getGameGenres(
+    params: GetGameGenresParams
+  ): Promise<ServiceResult<GameGenresResult>>;
+
+  getGameCompletionTimes(
+    params: GetGameCompletionTimesParams
+  ): Promise<ServiceResult<GameCompletionTimesResult>>;
+
+  getGameExpansions(
+    params: GetGameExpansionsParams
+  ): Promise<ServiceResult<GameExpansionsResult>>;
 }

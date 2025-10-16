@@ -2,8 +2,7 @@ import "server-only";
 
 import { type Prisma } from "@prisma/client";
 
-import { convertReleaseDateToIsoStringDate } from "@/shared/lib/date-functions";
-import { prisma } from "@/shared/lib/db";
+import { convertReleaseDateToIsoStringDate, prisma } from "@/shared/lib";
 import igdbApi from "@/shared/lib/igdb";
 
 import { type CreateGameInput, type GameInput } from "./types";

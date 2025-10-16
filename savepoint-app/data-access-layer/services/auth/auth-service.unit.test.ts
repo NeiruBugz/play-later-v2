@@ -1,26 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { prisma } from "@/shared/lib/db";
-import * as passwordUtils from "@/shared/lib/password";
+import { prisma } from "@/shared/lib";
+import * as passwordUtils from "@/shared/lib";
 
 import { ServiceErrorCode } from "../types";
 import { AuthService } from "./auth-service";
 
-// Mock the password utilities
-vi.mock("@/shared/lib/password", () => ({
-  hashPassword: vi.fn(),
-  verifyPassword: vi.fn(),
-}));
-
-// Mock Prisma
-vi.mock("@/shared/lib/db", () => ({
-  prisma: {
-    user: {
-      findUnique: vi.fn(),
-      create: vi.fn(),
-    },
-  },
-}));
+// Consolidated mock is defined in global setup; avoid redefining here to prevent conflicts
 
 describe("AuthService", () => {
   let service: AuthService;
