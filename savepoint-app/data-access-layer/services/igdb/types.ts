@@ -163,6 +163,65 @@ export interface GameExpansionsResult {
   }>;
 }
 
+export interface GetFranchiseGamesParams {
+  franchiseId: number;
+}
+
+export interface FranchiseGamesResult {
+  games: Array<{
+    id: number;
+    name: string;
+    cover: {
+      id: number;
+      image_id: string;
+    };
+    game_type: number;
+  }>;
+}
+
+export interface GetGameArtworksParams {
+  gameId: number;
+}
+
+export interface GameArtworksResult {
+  artworks: Array<{
+    id: number;
+    alpha_channel?: boolean;
+    animated?: boolean;
+    checksum: string;
+    game: number;
+    height?: number;
+    image_id: string;
+    url?: string;
+    width?: number;
+  }>;
+}
+
+export interface GetUpcomingReleasesByIdsParams {
+  ids: number[];
+}
+
+export interface UpcomingReleasesResult {
+  releases: Array<{
+    id: number;
+    name: string;
+    cover: {
+      id: number;
+      image_id: string;
+    };
+    first_release_date: number;
+    release_dates: Array<{
+      id: number;
+      human: string;
+      platform: {
+        id: number;
+        name: string;
+        human: string;
+      };
+    }>;
+  }>;
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -207,4 +266,16 @@ export interface IgdbService extends BaseService {
   getGameExpansions(
     params: GetGameExpansionsParams
   ): Promise<ServiceResult<GameExpansionsResult>>;
+
+  getFranchiseGames(
+    params: GetFranchiseGamesParams
+  ): Promise<ServiceResult<FranchiseGamesResult>>;
+
+  getGameArtworks(
+    params: GetGameArtworksParams
+  ): Promise<ServiceResult<GameArtworksResult>>;
+
+  getUpcomingReleasesByIds(
+    params: GetUpcomingReleasesByIdsParams
+  ): Promise<ServiceResult<UpcomingReleasesResult>>;
 }

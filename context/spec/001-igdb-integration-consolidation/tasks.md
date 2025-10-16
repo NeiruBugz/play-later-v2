@@ -142,16 +142,16 @@ Display game screenshots on detail pages via the service layer.
 
 Display game aggregated ratings via the service layer.
 
-- [ ] **Slice 6: Display game aggregated ratings via the service layer**
-  - [ ] Write unit tests for `getGameAggregatedRating()` method:
-    - [ ] Test: Success case with valid game ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid game ID
-    - [ ] Test: Handle missing rating data
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getGameAggregatedRating(params: GetGameAggregatedRatingParams)` in `IgdbService`
-  - [ ] Add `GetGameAggregatedRatingParams` and `GameAggregatedRatingResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGameRating()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 6: Display game aggregated ratings via the service layer**
+  - [x] Write unit tests for `getGameAggregatedRating()` method:
+    - [x] Test: Success case with valid game ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid game ID
+    - [x] Test: Handle missing rating data
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getGameAggregatedRating(params: GetGameAggregatedRatingParams)` in `IgdbService`
+  - [x] Add `GetGameAggregatedRatingParams` and `GameAggregatedRatingResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGameRating()` to use the new service method
+  - [x] Run full test suite
 
 ---
 
@@ -159,16 +159,16 @@ Display game aggregated ratings via the service layer.
 
 Display similar game recommendations via the service layer.
 
-- [ ] **Slice 7: Display similar game recommendations via the service layer**
-  - [ ] Write unit tests for `getSimilarGames()` method:
-    - [ ] Test: Success case with valid game ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid game ID
-    - [ ] Test: Handle empty response (no similar games found)
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getSimilarGames(params: GetSimilarGamesParams)` in `IgdbService`
-  - [ ] Add `GetSimilarGamesParams` and `SimilarGamesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getSimilarGames()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 7: Display similar game recommendations via the service layer**
+  - [x] Write unit tests for `getSimilarGames()` method:
+    - [x] Test: Success case with valid game ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid game ID
+    - [x] Test: Handle empty response (no similar games found)
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getSimilarGames(params: GetSimilarGamesParams)` in `IgdbService`
+  - [x] Add `GetSimilarGamesParams` and `SimilarGamesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getSimilarGames()` to use the new service method
+  - [x] Run full test suite
 
 **Progress Checkpoint:** After Slice 7, all Phase 2 high-priority methods are migrated. Core features are fully functional with improved error handling and test coverage.
 
@@ -178,16 +178,16 @@ Display similar game recommendations via the service layer.
 
 Display game genres via the service layer.
 
-- [ ] **Slice 8: Display game genres via the service layer**
-  - [ ] Write unit tests for `getGameGenres()` method:
-    - [ ] Test: Success case with valid game ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid game ID
-    - [ ] Test: Handle empty response
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getGameGenres(params: GetGameGenresParams)` in `IgdbService`
-  - [ ] Add `GetGameGenresParams` and `GameGenresResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGameGenres()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 8: Display game genres via the service layer**
+  - [x] Write unit tests for `getGameGenres()` method:
+    - [x] Test: Success case with valid game ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid game ID
+    - [x] Test: Handle empty response
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getGameGenres(params: GetGameGenresParams)` in `IgdbService`
+  - [x] Add `GetGameGenresParams` and `GameGenresResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGameGenres()` to use the new service method
+  - [x] Run full test suite
 
 ---
 
@@ -195,16 +195,16 @@ Display game genres via the service layer.
 
 Display game completion times via the service layer.
 
-- [ ] **Slice 9: Display game completion times via the service layer**
-  - [ ] Write unit tests for `getGameCompletionTimes()` method:
-    - [ ] Test: Success case with valid game ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid game ID
-    - [ ] Test: Handle missing completion time data
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getGameCompletionTimes(params: GetGameCompletionTimesParams)` in `IgdbService`
-  - [ ] Add `GetGameCompletionTimesParams` and `GameCompletionTimesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGameTimeToBeats()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 9: Display game completion times via the service layer**
+  - [x] Write unit tests for `getGameCompletionTimes()` method:
+    - [x] Test: Success case with valid game ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid game ID
+    - [x] Test: Handle missing completion time data
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getGameCompletionTimes(params: GetGameCompletionTimesParams)` in `IgdbService`
+  - [x] Add `GetGameCompletionTimesParams` and `GameCompletionTimesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGameTimeToBeats()` to use the new service method
+  - [x] Run full test suite
 
 ---
 
@@ -212,16 +212,16 @@ Display game completion times via the service layer.
 
 Display game expansions and DLCs via the service layer.
 
-- [ ] **Slice 10: Display game expansions and DLCs via the service layer**
-  - [ ] Write unit tests for `getGameExpansions()` method:
-    - [ ] Test: Success case with valid game ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid game ID
-    - [ ] Test: Handle no expansions (empty response)
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getGameExpansions(params: GetGameExpansionsParams)` in `IgdbService`
-  - [ ] Add `GetGameExpansionsParams` and `GameExpansionsResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGameDLCsAndExpansions()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 10: Display game expansions and DLCs via the service layer**
+  - [x] Write unit tests for `getGameExpansions()` method:
+    - [x] Test: Success case with valid game ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid game ID
+    - [x] Test: Handle no expansions (empty response)
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getGameExpansions(params: GetGameExpansionsParams)` in `IgdbService`
+  - [x] Add `GetGameExpansionsParams` and `GameExpansionsResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGameDLCsAndExpansions()` to use the new service method
+  - [x] Run full test suite
 
 ---
 
@@ -229,16 +229,16 @@ Display game expansions and DLCs via the service layer.
 
 Display franchise games via the service layer.
 
-- [ ] **Slice 11: Display franchise games via the service layer**
-  - [ ] Write unit tests for `getFranchiseGames()` method:
-    - [ ] Test: Success case with valid franchise ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid franchise ID
-    - [ ] Test: Handle no franchise games (empty response)
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getFranchiseGames(params: GetFranchiseGamesParams)` in `IgdbService`
-  - [ ] Add `GetFranchiseGamesParams` and `FranchiseGamesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getGameFranchiseGames()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 11: Display franchise games via the service layer**
+  - [x] Write unit tests for `getFranchiseGames()` method:
+    - [x] Test: Success case with valid franchise ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid franchise ID
+    - [x] Test: Handle no franchise games (empty response)
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getFranchiseGames(params: GetFranchiseGamesParams)` in `IgdbService`
+  - [x] Add `GetFranchiseGamesParams` and `FranchiseGamesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getGameFranchiseGames()` to use the new service method
+  - [x] Run full test suite
 
 ---
 
@@ -246,16 +246,16 @@ Display franchise games via the service layer.
 
 Display game artworks via the service layer.
 
-- [ ] **Slice 12: Display game artworks via the service layer**
-  - [ ] Write unit tests for `getGameArtworks()` method:
-    - [ ] Test: Success case with valid game ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid game ID
-    - [ ] Test: Handle no artworks (empty response)
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getGameArtworks(params: GetGameArtworksParams)` in `IgdbService`
-  - [ ] Add `GetGameArtworksParams` and `GameArtworksResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getArtworks()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 12: Display game artworks via the service layer**
+  - [x] Write unit tests for `getGameArtworks()` method:
+    - [x] Test: Success case with valid game ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid game ID
+    - [x] Test: Handle no artworks (empty response)
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getGameArtworks(params: GetGameArtworksParams)` in `IgdbService`
+  - [x] Add `GetGameArtworksParams` and `GameArtworksResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getArtworks()` to use the new service method
+  - [x] Run full test suite
 
 ---
 
@@ -263,16 +263,16 @@ Display game artworks via the service layer.
 
 Display upcoming game releases via the service layer.
 
-- [ ] **Slice 13: Display upcoming game releases via the service layer**
-  - [ ] Write unit tests for `getUpcomingReleasesByIds()` method:
-    - [ ] Test: Success case with array of valid game IDs
-    - [ ] Test: `INVALID_INPUT` error for empty array
-    - [ ] Test: Handle no upcoming releases
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getUpcomingReleasesByIds(params: GetUpcomingReleasesByIdsParams)` in `IgdbService`
-  - [ ] Add `GetUpcomingReleasesByIdsParams` and `UpcomingReleasesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getNextMonthReleases()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 13: Display upcoming game releases via the service layer**
+  - [x] Write unit tests for `getUpcomingReleasesByIds()` method:
+    - [x] Test: Success case with array of valid game IDs
+    - [x] Test: `INVALID_INPUT` error for empty array
+    - [x] Test: Handle no upcoming releases
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getUpcomingReleasesByIds(params: GetUpcomingReleasesByIdsParams)` in `IgdbService`
+  - [x] Add `GetUpcomingReleasesByIdsParams` and `UpcomingReleasesResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getNextMonthReleases()` to use the new service method
+  - [x] Run full test suite
 
 ---
 

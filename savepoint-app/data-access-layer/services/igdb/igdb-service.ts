@@ -18,7 +18,9 @@ import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import { SEARCH_RESULTS_LIMIT, TOP_RATED_GAMES_LIMIT } from "./constants";
 import { QueryBuilder } from "./query-builder";
 import type {
+  FranchiseGamesResult,
   GameAggregatedRatingResult,
+  GameArtworksResult,
   GameBySteamAppIdResult,
   GameCompletionTimesResult,
   GameDetailsParams,
@@ -28,19 +30,23 @@ import type {
   GameScreenshotsResult,
   GameSearchParams,
   GameSearchResult,
+  GetFranchiseGamesParams,
   GetGameAggregatedRatingParams,
+  GetGameArtworksParams,
   GetGameBySteamAppIdParams,
   GetGameCompletionTimesParams,
   GetGameExpansionsParams,
   GetGameGenresParams,
   GetGameScreenshotsParams,
   GetSimilarGamesParams,
+  GetUpcomingReleasesByIdsParams,
   IgdbService as IgdbServiceInterface,
   PlatformSearchResult,
   PlatformsResult,
   SearchPlatformByNameParams,
   SimilarGamesResult,
   TopRatedGamesResult,
+  UpcomingReleasesResult,
 } from "./types";
 
 export class IgdbService extends BaseService implements IgdbServiceInterface {
@@ -1103,6 +1109,304 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Error fetching game expansions"
       );
       return this.handleError(error, "Failed to fetch game expansions");
+    }
+  }
+
+  /**
+   * Get all games in a franchise
+   * Returns array of games that belong to the specified franchise
+   *
+   * @param params - Parameters containing franchise ID
+   * @returns ServiceResult with array of franchise games
+   */
+  async getFranchiseGames(
+    params: GetFranchiseGamesParams
+  ): Promise<ServiceResult<FranchiseGamesResult>> {
+    try {
+      // 1. Input validation
+      if (!params.franchiseId || params.franchiseId <= 0) {
+        this.logger.warn(
+          { franchiseId: params.franchiseId },
+          "Invalid franchise ID provided for franchise games fetch"
+        );
+        return this.error(
+          "Valid franchise ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { franchiseId } = params;
+
+      this.logger.info({ franchiseId }, "Fetching franchise games");
+
+      // 2. Build query (replicate legacy logic)
+      const query = new QueryBuilder()
+        .fields([
+          "name",
+          "id",
+          "games.name",
+          "games.cover.image_id",
+          "games.game_type",
+        ])
+        .where(`id = ${franchiseId}`)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          name: string;
+          games?: Array<{
+            id: number;
+            name: string;
+            cover: {
+              id: number;
+              image_id: string;
+            };
+            game_type: number;
+          }>;
+        }>
+      >({
+        body: query,
+        resource: "/franchises",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch franchise games from IGDB API");
+        return this.error(
+          "Failed to fetch franchise games",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response or missing games field (NOT an error)
+      if (
+        !response ||
+        response.length === 0 ||
+        !response[0] ||
+        !response[0].games
+      ) {
+        this.logger.info({ franchiseId }, "No games found for franchise");
+        return this.success({
+          games: [],
+        });
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { franchiseId, count: response[0].games.length },
+        "Successfully fetched franchise games"
+      );
+
+      return this.success({
+        games: response[0].games,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, franchiseId: params.franchiseId },
+        "Error fetching franchise games"
+      );
+      return this.handleError(error, "Failed to fetch franchise games");
+    }
+  }
+
+  /**
+   * Get artworks for a specific game
+   * Returns array of artwork images with metadata
+   *
+   * @param params - Parameters containing game ID
+   * @returns ServiceResult with array of artworks
+   */
+  async getGameArtworks(
+    params: GetGameArtworksParams
+  ): Promise<ServiceResult<GameArtworksResult>> {
+    try {
+      // 1. Input validation
+      if (!params.gameId || params.gameId <= 0) {
+        this.logger.warn(
+          { gameId: params.gameId },
+          "Invalid game ID provided for artworks fetch"
+        );
+        return this.error(
+          "Valid game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { gameId } = params;
+
+      this.logger.info({ gameId }, "Fetching game artworks");
+
+      // 2. Build query using QueryBuilder (replicate legacy fields)
+      const query = new QueryBuilder()
+        .fields([
+          "alpha_channel",
+          "animated",
+          "checksum",
+          "game",
+          "height",
+          "image_id",
+          "url",
+          "width",
+        ])
+        .where(`game = ${gameId}`)
+        .limit(50)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          alpha_channel?: boolean;
+          animated?: boolean;
+          checksum: string;
+          game: number;
+          height?: number;
+          image_id: string;
+          url?: string;
+          width?: number;
+        }>
+      >({
+        body: query,
+        resource: "/artworks",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch game artworks from IGDB API");
+        return this.error(
+          "Failed to fetch game artworks",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response (NOT an error - game has no artworks)
+      if (response.length === 0) {
+        this.logger.info({ gameId }, "No artworks found for game");
+        return this.success({
+          artworks: [],
+        });
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { gameId, count: response.length },
+        "Successfully fetched game artworks"
+      );
+
+      return this.success({
+        artworks: response,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, gameId: params.gameId },
+        "Error fetching game artworks"
+      );
+      return this.handleError(error, "Failed to fetch game artworks");
+    }
+  }
+
+  async getUpcomingReleasesByIds(
+    params: GetUpcomingReleasesByIdsParams
+  ): Promise<ServiceResult<UpcomingReleasesResult>> {
+    try {
+      // 1. Input validation
+      if (!params.ids || params.ids.length === 0) {
+        this.logger.warn("Attempted to fetch releases with empty IDs array");
+        return this.error(
+          "At least one game ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      // Validate all IDs are positive integers
+      if (params.ids.some((id) => !id || id <= 0)) {
+        this.logger.warn({ ids: params.ids }, "Invalid game IDs provided");
+        return this.error(
+          "All game IDs must be valid positive integers",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      this.logger.info(
+        { ids: params.ids, count: params.ids.length },
+        "Fetching upcoming releases"
+      );
+
+      // 2. Build query using QueryBuilder
+      const query = this.queryBuilder
+        .fields([
+          "name",
+          "cover.image_id",
+          "first_release_date",
+          "release_dates.platform.name",
+          "release_dates.human",
+        ])
+        .sort("first_release_date", "asc")
+        .where(`id = (${params.ids.join(",")})`)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          name: string;
+          cover: {
+            id: number;
+            image_id: string;
+          };
+          first_release_date: number;
+          release_dates: Array<{
+            id: number;
+            human: string;
+            platform: {
+              id: number;
+              name: string;
+              human: string;
+            };
+          }>;
+        }>
+      >({
+        body: query,
+        resource: "/games",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch upcoming releases from IGDB API");
+        return this.error(
+          "Failed to fetch upcoming releases",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response (NOT an error - no upcoming releases is valid)
+      if (response.length === 0) {
+        this.logger.info({ ids: params.ids }, "No upcoming releases found");
+        return this.success({
+          releases: [],
+        });
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { ids: params.ids, count: response.length },
+        "Successfully fetched upcoming releases"
+      );
+
+      return this.success({
+        releases: response,
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, ids: params.ids },
+        "Error fetching upcoming releases"
+      );
+      return this.handleError(error, "Failed to fetch upcoming releases");
     }
   }
 }

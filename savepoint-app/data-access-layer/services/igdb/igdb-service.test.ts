@@ -2017,4 +2017,731 @@ describe("IgdbService", () => {
       });
     });
   });
+
+  describe("getGameArtworks", () => {
+    describe("when service returns", () => {
+      it("should return artworks when valid game ID is provided", async () => {
+        // Given: A valid game ID and mocked artwork response
+        const params = { gameId: 1234 };
+        const mockArtworks = [
+          {
+            id: 1,
+            image_id: "abc123",
+            game: 1234,
+            checksum: "checksum1",
+            url: "//images.igdb.com/igdb/image/upload/t_thumb/abc123.jpg",
+            width: 1920,
+            height: 1080,
+            alpha_channel: false,
+            animated: false,
+          },
+          {
+            id: 2,
+            image_id: "def456",
+            game: 1234,
+            checksum: "checksum2",
+            url: "//images.igdb.com/igdb/image/upload/t_thumb/def456.jpg",
+            width: 1920,
+            height: 1080,
+            alpha_channel: true,
+            animated: false,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockArtworks,
+        });
+
+        // When: We fetch game artworks
+        const result = await service.getGameArtworks(params);
+
+        // Then: We get successful response with artworks
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.artworks).toHaveLength(2);
+          expect(result.data.artworks[0].image_id).toBe("abc123");
+          expect(result.data.artworks[0].game).toBe(1234);
+          expect(result.data.artworks[1].image_id).toBe("def456");
+        }
+      });
+
+      it("should return empty array when game has no artworks", async () => {
+        // Given: A valid game ID but no artworks
+        const params = { gameId: 9999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We fetch game artworks
+        const result = await service.getGameArtworks(params);
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.artworks).toEqual([]);
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when game ID is null", async () => {
+        // Given: Invalid game ID
+        const params = { gameId: null as any };
+
+        // When: We attempt to fetch artworks
+        const result = await service.getGameArtworks(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is 0", async () => {
+        // Given: Invalid game ID (0)
+        const params = { gameId: 0 };
+
+        // When: We attempt to fetch artworks
+        const result = await service.getGameArtworks(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+        }
+      });
+
+      it("should return VALIDATION_ERROR when game ID is negative", async () => {
+        // Given: Invalid game ID (negative)
+        const params = { gameId: -100 };
+
+        // When: We attempt to fetch artworks
+        const result = await service.getGameArtworks(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API fails", async () => {
+        // Given: IGDB API is experiencing errors
+        const params = { gameId: 1234 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We attempt to fetch artworks
+        const result = await service.getGameArtworks(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        const params = { gameId: 1234 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We attempt to fetch artworks
+        const result = await service.getGameArtworks(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
+
+  describe("getFranchiseGames", () => {
+    describe("when service returns", () => {
+      it("should return franchise games when valid franchise ID is provided", async () => {
+        // Given: A valid franchise ID and mocked IGDB response
+        const params = { franchiseId: 123 };
+        const mockResponse = [
+          {
+            id: 123,
+            name: "The Legend of Zelda",
+            games: [
+              {
+                id: 1,
+                name: "The Legend of Zelda: Breath of the Wild",
+                cover: { id: 10, image_id: "cover1" },
+                game_type: 0,
+              },
+              {
+                id: 2,
+                name: "The Legend of Zelda: Tears of the Kingdom",
+                cover: { id: 11, image_id: "cover2" },
+                game_type: 0,
+              },
+            ],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get a successful response with franchise games
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.games).toHaveLength(2);
+          expect(result.data.games[0].id).toBe(1);
+          expect(result.data.games[0].name).toBe(
+            "The Legend of Zelda: Breath of the Wild"
+          );
+          expect(result.data.games[1].id).toBe(2);
+          expect(result.data.games[1].name).toBe(
+            "The Legend of Zelda: Tears of the Kingdom"
+          );
+        }
+      });
+
+      it("should handle empty response (no games in franchise) gracefully", async () => {
+        // Given: A valid franchise ID but no games
+        const params = { franchiseId: 999 };
+        const mockResponse = [
+          {
+            id: 999,
+            name: "Empty Franchise",
+            games: [],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.games).toEqual([]);
+        }
+      });
+
+      it("should handle response without games field gracefully", async () => {
+        // Given: A valid franchise ID but response has no games field
+        const params = { franchiseId: 888 };
+        const mockResponse = [
+          {
+            id: 888,
+            name: "Franchise without games",
+            // No games field
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.games).toEqual([]);
+        }
+      });
+
+      it("should handle API returning empty array", async () => {
+        // Given: API returns empty array (franchise not found)
+        const params = { franchiseId: 777 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.games).toEqual([]);
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when franchise ID is null", async () => {
+        // Given: An invalid franchise ID (null)
+        const params = { franchiseId: null as any };
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid franchise ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when franchise ID is undefined", async () => {
+        // Given: An invalid franchise ID (undefined)
+        const params = { franchiseId: undefined as any };
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid franchise ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when franchise ID is zero", async () => {
+        // Given: An invalid franchise ID (0)
+        const params = { franchiseId: 0 };
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid franchise ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when franchise ID is negative", async () => {
+        // Given: An invalid franchise ID (negative)
+        const params = { franchiseId: -100 };
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid franchise ID is required");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+        // Given: IGDB API error
+        const params = { franchiseId: 123 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch franchise games");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Token fetch fails
+        const params = { franchiseId: 123 };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+
+      it("should return INTERNAL_ERROR when API returns undefined", async () => {
+        // Given: API returns undefined (error occurred in makeRequest)
+        const params = { franchiseId: 456 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => undefined,
+        });
+
+        // When: We call getFranchiseGames
+        const result = await service.getFranchiseGames(params);
+
+        // Then: We get INTERNAL_ERROR (undefined response means API error)
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch franchise games");
+        }
+      });
+    });
+  });
+
+  describe("getUpcomingReleasesByIds", () => {
+    describe("when service returns", () => {
+      it("should return upcoming releases when valid game IDs are provided", async () => {
+        // Given: Array of valid game IDs and mocked release data
+        const params = { ids: [1234, 5678, 9012] };
+        const futureTimestamp = Math.floor(Date.now() / 1000) + 86400 * 30; // 30 days from now
+        const mockReleases = [
+          {
+            id: 1234,
+            name: "Future Game 1",
+            cover: { id: 1, image_id: "cover1" },
+            first_release_date: futureTimestamp,
+            release_dates: [
+              {
+                id: 1,
+                human: "2025-Q4",
+                platform: { id: 6, name: "PC", human: "2025-Q4" },
+              },
+            ],
+          },
+          {
+            id: 5678,
+            name: "Future Game 2",
+            cover: { id: 2, image_id: "cover2" },
+            first_release_date: futureTimestamp + 86400 * 15,
+            release_dates: [
+              {
+                id: 2,
+                human: "2026-Q1",
+                platform: { id: 48, name: "PlayStation 5", human: "2026-Q1" },
+              },
+            ],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockReleases,
+        });
+
+        // When: We fetch upcoming releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get successful response with releases
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.releases).toHaveLength(2);
+          expect(result.data.releases[0].id).toBe(1234);
+          expect(result.data.releases[0].name).toBe("Future Game 1");
+          expect(result.data.releases[1].id).toBe(5678);
+          expect(result.data.releases[1].name).toBe("Future Game 2");
+        }
+      });
+
+      it("should return empty array when no upcoming releases found", async () => {
+        // Given: Valid game IDs but no upcoming releases
+        const params = { ids: [1234, 5678] };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We fetch upcoming releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.releases).toEqual([]);
+        }
+      });
+
+      it("should handle single game ID", async () => {
+        // Given: Single game ID
+        const params = { ids: [1234] };
+        const futureTimestamp = Math.floor(Date.now() / 1000) + 86400 * 30;
+        const mockReleases = [
+          {
+            id: 1234,
+            name: "Future Game",
+            cover: { id: 1, image_id: "cover1" },
+            first_release_date: futureTimestamp,
+            release_dates: [],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockReleases,
+        });
+
+        // When: We fetch upcoming releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get successful response
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.releases).toHaveLength(1);
+          expect(result.data.releases[0].id).toBe(1234);
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when IDs array is empty", async () => {
+        // Given: Empty array of IDs
+        const params = { ids: [] };
+
+        // When: We attempt to fetch releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("At least one game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when ids is undefined", async () => {
+        // Given: Undefined ids
+        const params = { ids: undefined as unknown as number[] };
+
+        // When: We attempt to fetch releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("At least one game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when any ID is invalid (0)", async () => {
+        // Given: Array with invalid ID (0)
+        const params = { ids: [1234, 0, 5678] };
+
+        // When: We attempt to fetch releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("valid positive integers");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when any ID is negative", async () => {
+        // Given: Array with negative ID
+        const params = { ids: [1234, -100, 5678] };
+
+        // When: We attempt to fetch releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("valid positive integers");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API fails", async () => {
+        // Given: Valid IDs but API failure
+        const params = { ids: [1234, 5678] };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We attempt to fetch releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch upcoming releases");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: Valid IDs but token fetch fails
+        const params = { ids: [1234, 5678] };
+
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We attempt to fetch releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+
+      it("should return INTERNAL_ERROR when API returns undefined", async () => {
+        // Given: Valid IDs but API returns undefined
+        const params = { ids: [1234, 5678] };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => undefined,
+        });
+
+        // When: We attempt to fetch releases
+        const result = await service.getUpcomingReleasesByIds(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch upcoming releases");
+        }
+      });
+    });
+  });
 });
