@@ -15,9 +15,14 @@ import {
 } from "@/shared/types";
 
 import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
-import { SEARCH_RESULTS_LIMIT, TOP_RATED_GAMES_LIMIT } from "./constants";
+import {
+  SEARCH_RESULTS_LIMIT,
+  TOP_RATED_GAMES_LIMIT,
+  UPCOMING_EVENTS_LIMIT,
+} from "./constants";
 import { QueryBuilder } from "./query-builder";
 import type {
+  EventLogoResult,
   FranchiseGamesResult,
   GameAggregatedRatingResult,
   GameArtworksResult,
@@ -30,6 +35,7 @@ import type {
   GameScreenshotsResult,
   GameSearchParams,
   GameSearchResult,
+  GetEventLogoParams,
   GetFranchiseGamesParams,
   GetGameAggregatedRatingParams,
   GetGameArtworksParams,
@@ -46,6 +52,7 @@ import type {
   SearchPlatformByNameParams,
   SimilarGamesResult,
   TopRatedGamesResult,
+  UpcomingGamingEventsResult,
   UpcomingReleasesResult,
 } from "./types";
 
@@ -1407,6 +1414,186 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Error fetching upcoming releases"
       );
       return this.handleError(error, "Failed to fetch upcoming releases");
+    }
+  }
+
+  /**
+   * Get upcoming gaming events from IGDB
+   * Returns events that start in the future, sorted by start time
+   *
+   * @returns ServiceResult with array of upcoming gaming events
+   */
+  async getUpcomingGamingEvents(): Promise<
+    ServiceResult<UpcomingGamingEventsResult>
+  > {
+    try {
+      this.logger.info("Fetching upcoming gaming events");
+
+      // 1. Build query using QueryBuilder
+      // Query for events that are in the future
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+      const query = new QueryBuilder()
+        .fields([
+          "checksum",
+          "created_at",
+          "description",
+          "end_time",
+          "event_logo",
+          "event_networks",
+          "games",
+          "live_stream_url",
+          "name",
+          "slug",
+          "start_time",
+          "time_zone",
+          "updated_at",
+          "videos",
+        ])
+        .where(`start_time >= ${currentTimestamp}`)
+        .sort("start_time", "asc")
+        .limit(UPCOMING_EVENTS_LIMIT)
+        .build();
+
+      // 2. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          name: string;
+          checksum?: string;
+          created_at?: number;
+          description?: string;
+          end_time?: number;
+          event_logo?: number | { id: number };
+          event_networks?: number[];
+          games?: number[];
+          live_stream_url?: string;
+          slug?: string;
+          start_time: number;
+          time_zone?: string;
+          updated_at?: number;
+          videos?: number[];
+        }>
+      >({
+        body: query,
+        resource: "/events",
+      });
+
+      // 3. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error(
+          "Failed to fetch upcoming gaming events from IGDB API"
+        );
+        return this.error(
+          "Failed to fetch upcoming gaming events",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 4. Handle empty response (NOT an error - no upcoming events is valid)
+      if (response.length === 0) {
+        this.logger.info("No upcoming gaming events found");
+        return this.success({
+          events: [],
+        });
+      }
+
+      // 5. Return success
+      this.logger.info(
+        { count: response.length },
+        "Successfully fetched upcoming gaming events"
+      );
+
+      return this.success({
+        events: response,
+      });
+    } catch (error) {
+      // 6. Catch-all error handling
+      this.logger.error({ error }, "Error fetching upcoming gaming events");
+      return this.handleError(error, "Failed to fetch upcoming gaming events");
+    }
+  }
+
+  /**
+   * Get logo for a specific gaming event
+   * Returns logo image metadata including dimensions and image ID
+   *
+   * @param params - Parameters containing event logo ID
+   * @returns ServiceResult with event logo data
+   */
+  async getEventLogo(
+    params: GetEventLogoParams
+  ): Promise<ServiceResult<EventLogoResult>> {
+    try {
+      // 1. Input validation
+      if (!params.logoId || params.logoId <= 0) {
+        this.logger.warn(
+          { logoId: params.logoId },
+          "Invalid event logo ID provided"
+        );
+        return this.error(
+          "Valid event logo ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { logoId } = params;
+
+      this.logger.info({ logoId }, "Fetching event logo");
+
+      // 2. Build query using QueryBuilder
+      const query = new QueryBuilder()
+        .fields(["id", "width", "height", "image_id"])
+        .where(`id = ${logoId}`)
+        .limit(1)
+        .build();
+
+      // 3. Make API request
+      const response = await this.makeRequest<
+        Array<{
+          id: number;
+          width?: number;
+          height?: number;
+          image_id: string;
+        }>
+      >({
+        body: query,
+        resource: "/event_logos",
+      });
+
+      // 4. Handle error response (undefined means API error occurred)
+      if (response === undefined) {
+        this.logger.error("Failed to fetch event logo from IGDB API");
+        return this.error(
+          "Failed to fetch event logo",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      // 5. Handle empty response (NOT_FOUND)
+      if (!response || response.length === 0) {
+        this.logger.warn({ logoId }, "Event logo not found");
+        return this.error(
+          `Event logo with ID ${logoId} not found`,
+          ServiceErrorCode.NOT_FOUND
+        );
+      }
+
+      // 6. Return success
+      this.logger.info(
+        { logoId, imageId: response[0].image_id },
+        "Successfully fetched event logo"
+      );
+
+      return this.success({
+        logo: response[0],
+      });
+    } catch (error) {
+      // 7. Catch-all error handling
+      this.logger.error(
+        { error, logoId: params.logoId },
+        "Error fetching event logo"
+      );
+      return this.handleError(error, "Failed to fetch event logo");
     }
   }
 }

@@ -222,6 +222,39 @@ export interface UpcomingReleasesResult {
   }>;
 }
 
+export interface UpcomingGamingEventsResult {
+  events: Array<{
+    id: number;
+    name: string;
+    checksum?: string;
+    created_at?: number;
+    description?: string;
+    end_time?: number;
+    event_logo?: number | { id: number };
+    event_networks?: number[];
+    games?: number[];
+    live_stream_url?: string;
+    slug?: string;
+    start_time: number;
+    time_zone?: string;
+    updated_at?: number;
+    videos?: number[];
+  }>;
+}
+
+export interface GetEventLogoParams {
+  logoId: number;
+}
+
+export interface EventLogoResult {
+  logo: {
+    id: number;
+    width?: number;
+    height?: number;
+    image_id: string;
+  };
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -278,4 +311,10 @@ export interface IgdbService extends BaseService {
   getUpcomingReleasesByIds(
     params: GetUpcomingReleasesByIdsParams
   ): Promise<ServiceResult<UpcomingReleasesResult>>;
+
+  getUpcomingGamingEvents(): Promise<ServiceResult<UpcomingGamingEventsResult>>;
+
+  getEventLogo(
+    params: GetEventLogoParams
+  ): Promise<ServiceResult<EventLogoResult>>;
 }

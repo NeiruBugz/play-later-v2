@@ -1,9 +1,9 @@
 import "server-only";
 
+import { IgdbService } from "@/data-access-layer/services";
 import { type Prisma } from "@prisma/client";
 
 import { convertReleaseDateToIsoStringDate, prisma } from "@/shared/lib";
-import igdbApi from "@/shared/lib/igdb";
 
 import { type CreateGameInput, type GameInput } from "./types";
 
@@ -130,22 +130,24 @@ export async function findOrCreateGameByIgdbId({ igdbId }: { igdbId: number }) {
   try {
     return await findGameByIgdbId({ igdbId });
   } catch {
-    const gameInfo = await igdbApi.getGameById(igdbId);
+    const igdbService = new IgdbService();
+    const result = await igdbService.getGameDetails({ gameId: igdbId });
 
-    if (!gameInfo) {
+    if (!result.success || !result.data.game) {
       throw new Error(`Game with IGDB ID ${igdbId} not found`);
     }
 
+    const gameInfo = result.data.game;
     const releaseDate = convertReleaseDateToIsoStringDate(
-      gameInfo.release_dates[0]?.human
+      gameInfo.release_dates?.[0]?.human
     );
 
     const gameInput: GameInput = {
       igdbId: String(igdbId),
       title: gameInfo.name,
-      coverImage: gameInfo.cover.image_id,
-      description: gameInfo.summary,
-      releaseDate,
+      coverImage: gameInfo.cover?.image_id ?? null,
+      description: gameInfo.summary ?? null,
+      releaseDate: releaseDate ?? null,
     };
 
     return createGame({ game: gameInput });

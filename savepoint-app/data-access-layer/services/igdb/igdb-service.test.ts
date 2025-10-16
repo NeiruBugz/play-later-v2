@@ -2744,4 +2744,302 @@ describe("IgdbService", () => {
       });
     });
   });
+
+  describe("getUpcomingGamingEvents", () => {
+    describe("when service returns", () => {
+      it("should return upcoming events when API call succeeds", async () => {
+        // Given: IGDB API returns upcoming gaming events
+        const futureTimestamp = Math.floor(Date.now() / 1000) + 86400; // Tomorrow
+        const mockEvents = [
+          {
+            id: 1,
+            name: "Summer Game Fest 2025",
+            start_time: futureTimestamp,
+            end_time: futureTimestamp + 7200,
+            checksum: "abc123",
+            created_at: 1609459200,
+            description: "Annual gaming event",
+            event_logo: { id: 100 },
+            event_networks: [1, 2, 3],
+            games: [1000, 1001],
+            live_stream_url: "https://example.com/stream",
+            slug: "summer-game-fest-2025",
+            time_zone: "America/Los_Angeles",
+            updated_at: 1609459300,
+            videos: [1, 2],
+          },
+          {
+            id: 2,
+            name: "E3 2025",
+            start_time: futureTimestamp + 86400,
+            end_time: futureTimestamp + 86400 + 7200,
+            checksum: "def456",
+            created_at: 1609459400,
+            description: "Electronic Entertainment Expo",
+            event_logo: 101,
+            event_networks: [4, 5],
+            games: [2000, 2001, 2002],
+            slug: "e3-2025",
+            time_zone: "America/Los_Angeles",
+            updated_at: 1609459500,
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockEvents,
+        });
+
+        // When: We fetch upcoming gaming events
+        const result = await service.getUpcomingGamingEvents();
+
+        // Then: We get successful response with events
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.events).toHaveLength(2);
+          expect(result.data.events[0].name).toBe("Summer Game Fest 2025");
+          expect(result.data.events[0].start_time).toBe(futureTimestamp);
+          expect(result.data.events[1].name).toBe("E3 2025");
+          expect(result.data.events[1].start_time).toBe(
+            futureTimestamp + 86400
+          );
+        }
+      });
+
+      it("should return empty array when no upcoming events exist", async () => {
+        // Given: IGDB API returns empty array
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // When: We fetch upcoming gaming events
+        const result = await service.getUpcomingGamingEvents();
+
+        // Then: We get successful response with empty array
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.events).toEqual([]);
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return INTERNAL_ERROR when IGDB API fails", async () => {
+        // Given: IGDB API is experiencing errors
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We attempt to fetch events
+        const result = await service.getUpcomingGamingEvents();
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain(
+            "Failed to fetch upcoming gaming events"
+          );
+        }
+      });
+
+      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+        // Given: OAuth token endpoint is unavailable
+        mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+        // When: We attempt to fetch events
+        const result = await service.getUpcomingGamingEvents();
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+
+      it("should return INTERNAL_ERROR when API returns undefined", async () => {
+        // Given: API request fails and returns undefined
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => undefined,
+        });
+
+        // When: We attempt to fetch events
+        const result = await service.getUpcomingGamingEvents();
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain(
+            "Failed to fetch upcoming gaming events"
+          );
+        }
+      });
+    });
+  });
+
+  describe("getEventLogo", () => {
+    describe("when service returns", () => {
+      it("should return event logo when valid logo ID is provided", async () => {
+        // Given: A valid event logo ID and mocked IGDB response
+        const params = { logoId: 12345 };
+        const mockLogo = {
+          id: 12345,
+          width: 800,
+          height: 400,
+          image_id: "event_logo_abc123",
+        };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [mockLogo],
+        });
+
+        // When: We fetch the event logo
+        const result = await service.getEventLogo(params);
+
+        // Then: We get a successful response with the logo
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.logo.id).toBe(12345);
+          expect(result.data.logo.width).toBe(800);
+          expect(result.data.logo.height).toBe(400);
+          expect(result.data.logo.image_id).toBe("event_logo_abc123");
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return VALIDATION_ERROR when logo ID is null", async () => {
+        // Given: An invalid logo ID
+        const params = { logoId: null as unknown as number };
+
+        // When: We attempt to fetch the logo
+        const result = await service.getEventLogo(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid event logo ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when logo ID is zero or negative", async () => {
+        // Given: An invalid logo ID (zero)
+        const params = { logoId: 0 };
+
+        // When: We attempt to fetch the logo
+        const result = await service.getEventLogo(params);
+
+        // Then: We get VALIDATION_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid event logo ID is required");
+        }
+      });
+
+      it("should return NOT_FOUND when logo does not exist", async () => {
+        // Given: A valid logo ID but no match in IGDB
+        const params = { logoId: 999999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [], // Empty response
+        });
+
+        // When: We attempt to fetch the logo
+        const result = await service.getEventLogo(params);
+
+        // Then: We get NOT_FOUND error
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+          expect(result.error).toContain("Event logo with ID 999999 not found");
+        }
+      });
+
+      it("should return INTERNAL_ERROR when IGDB API fails", async () => {
+        // Given: IGDB API is experiencing errors
+        const params = { logoId: 12345 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        // When: We attempt to fetch the logo
+        const result = await service.getEventLogo(params);
+
+        // Then: We get INTERNAL_ERROR
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch event logo");
+        }
+      });
+    });
+  });
 });

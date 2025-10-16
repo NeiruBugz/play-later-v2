@@ -30,8 +30,8 @@ import {
 import type { GameInput } from "@/data-access-layer/repository/game/types";
 
 import { convertReleaseDateToIsoStringDate } from "@/shared/lib";
-import igdbApi from "@/shared/lib/igdb";
 
+import { IgdbService } from "../igdb/igdb-service";
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
   CreateGameFromIgdbInput,
@@ -79,6 +79,13 @@ import type {
  * ```
  */
 export class GameService extends BaseService {
+  private igdbService: IgdbService;
+
+  constructor() {
+    super();
+    this.igdbService = new IgdbService();
+  }
+
   /**
    * Get game by ID with optional user's library items.
    *
@@ -170,17 +177,19 @@ export class GameService extends BaseService {
    */
   async searchGames(input: GameSearchInput): Promise<SearchGamesResult> {
     try {
-      const games = await igdbApi.search({
+      const result = await this.igdbService.searchGamesByName({
         name: input.query,
         fields: input.filters as Record<string, string> | undefined,
       });
 
-      if (!games) {
+      if (!result.success) {
         return this.error(
           "Failed to search games",
           ServiceErrorCode.EXTERNAL_SERVICE_ERROR
         );
       }
+
+      const games = result.data.games;
 
       // Apply limit and offset
       const limit = input.limit ?? 10;
@@ -238,14 +247,18 @@ export class GameService extends BaseService {
       }
 
       // Fetch game details from IGDB
-      const gameInfo = await igdbApi.getGameById(input.igdbId);
+      const result = await this.igdbService.getGameDetails({
+        gameId: input.igdbId,
+      });
 
-      if (!gameInfo) {
+      if (!result.success || !result.data.game) {
         return this.error(
           `Game with IGDB ID ${input.igdbId} not found`,
           ServiceErrorCode.NOT_FOUND
         );
       }
+
+      const gameInfo = result.data.game;
 
       // Transform IGDB data to game input
       const releaseDate = convertReleaseDateToIsoStringDate(
@@ -350,16 +363,16 @@ export class GameService extends BaseService {
    */
   async getIgdbGameDetails(igdbId: number): Promise<GetGameDetailsResult> {
     try {
-      const gameDetails = await igdbApi.getGameById(igdbId);
+      const result = await this.igdbService.getGameDetails({ gameId: igdbId });
 
-      if (!gameDetails) {
+      if (!result.success || !result.data.game) {
         return this.error(
           `Game with IGDB ID ${igdbId} not found`,
           ServiceErrorCode.NOT_FOUND
         );
       }
 
-      return this.success({ game: gameDetails });
+      return this.success({ game: result.data.game });
     } catch (error) {
       return this.handleError(error, "Failed to fetch IGDB game details");
     }

@@ -7,14 +7,14 @@ import {
 } from "@/data-access-layer/repository/game/game-repository";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import igdbApi from "@/shared/lib/igdb";
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types/igdb";
 
+import { IgdbService } from "../igdb/igdb-service";
 import { ServiceErrorCode } from "../types";
 import { GameService } from "./game-service";
 import type { GameWithLibraryItems } from "./types";
 
-// Mock the repository functions and IGDB API
+// Mock the repository functions
 vi.mock("@/data-access-layer/repository/game/game-repository", () => ({
   createGame: vi.fn(),
   findGameById: vi.fn(),
@@ -23,11 +23,12 @@ vi.mock("@/data-access-layer/repository/game/game-repository", () => ({
   updateGame: vi.fn(),
 }));
 
-vi.mock("@/shared/lib/igdb", () => ({
-  default: {
-    getGameById: vi.fn(),
-    search: vi.fn(),
-  },
+// Mock the IGDB Service
+vi.mock("../igdb/igdb-service", () => ({
+  IgdbService: vi.fn().mockImplementation(() => ({
+    searchGamesByName: vi.fn(),
+    getGameDetails: vi.fn(),
+  })),
 }));
 
 // Rely on global mock for '@/shared/lib'
@@ -39,6 +40,10 @@ describe("GameService", () => {
   let mockFindGameByIgdbId: ReturnType<typeof vi.fn>;
   let mockIsGameExisting: ReturnType<typeof vi.fn>;
   let mockUpdateGame: ReturnType<typeof vi.fn>;
+  let mockIgdbService: {
+    searchGamesByName: ReturnType<typeof vi.fn>;
+    getGameDetails: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -48,6 +53,12 @@ describe("GameService", () => {
     mockFindGameByIgdbId = vi.mocked(findGameByIgdbId);
     mockIsGameExisting = vi.mocked(isGameExisting);
     mockUpdateGame = vi.mocked(updateGame);
+
+    // Get the mocked IgdbService instance
+    const MockedIgdbService = vi.mocked(IgdbService);
+    mockIgdbService = MockedIgdbService.mock.results[
+      MockedIgdbService.mock.results.length - 1
+    ].value as typeof mockIgdbService;
   });
 
   describe("getGame", () => {
@@ -182,9 +193,13 @@ describe("GameService", () => {
         },
       ];
 
-      vi.mocked(igdbApi.search).mockResolvedValue(
-        mockGames as SearchResponse[]
-      );
+      mockIgdbService.searchGamesByName.mockResolvedValue({
+        success: true,
+        data: {
+          games: mockGames as SearchResponse[],
+          count: mockGames.length,
+        },
+      });
 
       const result = await service.searchGames({ query: "Witcher" });
 
@@ -194,7 +209,7 @@ describe("GameService", () => {
         expect(result.data.total).toBe(2);
       }
 
-      expect(igdbApi.search).toHaveBeenCalledWith({
+      expect(mockIgdbService.searchGamesByName).toHaveBeenCalledWith({
         name: "Witcher",
         fields: undefined,
       });
@@ -210,9 +225,13 @@ describe("GameService", () => {
         })
       );
 
-      vi.mocked(igdbApi.search).mockResolvedValue(
-        mockGames as SearchResponse[]
-      );
+      mockIgdbService.searchGamesByName.mockResolvedValue({
+        success: true,
+        data: {
+          games: mockGames as SearchResponse[],
+          count: mockGames.length,
+        },
+      });
 
       const result = await service.searchGames({
         query: "Game",
@@ -237,9 +256,13 @@ describe("GameService", () => {
         },
       ];
 
-      vi.mocked(igdbApi.search).mockResolvedValue(
-        mockGames as SearchResponse[]
-      );
+      mockIgdbService.searchGamesByName.mockResolvedValue({
+        success: true,
+        data: {
+          games: mockGames as SearchResponse[],
+          count: mockGames.length,
+        },
+      });
 
       const result = await service.searchGames({
         query: "Witcher",
@@ -247,14 +270,18 @@ describe("GameService", () => {
       });
 
       expect(result.success).toBe(true);
-      expect(igdbApi.search).toHaveBeenCalledWith({
+      expect(mockIgdbService.searchGamesByName).toHaveBeenCalledWith({
         name: "Witcher",
         fields: { platforms: "6" },
       });
     });
 
-    it("should return EXTERNAL_SERVICE_ERROR when IGDB returns undefined", async () => {
-      vi.mocked(igdbApi.search).mockResolvedValue(undefined);
+    it("should return EXTERNAL_SERVICE_ERROR when IGDB returns error", async () => {
+      mockIgdbService.searchGamesByName.mockResolvedValue({
+        success: false,
+        error: "Search failed",
+        code: "EXTERNAL_SERVICE_ERROR",
+      });
 
       const result = await service.searchGames({ query: "Witcher" });
 
@@ -267,7 +294,7 @@ describe("GameService", () => {
 
     it("should handle IGDB errors", async () => {
       const igdbError = new Error("IGDB API error");
-      vi.mocked(igdbApi.search).mockRejectedValue(igdbError);
+      mockIgdbService.searchGamesByName.mockRejectedValue(igdbError);
 
       const result = await service.searchGames({ query: "Witcher" });
 
@@ -310,7 +337,7 @@ describe("GameService", () => {
 
       expect(mockIsGameExisting).toHaveBeenCalledWith({ igdbId: 1942 });
       expect(mockFindGameByIgdbId).toHaveBeenCalledWith({ igdbId: 1942 });
-      expect(igdbApi.getGameById).not.toHaveBeenCalled();
+      expect(mockIgdbService.getGameDetails).not.toHaveBeenCalled();
     });
 
     it("should create new game from IGDB when not exists", async () => {
@@ -345,9 +372,12 @@ describe("GameService", () => {
       };
 
       mockIsGameExisting.mockResolvedValue(false);
-      vi.mocked(igdbApi.getGameById).mockResolvedValue(
-        mockIgdbGame as FullGameInfoResponse
-      );
+      mockIgdbService.getGameDetails.mockResolvedValue({
+        success: true,
+        data: {
+          game: mockIgdbGame as FullGameInfoResponse,
+        },
+      });
       mockCreateGame.mockResolvedValue(mockCreatedGame);
 
       const result = await service.createGameFromIgdb({ igdbId: 1942 });
@@ -359,7 +389,9 @@ describe("GameService", () => {
       }
 
       expect(mockIsGameExisting).toHaveBeenCalledWith({ igdbId: 1942 });
-      expect(igdbApi.getGameById).toHaveBeenCalledWith(1942);
+      expect(mockIgdbService.getGameDetails).toHaveBeenCalledWith({
+        gameId: 1942,
+      });
       expect(mockCreateGame).toHaveBeenCalledWith({
         game: {
           igdbId: "1942",
@@ -394,9 +426,12 @@ describe("GameService", () => {
       };
 
       mockIsGameExisting.mockResolvedValue(false);
-      vi.mocked(igdbApi.getGameById).mockResolvedValue(
-        mockIgdbGame as FullGameInfoResponse
-      );
+      mockIgdbService.getGameDetails.mockResolvedValue({
+        success: true,
+        data: {
+          game: mockIgdbGame as FullGameInfoResponse,
+        },
+      });
       mockCreateGame.mockResolvedValue(mockCreatedGame);
 
       const result = await service.createGameFromIgdb({ igdbId: 1942 });
@@ -417,9 +452,13 @@ describe("GameService", () => {
       });
     });
 
-    it("should return NOT_FOUND error when IGDB returns undefined", async () => {
+    it("should return NOT_FOUND error when IGDB returns error", async () => {
       mockIsGameExisting.mockResolvedValue(false);
-      vi.mocked(igdbApi.getGameById).mockResolvedValue(undefined);
+      mockIgdbService.getGameDetails.mockResolvedValue({
+        success: false,
+        error: "Game not found",
+        code: "NOT_FOUND",
+      });
 
       const result = await service.createGameFromIgdb({ igdbId: 1942 });
 
@@ -650,9 +689,12 @@ describe("GameService", () => {
         ],
       };
 
-      vi.mocked(igdbApi.getGameById).mockResolvedValue(
-        mockGameDetails as FullGameInfoResponse
-      );
+      mockIgdbService.getGameDetails.mockResolvedValue({
+        success: true,
+        data: {
+          game: mockGameDetails as FullGameInfoResponse,
+        },
+      });
 
       const result = await service.getIgdbGameDetails(1942);
 
@@ -661,11 +703,17 @@ describe("GameService", () => {
         expect(result.data.game).toEqual(mockGameDetails);
       }
 
-      expect(igdbApi.getGameById).toHaveBeenCalledWith(1942);
+      expect(mockIgdbService.getGameDetails).toHaveBeenCalledWith({
+        gameId: 1942,
+      });
     });
 
-    it("should return NOT_FOUND error when IGDB returns undefined", async () => {
-      vi.mocked(igdbApi.getGameById).mockResolvedValue(undefined);
+    it("should return NOT_FOUND error when IGDB returns error", async () => {
+      mockIgdbService.getGameDetails.mockResolvedValue({
+        success: false,
+        error: "Game not found",
+        code: "NOT_FOUND",
+      });
 
       const result = await service.getIgdbGameDetails(1942);
 
@@ -678,7 +726,7 @@ describe("GameService", () => {
 
     it("should handle IGDB errors", async () => {
       const igdbError = new Error("IGDB API error");
-      vi.mocked(igdbApi.getGameById).mockRejectedValue(igdbError);
+      mockIgdbService.getGameDetails.mockRejectedValue(igdbError);
 
       const result = await service.getIgdbGameDetails(1942);
 
