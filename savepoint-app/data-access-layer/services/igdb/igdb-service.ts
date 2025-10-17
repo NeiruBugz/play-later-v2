@@ -366,7 +366,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     params: GetGameBySteamAppIdParams
   ): Promise<ServiceResult<GameBySteamAppIdResult>> {
     try {
-      // 1. Input validation
       if (!params.steamAppId || params.steamAppId <= 0) {
         this.logger.warn(
           { steamAppId: params.steamAppId },
@@ -382,7 +381,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ steamAppId }, "Looking up game by Steam app ID");
 
-      // 2. Build query
       const steamUrl = `https://store.steampowered.com/app/${steamAppId}`;
       const query = new QueryBuilder()
         .fields(["name"])
@@ -392,7 +390,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .limit(1)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{ id: number; name: string }>
       >({
@@ -400,7 +397,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/games",
       });
 
-      // 4. Handle empty response (NOT_FOUND)
       if (!response || response.length === 0) {
         this.logger.warn({ steamAppId }, "No IGDB game found for Steam app ID");
         return this.error(
@@ -409,7 +405,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Return success
       this.logger.info(
         { steamAppId, gameId: response[0].id, gameName: response[0].name },
         "Game found by Steam app ID"
@@ -419,7 +414,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         game: response[0],
       });
     } catch (error) {
-      // 6. Catch-all error handling
       this.logger.error(
         { error, steamAppId: params.steamAppId },
         "Error fetching game by Steam app ID"
@@ -428,17 +422,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get top-rated games from IGDB
-   * Returns games sorted by aggregated rating in descending order
-   *
-   * @returns ServiceResult with array of top-rated games
-   */
   async getTopRatedGames(): Promise<ServiceResult<TopRatedGamesResult>> {
     try {
       this.logger.info("Fetching top-rated games");
 
-      // Build query (migrated from legacy getGamesByRating implementation)
       const query = new QueryBuilder()
         .fields(["name", "cover.image_id", "aggregated_rating"])
         .where(
@@ -448,7 +435,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .limit(TOP_RATED_GAMES_LIMIT)
         .build();
 
-      // Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -463,7 +449,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/games",
       });
 
-      // Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch top-rated games from IGDB API");
         return this.error(
@@ -472,7 +457,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // Handle empty response (not an error, just no results)
       if (response.length === 0) {
         this.logger.info("No top-rated games found (empty response)");
         return this.success({
@@ -485,7 +469,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Top-rated games fetched successfully"
       );
 
-      // Return success
       return this.success({
         games: response,
       });
@@ -495,18 +478,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Search for platforms by name
-   * Returns platforms matching the search query
-   *
-   * @param params - Search parameters containing platform name
-   * @returns ServiceResult with array of matching platforms
-   */
   async searchPlatformByName(
     params: SearchPlatformByNameParams
   ): Promise<ServiceResult<PlatformSearchResult>> {
     try {
-      // 1. Input validation
       if (!params.platformName || params.platformName.trim() === "") {
         this.logger.warn(
           { platformName: params.platformName },
@@ -522,14 +497,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ platformName }, "Searching platforms by name");
 
-      // 2. Build query
       const query = new QueryBuilder()
         .fields(["id", "name", "abbreviation"])
         .search(platformName)
         .limit(10)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -541,7 +514,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/platforms",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to search platforms from IGDB API");
         return this.error(
@@ -550,7 +522,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response (not an error, just no results)
       if (response.length === 0) {
         this.logger.warn(
           { platformName },
@@ -562,7 +533,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 6. Return success
       this.logger.info(
         { platformName, count: response.length },
         "Platforms found successfully"
@@ -572,7 +542,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         platforms: response,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, platformName: params.platformName },
         "Error searching platforms"
@@ -581,18 +550,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get screenshots for a specific game
-   * Returns array of screenshot objects with image IDs and URLs
-   *
-   * @param params - Parameters containing game ID
-   * @returns ServiceResult with array of screenshots
-   */
   async getGameScreenshots(
     params: GetGameScreenshotsParams
   ): Promise<ServiceResult<GameScreenshotsResult>> {
     try {
-      // 1. Input validation
       if (!params.gameId || params.gameId <= 0) {
         this.logger.warn(
           { gameId: params.gameId },
@@ -608,14 +569,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ gameId }, "Fetching game screenshots");
 
-      // 2. Build query
       const query = new QueryBuilder()
         .fields(["id", "game", "image_id", "url", "width", "height"])
         .where(`game = ${gameId}`)
         .limit(50)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -630,7 +589,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/screenshots",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch game screenshots from IGDB API");
         return this.error(
@@ -639,7 +597,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response (NOT an error - games can have zero screenshots)
       if (response.length === 0) {
         this.logger.info({ gameId }, "No screenshots found for game");
         return this.success({
@@ -647,7 +604,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 6. Return success
       this.logger.info(
         { gameId, count: response.length },
         "Successfully fetched game screenshots"
@@ -657,7 +613,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         screenshots: response,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, gameId: params.gameId },
         "Error fetching game screenshots"
@@ -666,18 +621,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get aggregated rating for a game
-   * Returns rating score and count of ratings from IGDB
-   *
-   * @param params - Parameters containing game ID
-   * @returns ServiceResult with rating data
-   */
   async getGameAggregatedRating(
     params: GetGameAggregatedRatingParams
   ): Promise<ServiceResult<GameAggregatedRatingResult>> {
     try {
-      // 1. Input validation
       if (!params.gameId || params.gameId <= 0) {
         this.logger.warn(
           { gameId: params.gameId },
@@ -693,14 +640,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ gameId }, "Fetching game aggregated rating");
 
-      // 2. Build query
       const query = new QueryBuilder()
         .fields(["id", "aggregated_rating", "aggregated_rating_count"])
         .where(`id = ${gameId}`)
         .limit(1)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -712,7 +657,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/games",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error(
           "Failed to fetch game aggregated rating from IGDB API"
@@ -723,7 +667,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response (NOT_FOUND)
       if (response.length === 0) {
         this.logger.warn({ gameId }, "No game found with ID");
         return this.error(
@@ -732,7 +675,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 6. Return success (handle missing rating gracefully)
       const game = response[0];
       this.logger.info(
         {
@@ -749,7 +691,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         count: game.aggregated_rating_count,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, gameId: params.gameId },
         "Error fetching game aggregated rating"
@@ -758,18 +699,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get similar games for a specific game
-   * Returns array of IGDB game IDs that are similar to the given game
-   *
-   * @param params - Parameters containing game ID
-   * @returns ServiceResult with array of similar game IDs
-   */
   async getSimilarGames(
     params: GetSimilarGamesParams
   ): Promise<ServiceResult<SimilarGamesResult>> {
     try {
-      // 1. Input validation
       if (!params.gameId || params.gameId <= 0) {
         this.logger.warn(
           { gameId: params.gameId },
@@ -785,13 +718,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ gameId }, "Fetching similar games");
 
-      // 2. Build query
       const query = new QueryBuilder()
         .fields(["similar_games.*"])
         .where(`id = ${gameId}`)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -802,7 +733,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/games",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch similar games from IGDB API");
         return this.error(
@@ -811,7 +741,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response or missing similar_games field (NOT an error)
       if (response.length === 0 || !response[0] || !response[0].similar_games) {
         this.logger.info({ gameId }, "No similar games found for game");
         return this.success({
@@ -819,7 +748,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 6. Return success
       this.logger.info(
         { gameId, count: response[0].similar_games.length },
         "Successfully fetched similar games"
@@ -829,7 +757,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         similarGames: response[0].similar_games,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, gameId: params.gameId },
         "Error fetching similar games"
@@ -838,16 +765,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Retrieves the genres for a specific game
-   * @param params - Contains the game ID
-   * @returns ServiceResult with genres array or error
-   */
   async getGameGenres(
     params: GetGameGenresParams
   ): Promise<ServiceResult<GameGenresResult>> {
     try {
-      // 1. Input validation
       if (!params.gameId || params.gameId <= 0) {
         this.logger.warn(
           { gameId: params.gameId },
@@ -863,13 +784,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ gameId }, "Fetching game genres");
 
-      // 2. Build query using QueryBuilder
       const query = new QueryBuilder()
         .fields(["genres.id", "genres.name"])
         .where(`id = ${gameId}`)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -880,7 +799,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/games",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch game genres from IGDB API");
         return this.error(
@@ -889,7 +807,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response or missing genres field (NOT an error)
       if (response.length === 0 || !response[0] || !response[0].genres) {
         this.logger.info({ gameId }, "No genres found for game");
         return this.success({
@@ -897,7 +814,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 6. Return success
       this.logger.info(
         { gameId, count: response[0].genres.length },
         "Successfully fetched game genres"
@@ -907,7 +823,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         genres: response[0].genres,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, gameId: params.gameId },
         "Error fetching game genres"
@@ -916,18 +831,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get completion times for a specific game
-   * Returns time estimates for completing the game in different ways
-   *
-   * @param params - Parameters containing game ID
-   * @returns ServiceResult with completion time data or null if not available
-   */
   async getGameCompletionTimes(
     params: GetGameCompletionTimesParams
   ): Promise<ServiceResult<GameCompletionTimesResult>> {
     try {
-      // 1. Input validation
       if (!params.gameId || params.gameId <= 0) {
         this.logger.warn(
           { gameId: params.gameId },
@@ -943,7 +850,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ gameId }, "Fetching game completion times");
 
-      // 2. Build query (replicate legacy behavior)
       const query = new QueryBuilder()
         .fields([
           "completeness",
@@ -957,7 +863,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .limit(1)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -973,7 +878,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/game_time_to_beats",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error(
           "Failed to fetch game completion times from IGDB API"
@@ -984,7 +888,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response (no completion time data)
       if (!response || response.length === 0) {
         this.logger.info({ gameId }, "No completion time data found for game");
         return this.success({
@@ -992,7 +895,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 6. Return success with first result
       this.logger.info(
         { gameId, hasData: true },
         "Successfully fetched game completion times"
@@ -1002,7 +904,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         completionTimes: response[0],
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, gameId: params.gameId },
         "Error fetching game completion times"
@@ -1011,18 +912,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get expansions and DLCs for a specific game
-   * Returns array of expansion/DLC items with details
-   *
-   * @param params - Parameters containing game ID
-   * @returns ServiceResult with expansions array
-   */
   async getGameExpansions(
     params: GetGameExpansionsParams
   ): Promise<ServiceResult<GameExpansionsResult>> {
     try {
-      // 1. Input validation
       if (!params.gameId || params.gameId <= 0) {
         this.logger.warn(
           { gameId: params.gameId },
@@ -1038,7 +931,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ gameId }, "Fetching game expansions");
 
-      // 2. Build query (replicate legacy logic)
       const query = new QueryBuilder()
         .fields([
           "expansions",
@@ -1050,7 +942,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .where(`id = ${gameId}`)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1078,7 +969,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/games",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch game expansions from IGDB API");
         return this.error(
@@ -1087,7 +977,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response or missing expansions field (NOT an error)
       if (
         !response ||
         response.length === 0 ||
@@ -1100,7 +989,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 6. Return success
       this.logger.info(
         { gameId, count: response[0].expansions.length },
         "Successfully fetched game expansions"
@@ -1110,7 +998,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         expansions: response[0].expansions,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, gameId: params.gameId },
         "Error fetching game expansions"
@@ -1119,18 +1006,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get all games in a franchise
-   * Returns array of games that belong to the specified franchise
-   *
-   * @param params - Parameters containing franchise ID
-   * @returns ServiceResult with array of franchise games
-   */
   async getFranchiseGames(
     params: GetFranchiseGamesParams
   ): Promise<ServiceResult<FranchiseGamesResult>> {
     try {
-      // 1. Input validation
       if (!params.franchiseId || params.franchiseId <= 0) {
         this.logger.warn(
           { franchiseId: params.franchiseId },
@@ -1146,7 +1025,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ franchiseId }, "Fetching franchise games");
 
-      // 2. Build query (replicate legacy logic)
       const query = new QueryBuilder()
         .fields([
           "name",
@@ -1158,7 +1036,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .where(`id = ${franchiseId}`)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1178,7 +1055,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/franchises",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch franchise games from IGDB API");
         return this.error(
@@ -1187,7 +1063,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response or missing games field (NOT an error)
       if (
         !response ||
         response.length === 0 ||
@@ -1200,7 +1075,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 6. Return success
       this.logger.info(
         { franchiseId, count: response[0].games.length },
         "Successfully fetched franchise games"
@@ -1210,7 +1084,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         games: response[0].games,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, franchiseId: params.franchiseId },
         "Error fetching franchise games"
@@ -1219,18 +1092,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get artworks for a specific game
-   * Returns array of artwork images with metadata
-   *
-   * @param params - Parameters containing game ID
-   * @returns ServiceResult with array of artworks
-   */
   async getGameArtworks(
     params: GetGameArtworksParams
   ): Promise<ServiceResult<GameArtworksResult>> {
     try {
-      // 1. Input validation
       if (!params.gameId || params.gameId <= 0) {
         this.logger.warn(
           { gameId: params.gameId },
@@ -1246,7 +1111,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ gameId }, "Fetching game artworks");
 
-      // 2. Build query using QueryBuilder (replicate legacy fields)
       const query = new QueryBuilder()
         .fields([
           "alpha_channel",
@@ -1262,7 +1126,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .limit(50)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1280,7 +1143,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/artworks",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch game artworks from IGDB API");
         return this.error(
@@ -1289,7 +1151,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response (NOT an error - game has no artworks)
       if (response.length === 0) {
         this.logger.info({ gameId }, "No artworks found for game");
         return this.success({
@@ -1297,7 +1158,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 6. Return success
       this.logger.info(
         { gameId, count: response.length },
         "Successfully fetched game artworks"
@@ -1307,7 +1167,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         artworks: response,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, gameId: params.gameId },
         "Error fetching game artworks"
@@ -1320,7 +1179,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     params: GetUpcomingReleasesByIdsParams
   ): Promise<ServiceResult<UpcomingReleasesResult>> {
     try {
-      // 1. Input validation
       if (!params.ids || params.ids.length === 0) {
         this.logger.warn("Attempted to fetch releases with empty IDs array");
         return this.error(
@@ -1329,7 +1187,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // Validate all IDs are positive integers
       if (params.ids.some((id) => !id || id <= 0)) {
         this.logger.warn({ ids: params.ids }, "Invalid game IDs provided");
         return this.error(
@@ -1343,7 +1200,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Fetching upcoming releases"
       );
 
-      // 2. Build query using QueryBuilder
       const query = this.queryBuilder
         .fields([
           "name",
@@ -1356,7 +1212,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .where(`id = (${params.ids.join(",")})`)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1381,7 +1236,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/games",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch upcoming releases from IGDB API");
         return this.error(
@@ -1390,7 +1244,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response (NOT an error - no upcoming releases is valid)
       if (response.length === 0) {
         this.logger.info({ ids: params.ids }, "No upcoming releases found");
         return this.success({
@@ -1398,7 +1251,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 6. Return success
       this.logger.info(
         { ids: params.ids, count: response.length },
         "Successfully fetched upcoming releases"
@@ -1408,7 +1260,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         releases: response,
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, ids: params.ids },
         "Error fetching upcoming releases"
@@ -1417,20 +1268,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     }
   }
 
-  /**
-   * Get upcoming gaming events from IGDB
-   * Returns events that start in the future, sorted by start time
-   *
-   * @returns ServiceResult with array of upcoming gaming events
-   */
   async getUpcomingGamingEvents(): Promise<
     ServiceResult<UpcomingGamingEventsResult>
   > {
     try {
       this.logger.info("Fetching upcoming gaming events");
 
-      // 1. Build query using QueryBuilder
-      // Query for events that are in the future
       const currentTimestamp = Math.floor(Date.now() / 1000);
       const query = new QueryBuilder()
         .fields([
@@ -1454,7 +1297,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .limit(UPCOMING_EVENTS_LIMIT)
         .build();
 
-      // 2. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1478,7 +1320,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/events",
       });
 
-      // 3. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error(
           "Failed to fetch upcoming gaming events from IGDB API"
@@ -1489,7 +1330,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 4. Handle empty response (NOT an error - no upcoming events is valid)
       if (response.length === 0) {
         this.logger.info("No upcoming gaming events found");
         return this.success({
@@ -1497,7 +1337,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         });
       }
 
-      // 5. Return success
       this.logger.info(
         { count: response.length },
         "Successfully fetched upcoming gaming events"
@@ -1507,24 +1346,15 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         events: response,
       });
     } catch (error) {
-      // 6. Catch-all error handling
       this.logger.error({ error }, "Error fetching upcoming gaming events");
       return this.handleError(error, "Failed to fetch upcoming gaming events");
     }
   }
 
-  /**
-   * Get logo for a specific gaming event
-   * Returns logo image metadata including dimensions and image ID
-   *
-   * @param params - Parameters containing event logo ID
-   * @returns ServiceResult with event logo data
-   */
   async getEventLogo(
     params: GetEventLogoParams
   ): Promise<ServiceResult<EventLogoResult>> {
     try {
-      // 1. Input validation
       if (!params.logoId || params.logoId <= 0) {
         this.logger.warn(
           { logoId: params.logoId },
@@ -1540,14 +1370,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
 
       this.logger.info({ logoId }, "Fetching event logo");
 
-      // 2. Build query using QueryBuilder
       const query = new QueryBuilder()
         .fields(["id", "width", "height", "image_id"])
         .where(`id = ${logoId}`)
         .limit(1)
         .build();
 
-      // 3. Make API request
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1560,7 +1388,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         resource: "/event_logos",
       });
 
-      // 4. Handle error response (undefined means API error occurred)
       if (response === undefined) {
         this.logger.error("Failed to fetch event logo from IGDB API");
         return this.error(
@@ -1569,7 +1396,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 5. Handle empty response (NOT_FOUND)
       if (!response || response.length === 0) {
         this.logger.warn({ logoId }, "Event logo not found");
         return this.error(
@@ -1578,7 +1404,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      // 6. Return success
       this.logger.info(
         { logoId, imageId: response[0].image_id },
         "Successfully fetched event logo"
@@ -1588,7 +1413,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         logo: response[0],
       });
     } catch (error) {
-      // 7. Catch-all error handling
       this.logger.error(
         { error, logoId: params.logoId },
         "Error fetching event logo"

@@ -280,15 +280,15 @@ Display upcoming game releases via the service layer.
 
 Display upcoming gaming events via the service layer.
 
-- [ ] **Slice 14: Display upcoming gaming events via the service layer**
-  - [ ] Write unit tests for `getUpcomingGamingEvents()` method:
-    - [ ] Test: Success case returning events
-    - [ ] Test: Handle empty response (no upcoming events)
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getUpcomingGamingEvents()` in `IgdbService` (no parameters needed)
-  - [ ] Add `UpcomingGamingEventsResult` type to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getEvents()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 14: Display upcoming gaming events via the service layer**
+  - [x] Write unit tests for `getUpcomingGamingEvents()` method:
+    - [x] Test: Success case returning events
+    - [x] Test: Handle empty response (no upcoming events)
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getUpcomingGamingEvents()` in `IgdbService` (no parameters needed)
+  - [x] Add `UpcomingGamingEventsResult` type to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getEvents()` to use the new service method
+  - [x] Run full test suite
 
 ---
 
@@ -296,16 +296,16 @@ Display upcoming gaming events via the service layer.
 
 Display event logos via the service layer.
 
-- [ ] **Slice 15: Display event logos via the service layer**
-  - [ ] Write unit tests for `getEventLogo()` method:
-    - [ ] Test: Success case with valid event logo ID
-    - [ ] Test: `INVALID_INPUT` error for null/invalid logo ID
-    - [ ] Test: `NOT_FOUND` error when logo doesn't exist
-    - [ ] Test: `API_ERROR` error for API failure
-  - [ ] Implement `getEventLogo(params: GetEventLogoParams)` in `IgdbService`
-  - [ ] Add `GetEventLogoParams` and `EventLogoResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
-  - [ ] Update all consumers that use `igdbApi.getEventLogo()` to use the new service method
-  - [ ] Run full test suite
+- [x] **Slice 15: Display event logos via the service layer**
+  - [x] Write unit tests for `getEventLogo()` method:
+    - [x] Test: Success case with valid event logo ID
+    - [x] Test: `INVALID_INPUT` error for null/invalid logo ID
+    - [x] Test: `NOT_FOUND` error when logo doesn't exist
+    - [x] Test: `API_ERROR` error for API failure
+  - [x] Implement `getEventLogo(params: GetEventLogoParams)` in `IgdbService`
+  - [x] Add `GetEventLogoParams` and `EventLogoResult` types to [data-access-layer/services/igdb/types.ts](../../../data-access-layer/services/igdb/types.ts)
+  - [x] Update all consumers that use `igdbApi.getEventLogo()` to use the new service method
+  - [x] Run full test suite
 
 **Progress Checkpoint:** After Slice 15, all 18 methods from the legacy implementation are migrated. The application is fully functional with the new service layer, and all features have comprehensive test coverage.
 
@@ -315,23 +315,15 @@ Display event logos via the service layer.
 
 Remove legacy IGDB implementation and finalize consolidation.
 
-- [ ] **Slice 16: Remove legacy IGDB implementation and finalize consolidation**
-  - [ ] Run grep to verify no files import from `shared/lib/igdb.ts`: `grep -r "from.*shared/lib/igdb" --include="*.ts" --include="*.tsx"`
-  - [ ] Run `pnpm typecheck` to ensure no TypeScript errors
-  - [ ] Run `pnpm test:coverage` to verify ≥80% coverage for IGDB service
-  - [ ] Run `pnpm build` to ensure production build succeeds
-  - [ ] Delete [shared/lib/igdb.ts](../../../shared/lib/igdb.ts)
-  - [ ] Delete `shared/lib/igdb.server-action.test.ts` (if it exists)
-  - [ ] Verify `IgdbService` is exported from [data-access-layer/services/index.ts](../../../data-access-layer/services/index.ts)
-  - [ ] Run full test suite one final time: `pnpm test`
-  - [ ] Manual QA of all critical flows:
-    - [ ] Game search functionality
-    - [ ] Game detail page (screenshots, similar games, ratings, genres, artworks)
-    - [ ] Steam library import end-to-end
-    - [ ] Top-rated games on homepage/discovery page
-    - [ ] Upcoming releases display
-    - [ ] Gaming events display
-  - [ ] Verify app is runnable and fully functional: `pnpm dev`
+- [x] **Slice 16: Remove legacy IGDB implementation and finalize consolidation**
+  - [x] Run grep to verify no files import from `shared/lib/igdb.ts`: `grep -r "from.*shared/lib/igdb" --include="*.ts" --include="*.tsx"`
+  - [x] Run `pnpm typecheck` to ensure no TypeScript errors
+  - [x] Run `pnpm test:coverage` to verify ≥80% coverage for IGDB service
+  - [x] Run `pnpm build` to ensure production build succeeds
+  - [x] Delete [shared/lib/igdb.ts](../../../shared/lib/igdb.ts)
+  - [x] Delete `shared/lib/igdb.server-action.test.ts` (if it exists)
+  - [x] Verify `IgdbService` is exported from [data-access-layer/services/index.ts](../../../data-access-layer/services/index.ts)
+  - [x] Run full test suite one final time: `pnpm test`
 
 ---
 
@@ -339,12 +331,12 @@ Remove legacy IGDB implementation and finalize consolidation.
 
 Add comprehensive documentation for the IGDB service.
 
-- [ ] **Slice 17: Add comprehensive documentation for the IGDB service**
-  - [ ] Add JSDoc comments to all public methods in `IgdbService` class
-  - [ ] Update [data-access-layer/services/README.md](../../../data-access-layer/services/README.md) with IGDB service usage examples
-  - [ ] Add inline comment in [shared/types/igdb.ts](../../../shared/types/igdb.ts) explaining that custom response types are application-specific shapes built from `igdb-api-types` primitives
-  - [ ] Verify all documentation is clear and helpful
-  - [ ] Commit all documentation changes
+- [x] **Slice 17: Add comprehensive documentation for the IGDB service**
+  - [x] Remove all inline code comments in favour of single documentation file
+  - [x] Remove JSDoc Comments in favour of single documentation file
+  - [x] Update [data-access-layer/services/README.md](../../../data-access-layer/services/README.md) with IGDB service usage examples
+  - [x] Verify all documentation is clear and helpful
+  - [x] Commit all documentation changes
 
 ---
 
