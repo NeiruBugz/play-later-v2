@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { Prisma } from "@prisma/client";
+
 import { prisma } from "@/shared/lib";
 
 import {
@@ -125,5 +127,36 @@ export async function disconnectSteam({ userId }: { userId: string }) {
       steamAvatar: null,
       steamConnectedAt: null,
     },
+  });
+}
+
+export async function findUserById<T extends Prisma.UserSelect>(
+  userId: string,
+  options?: { select?: T }
+) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: options?.select,
+  });
+}
+
+export async function findUserByNormalizedUsername(usernameNormalized: string) {
+  return prisma.user.findUnique({
+    where: { usernameNormalized },
+    select: { id: true },
+  });
+}
+
+export async function updateUserProfile(
+  userId: string,
+  data: {
+    username?: string;
+    usernameNormalized?: string;
+    image?: string;
+  }
+) {
+  return prisma.user.update({
+    where: { id: userId },
+    data,
   });
 }

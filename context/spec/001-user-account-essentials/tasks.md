@@ -19,16 +19,16 @@
 ## **Slice 1: Basic Profile View Foundation (Read-Only)**
 *Goal: Display a minimal profile page with existing user data*
 
-- [ ] **Sub-task:** Add Prisma migration for `username`, `usernameNormalized`, `createdAt` fields to User model (nullable, with backfill strategy)
-- [ ] **Sub-task:** Run migration on local database and verify existing users have `createdAt` backfilled
-- [ ] **Sub-task:** Create `ProfileService` class skeleton in `data-access-layer/services/profile/` with `getProfile()` method
-- [ ] **Sub-task:** Add `findUserById()` repository function in `data-access-layer/repository/user/user-repository.ts`
-- [ ] **Sub-task:** Write unit tests for `ProfileService.getProfile()`
-- [ ] **Sub-task:** Create `/profile/page.tsx` with server component that calls `ProfileService.getProfile()` and displays username (or Google name), email, and join date
-- [ ] **Sub-task:** Create simple read-only `ProfileView` component in `features/profile/ui/profile-view.tsx`
-- [ ] **Sub-task:** Add navigation link to `/profile` in app navigation
-- [ ] **Sub-task:** Write E2E test: Navigate to `/profile` and verify basic profile data is displayed
-- [ ] **Sub-task:** Verify profile page loads correctly for authenticated users
+- [x] **Sub-task:** Add Prisma migration for `username`, `usernameNormalized`, `createdAt` fields to User model (nullable, with backfill strategy)
+- [x] **Sub-task:** Run migration on local database and verify existing users have `createdAt` backfilled
+- [x] **Sub-task:** Create `ProfileService` class skeleton in `data-access-layer/services/profile/` with `getProfile()` method
+- [x] **Sub-task:** Add `findUserById()` repository function in `data-access-layer/repository/user/user-repository.ts`
+- [x] **Sub-task:** Write unit tests for `ProfileService.getProfile()`
+- [x] **Sub-task:** Create `/profile/page.tsx` with server component that calls `ProfileService.getProfile()` and displays username (or Google name), email, and join date
+- [x] **Sub-task:** Create simple read-only `ProfileView` component in `features/profile/ui/profile-view.tsx`
+- [x] **Sub-task:** Add navigation link to `/profile` in app navigation
+- [x] **Sub-task:** Write E2E test: Navigate to `/profile` and verify basic profile data is displayed
+- [x] **Sub-task:** Verify profile page loads correctly for authenticated users
 
 ---
 

@@ -17,18 +17,15 @@ export async function signInWithCredentials(
   email: string,
   password: string
 ): Promise<void> {
-  // Navigate to sign-in page
-  await page.goto("/auth/signin");
+  await page.goto("/login");
+  await page.waitForLoadState("networkidle");
 
-  // Fill in email and password
-  await page.fill('input[name="email"]', email);
-  await page.fill('input[name="password"]', password);
+  await page.fill('input[id="email"]', email);
+  await page.fill('input[id="password"]', password);
 
-  // Submit the form
   await page.click('button[type="submit"]');
 
-  // Wait for navigation after successful sign-in
-  await page.waitForURL("/", { timeout: 10000 });
+  await page.waitForURL((url) => url.pathname !== "/login", { timeout: 10000 });
 }
 
 /**
@@ -66,9 +63,8 @@ export async function isAuthenticated(page: Page): Promise<boolean> {
  * @returns Session data or null
  */
 export async function getSession(page: Page): Promise<unknown> {
-  return page.evaluate(() => {
-    // This assumes you expose session data via a global variable or API
-    // Adjust based on your actual implementation
-    return fetch("/api/auth/session").then((res) => res.json());
+  return page.evaluate(async () => {
+    const res = await fetch("/api/auth/session");
+    return res.json();
   });
 }

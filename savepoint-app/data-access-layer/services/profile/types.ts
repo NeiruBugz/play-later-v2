@@ -1,0 +1,44 @@
+import type { ServiceResult } from "../types";
+
+export type GetProfileInput = {
+  userId: string;
+};
+
+export type GetProfileWithStatsInput = {
+  userId: string;
+};
+
+export type Profile = {
+  username: string | null;
+  image: string | null;
+  email: string | null;
+  name: string | null;
+  createdAt: Date;
+};
+
+export type RecentGame = {
+  gameId: string;
+  title: string;
+  coverImage: string | null;
+  lastPlayed: Date;
+};
+
+export type LibraryStats = {
+  statusCounts: Record<string, number>;
+  recentGames: RecentGame[];
+};
+
+export type ProfileWithStats = {
+  username: string | null;
+  image: string | null;
+  email: string | null;
+  name: string | null;
+  createdAt: Date;
+  stats: LibraryStats;
+};
+
+export type GetProfileResult = ServiceResult<{ profile: Profile }>;
+
+export type GetProfileWithStatsResult = ServiceResult<{
+  profile: ProfileWithStats;
+}>;

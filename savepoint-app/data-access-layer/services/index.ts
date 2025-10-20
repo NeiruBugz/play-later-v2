@@ -167,3 +167,20 @@ export {
 } from "./auth/types";
 
 export { AuthService } from "./auth/auth-service";
+
+// ============================================================================
+// Profile Service (Profile Management)
+// ============================================================================
+
+export {
+  type GetProfileInput,
+  type GetProfileResult,
+  type GetProfileWithStatsInput,
+  type GetProfileWithStatsResult,
+  type Profile,
+  type ProfileWithStats,
+  type LibraryStats,
+  type RecentGame,
+} from "./profile/types";
+
+export { ProfileService } from "./profile/profile-service";

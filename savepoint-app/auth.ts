@@ -34,6 +34,7 @@ export const { auth, handlers, signIn } = NextAuth({
       issuer: env.AUTH_COGNITO_ISSUER,
       clientId: env.AUTH_COGNITO_ID,
       clientSecret: env.AUTH_COGNITO_SECRET,
+      checks: ["nonce"], // Fix for Cognito + third-party IDP nonce mismatch
       authorization: {
         params: { identity_provider: "Google" },
       },
