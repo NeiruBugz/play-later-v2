@@ -43,6 +43,7 @@ export default defineConfig({
         "**/shared/lib/platform/platform-mapper.ts",
         "**/shared/lib/platform/platform-to-color.ts",
         "**/shared/lib/ui/string.ts",
+        "e2e",
       ],
       reporter: ["text", "json", "html"],
       thresholds: {

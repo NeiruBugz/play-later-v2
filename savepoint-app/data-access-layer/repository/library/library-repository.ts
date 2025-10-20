@@ -316,6 +316,65 @@ export async function addGameToUserLibrary({
   });
 }
 
+export async function getAggregatedLibraryStatsByUserId(userId: string) {
+  try {
+    const [statusCounts, recentGames] = await Promise.all([
+      // Count games by status
+      prisma.libraryItem.groupBy({
+        by: ["status"],
+        where: { userId },
+        _count: true,
+      }),
+
+      // Get last 5 games marked as CURRENTLY_EXPLORING
+      prisma.libraryItem.findMany({
+        where: {
+          userId,
+          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        },
+        orderBy: { updatedAt: "desc" },
+        take: 5,
+        include: {
+          game: {
+            select: {
+              id: true,
+              title: true,
+              coverImage: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      ok: true as const,
+      data: {
+        statusCounts: statusCounts.reduce(
+          (acc, item) => {
+            acc[item.status] = item._count;
+            return acc;
+          },
+          {} as Record<string, number>
+        ),
+        recentGames: recentGames.map((item) => ({
+          gameId: item.game.id,
+          title: item.game.title,
+          coverImage: item.game.coverImage,
+          lastPlayed: item.updatedAt,
+        })),
+      },
+    };
+  } catch (error) {
+    return {
+      ok: false as const,
+      error: {
+        code: "STATS_FETCH_FAILED",
+        message: "Failed to fetch library stats",
+      },
+    };
+  }
+}
+
 /**
  * Get library statistics for a user
  * Returns the count of games in each journey status and recent games

@@ -2,6 +2,7 @@
 const nextConfig = {
   eslint: {
     dirs: ["app", "features", "shared", "test", "."], // Include all relevant directories and root
+    dirs: ["app", "features", "shared", "test", "."], // Include all relevant directories and root
   },
   // Externalize Pino packages for server-side rendering
   // Pino uses worker threads which need to be handled separately in Next.js
@@ -50,6 +51,9 @@ const nextConfig = {
   },
   reactStrictMode: true,
   typedRoutes: true,
+  turbopack: {
+    root: "/Users/nailbadiullin/Developer/personal/play-later-v2/savepoint-app",
+  },
   experimental: {
     reactCompiler: true,
   },
