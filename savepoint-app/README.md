@@ -81,7 +81,8 @@ But I'm a Software Engineer, so I can build my own tool to cover all my needs fo
 
 ### Development Tools
 
-- **[Vitest](https://vitest.dev/)** - Testing framework
+- **[Vitest](https://vitest.dev/)** - Unit and integration testing
+- **[Playwright](https://playwright.dev/)** - End-to-end testing
 - **[ESLint](https://eslint.org/)** - Code linting
 - **[Prettier](https://prettier.io/)** - Code formatting
 - **[Bun](https://bun.sh/)** - Package manager and runtime
@@ -155,20 +156,86 @@ Visit [http://localhost:6060](http://localhost:6060) to see the application.
 
 ```bash
 # Run all tests
-pnpmrun test
+pnpm test
 
 # Run unit tests (fast, mocked database)
-pnpmrun test:unit
+pnpm test:unit
 
 # Run integration tests (real database)
-pnpmrun test:integration
+pnpm test:integration
 
 # Run tests with coverage
-pnpmrun test:coverage
+pnpm test:coverage
 
 # Watch mode
-pnpmrun test:unit:watch
-pnpmrun test:integration:watch
+pnpm test:unit:watch
+pnpm test:integration:watch
+```
+
+### End-to-End (E2E) Testing with Playwright
+
+The project uses Playwright for E2E testing to ensure the application works correctly from a user's perspective.
+
+**Prerequisites:**
+
+- Development server must be running on `http://localhost:6060` before running E2E tests
+- For authentication tests, set `AUTH_ENABLE_CREDENTIALS=true` in your `.env` file
+
+**Running E2E Tests:**
+
+```bash
+# Run all E2E tests (headless mode)
+pnpm test:e2e
+
+# Run E2E tests with UI mode (interactive)
+pnpm test:e2e:ui
+
+# Debug E2E tests (step through with Playwright Inspector)
+pnpm test:e2e:debug
+```
+
+**E2E Test Structure:**
+
+- Test files: `e2e/*.spec.ts`
+- Test helpers: `e2e/helpers/`
+  - `auth.ts`: Authentication utilities (sign in, sign out, session management)
+  - `db.ts`: Database seeding and cleanup utilities
+
+**Writing E2E Tests:**
+
+E2E tests should focus on critical user flows:
+
+- Authentication (sign up, sign in, sign out)
+- Game collection management (add, edit, delete games)
+- Steam integration workflows
+- User profile management
+
+Example:
+
+```typescript
+import { expect, test } from "@playwright/test";
+
+import { signInWithCredentials } from "./helpers/auth";
+import { clearTestData, createTestUser } from "./helpers/db";
+
+test.describe("User Authentication", () => {
+  test("should allow user to sign in", async ({ page }) => {
+    const testUser = await createTestUser({
+      email: "test@example.com",
+      username: "testuser",
+      password: "TestPassword123!",
+    });
+
+    await signInWithCredentials(page, testUser.email, testUser.password);
+
+    // Verify user is on the dashboard
+    await expect(page).toHaveURL("/");
+  });
+
+  test.afterAll(async () => {
+    await clearTestData();
+  });
+});
 ```
 
 ### Test Database Setup
@@ -177,10 +244,10 @@ For integration tests, start the test database:
 
 ```bash
 # Start test database
-pnpmrun test:db:setup
+pnpm test:db:setup
 
 # Stop test database
-pnpmrun test:db:teardown
+pnpm test:db:teardown
 ```
 
 ## 🔧 Development Commands

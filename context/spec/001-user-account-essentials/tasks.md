@@ -3,16 +3,16 @@
 ## **Slice 0: Playwright E2E Testing Setup**
 *Goal: Set up Playwright testing infrastructure for E2E tests*
 
-- [ ] **Sub-task:** Install Playwright and its dependencies (`pnpm add -D @playwright/test`)
-- [ ] **Sub-task:** Run Playwright initialization (`pnpm exec playwright install`)
-- [ ] **Sub-task:** Create `playwright.config.ts` in project root with configuration (base URL: `http://localhost:6060`, test directory, timeout settings)
-- [ ] **Sub-task:** Create `e2e/` directory in project root for E2E test files
-- [ ] **Sub-task:** Add Playwright scripts to `package.json` (`test:e2e`, `test:e2e:ui`, `test:e2e:debug`)
-- [ ] **Sub-task:** Create example E2E test (`e2e/example.spec.ts`) that verifies home page loads
-- [ ] **Sub-task:** Create test helper utilities in `e2e/helpers/` (auth helpers, database seeding utilities)
-- [ ] **Sub-task:** Add Playwright HTML report to `.gitignore`
-- [ ] **Sub-task:** Document Playwright setup and usage in README
-- [ ] **Sub-task:** Run example E2E test to verify Playwright works correctly
+- [x] **Sub-task:** Install Playwright and its dependencies (`pnpm add -D @playwright/test`)
+- [x] **Sub-task:** Run Playwright initialization (`pnpm exec playwright install`)
+- [x] **Sub-task:** Create `playwright.config.ts` in project root with configuration (base URL: `http://localhost:6060`, test directory, timeout settings)
+- [x] **Sub-task:** Create `e2e/` directory in project root for E2E test files
+- [x] **Sub-task:** Add Playwright scripts to `package.json` (`test:e2e`, `test:e2e:ui`, `test:e2e:debug`)
+- [x] **Sub-task:** Create example E2E test (`e2e/example.spec.ts`) that verifies home page loads
+- [x] **Sub-task:** Create test helper utilities in `e2e/helpers/` (auth helpers, database seeding utilities)
+- [x] **Sub-task:** Add Playwright HTML report to `.gitignore`
+- [x] **Sub-task:** Document Playwright setup and usage in README
+- [x] **Sub-task:** Run example E2E test to verify Playwright works correctly
 
 ---
 
