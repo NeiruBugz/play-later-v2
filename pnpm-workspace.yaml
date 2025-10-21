@@ -1,2 +1,6 @@
+packages:
+  - "savepoint-app"
+
 onlyBuiltDependencies:
   - lefthook
+  - '@tailwindcss/oxide'
