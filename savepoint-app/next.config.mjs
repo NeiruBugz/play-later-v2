@@ -51,9 +51,6 @@ const nextConfig = {
   },
   reactStrictMode: true,
   typedRoutes: true,
-  turbopack: {
-    root: "/Users/nailbadiullin/Developer/personal/play-later-v2/savepoint-app",
-  },
   experimental: {
     reactCompiler: true,
   },
