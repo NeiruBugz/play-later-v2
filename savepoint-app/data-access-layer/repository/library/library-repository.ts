@@ -12,6 +12,7 @@ import type {
   GetLibraryCountInput,
   GetLibraryItemsForUserByIgdbIdInput,
   GetManyLibraryItemsInput,
+  LibraryStatsResult,
   UpdateLibraryItemInput,
   UserWithLibraryItemsResponse,
 } from "./types";
@@ -316,7 +317,9 @@ export async function addGameToUserLibrary({
   });
 }
 
-export async function getAggregatedLibraryStatsByUserId(userId: string) {
+export async function getAggregatedLibraryStatsByUserId(
+  userId: string
+): Promise<LibraryStatsResult> {
   try {
     const [statusCounts, recentGames] = await Promise.all([
       // Count games by status
