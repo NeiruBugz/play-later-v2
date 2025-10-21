@@ -1,7 +1,7 @@
 {
   "name": "savepoint-root",
   "private": true,
-  "packageManager": "pnpm@10",
+  "packageManager": "pnpm@10.11.0",
   "devDependencies": {
     "lefthook": "^1.13.6",
     "@commitlint/cli": "^20.1.0",
