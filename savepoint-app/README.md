@@ -155,21 +155,14 @@ Visit [http://localhost:6060](http://localhost:6060) to see the application.
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests (unit + integration)
 pnpm test
 
-# Run unit tests (fast, mocked database)
-pnpm test:unit
+# Run tests in watch mode (re-run on file changes)
+pnpm test:watch
 
-# Run integration tests (real database)
-pnpm test:integration
-
-# Run tests with coverage
+# Run tests with coverage report
 pnpm test:coverage
-
-# Watch mode
-pnpm test:unit:watch
-pnpm test:integration:watch
 ```
 
 ### End-to-End (E2E) Testing with Playwright

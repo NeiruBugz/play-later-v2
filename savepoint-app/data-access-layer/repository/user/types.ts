@@ -19,3 +19,12 @@ export type UpdateUserDataInput = {
   username: string | null;
   steamProfileUrl: string | null;
 };
+
+export type DefaultUserSelect = {
+  readonly id: string;
+  readonly name: string | null;
+  readonly username: string | null;
+  readonly steamProfileURL: string | null;
+  readonly steamConnectedAt: Date | null;
+  readonly email: string | null;
+};

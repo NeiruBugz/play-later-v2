@@ -68,8 +68,6 @@ model User {
   IgnoredImportedGames IgnoredImportedGames[]
 
   ImportedGame ImportedGame[]
-
-  @@index([usernameNormalized])
 }
 
 // ----- Application Models ------//

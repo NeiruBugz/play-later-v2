@@ -1,195 +1,263 @@
-# Service Layer for Boundary Violation Elimination
+# Service Layer
 
-This service layer provides abstractions to eliminate architectural boundary violations between features. It implements the service layer pattern with dependency injection to decouple features and maintain clean architecture.
+This directory contains the service layer implementation for SavePoint's business logic. Services provide structured abstractions over repository functions, implementing validation, error handling, and business rules.
 
 ## Overview
 
-We're using two complementary approaches to eliminate 7 boundary violations:
+The service layer follows a **Result pattern** with consistent error handling and structured return types. All services extend `BaseService` and return `ServiceResult<TData, TError>` types for type-safe error handling.
 
-### **Business Logic Services** (This Directory)
+### Core Principles
 
-2. `view-imported-games` → `add-game` (server actions)
-3. `manage-integrations` → `steam-integration` (server actions)
+1. **Stateless Operations**: Services are instantiated per request/operation
+2. **Result-Based Errors**: No thrown exceptions - all errors returned as Result types
+3. **Repository Delegation**: Services call repository functions, never direct Prisma
+4. **Input Validation**: Zod schemas validate all inputs at service boundaries
+5. **Structured Logging**: Pino logger with contextual metadata
 
-### **Component Recomposition** (Separate Strategy)
+## Available Services
 
-1. `view-game-details` → `add-game` (modal components) → **Move modals to shared/components**
-2. `view-game-details` → `manage-backlog-item` (modal components) → **Move modals to shared/components**
-3. `view-game-details` → `add-review` (modal components) → **Move modals to shared/components**
-4. `view-game-details` → `steam-integration` (achievement component) → **Move to shared/components**
-5. `shared/components` → various features (type definitions) → **Move types to shared/types**
+### 1. **ProfileService** - User Profile Management
 
-## Architecture
+**Purpose**: Fetch and manage user profile data with library statistics
 
-### **Real Business Services** (This Directory)
+**Methods**:
 
-1. **Game Management Service** - Consolidates game creation and backlog operations
-2. **Steam Integration Adapter** - Abstracts Steam platform operations
+- `getProfile(input)` - Get basic profile information
+- `getProfileWithStats(input)` - Get profile with library stats and recent games
 
-### Migration Strategy
-
-The service layer is implemented in phases:
-
-#### Phase 1: Infrastructure (CURRENT)
-
-- ✅ Service interfaces defined in `types.ts`
-- ✅ Service registry created in `service-registry.ts`
-- ✅ Stub implementations that throw errors
-- ✅ No boundary violations introduced
-
-#### Phase 2: Type Migration
-
-- Move shared types from features to `shared/types`
-- Update imports in shared components
-- Fix 2 boundary violations (grid-view, list-view)
-
-#### Phase 3: Component Services
-
-- Implement modal service with lazy loading
-- Update view-game-details components
-- Implement navigation service
-- Fix 3 more boundary violations
-
-#### Phase 4: Business Logic Services
-
-- Implement game management service
-- Implement Steam integration adapter
-- Migrate remaining components
-- Fix final 2 boundary violations
-
-## Usage
-
-### Service Registry
+**Usage**:
 
 ```typescript
-import { createBoundaryViolationServices } from "@/shared/services/service-registry";
+const service = new ProfileService();
+const result = await service.getProfileWithStats({ userId });
 
-// Create service instance
-const services = createBoundaryViolationServices();
-
-// Use services (once implemented)
-const result = await services.gameManagement.createGameAndAddToBacklog(
-  input,
-  userId
-);
-```
-
-### Component Integration
-
-```typescript
-// Phase 3+ usage in components
-export function GameQuickActions({ game, backlogItems }) {
-  const services = createBoundaryViolationServices();
-
-  return (
-    <div>
-      <services.modals.AddToCollectionModal
-        gameTitle={game.name}
-        igdbId={game.igdbId}
-      />
-    </div>
-  );
+if (result.ok) {
+  console.log(result.data.profile.username);
+  console.log(result.data.profile.stats.statusCounts);
 }
 ```
 
-### Server Action Integration
+### 2. **GameService** - Game Search & Management
+
+**Purpose**: Search IGDB, create games, fetch game details
+
+**Methods**:
+
+- `searchGames(input)` - Search IGDB for games by name/platform
+- `createGameFromIgdb(input)` - Create game from IGDB data
+- `getGameDetails(input)` - Get comprehensive game details
+- `updateGame(input)` - Update game metadata
+
+**Usage**:
 
 ```typescript
-// Phase 4+ usage in server actions
-export const importToApplication = authorizedActionClient
-  .inputSchema(ImportToApplicationSchema)
-  .action(async ({ parsedInput, ctx: { userId } }) => {
-    const services = createBoundaryViolationServices();
+const service = new GameService();
+const result = await service.searchGames({ name: "Zelda", platform: "130" });
 
-    return await services.gameManagement.importSteamGameToCollection(
-      parsedInput.steamAppId,
-      userId
-    );
-  });
+if (result.ok) {
+  console.log(`Found ${result.data.count} games`);
+}
 ```
 
-## Testing
+### 3. **LibraryService** - User Library Item Management
 
-### Service Layer Tests
+**Purpose**: Manage user's game library (add, update, remove items)
 
-Service implementations include comprehensive unit tests:
+**Methods**:
+
+- `getLibraryItems(input)` - Get user's library with filters
+- `createLibraryItem(input)` - Add game to user's library
+- `updateLibraryItem(input)` - Update library item status/platform
+- `deleteLibraryItem(input)` - Remove item from library
+- `getLibraryCount(input)` - Get total library count for user
+
+**Usage**:
 
 ```typescript
-// Example: shared/services/service-registry.test.ts
-describe("BoundaryViolationServiceRegistry", () => {
-  it("should create all required services", () => {
-    const services = createBoundaryViolationServices();
-
-    expect(services.gameManagement).toBeDefined();
-    expect(services.steamIntegration).toBeDefined();
-    expect(services.modals).toBeDefined();
-    expect(services.navigation).toBeDefined();
-  });
+const service = new LibraryService();
+const result = await service.createLibraryItem({
+  userId,
+  gameId,
+  status: "CURIOUS_ABOUT",
+  platform: "PC",
 });
 ```
 
-### Integration Testing
+### 4. **ReviewService** - Review & Rating Management
 
-Each phase includes validation that existing functionality remains unchanged:
+**Purpose**: Create, update, and fetch game reviews
 
-1. All 313+ tests must pass
-2. Build must succeed with reduced boundary violations
-3. Performance must remain under 8 seconds
-4. No functionality regressions
+**Methods**:
 
-## Implementation Status
+- `getReviews(input)` - Get reviews for a game
+- `createReview(input)` - Create new review
+- `updateReview(input)` - Update existing review
+- `deleteReview(input)` - Delete review
+- `getAggregatedRating(input)` - Get average rating for game
 
-### Current Phase: 1 (Infrastructure) ✅
+### 5. **JournalService** - Gaming Journal Entries
 
-- [x] Service interfaces defined
-- [x] Service registry implementation
-- [x] Stub service implementations
-- [x] Documentation complete
-- [x] Foundation tests ready
+**Purpose**: Manage journal entries for gaming sessions
 
-### Next Phase: 2 (Type Migration)
+**Methods**:
 
-- [ ] Move `features/view-wishlist/types` → `shared/types/wishlist.ts`
-- [ ] Update grid-view.tsx imports
-- [ ] Update list-view.tsx imports
-- [ ] Verify 2 boundary violations eliminated
+- `getJournalEntries(input)` - Get entries for user/game
+- `createJournalEntry(input)` - Create new journal entry
+- `updateJournalEntry(input)` - Update existing entry
+- `deleteJournalEntry(input)` - Delete entry
+- `getJournalStats(input)` - Get journal statistics
 
-## Safety Measures
+### 6. **UserService** - User Account Management
 
-### Rollback Strategy
+**Purpose**: Manage user accounts and Steam integration
 
-Each phase is atomic and can be rolled back:
+**Methods**:
 
-```bash
-# Rollback current phase
-git revert HEAD
+- `getUser(input)` - Get user information
+- `updateUser(input)` - Update user profile
+- `getSteamIntegration(input)` - Get Steam connection status
+- `disconnectSteam(input)` - Disconnect Steam account
 
-# Verify rollback success
-pnpmrun test
-pnpmrun lint
+### 7. **AuthService** - Authentication
+
+**Purpose**: Handle user sign-up and sign-in
+
+**Methods**:
+
+- `signUp(input)` - Register new user (credentials auth)
+- `signIn(input)` - Authenticate user (credentials auth)
+
+**Note**: Only used when `AUTH_ENABLE_CREDENTIALS=true` (dev/test environments)
+
+### 8. **CollectionService** - User Game Collection Views
+
+**Purpose**: Fetch paginated views of user's game collection
+
+**Methods**:
+
+- `getCollection(input)` - Get user's collection with pagination and filters
+
+### 9. **IgdbService** - IGDB API Integration
+
+**Purpose**: Comprehensive IGDB API client with OAuth management
+
+See [IGDB Service](#igdb-service) section below for detailed documentation.
+
+## Common Usage Patterns
+
+### Service Instantiation
+
+Services are instantiated per operation (stateless):
+
+```typescript
+// ✅ Good: Create instance for operation
+const service = new GameService();
+const result = await service.searchGames({ name: "Zelda" });
+
+// ✅ Good: Reuse instance for related operations
+const gameService = new GameService();
+const searchResult = await gameService.searchGames({ name: "Zelda" });
+if (searchResult.ok) {
+  const detailsResult = await gameService.getGameDetails({
+    gameId: searchResult.data.games[0].id,
+  });
+}
 ```
 
-### Validation Checkpoints
+### Server Actions Integration
 
-After each commit:
+Services are the primary way server actions interact with business logic:
 
-```bash
-# Required validation sequence
-pnpmrun test                    # All tests pass
-pnpmrun lint                    # Check boundary violations
-pnpmrun typecheck               # No TypeScript errors
-pnpmrun build                   # Successful build
+```typescript
+"use server";
+
+import { GameService } from "@/data-access-layer/services";
+
+import { authorizedActionClient } from "@/shared/lib/safe-action";
+
+export const searchGamesAction = authorizedActionClient
+  .inputSchema(SearchGamesSchema)
+  .action(async ({ parsedInput, ctx: { userId } }) => {
+    const service = new GameService();
+    const result = await service.searchGames(parsedInput);
+
+    if (!result.ok) {
+      throw new Error(result.error.message);
+    }
+
+    return result.data;
+  });
 ```
 
-## Future Enhancements
+### Error Handling Pattern
 
-The service layer architecture enables:
+All services return `ServiceResult<TData, TError>`:
 
-1. **Platform Extensibility** - Easy addition of new gaming platforms
-2. **Service Composition** - Combining services for complex workflows
-3. **Testing Isolation** - Mock services for unit testing
-4. **Feature Flags** - Gradual rollout of new implementations
-5. **Performance Monitoring** - Service-level metrics and tracing
+```typescript
+const result = await service.getProfile({ userId });
+
+if (result.ok) {
+  // TypeScript knows result.data exists
+  const profile = result.data.profile;
+  console.log(profile.username);
+} else {
+  // TypeScript knows result.error exists
+  switch (result.error.code) {
+    case ServiceErrorCode.NOT_FOUND:
+      console.log("User not found");
+      break;
+    case ServiceErrorCode.UNAUTHORIZED:
+      console.log("Unauthorized access");
+      break;
+    default:
+      console.error(result.error.message);
+  }
+}
+```
+
+### Type-Safe Access with Result Helpers
+
+```typescript
+import { isErrorResult, isSuccessResult } from "@/data-access-layer/services";
+
+const result = await service.getGameDetails({ gameId: "123" });
+
+if (isSuccessResult(result)) {
+  // Type guard narrows to success type
+  const game = result.data.game;
+}
+
+if (isErrorResult(result)) {
+  // Type guard narrows to error type
+  console.error(result.error.code);
+}
+```
+
+### Page Components (App Router)
+
+Use services in Server Components:
+
+```typescript
+// app/(protected)/profile/page.tsx
+import { ProfileService } from "@/data-access-layer/services";
+import { getServerUserId } from "@/auth";
+import { redirect } from "next/navigation";
+
+export default async function ProfilePage() {
+  const userId = await getServerUserId();
+  if (!userId) redirect("/login");
+
+  const service = new ProfileService();
+  const result = await service.getProfileWithStats({ userId });
+
+  if (!result.ok) {
+    console.error("Failed to load profile:", result.error);
+    redirect("/login");
+  }
+
+  return <ProfileView profile={result.data.profile} />;
+}
+```
 
 ## IGDB Service
 
@@ -525,6 +593,91 @@ Logs include contextual data:
 
 ```typescript
 logger.info({ gameId, gameName: "Zelda" }, "Game details fetched successfully");
+```
+
+## Security Guidelines
+
+### Repository Layer Security
+
+When calling repository functions from services, always ensure proper security boundaries:
+
+#### User Authentication & Authorization
+
+**CRITICAL**: All repository functions that access user data MUST receive `userId` from authenticated session context. Services are responsible for:
+
+1. **Validating userId exists** before calling repository functions
+2. **Verifying userId matches authenticated session** (from `getServerUserId()` or action context)
+3. **Never accepting userId from client input** without validation
+
+#### Repository Function Security Features
+
+**`findUserById(userId, options?)`**
+
+- Enforces restrictive default select to prevent exposing sensitive fields
+- Default returns: `id`, `name`, `username`, `email`, `steamProfileURL`, `steamConnectedAt`
+- Explicitly requested fields via `select` option override defaults
+- **Services must validate**: `userId` is from authenticated session
+
+**`updateUserProfile(userId, data)`**
+
+- Validates `userId` is required (throws if missing)
+- Allowed update fields: `username`, `usernameNormalized`, `steamProfileURL`
+- Disallowed fields: `image` (managed through OAuth providers only), `password`, `steamAvatar`
+- **Services must validate**: `userId` matches authenticated session before calling
+
+#### Example: Secure Service Implementation
+
+```typescript
+export class ProfileService extends BaseService {
+  async updateUsername(input: { userId: string; username: string }) {
+    // ✅ Validate userId is provided (service layer responsibility)
+    if (!input.userId) {
+      return this.error("Unauthorized", ServiceErrorCode.UNAUTHORIZED);
+    }
+
+    // ✅ Normalize username for case-insensitive uniqueness
+    const normalized = input.username.toLowerCase().trim();
+
+    // ✅ Check uniqueness before updating
+    const existing = await findUserByNormalizedUsername(normalized);
+    if (existing && existing.id !== input.userId) {
+      return this.error(
+        "Username already taken",
+        ServiceErrorCode.VALIDATION_ERROR
+      );
+    }
+
+    // ✅ Call repository with validated userId
+    const user = await updateUserProfile(input.userId, {
+      username: input.username,
+      usernameNormalized: normalized,
+    });
+
+    return this.success({ user });
+  }
+}
+```
+
+#### Common Mistakes to Avoid
+
+```typescript
+// ❌ BAD: Accepting userId from client without validation
+export const updateProfileAction = actionClient
+  .inputSchema(z.object({ userId: z.string(), name: z.string() }))
+  .action(async ({ parsedInput }) => {
+    // Client could send any userId!
+    return await updateUserProfile(parsedInput.userId, {
+      name: parsedInput.name,
+    });
+  });
+
+// ✅ GOOD: Using authenticated session context
+export const updateProfileAction = authorizedActionClient
+  .inputSchema(z.object({ name: z.string() }))
+  .action(async ({ parsedInput, ctx: { userId } }) => {
+    // userId comes from verified session
+    return await updateUserProfile(userId, { name: parsedInput.name });
+  });
 ```
 
 ## Maintenance

@@ -65,3 +65,24 @@ export type AddGameToUserLibraryInput = {
     acquisitionType: AcquisitionType;
   };
 };
+
+export type LibraryStatsResult =
+  | {
+      ok: true;
+      data: {
+        statusCounts: Record<string, number>;
+        recentGames: Array<{
+          gameId: string;
+          title: string;
+          coverImage: string | null;
+          lastPlayed: Date;
+        }>;
+      };
+    }
+  | {
+      ok: false;
+      error: {
+        code: string;
+        message: string;
+      };
+    };

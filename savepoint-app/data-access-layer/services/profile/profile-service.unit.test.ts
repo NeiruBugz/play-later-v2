@@ -263,7 +263,18 @@ describe("ProfileService", () => {
     });
 
     it("should handle unexpected errors during stats fetch", async () => {
-      mockFindUserById.mockRejectedValue(new Error("Connection timeout"));
+      const mockUser = {
+        username: "testuser",
+        image: null,
+        email: "test@example.com",
+        name: "Test User",
+        createdAt: new Date("2024-01-15"),
+      };
+
+      mockFindUserById.mockResolvedValue(mockUser);
+      mockGetLibraryStatsByUserId.mockRejectedValue(
+        new Error("Connection timeout")
+      );
 
       const result = await service.getProfileWithStats({
         userId: "user-123",
