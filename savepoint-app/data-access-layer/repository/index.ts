@@ -18,7 +18,6 @@ export {
   findCurrentlyPlayingGames,
   buildCollectionFilter,
   addGameToUserLibrary,
-  getAggregatedLibraryStatsByUserId as getLibraryStatsByUserId,
   getLibraryStatsByUserId,
 } from "./library/library-repository";
 

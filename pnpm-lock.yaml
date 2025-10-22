@@ -3657,6 +3657,9 @@ packages:
   leo-profanity@1.8.0:
     resolution: {integrity: sha512-TATupbZhT3oFCtsiEXzgXcLvW6cDPhDtN+0yQAibjwBdSw3WJFLKM0DZ18eEW8KeFTT10x8gCP+DDZz0cI4Bfg==}
 
+  leo-profanity@1.8.0:
+    resolution: {integrity: sha512-TATupbZhT3oFCtsiEXzgXcLvW6cDPhDtN+0yQAibjwBdSw3WJFLKM0DZ18eEW8KeFTT10x8gCP+DDZz0cI4Bfg==}
+
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
@@ -8865,6 +8868,11 @@ snapshots:
   language-tags@1.0.9:
     dependencies:
       language-subtag-registry: 0.3.23
+
+  leo-profanity@1.8.0:
+    optionalDependencies:
+      french-badwords-list: 1.0.7
+      russian-bad-words: 0.5.0
 
   leo-profanity@1.8.0:
     optionalDependencies:
