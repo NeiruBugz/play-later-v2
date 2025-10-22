@@ -4,13 +4,11 @@ import type { FilterParams } from "@/shared/types/collection";
 
 import type { BaseService, ServiceResponse } from "../types";
 
-// Collection Service specific types
 export interface CollectionParams extends Omit<FilterParams, "page"> {
   userId: string;
   page?: number;
 }
 
-// Type representing the game with its library items as returned by the repository
 export type GameWithLibraryItems = Game & {
   libraryItems: LibraryItem[];
 };

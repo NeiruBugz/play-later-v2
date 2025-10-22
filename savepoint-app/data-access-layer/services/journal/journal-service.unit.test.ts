@@ -10,7 +10,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceErrorCode } from "../types";
 import { JournalService } from "./journal-service";
 
-// Mock the repository functions
 vi.mock("@/data-access-layer/repository/journal/journal-repository", () => ({
   createJournalEntry: vi.fn(),
   deleteJournalEntry: vi.fn(),
@@ -678,12 +677,12 @@ describe("JournalService", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.stats.totalEntries).toBe(3);
-        expect(result.data.stats.totalPlayTime).toBe(270); // 120 + 90 + 60
+        expect(result.data.stats.totalPlayTime).toBe(270);
         expect(result.data.stats.moodDistribution).toEqual([
           { mood: "EXCITED", count: 2 },
           { mood: "FRUSTRATED", count: 1 },
         ]);
-        expect(result.data.stats.recentEntries).toBe(2); // 2 entries in last 30 days
+        expect(result.data.stats.recentEntries).toBe(2);
       }
     });
 

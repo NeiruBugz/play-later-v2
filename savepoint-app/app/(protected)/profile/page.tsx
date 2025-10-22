@@ -3,9 +3,11 @@ import { ProfileService } from "@/data-access-layer/services";
 import { redirect } from "next/navigation";
 
 import { ProfileView } from "@/features/profile/ui/profile-view";
+import { createLogger } from "@/shared/lib";
 
 export default async function ProfilePage() {
   const userId = await getServerUserId();
+  const logger = createLogger({ name: "ProfilePage" });
 
   if (!userId) {
     redirect("/login");
@@ -15,7 +17,7 @@ export default async function ProfilePage() {
   const result = await service.getProfileWithStats({ userId });
 
   if (!result.success) {
-    console.error("Failed to load profile:", result.error);
+    logger.error({ error: result.error }, "Failed to load profile");
     redirect("/login");
   }
 

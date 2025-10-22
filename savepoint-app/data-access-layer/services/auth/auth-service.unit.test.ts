@@ -6,8 +6,6 @@ import * as passwordUtils from "@/shared/lib";
 import { ServiceErrorCode } from "../types";
 import { AuthService } from "./auth-service";
 
-// Consolidated mock is defined in global setup; avoid redefining here to prevent conflicts
-
 describe("AuthService", () => {
   let service: AuthService;
   let mockHashPassword: ReturnType<typeof vi.fn>;
@@ -239,7 +237,6 @@ describe("AuthService", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        // Service should handle null email gracefully
         expect(result.data.user.id).toBe("user-123");
       }
     });

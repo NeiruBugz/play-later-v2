@@ -2,7 +2,6 @@ import {
   cleanupDatabase,
   resetTestDatabase,
   setupDatabase,
-  testDataBase,
 } from "@/test/setup/database";
 import {
   createGame,
@@ -22,7 +21,6 @@ import {
 
 import { getLibraryStatsByUserId } from "./library-repository";
 
-// Mock the prisma client to use testDataBase
 vi.mock("@/shared/lib", async () => {
   const actual =
     await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
@@ -51,7 +49,6 @@ describe("LibraryRepository - Integration Tests", () => {
 
   describe("getLibraryStatsByUserId", () => {
     it("should return correct status counts for games in multiple statuses", async () => {
-      // Arrange
       const user = await createUser();
       const game1 = await createGame({ title: "Game 1" });
       const game2 = await createGame({ title: "Game 2" });
@@ -59,7 +56,6 @@ describe("LibraryRepository - Integration Tests", () => {
       const game4 = await createGame({ title: "Game 4" });
       const game5 = await createGame({ title: "Game 5" });
 
-      // Create library items with different statuses
       await createLibraryItem({
         userId: user.id,
         gameId: game1.id,
@@ -86,10 +82,8 @@ describe("LibraryRepository - Integration Tests", () => {
         status: LibraryItemStatus.WISHLIST,
       });
 
-      // Act
       const result = await getLibraryStatsByUserId(user.id);
 
-      // Assert
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.data.statusCounts).toEqual({
@@ -102,13 +96,10 @@ describe("LibraryRepository - Integration Tests", () => {
     });
 
     it("should return empty stats for user with no library items", async () => {
-      // Arrange
       const user = await createUser();
 
-      // Act
       const result = await getLibraryStatsByUserId(user.id);
 
-      // Assert
       if (!result.ok) {
         console.error("Error:", result.error);
       }
@@ -120,7 +111,6 @@ describe("LibraryRepository - Integration Tests", () => {
     });
 
     it("should return last 5 CURRENTLY_EXPLORING games ordered by updatedAt DESC", async () => {
-      // Arrange
       const user = await createUser();
       const games = await Promise.all([
         createGame({ title: "Game 1" }),
@@ -132,8 +122,6 @@ describe("LibraryRepository - Integration Tests", () => {
         createGame({ title: "Game 7" }),
       ]);
 
-      // Create library items with CURRENTLY_EXPLORING status
-      // Add small delays to ensure different updatedAt timestamps
       const items = [];
       for (let i = 0; i < games.length; i++) {
         const item = await createLibraryItem({
@@ -142,25 +130,20 @@ describe("LibraryRepository - Integration Tests", () => {
           status: LibraryItemStatus.CURRENTLY_EXPLORING,
         });
         items.push(item);
-        // Small delay to ensure different timestamps
         await new Promise((resolve) => setTimeout(resolve, 10));
       }
 
-      // Act
       const result = await getLibraryStatsByUserId(user.id);
 
-      // Assert
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.data.recentGames).toHaveLength(5);
-        // Should return the last 5 games in reverse order (most recent first)
         expect(result.data.recentGames[0].title).toBe("Game 7");
         expect(result.data.recentGames[1].title).toBe("Game 6");
         expect(result.data.recentGames[2].title).toBe("Game 5");
         expect(result.data.recentGames[3].title).toBe("Game 4");
         expect(result.data.recentGames[4].title).toBe("Game 3");
 
-        // Verify structure of recent games
         expect(result.data.recentGames[0]).toHaveProperty("gameId");
         expect(result.data.recentGames[0]).toHaveProperty("title");
         expect(result.data.recentGames[0]).toHaveProperty("coverImage");
@@ -170,7 +153,6 @@ describe("LibraryRepository - Integration Tests", () => {
     });
 
     it("should return only CURRENTLY_EXPLORING games in recentGames", async () => {
-      // Arrange
       const user = await createUser();
       const game1 = await createGame({ title: "Currently Playing" });
       const game2 = await createGame({ title: "Completed Game" });
@@ -192,10 +174,8 @@ describe("LibraryRepository - Integration Tests", () => {
         status: LibraryItemStatus.WISHLIST,
       });
 
-      // Act
       const result = await getLibraryStatsByUserId(user.id);
 
-      // Assert
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.data.recentGames).toHaveLength(1);
@@ -209,7 +189,6 @@ describe("LibraryRepository - Integration Tests", () => {
     });
 
     it("should handle games with null coverImage", async () => {
-      // Arrange
       const user = await createUser();
       const game = await createGame({
         title: "Game Without Cover",
@@ -222,10 +201,8 @@ describe("LibraryRepository - Integration Tests", () => {
         status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
-      // Act
       const result = await getLibraryStatsByUserId(user.id);
 
-      // Assert
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.data.recentGames).toHaveLength(1);
@@ -234,7 +211,6 @@ describe("LibraryRepository - Integration Tests", () => {
     });
 
     it("should not include other users' library items", async () => {
-      // Arrange
       const user1 = await createUser({ username: "user1" });
       const user2 = await createUser({ username: "user2" });
       const game1 = await createGame({ title: "User 1 Game" });
@@ -251,10 +227,8 @@ describe("LibraryRepository - Integration Tests", () => {
         status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
-      // Act
       const result = await getLibraryStatsByUserId(user1.id);
 
-      // Assert
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.data.statusCounts).toEqual({

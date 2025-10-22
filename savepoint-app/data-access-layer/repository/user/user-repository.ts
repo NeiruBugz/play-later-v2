@@ -142,7 +142,6 @@ export async function findUserById<T extends Prisma.UserSelect>(
   userId: string,
   options?: { select?: T }
 ): Promise<DefaultUserSelect | Prisma.UserGetPayload<{ select: T }> | null> {
-  // Default restrictive select prevents exposing sensitive fields
   const defaultSelect = {
     id: true,
     name: true,

@@ -11,7 +11,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceErrorCode } from "../types";
 import { LibraryService } from "./library-service";
 
-// Mock the repository functions
 vi.mock("@/data-access-layer/repository/library/library-repository", () => ({
   createLibraryItem: vi.fn(),
   deleteLibraryItem: vi.fn(),
@@ -661,9 +660,7 @@ describe("LibraryService", () => {
         userId: "user-123",
       });
 
-      // Should return 0 gracefully even on error
       expect(count).toBe(0);
-      // Logger is configured as silent in tests, so no need to spy
     });
   });
 });

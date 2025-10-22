@@ -13,7 +13,6 @@ import {
 } from "./journal-repository";
 import type { CreateJournalEntryInput, UpdateJournalEntryInput } from "./types";
 
-// Mock prisma client
 vi.mock("@/shared/lib", () => ({
   prisma: {
     journalEntry: {
@@ -567,7 +566,6 @@ describe("JournalRepository", () => {
 
       await updateJournalEntry(input);
 
-      // Should not call update with a new publishedAt since it's already public
       expect(prisma.journalEntry.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.not.objectContaining({

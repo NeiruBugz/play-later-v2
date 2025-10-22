@@ -86,7 +86,6 @@ export async function getJournalEntryById(
     return null;
   }
 
-  // If userId is provided, verify ownership or public visibility
   if (userId !== undefined) {
     const isOwner = entry.userId === userId;
     const isPublic = entry.visibility === "PUBLIC";
@@ -102,7 +101,6 @@ export async function getJournalEntryById(
 export async function updateJournalEntry(
   input: UpdateJournalEntryInput
 ): Promise<JournalEntryWithRelations> {
-  // First verify the entry exists and belongs to the user
   const existingEntry = await prisma.journalEntry.findUnique({
     where: {
       id: input.id,
@@ -117,7 +115,6 @@ export async function updateJournalEntry(
     throw new Error("Unauthorized to modify this journal entry");
   }
 
-  // Prepare update data
   const updateData: {
     title?: string;
     content?: string;
@@ -134,15 +131,12 @@ export async function updateJournalEntry(
   if (input.playSession !== undefined)
     updateData.playSession = input.playSession;
 
-  // Handle visibility change
   if (input.visibility !== undefined) {
     updateData.visibility = input.visibility;
     updateData.isPublic = input.visibility === "PUBLIC";
-    // Set publishedAt when making public for the first time
     if (input.visibility === "PUBLIC" && !existingEntry.publishedAt) {
       updateData.publishedAt = new Date();
     }
-    // Clear publishedAt when making private
     if (input.visibility === "PRIVATE") {
       updateData.publishedAt = null;
     }
@@ -161,7 +155,6 @@ export async function deleteJournalEntry(
   id: string,
   userId: string
 ): Promise<JournalEntryWithRelations> {
-  // First verify the entry exists and belongs to the user
   const existingEntry = await prisma.journalEntry.findUnique({
     where: {
       id,
@@ -188,7 +181,6 @@ export async function makeJournalEntryPublic(
   id: string,
   userId: string
 ): Promise<JournalEntryWithRelations> {
-  // First verify the entry exists and belongs to the user
   const existingEntry = await prisma.journalEntry.findUnique({
     where: {
       id,

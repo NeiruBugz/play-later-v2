@@ -8,7 +8,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceErrorCode } from "../types";
 import { ProfileService } from "./profile-service";
 
-// Mock the repository functions
 vi.mock("@/data-access-layer/repository", () => ({
   findUserById: vi.fn(),
   findUserByNormalizedUsername: vi.fn(),
@@ -339,7 +338,6 @@ describe("ProfileService", () => {
         expect(result.data.available).toBe(false);
       }
 
-      // Should normalize to lowercase before checking
       expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
         "existinguser"
       );

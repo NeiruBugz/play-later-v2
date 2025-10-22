@@ -9,7 +9,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceErrorCode } from "../types";
 import { UserService } from "./user-service";
 
-// Mock the repository functions
 vi.mock("@/data-access-layer/repository/user/user-repository", () => ({
   getUserInfo: vi.fn(),
   updateUserData: vi.fn(),

@@ -1,31 +1,17 @@
-// Service layer exports
-
-// ============================================================================
-// Core Service Types (New - Zod-first validation strategy)
-// ============================================================================
-
 export {
-  // Primary types
   type ServiceResult,
   ServiceErrorCode,
   type PaginatedResult,
   type CursorPaginatedResult,
   type PaginationInput,
   type BaseServiceInput,
-  // Base class
   BaseService,
-  // Type guards and helpers
   isSuccessResult,
   isErrorResult,
   type ExtractServiceData,
-  // Legacy types (deprecated)
   type ServiceResponse,
   type ServiceError,
 } from "./types";
-
-// ============================================================================
-// IGDB Service (Game Search & Metadata)
-// ============================================================================
 
 export {
   type GameSearchParams,
@@ -39,10 +25,6 @@ export {
 
 export { IgdbService } from "./igdb/igdb-service";
 
-// ============================================================================
-// Collection Service (User Game Collection)
-// ============================================================================
-
 export {
   type CollectionParams,
   type CollectionItem,
@@ -52,10 +34,6 @@ export {
 } from "./collection/types";
 
 export { CollectionService } from "./collection/collection-service";
-
-// ============================================================================
-// Library Service (User Library Item Management)
-// ============================================================================
 
 export {
   type GetLibraryItemsInput,
@@ -71,10 +49,6 @@ export {
 } from "./library/types";
 
 export { LibraryService } from "./library/library-service";
-
-// ============================================================================
-// Game Service (Game Management & IGDB Integration)
-// ============================================================================
 
 export {
   type GameSearchInput,
@@ -94,10 +68,6 @@ export {
 
 export { GameService } from "./game/game-service";
 
-// ============================================================================
-// Review Service (Review Management)
-// ============================================================================
-
 export {
   type GetReviewsInput,
   type CreateReviewInput,
@@ -114,10 +84,6 @@ export {
 
 export { ReviewService } from "./review/review-service";
 
-// ============================================================================
-// User Service (User Management)
-// ============================================================================
-
 export {
   type GetUserInput,
   type UpdateUserInput,
@@ -132,10 +98,6 @@ export {
 } from "./user/types";
 
 export { UserService } from "./user/user-service";
-
-// ============================================================================
-// Journal Service (Journal Entry Management)
-// ============================================================================
 
 export {
   type GetJournalEntriesInput,
@@ -154,10 +116,6 @@ export {
 
 export { JournalService } from "./journal/journal-service";
 
-// ============================================================================
-// Auth Service (Authentication)
-// ============================================================================
-
 export {
   type SignUpInput,
   type SignInInput,
@@ -167,10 +125,6 @@ export {
 } from "./auth/types";
 
 export { AuthService } from "./auth/auth-service";
-
-// ============================================================================
-// Profile Service (Profile Management)
-// ============================================================================
 
 export {
   type GetProfileInput,

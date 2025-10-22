@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CollectionService } from "./collection-service";
 
-// Mock the repository functions
 vi.mock("@/data-access-layer/repository", () => ({
   buildCollectionFilter: vi.fn(),
   findGamesWithLibraryItemsPaginated: vi.fn(),
@@ -228,12 +227,11 @@ describe("CollectionService", () => {
         platform: "",
         status: "",
         search: "",
-        // page not provided
       });
 
       expect(mockFindGamesWithLibraryItemsPaginated).toHaveBeenCalledWith({
         where: mockGameFilter,
-        page: 1, // default page
+        page: 1,
         itemsPerPage: 24,
       });
     });

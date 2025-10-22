@@ -349,7 +349,6 @@ describe("IgdbService", () => {
   describe("getTopRatedGames", () => {
     describe("when service returns", () => {
       it("should return games sorted by rating when API call succeeds", async () => {
-        // Given: IGDB API returns top rated games
         const mockGames = [
           {
             id: 1942,

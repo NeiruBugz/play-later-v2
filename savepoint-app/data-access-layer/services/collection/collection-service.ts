@@ -24,7 +24,6 @@ export class CollectionService
     params: CollectionParams
   ): Promise<ServiceResponse<CollectionResult>> {
     try {
-      // Validate required parameters
       if (!params.userId) {
         return this.createErrorResponse({
           message: "User ID is required",
@@ -32,7 +31,6 @@ export class CollectionService
         });
       }
 
-      // Build collection filter using existing repository logic
       const { gameFilter } = buildCollectionFilter({
         userId: params.userId,
         platform: params.platform,
@@ -40,14 +38,12 @@ export class CollectionService
         search: params.search,
       });
 
-      // Fetch paginated games with backlog items
       const [games, totalGames] = await findGamesWithLibraryItemsPaginated({
         where: gameFilter,
         page: params.page ?? DEFAULT_PAGE,
         itemsPerPage: ITEMS_PER_PAGE,
       });
 
-      // Transform the data to match the expected format
       const collection = games.map((game) => ({
         game,
         libraryItems: game.libraryItems,
