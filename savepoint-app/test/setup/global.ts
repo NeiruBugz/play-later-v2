@@ -89,15 +89,20 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Add the repository mocks that were in individual test files
-vi.mock("@/data-access-layer/repository", () => ({
-  createLibraryItem: vi.fn(),
-  deleteLibraryItem: vi.fn(),
-  updateLibraryItem: vi.fn(),
-  getManyLibraryItems: vi.fn(),
-  getOtherUsersLibraryItems: vi.fn(),
-  updateUserData: vi.fn(),
-  createReview: vi.fn(),
-}));
+vi.mock("@/data-access-layer/repository", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/data-access-layer/repository")>();
+  return {
+    ...actual,
+    createLibraryItem: vi.fn(),
+    deleteLibraryItem: vi.fn(),
+    updateLibraryItem: vi.fn(),
+    getManyLibraryItems: vi.fn(),
+    getOtherUsersLibraryItems: vi.fn(),
+    updateUserData: vi.fn(),
+    createReview: vi.fn(),
+  };
+});
 
 // Add the add-game mock
 vi.mock("@/features/add-game/server-actions/add-game", () => ({

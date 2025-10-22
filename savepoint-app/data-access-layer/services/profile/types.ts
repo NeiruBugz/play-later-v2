@@ -42,3 +42,11 @@ export type GetProfileResult = ServiceResult<{ profile: Profile }>;
 export type GetProfileWithStatsResult = ServiceResult<{
   profile: ProfileWithStats;
 }>;
+
+export type CheckUsernameAvailabilityInput = {
+  username: string;
+};
+
+export type CheckUsernameAvailabilityResult = ServiceResult<{
+  available: boolean;
+}>;

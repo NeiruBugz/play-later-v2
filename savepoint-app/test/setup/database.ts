@@ -2,7 +2,7 @@ import { execSync } from "child_process";
 import { PrismaClient } from "@prisma/client";
 import { nanoid } from "nanoid";
 
-let testDataBase: PrismaClient;
+let testDataBase: PrismaClient | undefined;
 
 export const setupDatabase = async () => {
   const testDatabaseName = `test_${nanoid()}`;
@@ -23,7 +23,7 @@ export const setupDatabase = async () => {
       { stdio: "ignore" }
     );
 
-    execSync("pnpmprisma migrate deploy", {
+    execSync("pnpm prisma migrate deploy", {
       stdio: "ignore",
       env: { ...process.env, POSTGRES_PRISMA_URL: databaseUrl },
     });
@@ -60,9 +60,9 @@ export const cleanupDatabase = async () => {
 export const resetTestDatabase = async () => {
   if (testDataBase) {
     const tables = await testDataBase.$queryRaw<Array<{ table_name: string }>>`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
       AND table_type = 'BASE TABLE'
       AND table_name != '_prisma_migrations'
     `;
@@ -78,4 +78,15 @@ export const resetTestDatabase = async () => {
   }
 };
 
+// Export a getter function to ensure testDataBase is initialized
+export const getTestDatabase = (): PrismaClient => {
+  if (!testDataBase) {
+    throw new Error(
+      "Test database not initialized. Call setupDatabase() in beforeAll()"
+    );
+  }
+  return testDataBase;
+};
+
+// Direct export for backward compatibility (use with caution)
 export { testDataBase };

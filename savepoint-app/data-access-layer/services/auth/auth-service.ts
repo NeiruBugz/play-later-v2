@@ -14,7 +14,7 @@
 
 import "server-only";
 
-import { hashPassword, prisma } from "@/shared/lib";
+import { createLogger, hashPassword, prisma } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
@@ -50,6 +50,7 @@ import type {
  * ```
  */
 export class AuthService extends BaseService {
+  private logger = createLogger({ service: "AuthService" });
   /**
    * Register a new user with email and password.
    *
@@ -78,12 +79,18 @@ export class AuthService extends BaseService {
    */
   async signUp(input: SignUpInput): Promise<SignUpResult> {
     try {
+      this.logger.info({ email: input.email }, "User sign up attempt");
+
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
         where: { email: input.email },
       });
 
       if (existingUser) {
+        this.logger.warn(
+          { email: input.email },
+          "Sign up failed: email already exists"
+        );
         return this.error(
           "An account with this email already exists",
           ServiceErrorCode.CONFLICT
@@ -107,6 +114,11 @@ export class AuthService extends BaseService {
         },
       });
 
+      this.logger.info(
+        { userId: user.id, email: user.email },
+        "User account created successfully"
+      );
+
       return this.success({
         user: {
           id: user.id,
@@ -122,12 +134,20 @@ export class AuthService extends BaseService {
         (error.message.includes("Unique constraint") ||
           error.message.includes("unique"))
       ) {
+        this.logger.warn(
+          { email: input.email, error },
+          "Sign up failed: unique constraint violation"
+        );
         return this.error(
           "An account with this email already exists",
           ServiceErrorCode.CONFLICT
         );
       }
 
+      this.logger.error(
+        { error, email: input.email },
+        "Error creating user account"
+      );
       return this.handleError(error, "Failed to create account");
     }
   }

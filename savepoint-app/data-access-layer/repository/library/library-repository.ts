@@ -12,7 +12,6 @@ import type {
   GetLibraryCountInput,
   GetLibraryItemsForUserByIgdbIdInput,
   GetManyLibraryItemsInput,
-  LibraryStatsResult,
   UpdateLibraryItemInput,
   UserWithLibraryItemsResponse,
 } from "./types";
@@ -317,26 +316,46 @@ export async function addGameToUserLibrary({
   });
 }
 
-export async function getAggregatedLibraryStatsByUserId(
-  userId: string
-): Promise<LibraryStatsResult> {
+/**
+ * Get library statistics for a user
+ * Returns the count of games in each journey status and recent games
+ * @param userId - The user's unique identifier
+ * @returns Result object with status counts and recent games or error
+ */
+export async function getLibraryStatsByUserId(userId: string): Promise<
+  | {
+      ok: true;
+      data: {
+        statusCounts: Record<string, number>;
+        recentGames: Array<{
+          gameId: string;
+          title: string;
+          coverImage: string | null;
+          lastPlayed: Date;
+        }>;
+      };
+    }
+  | {
+      ok: false;
+      error: {
+        code: string;
+        message: string;
+      };
+    }
+> {
   try {
-    const [statusCounts, recentGames] = await Promise.all([
-      // Count games by status
+    // Count games by status and fetch recent CURRENTLY_EXPLORING games
+    const [statusCountsRaw, recentItems] = await Promise.all([
       prisma.libraryItem.groupBy({
         by: ["status"],
         where: { userId },
         _count: true,
       }),
-
-      // Get last 5 games marked as CURRENTLY_EXPLORING
       prisma.libraryItem.findMany({
         where: {
           userId,
           status: LibraryItemStatus.CURRENTLY_EXPLORING,
         },
-        orderBy: { updatedAt: "desc" },
-        take: 5,
         include: {
           game: {
             select: {
@@ -346,33 +365,39 @@ export async function getAggregatedLibraryStatsByUserId(
             },
           },
         },
+        orderBy: { updatedAt: "desc" },
+        take: 5,
       }),
     ]);
 
+    const statusCounts = statusCountsRaw.reduce(
+      (acc, item) => {
+        acc[item.status] = item._count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const recentGames = recentItems.map((item) => ({
+      gameId: item.game.id,
+      title: item.game.title,
+      coverImage: item.game.coverImage,
+      lastPlayed: item.updatedAt,
+    }));
+
     return {
-      ok: true as const,
+      ok: true,
       data: {
-        statusCounts: statusCounts.reduce(
-          (acc, item) => {
-            acc[item.status] = item._count;
-            return acc;
-          },
-          {} as Record<string, number>
-        ),
-        recentGames: recentGames.map((item) => ({
-          gameId: item.game.id,
-          title: item.game.title,
-          coverImage: item.game.coverImage,
-          lastPlayed: item.updatedAt,
-        })),
+        statusCounts,
+        recentGames,
       },
     };
   } catch (error) {
     return {
-      ok: false as const,
+      ok: false,
       error: {
         code: "STATS_FETCH_FAILED",
-        message: "Failed to fetch library stats",
+        message: `Failed to fetch library stats: ${error instanceof Error ? error.message : "Unknown error"}`,
       },
     };
   }

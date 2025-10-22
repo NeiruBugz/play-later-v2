@@ -19,6 +19,8 @@ import {
   getAllReviewsForGame,
 } from "@/data-access-layer/repository/review/review-repository";
 
+import { createLogger } from "@/shared/lib";
+
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
   CreateReviewInput,
@@ -57,6 +59,7 @@ import type {
  * ```
  */
 export class ReviewService extends BaseService {
+  private logger = createLogger({ service: "ReviewService" });
   /**
    * Get reviews for a specific game.
    *

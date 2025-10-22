@@ -35,26 +35,26 @@
 ## **Slice 2: Display Profile Stats (Library Breakdown)**
 *Goal: Enhance profile view with game library statistics*
 
-- [ ] **Sub-task:** Add `getLibraryStatsByUserId()` repository function in `data-access-layer/repository/library/library-repository.ts` (status counts only)
-- [ ] **Sub-task:** Write integration tests for `getLibraryStatsByUserId()` with test data
-- [ ] **Sub-task:** Update `ProfileService.getProfileWithStats()` to call library repository and return aggregated data
-- [ ] **Sub-task:** Write unit tests for `ProfileService.getProfileWithStats()`
-- [ ] **Sub-task:** Update `/profile/page.tsx` to use `getProfileWithStats()` instead of `getProfile()`
-- [ ] **Sub-task:** Update `ProfileView` component to display status breakdown (e.g., "Curious About: 3, Currently Exploring: 2")
-- [ ] **Sub-task:** Write E2E test: Verify profile page displays correct library stats for user with games
-- [ ] **Sub-task:** Verify profile page displays correct stats for users with library items
+- [x] **Sub-task:** Add `getLibraryStatsByUserId()` repository function in `data-access-layer/repository/library/library-repository.ts` (status counts only)
+- [x] **Sub-task:** Write integration tests for `getLibraryStatsByUserId()` with test data
+- [x] **Sub-task:** Update `ProfileService.getProfileWithStats()` to call library repository and return aggregated data
+- [x] **Sub-task:** Write unit tests for `ProfileService.getProfileWithStats()`
+- [x] **Sub-task:** Update `/profile/page.tsx` to use `getProfileWithStats()` instead of `getProfile()`
+- [x] **Sub-task:** Update `ProfileView` component to display status breakdown (e.g., "Curious About: 3, Currently Exploring: 2")
+- [x] **Sub-task:** Write E2E test: Verify profile page displays correct library stats for user with games
+- [x] **Sub-task:** Verify profile page displays correct stats for users with library items
 
 ---
 
 ## **Slice 3: Display Recently Played Games**
 *Goal: Show last 3-5 games marked as "Currently Exploring"*
 
-- [ ] **Sub-task:** Update `getLibraryStatsByUserId()` to include recently played games (last 5 `CURRENTLY_EXPLORING` items, ordered by `updatedAt`)
-- [ ] **Sub-task:** Update integration tests to verify recent games query
-- [ ] **Sub-task:** Update `ProfileView` component to render list of recent games with cover images
-- [ ] **Sub-task:** Add basic styling for recent games list (grid or horizontal scroll)
-- [ ] **Sub-task:** Write E2E test: Verify recent games section displays correct games (or empty state)
-- [ ] **Sub-task:** Verify profile page shows recent games correctly (or empty state if none)
+- [x] **Sub-task:** Update `getLibraryStatsByUserId()` to include recently played games (last 5 `CURRENTLY_EXPLORING` items, ordered by `updatedAt`)
+- [x] **Sub-task:** Update integration tests to verify recent games query
+- [x] **Sub-task:** Update `ProfileView` component to render list of recent games with cover images
+- [x] **Sub-task:** Add basic styling for recent games list (grid or horizontal scroll)
+- [x] **Sub-task:** Write E2E test: Verify recent games section displays correct games (or empty state)
+- [x] **Sub-task:** Verify profile page shows recent games correctly (or empty state if none)
 
 ---
 

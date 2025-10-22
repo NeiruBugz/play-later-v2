@@ -29,7 +29,7 @@ import {
 } from "@/data-access-layer/repository/game/game-repository";
 import type { GameInput } from "@/data-access-layer/repository/game/types";
 
-import { convertReleaseDateToIsoStringDate } from "@/shared/lib";
+import { convertReleaseDateToIsoStringDate, createLogger } from "@/shared/lib";
 
 import { IgdbService } from "../igdb/igdb-service";
 import { BaseService, ServiceErrorCode } from "../types";
@@ -79,6 +79,7 @@ import type {
  * ```
  */
 export class GameService extends BaseService {
+  private logger = createLogger({ service: "GameService" });
   private igdbService: IgdbService;
 
   constructor() {

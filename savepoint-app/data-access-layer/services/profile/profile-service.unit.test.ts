@@ -1,5 +1,6 @@
 import {
   findUserById,
+  findUserByNormalizedUsername,
   getLibraryStatsByUserId,
 } from "@/data-access-layer/repository";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -10,18 +11,21 @@ import { ProfileService } from "./profile-service";
 // Mock the repository functions
 vi.mock("@/data-access-layer/repository", () => ({
   findUserById: vi.fn(),
+  findUserByNormalizedUsername: vi.fn(),
   getLibraryStatsByUserId: vi.fn(),
 }));
 
 describe("ProfileService", () => {
   let service: ProfileService;
   let mockFindUserById: ReturnType<typeof vi.fn>;
+  let mockFindUserByNormalizedUsername: ReturnType<typeof vi.fn>;
   let mockGetLibraryStatsByUserId: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     service = new ProfileService();
     mockFindUserById = vi.mocked(findUserById);
+    mockFindUserByNormalizedUsername = vi.mocked(findUserByNormalizedUsername);
     mockGetLibraryStatsByUserId = vi.mocked(getLibraryStatsByUserId);
   });
 
@@ -283,6 +287,76 @@ describe("ProfileService", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toBe("Connection timeout");
+        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+      }
+    });
+  });
+
+  describe("checkUsernameAvailability", () => {
+    it("should return available: true when username is not taken", async () => {
+      mockFindUserByNormalizedUsername.mockResolvedValue(null);
+
+      const result = await service.checkUsernameAvailability({
+        username: "newuser123",
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.available).toBe(true);
+      }
+
+      expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
+        "newuser123"
+      );
+    });
+
+    it("should return available: false when username is already taken", async () => {
+      mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-123" });
+
+      const result = await service.checkUsernameAvailability({
+        username: "existinguser",
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.available).toBe(false);
+      }
+
+      expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
+        "existinguser"
+      );
+    });
+
+    it("should check username case-insensitively", async () => {
+      mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-123" });
+
+      const result = await service.checkUsernameAvailability({
+        username: "ExistingUser",
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.available).toBe(false);
+      }
+
+      // Should normalize to lowercase before checking
+      expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
+        "existinguser"
+      );
+    });
+
+    it("should handle database errors gracefully", async () => {
+      mockFindUserByNormalizedUsername.mockRejectedValue(
+        new Error("Database connection failed")
+      );
+
+      const result = await service.checkUsernameAvailability({
+        username: "testuser",
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Database connection failed");
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
     });
