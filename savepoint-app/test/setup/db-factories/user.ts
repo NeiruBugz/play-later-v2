@@ -1,6 +1,6 @@
 import { type User } from "@prisma/client";
 
-import { testDataBase } from "../database";
+import { getTestDatabase } from "../database";
 
 export type UserFactoryOptions = {
   email?: string;
@@ -29,7 +29,7 @@ export const createUser = async (
     ...options,
   };
 
-  return testDataBase.user.create({
+  return getTestDatabase().user.create({
     data: defaultData,
   });
 };

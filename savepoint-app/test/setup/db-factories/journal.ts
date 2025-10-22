@@ -1,6 +1,6 @@
 import { type JournalEntry } from "@prisma/client";
 
-import { testDataBase } from "../database";
+import { getTestDatabase } from "../database";
 
 export type JournalEntryFactoryOptions = {
   userId: string;
@@ -38,7 +38,7 @@ export const createJournalEntry = async (
     ...options,
   };
 
-  return testDataBase.journalEntry.create({
+  return getTestDatabase().journalEntry.create({
     data: defaultData,
   });
 };
