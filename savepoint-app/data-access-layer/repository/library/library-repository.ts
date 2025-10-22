@@ -344,7 +344,6 @@ export async function getLibraryStatsByUserId(userId: string): Promise<
     }
 > {
   try {
-    // Count games by status and fetch recent CURRENTLY_EXPLORING games
     const [statusCountsRaw, recentItems] = await Promise.all([
       prisma.libraryItem.groupBy({
         by: ["status"],
