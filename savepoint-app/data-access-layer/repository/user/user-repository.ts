@@ -178,10 +178,6 @@ export async function updateUserProfile(
     profileSetupCompletedAt?: Date | null;
   }
 ) {
-  if (!userId) {
-    throw new Error("userId is required for updateUserProfile");
-  }
-
   return prisma.user.update({
     where: { id: userId },
     data,
