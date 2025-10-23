@@ -1,6 +1,9 @@
 import type { ProfileWithStats } from "@/data-access-layer/services";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
+import Link from "next/link";
+
+import { Button } from "@/shared/components/ui/button";
 
 import { statusLabels } from "../lib/constants";
 import { prepareProfileData } from "../lib/prepare-profile-data";
@@ -15,34 +18,40 @@ export function ProfileView({ profile }: ProfileViewProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start gap-6">
-        <div className="flex-shrink-0">
-          {profile.image ? (
-            <Image
-              width={96}
-              height={96}
-              src={profile.image}
-              alt={`${displayName}'s avatar`}
-              className="h-24 w-24 rounded-full object-cover ring-2 ring-gray-200"
-            />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 text-2xl font-bold text-gray-500">
-              {displayName.charAt(0).toUpperCase()}
-            </div>
-          )}
+      <div className="flex items-start justify-between gap-6">
+        <div className="flex items-start gap-6">
+          <div className="shrink-0">
+            {profile.image ? (
+              <Image
+                width={96}
+                height={96}
+                src={profile.image}
+                alt={`${displayName}'s avatar`}
+                className="h-24 w-24 rounded-full object-cover ring-2 ring-gray-200"
+              />
+            ) : (
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 text-2xl font-bold text-gray-500">
+                {displayName.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1">
+            <h2 className="font-serif text-3xl font-bold text-gray-900">
+              {displayName}
+            </h2>
+            {profile.email && (
+              <p className="mt-1 text-sm text-gray-600">{profile.email}</p>
+            )}
+            <p className="mt-2 text-sm text-gray-500">
+              Joined {joinDateFormatted}
+            </p>
+          </div>
         </div>
 
-        <div className="flex-1">
-          <h2 className="font-serif text-3xl font-bold text-gray-900">
-            {displayName}
-          </h2>
-          {profile.email && (
-            <p className="mt-1 text-sm text-gray-600">{profile.email}</p>
-          )}
-          <p className="mt-2 text-sm text-gray-500">
-            Joined {joinDateFormatted}
-          </p>
-        </div>
+        <Button variant="outline" className="shrink-0" asChild>
+          <Link href="/profile/settings">Edit Profile</Link>
+        </Button>
       </div>
 
       {statusEntries.length > 0 && (

@@ -17,7 +17,7 @@ export default async function Page() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="from-muted/30 to-background absolute inset-0 bg-gradient-to-b" />
+        <div className="from-muted/30 to-background absolute inset-0 bg-linear-to-b" />
 
         <div className="relative">
           {/* Navigation */}
@@ -43,8 +43,8 @@ export default async function Page() {
               >
                 Philosophy
               </a>
-              <Button variant="outline" size="sm">
-                Sign In
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Sign In</Link>
               </Button>
               <Button
                 size="sm"
@@ -224,7 +224,7 @@ export default async function Page() {
                   Explore Timeline
                 </Button>
               </div>
-              <div className="from-primary/20 to-secondary/20 relative aspect-[4/3] overflow-hidden rounded-lg bg-gradient-to-br">
+              <div className="from-primary/20 to-secondary/20 relative aspect-4/3 overflow-hidden rounded-lg bg-linear-to-br">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="space-y-2 text-center">
                     <BookOpen className="text-primary mx-auto h-16 w-16 opacity-50" />

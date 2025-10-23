@@ -4,8 +4,10 @@ import {
   findUserById,
   findUserByNormalizedUsername,
   getLibraryStatsByUserId,
+  updateUserProfile,
 } from "@/data-access-layer/repository";
 
+import { validateUsername } from "@/features/profile/lib/validation";
 import { createLogger } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
@@ -16,6 +18,8 @@ import type {
   GetProfileResult,
   GetProfileWithStatsInput,
   GetProfileWithStatsResult,
+  UpdateProfileInput,
+  UpdateProfileResult,
 } from "./types";
 
 export class ProfileService extends BaseService {
@@ -159,6 +163,72 @@ export class ProfileService extends BaseService {
         "Error checking username availability"
       );
       return this.handleError(error, "Failed to check username availability");
+    }
+  }
+
+  async updateProfile(input: UpdateProfileInput): Promise<UpdateProfileResult> {
+    try {
+      this.logger.info({ userId: input.userId }, "Updating profile");
+
+      // Validate username
+      const validation = validateUsername(input.username);
+      if (!validation.valid) {
+        this.logger.warn(
+          { userId: input.userId, username: input.username },
+          "Invalid username"
+        );
+        return this.error(validation.error, ServiceErrorCode.VALIDATION_ERROR);
+      }
+
+      // Check if username changed
+      const currentUser = await findUserById(input.userId, {
+        select: { username: true },
+      });
+
+      if (!currentUser) {
+        this.logger.warn({ userId: input.userId }, "User not found");
+        return this.error("User not found", ServiceErrorCode.NOT_FOUND);
+      }
+
+      if (currentUser.username !== input.username) {
+        // Username changed - check availability
+        const availabilityResult = await this.checkUsernameAvailability({
+          username: input.username,
+        });
+        if (!availabilityResult.success || !availabilityResult.data.available) {
+          this.logger.warn(
+            { userId: input.userId, username: input.username },
+            "Username already taken"
+          );
+          return this.error(
+            "Username already exists",
+            ServiceErrorCode.CONFLICT
+          );
+        }
+      }
+
+      // Update via repository
+      const user = await updateUserProfile(input.userId, {
+        username: input.username,
+        usernameNormalized: input.username.toLowerCase(),
+        image: input.avatarUrl,
+      });
+
+      this.logger.info(
+        { userId: input.userId, username: input.username },
+        "Profile updated successfully"
+      );
+
+      return this.success({
+        username: user.username,
+        image: user.image,
+      });
+    } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error updating profile"
+      );
+      return this.handleError(error, "Failed to update profile");
     }
   }
 }

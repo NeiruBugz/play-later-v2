@@ -50,3 +50,14 @@ export type CheckUsernameAvailabilityInput = {
 export type CheckUsernameAvailabilityResult = ServiceResult<{
   available: boolean;
 }>;
+
+export type UpdateProfileInput = {
+  userId: string;
+  username: string;
+  avatarUrl?: string;
+};
+
+export type UpdateProfileResult = ServiceResult<{
+  username: string | null;
+  image: string | null;
+}>;

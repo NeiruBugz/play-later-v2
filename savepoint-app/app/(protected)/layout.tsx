@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
+import { Toaster } from "@/shared/components/ui/sonner";
+
 export default function ProtectedLayout({ children }: PropsWithChildren) {
   return (
     <>
@@ -17,6 +19,12 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
               Dashboard
             </Link>
             <Link
+              href="/library"
+              className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"
+            >
+              Library
+            </Link>
+            <Link
               href="/profile"
               className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"
             >
@@ -25,7 +33,8 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
           </nav>
         </div>
       </header>
-      <main className="container mx-auto">{children}</main>
+      <main className="container mx-auto py-3">{children}</main>
+      <Toaster />
     </>
   );
 }

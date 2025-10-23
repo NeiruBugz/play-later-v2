@@ -166,18 +166,17 @@ export async function findUserByNormalizedUsername(usernameNormalized: string) {
   });
 }
 
+/**
+ * Update user profile fields
+ */
 export async function updateUserProfile(
   userId: string,
   data: {
     username?: string;
     usernameNormalized?: string;
-    steamProfileURL?: string;
+    image?: string;
   }
 ) {
-  if (!userId) {
-    throw new Error("userId is required for updateUserProfile");
-  }
-
   return prisma.user.update({
     where: { id: userId },
     data,

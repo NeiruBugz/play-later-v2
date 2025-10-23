@@ -61,29 +61,29 @@
 ## **Slice 4: Username Validation Logic (Client + Server)**
 *Goal: Implement username validation rules without UI*
 
-- [ ] **Sub-task:** Install `bad-words` npm package for profanity filtering
-- [ ] **Sub-task:** Create `features/profile/lib/validation.ts` with `validateUsername()` function (length, characters, reserved names, profanity)
-- [ ] **Sub-task:** Write comprehensive unit tests for username validation (all edge cases from spec)
-- [ ] **Sub-task:** Add `findUserByNormalizedUsername()` repository function
-- [ ] **Sub-task:** Implement `ProfileService.checkUsernameAvailability()` method (case-insensitive uniqueness check)
-- [ ] **Sub-task:** Write unit tests for `checkUsernameAvailability()`
-- [ ] **Sub-task:** Create `checkUsernameAvailability` server action in `features/profile/server-actions/`
-- [ ] **Sub-task:** Add Zod schema for username validation (`CheckUsernameSchema`)
-- [ ] **Sub-task:** Test server action with integration test (verify available/taken responses)
+- [x] **Sub-task:** Install `bad-words` npm package for profanity filtering
+- [x] **Sub-task:** Create `features/profile/lib/validation.ts` with `validateUsername()` function (length, characters, reserved names, profanity)
+- [x] **Sub-task:** Write comprehensive unit tests for username validation (all edge cases from spec)
+- [x] **Sub-task:** Add `findUserByNormalizedUsername()` repository function
+- [x] **Sub-task:** Implement `ProfileService.checkUsernameAvailability()` method (case-insensitive uniqueness check)
+- [x] **Sub-task:** Write unit tests for `checkUsernameAvailability()`
+- [x] **Sub-task:** Create `checkUsernameAvailability` server action in `features/profile/server-actions/`
+- [x] **Sub-task:** Add Zod schema for username validation (`CheckUsernameSchema`)
+- [x] **Sub-task:** Test server action with integration test (verify available/taken responses)
 
 ---
 
 ## **Slice 5: Profile Settings Page (Username Only)**
 *Goal: Allow users to update their username*
 
-- [ ] **Sub-task:** Create `/profile/settings/page.tsx` with server component that fetches current username
-- [ ] **Sub-task:** Add `updateUserProfile()` repository function (updates `username` and `usernameNormalized`)
-- [ ] **Sub-task:** Write integration tests for `updateUserProfile()`
-- [ ] **Sub-task:** Implement `ProfileService.updateProfile()` method (username validation + uniqueness check + update)
-- [ ] **Sub-task:** Write unit tests for `ProfileService.updateProfile()`
-- [ ] **Sub-task:** Create `updateProfile` server action with Zod schema (`UpdateProfileSchema`)
-- [ ] **Sub-task:** Create `ProfileSettingsForm` component with username input field (no real-time validation yet)
-- [ ] **Sub-task:** Add "Save Changes" button that calls `updateProfile` action and shows success toast
+- [x] **Sub-task:** Create `/profile/settings/page.tsx` with server component that fetches current username
+- [x] **Sub-task:** Add `updateUserProfile()` repository function (updates `username` and `usernameNormalized`)
+- [x] **Sub-task:** Write integration tests for `updateUserProfile()`
+- [x] **Sub-task:** Implement `ProfileService.updateProfile()` method (username validation + uniqueness check + update)
+- [x] **Sub-task:** Write unit tests for `ProfileService.updateProfile()`
+- [x] **Sub-task:** Create `updateProfile` server action with Zod schema (`UpdateProfileSchema`)
+- [x] **Sub-task:** Create `ProfileSettingsForm` component with username input field (no real-time validation yet)
+- [x] **Sub-task:** Add "Save Changes" button that calls `updateProfile` action and shows success toast
 - [ ] **Sub-task:** Write E2E test: Change username and verify it updates in profile view
 - [ ] **Sub-task:** Verify profile settings page allows username changes and updates profile view
 

@@ -121,7 +121,11 @@ export function CredentialsForm() {
           )}
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button
+          type="submit"
+          className="w-full cursor-pointer"
+          disabled={loading}
+        >
           {loading ? "Loading..." : mode === "signin" ? "Sign In" : "Sign Up"}
         </Button>
       </form>
@@ -130,26 +134,28 @@ export function CredentialsForm() {
         {mode === "signin" ? (
           <p>
             Don't have an account?{" "}
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={toggleMode}
-              className="text-primary font-medium hover:underline"
+              className="cursor-pointer font-medium"
               disabled={loading}
             >
               Sign up
-            </button>
+            </Button>
           </p>
         ) : (
           <p>
             Already have an account?{" "}
-            <button
+            <Button
               type="button"
               onClick={toggleMode}
-              className="text-primary font-medium hover:underline"
+              variant="secondary"
+              className="font-medium"
               disabled={loading}
             >
               Sign in
-            </button>
+            </Button>
           </p>
         )}
       </div>
