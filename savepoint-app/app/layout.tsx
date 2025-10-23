@@ -1,5 +1,6 @@
 import { type Metadata, type Viewport } from "next";
 
+import { LoadingScreen } from "@/shared/components/loading-screen";
 import { cn } from "@/shared/lib";
 import { Providers } from "@/shared/providers";
 
@@ -129,7 +130,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div id="root" className="relative flex min-h-screen flex-col">
-            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
           </div>
         </Providers>
       </body>

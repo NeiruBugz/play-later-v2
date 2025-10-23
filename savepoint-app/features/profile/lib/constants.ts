@@ -1,3 +1,5 @@
+import { UpdateProfileFormState } from "../server-actions/update-profile";
+
 export const statusLabels: Record<string, string> = {
   CURIOUS_ABOUT: "Curious About",
   CURRENTLY_EXPLORING: "Currently Exploring",
@@ -5,4 +7,8 @@ export const statusLabels: Record<string, string> = {
   EXPERIENCED: "Experienced",
   WISHLIST: "Wishlist",
   REVISITING: "Revisiting",
+};
+
+export const initialFormState: UpdateProfileFormState = {
+  status: "idle",
 };

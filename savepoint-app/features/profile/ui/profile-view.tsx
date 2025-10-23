@@ -96,10 +96,10 @@ export function ProfileView({ profile }: ProfileViewProps) {
                     height={267}
                     src={game.coverImage}
                     alt={game.title}
-                    className="aspect-[3/4] w-full object-cover"
+                    className="aspect-3/4 w-full object-cover"
                   />
                 ) : (
-                  <div className="aspect-[3/4] w-full bg-gray-200"></div>
+                  <div className="aspect-3/4 w-full bg-gray-200"></div>
                 )}
 
                 <div className="p-3">

@@ -3,10 +3,6 @@
 import { useActionState, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
-import {
-  updateProfileFormAction,
-  type UpdateProfileFormState,
-} from "@/features/profile/server-actions/update-profile";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -19,14 +15,9 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 
-type ProfileSettingsFormProps = {
-  currentUsername: string | null;
-  currentAvatar: string | null;
-};
-
-const initialFormState: UpdateProfileFormState = {
-  status: "idle",
-};
+import { initialFormState } from "../lib/constants";
+import { ProfileSettingsFormProps } from "../lib/types";
+import { updateProfileFormAction } from "../server-actions/update-profile";
 
 export function ProfileSettingsForm({
   currentUsername,
