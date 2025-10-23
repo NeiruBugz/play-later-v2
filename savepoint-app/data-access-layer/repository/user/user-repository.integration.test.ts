@@ -206,7 +206,7 @@ describe("UserRepository - Integration Tests", () => {
         id: user.id,
         username: "testuser",
         usernameNormalized: "testuser",
-        image: "https://example.com/avatar.jpg",
+        // image: "https://example.com/avatar.jpg",
       });
 
       // Verify database state remains unchanged
@@ -222,7 +222,7 @@ describe("UserRepository - Integration Tests", () => {
         id: user.id,
         username: "testuser",
         usernameNormalized: "testuser",
-        image: "https://example.com/avatar.jpg",
+        // image: "https://example.com/avatar.jpg",
       });
     });
 

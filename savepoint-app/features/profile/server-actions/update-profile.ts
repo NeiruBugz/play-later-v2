@@ -2,20 +2,18 @@
 
 import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { UpdateProfileSchema } from "../schemas";
 
-/**
- * Server action to update user profile
- * Requires authentication - uses session userId
- */
-export async function updateProfile(data: {
+type UpdateProfileInput = {
   username: string;
   avatarUrl?: string;
-}) {
+};
+
+async function performUpdateProfile(data: UpdateProfileInput) {
   try {
-    // Check authentication
     const userId = await getServerUserId();
     if (!userId) {
       return {
@@ -24,10 +22,13 @@ export async function updateProfile(data: {
       };
     }
 
-    // Validate input
-    const validatedData = UpdateProfileSchema.parse(data);
+    const sanitizedData: UpdateProfileInput = {
+      username: data.username.trim(),
+      avatarUrl: data.avatarUrl,
+    };
 
-    // Update profile via service
+    const validatedData = UpdateProfileSchema.parse(sanitizedData);
+
     const profileService = new ProfileService();
     const result = await profileService.updateProfile({
       userId,
@@ -59,4 +60,65 @@ export async function updateProfile(data: {
       error: "An unexpected error occurred",
     };
   }
+}
+
+/**
+ * Retains the original imperative API for programmatic updates.
+ */
+export async function updateProfile(data: UpdateProfileInput) {
+  return performUpdateProfile(data);
+}
+
+export type UpdateProfileFormState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+  submittedUsername?: string;
+};
+
+export async function updateProfileFormAction(
+  _prevState: UpdateProfileFormState,
+  formData: FormData
+): Promise<UpdateProfileFormState> {
+  const rawUsername = formData.get("username");
+  const rawAvatar = formData.get("avatarUrl");
+
+  if (typeof rawUsername !== "string") {
+    return {
+      status: "error",
+      message: "Username is required",
+      submittedUsername: undefined,
+    };
+  }
+
+  const trimmedUsername = rawUsername.trim();
+  if (!trimmedUsername) {
+    return {
+      status: "error",
+      message: "Username is required",
+      submittedUsername: undefined,
+    };
+  }
+
+  const result = await performUpdateProfile({
+    username: trimmedUsername,
+    avatarUrl:
+      typeof rawAvatar === "string" && rawAvatar.trim().length > 0
+        ? rawAvatar.trim()
+        : undefined,
+  });
+
+  if (result.success) {
+    revalidatePath("/profile");
+    return {
+      status: "success",
+      message: "Profile updated successfully!",
+      submittedUsername: trimmedUsername,
+    };
+  }
+
+  return {
+    status: "error",
+    message: result.error,
+    submittedUsername: trimmedUsername,
+  };
 }

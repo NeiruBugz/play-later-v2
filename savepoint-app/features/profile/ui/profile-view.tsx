@@ -7,6 +7,7 @@ import { Button } from "@/shared/components/ui/button";
 
 import { statusLabels } from "../lib/constants";
 import { prepareProfileData } from "../lib/prepare-profile-data";
+import { LogoutButton } from "./logout-button";
 
 type ProfileViewProps = {
   profile: ProfileWithStats;
@@ -49,9 +50,12 @@ export function ProfileView({ profile }: ProfileViewProps) {
           </div>
         </div>
 
-        <Button variant="outline" className="shrink-0" asChild>
-          <Link href="/profile/settings">Edit Profile</Link>
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button variant="outline" className="shrink-0" asChild>
+            <Link href="/profile/settings">Edit Profile</Link>
+          </Button>
+          <LogoutButton />
+        </div>
       </div>
 
       {statusEntries.length > 0 && (

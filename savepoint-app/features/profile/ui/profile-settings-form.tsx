@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useActionState, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
-import { updateProfile } from "@/features/profile/server-actions/update-profile";
+import {
+  updateProfileFormAction,
+  type UpdateProfileFormState,
+} from "@/features/profile/server-actions/update-profile";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -21,20 +24,35 @@ type ProfileSettingsFormProps = {
   currentAvatar: string | null;
 };
 
+const initialFormState: UpdateProfileFormState = {
+  status: "idle",
+};
+
 export function ProfileSettingsForm({
   currentUsername,
   currentAvatar,
 }: ProfileSettingsFormProps) {
   const [username, setUsername] = useState(currentUsername ?? "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [state, formAction, isPending] = useActionState(
+    updateProfileFormAction,
+    initialFormState
+  );
+
+  useEffect(() => {
+    if (state.status === "success") {
+      toast.success(state.message ?? "Profile updated successfully!");
+      setValidationError(null);
+      setUsername((current) => state.submittedUsername ?? current.trim());
+    }
+  }, [state]);
 
   const validateUsername = (value: string): string | null => {
-    if (value.length < 3) {
+    const trimmed = value.trim();
+    if (trimmed.length < 3) {
       return "Username must be at least 3 characters";
     }
-    if (value.length > 25) {
+    if (trimmed.length > 25) {
       return "Username must not exceed 25 characters";
     }
     return null;
@@ -43,41 +61,23 @@ export function ProfileSettingsForm({
   const handleUsernameChange = (value: string) => {
     setUsername(value);
     setValidationError(validateUsername(value));
-    setError(null);
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-
-    // Client-side validation
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     const validationErr = validateUsername(username);
     if (validationErr) {
+      event.preventDefault();
       setValidationError(validationErr);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const result = await updateProfile({
-        username,
-        avatarUrl: currentAvatar ?? undefined,
-      });
-
-      if (result.success) {
-        toast.success("Profile updated successfully!");
-        setError(null);
-        setValidationError(null);
-      } else {
-        setError(result.error);
-      }
-    } catch {
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      setValidationError(null);
     }
   };
+
+  const trimmedUsername = username.trim();
+  const showServerError =
+    state.status === "error" &&
+    !!state.message &&
+    state.submittedUsername === trimmedUsername;
 
   return (
     <Card className="w-full max-w-2xl">
@@ -88,17 +88,20 @@ export function ProfileSettingsForm({
           users.
         </CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
+      <form action={formAction} onSubmit={handleSubmit} noValidate>
+        <input type="hidden" name="avatarUrl" value={currentAvatar ?? ""} />
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
+              name="username"
               type="text"
+              autoComplete="username"
               placeholder="Enter your username"
               value={username}
-              onChange={(e) => handleUsernameChange(e.target.value)}
-              disabled={isSubmitting}
+              onChange={(event) => handleUsernameChange(event.target.value)}
+              disabled={isPending}
               className={validationError ? "border-red-500" : ""}
               aria-invalid={!!validationError}
               aria-describedby={validationError ? "username-error" : undefined}
@@ -117,22 +120,22 @@ export function ProfileSettingsForm({
             </p>
           </div>
 
-          {error && (
+          {showServerError && (
             <div
               className="rounded-md bg-red-50 p-4 text-sm text-red-800"
               role="alert"
             >
-              {error}
+              {state.message}
             </div>
           )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button
             type="submit"
-            disabled={isSubmitting || !!validationError}
+            disabled={isPending || !!validationError}
             className="w-full sm:w-auto"
           >
-            {isSubmitting ? "Saving..." : "Save Changes"}
+            {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </CardFooter>
       </form>

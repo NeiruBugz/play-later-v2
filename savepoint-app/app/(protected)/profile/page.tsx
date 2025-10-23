@@ -22,7 +22,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="container py-8">
       <ProfileView profile={result.data.profile} />
     </div>
   );
