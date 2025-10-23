@@ -16,26 +16,6 @@ import {
 import { signInAction } from "../server-actions/sign-in";
 import { signUpAction } from "../server-actions/sign-up";
 
-const signInSchema = z.object({
-  email: z.string().trim().email("Please enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-});
-
-const signUpSchema = signInSchema.extend({
-  password: z.string().min(8, "Must be at least 8 characters"),
-  name: z
-    .string()
-    .trim()
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name must be at most 50 characters")
-    .optional(),
-});
-
-type SignInValues = z.infer<typeof signInSchema>;
-type SignUpValues = z.infer<typeof signUpSchema>;
-
-type CredentialsFormValues = SignInValues & Partial<SignUpValues>;
-
 export function CredentialsForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const schema = useMemo(
