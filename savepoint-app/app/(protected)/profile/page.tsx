@@ -22,8 +22,8 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="container py-8">
+    <main className="container py-8" data-testid="profile-page">
       <ProfileView profile={result.data.profile} />
-    </div>
+    </main>
   );
 }

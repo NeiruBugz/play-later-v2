@@ -16,6 +16,7 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "target": "ESNext",
+    "types": ["vitest/globals"],
     "paths": {
       "@/*": ["./*"]
     },

@@ -1,5 +1,3 @@
-import { describe, expect, it } from "vitest";
-
 import { validateUsername } from "./validation";
 
 describe("validateUsername", () => {

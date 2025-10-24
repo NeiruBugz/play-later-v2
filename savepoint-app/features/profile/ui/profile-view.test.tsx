@@ -1,7 +1,5 @@
 import type { ProfileWithStats } from "@/data-access-layer/services";
 import { render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 import { ProfileView } from "./profile-view";
 
 const createMockProfile = (

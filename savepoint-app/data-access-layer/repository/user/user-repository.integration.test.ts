@@ -5,16 +5,6 @@ import {
 } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 import { Prisma } from "@prisma/client";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-
 import { findUserById, updateUserProfile } from "./user-repository";
 
 vi.mock("@/shared/lib", async () => {

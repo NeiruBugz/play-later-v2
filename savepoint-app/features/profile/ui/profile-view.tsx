@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/shared/components/ui/button";
+import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 
 import { statusLabels } from "../lib/constants";
 import { prepareProfileData } from "../lib/prepare-profile-data";
@@ -31,7 +32,10 @@ export function ProfileView({ profile }: ProfileViewProps) {
                 className="h-24 w-24 rounded-full object-cover ring-2 ring-gray-200"
               />
             ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 text-2xl font-bold text-gray-500">
+              <div
+                className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 text-2xl font-bold text-gray-500"
+                data-testid="profile-avatar-placeholder"
+              >
                 {displayName.charAt(0).toUpperCase()}
               </div>
             )}
@@ -63,16 +67,28 @@ export function ProfileView({ profile }: ProfileViewProps) {
           <h2 className="mb-4 font-serif text-2xl font-bold text-gray-900">
             Library Stats
           </h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+          <div
+            className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4"
+            data-testid="profile-stats-grid"
+          >
             {statusEntries.map(([status, count]) => (
               <div
                 key={status}
                 className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                data-testid="profile-status-card"
               >
-                <p className="text-sm font-medium text-gray-600">
+                <p
+                  className="text-sm font-medium text-gray-600"
+                  data-testid="profile-status-label"
+                >
                   {statusLabels[status] || status}
                 </p>
-                <p className="mt-1 text-2xl font-bold text-gray-900">{count}</p>
+                <p
+                  className="mt-1 text-2xl font-bold text-gray-900"
+                  data-testid="profile-status-count"
+                >
+                  {count}
+                </p>
               </div>
             ))}
           </div>
@@ -84,36 +100,54 @@ export function ProfileView({ profile }: ProfileViewProps) {
           <h2 className="mb-4 font-serif text-2xl font-bold text-gray-900">
             Recently Played
           </h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {profile.stats.recentGames.map((game) => (
-              <div
-                key={game.gameId}
-                className="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
-              >
-                {game.coverImage ? (
-                  <Image
-                    width={200}
-                    height={267}
-                    src={game.coverImage}
-                    alt={game.title}
-                    className="aspect-3/4 w-full object-cover"
-                  />
-                ) : (
-                  <div className="aspect-3/4 w-full bg-gray-200"></div>
-                )}
+          <div
+            className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+            data-testid="profile-recent-games-grid"
+          >
+            {profile.stats.recentGames.map((game) => {
+              const src = game.coverImage
+                ? `${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`
+                : "";
+              return (
+                <div
+                  key={game.gameId}
+                  className="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  data-testid="profile-recent-game-card"
+                >
+                  {game.coverImage ? (
+                    <Image
+                      width={200}
+                      height={267}
+                      src={src}
+                      alt={game.title}
+                      className="aspect-3/4 w-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="aspect-3/4 w-full bg-gray-200"
+                      data-testid="profile-game-cover-fallback"
+                    ></div>
+                  )}
 
-                <div className="p-3">
-                  <h3 className="line-clamp-2 text-sm font-medium text-gray-900">
-                    {game.title}
-                  </h3>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {formatDistanceToNow(new Date(game.lastPlayed), {
-                      addSuffix: true,
-                    })}
-                  </p>
+                  <div className="p-3">
+                    <h3
+                      className="line-clamp-2 text-sm font-medium text-gray-900"
+                      data-testid="profile-recent-game-title"
+                    >
+                      {game.title}
+                    </h3>
+                    <p
+                      className="mt-1 text-xs text-gray-500"
+                      data-testid="profile-recent-game-timestamp"
+                    >
+                      {formatDistanceToNow(new Date(game.lastPlayed), {
+                        addSuffix: true,
+                      })}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

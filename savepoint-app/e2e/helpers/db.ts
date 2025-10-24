@@ -1,15 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 
-/**
- * Database seeding and cleanup utilities for E2E tests
- */
-
 const prisma = new PrismaClient();
 
-/**
- * Test user data interface
- */
 export interface TestUser {
   id: string;
   email: string;
@@ -17,18 +10,11 @@ export interface TestUser {
   password: string;
 }
 
-/**
- * Creates a test user in the database
- *
- * @param data - Partial user data (email, username, password)
- * @returns Created user data including ID
- */
 export async function createTestUser(data: {
   email: string;
   username: string;
   password: string;
 }): Promise<TestUser> {
-  // Hash the password before storing
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
   const user = await prisma.user.create({
@@ -47,23 +33,11 @@ export async function createTestUser(data: {
   };
 }
 
-/**
- * Deletes a test user by email
- *
- * @param email - User email address
- */
 export async function deleteTestUser(email: string): Promise<void> {
   await prisma.user.delete({
     where: { email },
   });
 }
-
-/**
- * Deletes multiple test users by email pattern
- * Useful for cleaning up all test users at once
- *
- * @param emailPattern - Email pattern to match (e.g., "test-")
- */
 export async function deleteTestUsersByPattern(
   emailPattern: string
 ): Promise<void> {
@@ -76,14 +50,7 @@ export async function deleteTestUsersByPattern(
   });
 }
 
-/**
- * Clears all test data from the database
- * WARNING: This will delete ALL data matching test patterns
- * Only use in test environments!
- */
 export async function clearTestData(): Promise<void> {
-  // Delete in order to respect foreign key constraints
-  // First delete library items (has foreign keys to both User and Game)
   await prisma.libraryItem.deleteMany({
     where: {
       User: {
@@ -92,8 +59,6 @@ export async function clearTestData(): Promise<void> {
     },
   });
 
-  // Then delete games with test data
-  // (Games created during tests, we can identify them by recent createdAt)
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   await prisma.game.deleteMany({
     where: {
@@ -106,15 +71,10 @@ export async function clearTestData(): Promise<void> {
     },
   });
 
-  // Finally delete all users with test email patterns
   await deleteTestUsersByPattern("test-");
   await deleteTestUsersByPattern("e2e-");
 }
 
-/**
- * Seeds the database with a default test user
- * Returns the created user data for use in tests
- */
 export async function seedDefaultTestUser(): Promise<TestUser> {
   const defaultUser = {
     email: "test-user@example.com",
@@ -122,28 +82,17 @@ export async function seedDefaultTestUser(): Promise<TestUser> {
     password: "TestPassword123!",
   };
 
-  // Try to delete existing test user first
   try {
     await deleteTestUser(defaultUser.email);
-  } catch {
-    // User doesn't exist, that's fine
-  }
+  } catch {}
 
   return createTestUser(defaultUser);
 }
 
-/**
- * Disconnects from the database
- * Call this in test teardown to clean up connections
- */
 export async function disconnectDatabase(): Promise<void> {
   await prisma.$disconnect();
 }
 
-/**
- * Verifies database connection is working
- * Useful for setup validation
- */
 export async function verifyDatabaseConnection(): Promise<boolean> {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -153,22 +102,12 @@ export async function verifyDatabaseConnection(): Promise<boolean> {
   }
 }
 
-/**
- * Test game data interface
- */
 export interface TestGame {
   id: string;
   igdbId: number;
   title: string;
   coverImage?: string | null;
 }
-
-/**
- * Creates a test game in the database
- *
- * @param data - Partial game data
- * @returns Created game data including ID
- */
 export async function createTestGame(data?: {
   igdbId?: number;
   title?: string;
@@ -193,9 +132,6 @@ export async function createTestGame(data?: {
   };
 }
 
-/**
- * Test library item data interface
- */
 export interface TestLibraryItem {
   id: number;
   userId: string;
@@ -203,12 +139,6 @@ export interface TestLibraryItem {
   status: string;
 }
 
-/**
- * Creates a test library item in the database
- *
- * @param data - Library item data (userId, gameId, status)
- * @returns Created library item data
- */
 export async function createTestLibraryItem(data: {
   userId: string;
   gameId: string;

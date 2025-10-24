@@ -14,6 +14,7 @@ import {
 } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { cn } from "@/shared/lib/ui";
 
 import { initialFormState } from "../lib/constants";
 import { ProfileSettingsFormProps } from "../lib/types";
@@ -93,7 +94,9 @@ export function ProfileSettingsForm({
               value={username}
               onChange={(event) => handleUsernameChange(event.target.value)}
               disabled={isPending}
-              className={validationError ? "border-red-500" : ""}
+              className={cn("", {
+                "border-red-500": validationError,
+              })}
               aria-invalid={!!validationError}
               aria-describedby={validationError ? "username-error" : undefined}
             />

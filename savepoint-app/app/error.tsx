@@ -2,20 +2,33 @@
 
 import { RefreshCw, ShieldAlert } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 import { Button } from "@/shared/components/ui/button";
+import { createLogger } from "@/shared/lib/app/logger";
 
 type GlobalErrorProps = {
   error: Error & { digest?: string };
   reset: () => void;
 };
 
+const logger = createLogger({ component: "GlobalError" });
+
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
-    // Surface the error so it can be picked up by monitoring.
-    console.error(error);
+    logger.error(
+      { err: error, digest: error.digest },
+      "Global error boundary captured an unhandled error"
+    );
   }, [error]);
+
+  const handleReset = useCallback(() => {
+    logger.info(
+      { digest: error.digest },
+      "Global error boundary retry requested"
+    );
+    reset();
+  }, [error, reset]);
 
   return (
     <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
@@ -37,7 +50,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
 
         <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center">
           <Button
-            onClick={reset}
+            onClick={handleReset}
             size="lg"
             variant="outline"
             className="w-full sm:w-auto"

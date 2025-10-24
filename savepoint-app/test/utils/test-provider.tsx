@@ -27,3 +27,17 @@ export default function TestProviders({
 export function renderWithTestProviders(ui: React.ReactElement) {
   return render(ui, { wrapper: TestProviders });
 }
+
+export function createQueryWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return ({ children }: PropsWithChildren) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}

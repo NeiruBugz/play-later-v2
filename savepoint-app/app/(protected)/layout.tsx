@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
+import { AddGameButton } from "@/features/add-game/ui/add-game-button";
 import { Toaster } from "@/shared/components/ui/sonner";
 
 export default function ProtectedLayout({ children }: PropsWithChildren) {
@@ -11,7 +12,7 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
           <h1 className="font-serif text-3xl font-bold">
             <Link href="/dashboard">SavePoint</Link>
           </h1>
-          <nav className="flex gap-6">
+          <nav className="flex items-center gap-6">
             <Link
               href="/dashboard"
               className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"
@@ -24,6 +25,7 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
             >
               Library
             </Link>
+            <AddGameButton />
             <Link
               href="/profile"
               className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"

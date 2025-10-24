@@ -1,7 +1,35 @@
 import { afterEach, beforeAll, vi } from "vitest";
 
+// Set up environment variables BEFORE any modules that use them are imported
+process.env.NEXTAUTH_SECRET = "test-secret";
+process.env.AUTH_SECRET = "test-secret";
+process.env.AUTH_URL = "http://localhost:3000";
+process.env.AUTH_COGNITO_ID = "test-cognito-id";
+process.env.AUTH_COGNITO_SECRET = "test-cognito-secret";
+process.env.AUTH_COGNITO_ISSUER =
+  "https://cognito-idp.us-east-1.amazonaws.com/test-pool";
+process.env.IGDB_CLIENT_ID = "test-igdb-id";
+process.env.IGDB_CLIENT_SECRET = "test-igdb-secret";
+process.env.POSTGRES_URL = "postgresql://postgres:postgres@localhost:6432/test";
+process.env.POSTGRES_PRISMA_URL =
+  "postgresql://postgres:postgres@localhost:6432/test";
+process.env.POSTGRES_URL_NO_SSL =
+  "postgresql://postgres:postgres@localhost:6432/test";
+process.env.POSTGRES_URL_NON_POOLING =
+  "postgresql://postgres:postgres@localhost:6432/test";
+process.env.POSTGRES_HOST = "localhost";
+process.env.POSTGRES_USER = "postgres";
+process.env.POSTGRES_PASSWORD = "postgres";
+process.env.POSTGRES_DATABASE = "test";
+process.env.STEAM_API_KEY = "test-steam-key";
+
 // Hoist all mocks to the top level before any imports can happen
 vi.mock("server-only", () => ({}));
+
+vi.mock("@/shared/config/igdb", () => ({
+  API_URL: "https://api.igdb.com/v4",
+  TOKEN_URL: "https://id.twitch.tv/oauth2/token?client_id=test&client_secret=test&grant_type=client_credentials",
+}));
 
 vi.mock("@/shared/lib", () => {
   const mockLogger = {
@@ -86,6 +114,7 @@ vi.mock("next/navigation", () => ({
     replace: vi.fn(),
     back: vi.fn(),
   })),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
 }));
 
 // Add the repository mocks that were in individual test files
@@ -109,11 +138,8 @@ vi.mock("@/features/add-game/server-actions/add-game", () => ({
   saveGameAndAddToLibrary: vi.fn(),
 }));
 
-// Set up environment variables before any modules load
+// Set up test-specific configuration before tests run
 beforeAll(() => {
-  process.env.NEXTAUTH_SECRET = "test-secret";
-  process.env.POSTGRES_PRISMA_URL =
-    "postgresql://postgres:postgres@localhost:6432/test";
   // @ts-expect-error - NODE_ENV is read-only
   process.env.NODE_ENV = "test";
 });

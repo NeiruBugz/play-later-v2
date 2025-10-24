@@ -4,16 +4,6 @@ import {
   setupDatabase,
 } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-
 import { checkUsernameAvailability } from "./check-username-availability";
 
 // Mock the prisma client to use testDataBase
