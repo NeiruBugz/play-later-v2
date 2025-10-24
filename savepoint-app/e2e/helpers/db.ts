@@ -158,8 +158,6 @@ export async function clearTestData(): Promise<void> {
     },
   });
 
-  // Then delete games with test data
-  // (Games created during tests, we can identify them by recent createdAt)
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   await prisma.game.deleteMany({
     where: {
@@ -172,7 +170,6 @@ export async function clearTestData(): Promise<void> {
     },
   });
 
-  // Finally delete all users with test email patterns
   await deleteTestUsersByPattern("test-");
   await deleteTestUsersByPattern("e2e-");
 }
@@ -204,9 +201,6 @@ export async function verifyDatabaseConnection(): Promise<boolean> {
   }
 }
 
-/**
- * Test game data interface
- */
 export interface TestGame {
   id: string;
   igdbId: number;
@@ -244,9 +238,6 @@ export async function createTestGame(data?: {
   };
 }
 
-/**
- * Test library item data interface
- */
 export interface TestLibraryItem {
   id: number;
   userId: string;
@@ -254,12 +245,6 @@ export interface TestLibraryItem {
   status: string;
 }
 
-/**
- * Creates a test library item in the database
- *
- * @param data - Library item data (userId, gameId, status)
- * @returns Created library item data
- */
 export async function createTestLibraryItem(data: {
   userId: string;
   gameId: string;

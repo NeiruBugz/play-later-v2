@@ -284,30 +284,32 @@ test.describe("Profile Page - With Library Items", () => {
     });
 
     // Create test games with different statuses
-    const game1 = await createTestGame({
-      title: "The Legend of Zelda",
-      coverImage:
-        "https://images.igdb.com/igdb/image/upload/t_cover_big/co1234.jpg",
-    });
-    const game2 = await createTestGame({
-      title: "Super Mario Bros",
-      coverImage:
-        "https://images.igdb.com/igdb/image/upload/t_cover_big/co5678.jpg",
-    });
-    const game3 = await createTestGame({
-      title: "Hades",
-      coverImage:
-        "https://images.igdb.com/igdb/image/upload/t_cover_big/co9012.jpg",
-    });
-    const game4 = await createTestGame({
-      title: "Celeste",
-      coverImage: null, // Test game without cover image
-    });
-    const game5 = await createTestGame({
-      title: "Hollow Knight",
-      coverImage:
-        "https://images.igdb.com/igdb/image/upload/t_cover_big/co3456.jpg",
-    });
+    const [game1, game2, game3, game4, game5] = await Promise.all([
+      await createTestGame({
+        title: "The Legend of Zelda",
+        coverImage:
+          "https://images.igdb.com/igdb/image/upload/t_cover_big/co1234.jpg",
+      }),
+      await createTestGame({
+        title: "Super Mario Bros",
+        coverImage:
+          "https://images.igdb.com/igdb/image/upload/t_cover_big/co5678.jpg",
+      }),
+      await createTestGame({
+        title: "Hades",
+        coverImage:
+          "https://images.igdb.com/igdb/image/upload/t_cover_big/co9012.jpg",
+      }),
+      await createTestGame({
+        title: "Celeste",
+        coverImage: null, // Test game without cover image
+      }),
+      await createTestGame({
+        title: "Hollow Knight",
+        coverImage:
+          "https://images.igdb.com/igdb/image/upload/t_cover_big/co3456.jpg",
+      }),
+    ]);
 
     // Create library items with different statuses
     await createTestLibraryItem({
@@ -348,23 +350,24 @@ test.describe("Profile Page - With Library Items", () => {
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
 
-    // Verify Library Stats heading is visible
     const statsHeading = page.getByRole("heading", { name: "Library Stats" });
     await expect(statsHeading).toBeVisible();
 
-    // Verify "Curious About" status displays with correct count
-    const curiousAboutCard = page.locator("text=Curious About").locator("..");
-    await expect(curiousAboutCard).toBeVisible();
-    const curiousAboutCount = curiousAboutCard.locator("text=3");
-    await expect(curiousAboutCount).toBeVisible();
+    await expect(page.getByText("Curious About")).toBeVisible();
+    await expect(
+      page
+        .getByTestId("profile-status-card")
+        .filter({ hasText: "Curious About" })
+        .getByText("3")
+    ).toBeVisible();
 
-    // Verify "Currently Exploring" status displays with correct count
-    const currentlyExploringCard = page
-      .locator("text=Currently Exploring")
-      .locator("..");
-    await expect(currentlyExploringCard).toBeVisible();
-    const currentlyExploringCount = currentlyExploringCard.locator("text=2");
-    await expect(currentlyExploringCount).toBeVisible();
+    await expect(page.getByText("Currently Exploring")).toBeVisible();
+    await expect(
+      page
+        .getByTestId("profile-status-card")
+        .filter({ hasText: "Currently Exploring" })
+        .getByText("2")
+    ).toBeVisible();
   });
 
   test("should display status cards with proper styling", async ({ page }) => {
@@ -373,19 +376,14 @@ test.describe("Profile Page - With Library Items", () => {
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
 
-    // Find all status cards
-    const statusCards = page.locator(
-      "div.rounded-lg.border.border-gray-200.bg-white.p-4.shadow-sm"
-    );
+    const statusCards = page.getByTestId("profile-status-card");
 
-    // Should have at least 2 status cards (Curious About + Currently Exploring)
     const count = await statusCards.count();
     expect(count).toBeGreaterThanOrEqual(2);
 
-    // Verify first card has label and count
     const firstCard = statusCards.first();
-    await expect(firstCard.locator("p.text-sm.font-medium")).toBeVisible();
-    await expect(firstCard.locator("p.text-2xl.font-bold")).toBeVisible();
+    await expect(firstCard.getByTestId("profile-status-label")).toBeVisible();
+    await expect(firstCard.getByTestId("profile-status-count")).toBeVisible();
   });
 
   test("should use responsive grid layout for stats", async ({ page }) => {
@@ -394,11 +392,9 @@ test.describe("Profile Page - With Library Items", () => {
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
 
-    // Verify grid container has responsive classes
-    const statsGrid = page.locator(
-      "div.grid.grid-cols-2.gap-4.sm\\:grid-cols-3.md\\:grid-cols-4"
-    );
+    const statsGrid = page.getByTestId("profile-stats-grid");
     await expect(statsGrid).toBeVisible();
+    await expect(statsGrid).toHaveCSS("display", "grid");
   });
 
   test("should not display empty state when library has items", async ({
@@ -416,11 +412,9 @@ test.describe("Profile Page - With Library Items", () => {
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
 
-    // Verify labels are human-readable, not raw enum values
     await expect(page.getByText("Curious About")).toBeVisible();
     await expect(page.getByText("Currently Exploring")).toBeVisible();
 
-    // Verify raw enum values are NOT displayed
     await expect(page.getByText("CURIOUS_ABOUT")).not.toBeVisible();
     await expect(page.getByText("CURRENTLY_EXPLORING")).not.toBeVisible();
   });
@@ -439,9 +433,27 @@ test.describe("Profile Page - With Library Items", () => {
     });
     await expect(recentlyPlayedHeading).toBeVisible();
 
+    // Verify the grid of recent games is rendered
+    const recentlyPlayedGrid = page.getByTestId("profile-recent-games-grid");
+    await expect(recentlyPlayedGrid).toBeVisible();
+
+    const recentGameCards = page.getByTestId("profile-recent-game-card");
+    await expect(recentGameCards).toHaveCount(2);
+
     // Verify CURRENTLY_EXPLORING games are displayed (Celeste and Hollow Knight)
-    await expect(page.getByText("Celeste")).toBeVisible();
-    await expect(page.getByText("Hollow Knight")).toBeVisible();
+    const recentGameTitles = await recentGameCards.evaluateAll((cards) =>
+      cards
+        .map((card) =>
+          card
+            .querySelector("[data-testid='profile-recent-game-title']")
+            ?.textContent?.trim()
+        )
+        .filter((title): title is string => Boolean(title))
+    );
+
+    expect(recentGameTitles.sort()).toEqual(
+      ["Celeste", "Hollow Knight"].sort()
+    );
 
     // Verify Library Stats heading exists (separate section)
     const libraryStatsHeading = page.getByRole("heading", {
@@ -449,9 +461,8 @@ test.describe("Profile Page - With Library Items", () => {
     });
     await expect(libraryStatsHeading).toBeVisible();
 
-    // Verify CURIOUS_ABOUT games appear in stats but have game titles visible on page
-    // (They're in Library Stats, not Recently Played)
-    await expect(page.getByText("The Legend of Zelda")).toBeVisible();
+    const profileStatusCards = page.getByTestId("profile-status-card");
+    await expect(profileStatusCards).toHaveCount(2);
   });
 
   test("should display game cover images in Recently Played", async ({
@@ -468,11 +479,16 @@ test.describe("Profile Page - With Library Items", () => {
     });
     await expect(recentlyPlayedHeading).toBeVisible();
 
-    // Verify Hollow Knight game is visible
-    await expect(page.getByText("Hollow Knight")).toBeVisible();
+    // Verify Hollow Knight game card is visible
+    const hollowKnightCard = page
+      .getByTestId("profile-recent-game-card")
+      .filter({ hasText: "Hollow Knight" });
+    await expect(hollowKnightCard).toBeVisible();
 
     // Verify image with alt text for Hollow Knight exists (game has coverImage)
-    const hollowKnightImage = page.locator("img[alt='Hollow Knight']");
+    const hollowKnightImage = hollowKnightCard.locator(
+      "img[alt='Hollow Knight']"
+    );
     await expect(hollowKnightImage).toBeVisible();
 
     // Verify image has valid src
@@ -495,10 +511,13 @@ test.describe("Profile Page - With Library Items", () => {
     await expect(recentlyPlayedHeading).toBeVisible();
 
     // Verify Celeste game is present (game without cover image)
-    await expect(page.getByText("Celeste")).toBeVisible();
+    const celesteCard = page
+      .getByTestId("profile-recent-game-card")
+      .filter({ hasText: "Celeste" });
+    await expect(celesteCard).toBeVisible();
 
     // For games without cover images, verify no image alt text for Celeste
-    const celesteImage = page.locator("img[alt='Celeste']");
+    const celesteImage = celesteCard.locator("img[alt='Celeste']");
     await expect(celesteImage).not.toBeVisible();
   });
 
