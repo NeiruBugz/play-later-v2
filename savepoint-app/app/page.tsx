@@ -78,6 +78,7 @@ export default async function Page() {
                 <Button
                   size="lg"
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+                  asChild
                 >
                   <Link href="/login">Start Your Journey</Link>
                 </Button>
