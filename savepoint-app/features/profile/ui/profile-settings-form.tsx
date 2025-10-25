@@ -12,20 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import { cn } from "@/shared/lib/ui";
 
 import { initialFormState } from "../lib/constants";
 import { ProfileSettingsFormProps } from "../lib/types";
 import { updateProfileFormAction } from "../server-actions/update-profile";
+import { UsernameInput } from "./username-input";
 
 export function ProfileSettingsForm({
   currentUsername,
   currentAvatar,
 }: ProfileSettingsFormProps) {
   const [username, setUsername] = useState(currentUsername ?? "");
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [hasValidationError, setHasValidationError] = useState(false);
   const [state, formAction, isPending] = useActionState(
     updateProfileFormAction,
     initialFormState
@@ -34,34 +32,14 @@ export function ProfileSettingsForm({
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Profile updated successfully!");
-      setValidationError(null);
       setUsername((current) => state.submittedUsername ?? current.trim());
     }
   }, [state]);
 
-  const validateUsername = (value: string): string | null => {
-    const trimmed = value.trim();
-    if (trimmed.length < 3) {
-      return "Username must be at least 3 characters";
-    }
-    if (trimmed.length > 25) {
-      return "Username must not exceed 25 characters";
-    }
-    return null;
-  };
-
-  const handleUsernameChange = (value: string) => {
-    setUsername(value);
-    setValidationError(validateUsername(value));
-  };
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    const validationErr = validateUsername(username);
-    if (validationErr) {
+    // Basic validation before submission (UsernameInput handles detailed validation)
+    if (username.trim().length < 3 || username.trim().length > 25) {
       event.preventDefault();
-      setValidationError(validationErr);
-    } else {
-      setValidationError(null);
     }
   };
 
@@ -82,51 +60,23 @@ export function ProfileSettingsForm({
       </CardHeader>
       <form action={formAction} onSubmit={handleSubmit} noValidate>
         <input type="hidden" name="avatarUrl" value={currentAvatar ?? ""} />
+        <input type="hidden" name="username" value={username} />
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              name="username"
-              type="text"
-              autoComplete="username"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(event) => handleUsernameChange(event.target.value)}
-              disabled={isPending}
-              className={cn("", {
-                "border-red-500": validationError,
-              })}
-              aria-invalid={!!validationError}
-              aria-describedby={validationError ? "username-error" : undefined}
-            />
-            {validationError && (
-              <p
-                id="username-error"
-                className="text-sm text-red-600"
-                role="alert"
-              >
-                {validationError}
-              </p>
-            )}
-            <p className="text-muted-foreground text-sm">
-              Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.
-            </p>
-          </div>
-
-          {showServerError && (
-            <div
-              className="rounded-md bg-red-50 p-4 text-sm text-red-800"
-              role="alert"
-            >
-              {state.message}
-            </div>
-          )}
+          <UsernameInput
+            value={username}
+            onChange={setUsername}
+            error={showServerError ? state.message : undefined}
+            disabled={isPending}
+            onValidationChange={setHasValidationError}
+          />
+          <p className="text-muted-foreground -mt-4 text-sm">
+            Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.
+          </p>
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button
             type="submit"
-            disabled={isPending || !!validationError}
+            disabled={isPending || hasValidationError}
             className="w-full sm:w-auto"
           >
             {isPending ? "Saving..." : "Save Changes"}

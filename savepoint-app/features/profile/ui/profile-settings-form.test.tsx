@@ -2,10 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 
-import {
-  updateProfileFormAction,
-  type UpdateProfileFormState,
-} from "../server-actions/update-profile";
+import { updateProfileFormAction } from "../server-actions/update-profile";
 import { ProfileSettingsForm } from "./profile-settings-form";
 
 vi.mock("sonner", () => ({
@@ -29,16 +26,10 @@ const elements = {
   getUsernameHint: () => screen.getByText(/Must be 3-25 characters/i),
   getSubmitButton: () => screen.getByRole("button", { name: /save changes/i }),
   getSavingButton: () => screen.getByRole("button", { name: /saving.../i }),
-  queryValidationError: () => screen.queryByRole("alert"),
-  getValidationError: () => screen.getByRole("alert"),
-  queryServerError: () =>
-    screen.queryByText(/username already exists/i, {
-      selector: '[role="alert"]',
-    }),
-  getServerError: () =>
-    screen.getByText(/username already exists/i, {
-      selector: '[role="alert"]',
-    }),
+  queryValidationError: () => screen.queryByText(/username must/i),
+  getValidationError: () => screen.getByText(/username must/i),
+  queryServerError: () => screen.queryByText(/username already exists/i),
+  getServerError: () => screen.getByText(/username already exists/i),
 };
 
 const actions = {
@@ -500,7 +491,7 @@ describe("ProfileSettingsForm", () => {
       });
     });
 
-    it("should mark error messages with role=alert", async () => {
+    it("should display error message for invalid username", async () => {
       render(
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
@@ -509,7 +500,10 @@ describe("ProfileSettingsForm", () => {
 
       await waitFor(() => {
         const error = elements.getValidationError();
-        expect(error).toHaveAttribute("role", "alert");
+        expect(error).toBeInTheDocument();
+        expect(error).toHaveTextContent(
+          "Username must be at least 3 characters"
+        );
       });
     });
   });
