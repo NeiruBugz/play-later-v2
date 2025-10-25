@@ -27,4 +27,5 @@ export interface CollectionService extends BaseService {
   getCollection(
     params: CollectionParams
   ): Promise<ServiceResponse<CollectionResult>>;
+  getUserPlatforms(userId: string): Promise<ServiceResponse<string[]>>;
 }

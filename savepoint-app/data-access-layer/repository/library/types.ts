@@ -1,3 +1,4 @@
+import { RecentGame } from "@/data-access-layer/services";
 import {
   type AcquisitionType,
   type Game,
@@ -71,12 +72,7 @@ export type LibraryStatsResult =
       ok: true;
       data: {
         statusCounts: Record<string, number>;
-        recentGames: Array<{
-          gameId: string;
-          title: string;
-          coverImage: string | null;
-          lastPlayed: Date;
-        }>;
+        recentGames: Array<RecentGame>;
       };
     }
   | {

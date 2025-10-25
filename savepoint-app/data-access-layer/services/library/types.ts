@@ -66,3 +66,17 @@ export type DeleteLibraryItemResult = ServiceResult<{
 export type GetLibraryCountResult = ServiceResult<{
   count: number;
 }>;
+
+export type AddGameToLibraryInput = {
+  userId: string;
+  igdbId: number;
+  status: LibraryItemStatus;
+  platform: string;
+  acquisitionType?: AcquisitionType;
+  startedAt?: Date;
+  completedAt?: Date;
+};
+
+export type AddGameToLibraryResult = ServiceResult<{
+  game: Game;
+}>;

@@ -14,9 +14,23 @@ import {
   type Website,
 } from "igdb-api-types";
 
-// Core IGDB entity types now imported from igdb-api-types:
-// Platform, Company, Cover (GameCover), ExternalGame, GameEngine, GameMode, Genre,
-// PlayerPerspective, Screenshot, Theme, Website, Event, Artwork
+export enum GameCategory {
+  MAIN_GAME = 0,
+  DLC_ADDON = 1,
+  EXPANSION = 2,
+  BUNDLE = 3,
+  STANDALONE_EXPANSION = 4,
+  MOD = 5,
+  EPISODE = 6,
+  SEASON = 7,
+  REMAKE = 8,
+  REMASTER = 9,
+  EXPANDED_GAME = 10,
+  PORT = 11,
+  FORK = 12,
+  PACK = 13,
+  UPDATE = 14,
+}
 
 type PlatformWithReleaseDate = {
   human: string;
@@ -89,8 +103,10 @@ export type FullGameInfoResponse = {
 };
 
 export type SearchResponse = {
+  category: number;
   cover: Cover;
   first_release_date: number;
+  game_type?: number;
   id: number;
   name: string;
   platforms: Platform[];
@@ -104,8 +120,6 @@ export type UpcomingReleaseResponse = {
   name: string;
   release_dates: ReleaseDate[];
 };
-
-// Event and Artwork now imported from igdb-api-types
 
 export type UpcomingEventsResponse = Event[];
 
@@ -146,9 +160,3 @@ export type FranchiseGamesResponse = {
     game_type: number;
   }>;
 };
-
-export enum GAME_TYPE {
-  MAIN_GAME = 0,
-
-  EXPANDED_GAME = 10,
-}

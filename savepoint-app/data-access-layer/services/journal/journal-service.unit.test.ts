@@ -5,7 +5,6 @@ import {
   getJournalEntriesForUser,
   updateJournalEntry,
 } from "@/data-access-layer/repository/journal/journal-repository";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ServiceErrorCode } from "../types";
 import { JournalService } from "./journal-service";

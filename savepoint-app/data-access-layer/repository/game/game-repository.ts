@@ -119,6 +119,9 @@ export async function findGamesWithLibraryItemsPaginated({
       include: {
         libraryItems: {
           where: where.libraryItems?.some,
+          orderBy: {
+            updatedAt: "desc",
+          },
         },
       },
     }),

@@ -4,7 +4,12 @@ export {
   isoToReadable,
   getTimeStamp,
 } from "./date-functions";
-export { LibraryStatusMapper, AcquisitionStatusMapper } from "./enum-mappers";
+export {
+  LibraryStatusMapper,
+  LibraryStatusColorMapper,
+  AcquisitionStatusMapper,
+} from "./enum-mappers";
+export { createSelectOptionsFromEnum } from "./enum-to-select-options";
 export {
   capitalizeString,
   normalizeGameTitle,

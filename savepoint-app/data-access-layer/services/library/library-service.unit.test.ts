@@ -6,7 +6,6 @@ import {
   updateLibraryItem,
 } from "@/data-access-layer/repository/library/library-repository";
 import { LibraryItemStatus } from "@prisma/client";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ServiceErrorCode } from "../types";
 import { LibraryService } from "./library-service";

@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  addGameToUserLibrary,
   createLibraryItem as createLibraryItemRepo,
   deleteLibraryItem as deleteLibraryItemRepo,
   getLibraryCount,
@@ -13,6 +14,8 @@ import { createLogger } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
+  AddGameToLibraryInput,
+  AddGameToLibraryResult,
   CreateLibraryItemInput,
   CreateLibraryItemResult,
   DeleteLibraryItemInput,
@@ -56,6 +59,44 @@ export class LibraryService extends BaseService {
       });
     } catch (error) {
       return this.handleError(error, "Failed to fetch library items");
+    }
+  }
+
+  async addGameToLibrary(
+    input: AddGameToLibraryInput
+  ): Promise<AddGameToLibraryResult> {
+    try {
+      this.logger.info(
+        {
+          userId: input.userId,
+          igdbId: input.igdbId,
+          platform: input.platform,
+        },
+        "Adding game to library"
+      );
+
+      const game = await addGameToUserLibrary({
+        userId: input.userId,
+        igdbId: input.igdbId,
+        libraryItem: {
+          status: input.status,
+          platform: input.platform,
+          acquisitionType: input.acquisitionType ?? AcquisitionType.DIGITAL,
+        },
+      });
+
+      this.logger.info(
+        { userId: input.userId, gameId: game.id, igdbId: input.igdbId },
+        "Game added to library successfully"
+      );
+
+      return this.success({ game });
+    } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId, igdbId: input.igdbId },
+        "Failed to add game to library"
+      );
+      return this.handleError(error, "Failed to add game to library");
     }
   }
 

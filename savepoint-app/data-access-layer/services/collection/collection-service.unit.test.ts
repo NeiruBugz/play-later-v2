@@ -2,7 +2,6 @@ import {
   buildCollectionFilter,
   findGamesWithLibraryItemsPaginated,
 } from "@/data-access-layer/repository";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CollectionService } from "./collection-service";
 

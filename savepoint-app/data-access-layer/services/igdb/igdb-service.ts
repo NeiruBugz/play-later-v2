@@ -9,6 +9,7 @@ import {
 } from "@/shared/lib";
 import {
   FullGameInfoResponse,
+  GameCategory,
   RequestOptions,
   TwitchTokenResponse,
   type SearchResponse,
@@ -217,9 +218,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           "release_dates.human",
           "first_release_date",
           "category",
+          "game_type",
           "cover.image_id",
         ])
-        .where(`cover.image_id != null ${filters}`)
+        .where(
+          `cover.image_id != null & game_type = (${GameCategory.MAIN_GAME},${GameCategory.STANDALONE_EXPANSION},${GameCategory.REMAKE},${GameCategory.REMASTER},${GameCategory.PORT},${GameCategory.EXPANDED_GAME}) ${filters}`
+        )
         .search(normalizedSearchQuery)
         .limit(SEARCH_RESULTS_LIMIT)
         .build();
@@ -429,7 +433,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       const query = new QueryBuilder()
         .fields(["name", "cover.image_id", "aggregated_rating"])
         .where(
-          "aggregated_rating_count > 20 & aggregated_rating != null & rating != null & category = 0"
+          `aggregated_rating_count > 20 & aggregated_rating != null & rating != null & game_type = ${GameCategory.MAIN_GAME}`
         )
         .sort("aggregated_rating", "desc")
         .limit(TOP_RATED_GAMES_LIMIT)

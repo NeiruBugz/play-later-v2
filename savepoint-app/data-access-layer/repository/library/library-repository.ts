@@ -1,6 +1,7 @@
 import "server-only";
 
 import { findOrCreateGameByIgdbId } from "@/data-access-layer/repository/game/game-repository";
+import { RecentGame } from "@/data-access-layer/services";
 import { LibraryItemStatus, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/shared/lib";
@@ -89,6 +90,22 @@ export async function getLibraryCount({
   gteClause,
 }: GetLibraryCountInput) {
   return prisma.libraryItem.count({ where: { userId, status, ...gteClause } });
+}
+
+export async function getUniquePlatformsForUser({
+  userId,
+}: {
+  userId: string;
+}): Promise<string[]> {
+  const platforms = await prisma.libraryItem.findMany({
+    where: { userId, platform: { not: null } },
+    select: { platform: true },
+    distinct: ["platform"],
+  });
+
+  return platforms
+    .map((p) => p.platform)
+    .filter((p): p is string => p !== null);
 }
 
 export async function getPlatformBreakdown({ userId }: { userId: string }) {
@@ -327,12 +344,7 @@ export async function getLibraryStatsByUserId(userId: string): Promise<
       ok: true;
       data: {
         statusCounts: Record<string, number>;
-        recentGames: Array<{
-          gameId: string;
-          title: string;
-          coverImage: string | null;
-          lastPlayed: Date;
-        }>;
+        recentGames: Array<RecentGame>;
       };
     }
   | {

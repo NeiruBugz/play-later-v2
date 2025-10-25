@@ -5,7 +5,6 @@ import {
   isGameExisting,
   updateGame,
 } from "@/data-access-layer/repository/game/game-repository";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types/igdb";
 
