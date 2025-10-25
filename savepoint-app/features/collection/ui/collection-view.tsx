@@ -49,7 +49,7 @@ export function CollectionView({ availablePlatforms }: CollectionViewProps) {
   const hasActiveFilters = filters.search || filters.status || filters.platform;
 
   if (error) {
-    logger.error({ error, filters }, "Failed to load user collection");
+    logger.error({ err: error, filters }, "Failed to load user collection");
 
     return (
       <div className="flex min-h-[400px] items-center justify-center">

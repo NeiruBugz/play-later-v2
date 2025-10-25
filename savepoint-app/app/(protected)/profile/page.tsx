@@ -18,7 +18,7 @@ export default async function ProfilePage() {
 
   if (!result.success) {
     logger.error(
-      { error: result.error, code: result.code },
+      { err: result.error, code: result.code },
       "Failed to load profile"
     );
 

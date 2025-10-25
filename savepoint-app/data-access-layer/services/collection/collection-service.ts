@@ -76,7 +76,7 @@ export class CollectionService
         count: totalGames,
       });
     } catch (error) {
-      this.logger.error({ error, params }, "Failed to fetch collection");
+      this.logger.error({ err: error, params }, "Failed to fetch collection");
       return this.handleError(error, "Failed to fetch user game collection");
     }
   }
@@ -103,7 +103,10 @@ export class CollectionService
 
       return this.createSuccessResponse(sortedPlatforms);
     } catch (error) {
-      this.logger.error({ error, userId }, "Failed to fetch user platforms");
+      this.logger.error(
+        { err: error, userId },
+        "Failed to fetch user platforms"
+      );
       return this.handleError(error, "Failed to fetch user platforms");
     }
   }

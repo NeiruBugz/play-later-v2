@@ -43,7 +43,10 @@ export class UserService extends BaseService {
       );
       return this.success({ user });
     } catch (error) {
-      this.logger.error({ error, userId: input.userId }, "Error fetching user");
+      this.logger.error(
+        { err: error, userId: input.userId },
+        "Error fetching user"
+      );
       return this.handleError(error, "Failed to fetch user");
     }
   }
@@ -96,7 +99,7 @@ export class UserService extends BaseService {
           error.message.includes("unique"))
       ) {
         this.logger.warn(
-          { userId: input.userId, username: input.username, error },
+          { userId: input.userId, username: input.username, err: error },
           "Update failed: username already taken"
         );
         return this.error(
@@ -114,7 +117,7 @@ export class UserService extends BaseService {
       }
 
       this.logger.error(
-        { error, userId: input.userId },
+        { err: error, userId: input.userId },
         "Error updating user profile"
       );
       return this.handleError(error, "Failed to update user profile");
@@ -158,7 +161,7 @@ export class UserService extends BaseService {
       });
     } catch (error) {
       this.logger.error(
-        { error, userId: input.userId },
+        { err: error, userId: input.userId },
         "Error fetching Steam integration status"
       );
       return this.handleError(error, "Failed to get Steam integration status");
@@ -183,7 +186,7 @@ export class UserService extends BaseService {
       });
     } catch (error) {
       this.logger.error(
-        { error, userId: input.userId },
+        { err: error, userId: input.userId },
         "Error disconnecting Steam account"
       );
       return this.handleError(error, "Failed to disconnect Steam account");
@@ -212,7 +215,11 @@ export class UserService extends BaseService {
       return this.success({ steamId64: res?.steamId64 ?? null });
     } catch (error) {
       this.logger.error(
-        { error, userId: input.userId, steamUsername: input.steamUsername },
+        {
+          err: error,
+          userId: input.userId,
+          steamUsername: input.steamUsername,
+        },
         "Error fetching Steam ID"
       );
       return this.handleError(error, "Failed to fetch Steam ID for user");

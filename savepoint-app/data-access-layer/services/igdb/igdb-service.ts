@@ -94,7 +94,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       );
       return token;
     } catch (thrown) {
-      this.logger.error({ error: thrown }, "Error requesting Twitch token");
+      this.logger.error({ err: thrown }, "Error requesting Twitch token");
       this.handleError(thrown);
     }
   }
@@ -163,7 +163,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return (await response.json()) as unknown as T;
     } catch (thrown) {
       this.logger.error(
-        { error: thrown, resource: options.resource },
+        { err: thrown, resource: options.resource },
         "Error making IGDB API request"
       );
       this.handleError(thrown);
@@ -252,7 +252,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, searchQuery: params.name },
+        { err: error, searchQuery: params.name },
         "Error searching games"
       );
       return this.handleError(error, "Failed to find games");
@@ -333,7 +333,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
     } catch (error) {
       this.logger.error(
-        { error, gameId: params.gameId },
+        { err: error, gameId: params.gameId },
         "Error fetching game details"
       );
       return this.handleError(error, "Failed to fetch game details");
@@ -419,7 +419,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, steamAppId: params.steamAppId },
+        { err: error, steamAppId: params.steamAppId },
         "Error fetching game by Steam app ID"
       );
       return this.handleError(error, "Failed to fetch game by Steam app ID");
@@ -477,7 +477,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         games: response,
       });
     } catch (error) {
-      this.logger.error({ error }, "Error fetching top-rated games");
+      this.logger.error({ err: error }, "Error fetching top-rated games");
       return this.handleError(error, "Failed to fetch top-rated games");
     }
   }
@@ -547,7 +547,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, platformName: params.platformName },
+        { err: error, platformName: params.platformName },
         "Error searching platforms"
       );
       return this.handleError(error, "Failed to search platforms");
@@ -618,7 +618,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, gameId: params.gameId },
+        { err: error, gameId: params.gameId },
         "Error fetching game screenshots"
       );
       return this.handleError(error, "Failed to fetch game screenshots");
@@ -696,7 +696,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, gameId: params.gameId },
+        { err: error, gameId: params.gameId },
         "Error fetching game aggregated rating"
       );
       return this.handleError(error, "Failed to fetch game aggregated rating");
@@ -762,7 +762,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, gameId: params.gameId },
+        { err: error, gameId: params.gameId },
         "Error fetching similar games"
       );
       return this.handleError(error, "Failed to fetch similar games");
@@ -828,7 +828,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, gameId: params.gameId },
+        { err: error, gameId: params.gameId },
         "Error fetching game genres"
       );
       return this.handleError(error, "Failed to fetch game genres");
@@ -909,7 +909,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, gameId: params.gameId },
+        { err: error, gameId: params.gameId },
         "Error fetching game completion times"
       );
       return this.handleError(error, "Failed to fetch game completion times");
@@ -1003,7 +1003,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, gameId: params.gameId },
+        { err: error, gameId: params.gameId },
         "Error fetching game expansions"
       );
       return this.handleError(error, "Failed to fetch game expansions");
@@ -1089,7 +1089,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, franchiseId: params.franchiseId },
+        { err: error, franchiseId: params.franchiseId },
         "Error fetching franchise games"
       );
       return this.handleError(error, "Failed to fetch franchise games");
@@ -1172,7 +1172,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, gameId: params.gameId },
+        { err: error, gameId: params.gameId },
         "Error fetching game artworks"
       );
       return this.handleError(error, "Failed to fetch game artworks");
@@ -1265,7 +1265,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, ids: params.ids },
+        { err: error, ids: params.ids },
         "Error fetching upcoming releases"
       );
       return this.handleError(error, "Failed to fetch upcoming releases");
@@ -1350,7 +1350,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         events: response,
       });
     } catch (error) {
-      this.logger.error({ error }, "Error fetching upcoming gaming events");
+      this.logger.error(
+        { err: error },
+        "Error fetching upcoming gaming events"
+      );
       return this.handleError(error, "Failed to fetch upcoming gaming events");
     }
   }
@@ -1418,7 +1421,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       this.logger.error(
-        { error, logoId: params.logoId },
+        { err: error, logoId: params.logoId },
         "Error fetching event logo"
       );
       return this.handleError(error, "Failed to fetch event logo");

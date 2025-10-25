@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const userId = await getServerUserId();
 
   if (!userId) {
-    logger.warn("Unauthorized search attempt");
+    logger.warn("Unauthorized collection access attempt");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -20,10 +20,7 @@ export async function GET(request: Request) {
   const parsedQuery = FilterParamsSchema.safeParse(unparsedQuery);
 
   if (!parsedQuery.success) {
-    logger.warn(
-      { error: parsedQuery.error, userId },
-      "Invalid query parameters"
-    );
+    logger.warn({ err: parsedQuery.error, userId }, "Invalid query parameters");
     return NextResponse.json(
       { error: "Invalid query parameters" },
       { status: 400 }
@@ -40,7 +37,7 @@ export async function GET(request: Request) {
 
   if (!result.success) {
     logger.error(
-      { error: result.error, userId, query: parsedQuery.data },
+      { err: result.error, userId, query: parsedQuery.data },
       "Fetching collection failed"
     );
     return NextResponse.json({ error: result.error }, { status: 500 });

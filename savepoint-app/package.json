@@ -28,7 +28,8 @@
     "test:e2e:debug": "playwright test --debug",
     "code-fix": "pnpm format:write && pnpm lint:fix",
     "code-check": "pnpm format:check && pnpm lint && pnpm typecheck",
-    "commitlint": "commitlint --edit"
+    "commitlint": "commitlint --edit",
+    "ci:check": "pnpm format:write && pnpm lint:fix && pnpm typecheck && pnpm test:backend && pnpm test:components && pnpm test:utilities"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
