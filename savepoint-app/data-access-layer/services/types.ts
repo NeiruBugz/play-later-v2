@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 import { logger } from "@/shared/lib";
 
 export type ServiceResult<TData> =
@@ -87,8 +89,14 @@ export abstract class BaseService {
     error: unknown,
     fallbackMessage = "An unexpected error occurred"
   ): ServiceResult<never> {
-    const message = error instanceof Error ? error.message : fallbackMessage;
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return this.error("Resource already exists", ServiceErrorCode.CONFLICT);
+    }
 
+    const message = error instanceof Error ? error.message : fallbackMessage;
     logger.error(
       {
         error,

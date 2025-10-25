@@ -5,6 +5,7 @@ import {
 } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 import { Prisma } from "@prisma/client";
+
 import { findUserById, updateUserProfile } from "./user-repository";
 
 vi.mock("@/shared/lib", async () => {
@@ -290,10 +291,6 @@ describe("UserRepository - Integration Tests", () => {
         id: user.id,
         username: "newusername",
         usernameNormalized: "newusername",
-        email: "test@example.com",
-        name: "Test User",
-        steamId64: "76561198012345678",
-        steamUsername: "steamuser",
       });
     });
 

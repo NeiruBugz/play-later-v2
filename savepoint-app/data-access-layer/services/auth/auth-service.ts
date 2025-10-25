@@ -15,7 +15,7 @@ export class AuthService extends BaseService {
 
   async signUp(input: SignUpInput): Promise<SignUpResult> {
     try {
-      this.logger.info({ email: input.email }, "User sign up attempt");
+      this.logger.info({ userId: "unknown" }, "User sign up attempt");
 
       const existingUser = await prisma.user.findUnique({
         where: { email: input.email },
@@ -23,7 +23,7 @@ export class AuthService extends BaseService {
 
       if (existingUser) {
         this.logger.warn(
-          { email: input.email },
+          { userId: "unknown" },
           "Sign up failed: email already exists"
         );
         return this.error(
@@ -48,7 +48,7 @@ export class AuthService extends BaseService {
       });
 
       this.logger.info(
-        { userId: user.id, email: user.email },
+        { userId: user.id },
         "User account created successfully"
       );
 
@@ -67,7 +67,7 @@ export class AuthService extends BaseService {
           error.message.includes("unique"))
       ) {
         this.logger.warn(
-          { email: input.email, error },
+          { userId: "unknown", error },
           "Sign up failed: unique constraint violation"
         );
         return this.error(
@@ -77,7 +77,7 @@ export class AuthService extends BaseService {
       }
 
       this.logger.error(
-        { error, email: input.email },
+        { error, userId: "unknown" },
         "Error creating user account"
       );
       return this.handleError(error, "Failed to create account");

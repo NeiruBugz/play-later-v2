@@ -180,5 +180,12 @@ export async function updateUserProfile(
   return prisma.user.update({
     where: { id: userId },
     data,
+    select: {
+      id: true,
+      username: true,
+      usernameNormalized: true,
+      steamProfileURL: true,
+      image: true,
+    },
   });
 }
