@@ -29,7 +29,7 @@
     "code-fix": "pnpm format:write && pnpm lint:fix",
     "code-check": "pnpm format:check && pnpm lint && pnpm typecheck",
     "commitlint": "commitlint --edit",
-    "ci:check": "pnpm format:write && pnpm lint:fix && pnpm typecheck && pnpm test:backend && pnpm test:components && pnpm test:utilities"
+    "ci:check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:backend && pnpm test:components && pnpm test:utilities"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",

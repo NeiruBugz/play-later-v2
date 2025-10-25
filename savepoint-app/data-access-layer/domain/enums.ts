@@ -10,8 +10,8 @@ export const LIBRARY_ITEM_STATUS = [
 export type LibraryItemStatus = (typeof LIBRARY_ITEM_STATUS)[number];
 
 export const ACQUISITION_TYPES = [
-  "PHYSICAL",
   "DIGITAL",
+  "PHYSICAL",
   "SUBSCRIPTION",
 ] as const;
 

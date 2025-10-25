@@ -1,6 +1,6 @@
 "use client";
 
-import { LibraryItemStatus } from "@prisma/client";
+import { LIBRARY_ITEM_STATUS } from "@/data-access-layer/domain/enums";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -27,7 +27,7 @@ interface CollectionFiltersProps {
 }
 
 const statusOptions = createSelectOptionsFromEnum(
-  LibraryItemStatus,
+  LIBRARY_ITEM_STATUS,
   LibraryStatusMapper
 );
 

@@ -1,7 +1,10 @@
 "use client";
 
+import {
+  ACQUISITION_TYPES,
+  LIBRARY_ITEM_STATUS,
+} from "@/data-access-layer/domain/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -64,8 +67,8 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
     resolver: zodResolver(AddGameToLibrarySchema),
     defaultValues: {
       igdbId: game.id,
-      status: LibraryItemStatus.CURIOUS_ABOUT,
-      acquisitionType: AcquisitionType.DIGITAL,
+      status: LIBRARY_ITEM_STATUS[0],
+      acquisitionType: ACQUISITION_TYPES[0],
     },
   });
 
@@ -105,11 +108,11 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
   const platforms = game.platforms?.slice(0, 5).map((p) => p.name);
 
   const statusOptions = createSelectOptionsFromEnum(
-    LibraryItemStatus,
+    LIBRARY_ITEM_STATUS,
     LibraryStatusMapper
   );
   const acquisitionOptions = createSelectOptionsFromEnum(
-    AcquisitionType,
+    ACQUISITION_TYPES,
     AcquisitionStatusMapper
   );
 

@@ -20,19 +20,19 @@ const platformSchema = z
   );
 
 const optionalDate = z
-  .union([
-    z.coerce.date(),
-    z.string().trim().length(0),
-    z.undefined(),
-    z.null(),
-  ])
-  .transform<Date | undefined>((value) => {
-    if (value instanceof Date) {
-      return value;
+  .preprocess((value) => {
+    if (
+      value === undefined ||
+      value === null ||
+      (typeof value === "string" && value.trim().length === 0)
+    ) {
+      return undefined;
     }
-
-    return undefined;
-  });
+    return value;
+  }, z.coerce.date().optional())
+  .transform<Date | undefined>((value) =>
+    value instanceof Date ? value : undefined
+  );
 
 export const AddGameToLibrarySchema = z
   .object({
