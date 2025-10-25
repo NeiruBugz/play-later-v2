@@ -98,10 +98,10 @@ describe("addGameToLibraryAction", () => {
       acquisitionType: AcquisitionType.DIGITAL,
     });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBe("Game not found");
-    }
+    expect(result).toEqual({
+      success: false,
+      error: "Unable to add game to library",
+    });
   });
 
   it("should return error for invalid input (negative igdbId)", async () => {
@@ -112,10 +112,10 @@ describe("addGameToLibraryAction", () => {
       acquisitionType: AcquisitionType.DIGITAL,
     });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBeDefined();
-    }
+    expect(result).toEqual({
+      success: false,
+      error: "Invalid input",
+    });
     expect(mockLibraryService.addGameToLibrary).not.toHaveBeenCalled();
   });
 
@@ -127,10 +127,10 @@ describe("addGameToLibraryAction", () => {
       acquisitionType: AcquisitionType.DIGITAL,
     });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toContain("Platform is required");
-    }
+    expect(result).toEqual({
+      success: false,
+      error: "Invalid input",
+    });
     expect(mockLibraryService.addGameToLibrary).not.toHaveBeenCalled();
   });
 
@@ -146,9 +146,9 @@ describe("addGameToLibraryAction", () => {
       acquisitionType: AcquisitionType.DIGITAL,
     });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBe("Unexpected error");
-    }
+    expect(result).toEqual({
+      success: false,
+      error: "Unable to add game to library",
+    });
   });
 });

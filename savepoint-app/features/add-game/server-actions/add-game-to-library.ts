@@ -4,6 +4,8 @@ import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { revalidatePath } from "next/cache";
 
+import { logger } from "@/shared/lib/app/logger";
+
 import { AddGameToLibrarySchema } from "../lib/validation";
 
 type AddGameToLibraryServerInput = {
@@ -26,24 +28,53 @@ export async function addGameToLibraryAction(
       return { success: false, error: "Unauthorized" };
     }
 
-    const validatedData = AddGameToLibrarySchema.parse(input);
+    const validationResult = AddGameToLibrarySchema.safeParse(input);
+    if (!validationResult.success) {
+      logger.error(
+        { err: validationResult.error },
+        "addGameToLibraryAction validation failed"
+      );
+      return { success: false, error: "Invalid input" };
+    }
 
     const libraryService = new LibraryService();
-    const result = await libraryService.addGameToLibrary({
-      userId,
-      ...validatedData,
-    });
+    try {
+      const result = await libraryService.addGameToLibrary({
+        userId,
+        ...validationResult.data,
+      });
 
-    if (!result.success) {
-      return { success: false, error: result.error };
+      if (!result.success) {
+        logger.error(
+          { error: result.error },
+          "Library service failed to add game to library"
+        );
+        return {
+          success: false,
+          error: "Unable to add game to library",
+        };
+      }
+
+      revalidatePath("/library");
+      return { success: true, gameId: result.data.game.id };
+    } catch (serviceError) {
+      logger.error(
+        {
+          err: serviceError instanceof Error ? serviceError : undefined,
+          serviceError,
+        },
+        "addGameToLibraryAction service error"
+      );
+      return {
+        success: false,
+        error: "Unable to add game to library",
+      };
     }
-
-    revalidatePath("/library");
-    return { success: true, gameId: result.data.game.id };
   } catch (error) {
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: "An unexpected error occurred" };
+    logger.error(
+      { err: error instanceof Error ? error : undefined, error },
+      "addGameToLibraryAction unexpected error"
+    );
+    return { success: false, error: "Unable to add game to library" };
   }
 }
