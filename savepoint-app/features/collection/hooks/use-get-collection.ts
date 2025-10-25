@@ -27,10 +27,37 @@ const queryFn = async (
 
   const response = await fetch(`/api/collection?${searchParams.toString()}`);
   if (!response.ok) {
-    const errorData: ErrorResponse = await response.json();
-    throw new Error(errorData.error || "Failed to get collection");
+    let errorMessage = "Failed to get collection";
+
+    try {
+      const errorData = (await response.clone().json()) as
+        | ErrorResponse
+        | { message?: string }
+        | undefined;
+      if (errorData && typeof errorData === "object") {
+        errorMessage =
+          ("error" in errorData && errorData.error) ||
+          ("message" in errorData && errorData.message) ||
+          errorMessage;
+      }
+    } catch {
+      try {
+        const fallbackText = await response.text();
+        if (fallbackText) {
+          errorMessage = fallbackText;
+        }
+      } catch {
+        /* noop */
+      }
+    }
+
+    throw new Error(errorMessage || "Failed to get collection");
   }
-  return await response.json();
+  try {
+    return await response.json();
+  } catch {
+    throw new Error("Failed to parse collection response");
+  }
 };
 
 export function useGetCollection(
