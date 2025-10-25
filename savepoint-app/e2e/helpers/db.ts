@@ -21,6 +21,7 @@ export async function createTestUser(data: {
     data: {
       email: data.email,
       username: data.username,
+      usernameNormalized: data.username.toLowerCase(), // Important: set normalized username for uniqueness check
       password: hashedPassword,
     },
   });
