@@ -2,7 +2,7 @@
 
 import { LibraryItemStatus } from "@prisma/client";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -38,6 +38,17 @@ export function CollectionFilters({
   availablePlatforms,
 }: CollectionFiltersProps) {
   const [localFilters, setLocalFilters] = useState(filters);
+
+  useEffect(() => {
+    setLocalFilters((currentFilters) => {
+      const hasChanged =
+        currentFilters.search !== filters.search ||
+        currentFilters.status !== filters.status ||
+        currentFilters.platform !== filters.platform;
+
+      return hasChanged ? { ...filters } : currentFilters;
+    });
+  }, [filters]);
 
   const hasUnappliedChanges =
     localFilters.search !== filters.search ||
