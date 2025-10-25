@@ -45,6 +45,7 @@ import { platformOptions } from "../lib/constants";
 import { AddGameFormProps } from "../lib/types";
 import {
   AddGameToLibrarySchema,
+  type AddGameToLibraryFormValues,
   type AddGameToLibraryInput,
 } from "../lib/validation";
 import { addGameToLibraryAction } from "../server-actions/add-game-to-library";
@@ -55,12 +56,15 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<AddGameToLibraryInput>({
+  const form = useForm<
+    AddGameToLibraryFormValues,
+    undefined,
+    AddGameToLibraryInput
+  >({
     resolver: zodResolver(AddGameToLibrarySchema),
     defaultValues: {
       igdbId: game.id,
       status: LibraryItemStatus.CURIOUS_ABOUT,
-      platform: "",
       acquisitionType: AcquisitionType.DIGITAL,
     },
   });
@@ -172,10 +176,7 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a status" />
@@ -200,10 +201,7 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Platform</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a platform" />
@@ -228,10 +226,7 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Acquisition Type</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select acquisition type" />

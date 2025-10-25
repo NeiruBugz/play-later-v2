@@ -10,4 +10,6 @@ export const platformOptions = [
   { value: "Linux", label: "Linux" },
   { value: "iOS", label: "iOS" },
   { value: "Android", label: "Android" },
-];
+] as const;
+
+export type SupportedPlatform = (typeof platformOptions)[number]["value"];
