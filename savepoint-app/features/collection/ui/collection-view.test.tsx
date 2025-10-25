@@ -547,7 +547,7 @@ describe("CollectionView", () => {
 
       expect(mockUseGetCollection).toHaveBeenCalledWith(
         expect.objectContaining({
-          page: NaN,
+          page: undefined,
         })
       );
     });

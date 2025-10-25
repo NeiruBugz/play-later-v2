@@ -21,13 +21,19 @@ export function CollectionView({ availablePlatforms }: CollectionViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const pageParam = searchParams.get("page");
+  const parsedPage =
+    pageParam && pageParam.trim().length > 0 ? Number(pageParam) : undefined;
+  const normalizedPage =
+    typeof parsedPage === "number" && Number.isFinite(parsedPage)
+      ? parsedPage
+      : undefined;
+
   const filters: Omit<FilterParams, "page"> & { page?: number } = {
     search: searchParams.get("search") || "",
     status: searchParams.get("status") || "",
     platform: searchParams.get("platform") || "",
-    page: searchParams.get("page")
-      ? Number(searchParams.get("page"))
-      : undefined,
+    page: normalizedPage,
   };
 
   const { data, isLoading, error, refetch } = useGetCollection(filters);
@@ -63,8 +69,8 @@ export function CollectionView({ availablePlatforms }: CollectionViewProps) {
             </h2>
             <p className="text-muted-foreground mt-2">
               We're having trouble loading your game collection.
-              {hasActiveFilters && " Try clearing your filters or "}
-              This could be a temporary issue.
+              {hasActiveFilters ? " Try clearing your filters or " : " "}
+              this could be a temporary issue.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">

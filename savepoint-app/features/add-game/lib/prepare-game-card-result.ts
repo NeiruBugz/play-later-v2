@@ -13,10 +13,10 @@ export const prepareGameCardResult = (game: SearchResponse) => {
 
   const gameTypeLabel = getGameTypeLabel(game.game_type);
 
-  const hasMorePlatforms = (game.platforms?.length ?? 0) > 3;
+  const hasMorePlatforms = (game.platforms?.length ?? 0) > 5;
 
   const platforms = game.platforms
-    ?.slice(0, 3)
+    ?.slice(0, 5)
     .map((p) => p.name)
     .join(", ");
 
