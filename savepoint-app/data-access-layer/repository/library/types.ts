@@ -1,4 +1,3 @@
-import { RecentGame } from "@/data-access-layer/services";
 import {
   type AcquisitionType,
   type Game,
@@ -7,6 +6,13 @@ import {
   type Prisma,
   type User,
 } from "@prisma/client";
+
+export type RecentGame = {
+  gameId: string;
+  title: string;
+  coverImage: string | null;
+  lastPlayed: Date;
+};
 
 export type CreateLibraryItemInput = {
   userId: string;

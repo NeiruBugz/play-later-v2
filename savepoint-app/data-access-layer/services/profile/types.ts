@@ -1,3 +1,5 @@
+import type { RecentGame as RepositoryRecentGame } from "@/data-access-layer/repository/library/types";
+
 import type { ServiceResult } from "../types";
 
 export type GetProfileInput = {
@@ -16,12 +18,7 @@ export type Profile = {
   createdAt: Date;
 };
 
-export type RecentGame = {
-  gameId: string;
-  title: string;
-  coverImage: string | null;
-  lastPlayed: Date;
-};
+export type RecentGame = RepositoryRecentGame;
 
 export type LibraryStats = {
   statusCounts: Record<string, number>;

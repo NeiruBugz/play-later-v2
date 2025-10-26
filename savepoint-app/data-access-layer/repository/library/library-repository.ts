@@ -1,7 +1,6 @@
 import "server-only";
 
 import { findOrCreateGameByIgdbId } from "@/data-access-layer/repository/game/game-repository";
-import { RecentGame } from "@/data-access-layer/services";
 import { LibraryItemStatus, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/shared/lib";
@@ -13,6 +12,7 @@ import type {
   GetLibraryCountInput,
   GetLibraryItemsForUserByIgdbIdInput,
   GetManyLibraryItemsInput,
+  RecentGame,
   UpdateLibraryItemInput,
   UserWithLibraryItemsResponse,
 } from "./types";

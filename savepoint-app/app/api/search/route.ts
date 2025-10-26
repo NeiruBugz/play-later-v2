@@ -47,7 +47,7 @@ export async function GET(request: Request) {
   });
 
   if (!result.success) {
-    logger.error({ error: result.error, query, userId }, "Game search failed");
+    logger.error({ err: result.error, query, userId }, "Game search failed");
     return NextResponse.json({ error: result.error }, { status: 500 });
   }
 

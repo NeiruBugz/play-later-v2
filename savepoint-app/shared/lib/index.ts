@@ -32,7 +32,7 @@ export {
   isoToReadable,
   getTimeStamp,
   LibraryStatusMapper,
-  AcquisitionStatusMapper,
+  AcquisitionTypeMapper,
   capitalizeString,
   normalizeGameTitle,
   normalizeString,

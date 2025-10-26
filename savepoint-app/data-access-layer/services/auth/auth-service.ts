@@ -79,7 +79,7 @@ export class AuthService extends BaseService {
       }
 
       this.logger.error(
-        { error, userId: "unknown" },
+        { err: error, userId: "unknown" },
         "Error creating user account"
       );
       return this.handleError(error, "Failed to create account");

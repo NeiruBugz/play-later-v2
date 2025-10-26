@@ -7,7 +7,7 @@ export {
 export {
   LibraryStatusMapper,
   LibraryStatusColorMapper,
-  AcquisitionStatusMapper,
+  AcquisitionTypeMapper,
 } from "./enum-mappers";
 export { createSelectOptionsFromEnum } from "./enum-to-select-options";
 export {

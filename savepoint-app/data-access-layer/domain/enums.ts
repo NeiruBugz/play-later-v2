@@ -16,6 +16,7 @@ export const ACQUISITION_TYPES = [
 ] as const;
 
 export type AcquisitionType = (typeof ACQUISITION_TYPES)[number];
+export const DEFAULT_ACQUISITION_TYPE: AcquisitionType = "DIGITAL";
 
 export const STOREFRONTS = ["STEAM", "PLAYSTATION", "XBOX"] as const;
 export type Storefront = (typeof STOREFRONTS)[number];

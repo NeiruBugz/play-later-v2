@@ -2,6 +2,7 @@
 
 import {
   ACQUISITION_TYPES,
+  DEFAULT_ACQUISITION_TYPE,
   LIBRARY_ITEM_STATUS,
 } from "@/data-access-layer/domain/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,7 +40,7 @@ import {
 import { createLogger } from "@/shared/lib/app/logger";
 import { buildIgdbImageUrl } from "@/shared/lib/igdb/igdb-image-utils";
 import {
-  AcquisitionStatusMapper,
+  AcquisitionTypeMapper,
   createSelectOptionsFromEnum,
   LibraryStatusMapper,
 } from "@/shared/lib/ui";
@@ -59,6 +60,23 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const statusOptions = createSelectOptionsFromEnum(
+    LIBRARY_ITEM_STATUS,
+    LibraryStatusMapper
+  );
+  const acquisitionOptions = createSelectOptionsFromEnum(
+    ACQUISITION_TYPES,
+    AcquisitionTypeMapper
+  );
+  const defaultStatus: AddGameToLibraryFormValues["status"] =
+    statusOptions[0]?.value ?? "CURIOUS_ABOUT";
+  const fallbackAcquisitionType =
+    acquisitionOptions[0]?.value ?? DEFAULT_ACQUISITION_TYPE;
+  const defaultAcquisitionType: AddGameToLibraryFormValues["acquisitionType"] =
+    ACQUISITION_TYPES.includes(DEFAULT_ACQUISITION_TYPE)
+      ? DEFAULT_ACQUISITION_TYPE
+      : fallbackAcquisitionType;
+
   const form = useForm<
     AddGameToLibraryFormValues,
     undefined,
@@ -67,8 +85,8 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
     resolver: zodResolver(AddGameToLibrarySchema),
     defaultValues: {
       igdbId: game.id,
-      status: LIBRARY_ITEM_STATUS[0],
-      acquisitionType: ACQUISITION_TYPES[0],
+      status: defaultStatus,
+      acquisitionType: defaultAcquisitionType,
     },
   });
 
@@ -106,15 +124,6 @@ export function AddGameForm({ game, onCancel }: AddGameFormProps) {
     : "Release date unknown";
 
   const platforms = game.platforms?.slice(0, 5).map((p) => p.name);
-
-  const statusOptions = createSelectOptionsFromEnum(
-    LIBRARY_ITEM_STATUS,
-    LibraryStatusMapper
-  );
-  const acquisitionOptions = createSelectOptionsFromEnum(
-    ACQUISITION_TYPES,
-    AcquisitionStatusMapper
-  );
 
   return (
     <Card>

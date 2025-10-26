@@ -1,4 +1,7 @@
-import { type AcquisitionType, type LibraryItemStatus } from "@prisma/client";
+import type {
+  AcquisitionType,
+  LibraryItemStatus,
+} from "@/data-access-layer/domain/enums";
 
 export const LibraryStatusMapper: Record<LibraryItemStatus, string> = {
   CURIOUS_ABOUT: "Curious About",
@@ -9,7 +12,7 @@ export const LibraryStatusMapper: Record<LibraryItemStatus, string> = {
   REVISITING: "Revisiting",
 };
 
-export const AcquisitionStatusMapper: Record<AcquisitionType, string> = {
+export const AcquisitionTypeMapper: Record<AcquisitionType, string> = {
   DIGITAL: "Digital",
   PHYSICAL: "Physical",
   SUBSCRIPTION: "Subscription service",

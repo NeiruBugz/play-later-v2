@@ -632,7 +632,7 @@ export class ProfileService extends BaseService {
         },
       };
     } catch (error) {
-      this.logger.error({ error, userId }, "Failed to fetch profile");
+      this.logger.error({ err: error, userId }, "Failed to fetch profile");
       return {
         ok: false,
         error: { code: "FETCH_FAILED", message: "Failed to load profile" },
@@ -759,7 +759,7 @@ export class ProfileService extends BaseService {
       this.logger.info({ userId, username: data.username }, "Profile setup completed");
       return { ok: true, data: user };
     } catch (error) {
-      this.logger.error({ error, userId }, "Profile setup failed");
+      this.logger.error({ err: error, userId }, "Profile setup failed");
       return {
         ok: false,
         error: { code: "SETUP_FAILED", message: "Failed to complete setup" },
@@ -812,7 +812,7 @@ export class ProfileService extends BaseService {
       this.logger.info({ userId, username: data.username }, "Profile updated");
       return { ok: true, data: user };
     } catch (error) {
-      this.logger.error({ error, userId }, "Profile update failed");
+      this.logger.error({ err: error, userId }, "Profile update failed");
       return {
         ok: false,
         error: { code: "UPDATE_FAILED", message: "Failed to update profile" },
@@ -849,7 +849,7 @@ export class ProfileService extends BaseService {
       await updateUserProfile(userId, { image: avatarUrl });
       return { ok: true, data: undefined };
     } catch (error) {
-      this.logger.error({ error, userId }, "Avatar URL update failed");
+      this.logger.error({ err: error, userId }, "Avatar URL update failed");
       return {
         ok: false,
         error: { code: "UPDATE_FAILED", message: "Failed to update avatar" },
