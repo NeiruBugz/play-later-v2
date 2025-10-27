@@ -16,6 +16,7 @@ import {
 import { initialFormState } from "../lib/constants";
 import { ProfileSettingsFormProps } from "../lib/types";
 import { updateProfileFormAction } from "../server-actions/update-profile";
+import { AvatarUpload } from "./avatar-upload";
 import { UsernameInput } from "./username-input";
 
 export function ProfileSettingsForm({
@@ -23,6 +24,9 @@ export function ProfileSettingsForm({
   currentAvatar,
 }: ProfileSettingsFormProps) {
   const [username, setUsername] = useState(currentUsername ?? "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    currentAvatar ?? null
+  );
   const [hasValidationError, setHasValidationError] = useState(false);
   const [state, formAction, isPending] = useActionState(
     updateProfileFormAction,
@@ -36,8 +40,18 @@ export function ProfileSettingsForm({
     }
   }, [state]);
 
+  const handleAvatarUploadSuccess = (url: string) => {
+    setAvatarUrl(url);
+    toast.success("Profile image uploaded successfully.");
+  };
+
+  const handleAvatarUploadError = (error: string) => {
+    toast.error(error, {
+      description: "Please try again or choose a different image.",
+    });
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    // Basic validation before submission (UsernameInput handles detailed validation)
     if (username.trim().length < 3 || username.trim().length > 25) {
       event.preventDefault();
     }
@@ -59,19 +73,35 @@ export function ProfileSettingsForm({
         </CardDescription>
       </CardHeader>
       <form action={formAction} onSubmit={handleSubmit} noValidate>
-        <input type="hidden" name="avatarUrl" value={currentAvatar ?? ""} />
+        <input type="hidden" name="avatarUrl" value={avatarUrl ?? ""} />
         <input type="hidden" name="username" value={username} />
         <CardContent className="space-y-6">
-          <UsernameInput
-            value={username}
-            onChange={setUsername}
-            error={showServerError ? state.message : undefined}
-            disabled={isPending}
-            onValidationChange={setHasValidationError}
-          />
-          <p className="text-muted-foreground -mt-4 text-sm">
-            Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.
-          </p>
+          <div className="space-y-2">
+            <label className="text-foreground text-sm font-medium">
+              Profile Image
+            </label>
+            <AvatarUpload
+              currentAvatar={avatarUrl}
+              onUploadSuccess={handleAvatarUploadSuccess}
+              onUploadError={handleAvatarUploadError}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-foreground text-sm font-medium">
+              Username
+            </label>
+            <UsernameInput
+              value={username}
+              onChange={setUsername}
+              error={showServerError ? state.message : undefined}
+              disabled={isPending}
+              onValidationChange={setHasValidationError}
+            />
+            <p className="text-muted-foreground text-sm">
+              Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.
+            </p>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button

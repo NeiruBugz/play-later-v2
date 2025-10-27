@@ -2,11 +2,16 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
 import { Toaster } from "@/shared/components/ui/sonner";
+import { requireServerUserId } from "@/shared/lib/app/auth";
 
-export default function ProtectedLayout({ children }: PropsWithChildren) {
+export const dynamic = "force-dynamic";
+
+export default async function ProtectedLayout({ children }: PropsWithChildren) {
+  await requireServerUserId();
+
   return (
     <>
-      <header className="container mx-auto border-b border-gray-200 py-4">
+      <header className="border-border container mx-auto border-b py-4">
         <div className="flex items-center justify-between">
           <h1 className="font-serif text-3xl font-bold">
             <Link href="/dashboard">SavePoint</Link>
@@ -14,19 +19,19 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
           <nav className="flex items-center gap-6">
             <Link
               href="/dashboard"
-              className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
             >
               Dashboard
             </Link>
             <Link
               href="/library"
-              className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
             >
               Library
             </Link>
             <Link
               href="/profile"
-              className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
             >
               Profile
             </Link>

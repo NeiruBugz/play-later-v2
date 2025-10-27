@@ -104,10 +104,13 @@ export function UsernameInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className={cn("pr-10", {
-            "border-red-500 focus-visible:ring-red-500": showError,
-            "border-green-500 focus-visible:ring-green-500": showSuccess,
-          })}
+          className={cn(
+            "pr-10",
+            showError &&
+              "border-red-500 focus-visible:ring-red-500 dark:border-red-400 dark:focus-visible:ring-red-400",
+            showSuccess &&
+              "border-emerald-500 focus-visible:ring-emerald-500 dark:border-emerald-400 dark:focus-visible:ring-emerald-400"
+          )}
           aria-invalid={showError ? "true" : "false"}
           aria-describedby="username-error"
           placeholder="Enter username"
@@ -117,19 +120,27 @@ export function UsernameInput({
           {validationStatus === "validating" && (
             <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
           )}
-          {showSuccess && <Check className="h-4 w-4 text-green-500" />}
+          {showSuccess && (
+            <Check className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />
+          )}
           {showError && validationStatus === "error" && (
-            <X className="h-4 w-4 text-red-500" />
+            <X className="h-4 w-4 text-red-500 dark:text-red-400" />
           )}
         </div>
       </div>
       {showError && (
-        <p className="text-sm text-red-500" id="username-error">
+        <p
+          className="text-sm text-red-500 dark:text-red-400"
+          id="username-error"
+        >
           {displayError}
         </p>
       )}
       {showSuccess && (
-        <p className="text-sm text-green-600" role="status">
+        <p
+          className="text-sm text-emerald-600 dark:text-emerald-300"
+          role="status"
+        >
           {validationMessage}
         </p>
       )}

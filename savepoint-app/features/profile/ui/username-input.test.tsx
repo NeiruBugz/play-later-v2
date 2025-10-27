@@ -228,7 +228,7 @@ describe("UsernameInput", () => {
     });
 
     expect(screen.getByText("Username available")).toBeInTheDocument();
-    expect(document.querySelector(".text-green-500")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
   it("should show 'Username already exists' with error for taken username", async () => {

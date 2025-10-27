@@ -27,13 +27,14 @@ export function ProfileView({ profile }: ProfileViewProps) {
               <Image
                 width={96}
                 height={96}
+                priority
                 src={profile.image}
                 alt={`${displayName}'s avatar`}
-                className="h-24 w-24 rounded-full object-cover ring-2 ring-gray-200"
+                className="h-24 w-24 rounded-full object-cover ring-2 ring-[oklch(var(--border))]"
               />
             ) : (
               <div
-                className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-200 text-2xl font-bold text-gray-500"
+                className="bg-muted text-muted-foreground flex h-24 w-24 items-center justify-center rounded-full text-2xl font-bold"
                 data-testid="profile-avatar-placeholder"
               >
                 {displayName.charAt(0).toUpperCase()}
@@ -42,13 +43,15 @@ export function ProfileView({ profile }: ProfileViewProps) {
           </div>
 
           <div className="flex-1">
-            <h2 className="font-serif text-3xl font-bold text-gray-900">
+            <h2 className="text-foreground font-serif text-3xl font-bold">
               {displayName}
             </h2>
             {profile.email && (
-              <p className="mt-1 text-sm text-gray-600">{profile.email}</p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {profile.email}
+              </p>
             )}
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="text-muted-foreground mt-2 text-sm">
               Joined {joinDateFormatted}
             </p>
           </div>
@@ -64,7 +67,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
 
       {statusEntries.length > 0 && (
         <div>
-          <h2 className="mb-4 font-serif text-2xl font-bold text-gray-900">
+          <h2 className="text-foreground mb-4 font-serif text-2xl font-bold">
             Library Stats
           </h2>
           <div
@@ -74,17 +77,17 @@ export function ProfileView({ profile }: ProfileViewProps) {
             {statusEntries.map(([status, count]) => (
               <div
                 key={status}
-                className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                className="border-border bg-card rounded-lg border p-4 shadow-sm"
                 data-testid="profile-status-card"
               >
                 <p
-                  className="text-sm font-medium text-gray-600"
+                  className="text-muted-foreground text-sm font-medium"
                   data-testid="profile-status-label"
                 >
                   {statusLabels[status] || status}
                 </p>
                 <p
-                  className="mt-1 text-2xl font-bold text-gray-900"
+                  className="text-foreground mt-1 text-2xl font-bold"
                   data-testid="profile-status-count"
                 >
                   {count}
@@ -97,7 +100,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
 
       {profile.stats.recentGames.length > 0 && (
         <div>
-          <h2 className="mb-4 font-serif text-2xl font-bold text-gray-900">
+          <h2 className="text-foreground mb-4 font-serif text-2xl font-bold">
             Recently Played
           </h2>
           <div
@@ -111,7 +114,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
               return (
                 <div
                   key={game.gameId}
-                  className="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  className="group border-border bg-card overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-md"
                   data-testid="profile-recent-game-card"
                 >
                   {game.coverImage ? (
@@ -124,20 +127,20 @@ export function ProfileView({ profile }: ProfileViewProps) {
                     />
                   ) : (
                     <div
-                      className="aspect-3/4 w-full bg-gray-200"
+                      className="bg-muted aspect-3/4 w-full"
                       data-testid="profile-game-cover-fallback"
                     ></div>
                   )}
 
                   <div className="p-3">
                     <h3
-                      className="line-clamp-2 text-sm font-medium text-gray-900"
+                      className="text-foreground line-clamp-2 text-sm font-medium"
                       data-testid="profile-recent-game-title"
                     >
                       {game.title}
                     </h3>
                     <p
-                      className="mt-1 text-xs text-gray-500"
+                      className="text-muted-foreground mt-1 text-xs"
                       data-testid="profile-recent-game-timestamp"
                     >
                       {formatDistanceToNow(new Date(game.lastPlayed), {
@@ -153,8 +156,8 @@ export function ProfileView({ profile }: ProfileViewProps) {
       )}
 
       {statusEntries.length === 0 && profile.stats.recentGames.length === 0 && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center">
-          <p className="text-lg text-gray-600">
+        <div className="border-border bg-muted rounded-lg border p-12 text-center">
+          <p className="text-muted-foreground text-lg">
             Your library is empty. Start adding games to your collection!
           </p>
         </div>

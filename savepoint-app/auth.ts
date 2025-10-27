@@ -6,6 +6,9 @@ import Credentials from "next-auth/providers/credentials";
 
 import { prisma, sessionErrorHandler, verifyPassword } from "@/shared/lib";
 
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
+const SESSION_UPDATE_AGE = 24 * 60 * 60; // Rotate every day
+
 const enableCredentials =
   process.env.NODE_ENV === "test" ||
   process.env.AUTH_ENABLE_CREDENTIALS === "true";
@@ -88,9 +91,9 @@ export const { auth, handlers, signIn } = NextAuth({
       : []),
   ],
   session: {
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: SESSION_MAX_AGE,
     strategy: "jwt",
-    updateAge: 24 * 60 * 60, // Rotate every day
+    updateAge: SESSION_UPDATE_AGE,
   },
 });
 

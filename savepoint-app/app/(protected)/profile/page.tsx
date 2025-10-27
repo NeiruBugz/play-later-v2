@@ -1,12 +1,12 @@
-import { getServerUserId } from "@/auth";
 import { ProfileService, ServiceErrorCode } from "@/data-access-layer/services";
 import { redirect } from "next/navigation";
 
 import { ProfileView } from "@/features/profile/ui/profile-view";
 import { createLogger } from "@/shared/lib";
+import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export default async function ProfilePage() {
-  const userId = await getServerUserId();
+  const userId = await requireServerUserId();
   const logger = createLogger({ name: "ProfilePage" });
 
   if (!userId) {

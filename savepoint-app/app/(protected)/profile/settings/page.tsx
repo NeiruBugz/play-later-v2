@@ -1,16 +1,12 @@
-import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services";
 import { redirect } from "next/navigation";
 
 import { ProfileSettingsForm } from "@/features/profile/ui/profile-settings-form";
 import { BrowserBackButton } from "@/shared/components/browser-back-button";
+import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export default async function ProfileSettingsPage() {
-  const userId = await getServerUserId();
-
-  if (!userId) {
-    redirect("/login");
-  }
+  const userId = await requireServerUserId();
 
   const profileService = new ProfileService();
   const result = await profileService.getProfile({ userId });

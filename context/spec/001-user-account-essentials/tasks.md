@@ -133,16 +133,16 @@
 ## **Slice 9: Avatar Upload UI Component**
 *Goal: Add avatar upload widget to profile settings*
 
-- [ ] **Sub-task:** Create `AvatarUpload` component in `features/profile/ui/avatar-upload.tsx` (drag-and-drop or click to select)
-- [ ] **Sub-task:** Add client-side file validation (size, MIME type) before upload
-- [ ] **Sub-task:** Add image preview after selection (before upload)
-- [ ] **Sub-task:** Add progress indicator during upload (loading state)
-- [ ] **Sub-task:** Write component tests for `AvatarUpload` (file selection, validation, upload success/failure)
-- [ ] **Sub-task:** Integrate `AvatarUpload` into `ProfileSettingsForm` (display current avatar + upload widget)
-- [ ] **Sub-task:** Update `ProfileService.updateAvatarUrl()` method to save S3 URL to user record
-- [ ] **Sub-task:** Update `updateProfile` action to accept `avatarUrl` parameter
-- [ ] **Sub-task:** Write E2E test: Upload avatar and verify it displays in profile view
-- [ ] **Sub-task:** Verify avatar upload works end-to-end (upload → save → display in profile view)
+- [x] **Sub-task:** Create `AvatarUpload` component in `features/profile/ui/avatar-upload.tsx` (drag-and-drop or click to select)
+- [x] **Sub-task:** Add client-side file validation (size, MIME type) before upload
+- [x] **Sub-task:** Add image preview after selection (before upload)
+- [x] **Sub-task:** Add progress indicator during upload (loading state)
+- [x] **Sub-task:** Write component tests for `AvatarUpload` (file selection, validation, upload success/failure)
+- [x] **Sub-task:** Integrate `AvatarUpload` into `ProfileSettingsForm` (display current avatar + upload widget)
+- [x] **Sub-task:** Update `ProfileService.updateAvatarUrl()` method to save S3 URL to user record
+- [x] **Sub-task:** Update `updateProfile` action to accept `avatarUrl` parameter
+- [x] **Sub-task:** Write E2E test: Upload avatar and verify it displays in profile view
+- [x] **Sub-task:** Verify avatar upload works end-to-end (upload → save → display in profile view)
 
 ---
 
@@ -181,8 +181,8 @@
 ## **Slice 12: 30-Day Session Duration**
 *Goal: Update session expiry to 30 days*
 
-- [ ] **Sub-task:** Update `auth.ts` session configuration: change `maxAge` to `30 * 24 * 60 * 60` (30 days)
-- [ ] **Sub-task:** Verify `updateAge` is set to `24 * 60 * 60` (rotate session token daily)
+- [x] **Sub-task:** Update `auth.ts` session configuration: change `maxAge` to `30 * 24 * 60 * 60` (30 days)
+- [x] **Sub-task:** Verify `updateAge` is set to `24 * 60 * 60` (rotate session token daily)
 - [ ] **Sub-task:** Write E2E test to verify session persists across page reloads
 - [ ] **Sub-task:** Document 30-day session behavior in security policy or README
 
@@ -191,11 +191,11 @@
 ## **Slice 13: Credentials-Based Login (Development Only)**
 *Goal: Enable email/password login for testing*
 
-- [ ] **Sub-task:** Verify `AUTH_ENABLE_CREDENTIALS` environment variable is documented in `.env.example`
-- [ ] **Sub-task:** Update `auth.ts` to conditionally include Credentials provider based on `AUTH_ENABLE_CREDENTIALS`
-- [ ] **Sub-task:** Create or update login page to show email/password form when credentials enabled
-- [ ] **Sub-task:** Write E2E test: Credentials-based login (test environment only)
-- [ ] **Sub-task:** Verify credentials login form is hidden when `AUTH_ENABLE_CREDENTIALS=false`
+- [x] **Sub-task:** Verify `AUTH_ENABLE_CREDENTIALS` environment variable is documented in `.env.example`
+- [x] **Sub-task:** Update `auth.ts` to conditionally include Credentials provider based on `AUTH_ENABLE_CREDENTIALS`
+- [x] **Sub-task:** Create or update login page to show email/password form when credentials enabled
+- [x] **Sub-task:** Write E2E test: Credentials-based login (test environment only)
+- [x] **Sub-task:** Verify credentials login form is hidden when `AUTH_ENABLE_CREDENTIALS=false`
 - [ ] **Sub-task:** Document credentials-based login setup in README (for developers and testers)
 
 ---

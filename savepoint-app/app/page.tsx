@@ -287,101 +287,11 @@ export default async function Page() {
                 Your personal gaming library and journal for patient gamers.
               </p>
             </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold">Product</h4>
-              <ul className="text-muted-foreground space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Integrations
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold">Community</h4>
-              <ul className="text-muted-foreground space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Discord
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Twitter
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold">Company</h4>
-              <ul className="text-muted-foreground space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Privacy
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Terms
-                  </a>
-                </li>
-              </ul>
-            </div>
           </div>
 
           <div className="border-border text-muted-foreground mt-12 border-t pt-8 text-center text-sm">
             <p>
-              © 2025 SavePoint. For patient gamers who view games as worlds to
+              2025 SavePoint. For patient gamers who view games as worlds to
               explore.
             </p>
           </div>
