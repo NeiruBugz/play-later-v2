@@ -37,8 +37,6 @@ const createMockProfile = (
 
 const elements = {
   getHeading: (name: string) => screen.getByRole("heading", { name, level: 2 }),
-  queryHeading: (name: string) =>
-    screen.queryByRole("heading", { name, level: 1 }),
   getLibraryStatsHeading: () =>
     screen.getByRole("heading", { name: "Library Stats", level: 2 }),
   queryLibraryStatsHeading: () =>

@@ -77,10 +77,9 @@ async function performUpdateProfile(
   }
 }
 
-/**
- * Retains the original imperative API for programmatic updates.
- */
-export async function updateProfile(data: UpdateProfileInput) {
+export async function updateProfile(
+  data: UpdateProfileInput
+): Promise<PerformUpdateProfileResult> {
   return performUpdateProfile(data);
 }
 

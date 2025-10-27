@@ -210,13 +210,13 @@ jobs:
                 echo "Checking $migration:"
 
                 # Check for DROP statements
-                if grep -i "DROP\s\+\(TABLE\|COLUMN\|INDEX\|CONSTRAINT\)" "$migration"; then
+                if grep -i "DROP[[:space:]]\+\(TABLE\|COLUMN\|INDEX\|CONSTRAINT\)" "$migration"; then
                   echo "⚠️ Found potentially destructive DROP operation in $migration"
                   DESTRUCTIVE_FOUND=true
                 fi
 
                 # Check for data type changes that might cause data loss
-                if grep -i "ALTER\s\+COLUMN.*TYPE" "$migration"; then
+                if grep -i "ALTER[[:space:]]\+COLUMN.*TYPE" "$migration"; then
                   echo "⚠️ Found column type change in $migration - review for potential data loss"
                   DESTRUCTIVE_FOUND=true
                 fi

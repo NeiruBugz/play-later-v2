@@ -5,7 +5,7 @@ import { clearTestData, disconnectDatabase } from "./helpers/db";
  * Runs once after all test files have completed
  * Ensures database cleanup even if individual tests fail
  */
-async function globalTeardown() {
+async function globalTeardown(): Promise<void> {
   console.log("\n🧹 Running global E2E teardown...");
 
   try {

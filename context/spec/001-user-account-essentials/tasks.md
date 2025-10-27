@@ -118,14 +118,14 @@
 ## **Slice 8: S3 Storage Service (Avatar Upload Backend)**
 *Goal: Implement avatar upload to S3 without UI*
 
-- [ ] **Sub-task:** Install `@aws-sdk/client-s3` npm package
-- [ ] **Sub-task:** Update `env.mjs` to validate S3 environment variables (`AWS_REGION`, `S3_BUCKET_NAME`, etc.)
-- [ ] **Sub-task:** Create `shared/lib/storage/s3-client.ts` with S3Client wrapper
-- [ ] **Sub-task:** Create `shared/lib/storage/avatar-storage.ts` with `AvatarStorageService.uploadAvatar()` method
-- [ ] **Sub-task:** Write unit tests for avatar upload (file validation, S3 key generation)
-- [ ] **Sub-task:** Write LocalStack integration tests for avatar upload (upload file, verify in bucket)
-- [ ] **Sub-task:** Create `uploadAvatar` server action with file validation (size, MIME type)
-- [ ] **Sub-task:** Add Zod schema for avatar upload (`UploadAvatarSchema`)
+- [x] **Sub-task:** Install `@aws-sdk/client-s3` npm package
+- [x] **Sub-task:** Update `env.mjs` to validate S3 environment variables (`AWS_REGION`, `S3_BUCKET_NAME`, etc.)
+- [x] **Sub-task:** Create `shared/lib/storage/s3-client.ts` with S3Client wrapper
+- [x] **Sub-task:** Create `shared/lib/storage/avatar-storage.ts` with `AvatarStorageService.uploadAvatar()` method
+- [x] **Sub-task:** Write unit tests for avatar upload (file validation, S3 key generation)
+- [x] **Sub-task:** Write LocalStack integration tests for avatar upload (upload file, verify in bucket)
+- [x] **Sub-task:** Create `uploadAvatar` server action with file validation (size, MIME type)
+- [x] **Sub-task:** Add Zod schema for avatar upload (`UploadAvatarSchema`)
 - [ ] **Sub-task:** Test avatar upload with integration test (verify S3 URL returned)
 
 ---

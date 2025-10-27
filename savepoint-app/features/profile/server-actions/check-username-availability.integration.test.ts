@@ -27,7 +27,11 @@ describe("checkUsernameAvailability server action", () => {
   });
 
   afterAll(async () => {
-    await cleanupDatabase();
+    try {
+      await cleanupDatabase();
+    } catch (error) {
+      console.error("Error in global teardown:", error);
+    }
   });
 
   beforeEach(async () => {

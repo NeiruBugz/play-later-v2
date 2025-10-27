@@ -48,9 +48,12 @@ export const cleanupDatabase = async () => {
   const dbName = process.env.POSTGRES_PRISMA_URL?.split("/").pop();
   if (dbName) {
     try {
-      execSync(`docker exec savepoint-postgres dropdb -U postgres ${dbName}`, {
-        stdio: "ignore",
-      });
+      execSync(
+        `docker exec savepoint-postgres dropdb --if-exists -U postgres ${dbName}`,
+        {
+          stdio: "ignore",
+        }
+      );
     } catch (error) {
       console.warn("Failed to cleanup test database:", error);
     }

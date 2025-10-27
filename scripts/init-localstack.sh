@@ -15,7 +15,7 @@ aws --endpoint-url=$ENDPOINT_URL s3 mb s3://savepoint-dev
 echo "Applying CORS configuration..."
 aws --endpoint-url=$ENDPOINT_URL s3api put-bucket-cors \
   --bucket savepoint-dev \
-  --cors-configuration file://$(dirname "$0")/localstack-cors.json
+  --cors-configuration "file://$(dirname "$0")/localstack-cors.json"
 
 echo "LocalStack S3 setup complete!"
 echo "Bucket 'savepoint-dev' created and configured."
