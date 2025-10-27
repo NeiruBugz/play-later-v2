@@ -23,6 +23,14 @@ process.env.POSTGRES_PASSWORD = "postgres";
 process.env.POSTGRES_DATABASE = "test";
 process.env.STEAM_API_KEY = "test-steam-key";
 
+// S3 / LocalStack configuration for integration tests
+process.env.AWS_REGION = "us-east-1";
+process.env.AWS_ENDPOINT_URL = "http://localhost:4568";
+process.env.AWS_ACCESS_KEY_ID = "test";
+process.env.AWS_SECRET_ACCESS_KEY = "test";
+process.env.S3_BUCKET_NAME = "savepoint-dev";
+process.env.S3_AVATAR_PATH_PREFIX = "user-avatars/";
+
 // Hoist all mocks to the top level before any imports can happen
 vi.mock("server-only", () => ({}));
 

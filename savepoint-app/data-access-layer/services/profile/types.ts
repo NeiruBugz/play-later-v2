@@ -61,3 +61,10 @@ export type UpdateProfileResult = ServiceResult<{
   username: string | null;
   image: string | null;
 }>;
+
+export type UpdateAvatarUrlInput = {
+  userId: string;
+  avatarUrl: string;
+};
+
+export type UpdateAvatarUrlResult = ServiceResult<void>;

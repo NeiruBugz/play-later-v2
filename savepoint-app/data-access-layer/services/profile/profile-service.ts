@@ -18,6 +18,8 @@ import type {
   GetProfileResult,
   GetProfileWithStatsInput,
   GetProfileWithStatsResult,
+  UpdateAvatarUrlInput,
+  UpdateAvatarUrlResult,
   UpdateProfileInput,
   UpdateProfileResult,
 } from "./types";
@@ -229,6 +231,42 @@ export class ProfileService extends BaseService {
         "Error updating profile"
       );
       return this.handleError(error, "Failed to update profile");
+    }
+  }
+
+  async updateAvatarUrl(
+    input: UpdateAvatarUrlInput
+  ): Promise<UpdateAvatarUrlResult> {
+    try {
+      this.logger.info({ userId: input.userId }, "Updating avatar URL");
+
+      // Verify user exists
+      const user = await findUserById(input.userId, {
+        select: { id: true },
+      });
+
+      if (!user) {
+        this.logger.warn({ userId: input.userId }, "User not found");
+        return this.error("User not found", ServiceErrorCode.NOT_FOUND);
+      }
+
+      // Update avatar URL via repository
+      await updateUserProfile(input.userId, {
+        image: input.avatarUrl,
+      });
+
+      this.logger.info(
+        { userId: input.userId, avatarUrl: input.avatarUrl },
+        "Avatar URL updated successfully"
+      );
+
+      return this.success(undefined);
+    } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error updating avatar URL"
+      );
+      return this.handleError(error, "Failed to update avatar URL");
     }
   }
 }

@@ -70,6 +70,7 @@ export default defineConfig({
             "**/dist/**",
             "**/.next/**",
             "**/coverage/**",
+            "**/*.integration.test.{js,ts,jsx,tsx}",
           ],
         },
       },
@@ -121,6 +122,7 @@ export default defineConfig({
           environment: "node",
           testTimeout: 15000,
           hookTimeout: 15000,
+          setupFiles: ["./test/setup/integration.ts"],
           pool: "forks",
           poolOptions: {
             forks: {
