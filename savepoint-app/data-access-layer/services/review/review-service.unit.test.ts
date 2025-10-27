@@ -75,6 +75,7 @@ describe("ReviewService", () => {
 
       expect(mockGetAllReviewsForGame).toHaveBeenCalledWith({
         gameId: "game-456",
+        userId: undefined,
       });
     });
 
@@ -95,21 +96,6 @@ describe("ReviewService", () => {
             username: "johndoe",
           },
         },
-        {
-          id: "review-2",
-          userId: "user-789",
-          gameId: "game-456",
-          rating: 4,
-          content: "Great game",
-          completedOn: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          User: {
-            name: "Jane Smith",
-            image: "avatar2.jpg",
-            username: "janesmith",
-          },
-        },
       ];
 
       mockGetAllReviewsForGame.mockResolvedValue(mockReviews);
@@ -122,9 +108,14 @@ describe("ReviewService", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.reviews).toHaveLength(1);
-        expect(result.data.reviews[0].userId).toBe("user-123");
         expect(result.data.total).toBe(1);
+        expect(result.data.reviews).toEqual(mockReviews);
       }
+
+      expect(mockGetAllReviewsForGame).toHaveBeenCalledWith({
+        gameId: "game-456",
+        userId: "user-123",
+      });
     });
 
     it("should return empty array when no reviews found", async () => {

@@ -3,7 +3,6 @@
 import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { UpdateProfileSchema } from "../schemas";
 
@@ -12,7 +11,22 @@ type UpdateProfileInput = {
   avatarUrl?: string;
 };
 
-async function performUpdateProfile(data: UpdateProfileInput) {
+type PerformUpdateProfileResult =
+  | {
+      success: true;
+      data: {
+        username: string | null;
+        image: string | null;
+      };
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
+async function performUpdateProfile(
+  data: UpdateProfileInput
+): Promise<PerformUpdateProfileResult> {
   try {
     const userId = await getServerUserId();
     if (!userId) {
@@ -27,7 +41,15 @@ async function performUpdateProfile(data: UpdateProfileInput) {
       avatarUrl: data.avatarUrl,
     };
 
-    const validatedData = UpdateProfileSchema.parse(sanitizedData);
+    const validationResult = UpdateProfileSchema.safeParse(sanitizedData);
+    if (!validationResult.success) {
+      return {
+        success: false as const,
+        error: validationResult.error.errors[0]?.message ?? "Validation error",
+      };
+    }
+
+    const validatedData = validationResult.data;
 
     const profileService = new ProfileService();
     const result = await profileService.updateProfile({
@@ -47,14 +69,7 @@ async function performUpdateProfile(data: UpdateProfileInput) {
       success: true as const,
       data: result.data,
     };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false as const,
-        error: error.errors[0]?.message ?? "Validation error",
-      };
-    }
-
+  } catch {
     return {
       success: false as const,
       error: "An unexpected error occurred",

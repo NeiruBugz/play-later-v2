@@ -128,7 +128,6 @@ vi.mock("@/data-access-layer/repository", async (importOriginal) => {
     deleteLibraryItem: vi.fn(),
     updateLibraryItem: vi.fn(),
     getManyLibraryItems: vi.fn(),
-    getOtherUsersLibraryItems: vi.fn(),
     updateUserData: vi.fn(),
     createReview: vi.fn(),
   };

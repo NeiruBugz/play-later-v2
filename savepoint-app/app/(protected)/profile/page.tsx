@@ -1,5 +1,5 @@
 import { getServerUserId } from "@/auth";
-import { ProfileService } from "@/data-access-layer/services";
+import { ProfileService, ServiceErrorCode } from "@/data-access-layer/services";
 import { redirect } from "next/navigation";
 
 import { ProfileView } from "@/features/profile/ui/profile-view";
@@ -17,8 +17,16 @@ export default async function ProfilePage() {
   const result = await service.getProfileWithStats({ userId });
 
   if (!result.success) {
-    logger.error({ error: result.error }, "Failed to load profile");
-    redirect("/login");
+    logger.error(
+      { error: result.error, code: result.code },
+      "Failed to load profile"
+    );
+
+    if (result.code === ServiceErrorCode.NOT_FOUND) {
+      redirect("/login");
+    }
+
+    redirect("/error");
   }
 
   return (

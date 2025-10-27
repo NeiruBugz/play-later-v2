@@ -6,7 +6,7 @@ import { Button } from "@/shared/components/ui/button";
 export default function NotFoundPage() {
   return (
     <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
-      <div className="from-background via-background to-muted pointer-events-none absolute inset-0 bg-gradient-to-br opacity-60" />
+      <div className="from-background via-background to-muted pointer-events-none absolute inset-0 bg-linear-to-br opacity-60" />
       <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-6 text-center">
         <span className="bg-secondary/20 text-secondary inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium">
           <Compass className="h-4 w-4" aria-hidden="true" />

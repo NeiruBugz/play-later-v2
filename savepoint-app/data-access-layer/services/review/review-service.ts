@@ -20,15 +20,14 @@ import type {
 export class ReviewService extends BaseService {
   async getReviews(input: GetReviewsInput): Promise<GetReviewsResult> {
     try {
-      const reviews = await getAllReviewsForGame({ gameId: input.gameId });
-
-      const filteredReviews = input.userId
-        ? reviews.filter((review) => review.userId === input.userId)
-        : reviews;
+      const reviews = await getAllReviewsForGame({
+        gameId: input.gameId,
+        userId: input.userId,
+      });
 
       return this.success({
-        reviews: filteredReviews,
-        total: filteredReviews.length,
+        reviews,
+        total: reviews.length,
       });
     } catch (error) {
       return this.handleError(error, "Failed to fetch reviews");

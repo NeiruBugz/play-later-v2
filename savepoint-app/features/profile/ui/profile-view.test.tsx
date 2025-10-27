@@ -1,6 +1,8 @@
 import type { ProfileWithStats } from "@/data-access-layer/services";
 import { render, screen } from "@testing-library/react";
 
+import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
+
 import { ProfileView } from "./profile-view";
 
 const createMockProfile = (
@@ -21,13 +23,13 @@ const createMockProfile = (
       {
         gameId: "1",
         title: "The Legend of Zelda",
-        coverImage: "https://example.com/zelda.jpg",
+        coverImage: "zelda-cover",
         lastPlayed: new Date("2025-01-15T12:00:00.000Z"),
       },
       {
         gameId: "2",
         title: "Super Mario Bros",
-        coverImage: "https://example.com/mario.jpg",
+        coverImage: "mario-cover",
         lastPlayed: new Date("2025-01-10T12:00:00.000Z"),
       },
     ],
@@ -299,14 +301,14 @@ describe("ProfileView", () => {
       expect(zeldaCover).toBeVisible();
       expect(zeldaCover).toHaveAttribute(
         "src",
-        expect.stringContaining("zelda.jpg")
+        expect.stringContaining("zelda-cover.webp")
       );
 
       const marioCover = screen.getByAltText("Super Mario Bros");
       expect(marioCover).toBeVisible();
       expect(marioCover).toHaveAttribute(
         "src",
-        expect.stringContaining("mario.jpg")
+        expect.stringContaining(`mario-cover.webp`)
       );
     });
 
