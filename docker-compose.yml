@@ -40,3 +40,16 @@ services:
       - ./.docker/pgadmin/pgpass:/pgpass
     depends_on:
       - postgres-db
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: savepoint-localstack
+    environment:
+      SERVICES: s3
+      DEBUG: 1
+    ports:
+      - "4568:4566"            # LocalStack Gateway (mapped to 4568 externally)
+      - "4610-4659:4510-4559"  # External services port range (mapped to 4610-4659)
+    volumes:
+      - ./localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock

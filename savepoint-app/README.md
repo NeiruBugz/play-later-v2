@@ -243,6 +243,114 @@ pnpm test:db:setup
 pnpm test:db:teardown
 ```
 
+## 🪣 LocalStack S3 Setup
+
+### What is LocalStack?
+
+LocalStack is a fully functional local AWS cloud stack that emulates AWS services like S3, DynamoDB, Lambda, and more. For this project, we use LocalStack to emulate AWS S3 for local development of features like avatar uploads, eliminating the need for real AWS credentials during development.
+
+### Starting LocalStack
+
+LocalStack runs as a Docker container alongside PostgreSQL and pgAdmin. To start it:
+
+```bash
+# From repository root
+docker-compose up -d localstack
+
+# Or start all services at once
+docker-compose up -d
+```
+
+LocalStack will be available at `http://localhost:4568` (mapped from internal port 4566 to avoid conflicts with other LocalStack instances).
+
+### Initializing the S3 Bucket
+
+After starting LocalStack for the first time, you need to create the S3 bucket and apply CORS configuration:
+
+```bash
+# From repository root
+bash scripts/init-localstack.sh
+```
+
+This script will:
+
+- Wait for LocalStack to be ready
+- Create the `savepoint-dev` bucket
+- Apply CORS configuration to allow uploads from `http://localhost:6060`
+
+### Verifying Setup
+
+You can verify that LocalStack is working correctly using the AWS CLI:
+
+```bash
+# List all buckets
+aws --endpoint-url=http://localhost:4568 s3 ls
+
+# Check CORS configuration
+aws --endpoint-url=http://localhost:4568 s3api get-bucket-cors --bucket savepoint-dev
+
+# List bucket contents
+aws --endpoint-url=http://localhost:4568 s3 ls s3://savepoint-dev/
+```
+
+### Environment Configuration
+
+The application requires these environment variables to connect to LocalStack (already configured in `.env.example`):
+
+```bash
+AWS_REGION=us-east-1
+AWS_ENDPOINT_URL=http://localhost:4568
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+S3_BUCKET_NAME=savepoint-dev
+S3_AVATAR_PATH_PREFIX=user-avatars/
+```
+
+For LocalStack, you can use `test` for both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+### Troubleshooting
+
+**Port 4568 already in use:**
+If you see an error about port 4568 being in use, check if another process is using it:
+
+```bash
+# Check what's using port 4568
+lsof -i :4568
+
+# Stop all Docker containers
+docker-compose down
+
+# Start fresh
+docker-compose up -d
+```
+
+**Note:** This project uses port 4568 (instead of the default 4566) to avoid conflicts with other LocalStack instances you may have running.
+
+**Bucket not found:**
+If you get "bucket not found" errors, re-run the initialization script:
+
+```bash
+bash scripts/init-localstack.sh
+```
+
+**Data persistence:**
+LocalStack data is persisted in the `localstack-data/` directory at the repository root. To start fresh:
+
+```bash
+# Stop LocalStack
+docker-compose down localstack
+
+# Remove persisted data
+rm -rf localstack-data
+
+# Start and reinitialize
+docker-compose up -d localstack
+bash scripts/init-localstack.sh
+```
+
+**AWS CLI not configured:**
+The AWS CLI commands above don't require AWS credentials configuration. They use the `--endpoint-url` flag to point directly to LocalStack.
+
 ## 🔧 Development Commands
 
 ### Core Development

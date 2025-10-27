@@ -84,34 +84,34 @@
 - [x] **Sub-task:** Create `updateProfile` server action with Zod schema (`UpdateProfileSchema`)
 - [x] **Sub-task:** Create `ProfileSettingsForm` component with username input field (no real-time validation yet)
 - [x] **Sub-task:** Add "Save Changes" button that calls `updateProfile` action and shows success toast
-- [ ] **Sub-task:** Write E2E test: Change username and verify it updates in profile view
-- [ ] **Sub-task:** Verify profile settings page allows username changes and updates profile view
+- [x] **Sub-task:** Write E2E test: Change username and verify it updates in profile view
+- [x] **Sub-task:** Verify profile settings page allows username changes and updates profile view
 
 ---
 
 ## **Slice 6: Real-Time Username Validation UI**
 *Goal: Add live validation feedback while typing username*
 
-- [ ] **Sub-task:** Create `UsernameInput` component in `features/profile/ui/username-input.tsx` with debounced input (500ms)
-- [ ] **Sub-task:** Create `useUsernameValidation` hook that calls `checkUsernameAvailability` action after debounce
-- [ ] **Sub-task:** Add loading spinner, error states, and success checkmark icons to `UsernameInput`
-- [ ] **Sub-task:** Write component tests for `UsernameInput` (typing, debounce, validation states)
-- [ ] **Sub-task:** Replace plain input in `ProfileSettingsForm` with `UsernameInput` component
-- [ ] **Sub-task:** Write E2E test: Type username and verify real-time validation feedback (available vs. taken)
-- [ ] **Sub-task:** Verify real-time validation works correctly (available = checkmark, taken = error message)
+- [x] **Sub-task:** Create `UsernameInput` component in `features/profile/ui/username-input.tsx` with debounced input (500ms)
+- [x] **Sub-task:** Create `useUsernameValidation` hook that calls `checkUsernameAvailability` action after debounce
+- [x] **Sub-task:** Add loading spinner, error states, and success checkmark icons to `UsernameInput`
+- [x] **Sub-task:** Write component tests for `UsernameInput` (typing, debounce, validation states)
+- [x] **Sub-task:** Replace plain input in `ProfileSettingsForm` with `UsernameInput` component
+- [x] **Sub-task:** Write E2E test: Type username and verify real-time validation feedback (available vs. taken)
+- [x] **Sub-task:** Verify real-time validation works correctly (available = checkmark, taken = error message)
 
 ---
 
 ## **Slice 7: LocalStack S3 Setup (Development Infrastructure)**
 *Goal: Add local S3 storage for avatar uploads*
 
-- [ ] **Sub-task:** Add LocalStack service to `docker-compose.yml` with S3 configuration
-- [ ] **Sub-task:** Create `scripts/init-localstack.sh` script to create `savepoint-dev` S3 bucket
-- [ ] **Sub-task:** Create `scripts/localstack-cors.json` CORS configuration file
-- [ ] **Sub-task:** Add S3 environment variables to `.env.example` (AWS_REGION, AWS_ENDPOINT_URL, etc.)
-- [ ] **Sub-task:** Run `docker-compose up -d` and verify LocalStack service starts successfully
-- [ ] **Sub-task:** Run initialization script and verify bucket is created (use AWS CLI to list buckets)
-- [ ] **Sub-task:** Update project README with LocalStack setup instructions
+- [x] **Sub-task:** Add LocalStack service to `docker-compose.yml` with S3 configuration
+- [x] **Sub-task:** Create `scripts/init-localstack.sh` script to create `savepoint-dev` S3 bucket
+- [x] **Sub-task:** Create `scripts/localstack-cors.json` CORS configuration file
+- [x] **Sub-task:** Add S3 environment variables to `.env.example` (AWS_REGION, AWS_ENDPOINT_URL, etc.)
+- [x] **Sub-task:** Run `docker-compose up -d` and verify LocalStack service starts successfully
+- [x] **Sub-task:** Run initialization script and verify bucket is created (use AWS CLI to list buckets)
+- [x] **Sub-task:** Update project README with LocalStack setup instructions
 
 ---
 
