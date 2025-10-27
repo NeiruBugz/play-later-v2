@@ -1,5 +1,6 @@
 import {
   cleanupDatabase,
+  getTestDatabase,
   resetTestDatabase,
   setupDatabase,
 } from "@/test/setup/database";
@@ -123,14 +124,23 @@ describe("LibraryRepository - Integration Tests", () => {
       ]);
 
       const items = [];
+      const prisma = getTestDatabase();
+      const baseTime = new Date("2024-01-01T00:00:00.000Z");
+      const intervalMs = 1000;
       for (let i = 0; i < games.length; i++) {
         const item = await createLibraryItem({
           userId: user.id,
           gameId: games[i].id,
           status: LibraryItemStatus.CURRENTLY_EXPLORING,
         });
-        items.push(item);
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        const deterministicUpdatedAt = new Date(
+          baseTime.getTime() + i * intervalMs
+        );
+        const updatedItem = await prisma.libraryItem.update({
+          where: { id: item.id },
+          data: { updatedAt: deterministicUpdatedAt },
+        });
+        items.push(updatedItem);
       }
 
       const result = await getLibraryStatsByUserId(user.id);

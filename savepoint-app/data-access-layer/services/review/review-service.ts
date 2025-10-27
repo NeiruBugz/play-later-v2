@@ -5,8 +5,6 @@ import {
   getAllReviewsForGame,
 } from "@/data-access-layer/repository/review/review-repository";
 
-import { createLogger } from "@/shared/lib";
-
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
   CreateReviewInput,
@@ -20,8 +18,6 @@ import type {
 } from "./types";
 
 export class ReviewService extends BaseService {
-  private logger = createLogger({ service: "ReviewService" });
-
   async getReviews(input: GetReviewsInput): Promise<GetReviewsResult> {
     try {
       const reviews = await getAllReviewsForGame({ gameId: input.gameId });

@@ -1,5 +1,6 @@
 import type { ProfileWithStats } from "@/data-access-layer/services";
 import { render, screen } from "@testing-library/react";
+
 import { ProfileView } from "./profile-view";
 
 const createMockProfile = (

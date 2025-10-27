@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
-import { AddGameButton } from "@/features/add-game/ui/add-game-button";
 import { Toaster } from "@/shared/components/ui/sonner";
 
 export default function ProtectedLayout({ children }: PropsWithChildren) {
@@ -25,7 +24,6 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
             >
               Library
             </Link>
-            <AddGameButton />
             <Link
               href="/profile"
               className="text-sm font-medium text-gray-700 transition-colors hover:text-gray-900"

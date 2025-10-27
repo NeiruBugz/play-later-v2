@@ -3,8 +3,6 @@ import {
   findGamesWithLibraryItemsPaginated,
 } from "@/data-access-layer/repository";
 
-import { createLogger } from "@/shared/lib";
-
 import { BaseService, type ServiceResponse } from "../types";
 import type {
   CollectionParams,
@@ -19,7 +17,6 @@ export class CollectionService
   extends BaseService
   implements CollectionServiceInterface
 {
-  private logger = createLogger({ service: "CollectionService" });
   async getCollection(
     params: CollectionParams
   ): Promise<ServiceResponse<CollectionResult>> {

@@ -5,7 +5,6 @@ export {
   getLibraryItemsForUserByIgdbId,
   getManyLibraryItems,
   getLibraryCount,
-  getUniquePlatformsForUser,
   getPlatformBreakdown,
   getAcquisitionTypeBreakdown,
   getRecentlyCompletedLibraryItems,

@@ -28,7 +28,8 @@ vi.mock("server-only", () => ({}));
 
 vi.mock("@/shared/config/igdb", () => ({
   API_URL: "https://api.igdb.com/v4",
-  TOKEN_URL: "https://id.twitch.tv/oauth2/token?client_id=test&client_secret=test&grant_type=client_credentials",
+  TOKEN_URL:
+    "https://id.twitch.tv/oauth2/token?client_id=test&client_secret=test&grant_type=client_credentials",
 }));
 
 vi.mock("@/shared/lib", () => {

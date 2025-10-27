@@ -127,9 +127,7 @@ export default defineConfig({
               singleFork: true,
             },
           },
-          include: [
-            "**/*.integration.test.{js,ts,jsx,tsx}",
-          ],
+          include: ["**/*.integration.test.{js,ts,jsx,tsx}"],
           exclude: [
             "**/node_modules/**",
             "**/dist/**",
