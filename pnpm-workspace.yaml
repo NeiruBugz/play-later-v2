@@ -1,6 +1,6 @@
 packages:
-  - "savepoint-app"
-
+  - savepoint-app
 onlyBuiltDependencies:
-  - lefthook
   - '@tailwindcss/oxide'
+  - '@vercel/speed-insights'
+  - lefthook

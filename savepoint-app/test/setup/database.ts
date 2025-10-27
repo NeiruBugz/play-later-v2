@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 
 let testDataBase: PrismaClient | undefined;
 
-export const setupDatabase = async () => {
+export const setupDatabase = async (): Promise<PrismaClient> => {
   const testDatabaseName = `test_${nanoid()}`;
   const databaseUrl = `postgresql://postgres:postgres@localhost:6432/${testDatabaseName}`;
 
@@ -40,7 +40,7 @@ export const setupDatabase = async () => {
   }
 };
 
-export const cleanupDatabase = async () => {
+export const cleanupDatabase = async (): Promise<void> => {
   if (testDataBase) {
     await testDataBase.$disconnect();
   }
@@ -60,7 +60,7 @@ export const cleanupDatabase = async () => {
   }
 };
 
-export const resetTestDatabase = async () => {
+export const resetTestDatabase = async (): Promise<void> => {
   if (testDataBase) {
     const tables = await testDataBase.$queryRaw<Array<{ table_name: string }>>`
       SELECT table_name

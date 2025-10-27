@@ -126,7 +126,7 @@
 - [x] **Sub-task:** Write LocalStack integration tests for avatar upload (upload file, verify in bucket)
 - [x] **Sub-task:** Create `uploadAvatar` server action with file validation (size, MIME type)
 - [x] **Sub-task:** Add Zod schema for avatar upload (`UploadAvatarSchema`)
-- [ ] **Sub-task:** Test avatar upload with integration test (verify S3 URL returned)
+- [x] **Sub-task:** Test avatar upload with integration test (verify S3 URL returned)
 
 ---
 

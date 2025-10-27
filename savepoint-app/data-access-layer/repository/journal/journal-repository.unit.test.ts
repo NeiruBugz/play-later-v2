@@ -79,7 +79,6 @@ describe("JournalRepository", () => {
     mood: "EXCITED" as const,
     playSession: 1,
     visibility: "PRIVATE" as const,
-    isPublic: false,
     publishedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -118,7 +117,6 @@ describe("JournalRepository", () => {
           mood: "EXCITED",
           playSession: 1,
           visibility: "PRIVATE",
-          isPublic: false,
           publishedAt: null,
         },
         include: {
@@ -153,12 +151,11 @@ describe("JournalRepository", () => {
         expect.objectContaining({
           data: expect.objectContaining({
             visibility: "PUBLIC",
-            isPublic: true,
             publishedAt: expect.any(Date),
           }),
         })
       );
-      expect(result.isPublic).toBe(true);
+      expect(result.publishedAt).toBeDefined();
       expect(result.visibility).toBe("PUBLIC");
     });
 
@@ -192,7 +189,6 @@ describe("JournalRepository", () => {
           mood: undefined,
           playSession: undefined,
           visibility: "PRIVATE",
-          isPublic: false,
           publishedAt: null,
         },
         include: {
@@ -392,7 +388,6 @@ describe("JournalRepository", () => {
       const publicEntry = {
         ...mockJournalEntry,
         visibility: "PUBLIC" as const,
-        isPublic: true,
       };
       vi.mocked(prisma.journalEntry.findUnique).mockResolvedValue(publicEntry);
 
@@ -492,7 +487,6 @@ describe("JournalRepository", () => {
       const updatedEntry = {
         ...mockJournalEntry,
         visibility: "PUBLIC" as const,
-        isPublic: true,
         publishedAt: new Date(),
       };
       vi.mocked(prisma.journalEntry.update).mockResolvedValue(updatedEntry);
@@ -503,7 +497,6 @@ describe("JournalRepository", () => {
         expect.objectContaining({
           data: expect.objectContaining({
             visibility: "PUBLIC",
-            isPublic: true,
             publishedAt: expect.any(Date),
           }),
         })
@@ -520,7 +513,6 @@ describe("JournalRepository", () => {
       const publicEntry = {
         ...mockJournalEntry,
         visibility: "PUBLIC" as const,
-        isPublic: true,
         publishedAt: new Date(),
       };
       vi.mocked(prisma.journalEntry.findUnique).mockResolvedValue(publicEntry);
@@ -528,7 +520,6 @@ describe("JournalRepository", () => {
       const updatedEntry = {
         ...publicEntry,
         visibility: "PRIVATE" as const,
-        isPublic: false,
         publishedAt: null,
       };
       vi.mocked(prisma.journalEntry.update).mockResolvedValue(updatedEntry);
@@ -539,7 +530,6 @@ describe("JournalRepository", () => {
         expect.objectContaining({
           data: expect.objectContaining({
             visibility: "PRIVATE",
-            isPublic: false,
             publishedAt: null,
           }),
         })
@@ -551,7 +541,6 @@ describe("JournalRepository", () => {
       const publicEntry = {
         ...mockJournalEntry,
         visibility: "PUBLIC" as const,
-        isPublic: true,
         publishedAt: existingPublishedAt,
       };
 
@@ -627,7 +616,6 @@ describe("JournalRepository", () => {
       const publicEntry = {
         ...mockJournalEntry,
         visibility: "PUBLIC" as const,
-        isPublic: true,
         publishedAt: new Date(),
       };
       vi.mocked(prisma.journalEntry.update).mockResolvedValue(publicEntry);
@@ -638,7 +626,6 @@ describe("JournalRepository", () => {
         where: { id: "entry-1" },
         data: {
           visibility: "PUBLIC",
-          isPublic: true,
           publishedAt: expect.any(Date),
         },
         include: {
@@ -648,7 +635,6 @@ describe("JournalRepository", () => {
         },
       });
       expect(result.visibility).toBe("PUBLIC");
-      expect(result.isPublic).toBe(true);
     });
 
     it("should preserve existing publishedAt if already public", async () => {
@@ -656,7 +642,6 @@ describe("JournalRepository", () => {
       const alreadyPublicEntry = {
         ...mockJournalEntry,
         visibility: "PUBLIC" as const,
-        isPublic: true,
         publishedAt: existingPublishedAt,
       };
 
@@ -673,7 +658,6 @@ describe("JournalRepository", () => {
         where: { id: "entry-1" },
         data: {
           visibility: "PUBLIC",
-          isPublic: true,
           publishedAt: existingPublishedAt,
         },
         include: {

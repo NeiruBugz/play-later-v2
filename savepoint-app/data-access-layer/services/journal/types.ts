@@ -51,7 +51,6 @@ export type JournalEntryData = {
   mood: JournalMood | null;
   playSession: number | null;
   visibility: JournalVisibility;
-  isPublic: boolean;
   publishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;

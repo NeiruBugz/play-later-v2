@@ -55,7 +55,7 @@ model User {
   username             String?                @unique
   usernameNormalized   String?                @unique
   createdAt            DateTime               @default(now())
-  updatedAt            DateTime?
+  updatedAt            DateTime?              @updatedAt
   steamProfileURL      String?
   steamId64            String?
   steamUsername        String?
@@ -132,7 +132,6 @@ model JournalEntry {
   content     String            @db.Text // Rich text journal content
   mood        JournalMood? // Optional mood indicator
   playSession Int? // Session number for this game
-  isPublic    Boolean           @default(false) // Privacy control
   visibility  JournalVisibility @default(PRIVATE)
 
   // Relationships

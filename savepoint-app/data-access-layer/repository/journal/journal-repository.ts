@@ -32,7 +32,6 @@ export async function createJournalEntry(
       mood: input.mood,
       playSession: input.playSession,
       visibility,
-      isPublic,
       publishedAt: isPublic ? new Date() : null,
     },
     include: journalEntryInclude,
@@ -201,7 +200,6 @@ export async function makeJournalEntryPublic(
     },
     data: {
       visibility: "PUBLIC",
-      isPublic: true,
       publishedAt: existingEntry.publishedAt ?? new Date(),
     },
     include: journalEntryInclude,

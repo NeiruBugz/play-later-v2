@@ -4,12 +4,7 @@ import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
-import { UpdateProfileSchema } from "../schemas";
-
-type UpdateProfileInput = {
-  username: string;
-  avatarUrl?: string;
-};
+import { UpdateProfileSchema, type UpdateProfileInput } from "../schemas";
 
 type PerformUpdateProfileResult =
   | {
