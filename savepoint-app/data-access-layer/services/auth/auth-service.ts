@@ -69,7 +69,7 @@ export class AuthService extends BaseService {
           error.message.includes("unique"))
       ) {
         this.logger.warn(
-          { userId: "unknown", error },
+          { userId: "unknown", err: error },
           "Sign up failed: unique constraint violation"
         );
         return this.error(
