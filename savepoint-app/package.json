@@ -8,7 +8,7 @@
     "postinstall": "prisma generate",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint --fix .",
     "preview": "next build && next start -p 6060",
     "typecheck": "tsc --noEmit",

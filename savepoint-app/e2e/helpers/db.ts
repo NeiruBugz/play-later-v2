@@ -52,26 +52,60 @@ export async function deleteTestUsersByPattern(
 }
 
 export async function clearTestData(): Promise<void> {
-  await prisma.libraryItem.deleteMany({
+  // Define test user pattern for cleanup
+  const testUserPattern = {
+    OR: [{ email: { contains: "test-" } }, { email: { contains: "e2e-" } }],
+  };
+
+  // 1. Delete JournalEntry records for test users
+  await prisma.journalEntry.deleteMany({
     where: {
-      User: {
-        OR: [{ email: { contains: "test-" } }, { email: { contains: "e2e-" } }],
-      },
+      user: testUserPattern,
     },
   });
 
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  // 2. Delete Review records for test users
+  await prisma.review.deleteMany({
+    where: {
+      User: testUserPattern,
+    },
+  });
+
+  // 3. Delete ImportedGame records for test users
+  await prisma.importedGame.deleteMany({
+    where: {
+      User: testUserPattern,
+    },
+  });
+
+  // 4. Delete IgnoredImportedGames records for test users
+  await prisma.ignoredImportedGames.deleteMany({
+    where: {
+      User: testUserPattern,
+    },
+  });
+
+  // 5. Delete LibraryItem records for test users
+  await prisma.libraryItem.deleteMany({
+    where: {
+      User: testUserPattern,
+    },
+  });
+
+  // 6. Delete test games (no time filter - delete all test games)
+  // Only delete games that have no remaining library items
   await prisma.game.deleteMany({
     where: {
-      createdAt: {
-        gte: oneHourAgo,
-      },
       title: {
         contains: "Test Game",
       },
+      libraryItems: {
+        none: {},
+      },
     },
   });
 
+  // 7. Delete test users (Account and Session will cascade)
   await deleteTestUsersByPattern("test-");
   await deleteTestUsersByPattern("e2e-");
 }

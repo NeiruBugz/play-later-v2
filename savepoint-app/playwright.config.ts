@@ -7,6 +7,11 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: process.env.CI ? "github" : "html",
+
+  // Global setup and teardown for database cleanup
+  globalSetup: "./e2e/global-setup.ts",
+  globalTeardown: "./e2e/global-teardown.ts",
+
   use: {
     baseURL: "http://localhost:6060",
     trace: "on-first-retry",
