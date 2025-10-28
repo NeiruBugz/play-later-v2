@@ -55,8 +55,12 @@ export const { auth, handlers, signIn } = NextAuth({
                 return null;
               }
 
+              const normalizedEmail = (credentials.email as string)
+                .trim()
+                .toLowerCase();
+
               const user = await prisma.user.findUnique({
-                where: { email: credentials.email as string },
+                where: { email: normalizedEmail },
                 select: {
                   id: true,
                   email: true,

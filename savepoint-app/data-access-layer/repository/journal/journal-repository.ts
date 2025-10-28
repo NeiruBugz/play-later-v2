@@ -120,7 +120,6 @@ export async function updateJournalEntry(
     mood?: typeof input.mood;
     playSession?: number;
     visibility?: typeof input.visibility;
-    isPublic?: boolean;
     publishedAt?: Date | null;
   } = {};
 
@@ -132,7 +131,6 @@ export async function updateJournalEntry(
 
   if (input.visibility !== undefined) {
     updateData.visibility = input.visibility;
-    updateData.isPublic = input.visibility === "PUBLIC";
     if (input.visibility === "PUBLIC" && !existingEntry.publishedAt) {
       updateData.publishedAt = new Date();
     }

@@ -17,8 +17,10 @@ export class AuthService extends BaseService {
     try {
       this.logger.info({ userId: "unknown" }, "User sign up attempt");
 
+      const normalizedEmail = input.email.trim().toLowerCase();
+
       const existingUser = await prisma.user.findUnique({
-        where: { email: input.email },
+        where: { email: normalizedEmail },
       });
 
       if (existingUser) {
@@ -36,7 +38,7 @@ export class AuthService extends BaseService {
 
       const user = await prisma.user.create({
         data: {
-          email: input.email,
+          email: normalizedEmail,
           password: hashedPassword,
           name: input.name ?? null,
         },
@@ -55,7 +57,7 @@ export class AuthService extends BaseService {
       return this.success({
         user: {
           id: user.id,
-          email: user.email!,
+          email: user.email ?? normalizedEmail,
           name: user.name,
         },
         message: "Account created successfully",

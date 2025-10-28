@@ -140,6 +140,28 @@ describe("checkUsernameAvailability server action", () => {
         expect(result.error).toBeDefined();
       }
     });
+
+    it("should reject reserved usernames", async () => {
+      const result = await checkUsernameAvailability({
+        username: "Admin",
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Username is not allowed");
+      }
+    });
+
+    it("should reject profane usernames", async () => {
+      const result = await checkUsernameAvailability({
+        username: "damnUser",
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Username is not allowed");
+      }
+    });
   });
 
   describe("edge cases", () => {

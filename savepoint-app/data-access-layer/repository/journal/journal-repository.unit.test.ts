@@ -139,7 +139,6 @@ describe("JournalRepository", () => {
       const publicEntry = {
         ...mockJournalEntry,
         visibility: "PUBLIC" as const,
-        isPublic: true,
         publishedAt: new Date(),
       };
 

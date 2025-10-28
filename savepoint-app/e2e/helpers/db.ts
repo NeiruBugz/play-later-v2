@@ -16,10 +16,11 @@ export async function createTestUser(data: {
   password: string;
 }): Promise<TestUser> {
   const hashedPassword = await bcrypt.hash(data.password, 10);
+  const email = data.email.trim().toLowerCase();
 
   const user = await prisma.user.create({
     data: {
-      email: data.email,
+      email: email,
       username: data.username,
       usernameNormalized: data.username.toLowerCase(), // Important: set normalized username for uniqueness check
       password: hashedPassword,
@@ -28,7 +29,7 @@ export async function createTestUser(data: {
 
   return {
     id: user.id,
-    email: user.email ?? data.email, // Fallback to input if null
+    email: user.email ?? email, // Fallback to normalized input if null
     username: user.username ?? data.username, // Fallback to input if null
     password: data.password, // Return original password for test usage
   };
@@ -36,7 +37,7 @@ export async function createTestUser(data: {
 
 export async function deleteTestUser(email: string): Promise<void> {
   await prisma.user.delete({
-    where: { email },
+    where: { email: email.trim().toLowerCase() },
   });
 }
 export async function deleteTestUsersByPattern(

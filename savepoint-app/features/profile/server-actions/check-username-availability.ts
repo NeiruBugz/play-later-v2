@@ -1,8 +1,8 @@
 "use server";
 
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { z } from "zod";
 
+import { validateUsername } from "../lib/validation";
 import { CheckUsernameSchema } from "../schemas";
 
 /**
@@ -11,13 +11,30 @@ import { CheckUsernameSchema } from "../schemas";
  */
 export async function checkUsernameAvailability(data: { username: string }) {
   try {
-    // Validate input
-    const validatedData = CheckUsernameSchema.parse(data);
+    // Validate input shape
+    const parsedInput = CheckUsernameSchema.safeParse(data);
+
+    if (!parsedInput.success) {
+      return {
+        success: false as const,
+        error: parsedInput.error.errors[0]?.message ?? "Validation error",
+      };
+    }
+
+    const username = parsedInput.data.username;
+    const validation = validateUsername(username);
+
+    if (!validation.valid) {
+      return {
+        success: false as const,
+        error: validation.error,
+      };
+    }
 
     // Check availability via service
     const profileService = new ProfileService();
     const result = await profileService.checkUsernameAvailability({
-      username: validatedData.username,
+      username,
     });
 
     if (!result.success) {
@@ -31,14 +48,7 @@ export async function checkUsernameAvailability(data: { username: string }) {
       success: true as const,
       available: result.data.available,
     };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false as const,
-        error: error.errors[0]?.message ?? "Validation error",
-      };
-    }
-
+  } catch {
     return {
       success: false as const,
       error: "An unexpected error occurred",

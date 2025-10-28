@@ -379,7 +379,6 @@ export function buildMockJournalEntry(
       | null;
     playSession?: number | null;
     visibility?: "PRIVATE" | "PUBLIC";
-    isPublic?: boolean;
     publishedAt?: Date | null;
     createdAt?: Date;
     updatedAt?: Date;
@@ -395,7 +394,6 @@ export function buildMockJournalEntry(
     mood: "EXCITED" as const,
     playSession: 1,
     visibility: "PRIVATE" as const,
-    isPublic: false,
     publishedAt: null,
     createdAt: createMockDate(),
     updatedAt: createMockDate(),
