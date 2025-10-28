@@ -62,10 +62,11 @@ export function CredentialsForm() {
   const onSubmit = handleSubmit(async (values) => {
     clearErrors("root");
 
+    const trimmedName = values.name?.trim();
     const payload = {
       email: values.email.trim(),
       password: values.password,
-      name: values.name?.trim() || undefined,
+      ...(trimmedName && { name: trimmedName }), // Only include name if it has a value
     };
 
     try {

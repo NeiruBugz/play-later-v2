@@ -12,8 +12,12 @@ import { createLogger } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
+  CheckSetupStatusInput,
+  CheckSetupStatusResult,
   CheckUsernameAvailabilityInput,
   CheckUsernameAvailabilityResult,
+  CompleteSetupInput,
+  CompleteSetupResult,
   GetProfileInput,
   GetProfileResult,
   GetProfileWithStatsInput,
@@ -267,6 +271,119 @@ export class ProfileService extends BaseService {
         "Error updating avatar URL"
       );
       return this.handleError(error, "Failed to update avatar URL");
+    }
+  }
+
+  async checkSetupStatus(
+    input: CheckSetupStatusInput
+  ): Promise<CheckSetupStatusResult> {
+    try {
+      this.logger.info({ userId: input.userId }, "Checking setup status");
+
+      const user = await findUserById(input.userId, {
+        select: {
+          username: true,
+          name: true,
+          createdAt: true,
+        },
+      });
+
+      if (!user) {
+        this.logger.warn({ userId: input.userId }, "User not found");
+        return this.error("User not found", ServiceErrorCode.NOT_FOUND);
+      }
+
+      // Determine if user needs setup
+      // Business logic: needs setup if no username OR created within last 5 minutes
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const isNewUser = user.createdAt > fiveMinutesAgo;
+      const needsSetup = !user.username || isNewUser;
+
+      // Generate suggested username from user's name
+      let suggestedUsername: string | undefined;
+      if (needsSetup && user.name) {
+        // Create a simple username from the user's name
+        // Remove non-alphanumeric characters and convert to lowercase
+        suggestedUsername = user.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "")
+          .slice(0, 20); // Limit to 20 characters
+      }
+
+      this.logger.info(
+        { userId: input.userId, needsSetup, hasUsername: !!user.username },
+        "Setup status checked"
+      );
+
+      return this.success({
+        needsSetup,
+        suggestedUsername,
+      });
+    } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error checking setup status"
+      );
+      return this.handleError(error, "Failed to check setup status");
+    }
+  }
+
+  async completeSetup(input: CompleteSetupInput): Promise<CompleteSetupResult> {
+    try {
+      this.logger.info({ userId: input.userId }, "Completing profile setup");
+
+      // Validate username if provided
+      if (input.username) {
+        const validation = validateUsername(input.username);
+        if (!validation.valid) {
+          this.logger.warn(
+            { userId: input.userId, username: input.username },
+            "Invalid username"
+          );
+          return this.error(
+            validation.error,
+            ServiceErrorCode.VALIDATION_ERROR
+          );
+        }
+
+        // Check uniqueness
+        const availabilityResult = await this.checkUsernameAvailability({
+          username: input.username,
+        });
+        if (!availabilityResult.success || !availabilityResult.data.available) {
+          this.logger.warn(
+            { userId: input.userId, username: input.username },
+            "Username already taken"
+          );
+          return this.error(
+            "Username already exists",
+            ServiceErrorCode.CONFLICT
+          );
+        }
+      }
+
+      // Update user record via repository
+      const user = await updateUserProfile(input.userId, {
+        username: input.username,
+        usernameNormalized: input.username?.toLowerCase(),
+        image: input.avatarUrl,
+      });
+
+      this.logger.info(
+        { userId: input.userId, username: input.username },
+        "Profile setup completed"
+      );
+
+      return this.success({
+        username: user.username,
+        image: user.image,
+      });
+    } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error completing profile setup"
+      );
+      return this.handleError(error, "Failed to complete setup");
     }
   }
 }

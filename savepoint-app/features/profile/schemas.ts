@@ -41,3 +41,16 @@ export const UploadAvatarSchema = z.object({
 });
 
 export type UploadAvatarInput = z.infer<typeof UploadAvatarSchema>;
+
+/**
+ * Schema for completing profile setup (first-time users)
+ * Both fields are optional - users can skip setup entirely
+ */
+export const CompleteProfileSetupSchema = z.object({
+  username: z.string().min(3).max(25).optional(),
+  avatarUrl: z.string().optional(),
+});
+
+export type CompleteProfileSetupInput = z.infer<
+  typeof CompleteProfileSetupSchema
+>;

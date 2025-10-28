@@ -68,3 +68,23 @@ export type UpdateAvatarUrlInput = {
 };
 
 export type UpdateAvatarUrlResult = ServiceResult<void>;
+
+export type CheckSetupStatusInput = {
+  userId: string;
+};
+
+export type CheckSetupStatusResult = ServiceResult<{
+  needsSetup: boolean;
+  suggestedUsername?: string;
+}>;
+
+export type CompleteSetupInput = {
+  userId: string;
+  username?: string;
+  avatarUrl?: string;
+};
+
+export type CompleteSetupResult = ServiceResult<{
+  username: string | null;
+  image: string | null;
+}>;

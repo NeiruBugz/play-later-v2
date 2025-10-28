@@ -757,4 +757,259 @@ describe("ProfileService", () => {
       });
     });
   });
+
+  describe("checkSetupStatus", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      const now = new Date("2025-01-20T12:00:00Z");
+      vi.setSystemTime(now);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    describe("success scenarios", () => {
+      it("should return needsSetup: true for user with no username", async () => {
+        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: null,
+          name: "John Doe",
+          createdAt: tenMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({ userId: "user-123" });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.needsSetup).toBe(true);
+          expect(result.data.suggestedUsername).toBe("johndoe");
+        }
+
+        expect(mockFindUserById).toHaveBeenCalledWith("user-123", {
+          select: {
+            username: true,
+            name: true,
+            createdAt: true,
+          },
+        });
+      });
+
+      it("should return needsSetup: true for new user created within 5 minutes with username", async () => {
+        const twoMinutesAgo = new Date("2025-01-20T11:58:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: "existinguser",
+          name: "John Doe",
+          createdAt: twoMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({ userId: "user-123" });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.needsSetup).toBe(true);
+          expect(result.data.suggestedUsername).toBe("johndoe");
+        }
+      });
+
+      it("should return needsSetup: true for new user without username created within 5 minutes", async () => {
+        const threeMinutesAgo = new Date("2025-01-20T11:57:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: null,
+          name: "Jane Smith",
+          createdAt: threeMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({ userId: "user-456" });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.needsSetup).toBe(true);
+          expect(result.data.suggestedUsername).toBe("janesmith");
+        }
+      });
+
+      it("should return needsSetup: false for existing user with username created 10 minutes ago", async () => {
+        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: "existinguser",
+          name: "John Doe",
+          createdAt: tenMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({ userId: "user-789" });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.needsSetup).toBe(false);
+          expect(result.data.suggestedUsername).toBeUndefined();
+        }
+      });
+
+      it("should return needsSetup: false for user at exact 5-minute boundary with username", async () => {
+        const exactlyFiveMinutesAgo = new Date("2025-01-20T11:55:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: "boundaryuser",
+          name: "Boundary Test",
+          createdAt: exactlyFiveMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({
+          userId: "user-boundary",
+        });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.needsSetup).toBe(false);
+          expect(result.data.suggestedUsername).toBeUndefined();
+        }
+      });
+
+      it("should return needsSetup: true for user just under 5-minute boundary", async () => {
+        const fourMinutesFiftyNineSecondsAgo = new Date("2025-01-20T11:55:01Z");
+        mockFindUserById.mockResolvedValue({
+          username: "recentuser",
+          name: "Recent User",
+          createdAt: fourMinutesFiftyNineSecondsAgo,
+        });
+
+        const result = await service.checkSetupStatus({
+          userId: "user-recent",
+        });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.needsSetup).toBe(true);
+          expect(result.data.suggestedUsername).toBe("recentuser");
+        }
+      });
+    });
+
+    describe("suggested username generation", () => {
+      it("should generate suggested username from Google name", async () => {
+        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: null,
+          name: "John Doe",
+          createdAt: tenMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({ userId: "user-123" });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.suggestedUsername).toBe("johndoe");
+        }
+      });
+
+      it("should remove special characters from suggested username", async () => {
+        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: null,
+          name: "John-Paul O'Brien",
+          createdAt: tenMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({ userId: "user-456" });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.suggestedUsername).toBe("johnpaulobrien");
+        }
+      });
+
+      it("should truncate suggested username to 20 characters", async () => {
+        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: null,
+          name: "Christopher Alexander Montgomery",
+          createdAt: tenMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({ userId: "user-long" });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.suggestedUsername).toBe("christopheralexander");
+          expect(result.data.suggestedUsername?.length).toBe(20);
+        }
+      });
+
+      it("should return undefined suggested username when setup not needed", async () => {
+        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: "existinguser",
+          name: "John Doe",
+          createdAt: tenMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({
+          userId: "user-existing",
+        });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.needsSetup).toBe(false);
+          expect(result.data.suggestedUsername).toBeUndefined();
+        }
+      });
+
+      it("should return undefined suggested username when name is null", async () => {
+        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
+        mockFindUserById.mockResolvedValue({
+          username: null,
+          name: null,
+          createdAt: tenMinutesAgo,
+        });
+
+        const result = await service.checkSetupStatus({
+          userId: "user-noname",
+        });
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.needsSetup).toBe(true);
+          expect(result.data.suggestedUsername).toBeUndefined();
+        }
+      });
+    });
+
+    describe("error scenarios", () => {
+      it("should return NOT_FOUND error when user does not exist", async () => {
+        mockFindUserById.mockResolvedValue(null);
+
+        const result = await service.checkSetupStatus({
+          userId: "nonexistent-user",
+        });
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error).toBe("User not found");
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+        }
+
+        expect(mockFindUserById).toHaveBeenCalledWith("nonexistent-user", {
+          select: {
+            username: true,
+            name: true,
+            createdAt: true,
+          },
+        });
+      });
+
+      it("should handle unexpected database error gracefully", async () => {
+        mockFindUserById.mockRejectedValue(
+          new Error("Database connection failed")
+        );
+
+        const result = await service.checkSetupStatus({ userId: "user-123" });
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error).toBe("Database connection failed");
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
 });

@@ -132,11 +132,16 @@ export const AvatarUpload = ({
   return (
     <div className="space-y-4">
       <div
-        className={`relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all duration-200 ${
-          isDragging
-            ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
-            : "border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800"
-        } ${isUploading ? "cursor-not-allowed opacity-50" : "hover:border-gray-400 dark:hover:border-gray-600"} `}
+        className={cn(
+          "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all duration-200",
+          {
+            "border-blue-500 bg-blue-50 dark:bg-blue-950/30": isDragging,
+            "border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800":
+              !isDragging,
+            "cursor-not-allowed opacity-50": isUploading,
+            "hover:border-gray-400 dark:hover:border-gray-600": !isUploading,
+          }
+        )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -200,7 +205,7 @@ export const AvatarUpload = ({
           className="border-destructive/30 bg-destructive/10 flex items-start gap-2 rounded-md border p-3"
           role="alert"
         >
-          <X className="text-destructive mt-0.5 h-4 w-4 flex-shrink-0" />
+          <X className="text-destructive mt-0.5 h-4 w-4 shrink-0" />
           <p className="text-destructive text-sm">{error}</p>
         </div>
       )}
