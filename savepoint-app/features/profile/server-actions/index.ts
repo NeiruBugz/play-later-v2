@@ -3,5 +3,6 @@ export {
   completeProfileSetup,
   completeProfileSetupFormAction,
 } from "./complete-profile-setup";
+export { skipProfileSetup } from "./skip-profile-setup";
 export { updateProfile, updateProfileFormAction } from "./update-profile";
 export { uploadAvatar } from "./upload-avatar";

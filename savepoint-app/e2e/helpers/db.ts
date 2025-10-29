@@ -35,6 +35,35 @@ export async function createTestUser(data: {
   };
 }
 
+/**
+ * Create a test user without a username to trigger first-time setup flow.
+ * Useful for E2E tests that verify the optional profile setup page.
+ */
+export async function createTestUserWithoutUsername(data: {
+  email: string;
+  password: string;
+  name?: string;
+}): Promise<TestUser> {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  const email = data.email.trim().toLowerCase();
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+      // Explicitly omit username and usernameNormalized to keep them NULL
+      name: data.name ?? null,
+    },
+  });
+
+  return {
+    id: user.id,
+    email: user.email ?? email,
+    username: user.username ?? "", // return empty for convenience
+    password: data.password,
+  };
+}
+
 export async function deleteTestUser(email: string): Promise<void> {
   await prisma.user.delete({
     where: { email: email.trim().toLowerCase() },

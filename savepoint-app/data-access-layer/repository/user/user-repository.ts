@@ -175,6 +175,7 @@ export async function updateUserProfile(
     username?: string;
     usernameNormalized?: string;
     image?: string;
+    profileSetupCompletedAt?: Date | null;
   }
 ) {
   return prisma.user.update({
@@ -186,6 +187,7 @@ export async function updateUserProfile(
       usernameNormalized: true,
       steamProfileURL: true,
       image: true,
+      profileSetupCompletedAt: true,
     },
   });
 }

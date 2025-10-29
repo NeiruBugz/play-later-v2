@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
 import Credentials from "next-auth/providers/credentials";
+import { ProfileService } from "@/data-access-layer/services";
 
 import { prisma, sessionErrorHandler, verifyPassword } from "@/shared/lib";
 
@@ -16,6 +17,24 @@ const enableCredentials =
 export const { auth, handlers, signIn } = NextAuth({
   adapter: PrismaAdapter(prisma),
   callbacks: {
+    async signIn({ user, account }) {
+      // Only customize redirect logic for OAuth (Cognito+Google). Keep credentials flow as-is.
+      if (!account || account.provider !== "cognito") return true;
+
+      try {
+        const userId = (user as { id?: string })?.id;
+        if (!userId) return "/dashboard";
+
+        const service = new ProfileService();
+        const status = await service.checkSetupStatus({ userId });
+        if (!status.success) return "/dashboard";
+
+        return status.data.needsSetup ? "/profile/setup" : "/dashboard";
+      } catch {
+        // Fail safe to dashboard
+        return "/dashboard";
+      }
+    },
     jwt: async ({ token, user }) => {
       if (user) {
         token.id = user.id;

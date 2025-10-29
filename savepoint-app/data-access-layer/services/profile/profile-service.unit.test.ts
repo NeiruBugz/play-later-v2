@@ -790,6 +790,7 @@ describe("ProfileService", () => {
           select: {
             username: true,
             name: true,
+            profileSetupCompletedAt: true,
             createdAt: true,
           },
         });
@@ -992,6 +993,7 @@ describe("ProfileService", () => {
           select: {
             username: true,
             name: true,
+            profileSetupCompletedAt: true,
             createdAt: true,
           },
         });

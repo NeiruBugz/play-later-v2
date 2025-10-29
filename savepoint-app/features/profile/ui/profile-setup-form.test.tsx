@@ -12,6 +12,7 @@ import {
 } from "vitest";
 
 import { completeProfileSetupFormAction } from "../server-actions/complete-profile-setup";
+import { skipProfileSetup } from "../server-actions/skip-profile-setup";
 import { ProfileSetupForm } from "./profile-setup-form";
 
 // Mock Next.js router
@@ -22,6 +23,10 @@ vi.mock("next/navigation", () => ({
 // Mock server action
 vi.mock("../server-actions/complete-profile-setup", () => ({
   completeProfileSetupFormAction: vi.fn(),
+}));
+
+vi.mock("../server-actions/skip-profile-setup", () => ({
+  skipProfileSetup: vi.fn(),
 }));
 
 // Mock toast
@@ -82,12 +87,14 @@ vi.mock("./avatar-upload", () => ({
 
 const mockPush = vi.fn();
 const mockFormAction = vi.mocked(completeProfileSetupFormAction);
+const mockSkipAction = vi.mocked(skipProfileSetup);
 
 describe("ProfileSetupForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (useRouter as Mock).mockReturnValue({ push: mockPush });
     mockFormAction.mockResolvedValue({ status: "idle" });
+    mockSkipAction.mockResolvedValue({ success: true });
   });
 
   afterEach(() => {
@@ -142,18 +149,19 @@ describe("ProfileSetupForm", () => {
   // ============================================================
 
   describe("given user clicks Skip button", () => {
-    it("should redirect to dashboard without calling server action", async () => {
+    it("should persist completion via server action and redirect to dashboard", async () => {
       const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
       const skipButton = screen.getByRole("button", { name: /skip for now/i });
       await user.click(skipButton);
 
+      expect(mockSkipAction).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
       expect(mockFormAction).not.toHaveBeenCalled();
     });
 
-    it("should redirect to dashboard when skip clicked with modified username", async () => {
+    it("should persist completion and redirect when skip clicked with modified username", async () => {
       const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
@@ -166,6 +174,7 @@ describe("ProfileSetupForm", () => {
       const skipButton = screen.getByRole("button", { name: /skip for now/i });
       await user.click(skipButton);
 
+      expect(mockSkipAction).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
       expect(mockFormAction).not.toHaveBeenCalled();
     });
@@ -536,6 +545,7 @@ describe("ProfileSetupForm", () => {
 
       await user.click(skipButton);
 
+      expect(mockSkipAction).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
       expect(mockFormAction).not.toHaveBeenCalled();
     });

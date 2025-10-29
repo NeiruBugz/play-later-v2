@@ -20,9 +20,9 @@ export default async function ProfileSetupPage() {
     redirect("/login");
   }
 
-  // If setup already completed, redirect to profile
+  // If setup already completed, redirect to dashboard
   if (!result.data.needsSetup) {
-    redirect("/profile");
+    redirect("/dashboard");
   }
 
   return <ProfileSetupForm defaultUsername={result.data.suggestedUsername} />;

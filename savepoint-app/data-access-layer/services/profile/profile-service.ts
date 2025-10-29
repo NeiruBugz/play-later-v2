@@ -284,6 +284,7 @@ export class ProfileService extends BaseService {
         select: {
           username: true,
           name: true,
+          profileSetupCompletedAt: true,
           createdAt: true,
         },
       });
@@ -294,7 +295,12 @@ export class ProfileService extends BaseService {
       }
 
       // Determine if user needs setup
-      // Business logic: needs setup if no username OR created within last 5 minutes
+      // Persistent rule: if setup completed at least once, do not prompt
+      if (user.profileSetupCompletedAt) {
+        return this.success({ needsSetup: false, suggestedUsername: undefined });
+      }
+
+      // Fallback rule: needs setup if no username OR created within last 5 minutes
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
       const isNewUser = user.createdAt > fiveMinutesAgo;
       const needsSetup = !user.username || isNewUser;
@@ -367,6 +373,7 @@ export class ProfileService extends BaseService {
         username: input.username,
         usernameNormalized: input.username?.toLowerCase(),
         image: input.avatarUrl,
+        profileSetupCompletedAt: new Date(),
       });
 
       this.logger.info(

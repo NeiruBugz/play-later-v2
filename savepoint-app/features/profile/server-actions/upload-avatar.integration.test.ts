@@ -324,7 +324,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       const listResponse = await s3Client.send(
         new ListObjectsV2Command({
           Bucket: env.S3_BUCKET_NAME,
-          Prefix: env.S3_AVATAR_PATH_PREFIX,
+          Prefix: `${env.S3_AVATAR_PATH_PREFIX}${testUserId}/`,
         })
       );
       expect(listResponse.Contents?.length || 0).toBe(0);

@@ -54,6 +54,7 @@ model User {
   password             String? // For credentials authentication
   username             String?                @unique
   usernameNormalized   String?                @unique
+  profileSetupCompletedAt DateTime?
   createdAt            DateTime               @default(now())
   updatedAt            DateTime?              @updatedAt
   steamProfileURL      String?

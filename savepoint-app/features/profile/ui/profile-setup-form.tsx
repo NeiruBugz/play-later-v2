@@ -16,6 +16,7 @@ import {
 
 import { initialFormState } from "../lib/constants";
 import { completeProfileSetupFormAction } from "../server-actions/complete-profile-setup";
+import { skipProfileSetup } from "../server-actions/skip-profile-setup";
 import { AvatarUpload } from "./avatar-upload";
 import { UsernameInput } from "./username-input";
 
@@ -58,7 +59,13 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    // Persist completion to DB to avoid future prompts
+    const res = await skipProfileSetup();
+    if (!res.success) {
+      toast.error(res.error ?? "Failed to complete setup");
+      return;
+    }
     router.push("/dashboard");
   };
 
