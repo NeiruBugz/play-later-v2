@@ -81,9 +81,7 @@ export async function deleteTestUsersByPattern(
   });
 }
 
-export async function getUserByEmail(
-  email: string
-): Promise<{
+export async function getUserByEmail(email: string): Promise<{
   id: string;
   email: string | null;
   username: string | null;

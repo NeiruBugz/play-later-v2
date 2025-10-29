@@ -2,11 +2,11 @@ import * as path from "path";
 import { fileURLToPath } from "url";
 import { expect, test } from "@playwright/test";
 
+import { signInWithCredentials } from "./helpers/auth";
 import {
   createTestUserWithoutUsername,
   disconnectDatabase,
 } from "./helpers/db";
-import { signInWithCredentials } from "./helpers/auth";
 import { ProfileSetupPage } from "./pages/profile-setup.page";
 
 /*
@@ -88,4 +88,3 @@ test.describe("[setup] Profile Setup — First-time user flow", () => {
     await expect(page.getByText(email)).toBeVisible();
   });
 });
-

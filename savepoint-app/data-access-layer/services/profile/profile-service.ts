@@ -297,7 +297,10 @@ export class ProfileService extends BaseService {
       // Determine if user needs setup
       // Persistent rule: if setup completed at least once, do not prompt
       if (user.profileSetupCompletedAt) {
-        return this.success({ needsSetup: false, suggestedUsername: undefined });
+        return this.success({
+          needsSetup: false,
+          suggestedUsername: undefined,
+        });
       }
 
       // Fallback rule: needs setup if no username OR created within last 5 minutes

@@ -1,9 +1,9 @@
+import { ProfileService } from "@/data-access-layer/services";
 import { env } from "@/env.mjs";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
 import Credentials from "next-auth/providers/credentials";
-import { ProfileService } from "@/data-access-layer/services";
 
 import { prisma, sessionErrorHandler, verifyPassword } from "@/shared/lib";
 

@@ -4,6 +4,8 @@ import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
+import { createLogger } from "@/shared/lib";
+
 import {
   CompleteProfileSetupSchema,
   type CompleteProfileSetupInput,
@@ -25,9 +27,11 @@ type PerformCompleteSetupResult =
 async function performCompleteSetup(
   data: CompleteProfileSetupInput
 ): Promise<PerformCompleteSetupResult> {
+  const logger = createLogger({ serverAction: "completeProfileSetup" });
   try {
     const userId = await getServerUserId();
     if (!userId) {
+      logger.warn({ reason: "unauthorized" }, "Complete profile setup denied");
       return {
         success: false as const,
         error: "Unauthorized",
@@ -43,6 +47,10 @@ async function performCompleteSetup(
     const validationResult =
       CompleteProfileSetupSchema.safeParse(sanitizedData);
     if (!validationResult.success) {
+      logger.warn(
+        { userId, reason: "validation_error" },
+        "Invalid complete setup input"
+      );
       return {
         success: false as const,
         error: validationResult.error.errors[0]?.message ?? "Validation error",
@@ -52,6 +60,7 @@ async function performCompleteSetup(
     const validatedData = validationResult.data;
 
     const profileService = new ProfileService();
+    logger.info({ userId }, "Completing profile setup");
     const result = await profileService.completeSetup({
       userId,
       username: validatedData.username,
@@ -59,17 +68,20 @@ async function performCompleteSetup(
     });
 
     if (!result.success) {
+      logger.error({ userId, reason: result.error }, "Complete setup failed");
       return {
         success: false as const,
         error: result.error,
       };
     }
 
+    logger.info({ userId }, "Profile setup completed");
     return {
       success: true as const,
       data: result.data,
     };
-  } catch {
+  } catch (err) {
+    logger.error({ err }, "Unexpected error in completeProfileSetup");
     return {
       success: false as const,
       error: "An unexpected error occurred",

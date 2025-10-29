@@ -1,6 +1,6 @@
+import { ProfileService } from "@/data-access-layer/services";
 import { redirect } from "next/navigation";
 
-import { ProfileService } from "@/data-access-layer/services";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export default async function Page() {

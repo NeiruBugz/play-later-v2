@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+import { signInWithCredentials } from "./helpers/auth";
 import {
   createTestUserWithoutUsername,
   disconnectDatabase,
 } from "./helpers/db";
-import { signInWithCredentials } from "./helpers/auth";
 import { ProfileSetupPage } from "./pages/profile-setup.page";
 
 test.describe("[guard] Dashboard redirect for first-time users", () => {
@@ -12,11 +12,17 @@ test.describe("[guard] Dashboard redirect for first-time users", () => {
     await disconnectDatabase();
   });
 
-  test("redirects to /profile/setup when user needs setup", async ({ page }) => {
+  test("redirects to /profile/setup when user needs setup", async ({
+    page,
+  }) => {
     const email = `e2e-guard-redirect-${Date.now()}@example.com`;
     const password = "TestPassword123!";
 
-    await createTestUserWithoutUsername({ email, password, name: "Guard User" });
+    await createTestUserWithoutUsername({
+      email,
+      password,
+      name: "Guard User",
+    });
 
     await signInWithCredentials(page, email, password);
 
@@ -32,7 +38,11 @@ test.describe("[guard] Dashboard redirect for first-time users", () => {
     const email = `e2e-guard-skip-${Date.now()}@example.com`;
     const password = "TestPassword123!";
 
-    await createTestUserWithoutUsername({ email, password, name: "Skip Guard" });
+    await createTestUserWithoutUsername({
+      email,
+      password,
+      name: "Skip Guard",
+    });
 
     await signInWithCredentials(page, email, password);
 
@@ -53,4 +63,3 @@ test.describe("[guard] Dashboard redirect for first-time users", () => {
     expect(page.url()).toMatch(/\/dashboard$/);
   });
 });
-

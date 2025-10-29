@@ -4,6 +4,8 @@ import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
+import { createLogger } from "@/shared/lib";
+
 import { UpdateProfileSchema, type UpdateProfileInput } from "../schemas";
 
 type PerformUpdateProfileResult =
@@ -22,9 +24,11 @@ type PerformUpdateProfileResult =
 async function performUpdateProfile(
   data: UpdateProfileInput
 ): Promise<PerformUpdateProfileResult> {
+  const logger = createLogger({ serverAction: "updateProfile" });
   try {
     const userId = await getServerUserId();
     if (!userId) {
+      logger.warn({ reason: "unauthorized" }, "Update profile denied");
       return {
         success: false as const,
         error: "Unauthorized",
@@ -38,6 +42,10 @@ async function performUpdateProfile(
 
     const validationResult = UpdateProfileSchema.safeParse(sanitizedData);
     if (!validationResult.success) {
+      logger.warn(
+        { userId, reason: "validation_error" },
+        "Invalid update profile input"
+      );
       return {
         success: false as const,
         error: validationResult.error.errors[0]?.message ?? "Validation error",
@@ -47,6 +55,7 @@ async function performUpdateProfile(
     const validatedData = validationResult.data;
 
     const profileService = new ProfileService();
+    logger.info({ userId }, "Updating user profile");
     const result = await profileService.updateProfile({
       userId,
       username: validatedData.username,
@@ -54,17 +63,20 @@ async function performUpdateProfile(
     });
 
     if (!result.success) {
+      logger.error({ userId, reason: result.error }, "Profile update failed");
       return {
         success: false as const,
         error: result.error,
       };
     }
 
+    logger.info({ userId }, "Profile updated successfully");
     return {
       success: true as const,
       data: result.data,
     };
-  } catch {
+  } catch (err) {
+    logger.error({ err }, "Unexpected error in updateProfile");
     return {
       success: false as const,
       error: "An unexpected error occurred",
