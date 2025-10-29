@@ -396,4 +396,32 @@ export class ProfileService extends BaseService {
       return this.handleError(error, "Failed to complete setup");
     }
   }
+
+  async getRedirectAfterAuth(
+    input: { userId: string }
+  ): Promise<import("./types").GetRedirectAfterAuthResult> {
+    try {
+      this.logger.info(
+        { userId: input.userId },
+        "Determining post-auth redirect"
+      );
+
+      const status = await this.checkSetupStatus({ userId: input.userId });
+      if (!status.success) {
+        // Fail-safe to dashboard on any error
+        return this.success({ redirectTo: "/dashboard", isNewUser: false });
+      }
+
+      const isNewUser = status.data.needsSetup;
+      const redirectTo = isNewUser ? "/profile/setup" : "/dashboard";
+
+      return this.success({ redirectTo, isNewUser });
+    } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error determining post-auth redirect"
+      );
+      return this.handleError(error, "Failed to determine post-auth redirect");
+    }
+  }
 }

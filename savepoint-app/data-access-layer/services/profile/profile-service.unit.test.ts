@@ -1014,4 +1014,61 @@ describe("ProfileService", () => {
       });
     });
   });
+
+  describe("getRedirectAfterAuth", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2025-01-20T12:00:00Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("should redirect new users to /profile/setup", async () => {
+      mockFindUserById.mockResolvedValue({
+        username: null,
+        name: "New User",
+        profileSetupCompletedAt: null,
+        createdAt: new Date("2025-01-20T11:58:00Z"),
+      });
+
+      const result = await service.getRedirectAfterAuth({ userId: "user-1" });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.redirectTo).toBe("/profile/setup");
+        expect(result.data.isNewUser).toBe(true);
+      }
+    });
+
+    it("should redirect existing users to /dashboard", async () => {
+      mockFindUserById.mockResolvedValue({
+        username: "existing",
+        name: "Existing User",
+        profileSetupCompletedAt: new Date("2025-01-10T00:00:00Z"),
+        createdAt: new Date("2025-01-01T00:00:00Z"),
+      });
+
+      const result = await service.getRedirectAfterAuth({ userId: "user-2" });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.redirectTo).toBe("/dashboard");
+        expect(result.data.isNewUser).toBe(false);
+      }
+    });
+
+    it("should fail-safe to /dashboard when status check fails", async () => {
+      mockFindUserById.mockRejectedValue(new Error("db down"));
+
+      const result = await service.getRedirectAfterAuth({ userId: "user-3" });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.redirectTo).toBe("/dashboard");
+        expect(result.data.isNewUser).toBe(false);
+      }
+    });
+  });
 });

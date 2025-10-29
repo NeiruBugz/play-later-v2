@@ -5,10 +5,77 @@ on:
     branches: [main]
 
 jobs:
+  infra:
+    name: Provision AWS Infra (Terraform)
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (assume role)
+        if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Configure AWS credentials (access keys)
+        if: ${{ secrets.AWS_ROLE_TO_ASSUME == '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform Init
+        working-directory: infra/envs/prod
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        working-directory: infra/envs/prod
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: tf-plan
+        working-directory: infra/envs/prod
+        run: >
+          terraform plan -input=false -out=tfplan
+          -var="region=${{ secrets.AWS_REGION }}"
+          -var="project_name=${{ secrets.PROJECT_NAME }}"
+          -var="app_url=${{ secrets.APP_URL }}"
+          -var="domain_prefix=${{ secrets.COGNITO_DOMAIN_PREFIX }}"
+          -var="enable_cognito_native=${{ secrets.ENABLE_COGNITO_NATIVE }}"
+          -var="google_client_id=${{ secrets.GOOGLE_CLIENT_ID }}"
+          -var="google_client_secret=${{ secrets.GOOGLE_CLIENT_SECRET }}"
+
+      - name: Terraform Apply
+        working-directory: infra/envs/prod
+        run: terraform apply -auto-approve tfplan
+
+      - name: Capture important outputs
+        id: tf-outputs
+        working-directory: infra/envs/prod
+        run: |
+          echo "cognito_user_pool_id=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_OUTPUT
+          echo "cognito_user_pool_client_id=$(terraform output -raw cognito_user_pool_client_id)" >> $GITHUB_OUTPUT
+          # client secret is sensitive; do not print or expose
+          echo "cognito_issuer=$(terraform output -raw cognito_issuer)" >> $GITHUB_OUTPUT
+
   migrate:
     name: Run Database Migrations
     runs-on: ubuntu-latest
     environment: production
+    needs: [infra]
     
     steps:
       - name: Checkout code

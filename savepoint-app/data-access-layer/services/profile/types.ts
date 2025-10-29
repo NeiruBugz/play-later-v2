@@ -88,3 +88,13 @@ export type CompleteSetupResult = ServiceResult<{
   username: string | null;
   image: string | null;
 }>;
+
+// Determines where to send the user right after auth
+export type GetRedirectAfterAuthInput = {
+  userId: string;
+};
+
+export type GetRedirectAfterAuthResult = ServiceResult<{
+  redirectTo: string; // "/profile/setup" or "/dashboard"
+  isNewUser: boolean;
+}>;
