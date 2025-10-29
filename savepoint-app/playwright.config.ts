@@ -21,9 +21,19 @@ export default defineConfig({
   },
   timeout: 60 * 1000,
   projects: [
+    // Setup project to authenticate and save storage state
+    {
+      name: "setup",
+      testMatch: /.*auth\.setup\.ts/,
+    },
+    // Main browser project depends on setup and reuses authenticated storage
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "e2e/.auth/user.json",
+      },
+      dependencies: ["setup"],
     },
   ],
   webServer: {

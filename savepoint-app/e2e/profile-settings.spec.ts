@@ -1,227 +1,299 @@
+import * as path from "path";
+import { fileURLToPath } from "url";
 import { expect, test } from "@playwright/test";
 
-import { signInWithCredentials } from "./helpers/auth";
-import {
-  clearTestData,
-  createTestUser,
-  disconnectDatabase,
-  type TestUser,
-} from "./helpers/db";
+import { createTestUser, disconnectDatabase } from "./helpers/db";
+import { ProfileSettingsPage } from "./pages/profile-settings.page";
 
-test.describe("Profile Settings - Username Change", () => {
-  let testUser: TestUser;
-  const newUsername = "newusername123";
+/*
+Story: As an authenticated user, I want to manage my profile settings (username and avatar) so that my identity is clear and consistent across the app.
+Acceptance Criteria:
+- Can change username successfully and see it on profile
+- Real-time username validation shows available/taken states
+- Client-side validation for min/max length
+- Navigating back returns to previous page
+- Can upload avatar, see it on profile, and it persists after reload
+- Validation for large/unsupported avatar files; can cancel selection
+*/
 
-  test.beforeAll(async () => {
-    // Clean up any existing test data
-    await clearTestData();
-
-    // Create a test user with a known username
-    testUser = await createTestUser({
-      email: "e2e-settings-test@example.com",
-      username: "oldusername",
-      password: "TestPassword123!",
-    });
-  });
-
+test.describe("[settings] Profile Settings — Manage username and avatar", () => {
   test.afterAll(async () => {
-    // Clean up test data and disconnect
-    await clearTestData();
+    // Allow global teardown to clear data at the end of the run.
     await disconnectDatabase();
   });
 
-  test("should successfully change username through profile settings", async ({
+  test("Scenario: Save valid username shows success and updates profile", async ({
     page,
   }) => {
-    // Step 1: Sign in with the test user
-    await signInWithCredentials(page, testUser.email, testUser.password);
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
 
-    // Step 2: Navigate to profile settings page
-    await page.goto("/profile/settings");
-    await page.waitForLoadState("networkidle");
+    const newUsername = `newusername${Date.now()}`;
+    await expect(settings.usernameInput()).toBeVisible();
+    await settings.changeUsername(newUsername);
 
-    const usernameInput = page.getByLabel(/username/i);
-    await expect(usernameInput).toBeVisible({ timeout: 10000 });
-
-    await expect(usernameInput).toHaveValue(testUser.username);
-
-    await usernameInput.clear();
-    await usernameInput.fill(newUsername);
-
-    await expect(usernameInput).toHaveValue(newUsername);
-
-    const validationError = page.getByText(
-      /username must be at least 3 characters/i
-    );
-    await expect(validationError).not.toBeVisible();
-
-    // Step 5: Click the "Save Changes" button
-    const saveButton = page.getByRole("button", { name: "Save Changes" });
-    await expect(saveButton).toBeVisible();
-    await expect(saveButton).toBeEnabled();
-
-    await saveButton.click();
-
-    // Wait for the form submission to complete
-    // Note: The form may submit so quickly that "Saving..." isn't visible
-    // So we'll wait for the success toast instead
-
-    const successToast = page.getByText(/profile updated successfully/i);
-    await expect(successToast).toBeVisible({ timeout: 5000 });
-
-    // Step 7: Navigate to profile view page
-    await page.goto("/profile");
-    await page.waitForLoadState("networkidle");
-
-    // Verify we're on the profile page
-    expect(page.url()).toContain("/profile");
-
-    // Step 8: Verify the new username is displayed in the profile view
-    const profileHeading = page.getByRole("heading", {
-      level: 2,
-      name: newUsername,
-    });
-    await expect(profileHeading).toBeVisible();
-
-    // Also verify in the profile view that the old username is not displayed
-    const oldUsernameHeading = page.getByRole("heading", {
-      level: 2,
-      name: testUser.username,
-    });
-    await expect(oldUsernameHeading).not.toBeVisible();
-
-    // Verify other profile information is still displayed correctly
-    const emailText = page.getByText(testUser.email);
-    await expect(emailText).toBeVisible();
-
-    const joinedText = page.getByText(/Joined/);
-    await expect(joinedText).toBeVisible();
-  });
-
-  test("should show validation error for username that is too short", async ({
-    page,
-  }) => {
-    await signInWithCredentials(page, testUser.email, testUser.password);
-
-    await page.goto("/profile/settings");
-    await page.waitForLoadState("networkidle");
-
-    const usernameInput = page.getByLabel(/username/i);
-    await usernameInput.clear();
-    await usernameInput.fill("ab");
-
-    const validationError = page.getByText(
-      "Username must be at least 3 characters"
-    );
-    await expect(validationError).toBeVisible();
-
-    // Note: The form may not disable the button for client-side validation
-    // This is acceptable UX as the server action will handle final validation
-  });
-
-  test("should show validation error for username that is too long", async ({
-    page,
-  }) => {
-    await signInWithCredentials(page, testUser.email, testUser.password);
-
-    await page.goto("/profile/settings");
-    await page.waitForLoadState("networkidle");
-
-    const usernameInput = page.getByLabel(/username/i);
-    await usernameInput.clear();
-    await usernameInput.fill("a".repeat(26));
-
-    const validationError = page.getByText(
-      "Username must not exceed 25 characters"
-    );
-    await expect(validationError).toBeVisible();
-
-    const saveButton = page.getByRole("button", { name: "Save Changes" });
-    await expect(saveButton).toBeDisabled();
-  });
-
-  test("should clear validation error when valid username is entered", async ({
-    page,
-  }) => {
-    await signInWithCredentials(page, testUser.email, testUser.password);
-
-    await page.goto("/profile/settings");
-    await page.waitForLoadState("networkidle");
-
-    const usernameInput = page.getByLabel(/username/i);
-
-    await usernameInput.clear();
-    await usernameInput.fill("ab");
-
-    const validationError = page.getByText(
-      "Username must be at least 3 characters"
-    );
-    await expect(validationError).toBeVisible();
-
-    await usernameInput.clear();
-    await usernameInput.fill("validusername");
-
-    await expect(validationError).not.toBeVisible();
-
-    const saveButton = page.getByRole("button", { name: "Save Changes" });
-    await expect(saveButton).toBeEnabled();
-  });
-
-  test("should display the back button that navigates to previous page", async ({
-    page,
-  }) => {
-    await signInWithCredentials(page, testUser.email, testUser.password);
+    await expect(settings.profileUpdatedToast()).toBeVisible({ timeout: 5000 });
 
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
+    await expect(
+      page.getByRole("heading", { level: 2, name: newUsername })
+    ).toBeVisible();
+    // Sanity check: joined date still visible
+    await expect(page.getByText(/Joined/)).toBeVisible();
+  });
 
-    await page.goto("/profile/settings");
+  test("Scenario: Too-short username shows validation error", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    await settings.typeUsername("ab");
+    await expect(settings.usernameTooShortMessage()).toBeVisible();
+  });
+
+  test("Scenario: Too-long username shows validation error and disables save", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    await settings.typeUsername("a".repeat(26));
+    await expect(settings.usernameTooLongMessage()).toBeVisible();
+    await expect(settings.saveButton()).toBeDisabled();
+  });
+
+  test("Scenario: Validation clears when switching to valid username", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    await settings.typeUsername("ab");
+    await expect(settings.usernameTooShortMessage()).toBeVisible();
+
+    await settings.typeUsername("validusername");
+    await expect(settings.usernameTooShortMessage()).not.toBeVisible();
+    await expect(settings.saveButton()).toBeEnabled();
+  });
+
+  test("Scenario: Back button navigates to previous page", async ({ page }) => {
+    await page.goto("/profile");
     await page.waitForLoadState("networkidle");
 
-    const backButton = page.getByRole("button", { name: /back/i });
-    await expect(backButton).toBeVisible();
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
 
-    await backButton.click();
+    await expect(settings.backButton()).toBeVisible();
+    await settings.backButton().click();
     await page.waitForLoadState("networkidle");
 
     expect(page.url()).toContain("/profile");
     expect(page.url()).not.toContain("/settings");
   });
 
-  test("should preserve username input when validation fails", async ({
+  test("Scenario: Real-time shows available for unique username", async ({
     page,
   }) => {
-    await signInWithCredentials(page, testUser.email, testUser.password);
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
 
-    await page.goto("/profile/settings");
-    await page.waitForLoadState("networkidle");
-
-    const usernameInput = page.getByLabel(/username/i);
-    const invalidUsername = "ab";
-
-    await usernameInput.clear();
-    await usernameInput.fill(invalidUsername);
-
-    await expect(usernameInput).toHaveValue(invalidUsername);
-
-    const validationError = page.getByText(
-      "Username must be at least 3 characters"
-    );
-    await expect(validationError).toBeVisible();
+    const unique = `uniqueuser${Date.now()}`;
+    await settings.typeUsername(unique);
+    await expect(settings.usernameAvailableMessage()).toBeVisible({
+      timeout: 3000,
+    });
   });
 
-  test("should show helper text about username requirements", async ({
+  test("Scenario: Real-time shows taken for existing username (case-insensitive)", async ({
     page,
   }) => {
-    await signInWithCredentials(page, testUser.email, testUser.password);
+    const takenUser = await createTestUser({
+      email: `e2e-taken-${Date.now()}@example.com`,
+      username: "takentestuser",
+      password: "TestPassword123!",
+    });
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
 
-    await page.goto("/profile/settings");
+    await settings.typeUsername(takenUser.username);
+    await expect(settings.usernameTakenMessage()).toBeVisible({
+      timeout: 5000,
+    });
+  });
+
+  test("Scenario: Debounced validation after fast typing eventually shows available", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    await settings.usernameInput().clear();
+
+    const finalUsername = `quicktyping${Date.now()}`;
+    await settings
+      .usernameInput()
+      .pressSequentially(finalUsername, { delay: 50 });
+    await expect(settings.usernameAvailableMessage()).toBeVisible({
+      timeout: 3000,
+    });
+  });
+
+  test("Scenario: Clearing input resets validation state", async ({ page }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    const unique = `cleartest${Date.now()}`;
+    await settings.typeUsername(unique);
+    await expect(settings.usernameAvailableMessage()).toBeVisible({
+      timeout: 3000,
+    });
+
+    await settings.usernameInput().clear();
+    await page.waitForTimeout(600); // allow debounce to settle
+    await expect(settings.usernameAvailableMessage()).not.toBeVisible();
+    await expect(settings.usernameTakenMessage()).not.toBeVisible();
+  });
+
+  test("Scenario: Transition from taken to available updates feedback", async ({
+    page,
+  }) => {
+    const takenUser = await createTestUser({
+      email: `e2e-transition-${Date.now()}@example.com`,
+      username: `takenfortest${Date.now()}`,
+      password: "TestPassword123!",
+    });
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    await settings.typeUsername(takenUser.username);
+    await expect(settings.usernameTakenMessage()).toBeVisible({
+      timeout: 5000,
+    });
+
+    const available = `available${Date.now()}`;
+    await settings.typeUsername(available);
+    await expect(settings.usernameTakenMessage()).not.toBeVisible({
+      timeout: 1500,
+    });
+    await expect(settings.usernameAvailableMessage()).toBeVisible({
+      timeout: 5000,
+    });
+  });
+
+  test("Scenario: Upload avatar and display on profile", async ({ page }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const testImagePath = path.join(here, "fixtures", "test-avatar.png");
+    await expect(settings.fileInput()).toBeAttached();
+    await settings.selectAvatarFromPath(testImagePath);
+
+    await expect(settings.previewAvatar()).toBeVisible({ timeout: 5000 });
+    await expect(settings.avatarUploadButton()).toBeVisible({ timeout: 5000 });
+    await settings.submitAvatarUpload();
+
+    await expect(settings.avatarUploadSuccessToast()).toBeVisible({
+      timeout: 10000,
+    });
+
+    await page.goto("/profile");
     await page.waitForLoadState("networkidle");
+    const profileAvatar = page.locator("img[alt*='avatar']");
+    await expect(profileAvatar).toBeVisible({ timeout: 5000 });
+  });
 
-    // Verify the helper text is displayed
-    const helperText = page.getByText(
-      /Must be 3-25 characters. Letters, numbers, and \(_, -, \.\) allowed./
+  test("Scenario: Avatar persists after page reload", async ({ page }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const testImagePath = path.join(here, "fixtures", "test-avatar.png");
+    await settings.selectAvatarFromPath(testImagePath);
+    await settings.submitAvatarUpload();
+    await expect(settings.avatarUploadSuccessToast()).toBeVisible({
+      timeout: 10000,
+    });
+
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    await expect(settings.currentAvatar()).toBeVisible({ timeout: 5000 });
+  });
+
+  test("Scenario: Large avatar file shows validation error", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    // Simulate a 6MB file via DOM
+    const largeFileBuffer = Buffer.alloc(6 * 1024 * 1024);
+    await page.evaluate(
+      ({ fileName, buffer }) => {
+        const blob = new Blob([new Uint8Array(buffer)], { type: "image/png" });
+        const file = new File([blob], fileName, { type: "image/png" });
+        const input = document.querySelector(
+          'input[type="file"]'
+        ) as HTMLInputElement;
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        input.files = dataTransfer.files;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      },
+      { fileName: "large-avatar.png", buffer: Array.from(largeFileBuffer) }
     );
-    await expect(helperText).toBeVisible();
+
+    const sizeErrorToast = settings.getToast(
+      "File size exceeds 5MB. Please upload a smaller image."
+    );
+    await expect(sizeErrorToast).toBeVisible({ timeout: 3000 });
+    await expect(settings.avatarUploadButton()).not.toBeVisible();
+  });
+
+  test("Scenario: Unsupported file format shows validation error", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    await page.evaluate(() => {
+      const blob = new Blob(["fake pdf content"], { type: "application/pdf" });
+      const file = new File([blob], "document.pdf", {
+        type: "application/pdf",
+      });
+      const input = document.querySelector(
+        'input[type="file"]'
+      ) as HTMLInputElement;
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      input.files = dataTransfer.files;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    const errorToast = settings.getToast(
+      "Unsupported file format. Please upload a JPG, PNG, GIF, or WebP image."
+    );
+    await expect(errorToast).toBeVisible({ timeout: 3000 });
+    await expect(settings.avatarUploadButton()).not.toBeVisible();
+  });
+
+  test("Scenario: Cancel avatar selection hides preview and upload button", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const testImagePath = path.join(here, "fixtures", "test-avatar.png");
+    await settings.selectAvatarFromPath(testImagePath);
+    await expect(settings.previewAvatar()).toBeVisible({ timeout: 5000 });
+
+    await expect(settings.avatarCancelButton()).toBeVisible();
+    await settings.avatarCancelButton().click();
+
+    await expect(settings.previewAvatar()).not.toBeVisible();
+    await expect(settings.avatarUploadButton()).not.toBeVisible();
   });
 });

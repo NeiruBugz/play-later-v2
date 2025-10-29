@@ -52,6 +52,20 @@ export async function deleteTestUsersByPattern(
   });
 }
 
+export async function getUserByEmail(
+  email: string
+): Promise<{
+  id: string;
+  email: string | null;
+  username: string | null;
+} | null> {
+  const user = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+    select: { id: true, email: true, username: true },
+  });
+  return user;
+}
+
 export async function clearTestData(): Promise<void> {
   // Define test user pattern for cleanup
   const testUserPattern = {
