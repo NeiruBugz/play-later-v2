@@ -14,7 +14,7 @@ import { s3Client } from "./s3-client";
  * Integration tests for AvatarStorageService
  *
  * These tests verify actual S3 operations against LocalStack.
- * LocalStack must be running on port 4568 before running these tests.
+ * LocalStack endpoint is taken from env.AWS_ENDPOINT_URL (e.g., http://localhost:4566).
  *
  * Run: pnpm test avatar-storage.integration.test.ts
  */
