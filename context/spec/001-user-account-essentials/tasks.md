@@ -149,18 +149,18 @@
 ## **Slice 10: Profile Setup Page (Optional First-Time Setup)**
 *Goal: Add profile setup page for new users*
 
-- [ ] **Sub-task:** Create `/profile/setup/page.tsx` server component with setup status check
-- [ ] **Sub-task:** Implement `ProfileService.checkSetupStatus()` method (determines if setup needed)
-- [ ] **Sub-task:** Write unit tests for `checkSetupStatus()`
-- [ ] **Sub-task:** Create `ProfileSetupForm` component (username input + avatar upload, both optional)
-- [ ] **Sub-task:** Add "Skip" button that redirects to `/dashboard` without saving
-- [ ] **Sub-task:** Add "Save & Continue" button that calls `completeProfileSetup` action
-- [ ] **Sub-task:** Implement `ProfileService.completeSetup()` method (saves username + avatar if provided)
-- [ ] **Sub-task:** Create `completeProfileSetup` server action with Zod schema
-- [ ] **Sub-task:** Write component tests for `ProfileSetupForm` (skip flow, save flow)
-- [ ] **Sub-task:** Write E2E test: Complete profile setup (username + avatar) and verify redirect to dashboard
-- [ ] **Sub-task:** Write E2E test: Skip profile setup and verify redirect to dashboard with defaults
-- [ ] **Sub-task:** Verify setup page works for new users (redirects to dashboard after setup/skip)
+- [x] **Sub-task:** Create `/profile/setup/page.tsx` server component with setup status check
+- [x] **Sub-task:** Implement `ProfileService.checkSetupStatus()` method (determines if setup needed)
+- [x] **Sub-task:** Write unit tests for `checkSetupStatus()`
+- [x] **Sub-task:** Create `ProfileSetupForm` component (username input + avatar upload, both optional)
+- [x] **Sub-task:** Add "Skip" button that redirects to `/dashboard` without saving
+- [x] **Sub-task:** Add "Save & Continue" button that calls `completeProfileSetup` action
+- [x] **Sub-task:** Implement `ProfileService.completeSetup()` method (saves username + avatar if provided)
+- [x] **Sub-task:** Create `completeProfileSetup` server action with Zod schema
+- [x] **Sub-task:** Write component tests for `ProfileSetupForm` (skip flow, save flow)
+- [x] **Sub-task:** Write E2E test: Complete profile setup (username + avatar) and verify redirect to dashboard
+- [x] **Sub-task:** Write E2E test: Skip profile setup and verify redirect to dashboard with defaults
+- [x] **Sub-task:** Verify setup page works for new users (redirects to dashboard after setup/skip)
 
 ---
 
