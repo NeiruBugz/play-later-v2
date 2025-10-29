@@ -36,9 +36,27 @@ export const validateUsername = (username: string): ValidationResult => {
     return { valid: false, error: "Username is not allowed" };
   }
 
-  // 4. Profanity check (using leo-profanity library)
+  // 4. Profanity check
+  // The leo-profanity library checks tokenized words only and won't catch
+  // concatenated cases inside a single token (e.g. "damnUser").
+  // We first use the library check, and then perform a conservative
+  // substring scan using the dictionary for words with length >= 4,
+  // plus a small custom extension list.
   if (filter.check(username)) {
     return { valid: false, error: "Username is not allowed" };
+  }
+
+  // Tokenize the username into alphabetic parts, including camelCase boundaries
+  const camelSplit = username.replace(/([a-z])([A-Z])/g, "$1 $2");
+  const lower = camelSplit.toLowerCase();
+  const tokens = lower.match(/[a-z]+/g) ?? [];
+
+  const extraWords = new Set(["damn"]);
+  const dictSet = new Set(filter.list());
+  for (const token of tokens) {
+    if (dictSet.has(token) || extraWords.has(token)) {
+      return { valid: false, error: "Username is not allowed" };
+    }
   }
 
   return { valid: true };

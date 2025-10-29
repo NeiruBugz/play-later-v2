@@ -256,13 +256,13 @@ describe("validateUsername", () => {
   });
 
   describe("profanity validation", () => {
-    it("should reject profane username (common profanity)", () => {
-      const result = validateUsername("badword");
+    it("should reject profane username (concatenated)", () => {
+      const result = validateUsername("damnUser");
 
-      // Note: This test may pass or fail depending on bad-words library configuration
-      // The library may not catch "badword" literally, but will catch actual profanity
-      // This is a placeholder test - real profanity words will be caught
-      expect(result).toBeDefined();
+      expect(result.valid).toBe(false);
+      if (!result.valid) {
+        expect(result.error).toBe("Username is not allowed");
+      }
     });
 
     it("should accept clean username", () => {

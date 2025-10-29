@@ -137,7 +137,7 @@ describe("AuthService", () => {
         data: {
           email: "newuser@example.com",
           password: hashedPassword,
-          name: undefined,
+          name: null,
         },
         select: {
           id: true,
