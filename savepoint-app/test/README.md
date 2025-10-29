@@ -780,10 +780,40 @@ e2e/
 ├── example.spec.ts                    # Basic smoke tests
 ├── profile.spec.ts                    # Profile display and stats
 ├── profile-settings.spec.ts           # Profile settings form
+├── pages/                              # Page Object Models (POM)
+│   ├── profile.page.ts                 # Public profile screen
+│   └── profile-settings.page.ts        # Profile Settings screen
 └── helpers/
     ├── auth.ts                        # Authentication helpers
     └── db.ts                          # Database seeding/cleanup
 ```
+
+### Page Objects (POM)
+
+We use lightweight Page Objects to encapsulate semantic locators and common actions per screen. This keeps tests readable and reduces flakiness when UI structure changes.
+
+Key principles:
+
+- Prefer role-based selectors with stable accessible names.
+- Scope locators to relevant regions when helpful (e.g., toast region).
+- Expose intentful actions (e.g., `changeUsername()`, `submitAvatarUpload()`).
+
+Example (excerpt from `e2e/pages/profile-settings.page.ts`):
+
+```ts
+avatarUploadButton(): Locator {
+  // Handle label variations like "Upload" vs "Upload selected avatar"
+  return this.page.getByRole("button", {
+    name: /^(Upload selected avatar|Upload)$/i,
+  });
+}
+
+async submitAvatarUpload(): Promise<void> {
+  await this.avatarUploadButton().click();
+}
+```
+
+This pattern avoids brittle exact-text matches and stays aligned with accessibility.
 
 ### Selector Hierarchy (Most to Least Preferred)
 
@@ -822,6 +852,31 @@ page.locator(".css-class-name"); // Brittle implementation detail
 **Why Semantic Selectors Matter:**
 Test what users experience, not implementation details. Users don't see CSS classes or DOM structure—they see buttons, headings, and text. Semantic selectors make tests resilient to refactoring while ensuring accessibility.
 `─────────────────────────────────────────────────`
+
+### Authentication & Storage State
+
+Authenticated E2E flows reuse a persisted Playwright storage state to avoid logging in in every test:
+
+- `e2e/auth.setup.ts` signs in via the UI once and saves storage to `e2e/.auth/user.json`.
+- `playwright.config.ts` defines a `setup` project and makes the main `chromium` project depend on it, reusing `storageState`.
+
+Regenerate storage state on demand:
+
+```bash
+pnpm exec playwright test --project=setup
+```
+
+Ensure credentials-based auth is enabled for E2E in your `.env` (see app README).
+
+### Global Setup/Teardown & DB Hygiene
+
+Database state is cleaned before and after the E2E run to keep tests isolated and repeatable:
+
+- `e2e/global-setup.ts` calls `clearTestData()` and closes the Prisma connection.
+- `e2e/global-teardown.ts` calls `clearTestData()` again and closes the connection.
+- `e2e/helpers/db.ts` centralizes user/game/library seeding and cleanup helpers.
+
+Tip: Use clear, prefixed identifiers for seeded users (e.g., `e2e-` or `test-`) so cleanup patterns remain targeted and safe.
 
 ### Authentication Patterns
 
@@ -937,6 +992,13 @@ pnpm test:e2e e2e/profile.spec.ts
 pnpm test:e2e -g "should display user profile"
 ```
 
+### Prerequisites
+
+- Dev server: The config auto-starts `pnpm dev` via `webServer` at `http://localhost:6060`.
+- Database: Ensure local PostgreSQL is available as per `.env` and project setup.
+- S3/LocalStack (for avatar uploads): Start LocalStack per project docs so S3 operations succeed locally.
+- Auth: Enable credentials-based auth for tests.
+
 ### Configuration
 
 See `playwright.config.ts` for full configuration:
@@ -947,6 +1009,16 @@ See `playwright.config.ts` for full configuration:
 - **Reporter**: GitHub Actions in CI, HTML locally
 - **Video**: Recorded on failure
 - **webServer**: Automatically starts `pnpm dev`
+
+### Example: Avatar Upload Locator
+
+We favor resilient, accessible locators for dynamic controls. For the avatar uploader, the button’s accessible name may vary (e.g., "Upload" vs "Upload selected avatar"). Use a role-based locator with a regex to cover both cases:
+
+```ts
+page.getByRole("button", { name: /^(Upload selected avatar|Upload)$/i });
+```
+
+This avoids flakes when the UI updates its label based on state.
 
 ### Best Practices
 
@@ -1023,5 +1095,5 @@ console.log(await page.locator("body").textContent()); // All text
 
 ---
 
-**Last Updated:** 2025-01-24
+**Last Updated:** 2025-10-29
 **Maintained By:** SavePoint Engineering Team
