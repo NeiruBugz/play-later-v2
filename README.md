@@ -13,12 +13,9 @@ pnpm dev
 
 Infra quickstart is documented at infra/README.md.
 
-Git hooks (Lefthook)
+Pre-commit Hooks
 
-- Install hooks once at the repo root:
+- Local git hooks have been removed. All code quality checks run in CI on pull requests.
+- To run checks locally before pushing, use from `savepoint-app/`:
 
-pnpm install
-
-This installs `lefthook` locally and runs `lefthook install -f` via the root `prepare` script. If hooks ever break, re-run:
-
-pnpm lefthook:install
+pnpm code-check

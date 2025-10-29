@@ -53,7 +53,7 @@ Run from `savepoint-app/` or prefix with `pnpm -C savepoint-app` from the repo r
 
 ## Commit & Pull Request Guidelines
 
-- Conventional Commits enforced by commitlint (e.g., `feat: add filters`, `fix(ui): align button`).
+- Conventional Commits (e.g., `feat: add filters`, `fix(ui): align button`). Validate locally with `pnpm exec commitlint`.
 - Keep commits focused; include tests when changing logic.
 - PRs: clear description, linked issues, screenshots for UI, and note breaking changes.
 
@@ -69,8 +69,8 @@ Run from `savepoint-app/` or prefix with `pnpm -C savepoint-app` from the repo r
 - PR checks: see `.github/workflows/pr-checks.yml` for lint, typecheck, and tests.
 - E2E on CI: `.github/workflows/e2e.yml` spins up Postgres and LocalStack, prepares schema via Prisma, initializes S3 bucket/CORS, and runs Playwright. Artifacts (HTML report and results) are uploaded on failure.
 
-## Git Hooks (Lefthook)
+## Local Hooks
 
-- Hooks are configured via `lefthook.yml` at the repo root.
-- Install hooks once at root: `pnpm install` (runs `lefthook install -f` via root `prepare`).
-- If you see "Can't find lefthook in PATH", reinstall hooks: `pnpm lefthook:install` from the repo root.
+- Pre-commit hooks have been removed in favor of CI checks.
+- Run local checks manually with `pnpm code-check` from `savepoint-app/`.
+- CI runs formatting, lint, typecheck, and tests on PRs; commit message validation is local-only.

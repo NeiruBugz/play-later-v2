@@ -3,12 +3,10 @@
   "private": true,
   "packageManager": "pnpm@10.11.0",
   "devDependencies": {
-    "lefthook": "^1.13.6",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0"
   },
   "scripts": {
-    "prepare": "lefthook install -f",
-    "lefthook:install": "lefthook install -f"
+    
   }
 }
