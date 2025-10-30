@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import { expect, test } from "@playwright/test";
 
 import { getSession } from "./helpers/auth";
@@ -9,7 +10,22 @@ import {
 } from "./helpers/db";
 import { ProfilePage } from "./pages/profile.page";
 
+const prisma = new PrismaClient();
+
+// Run describe blocks serially to avoid database conflicts
+test.describe.configure({ mode: "serial" });
+
 test.describe("Profile Page", () => {
+  // Ensure clean state before each test in this suite
+  test.beforeEach(async () => {
+    const email = process.env.E2E_AUTH_EMAIL ?? "e2e-auth-user@example.com";
+    const user = await getUserByEmail(email);
+    if (!user) throw new Error("Authenticated user not found in DB");
+
+    // Clean up any existing library items for this user
+    await prisma.libraryItem.deleteMany({ where: { userId: user.id } });
+  });
+
   test.afterAll(async () => {
     await disconnectDatabase();
   });
@@ -29,7 +45,10 @@ test.describe("Profile Page", () => {
     // Validate heading exists and email from session is visible
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const session: any = await getSession(page);
-    await expect(profile.heading(2)).toBeVisible();
+    // Use specific heading name to avoid ambiguity with multiple H2 elements
+    await expect(
+      profile.heading(2, session?.user?.email ? /\w+/ : "Profile")
+    ).toBeVisible();
 
     if (session?.user?.email) {
       await expect(profile.emailText(session.user.email)).toBeVisible();
@@ -85,11 +104,19 @@ test.describe("Profile Page", () => {
 });
 
 test.describe("Profile Page - With Library Items", () => {
+  // Store game IDs for cleanup
+  let createdGameIds: string[] = [];
+  let testUserId: string;
+
   test.beforeAll(async () => {
     // Seed directly via DB using the known auth user from setup
     const email = process.env.E2E_AUTH_EMAIL ?? "e2e-auth-user@example.com";
     const user = await getUserByEmail(email);
     if (!user) throw new Error("Authenticated user not found in DB");
+    testUserId = user.id;
+
+    // Clean up any existing library items first
+    await prisma.libraryItem.deleteMany({ where: { userId: user.id } });
 
     // Create test games with different statuses
     const [game1, game2, game3, game4, game5] = await Promise.all([
@@ -115,6 +142,9 @@ test.describe("Profile Page - With Library Items", () => {
           "https://images.igdb.com/igdb/image/upload/t_cover_big/co3456.jpg",
       }),
     ]);
+
+    // Store game IDs for cleanup
+    createdGameIds = [game1.id, game2.id, game3.id, game4.id, game5.id];
 
     // Create library items with different statuses for the authed user
     await Promise.all([
@@ -147,6 +177,13 @@ test.describe("Profile Page - With Library Items", () => {
   });
 
   test.afterAll(async () => {
+    // Clean up library items and games created in this suite
+    await prisma.libraryItem.deleteMany({
+      where: { userId: testUserId },
+    });
+    await prisma.game.deleteMany({
+      where: { id: { in: createdGameIds } },
+    });
     await disconnectDatabase();
   });
 

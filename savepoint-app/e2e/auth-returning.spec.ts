@@ -14,9 +14,11 @@ test.describe("[auth] Returning user login", () => {
   test("users with username go to dashboard directly (no setup)", async ({
     page,
   }) => {
-    const email = `e2e-returning-${Date.now()}@example.com`;
+    const timestamp = Date.now();
+    const email = `e2e-returning-${timestamp}@example.com`;
+    const username = `returninguser${timestamp}`;
     const password = "TestPassword123!";
-    await createTestUser({ email, username: "returninguser", password });
+    await createTestUser({ email, username, password });
 
     await signInWithCredentials(page, email, password);
 
@@ -29,7 +31,7 @@ test.describe("[auth] Returning user login", () => {
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
     await expect(
-      page.getByRole("heading", { level: 2, name: /returninguser/ })
+      page.getByRole("heading", { level: 2, name: new RegExp(username) })
     ).toBeVisible();
   });
 });

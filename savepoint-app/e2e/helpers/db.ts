@@ -24,6 +24,7 @@ export async function createTestUser(data: {
       username: data.username,
       usernameNormalized: data.username.toLowerCase(), // Important: set normalized username for uniqueness check
       password: hashedPassword,
+      profileSetupCompletedAt: new Date(), // Mark setup as completed for returning users
     },
   });
 

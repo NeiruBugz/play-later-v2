@@ -60,21 +60,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Browsers
-        run: |
-          npx playwright install --with-deps
-
       - name: Create .env for E2E
         working-directory: savepoint-app
         run: |
           cat > .env << 'EOF'
           # Database
-          POSTGRES_PRISMA_URL=postgresql://postgres:postgres@postgres:5432/savepoint-db
-          POSTGRES_URL_NON_POOLING=postgresql://postgres:postgres@postgres:5432/savepoint-db
-          POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/savepoint-db
-          POSTGRES_URL_NO_SSL=postgresql://postgres:postgres@postgres:5432/savepoint-db
+          DATABASE_URL=postgresql://postgres:postgres@localhost:5432/savepoint-db
+          POSTGRES_PRISMA_URL=postgresql://postgres:postgres@localhost:5432/savepoint-db
+          POSTGRES_URL_NON_POOLING=postgresql://postgres:postgres@localhost:5432/savepoint-db
+          POSTGRES_URL=postgresql://postgres:postgres@localhost:5432/savepoint-db
+          POSTGRES_URL_NO_SSL=postgresql://postgres:postgres@localhost:5432/savepoint-db
           POSTGRES_USER=postgres
-          POSTGRES_HOST=postgres
+          POSTGRES_HOST=localhost
           POSTGRES_PASSWORD=postgres
           POSTGRES_DATABASE=savepoint-db
 
@@ -104,7 +101,7 @@ jobs:
         working-directory: savepoint-app
         env:
           # Ensure Prisma uses the same URL as the app
-          POSTGRES_PRISMA_URL: postgresql://postgres:postgres@postgres:5432/savepoint-db
+          POSTGRES_PRISMA_URL: postgresql://postgres:postgres@localhost:5432/savepoint-db
         run: |
           pnpm prisma migrate deploy
 
@@ -121,6 +118,10 @@ jobs:
           aws --endpoint-url=http://localhost:4566 s3api put-bucket-cors \
             --bucket savepoint-dev \
             --cors-configuration file://scripts/localstack-cors.json
+
+      - name: Install Playwright Browsers
+        run: |
+          npx playwright install --with-deps
 
       - name: Run E2E tests (Playwright)
         working-directory: savepoint-app
