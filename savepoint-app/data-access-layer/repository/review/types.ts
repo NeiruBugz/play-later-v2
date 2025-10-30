@@ -7,3 +7,8 @@ export type CreateReviewInput = {
     completedOn: string | undefined;
   };
 };
+
+export type GetReviewsForGameInput = {
+  gameId: string;
+  userId?: string;
+};

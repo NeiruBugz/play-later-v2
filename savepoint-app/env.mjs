@@ -24,6 +24,12 @@ export const env = createEnv({
     POSTGRES_URL_NON_POOLING: process.env.POSTGRES_URL_NON_POOLING,
     POSTGRES_USER: process.env.POSTGRES_USER,
     STEAM_API_KEY: process.env.STEAM_API_KEY,
+    AWS_REGION: process.env.AWS_REGION,
+    AWS_ENDPOINT_URL: process.env.AWS_ENDPOINT_URL,
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+    S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
+    S3_AVATAR_PATH_PREFIX: process.env.S3_AVATAR_PATH_PREFIX,
   },
   server: {
     AUTH_COGNITO_ID: z.string({ message: "AUTH_COGNITO_ID is required" }),
@@ -57,5 +63,18 @@ export const env = createEnv({
       .url({ message: "POSTGRES_URL_NON_POOLING is required" }),
     POSTGRES_USER: z.string({ message: "POSTGRES_USER is required" }),
     STEAM_API_KEY: z.string({ message: "STEAM_API_KEY is required" }),
+
+    // S3 Storage Configuration
+    AWS_REGION: z.string().min(1, { message: "AWS_REGION is required" }),
+    AWS_ENDPOINT_URL: z.string().optional(), // LocalStack in dev
+    AWS_ACCESS_KEY_ID: z.string().min(1, { message: "AWS_ACCESS_KEY_ID is required" }),
+    AWS_SECRET_ACCESS_KEY: z.string().min(1, { message: "AWS_SECRET_ACCESS_KEY is required" }),
+    S3_BUCKET_NAME: z.string().min(1, { message: "S3_BUCKET_NAME is required" }),
+    S3_AVATAR_PATH_PREFIX: z
+      .string()
+      .min(1, { message: "S3_AVATAR_PATH_PREFIX is required" })
+      .refine((val) => val.endsWith("/"), {
+        message: "S3_AVATAR_PATH_PREFIX must end with '/'",
+      }),
   },
 });

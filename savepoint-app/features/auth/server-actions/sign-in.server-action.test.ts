@@ -1,9 +1,7 @@
 import * as authModule from "@/auth";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { signInAction } from "./sign-in";
 
-// Mock the auth module
 vi.mock("@/auth", () => ({
   signIn: vi.fn(),
 }));

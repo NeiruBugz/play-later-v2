@@ -1,8 +1,11 @@
 import "server-only";
 
+import type { Prisma } from "@prisma/client";
+
 import { prisma } from "@/shared/lib";
 
 import {
+  type DefaultUserSelect,
   type GetUserBySteamIdInput,
   type GetUserByUsernameInput,
   type UpdateUserDataInput,
@@ -124,6 +127,67 @@ export async function disconnectSteam({ userId }: { userId: string }) {
       steamProfileURL: null,
       steamAvatar: null,
       steamConnectedAt: null,
+    },
+  });
+}
+
+export async function findUserById(
+  userId: string
+): Promise<DefaultUserSelect | null>;
+export async function findUserById<T extends Prisma.UserSelect>(
+  userId: string,
+  options: { select: T }
+): Promise<Prisma.UserGetPayload<{ select: T }> | null>;
+export async function findUserById<T extends Prisma.UserSelect>(
+  userId: string,
+  options?: { select?: T }
+): Promise<DefaultUserSelect | Prisma.UserGetPayload<{ select: T }> | null> {
+  const defaultSelect = {
+    id: true,
+    name: true,
+    username: true,
+    steamProfileURL: true,
+    steamConnectedAt: true,
+    email: true,
+  } as const;
+
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: options?.select ?? (defaultSelect as T),
+  }) as Promise<
+    DefaultUserSelect | Prisma.UserGetPayload<{ select: T }> | null
+  >;
+}
+
+export async function findUserByNormalizedUsername(usernameNormalized: string) {
+  return prisma.user.findUnique({
+    where: { usernameNormalized },
+    select: { id: true },
+  });
+}
+
+/**
+ * Update user profile fields
+ */
+export async function updateUserProfile(
+  userId: string,
+  data: {
+    username?: string;
+    usernameNormalized?: string;
+    image?: string;
+    profileSetupCompletedAt?: Date | null;
+  }
+) {
+  return prisma.user.update({
+    where: { id: userId },
+    data,
+    select: {
+      id: true,
+      username: true,
+      usernameNormalized: true,
+      steamProfileURL: true,
+      image: true,
+      profileSetupCompletedAt: true,
     },
   });
 }

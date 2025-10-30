@@ -4,7 +4,17 @@ import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
 import Credentials from "next-auth/providers/credentials";
 
-import { prisma, sessionErrorHandler, verifyPassword } from "@/shared/lib";
+import { prisma, sessionErrorHandler } from "@/shared/lib";
+import { onAuthorize } from "@/shared/lib/app/auth/credentials-callbacks";
+import {
+  onJwt,
+  onRedirect,
+  onSession,
+  onSignIn,
+} from "@/shared/lib/app/auth/oauth-callbacks";
+
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
+const SESSION_UPDATE_AGE = 24 * 60 * 60; // Rotate every day
 
 const enableCredentials =
   process.env.NODE_ENV === "test" ||
@@ -13,27 +23,17 @@ const enableCredentials =
 export const { auth, handlers, signIn } = NextAuth({
   adapter: PrismaAdapter(prisma),
   callbacks: {
-    jwt: async ({ token, user }) => {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    session: async ({ session, token }) => {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id as string,
-        },
-      };
-    },
+    signIn: onSignIn,
+    redirect: onRedirect,
+    jwt: onJwt,
+    session: onSession,
   },
   providers: [
     Cognito({
       issuer: env.AUTH_COGNITO_ISSUER,
       clientId: env.AUTH_COGNITO_ID,
       clientSecret: env.AUTH_COGNITO_SECRET,
+      checks: ["nonce"], // Fix for Cognito + third-party IDP nonce mismatch
       authorization: {
         params: { identity_provider: "Google" },
       },
@@ -46,50 +46,15 @@ export const { auth, handlers, signIn } = NextAuth({
               email: { label: "Email", type: "email" },
               password: { label: "Password", type: "password" },
             },
-            async authorize(credentials) {
-              if (!credentials?.email || !credentials?.password) {
-                return null;
-              }
-
-              const user = await prisma.user.findUnique({
-                where: { email: credentials.email as string },
-                select: {
-                  id: true,
-                  email: true,
-                  name: true,
-                  image: true,
-                  password: true,
-                },
-              });
-
-              if (!user || !user.password) {
-                return null;
-              }
-
-              const isPasswordValid = await verifyPassword(
-                credentials.password as string,
-                user.password
-              );
-
-              if (!isPasswordValid) {
-                return null;
-              }
-
-              return {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                image: user.image,
-              };
-            },
+            authorize: onAuthorize,
           }),
         ]
       : []),
   ],
   session: {
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: SESSION_MAX_AGE,
     strategy: "jwt",
-    updateAge: 24 * 60 * 60, // Rotate every day
+    updateAge: SESSION_UPDATE_AGE,
   },
 });
 

@@ -1,12 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { prisma } from "@/shared/lib";
 import * as passwordUtils from "@/shared/lib";
 
 import { ServiceErrorCode } from "../types";
 import { AuthService } from "./auth-service";
-
-// Consolidated mock is defined in global setup; avoid redefining here to prevent conflicts
 
 describe("AuthService", () => {
   let service: AuthService;
@@ -23,6 +19,48 @@ describe("AuthService", () => {
   });
 
   describe("signUp", () => {
+    it("should normalize email casing before lookup and creation", async () => {
+      const signUpInput = {
+        email: "NewUser@Example.COM",
+        password: "securepassword123",
+        name: "John Doe",
+      };
+
+      const hashedPassword = "$2a$10$hashedpassword";
+      const createdUser = {
+        id: "user-123",
+        email: "newuser@example.com",
+        name: "John Doe",
+      };
+
+      mockPrismaFindUnique.mockResolvedValue(null);
+      mockHashPassword.mockResolvedValue(hashedPassword);
+      mockPrismaCreate.mockResolvedValue(createdUser);
+
+      const result = await service.signUp(signUpInput);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.user.email).toBe("newuser@example.com");
+      }
+
+      expect(mockPrismaFindUnique).toHaveBeenCalledWith({
+        where: { email: "newuser@example.com" },
+      });
+      expect(mockPrismaCreate).toHaveBeenCalledWith({
+        data: {
+          email: "newuser@example.com",
+          password: hashedPassword,
+          name: "John Doe",
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      });
+    });
+
     it("should successfully create a new user with hashed password", async () => {
       const signUpInput = {
         email: "newuser@example.com",
@@ -239,7 +277,6 @@ describe("AuthService", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        // Service should handle null email gracefully
         expect(result.data.user.id).toBe("user-123");
       }
     });

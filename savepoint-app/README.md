@@ -81,7 +81,8 @@ But I'm a Software Engineer, so I can build my own tool to cover all my needs fo
 
 ### Development Tools
 
-- **[Vitest](https://vitest.dev/)** - Testing framework
+- **[Vitest](https://vitest.dev/)** - Unit and integration testing
+- **[Playwright](https://playwright.dev/)** - End-to-end testing
 - **[ESLint](https://eslint.org/)** - Code linting
 - **[Prettier](https://prettier.io/)** - Code formatting
 - **[Bun](https://bun.sh/)** - Package manager and runtime
@@ -126,7 +127,7 @@ cd play-later-v2
 2. Install dependencies:
 
 ```bash
-pnpminstall
+pnpm install
 ```
 
 3. Set up environment variables:
@@ -138,13 +139,13 @@ cp .env.example .env.local
 4. Configure your database and run migrations:
 
 ```bash
-pnpmpostinstall
+pnpm postinstall
 ```
 
 5. Start the development server:
 
 ```bash
-pnpmdev
+pnpm dev
 ```
 
 Visit [http://localhost:6060](http://localhost:6060) to see the application.
@@ -154,21 +155,80 @@ Visit [http://localhost:6060](http://localhost:6060) to see the application.
 ### Running Tests
 
 ```bash
-# Run all tests
-pnpmrun test
+# Run all tests (unit + integration)
+pnpm test
 
-# Run unit tests (fast, mocked database)
-pnpmrun test:unit
+# Run tests in watch mode (re-run on file changes)
+pnpm test:watch
 
-# Run integration tests (real database)
-pnpmrun test:integration
+# Run tests with coverage report
+pnpm test:coverage
+```
 
-# Run tests with coverage
-pnpmrun test:coverage
+### End-to-End (E2E) Testing with Playwright
 
-# Watch mode
-pnpmrun test:unit:watch
-pnpmrun test:integration:watch
+The project uses Playwright for E2E testing to ensure the application works correctly from a user's perspective.
+
+**Prerequisites:**
+
+- Development server must be running on `http://localhost:6060` before running E2E tests
+- For authentication tests, set `AUTH_ENABLE_CREDENTIALS=true` in your `.env` file
+
+**Running E2E Tests:**
+
+```bash
+# Run all E2E tests (headless mode)
+pnpm test:e2e
+
+# Run E2E tests with UI mode (interactive)
+pnpm test:e2e:ui
+
+# Debug E2E tests (step through with Playwright Inspector)
+pnpm test:e2e:debug
+```
+
+**E2E Test Structure:**
+
+- Test files: `e2e/*.spec.ts`
+- Test helpers: `e2e/helpers/`
+  - `auth.ts`: Authentication utilities (sign in, sign out, session management)
+  - `db.ts`: Database seeding and cleanup utilities
+
+**Writing E2E Tests:**
+
+E2E tests should focus on critical user flows:
+
+- Authentication (sign up, sign in, sign out)
+- Game collection management (add, edit, delete games)
+- Steam integration workflows
+- User profile management
+
+Example:
+
+```typescript
+import { expect, test } from "@playwright/test";
+
+import { signInWithCredentials } from "./helpers/auth";
+import { clearTestData, createTestUser } from "./helpers/db";
+
+test.describe("User Authentication", () => {
+  test("should allow user to sign in", async ({ page }) => {
+    const testUser = await createTestUser({
+      email: "test@example.com",
+      username: "testuser",
+      password: "TestPassword123!",
+    });
+
+    await signInWithCredentials(page, testUser.email, testUser.password);
+
+    // Verify user is on the dashboard
+    await expect(page).toHaveURL("/");
+  });
+
+  test.afterAll(async () => {
+    await clearTestData();
+  });
+});
 ```
 
 ### Test Database Setup
@@ -177,33 +237,141 @@ For integration tests, start the test database:
 
 ```bash
 # Start test database
-pnpmrun test:db:setup
+pnpm test:db:setup
 
 # Stop test database
-pnpmrun test:db:teardown
+pnpm test:db:teardown
 ```
+
+## 🪣 LocalStack S3 Setup
+
+### What is LocalStack?
+
+LocalStack is a fully functional local AWS cloud stack that emulates AWS services like S3, DynamoDB, Lambda, and more. For this project, we use LocalStack to emulate AWS S3 for local development of features like avatar uploads, eliminating the need for real AWS credentials during development.
+
+### Starting LocalStack
+
+LocalStack runs as a Docker container alongside PostgreSQL and pgAdmin. To start it:
+
+```bash
+# From repository root
+docker-compose up -d localstack
+
+# Or start all services at once
+docker-compose up -d
+```
+
+LocalStack will be available at `http://localhost:4568` (mapped from internal port 4566 to avoid conflicts with other LocalStack instances).
+
+### Initializing the S3 Bucket
+
+After starting LocalStack for the first time, you need to create the S3 bucket and apply CORS configuration:
+
+```bash
+# From repository root
+bash scripts/init-localstack.sh
+```
+
+This script will:
+
+- Wait for LocalStack to be ready
+- Create the `savepoint-dev` bucket
+- Apply CORS configuration to allow uploads from `http://localhost:6060`
+
+### Verifying Setup
+
+You can verify that LocalStack is working correctly using the AWS CLI:
+
+```bash
+# List all buckets
+aws --endpoint-url=http://localhost:4568 s3 ls
+
+# Check CORS configuration
+aws --endpoint-url=http://localhost:4568 s3api get-bucket-cors --bucket savepoint-dev
+
+# List bucket contents
+aws --endpoint-url=http://localhost:4568 s3 ls s3://savepoint-dev/
+```
+
+### Environment Configuration
+
+The application requires these environment variables to connect to LocalStack (already configured in `.env.example`):
+
+```bash
+AWS_REGION=us-east-1
+AWS_ENDPOINT_URL=http://localhost:4568
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+S3_BUCKET_NAME=savepoint-dev
+S3_AVATAR_PATH_PREFIX=user-avatars/
+```
+
+For LocalStack, you can use `test` for both `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+
+### Troubleshooting
+
+**Port 4568 already in use:**
+If you see an error about port 4568 being in use, check if another process is using it:
+
+```bash
+# Check what's using port 4568
+lsof -i :4568
+
+# Stop all Docker containers
+docker-compose down
+
+# Start fresh
+docker-compose up -d
+```
+
+**Note:** This project uses port 4568 (instead of the default 4566) to avoid conflicts with other LocalStack instances you may have running.
+
+**Bucket not found:**
+If you get "bucket not found" errors, re-run the initialization script:
+
+```bash
+bash scripts/init-localstack.sh
+```
+
+**Data persistence:**
+LocalStack data is persisted in the `localstack-data/` directory at the repository root. To start fresh:
+
+```bash
+# Stop LocalStack
+docker-compose down localstack
+
+# Remove persisted data
+rm -rf localstack-data
+
+# Start and reinitialize
+docker-compose up -d localstack
+bash scripts/init-localstack.sh
+```
+
+**AWS CLI not configured:**
+The AWS CLI commands above don't require AWS credentials configuration. They use the `--endpoint-url` flag to point directly to LocalStack.
 
 ## 🔧 Development Commands
 
 ### Core Development
 
 ```bash
-pnpmdev          # Start development server on port 6060
-pnpmbuild        # Build the application
-pnpmstart        # Start production server
-pnpmpreview      # Build and start production server
+pnpm dev          # Start development server on port 6060
+pnpm build        # Build the application
+pnpm start        # Start production server
+pnpm preview      # Build and start production server
 ```
 
 ### Code Quality
 
 ```bash
-pnpmlint         # Run ESLint
-pnpmlint:fix     # Fix ESLint errors
-pnpmtypecheck    # TypeScript type checking
-pnpmformat:write # Format code with Prettier
-pnpmformat:check # Check code formatting
-pnpmcode-fix     # Run format:write and lint:fix
-pnpmcode-check   # Run format:check, lint, and typecheck
+pnpm lint         # Run ESLint
+pnpm lint:fix     # Fix ESLint errors
+pnpm typecheck    # TypeScript type checking
+pnpm format:write # Format code with Prettier
+pnpm format:check # Check code formatting
+pnpm code-fix     # Run format:write and lint:fix
+pnpm code-check   # Run format:check, lint, and typecheck
 ```
 
 ## 🏗️ Architecture
@@ -223,13 +391,36 @@ The application uses a repository pattern for data access, providing a clean sep
 - **UI Components**: shadcn/ui built on Radix UI primitives
 - **State Management**: React Server Components with TanStack Query for client state
 
+## 🔐 Authentication Session Policy
+
+The application uses NextAuth.js with a JWT-based session. Sessions are configured for long-lived but rotating authentication to balance convenience and safety.
+
+- Max age: 30 days. Users remain signed in across browser restarts for up to 30 days (`SESSION_MAX_AGE` in `auth.ts`).
+- Rotation cadence: 24 hours. The session token is re-issued every 24 hours (`SESSION_UPDATE_AGE`), reducing exposure if a token is compromised shortly after issuance.
+- Strategy: `jwt`. The session is stored in an HTTP-only cookie; in production it is marked `secure` with a default `sameSite` of `lax` as provided by NextAuth.
+- Sign-out and revocation: Signing out clears the local session. Global invalidation across devices is not yet implemented; rotating `AUTH_SECRET` forces a global logout but should be coordinated carefully. A dedicated “Sign out on all devices” feature is planned in a later slice.
+- Where to change: Update `SESSION_MAX_AGE` and `SESSION_UPDATE_AGE` in `savepoint-app/auth.ts` if different durations are required.
+
+## 🔑 Credentials-Based Login (Dev/Test)
+
+For local development and automated tests, the app includes a Credentials provider (email + password) in addition to OAuth.
+
+- Enablement: The credentials form is shown by default in development and test. In production it is hidden unless `AUTH_ENABLE_CREDENTIALS=true`.
+- Configure: Set `AUTH_ENABLE_CREDENTIALS=true` in `savepoint-app/.env.local` to force-enable when needed. An example is present in `.env.example`.
+- Where it appears: Visit `/login`. Use the toggle to switch between "Sign In" and "Sign Up".
+- Sign up flow: Enter email and a password (min 8 chars). Name is optional. Successful sign up auto-signs in and redirects to `/dashboard`.
+- Sign in flow: Enter the same email/password you signed up with. Email matching is case-insensitive.
+- How it works: `Credentials` provider is conditionally included in `auth.ts` and validates against users stored in the database; passwords are hashed with bcrypt and verified in `shared/lib/app/auth/credentials-callbacks.ts`.
+- Test helpers: See `e2e/helpers/db.ts#createTestUser` and `e2e/helpers/auth.ts#signInWithCredentials` to seed and log in users during E2E.
+- Security note: This path is intended for dev/test only and is disabled in production by default. Do not reuse real passwords.
+
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and add tests
-4. Run the test suite: `pnpmrun test`
-5. Run code quality checks: `pnpmcode-check`
+4. Run the test suite: `pnpm test`
+5. Run code quality checks: `pnpm code-check`
 6. Commit your changes using conventional commits (see examples below)
 7. Push to the branch: `git push origin feature/amazing-feature`
 8. Open a Pull Request

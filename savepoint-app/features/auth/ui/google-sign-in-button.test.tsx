@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
 
 import { GoogleSignInButton } from "./google-sign-in-button";
 

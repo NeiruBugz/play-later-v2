@@ -1,6 +1,6 @@
 import { type Game, type LibraryItem, type Review } from "@prisma/client";
 
-import { testDataBase } from "../database";
+import { getTestDatabase } from "../database";
 
 export type GameFactoryOptions = {
   title?: string;
@@ -24,7 +24,7 @@ export const createGame = async (
     ...options,
   };
 
-  return testDataBase.game.create({
+  return getTestDatabase().game.create({
     data: defaultData,
   });
 };
@@ -53,7 +53,7 @@ export const createLibraryItem = async (
     ...options,
   };
 
-  return testDataBase.libraryItem.create({
+  return getTestDatabase().libraryItem.create({
     data: defaultData,
   });
 };
@@ -76,7 +76,7 @@ export const createReview = async (
     ...options,
   };
 
-  return testDataBase.review.create({
+  return getTestDatabase().review.create({
     data: defaultData,
   });
 };

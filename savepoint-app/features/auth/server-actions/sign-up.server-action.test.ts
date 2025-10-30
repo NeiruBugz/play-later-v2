@@ -1,15 +1,12 @@
 import * as authModule from "@/auth";
 import { AuthService } from "@/data-access-layer/services";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { signUpAction } from "./sign-up";
 
-// Mock the auth module
 vi.mock("@/auth", () => ({
   signIn: vi.fn(),
 }));
 
-// Mock the AuthService
 vi.mock("@/data-access-layer/services", () => ({
   AuthService: vi.fn(),
 }));
@@ -23,13 +20,11 @@ describe("signUpAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Setup mock AuthService instance
     mockAuthService = {
       signUp: vi.fn(),
     };
     vi.mocked(AuthService).mockImplementation(() => mockAuthService as any);
 
-    // Setup mock signIn
     mockSignIn = vi.mocked(authModule.signIn);
   });
 

@@ -315,3 +315,89 @@ export async function addGameToUserLibrary({
     return game;
   });
 }
+
+/**
+ * Get library statistics for a user
+ * Returns the count of games in each journey status and recent games
+ * @param userId - The user's unique identifier
+ * @returns Result object with status counts and recent games or error
+ */
+export async function getLibraryStatsByUserId(userId: string): Promise<
+  | {
+      ok: true;
+      data: {
+        statusCounts: Record<string, number>;
+        recentGames: Array<{
+          gameId: string;
+          title: string;
+          coverImage: string | null;
+          lastPlayed: Date;
+        }>;
+      };
+    }
+  | {
+      ok: false;
+      error: {
+        code: string;
+        message: string;
+      };
+    }
+> {
+  try {
+    const [statusCountsRaw, recentItems] = await Promise.all([
+      prisma.libraryItem.groupBy({
+        by: ["status"],
+        where: { userId },
+        _count: true,
+      }),
+      prisma.libraryItem.findMany({
+        where: {
+          userId,
+          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        },
+        include: {
+          game: {
+            select: {
+              id: true,
+              title: true,
+              coverImage: true,
+            },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+        take: 5,
+      }),
+    ]);
+
+    const statusCounts = statusCountsRaw.reduce(
+      (acc, item) => {
+        acc[item.status] = item._count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const recentGames = recentItems.map((item) => ({
+      gameId: item.game.id,
+      title: item.game.title,
+      coverImage: item.game.coverImage,
+      lastPlayed: item.updatedAt,
+    }));
+
+    return {
+      ok: true,
+      data: {
+        statusCounts,
+        recentGames,
+      },
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: {
+        code: "STATS_FETCH_FAILED",
+        message: `Failed to fetch library stats: ${error instanceof Error ? error.message : "Unknown error"}`,
+      },
+    };
+  }
+}

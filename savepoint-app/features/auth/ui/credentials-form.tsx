@@ -1,93 +1,131 @@
 "use client";
 
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 
+import {
+  signInSchema,
+  signUpSchema,
+  type CredentialsFormValues,
+} from "../lib/validation";
 import { signInAction } from "../server-actions/sign-in";
 import { signUpAction } from "../server-actions/sign-up";
 
 export function CredentialsForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const schema = useMemo(
+    () => (mode === "signup" ? signUpSchema : signInSchema),
+    [mode]
+  );
 
-  const toggleMode = () => {
-    setMode(mode === "signin" ? "signup" : "signin");
-    setError("");
-  };
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+    reset,
+    getValues,
+    trigger,
+    clearErrors,
+  } = useForm<CredentialsFormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      email: "",
+      password: "",
+      name: "",
+    },
+    shouldUnregister: true,
+  });
 
-  const handleSignUpAction = async ({
-    email,
-    password,
-    name,
-  }: {
-    email: string;
-    password: string;
-    name?: string;
-  }) => {
-    const result = await signUpAction({ email, password, name });
-    if (!result.success) {
-      setError(result.error);
-      setLoading(false);
+  const toggleMode = useCallback(() => {
+    clearErrors();
+    setMode((prevMode) => {
+      const nextMode = prevMode === "signin" ? "signup" : "signin";
+      if (nextMode === "signin") {
+        reset({ ...getValues(), name: "" });
+      }
+      return nextMode;
+    });
+  }, [clearErrors, getValues, reset]);
+
+  useEffect(() => {
+    if (mode === "signup") {
+      trigger("password");
     }
-  };
+  }, [mode, trigger]);
 
-  const handleSignInAction = async ({
-    email,
-    password,
-  }: {
-    email: string;
-    password: string;
-  }) => {
-    const result = await signInAction({ email, password });
-    if (!result.success) {
-      setError(result.error);
-      setLoading(false);
-    }
-  };
+  const onSubmit = handleSubmit(async (values) => {
+    clearErrors("root");
 
-  const handleSubmit = async (formData: FormData) => {
-    setError("");
-    setLoading(true);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const name = formData.get("name") as string | undefined;
+    const trimmedName = values.name?.trim();
+    const payload = {
+      email: values.email.trim(),
+      password: values.password,
+      ...(trimmedName && { name: trimmedName }), // Only include name if it has a value
+    };
 
     try {
-      if (mode === "signup") {
-        await handleSignUpAction({ email, password, name });
-      } else {
-        await handleSignInAction({ email, password });
+      const result =
+        mode === "signup"
+          ? await signUpAction(payload)
+          : await signInAction(payload);
+
+      if (!result.success) {
+        setError("root", {
+          type: "server",
+          message: result.error,
+        });
       }
-    } catch (error) {
-      console.log(error);
-      setError("An unexpected error occurred");
-      setLoading(false);
+    } catch {
+      setError("root", {
+        type: "server",
+        message: "An unexpected error occurred",
+      });
     }
-  };
+  });
+
+  const passwordHint =
+    errors.password?.message ??
+    (mode === "signup" ? "Must be at least 8 characters" : undefined);
 
   return (
     <div>
-      {error && (
+      {errors.root?.message && (
         <div className="bg-destructive/10 text-destructive mb-4 rounded-md p-3 text-sm">
-          {error}
+          {errors.root.message}
         </div>
       )}
 
-      <form action={handleSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {mode === "signup" && (
           <div className="space-y-2">
             <Label htmlFor="name">Name (Optional)</Label>
             <Input
               id="name"
-              name="name"
               type="text"
               placeholder="John Doe"
-              disabled={loading}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? "name-error" : undefined}
+              {...register("name", {
+                setValueAs: (value: string) =>
+                  value.trim().length === 0 ? undefined : value,
+              })}
             />
+            {errors.name?.message && (
+              <p
+                id="name-error"
+                className="text-destructive text-xs"
+                role="alert"
+              >
+                {errors.name.message}
+              </p>
+            )}
           </div>
         )}
 
@@ -95,34 +133,59 @@ export function CredentialsForm() {
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
-            name="email"
             type="email"
             placeholder="you@example.com"
+            disabled={isSubmitting}
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? "email-error" : undefined}
             required
-            disabled={loading}
+            {...register("email")}
           />
+          {errors.email?.message && (
+            <p
+              id="email-error"
+              className="text-destructive text-xs"
+              role="alert"
+            >
+              {errors.email.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
-            name="password"
             type="password"
             placeholder="••••••••"
-            required
-            disabled={loading}
+            disabled={isSubmitting}
+            aria-invalid={!!errors.password}
+            aria-describedby={passwordHint ? "password-hint" : undefined}
             minLength={mode === "signup" ? 8 : undefined}
+            required
+            {...register("password")}
           />
-          {mode === "signup" && (
-            <p className="text-muted-foreground text-xs">
-              Must be at least 8 characters
+          {passwordHint ? (
+            <p
+              id="password-hint"
+              className="text-muted-foreground text-xs"
+              role={errors.password ? "alert" : undefined}
+            >
+              {passwordHint}
             </p>
-          )}
+          ) : null}
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Loading..." : mode === "signin" ? "Sign In" : "Sign Up"}
+        <Button
+          type="submit"
+          className="w-full cursor-pointer"
+          disabled={isSubmitting}
+        >
+          {isSubmitting
+            ? "Loading..."
+            : mode === "signin"
+              ? "Sign In"
+              : "Sign Up"}
         </Button>
       </form>
 
@@ -130,26 +193,28 @@ export function CredentialsForm() {
         {mode === "signin" ? (
           <p>
             Don't have an account?{" "}
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={toggleMode}
-              className="text-primary font-medium hover:underline"
-              disabled={loading}
+              className="cursor-pointer font-medium"
+              disabled={isSubmitting}
             >
               Sign up
-            </button>
+            </Button>
           </p>
         ) : (
           <p>
             Already have an account?{" "}
-            <button
+            <Button
               type="button"
               onClick={toggleMode}
-              className="text-primary font-medium hover:underline"
-              disabled={loading}
+              variant="secondary"
+              className="font-medium"
+              disabled={isSubmitting}
             >
               Sign in
-            </button>
+            </Button>
           </p>
         )}
       </div>

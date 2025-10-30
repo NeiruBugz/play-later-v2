@@ -1,17 +1,3 @@
-/**
- * UserService - Business logic layer for user operations
- *
- * This service handles all business logic for user management.
- * Input validation is handled at the server action layer via Zod.
- * This service focuses on:
- * - Business rule enforcement (e.g., username uniqueness)
- * - Data transformation
- * - Repository orchestration
- * - Error handling
- *
- * @module shared/services/user/user-service
- */
-
 import "server-only";
 
 import {
@@ -21,6 +7,8 @@ import {
   getUserSteamId,
   updateUserData,
 } from "@/data-access-layer/repository/user/user-repository";
+
+import { createLogger } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
@@ -36,98 +24,46 @@ import type {
   UpdateUserResult,
 } from "./types";
 
-/**
- * UserService class
- *
- * Provides business logic operations for managing users.
- * All methods return ServiceResult discriminated unions for type-safe error handling.
- *
- * @example
- * ```typescript
- * const service = new UserService();
- *
- * // Get user info
- * const result = await service.getUser({
- *   userId: "user-123"
- * });
- *
- * if (result.success) {
- *   console.log(result.data.user); // TypeScript knows user exists
- * } else {
- *   console.error(result.error); // TypeScript knows error exists
- * }
- * ```
- */
 export class UserService extends BaseService {
-  /**
-   * Get user by ID.
-   *
-   * Fetches user information including basic profile data and Steam connection status.
-   *
-   * @param input - User ID
-   * @returns ServiceResult with user data
-   *
-   * @example
-   * ```typescript
-   * const result = await service.getUser({
-   *   userId: "user-123"
-   * });
-   *
-   * if (result.success) {
-   *   console.log(result.data.user.username);
-   *   console.log(result.data.user.email);
-   *   console.log(result.data.user.steamConnectedAt);
-   * }
-   * ```
-   */
+  private logger = createLogger({ service: "UserService" });
   async getUser(input: GetUserInput): Promise<GetUserResult> {
     try {
+      this.logger.info({ userId: input.userId }, "Fetching user info");
+
       const user = await getUserInfo({ userId: input.userId });
 
       if (!user) {
+        this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
 
+      this.logger.info(
+        { userId: input.userId },
+        "User info fetched successfully"
+      );
       return this.success({ user });
     } catch (error) {
+      this.logger.error({ error, userId: input.userId }, "Error fetching user");
       return this.handleError(error, "Failed to fetch user");
     }
   }
 
-  /**
-   * Update user profile.
-   *
-   * Business rules:
-   * - Username must be unique (enforced by repository/database)
-   * - At least one field must be provided for update
-   *
-   * @param input - Update parameters
-   * @returns ServiceResult with updated user data
-   *
-   * @example
-   * ```typescript
-   * // Update username
-   * const result = await service.updateUser({
-   *   userId: "user-123",
-   *   username: "newusername"
-   * });
-   *
-   * // Update Steam profile URL
-   * const result = await service.updateUser({
-   *   userId: "user-123",
-   *   steamProfileUrl: "https://steamcommunity.com/id/newprofile"
-   * });
-   *
-   * if (result.success) {
-   *   console.log(result.data.user);
-   *   console.log(result.data.message);
-   * }
-   * ```
-   */
   async updateUser(input: UpdateUserInput): Promise<UpdateUserResult> {
     try {
-      // Validate that at least one field is provided
+      this.logger.info(
+        {
+          userId: input.userId,
+          hasUsername: !!input.username,
+          hasSteamUrl: !!input.steamProfileUrl,
+        },
+        "Updating user profile"
+      );
+
       if (input.username === undefined && input.steamProfileUrl === undefined) {
+        this.logger.warn(
+          { userId: input.userId },
+          "Update failed: no fields provided"
+        );
         return this.error(
           "At least one field must be provided for update",
           ServiceErrorCode.VALIDATION_ERROR
@@ -140,6 +76,11 @@ export class UserService extends BaseService {
         steamProfileUrl: input.steamProfileUrl ?? null,
       });
 
+      this.logger.info(
+        { userId: updatedUser.id, username: updatedUser.username },
+        "User profile updated successfully"
+      );
+
       return this.success({
         user: {
           id: updatedUser.id,
@@ -149,61 +90,62 @@ export class UserService extends BaseService {
         message: "User profile updated successfully",
       });
     } catch (error) {
-      // Check for unique constraint violation (username already taken)
       if (
         error instanceof Error &&
         (error.message.includes("Unique constraint") ||
           error.message.includes("unique"))
       ) {
+        this.logger.warn(
+          { userId: input.userId, username: input.username, error },
+          "Update failed: username already taken"
+        );
         return this.error(
           "Username is already taken",
           ServiceErrorCode.CONFLICT
         );
       }
 
-      // Check for user not found
       if (error instanceof Error && error.message === "User not found") {
+        this.logger.warn(
+          { userId: input.userId },
+          "Update failed: user not found"
+        );
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
 
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error updating user profile"
+      );
       return this.handleError(error, "Failed to update user profile");
     }
   }
 
-  /**
-   * Get Steam integration status for a user.
-   *
-   * Returns Steam connection information including Steam ID, username,
-   * profile URL, and connection timestamp.
-   *
-   * @param input - User ID
-   * @returns ServiceResult with Steam integration data
-   *
-   * @example
-   * ```typescript
-   * const result = await service.getSteamIntegrationStatus({
-   *   userId: "user-123"
-   * });
-   *
-   * if (result.success) {
-   *   if (result.data.integration.isConnected) {
-   *     console.log("Steam ID:", result.data.integration.steamId64);
-   *     console.log("Steam Username:", result.data.integration.steamUsername);
-   *   } else {
-   *     console.log("Steam is not connected");
-   *   }
-   * }
-   * ```
-   */
   async getSteamIntegrationStatus(
     input: GetSteamIntegrationInput
   ): Promise<GetSteamIntegrationResult> {
     try {
+      this.logger.info(
+        { userId: input.userId },
+        "Fetching Steam integration status"
+      );
+
       const steamData = await getUserSteamData({ userId: input.userId });
 
       if (!steamData) {
+        this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
+
+      const isConnected = steamData.steamId64 !== null;
+      this.logger.info(
+        {
+          userId: input.userId,
+          isConnected,
+          steamUsername: steamData.steamUsername,
+        },
+        "Steam integration status fetched"
+      );
 
       return this.success({
         integration: {
@@ -211,61 +153,68 @@ export class UserService extends BaseService {
           steamUsername: steamData.steamUsername,
           steamProfileURL: steamData.steamProfileURL,
           steamConnectedAt: steamData.steamConnectedAt,
-          isConnected: steamData.steamId64 !== null,
+          isConnected,
         },
       });
     } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error fetching Steam integration status"
+      );
       return this.handleError(error, "Failed to get Steam integration status");
     }
   }
 
-  /**
-   * Disconnect Steam integration for a user.
-   *
-   * Removes all Steam-related data from the user's profile including
-   * Steam ID, username, profile URL, avatar, and connection timestamp.
-   *
-   * @param input - User ID
-   * @returns ServiceResult with success message
-   *
-   * @example
-   * ```typescript
-   * const result = await service.disconnectSteam({
-   *   userId: "user-123"
-   * });
-   *
-   * if (result.success) {
-   *   console.log(result.data.message); // "Steam account disconnected successfully"
-   * }
-   * ```
-   */
   async disconnectSteam(
     input: DisconnectSteamInput
   ): Promise<DisconnectSteamResult> {
     try {
+      this.logger.info({ userId: input.userId }, "Disconnecting Steam account");
+
       await disconnectSteamRepo({ userId: input.userId });
+
+      this.logger.info(
+        { userId: input.userId },
+        "Steam account disconnected successfully"
+      );
 
       return this.success({
         message: "Steam account disconnected successfully",
       });
     } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error disconnecting Steam account"
+      );
       return this.handleError(error, "Failed to disconnect Steam account");
     }
   }
 
-  /**
-   * Get user's Steam ID by Steam username (for the authenticated user).
-   */
   async getSteamIdForUser(
     input: GetSteamIdForUserInput
   ): Promise<GetSteamIdForUserResult> {
     try {
+      this.logger.info(
+        { userId: input.userId, steamUsername: input.steamUsername },
+        "Fetching Steam ID for user"
+      );
+
       const res = await getUserSteamId({
         steamUsername: input.steamUsername,
         userId: input.userId,
       });
+
+      this.logger.info(
+        { userId: input.userId, steamId64: res?.steamId64 },
+        "Steam ID fetched"
+      );
+
       return this.success({ steamId64: res?.steamId64 ?? null });
     } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId, steamUsername: input.steamUsername },
+        "Error fetching Steam ID"
+      );
       return this.handleError(error, "Failed to fetch Steam ID for user");
     }
   }

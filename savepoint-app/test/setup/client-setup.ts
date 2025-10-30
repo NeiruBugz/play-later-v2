@@ -49,6 +49,16 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   disconnect: vi.fn(),
 }));
 
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = vi.fn();
+  Element.prototype.setPointerCapture = vi.fn();
+  Element.prototype.releasePointerCapture = vi.fn();
+}
+
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = vi.fn();
+}
+
 export const server = setupServer(
   http.get("/api/igdb-search", async ({ request }: { request: Request }) => {
     const url = new URL(request.url);

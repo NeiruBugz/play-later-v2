@@ -1,6 +1,3 @@
-// Domain enums exposed for UI/server-actions without importing Prisma directly.
-// Keep in sync with prisma/schema.prisma.
-
 export const LIBRARY_ITEM_STATUS = [
   "CURIOUS_ABOUT",
   "CURRENTLY_EXPLORING",

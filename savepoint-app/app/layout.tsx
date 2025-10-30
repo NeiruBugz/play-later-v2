@@ -1,5 +1,7 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { type Metadata, type Viewport } from "next";
 
+import { LoadingScreen } from "@/shared/components/loading-screen";
 import { cn } from "@/shared/lib";
 import { Providers } from "@/shared/providers";
 
@@ -46,18 +48,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://SavePoint.vercel.app"),
+  metadataBase: new URL("https://savepoint-app.vercel.app"),
   title: "SavePoint - Your Personal Gaming Library & Journal",
   description:
     "Curate your gaming library and journal your experiences. For patient gamers who view games as worlds to explore, not chores to complete.",
-  keywords: [
-    "game backlog",
-    "gaming",
-    "game tracker",
-    "video games",
-    "game collection",
-    "game management",
-  ],
   authors: [{ name: "SavePoint Team" }],
   creator: "SavePoint Team",
   publisher: "SavePoint",
@@ -86,23 +80,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://SavePoint.vercel.app",
+    url: "https://savepoint-app.vercel.app",
     title: "SavePoint",
-    description: "SavePoint – Your ultimate game backlog companion",
+    description: "SavePoint – Your Personal Gaming Library & Journal",
     siteName: "SavePoint",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "SavePoint - Game Backlog Manager",
+        alt: "SavePoint - Your Personal Gaming Library & Journal",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "SavePoint",
-    description: "SavePoint – Your ultimate game backlog companion",
+    description: "SavePoint – Your Personal Gaming Library & Journal",
     images: ["/og-image.png"],
   },
   category: "entertainment",
@@ -129,8 +123,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div id="root" className="relative flex min-h-screen flex-col">
-            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
           </div>
+          <SpeedInsights />
         </Providers>
       </body>
     </html>

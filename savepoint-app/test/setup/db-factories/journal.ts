@@ -1,6 +1,6 @@
 import { type JournalEntry } from "@prisma/client";
 
-import { testDataBase } from "../database";
+import { getTestDatabase } from "../database";
 
 export type JournalEntryFactoryOptions = {
   userId: string;
@@ -17,7 +17,6 @@ export type JournalEntryFactoryOptions = {
     | "NOSTALGIC"
     | null;
   playSession?: number | null;
-  isPublic?: boolean;
   visibility?: "PRIVATE" | "FRIENDS_ONLY" | "PUBLIC";
   publishedAt?: Date | null;
 };
@@ -32,13 +31,12 @@ export const createJournalEntry = async (
     content: `Test journal entry created at ${timestamp}`,
     mood: null,
     playSession: null,
-    isPublic: false,
     visibility: "PRIVATE" as const,
     publishedAt: null,
     ...options,
   };
 
-  return testDataBase.journalEntry.create({
+  return getTestDatabase().journalEntry.create({
     data: defaultData,
   });
 };

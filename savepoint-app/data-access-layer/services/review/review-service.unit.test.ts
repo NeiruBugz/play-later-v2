@@ -7,7 +7,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceErrorCode } from "../types";
 import { ReviewService } from "./review-service";
 
-// Mock the repository functions
 vi.mock("@/data-access-layer/repository/review/review-repository", () => ({
   createReview: vi.fn(),
   getAllReviewsForGame: vi.fn(),
@@ -76,6 +75,7 @@ describe("ReviewService", () => {
 
       expect(mockGetAllReviewsForGame).toHaveBeenCalledWith({
         gameId: "game-456",
+        userId: undefined,
       });
     });
 
@@ -96,21 +96,6 @@ describe("ReviewService", () => {
             username: "johndoe",
           },
         },
-        {
-          id: "review-2",
-          userId: "user-789",
-          gameId: "game-456",
-          rating: 4,
-          content: "Great game",
-          completedOn: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          User: {
-            name: "Jane Smith",
-            image: "avatar2.jpg",
-            username: "janesmith",
-          },
-        },
       ];
 
       mockGetAllReviewsForGame.mockResolvedValue(mockReviews);
@@ -123,9 +108,14 @@ describe("ReviewService", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.reviews).toHaveLength(1);
-        expect(result.data.reviews[0].userId).toBe("user-123");
         expect(result.data.total).toBe(1);
+        expect(result.data.reviews).toEqual(mockReviews);
       }
+
+      expect(mockGetAllReviewsForGame).toHaveBeenCalledWith({
+        gameId: "game-456",
+        userId: "user-123",
+      });
     });
 
     it("should return empty array when no reviews found", async () => {
@@ -272,41 +262,6 @@ describe("ReviewService", () => {
     });
   });
 
-  // describe("updateReview", () => {
-  //   it("should return not implemented error", async () => {
-  //     const result = await service.updateReview({
-  //       userId: "user-123",
-  //       id: "review-1",
-  //       rating: 4,
-  //     });
-
-  //     expect(result.success).toBe(false);
-  //     if (!result.success) {
-  //       expect(result.error).toBe(
-  //         "Update review functionality not yet implemented"
-  //       );
-  //       expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-  //     }
-  //   });
-  // });
-
-  // describe("deleteReview", () => {
-  //   it("should return not implemented error", async () => {
-  //     const result = await service.deleteReview({
-  //       id: "review-1",
-  //       userId: "user-123",
-  //     });
-
-  //     expect(result.success).toBe(false);
-  //     if (!result.success) {
-  //       expect(result.error).toBe(
-  //         "Delete review functionality not yet implemented"
-  //       );
-  //       expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-  //     }
-  //   });
-  // });
-
   describe("getAggregatedRating", () => {
     it("should calculate average rating for a game", async () => {
       const mockReviews = [
@@ -365,7 +320,7 @@ describe("ReviewService", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.averageRating).toBe(4); // (5 + 4 + 3) / 3 = 4
+        expect(result.data.averageRating).toBe(4);
         expect(result.data.count).toBe(3);
       }
     });
@@ -426,7 +381,7 @@ describe("ReviewService", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.averageRating).toBe(4.5); // (5 + 4) / 2 = 4.5
+        expect(result.data.averageRating).toBe(4.5);
         expect(result.data.count).toBe(2);
       }
     });

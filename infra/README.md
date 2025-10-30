@@ -5,6 +5,7 @@ Overview
 - Location: `infra/`
 - Structure:
   - `modules/cognito/`: Reusable Cognito module
+  - `modules/s3/`: Reusable S3 bucket module (versioned, CORS, IAM policy)
   - `envs/dev/`: Dev environment stack
   - `envs/prod/`: Prod environment stack
 
@@ -14,6 +15,8 @@ What this provisions
 - Cognito User Pool App Client (OIDC code flow)
 - Cognito Hosted UI domain
 - Optional: Google IdP federation into Cognito (supply Google client ID/secret)
+- AWS S3 bucket with versioning, public access blocks, and CORS
+  - Exposes an IAM policy granting RW access for your app runtime
 
 Outputs → App env mapping
 
@@ -33,6 +36,14 @@ Dev quickstart
    - `AUTH_COGNITO_ID=...`
    - `AUTH_COGNITO_SECRET=...`
    - `AUTH_COGNITO_ISSUER=...`
+   - `S3_BUCKET_NAME=...` (from `s3_bucket_name`)
+
+S3 module notes
+
+- Bucket naming: S3 names are global. The module defaults to `<project_name>-<environment>-<account_id>-<region>` to avoid collisions. You can override via `s3_bucket_name` in env tfvars.
+- CORS: The env passes `app_url` as an allowed origin; add more via `s3_additional_allowed_origins`.
+- IAM policy: Output `s3_access_policy_arn` grants `GetObject/PutObject/DeleteObject` and `ListBucket`.
+- Optional ECS role attachment: Set `s3_ecs_task_role_name` to attach the policy to an existing role by name.
 
 Notes
 

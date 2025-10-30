@@ -46,24 +46,28 @@ model VerificationToken {
 }
 
 model User {
-  id                   String                 @id @default(cuid())
-  name                 String?
-  email                String?                @unique
-  emailVerified        DateTime?
-  image                String?
-  password             String?                // For credentials authentication
-  username             String?
-  steamProfileURL      String?
-  steamId64            String?
-  steamUsername        String?
-  steamAvatar          String?
-  steamConnectedAt     DateTime?
-  Account              Account[]
-  Session              Session[]
-  LibraryItem          LibraryItem[]
-  Review               Review[]
-  JournalEntry         JournalEntry[]
-  IgnoredImportedGames IgnoredImportedGames[]
+  id                      String                 @id @default(cuid())
+  name                    String?
+  email                   String?                @unique
+  emailVerified           DateTime?
+  image                   String?
+  password                String? // For credentials authentication
+  username                String?                @unique
+  usernameNormalized      String?                @unique
+  profileSetupCompletedAt DateTime?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+  steamProfileURL         String?
+  steamId64               String?
+  steamUsername           String?
+  steamAvatar             String?
+  steamConnectedAt        DateTime?
+  Account                 Account[]
+  Session                 Session[]
+  LibraryItem             LibraryItem[]
+  Review                  Review[]
+  JournalEntry            JournalEntry[]
+  IgnoredImportedGames    IgnoredImportedGames[]
 
   ImportedGame ImportedGame[]
 }
@@ -124,13 +128,12 @@ model Review {
 }
 
 model JournalEntry {
-  id            String            @id @default(cuid())
-  title         String? // Optional title for the entry
-  content       String            @db.Text // Rich text journal content
-  mood          JournalMood? // Optional mood indicator
-  playSession   Int? // Session number for this game
-  isPublic      Boolean           @default(false) // Privacy control
-  visibility    JournalVisibility @default(PRIVATE)
+  id          String            @id @default(cuid())
+  title       String? // Optional title for the entry
+  content     String            @db.Text // Rich text journal content
+  mood        JournalMood? // Optional mood indicator
+  playSession Int? // Session number for this game
+  visibility  JournalVisibility @default(PRIVATE)
 
   // Relationships
   userId        String
@@ -207,7 +210,7 @@ enum JournalMood {
 }
 
 enum JournalVisibility {
-  PRIVATE      // Only user can see
+  PRIVATE // Only user can see
   FRIENDS_ONLY // Future feature
-  PUBLIC       // Anyone can see
+  PUBLIC // Anyone can see
 }

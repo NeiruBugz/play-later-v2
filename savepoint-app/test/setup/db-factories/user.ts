@@ -1,13 +1,15 @@
 import { type User } from "@prisma/client";
 
-import { testDataBase } from "../database";
+import { getTestDatabase } from "../database";
 
 export type UserFactoryOptions = {
   email?: string;
   name?: string;
   username?: string;
+  usernameNormalized?: string;
   steamId64?: string;
   steamUsername?: string;
+  password?: string;
 };
 
 export const createUser = async (
@@ -16,14 +18,18 @@ export const createUser = async (
   const timestamp = Date.now();
   const randomSuffix = Math.random().toString(36).substring(2, 8);
 
+  const username = options.username ?? `testuser${timestamp}${randomSuffix}`;
+
   const defaultData = {
     email: `user-${timestamp}-${randomSuffix}@example.com`,
     name: `Test User ${timestamp}`,
-    username: `testuser${timestamp}${randomSuffix}`,
+    username,
+    usernameNormalized: options.usernameNormalized ?? username.toLowerCase(),
+    password: options.password,
     ...options,
   };
 
-  return testDataBase.user.create({
+  return getTestDatabase().user.create({
     data: defaultData,
   });
 };

@@ -14,7 +14,6 @@ import { ServiceErrorCode } from "../types";
 import { GameService } from "./game-service";
 import type { GameWithLibraryItems } from "./types";
 
-// Mock the repository functions
 vi.mock("@/data-access-layer/repository/game/game-repository", () => ({
   createGame: vi.fn(),
   findGameById: vi.fn(),
@@ -22,16 +21,12 @@ vi.mock("@/data-access-layer/repository/game/game-repository", () => ({
   isGameExisting: vi.fn(),
   updateGame: vi.fn(),
 }));
-
-// Mock the IGDB Service
 vi.mock("../igdb/igdb-service", () => ({
   IgdbService: vi.fn().mockImplementation(() => ({
     searchGamesByName: vi.fn(),
     getGameDetails: vi.fn(),
   })),
 }));
-
-// Rely on global mock for '@/shared/lib'
 
 describe("GameService", () => {
   let service: GameService;
@@ -54,7 +49,6 @@ describe("GameService", () => {
     mockIsGameExisting = vi.mocked(isGameExisting);
     mockUpdateGame = vi.mocked(updateGame);
 
-    // Get the mocked IgdbService instance
     const MockedIgdbService = vi.mocked(IgdbService);
     mockIgdbService = MockedIgdbService.mock.results[
       MockedIgdbService.mock.results.length - 1
@@ -242,7 +236,7 @@ describe("GameService", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.games).toHaveLength(5);
-        expect(result.data.games[0].id).toBe(11); // offset 10, so starts at 11
+        expect(result.data.games[0].id).toBe(11);
         expect(result.data.total).toBe(20);
       }
     });

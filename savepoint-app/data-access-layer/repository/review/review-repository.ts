@@ -2,11 +2,17 @@ import "server-only";
 
 import { prisma } from "@/shared/lib";
 
-import { type CreateReviewInput } from "./types";
+import { type CreateReviewInput, type GetReviewsForGameInput } from "./types";
 
-export async function getAllReviewsForGame({ gameId }: { gameId: string }) {
+export async function getAllReviewsForGame({
+  gameId,
+  userId,
+}: GetReviewsForGameInput) {
   return prisma.review.findMany({
-    where: { gameId },
+    where: {
+      gameId,
+      ...(userId ? { userId } : {}),
+    },
     include: {
       User: {
         select: {

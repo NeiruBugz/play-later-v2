@@ -17,7 +17,7 @@ export default async function Page() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="from-muted/30 to-background absolute inset-0 bg-gradient-to-b" />
+        <div className="from-muted/30 to-background absolute inset-0 bg-linear-to-b" />
 
         <div className="relative">
           {/* Navigation */}
@@ -43,8 +43,8 @@ export default async function Page() {
               >
                 Philosophy
               </a>
-              <Button variant="outline" size="sm">
-                Sign In
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Sign In</Link>
               </Button>
               <Button
                 size="sm"
@@ -78,6 +78,7 @@ export default async function Page() {
                 <Button
                   size="lg"
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+                  asChild
                 >
                   <Link href="/login">Start Your Journey</Link>
                 </Button>
@@ -224,7 +225,7 @@ export default async function Page() {
                   Explore Timeline
                 </Button>
               </div>
-              <div className="from-primary/20 to-secondary/20 relative aspect-[4/3] overflow-hidden rounded-lg bg-gradient-to-br">
+              <div className="from-primary/20 to-secondary/20 relative aspect-4/3 overflow-hidden rounded-lg bg-linear-to-br">
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="space-y-2 text-center">
                     <BookOpen className="text-primary mx-auto h-16 w-16 opacity-50" />
@@ -286,101 +287,11 @@ export default async function Page() {
                 Your personal gaming library and journal for patient gamers.
               </p>
             </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold">Product</h4>
-              <ul className="text-muted-foreground space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Integrations
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold">Community</h4>
-              <ul className="text-muted-foreground space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Discord
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Twitter
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold">Company</h4>
-              <ul className="text-muted-foreground space-y-2 text-sm">
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Privacy
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Terms
-                  </a>
-                </li>
-              </ul>
-            </div>
           </div>
 
           <div className="border-border text-muted-foreground mt-12 border-t pt-8 text-center text-sm">
             <p>
-              © 2025 SavePoint. For patient gamers who view games as worlds to
+              2025 SavePoint. For patient gamers who view games as worlds to
               explore.
             </p>
           </div>

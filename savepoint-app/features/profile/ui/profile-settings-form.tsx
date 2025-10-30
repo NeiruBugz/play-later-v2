@@ -1,0 +1,118 @@
+"use client";
+
+import { useActionState, useEffect, useState, type FormEvent } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+
+import { initialFormState } from "../lib/constants";
+import { ProfileSettingsFormProps } from "../lib/types";
+import { updateProfileFormAction } from "../server-actions/update-profile";
+import { AvatarUpload } from "./avatar-upload";
+import { UsernameInput } from "./username-input";
+
+export function ProfileSettingsForm({
+  currentUsername,
+  currentAvatar,
+}: ProfileSettingsFormProps) {
+  const [username, setUsername] = useState(currentUsername ?? "");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    currentAvatar ?? null
+  );
+  const [hasValidationError, setHasValidationError] = useState(false);
+  const [state, formAction, isPending] = useActionState(
+    updateProfileFormAction,
+    initialFormState
+  );
+
+  useEffect(() => {
+    if (state.status === "success") {
+      toast.success(state.message ?? "Profile updated successfully!");
+      setUsername((current) => state.submittedUsername ?? current.trim());
+    }
+  }, [state]);
+
+  const handleAvatarUploadSuccess = (url: string) => {
+    setAvatarUrl(url);
+    toast.success("Profile image uploaded successfully.");
+  };
+
+  const handleAvatarUploadError = (error: string) => {
+    toast.error(error, {
+      description: "Please try again or choose a different image.",
+    });
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    if (username.trim().length < 3 || username.trim().length > 25) {
+      event.preventDefault();
+    }
+  };
+
+  const trimmedUsername = username.trim();
+  const showServerError =
+    state.status === "error" &&
+    !!state.message &&
+    state.submittedUsername === trimmedUsername;
+
+  return (
+    <Card className="w-full max-w-2xl">
+      <CardHeader>
+        <CardTitle>Profile Settings</CardTitle>
+        <CardDescription>
+          Update your profile information. Changes will be visible to other
+          users.
+        </CardDescription>
+      </CardHeader>
+      <form action={formAction} onSubmit={handleSubmit} noValidate>
+        <input type="hidden" name="avatarUrl" value={avatarUrl ?? ""} />
+        <input type="hidden" name="username" value={username} />
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-foreground text-sm font-medium">
+              Profile Image
+            </label>
+            <AvatarUpload
+              currentAvatar={avatarUrl}
+              onUploadSuccess={handleAvatarUploadSuccess}
+              onUploadError={handleAvatarUploadError}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-foreground text-sm font-medium">
+              Username
+            </label>
+            <UsernameInput
+              value={username}
+              onChange={setUsername}
+              error={showServerError ? state.message : undefined}
+              disabled={isPending}
+              onValidationChange={setHasValidationError}
+            />
+            <p className="text-muted-foreground text-sm">
+              Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.
+            </p>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button
+            type="submit"
+            disabled={isPending || hasValidationError}
+            className="w-full sm:w-auto"
+          >
+            {isPending ? "Saving..." : "Save Changes"}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+}

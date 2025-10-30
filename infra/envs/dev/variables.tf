@@ -41,3 +41,21 @@ variable "google_client_secret" {
   description = "Google OAuth client secret for Cognito federation"
   default     = ""
 }
+
+variable "s3_bucket_name" {
+  type        = string
+  description = "Optional explicit S3 bucket name override for this env"
+  default     = ""
+}
+
+variable "s3_additional_allowed_origins" {
+  type        = list(string)
+  description = "Additional CORS allowed origins besides app_url"
+  default     = []
+}
+
+variable "s3_ecs_task_role_name" {
+  type        = string
+  description = "Optional ECS task role name to attach S3 access policy"
+  default     = ""
+}

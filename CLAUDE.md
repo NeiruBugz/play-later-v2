@@ -33,7 +33,7 @@ tree -L 2 -I 'node_modules|.git|.next' --gitignore
 - `savepoint-app/`: Main Next.js application
 - `infra/`: Terraform infrastructure as code (AWS Cognito, etc.)
 - `context/`: Product documentation and specifications
-- Root: Shared tooling (commitlint, lefthook)
+- Root: Shared tooling (commitlint)
 
 ### Key Architecture Layers (within `savepoint-app/`)
 
@@ -409,9 +409,14 @@ chore: update dependencies
 
 **Scopes** (optional): `auth`, `ui`, `api`, `db`, feature names
 
-### Pre-commit Hooks
+### CI Checks (no local hooks)
 
-Managed by **lefthook** (configured in `lefthook.yml`):
+- Pre-commit hooks are removed. CI enforces:
+  - `format:check`, `lint`, and `typecheck`
+  - Vitest projects (`components`, `backend`, `utilities`)
+  - Migration safety checks
+  
+Commit message conventions are validated locally with `pnpm exec commitlint`.
 
 - Runs linting on staged files
 - Runs type checking

@@ -10,7 +10,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceErrorCode } from "../types";
 import { JournalService } from "./journal-service";
 
-// Mock the repository functions
 vi.mock("@/data-access-layer/repository/journal/journal-repository", () => ({
   createJournalEntry: vi.fn(),
   deleteJournalEntry: vi.fn(),
@@ -51,7 +50,6 @@ describe("JournalService", () => {
           mood: "EXCITED" as const,
           playSession: 120,
           visibility: "PRIVATE" as const,
-          isPublic: false,
           publishedAt: null,
           createdAt: new Date("2024-03-01"),
           updatedAt: new Date("2024-03-01"),
@@ -100,7 +98,6 @@ describe("JournalService", () => {
           mood: "EXCITED" as const,
           playSession: 60,
           visibility: "PRIVATE" as const,
-          isPublic: false,
           publishedAt: null,
           createdAt: new Date("2024-03-01"),
           updatedAt: new Date("2024-03-01"),
@@ -149,7 +146,6 @@ describe("JournalService", () => {
           mood: "EXCITED" as const,
           playSession: 60,
           visibility: "PRIVATE" as const,
-          isPublic: false,
           publishedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -178,7 +174,6 @@ describe("JournalService", () => {
           mood: "EXCITED" as const,
           playSession: 90,
           visibility: "PRIVATE" as const,
-          isPublic: false,
           publishedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -257,7 +252,6 @@ describe("JournalService", () => {
         mood: "EXCITED" as const,
         playSession: 120,
         visibility: "PUBLIC" as const,
-        isPublic: true,
         publishedAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -319,7 +313,6 @@ describe("JournalService", () => {
         mood: null,
         playSession: null,
         visibility: "PRIVATE" as const,
-        isPublic: false,
         publishedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -381,7 +374,6 @@ describe("JournalService", () => {
         mood: "RELAXED" as const,
         playSession: 90,
         visibility: "PRIVATE" as const,
-        isPublic: false,
         publishedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -487,7 +479,6 @@ describe("JournalService", () => {
         mood: null,
         playSession: null,
         visibility: "PRIVATE" as const,
-        isPublic: false,
         publishedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -599,7 +590,6 @@ describe("JournalService", () => {
           mood: "EXCITED" as const,
           playSession: 120,
           visibility: "PRIVATE" as const,
-          isPublic: false,
           publishedAt: null,
           createdAt: tenDaysAgo,
           updatedAt: tenDaysAgo,
@@ -625,7 +615,6 @@ describe("JournalService", () => {
           mood: "EXCITED" as const,
           playSession: 90,
           visibility: "PRIVATE" as const,
-          isPublic: false,
           publishedAt: null,
           createdAt: twentyDaysAgo,
           updatedAt: twentyDaysAgo,
@@ -651,7 +640,6 @@ describe("JournalService", () => {
           mood: "FRUSTRATED" as const,
           playSession: 60,
           visibility: "PRIVATE" as const,
-          isPublic: false,
           publishedAt: null,
           createdAt: fortyDaysAgo,
           updatedAt: fortyDaysAgo,
@@ -678,12 +666,12 @@ describe("JournalService", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.stats.totalEntries).toBe(3);
-        expect(result.data.stats.totalPlayTime).toBe(270); // 120 + 90 + 60
+        expect(result.data.stats.totalPlayTime).toBe(270);
         expect(result.data.stats.moodDistribution).toEqual([
           { mood: "EXCITED", count: 2 },
           { mood: "FRUSTRATED", count: 1 },
         ]);
-        expect(result.data.stats.recentEntries).toBe(2); // 2 entries in last 30 days
+        expect(result.data.stats.recentEntries).toBe(2);
       }
     });
 
@@ -715,7 +703,6 @@ describe("JournalService", () => {
           mood: null,
           playSession: 120,
           visibility: "PRIVATE" as const,
-          isPublic: false,
           publishedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),

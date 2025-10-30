@@ -2,7 +2,6 @@ import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
 import type { BaseService, ServiceResult } from "../types";
 
-// IGDB Service specific types
 export interface GameSearchParams {
   name: string;
   fields?: {
@@ -109,7 +108,7 @@ export interface GetSimilarGamesParams {
 }
 
 export interface SimilarGamesResult {
-  similarGames: number[]; // Array of IGDB game IDs
+  similarGames: number[];
 }
 
 export interface GetGameGenresParams {

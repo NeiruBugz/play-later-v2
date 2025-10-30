@@ -18,6 +18,7 @@ export {
   findCurrentlyPlayingGames,
   buildCollectionFilter,
   addGameToUserLibrary,
+  getLibraryStatsByUserId,
 } from "./library/library-repository";
 
 export {
@@ -36,6 +37,9 @@ export {
   updateUserData,
   getUserSteamId,
   disconnectSteam,
+  findUserById,
+  findUserByNormalizedUsername,
+  updateUserProfile,
 } from "./user/user-repository";
 
 export {
