@@ -9,3 +9,15 @@ enable_cognito_native = false
 # Optional: enable Google as Cognito IdP
 # google_client_id     = "..."
 # google_client_secret = "..."
+
+# --- S3 (Production-like) ---
+# Optional explicit bucket name (defaults to "${project_name}-${environment}")
+# s3_bucket_name = "savepoint-dev"
+
+# Additional CORS origins (app_url is always included)
+# s3_additional_allowed_origins = [
+#   "http://127.0.0.1:6060"
+# ]
+
+# Optional: attach S3 access policy to an existing ECS task role by name
+# s3_ecs_task_role_name = "savepoint-dev-task-role"
