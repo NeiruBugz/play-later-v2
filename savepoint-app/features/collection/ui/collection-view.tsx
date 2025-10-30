@@ -69,8 +69,9 @@ export function CollectionView({ availablePlatforms }: CollectionViewProps) {
             </h2>
             <p className="text-muted-foreground mt-2">
               We're having trouble loading your game collection.
-              {hasActiveFilters ? " Try clearing your filters or " : " "}
-              this could be a temporary issue.
+              {hasActiveFilters
+                ? " Try clearing your filters or try again below."
+                : " This could be a temporary issue."}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">

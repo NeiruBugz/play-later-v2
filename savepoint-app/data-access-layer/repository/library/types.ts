@@ -70,6 +70,8 @@ export type AddGameToUserLibraryInput = {
     status: LibraryItemStatus;
     platform?: string;
     acquisitionType: AcquisitionType;
+    startedAt?: Date;
+    completedAt?: Date;
   };
 };
 

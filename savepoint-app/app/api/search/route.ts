@@ -48,7 +48,10 @@ export async function GET(request: Request) {
 
   if (!result.success) {
     logger.error({ err: result.error, query, userId }, "Game search failed");
-    return NextResponse.json({ error: result.error }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to search games" },
+      { status: 500 }
+    );
   }
 
   logger.info(

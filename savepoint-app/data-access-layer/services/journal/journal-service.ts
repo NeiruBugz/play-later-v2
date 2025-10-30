@@ -9,8 +9,6 @@ import {
 } from "@/data-access-layer/repository/journal/journal-repository";
 import type { JournalMood } from "@prisma/client";
 
-import { createLogger } from "@/shared/lib";
-
 import { BaseService, ServiceErrorCode } from "../types";
 import type {
   CreateJournalEntryInput,

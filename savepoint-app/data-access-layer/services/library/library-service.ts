@@ -82,6 +82,8 @@ export class LibraryService extends BaseService {
           status: input.status,
           platform: input.platform,
           acquisitionType: input.acquisitionType ?? AcquisitionType.DIGITAL,
+          startedAt: input.startedAt,
+          completedAt: input.completedAt,
         },
       });
 
