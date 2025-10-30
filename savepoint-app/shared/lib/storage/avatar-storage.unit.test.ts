@@ -43,7 +43,7 @@ describe("AvatarStorageService", () => {
   });
 
   describe("File Validation - Valid Files", () => {
-    it("should accept valid JPEG file under 5MB", async () => {
+    it("should accept valid JPEG file under 4MB", async () => {
       const file = createMockFile("avatar.jpg", 3 * 1024 * 1024, "image/jpeg");
 
       const result = await AvatarStorageService.uploadAvatar(
@@ -100,8 +100,8 @@ describe("AvatarStorageService", () => {
       }
     });
 
-    it("should accept file exactly 5MB (boundary test)", async () => {
-      const file = createMockFile("avatar.jpg", 5 * 1024 * 1024, "image/jpeg");
+    it("should accept file exactly 4MB (boundary test)", async () => {
+      const file = createMockFile("avatar.jpg", 4 * 1024 * 1024, "image/jpeg");
 
       const result = await AvatarStorageService.uploadAvatar(
         TEST_USER_ID,
@@ -116,7 +116,7 @@ describe("AvatarStorageService", () => {
   });
 
   describe("File Validation - Invalid Files", () => {
-    it("should reject file over 5MB (6MB)", async () => {
+    it("should reject file over 4MB", async () => {
       const file = createMockFile("large.jpg", 6 * 1024 * 1024, "image/jpeg");
 
       const result = await AvatarStorageService.uploadAvatar(
@@ -126,7 +126,7 @@ describe("AvatarStorageService", () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error).toBe("File size exceeds 5MB");
+        expect(result.error).toBe("File size exceeds 4MB");
       }
     });
 

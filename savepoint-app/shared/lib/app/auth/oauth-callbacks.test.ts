@@ -50,9 +50,7 @@ describe("oauth callbacks", () => {
 
   it("onSession exposes token id on session.user.id", async () => {
     const session = await onSession({
-      // @ts-expect-error – shape simplified for test
       session: { user: { name: "Test" } },
-      // @ts-expect-error – shape simplified for test
       token: { id: "u42" },
     });
     expect(session.user.id).toBe("u42");

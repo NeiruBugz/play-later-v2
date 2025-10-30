@@ -182,7 +182,7 @@
 - [x] **Sub-task:** Update `auth.ts` session configuration: change `maxAge` to `30 * 24 * 60 * 60` (30 days)
 - [x] **Sub-task:** Verify `updateAge` is set to `24 * 60 * 60` (rotate session token daily)
 - *Note: E2E test for session persistence moved to Slice 17.*
-- [ ] **Sub-task:** Document 30-day session behavior in security policy or README
+- [x] **Sub-task:** Document 30-day session behavior in security policy or README
 
 ---
 
@@ -194,21 +194,21 @@
 - [x] **Sub-task:** Create or update login page to show email/password form when credentials enabled
 - [x] **Sub-task:** Write E2E test: Credentials-based login (test environment only)
 - [x] **Sub-task:** Verify credentials login form is hidden when `AUTH_ENABLE_CREDENTIALS=false`
-- [ ] **Sub-task:** Document credentials-based login setup in README (for developers and testers)
+- [x] **Sub-task:** Document credentials-based login setup in README (for developers and testers)
 
 ---
 
 ## **Slice 14: Production S3 Setup (Terraform)**
 *Goal: Create S3 bucket infrastructure for production*
 
-- [ ] **Sub-task:** Create `infra/modules/s3/main.tf` Terraform module for S3 bucket
-- [ ] **Sub-task:** Add S3 bucket resource with versioning enabled
-- [ ] **Sub-task:** Add CORS configuration for production domain (`https://savepoint.app`)
-- [ ] **Sub-task:** Add public access block (prevent accidental public exposure)
-- [ ] **Sub-task:** Create IAM policy for ECS task to access S3 bucket (PutObject, GetObject, DeleteObject)
-- [ ] **Sub-task:** Update ECS task execution role to attach S3 access policy
-- [ ] **Sub-task:** Apply Terraform configuration to dev environment and verify bucket creation
-- [ ] **Sub-task:** Document Terraform S3 setup in infrastructure README
+- [x] **Sub-task:** Create `infra/modules/s3/main.tf` Terraform module for S3 bucket
+- [x] **Sub-task:** Add S3 bucket resource with versioning enabled
+- [x] **Sub-task:** Add CORS configuration for production domain (`https://savepoint.app`)
+- [x] **Sub-task:** Add public access block (prevent accidental public exposure)
+- [x] **Sub-task:** Create IAM policy for ECS task to access S3 bucket (PutObject, GetObject, DeleteObject)
+- [x] **Sub-task:** Update ECS task execution role to attach S3 access policy
+- [x] **Sub-task:** Apply Terraform configuration to dev environment and verify bucket creation
+- [x] **Sub-task:** Document Terraform S3 setup in infrastructure README
 
 ---
 
@@ -238,12 +238,12 @@
 *Goal: Consolidate remaining E2E tests to reduce churn while core flows stabilize*
 
 - [ ] **Sub-task:** Write E2E test: First-time OAuth sign-up flow (Google OAuth → setup page → dashboard)
-- [ ] **Sub-task:** Write E2E test: Returning user login (Google OAuth → dashboard directly)
-- [ ] **Sub-task:** Write E2E test to verify session persists across page reloads
-- [ ] **Sub-task:** Write E2E test: Username conflict (case-insensitive uniqueness)
-- [ ] **Sub-task:** Write E2E test: Profile view displays stats and recent games correctly
-- [ ] **Sub-task:** Write E2E test: Invalid username scenarios (too short, profanity, reserved names)
-- [ ] **Sub-task:** Write E2E test: Avatar upload validation (file size, unsupported format)
+- [x] **Sub-task:** Write E2E test: Returning user login (Google OAuth → dashboard directly)
+- [x] **Sub-task:** Write E2E test to verify session persists across page reloads
+- [x] **Sub-task:** Write E2E test: Username conflict (case-insensitive uniqueness)
+- [x] **Sub-task:** Write E2E test: Profile view displays stats and recent games correctly
+- [x] **Sub-task:** Write E2E test: Invalid username scenarios (too short, profanity, reserved names)
+- [x] **Sub-task:** Write E2E test: Avatar upload validation (file size, unsupported format)
 - [ ] **Sub-task:** Run all unit, integration, and E2E tests (verify ≥80% coverage)
 
 ---

@@ -16,6 +16,8 @@ coverage
 playwright-report/
 test-results/
 .playwright/
+e2e/.auth/user.json
+savepoint-app/e2e/.auth/user.json
 
 # next.js
 .next/

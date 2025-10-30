@@ -23,7 +23,10 @@ export async function onRedirect({
     // Only allow relative or same-origin URLs. Cross-origin -> baseUrl.
     if (url.startsWith("/")) {
       const target = new URL(url, baseUrl);
-      if (target.pathname === "/profile/setup" || target.pathname === "/dashboard") {
+      if (
+        target.pathname === "/profile/setup" ||
+        target.pathname === "/dashboard"
+      ) {
         const count = Number(target.searchParams.get("r") ?? "0");
         if (count >= 2) return `${baseUrl}/dashboard`;
         target.searchParams.set("r", String(count + 1));
@@ -33,7 +36,10 @@ export async function onRedirect({
 
     if (url.startsWith(baseUrl)) {
       const target = new URL(url);
-      if (target.pathname === "/profile/setup" || target.pathname === "/dashboard") {
+      if (
+        target.pathname === "/profile/setup" ||
+        target.pathname === "/dashboard"
+      ) {
         const count = Number(target.searchParams.get("r") ?? "0");
         if (count >= 2) return `${baseUrl}/dashboard`;
         target.searchParams.set("r", String(count + 1));

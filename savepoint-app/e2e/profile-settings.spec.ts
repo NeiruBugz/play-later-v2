@@ -117,7 +117,8 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     const settings = new ProfileSettingsPage(page);
     await settings.goto();
 
-    await settings.typeUsername(takenUser.username);
+    // Type the username in a different case to verify case-insensitive behavior
+    await settings.typeUsername(takenUser.username.toUpperCase());
     await expect(settings.usernameTakenMessage()).toBeVisible({
       timeout: 5000,
     });
@@ -154,6 +155,34 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     await page.waitForTimeout(600); // allow debounce to settle
     await expect(settings.usernameAvailableMessage()).not.toBeVisible();
     await expect(settings.usernameTakenMessage()).not.toBeVisible();
+  });
+
+  test("Scenario: Reserved username shows validation error", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    // "admin" is reserved according to validation rules
+    await settings.typeUsername("admin");
+    await expect(page.getByText("Username is not allowed")).toBeVisible({
+      timeout: 3000,
+    });
+    await expect(settings.saveButton()).toBeDisabled();
+  });
+
+  test("Scenario: Profanity-like username shows validation error", async ({
+    page,
+  }) => {
+    const settings = new ProfileSettingsPage(page);
+    await settings.goto();
+
+    // "damn" is included in additional profanity checks
+    await settings.typeUsername(`damnuser${Date.now()}`);
+    await expect(page.getByText("Username is not allowed")).toBeVisible({
+      timeout: 3000,
+    });
+    await expect(settings.saveButton()).toBeDisabled();
   });
 
   test("Scenario: Transition from taken to available updates feedback", async ({
@@ -246,7 +275,7 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     );
 
     const sizeErrorToast = settings.getToast(
-      "File size exceeds 5MB. Please upload a smaller image."
+      "File size exceeds 4MB. Please upload a smaller image."
     );
     await expect(sizeErrorToast).toBeVisible({ timeout: 3000 });
     await expect(settings.avatarUploadButton()).not.toBeVisible();

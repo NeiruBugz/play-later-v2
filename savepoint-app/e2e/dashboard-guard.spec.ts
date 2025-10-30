@@ -8,6 +8,9 @@ import {
 import { ProfileSetupPage } from "./pages/profile-setup.page";
 
 test.describe("[guard] Dashboard redirect for first-time users", () => {
+  // Ensure this suite starts unauthenticated to render the login page
+  test.use({ storageState: undefined });
+  test.use({ storageState: undefined });
   test.afterAll(async () => {
     await disconnectDatabase();
   });

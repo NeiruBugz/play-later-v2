@@ -1,5 +1,11 @@
 import * as filter from "leo-profanity";
 
+// Extend leo-profanity with a minimal set our product requires
+// that is missing from the default dictionary.
+// Keep this list small and maintained via the library API (not custom scanning).
+const ADDITIONAL_PROFANITY = ["damn"] as const;
+filter.add(ADDITIONAL_PROFANITY as unknown as string[]);
+
 export type ValidationResult =
   | { valid: true }
   | { valid: false; error: string };
@@ -36,25 +42,32 @@ export const validateUsername = (username: string): ValidationResult => {
     return { valid: false, error: "Username is not allowed" };
   }
 
-  // 4. Profanity check
-  // The leo-profanity library checks tokenized words only and won't catch
-  // concatenated cases inside a single token (e.g. "damnUser").
-  // We first use the library check, and then perform a conservative
-  // substring scan using the dictionary for words with length >= 4,
-  // plus a small custom extension list.
+  // 4. Profanity check (leo-profanity) with concatenation handling
+  // a) Direct check handles cases split by separators already
   if (filter.check(username)) {
     return { valid: false, error: "Username is not allowed" };
   }
 
-  // Tokenize the username into alphabetic parts, including camelCase boundaries
+  // b) Token check with camelCase splitting (e.g., "damnUser" -> "damn user")
   const camelSplit = username.replace(/([a-z])([A-Z])/g, "$1 $2");
   const lower = camelSplit.toLowerCase();
   const tokens = lower.match(/[a-z]+/g) ?? [];
-
-  const extraWords = new Set(["damn"]);
   const dictSet = new Set(filter.list());
   for (const token of tokens) {
-    if (dictSet.has(token) || extraWords.has(token)) {
+    if (dictSet.has(token)) {
+      return { valid: false, error: "Username is not allowed" };
+    }
+  }
+
+  // c) Conservative substring scan on a compact form to catch concatenations
+  //    Use only dictionary words with length >= 4 to avoid false positives
+  //    like "class" containing "ass" (len 3).
+  const compact = lower.replace(/[^a-z0-9]/g, "");
+  const profaneWords = filter
+    .list()
+    .filter((w) => /^[a-z]+$/.test(w) && w.length >= 4);
+  for (const w of profaneWords) {
+    if (compact.startsWith(w) || compact.endsWith(w)) {
       return { valid: false, error: "Username is not allowed" };
     }
   }

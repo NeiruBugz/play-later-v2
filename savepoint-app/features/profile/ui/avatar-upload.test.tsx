@@ -39,7 +39,7 @@ describe("AvatarUpload", () => {
         screen.getByText(/Click to upload or drag and drop/i)
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/JPG, PNG, GIF, or WebP \(max 5MB\)/i)
+        screen.getByText(/JPG, PNG, GIF, or WebP \(max 4MB\)/i)
       ).toBeInTheDocument();
     });
 
@@ -223,7 +223,7 @@ describe("AvatarUpload", () => {
   });
 
   describe("Validation", () => {
-    it("rejects file over 5MB with correct error message", async () => {
+    it("rejects file over 4MB with correct error message", async () => {
       const user = userEvent.setup();
       const onUploadError = vi.fn();
       render(<AvatarUpload onUploadError={onUploadError} />);
@@ -237,11 +237,11 @@ describe("AvatarUpload", () => {
 
       expect(
         screen.getByText(
-          /File size exceeds 5MB. Please upload a smaller image./i
+          /File size exceeds 4MB. Please upload a smaller image./i
         )
       ).toBeInTheDocument();
       expect(onUploadError).toHaveBeenCalledWith(
-        "File size exceeds 5MB. Please upload a smaller image."
+        "File size exceeds 4MB. Please upload a smaller image."
       );
     });
 
@@ -692,7 +692,7 @@ describe("AvatarUpload", () => {
 
       await user.upload(input, file);
 
-      expect(screen.getByText(/File size exceeds 5MB/i)).toBeInTheDocument();
+      expect(screen.getByText(/File size exceeds 4MB/i)).toBeInTheDocument();
 
       const validFile = createMockFile("test.jpg", 1024, "image/jpeg");
       await user.upload(input, validFile);

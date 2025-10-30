@@ -391,6 +391,29 @@ The application uses a repository pattern for data access, providing a clean sep
 - **UI Components**: shadcn/ui built on Radix UI primitives
 - **State Management**: React Server Components with TanStack Query for client state
 
+## 🔐 Authentication Session Policy
+
+The application uses NextAuth.js with a JWT-based session. Sessions are configured for long-lived but rotating authentication to balance convenience and safety.
+
+- Max age: 30 days. Users remain signed in across browser restarts for up to 30 days (`SESSION_MAX_AGE` in `auth.ts`).
+- Rotation cadence: 24 hours. The session token is re-issued every 24 hours (`SESSION_UPDATE_AGE`), reducing exposure if a token is compromised shortly after issuance.
+- Strategy: `jwt`. The session is stored in an HTTP-only cookie; in production it is marked `secure` with a default `sameSite` of `lax` as provided by NextAuth.
+- Sign-out and revocation: Signing out clears the local session. Global invalidation across devices is not yet implemented; rotating `AUTH_SECRET` forces a global logout but should be coordinated carefully. A dedicated “Sign out on all devices” feature is planned in a later slice.
+- Where to change: Update `SESSION_MAX_AGE` and `SESSION_UPDATE_AGE` in `savepoint-app/auth.ts` if different durations are required.
+
+## 🔑 Credentials-Based Login (Dev/Test)
+
+For local development and automated tests, the app includes a Credentials provider (email + password) in addition to OAuth.
+
+- Enablement: The credentials form is shown by default in development and test. In production it is hidden unless `AUTH_ENABLE_CREDENTIALS=true`.
+- Configure: Set `AUTH_ENABLE_CREDENTIALS=true` in `savepoint-app/.env.local` to force-enable when needed. An example is present in `.env.example`.
+- Where it appears: Visit `/login`. Use the toggle to switch between "Sign In" and "Sign Up".
+- Sign up flow: Enter email and a password (min 8 chars). Name is optional. Successful sign up auto-signs in and redirects to `/dashboard`.
+- Sign in flow: Enter the same email/password you signed up with. Email matching is case-insensitive.
+- How it works: `Credentials` provider is conditionally included in `auth.ts` and validates against users stored in the database; passwords are hashed with bcrypt and verified in `shared/lib/app/auth/credentials-callbacks.ts`.
+- Test helpers: See `e2e/helpers/db.ts#createTestUser` and `e2e/helpers/auth.ts#signInWithCredentials` to seed and log in users during E2E.
+- Security note: This path is intended for dev/test only and is disabled in production by default. Do not reuse real passwords.
+
 ## 🤝 Contributing
 
 1. Fork the repository

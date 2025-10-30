@@ -21,13 +21,13 @@ export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
 
 /**
  * Schema for uploading avatar
- * Validates file size (max 5MB) and MIME type
+ * Validates file size (max 4MB) and MIME type
  */
 export const UploadAvatarSchema = z.object({
   file: z
     .instanceof(File)
-    .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: "File size exceeds 5MB",
+    .refine((file) => file.size <= 4 * 1024 * 1024, {
+      message: "File size exceeds 4MB",
     })
     .refine(
       (file) =>

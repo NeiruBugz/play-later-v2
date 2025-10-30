@@ -5,8 +5,18 @@ export async function signInWithCredentials(
   email: string,
   password: string
 ): Promise<void> {
-  await page.goto("/login");
-  await page.waitForLoadState("networkidle");
+  // Ensure a clean, unauthenticated context to avoid redirects away from /login
+  await page.context().clearCookies();
+  await page.addInitScript(() => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+    } catch {}
+  });
+
+  // Navigate to the login page and wait for the form to be present
+  await page.goto("/login", { waitUntil: "domcontentloaded" });
+  await page.getByRole("textbox", { name: /email/i }).waitFor();
 
   await page.getByLabel(/email/i).fill(email);
   await page.getByLabel(/password/i).fill(password);

@@ -19,9 +19,9 @@ export class AvatarStorageService {
   > {
     try {
       // Validate file
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      const maxSize = 4 * 1024 * 1024; // 4MB
       if (file.size > maxSize) {
-        return { ok: false, error: "File size exceeds 5MB" };
+        return { ok: false, error: "File size exceeds 4MB" };
       }
 
       const allowedTypes = [

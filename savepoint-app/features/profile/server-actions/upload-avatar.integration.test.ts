@@ -235,10 +235,10 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
   });
 
   describe("Validation Error Tests", () => {
-    it("should reject file over 5MB with size error", async () => {
+    it("should reject file over 4MB with size error", async () => {
       const file = createTestFile(
         "huge.jpg",
-        5 * 1024 * 1024 + 1, // 5MB + 1 byte
+        4 * 1024 * 1024 + 1, // 4MB + 1 byte
         "image/jpeg"
       );
 
@@ -246,7 +246,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("File size exceeds 5MB");
+        expect(result.error).toBe("File size exceeds 4MB");
       }
 
       const listResponse = await s3Client.send(
@@ -265,10 +265,10 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       expect(user?.image).toBeNull();
     });
 
-    it("should reject file at exactly 5MB boundary", async () => {
+    it("should accept file at exactly 4MB boundary", async () => {
       const file = createTestFile(
-        "exact-5mb.jpg",
-        5 * 1024 * 1024, // Exactly 5MB
+        "exact-4mb.jpg",
+        4 * 1024 * 1024, // Exactly 4MB
         "image/jpeg"
       );
 

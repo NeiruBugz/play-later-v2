@@ -14,7 +14,7 @@ interface AvatarUploadProps {
   onUploadError?: (error: string) => void;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FILE_SIZE = 4 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 export const AvatarUpload = ({
@@ -31,7 +31,7 @@ export const AvatarUpload = ({
 
   const validateFile = (file: File): string | null => {
     if (file.size > MAX_FILE_SIZE) {
-      return "File size exceeds 5MB. Please upload a smaller image.";
+      return "File size exceeds 4MB. Please upload a smaller image.";
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -184,7 +184,7 @@ export const AvatarUpload = ({
               Click to upload or drag and drop
             </p>
             <p className="text-muted-foreground text-xs">
-              JPG, PNG, GIF, or WebP (max 5MB)
+              JPG, PNG, GIF, or WebP (max 4MB)
             </p>
           </div>
         )}

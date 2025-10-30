@@ -18,9 +18,13 @@ Acceptance Criteria (Slice 10):
 */
 
 test.describe("[setup] Profile Setup — First-time user flow", () => {
+  // Ensure this suite starts unauthenticated to render the login page
+  test.use({ storageState: undefined });
   test.afterAll(async () => {
     await disconnectDatabase();
   });
+
+  test.use({ storageState: undefined });
 
   test("Scenario: Complete setup with username and avatar redirects to dashboard", async ({
     page,

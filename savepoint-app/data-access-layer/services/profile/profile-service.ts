@@ -397,9 +397,9 @@ export class ProfileService extends BaseService {
     }
   }
 
-  async getRedirectAfterAuth(
-    input: { userId: string }
-  ): Promise<import("./types").GetRedirectAfterAuthResult> {
+  async getRedirectAfterAuth(input: {
+    userId: string;
+  }): Promise<import("./types").GetRedirectAfterAuthResult> {
     try {
       this.logger.info(
         { userId: input.userId },
