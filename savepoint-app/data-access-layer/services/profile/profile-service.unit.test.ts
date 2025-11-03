@@ -4,7 +4,11 @@ import {
   getLibraryStatsByUserId,
   updateUserProfile,
 } from "@/data-access-layer/repository";
-import { repositorySuccess } from "@/data-access-layer/repository/types";
+import {
+  repositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+} from "@/data-access-layer/repository/types";
 import {
   basicUserProfileFixture,
   existingUserForRedirectFixture,
@@ -246,7 +250,9 @@ describe("ProfileService", () => {
 
   describe("checkUsernameAvailability", () => {
     it("should return available: true when username is not taken", async () => {
-      mockFindUserByNormalizedUsername.mockResolvedValue(null);
+      mockFindUserByNormalizedUsername.mockResolvedValue(
+        repositorySuccess(null)
+      );
 
       const result = await service.checkUsernameAvailability({
         username: "newuser123",
@@ -263,7 +269,9 @@ describe("ProfileService", () => {
     });
 
     it("should return available: false when username is already taken", async () => {
-      mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-123" });
+      mockFindUserByNormalizedUsername.mockResolvedValue(
+        repositorySuccess({ id: "user-123" })
+      );
 
       const result = await service.checkUsernameAvailability({
         username: "existinguser",
@@ -280,7 +288,9 @@ describe("ProfileService", () => {
     });
 
     it("should check username case-insensitively", async () => {
-      mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-123" });
+      mockFindUserByNormalizedUsername.mockResolvedValue(
+        repositorySuccess({ id: "user-123" })
+      );
 
       const result = await service.checkUsernameAvailability({
         username: "ExistingUser",
@@ -324,7 +334,11 @@ describe("ProfileService", () => {
           repositorySuccess({ username: "existinguser" })
         );
         mockUpdateUserProfile.mockResolvedValue(
-          userForUnchangedUsernameFixture
+          repositorySuccess({
+            ...userForUnchangedUsernameFixture,
+            steamProfileURL: null,
+            profileSetupCompletedAt: null,
+          })
         );
 
         const result = await service.updateProfile({
@@ -358,8 +372,16 @@ describe("ProfileService", () => {
         mockFindUserById.mockResolvedValue(
           repositorySuccess({ username: "olduser" })
         );
-        mockFindUserByNormalizedUsername.mockResolvedValue(null);
-        mockUpdateUserProfile.mockResolvedValue(userForNewUsernameFixture);
+        mockFindUserByNormalizedUsername.mockResolvedValue(
+          repositorySuccess(null)
+        );
+        mockUpdateUserProfile.mockResolvedValue(
+          repositorySuccess({
+            ...userForNewUsernameFixture,
+            steamProfileURL: null,
+            profileSetupCompletedAt: null,
+          })
+        );
 
         const result = await service.updateProfile({
           userId,
@@ -394,7 +416,13 @@ describe("ProfileService", () => {
         mockFindUserById.mockResolvedValue(
           repositorySuccess({ username: "testuser" })
         );
-        mockUpdateUserProfile.mockResolvedValue(userWithAvatarUpdateFixture);
+        mockUpdateUserProfile.mockResolvedValue(
+          repositorySuccess({
+            ...userWithAvatarUpdateFixture,
+            steamProfileURL: null,
+            profileSetupCompletedAt: null,
+          })
+        );
 
         const result = await service.updateProfile({
           userId,
@@ -639,9 +667,14 @@ describe("ProfileService", () => {
         mockFindUserById.mockResolvedValue(
           repositorySuccess({ username: "olduser" })
         );
-        mockFindUserByNormalizedUsername.mockResolvedValue(null);
-        mockUpdateUserProfile.mockRejectedValue(
-          new Error("Database connection failed")
+        mockFindUserByNormalizedUsername.mockResolvedValue(
+          repositorySuccess(null)
+        );
+        mockUpdateUserProfile.mockResolvedValue(
+          repositoryError(
+            RepositoryErrorCode.INTERNAL_ERROR,
+            "Database connection failed"
+          )
         );
 
         const result = await service.updateProfile({
@@ -651,7 +684,7 @@ describe("ProfileService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Database connection failed");
+          expect(result.error).toBe("Failed to update profile");
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
         }
       });

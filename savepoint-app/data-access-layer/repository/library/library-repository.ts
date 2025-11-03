@@ -6,11 +6,7 @@ import {
   repositorySuccess,
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
-import {
-  LibraryItemStatus,
-  type LibraryItem,
-  type Prisma,
-} from "@prisma/client";
+import { LibraryItemStatus, Prisma, type LibraryItem } from "@prisma/client";
 
 import { prisma } from "@/shared/lib";
 
@@ -28,14 +24,33 @@ export async function createLibraryItem({
   libraryItem,
   userId,
   gameId,
-}: CreateLibraryItemInput) {
-  return prisma.libraryItem.create({
-    data: {
-      ...libraryItem,
-      User: { connect: { id: userId } },
-      game: { connect: { id: gameId } },
-    },
-  });
+}: CreateLibraryItemInput): Promise<RepositoryResult<LibraryItem>> {
+  try {
+    const created = await prisma.libraryItem.create({
+      data: {
+        ...libraryItem,
+        User: { connect: { id: userId } },
+        game: { connect: { id: gameId } },
+      },
+    });
+
+    return repositorySuccess(created);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return repositoryError(
+        RepositoryErrorCode.DUPLICATE,
+        "Library item already exists"
+      );
+    }
+
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to create library item: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function deleteLibraryItem({
@@ -103,72 +118,155 @@ export async function updateLibraryItem({
 export async function getLibraryItemsForUserByIgdbId({
   userId,
   igdbId,
-}: GetLibraryItemsForUserByIgdbIdInput) {
-  const items = await prisma.libraryItem.findMany({
-    where: { userId, game: { igdbId } },
-  });
-  return items;
+}: GetLibraryItemsForUserByIgdbIdInput): Promise<
+  RepositoryResult<LibraryItem[]>
+> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: { userId, game: { igdbId } },
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get library items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function getManyLibraryItems({
   userId,
   gameId,
-}: GetManyLibraryItemsInput) {
-  return prisma.libraryItem.findMany({
-    where: { gameId, userId },
-    orderBy: { createdAt: "asc" },
-  });
+}: GetManyLibraryItemsInput): Promise<RepositoryResult<LibraryItem[]>> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: { gameId, userId },
+      orderBy: { createdAt: "asc" },
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get library items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function getLibraryCount({
   userId,
   status,
   gteClause,
-}: GetLibraryCountInput) {
-  return prisma.libraryItem.count({ where: { userId, status, ...gteClause } });
+}: GetLibraryCountInput): Promise<RepositoryResult<number>> {
+  try {
+    const count = await prisma.libraryItem.count({
+      where: { userId, status, ...gteClause },
+    });
+    return repositorySuccess(count);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get library count: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
-export async function getPlatformBreakdown({ userId }: { userId: string }) {
-  return prisma.libraryItem.groupBy({
-    by: ["platform"],
-    where: { userId, platform: { not: null } },
-    _count: true,
-    orderBy: { _count: { platform: "desc" } },
-    take: 5,
-  });
+export async function getPlatformBreakdown({
+  userId,
+}: {
+  userId: string;
+}): Promise<
+  RepositoryResult<
+    Array<{
+      platform: string | null;
+      _count: number;
+    }>
+  >
+> {
+  try {
+    const breakdown = await prisma.libraryItem.groupBy({
+      by: ["platform"],
+      where: { userId, platform: { not: null } },
+      _count: true,
+      orderBy: { _count: { platform: "desc" } },
+      take: 5,
+    });
+    return repositorySuccess(breakdown);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get platform breakdown: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function getAcquisitionTypeBreakdown({
   userId,
 }: {
   userId: string;
-}) {
-  return prisma.libraryItem.groupBy({
-    by: ["acquisitionType"],
-    where: { userId },
-    _count: true,
-  });
+}): Promise<
+  RepositoryResult<
+    Array<{
+      acquisitionType: string | null;
+      _count: number;
+    }>
+  >
+> {
+  try {
+    const breakdown = await prisma.libraryItem.groupBy({
+      by: ["acquisitionType"],
+      where: { userId },
+      _count: true,
+    });
+    return repositorySuccess(breakdown);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get acquisition type breakdown: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function getRecentlyCompletedLibraryItems({
   userId,
 }: {
   userId: string;
-}) {
-  return prisma.libraryItem.findMany({
-    where: { userId, status: LibraryItemStatus.EXPERIENCED },
-    include: { game: { select: { title: true } } },
-    orderBy: { completedAt: "desc" },
-    take: 3,
-  });
+}): Promise<
+  RepositoryResult<Array<LibraryItem & { game: { title: string } }>>
+> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: { userId, status: LibraryItemStatus.EXPERIENCED },
+      include: { game: { select: { title: true } } },
+      orderBy: { completedAt: "desc" },
+      take: 3,
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get recently completed items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
-export async function getUniquePlatforms({ userId }: { userId: string }) {
-  return prisma.libraryItem.findMany({
-    where: { userId },
-    select: { platform: true },
-    distinct: ["platform"],
-  });
+export async function getUniquePlatforms({
+  userId,
+}: {
+  userId: string;
+}): Promise<RepositoryResult<Array<{ platform: string | null }>>> {
+  try {
+    const platforms = await prisma.libraryItem.findMany({
+      where: { userId },
+      select: { platform: true },
+      distinct: ["platform"],
+    });
+    return repositorySuccess(platforms);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get unique platforms: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 /**
@@ -177,24 +275,35 @@ export async function getUniquePlatforms({ userId }: { userId: string }) {
  * Use getOtherUsersLibrariesPaginated() instead, which provides proper pagination.
  * This function is kept for backward compatibility but should not be used in new code.
  */
-export async function getOtherUsersLibraries({ userId }: { userId: string }) {
-  const userGames = await prisma.libraryItem.findMany({
-    where: { userId: { not: userId }, User: { username: { not: null } } },
-    include: { game: true, User: true },
-    orderBy: { createdAt: "asc" },
-  });
+export async function getOtherUsersLibraries({
+  userId,
+}: {
+  userId: string;
+}): Promise<RepositoryResult<UserWithLibraryItemsResponse[]>> {
+  try {
+    const userGames = await prisma.libraryItem.findMany({
+      where: { userId: { not: userId }, User: { username: { not: null } } },
+      include: { game: true, User: true },
+      orderBy: { createdAt: "asc" },
+    });
 
-  const groupedByUser = userGames.reduce(
-    (acc: Record<string, UserWithLibraryItemsResponse>, item) => {
-      const { User } = item;
-      acc[User.id] ??= { user: User, libraryItems: [] };
-      acc[User.id].libraryItems.push(item);
-      return acc;
-    },
-    {}
-  );
+    const groupedByUser = userGames.reduce(
+      (acc: Record<string, UserWithLibraryItemsResponse>, item) => {
+        const { User } = item;
+        acc[User.id] ??= { user: User, libraryItems: [] };
+        acc[User.id].libraryItems.push(item);
+        return acc;
+      },
+      {}
+    );
 
-  return Object.values(groupedByUser);
+    return repositorySuccess(Object.values(groupedByUser));
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get other users' libraries: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function getOtherUsersLibrariesPaginated({
@@ -207,114 +316,229 @@ export async function getOtherUsersLibrariesPaginated({
   page?: number;
   itemsPerPage?: number;
   search?: string;
-}) {
-  const skip = Math.max((page || 1) - 1, 0) * itemsPerPage;
-  const userWhere: Prisma.UserWhereInput = {
-    id: { not: userId },
-    username: { not: null },
-    ...(search
-      ? {
-          OR: [
-            { username: { contains: search, mode: "insensitive" } },
-            { name: { contains: search, mode: "insensitive" } },
-          ],
-        }
-      : {}),
-  };
+}): Promise<
+  RepositoryResult<{
+    users: Array<{
+      user: Prisma.UserGetPayload<{
+        include: {
+          _count: { select: { LibraryItem: true } };
+          LibraryItem: { include: { game: true } };
+        };
+      }>;
+      previewItems: Array<
+        Prisma.LibraryItemGetPayload<{ include: { game: true } }>
+      >;
+      totalCount: number;
+    }>;
+    count: number;
+  }>
+> {
+  try {
+    const skip = Math.max((page || 1) - 1, 0) * itemsPerPage;
+    const userWhere: Prisma.UserWhereInput = {
+      id: { not: userId },
+      username: { not: null },
+      ...(search
+        ? {
+            OR: [
+              { username: { contains: search, mode: "insensitive" } },
+              { name: { contains: search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
 
-  const [users, total] = await prisma.$transaction([
-    prisma.user.findMany({
-      where: userWhere,
-      orderBy: { username: "asc" },
-      skip,
-      take: itemsPerPage,
-      include: {
-        _count: { select: { LibraryItem: true } },
-        LibraryItem: {
-          include: { game: true },
-          orderBy: { createdAt: "asc" },
-          take: 3,
+    const [users, total] = await prisma.$transaction([
+      prisma.user.findMany({
+        where: userWhere,
+        orderBy: { username: "asc" },
+        skip,
+        take: itemsPerPage,
+        include: {
+          _count: { select: { LibraryItem: true } },
+          LibraryItem: {
+            include: { game: true },
+            orderBy: { createdAt: "asc" },
+            take: 3,
+          },
         },
-      },
-    }),
-    prisma.user.count({ where: userWhere }),
-  ]);
+      }),
+      prisma.user.count({ where: userWhere }),
+    ]);
 
-  const result = users.map((u) => ({
-    user: u,
-    previewItems: u.LibraryItem,
-    totalCount: u._count.LibraryItem,
-  }));
+    const result = users.map((u) => ({
+      user: u,
+      previewItems: u.LibraryItem,
+      totalCount: u._count.LibraryItem,
+    }));
 
-  return { users: result, count: total };
+    return repositorySuccess({ users: result, count: total });
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get paginated libraries: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
-export async function getLibraryByUsername({ username }: { username: string }) {
-  return prisma.libraryItem.findMany({
-    where: { User: { username } },
-    include: { game: { select: { id: true, title: true, coverImage: true } } },
-    orderBy: { createdAt: "asc" },
-  });
+export async function getLibraryByUsername({
+  username,
+}: {
+  username: string;
+}): Promise<
+  RepositoryResult<
+    Array<
+      LibraryItem & {
+        game: { id: string; title: string; coverImage: string | null };
+      }
+    >
+  >
+> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: { User: { username } },
+      include: {
+        game: { select: { id: true, title: true, coverImage: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get library by username: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function getWishlistedItemsByUsername({
   username,
 }: {
   username: string;
-}) {
-  return prisma.libraryItem.findMany({
-    where: { User: { username }, status: LibraryItemStatus.WISHLIST },
-    include: { game: true },
-    orderBy: { createdAt: "asc" },
-  });
+}): Promise<
+  RepositoryResult<
+    Array<Prisma.LibraryItemGetPayload<{ include: { game: true } }>>
+  >
+> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: { User: { username }, status: LibraryItemStatus.WISHLIST },
+      include: { game: true },
+      orderBy: { createdAt: "asc" },
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get wishlisted items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
-export async function findWishlistItemsForUser({ userId }: { userId: string }) {
-  return prisma.libraryItem.findMany({
-    where: { userId, status: LibraryItemStatus.WISHLIST },
-    include: { game: true },
-    orderBy: { createdAt: "asc" },
-  });
+export async function findWishlistItemsForUser({
+  userId,
+}: {
+  userId: string;
+}): Promise<
+  RepositoryResult<
+    Array<Prisma.LibraryItemGetPayload<{ include: { game: true } }>>
+  >
+> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: { userId, status: LibraryItemStatus.WISHLIST },
+      include: { game: true },
+      orderBy: { createdAt: "asc" },
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find wishlist items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function findUpcomingWishlistItems({
   userId,
 }: {
   userId: string;
-}) {
-  return prisma.libraryItem.findMany({
-    where: {
-      userId,
-      status: LibraryItemStatus.WISHLIST,
-      game: { releaseDate: { gte: new Date() } },
-    },
-    include: {
-      game: {
-        select: {
-          igdbId: true,
-          title: true,
-          coverImage: true,
-          releaseDate: true,
+}): Promise<
+  RepositoryResult<
+    Array<
+      LibraryItem & {
+        game: {
+          igdbId: number;
+          title: string;
+          coverImage: string | null;
+          releaseDate: Date | null;
+        };
+      }
+    >
+  >
+> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: {
+        userId,
+        status: LibraryItemStatus.WISHLIST,
+        game: { releaseDate: { gte: new Date() } },
+      },
+      include: {
+        game: {
+          select: {
+            igdbId: true,
+            title: true,
+            coverImage: true,
+            releaseDate: true,
+          },
         },
       },
-    },
-  });
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find upcoming wishlist items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function findCurrentlyPlayingGames({
   userId,
 }: {
   userId: string;
-}) {
-  return prisma.libraryItem.findMany({
-    where: { userId, status: LibraryItemStatus.CURRENTLY_EXPLORING },
-    include: {
-      game: {
-        select: { id: true, title: true, igdbId: true, coverImage: true },
+}): Promise<
+  RepositoryResult<
+    Array<
+      LibraryItem & {
+        game: {
+          id: string;
+          title: string;
+          igdbId: number;
+          coverImage: string | null;
+        };
+      }
+    >
+  >
+> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: { userId, status: LibraryItemStatus.CURRENTLY_EXPLORING },
+      include: {
+        game: {
+          select: { id: true, title: true, igdbId: true, coverImage: true },
+        },
       },
-    },
-    orderBy: { createdAt: "asc" },
-  });
+      orderBy: { createdAt: "asc" },
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find currently playing games: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export function buildCollectionFilter({

@@ -162,9 +162,20 @@ export class ProfileService extends BaseService {
       );
 
       const normalized = input.username.toLowerCase();
-      const existingUser = await findUserByNormalizedUsername(normalized);
+      const existingUserResult = await findUserByNormalizedUsername(normalized);
 
-      const available = !existingUser;
+      if (!existingUserResult.ok) {
+        this.logger.error(
+          { username: input.username, error: existingUserResult.error },
+          "Error checking username availability"
+        );
+        return this.error(
+          "Failed to check username availability",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      const available = !existingUserResult.data;
 
       this.logger.info(
         { username: input.username, available },
@@ -238,18 +249,32 @@ export class ProfileService extends BaseService {
       }
 
       // Update via repository
-      const user = await updateUserProfile(input.userId, {
+      const userResult = await updateUserProfile(input.userId, {
         username: input.username,
         usernameNormalized: input.username.toLowerCase(),
         image: input.avatarUrl,
       });
+
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error updating user profile"
+        );
+        return this.error(
+          "Failed to update profile",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
 
       this.logger.info(
         { userId: input.userId, username: input.username },
         "Profile updated successfully"
       );
 
-      return this.success({ username: user.username, image: user.image });
+      return this.success({
+        username: userResult.data.username,
+        image: userResult.data.image,
+      });
     } catch (error) {
       this.logger.error(
         { error, userId: input.userId },
@@ -417,19 +442,33 @@ export class ProfileService extends BaseService {
       }
 
       // Update user record via repository
-      const user = await updateUserProfile(input.userId, {
+      const userResult = await updateUserProfile(input.userId, {
         username: input.username,
         usernameNormalized: input.username?.toLowerCase(),
         image: input.avatarUrl,
         profileSetupCompletedAt: new Date(),
       });
 
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error updating user profile"
+        );
+        return this.error(
+          "Failed to complete setup",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
       this.logger.info(
         { userId: input.userId, username: input.username },
         "Profile setup completed"
       );
 
-      return this.success({ username: user.username, image: user.image });
+      return this.success({
+        username: userResult.data.username,
+        image: userResult.data.image,
+      });
     } catch (error) {
       this.logger.error(
         { error, userId: input.userId },
