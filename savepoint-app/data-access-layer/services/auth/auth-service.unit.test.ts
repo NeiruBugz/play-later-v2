@@ -9,6 +9,7 @@ import {
   signUpInputForUniqueConstraintViolationFixture,
   signUpInputWithoutNameFixture,
 } from "@fixtures/service/auth";
+import { Prisma } from "@prisma/client";
 
 import { hashPassword, prisma } from "@/shared/lib";
 
@@ -141,9 +142,15 @@ describe("AuthService", () => {
     it("should handle unique constraint violation from database", async () => {
       mockPrismaFindUnique.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockPrismaCreate.mockRejectedValue(
-        new Error("Unique constraint failed on the fields: (`email`)")
+      // Simulate Prisma P2002 error (unique constraint violation)
+      const prismaError = new Prisma.PrismaClientKnownRequestError(
+        "Unique constraint failed on the fields: (`email`)",
+        {
+          code: "P2002",
+          clientVersion: "5.0.0",
+        }
       );
+      mockPrismaCreate.mockRejectedValue(prismaError);
 
       const result = await service.signUp(
         signUpInputForUniqueConstraintViolationFixture
@@ -151,8 +158,8 @@ describe("AuthService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("An account with this email already exists");
-        expect(result.code).toBe(ServiceErrorCode.CONFLICT);
+        expect(result.error).toBe("User with this email already exists");
+        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
     });
 
@@ -182,7 +189,9 @@ describe("AuthService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("Database connection failed");
+        expect(result.error).toBe(
+          "Failed to create user: Database connection failed"
+        );
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
     });

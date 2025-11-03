@@ -43,7 +43,7 @@ export async function deleteLibraryItem({
   userId,
 }: DeleteLibraryItemInput): Promise<RepositoryResult<{ id: number }>> {
   try {
-    const item = await prisma.libraryItem.findUnique({
+    const item = await prisma.libraryItem.findFirst({
       where: { id: libraryItemId, userId },
     });
 
@@ -72,7 +72,7 @@ export async function updateLibraryItem({
   libraryItem,
 }: UpdateLibraryItemInput): Promise<RepositoryResult<LibraryItem>> {
   try {
-    const item = await prisma.libraryItem.findUnique({
+    const item = await prisma.libraryItem.findFirst({
       where: { id: libraryItem.id, userId },
     });
 
@@ -83,9 +83,12 @@ export async function updateLibraryItem({
       );
     }
 
+    // Exclude id from update payload (Prisma forbids updating primary key)
+    const { id, ...updateData } = libraryItem;
+
     const updated = await prisma.libraryItem.update({
-      where: { id: libraryItem.id },
-      data: { ...libraryItem },
+      where: { id },
+      data: updateData,
     });
 
     return repositorySuccess(updated);

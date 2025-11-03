@@ -24,9 +24,20 @@ export class AuthService extends BaseService {
       this.logger.info({ userId: "unknown" }, "User sign up attempt");
 
       const normalizedEmail = input.email.trim().toLowerCase();
-      const existingUser = await findUserByEmail(normalizedEmail);
+      const existingUserResult = await findUserByEmail(normalizedEmail);
 
-      if (existingUser) {
+      if (!existingUserResult.ok) {
+        this.logger.error(
+          { userId: "unknown", error: existingUserResult.error },
+          "Error checking for existing user"
+        );
+        return this.error(
+          "Failed to verify email availability",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (existingUserResult.data) {
         this.logger.warn(
           { userId: "unknown" },
           "Sign up failed: email already exists"
@@ -39,11 +50,24 @@ export class AuthService extends BaseService {
 
       const hashedPassword = await hashPassword(input.password);
 
-      const user = await createUserWithCredentials({
+      const createUserResult = await createUserWithCredentials({
         email: normalizedEmail,
         password: hashedPassword,
         name: input.name ?? null,
       });
+
+      if (!createUserResult.ok) {
+        this.logger.error(
+          { userId: "unknown", error: createUserResult.error },
+          "Error creating user account"
+        );
+        return this.error(
+          createUserResult.error.message,
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      const user = createUserResult.data;
 
       this.logger.info(
         { userId: user.id },

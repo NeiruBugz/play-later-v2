@@ -23,7 +23,11 @@ vi.mock("next/cache", () => ({
 
 // Mock Next.js navigation
 vi.mock("next/navigation", () => ({
-  redirect: vi.fn(),
+  redirect: vi.fn((url: string) => {
+    const redirectError = new Error("NEXT_REDIRECT");
+    (redirectError as Error & { digest?: string }).digest = "NEXT_REDIRECT";
+    throw redirectError;
+  }),
   useRouter: vi.fn(() => ({
     push: vi.fn(),
     replace: vi.fn(),

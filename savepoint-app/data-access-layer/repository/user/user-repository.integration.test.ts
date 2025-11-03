@@ -56,11 +56,14 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: { id: true, username: true, usernameNormalized: true },
       });
-      expect(dbUser?.username).toBe("NewUsername");
-      expect(dbUser?.usernameNormalized).toBe("newusername");
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data?.username).toBe("NewUsername");
+        expect(dbUserResult.data?.usernameNormalized).toBe("newusername");
+      }
     });
 
     it("should fail when updating username to existing username (different case)", async () => {
@@ -113,10 +116,13 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: { id: true, image: true },
       });
-      expect(dbUser?.image).toBe("https://example.com/avatar.jpg");
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data?.image).toBe("https://example.com/avatar.jpg");
+      }
     });
 
     it("should update multiple fields at once", async () => {
@@ -142,7 +148,7 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,
           username: true,
@@ -150,12 +156,15 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUser).toMatchObject({
-        id: user.id,
-        username: "NewUsername",
-        usernameNormalized: "newusername",
-        image: "https://example.com/new-avatar.jpg",
-      });
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data).toMatchObject({
+          id: user.id,
+          username: "NewUsername",
+          usernameNormalized: "newusername",
+          image: "https://example.com/new-avatar.jpg",
+        });
+      }
     });
 
     it("should throw error with non-existent user ID", async () => {
@@ -201,7 +210,7 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Verify database state remains unchanged
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,
           username: true,
@@ -209,12 +218,15 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUser).toMatchObject({
-        id: user.id,
-        username: "testuser",
-        usernameNormalized: "testuser",
-        // image: "https://example.com/avatar.jpg",
-      });
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data).toMatchObject({
+          id: user.id,
+          username: "testuser",
+          usernameNormalized: "testuser",
+          // image: "https://example.com/avatar.jpg",
+        });
+      }
     });
 
     it("should handle updating username to null", async () => {
@@ -238,11 +250,14 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: { id: true, username: true, usernameNormalized: true },
       });
-      expect(dbUser?.username).toBeNull();
-      expect(dbUser?.usernameNormalized).toBeNull();
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data?.username).toBeNull();
+        expect(dbUserResult.data?.usernameNormalized).toBeNull();
+      }
     });
 
     it("should handle updating image to null", async () => {
@@ -263,10 +278,13 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: { id: true, image: true },
       });
-      expect(dbUser?.image).toBeNull();
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data?.image).toBeNull();
+      }
     });
 
     it("should maintain other user fields when updating profile", async () => {
@@ -380,7 +398,7 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Verify final database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,
           username: true,
@@ -388,11 +406,14 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUser).toMatchObject({
-        username: "user3",
-        usernameNormalized: "user3",
-        image: "https://example.com/avatar2.jpg",
-      });
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data).toMatchObject({
+          username: "user3",
+          usernameNormalized: "user3",
+          image: "https://example.com/avatar2.jpg",
+        });
+      }
     });
   });
 });

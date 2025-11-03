@@ -23,6 +23,8 @@ export enum RepositoryErrorCode {
 
   /** Unexpected internal error */
   INTERNAL_ERROR = "INTERNAL_ERROR",
+
+  ALREADY_EXISTS = "ALREADY_EXISTS",
 }
 
 /**

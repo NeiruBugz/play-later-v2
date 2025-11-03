@@ -35,7 +35,7 @@ export class ProfileService extends BaseService {
     try {
       this.logger.info({ userId: input.userId }, "Fetching user profile");
 
-      const user = await findUserById(input.userId, {
+      const userResult = await findUserById(input.userId, {
         select: {
           username: true,
           image: true,
@@ -45,10 +45,23 @@ export class ProfileService extends BaseService {
         },
       });
 
-      if (!user) {
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to fetch user profile",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!userResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
+
+      const user = userResult.data;
 
       this.logger.info(
         { userId: input.userId, username: user.username },
@@ -75,7 +88,7 @@ export class ProfileService extends BaseService {
         "Fetching user profile with stats"
       );
 
-      const [user, statsResult] = await Promise.all([
+      const [userResult, statsResult] = await Promise.all([
         findUserById(input.userId, {
           select: {
             username: true,
@@ -88,7 +101,18 @@ export class ProfileService extends BaseService {
         getLibraryStatsByUserId(input.userId),
       ]);
 
-      if (!user) {
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to fetch user profile",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!userResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
@@ -105,6 +129,8 @@ export class ProfileService extends BaseService {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
+
+      const user = userResult.data;
 
       this.logger.info(
         {
@@ -172,14 +198,27 @@ export class ProfileService extends BaseService {
       }
 
       // Check if username changed
-      const currentUser = await findUserById(input.userId, {
+      const currentUserResult = await findUserById(input.userId, {
         select: { username: true },
       });
 
-      if (!currentUser) {
+      if (!currentUserResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: currentUserResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to fetch user data",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!currentUserResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
+
+      const currentUser = currentUserResult.data;
 
       if (currentUser.username !== input.username) {
         // Username changed - check availability
@@ -227,11 +266,22 @@ export class ProfileService extends BaseService {
       this.logger.info({ userId: input.userId }, "Updating avatar URL");
 
       // Verify user exists
-      const user = await findUserById(input.userId, {
+      const userResult = await findUserById(input.userId, {
         select: { id: true },
       });
 
-      if (!user) {
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to verify user",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!userResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
@@ -262,7 +312,7 @@ export class ProfileService extends BaseService {
     try {
       this.logger.info({ userId: input.userId }, "Checking setup status");
 
-      const user = await findUserById(input.userId, {
+      const userResult = await findUserById(input.userId, {
         select: {
           username: true,
           name: true,
@@ -271,10 +321,23 @@ export class ProfileService extends BaseService {
         },
       });
 
-      if (!user) {
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to check setup status",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!userResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
+
+      const user = userResult.data;
 
       // Determine if user needs setup
       // Persistent rule: if setup completed at least once, do not prompt

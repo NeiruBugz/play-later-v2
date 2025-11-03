@@ -128,7 +128,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
               type="button"
               variant="ghost"
               onClick={handleSkip}
-              disabled={isPending}
+              disabled={isPending || isAvatarUploading}
               className="w-full sm:w-auto"
             >
               Skip for now

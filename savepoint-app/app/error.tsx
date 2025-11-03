@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useCallback, useEffect } from "react";
 
 import { Button } from "@/shared/components/ui/button";
-import { LOGGER_CONTEXT } from "@/shared/lib";
 import { createLogger } from "@/shared/lib/app/logger";
+import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
 
 type GlobalErrorProps = {
   error: Error & { digest?: string };

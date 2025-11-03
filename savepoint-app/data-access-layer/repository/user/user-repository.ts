@@ -163,46 +163,87 @@ export async function disconnectSteam({ userId }: { userId: string }) {
   });
 }
 
-export async function findUserByEmail(email: string) {
-  return prisma.user.findUnique({
-    where: { email: email.trim().toLowerCase() },
-    select: { id: true },
-  });
+export async function findUserByEmail(
+  email: string
+): Promise<RepositoryResult<{ id: string } | null>> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+      select: { id: true },
+    });
+
+    return repositorySuccess(user);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find user by email: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function createUserWithCredentials(input: {
   email: string;
   password: string;
   name?: string | null;
-}) {
-  return prisma.user.create({
-    data: {
-      email: input.email.trim().toLowerCase(),
-      password: input.password,
-      name: input.name ?? null,
-    },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-    },
-  });
+}): Promise<
+  RepositoryResult<{ id: string; email: string | null; name: string | null }>
+> {
+  try {
+    const user = await prisma.user.create({
+      data: {
+        email: input.email.trim().toLowerCase(),
+        password: input.password,
+        name: input.name ?? null,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+      },
+    });
+
+    return repositorySuccess(user);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return repositoryError(
+        RepositoryErrorCode.ALREADY_EXISTS,
+        "User with this email already exists"
+      );
+    }
+
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to create user: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 /**
  * Find user by ID with custom field selection
  * @param userId - User ID to find
  * @param options - Required select option to specify which fields to return
- * @returns User with selected fields or null if not found
+ * @returns RepositoryResult with user data (with selected fields) or null if not found
  */
 export async function findUserById<T extends Prisma.UserSelect>(
   userId: string,
   options: { select: T }
-): Promise<Prisma.UserGetPayload<{ select: T }> | null> {
-  return prisma.user.findUnique({
-    where: { id: userId },
-    select: options.select,
-  });
+): Promise<RepositoryResult<Prisma.UserGetPayload<{ select: T }> | null>> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: options.select,
+    });
+
+    return repositorySuccess(user);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find user by ID: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }
 
 export async function findUserByNormalizedUsername(usernameNormalized: string) {
