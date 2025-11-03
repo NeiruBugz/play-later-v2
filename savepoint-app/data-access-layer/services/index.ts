@@ -9,8 +9,6 @@ export {
   isSuccessResult,
   isErrorResult,
   type ExtractServiceData,
-  type ServiceResponse,
-  type ServiceError,
 } from "./types";
 
 // Keep IGDB service available as part of the public API

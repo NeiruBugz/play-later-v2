@@ -8,9 +8,10 @@ import {
 } from "@/data-access-layer/repository";
 
 import { validateUsername } from "@/features/profile/lib/validation";
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
+import { mapUserToProfile, mapUserToProfileWithStats } from "./mappers";
 import type {
   CheckSetupStatusInput,
   CheckSetupStatusResult,
@@ -29,7 +30,7 @@ import type {
 } from "./types";
 
 export class ProfileService extends BaseService {
-  private logger = createLogger({ service: "ProfileService" });
+  private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "ProfileService" });
   async getProfile(input: GetProfileInput): Promise<GetProfileResult> {
     try {
       this.logger.info({ userId: input.userId }, "Fetching user profile");
@@ -54,15 +55,8 @@ export class ProfileService extends BaseService {
         "User profile fetched successfully"
       );
 
-      return this.success({
-        profile: {
-          username: user.username,
-          image: user.image,
-          email: user.email,
-          name: user.name,
-          createdAt: user.createdAt,
-        },
-      });
+      const profile = mapUserToProfile(user);
+      return this.success({ profile });
     } catch (error) {
       this.logger.error(
         { error, userId: input.userId },
@@ -104,8 +98,10 @@ export class ProfileService extends BaseService {
           { userId: input.userId, error: statsResult.error },
           "Failed to load library stats"
         );
+
+        // Map repository error to service error, preserving the error message
         return this.error(
-          "Failed to load library stats",
+          statsResult.error.message,
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
@@ -119,19 +115,8 @@ export class ProfileService extends BaseService {
         "User profile with stats fetched successfully"
       );
 
-      return this.success({
-        profile: {
-          username: user.username,
-          image: user.image,
-          email: user.email,
-          name: user.name,
-          createdAt: user.createdAt,
-          stats: {
-            statusCounts: statsResult.data.statusCounts,
-            recentGames: statsResult.data.recentGames,
-          },
-        },
-      });
+      const profile = mapUserToProfileWithStats(user, statsResult.data);
+      return this.success({ profile });
     } catch (error) {
       this.logger.error(
         { error, userId: input.userId },
@@ -225,10 +210,7 @@ export class ProfileService extends BaseService {
         "Profile updated successfully"
       );
 
-      return this.success({
-        username: user.username,
-        image: user.image,
-      });
+      return this.success({ username: user.username, image: user.image });
     } catch (error) {
       this.logger.error(
         { error, userId: input.userId },
@@ -384,10 +366,7 @@ export class ProfileService extends BaseService {
         "Profile setup completed"
       );
 
-      return this.success({
-        username: user.username,
-        image: user.image,
-      });
+      return this.success({ username: user.username, image: user.image });
     } catch (error) {
       this.logger.error(
         { error, userId: input.userId },

@@ -1,15 +1,13 @@
 "use client";
 
 import { Check, Loader2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/shared/lib/ui/utils";
 
-import { checkUsernameAvailability } from "../server-actions/check-username-availability";
-
-type ValidationStatus = "idle" | "validating" | "available" | "error";
+import { useUsernameValidation } from "../hooks/use-username-validation";
 
 interface UsernameInputProps {
   value: string;
@@ -28,57 +26,7 @@ export function UsernameInput({
   disabled = false,
   onValidationChange,
 }: UsernameInputProps) {
-  const [validationStatus, setValidationStatus] =
-    useState<ValidationStatus>("idle");
-  const [validationMessage, setValidationMessage] = useState<string>("");
-
-  useEffect(() => {
-    if (!value || value.trim().length === 0) {
-      setValidationStatus("idle");
-      setValidationMessage("");
-      return;
-    }
-
-    if (value.length < 3) {
-      setValidationStatus("error");
-      setValidationMessage("Username must be at least 3 characters");
-      return;
-    }
-
-    if (value.length > 25) {
-      setValidationStatus("error");
-      setValidationMessage("Username must not exceed 25 characters");
-      return;
-    }
-
-    // Show validating state immediately
-    setValidationStatus("validating");
-    setValidationMessage("");
-
-    const timeoutId = setTimeout(async () => {
-      try {
-        const result = await checkUsernameAvailability({ username: value });
-
-        if (result.success) {
-          if (result.available) {
-            setValidationStatus("available");
-            setValidationMessage("Username available");
-          } else {
-            setValidationStatus("error");
-            setValidationMessage("Username already exists");
-          }
-        } else {
-          setValidationStatus("error");
-          setValidationMessage(result.error);
-        }
-      } catch {
-        setValidationStatus("error");
-        setValidationMessage("Failed to check username availability");
-      }
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
-  }, [value]);
+  const { validationStatus, validationMessage } = useUsernameValidation(value);
 
   const displayError = externalError || validationMessage;
   const showError =

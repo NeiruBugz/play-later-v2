@@ -4,7 +4,7 @@ import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import {
   CompleteProfileSetupSchema,
@@ -27,7 +27,9 @@ type PerformCompleteSetupResult =
 async function performCompleteSetup(
   data: CompleteProfileSetupInput
 ): Promise<PerformCompleteSetupResult> {
-  const logger = createLogger({ serverAction: "completeProfileSetup" });
+  const logger = createLogger({
+    [LOGGER_CONTEXT.SERVER_ACTION]: "completeProfileSetup",
+  });
   try {
     const userId = await getServerUserId();
     if (!userId) {

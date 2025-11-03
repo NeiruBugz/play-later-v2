@@ -1,3 +1,17 @@
+// Repository types
+export {
+  type RepositoryResult,
+  type RepositorySuccess,
+  type RepositoryFailure,
+  type RepositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+  repositoryError,
+  isRepositorySuccess,
+  isRepositoryError,
+} from "./types";
+
+// Library repository
 export {
   createLibraryItem,
   deleteLibraryItem,
@@ -20,6 +34,7 @@ export {
   getLibraryStatsByUserId,
 } from "./library/library-repository";
 
+// User repository
 export {
   getUserBySteamId,
   getUserByUsername,
@@ -32,4 +47,6 @@ export {
   findUserById,
   findUserByNormalizedUsername,
   updateUserProfile,
+  findUserByEmail,
+  createUserWithCredentials,
 } from "./user/user-repository";

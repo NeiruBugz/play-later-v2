@@ -23,7 +23,10 @@ describe("signUpAction", () => {
     mockAuthService = {
       signUp: vi.fn(),
     };
-    vi.mocked(AuthService).mockImplementation(() => mockAuthService as any);
+    // Cast through unknown to satisfy TypeScript - we only mock the methods we use in tests
+    vi.mocked(AuthService).mockImplementation(
+      () => mockAuthService as unknown as AuthService
+    );
 
     mockSignIn = vi.mocked(authModule.signIn);
   });

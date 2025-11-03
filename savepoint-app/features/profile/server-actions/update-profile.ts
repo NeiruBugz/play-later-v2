@@ -4,7 +4,7 @@ import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { UpdateProfileSchema, type UpdateProfileInput } from "../schemas";
 
@@ -24,7 +24,9 @@ type PerformUpdateProfileResult =
 async function performUpdateProfile(
   data: UpdateProfileInput
 ): Promise<PerformUpdateProfileResult> {
-  const logger = createLogger({ serverAction: "updateProfile" });
+  const logger = createLogger({
+    [LOGGER_CONTEXT.SERVER_ACTION]: "updateProfile",
+  });
   try {
     const userId = await getServerUserId();
     if (!userId) {

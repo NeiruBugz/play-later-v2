@@ -3,13 +3,15 @@
 import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 export async function skipProfileSetup(): Promise<{
   success: boolean;
   error?: string;
 }> {
-  const logger = createLogger({ serverAction: "skipProfileSetup" });
+  const logger = createLogger({
+    [LOGGER_CONTEXT.SERVER_ACTION]: "skipProfileSetup",
+  });
   try {
     const userId = await getServerUserId();
     if (!userId) {

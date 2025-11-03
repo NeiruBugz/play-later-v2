@@ -18,7 +18,8 @@
     "target": "ESNext",
     "types": ["vitest/globals"],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@fixtures/*": ["test/fixtures/*"]
     },
     "plugins": [
       {

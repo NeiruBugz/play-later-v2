@@ -4,13 +4,19 @@ import { signIn } from "@/auth";
 import { z } from "zod";
 
 import { SignInFormData, signInSchema } from "@/features/auth/lib/types";
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import {
+  isAuthenticationError,
+  isNextAuthRedirect,
+} from "@/shared/lib/auth/handle-next-auth-error";
 
 /**
  * Sign in with email and password using NextAuth
  */
 export async function signInAction(data: SignInFormData) {
-  const logger = createLogger({ serverAction: "signInAction" });
+  const logger = createLogger({
+    [LOGGER_CONTEXT.SERVER_ACTION]: "signInAction",
+  });
   try {
     // Validate input
     const validatedData = signInSchema.parse(data);
@@ -36,8 +42,14 @@ export async function signInAction(data: SignInFormData) {
       };
     }
 
-    // NextAuth throws NEXT_REDIRECT on successful auth, catch other errors
-    if (error instanceof Error && error.message !== "NEXT_REDIRECT") {
+    // NextAuth throws NEXT_REDIRECT on successful auth - re-throw to allow redirect
+    if (isNextAuthRedirect(error)) {
+      logger.debug("Redirecting after successful sign in");
+      throw error;
+    }
+
+    // Actual authentication failure
+    if (isAuthenticationError(error)) {
       logger.warn({ err: error }, "Invalid credentials during sign in");
       return {
         success: false as const,
@@ -45,8 +57,8 @@ export async function signInAction(data: SignInFormData) {
       };
     }
 
-    // Re-throw redirect errors
-    logger.debug("Redirecting after successful sign in");
+    // Unexpected error type
+    logger.error({ err: error }, "Unexpected error during sign in");
     throw error;
   }
 }

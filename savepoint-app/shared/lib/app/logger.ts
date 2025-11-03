@@ -50,11 +50,27 @@ const SAFE_EXTRA_KEYS = [
 export const logger = pino(createLoggerOptions());
 
 /**
- * Create a child logger with additional context
+ * Create a child logger with additional context.
+ *
+ * Use standardized context keys from LOGGER_CONTEXT for consistency:
+ * - service: Data access layer services
+ * - serverAction: Next.js server actions
+ * - page: Next.js pages
+ * - errorBoundary: React error boundaries
+ * - storage: Storage utilities
  *
  * @example
+ * // Service
  * const serviceLogger = createLogger({ service: 'GameService' });
  * serviceLogger.info('Game searched', { query: 'zelda' });
+ *
+ * // Server Action
+ * const actionLogger = createLogger({ serverAction: 'addGameAction' });
+ * actionLogger.info('Adding game to library', { gameId: 123 });
+ *
+ * // Page
+ * const pageLogger = createLogger({ page: 'ProfilePage' });
+ * pageLogger.info('Loading profile', { userId: '456' });
  */
 export const createLogger = (bindings: Record<string, unknown>) => {
   return logger.child(bindings);

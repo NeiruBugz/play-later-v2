@@ -1,8 +1,14 @@
 import "server-only";
 
-import { createLogger, hashPassword, prisma } from "@/shared/lib";
+import {
+  createUserWithCredentials,
+  findUserByEmail,
+} from "@/data-access-layer/repository";
+
+import { createLogger, hashPassword, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
+import { mapToAuthUserData } from "./mappers";
 import type {
   SignInInput,
   SignInResult,
@@ -11,17 +17,14 @@ import type {
 } from "./types";
 
 export class AuthService extends BaseService {
-  private logger = createLogger({ service: "AuthService" });
+  private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "AuthService" });
 
   async signUp(input: SignUpInput): Promise<SignUpResult> {
     try {
       this.logger.info({ userId: "unknown" }, "User sign up attempt");
 
       const normalizedEmail = input.email.trim().toLowerCase();
-
-      const existingUser = await prisma.user.findUnique({
-        where: { email: normalizedEmail },
-      });
+      const existingUser = await findUserByEmail(normalizedEmail);
 
       if (existingUser) {
         this.logger.warn(
@@ -36,17 +39,10 @@ export class AuthService extends BaseService {
 
       const hashedPassword = await hashPassword(input.password);
 
-      const user = await prisma.user.create({
-        data: {
-          email: normalizedEmail,
-          password: hashedPassword,
-          name: input.name ?? null,
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-        },
+      const user = await createUserWithCredentials({
+        email: normalizedEmail,
+        password: hashedPassword,
+        name: input.name ?? null,
       });
 
       this.logger.info(
@@ -55,11 +51,11 @@ export class AuthService extends BaseService {
       );
 
       return this.success({
-        user: {
+        user: mapToAuthUserData({
           id: user.id,
           email: user.email ?? normalizedEmail,
           name: user.name,
-        },
+        }),
         message: "Account created successfully",
       });
     } catch (error) {

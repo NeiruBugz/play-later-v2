@@ -1,11 +1,16 @@
 import "server-only";
 
-import type { Prisma } from "@prisma/client";
+import {
+  repositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+  type RepositoryResult,
+} from "@/data-access-layer/repository/types";
+import { Prisma, type User } from "@prisma/client";
 
 import { prisma } from "@/shared/lib";
 
 import {
-  type DefaultUserSelect,
   type GetUserBySteamIdInput,
   type GetUserByUsernameInput,
   type UpdateUserDataInput,
@@ -31,38 +36,65 @@ export async function updateUserSteamData({
   steamId,
   username,
   avatar,
-}: UpdateUserSteamDataInput) {
-  const user = await prisma.user.findFirst({
-    where: { id: userId },
-  });
+}: UpdateUserSteamDataInput): Promise<RepositoryResult<User>> {
+  try {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        steamId64: steamId,
+        steamUsername: username,
+        steamAvatar: avatar,
+      },
+    });
 
-  if (!user) {
-    throw new Error("User not found");
+    return repositorySuccess(updated);
+  } catch (error) {
+    // Prisma throws P2025 when record to update is not found
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
+    }
+
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to update user Steam data: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
-
-  return prisma.user.update({
-    where: { id: userId },
-    data: {
-      steamId64: steamId,
-      steamUsername: username,
-      steamAvatar: avatar,
-    },
-  });
 }
 
-export async function getUserByUsername({ username }: GetUserByUsernameInput) {
-  const user = await prisma.user.findFirst({
-    where: { username },
-    select: {
-      username: true,
-    },
-  });
+/**
+ * @deprecated This function appears to have no practical use case.
+ * It returns only the username field when the username is already known (it's the input).
+ * Consider using findUserByNormalizedUsername() for actual user lookups.
+ * This function is kept for backward compatibility but should not be used in new code.
+ */
+export async function getUserByUsername({
+  username,
+}: GetUserByUsernameInput): Promise<
+  RepositoryResult<{ username: string | null }>
+> {
+  try {
+    // Use normalized username for case-insensitive lookup
+    const user = await prisma.user.findUnique({
+      where: { usernameNormalized: username.toLowerCase().trim() },
+      select: {
+        username: true,
+      },
+    });
 
-  if (!user) {
-    throw new Error("User not found");
+    if (!user) {
+      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
+    }
+
+    return repositorySuccess(user);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get user by username: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
-
-  return user;
 }
 
 export async function getUserSteamData({ userId }: { userId: string }) {
@@ -131,32 +163,46 @@ export async function disconnectSteam({ userId }: { userId: string }) {
   });
 }
 
-export async function findUserById(
-  userId: string
-): Promise<DefaultUserSelect | null>;
+export async function findUserByEmail(email: string) {
+  return prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+    select: { id: true },
+  });
+}
+
+export async function createUserWithCredentials(input: {
+  email: string;
+  password: string;
+  name?: string | null;
+}) {
+  return prisma.user.create({
+    data: {
+      email: input.email.trim().toLowerCase(),
+      password: input.password,
+      name: input.name ?? null,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+    },
+  });
+}
+
+/**
+ * Find user by ID with custom field selection
+ * @param userId - User ID to find
+ * @param options - Required select option to specify which fields to return
+ * @returns User with selected fields or null if not found
+ */
 export async function findUserById<T extends Prisma.UserSelect>(
   userId: string,
   options: { select: T }
-): Promise<Prisma.UserGetPayload<{ select: T }> | null>;
-export async function findUserById<T extends Prisma.UserSelect>(
-  userId: string,
-  options?: { select?: T }
-): Promise<DefaultUserSelect | Prisma.UserGetPayload<{ select: T }> | null> {
-  const defaultSelect = {
-    id: true,
-    name: true,
-    username: true,
-    steamProfileURL: true,
-    steamConnectedAt: true,
-    email: true,
-  } as const;
-
+): Promise<Prisma.UserGetPayload<{ select: T }> | null> {
   return prisma.user.findUnique({
     where: { id: userId },
-    select: options?.select ?? (defaultSelect as T),
-  }) as Promise<
-    DefaultUserSelect | Prisma.UserGetPayload<{ select: T }> | null
-  >;
+    select: options.select,
+  });
 }
 
 export async function findUserByNormalizedUsername(usernameNormalized: string) {

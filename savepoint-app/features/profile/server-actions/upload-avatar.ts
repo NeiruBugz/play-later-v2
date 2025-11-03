@@ -3,7 +3,7 @@
 import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { AvatarStorageService } from "@/shared/lib/storage/avatar-storage";
 
 import { UploadAvatarSchema } from "../schemas";
@@ -31,7 +31,9 @@ type UploadAvatarResult =
 export async function uploadAvatar(
   data: UploadAvatarInput
 ): Promise<UploadAvatarResult> {
-  const logger = createLogger({ serverAction: "uploadAvatar" });
+  const logger = createLogger({
+    [LOGGER_CONTEXT.SERVER_ACTION]: "uploadAvatar",
+  });
   try {
     // Check authentication
     const userId = await getServerUserId();

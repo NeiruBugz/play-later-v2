@@ -1,11 +1,11 @@
 import { env } from "@/env.mjs";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
-import { createLogger } from "@/shared/lib/app/logger";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { s3Client } from "./s3-client";
 
-const logger = createLogger({ service: "AvatarStorage" });
+const logger = createLogger({ [LOGGER_CONTEXT.STORAGE]: "AvatarStorage" });
 
 export class AvatarStorageService {
   /**

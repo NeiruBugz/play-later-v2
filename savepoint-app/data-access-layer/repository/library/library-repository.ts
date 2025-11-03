@@ -1,11 +1,20 @@
 import "server-only";
 
-import { LibraryItemStatus, type Prisma } from "@prisma/client";
+import {
+  repositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+  type RepositoryResult,
+} from "@/data-access-layer/repository/types";
+import {
+  LibraryItemStatus,
+  type LibraryItem,
+  type Prisma,
+} from "@prisma/client";
 
 import { prisma } from "@/shared/lib";
 
 import type {
-  AddGameToUserLibraryInput,
   CreateLibraryItemInput,
   DeleteLibraryItemInput,
   GetLibraryCountInput,
@@ -32,34 +41,60 @@ export async function createLibraryItem({
 export async function deleteLibraryItem({
   libraryItemId,
   userId,
-}: DeleteLibraryItemInput) {
-  const item = await prisma.libraryItem.findUnique({
-    where: { id: libraryItemId, userId },
-  });
+}: DeleteLibraryItemInput): Promise<RepositoryResult<{ id: number }>> {
+  try {
+    const item = await prisma.libraryItem.findUnique({
+      where: { id: libraryItemId, userId },
+    });
 
-  if (!item) {
-    throw new Error("Library item not found");
+    if (!item) {
+      return repositoryError(
+        RepositoryErrorCode.NOT_FOUND,
+        "Library item not found"
+      );
+    }
+
+    const deleted = await prisma.libraryItem.delete({
+      where: { id: libraryItemId },
+    });
+
+    return repositorySuccess({ id: deleted.id });
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to delete library item: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
-
-  return prisma.libraryItem.delete({ where: { id: libraryItemId } });
 }
 
 export async function updateLibraryItem({
   userId,
   libraryItem,
-}: UpdateLibraryItemInput) {
-  const item = await prisma.libraryItem.findUnique({
-    where: { id: libraryItem.id, userId },
-  });
+}: UpdateLibraryItemInput): Promise<RepositoryResult<LibraryItem>> {
+  try {
+    const item = await prisma.libraryItem.findUnique({
+      where: { id: libraryItem.id, userId },
+    });
 
-  if (!item) {
-    throw new Error("Library item not found");
+    if (!item) {
+      return repositoryError(
+        RepositoryErrorCode.NOT_FOUND,
+        "Library item not found"
+      );
+    }
+
+    const updated = await prisma.libraryItem.update({
+      where: { id: libraryItem.id },
+      data: { ...libraryItem },
+    });
+
+    return repositorySuccess(updated);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to update library item: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
-
-  return prisma.libraryItem.update({
-    where: { id: libraryItem.id },
-    data: { ...libraryItem },
-  });
 }
 
 export async function getLibraryItemsForUserByIgdbId({
@@ -133,6 +168,12 @@ export async function getUniquePlatforms({ userId }: { userId: string }) {
   });
 }
 
+/**
+ * @deprecated This function has a potential N+1 query issue and fetches ALL library items
+ * for ALL users without pagination, which could cause severe performance problems.
+ * Use getOtherUsersLibrariesPaginated() instead, which provides proper pagination.
+ * This function is kept for backward compatibility but should not be used in new code.
+ */
 export async function getOtherUsersLibraries({ userId }: { userId: string }) {
   const userGames = await prisma.libraryItem.findMany({
     where: { userId: { not: userId }, User: { username: { not: null } } },
@@ -310,25 +351,15 @@ export function buildCollectionFilter({
  * @returns Result object with status counts and recent games or error
  */
 export async function getLibraryStatsByUserId(userId: string): Promise<
-  | {
-      ok: true;
-      data: {
-        statusCounts: Record<string, number>;
-        recentGames: Array<{
-          gameId: string;
-          title: string;
-          coverImage: string | null;
-          lastPlayed: Date;
-        }>;
-      };
-    }
-  | {
-      ok: false;
-      error: {
-        code: string;
-        message: string;
-      };
-    }
+  RepositoryResult<{
+    statusCounts: Record<string, number>;
+    recentGames: Array<{
+      gameId: string;
+      title: string;
+      coverImage: string | null;
+      lastPlayed: Date;
+    }>;
+  }>
 > {
   try {
     const [statusCountsRaw, recentItems] = await Promise.all([
@@ -371,20 +402,14 @@ export async function getLibraryStatsByUserId(userId: string): Promise<
       lastPlayed: item.updatedAt,
     }));
 
-    return {
-      ok: true,
-      data: {
-        statusCounts,
-        recentGames,
-      },
-    };
+    return repositorySuccess({
+      statusCounts,
+      recentGames,
+    });
   } catch (error) {
-    return {
-      ok: false,
-      error: {
-        code: "STATS_FETCH_FAILED",
-        message: `Failed to fetch library stats: ${error instanceof Error ? error.message : "Unknown error"}`,
-      },
-    };
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to fetch library stats: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
 }

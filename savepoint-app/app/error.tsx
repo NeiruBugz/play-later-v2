@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect } from "react";
 
 import { Button } from "@/shared/components/ui/button";
+import { LOGGER_CONTEXT } from "@/shared/lib";
 import { createLogger } from "@/shared/lib/app/logger";
 
 type GlobalErrorProps = {
@@ -12,7 +13,7 @@ type GlobalErrorProps = {
   reset: () => void;
 };
 
-const logger = createLogger({ component: "GlobalError" });
+const logger = createLogger({ [LOGGER_CONTEXT.ERROR_BOUNDARY]: "GlobalError" });
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
