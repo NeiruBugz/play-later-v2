@@ -16,7 +16,7 @@ The service layer follows a **Result pattern** with consistent error handling an
 
 ## Available Services
 
-### 1. **ProfileService** - User Profile Management
+### 1. **ProfileService** — User Profile Management
 
 **Purpose**: Fetch and manage user profile data with library statistics
 
@@ -37,88 +37,7 @@ if (result.ok) {
 }
 ```
 
-### 2. **GameService** - Game Search & Management
-
-**Purpose**: Search IGDB, create games, fetch game details
-
-**Methods**:
-
-- `searchGames(input)` - Search IGDB for games by name/platform
-- `createGameFromIgdb(input)` - Create game from IGDB data
-- `getGameDetails(input)` - Get comprehensive game details
-- `updateGame(input)` - Update game metadata
-
-**Usage**:
-
-```typescript
-const service = new GameService();
-const result = await service.searchGames({ name: "Zelda", platform: "130" });
-
-if (result.ok) {
-  console.log(`Found ${result.data.count} games`);
-}
-```
-
-### 3. **LibraryService** - User Library Item Management
-
-**Purpose**: Manage user's game library (add, update, remove items)
-
-**Methods**:
-
-- `getLibraryItems(input)` - Get user's library with filters
-- `createLibraryItem(input)` - Add game to user's library
-- `updateLibraryItem(input)` - Update library item status/platform
-- `deleteLibraryItem(input)` - Remove item from library
-- `getLibraryCount(input)` - Get total library count for user
-
-**Usage**:
-
-```typescript
-const service = new LibraryService();
-const result = await service.createLibraryItem({
-  userId,
-  gameId,
-  status: "CURIOUS_ABOUT",
-  platform: "PC",
-});
-```
-
-### 4. **ReviewService** - Review & Rating Management
-
-**Purpose**: Create, update, and fetch game reviews
-
-**Methods**:
-
-- `getReviews(input)` - Get reviews for a game
-- `createReview(input)` - Create new review
-- `updateReview(input)` - Update existing review
-- `deleteReview(input)` - Delete review
-- `getAggregatedRating(input)` - Get average rating for game
-
-### 5. **JournalService** - Gaming Journal Entries
-
-**Purpose**: Manage journal entries for gaming sessions
-
-**Methods**:
-
-- `getJournalEntries(input)` - Get entries for user/game
-- `createJournalEntry(input)` - Create new journal entry
-- `updateJournalEntry(input)` - Update existing entry
-- `deleteJournalEntry(input)` - Delete entry
-- `getJournalStats(input)` - Get journal statistics
-
-### 6. **UserService** - User Account Management
-
-**Purpose**: Manage user accounts and Steam integration
-
-**Methods**:
-
-- `getUser(input)` - Get user information
-- `updateUser(input)` - Update user profile
-- `getSteamIntegration(input)` - Get Steam connection status
-- `disconnectSteam(input)` - Disconnect Steam account
-
-### 7. **AuthService** - Authentication
+### 2. **AuthService** — Authentication
 
 **Purpose**: Handle user sign-up and sign-in
 
@@ -129,15 +48,7 @@ const result = await service.createLibraryItem({
 
 **Note**: Only used when `AUTH_ENABLE_CREDENTIALS=true` (dev/test environments)
 
-### 8. **CollectionService** - User Game Collection Views
-
-**Purpose**: Fetch paginated views of user's game collection
-
-**Methods**:
-
-- `getCollection(input)` - Get user's collection with pagination and filters
-
-### 9. **IgdbService** - IGDB API Integration
+### 3. **IgdbService** — IGDB API Integration
 
 **Purpose**: Comprehensive IGDB API client with OAuth management
 
@@ -150,17 +61,15 @@ See [IGDB Service](#igdb-service) section below for detailed documentation.
 Services are instantiated per operation (stateless):
 
 ```typescript
-// ✅ Good: Create instance for operation
-const service = new GameService();
-const result = await service.searchGames({ name: "Zelda" });
+// Profile service (per request)
+const profileService = new ProfileService();
+const result = await profileService.getProfileWithStats({ userId });
 
-// ✅ Good: Reuse instance for related operations
-const gameService = new GameService();
-const searchResult = await gameService.searchGames({ name: "Zelda" });
-if (searchResult.ok) {
-  const detailsResult = await gameService.getGameDetails({
-    gameId: searchResult.data.games[0].id,
-  });
+// IGDB service — reuse within a single request to benefit from token caching
+const igdbService = new IgdbService();
+const search = await igdbService.searchGamesByName({ name: "Zelda" });
+if (search.ok && search.data.games.length > 0) {
+  await igdbService.getGameDetails({ gameId: search.data.games[0].id });
 }
 ```
 
@@ -171,20 +80,15 @@ Services are the primary way server actions interact with business logic:
 ```typescript
 "use server";
 
-import { GameService } from "@/data-access-layer/services";
-
+import { ProfileService } from "@/data-access-layer/services";
 import { authorizedActionClient } from "@/shared/lib/safe-action";
 
-export const searchGamesAction = authorizedActionClient
-  .inputSchema(SearchGamesSchema)
-  .action(async ({ parsedInput, ctx: { userId } }) => {
-    const service = new GameService();
-    const result = await service.searchGames(parsedInput);
-
-    if (!result.ok) {
-      throw new Error(result.error.message);
-    }
-
+export const getProfileWithStats = authorizedActionClient
+  .inputSchema(z.object({ userId: z.string() }))
+  .action(async ({ parsedInput }) => {
+    const service = new ProfileService();
+    const result = await service.getProfileWithStats(parsedInput);
+    if (!result.ok) throw new Error(result.error.message);
     return result.data;
   });
 ```
@@ -220,15 +124,13 @@ if (result.ok) {
 ```typescript
 import { isErrorResult, isSuccessResult } from "@/data-access-layer/services";
 
-const result = await service.getGameDetails({ gameId: "123" });
+const result = await new ProfileService().getProfile({ userId });
 
 if (isSuccessResult(result)) {
-  // Type guard narrows to success type
-  const game = result.data.game;
+  console.log(result.data.profile.username);
 }
 
 if (isErrorResult(result)) {
-  // Type guard narrows to error type
   console.error(result.error.code);
 }
 ```

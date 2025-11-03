@@ -17,16 +17,8 @@ export {
   findUpcomingWishlistItems,
   findCurrentlyPlayingGames,
   buildCollectionFilter,
-  addGameToUserLibrary,
   getLibraryStatsByUserId,
 } from "./library/library-repository";
-
-export {
-  createReview,
-  getAllReviewsForGame,
-  aggregateReviewsRatingsForUser,
-  getRecentReviews,
-} from "./review/review-repository";
 
 export {
   getUserBySteamId,
@@ -41,31 +33,3 @@ export {
   findUserByNormalizedUsername,
   updateUserProfile,
 } from "./user/user-repository";
-
-export {
-  createGame,
-  isGameExisting,
-  findGameByIgdbId,
-  findManyByIgdbIds,
-  findGameById,
-  findGamesWithLibraryItemsPaginated,
-} from "./game/game-repository";
-
-export {
-  getImportedGamesCount,
-  getFilteredImportedGamesCount,
-  getFilteredImportedGames,
-  findByStorefrontGameId,
-  softDeleteImportedGame,
-  createManyImportedGames,
-} from "./imported-game/imported-game-repository";
-
-export {
-  createJournalEntry,
-  getJournalEntriesForUser,
-  getJournalEntriesByGame,
-  getJournalEntryById,
-  updateJournalEntry,
-  deleteJournalEntry,
-  makeJournalEntryPublic,
-} from "./journal/journal-repository";

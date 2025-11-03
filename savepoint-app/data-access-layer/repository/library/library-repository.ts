@@ -1,6 +1,5 @@
 import "server-only";
 
-import { findOrCreateGameByIgdbId } from "@/data-access-layer/repository/game/game-repository";
 import { LibraryItemStatus, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/shared/lib";
@@ -302,19 +301,7 @@ export function buildCollectionFilter({
   return { gameFilter, libraryFilter };
 }
 
-export async function addGameToUserLibrary({
-  userId,
-  igdbId,
-  libraryItem,
-}: AddGameToUserLibraryInput) {
-  return prisma.$transaction(async () => {
-    const game = await findOrCreateGameByIgdbId({ igdbId });
-
-    await createLibraryItem({ libraryItem, userId, gameId: game.id });
-
-    return game;
-  });
-}
+// addGameToUserLibrary was removed as part of cleanup.
 
 /**
  * Get library statistics for a user
