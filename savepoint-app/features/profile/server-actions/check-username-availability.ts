@@ -2,7 +2,7 @@
 
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { validateUsername } from "../lib/validation";
 import { CheckUsernameSchema } from "../schemas";
@@ -12,7 +12,9 @@ import { CheckUsernameSchema } from "../schemas";
  * This is a public endpoint (no auth required) for real-time validation
  */
 export async function checkUsernameAvailability(data: { username: string }) {
-  const logger = createLogger({ serverAction: "checkUsernameAvailability" });
+  const logger = createLogger({
+    [LOGGER_CONTEXT.SERVER_ACTION]: "checkUsernameAvailability",
+  });
   try {
     // Validate input shape
     const parsedInput = CheckUsernameSchema.safeParse(data);

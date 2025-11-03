@@ -6,13 +6,14 @@ import { useCallback, useEffect } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import { createLogger } from "@/shared/lib/app/logger";
+import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
 
 type GlobalErrorProps = {
   error: Error & { digest?: string };
   reset: () => void;
 };
 
-const logger = createLogger({ component: "GlobalError" });
+const logger = createLogger({ [LOGGER_CONTEXT.ERROR_BOUNDARY]: "GlobalError" });
 
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {

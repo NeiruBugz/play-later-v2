@@ -5,9 +5,12 @@ import { AuthService } from "@/data-access-layer/services";
 import z from "zod";
 
 import { SignUpFormData, signUpSchema } from "@/features/auth/lib/types";
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { isNextAuthRedirect } from "@/shared/lib/auth/handle-next-auth-error";
 
-const logger = createLogger({ serverAction: "signUpAction" });
+const logger = createLogger({
+  [LOGGER_CONTEXT.SERVER_ACTION]: "signUpAction",
+});
 
 /**
  * Sign up a new user with email and password
@@ -50,10 +53,10 @@ export async function signUpAction(data: SignUpFormData) {
       };
     }
 
-    // NextAuth throws NEXT_REDIRECT on successful auth - this is expected behavior
-    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+    // NextAuth throws NEXT_REDIRECT on successful auth - re-throw to allow redirect
+    if (isNextAuthRedirect(error)) {
       logger.debug("Redirecting user to dashboard after successful sign up");
-      throw error; // Re-throw to allow Next.js to handle the redirect
+      throw error;
     }
 
     // Log actual unexpected errors

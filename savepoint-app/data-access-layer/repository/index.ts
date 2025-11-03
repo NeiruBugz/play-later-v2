@@ -1,3 +1,17 @@
+// Repository types
+export {
+  type RepositoryResult,
+  type RepositorySuccess,
+  type RepositoryFailure,
+  type RepositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+  repositoryError,
+  isRepositorySuccess,
+  isRepositoryError,
+} from "./types";
+
+// Library repository
 export {
   createLibraryItem,
   deleteLibraryItem,
@@ -17,17 +31,10 @@ export {
   findUpcomingWishlistItems,
   findCurrentlyPlayingGames,
   buildCollectionFilter,
-  addGameToUserLibrary,
   getLibraryStatsByUserId,
 } from "./library/library-repository";
 
-export {
-  createReview,
-  getAllReviewsForGame,
-  aggregateReviewsRatingsForUser,
-  getRecentReviews,
-} from "./review/review-repository";
-
+// User repository
 export {
   getUserBySteamId,
   getUserByUsername,
@@ -40,32 +47,6 @@ export {
   findUserById,
   findUserByNormalizedUsername,
   updateUserProfile,
+  findUserByEmail,
+  createUserWithCredentials,
 } from "./user/user-repository";
-
-export {
-  createGame,
-  isGameExisting,
-  findGameByIgdbId,
-  findManyByIgdbIds,
-  findGameById,
-  findGamesWithLibraryItemsPaginated,
-} from "./game/game-repository";
-
-export {
-  getImportedGamesCount,
-  getFilteredImportedGamesCount,
-  getFilteredImportedGames,
-  findByStorefrontGameId,
-  softDeleteImportedGame,
-  createManyImportedGames,
-} from "./imported-game/imported-game-repository";
-
-export {
-  createJournalEntry,
-  getJournalEntriesForUser,
-  getJournalEntriesByGame,
-  getJournalEntryById,
-  updateJournalEntry,
-  deleteJournalEntry,
-  makeJournalEntryPublic,
-} from "./journal/journal-repository";

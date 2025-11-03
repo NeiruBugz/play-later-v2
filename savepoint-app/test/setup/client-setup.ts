@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom";
 
-import { searchResponseFixture } from "@/test/fixtures/search";
+import { searchResponseFixture } from "@fixtures/search";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
@@ -76,14 +76,17 @@ export const server = setupServer(
   })
 );
 
-// beforeAll(() => {
-//   server.listen({ onUnhandledRequest: "bypass" });
-// });
+// Start MSW server before tests
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: "bypass" });
+});
 
-// afterEach(() => {
-//   server.resetHandlers();
-// });
+// Reset handlers between tests to prevent cross-test contamination
+afterEach(() => {
+  server.resetHandlers();
+});
 
-// afterAll(() => {
-//   server.close();
-// });
+// Clean up MSW server after all tests
+afterAll(() => {
+  server.close();
+});

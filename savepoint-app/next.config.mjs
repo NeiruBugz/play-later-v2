@@ -46,7 +46,6 @@ const nextConfig = {
         protocol: "https",
       },
     ],
-    unoptimized: true,
   },
   reactStrictMode: true,
   typedRoutes: true,

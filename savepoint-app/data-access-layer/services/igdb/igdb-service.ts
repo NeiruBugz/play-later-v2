@@ -4,6 +4,7 @@ import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import {
   createLogger,
   getTimeStamp,
+  LOGGER_CONTEXT,
   normalizeGameTitle,
   normalizeString,
 } from "@/shared/lib";
@@ -60,7 +61,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
   private token: TwitchTokenResponse | null = null;
   private tokenExpiry: number = 0;
   private queryBuilder: QueryBuilder;
-  private logger = createLogger({ service: "IgdbService" });
+  private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "IgdbService" });
 
   constructor() {
     super();

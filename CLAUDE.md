@@ -530,17 +530,29 @@ This project uses **pnpm** (version 10), not npm or yarn. The `pnpm` commands ar
 
 ### Logging
 
-The project uses **Pino** for production-grade structured logging.
+The project uses **Pino** for production-grade structured logging with standardized context keys.
 
 **Logger Location**: `shared/lib/logger.ts`
 
-**Basic Usage**:
+**Standardized Context Keys**: Always use `LOGGER_CONTEXT` constants for consistent logging across the application.
 
 ```typescript
-import { createLogger } from "@/shared/lib/logger";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-// Create service-specific logger with context
-const logger = createLogger({ service: "GameService" });
+// Services
+const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "GameService" });
+
+// Server Actions
+const logger = createLogger({ [LOGGER_CONTEXT.SERVER_ACTION]: "addGameAction" });
+
+// Pages
+const logger = createLogger({ [LOGGER_CONTEXT.PAGE]: "ProfilePage" });
+
+// Error Boundaries
+const logger = createLogger({ [LOGGER_CONTEXT.ERROR_BOUNDARY]: "GlobalError" });
+
+// Storage Utilities
+const logger = createLogger({ [LOGGER_CONTEXT.STORAGE]: "AvatarStorage" });
 
 // Log at different levels
 logger.debug("Detailed debug info", { gameId: 123 });
@@ -548,6 +560,13 @@ logger.info("Key application event", { action: "game_searched" });
 logger.warn("Warning condition", { issue: "rate_limit_approaching" });
 logger.error({ error: err }, "Error message");
 ```
+
+**Available Context Keys**:
+- `LOGGER_CONTEXT.SERVICE` - Data access layer services
+- `LOGGER_CONTEXT.SERVER_ACTION` - Next.js server actions
+- `LOGGER_CONTEXT.PAGE` - Next.js pages
+- `LOGGER_CONTEXT.ERROR_BOUNDARY` - React error boundaries
+- `LOGGER_CONTEXT.STORAGE` - Storage utilities (S3, etc.)
 
 **Log Levels** (in order of severity):
 
@@ -584,16 +603,33 @@ logger.info(`User ${userId} added game ${gameId}`);
 
 **Service Integration**:
 
-Services should create a logger in their constructor:
+Services should create a logger with the appropriate context key:
 
 ```typescript
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 export class GameService extends BaseService {
-  private logger = createLogger({ service: "GameService" });
+  private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "GameService" });
 
   async searchGames(query: string) {
     this.logger.info({ query }, "Searching games");
     // ... implementation
   }
+}
+```
+
+**Server Action Integration**:
+
+```typescript
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
+export async function addGameAction(data: AddGameInput) {
+  const logger = createLogger({
+    [LOGGER_CONTEXT.SERVER_ACTION]: "addGameAction",
+  });
+
+  logger.info({ gameId: data.gameId }, "Adding game to library");
+  // ... implementation
 }
 ```
 

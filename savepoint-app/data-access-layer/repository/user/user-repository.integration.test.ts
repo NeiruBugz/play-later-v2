@@ -4,7 +4,6 @@ import {
   setupDatabase,
 } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
-import { Prisma } from "@prisma/client";
 
 import { findUserById, updateUserProfile } from "./user-repository";
 
@@ -43,24 +42,30 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Act
-      const updatedUser = await updateUserProfile(user.id, {
+      const result = await updateUserProfile(user.id, {
         username: "NewUsername",
         usernameNormalized: "newusername",
       });
 
       // Assert
-      expect(updatedUser).toMatchObject({
-        id: user.id,
-        username: "NewUsername",
-        usernameNormalized: "newusername",
-      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: user.id,
+          username: "NewUsername",
+          usernameNormalized: "newusername",
+        });
+      }
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: { id: true, username: true, usernameNormalized: true },
       });
-      expect(dbUser?.username).toBe("NewUsername");
-      expect(dbUser?.usernameNormalized).toBe("newusername");
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data?.username).toBe("NewUsername");
+        expect(dbUserResult.data?.usernameNormalized).toBe("newusername");
+      }
     });
 
     it("should fail when updating username to existing username (different case)", async () => {
@@ -74,26 +79,17 @@ describe("UserRepository - Integration Tests", () => {
         usernameNormalized: "anotheruser",
       });
 
-      // Act & Assert
-      await expect(
-        updateUserProfile(user2.id, {
-          username: "existinguser",
-          usernameNormalized: "existinguser",
-        })
-      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
+      // Act
+      const result = await updateUserProfile(user2.id, {
+        username: "existinguser",
+        usernameNormalized: "existinguser",
+      });
 
-      // Verify error is a unique constraint violation
-      try {
-        await updateUserProfile(user2.id, {
-          username: "existinguser",
-          usernameNormalized: "existinguser",
-        });
-      } catch (error) {
-        expect(error).toBeInstanceOf(Prisma.PrismaClientKnownRequestError);
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          expect(error.code).toBe("P2002");
-          expect(error.meta?.target).toContain("usernameNormalized");
-        }
+      // Assert - should return error result for unique constraint violation
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("DATABASE_ERROR");
+        expect(result.error.message).toContain("Failed to update user profile");
       }
     });
 
@@ -102,21 +98,27 @@ describe("UserRepository - Integration Tests", () => {
       const user = await createUser();
 
       // Act
-      const updatedUser = await updateUserProfile(user.id, {
+      const result = await updateUserProfile(user.id, {
         image: "https://example.com/avatar.jpg",
       });
 
       // Assert
-      expect(updatedUser).toMatchObject({
-        id: user.id,
-        image: "https://example.com/avatar.jpg",
-      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: user.id,
+          image: "https://example.com/avatar.jpg",
+        });
+      }
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: { id: true, image: true },
       });
-      expect(dbUser?.image).toBe("https://example.com/avatar.jpg");
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data?.image).toBe("https://example.com/avatar.jpg");
+      }
     });
 
     it("should update multiple fields at once", async () => {
@@ -127,22 +129,25 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Act
-      const updatedUser = await updateUserProfile(user.id, {
+      const result = await updateUserProfile(user.id, {
         username: "NewUsername",
         usernameNormalized: "newusername",
         image: "https://example.com/new-avatar.jpg",
       });
 
       // Assert
-      expect(updatedUser).toMatchObject({
-        id: user.id,
-        username: "NewUsername",
-        usernameNormalized: "newusername",
-        image: "https://example.com/new-avatar.jpg",
-      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: user.id,
+          username: "NewUsername",
+          usernameNormalized: "newusername",
+          image: "https://example.com/new-avatar.jpg",
+        });
+      }
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,
           username: true,
@@ -150,34 +155,31 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUser).toMatchObject({
-        id: user.id,
-        username: "NewUsername",
-        usernameNormalized: "newusername",
-        image: "https://example.com/new-avatar.jpg",
-      });
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data).toMatchObject({
+          id: user.id,
+          username: "NewUsername",
+          usernameNormalized: "newusername",
+          image: "https://example.com/new-avatar.jpg",
+        });
+      }
     });
 
-    it("should throw error with non-existent user ID", async () => {
+    it("should return error with non-existent user ID", async () => {
       // Arrange
       const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
 
-      // Act & Assert
-      await expect(
-        updateUserProfile(nonExistentId, {
-          username: "newusername",
-        })
-      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
+      // Act
+      const result = await updateUserProfile(nonExistentId, {
+        username: "newusername",
+      });
 
-      try {
-        await updateUserProfile(nonExistentId, {
-          username: "newusername",
-        });
-      } catch (error) {
-        expect(error).toBeInstanceOf(Prisma.PrismaClientKnownRequestError);
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          expect(error.code).toBe("P2025");
-        }
+      // Assert
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+        expect(result.error.message).toBe("User not found");
       }
     });
 
@@ -190,18 +192,21 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Act
-      const updatedUser = await updateUserProfile(user.id, {});
+      const result = await updateUserProfile(user.id, {});
 
       // Assert
-      expect(updatedUser).toMatchObject({
-        id: user.id,
-        username: "testuser",
-        usernameNormalized: "testuser",
-        // image: "https://example.com/avatar.jpg",
-      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: user.id,
+          username: "testuser",
+          usernameNormalized: "testuser",
+          // image: "https://example.com/avatar.jpg",
+        });
+      }
 
       // Verify database state remains unchanged
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,
           username: true,
@@ -209,12 +214,15 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUser).toMatchObject({
-        id: user.id,
-        username: "testuser",
-        usernameNormalized: "testuser",
-        // image: "https://example.com/avatar.jpg",
-      });
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data).toMatchObject({
+          id: user.id,
+          username: "testuser",
+          usernameNormalized: "testuser",
+          // image: "https://example.com/avatar.jpg",
+        });
+      }
     });
 
     it("should handle updating username to null", async () => {
@@ -225,24 +233,30 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Act
-      const updatedUser = await updateUserProfile(user.id, {
+      const result = await updateUserProfile(user.id, {
         username: null as unknown as string,
         usernameNormalized: null as unknown as string,
       });
 
       // Assert
-      expect(updatedUser).toMatchObject({
-        id: user.id,
-        username: null,
-        usernameNormalized: null,
-      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: user.id,
+          username: null,
+          usernameNormalized: null,
+        });
+      }
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: { id: true, username: true, usernameNormalized: true },
       });
-      expect(dbUser?.username).toBeNull();
-      expect(dbUser?.usernameNormalized).toBeNull();
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data?.username).toBeNull();
+        expect(dbUserResult.data?.usernameNormalized).toBeNull();
+      }
     });
 
     it("should handle updating image to null", async () => {
@@ -252,21 +266,27 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Act
-      const updatedUser = await updateUserProfile(user.id, {
+      const result = await updateUserProfile(user.id, {
         image: null as unknown as string,
       });
 
       // Assert
-      expect(updatedUser).toMatchObject({
-        id: user.id,
-        image: null,
-      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: user.id,
+          image: null,
+        });
+      }
 
       // Verify database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: { id: true, image: true },
       });
-      expect(dbUser?.image).toBeNull();
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data?.image).toBeNull();
+      }
     });
 
     it("should maintain other user fields when updating profile", async () => {
@@ -281,17 +301,20 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Act
-      const updatedUser = await updateUserProfile(user.id, {
+      const result = await updateUserProfile(user.id, {
         username: "newusername",
         usernameNormalized: "newusername",
       });
 
       // Assert - other fields should remain unchanged
-      expect(updatedUser).toMatchObject({
-        id: user.id,
-        username: "newusername",
-        usernameNormalized: "newusername",
-      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: user.id,
+          username: "newusername",
+          usernameNormalized: "newusername",
+        });
+      }
     });
 
     it("should enforce unique constraint on username field", async () => {
@@ -305,23 +328,17 @@ describe("UserRepository - Integration Tests", () => {
         usernameNormalized: "anotheruser",
       });
 
-      // Act & Assert - try to update to exact same username
-      await expect(
-        updateUserProfile(user2.id, {
-          username: "uniqueuser",
-          usernameNormalized: "uniqueuser",
-        })
-      ).rejects.toThrow(Prisma.PrismaClientKnownRequestError);
+      // Act - try to update to exact same username
+      const result = await updateUserProfile(user2.id, {
+        username: "uniqueuser",
+        usernameNormalized: "uniqueuser",
+      });
 
-      try {
-        await updateUserProfile(user2.id, {
-          username: "uniqueuser",
-          usernameNormalized: "uniqueuser",
-        });
-      } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          expect(error.code).toBe("P2002");
-        }
+      // Assert - should return error result for unique constraint violation
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("DATABASE_ERROR");
+        expect(result.error.message).toContain("Failed to update user profile");
       }
     });
 
@@ -333,16 +350,19 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Act - update only the case of username, keep normalized the same
-      const updatedUser = await updateUserProfile(user.id, {
+      const result = await updateUserProfile(user.id, {
         username: "TestUser",
       });
 
       // Assert
-      expect(updatedUser).toMatchObject({
-        id: user.id,
-        username: "TestUser",
-        usernameNormalized: "testuser",
-      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: user.id,
+          username: "TestUser",
+          usernameNormalized: "testuser",
+        });
+      }
     });
 
     it("should handle multiple sequential updates", async () => {
@@ -353,34 +373,43 @@ describe("UserRepository - Integration Tests", () => {
       });
 
       // Act - multiple sequential updates
-      const update1 = await updateUserProfile(user.id, {
+      const result1 = await updateUserProfile(user.id, {
         username: "user2",
         usernameNormalized: "user2",
       });
-      expect(update1.username).toBe("user2");
+      expect(result1.ok).toBe(true);
+      if (result1.ok) {
+        expect(result1.data.username).toBe("user2");
+      }
 
-      const update2 = await updateUserProfile(user.id, {
+      const result2 = await updateUserProfile(user.id, {
         image: "https://example.com/avatar1.jpg",
       });
-      expect(update2.image).toBe("https://example.com/avatar1.jpg");
-      expect(update2.username).toBe("user2");
+      expect(result2.ok).toBe(true);
+      if (result2.ok) {
+        expect(result2.data.image).toBe("https://example.com/avatar1.jpg");
+        expect(result2.data.username).toBe("user2");
+      }
 
-      const update3 = await updateUserProfile(user.id, {
+      const result3 = await updateUserProfile(user.id, {
         username: "user3",
         usernameNormalized: "user3",
         image: "https://example.com/avatar2.jpg",
       });
 
       // Assert
-      expect(update3).toMatchObject({
-        id: user.id,
-        username: "user3",
-        usernameNormalized: "user3",
-        image: "https://example.com/avatar2.jpg",
-      });
+      expect(result3.ok).toBe(true);
+      if (result3.ok) {
+        expect(result3.data).toMatchObject({
+          id: user.id,
+          username: "user3",
+          usernameNormalized: "user3",
+          image: "https://example.com/avatar2.jpg",
+        });
+      }
 
       // Verify final database state
-      const dbUser = await findUserById(user.id, {
+      const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,
           username: true,
@@ -388,11 +417,14 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUser).toMatchObject({
-        username: "user3",
-        usernameNormalized: "user3",
-        image: "https://example.com/avatar2.jpg",
-      });
+      expect(dbUserResult.ok).toBe(true);
+      if (dbUserResult.ok) {
+        expect(dbUserResult.data).toMatchObject({
+          username: "user3",
+          usernameNormalized: "user3",
+          image: "https://example.com/avatar2.jpg",
+        });
+      }
     });
   });
 });

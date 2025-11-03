@@ -8,9 +8,10 @@ import {
 } from "@/data-access-layer/repository";
 
 import { validateUsername } from "@/features/profile/lib/validation";
-import { createLogger } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
+import { mapUserToProfile, mapUserToProfileWithStats } from "./mappers";
 import type {
   CheckSetupStatusInput,
   CheckSetupStatusResult,
@@ -29,12 +30,12 @@ import type {
 } from "./types";
 
 export class ProfileService extends BaseService {
-  private logger = createLogger({ service: "ProfileService" });
+  private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "ProfileService" });
   async getProfile(input: GetProfileInput): Promise<GetProfileResult> {
     try {
       this.logger.info({ userId: input.userId }, "Fetching user profile");
 
-      const user = await findUserById(input.userId, {
+      const userResult = await findUserById(input.userId, {
         select: {
           username: true,
           image: true,
@@ -44,25 +45,31 @@ export class ProfileService extends BaseService {
         },
       });
 
-      if (!user) {
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to fetch user profile",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!userResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
+
+      const user = userResult.data;
 
       this.logger.info(
         { userId: input.userId, username: user.username },
         "User profile fetched successfully"
       );
 
-      return this.success({
-        profile: {
-          username: user.username,
-          image: user.image,
-          email: user.email,
-          name: user.name,
-          createdAt: user.createdAt,
-        },
-      });
+      const profile = mapUserToProfile(user);
+      return this.success({ profile });
     } catch (error) {
       this.logger.error(
         { error, userId: input.userId },
@@ -81,7 +88,7 @@ export class ProfileService extends BaseService {
         "Fetching user profile with stats"
       );
 
-      const [user, statsResult] = await Promise.all([
+      const [userResult, statsResult] = await Promise.all([
         findUserById(input.userId, {
           select: {
             username: true,
@@ -94,7 +101,18 @@ export class ProfileService extends BaseService {
         getLibraryStatsByUserId(input.userId),
       ]);
 
-      if (!user) {
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to fetch user profile",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!userResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
@@ -104,11 +122,15 @@ export class ProfileService extends BaseService {
           { userId: input.userId, error: statsResult.error },
           "Failed to load library stats"
         );
+
+        // Map repository error to service error, preserving the error message
         return this.error(
-          "Failed to load library stats",
+          statsResult.error.message,
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
+
+      const user = userResult.data;
 
       this.logger.info(
         {
@@ -119,19 +141,8 @@ export class ProfileService extends BaseService {
         "User profile with stats fetched successfully"
       );
 
-      return this.success({
-        profile: {
-          username: user.username,
-          image: user.image,
-          email: user.email,
-          name: user.name,
-          createdAt: user.createdAt,
-          stats: {
-            statusCounts: statsResult.data.statusCounts,
-            recentGames: statsResult.data.recentGames,
-          },
-        },
-      });
+      const profile = mapUserToProfileWithStats(user, statsResult.data);
+      return this.success({ profile });
     } catch (error) {
       this.logger.error(
         { error, userId: input.userId },
@@ -151,9 +162,20 @@ export class ProfileService extends BaseService {
       );
 
       const normalized = input.username.toLowerCase();
-      const existingUser = await findUserByNormalizedUsername(normalized);
+      const existingUserResult = await findUserByNormalizedUsername(normalized);
 
-      const available = !existingUser;
+      if (!existingUserResult.ok) {
+        this.logger.error(
+          { username: input.username, error: existingUserResult.error },
+          "Error checking username availability"
+        );
+        return this.error(
+          "Failed to check username availability",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      const available = !existingUserResult.data;
 
       this.logger.info(
         { username: input.username, available },
@@ -187,14 +209,27 @@ export class ProfileService extends BaseService {
       }
 
       // Check if username changed
-      const currentUser = await findUserById(input.userId, {
+      const currentUserResult = await findUserById(input.userId, {
         select: { username: true },
       });
 
-      if (!currentUser) {
+      if (!currentUserResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: currentUserResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to fetch user data",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!currentUserResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
+
+      const currentUser = currentUserResult.data;
 
       if (currentUser.username !== input.username) {
         // Username changed - check availability
@@ -214,11 +249,22 @@ export class ProfileService extends BaseService {
       }
 
       // Update via repository
-      const user = await updateUserProfile(input.userId, {
+      const userResult = await updateUserProfile(input.userId, {
         username: input.username,
         usernameNormalized: input.username.toLowerCase(),
         image: input.avatarUrl,
       });
+
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error updating user profile"
+        );
+        return this.error(
+          "Failed to update profile",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
 
       this.logger.info(
         { userId: input.userId, username: input.username },
@@ -226,8 +272,8 @@ export class ProfileService extends BaseService {
       );
 
       return this.success({
-        username: user.username,
-        image: user.image,
+        username: userResult.data.username,
+        image: userResult.data.image,
       });
     } catch (error) {
       this.logger.error(
@@ -245,11 +291,22 @@ export class ProfileService extends BaseService {
       this.logger.info({ userId: input.userId }, "Updating avatar URL");
 
       // Verify user exists
-      const user = await findUserById(input.userId, {
+      const userResult = await findUserById(input.userId, {
         select: { id: true },
       });
 
-      if (!user) {
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to verify user",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!userResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
@@ -280,7 +337,7 @@ export class ProfileService extends BaseService {
     try {
       this.logger.info({ userId: input.userId }, "Checking setup status");
 
-      const user = await findUserById(input.userId, {
+      const userResult = await findUserById(input.userId, {
         select: {
           username: true,
           name: true,
@@ -289,10 +346,23 @@ export class ProfileService extends BaseService {
         },
       });
 
-      if (!user) {
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error fetching user by ID"
+        );
+        return this.error(
+          "Failed to check setup status",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      if (!userResult.data) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
+
+      const user = userResult.data;
 
       // Determine if user needs setup
       // Persistent rule: if setup completed at least once, do not prompt
@@ -372,12 +442,23 @@ export class ProfileService extends BaseService {
       }
 
       // Update user record via repository
-      const user = await updateUserProfile(input.userId, {
+      const userResult = await updateUserProfile(input.userId, {
         username: input.username,
         usernameNormalized: input.username?.toLowerCase(),
         image: input.avatarUrl,
         profileSetupCompletedAt: new Date(),
       });
+
+      if (!userResult.ok) {
+        this.logger.error(
+          { userId: input.userId, error: userResult.error },
+          "Error updating user profile"
+        );
+        return this.error(
+          "Failed to complete setup",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
 
       this.logger.info(
         { userId: input.userId, username: input.username },
@@ -385,8 +466,8 @@ export class ProfileService extends BaseService {
       );
 
       return this.success({
-        username: user.username,
-        image: user.image,
+        username: userResult.data.username,
+        image: userResult.data.image,
       });
     } catch (error) {
       this.logger.error(

@@ -29,6 +29,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
   const [username, setUsername] = useState(defaultUsername ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [hasValidationError, setHasValidationError] = useState(false);
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [state, formAction, isPending] = useActionState(
     completeProfileSetupFormAction,
     initialFormState
@@ -51,6 +52,10 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
     toast.error(error, {
       description: "Please try again or choose a different image.",
     });
+  };
+
+  const handleAvatarUploadStateChange = (uploading: boolean) => {
+    setIsAvatarUploading(uploading);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -97,6 +102,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
                 currentAvatar={avatarUrl}
                 onUploadSuccess={handleAvatarUploadSuccess}
                 onUploadError={handleAvatarUploadError}
+                onUploadStateChange={handleAvatarUploadStateChange}
               />
             </div>
 
@@ -122,17 +128,21 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
               type="button"
               variant="ghost"
               onClick={handleSkip}
-              disabled={isPending}
+              disabled={isPending || isAvatarUploading}
               className="w-full sm:w-auto"
             >
               Skip for now
             </Button>
             <Button
               type="submit"
-              disabled={isPending || hasValidationError}
+              disabled={isPending || hasValidationError || isAvatarUploading}
               className="w-full sm:w-auto"
             >
-              {isPending ? "Saving..." : "Complete Setup"}
+              {isPending
+                ? "Saving..."
+                : isAvatarUploading
+                  ? "Uploading image..."
+                  : "Complete Setup"}
             </Button>
           </CardFooter>
         </form>

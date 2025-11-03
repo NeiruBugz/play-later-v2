@@ -8,6 +8,13 @@ export {
   hashPassword,
 } from "./app";
 
+export { LOGGER_CONTEXT, type LoggerContextKey } from "./app/logger-context";
+
+export {
+  isNextAuthRedirect,
+  isAuthenticationError,
+} from "./auth/handle-next-auth-error";
+
 export { getGameUrl, isExternalGameId } from "./game";
 
 export {

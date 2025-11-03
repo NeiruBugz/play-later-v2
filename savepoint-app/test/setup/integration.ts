@@ -1,4 +1,22 @@
+/**
+ * Integration Test Setup
+ *
+ * This file configures the test environment for integration tests that use a real database.
+ * Unlike unit tests, integration tests do NOT mock Prisma - they use a real PostgreSQL database.
+ *
+ * Key differences from unit tests (global.ts):
+ * - Uses real database via getTestDatabase() instead of mocked Prisma
+ * - Runs in single-fork mode to prevent database conflicts
+ * - Has longer timeout (15s vs 10s) for database operations
+ */
+
 import { afterEach, beforeAll, vi } from "vitest";
+
+// Import common mocks shared across all test types
+import "./common-mocks";
+
+// Import database cleanup function for test isolation
+import { resetTestDatabase } from "./database";
 
 // Set up environment variables BEFORE any modules that use them are imported
 process.env.NEXTAUTH_SECRET = "test-secret";
@@ -31,17 +49,10 @@ process.env.AWS_SECRET_ACCESS_KEY = "test";
 process.env.S3_BUCKET_NAME = "savepoint-dev";
 process.env.S3_AVATAR_PATH_PREFIX = "user-avatars/";
 
-// Mock server-only module
-vi.mock("server-only", () => ({}));
-
-// Mock IGDB config only
-vi.mock("@/shared/config/igdb", () => ({
-  API_URL: "https://api.igdb.com/v4",
-  TOKEN_URL:
-    "https://id.twitch.tv/oauth2/token?client_id=test&client_secret=test&grant_type=client_credentials",
-}));
-
-// Mock shared/lib to use test database for prisma
+/**
+ * Override @/shared/lib to use REAL database for integration tests.
+ * This replaces the mocked Prisma from global.ts with a real database client.
+ */
 vi.mock("@/shared/lib", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/shared/lib")>();
   const { getTestDatabase } = await import("./database");
@@ -55,29 +66,19 @@ vi.mock("@/shared/lib", async (importOriginal) => {
   };
 });
 
-// Mock Next.js cache functions
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
-}));
-
-// Mock Next.js navigation
-vi.mock("next/navigation", () => ({
-  redirect: vi.fn(),
-  useRouter: vi.fn(() => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
-  })),
-  useSearchParams: vi.fn(() => new URLSearchParams()),
-}));
-
 // Set up test-specific configuration before tests run
 beforeAll(() => {
   // @ts-expect-error - NODE_ENV is read-only
   process.env.NODE_ENV = "test";
 });
 
-afterEach(() => {
+/**
+ * Clean up after each test to ensure test isolation.
+ * This prevents data leakage between tests and eliminates test interdependencies.
+ */
+afterEach(async () => {
   vi.clearAllMocks();
+
+  // Reset database state between tests
+  await resetTestDatabase();
 });

@@ -1,4 +1,16 @@
+/**
+ * Global Test Setup for Unit Tests
+ *
+ * This file configures the test environment for unit tests (utilities, backend, components).
+ * It mocks Prisma and other dependencies to provide fast, isolated tests.
+ *
+ * For integration tests that use a real database, see test/setup/integration.ts
+ */
+
 import { afterEach, beforeAll, vi } from "vitest";
+
+// Import common mocks shared across all test types
+import "./common-mocks";
 
 // Set up environment variables BEFORE any modules that use them are imported
 process.env.NEXTAUTH_SECRET = "test-secret";
@@ -23,7 +35,7 @@ process.env.POSTGRES_PASSWORD = "postgres";
 process.env.POSTGRES_DATABASE = "test";
 process.env.STEAM_API_KEY = "test-steam-key";
 
-// S3 / LocalStack configuration for integration tests
+// S3 / LocalStack configuration
 process.env.AWS_REGION = "us-east-1";
 process.env.AWS_ENDPOINT_URL = "http://localhost:4568";
 process.env.AWS_ACCESS_KEY_ID = "test";
@@ -31,15 +43,10 @@ process.env.AWS_SECRET_ACCESS_KEY = "test";
 process.env.S3_BUCKET_NAME = "savepoint-dev";
 process.env.S3_AVATAR_PATH_PREFIX = "user-avatars/";
 
-// Hoist all mocks to the top level before any imports can happen
-vi.mock("server-only", () => ({}));
-
-vi.mock("@/shared/config/igdb", () => ({
-  API_URL: "https://api.igdb.com/v4",
-  TOKEN_URL:
-    "https://id.twitch.tv/oauth2/token?client_id=test&client_secret=test&grant_type=client_credentials",
-}));
-
+/**
+ * Mock @/shared/lib with mocked Prisma client for unit tests.
+ * Integration tests override this to use a real database.
+ */
 vi.mock("@/shared/lib", () => {
   const mockLogger = {
     fatal: vi.fn(),
@@ -103,27 +110,22 @@ vi.mock("@/shared/lib", () => {
         .trim()
     ),
     convertReleaseDateToIsoStringDate: vi.fn((date?: string) => date),
+    LOGGER_CONTEXT: {
+      SERVICE: "service",
+      SERVER_ACTION: "serverAction",
+      PAGE: "page",
+      ERROR_BOUNDARY: "errorBoundary",
+      STORAGE: "storage",
+    },
   };
 });
 
+/**
+ * Mock NextAuth functions for authentication tests
+ */
 vi.mock("@/auth", () => ({
   auth: vi.fn(),
   getServerUserId: vi.fn(),
-}));
-
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
-}));
-
-vi.mock("next/navigation", () => ({
-  redirect: vi.fn(),
-  useRouter: vi.fn(() => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
-  })),
-  useSearchParams: vi.fn(() => new URLSearchParams()),
 }));
 
 // Add the repository mocks that were in individual test files

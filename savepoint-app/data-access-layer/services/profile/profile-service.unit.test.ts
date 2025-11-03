@@ -4,6 +4,34 @@ import {
   getLibraryStatsByUserId,
   updateUserProfile,
 } from "@/data-access-layer/repository";
+import {
+  repositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+} from "@/data-access-layer/repository/types";
+import {
+  basicUserProfileFixture,
+  existingUserForRedirectFixture,
+  existingUserWithTakenUsernameFixture,
+  libraryStatsEmptyFixture,
+  libraryStatsErrorFixture,
+  libraryStatsSuccessFixture,
+  newUserForRedirectFixture,
+  newUserProfileFixture,
+  userAtExactBoundaryFixture,
+  userForNewUsernameFixture,
+  userForUnchangedUsernameFixture,
+  userJustUnderBoundaryFixture,
+  userProfileWithNullFieldsFixture,
+  userWithAvatarUpdateFixture,
+  userWithLongNameFixture,
+  userWithNoUsernameFixture,
+  userWithNullNameFixture,
+  userWithoutUsernameRecentCreationFixture,
+  userWithSpecialCharactersNameFixture,
+  userWithUsernameAndRecentCreationFixture,
+  userWithUsernameNotRecentFixture,
+} from "@/test/fixtures/service/profile";
 
 import { validateUsername } from "@/features/profile/lib/validation";
 
@@ -41,15 +69,9 @@ describe("ProfileService", () => {
 
   describe("getProfile", () => {
     it("should return basic profile data for a user", async () => {
-      const mockUser = {
-        username: "testuser",
-        image: "https://example.com/avatar.jpg",
-        email: "test@example.com",
-        name: "Test User",
-        createdAt: new Date("2024-01-15"),
-      };
-
-      mockFindUserById.mockResolvedValue(mockUser);
+      mockFindUserById.mockResolvedValue(
+        repositorySuccess(basicUserProfileFixture)
+      );
 
       const result = await service.getProfile({
         userId: "user-123",
@@ -57,13 +79,7 @@ describe("ProfileService", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.profile).toEqual({
-          username: "testuser",
-          image: "https://example.com/avatar.jpg",
-          email: "test@example.com",
-          name: "Test User",
-          createdAt: new Date("2024-01-15"),
-        });
+        expect(result.data.profile).toEqual(basicUserProfileFixture);
       }
 
       expect(mockFindUserById).toHaveBeenCalledWith("user-123", {
@@ -78,15 +94,9 @@ describe("ProfileService", () => {
     });
 
     it("should return profile with null values for missing fields", async () => {
-      const mockUser = {
-        username: null,
-        image: null,
-        email: "test@example.com",
-        name: "Test User",
-        createdAt: new Date("2024-01-15"),
-      };
-
-      mockFindUserById.mockResolvedValue(mockUser);
+      mockFindUserById.mockResolvedValue(
+        repositorySuccess(userProfileWithNullFieldsFixture)
+      );
 
       const result = await service.getProfile({
         userId: "user-123",
@@ -101,7 +111,7 @@ describe("ProfileService", () => {
     });
 
     it("should return error when user is not found", async () => {
-      mockFindUserById.mockResolvedValue(null);
+      mockFindUserById.mockResolvedValue(repositorySuccess(null));
 
       const result = await service.getProfile({
         userId: "nonexistent-user",
@@ -133,41 +143,10 @@ describe("ProfileService", () => {
 
   describe("getProfileWithStats", () => {
     it("should return profile data with library statistics", async () => {
-      const mockUser = {
-        username: "testuser",
-        image: "https://example.com/avatar.jpg",
-        email: "test@example.com",
-        name: "Test User",
-        createdAt: new Date("2024-01-15"),
-      };
-
-      const mockStats = {
-        ok: true as const,
-        data: {
-          statusCounts: {
-            CURIOUS_ABOUT: 5,
-            CURRENTLY_EXPLORING: 2,
-            EXPERIENCED: 10,
-          },
-          recentGames: [
-            {
-              gameId: "game-1",
-              title: "Test Game 1",
-              coverImage: "https://example.com/cover1.jpg",
-              lastPlayed: new Date("2024-03-01"),
-            },
-            {
-              gameId: "game-2",
-              title: "Test Game 2",
-              coverImage: null,
-              lastPlayed: new Date("2024-02-28"),
-            },
-          ],
-        },
-      };
-
-      mockFindUserById.mockResolvedValue(mockUser);
-      mockGetLibraryStatsByUserId.mockResolvedValue(mockStats);
+      mockFindUserById.mockResolvedValue(
+        repositorySuccess(basicUserProfileFixture)
+      );
+      mockGetLibraryStatsByUserId.mockResolvedValue(libraryStatsSuccessFixture);
 
       const result = await service.getProfileWithStats({
         userId: "user-123",
@@ -201,24 +180,10 @@ describe("ProfileService", () => {
     });
 
     it("should return profile with empty stats for user with no library items", async () => {
-      const mockUser = {
-        username: "newuser",
-        image: null,
-        email: "new@example.com",
-        name: "New User",
-        createdAt: new Date("2024-03-01"),
-      };
-
-      const mockStats = {
-        ok: true as const,
-        data: {
-          statusCounts: {},
-          recentGames: [],
-        },
-      };
-
-      mockFindUserById.mockResolvedValue(mockUser);
-      mockGetLibraryStatsByUserId.mockResolvedValue(mockStats);
+      mockFindUserById.mockResolvedValue(
+        repositorySuccess(newUserProfileFixture)
+      );
+      mockGetLibraryStatsByUserId.mockResolvedValue(libraryStatsEmptyFixture);
 
       const result = await service.getProfileWithStats({
         userId: "user-456",
@@ -232,7 +197,7 @@ describe("ProfileService", () => {
     });
 
     it("should return error when user is not found", async () => {
-      mockFindUserById.mockResolvedValue(null);
+      mockFindUserById.mockResolvedValue(repositorySuccess(null));
 
       const result = await service.getProfileWithStats({
         userId: "nonexistent-user",
@@ -246,24 +211,10 @@ describe("ProfileService", () => {
     });
 
     it("should return error when library stats fetch fails", async () => {
-      const mockUser = {
-        username: "testuser",
-        image: null,
-        email: "test@example.com",
-        name: "Test User",
-        createdAt: new Date("2024-01-15"),
-      };
-
-      const mockStats = {
-        ok: false as const,
-        error: {
-          code: "STATS_FETCH_FAILED",
-          message: "Failed to fetch library stats",
-        },
-      };
-
-      mockFindUserById.mockResolvedValue(mockUser);
-      mockGetLibraryStatsByUserId.mockResolvedValue(mockStats);
+      mockFindUserById.mockResolvedValue(
+        repositorySuccess(basicUserProfileFixture)
+      );
+      mockGetLibraryStatsByUserId.mockResolvedValue(libraryStatsErrorFixture);
 
       const result = await service.getProfileWithStats({
         userId: "user-123",
@@ -271,21 +222,16 @@ describe("ProfileService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("Failed to load library stats");
+        // Now propagates the actual repository error message
+        expect(result.error).toBe("Failed to fetch library stats");
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
     });
 
     it("should handle unexpected errors during stats fetch", async () => {
-      const mockUser = {
-        username: "testuser",
-        image: null,
-        email: "test@example.com",
-        name: "Test User",
-        createdAt: new Date("2024-01-15"),
-      };
-
-      mockFindUserById.mockResolvedValue(mockUser);
+      mockFindUserById.mockResolvedValue(
+        repositorySuccess(basicUserProfileFixture)
+      );
       mockGetLibraryStatsByUserId.mockRejectedValue(
         new Error("Connection timeout")
       );
@@ -304,7 +250,9 @@ describe("ProfileService", () => {
 
   describe("checkUsernameAvailability", () => {
     it("should return available: true when username is not taken", async () => {
-      mockFindUserByNormalizedUsername.mockResolvedValue(null);
+      mockFindUserByNormalizedUsername.mockResolvedValue(
+        repositorySuccess(null)
+      );
 
       const result = await service.checkUsernameAvailability({
         username: "newuser123",
@@ -321,7 +269,9 @@ describe("ProfileService", () => {
     });
 
     it("should return available: false when username is already taken", async () => {
-      mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-123" });
+      mockFindUserByNormalizedUsername.mockResolvedValue(
+        repositorySuccess({ id: "user-123" })
+      );
 
       const result = await service.checkUsernameAvailability({
         username: "existinguser",
@@ -338,7 +288,9 @@ describe("ProfileService", () => {
     });
 
     it("should check username case-insensitively", async () => {
-      mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-123" });
+      mockFindUserByNormalizedUsername.mockResolvedValue(
+        repositorySuccess({ id: "user-123" })
+      );
 
       const result = await service.checkUsernameAvailability({
         username: "ExistingUser",
@@ -378,13 +330,16 @@ describe("ProfileService", () => {
         const username = "existinguser";
 
         mockValidateUsername.mockReturnValue({ valid: true });
-        mockFindUserById.mockResolvedValue({ username: "existinguser" });
-        mockUpdateUserProfile.mockResolvedValue({
-          id: userId,
-          username: "existinguser",
-          usernameNormalized: "existinguser",
-          image: null,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess({ username: "existinguser" })
+        );
+        mockUpdateUserProfile.mockResolvedValue(
+          repositorySuccess({
+            ...userForUnchangedUsernameFixture,
+            steamProfileURL: null,
+            profileSetupCompletedAt: null,
+          })
+        );
 
         const result = await service.updateProfile({
           userId,
@@ -414,14 +369,19 @@ describe("ProfileService", () => {
         const newUsername = "newuser123";
 
         mockValidateUsername.mockReturnValue({ valid: true });
-        mockFindUserById.mockResolvedValue({ username: "olduser" });
-        mockFindUserByNormalizedUsername.mockResolvedValue(null);
-        mockUpdateUserProfile.mockResolvedValue({
-          id: userId,
-          username: "newuser123",
-          usernameNormalized: "newuser123",
-          image: null,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess({ username: "olduser" })
+        );
+        mockFindUserByNormalizedUsername.mockResolvedValue(
+          repositorySuccess(null)
+        );
+        mockUpdateUserProfile.mockResolvedValue(
+          repositorySuccess({
+            ...userForNewUsernameFixture,
+            steamProfileURL: null,
+            profileSetupCompletedAt: null,
+          })
+        );
 
         const result = await service.updateProfile({
           userId,
@@ -453,13 +413,16 @@ describe("ProfileService", () => {
         const avatarUrl = "https://example.com/avatar.jpg";
 
         mockValidateUsername.mockReturnValue({ valid: true });
-        mockFindUserById.mockResolvedValue({ username: "testuser" });
-        mockUpdateUserProfile.mockResolvedValue({
-          id: userId,
-          username: "testuser",
-          usernameNormalized: "testuser",
-          image: avatarUrl,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess({ username: "testuser" })
+        );
+        mockUpdateUserProfile.mockResolvedValue(
+          repositorySuccess({
+            ...userWithAvatarUpdateFixture,
+            steamProfileURL: null,
+            profileSetupCompletedAt: null,
+          })
+        );
 
         const result = await service.updateProfile({
           userId,
@@ -612,8 +575,12 @@ describe("ProfileService", () => {
         const username = "NewUser";
 
         mockValidateUsername.mockReturnValue({ valid: true });
-        mockFindUserById.mockResolvedValue({ username: "olduser" });
-        mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-456" });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess({ username: "olduser" })
+        );
+        mockFindUserByNormalizedUsername.mockResolvedValue(
+          existingUserWithTakenUsernameFixture
+        );
 
         const result = await service.updateProfile({
           userId,
@@ -641,8 +608,12 @@ describe("ProfileService", () => {
         const username = "NEWUSER";
 
         mockValidateUsername.mockReturnValue({ valid: true });
-        mockFindUserById.mockResolvedValue({ username: "olduser" });
-        mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-456" });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess({ username: "olduser" })
+        );
+        mockFindUserByNormalizedUsername.mockResolvedValue(
+          existingUserWithTakenUsernameFixture
+        );
 
         const result = await service.updateProfile({
           userId,
@@ -666,7 +637,7 @@ describe("ProfileService", () => {
         const username = "validuser";
 
         mockValidateUsername.mockReturnValue({ valid: true });
-        mockFindUserById.mockResolvedValue(null);
+        mockFindUserById.mockResolvedValue(repositorySuccess(null));
 
         const result = await service.updateProfile({
           userId,
@@ -693,10 +664,17 @@ describe("ProfileService", () => {
         const username = "validuser";
 
         mockValidateUsername.mockReturnValue({ valid: true });
-        mockFindUserById.mockResolvedValue({ username: "olduser" });
-        mockFindUserByNormalizedUsername.mockResolvedValue(null);
-        mockUpdateUserProfile.mockRejectedValue(
-          new Error("Database connection failed")
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess({ username: "olduser" })
+        );
+        mockFindUserByNormalizedUsername.mockResolvedValue(
+          repositorySuccess(null)
+        );
+        mockUpdateUserProfile.mockResolvedValue(
+          repositoryError(
+            RepositoryErrorCode.INTERNAL_ERROR,
+            "Database connection failed"
+          )
         );
 
         const result = await service.updateProfile({
@@ -706,7 +684,7 @@ describe("ProfileService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Database connection failed");
+          expect(result.error).toBe("Failed to update profile");
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
         }
       });
@@ -737,7 +715,9 @@ describe("ProfileService", () => {
         const username = "newuser";
 
         mockValidateUsername.mockReturnValue({ valid: true });
-        mockFindUserById.mockResolvedValue({ username: "olduser" });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess({ username: "olduser" })
+        );
         mockFindUserByNormalizedUsername.mockRejectedValue(
           new Error("Database query failed")
         );
@@ -771,12 +751,9 @@ describe("ProfileService", () => {
 
     describe("success scenarios", () => {
       it("should return needsSetup: true for user with no username", async () => {
-        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: null,
-          name: "John Doe",
-          createdAt: tenMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithNoUsernameFixture)
+        );
 
         const result = await service.checkSetupStatus({ userId: "user-123" });
 
@@ -797,12 +774,9 @@ describe("ProfileService", () => {
       });
 
       it("should return needsSetup: true for new user created within 5 minutes with username", async () => {
-        const twoMinutesAgo = new Date("2025-01-20T11:58:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: "existinguser",
-          name: "John Doe",
-          createdAt: twoMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithUsernameAndRecentCreationFixture)
+        );
 
         const result = await service.checkSetupStatus({ userId: "user-123" });
 
@@ -814,12 +788,9 @@ describe("ProfileService", () => {
       });
 
       it("should return needsSetup: true for new user without username created within 5 minutes", async () => {
-        const threeMinutesAgo = new Date("2025-01-20T11:57:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: null,
-          name: "Jane Smith",
-          createdAt: threeMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithoutUsernameRecentCreationFixture)
+        );
 
         const result = await service.checkSetupStatus({ userId: "user-456" });
 
@@ -831,12 +802,9 @@ describe("ProfileService", () => {
       });
 
       it("should return needsSetup: false for existing user with username created 10 minutes ago", async () => {
-        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: "existinguser",
-          name: "John Doe",
-          createdAt: tenMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithUsernameNotRecentFixture)
+        );
 
         const result = await service.checkSetupStatus({ userId: "user-789" });
 
@@ -848,12 +816,9 @@ describe("ProfileService", () => {
       });
 
       it("should return needsSetup: false for user at exact 5-minute boundary with username", async () => {
-        const exactlyFiveMinutesAgo = new Date("2025-01-20T11:55:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: "boundaryuser",
-          name: "Boundary Test",
-          createdAt: exactlyFiveMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userAtExactBoundaryFixture)
+        );
 
         const result = await service.checkSetupStatus({
           userId: "user-boundary",
@@ -867,12 +832,9 @@ describe("ProfileService", () => {
       });
 
       it("should return needsSetup: true for user just under 5-minute boundary", async () => {
-        const fourMinutesFiftyNineSecondsAgo = new Date("2025-01-20T11:55:01Z");
-        mockFindUserById.mockResolvedValue({
-          username: "recentuser",
-          name: "Recent User",
-          createdAt: fourMinutesFiftyNineSecondsAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userJustUnderBoundaryFixture)
+        );
 
         const result = await service.checkSetupStatus({
           userId: "user-recent",
@@ -888,12 +850,9 @@ describe("ProfileService", () => {
 
     describe("suggested username generation", () => {
       it("should generate suggested username from Google name", async () => {
-        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: null,
-          name: "John Doe",
-          createdAt: tenMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithNoUsernameFixture)
+        );
 
         const result = await service.checkSetupStatus({ userId: "user-123" });
 
@@ -904,12 +863,9 @@ describe("ProfileService", () => {
       });
 
       it("should remove special characters from suggested username", async () => {
-        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: null,
-          name: "John-Paul O'Brien",
-          createdAt: tenMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithSpecialCharactersNameFixture)
+        );
 
         const result = await service.checkSetupStatus({ userId: "user-456" });
 
@@ -920,12 +876,9 @@ describe("ProfileService", () => {
       });
 
       it("should truncate suggested username to 20 characters", async () => {
-        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: null,
-          name: "Christopher Alexander Montgomery",
-          createdAt: tenMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithLongNameFixture)
+        );
 
         const result = await service.checkSetupStatus({ userId: "user-long" });
 
@@ -937,12 +890,9 @@ describe("ProfileService", () => {
       });
 
       it("should return undefined suggested username when setup not needed", async () => {
-        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: "existinguser",
-          name: "John Doe",
-          createdAt: tenMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithUsernameNotRecentFixture)
+        );
 
         const result = await service.checkSetupStatus({
           userId: "user-existing",
@@ -956,12 +906,9 @@ describe("ProfileService", () => {
       });
 
       it("should return undefined suggested username when name is null", async () => {
-        const tenMinutesAgo = new Date("2025-01-20T11:50:00Z");
-        mockFindUserById.mockResolvedValue({
-          username: null,
-          name: null,
-          createdAt: tenMinutesAgo,
-        });
+        mockFindUserById.mockResolvedValue(
+          repositorySuccess(userWithNullNameFixture)
+        );
 
         const result = await service.checkSetupStatus({
           userId: "user-noname",
@@ -977,7 +924,7 @@ describe("ProfileService", () => {
 
     describe("error scenarios", () => {
       it("should return NOT_FOUND error when user does not exist", async () => {
-        mockFindUserById.mockResolvedValue(null);
+        mockFindUserById.mockResolvedValue(repositorySuccess(null));
 
         const result = await service.checkSetupStatus({
           userId: "nonexistent-user",
@@ -1026,12 +973,9 @@ describe("ProfileService", () => {
     });
 
     it("should redirect new users to /profile/setup", async () => {
-      mockFindUserById.mockResolvedValue({
-        username: null,
-        name: "New User",
-        profileSetupCompletedAt: null,
-        createdAt: new Date("2025-01-20T11:58:00Z"),
-      });
+      mockFindUserById.mockResolvedValue(
+        repositorySuccess(newUserForRedirectFixture)
+      );
 
       const result = await service.getRedirectAfterAuth({ userId: "user-1" });
 
@@ -1043,12 +987,9 @@ describe("ProfileService", () => {
     });
 
     it("should redirect existing users to /dashboard", async () => {
-      mockFindUserById.mockResolvedValue({
-        username: "existing",
-        name: "Existing User",
-        profileSetupCompletedAt: new Date("2025-01-10T00:00:00Z"),
-        createdAt: new Date("2025-01-01T00:00:00Z"),
-      });
+      mockFindUserById.mockResolvedValue(
+        repositorySuccess(existingUserForRedirectFixture)
+      );
 
       const result = await service.getRedirectAfterAuth({ userId: "user-2" });
 

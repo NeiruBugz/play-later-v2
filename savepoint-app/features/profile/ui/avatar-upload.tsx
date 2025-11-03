@@ -12,6 +12,7 @@ interface AvatarUploadProps {
   currentAvatar?: string | null;
   onUploadSuccess?: (url: string) => void;
   onUploadError?: (error: string) => void;
+  onUploadStateChange?: (isUploading: boolean) => void;
 }
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -21,6 +22,7 @@ export const AvatarUpload = ({
   currentAvatar,
   onUploadSuccess,
   onUploadError,
+  onUploadStateChange,
 }: AvatarUploadProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -84,6 +86,7 @@ export const AvatarUpload = ({
     if (!selectedFile) return;
 
     setIsUploading(true);
+    onUploadStateChange?.(true); // Notify parent that upload started
     setError(null);
 
     try {
@@ -108,6 +111,7 @@ export const AvatarUpload = ({
       onUploadError?.(errorMessage);
     } finally {
       setIsUploading(false);
+      onUploadStateChange?.(false); // Notify parent that upload completed
     }
   };
 
