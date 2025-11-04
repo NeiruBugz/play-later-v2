@@ -12,14 +12,14 @@ _The highest priority features that form the core foundation of SavePoint—enab
   - [x] **IGDB Integration Consolidation:** Refactor IGDB implementation to eliminate duplication between `shared/lib/igdb.ts` and `data-access-layer/services/igdb/igdb-service.ts`. Extract types to `igdb-api-types` package for unified type definitions. Deprecate legacy utility in favor of service layer pattern. ✅ **Completed:** All 18 methods migrated, legacy implementation removed, comprehensive documentation in place.
   - [ ] **Vitest Configuration Restructure:** Refactor test setup to three-project architecture (unit/integration/components) with explicit naming conventions (`.unit.test.ts`, `.integration.test.ts`). Create separate setup files for each test type. Update existing tests to follow new structure.
 
-- [ ] **User Account Essentials**
-  - [ ] **Google OAuth Sign-Up & Login:** Allow users to create an account and sign in using Google OAuth as the primary authentication method.
-  - [ ] **Credentials-Based Login:** Provide email/password authentication as a secondary option, primarily for testing and development scenarios (E2E tests with Playwright).
-  - [ ] **Basic Profile Management:** Enable users to view and update their name and basic profile information after signing up.
+- [x] **User Account Essentials**
+  - [x] **Google OAuth Sign-Up & Login:** Allow users to create an account and sign in using Google OAuth as the primary authentication method.
+  - [x] **Credentials-Based Login:** Provide email/password authentication as a secondary option, primarily for testing and development scenarios (E2E tests with Playwright).
+  - [x] **Basic Profile Management:** Enable users to view and update their name and basic profile information after signing up.
 
 - [ ] **Game Metadata Foundation**
-  - [ ] **IGDB Integration:** Connect to IGDB as the primary source for game metadata, covers, descriptions, release dates, and platform information.
-  - [ ] **Game Search:** Allow users to search for games via IGDB to add to their library.
+  - [x] **IGDB Integration:** Connect to IGDB as the primary source for game metadata, covers, descriptions, release dates, and platform information.
+  - [x] **Game Search:** Allow users to search for games via IGDB to add to their library.
   - [ ] **Game Detail Pages:** Create rich game detail pages showing IGDB metadata and user's personal journal entries for that game.
 
 - [ ] **Personal Gaming Library**

@@ -101,7 +101,7 @@ pnpm lint:fix         # Auto-fix ESLint issues
 pnpm typecheck        # TypeScript type checking
 pnpm format:check     # Check Prettier formatting
 pnpm format:write     # Auto-format with Prettier
-pnpm code-check       # Run all checks: format + lint + typecheck
+pnpm ci:check       # Run all checks: format + lint + typecheck
 pnpm code-fix         # Auto-fix: format + lint
 pnpm knip             # Detect unused dependencies and exports
 ```
