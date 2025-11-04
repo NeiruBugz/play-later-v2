@@ -1,7 +1,6 @@
 import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
-// Collection filter parameters schema and types
 export const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),
   status: z.union([z.nativeEnum(LibraryItemStatus), z.string()]).optional(),

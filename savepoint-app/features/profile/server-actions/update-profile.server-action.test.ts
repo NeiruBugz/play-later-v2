@@ -100,7 +100,7 @@ describe("updateProfile server action", () => {
 
     it("should handle validation error from Zod schema", async () => {
       const result = await updateProfile({
-        username: "ab", // Too short (min 3 chars)
+        username: "ab",
       });
 
       expect(result.success).toBe(false);
@@ -112,7 +112,7 @@ describe("updateProfile server action", () => {
 
     it("should handle validation error for too long username", async () => {
       const result = await updateProfile({
-        username: "a".repeat(26), // Too long (max 25 chars)
+        username: "a".repeat(26),
       });
 
       expect(result.success).toBe(false);
@@ -163,7 +163,6 @@ describe("updateProfile server action", () => {
 
     it("should return error when username field is missing", async () => {
       const formData = new FormData();
-      // No username field
 
       const result = await updateProfileFormAction(prevState, formData);
 
@@ -272,7 +271,7 @@ describe("updateProfile server action", () => {
 
     it("should handle validation errors from Zod schema", async () => {
       const formData = new FormData();
-      formData.append("username", "ab"); // Too short
+      formData.append("username", "ab");
 
       const result = await updateProfileFormAction(prevState, formData);
 

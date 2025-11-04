@@ -1,10 +1,5 @@
 import { clearTestData, disconnectDatabase } from "./helpers/db";
 
-/**
- * Playwright global setup
- * Runs once before all test files
- * Ensures a clean database state before tests start
- */
 async function globalSetup(): Promise<void> {
   console.log("\n🚀 Running global E2E setup...");
 

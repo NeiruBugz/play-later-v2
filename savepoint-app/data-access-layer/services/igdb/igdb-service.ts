@@ -17,6 +17,7 @@ import {
 
 import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import {
+  ALLOWED_GAME_CATEGORIES,
   SEARCH_RESULTS_LIMIT,
   TOP_RATED_GAMES_LIMIT,
   UPCOMING_EVENTS_LIMIT,
@@ -211,19 +212,37 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Searching games by name"
       );
 
-      const query = this.queryBuilder
+      const gameTypeFilter = `game_type = (${ALLOWED_GAME_CATEGORIES.join(",")})`;
+      const baseConditions = `cover.image_id != null & ${gameTypeFilter}`;
+      const whereClause = filters
+        ? `${baseConditions} & ${filters}`
+        : baseConditions;
+
+      this.logger.debug(
+        {
+          whereClause,
+        },
+        "search query filters"
+      );
+
+      const queryBuilder = this.queryBuilder
         .fields([
           "name",
           "platforms.name",
           "release_dates.human",
           "first_release_date",
-          "category",
+          "game_type",
           "cover.image_id",
         ])
-        .where(`cover.image_id != null ${filters}`)
+        .where(whereClause)
         .search(normalizedSearchQuery)
-        .limit(SEARCH_RESULTS_LIMIT)
-        .build();
+        .limit(SEARCH_RESULTS_LIMIT);
+
+      if (params.offset && params.offset > 0) {
+        queryBuilder.offset(params.offset);
+      }
+
+      const query = queryBuilder.build();
 
       const games = await this.makeRequest<SearchResponse[]>({
         body: query,

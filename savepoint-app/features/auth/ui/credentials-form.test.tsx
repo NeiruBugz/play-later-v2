@@ -1,12 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// Import the mocked functions
 import { signInAction } from "../server-actions/sign-in";
 import { signUpAction } from "../server-actions/sign-up";
 import { CredentialsForm } from "./credentials-form";
 
-// Mock the server actions
 vi.mock("../server-actions/sign-in", () => ({
   signInAction: vi.fn(),
 }));
@@ -246,7 +244,6 @@ describe("CredentialsForm", () => {
       await actions.typeInEmailField("test@example.com");
       await actions.typeInPasswordField("password");
 
-      // Submit the form
       await actions.clickSignInSubmit();
 
       await waitFor(() => {
@@ -272,10 +269,8 @@ describe("CredentialsForm", () => {
       await actions.typeInEmailField("test@example.com");
       await actions.typeInPasswordField("password");
 
-      // Submit the form
       await actions.clickSignInSubmit();
 
-      // Check loading state
       await waitFor(() => {
         expect(elements.getLoadingStateButton()).toHaveTextContent(
           "Loading..."
@@ -300,7 +295,6 @@ describe("CredentialsForm", () => {
     it("should have minLength attribute for password in sign-up mode", async () => {
       render(<CredentialsForm />);
 
-      // Toggle to sign-up mode
       await actions.toggleSignUpMode();
 
       const passwordInput = elements.getPasswordInput();
@@ -312,10 +306,8 @@ describe("CredentialsForm", () => {
     it("should show password hint only in sign-up mode", async () => {
       render(<CredentialsForm />);
 
-      // Initially no hint in sign-in mode
       expect(elements.getPasswordHint()).not.toBeInTheDocument();
 
-      // Toggle to sign-up mode
       await actions.toggleSignUpMode();
       expect(elements.getPasswordHint()).toBeVisible();
     });

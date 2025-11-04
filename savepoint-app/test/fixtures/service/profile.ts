@@ -1,4 +1,3 @@
-// Basic profile fixtures
 export const basicUserProfileFixture = {
   username: "testuser",
   image: "https://example.com/avatar.jpg",
@@ -23,7 +22,6 @@ export const newUserProfileFixture = {
   createdAt: new Date("2024-03-01"),
 };
 
-// Profile with stats fixtures
 export const libraryStatsSuccessFixture = {
   ok: true as const,
   data: {
@@ -65,7 +63,6 @@ export const libraryStatsErrorFixture = {
   },
 };
 
-// Update profile fixtures
 export const userForUnchangedUsernameFixture = {
   id: "user-123",
   username: "existinguser",
@@ -91,7 +88,6 @@ export const existingUserWithTakenUsernameFixture = {
   id: "user-456",
 };
 
-// Setup status fixtures
 export const userWithNoUsernameFixture = {
   username: null,
   name: "John Doe",
@@ -146,7 +142,6 @@ export const userWithNullNameFixture = {
   createdAt: new Date("2025-01-20T11:50:00Z"),
 };
 
-// Redirect after auth fixtures
 export const newUserForRedirectFixture = {
   username: null,
   name: "New User",

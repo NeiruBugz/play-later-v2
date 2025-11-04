@@ -98,7 +98,6 @@ export async function updateLibraryItem({
       );
     }
 
-    // Exclude id from update payload (Prisma forbids updating primary key)
     const { id, ...updateData } = libraryItem;
 
     const updated = await prisma.libraryItem.update({
@@ -269,12 +268,6 @@ export async function getUniquePlatforms({
   }
 }
 
-/**
- * @deprecated This function has a potential N+1 query issue and fetches ALL library items
- * for ALL users without pagination, which could cause severe performance problems.
- * Use getOtherUsersLibrariesPaginated() instead, which provides proper pagination.
- * This function is kept for backward compatibility but should not be used in new code.
- */
 export async function getOtherUsersLibraries({
   userId,
 }: {
@@ -569,14 +562,6 @@ export function buildCollectionFilter({
   return { gameFilter, libraryFilter };
 }
 
-// addGameToUserLibrary was removed as part of cleanup.
-
-/**
- * Get library statistics for a user
- * Returns the count of games in each journey status and recent games
- * @param userId - The user's unique identifier
- * @returns Result object with status counts and recent games or error
- */
 export async function getLibraryStatsByUserId(userId: string): Promise<
   RepositoryResult<{
     statusCounts: Record<string, number>;

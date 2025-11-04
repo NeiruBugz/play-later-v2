@@ -89,7 +89,6 @@ export type CompleteSetupResult = ServiceResult<{
   image: string | null;
 }>;
 
-// Determines where to send the user right after auth
 export type GetRedirectAfterAuthInput = {
   userId: string;
 };

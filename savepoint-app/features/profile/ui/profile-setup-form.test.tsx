@@ -15,12 +15,10 @@ import { completeProfileSetupFormAction } from "../server-actions/complete-profi
 import { skipProfileSetup } from "../server-actions/skip-profile-setup";
 import { ProfileSetupForm } from "./profile-setup-form";
 
-// Mock Next.js router
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
 }));
 
-// Mock server action
 vi.mock("../server-actions/complete-profile-setup", () => ({
   completeProfileSetupFormAction: vi.fn(),
 }));
@@ -29,7 +27,6 @@ vi.mock("../server-actions/skip-profile-setup", () => ({
   skipProfileSetup: vi.fn(),
 }));
 
-// Mock toast
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -37,7 +34,6 @@ vi.mock("sonner", () => ({
   },
 }));
 
-// Mock UsernameInput component to simplify testing
 vi.mock("./username-input", () => ({
   UsernameInput: ({
     value,
@@ -56,7 +52,6 @@ vi.mock("./username-input", () => ({
       const newValue = e.target.value;
       onChange(newValue);
 
-      // Simulate client-side validation
       const trimmed = newValue.trim();
       const hasError =
         trimmed.length > 0 && (trimmed.length < 3 || trimmed.length > 25);
@@ -80,7 +75,6 @@ vi.mock("./username-input", () => ({
   },
 }));
 
-// Mock AvatarUpload component to simplify testing
 vi.mock("./avatar-upload", () => ({
   AvatarUpload: () => <div data-testid="avatar-upload">Avatar Upload</div>,
 }));
@@ -100,10 +94,6 @@ describe("ProfileSetupForm", () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
-
-  // ============================================================
-  // Rendering Tests
-  // ============================================================
 
   describe("given form is rendered", () => {
     it("should display all form elements", () => {
@@ -144,10 +134,6 @@ describe("ProfileSetupForm", () => {
     });
   });
 
-  // ============================================================
-  // Skip Flow Tests
-  // ============================================================
-
   describe("given user clicks Skip button", () => {
     it("should persist completion via server action and redirect to dashboard", async () => {
       const user = userEvent.setup();
@@ -165,12 +151,10 @@ describe("ProfileSetupForm", () => {
       const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
-      // Modify username
       const usernameInput = screen.getByLabelText("Username");
       await user.clear(usernameInput);
       await user.type(usernameInput, "ModifiedUser");
 
-      // Click skip
       const skipButton = screen.getByRole("button", { name: /skip for now/i });
       await user.click(skipButton);
 
@@ -179,10 +163,6 @@ describe("ProfileSetupForm", () => {
       expect(mockFormAction).not.toHaveBeenCalled();
     });
   });
-
-  // ============================================================
-  // Save Flow Tests - Valid Data
-  // ============================================================
 
   describe("given user submits with valid username", () => {
     it("should call server action with username and redirect on success", async () => {
@@ -195,23 +175,19 @@ describe("ProfileSetupForm", () => {
 
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
-      // Modify username
       const usernameInput = screen.getByLabelText("Username");
       await user.clear(usernameInput);
       await user.type(usernameInput, "ValidUser");
 
-      // Submit form
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
       await user.click(submitButton);
 
-      // Wait for form action to be called
       await waitFor(() => {
         expect(mockFormAction).toHaveBeenCalled();
       });
 
-      // Wait for redirect
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith("/dashboard");
       });
@@ -227,7 +203,6 @@ describe("ProfileSetupForm", () => {
 
       render(<ProfileSetupForm defaultUsername="DefaultUser" />);
 
-      // Submit without modifying username
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
@@ -266,26 +241,19 @@ describe("ProfileSetupForm", () => {
     });
   });
 
-  // ============================================================
-  // Save Flow Tests - Empty Username
-  // ============================================================
-
   describe("given user submits with empty username", () => {
     it("should prevent submission with empty username due to validation", async () => {
       const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="DefaultUser" />);
 
-      // Clear username
       const usernameInput = screen.getByLabelText("Username");
       await user.clear(usernameInput);
 
-      // Submit form
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
       await user.click(submitButton);
 
-      // Form action should not be called because empty username is prevented
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
@@ -302,15 +270,10 @@ describe("ProfileSetupForm", () => {
       });
       await user.click(submitButton);
 
-      // Form action should not be called because whitespace-only is treated as invalid
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
   });
-
-  // ============================================================
-  // Invalid Username Tests
-  // ============================================================
 
   describe("given user submits with invalid username", () => {
     it("should prevent submission when username is too short", async () => {
@@ -324,15 +287,12 @@ describe("ProfileSetupForm", () => {
         name: /complete setup/i,
       });
 
-      // Button should be disabled due to validation error
       await waitFor(() => {
         expect(submitButton).toBeDisabled();
       });
 
-      // Attempt to submit
       await user.click(submitButton);
 
-      // Form action should not be called
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
@@ -380,7 +340,6 @@ describe("ProfileSetupForm", () => {
         expect(mockFormAction).toHaveBeenCalled();
       });
 
-      // Should display error and NOT redirect
       await waitFor(() => {
         expect(screen.getByRole("alert")).toHaveTextContent(
           "Username already exists"
@@ -414,20 +373,14 @@ describe("ProfileSetupForm", () => {
         );
       });
 
-      // Now modify username
       await user.clear(usernameInput);
       await user.type(usernameInput, "DifferentUser");
 
-      // Error should disappear
       await waitFor(() => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
       });
     });
   });
-
-  // ============================================================
-  // Loading State Tests
-  // ============================================================
 
   describe("given form is submitting", () => {
     it("should disable all inputs and buttons during submission", async () => {
@@ -454,7 +407,6 @@ describe("ProfileSetupForm", () => {
       });
       await user.click(submitButton);
 
-      // Check that inputs are disabled during submission
       const usernameInput = screen.getByLabelText("Username");
       expect(usernameInput).toBeDisabled();
 
@@ -493,10 +445,6 @@ describe("ProfileSetupForm", () => {
     });
   });
 
-  // ============================================================
-  // Edge Cases
-  // ============================================================
-
   describe("given edge cases", () => {
     it("should handle server action returning idle state", async () => {
       const user = userEvent.setup();
@@ -513,7 +461,6 @@ describe("ProfileSetupForm", () => {
         expect(mockFormAction).toHaveBeenCalled();
       });
 
-      // Should not redirect on idle status
       expect(mockPush).not.toHaveBeenCalled();
     });
 
@@ -526,7 +473,6 @@ describe("ProfileSetupForm", () => {
       });
       await user.click(submitButton);
 
-      // Form action should not be called with empty username
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
@@ -536,11 +482,10 @@ describe("ProfileSetupForm", () => {
       render(<ProfileSetupForm defaultUsername="" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.type(usernameInput, "ab"); // Invalid username
+      await user.type(usernameInput, "ab");
 
       const skipButton = screen.getByRole("button", { name: /skip for now/i });
 
-      // Skip should still be enabled
       expect(skipButton).not.toBeDisabled();
 
       await user.click(skipButton);

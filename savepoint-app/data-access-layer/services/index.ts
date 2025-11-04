@@ -11,7 +11,6 @@ export {
   type ExtractServiceData,
 } from "./types";
 
-// Keep IGDB service available as part of the public API
 export {
   type GameSearchParams,
   type GameSearchResult,

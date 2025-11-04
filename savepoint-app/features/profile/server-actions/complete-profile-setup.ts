@@ -40,7 +40,6 @@ async function performCompleteSetup(
       };
     }
 
-    // Sanitize data - trim username if provided, handle avatarUrl
     const sanitizedData: CompleteProfileSetupInput = {
       username: data.username?.trim(),
       avatarUrl: data.avatarUrl,

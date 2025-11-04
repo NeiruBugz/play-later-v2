@@ -51,7 +51,6 @@ export class ProfileSettingsPage {
     return this.page.getByRole("button", { name: /back/i });
   }
 
-  // Avatar upload
   uploadAvatarButton(): Locator {
     return this.page.getByRole("button", { name: "Upload avatar" });
   }
@@ -88,7 +87,6 @@ export class ProfileSettingsPage {
     await this.avatarUploadButton().click();
   }
 
-  // Toast helpers
   private toastRegion(): Locator {
     return this.page.getByRole("region", { name: "Notifications alt+T" });
   }

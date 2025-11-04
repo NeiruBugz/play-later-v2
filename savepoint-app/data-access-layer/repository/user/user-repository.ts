@@ -56,7 +56,6 @@ export async function updateUserSteamData({
 
     return repositorySuccess(updated);
   } catch (error) {
-    // Prisma throws P2025 when record to update is not found
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
@@ -71,19 +70,12 @@ export async function updateUserSteamData({
   }
 }
 
-/**
- * @deprecated This function appears to have no practical use case.
- * It returns only the username field when the username is already known (it's the input).
- * Consider using findUserByNormalizedUsername() for actual user lookups.
- * This function is kept for backward compatibility but should not be used in new code.
- */
 export async function getUserByUsername({
   username,
 }: GetUserByUsernameInput): Promise<
   RepositoryResult<{ username: string | null }>
 > {
   try {
-    // Use normalized username for case-insensitive lookup
     const user = await prisma.user.findUnique({
       where: { usernameNormalized: username.toLowerCase().trim() },
       select: {
@@ -302,12 +294,6 @@ export async function createUserWithCredentials(input: {
   }
 }
 
-/**
- * Find user by ID with custom field selection
- * @param userId - User ID to find
- * @param options - Required select option to specify which fields to return
- * @returns RepositoryResult with user data (with selected fields) or null if not found
- */
 export async function findUserById<T extends Prisma.UserSelect>(
   userId: string,
   options: { select: T }
@@ -344,9 +330,6 @@ export async function findUserByNormalizedUsername(
   }
 }
 
-/**
- * Update user profile fields
- */
 export async function updateUserProfile(
   userId: string,
   data: {

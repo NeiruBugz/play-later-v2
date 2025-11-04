@@ -4,47 +4,50 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.985 0.005 85);
-  --foreground: oklch(0.205 0.015 85);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.205 0.015 85);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.205 0.015 85);
-  --primary: oklch(0.55 0.15 25);
-  --primary-foreground: oklch(0.99 0.005 85);
-  --secondary: oklch(0.42 0.08 155);
-  --secondary-foreground: oklch(0.99 0.005 85);
-  --muted: oklch(0.96 0.005 85);
-  --muted-foreground: oklch(0.52 0.015 85);
-  --accent: oklch(0.96 0.005 85);
-  --accent-foreground: oklch(0.205 0.015 85);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0.005 85);
-  --border: oklch(0.92 0.005 85);
-  --input: oklch(0.92 0.005 85);
-  --ring: oklch(0.55 0.15 25);
-  --chart-1: oklch(0.55 0.15 25);
-  --chart-2: oklch(0.42 0.08 155);
-  --chart-3: oklch(0.65 0.12 65);
-  --chart-4: oklch(0.62 0.18 285);
-  --chart-5: oklch(0.58 0.14 45);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0.005 85);
-  --sidebar-foreground: oklch(0.205 0.015 85);
-  --sidebar-primary: oklch(0.55 0.15 25);
-  --sidebar-primary-foreground: oklch(0.99 0.005 85);
-  --sidebar-accent: oklch(0.96 0.005 85);
-  --sidebar-accent-foreground: oklch(0.205 0.015 85);
-  --sidebar-border: oklch(0.92 0.005 85);
-  --sidebar-ring: oklch(0.55 0.15 25);
-  /* Gaming theme colors */
-  --gaming-primary: oklch(0.6 0.2 280);
-  --gaming-secondary: oklch(0.55 0.18 320);
-  --gaming-accent: oklch(0.65 0.15 180);
-  --gaming-neon-green: oklch(0.75 0.25 145);
-  --gaming-neon-blue: oklch(0.65 0.2 240);
-  --gaming-gradient-start: oklch(0.6 0.2 280);
-  --gaming-gradient-end: oklch(0.55 0.18 320);
+  /* Base colors - warm neutrals inspired by aged paper */
+  --background: oklch(0.97 0.008 50);
+  --foreground: oklch(0.25 0.015 40);
+  /* Surface colors */
+  --card: oklch(0.985 0.006 50);
+  --card-foreground: oklch(0.25 0.015 40);
+  --popover: oklch(0.99 0.005 50);
+  --popover-foreground: oklch(0.25 0.015 40);
+  /* Primary accent - Deep burgundy (leather-bound books) */
+  --primary: oklch(0.42 0.12 20);
+  --primary-foreground: oklch(0.98 0.005 50);
+  /* Secondary accent - Forest green (reading lamp shades) */
+  --secondary: oklch(0.45 0.08 150);
+  --secondary-foreground: oklch(0.98 0.005 50);
+  /* Muted - Warm gray backgrounds */
+  --muted: oklch(0.92 0.01 50);
+  --muted-foreground: oklch(0.50 0.015 40);
+  /* Accent - Amber highlights */
+  --accent: oklch(0.90 0.015 70);
+  --accent-foreground: oklch(0.30 0.02 40);
+  /* Destructive - Muted red (not alarm red) */
+  --destructive: oklch(0.55 0.18 25);
+  --destructive-foreground: oklch(0.98 0.005 50);
+  /* Borders and inputs */
+  --border: oklch(0.88 0.012 50);
+  --input: oklch(0.88 0.012 50);
+  --ring: oklch(0.42 0.12 20);
+  /* Chart colors - warm, sophisticated palette */
+  --chart-1: oklch(0.42 0.12 20);
+  --chart-2: oklch(0.45 0.08 150);
+  --chart-3: oklch(0.58 0.12 70);
+  --chart-4: oklch(0.50 0.10 250);
+  --chart-5: oklch(0.52 0.10 30);
+  /* Border radius - slightly softer */
+  --radius: 0.75rem;
+  /* Sidebar */
+  --sidebar: oklch(0.95 0.01 50);
+  --sidebar-foreground: oklch(0.30 0.015 40);
+  --sidebar-primary: oklch(0.42 0.12 20);
+  --sidebar-primary-foreground: oklch(0.98 0.005 50);
+  --sidebar-accent: oklch(0.92 0.01 50);
+  --sidebar-accent-foreground: oklch(0.30 0.015 40);
+  --sidebar-border: oklch(0.88 0.012 50);
+  --sidebar-ring: oklch(0.42 0.12 20);
   /* Platform brand colors */
   --color-nintendo: #e60012;
   --color-playstation: #0070d1;
@@ -95,47 +98,61 @@
   --font-weight-subheading: 600;
   --font-weight-body: 400;
   --font-weight-caption: 500;
-  /* Custom shadows */
-  --shadow-neon:
-    0 0 20px oklch(var(--accent) / 0.3), 0 0 40px oklch(var(--accent) / 0.1);
-  --shadow-neon-strong:
-    0 0 30px oklch(var(--accent) / 0.5), 0 0 60px oklch(var(--accent) / 0.2);
-  --shadow-gaming: 0 4px 20px oklch(var(--gaming-primary) / 0.3);
+  /* Custom shadows - paper-like, soft */
+  --shadow-paper-sm: 0 1px 2px 0 oklch(0.25 0.015 40 / 0.05);
+  --shadow-paper: 0 2px 8px 0 oklch(0.25 0.015 40 / 0.06), 0 1px 3px 0 oklch(0.25 0.015 40 / 0.04);
+  --shadow-paper-md: 0 4px 12px 0 oklch(0.25 0.015 40 / 0.08), 0 2px 4px 0 oklch(0.25 0.015 40 / 0.05);
+  --shadow-paper-lg: 0 8px 24px 0 oklch(0.25 0.015 40 / 0.10), 0 4px 8px 0 oklch(0.25 0.015 40 / 0.06);
 }
 
 .dark {
-  --background: oklch(0.18 0.01 85);
-  --foreground: oklch(0.97 0.005 85);
-  --card: oklch(0.22 0.01 85);
-  --card-foreground: oklch(0.97 0.005 85);
-  --popover: oklch(0.22 0.01 85);
-  --popover-foreground: oklch(0.97 0.005 85);
-  --primary: oklch(0.62 0.15 25);
-  --primary-foreground: oklch(0.99 0.005 85);
-  --secondary: oklch(0.48 0.08 155);
-  --secondary-foreground: oklch(0.99 0.005 85);
-  --muted: oklch(0.28 0.01 85);
-  --muted-foreground: oklch(0.68 0.01 85);
-  --accent: oklch(0.28 0.01 85);
-  --accent-foreground: oklch(0.97 0.005 85);
-  --destructive: oklch(0.55 0.22 27);
-  --destructive-foreground: oklch(0.97 0.005 85);
-  --border: oklch(0.32 0.01 85);
-  --input: oklch(0.32 0.01 85);
-  --ring: oklch(0.62 0.15 25);
-  --chart-1: oklch(0.62 0.15 25);
-  --chart-2: oklch(0.52 0.08 155);
-  --chart-3: oklch(0.72 0.12 65);
-  --chart-4: oklch(0.68 0.18 285);
-  --chart-5: oklch(0.65 0.14 45);
-  --sidebar: oklch(0.22 0.01 85);
-  --sidebar-foreground: oklch(0.97 0.005 85);
-  --sidebar-primary: oklch(0.62 0.15 25);
-  --sidebar-primary-foreground: oklch(0.99 0.005 85);
-  --sidebar-accent: oklch(0.28 0.01 85);
-  --sidebar-accent-foreground: oklch(0.97 0.005 85);
-  --sidebar-border: oklch(0.32 0.01 85);
-  --sidebar-ring: oklch(0.62 0.15 25);
+  /* Base colors - warm dark like aged wood */
+  --background: oklch(0.20 0.015 40);
+  --foreground: oklch(0.92 0.01 50);
+  /* Surface colors */
+  --card: oklch(0.24 0.015 40);
+  --card-foreground: oklch(0.92 0.01 50);
+  --popover: oklch(0.24 0.015 40);
+  --popover-foreground: oklch(0.92 0.01 50);
+  /* Primary accent - Lighter burgundy for dark mode */
+  --primary: oklch(0.55 0.12 20);
+  --primary-foreground: oklch(0.98 0.005 50);
+  /* Secondary accent - Lighter forest green */
+  --secondary: oklch(0.58 0.08 150);
+  --secondary-foreground: oklch(0.98 0.005 50);
+  /* Muted - Darker warm gray */
+  --muted: oklch(0.30 0.015 40);
+  --muted-foreground: oklch(0.68 0.01 50);
+  /* Accent - Warm amber glow (lamplight effect) */
+  --accent: oklch(0.35 0.025 70);
+  --accent-foreground: oklch(0.92 0.01 50);
+  /* Destructive - Softer red for dark mode */
+  --destructive: oklch(0.60 0.18 25);
+  --destructive-foreground: oklch(0.98 0.005 50);
+  /* Borders and inputs */
+  --border: oklch(0.35 0.018 40);
+  --input: oklch(0.35 0.018 40);
+  --ring: oklch(0.55 0.12 20);
+  /* Chart colors - adjusted for dark mode visibility */
+  --chart-1: oklch(0.58 0.12 20);
+  --chart-2: oklch(0.62 0.08 150);
+  --chart-3: oklch(0.68 0.12 70);
+  --chart-4: oklch(0.62 0.10 250);
+  --chart-5: oklch(0.65 0.10 30);
+  /* Sidebar */
+  --sidebar: oklch(0.24 0.015 40);
+  --sidebar-foreground: oklch(0.92 0.01 50);
+  --sidebar-primary: oklch(0.55 0.12 20);
+  --sidebar-primary-foreground: oklch(0.98 0.005 50);
+  --sidebar-accent: oklch(0.30 0.015 40);
+  --sidebar-accent-foreground: oklch(0.92 0.01 50);
+  --sidebar-border: oklch(0.35 0.018 40);
+  --sidebar-ring: oklch(0.55 0.12 20);
+  /* Custom shadows - darker for dark mode */
+  --shadow-paper-sm: 0 1px 3px 0 oklch(0 0 0 / 0.15);
+  --shadow-paper: 0 2px 10px 0 oklch(0 0 0 / 0.20), 0 1px 4px 0 oklch(0 0 0 / 0.12);
+  --shadow-paper-md: 0 4px 16px 0 oklch(0 0 0 / 0.25), 0 2px 6px 0 oklch(0 0 0 / 0.15);
+  --shadow-paper-lg: 0 8px 32px 0 oklch(0 0 0 / 0.30), 0 4px 12px 0 oklch(0 0 0 / 0.18);
 }
 
 @theme inline {
@@ -176,12 +193,6 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  /* Gaming colors */
-  --color-gaming-primary: var(--gaming-primary);
-  --color-gaming-secondary: var(--gaming-secondary);
-  --color-gaming-accent: var(--gaming-accent);
-  --color-gaming-neon-green: var(--gaming-neon-green);
-  --color-gaming-neon-blue: var(--gaming-neon-blue);
   /* Platform colors */
   --color-nintendo: var(--color-nintendo);
   --color-playstation: var(--color-playstation);
@@ -214,30 +225,6 @@
   }
   to {
     height: 0;
-  }
-}
-
-@keyframes pulse-neon {
-  0%,
-  100% {
-    box-shadow:
-      0 0 20px oklch(var(--accent) / 0.3),
-      0 0 40px oklch(var(--accent) / 0.1);
-  }
-  50% {
-    box-shadow:
-      0 0 30px oklch(var(--accent) / 0.5),
-      0 0 60px oklch(var(--accent) / 0.2);
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-4px);
   }
 }
 
@@ -363,37 +350,18 @@
     font-weight: var(--font-weight-caption);
     text-transform: uppercase;
   }
-  /* Gaming gradients */
-  .bg-gaming-gradient {
-    background-image: linear-gradient(
-      135deg,
-      oklch(var(--gaming-gradient-start)),
-      oklch(var(--gaming-gradient-end))
-    );
+  /* Paper-like shadows */
+  .shadow-paper-sm {
+    box-shadow: var(--shadow-paper-sm);
   }
-  .bg-gaming-gradient-hover {
-    background-image: linear-gradient(
-      135deg,
-      oklch(var(--gaming-gradient-start) / 0.8),
-      oklch(var(--gaming-gradient-end) / 0.8)
-    );
+  .shadow-paper {
+    box-shadow: var(--shadow-paper);
   }
-  .bg-radial-gaming {
-    background-image: radial-gradient(
-      circle at center,
-      oklch(var(--gaming-primary) / 0.1),
-      transparent
-    );
+  .shadow-paper-md {
+    box-shadow: var(--shadow-paper-md);
   }
-  /* Custom shadows */
-  .shadow-neon {
-    box-shadow: var(--shadow-neon);
-  }
-  .shadow-neon-strong {
-    box-shadow: var(--shadow-neon-strong);
-  }
-  .shadow-gaming {
-    box-shadow: var(--shadow-gaming);
+  .shadow-paper-lg {
+    box-shadow: var(--shadow-paper-lg);
   }
   /* Custom animations */
   .animate-accordion-down {
@@ -401,11 +369,5 @@
   }
   .animate-accordion-up {
     animation: accordion-up 0.2s ease-out;
-  }
-  .animate-pulse-neon {
-    animation: pulse-neon 2s ease-in-out infinite;
-  }
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
   }
 }

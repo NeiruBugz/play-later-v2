@@ -142,7 +142,7 @@ describe("AuthService", () => {
     it("should handle unique constraint violation from database", async () => {
       mockPrismaFindUnique.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      // Simulate Prisma P2002 error (unique constraint violation)
+
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         "Unique constraint failed on the fields: (`email`)",
         {

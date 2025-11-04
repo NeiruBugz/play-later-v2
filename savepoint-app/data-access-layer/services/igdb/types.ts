@@ -4,6 +4,7 @@ import type { BaseService, ServiceResult } from "../types";
 
 export interface GameSearchParams {
   name: string;
+  offset?: number;
   fields?: {
     platform?: string;
     platforms?: string;

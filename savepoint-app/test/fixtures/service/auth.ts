@@ -36,7 +36,7 @@ export const createdUserWithoutNameFixture = {
 
 export const createdUserWithNullEmailFixture = {
   id: "user-123",
-  email: null, // Edge case: email is null
+  email: null,
   name: "John Doe",
 };
 

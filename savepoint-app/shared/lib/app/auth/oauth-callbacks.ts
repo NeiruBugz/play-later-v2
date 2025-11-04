@@ -1,13 +1,10 @@
 import type { JWT } from "next-auth/jwt";
 
-// Keep callbacks isolated for clarity and reuse
-
 export async function onSignIn({
   account,
 }: {
   account?: { provider?: string } | null;
 }): Promise<boolean> {
-  // Allow OAuth (Cognito) and credentials to proceed; redirect decided later.
   if (!account) return true;
   return true;
 }
@@ -20,7 +17,6 @@ export async function onRedirect({
   baseUrl: string;
 }): Promise<string> {
   try {
-    // Only allow relative or same-origin URLs. Cross-origin -> baseUrl.
     if (url.startsWith("/")) {
       const target = new URL(url, baseUrl);
       if (
@@ -47,7 +43,6 @@ export async function onRedirect({
       return target.toString();
     }
 
-    // Cross-origin – return baseUrl verbatim (no trailing slash changes)
     return baseUrl;
   } catch {
     return baseUrl;

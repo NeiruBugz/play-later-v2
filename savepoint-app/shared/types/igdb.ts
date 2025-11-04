@@ -14,10 +14,6 @@ import {
   type Website,
 } from "igdb-api-types";
 
-// Core IGDB entity types now imported from igdb-api-types:
-// Platform, Company, Cover (GameCover), ExternalGame, GameEngine, GameMode, Genre,
-// PlayerPerspective, Screenshot, Theme, Website, Event, Artwork
-
 type PlatformWithReleaseDate = {
   human: string;
   id: number;
@@ -95,6 +91,7 @@ export type SearchResponse = {
   name: string;
   platforms: Platform[];
   release_dates?: ReleaseDate[];
+  game_type: number;
 };
 
 export type UpcomingReleaseResponse = {
@@ -104,8 +101,6 @@ export type UpcomingReleaseResponse = {
   name: string;
   release_dates: ReleaseDate[];
 };
-
-// Event and Artwork now imported from igdb-api-types
 
 export type UpcomingEventsResponse = Event[];
 

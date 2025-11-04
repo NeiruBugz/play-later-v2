@@ -8,7 +8,6 @@ export class ProfilePage {
     await this.page.waitForLoadState("networkidle");
   }
 
-  // Page containers and basics
   container(): Locator {
     return this.page.getByTestId("profile-page");
   }
@@ -25,7 +24,6 @@ export class ProfilePage {
     return this.page.getByText(/Joined/);
   }
 
-  // Avatar
   avatarImage(): Locator {
     return this.page.locator("img[alt*='avatar']");
   }
@@ -34,12 +32,10 @@ export class ProfilePage {
     return this.page.getByTestId("profile-avatar-placeholder");
   }
 
-  // Empty state
   emptyLibraryText(): Locator {
     return this.page.getByText(/Your library is empty/i);
   }
 
-  // Stats
   statsHeading(): Locator {
     return this.page.getByRole("heading", { name: "Library Stats" });
   }
@@ -56,7 +52,6 @@ export class ProfilePage {
     return this.statusCards().filter({ hasText: label });
   }
 
-  // Recently Played
   recentlyPlayedHeading(): Locator {
     return this.page.getByRole("heading", { name: "Recently Played" });
   }

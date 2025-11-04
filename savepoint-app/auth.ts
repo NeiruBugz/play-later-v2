@@ -13,8 +13,8 @@ import {
   onSignIn,
 } from "@/shared/lib/app/auth/oauth-callbacks";
 
-const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
-const SESSION_UPDATE_AGE = 24 * 60 * 60; // Rotate every day
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
+const SESSION_UPDATE_AGE = 24 * 60 * 60;
 
 const enableCredentials =
   process.env.NODE_ENV === "test" ||
@@ -33,7 +33,7 @@ export const { auth, handlers, signIn } = NextAuth({
       issuer: env.AUTH_COGNITO_ISSUER,
       clientId: env.AUTH_COGNITO_ID,
       clientSecret: env.AUTH_COGNITO_SECRET,
-      checks: ["nonce"], // Fix for Cognito + third-party IDP nonce mismatch
+      checks: ["nonce"],
       authorization: {
         params: { identity_provider: "Google" },
       },

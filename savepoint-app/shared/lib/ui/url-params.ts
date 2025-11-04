@@ -4,8 +4,8 @@ export type ListParams = {
   sort?: string;
   order?: "asc" | "desc";
   platform?: string;
-  storefront?: string; // for imported-games
-  status?: string; // for collection
+  storefront?: string;
+  status?: string;
 };
 
 export function parseListParams(input: URLSearchParams): ListParams {

@@ -383,10 +383,8 @@ describe("IgdbService", () => {
           json: async () => mockGames,
         });
 
-        // When: We request top rated games
         const result = await service.getTopRatedGames();
 
-        // Then: We get successful response with sorted games
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.games).toHaveLength(3);
@@ -396,7 +394,7 @@ describe("IgdbService", () => {
           expect(result.data.games[0].aggregated_rating).toBe(97.5);
           expect(result.data.games[1].aggregated_rating).toBe(96.2);
           expect(result.data.games[2].aggregated_rating).toBe(95.8);
-          // Verify games are sorted by rating descending
+
           expect(result.data.games[0].aggregated_rating!).toBeGreaterThan(
             result.data.games[1].aggregated_rating!
           );
@@ -406,7 +404,6 @@ describe("IgdbService", () => {
         }
       });
       it("should handle empty response gracefully", async () => {
-        // Given: IGDB API returns empty array
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -420,10 +417,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We request top rated games
         const result = await service.getTopRatedGames();
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.games).toEqual([]);
@@ -433,7 +428,6 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        // Given: Token fetch succeeds but IGDB API fails
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -448,10 +442,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We request top rated games
         const result = await service.getTopRatedGames();
 
-        // Then: We get error response
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -460,13 +452,10 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We request top rated games
         const result = await service.getTopRatedGames();
 
-        // Then: We get error response
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -502,10 +491,8 @@ describe("IgdbService", () => {
           json: async () => mockPlatforms,
         });
 
-        // When: We search for platforms by name
         const result = await service.searchPlatformByName(params);
 
-        // Then: We get successful response with matching platforms
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.platforms).toHaveLength(6);
@@ -518,13 +505,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when platform name is empty", async () => {
-        // Given: Empty platform name
         const params = { platformName: "" };
 
-        // When: We search for platforms
         const result = await service.searchPlatformByName(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -549,10 +533,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We search for platforms
         const result = await service.searchPlatformByName(params);
 
-        // Then: We get NOT_FOUND error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
@@ -561,7 +543,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        // Given: Token fetch succeeds but IGDB API fails
         const params = { platformName: "PlayStation" };
 
         mockFetch.mockResolvedValueOnce({
@@ -578,10 +559,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We search for platforms
         const result = await service.searchPlatformByName(params);
 
-        // Then: We get error response
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -590,13 +569,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when platform name is whitespace only", async () => {
-        // Given: Whitespace-only platform name
         const params = { platformName: "   " };
 
-        // When: We search for platforms
         const result = await service.searchPlatformByName(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -605,13 +581,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when platform name is null", async () => {
-        // Given: Null platform name (type coercion)
         const params = { platformName: null as unknown as string };
 
-        // When: We search for platforms
         const result = await service.searchPlatformByName(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -620,13 +593,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when platform name is undefined", async () => {
-        // Given: Undefined platform name (type coercion)
         const params = { platformName: undefined as unknown as string };
 
-        // When: We search for platforms
         const result = await service.searchPlatformByName(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -639,7 +609,6 @@ describe("IgdbService", () => {
   describe("getGameScreenshots", () => {
     describe("when service returns", () => {
       it("should return screenshots when valid game ID is provided", async () => {
-        // Given: Valid game ID and IGDB API returns screenshots
         const params = { gameId: 1942 };
         const mockScreenshots = [
           {
@@ -681,10 +650,8 @@ describe("IgdbService", () => {
           json: async () => mockScreenshots,
         });
 
-        // When: We request game screenshots
         const result = await service.getGameScreenshots(params);
 
-        // Then: We get successful response with screenshots
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.screenshots).toHaveLength(3);
@@ -698,7 +665,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle empty response gracefully (game has no screenshots)", async () => {
-        // Given: Valid game ID but IGDB API returns empty array
         const params = { gameId: 9999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -714,10 +680,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We request game screenshots
         const result = await service.getGameScreenshots(params);
 
-        // Then: We get successful response with empty array (NOT an error)
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.screenshots).toEqual([]);
@@ -727,13 +691,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when game ID is null", async () => {
-        // Given: Null game ID
         const params = { gameId: null as unknown as number };
 
-        // When: We request game screenshots
         const result = await service.getGameScreenshots(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -742,13 +703,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is undefined", async () => {
-        // Given: Undefined game ID
         const params = { gameId: undefined as unknown as number };
 
-        // When: We request game screenshots
         const result = await service.getGameScreenshots(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -757,13 +715,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is 0", async () => {
-        // Given: Game ID is 0
         const params = { gameId: 0 };
 
-        // When: We request game screenshots
         const result = await service.getGameScreenshots(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -772,13 +727,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is negative", async () => {
-        // Given: Negative game ID
         const params = { gameId: -100 };
 
-        // When: We request game screenshots
         const result = await service.getGameScreenshots(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -787,7 +739,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        // Given: Token fetch succeeds but IGDB API fails
         const params = { gameId: 1942 };
 
         mockFetch.mockResolvedValueOnce({
@@ -804,10 +755,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We request game screenshots
         const result = await service.getGameScreenshots(params);
 
-        // Then: We get error response
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -816,15 +765,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         const params = { gameId: 1942 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We request game screenshots
         const result = await service.getGameScreenshots(params);
 
-        // Then: We get error response
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -836,7 +782,6 @@ describe("IgdbService", () => {
   describe("getSimilarGames", () => {
     describe("when service returns", () => {
       it("should return similar games when valid game ID is provided", async () => {
-        // Given: A valid game ID and mocked similar games response
         const params = { gameId: 1234 };
         const mockResponse = [
           {
@@ -858,10 +803,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get a successful response with similar games
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.similarGames).toBeDefined();
@@ -872,12 +815,10 @@ describe("IgdbService", () => {
       });
 
       it("should handle empty response gracefully (game has no similar games)", async () => {
-        // Given: Valid game ID but no similar games
         const params = { gameId: 9999 };
         const mockResponse = [
           {
             id: 9999,
-            // No similar_games field
           },
         ];
 
@@ -894,10 +835,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get successful response with empty array (NOT an error)
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.similarGames).toEqual([]);
@@ -905,7 +844,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle game not found in response", async () => {
-        // Given: Valid game ID but API returns empty array
         const params = { gameId: 7777 };
 
         mockFetch.mockResolvedValueOnce({
@@ -921,10 +859,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.similarGames).toEqual([]);
@@ -934,13 +870,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when game ID is null", async () => {
-        // Given: Null game ID
         const params = { gameId: null as unknown as number };
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -949,13 +882,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is undefined", async () => {
-        // Given: Undefined game ID
         const params = { gameId: undefined as unknown as number };
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -964,13 +894,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is 0", async () => {
-        // Given: Game ID is 0
         const params = { gameId: 0 };
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -979,13 +906,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is negative", async () => {
-        // Given: Negative game ID
         const params = { gameId: -100 };
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get validation error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -994,7 +918,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        // Given: Token fetch succeeds but IGDB API fails
         const params = { gameId: 1234 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1011,10 +934,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get error response
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -1023,15 +944,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         const params = { gameId: 1234 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We request similar games
         const result = await service.getSimilarGames(params);
 
-        // Then: We get error response
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -1043,7 +961,6 @@ describe("IgdbService", () => {
   describe("getGameGenres", () => {
     describe("when service returns", () => {
       it("should return genres when valid game ID is provided", async () => {
-        // Given: A valid game ID and mocked IGDB response
         const params = { gameId: 1234 };
         const mockResponse = [
           {
@@ -1068,10 +985,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request game genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get a successful response with genres
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.genres).toHaveLength(2);
@@ -1083,7 +998,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle empty response (game has no genres)", async () => {
-        // Given: Game exists but has no genres
         const params = { gameId: 1234 };
         const mockResponse = [{ id: 1234, genres: [] }];
 
@@ -1100,10 +1014,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get successful response with empty genres
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.genres).toEqual([]);
@@ -1111,7 +1023,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle response without genres field", async () => {
-        // Given: Game exists but response has no genres field
         const params = { gameId: 1234 };
         const mockResponse = [{ id: 1234 }];
 
@@ -1128,10 +1039,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get successful response with empty genres
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.genres).toEqual([]);
@@ -1139,7 +1048,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle API returning empty array (game not found)", async () => {
-        // Given: API returns empty array
         const params = { gameId: 9999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1155,10 +1063,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get successful response with empty genres
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.genres).toEqual([]);
@@ -1168,13 +1074,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when game ID is null", async () => {
-        // Given: An invalid game ID (null)
         const params = { gameId: null as unknown as number };
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1183,13 +1086,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is undefined", async () => {
-        // Given: An invalid game ID (undefined)
         const params = { gameId: undefined as unknown as number };
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1198,13 +1098,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is 0", async () => {
-        // Given: An invalid game ID (0)
         const params = { gameId: 0 };
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1213,13 +1110,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is negative", async () => {
-        // Given: An invalid game ID (negative)
         const params = { gameId: -100 };
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1228,7 +1122,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API fails", async () => {
-        // Given: IGDB API returns error
         const params = { gameId: 1234 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1245,10 +1138,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -1257,15 +1148,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         const params = { gameId: 1234 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We request genres
         const result = await service.getGameGenres(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -1277,7 +1165,6 @@ describe("IgdbService", () => {
   describe("getGameAggregatedRating", () => {
     describe("when service returns", () => {
       it("should return aggregated rating when valid game ID is provided", async () => {
-        // Given: Valid game ID and IGDB API returns rating data
         const params = { gameId: 1942 };
         const mockResponse = [
           {
@@ -1303,7 +1190,6 @@ describe("IgdbService", () => {
         // When: We request the game's aggregated rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get a successful response with rating data
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.gameId).toBe(1942);
@@ -1313,9 +1199,8 @@ describe("IgdbService", () => {
       });
 
       it("should handle missing rating data gracefully", async () => {
-        // Given: Game exists but has no rating data
         const params = { gameId: 1234 };
-        const mockResponse = [{ id: 1234 }]; // No rating fields
+        const mockResponse = [{ id: 1234 }];
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
@@ -1330,10 +1215,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get success with undefined rating
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.gameId).toBe(1234);
@@ -1343,7 +1226,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle rating without count", async () => {
-        // Given: Game has rating but no count
         const params = { gameId: 5678 };
         const mockResponse = [
           {
@@ -1365,10 +1247,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get success with rating but no count
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.gameId).toBe(5678);
@@ -1380,13 +1260,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when game ID is null", async () => {
-        // Given: Null game ID
         const params = { gameId: null as unknown as number };
 
-        // When: We attempt to get rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1395,13 +1272,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is undefined", async () => {
-        // Given: Undefined game ID
         const params = { gameId: undefined as unknown as number };
 
-        // When: We attempt to get rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1410,13 +1284,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is 0", async () => {
-        // Given: Game ID is 0
         const params = { gameId: 0 };
 
-        // When: We attempt to get rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1425,13 +1296,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is negative", async () => {
-        // Given: Negative game ID
         const params = { gameId: -100 };
 
-        // When: We attempt to get rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1456,10 +1324,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We request rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get NOT_FOUND error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
@@ -1469,7 +1335,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        // Given: Token fetch succeeds but IGDB API fails
         const params = { gameId: 1234 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1486,10 +1351,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We request rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -1500,15 +1363,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         const params = { gameId: 1234 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We request rating
         const result = await service.getGameAggregatedRating(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -1520,7 +1380,6 @@ describe("IgdbService", () => {
   describe("getGameCompletionTimes", () => {
     describe("when service returns", () => {
       it("should return completion times when valid game ID is provided", async () => {
-        // Given: A valid game ID and mocked IGDB response
         const params = { gameId: 1234 };
         const mockResponse = [
           {
@@ -1547,10 +1406,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get successful response with completion time data
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.completionTimes).toBeDefined();
@@ -1566,7 +1423,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle missing completion time data gracefully (empty response)", async () => {
-        // Given: Valid game ID but no completion time data in IGDB
         const params = { gameId: 9999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1582,10 +1438,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get successful response with null completion times
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.completionTimes).toBeNull();
@@ -1593,7 +1447,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle partial completion time data", async () => {
-        // Given: Completion time data with only main gameplay time
         const params = { gameId: 1234 };
         const mockResponse = [
           {
@@ -1616,10 +1469,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get successful response with partial data
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.completionTimes).toBeDefined();
@@ -1633,13 +1484,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when game ID is null", async () => {
-        // Given: Invalid game ID (null)
         const params = { gameId: null as unknown as number };
 
-        // When: We attempt to fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1648,13 +1496,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is undefined", async () => {
-        // Given: Invalid game ID (undefined)
         const params = { gameId: undefined as unknown as number };
 
-        // When: We attempt to fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1663,13 +1508,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is 0", async () => {
-        // Given: Invalid game ID (0)
         const params = { gameId: 0 };
 
-        // When: We attempt to fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1678,13 +1520,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is negative", async () => {
-        // Given: Invalid game ID (negative)
         const params = { gameId: -100 };
 
-        // When: We attempt to fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1693,7 +1532,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        // Given: IGDB API is experiencing errors
         const params = { gameId: 1234 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1710,10 +1548,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We attempt to fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -1724,15 +1560,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         const params = { gameId: 1234 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We attempt to fetch completion times
         const result = await service.getGameCompletionTimes(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -1744,7 +1577,6 @@ describe("IgdbService", () => {
   describe("getGameExpansions", () => {
     describe("when service returns", () => {
       it("should return expansions when valid game ID is provided", async () => {
-        // Given: A valid game ID and mocked IGDB response with expansions
         const params = { gameId: 1234 };
         const mockResponse = [
           {
@@ -1797,10 +1629,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request game expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get a successful response with expansions
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.expansions).toHaveLength(2);
@@ -1817,7 +1647,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle empty response (game has no expansions) gracefully", async () => {
-        // Given: Game has no expansions
         const params = { gameId: 1234 };
         const mockResponse = [
           {
@@ -1839,10 +1668,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.expansions).toEqual([]);
@@ -1850,7 +1677,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle response without expansions field", async () => {
-        // Given: API response without expansions field
         const params = { gameId: 1234 };
         const mockResponse = [
           {
@@ -1871,10 +1697,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.expansions).toEqual([]);
@@ -1898,10 +1722,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get successful response with empty array (NOT an error)
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.expansions).toEqual([]);
@@ -1911,13 +1733,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when game ID is null", async () => {
-        // Given: Invalid game ID (null)
         const params = { gameId: null as unknown as number };
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1926,13 +1745,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is undefined", async () => {
-        // Given: Invalid game ID (undefined)
         const params = { gameId: undefined as unknown as number };
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1941,13 +1757,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is 0", async () => {
-        // Given: Invalid game ID (0)
         const params = { gameId: 0 };
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1956,13 +1769,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is negative", async () => {
-        // Given: Invalid game ID (negative)
         const params = { gameId: -100 };
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -1971,7 +1781,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        // Given: IGDB API error
         const params = { gameId: 1234 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1988,10 +1797,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2000,15 +1807,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         const params = { gameId: 1234 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We request expansions
         const result = await service.getGameExpansions(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2020,7 +1824,6 @@ describe("IgdbService", () => {
   describe("getGameArtworks", () => {
     describe("when service returns", () => {
       it("should return artworks when valid game ID is provided", async () => {
-        // Given: A valid game ID and mocked artwork response
         const params = { gameId: 1234 };
         const mockArtworks = [
           {
@@ -2060,10 +1863,8 @@ describe("IgdbService", () => {
           json: async () => mockArtworks,
         });
 
-        // When: We fetch game artworks
         const result = await service.getGameArtworks(params);
 
-        // Then: We get successful response with artworks
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.artworks).toHaveLength(2);
@@ -2074,7 +1875,6 @@ describe("IgdbService", () => {
       });
 
       it("should return empty array when game has no artworks", async () => {
-        // Given: A valid game ID but no artworks
         const params = { gameId: 9999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -2090,10 +1890,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We fetch game artworks
         const result = await service.getGameArtworks(params);
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.artworks).toEqual([]);
@@ -2103,13 +1901,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when game ID is null", async () => {
-        // Given: Invalid game ID
         const params = { gameId: null as any };
 
-        // When: We attempt to fetch artworks
         const result = await service.getGameArtworks(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2118,13 +1913,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is 0", async () => {
-        // Given: Invalid game ID (0)
         const params = { gameId: 0 };
 
-        // When: We attempt to fetch artworks
         const result = await service.getGameArtworks(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2132,13 +1924,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when game ID is negative", async () => {
-        // Given: Invalid game ID (negative)
         const params = { gameId: -100 };
 
-        // When: We attempt to fetch artworks
         const result = await service.getGameArtworks(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2146,7 +1935,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API fails", async () => {
-        // Given: IGDB API is experiencing errors
         const params = { gameId: 1234 };
 
         mockFetch.mockResolvedValueOnce({
@@ -2163,10 +1951,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We attempt to fetch artworks
         const result = await service.getGameArtworks(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2174,15 +1960,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         const params = { gameId: 1234 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We attempt to fetch artworks
         const result = await service.getGameArtworks(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2194,7 +1977,6 @@ describe("IgdbService", () => {
   describe("getFranchiseGames", () => {
     describe("when service returns", () => {
       it("should return franchise games when valid franchise ID is provided", async () => {
-        // Given: A valid franchise ID and mocked IGDB response
         const params = { franchiseId: 123 };
         const mockResponse = [
           {
@@ -2230,10 +2012,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get a successful response with franchise games
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.games).toHaveLength(2);
@@ -2249,7 +2029,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle empty response (no games in franchise) gracefully", async () => {
-        // Given: A valid franchise ID but no games
         const params = { franchiseId: 999 };
         const mockResponse = [
           {
@@ -2272,10 +2051,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.games).toEqual([]);
@@ -2283,13 +2060,11 @@ describe("IgdbService", () => {
       });
 
       it("should handle response without games field gracefully", async () => {
-        // Given: A valid franchise ID but response has no games field
         const params = { franchiseId: 888 };
         const mockResponse = [
           {
             id: 888,
             name: "Franchise without games",
-            // No games field
           },
         ];
 
@@ -2306,10 +2081,8 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.games).toEqual([]);
@@ -2317,7 +2090,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle API returning empty array", async () => {
-        // Given: API returns empty array (franchise not found)
         const params = { franchiseId: 777 };
 
         mockFetch.mockResolvedValueOnce({
@@ -2333,10 +2105,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.games).toEqual([]);
@@ -2346,13 +2116,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when franchise ID is null", async () => {
-        // Given: An invalid franchise ID (null)
         const params = { franchiseId: null as any };
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2361,13 +2128,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when franchise ID is undefined", async () => {
-        // Given: An invalid franchise ID (undefined)
         const params = { franchiseId: undefined as any };
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2376,13 +2140,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when franchise ID is zero", async () => {
-        // Given: An invalid franchise ID (0)
         const params = { franchiseId: 0 };
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2391,13 +2152,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when franchise ID is negative", async () => {
-        // Given: An invalid franchise ID (negative)
         const params = { franchiseId: -100 };
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2406,7 +2164,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        // Given: IGDB API error
         const params = { franchiseId: 123 };
 
         mockFetch.mockResolvedValueOnce({
@@ -2423,10 +2180,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2435,15 +2190,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Token fetch fails
         const params = { franchiseId: 123 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2451,7 +2203,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when API returns undefined", async () => {
-        // Given: API returns undefined (error occurred in makeRequest)
         const params = { franchiseId: 456 };
 
         mockFetch.mockResolvedValueOnce({
@@ -2467,10 +2218,8 @@ describe("IgdbService", () => {
           json: async () => undefined,
         });
 
-        // When: We call getFranchiseGames
         const result = await service.getFranchiseGames(params);
 
-        // Then: We get INTERNAL_ERROR (undefined response means API error)
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2483,9 +2232,8 @@ describe("IgdbService", () => {
   describe("getUpcomingReleasesByIds", () => {
     describe("when service returns", () => {
       it("should return upcoming releases when valid game IDs are provided", async () => {
-        // Given: Array of valid game IDs and mocked release data
         const params = { ids: [1234, 5678, 9012] };
-        const futureTimestamp = Math.floor(Date.now() / 1000) + 86400 * 30; // 30 days from now
+        const futureTimestamp = Math.floor(Date.now() / 1000) + 86400 * 30;
         const mockReleases = [
           {
             id: 1234,
@@ -2528,10 +2276,8 @@ describe("IgdbService", () => {
           json: async () => mockReleases,
         });
 
-        // When: We fetch upcoming releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get successful response with releases
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.releases).toHaveLength(2);
@@ -2543,7 +2289,6 @@ describe("IgdbService", () => {
       });
 
       it("should return empty array when no upcoming releases found", async () => {
-        // Given: Valid game IDs but no upcoming releases
         const params = { ids: [1234, 5678] };
 
         mockFetch.mockResolvedValueOnce({
@@ -2559,10 +2304,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We fetch upcoming releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.releases).toEqual([]);
@@ -2570,7 +2313,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle single game ID", async () => {
-        // Given: Single game ID
         const params = { ids: [1234] };
         const futureTimestamp = Math.floor(Date.now() / 1000) + 86400 * 30;
         const mockReleases = [
@@ -2596,10 +2338,8 @@ describe("IgdbService", () => {
           json: async () => mockReleases,
         });
 
-        // When: We fetch upcoming releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get successful response
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.releases).toHaveLength(1);
@@ -2610,13 +2350,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when IDs array is empty", async () => {
-        // Given: Empty array of IDs
         const params = { ids: [] };
 
-        // When: We attempt to fetch releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2625,13 +2362,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when ids is undefined", async () => {
-        // Given: Undefined ids
         const params = { ids: undefined as unknown as number[] };
 
-        // When: We attempt to fetch releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2640,13 +2374,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when any ID is invalid (0)", async () => {
-        // Given: Array with invalid ID (0)
         const params = { ids: [1234, 0, 5678] };
 
-        // When: We attempt to fetch releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2655,13 +2386,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when any ID is negative", async () => {
-        // Given: Array with negative ID
         const params = { ids: [1234, -100, 5678] };
 
-        // When: We attempt to fetch releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2670,7 +2398,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API fails", async () => {
-        // Given: Valid IDs but API failure
         const params = { ids: [1234, 5678] };
 
         mockFetch.mockResolvedValueOnce({
@@ -2687,10 +2414,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We attempt to fetch releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2699,15 +2424,12 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: Valid IDs but token fetch fails
         const params = { ids: [1234, 5678] };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We attempt to fetch releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2715,7 +2437,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when API returns undefined", async () => {
-        // Given: Valid IDs but API returns undefined
         const params = { ids: [1234, 5678] };
 
         mockFetch.mockResolvedValueOnce({
@@ -2731,10 +2452,8 @@ describe("IgdbService", () => {
           json: async () => undefined,
         });
 
-        // When: We attempt to fetch releases
         const result = await service.getUpcomingReleasesByIds(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2747,8 +2466,7 @@ describe("IgdbService", () => {
   describe("getUpcomingGamingEvents", () => {
     describe("when service returns", () => {
       it("should return upcoming events when API call succeeds", async () => {
-        // Given: IGDB API returns upcoming gaming events
-        const futureTimestamp = Math.floor(Date.now() / 1000) + 86400; // Tomorrow
+        const futureTimestamp = Math.floor(Date.now() / 1000) + 86400;
         const mockEvents = [
           {
             id: 1,
@@ -2797,10 +2515,8 @@ describe("IgdbService", () => {
           json: async () => mockEvents,
         });
 
-        // When: We fetch upcoming gaming events
         const result = await service.getUpcomingGamingEvents();
 
-        // Then: We get successful response with events
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.events).toHaveLength(2);
@@ -2814,7 +2530,6 @@ describe("IgdbService", () => {
       });
 
       it("should return empty array when no upcoming events exist", async () => {
-        // Given: IGDB API returns empty array
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2828,10 +2543,8 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        // When: We fetch upcoming gaming events
         const result = await service.getUpcomingGamingEvents();
 
-        // Then: We get successful response with empty array
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.events).toEqual([]);
@@ -2841,7 +2554,6 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return INTERNAL_ERROR when IGDB API fails", async () => {
-        // Given: IGDB API is experiencing errors
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2856,10 +2568,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We attempt to fetch events
         const result = await service.getUpcomingGamingEvents();
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2870,13 +2580,10 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        // Given: OAuth token endpoint is unavailable
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        // When: We attempt to fetch events
         const result = await service.getUpcomingGamingEvents();
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2884,7 +2591,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when API returns undefined", async () => {
-        // Given: API request fails and returns undefined
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2898,10 +2604,8 @@ describe("IgdbService", () => {
           json: async () => undefined,
         });
 
-        // When: We attempt to fetch events
         const result = await service.getUpcomingGamingEvents();
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
@@ -2916,7 +2620,6 @@ describe("IgdbService", () => {
   describe("getEventLogo", () => {
     describe("when service returns", () => {
       it("should return event logo when valid logo ID is provided", async () => {
-        // Given: A valid event logo ID and mocked IGDB response
         const params = { logoId: 12345 };
         const mockLogo = {
           id: 12345,
@@ -2938,10 +2641,8 @@ describe("IgdbService", () => {
           json: async () => [mockLogo],
         });
 
-        // When: We fetch the event logo
         const result = await service.getEventLogo(params);
 
-        // Then: We get a successful response with the logo
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.logo.id).toBe(12345);
@@ -2954,13 +2655,10 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when logo ID is null", async () => {
-        // Given: An invalid logo ID
         const params = { logoId: null as unknown as number };
 
-        // When: We attempt to fetch the logo
         const result = await service.getEventLogo(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2969,13 +2667,10 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when logo ID is zero or negative", async () => {
-        // Given: An invalid logo ID (zero)
         const params = { logoId: 0 };
 
-        // When: We attempt to fetch the logo
         const result = await service.getEventLogo(params);
 
-        // Then: We get VALIDATION_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
@@ -2984,7 +2679,6 @@ describe("IgdbService", () => {
       });
 
       it("should return NOT_FOUND when logo does not exist", async () => {
-        // Given: A valid logo ID but no match in IGDB
         const params = { logoId: 999999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -2997,13 +2691,11 @@ describe("IgdbService", () => {
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: async () => [], // Empty response
+          json: async () => [],
         });
 
-        // When: We attempt to fetch the logo
         const result = await service.getEventLogo(params);
 
-        // Then: We get NOT_FOUND error
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
@@ -3012,7 +2704,6 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when IGDB API fails", async () => {
-        // Given: IGDB API is experiencing errors
         const params = { logoId: 12345 };
 
         mockFetch.mockResolvedValueOnce({
@@ -3029,10 +2720,8 @@ describe("IgdbService", () => {
           statusText: "Internal Server Error",
         });
 
-        // When: We attempt to fetch the logo
         const result = await service.getEventLogo(params);
 
-        // Then: We get INTERNAL_ERROR
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);

@@ -5,6 +5,7 @@ import {
 } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 
+import { isRepositorySuccess } from "../types";
 import { findUserById, updateUserProfile } from "./user-repository";
 
 vi.mock("@/shared/lib", async () => {
@@ -35,21 +36,18 @@ describe("UserRepository - Integration Tests", () => {
 
   describe("updateUserProfile", () => {
     it("should update username and usernameNormalized", async () => {
-      // Arrange
       const user = await createUser({
         username: "originaluser",
         usernameNormalized: "originaluser",
       });
 
-      // Act
       const result = await updateUserProfile(user.id, {
         username: "NewUsername",
         usernameNormalized: "newusername",
       });
 
-      // Assert
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data).toMatchObject({
           id: user.id,
           username: "NewUsername",
@@ -57,7 +55,6 @@ describe("UserRepository - Integration Tests", () => {
         });
       }
 
-      // Verify database state
       const dbUserResult = await findUserById(user.id, {
         select: { id: true, username: true, usernameNormalized: true },
       });
@@ -69,7 +66,6 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should fail when updating username to existing username (different case)", async () => {
-      // Arrange
       await createUser({
         username: "ExistingUser",
         usernameNormalized: "existinguser",
@@ -79,39 +75,33 @@ describe("UserRepository - Integration Tests", () => {
         usernameNormalized: "anotheruser",
       });
 
-      // Act
       const result = await updateUserProfile(user2.id, {
         username: "existinguser",
         usernameNormalized: "existinguser",
       });
 
-      // Assert - should return error result for unique constraint violation
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(isRepositorySuccess(result)).toBe(false);
+      if (!isRepositorySuccess(result)) {
         expect(result.error.code).toBe("DATABASE_ERROR");
         expect(result.error.message).toContain("Failed to update user profile");
       }
     });
 
     it("should update user image", async () => {
-      // Arrange
       const user = await createUser();
 
-      // Act
       const result = await updateUserProfile(user.id, {
         image: "https://example.com/avatar.jpg",
       });
 
-      // Assert
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data).toMatchObject({
           id: user.id,
           image: "https://example.com/avatar.jpg",
         });
       }
 
-      // Verify database state
       const dbUserResult = await findUserById(user.id, {
         select: { id: true, image: true },
       });
@@ -122,22 +112,19 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should update multiple fields at once", async () => {
-      // Arrange
       const user = await createUser({
         username: "oldusername",
         usernameNormalized: "oldusername",
       });
 
-      // Act
       const result = await updateUserProfile(user.id, {
         username: "NewUsername",
         usernameNormalized: "newusername",
         image: "https://example.com/new-avatar.jpg",
       });
 
-      // Assert
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data).toMatchObject({
           id: user.id,
           username: "NewUsername",
@@ -146,7 +133,6 @@ describe("UserRepository - Integration Tests", () => {
         });
       }
 
-      // Verify database state
       const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,
@@ -167,36 +153,30 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should return error with non-existent user ID", async () => {
-      // Arrange
       const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
 
-      // Act
       const result = await updateUserProfile(nonExistentId, {
         username: "newusername",
       });
 
-      // Assert
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(isRepositorySuccess(result)).toBe(false);
+      if (!isRepositorySuccess(result)) {
         expect(result.error.code).toBe("NOT_FOUND");
         expect(result.error.message).toBe("User not found");
       }
     });
 
     it("should succeed with empty data object (no-op update)", async () => {
-      // Arrange
       const user = await createUser({
         username: "testuser",
         usernameNormalized: "testuser",
         // image: "https://example.com/avatar.jpg",
       });
 
-      // Act
       const result = await updateUserProfile(user.id, {});
 
-      // Assert
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data).toMatchObject({
           id: user.id,
           username: "testuser",
@@ -205,7 +185,6 @@ describe("UserRepository - Integration Tests", () => {
         });
       }
 
-      // Verify database state remains unchanged
       const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,
@@ -226,21 +205,18 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should handle updating username to null", async () => {
-      // Arrange
       const user = await createUser({
         username: "testuser",
         usernameNormalized: "testuser",
       });
 
-      // Act
       const result = await updateUserProfile(user.id, {
         username: null as unknown as string,
         usernameNormalized: null as unknown as string,
       });
 
-      // Assert
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data).toMatchObject({
           id: user.id,
           username: null,
@@ -248,7 +224,6 @@ describe("UserRepository - Integration Tests", () => {
         });
       }
 
-      // Verify database state
       const dbUserResult = await findUserById(user.id, {
         select: { id: true, username: true, usernameNormalized: true },
       });
@@ -260,26 +235,22 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should handle updating image to null", async () => {
-      // Arrange
       const user = await createUser({
         // image: "https://example.com/avatar.jpg",
       });
 
-      // Act
       const result = await updateUserProfile(user.id, {
         image: null as unknown as string,
       });
 
-      // Assert
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data).toMatchObject({
           id: user.id,
           image: null,
         });
       }
 
-      // Verify database state
       const dbUserResult = await findUserById(user.id, {
         select: { id: true, image: true },
       });
@@ -290,7 +261,6 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should maintain other user fields when updating profile", async () => {
-      // Arrange
       const user = await createUser({
         username: "testuser",
         usernameNormalized: "testuser",
@@ -300,15 +270,13 @@ describe("UserRepository - Integration Tests", () => {
         steamUsername: "steamuser",
       });
 
-      // Act
       const result = await updateUserProfile(user.id, {
         username: "newusername",
         usernameNormalized: "newusername",
       });
 
-      // Assert - other fields should remain unchanged
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data).toMatchObject({
           id: user.id,
           username: "newusername",
@@ -318,7 +286,6 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should enforce unique constraint on username field", async () => {
-      // Arrange
       await createUser({
         username: "uniqueuser",
         usernameNormalized: "uniqueuser",
@@ -328,35 +295,30 @@ describe("UserRepository - Integration Tests", () => {
         usernameNormalized: "anotheruser",
       });
 
-      // Act - try to update to exact same username
       const result = await updateUserProfile(user2.id, {
         username: "uniqueuser",
         usernameNormalized: "uniqueuser",
       });
 
-      // Assert - should return error result for unique constraint violation
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(isRepositorySuccess(result)).toBe(false);
+      if (!isRepositorySuccess(result)) {
         expect(result.error.code).toBe("DATABASE_ERROR");
         expect(result.error.message).toContain("Failed to update user profile");
       }
     });
 
     it("should allow updating username case without changing usernameNormalized", async () => {
-      // Arrange
       const user = await createUser({
         username: "testuser",
         usernameNormalized: "testuser",
       });
 
-      // Act - update only the case of username, keep normalized the same
       const result = await updateUserProfile(user.id, {
         username: "TestUser",
       });
 
-      // Assert
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data).toMatchObject({
           id: user.id,
           username: "TestUser",
@@ -366,13 +328,11 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should handle multiple sequential updates", async () => {
-      // Arrange
       const user = await createUser({
         username: "user1",
         usernameNormalized: "user1",
       });
 
-      // Act - multiple sequential updates
       const result1 = await updateUserProfile(user.id, {
         username: "user2",
         usernameNormalized: "user2",
@@ -397,7 +357,6 @@ describe("UserRepository - Integration Tests", () => {
         image: "https://example.com/avatar2.jpg",
       });
 
-      // Assert
       expect(result3.ok).toBe(true);
       if (result3.ok) {
         expect(result3.data).toMatchObject({
@@ -408,7 +367,6 @@ describe("UserRepository - Integration Tests", () => {
         });
       }
 
-      // Verify final database state
       const dbUserResult = await findUserById(user.id, {
         select: {
           id: true,

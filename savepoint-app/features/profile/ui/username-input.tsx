@@ -13,9 +13,9 @@ interface UsernameInputProps {
   value: string;
   onChange: (value: string) => void;
   label?: string;
-  error?: string; // External validation errors (optional)
+  error?: string;
   disabled?: boolean;
-  onValidationChange?: (hasError: boolean) => void; // Callback to notify parent of validation state
+  onValidationChange?: (hasError: boolean) => void;
 }
 
 export function UsernameInput({
@@ -33,10 +33,8 @@ export function UsernameInput({
     (externalError || validationStatus === "error") && displayError;
   const showSuccess = !externalError && validationStatus === "available";
 
-  // Notify parent component of validation state changes
   useEffect(() => {
     if (onValidationChange) {
-      // Only report actual errors, not validating state
       const hasError = Boolean(showError);
       onValidationChange(hasError);
     }

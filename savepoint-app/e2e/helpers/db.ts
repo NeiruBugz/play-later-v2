@@ -22,23 +22,19 @@ export async function createTestUser(data: {
     data: {
       email: email,
       username: data.username,
-      usernameNormalized: data.username.toLowerCase(), // Important: set normalized username for uniqueness check
+      usernameNormalized: data.username.toLowerCase(),
       password: hashedPassword,
     },
   });
 
   return {
     id: user.id,
-    email: user.email ?? email, // Fallback to normalized input if null
-    username: user.username ?? data.username, // Fallback to input if null
-    password: data.password, // Return original password for test usage
+    email: user.email ?? email,
+    username: user.username ?? data.username,
+    password: data.password,
   };
 }
 
-/**
- * Create a test user without a username to trigger first-time setup flow.
- * Useful for E2E tests that verify the optional profile setup page.
- */
 export async function createTestUserWithoutUsername(data: {
   email: string;
   password: string;
@@ -51,7 +47,7 @@ export async function createTestUserWithoutUsername(data: {
     data: {
       email,
       password: hashedPassword,
-      // Explicitly omit username and usernameNormalized to keep them NULL
+
       name: data.name ?? null,
     },
   });
@@ -59,7 +55,7 @@ export async function createTestUserWithoutUsername(data: {
   return {
     id: user.id,
     email: user.email ?? email,
-    username: user.username ?? "", // return empty for convenience
+    username: user.username ?? "",
     password: data.password,
   };
 }
@@ -94,48 +90,40 @@ export async function getUserByEmail(email: string): Promise<{
 }
 
 export async function clearTestData(): Promise<void> {
-  // Define test user pattern for cleanup
   const testUserPattern = {
     OR: [{ email: { contains: "test-" } }, { email: { contains: "e2e-" } }],
   };
 
-  // 1. Delete JournalEntry records for test users
   await prisma.journalEntry.deleteMany({
     where: {
       user: testUserPattern,
     },
   });
 
-  // 2. Delete Review records for test users
   await prisma.review.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
 
-  // 3. Delete ImportedGame records for test users
   await prisma.importedGame.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
 
-  // 4. Delete IgnoredImportedGames records for test users
   await prisma.ignoredImportedGames.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
 
-  // 5. Delete LibraryItem records for test users
   await prisma.libraryItem.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
 
-  // 6. Delete test games (no time filter - delete all test games)
-  // Only delete games that have no remaining library items
   await prisma.game.deleteMany({
     where: {
       title: {
@@ -147,7 +135,6 @@ export async function clearTestData(): Promise<void> {
     },
   });
 
-  // 7. Delete test users (Account and Session will cascade)
   await deleteTestUsersByPattern("test-");
   await deleteTestUsersByPattern("e2e-");
 }

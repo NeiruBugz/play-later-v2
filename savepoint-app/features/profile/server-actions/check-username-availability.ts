@@ -7,16 +7,11 @@ import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { validateUsername } from "../lib/validation";
 import { CheckUsernameSchema } from "../schemas";
 
-/**
- * Server action to check if a username is available
- * This is a public endpoint (no auth required) for real-time validation
- */
 export async function checkUsernameAvailability(data: { username: string }) {
   const logger = createLogger({
     [LOGGER_CONTEXT.SERVER_ACTION]: "checkUsernameAvailability",
   });
   try {
-    // Validate input shape
     const parsedInput = CheckUsernameSchema.safeParse(data);
 
     if (!parsedInput.success) {
@@ -44,7 +39,6 @@ export async function checkUsernameAvailability(data: { username: string }) {
       };
     }
 
-    // Check availability via service
     const profileService = new ProfileService();
     logger.info({ username }, "Checking username availability");
     const result = await profileService.checkUsernameAvailability({

@@ -291,14 +291,12 @@ describe("ProfileSettingsForm", () => {
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
 
-      // First create a validation error
       await actions.typeUsername("ab");
 
       await waitFor(() => {
         expect(elements.getValidationError()).toBeInTheDocument();
       });
 
-      // Then fix it and submit
       await actions.typeAndSubmit("newusername");
 
       await waitFor(() => {
@@ -374,11 +372,9 @@ describe("ProfileSettingsForm", () => {
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
 
-      // Type with whitespace and submit
       await actions.typeAndSubmit("  takenusername  ");
 
       await waitFor(() => {
-        // Should show error because trimmed version matches
         expect(elements.getServerError()).toBeInTheDocument();
       });
     });
@@ -386,7 +382,6 @@ describe("ProfileSettingsForm", () => {
 
   describe("given form is pending", () => {
     it("should disable username input while submitting", async () => {
-      // Mock a long-running submission
       mockUpdateProfileFormAction.mockImplementation(
         () =>
           new Promise((resolve) => {
@@ -408,7 +403,6 @@ describe("ProfileSettingsForm", () => {
 
       await actions.typeAndSubmit("newusername");
 
-      // Input should be disabled during submission
       expect(elements.getUsernameInput()).toBeDisabled();
     });
 

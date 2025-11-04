@@ -20,6 +20,7 @@ import {
   vi,
 } from "vitest";
 
+import { isRepositorySuccess } from "../types";
 import { getLibraryStatsByUserId } from "./library-repository";
 
 vi.mock("@/shared/lib", async () => {
@@ -85,8 +86,8 @@ describe("LibraryRepository - Integration Tests", () => {
 
       const result = await getLibraryStatsByUserId(user.id);
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data.statusCounts).toEqual({
           CURIOUS_ABOUT: 2,
           CURRENTLY_EXPLORING: 1,
@@ -101,11 +102,11 @@ describe("LibraryRepository - Integration Tests", () => {
 
       const result = await getLibraryStatsByUserId(user.id);
 
-      if (!result.ok) {
+      if (!isRepositorySuccess(result)) {
         console.error("Error:", result.error);
       }
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data.statusCounts).toEqual({});
         expect(result.data.recentGames).toEqual([]);
       }
@@ -145,8 +146,8 @@ describe("LibraryRepository - Integration Tests", () => {
 
       const result = await getLibraryStatsByUserId(user.id);
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data.recentGames).toHaveLength(5);
         expect(result.data.recentGames[0].title).toBe("Game 7");
         expect(result.data.recentGames[1].title).toBe("Game 6");
@@ -186,8 +187,8 @@ describe("LibraryRepository - Integration Tests", () => {
 
       const result = await getLibraryStatsByUserId(user.id);
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data.recentGames).toHaveLength(1);
         expect(result.data.recentGames[0].title).toBe("Currently Playing");
         expect(result.data.statusCounts).toEqual({
@@ -213,8 +214,8 @@ describe("LibraryRepository - Integration Tests", () => {
 
       const result = await getLibraryStatsByUserId(user.id);
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data.recentGames).toHaveLength(1);
         expect(result.data.recentGames[0].coverImage).toBeNull();
       }
@@ -239,8 +240,8 @@ describe("LibraryRepository - Integration Tests", () => {
 
       const result = await getLibraryStatsByUserId(user1.id);
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
         expect(result.data.statusCounts).toEqual({
           CURRENTLY_EXPLORING: 1,
         });

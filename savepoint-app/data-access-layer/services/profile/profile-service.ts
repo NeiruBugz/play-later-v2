@@ -123,7 +123,6 @@ export class ProfileService extends BaseService {
           "Failed to load library stats"
         );
 
-        // Map repository error to service error, preserving the error message
         return this.error(
           statsResult.error.message,
           ServiceErrorCode.INTERNAL_ERROR
@@ -198,7 +197,6 @@ export class ProfileService extends BaseService {
     try {
       this.logger.info({ userId: input.userId }, "Updating profile");
 
-      // Validate username
       const validation = validateUsername(input.username);
       if (!validation.valid) {
         this.logger.warn(
@@ -208,7 +206,6 @@ export class ProfileService extends BaseService {
         return this.error(validation.error, ServiceErrorCode.VALIDATION_ERROR);
       }
 
-      // Check if username changed
       const currentUserResult = await findUserById(input.userId, {
         select: { username: true },
       });
@@ -232,7 +229,6 @@ export class ProfileService extends BaseService {
       const currentUser = currentUserResult.data;
 
       if (currentUser.username !== input.username) {
-        // Username changed - check availability
         const availabilityResult = await this.checkUsernameAvailability({
           username: input.username,
         });
@@ -248,7 +244,6 @@ export class ProfileService extends BaseService {
         }
       }
 
-      // Update via repository
       const userResult = await updateUserProfile(input.userId, {
         username: input.username,
         usernameNormalized: input.username.toLowerCase(),
@@ -290,7 +285,6 @@ export class ProfileService extends BaseService {
     try {
       this.logger.info({ userId: input.userId }, "Updating avatar URL");
 
-      // Verify user exists
       const userResult = await findUserById(input.userId, {
         select: { id: true },
       });
@@ -311,7 +305,6 @@ export class ProfileService extends BaseService {
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
 
-      // Update avatar URL via repository
       await updateUserProfile(input.userId, {
         image: input.avatarUrl,
       });
@@ -364,8 +357,6 @@ export class ProfileService extends BaseService {
 
       const user = userResult.data;
 
-      // Determine if user needs setup
-      // Persistent rule: if setup completed at least once, do not prompt
       if (user.profileSetupCompletedAt) {
         return this.success({
           needsSetup: false,
@@ -373,7 +364,6 @@ export class ProfileService extends BaseService {
         });
       }
 
-      // Fallback rule: needs setup if no username OR created within last 5 minutes
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
       const isNewUser = user.createdAt > fiveMinutesAgo;
       const needsSetup = !user.username || isNewUser;
@@ -382,11 +372,11 @@ export class ProfileService extends BaseService {
       let suggestedUsername: string | undefined;
       if (needsSetup && user.name) {
         // Create a simple username from the user's name
-        // Remove non-alphanumeric characters and convert to lowercase
+
         suggestedUsername = user.name
           .toLowerCase()
           .replace(/[^a-z0-9]/g, "")
-          .slice(0, 20); // Limit to 20 characters
+          .slice(0, 20);
       }
 
       this.logger.info(
@@ -411,7 +401,6 @@ export class ProfileService extends BaseService {
     try {
       this.logger.info({ userId: input.userId }, "Completing profile setup");
 
-      // Validate username if provided
       if (input.username) {
         const validation = validateUsername(input.username);
         if (!validation.valid) {
@@ -425,7 +414,6 @@ export class ProfileService extends BaseService {
           );
         }
 
-        // Check uniqueness
         const availabilityResult = await this.checkUsernameAvailability({
           username: input.username,
         });
@@ -441,7 +429,6 @@ export class ProfileService extends BaseService {
         }
       }
 
-      // Update user record via repository
       const userResult = await updateUserProfile(input.userId, {
         username: input.username,
         usernameNormalized: input.username?.toLowerCase(),
@@ -489,7 +476,6 @@ export class ProfileService extends BaseService {
 
       const status = await this.checkSetupStatus({ userId: input.userId });
       if (!status.success) {
-        // Fail-safe to dashboard on any error
         return this.success({ redirectTo: "/dashboard", isNewUser: false });
       }
 

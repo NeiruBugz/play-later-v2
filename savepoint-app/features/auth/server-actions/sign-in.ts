@@ -10,18 +10,13 @@ import {
   isNextAuthRedirect,
 } from "@/shared/lib/auth/handle-next-auth-error";
 
-/**
- * Sign in with email and password using NextAuth
- */
 export async function signInAction(data: SignInFormData) {
   const logger = createLogger({
     [LOGGER_CONTEXT.SERVER_ACTION]: "signInAction",
   });
   try {
-    // Validate input
     const validatedData = signInSchema.parse(data);
 
-    // Sign in via NextAuth
     logger.info({ method: "credentials" }, "Signing in user");
     await signIn("credentials", {
       email: validatedData.email,
@@ -42,13 +37,11 @@ export async function signInAction(data: SignInFormData) {
       };
     }
 
-    // NextAuth throws NEXT_REDIRECT on successful auth - re-throw to allow redirect
     if (isNextAuthRedirect(error)) {
       logger.debug("Redirecting after successful sign in");
       throw error;
     }
 
-    // Actual authentication failure
     if (isAuthenticationError(error)) {
       logger.warn({ err: error }, "Invalid credentials during sign in");
       return {
@@ -57,7 +50,6 @@ export async function signInAction(data: SignInFormData) {
       };
     }
 
-    // Unexpected error type
     logger.error({ err: error }, "Unexpected error during sign in");
     throw error;
   }

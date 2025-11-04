@@ -24,10 +24,6 @@ type UploadAvatarResult =
       error: string;
     };
 
-/**
- * Server action to upload user avatar
- * Handles file upload to S3 and updates user profile with avatar URL
- */
 export async function uploadAvatar(
   data: UploadAvatarInput
 ): Promise<UploadAvatarResult> {
@@ -35,7 +31,6 @@ export async function uploadAvatar(
     [LOGGER_CONTEXT.SERVER_ACTION]: "uploadAvatar",
   });
   try {
-    // Check authentication
     const userId = await getServerUserId();
     if (!userId) {
       logger.warn({ reason: "unauthorized" }, "Upload avatar denied");
@@ -45,7 +40,6 @@ export async function uploadAvatar(
       };
     }
 
-    // Validate input
     const validationResult = UploadAvatarSchema.safeParse(data);
     if (!validationResult.success) {
       logger.warn(
@@ -60,7 +54,6 @@ export async function uploadAvatar(
 
     const validatedData = validationResult.data;
 
-    // Upload to S3
     logger.info({ userId }, "Uploading avatar to storage");
     const uploadResult = await AvatarStorageService.uploadAvatar(
       userId,
@@ -78,7 +71,6 @@ export async function uploadAvatar(
       };
     }
 
-    // Update user profile with avatar URL via service
     const profileService = new ProfileService();
     logger.debug({ userId }, "Saving avatar URL to profile");
     const updateResult = await profileService.updateAvatarUrl({

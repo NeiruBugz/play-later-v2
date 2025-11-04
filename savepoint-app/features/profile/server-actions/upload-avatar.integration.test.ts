@@ -146,7 +146,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        // LocalStack URL format: http://localhost:4568/bucket-name/key
         expect(result.data.url).toMatch(
           new RegExp(
             `^${env.AWS_ENDPOINT_URL}/${env.S3_BUCKET_NAME}/${env.S3_AVATAR_PATH_PREFIX}`
@@ -176,7 +175,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        // Verify database was updated
         const db = getTestDatabase();
         const updatedUser = await db.user.findUnique({
           where: { id: testUserId },
@@ -197,7 +195,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       if (result.success) {
         expect(result.data.url).toContain("avatar.png");
 
-        // Verify file exists
         const key = extractS3Key(result.data.url);
         expect(await fileExistsInS3(key)).toBe(true);
       }
@@ -212,7 +209,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       if (result.success) {
         expect(result.data.url).toContain("avatar.gif");
 
-        // Verify file exists
         const key = extractS3Key(result.data.url);
         expect(await fileExistsInS3(key)).toBe(true);
       }
@@ -227,7 +223,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       if (result.success) {
         expect(result.data.url).toContain("avatar.webp");
 
-        // Verify file exists
         const key = extractS3Key(result.data.url);
         expect(await fileExistsInS3(key)).toBe(true);
       }
@@ -238,7 +233,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     it("should reject file over 4MB with size error", async () => {
       const file = createTestFile(
         "huge.jpg",
-        4 * 1024 * 1024 + 1, // 4MB + 1 byte
+        4 * 1024 * 1024 + 1,
         "image/jpeg"
       );
 
@@ -268,7 +263,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     it("should accept file at exactly 4MB boundary", async () => {
       const file = createTestFile(
         "exact-4mb.jpg",
-        4 * 1024 * 1024, // Exactly 4MB
+        4 * 1024 * 1024,
         "image/jpeg"
       );
 
@@ -382,11 +377,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     });
 
     it("should not update database when file size exceeds limit", async () => {
-      const file = createTestFile(
-        "too-big.jpg",
-        6 * 1024 * 1024, // 6MB
-        "image/jpeg"
-      );
+      const file = createTestFile("too-big.jpg", 6 * 1024 * 1024, "image/jpeg");
 
       const result = await uploadAvatar({ file });
 

@@ -5,7 +5,6 @@ export async function signInWithCredentials(
   email: string,
   password: string
 ): Promise<void> {
-  // Ensure a clean, unauthenticated context to avoid redirects away from /login
   await page.context().clearCookies();
   await page.addInitScript(() => {
     try {
@@ -14,7 +13,6 @@ export async function signInWithCredentials(
     } catch {}
   });
 
-  // Navigate to the login page and wait for the form to be present
   await page.goto("/login", { waitUntil: "domcontentloaded" });
   await page.getByRole("textbox", { name: /email/i }).waitFor();
 
