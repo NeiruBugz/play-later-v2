@@ -12,7 +12,7 @@ import { TbBrandWindows, TbDeviceGamepad2 } from "react-icons/tb";
 export function getPlatformIcon(platformName: string): IconType {
   const lowerName = platformName.toLowerCase();
 
-  if (lowerName.includes("playstation") || lowerName.includes("ps")) {
+  if (lowerName.includes("playstation") || /\bps\b/.test(lowerName)) {
     return SiPlaystation;
   }
 
@@ -58,7 +58,7 @@ export function getPlatformIcon(platformName: string): IconType {
     return SiSteam;
   }
 
-  if (lowerName.includes("pc")) {
+  if (/\bpc\b/.test(lowerName)) {
     return TbDeviceGamepad2;
   }
 

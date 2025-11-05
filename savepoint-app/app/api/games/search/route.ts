@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get("q");
-    const offset = parseInt(searchParams.get("offset") ?? "0", 10);
+    const offset = Number(searchParams.get("offset") ?? "0") || 0;
 
     logger.info({ query, offset }, "Game search API request received");
 
