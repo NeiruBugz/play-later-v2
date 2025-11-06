@@ -625,3 +625,49 @@ export async function getLibraryStatsByUserId(userId: string): Promise<
     );
   }
 }
+
+/**
+ * Find the most recently updated library item for a specific game
+ * @param params - userId and gameId to search for
+ * @returns The most recent library item or null if not found
+ */
+export async function findMostRecentLibraryItemByGameId(params: {
+  userId: string;
+  gameId: string;
+}): Promise<RepositoryResult<LibraryItem | null>> {
+  try {
+    const item = await prisma.libraryItem.findFirst({
+      where: { userId: params.userId, gameId: params.gameId },
+      orderBy: { updatedAt: "desc" },
+    });
+    return repositorySuccess(item);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find most recent library item: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+/**
+ * Find all library items for a specific game for a user
+ * @param params - userId and gameId to search for
+ * @returns Array of library items ordered by creation date (oldest first)
+ */
+export async function findAllLibraryItemsByGameId(params: {
+  userId: string;
+  gameId: string;
+}): Promise<RepositoryResult<LibraryItem[]>> {
+  try {
+    const items = await prisma.libraryItem.findMany({
+      where: { userId: params.userId, gameId: params.gameId },
+      orderBy: { createdAt: "asc" },
+    });
+    return repositorySuccess(items);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find all library items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}

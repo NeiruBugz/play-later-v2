@@ -175,15 +175,18 @@ export interface TestGame {
 export async function createTestGame(data?: {
   igdbId?: number;
   title?: string;
+  slug?: string;
   coverImage?: string | null;
 }): Promise<TestGame> {
   const igdbId = data?.igdbId ?? Math.floor(Math.random() * 1000000);
   const title = data?.title ?? `Test Game ${igdbId}`;
+  const slug = data?.slug ?? `test-game-${igdbId}`;
 
   const game = await prisma.game.create({
     data: {
       igdbId,
       title,
+      slug,
       coverImage: data?.coverImage ?? null,
     },
   });

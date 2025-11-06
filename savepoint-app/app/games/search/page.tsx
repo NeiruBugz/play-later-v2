@@ -7,9 +7,18 @@ export const metadata: Metadata = {
   description: "Search our extensive game database powered by IGDB",
 };
 
-export default function GameSearchPage() {
+type GameSearchPageProps = {
+  searchParams: Promise<{ q?: string }>;
+};
+
+export default async function GameSearchPage({
+  searchParams,
+}: GameSearchPageProps) {
+  const { q } = await searchParams;
+  const initialQuery = q || "";
+
   return (
-    <div className="container mx-auto px-6 py-10">
+    <div className="container mx-auto px-6">
       <div className="space-y-8">
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight">Search Games</h1>
@@ -18,7 +27,7 @@ export default function GameSearchPage() {
           </p>
         </div>
 
-        <GameSearchInput />
+        <GameSearchInput initialQuery={initialQuery} />
       </div>
     </div>
   );

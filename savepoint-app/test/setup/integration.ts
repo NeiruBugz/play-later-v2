@@ -66,6 +66,13 @@ vi.mock("@/shared/lib", async (importOriginal) => {
   };
 });
 
+/**
+ * Unmock repository functions for integration tests.
+ * Integration tests should use REAL repository functions with REAL database.
+ * The global.ts file mocks these for unit tests, but we need to undo that here.
+ */
+vi.unmock("@/data-access-layer/repository");
+
 // Set up test-specific configuration before tests run
 beforeAll(() => {
   // @ts-expect-error - NODE_ENV is read-only

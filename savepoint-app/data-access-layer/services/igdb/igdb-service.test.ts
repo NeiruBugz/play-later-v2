@@ -1976,26 +1976,20 @@ describe("IgdbService", () => {
 
   describe("getFranchiseGames", () => {
     describe("when service returns", () => {
-      it("should return franchise games when valid franchise ID is provided", async () => {
-        const params = { franchiseId: 123 };
+      it("should return franchise games when valid franchise ID and current game ID are provided", async () => {
+        const params = { franchiseId: 123, currentGameId: 999 };
         const mockResponse = [
           {
-            id: 123,
-            name: "The Legend of Zelda",
-            games: [
-              {
-                id: 1,
-                name: "The Legend of Zelda: Breath of the Wild",
-                cover: { id: 10, image_id: "cover1" },
-                game_type: 0,
-              },
-              {
-                id: 2,
-                name: "The Legend of Zelda: Tears of the Kingdom",
-                cover: { id: 11, image_id: "cover2" },
-                game_type: 0,
-              },
-            ],
+            id: 1,
+            name: "The Legend of Zelda: Breath of the Wild",
+            slug: "the-legend-of-zelda-breath-of-the-wild",
+            cover: { image_id: "cover1" },
+          },
+          {
+            id: 2,
+            name: "The Legend of Zelda: Tears of the Kingdom",
+            slug: "the-legend-of-zelda-tears-of-the-kingdom",
+            cover: { image_id: "cover2" },
           },
         ];
 
@@ -2021,6 +2015,9 @@ describe("IgdbService", () => {
           expect(result.data.games[0].name).toBe(
             "The Legend of Zelda: Breath of the Wild"
           );
+          expect(result.data.games[0].slug).toBe(
+            "the-legend-of-zelda-breath-of-the-wild"
+          );
           expect(result.data.games[1].id).toBe(2);
           expect(result.data.games[1].name).toBe(
             "The Legend of Zelda: Tears of the Kingdom"
@@ -2029,14 +2026,7 @@ describe("IgdbService", () => {
       });
 
       it("should handle empty response (no games in franchise) gracefully", async () => {
-        const params = { franchiseId: 999 };
-        const mockResponse = [
-          {
-            id: 999,
-            name: "Empty Franchise",
-            games: [],
-          },
-        ];
+        const params = { franchiseId: 999, currentGameId: 1 };
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
@@ -2048,7 +2038,7 @@ describe("IgdbService", () => {
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: async () => mockResponse,
+          json: async () => [],
         });
 
         const result = await service.getFranchiseGames(params);
@@ -2059,12 +2049,13 @@ describe("IgdbService", () => {
         }
       });
 
-      it("should handle response without games field gracefully", async () => {
-        const params = { franchiseId: 888 };
+      it("should handle games without cover images", async () => {
+        const params = { franchiseId: 888, currentGameId: 1 };
         const mockResponse = [
           {
-            id: 888,
-            name: "Franchise without games",
+            id: 10,
+            name: "Game Without Cover",
+            slug: "game-without-cover",
           },
         ];
 
@@ -2085,12 +2076,13 @@ describe("IgdbService", () => {
 
         expect(result.success).toBe(true);
         if (result.success) {
-          expect(result.data.games).toEqual([]);
+          expect(result.data.games).toHaveLength(1);
+          expect(result.data.games[0].cover).toBeUndefined();
         }
       });
 
       it("should handle API returning empty array", async () => {
-        const params = { franchiseId: 777 };
+        const params = { franchiseId: 777, currentGameId: 5 };
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
@@ -2116,7 +2108,7 @@ describe("IgdbService", () => {
 
     describe("when service throws", () => {
       it("should return VALIDATION_ERROR when franchise ID is null", async () => {
-        const params = { franchiseId: null as any };
+        const params = { franchiseId: null as any, currentGameId: 1 };
 
         const result = await service.getFranchiseGames(params);
 
@@ -2128,7 +2120,7 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when franchise ID is undefined", async () => {
-        const params = { franchiseId: undefined as any };
+        const params = { franchiseId: undefined as any, currentGameId: 1 };
 
         const result = await service.getFranchiseGames(params);
 
@@ -2140,7 +2132,7 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when franchise ID is zero", async () => {
-        const params = { franchiseId: 0 };
+        const params = { franchiseId: 0, currentGameId: 1 };
 
         const result = await service.getFranchiseGames(params);
 
@@ -2152,7 +2144,7 @@ describe("IgdbService", () => {
       });
 
       it("should return VALIDATION_ERROR when franchise ID is negative", async () => {
-        const params = { franchiseId: -100 };
+        const params = { franchiseId: -100, currentGameId: 1 };
 
         const result = await service.getFranchiseGames(params);
 
@@ -2163,8 +2155,32 @@ describe("IgdbService", () => {
         }
       });
 
+      it("should return VALIDATION_ERROR when current game ID is null", async () => {
+        const params = { franchiseId: 123, currentGameId: null as any };
+
+        const result = await service.getFranchiseGames(params);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid current game ID is required");
+        }
+      });
+
+      it("should return VALIDATION_ERROR when current game ID is zero", async () => {
+        const params = { franchiseId: 123, currentGameId: 0 };
+
+        const result = await service.getFranchiseGames(params);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+          expect(result.error).toContain("Valid current game ID is required");
+        }
+      });
+
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
-        const params = { franchiseId: 123 };
+        const params = { franchiseId: 123, currentGameId: 1 };
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
@@ -2190,7 +2206,7 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when token fetch fails", async () => {
-        const params = { franchiseId: 123 };
+        const params = { franchiseId: 123, currentGameId: 1 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
@@ -2203,7 +2219,7 @@ describe("IgdbService", () => {
       });
 
       it("should return INTERNAL_ERROR when API returns undefined", async () => {
-        const params = { franchiseId: 456 };
+        const params = { franchiseId: 456, currentGameId: 1 };
 
         mockFetch.mockResolvedValueOnce({
           ok: true,

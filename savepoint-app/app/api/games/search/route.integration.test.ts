@@ -1,9 +1,27 @@
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import type { NextRequest } from "next/server";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import { GET } from "./route";
 
+/**
+ * This test file uses MSW (Mock Service Worker) to intercept HTTP requests.
+ * We need to unmock IgdbService to ensure the real service makes HTTP calls
+ * that MSW can intercept. Other integration tests may mock IgdbService, and
+ * because integration tests run in a single fork, those mocks can persist.
+ */
+vi.unmock("@/data-access-layer/services/igdb/igdb-service");
+
+// Set up MSW server for HTTP mocking
 const igdbHandlers = [
   http.post("https://id.twitch.tv/oauth2/token", () => {
     return HttpResponse.json({
@@ -43,11 +61,20 @@ const igdbHandlers = [
 
 const server = setupServer(...igdbHandlers);
 
-beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
+beforeAll(() => {
+  // Start MSW server with strict error handling to catch unhandled requests
+  server.listen({ onUnhandledRequest: "error" });
+});
+
 afterEach(() => {
+  // Reset any runtime handlers added during tests
   server.resetHandlers();
 });
-afterAll(() => server.close());
+
+afterAll(() => {
+  // Clean up and close the MSW server
+  server.close();
+});
 
 function createMockRequest(
   searchParams: Record<string, string | undefined>,

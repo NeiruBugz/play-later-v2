@@ -24,6 +24,14 @@ export interface GameDetailsResult {
   game: FullGameInfoResponse | null;
 }
 
+export interface GetGameDetailsBySlugParams {
+  slug: string;
+}
+
+export interface GameDetailsBySlugResult {
+  game: FullGameInfoResponse;
+}
+
 export interface PlatformsResult {
   platforms: Array<{ id: number; name: string }>;
 }
@@ -165,18 +173,29 @@ export interface GameExpansionsResult {
 
 export interface GetFranchiseGamesParams {
   franchiseId: number;
+  currentGameId: number;
 }
 
 export interface FranchiseGamesResult {
   games: Array<{
     id: number;
     name: string;
-    cover: {
-      id: number;
+    slug: string;
+    cover?: {
       image_id: string;
     };
-    game_type: number;
   }>;
+}
+
+export interface GetFranchiseDetailsParams {
+  franchiseId: number;
+}
+
+export interface FranchiseDetailsResult {
+  franchise: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface GetGameArtworksParams {
@@ -255,6 +274,19 @@ export interface EventLogoResult {
   };
 }
 
+export interface GetTimesToBeatParams {
+  igdbId: number;
+}
+
+export interface TimesToBeatData {
+  mainStory?: number;
+  completionist?: number;
+}
+
+export interface TimesToBeatResult {
+  timesToBeat: TimesToBeatData;
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -263,6 +295,10 @@ export interface IgdbService extends BaseService {
   getGameDetails(
     params: GameDetailsParams
   ): Promise<ServiceResult<GameDetailsResult>>;
+
+  getGameDetailsBySlug(
+    params: GetGameDetailsBySlugParams
+  ): Promise<ServiceResult<GameDetailsBySlugResult>>;
 
   getPlatforms(): Promise<ServiceResult<PlatformsResult>>;
 
@@ -317,4 +353,8 @@ export interface IgdbService extends BaseService {
   getEventLogo(
     params: GetEventLogoParams
   ): Promise<ServiceResult<EventLogoResult>>;
+
+  getTimesToBeat(
+    params: GetTimesToBeatParams
+  ): Promise<ServiceResult<TimesToBeatResult>>;
 }

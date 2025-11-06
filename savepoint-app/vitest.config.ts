@@ -69,6 +69,7 @@ export default defineConfig({
             "**/.next/**",
             "**/coverage/**",
             "**/*.integration.test.{js,ts,jsx,tsx}",
+            "**/shared/components/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
         },
       },
@@ -80,8 +81,9 @@ export default defineConfig({
           environment: "jsdom",
           setupFiles: ["./test/setup/client-setup.ts"],
           include: [
-            "**/features/**/ui/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/features/**/ui/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/features/**/hooks/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/components/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
           exclude: [
             "**/node_modules/**",

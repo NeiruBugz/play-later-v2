@@ -1,6 +1,7 @@
 export interface SearchGameResult {
   id: number;
   name: string;
+  slug: string;
   game_type: number;
   cover?: {
     image_id: string;

@@ -90,6 +90,12 @@ model Game {
   Review        Review[]
   JournalEntry  JournalEntry[]
   steamAppId    Int?
+  slug          String         @unique
+  franchiseId   Int?
+  genres        GameGenre[]
+  platforms     GamePlatform[]
+
+  @@index([slug])
 }
 
 model LibraryItem {
@@ -213,4 +219,60 @@ enum JournalVisibility {
   PRIVATE // Only user can see
   FRIENDS_ONLY // Future feature
   PUBLIC // Anyone can see
+}
+
+// ----- Game Metadata Models ------//
+model Genre {
+  id        String      @id @default(cuid())
+  igdbId    Int         @unique
+  name      String      @unique
+  slug      String      @unique
+  checksum  String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  games     GameGenre[]
+
+  @@index([slug])
+  @@index([name])
+}
+
+model Platform {
+  id              String         @id @default(cuid())
+  igdbId          Int            @unique
+  name            String         @unique
+  slug            String         @unique
+  abbreviation    String?
+  alternativeName String?
+  generation      Int?
+  platformFamily  Int?
+  platformType    Int?
+  checksum        String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  games           GamePlatform[]
+
+  @@index([slug])
+  @@index([name])
+}
+
+model GameGenre {
+  gameId  String
+  genreId String
+  game    Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, genreId])
+  @@index([gameId])
+  @@index([genreId])
+}
+
+model GamePlatform {
+  gameId     String
+  platformId String
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  platform   Platform @relation(fields: [platformId], references: [id], onDelete: Cascade)
+
+  @@id([gameId, platformId])
+  @@index([gameId])
+  @@index([platformId])
 }

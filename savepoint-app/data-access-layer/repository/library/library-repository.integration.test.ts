@@ -21,7 +21,11 @@ import {
 } from "vitest";
 
 import { isRepositorySuccess } from "../types";
-import { getLibraryStatsByUserId } from "./library-repository";
+import {
+  findAllLibraryItemsByGameId,
+  findMostRecentLibraryItemByGameId,
+  getLibraryStatsByUserId,
+} from "./library-repository";
 
 vi.mock("@/shared/lib", async () => {
   const actual =
@@ -247,6 +251,172 @@ describe("LibraryRepository - Integration Tests", () => {
         });
         expect(result.data.recentGames).toHaveLength(1);
         expect(result.data.recentGames[0].title).toBe("User 1 Game");
+      }
+    });
+  });
+
+  describe("findMostRecentLibraryItemByGameId", () => {
+    it("should return the most recently updated library item for a game", async () => {
+      const user = await createUser();
+      const game = await createGame({ title: "Test Game" });
+
+      // Create multiple library items at different times
+      await createLibraryItem({
+        userId: user.id,
+        gameId: game.id,
+        status: LibraryItemStatus.CURIOUS_ABOUT,
+      });
+
+      // Simulate time passing
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const item2 = await createLibraryItem({
+        userId: user.id,
+        gameId: game.id,
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+      });
+
+      // Update item2 to make it the most recent
+      await getTestDatabase().libraryItem.update({
+        where: { id: item2.id },
+        data: { updatedAt: new Date() },
+      });
+
+      const result = await findMostRecentLibraryItemByGameId({
+        userId: user.id,
+        gameId: game.id,
+      });
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data).not.toBeNull();
+        expect(result.data?.id).toBe(item2.id);
+        expect(result.data?.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
+      }
+    });
+
+    it("should return null when no library items exist for the game", async () => {
+      const user = await createUser();
+      const game = await createGame({ title: "Test Game" });
+
+      const result = await findMostRecentLibraryItemByGameId({
+        userId: user.id,
+        gameId: game.id,
+      });
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data).toBeNull();
+      }
+    });
+
+    it("should only return library items for the specified user", async () => {
+      const user1 = await createUser({ email: "user1@test.com" });
+      const user2 = await createUser({ email: "user2@test.com" });
+      const game = await createGame({ title: "Test Game" });
+
+      await createLibraryItem({
+        userId: user2.id,
+        gameId: game.id,
+        status: LibraryItemStatus.EXPERIENCED,
+      });
+
+      const result = await findMostRecentLibraryItemByGameId({
+        userId: user1.id,
+        gameId: game.id,
+      });
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data).toBeNull();
+      }
+    });
+  });
+
+  describe("findAllLibraryItemsByGameId", () => {
+    it("should return all library items for a game ordered by creation date", async () => {
+      const user = await createUser();
+      const game = await createGame({ title: "Test Game" });
+
+      const item1 = await createLibraryItem({
+        userId: user.id,
+        gameId: game.id,
+        status: LibraryItemStatus.CURIOUS_ABOUT,
+      });
+
+      // Simulate time passing
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const item2 = await createLibraryItem({
+        userId: user.id,
+        gameId: game.id,
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const item3 = await createLibraryItem({
+        userId: user.id,
+        gameId: game.id,
+        status: LibraryItemStatus.EXPERIENCED,
+      });
+
+      const result = await findAllLibraryItemsByGameId({
+        userId: user.id,
+        gameId: game.id,
+      });
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data).toHaveLength(3);
+        // Should be ordered by createdAt ascending (oldest first)
+        expect(result.data[0].id).toBe(item1.id);
+        expect(result.data[1].id).toBe(item2.id);
+        expect(result.data[2].id).toBe(item3.id);
+      }
+    });
+
+    it("should return empty array when no library items exist for the game", async () => {
+      const user = await createUser();
+      const game = await createGame({ title: "Test Game" });
+
+      const result = await findAllLibraryItemsByGameId({
+        userId: user.id,
+        gameId: game.id,
+      });
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data).toHaveLength(0);
+      }
+    });
+
+    it("should only return library items for the specified user", async () => {
+      const user1 = await createUser({ email: "user1@test.com" });
+      const user2 = await createUser({ email: "user2@test.com" });
+      const game = await createGame({ title: "Test Game" });
+
+      await createLibraryItem({
+        userId: user1.id,
+        gameId: game.id,
+        status: LibraryItemStatus.WISHLIST,
+      });
+
+      await createLibraryItem({
+        userId: user2.id,
+        gameId: game.id,
+        status: LibraryItemStatus.EXPERIENCED,
+      });
+
+      const result = await findAllLibraryItemsByGameId({
+        userId: user1.id,
+        gameId: game.id,
+      });
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data).toHaveLength(1);
+        expect(result.data[0].status).toBe(LibraryItemStatus.WISHLIST);
       }
     });
   });

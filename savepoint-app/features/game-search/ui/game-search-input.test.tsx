@@ -3,9 +3,24 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
+import { useRouter } from "next/navigation";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 import { GameSearchInput } from "./game-search-input";
+
+// Mock Next.js navigation
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(),
+}));
 
 const igdbHandlers = [
   http.get("*/api/games/search", ({ request }) => {
@@ -65,9 +80,23 @@ const igdbHandlers = [
 
 const server = setupServer(...igdbHandlers);
 
+const mockReplace = vi.fn();
+const mockRouter = {
+  push: vi.fn(),
+  replace: mockReplace,
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  prefetch: vi.fn(),
+};
+
 beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
+beforeEach(() => {
+  vi.mocked(useRouter).mockReturnValue(mockRouter);
+});
 afterEach(() => {
   server.resetHandlers();
+  vi.clearAllMocks();
 });
 afterAll(() => server.close());
 
@@ -287,6 +316,102 @@ describe("GameSearchInput", () => {
         },
         { timeout: 1000 }
       );
+    });
+  });
+
+  describe("when initialQuery prop is provided", () => {
+    it("should pre-populate search input with initial query", () => {
+      renderWithQueryClient(<GameSearchInput initialQuery="zelda" />);
+
+      const input = screen.getByPlaceholderText(
+        /Search for games \(minimum 3 characters\)/i
+      );
+      expect(input).toHaveValue("zelda");
+    });
+
+    it("should trigger search automatically for initialQuery ≥3 characters", async () => {
+      renderWithQueryClient(<GameSearchInput initialQuery="zelda" />);
+
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(/The Legend of Zelda: Breath of the Wild/i)
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+    });
+
+    it("should not trigger search for initialQuery <3 characters", async () => {
+      renderWithQueryClient(<GameSearchInput initialQuery="ze" />);
+
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      expect(screen.queryByText(/Legend of Zelda/i)).not.toBeInTheDocument();
+    });
+
+    it("should allow user to modify pre-populated query", async () => {
+      const user = userEvent.setup();
+      renderWithQueryClient(<GameSearchInput initialQuery="zelda" />);
+
+      const input = screen.getByPlaceholderText(
+        /Search for games \(minimum 3 characters\)/i
+      );
+
+      await user.clear(input);
+      await user.type(input, "mario");
+
+      await waitFor(
+        () => {
+          expect(screen.getByText(/Super Mario Odyssey/i)).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      expect(
+        screen.queryByText(/The Legend of Zelda: Breath of the Wild/i)
+      ).not.toBeInTheDocument();
+    });
+
+    it("should handle empty initialQuery gracefully", () => {
+      renderWithQueryClient(<GameSearchInput initialQuery="" />);
+
+      const input = screen.getByPlaceholderText(
+        /Search for games \(minimum 3 characters\)/i
+      );
+      expect(input).toHaveValue("");
+    });
+
+    it("should clean up URL when user modifies query", async () => {
+      const user = userEvent.setup();
+      renderWithQueryClient(<GameSearchInput initialQuery="zelda" />);
+
+      const input = screen.getByPlaceholderText(
+        /Search for games \(minimum 3 characters\)/i
+      );
+
+      await user.type(input, "a");
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith("/games/search", {
+          scroll: false,
+        });
+      });
+    });
+
+    it("should not clean up URL if no initialQuery was provided", async () => {
+      const user = userEvent.setup();
+      renderWithQueryClient(<GameSearchInput />);
+
+      const input = screen.getByPlaceholderText(
+        /Search for games \(minimum 3 characters\)/i
+      );
+
+      await user.type(input, "zelda");
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(mockReplace).not.toHaveBeenCalled();
     });
   });
 });

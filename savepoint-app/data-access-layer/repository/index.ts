@@ -30,6 +30,8 @@ export {
   findCurrentlyPlayingGames,
   buildCollectionFilter,
   getLibraryStatsByUserId,
+  findMostRecentLibraryItemByGameId,
+  findAllLibraryItemsByGameId,
 } from "./library/library-repository";
 
 export {
@@ -47,3 +49,27 @@ export {
   findUserByEmail,
   createUserWithCredentials,
 } from "./user/user-repository";
+
+export {
+  upsertGenre,
+  upsertGenres,
+  findGenreByIgdbId,
+} from "./genre/genre-repository";
+
+export {
+  upsertPlatform,
+  upsertPlatforms,
+  findPlatformByIgdbId,
+} from "./platform/platform-repository";
+
+export {
+  createGameWithRelations,
+  findGameBySlug,
+  findGameByIgdbId,
+  gameExistsByIgdbId,
+} from "./game/game-repository";
+
+export {
+  findJournalEntriesByGameId,
+  countJournalEntriesByGameId,
+} from "./journal/journal-repository";

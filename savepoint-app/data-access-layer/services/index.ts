@@ -55,3 +55,18 @@ export {
 } from "./profile/types";
 
 export { ProfileService } from "./profile/profile-service";
+
+export {
+  type AddGameToLibraryInput,
+  type AddGameToLibraryResult,
+  type LibraryService as ILibraryService,
+} from "./library/types";
+
+export { LibraryService } from "./library/library-service";
+
+export {
+  type FindJournalEntriesResult,
+  type JournalService as IJournalService,
+} from "./journal/types";
+
+export { JournalService } from "./journal/journal-service";

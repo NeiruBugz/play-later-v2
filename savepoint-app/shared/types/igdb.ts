@@ -67,21 +67,25 @@ export type FullGameInfoResponse = {
   aggregated_rating: number;
   cover: Cover;
   external_games: ExternalGame[];
+  first_release_date?: number;
   game_engines: GameEngine[];
   game_modes: GameMode[];
   genres: Genre[];
   id: number;
   involved_companies: InvolvedCompany[];
   name: string;
+  platforms?: Platform[];
   player_perspectives: PlayerPerspective[];
   release_dates: ReleaseDate[];
   screenshots: Screenshot[];
   similar_games: SimilarGame[];
-  summary: string;
+  slug: string;
+  summary?: string;
   themes: Theme[];
   websites: Website[];
-  franchise?: Franchise;
+  franchise?: Franchise | number; // Can be either a Franchise object or franchise ID
   franchises: number[];
+  game_type: number;
 };
 
 export type SearchResponse = {
@@ -91,6 +95,7 @@ export type SearchResponse = {
   name: string;
   platforms: Platform[];
   release_dates?: ReleaseDate[];
+  slug: string;
   game_type: number;
 };
 

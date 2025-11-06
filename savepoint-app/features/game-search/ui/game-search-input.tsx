@@ -1,15 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Input } from "@/shared/components/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
 import { GameSearchResults } from "./game-search-results";
 
-export const GameSearchInput = () => {
-  const [query, setQuery] = useState("");
+type GameSearchInputProps = {
+  initialQuery?: string;
+};
+
+export const GameSearchInput = ({
+  initialQuery = "",
+}: GameSearchInputProps) => {
+  const router = useRouter();
+  const [query, setQuery] = useState(initialQuery);
   const debouncedQuery = useDebouncedValue(query, 500);
+
+  useEffect(() => {
+    if (initialQuery && query !== initialQuery) {
+      router.replace("/games/search", { scroll: false });
+    }
+  }, [query, initialQuery, router]);
 
   return (
     <div className="space-y-8">
