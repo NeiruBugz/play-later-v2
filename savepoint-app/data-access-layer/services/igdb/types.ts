@@ -174,6 +174,8 @@ export interface GameExpansionsResult {
 export interface GetFranchiseGamesParams {
   franchiseId: number;
   currentGameId: number;
+  limit?: number;
+  offset?: number;
 }
 
 export interface FranchiseGamesResult {
@@ -185,6 +187,12 @@ export interface FranchiseGamesResult {
       image_id: string;
     };
   }>;
+  pagination: {
+    total: number;
+    offset: number;
+    limit: number;
+    hasMore: boolean;
+  };
 }
 
 export interface GetFranchiseDetailsParams {

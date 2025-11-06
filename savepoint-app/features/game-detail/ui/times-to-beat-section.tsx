@@ -9,8 +9,10 @@ export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
   const completionist = timesToBeat?.completionist;
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-lg font-semibold">Times to Beat</h2>
+    <section className="space-y-2" aria-labelledby="times-to-beat-heading">
+      <h2 id="times-to-beat-heading" className="text-lg font-semibold">
+        Times to Beat
+      </h2>
       <dl className="space-y-1 text-sm">
         <div className="flex justify-between">
           <dt className="text-muted-foreground">Main Story:</dt>
@@ -21,6 +23,6 @@ export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
           <dd>{completionist ? `${completionist} hours` : "—"}</dd>
         </div>
       </dl>
-    </div>
+    </section>
   );
 }

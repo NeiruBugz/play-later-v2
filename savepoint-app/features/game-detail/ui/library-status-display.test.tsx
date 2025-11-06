@@ -28,8 +28,11 @@ describe("LibraryStatusDisplay", () => {
         <LibraryStatusDisplay {...defaultProps} userLibraryStatus={undefined} />
       );
 
-      const button = screen.getByRole("button", { name: /add to library/i });
+      const button = screen.getByRole("button", {
+        name: `Add ${defaultProps.gameTitle} to your library`,
+      });
       expect(button).toBeInTheDocument();
+      expect(button).not.toBeDisabled();
     });
 
     it("should not show placeholder text anymore", () => {

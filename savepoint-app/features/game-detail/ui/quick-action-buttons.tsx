@@ -86,6 +86,7 @@ export const QuickActionButtons = ({
   const [activeStatus, setActiveStatus] = useState<
     LibraryItemStatus | undefined
   >(currentStatus);
+  const [announcement, setAnnouncement] = useState<string>("");
 
   const handleStatusChange = (status: LibraryItemStatus) => {
     if (isPending) return;
@@ -96,11 +97,15 @@ export const QuickActionButtons = ({
       if (result.success) {
         setActiveStatus(status);
         const statusLabel = STATUS_CONFIG[status].label;
-        toast.success(`Status updated to ${statusLabel}!`, {
+        const message = `Status updated to ${statusLabel}`;
+        setAnnouncement(message);
+        toast.success(message, {
           description: gameTitle,
         });
       } else {
-        toast.error("Failed to update status", {
+        const errorMessage = "Failed to update status";
+        setAnnouncement(errorMessage);
+        toast.error(errorMessage, {
           description: result.error || "Please try again",
         });
       }
@@ -113,7 +118,20 @@ export const QuickActionButtons = ({
         <CardTitle className="text-base">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-2">
+        {/* Screen reader announcement for status changes */}
+        <div
+          className="sr-only"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {announcement}
+        </div>
+        <div
+          className="grid grid-cols-2 gap-2"
+          role="group"
+          aria-label="Journey status quick actions"
+        >
           {STATUS_ORDER.map((status) => {
             const config = STATUS_CONFIG[status];
             const Icon = config.icon;
@@ -124,7 +142,7 @@ export const QuickActionButtons = ({
                 key={status}
                 variant={isActive ? "default" : "outline"}
                 size="sm"
-                className="flex h-auto flex-col gap-1 py-3"
+                className="flex h-auto flex-col gap-1 py-3 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 onClick={() => handleStatusChange(status)}
                 disabled={isPending}
                 aria-label={config.ariaLabel}

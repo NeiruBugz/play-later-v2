@@ -16,28 +16,13 @@ const logger = createLogger({
   [LOGGER_CONTEXT.SERVICE]: "getGameDetailsUseCase",
 });
 
-type RelatedGame = {
-  id: number;
-  name: string;
-  slug: string;
-  cover?: {
-    image_id: string;
-  };
-};
-
-type FranchiseWithGames = {
-  franchiseId: number;
-  franchiseName: string;
-  games: RelatedGame[];
-};
-
 type GameDetailsResult = {
   game: FullGameInfoResponse;
+  franchiseIds: number[];
   timesToBeat?: {
     mainStory?: number;
     completionist?: number;
   };
-  franchises: FranchiseWithGames[];
   userLibraryStatus?: {
     mostRecent: LibraryItem;
     updatedAt: Date;
@@ -125,29 +110,6 @@ export async function getGameDetails(params: {
       ? timesToBeatResult.data.timesToBeat
       : undefined;
 
-    const franchises: FranchiseWithGames[] = [];
-
-    for (const franchiseId of franchiseIds) {
-      const [franchiseDetailsResult, franchiseGamesResult] = await Promise.all([
-        igdbService.getFranchiseDetails({ franchiseId }),
-        igdbService.getFranchiseGames({
-          franchiseId,
-          currentGameId: game.id,
-        }),
-      ]);
-
-      if (franchiseDetailsResult.success && franchiseGamesResult.success) {
-        const games = franchiseGamesResult.data.games;
-        if (games.length > 0) {
-          franchises.push({
-            franchiseId,
-            franchiseName: franchiseDetailsResult.data.franchise.name,
-            games,
-          });
-        }
-      }
-    }
-
     let userLibraryStatus:
       | { mostRecent: LibraryItem; updatedAt: Date; allItems: LibraryItem[] }
       | undefined;
@@ -221,11 +183,7 @@ export async function getGameDetails(params: {
       {
         igdbId: game.id,
         slug: params.slug,
-        franchiseCount: franchises.length,
-        totalRelatedGames: franchises.reduce(
-          (sum, f) => sum + f.games.length,
-          0
-        ),
+        franchiseIdsCount: franchiseIds.length,
         hasLibraryStatus: !!userLibraryStatus,
       },
       "Game details fetched successfully"
@@ -235,8 +193,8 @@ export async function getGameDetails(params: {
       success: true,
       data: {
         game,
+        franchiseIds,
         timesToBeat,
-        franchises,
         userLibraryStatus,
         journalEntries,
       },

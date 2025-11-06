@@ -8,6 +8,10 @@ import type { SearchGameResult } from "../types";
 import { GameCategoryBadge } from "./game-category-badge";
 import { GameCoverPlaceholder } from "./game-cover-placeholder";
 
+// Simple blur placeholder for better perceived performance while images load
+const BLUR_DATA_URL =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iMTI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI5NiIgaGVpZ2h0PSIxMjgiIGZpbGw9IiNlNWU3ZWIiLz48L3N2Zz4=";
+
 export const GameCard = ({ game }: { game: SearchGameResult }) => {
   const releaseYear = game.first_release_date
     ? new Date(game.first_release_date * 1000).getFullYear()
@@ -28,6 +32,8 @@ export const GameCard = ({ game }: { game: SearchGameResult }) => {
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
                 sizes="96px"
+                placeholder="blur"
+                blurDataURL={BLUR_DATA_URL}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center">

@@ -1993,6 +1993,7 @@ describe("IgdbService", () => {
           },
         ];
 
+        // Mock token for first request
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2001,9 +2002,25 @@ describe("IgdbService", () => {
           }),
         });
 
+        // Mock token for second request (parallel race condition)
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        // Mock games response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => mockResponse,
+        });
+
+        // Mock count response
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [{ id: 1 }, { id: 2 }],
         });
 
         const result = await service.getFranchiseGames(params);
@@ -2022,12 +2039,19 @@ describe("IgdbService", () => {
           expect(result.data.games[1].name).toBe(
             "The Legend of Zelda: Tears of the Kingdom"
           );
+          expect(result.data.pagination).toEqual({
+            total: 2,
+            offset: 0,
+            limit: 20,
+            hasMore: false,
+          });
         }
       });
 
       it("should handle empty response (no games in franchise) gracefully", async () => {
         const params = { franchiseId: 999, currentGameId: 1 };
 
+        // Mock token for first request
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2036,6 +2060,22 @@ describe("IgdbService", () => {
           }),
         });
 
+        // Mock token for second request (parallel race condition)
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        // Mock games response
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // Mock count response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => [],
@@ -2046,6 +2086,12 @@ describe("IgdbService", () => {
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.games).toEqual([]);
+          expect(result.data.pagination).toEqual({
+            total: 0,
+            offset: 0,
+            limit: 20,
+            hasMore: false,
+          });
         }
       });
 
@@ -2059,6 +2105,7 @@ describe("IgdbService", () => {
           },
         ];
 
+        // Mock token for first request
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2067,9 +2114,25 @@ describe("IgdbService", () => {
           }),
         });
 
+        // Mock token for second request (parallel race condition)
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        // Mock games response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => mockResponse,
+        });
+
+        // Mock count response
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [{ id: 10 }],
         });
 
         const result = await service.getFranchiseGames(params);
@@ -2078,12 +2141,19 @@ describe("IgdbService", () => {
         if (result.success) {
           expect(result.data.games).toHaveLength(1);
           expect(result.data.games[0].cover).toBeUndefined();
+          expect(result.data.pagination).toEqual({
+            total: 1,
+            offset: 0,
+            limit: 20,
+            hasMore: false,
+          });
         }
       });
 
       it("should handle API returning empty array", async () => {
         const params = { franchiseId: 777, currentGameId: 5 };
 
+        // Mock token for first request
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2092,6 +2162,22 @@ describe("IgdbService", () => {
           }),
         });
 
+        // Mock token for second request (parallel race condition)
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        // Mock games response
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        // Mock count response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => [],
@@ -2102,6 +2188,12 @@ describe("IgdbService", () => {
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data.games).toEqual([]);
+          expect(result.data.pagination).toEqual({
+            total: 0,
+            offset: 0,
+            limit: 20,
+            hasMore: false,
+          });
         }
       });
     });

@@ -23,6 +23,7 @@ export const AddToLibraryButton = ({
         variant="default"
         className="w-full"
         onClick={() => setIsModalOpen(true)}
+        aria-label={`Add ${gameTitle} to your library`}
       >
         Add to Library
       </Button>

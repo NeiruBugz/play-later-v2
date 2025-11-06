@@ -14,6 +14,18 @@ import {
 import { GET } from "./route";
 
 /**
+ * Mock unstable_cache from next/cache to pass through to the actual function
+ * This allows the tests to work while bypassing the cache during tests
+ */
+vi.mock("next/cache", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("next/cache")>();
+  return {
+    ...actual,
+    unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
+  };
+});
+
+/**
  * This test file uses MSW (Mock Service Worker) to intercept HTTP requests.
  * We need to unmock IgdbService to ensure the real service makes HTTP calls
  * that MSW can intercept. Other integration tests may mock IgdbService, and

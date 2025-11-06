@@ -1146,41 +1146,59 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
 
       const { franchiseId, currentGameId } = params;
+      const limit = params.limit ?? 20;
+      const offset = params.offset ?? 0;
 
       this.logger.info(
-        { franchiseId, currentGameId },
+        { franchiseId, currentGameId, limit, offset },
         "Fetching franchise games from IGDB"
       );
 
       const gameTypeFilter = `game_type = (${ALLOWED_FRANCHISE_GAME_CATEGORIES.join(",")})`;
+      const whereClause = `franchises = [${franchiseId}] & id != ${currentGameId} & ${gameTypeFilter}`;
 
       // Search for games where franchises array contains this franchise ID
       // Using 'franchises' instead of 'franchise' because not all games have the franchise field set
-      const query = new QueryBuilder()
+      const gamesQuery = new QueryBuilder()
         .fields(["id", "name", "slug", "cover.image_id"])
-        .where(
-          `franchises = [${franchiseId}] & id != ${currentGameId} & ${gameTypeFilter}`
-        )
-        .limit(100)
+        .where(whereClause)
+        .limit(limit)
+        .offset(offset)
         .build();
 
-      this.logger.info({ query, franchiseId }, "IGDB franchise games query");
+      // Query for total count
+      const countQuery = new QueryBuilder()
+        .fields(["id"])
+        .where(whereClause)
+        .limit(500)
+        .build();
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          name: string;
-          slug: string;
-          cover?: {
-            image_id: string;
-          };
-        }>
-      >({
-        body: query,
-        resource: "/games",
-      });
+      this.logger.info(
+        { gamesQuery, countQuery, franchiseId },
+        "IGDB franchise games queries"
+      );
 
-      if (response === undefined) {
+      const [gamesResponse, countResponse] = await Promise.all([
+        this.makeRequest<
+          Array<{
+            id: number;
+            name: string;
+            slug: string;
+            cover?: {
+              image_id: string;
+            };
+          }>
+        >({
+          body: gamesQuery,
+          resource: "/games",
+        }),
+        this.makeRequest<Array<{ id: number }>>({
+          body: countQuery,
+          resource: "/games",
+        }),
+      ]);
+
+      if (gamesResponse === undefined || countResponse === undefined) {
         this.logger.error("Failed to fetch franchise games from IGDB API");
         return this.error(
           "Failed to fetch franchise games",
@@ -1188,23 +1206,29 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      if (!response || response.length === 0) {
+      const total = countResponse?.length ?? 0;
+      const games = gamesResponse ?? [];
+
+      if (games.length === 0 && offset === 0) {
         this.logger.warn(
-          { franchiseId, query, currentGameId },
+          { franchiseId, currentGameId },
           "No games found for franchise - this might indicate the franchise field is not properly linked in IGDB"
         );
-        return this.success({
-          games: [],
-        });
       }
 
       this.logger.info(
-        { franchiseId, gamesCount: response.length },
+        { franchiseId, gamesCount: games.length, total, offset, limit },
         "Franchise games fetched successfully"
       );
 
       return this.success({
-        games: response,
+        games,
+        pagination: {
+          total,
+          offset,
+          limit,
+          hasMore: offset + games.length < total,
+        },
       });
     } catch (error) {
       this.logger.error(

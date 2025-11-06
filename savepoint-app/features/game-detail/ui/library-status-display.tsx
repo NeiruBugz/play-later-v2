@@ -84,19 +84,22 @@ export const LibraryStatusDisplay = ({
           <CardTitle className="text-base">Library Status</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" role="status">
             <Icon className="text-primary h-5 w-5" aria-hidden="true" />
             <Badge variant="secondary" className="text-sm">
               {config.label}
             </Badge>
           </div>
           <p className="text-muted-foreground text-xs">
-            Updated: {updatedDate}
+            <time dateTime={userLibraryStatus.updatedAt.toISOString()}>
+              Updated: {updatedDate}
+            </time>
           </p>
           <Button
             variant="outline"
             className="w-full"
             onClick={() => setIsManageModalOpen(true)}
+            aria-label={`Manage library entries for ${gameTitle}`}
           >
             Manage Library
           </Button>

@@ -2,9 +2,9 @@
 
 **Specification:** [functional-spec.md](./functional-spec.md) | [technical-considerations.md](./technical-considerations.md)
 
-**Status:** In Progress
+**Status:** Complete
 
-**Last Updated:** 2025-11-05
+**Last Updated:** 2025-11-06
 
 ---
 
@@ -187,22 +187,22 @@ This task list follows the **Vertical Slicing** principle. Each main task repres
 ---
 
 ### **Slice 20: Final polish and accessibility**
-- [ ] Verify mobile responsive layout (all breakpoints)
-- [ ] Test sticky cover image positioning on various screen sizes
-- [ ] Accessibility audit: keyboard navigation for quick actions and modals
-- [ ] Accessibility audit: screen reader support for all interactive elements
-- [ ] Performance testing: measure page load times for initial IGDB fetch
-- [ ] Performance testing: verify background population doesn't block UI
-- [ ] Test: Complete end-to-end flow from search → detail → add to library → quick action update
+- [x] Verify mobile responsive layout (all breakpoints)
+- [x] Test sticky cover image positioning on various screen sizes
+- [x] Accessibility audit: keyboard navigation for quick actions and modals
+- [x] Accessibility audit: screen reader support for all interactive elements
+- [x] Performance testing: measure page load times for initial IGDB fetch
+- [x] Performance testing: verify background population doesn't block UI
+- [x] Test: Complete end-to-end flow from search → detail → add to library → quick action update
 
 ---
 
 ## Progress Summary
 
 **Total Slices:** 20
-**Completed:** 19
+**Completed:** 20
 **In Progress:** 0
-**Remaining:** 1
+**Remaining:** 0
 
 ---
 

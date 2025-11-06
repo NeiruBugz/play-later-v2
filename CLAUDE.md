@@ -509,6 +509,71 @@ features/feature-name/
 3. Export from `data-access-layer/repository/index.ts`
 4. Add integration tests with real database
 
+### API Routes vs Server Actions - Architectural Decision
+
+**When to Use API Routes:**
+- ✅ Public endpoints requiring rate limiting (e.g., `/api/games/search`)
+- ✅ Webhook handlers from external services
+- ✅ Non-React consumers (mobile apps, external integrations)
+- ✅ Explicit HTTP semantics (REST-style endpoints)
+
+**When to Use Server Actions:**
+- ✅ Form submissions and mutations from React components
+- ✅ Authenticated user operations
+- ✅ Data fetching consumed only by React Server Components
+- ✅ Operations requiring progressive enhancement
+
+**Current Game Search Implementation:**
+The game search feature (`/api/games/search`) uses an API Route instead of Server Actions because:
+1. Public access with IP-based rate limiting
+2. Standard REST-style GET endpoint
+3. May be consumed by non-React clients in the future
+4. Explicit caching control with `unstable_cache`
+
+**Future Migration Path:**
+When rate limiting moves to middleware, consider migrating to Server Actions for:
+- Server-side rendering of initial search results
+- Simplified data flow with React `cache()`
+- Better integration with Next.js 15 data fetching patterns
+
+### Caching Strategy
+
+**Client-Side Caching (TanStack Query):**
+```typescript
+// Used for client-side state management and infinite scroll
+staleTime: 5 * 60 * 1000,  // 5 minutes
+gcTime: 10 * 60 * 1000,     // 10 minutes garbage collection
+```
+
+**Server-Side Caching (Next.js `unstable_cache`):**
+```typescript
+// API routes use unstable_cache for server-side caching
+const getCachedGameSearch = unstable_cache(
+  async (query: string, offset: number) => {
+    // ... IGDB service call
+  },
+  ["game-search"],
+  {
+    revalidate: 300,  // Cache for 5 minutes
+    tags: ["game-search"]  // Enable cache invalidation
+  }
+);
+```
+
+**Cache Invalidation:**
+```typescript
+import { revalidateTag } from 'next/cache';
+
+// Invalidate all game search caches
+revalidateTag('game-search');
+```
+
+**Benefits:**
+- Reduced external API calls (IGDB)
+- Faster response times for repeated searches
+- Cost savings on API usage
+- Works across server instances (when deployed with proper cache backend)
+
 ## Important Notes
 
 ### Package Manager
