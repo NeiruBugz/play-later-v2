@@ -5,6 +5,8 @@ export const LOGGER_CONTEXT = {
   ERROR_BOUNDARY: "errorBoundary",
   STORAGE: "storage",
   API_ROUTE: "apiRoute",
+  DATABASE: "database",
+  HANDLER: "handler",
 } as const;
 
 export type LoggerContextKey =

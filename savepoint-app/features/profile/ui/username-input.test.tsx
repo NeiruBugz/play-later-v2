@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { act } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { checkUsernameAvailability } from "../server-actions/check-username-availability";
 import { UsernameInput } from "./username-input";
@@ -23,7 +22,7 @@ describe("UsernameInput", () => {
 
   it("should render with default label 'Username'", () => {
     render(<UsernameInput value="" onChange={() => {}} />);
-    expect(screen.getByLabelText("Username")).toBeInTheDocument();
+    expect(screen.getByLabelText("Username")).toBeVisible();
   });
 
   it("should render with custom label", () => {
@@ -34,7 +33,7 @@ describe("UsernameInput", () => {
         label="Custom Username Label"
       />
     );
-    expect(screen.getByLabelText("Custom Username Label")).toBeInTheDocument();
+    expect(screen.getByLabelText("Custom Username Label")).toBeVisible();
   });
 
   it("should show external error prop", () => {
@@ -45,7 +44,7 @@ describe("UsernameInput", () => {
         error="External validation error"
       />
     );
-    expect(screen.getByText("External validation error")).toBeInTheDocument();
+    expect(screen.getByText("External validation error")).toBeVisible();
   });
 
   it("should show error for username less than 3 characters", () => {
@@ -55,7 +54,7 @@ describe("UsernameInput", () => {
 
     expect(
       screen.getByText("Username must be at least 3 characters")
-    ).toBeInTheDocument();
+    ).toBeVisible();
     expect(mockCheckUsername).not.toHaveBeenCalled();
   });
 
@@ -67,7 +66,7 @@ describe("UsernameInput", () => {
 
     expect(
       screen.getByText("Username must not exceed 25 characters")
-    ).toBeInTheDocument();
+    ).toBeVisible();
     expect(mockCheckUsername).not.toHaveBeenCalled();
   });
 
@@ -85,13 +84,13 @@ describe("UsernameInput", () => {
     rerender(<UsernameInput value="ab" onChange={() => {}} />);
     expect(
       screen.getByText("Username must be at least 3 characters")
-    ).toBeInTheDocument();
+    ).toBeVisible();
 
     rerender(<UsernameInput value="abc" onChange={() => {}} />);
     expect(
       screen.queryByText("Username must be at least 3 characters")
     ).not.toBeInTheDocument();
-    expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+    expect(screen.getByTestId("username-validating-spinner")).toBeVisible();
   });
 
   it("should not call server before 500ms", () => {
@@ -157,7 +156,7 @@ describe("UsernameInput", () => {
 
     rerender(<UsernameInput value="testuser" onChange={() => {}} />);
 
-    expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+    expect(screen.getByTestId("username-validating-spinner")).toBeVisible();
   });
 
   it("should reset timer when value changes", async () => {
@@ -199,7 +198,7 @@ describe("UsernameInput", () => {
       await vi.runAllTimersAsync();
     });
 
-    expect(screen.getByText("Username available")).toBeInTheDocument();
+    expect(screen.getByText("Username available")).toBeVisible();
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
@@ -216,10 +215,8 @@ describe("UsernameInput", () => {
       await vi.runAllTimersAsync();
     });
 
-    expect(screen.getByText("Username already exists")).toBeInTheDocument();
-
-    const icons = document.querySelectorAll(".text-red-500");
-    expect(icons.length).toBeGreaterThan(0);
+    expect(screen.getByText("Username already exists")).toBeVisible();
+    expect(screen.getByTestId("username-error-icon")).toBeVisible();
   });
 
   it("should show error message for server validation failure", async () => {
@@ -238,7 +235,7 @@ describe("UsernameInput", () => {
       await vi.runAllTimersAsync();
     });
 
-    expect(screen.getByText("Database connection failed")).toBeInTheDocument();
+    expect(screen.getByText("Database connection failed")).toBeVisible();
   });
 
   it("should show error message for network error", async () => {
@@ -256,7 +253,7 @@ describe("UsernameInput", () => {
 
     expect(
       screen.getByText("Failed to check username availability")
-    ).toBeInTheDocument();
+    ).toBeVisible();
   });
 
   it("should have external error override internal validation", async () => {
@@ -272,7 +269,7 @@ describe("UsernameInput", () => {
       await vi.runAllTimersAsync();
     });
 
-    expect(screen.getByText("Username available")).toBeInTheDocument();
+    expect(screen.getByText("Username available")).toBeVisible();
 
     rerender(
       <UsernameInput
@@ -282,7 +279,7 @@ describe("UsernameInput", () => {
       />
     );
 
-    expect(screen.getByText("Form submission failed")).toBeInTheDocument();
+    expect(screen.getByText("Form submission failed")).toBeVisible();
     expect(screen.queryByText("Username available")).not.toBeInTheDocument();
   });
 
@@ -303,8 +300,10 @@ describe("UsernameInput", () => {
       await vi.runAllTimersAsync();
     });
 
-    expect(document.querySelector(".text-green-500")).not.toBeInTheDocument();
-    expect(screen.getByText("External error")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("username-success-icon")
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("External error")).toBeVisible();
   });
 
   it("should treat whitespace-only input as empty", async () => {

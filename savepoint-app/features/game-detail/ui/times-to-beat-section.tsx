@@ -1,4 +1,4 @@
-import type { TimesToBeatData } from "@/data-access-layer/services/igdb/types";
+import type { TimesToBeatData } from "@/shared/types/game";
 
 interface TimesToBeatSectionProps {
   timesToBeat?: TimesToBeatData;

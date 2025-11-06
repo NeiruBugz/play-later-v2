@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
-import { describe, expect, it, vi } from "vitest";
 
 import { GameNotFound } from "./game-not-found";
 
@@ -38,7 +37,7 @@ describe("GameNotFound", () => {
       screen.getByRole("heading", {
         name: /this game doesn't exist in our database/i,
       })
-    ).toBeInTheDocument();
+    ).toBeVisible();
   });
 
   it("displays appropriate error message", () => {
@@ -46,14 +45,14 @@ describe("GameNotFound", () => {
 
     expect(
       screen.getByText(/the game you're looking for might have been removed/i)
-    ).toBeInTheDocument();
+    ).toBeVisible();
   });
 
   it("renders a search input", () => {
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
-    expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toBeVisible();
     expect(searchInput).toHaveAttribute("type", "search");
   });
 
@@ -105,7 +104,7 @@ describe("GameNotFound", () => {
 
     expect(
       screen.getByText(/please enter at least 3 characters to search/i)
-    ).toBeInTheDocument();
+    ).toBeVisible();
   });
 
   it("hides validation message when query is empty", () => {
@@ -201,7 +200,7 @@ describe("GameNotFound", () => {
   it("renders back button from BrowserBackButton component", () => {
     render(<GameNotFound />);
 
-    expect(screen.getByRole("button", { name: /back/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /back/i })).toBeVisible();
   });
 
   describe("with initialQuery prop", () => {

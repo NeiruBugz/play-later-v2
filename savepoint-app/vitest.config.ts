@@ -84,12 +84,14 @@ export default defineConfig({
             "**/features/**/ui/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/features/**/hooks/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/shared/components/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
           exclude: [
             "**/node_modules/**",
             "**/dist/**",
             "**/.next/**",
             "**/coverage/**",
+            "**/*.integration.test.{js,ts,jsx,tsx}",
           ],
         },
       },
@@ -104,6 +106,7 @@ export default defineConfig({
             "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/data-access-layer/services/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/data-access-layer/repository/**/*.unit.test.{js,ts,jsx,tsx}",
+            "**/data-access-layer/handlers/**/*.unit.test.{js,ts,jsx,tsx}",
             "**/app/api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
           exclude: [

@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 
 import { GameDescription } from "./game-description";
 
@@ -10,7 +9,7 @@ describe("GameDescription", () => {
         "An epic adventure game where players explore vast landscapes.";
       render(<GameDescription summary={summary} />);
 
-      expect(screen.getByText(summary)).toBeInTheDocument();
+      expect(screen.getByText(summary)).toBeVisible();
     });
 
     it("should not apply italic styling when summary exists", () => {
@@ -35,25 +34,25 @@ describe("GameDescription", () => {
     it("should display placeholder when summary is undefined", () => {
       render(<GameDescription summary={undefined} />);
 
-      expect(screen.getByText("No description available")).toBeInTheDocument();
+      expect(screen.getByText("No description available")).toBeVisible();
     });
 
     it("should display placeholder when summary is null", () => {
       render(<GameDescription summary={null} />);
 
-      expect(screen.getByText("No description available")).toBeInTheDocument();
+      expect(screen.getByText("No description available")).toBeVisible();
     });
 
     it("should display placeholder when summary is empty string", () => {
       render(<GameDescription summary="" />);
 
-      expect(screen.getByText("No description available")).toBeInTheDocument();
+      expect(screen.getByText("No description available")).toBeVisible();
     });
 
     it("should display placeholder when summary is only whitespace", () => {
       render(<GameDescription summary="   " />);
 
-      expect(screen.getByText("No description available")).toBeInTheDocument();
+      expect(screen.getByText("No description available")).toBeVisible();
     });
 
     it("should apply italic styling to placeholder text", () => {
@@ -71,9 +70,7 @@ describe("GameDescription", () => {
       render(<GameDescription summary={summary} />);
 
       // Should display trimmed version
-      expect(
-        screen.getByText("A game with leading spaces")
-      ).toBeInTheDocument();
+      expect(screen.getByText("A game with leading spaces")).toBeVisible();
     });
 
     it("should handle summary with trailing whitespace", () => {
@@ -81,9 +78,7 @@ describe("GameDescription", () => {
       render(<GameDescription summary={summary} />);
 
       // Should display trimmed version
-      expect(
-        screen.getByText("A game with trailing spaces")
-      ).toBeInTheDocument();
+      expect(screen.getByText("A game with trailing spaces")).toBeVisible();
     });
 
     it("should handle very long summaries without truncation", () => {
@@ -93,19 +88,23 @@ describe("GameDescription", () => {
         );
       render(<GameDescription summary={longSummary} />);
 
-      expect(screen.getByText(longSummary.trim())).toBeInTheDocument();
+      expect(screen.getByText(longSummary.trim())).toBeVisible();
     });
 
     it("should preserve internal line breaks and formatting", () => {
       const summaryWithLineBreaks =
         "First paragraph.\n\nSecond paragraph with more details.";
-      const { container } = render(
-        <GameDescription summary={summaryWithLineBreaks} />
-      );
+      render(<GameDescription summary={summaryWithLineBreaks} />);
 
       // Verify that the text content includes the line breaks
-      const paragraph = container.querySelector("p");
-      expect(paragraph?.textContent).toBe(summaryWithLineBreaks);
+      // The paragraph is rendered as a single text block
+      const textElement = screen.getByText((content, element) => {
+        return (
+          element?.tagName.toLowerCase() === "p" &&
+          content.includes("First paragraph")
+        );
+      });
+      expect(textElement.textContent).toBe(summaryWithLineBreaks);
     });
   });
 });

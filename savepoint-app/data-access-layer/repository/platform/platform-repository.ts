@@ -69,21 +69,45 @@ export async function upsertPlatform(
 
 /**
  * Upserts multiple platforms from IGDB data
- * Processes each platform individually and returns all successfully upserted platforms
+ * Uses a transaction to batch all upsert operations for better performance
+ * Reduces database round trips from N queries to 1 transaction
  */
 export async function upsertPlatforms(
   igdbPlatforms: IgdbPlatform[]
 ): Promise<RepositoryResult<PrismaPlatform[]>> {
   try {
-    const results = await Promise.all(
-      igdbPlatforms.map((p) => upsertPlatform(p))
+    // Use $transaction to batch all upserts into a single operation
+    // This is more efficient than Promise.all with individual queries
+    const platforms = await prisma.$transaction(
+      igdbPlatforms.map((p) =>
+        prisma.platform.upsert({
+          where: { igdbId: p.id },
+          update: {
+            name: p.name ?? "Unknown Platform",
+            slug: p.slug ?? `platform-${p.id}`,
+            abbreviation: p.abbreviation ?? null,
+            alternativeName: p.alternative_name ?? null,
+            generation: p.generation ?? null,
+            platformFamily: p.platform_family ?? null,
+            platformType: p.platform_logo ?? null,
+            checksum: p.checksum ?? null,
+          },
+          create: {
+            igdbId: p.id,
+            name: p.name ?? "Unknown Platform",
+            slug: p.slug ?? `platform-${p.id}`,
+            abbreviation: p.abbreviation ?? null,
+            alternativeName: p.alternative_name ?? null,
+            generation: p.generation ?? null,
+            platformFamily: p.platform_family ?? null,
+            platformType: p.platform_logo ?? null,
+            checksum: p.checksum ?? null,
+          },
+        })
+      )
     );
 
-    const successfulPlatforms = results
-      .filter((r) => r.ok)
-      .map((r) => r.data as PrismaPlatform);
-
-    return repositorySuccess(successfulPlatforms);
+    return repositorySuccess(platforms);
   } catch (error) {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,

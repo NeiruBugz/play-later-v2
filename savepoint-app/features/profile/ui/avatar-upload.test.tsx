@@ -1,6 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { uploadAvatar } from "@/features/profile/server-actions";
 
@@ -37,10 +36,10 @@ describe("AvatarUpload", () => {
 
       expect(
         screen.getByText(/Click to upload or drag and drop/i)
-      ).toBeInTheDocument();
+      ).toBeVisible();
       expect(
         screen.getByText(/JPG, PNG, GIF, or WebP \(max 4MB\)/i)
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("renders current avatar when provided", () => {
@@ -53,19 +52,19 @@ describe("AvatarUpload", () => {
     it("shows Change overlay on hover when current avatar exists", () => {
       render(<AvatarUpload currentAvatar="https://example.com/avatar.jpg" />);
 
-      expect(screen.getByText(/Change/i)).toBeInTheDocument();
+      expect(screen.getByText(/Change/i)).toBeVisible();
     });
 
     it("renders with aria-label for upload state", () => {
       render(<AvatarUpload />);
 
-      expect(screen.getByLabelText(/Upload avatar/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Upload avatar/i)).toBeVisible();
     });
 
     it("renders with aria-label for change state", () => {
       render(<AvatarUpload currentAvatar="https://example.com/avatar.jpg" />);
 
-      expect(screen.getByLabelText(/Change avatar/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Change avatar/i)).toBeVisible();
     });
   });
 
@@ -95,8 +94,8 @@ describe("AvatarUpload", () => {
 
       await user.upload(input, file);
 
-      expect(screen.getByText(/Upload/i)).toBeInTheDocument();
-      expect(screen.getByText(/Cancel/i)).toBeInTheDocument();
+      expect(screen.getByText(/Upload/i)).toBeVisible();
+      expect(screen.getByText(/Cancel/i)).toBeVisible();
     });
 
     it("displays file preview after selection", async () => {
@@ -110,9 +109,7 @@ describe("AvatarUpload", () => {
 
       await user.upload(input, file);
 
-      expect(
-        screen.getByAltText(/Selected avatar preview/i)
-      ).toBeInTheDocument();
+      expect(screen.getByAltText(/Selected avatar preview/i)).toBeVisible();
     });
 
     it("shows Upload and Cancel buttons after selection", async () => {
@@ -128,10 +125,10 @@ describe("AvatarUpload", () => {
 
       expect(
         screen.getByRole("button", { name: /Upload selected avatar/i })
-      ).toBeInTheDocument();
+      ).toBeVisible();
       expect(
         screen.getByRole("button", { name: /Cancel avatar upload/i })
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("allows keyboard navigation with Enter key", async () => {
@@ -198,7 +195,7 @@ describe("AvatarUpload", () => {
       fireEvent.drop(dropZone, { dataTransfer });
 
       await waitFor(() => {
-        expect(screen.getByText(/Upload/i)).toBeInTheDocument();
+        expect(screen.getByText(/Upload/i)).toBeVisible();
       });
     });
 
@@ -215,9 +212,7 @@ describe("AvatarUpload", () => {
       fireEvent.drop(dropZone, { dataTransfer });
 
       await waitFor(() => {
-        expect(
-          screen.getByAltText(/Selected avatar preview/i)
-        ).toBeInTheDocument();
+        expect(screen.getByAltText(/Selected avatar preview/i)).toBeVisible();
       });
     });
   });
@@ -239,7 +234,7 @@ describe("AvatarUpload", () => {
         screen.getByText(
           /File size exceeds 4MB. Please upload a smaller image./i
         )
-      ).toBeInTheDocument();
+      ).toBeVisible();
       expect(onUploadError).toHaveBeenCalledWith(
         "File size exceeds 4MB. Please upload a smaller image."
       );
@@ -285,7 +280,7 @@ describe("AvatarUpload", () => {
       await user.upload(input, file);
 
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByText(/Upload/i)).toBeInTheDocument();
+      expect(screen.getByText(/Upload/i)).toBeVisible();
     });
 
     it("accepts valid PNG file", async () => {
@@ -300,7 +295,7 @@ describe("AvatarUpload", () => {
       await user.upload(input, file);
 
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByText(/Upload/i)).toBeInTheDocument();
+      expect(screen.getByText(/Upload/i)).toBeVisible();
     });
 
     it("accepts valid GIF file", async () => {
@@ -315,7 +310,7 @@ describe("AvatarUpload", () => {
       await user.upload(input, file);
 
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByText(/Upload/i)).toBeInTheDocument();
+      expect(screen.getByText(/Upload/i)).toBeVisible();
     });
 
     it("accepts valid WebP file", async () => {
@@ -330,7 +325,7 @@ describe("AvatarUpload", () => {
       await user.upload(input, file);
 
       expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByText(/Upload/i)).toBeInTheDocument();
+      expect(screen.getByText(/Upload/i)).toBeVisible();
     });
   });
 
@@ -394,7 +389,7 @@ describe("AvatarUpload", () => {
       expect(
         screen.getByRole("button", { name: /Upload selected avatar/i })
       ).toHaveTextContent("Uploading...");
-      expect(screen.getByText(/Uploading your avatar.../i)).toBeInTheDocument();
+      expect(screen.getByText(/Uploading your avatar.../i)).toBeVisible();
     });
 
     it("disables interactions during upload", async () => {
@@ -542,7 +537,7 @@ describe("AvatarUpload", () => {
       await user.click(uploadButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Network error/i)).toBeInTheDocument();
+        expect(screen.getByText(/Network error/i)).toBeVisible();
       });
     });
 
@@ -568,13 +563,11 @@ describe("AvatarUpload", () => {
       await user.click(uploadButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/Upload failed/i)).toBeInTheDocument();
+        expect(screen.getByText(/Upload failed/i)).toBeVisible();
       });
 
-      expect(
-        screen.getByAltText(/Selected avatar preview/i)
-      ).toBeInTheDocument();
-      expect(uploadButton).toBeInTheDocument();
+      expect(screen.getByAltText(/Selected avatar preview/i)).toBeVisible();
+      expect(uploadButton).toBeVisible();
     });
 
     it("shows default error message when upload throws exception", async () => {
@@ -598,7 +591,7 @@ describe("AvatarUpload", () => {
       await waitFor(() => {
         expect(
           screen.getByText(/Image upload failed. Please try again./i)
-        ).toBeInTheDocument();
+        ).toBeVisible();
       });
     });
   });
@@ -615,9 +608,7 @@ describe("AvatarUpload", () => {
 
       await user.upload(input, file);
 
-      expect(
-        screen.getByAltText(/Selected avatar preview/i)
-      ).toBeInTheDocument();
+      expect(screen.getByAltText(/Selected avatar preview/i)).toBeVisible();
 
       const cancelButton = screen.getByRole("button", {
         name: /Cancel avatar upload/i,
@@ -666,7 +657,7 @@ describe("AvatarUpload", () => {
 
       expect(
         screen.getByRole("button", { name: /Upload selected avatar/i })
-      ).toBeInTheDocument();
+      ).toBeVisible();
 
       const cancelButton = screen.getByRole("button", {
         name: /Cancel avatar upload/i,
@@ -692,7 +683,7 @@ describe("AvatarUpload", () => {
 
       await user.upload(input, file);
 
-      expect(screen.getByText(/File size exceeds 4MB/i)).toBeInTheDocument();
+      expect(screen.getByText(/File size exceeds 4MB/i)).toBeVisible();
 
       const validFile = createMockFile("test.jpg", 1024, "image/jpeg");
       await user.upload(input, validFile);

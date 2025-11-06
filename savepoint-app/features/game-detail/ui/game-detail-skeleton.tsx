@@ -6,11 +6,17 @@ import { Card } from "@/shared/components/ui/card";
  */
 export const GameDetailSkeleton = () => {
   return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[300px_1fr] lg:gap-8">
+    <div
+      className="flex flex-col gap-6 lg:grid lg:grid-cols-[300px_1fr] lg:gap-8"
+      data-testid="skeleton-layout"
+    >
       {/* Sidebar skeleton - sticky on desktop */}
       <aside className="space-y-4 lg:sticky lg:top-8 lg:self-start">
         {/* Cover image placeholder */}
-        <div className="bg-muted relative aspect-[3/4] w-full max-w-sm animate-pulse rounded-lg" />
+        <div
+          className="bg-muted relative aspect-[3/4] w-full max-w-sm animate-pulse rounded-lg"
+          data-testid="skeleton-animated-placeholder"
+        />
 
         {/* Library status placeholder - only shown when authenticated */}
         <div className="space-y-2">

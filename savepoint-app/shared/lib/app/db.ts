@@ -1,6 +1,8 @@
 import { env } from "@/env.mjs";
 import { PrismaClient } from "@prisma/client";
 
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -26,6 +28,28 @@ const prismaFactory = () => {
       },
     ],
   });
+
+  // Enable query logging in development when DATABASE_LOGGING=true
+  console.log("env.NODE_ENV", env.NODE_ENV);
+  console.log("env.DATABASE_LOGGING", env.DATABASE_LOGGING);
+  const isDatabaseLoggingEnabled =
+    env.NODE_ENV === "development" && env.DATABASE_LOGGING === "true";
+
+  if (isDatabaseLoggingEnabled) {
+    const logger = createLogger({ [LOGGER_CONTEXT.DATABASE]: "Prisma" });
+
+    prisma.$on("query", (e) => {
+      logger.debug(
+        {
+          query: e.query,
+          params: e.params,
+          duration: `${e.duration}ms`,
+          target: e.target,
+        },
+        "Database query executed"
+      );
+    });
+  }
 
   return prisma as PrismaClient;
 };

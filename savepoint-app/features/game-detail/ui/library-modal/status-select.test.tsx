@@ -2,7 +2,6 @@ import { LibraryItemStatus } from "@prisma/client";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
-import { describe, expect, it } from "vitest";
 
 import { FormField } from "@/shared/components/ui/form";
 
@@ -64,7 +63,7 @@ describe("StatusSelect", () => {
     it("should display form label", () => {
       renderStatusSelectInForm();
 
-      expect(screen.getByText("Journey Status")).toBeInTheDocument();
+      expect(screen.getByText("Journey Status")).toBeVisible();
     });
 
     it("should display default description", () => {
@@ -107,7 +106,7 @@ describe("StatusSelect", () => {
       expect(elements.getOptionByLabel("Curious About")).toBeInTheDocument();
       expect(
         screen.getAllByText("Interested in trying this game")[0]
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("should display 'Currently Exploring' option with description", async () => {
@@ -120,7 +119,7 @@ describe("StatusSelect", () => {
       ).toBeInTheDocument();
       expect(
         screen.getAllByText("Actively playing this game")[0]
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("should display 'Taking a Break' option with description", async () => {
@@ -129,9 +128,7 @@ describe("StatusSelect", () => {
       await actions.clickTrigger();
 
       expect(elements.getOptionByLabel("Taking a Break")).toBeInTheDocument();
-      expect(
-        screen.getAllByText("Paused but plan to return")[0]
-      ).toBeInTheDocument();
+      expect(screen.getAllByText("Paused but plan to return")[0]).toBeVisible();
     });
 
     it("should display 'Experienced' option with description", async () => {
@@ -142,7 +139,7 @@ describe("StatusSelect", () => {
       expect(elements.getOptionByLabel("Experienced")).toBeInTheDocument();
       expect(
         screen.getAllByText("Finished or completed this game")[0]
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("should display 'Wishlist' option with description", async () => {
@@ -153,7 +150,7 @@ describe("StatusSelect", () => {
       expect(elements.getOptionByLabel("Wishlist")).toBeInTheDocument();
       expect(
         screen.getAllByText("Want to play in the future")[0]
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("should display 'Revisiting' option with description", async () => {
@@ -164,17 +161,17 @@ describe("StatusSelect", () => {
       expect(elements.getOptionByLabel("Revisiting")).toBeInTheDocument();
       expect(
         screen.getAllByText("Playing again after a break")[0]
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
   });
 
   describe("given custom className provided", () => {
     it("should apply className to SelectTrigger", () => {
-      const { container } = renderStatusSelectInForm({
+      renderStatusSelectInForm({
         className: "py-6 text-left",
       });
 
-      const trigger = container.querySelector('[role="combobox"]');
+      const trigger = screen.getByRole("combobox");
       expect(trigger).toHaveClass("py-6");
       expect(trigger).toHaveClass("text-left");
     });

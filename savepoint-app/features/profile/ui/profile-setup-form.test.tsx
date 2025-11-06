@@ -1,15 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-  type Mock,
-} from "vitest";
 
 import { completeProfileSetupFormAction } from "../server-actions/complete-profile-setup";
 import { skipProfileSetup } from "../server-actions/skip-profile-setup";
@@ -99,18 +90,18 @@ describe("ProfileSetupForm", () => {
     it("should display all form elements", () => {
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
-      expect(screen.getByText("Complete Your Profile")).toBeInTheDocument();
+      expect(screen.getByText("Complete Your Profile")).toBeVisible();
       expect(
         screen.getByText(/Set up your username and profile image/i)
-      ).toBeInTheDocument();
-      expect(screen.getByLabelText("Username")).toBeInTheDocument();
-      expect(screen.getByTestId("avatar-upload")).toBeInTheDocument();
+      ).toBeVisible();
+      expect(screen.getByLabelText("Username")).toBeVisible();
+      expect(screen.getByTestId("avatar-upload")).toBeVisible();
       expect(
         screen.getByRole("button", { name: /skip for now/i })
-      ).toBeInTheDocument();
+      ).toBeVisible();
       expect(
         screen.getByRole("button", { name: /complete setup/i })
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("should pre-fill username with defaultUsername prop", () => {
@@ -130,7 +121,7 @@ describe("ProfileSetupForm", () => {
     it("should display helper text for username requirements", () => {
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
-      expect(screen.getByText(/Must be 3-25 characters/i)).toBeInTheDocument();
+      expect(screen.getByText(/Must be 3-25 characters/i)).toBeVisible();
     });
   });
 
@@ -439,9 +430,7 @@ describe("ProfileSetupForm", () => {
       await user.click(submitButton);
 
       // Check for "Saving..." text
-      expect(
-        screen.getByRole("button", { name: /saving.../i })
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /saving.../i })).toBeVisible();
     });
   });
 
@@ -486,7 +475,7 @@ describe("ProfileSetupForm", () => {
 
       const skipButton = screen.getByRole("button", { name: /skip for now/i });
 
-      expect(skipButton).not.toBeDisabled();
+      expect(skipButton).toBeEnabled();
 
       await user.click(skipButton);
 

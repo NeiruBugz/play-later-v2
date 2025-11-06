@@ -8,7 +8,10 @@ type LibraryEntryMetadataProps = {
 
 export const LibraryEntryMetadata = ({ item }: LibraryEntryMetadataProps) => {
   return (
-    <div className="bg-muted/50 space-y-1.5 rounded-lg border p-3 text-xs">
+    <div
+      className="bg-muted/50 space-y-1.5 rounded-lg border p-3 text-xs"
+      data-testid="library-entry-metadata-card"
+    >
       <div className="flex justify-between gap-4">
         <span className="text-muted-foreground">Created:</span>
         <span className="font-medium">

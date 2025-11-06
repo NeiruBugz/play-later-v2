@@ -5,7 +5,6 @@ import {
   createUser,
 } from "@/test/setup/db-factories";
 import { LibraryItemStatus } from "@prisma/client";
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/shared/lib";
 

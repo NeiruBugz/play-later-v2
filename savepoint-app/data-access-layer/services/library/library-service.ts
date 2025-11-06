@@ -12,8 +12,7 @@ import { populateGameInDatabase } from "@/data-access-layer/services/game-detail
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 
-import { createLogger } from "@/shared/lib/app/logger";
-import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService } from "../types";
 import type {

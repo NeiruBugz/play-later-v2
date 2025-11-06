@@ -5,7 +5,6 @@ import {
   HeadObjectCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { AvatarStorageService } from "./avatar-storage";
 import { s3Client } from "./s3-client";

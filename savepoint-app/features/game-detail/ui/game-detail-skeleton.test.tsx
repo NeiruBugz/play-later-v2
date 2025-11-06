@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 
 import { GameDetailSkeleton } from "./game-detail-skeleton";
 
@@ -14,20 +13,21 @@ describe("GameDetailSkeleton", () => {
   });
 
   it("should display skeleton placeholders for all major sections", () => {
-    const { container } = render(<GameDetailSkeleton />);
+    render(<GameDetailSkeleton />);
 
-    // Verify animated placeholders exist (animate-pulse class)
-    const animatedElements = container.querySelectorAll(".animate-pulse");
-    expect(animatedElements.length).toBeGreaterThan(0);
+    // Verify animated placeholders exist
+    const animatedPlaceholder = screen.getByTestId(
+      "skeleton-animated-placeholder"
+    );
+    expect(animatedPlaceholder).toBeVisible();
   });
 
   it("should match the two-column layout structure", () => {
-    const { container } = render(<GameDetailSkeleton />);
+    render(<GameDetailSkeleton />);
 
     // Verify the grid layout exists for desktop
-    const gridLayout = container.querySelector(
-      ".lg\\:grid-cols-\\[300px_1fr\\]"
-    );
-    expect(gridLayout).toBeInTheDocument();
+    const gridLayout = screen.getByTestId("skeleton-layout");
+    expect(gridLayout).toBeVisible();
+    expect(gridLayout).toHaveClass("lg:grid-cols-[300px_1fr]");
   });
 });

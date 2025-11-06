@@ -8,8 +8,7 @@ import {
 import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
 import type { JournalEntry, LibraryItem } from "@prisma/client";
 
-import { createLogger } from "@/shared/lib/app/logger";
-import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import type { FullGameInfoResponse } from "@/shared/types";
 
 const logger = createLogger({

@@ -23,7 +23,7 @@ const mockUpdateProfileFormAction = vi.mocked(updateProfileFormAction);
 const mockToastSuccess = vi.mocked(toast.success);
 
 const elements = {
-  getCard: () => screen.getByText("Profile Settings").closest("div"),
+  getCard: () => screen.getByRole("form"),
   getTitle: () => screen.getByText("Profile Settings"),
   getDescription: () => screen.getByText(/Update your profile information/i),
   getUsernameInput: () => screen.getByLabelText("Username"),
@@ -99,29 +99,25 @@ describe("ProfileSettingsForm", () => {
     });
 
     it("should include hidden avatarUrl input", () => {
-      const { container } = render(
+      render(
         <ProfileSettingsForm
           currentUsername="testuser"
           currentAvatar="https://example.com/avatar.jpg"
         />
       );
 
-      const hiddenInput = container.querySelector(
-        'input[name="avatarUrl"]'
-      ) as HTMLInputElement;
+      const hiddenInput = screen.getByTestId("avatar-url-input");
       expect(hiddenInput).toBeInTheDocument();
-      expect(hiddenInput.value).toBe("https://example.com/avatar.jpg");
+      expect(hiddenInput).toHaveValue("https://example.com/avatar.jpg");
     });
 
     it("should handle null avatar URL", () => {
-      const { container } = render(
+      render(
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
 
-      const hiddenInput = container.querySelector(
-        'input[name="avatarUrl"]'
-      ) as HTMLInputElement;
-      expect(hiddenInput?.value).toBe("");
+      const hiddenInput = screen.getByTestId("avatar-url-input");
+      expect(hiddenInput).toHaveValue("");
     });
   });
 

@@ -1,5 +1,3 @@
-import { describe, expect, it } from "vitest";
-
 import { onJwt, onRedirect, onSession, onSignIn } from "./oauth-callbacks";
 
 describe("oauth callbacks", () => {

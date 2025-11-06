@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 
 import { TimesToBeatSection } from "./times-to-beat-section";
 
@@ -8,19 +7,19 @@ describe("TimesToBeatSection", () => {
     it("should render the section title", () => {
       render(<TimesToBeatSection />);
 
-      expect(screen.getByText("Times to Beat")).toBeInTheDocument();
+      expect(screen.getByText("Times to Beat")).toBeVisible();
     });
 
     it("should render main story label", () => {
       render(<TimesToBeatSection />);
 
-      expect(screen.getByText("Main Story:")).toBeInTheDocument();
+      expect(screen.getByText("Main Story:")).toBeVisible();
     });
 
     it("should render 100% completion label", () => {
       render(<TimesToBeatSection />);
 
-      expect(screen.getByText("100% Completion:")).toBeInTheDocument();
+      expect(screen.getByText("100% Completion:")).toBeVisible();
     });
   });
 
@@ -49,23 +48,19 @@ describe("TimesToBeatSection", () => {
     it("should display dash for main story when only completionist is available", () => {
       render(<TimesToBeatSection timesToBeat={{ completionist: 80 }} />);
 
-      expect(screen.getByText("Main Story:").nextSibling).toHaveTextContent(
-        "—"
-      );
-      expect(
-        screen.getByText("100% Completion:").nextSibling
-      ).toHaveTextContent("80 hours");
+      expect(screen.getByText("80 hours")).toBeVisible();
+      // One dash for main story
+      const dashes = screen.getAllByText("—");
+      expect(dashes).toHaveLength(1);
     });
 
     it("should display dash for completionist when only main story is available", () => {
       render(<TimesToBeatSection timesToBeat={{ mainStory: 30 }} />);
 
-      expect(screen.getByText("Main Story:").nextSibling).toHaveTextContent(
-        "30 hours"
-      );
-      expect(
-        screen.getByText("100% Completion:").nextSibling
-      ).toHaveTextContent("—");
+      expect(screen.getByText("30 hours")).toBeVisible();
+      // One dash for completionist
+      const dashes = screen.getAllByText("—");
+      expect(dashes).toHaveLength(1);
     });
   });
 
@@ -77,28 +72,20 @@ describe("TimesToBeatSection", () => {
         />
       );
 
-      expect(screen.getByText("Main Story:").nextSibling).toHaveTextContent(
-        "30 hours"
-      );
-      expect(
-        screen.getByText("100% Completion:").nextSibling
-      ).toHaveTextContent("80 hours");
+      expect(screen.getByText("30 hours")).toBeVisible();
+      expect(screen.getByText("80 hours")).toBeVisible();
     });
 
     it("should display main story time correctly", () => {
       render(<TimesToBeatSection timesToBeat={{ mainStory: 12 }} />);
 
-      expect(screen.getByText("Main Story:").nextSibling).toHaveTextContent(
-        "12 hours"
-      );
+      expect(screen.getByText("12 hours")).toBeVisible();
     });
 
     it("should display completionist time correctly", () => {
       render(<TimesToBeatSection timesToBeat={{ completionist: 150 }} />);
 
-      expect(
-        screen.getByText("100% Completion:").nextSibling
-      ).toHaveTextContent("150 hours");
+      expect(screen.getByText("150 hours")).toBeVisible();
     });
 
     it("should handle single digit hours", () => {
@@ -106,12 +93,8 @@ describe("TimesToBeatSection", () => {
         <TimesToBeatSection timesToBeat={{ mainStory: 5, completionist: 8 }} />
       );
 
-      expect(screen.getByText("Main Story:").nextSibling).toHaveTextContent(
-        "5 hours"
-      );
-      expect(
-        screen.getByText("100% Completion:").nextSibling
-      ).toHaveTextContent("8 hours");
+      expect(screen.getByText("5 hours")).toBeVisible();
+      expect(screen.getByText("8 hours")).toBeVisible();
     });
 
     it("should handle large hour values", () => {
@@ -121,12 +104,8 @@ describe("TimesToBeatSection", () => {
         />
       );
 
-      expect(screen.getByText("Main Story:").nextSibling).toHaveTextContent(
-        "200 hours"
-      );
-      expect(
-        screen.getByText("100% Completion:").nextSibling
-      ).toHaveTextContent("500 hours");
+      expect(screen.getByText("200 hours")).toBeVisible();
+      expect(screen.getByText("500 hours")).toBeVisible();
     });
   });
 

@@ -12,15 +12,13 @@
  * @vitest-environment jsdom
  */
 
+import type { AcquisitionType, LibraryItem } from "@prisma/client";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { LibraryItem, AcquisitionType } from "@prisma/client";
-
-import { QuickActionButtons } from "./quick-action-buttons";
-import { LibraryStatusDisplay } from "./library-status-display";
 import { AddToLibraryButton } from "./add-to-library-button";
+import { LibraryStatusDisplay } from "./library-status-display";
+import { QuickActionButtons } from "./quick-action-buttons";
 
 // Mock server actions
 vi.mock("../server-actions", () => ({
@@ -63,7 +61,7 @@ describe("Game Detail Page - End-to-End Flow", () => {
       const addButton = screen.getByRole("button", {
         name: `Add ${mockGame.title} to your library`,
       });
-      expect(addButton).toBeInTheDocument();
+      expect(addButton).toBeVisible();
 
       await user.click(addButton);
 
@@ -72,7 +70,7 @@ describe("Game Detail Page - End-to-End Flow", () => {
         expect(screen.getByRole("dialog")).toBeInTheDocument();
         expect(
           screen.getByRole("heading", { name: "Add to Library" })
-        ).toBeInTheDocument();
+        ).toBeVisible();
       });
 
       // Step 3: User should see form to add entry
@@ -96,7 +94,7 @@ describe("Game Detail Page - End-to-End Flow", () => {
       // Step 1: User sees quick action buttons
       expect(
         screen.getByRole("button", { name: "Mark as Curious About" })
-      ).toBeInTheDocument();
+      ).toBeVisible();
 
       // Step 2: User clicks "Curious About" button
       const curiousButton = screen.getByRole("button", {
@@ -196,7 +194,7 @@ describe("Game Detail Page - End-to-End Flow", () => {
       );
 
       // Step 1: User sees current library status
-      expect(screen.getByText("Curious About")).toBeInTheDocument();
+      expect(screen.getByText("Curious About")).toBeVisible();
 
       // Step 2: User clicks "Manage Library" button
       const manageButton = screen.getByRole("button", {
@@ -209,7 +207,7 @@ describe("Game Detail Page - End-to-End Flow", () => {
         expect(screen.getByRole("dialog")).toBeInTheDocument();
         expect(
           screen.getByRole("heading", { name: "Manage Library" })
-        ).toBeInTheDocument();
+        ).toBeVisible();
       });
     });
   });

@@ -73,7 +73,12 @@ export function ProfileSettingsForm({
         </CardDescription>
       </CardHeader>
       <form action={formAction} onSubmit={handleSubmit} noValidate>
-        <input type="hidden" name="avatarUrl" value={avatarUrl ?? ""} />
+        <input
+          type="hidden"
+          name="avatarUrl"
+          value={avatarUrl ?? ""}
+          data-testid="avatar-url-input"
+        />
         <input type="hidden" name="username" value={username} />
         <CardContent className="space-y-6">
           <div className="space-y-2">

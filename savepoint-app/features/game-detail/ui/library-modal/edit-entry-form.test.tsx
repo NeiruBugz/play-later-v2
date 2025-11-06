@@ -2,7 +2,6 @@ import { LibraryItemStatus, type LibraryItem } from "@prisma/client";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { updateLibraryEntryAction } from "../../server-actions";
 import { EditEntryForm } from "./edit-entry-form";
@@ -46,7 +45,7 @@ const elements = {
   getStatusTrigger: () => screen.getByRole("combobox"),
   getCancelButton: () => screen.getByRole("button", { name: /cancel/i }),
   getSubmitButton: () => screen.getByRole("button", { name: /update entry/i }),
-  getMetadataSection: () => screen.getByText("Created:").closest("div"),
+  getMetadataSection: () => screen.getByTestId("library-entry-metadata-card"),
   getCreatedDate: () => screen.getAllByText("2 days ago")[0],
   getPlatform: (platform: string) => screen.getByText(platform),
 };
@@ -94,7 +93,7 @@ describe("EditEntryForm", () => {
       render(<EditEntryForm {...defaultProps} />);
 
       expect(elements.getMetadataSection()).toBeInTheDocument();
-      expect(screen.getByText("Created:")).toBeInTheDocument();
+      expect(screen.getByText("Created:")).toBeVisible();
     });
 
     it("should display created date from metadata", () => {
@@ -132,7 +131,7 @@ describe("EditEntryForm", () => {
 
       expect(
         screen.getByText("Update your journey status for this entry")
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
   });
 

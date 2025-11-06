@@ -37,7 +37,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       <div className="from-background via-background to-muted pointer-events-none absolute inset-0 bg-linear-to-br opacity-60" />
       <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-6 text-center">
         <span className="bg-destructive/10 text-destructive inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium">
-          <ShieldAlert className="h-4 w-4" aria-hidden="true" />
+          <ShieldAlert
+            className="h-4 w-4"
+            aria-hidden="true"
+            data-testid="error-shield-icon"
+          />
           Something went wrong
         </span>
 

@@ -85,7 +85,11 @@ export const LibraryStatusDisplay = ({
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center gap-2" role="status">
-            <Icon className="text-primary h-5 w-5" aria-hidden="true" />
+            <Icon
+              className="text-primary h-5 w-5"
+              aria-hidden="true"
+              data-testid="library-status-icon"
+            />
             <Badge variant="secondary" className="text-sm">
               {config.label}
             </Badge>

@@ -2,7 +2,6 @@ import { LibraryItemStatus } from "@prisma/client";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addToLibraryAction } from "../../server-actions";
 import { AddEntryForm } from "./add-entry-form";
@@ -127,7 +126,7 @@ describe("AddEntryForm", () => {
       expect(elements.getEditModeInfo()).toBeInTheDocument();
       expect(
         screen.getByText(/The Legend of Zelda: Breath of the Wild/)
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("should explain multiple platform use case", () => {
@@ -135,7 +134,7 @@ describe("AddEntryForm", () => {
 
       expect(
         screen.getByText(/own the game on multiple platforms/)
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
   });
 

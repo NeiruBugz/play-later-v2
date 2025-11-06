@@ -199,7 +199,7 @@ function GameCard({ game }: { game: RelatedGame }) {
   return (
     <Link
       href={`/games/${game.slug}`}
-      className="group block transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
+      className="group focus-visible:ring-primary block rounded-lg transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
       aria-label={`View details for ${game.name}`}
     >
       <Card className="overflow-hidden">
@@ -217,7 +217,10 @@ function GameCard({ game }: { game: RelatedGame }) {
               className="flex h-full w-full items-center justify-center"
               aria-label="No cover image available"
             >
-              <Gamepad2 className="text-muted-foreground h-8 w-8" aria-hidden="true" />
+              <Gamepad2
+                className="text-muted-foreground h-8 w-8"
+                aria-hidden="true"
+              />
             </div>
           )}
         </div>

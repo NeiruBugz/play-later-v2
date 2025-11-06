@@ -54,7 +54,10 @@ export default async function GameDetailPage({
           className="space-y-4 lg:sticky lg:top-8 lg:self-start"
           aria-label="Game details sidebar"
         >
-          <GameCoverImage imageId={game.cover?.image_id} gameTitle={game.name} />
+          <GameCoverImage
+            imageId={game.cover?.image_id}
+            gameTitle={game.name}
+          />
           {userId && (
             <>
               <LibraryStatusDisplay

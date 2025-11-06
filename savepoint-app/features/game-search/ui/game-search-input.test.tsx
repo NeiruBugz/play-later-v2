@@ -4,16 +4,6 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { useRouter } from "next/navigation";
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
 
 import { GameSearchInput } from "./game-search-input";
 
@@ -124,7 +114,7 @@ describe("GameSearchInput", () => {
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
-      expect(input).toBeInTheDocument();
+      expect(input).toBeVisible();
       expect(input).toHaveValue("");
     });
 
@@ -167,7 +157,7 @@ describe("GameSearchInput", () => {
         () => {
           expect(
             screen.getByText(/The Legend of Zelda: Breath of the Wild/i)
-          ).toBeInTheDocument();
+          ).toBeVisible();
         },
         { timeout: 2000 }
       );
@@ -187,10 +177,10 @@ describe("GameSearchInput", () => {
         () => {
           expect(
             screen.getByText(/The Legend of Zelda: Breath of the Wild/i)
-          ).toBeInTheDocument();
+          ).toBeVisible();
           expect(
             screen.getByText(/The Legend of Zelda: Ocarina of Time/i)
-          ).toBeInTheDocument();
+          ).toBeVisible();
         },
         { timeout: 2000 }
       );
@@ -213,7 +203,7 @@ describe("GameSearchInput", () => {
         () => {
           expect(
             screen.getByText(/The Legend of Zelda: Breath of the Wild/i)
-          ).toBeInTheDocument();
+          ).toBeVisible();
         },
         { timeout: 2000 }
       );
@@ -235,7 +225,7 @@ describe("GameSearchInput", () => {
         () => {
           expect(
             screen.getByText(/The Legend of Zelda: Breath of the Wild/i)
-          ).toBeInTheDocument();
+          ).toBeVisible();
         },
         { timeout: 2000 }
       );
@@ -267,7 +257,7 @@ describe("GameSearchInput", () => {
         () => {
           expect(
             screen.getByText(/The Legend of Zelda: Breath of the Wild/i)
-          ).toBeInTheDocument();
+          ).toBeVisible();
         },
         { timeout: 2000 }
       );
@@ -277,7 +267,7 @@ describe("GameSearchInput", () => {
 
       await waitFor(
         () => {
-          expect(screen.getByText(/Super Mario Odyssey/i)).toBeInTheDocument();
+          expect(screen.getByText(/Super Mario Odyssey/i)).toBeVisible();
         },
         { timeout: 2000 }
       );
@@ -301,7 +291,7 @@ describe("GameSearchInput", () => {
         () => {
           expect(
             screen.getByText(/The Legend of Zelda: Breath of the Wild/i)
-          ).toBeInTheDocument();
+          ).toBeVisible();
         },
         { timeout: 2000 }
       );
@@ -336,7 +326,7 @@ describe("GameSearchInput", () => {
         () => {
           expect(
             screen.getByText(/The Legend of Zelda: Breath of the Wild/i)
-          ).toBeInTheDocument();
+          ).toBeVisible();
         },
         { timeout: 2000 }
       );
@@ -363,7 +353,7 @@ describe("GameSearchInput", () => {
 
       await waitFor(
         () => {
-          expect(screen.getByText(/Super Mario Odyssey/i)).toBeInTheDocument();
+          expect(screen.getByText(/Super Mario Odyssey/i)).toBeVisible();
         },
         { timeout: 2000 }
       );

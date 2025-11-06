@@ -54,19 +54,35 @@ export async function upsertGenre(
 
 /**
  * Upserts multiple genres from IGDB data
- * Processes each genre individually and returns all successfully upserted genres
+ * Uses a transaction to batch all upsert operations for better performance
+ * Reduces database round trips from N queries to 1 transaction
  */
 export async function upsertGenres(
   igdbGenres: IgdbGenre[]
 ): Promise<RepositoryResult<PrismaGenre[]>> {
   try {
-    const results = await Promise.all(igdbGenres.map((g) => upsertGenre(g)));
+    // Use $transaction to batch all upserts into a single operation
+    // This is more efficient than Promise.all with individual queries
+    const genres = await prisma.$transaction(
+      igdbGenres.map((g) =>
+        prisma.genre.upsert({
+          where: { igdbId: g.id },
+          update: {
+            name: g.name ?? "Unknown Genre",
+            slug: g.slug ?? `genre-${g.id}`,
+            checksum: g.checksum ?? null,
+          },
+          create: {
+            igdbId: g.id,
+            name: g.name ?? "Unknown Genre",
+            slug: g.slug ?? `genre-${g.id}`,
+            checksum: g.checksum ?? null,
+          },
+        })
+      )
+    );
 
-    const successfulGenres = results
-      .filter((r) => r.ok)
-      .map((r) => r.data as PrismaGenre);
-
-    return repositorySuccess(successfulGenres);
+    return repositorySuccess(genres);
   } catch (error) {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,

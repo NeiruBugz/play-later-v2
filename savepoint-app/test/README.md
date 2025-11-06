@@ -1,23 +1,16 @@
 # Testing Guide
 
-This document outlines testing practices, patterns, and conventions for the SavePoint application.
+This document provides an overview of testing practices for the SavePoint application. For detailed testing patterns and examples, see the specialized guides linked below.
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Test Types](#test-types)
+- [Test Types & Architecture](#test-types--architecture)
+- [Testing Guides](#testing-guides)
 - [File Naming Conventions](#file-naming-conventions)
-- [Test Structure Standards](#test-structure-standards)
-- [Writing Tests](#writing-tests)
-  - [Service Layer Tests](#service-layer-tests)
-  - [Repository Layer Tests](#repository-layer-tests)
-  - [Server Action Tests](#server-action-tests)
-  - [Component Tests (BDD Style)](#component-tests-bdd-style)
-  - [Utility/Library Tests](#utilitylibrary-tests)
-- [Test Utilities](#test-utilities)
 - [Running Tests](#running-tests)
 - [Coverage Requirements](#coverage-requirements)
-- [Best Practices](#best-practices)
+- [Quick Reference](#quick-reference)
 
 ## Overview
 
@@ -47,7 +40,48 @@ Our testing strategy follows a **layered approach** matching the application arc
 - **E2E tests** for critical user flows
 - **High coverage** (80%+) focused on meaningful code, not boilerplate
 
-## Test Types
+## Testing Guides
+
+For detailed testing patterns, examples, and best practices, see these specialized guides:
+
+### 📘 [Component Testing Guide](./guides/COMPONENT_TESTING.md)
+
+Comprehensive guide for testing React components with React Testing Library:
+- BDD-style testing with `elements` and `actions` helpers
+- Query priority hierarchy (role > label > placeholder > text > testId)
+- User interactions with `userEvent`
+- Mocking server actions and dependencies
+- Testing async behavior and accessibility
+- API mocking with MSW
+- Common patterns and anti-patterns
+
+### 📗 [Integration Testing Guide](./guides/INTEGRATION_TESTING.md)
+
+Guide for testing repository layer with real PostgreSQL database:
+- Testing philosophy (what to test, what to skip)
+- Database lifecycle management (setup, cleanup, reset)
+- Using factory functions for test data
+- Testing complex queries, constraints, and transactions
+- Result type assertions
+- Common patterns and troubleshooting
+
+### 📙 [Backend Testing Guide](./guides/BACKEND_TESTING.md)
+
+Guide for testing services and server actions with mocked dependencies:
+- Service layer testing with mocked Prisma
+- Server action patterns with mocked services
+- Testing business logic in isolation
+- Result type patterns
+- Error handling and edge cases
+- Mocking strategies
+
+### 🎭 [E2E Testing with Playwright](#e2e-testing-with-playwright)
+
+End-to-end testing with Playwright is documented below in this file.
+
+---
+
+## Test Types & Architecture
 
 ### Unit Tests
 
@@ -196,347 +230,17 @@ This project uses Vitest's global test APIs (`globals: true` in `vitest.config.t
 - `vitest.config.ts`: `globals: true`
 - `tsconfig.json`: `types: ["vitest/globals"]`
 
-## Writing Tests
+## Writing Tests - Quick Start
 
-### Service Layer Tests
+For detailed testing patterns with complete examples, see the specialized guides linked in the [Testing Guides](#testing-guides) section above.
 
-Services contain business logic and return `ServiceResult<T>` types. Test with **mocked repositories**.
+**Quick reference:**
 
-**Template:**
-
-```typescript
-import { repositoryFunction } from "@/data-access-layer/repository";
-
-import type { ServiceErrorCode } from "../types";
-import { ServiceName } from "./service-name";
-
-vi.mock("@/data-access-layer/repository", () => ({
-  repositoryFunction: vi.fn(),
-}));
-
-const mockRepositoryFunction = vi.mocked(repositoryFunction);
-
-describe("ServiceName", () => {
-  let service: ServiceName;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    service = new ServiceName();
-  });
-
-  describe("methodName", () => {
-    it("should return success with data", async () => {
-      const mockData = { id: "1", name: "Test" };
-      mockRepositoryFunction.mockResolvedValue(mockData);
-
-      const result = await service.methodName({ id: "1" });
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual(mockData);
-      }
-      expect(mockRepositoryFunction).toHaveBeenCalledWith({ id: "1" });
-    });
-
-    it("should return error on failure", async () => {
-      mockRepositoryFunction.mockRejectedValue(new Error("DB error"));
-
-      const result = await service.methodName({ id: "1" });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("DB error");
-        expect(result.code).toBe(ServiceErrorCode.DATABASE_ERROR);
-      }
-    });
-  });
-});
-```
-
-**Key Points:**
-
-- ✅ Mock all repository dependencies
-- ✅ Test both success and error paths
-- ✅ Verify Result type shape (`success: true/false`)
-- ✅ Use type narrowing (`if (result.success)`)
-- ✅ Assert function calls with `toHaveBeenCalledWith`
-
-### Repository Layer Tests
-
-Repositories handle database operations. Test **complex queries only** with **real database**.
-
-**What to Test:**
-
-- ✅ Complex queries (joins, filters, pagination, aggregations)
-- ✅ Multi-table operations
-- ✅ Custom WHERE clauses
-- ❌ Simple CRUD (findById, create, update, delete)
-
-**Template:**
-
-```typescript
-import {
-  cleanupDatabase,
-  resetTestDatabase,
-  setupDatabase,
-} from "@/test/setup/database";
-import { createGame, createUser } from "@/test/setup/db-factories";
-
-import { findGamesWithLibraryItemsPaginated } from "./game-repository";
-
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
-describe("GameRepository - Integration", () => {
-  beforeAll(async () => {
-    await setupDatabase();
-  });
-
-  afterAll(async () => {
-    await cleanupDatabase();
-  });
-
-  beforeEach(async () => {
-    await resetTestDatabase();
-  });
-
-  describe("findGamesWithLibraryItemsPaginated", () => {
-    it("should return games with filters applied", async () => {
-      const user = await createUser();
-      const game = await createGame({ title: "Test Game" });
-
-      const result = await findGamesWithLibraryItemsPaginated({
-        userId: user.id,
-        limit: 10,
-        offset: 0,
-      });
-
-      expect(result).toBeDefined();
-      expect(result.games).toHaveLength(1);
-    });
-  });
-});
-```
-
-**Key Points:**
-
-- ✅ Use real PostgreSQL database
-- ✅ Setup/cleanup database lifecycle
-- ✅ Reset database before each test
-- ✅ Use factory functions for test data
-- ✅ Test complex query logic, not simple CRUD
-
-### Server Action Tests
-
-Server actions are Next.js endpoints. Test with **real or mocked services** depending on complexity.
-
-**Template (with mocked service):**
-
-```typescript
-import { AuthService } from "@/data-access-layer/services";
-
-import { signInAction } from "./sign-in";
-
-vi.mock("@/data-access-layer/services", () => ({
-  AuthService: {
-    signIn: vi.fn(),
-  },
-}));
-
-const mockSignIn = vi.mocked(AuthService.signIn);
-
-describe("signInAction", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("should return success on valid credentials", async () => {
-    mockSignIn.mockResolvedValue({ success: true, data: { userId: "user-1" } });
-
-    const result = await signInAction({
-      email: "test@example.com",
-      password: "password123",
-    });
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.userId).toBe("user-1");
-    }
-  });
-
-  it("should return error on invalid credentials", async () => {
-    mockSignIn.mockResolvedValue({
-      success: false,
-      error: "Invalid credentials",
-    });
-
-    const result = await signInAction({
-      email: "test@example.com",
-      password: "wrong",
-    });
-
-    expect(result.success).toBe(false);
-  });
-});
-```
-
-### Component Tests (BDD Style)
-
-Component tests use **BDD (Behavior-Driven Development) style** with helper objects for readability.
-
-**Template:**
-
-```typescript
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-
-import { serverAction } from "../server-actions/action";
-import { ComponentName } from "./component-name";
-
-vi.mock("../server-actions/action", () => ({
-  serverAction: vi.fn(),
-}));
-
-const mockServerAction = vi.mocked(serverAction);
-
-const elements = {
-  getButton: () => screen.getByRole("button", { name: "Submit" }),
-  getInput: () => screen.getByLabelText("Email"),
-  queryErrorMessage: () => screen.queryByRole("alert"),
-  getHeading: () => screen.getByRole("heading", { name: "Title" }),
-};
-
-const actions = {
-  typeEmail: async (value: string) => {
-    const user = userEvent.setup();
-    await user.type(elements.getInput(), value);
-  },
-
-  clickSubmit: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getButton());
-  },
-
-  fillAndSubmitForm: async (email: string) => {
-    await actions.typeEmail(email);
-    await actions.clickSubmit();
-  },
-};
-
-describe("ComponentName", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  describe("initial render", () => {
-    it("should display form elements", () => {
-      render(<ComponentName />);
-
-      expect(elements.getHeading()).toBeInTheDocument();
-      expect(elements.getInput()).toBeInTheDocument();
-      expect(elements.getButton()).toBeInTheDocument();
-    });
-  });
-
-  describe("form submission", () => {
-    it("should submit with valid email", async () => {
-      mockServerAction.mockResolvedValue({ success: true });
-      render(<ComponentName />);
-
-      await actions.fillAndSubmitForm("test@example.com");
-
-      await waitFor(() => {
-        expect(mockServerAction).toHaveBeenCalledWith({
-          email: "test@example.com",
-        });
-      });
-    });
-
-    it("should display error on failure", async () => {
-      mockServerAction.mockResolvedValue({
-        success: false,
-        error: "Invalid email",
-      });
-      render(<ComponentName />);
-
-      await actions.fillAndSubmitForm("invalid");
-
-      await waitFor(() => {
-        expect(elements.queryErrorMessage()).toHaveTextContent("Invalid email");
-      });
-    });
-  });
-
-  describe("user interactions", () => {
-    it("should enable button when input is filled", async () => {
-      render(<ComponentName />);
-
-      expect(elements.getButton()).toBeDisabled();
-
-      await actions.typeEmail("test@example.com");
-
-      expect(elements.getButton()).toBeEnabled();
-    });
-  });
-});
-```
-
-**BDD Helper Objects:**
-
-1. **`elements`** - Element queries (getters and matchers)
-   - Use `get*` for elements that should exist
-   - Use `query*` for elements that may not exist
-   - Use semantic queries (`getByRole`, `getByLabelText`)
-
-2. **`actions`** - User interactions
-   - Encapsulate user events (click, type, select)
-   - Create compound actions for common flows
-   - Always use `userEvent.setup()` per action
-
-**Key Points:**
-
-- ✅ Use `elements` and `actions` helper objects
-- ✅ Group tests by behavior (`describe("form submission")`)
-- ✅ Use semantic queries (`getByRole`, `getByLabelText`)
-- ✅ Test user interactions, not implementation
-- ✅ Use `waitFor` for async state changes
-
-### Utility/Library Tests
-
-Pure functions should have simple, focused tests.
-
-**Template:**
-
-```typescript
-import { convertReleaseDateToIsoStringDate } from "./date-functions";
-
-describe("convertReleaseDateToIsoStringDate", () => {
-  it("should convert year to ISO string", () => {
-    const result = convertReleaseDateToIsoStringDate("2024");
-    expect(result).toBe("2024-12-31T23:59:59.999Z");
-  });
-
-  it("should return null for undefined input", () => {
-    const result = convertReleaseDateToIsoStringDate(undefined);
-    expect(result).toBeNull();
-  });
-
-  it("should handle edge cases", () => {
-    const result = convertReleaseDateToIsoStringDate("2000");
-    expect(result).toBe("2000-12-31T23:59:59.999Z");
-  });
-});
-```
+- **Component tests:** See [Component Testing Guide](./guides/COMPONENT_TESTING.md) for BDD-style patterns with `elements` and `actions` helpers
+- **Service tests:** See [Backend Testing Guide](./guides/BACKEND_TESTING.md) for testing business logic with mocked dependencies
+- **Repository tests:** See [Integration Testing Guide](./guides/INTEGRATION_TESTING.md) for testing complex database operations
+- **Server action tests:** See [Backend Testing Guide](./guides/BACKEND_TESTING.md) for testing Next.js server actions
+- **Utility tests:** See [Backend Testing Guide](./guides/BACKEND_TESTING.md) for testing pure functions
 
 ## Test Utilities
 
@@ -1095,5 +799,85 @@ console.log(await page.locator("body").textContent()); // All text
 
 ---
 
-**Last Updated:** 2025-10-29
+## Quick Reference
+
+### Common Test Commands
+
+```bash
+# Run all tests
+pnpm test
+
+# Watch mode
+pnpm test:watch
+
+# Coverage
+pnpm test:coverage
+
+# Specific projects
+pnpm test:components
+pnpm test:backend
+pnpm test:integration
+
+# Single file
+pnpm test path/to/file.test.ts
+```
+
+### Test File Naming
+
+| Pattern | Type | Example |
+|---------|------|---------|
+| `*.test.tsx` | Component test | `login-form.test.tsx` |
+| `*.unit.test.ts` | Unit test (mocked deps) | `auth-service.unit.test.ts` |
+| `*.integration.test.ts` | Integration test (real DB) | `user-repository.integration.test.ts` |
+| `*.server-action.test.ts` | Server action test | `sign-in.server-action.test.ts` |
+
+### Query Priority (Component Tests)
+
+Always prefer semantic queries in this order:
+
+1. `getByRole` - Accessible roles (button, heading, textbox)
+2. `getByLabelText` - Form labels
+3. `getByPlaceholderText` - Input placeholders
+4. `getByText` - Visible text content
+5. `getByTestId` - Last resort only
+
+### Mocking Layers
+
+```typescript
+// Server Action Tests → Mock services
+vi.mock("@/data-access-layer/services");
+
+// Service Tests → Mock Prisma/repositories
+vi.mock("@/shared/lib", () => ({
+  prisma: { /* mocked methods */ }
+}));
+
+// Repository Tests → Real database (no mocks)
+```
+
+### Result Type Pattern
+
+```typescript
+const result = await service.method(input);
+
+// Type guard for success/error
+if (result.success) {
+  console.log(result.data); // TypeScript knows data exists
+} else {
+  console.error(result.error); // TypeScript knows error exists
+}
+```
+
+### Useful Links
+
+- [Component Testing Guide](./guides/COMPONENT_TESTING.md)
+- [Integration Testing Guide](./guides/INTEGRATION_TESTING.md)
+- [Backend Testing Guide](./guides/BACKEND_TESTING.md)
+- [Vitest Documentation](https://vitest.dev/)
+- [React Testing Library](https://testing-library.com/react)
+- [Playwright Documentation](https://playwright.dev/)
+
+---
+
+**Last Updated:** January 2025
 **Maintained By:** SavePoint Engineering Team

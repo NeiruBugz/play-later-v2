@@ -1,6 +1,5 @@
 import { LibraryItemStatus } from "@prisma/client";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 
 import { LibraryStatusDisplay } from "./library-status-display";
 
@@ -16,11 +15,9 @@ describe("LibraryStatusDisplay", () => {
         <LibraryStatusDisplay {...defaultProps} userLibraryStatus={undefined} />
       );
 
-      expect(screen.getByText("Add to Library")).toBeInTheDocument();
-      expect(screen.getByText("Library Status")).toBeInTheDocument();
-      expect(
-        screen.getByText("Add this game to your library")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Add to Library")).toBeVisible();
+      expect(screen.getByText("Library Status")).toBeVisible();
+      expect(screen.getByText("Add this game to your library")).toBeVisible();
     });
 
     it("should show Add to Library button (not disabled)", () => {
@@ -31,8 +28,8 @@ describe("LibraryStatusDisplay", () => {
       const button = screen.getByRole("button", {
         name: `Add ${defaultProps.gameTitle} to your library`,
       });
-      expect(button).toBeInTheDocument();
-      expect(button).not.toBeDisabled();
+      expect(button).toBeVisible();
+      expect(button).toBeEnabled();
     });
 
     it("should not show placeholder text anymore", () => {
@@ -59,7 +56,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText("Curious About")).toBeInTheDocument();
+      expect(screen.getByText("Curious About")).toBeVisible();
     });
 
     it("should display status label for CURRENTLY_EXPLORING", () => {
@@ -74,7 +71,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText("Currently Exploring")).toBeInTheDocument();
+      expect(screen.getByText("Currently Exploring")).toBeVisible();
     });
 
     it("should display status label for TOOK_A_BREAK", () => {
@@ -89,7 +86,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText("Taking a Break")).toBeInTheDocument();
+      expect(screen.getByText("Taking a Break")).toBeVisible();
     });
 
     it("should display status label for EXPERIENCED", () => {
@@ -104,7 +101,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText("Experienced")).toBeInTheDocument();
+      expect(screen.getByText("Experienced")).toBeVisible();
     });
 
     it("should display status label for WISHLIST", () => {
@@ -119,7 +116,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText("Wishlist")).toBeInTheDocument();
+      expect(screen.getByText("Wishlist")).toBeVisible();
     });
 
     it("should display status label for REVISITING", () => {
@@ -134,7 +131,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText("Revisiting")).toBeInTheDocument();
+      expect(screen.getByText("Revisiting")).toBeVisible();
     });
 
     it("should format and display updated date correctly", () => {
@@ -149,7 +146,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText(/Updated: Jan 15, 2023/)).toBeInTheDocument();
+      expect(screen.getByText(/Updated: Jan 15, 2023/)).toBeVisible();
     });
 
     it("should display Manage Library button when status exists", () => {
@@ -164,7 +161,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText("Manage Library")).toBeInTheDocument();
+      expect(screen.getByText("Manage Library")).toBeVisible();
     });
 
     it("should enable Manage Library button", () => {
@@ -180,11 +177,11 @@ describe("LibraryStatusDisplay", () => {
       );
 
       const button = screen.getByRole("button", { name: /manage library/i });
-      expect(button).not.toBeDisabled();
+      expect(button).toBeEnabled();
     });
 
     it("should render status icon", () => {
-      const { container } = render(
+      render(
         <LibraryStatusDisplay
           {...defaultProps}
           userLibraryStatus={{
@@ -196,8 +193,8 @@ describe("LibraryStatusDisplay", () => {
       );
 
       // lucide-react icons render as SVG elements
-      const icon = container.querySelector("svg");
-      expect(icon).toBeInTheDocument();
+      const icon = screen.getByTestId("library-status-icon");
+      expect(icon).toBeVisible();
     });
 
     it("should not display 'Add to Library' button when status exists", () => {
@@ -231,7 +228,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText(/Updated: Dec 25, 2023/)).toBeInTheDocument();
+      expect(screen.getByText(/Updated: Dec 25, 2023/)).toBeVisible();
     });
 
     it("should handle different year correctly", () => {
@@ -246,7 +243,7 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      expect(screen.getByText(/Updated: Mar 10, 2024/)).toBeInTheDocument();
+      expect(screen.getByText(/Updated: Mar 10, 2024/)).toBeVisible();
     });
   });
 });

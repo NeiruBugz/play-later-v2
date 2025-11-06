@@ -286,10 +286,8 @@ export interface GetTimesToBeatParams {
   igdbId: number;
 }
 
-export interface TimesToBeatData {
-  mainStory?: number;
-  completionist?: number;
-}
+// Re-export from shared types for backward compatibility
+export type { TimesToBeatData } from "@/shared/types/game";
 
 export interface TimesToBeatResult {
   timesToBeat: TimesToBeatData;

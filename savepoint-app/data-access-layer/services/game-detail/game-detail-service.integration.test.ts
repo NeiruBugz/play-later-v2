@@ -4,15 +4,6 @@ import {
   resetTestDatabase,
   setupDatabase,
 } from "@/test/setup/database";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
 
 import { findGameByIgdbId } from "../../repository/game/game-repository";
 import { populateGameInDatabase } from "./game-detail-service";

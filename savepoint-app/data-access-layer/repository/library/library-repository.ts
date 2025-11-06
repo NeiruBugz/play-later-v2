@@ -118,11 +118,27 @@ export async function getLibraryItemsForUserByIgdbId({
   userId,
   igdbId,
 }: GetLibraryItemsForUserByIgdbIdInput): Promise<
-  RepositoryResult<LibraryItem[]>
+  RepositoryResult<
+    Array<
+      LibraryItem & {
+        game: {
+          id: string;
+          title: string;
+          coverImage: string | null;
+          slug: string;
+        };
+      }
+    >
+  >
 > {
   try {
     const items = await prisma.libraryItem.findMany({
       where: { userId, game: { igdbId } },
+      include: {
+        game: {
+          select: { id: true, title: true, coverImage: true, slug: true },
+        },
+      },
     });
     return repositorySuccess(items);
   } catch (error) {
@@ -136,10 +152,28 @@ export async function getLibraryItemsForUserByIgdbId({
 export async function getManyLibraryItems({
   userId,
   gameId,
-}: GetManyLibraryItemsInput): Promise<RepositoryResult<LibraryItem[]>> {
+}: GetManyLibraryItemsInput): Promise<
+  RepositoryResult<
+    Array<
+      LibraryItem & {
+        game: {
+          id: string;
+          title: string;
+          coverImage: string | null;
+          slug: string;
+        };
+      }
+    >
+  >
+> {
   try {
     const items = await prisma.libraryItem.findMany({
       where: { gameId, userId },
+      include: {
+        game: {
+          select: { id: true, title: true, coverImage: true, slug: true },
+        },
+      },
       orderBy: { createdAt: "asc" },
     });
     return repositorySuccess(items);
@@ -268,6 +302,31 @@ export async function getUniquePlatforms({
   }
 }
 
+/**
+ * @deprecated This function fetches ALL library items for ALL users without pagination,
+ * which will cause severe performance and memory issues as the user base grows.
+ * Use `getOtherUsersLibrariesPaginated` instead, which implements proper pagination
+ * and limits the number of records fetched.
+ *
+ * **Migration Guide:**
+ * Replace:
+ * ```ts
+ * const result = await getOtherUsersLibraries({ userId });
+ * ```
+ * With:
+ * ```ts
+ * const result = await getOtherUsersLibrariesPaginated({ userId, page: 1, limit: 10 });
+ * ```
+ *
+ * **Why deprecated:**
+ * - No pagination - fetches potentially thousands/millions of records
+ * - In-memory grouping after fetching all data
+ * - Memory exhaustion risk
+ * - Database connection pool exhaustion
+ * - Slow page loads
+ *
+ * This function will be removed in a future version.
+ */
 export async function getOtherUsersLibraries({
   userId,
 }: {

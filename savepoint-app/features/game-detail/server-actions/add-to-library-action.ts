@@ -5,8 +5,7 @@ import { LibraryService } from "@/data-access-layer/services";
 import type { LibraryItem } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-import { createLogger } from "@/shared/lib/app/logger";
-import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { AddToLibrarySchema, type AddToLibraryInput } from "../schemas";
 

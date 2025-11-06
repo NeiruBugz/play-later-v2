@@ -2,8 +2,7 @@ import "server-only";
 
 import { findJournalEntriesByGameId } from "@/data-access-layer/repository";
 
-import { createLogger } from "@/shared/lib/app/logger";
-import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService } from "../types";
 

@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 
 import { GameCoverImage } from "./game-cover-image";
 
@@ -8,41 +7,35 @@ describe("GameCoverImage", () => {
     it("should display placeholder when imageId is null", () => {
       render(<GameCoverImage imageId={null} gameTitle="Test Game" />);
 
-      expect(screen.getByText("No cover available")).toBeInTheDocument();
-      expect(
-        screen.getByLabelText("No cover image available")
-      ).toBeInTheDocument();
+      expect(screen.getByText("No cover available")).toBeVisible();
+      expect(screen.getByLabelText("No cover image available")).toBeVisible();
     });
 
     it("should display placeholder when imageId is undefined", () => {
       render(<GameCoverImage gameTitle="Test Game" />);
 
-      expect(screen.getByText("No cover available")).toBeInTheDocument();
-      expect(
-        screen.getByLabelText("No cover image available")
-      ).toBeInTheDocument();
+      expect(screen.getByText("No cover available")).toBeVisible();
+      expect(screen.getByLabelText("No cover image available")).toBeVisible();
     });
 
     it("should display placeholder when imageId is empty string", () => {
       render(<GameCoverImage imageId="" gameTitle="Test Game" />);
 
-      expect(screen.getByText("No cover available")).toBeInTheDocument();
+      expect(screen.getByText("No cover available")).toBeVisible();
     });
 
     it("should display placeholder when imageId is whitespace only", () => {
       render(<GameCoverImage imageId="   " gameTitle="Test Game" />);
 
-      expect(screen.getByText("No cover available")).toBeInTheDocument();
+      expect(screen.getByText("No cover available")).toBeVisible();
     });
 
     it("should display gamepad icon in placeholder", () => {
-      const { container } = render(
-        <GameCoverImage imageId={null} gameTitle="Test Game" />
-      );
+      render(<GameCoverImage imageId={null} gameTitle="Test Game" />);
 
       // lucide-react icons render as SVG elements
-      const icon = container.querySelector("svg");
-      expect(icon).toBeInTheDocument();
+      const icon = screen.getByTestId("game-cover-icon");
+      expect(icon).toBeVisible();
     });
   });
 
@@ -51,7 +44,7 @@ describe("GameCoverImage", () => {
       render(<GameCoverImage imageId="abc123" gameTitle="Zelda" />);
 
       const img = screen.getByRole("img");
-      expect(img).toBeInTheDocument();
+      expect(img).toBeVisible();
       expect(img).toHaveAttribute("alt", "Zelda cover");
     });
 
@@ -68,7 +61,7 @@ describe("GameCoverImage", () => {
     });
 
     it("should apply custom className when provided", () => {
-      const { container } = render(
+      render(
         <GameCoverImage
           imageId="abc123"
           gameTitle="Test Game"
@@ -76,7 +69,7 @@ describe("GameCoverImage", () => {
         />
       );
 
-      const imageContainer = container.firstChild as HTMLElement;
+      const imageContainer = screen.getByTestId("game-cover-image");
       expect(imageContainer).toHaveClass("custom-class");
     });
 
@@ -89,29 +82,23 @@ describe("GameCoverImage", () => {
 
   describe("Styling", () => {
     it("should have aspect ratio of 3:4 for images", () => {
-      const { container } = render(
-        <GameCoverImage imageId="abc123" gameTitle="Test Game" />
-      );
+      render(<GameCoverImage imageId="abc123" gameTitle="Test Game" />);
 
-      const imageContainer = container.firstChild as HTMLElement;
+      const imageContainer = screen.getByTestId("game-cover-image");
       expect(imageContainer).toHaveClass("aspect-[3/4]");
     });
 
     it("should have aspect ratio of 3:4 for placeholder", () => {
-      const { container } = render(
-        <GameCoverImage imageId={null} gameTitle="Test Game" />
-      );
+      render(<GameCoverImage imageId={null} gameTitle="Test Game" />);
 
-      const placeholder = container.firstChild as HTMLElement;
+      const placeholder = screen.getByTestId("game-cover-placeholder");
       expect(placeholder).toHaveClass("aspect-[3/4]");
     });
 
     it("should have max-width constraint", () => {
-      const { container } = render(
-        <GameCoverImage imageId={null} gameTitle="Test Game" />
-      );
+      render(<GameCoverImage imageId={null} gameTitle="Test Game" />);
 
-      const element = container.firstChild as HTMLElement;
+      const element = screen.getByTestId("game-cover-placeholder");
       expect(element).toHaveClass("max-w-sm");
     });
   });

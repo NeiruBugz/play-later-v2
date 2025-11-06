@@ -26,8 +26,12 @@ export const GameCoverImage = ({
           className
         )}
         aria-label="No cover image available"
+        data-testid="game-cover-placeholder"
       >
-        <Gamepad2 className="text-muted-foreground h-16 w-16" />
+        <Gamepad2
+          className="text-muted-foreground h-16 w-16"
+          data-testid="game-cover-icon"
+        />
         <p className="text-muted-foreground text-sm font-medium">
           No cover available
         </p>
@@ -44,6 +48,7 @@ export const GameCoverImage = ({
         "relative aspect-[3/4] w-full max-w-sm overflow-hidden rounded-lg",
         className
       )}
+      data-testid="game-cover-image"
     >
       <Image
         src={imageUrl}

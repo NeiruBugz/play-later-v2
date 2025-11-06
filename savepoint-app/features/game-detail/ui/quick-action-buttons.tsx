@@ -142,7 +142,7 @@ export const QuickActionButtons = ({
                 key={status}
                 variant={isActive ? "default" : "outline"}
                 size="sm"
-                className="flex h-auto flex-col gap-1 py-3 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="focus-visible:ring-primary flex h-auto flex-col gap-1 py-3 focus-visible:ring-2 focus-visible:ring-offset-2"
                 onClick={() => handleStatusChange(status)}
                 disabled={isPending}
                 aria-label={config.ariaLabel}

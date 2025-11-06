@@ -1,4 +1,4 @@
-import { GameCategory } from "@/data-access-layer/services/igdb/constants";
+import { GameCategory } from "@/shared/constants/game";
 
 import { Badge } from "@/shared/components/ui/badge";
 

@@ -1,4 +1,4 @@
-import type { ProfileWithStats } from "@/data-access-layer/services";
+import type { ProfileWithStats } from "@/shared/types/profile";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";

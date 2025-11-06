@@ -47,12 +47,28 @@ Follow this process precisely.
 
 - **CRITICAL RULE:** You are **strictly prohibited** from writing, editing, or modifying any production code, configuration files, or database schemas yourself. Your only role is to delegate.
 
-1.  **Formulate Subagent Prompt:** Construct a clear and detailed prompt for a specialized coding subagent. This prompt MUST include:
+1.  **Select Appropriate Agent:** Analyze the task to determine which specialized agent should handle it:
+    - Use `@nextjs-ui-expert` for tasks involving:
+      - React components, UI components, or frontend interfaces
+      - Client-side state management, hooks, or effects
+      - Styling, Tailwind CSS, or UI/UX implementation
+      - Component testing or frontend testing
+    - Use `@nextjs-backend-expert` for tasks involving:
+      - Server Actions, Route Handlers, or API endpoints
+      - Database queries, Prisma migrations, or data models
+      - Server-side logic, services, or repositories
+      - Authentication, authorization, or security
+      - Backend testing or integration testing
+    - If a task involves both frontend and backend work, delegate to the primary domain first, then coordinate with the other agent if needed.
+
+2.  **Formulate Subagent Prompt:** Construct a clear and detailed prompt for the selected agent. This prompt MUST include:
     - The full context from the three files you just loaded.
     - The specific task description that needs to be implemented.
     - Clear instructions on what code to write or what files to modify.
     - A definition of success (e.g., "The task is done when the new migration file is created and passes linting.").
-2.  **Execute Delegation:** Call the subagent with the formulated prompt. Example: "I am now delegating this task to a coding agent with all the necessary context and instructions."
+    - **MCP Server Access:** Inform the agent that they have access to any available MCP servers (such as Context7) and should leverage them when appropriate for research, documentation lookup, or additional tooling capabilities.
+
+3.  **Execute Delegation:** Invoke the selected agent using `@agent-name` syntax with the formulated prompt. Example: "I am now delegating this task to @nextjs-backend-expert with all the necessary context and instructions. You have access to MCP servers like Context7 if needed for research or additional capabilities."
 
 ### Step 4: Await and Verify Completion
 

@@ -1,6 +1,6 @@
+import type { AcquisitionType, LibraryItem } from "@prisma/client";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
 
 import { LibraryModal } from "./library-modal";
 
@@ -35,8 +35,6 @@ vi.mock("./edit-entry-form", () => ({
   ),
 }));
 
-import type { AcquisitionType, LibraryItem } from "@prisma/client";
-
 describe("LibraryModal - Accessibility", () => {
   const mockLibraryItem: LibraryItem = {
     id: 1,
@@ -68,12 +66,12 @@ describe("LibraryModal - Accessibility", () => {
 
       expect(
         screen.getByRole("heading", { name: "Add to Library" })
-      ).toBeInTheDocument();
+      ).toBeVisible();
       expect(
         screen.getByText(
           "Add Test Game to your library and set your journey status."
         )
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("should have proper dialog labels in edit mode", () => {
@@ -90,10 +88,10 @@ describe("LibraryModal - Accessibility", () => {
 
       expect(
         screen.getByRole("heading", { name: "Manage Library" })
-      ).toBeInTheDocument();
+      ).toBeVisible();
       expect(
         screen.getByText("Update your library entries for Test Game.")
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
   });
 
@@ -115,7 +113,7 @@ describe("LibraryModal - Accessibility", () => {
 
       // Close button should be present (Radix Dialog handles focus trap automatically)
       const closeButton = screen.getByRole("button", { name: /close/i });
-      expect(closeButton).toBeInTheDocument();
+      expect(closeButton).toBeVisible();
     });
 
     it("should close with Escape key", async () => {
@@ -224,7 +222,7 @@ describe("LibraryModal - Accessibility", () => {
       );
 
       const closeButton = screen.getByRole("button", { name: /close/i });
-      expect(closeButton).toBeInTheDocument();
+      expect(closeButton).toBeVisible();
 
       // Radix Dialog close button has focus styles
       expect(closeButton.className).toContain("focus:ring");
@@ -248,7 +246,7 @@ describe("LibraryModal - Accessibility", () => {
         screen.getByText(
           "Add Test Game to your library and set your journey status."
         )
-      ).toBeInTheDocument();
+      ).toBeVisible();
     });
 
     it("should announce tab labels in edit mode", () => {

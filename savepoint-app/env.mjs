@@ -15,6 +15,7 @@ export const env = createEnv({
     LOG_LEVEL: process.env.LOG_LEVEL,
     NODE_ENV: process.env.NODE_ENV ?? "development",
     AUTH_ENABLE_CREDENTIALS: process.env.AUTH_ENABLE_CREDENTIALS,
+    DATABASE_LOGGING: process.env.DATABASE_LOGGING,
     POSTGRES_DATABASE: process.env.POSTGRES_DATABASE,
     POSTGRES_HOST: process.env.POSTGRES_HOST,
     POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD,
@@ -47,6 +48,9 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "test", "production"]),
     AUTH_ENABLE_CREDENTIALS: z
       .enum(["true", "false"]) // enable test/dev-only Credentials provider
+      .optional(),
+    DATABASE_LOGGING: z
+      .enum(["true", "false"]) // enable database query logging in development
       .optional(),
     POSTGRES_DATABASE: z.string({ message: "POSTGRES_DATABASE is required" }),
     POSTGRES_HOST: z.string({ message: "POSTGRES_HOST is required" }),

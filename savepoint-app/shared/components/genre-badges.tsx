@@ -6,7 +6,10 @@ export const GenreBadges = ({ genres }: { genres?: string[] }) => {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div
+      className="flex flex-wrap items-center gap-1.5"
+      data-testid="genre-badges-wrapper"
+    >
       {genres.map((name) => (
         <Badge
           key={name}

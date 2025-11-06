@@ -7,8 +7,7 @@ import {
   upsertPlatforms,
 } from "@/data-access-layer/repository";
 
-import { createLogger } from "@/shared/lib/app/logger";
-import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import type { FullGameInfoResponse } from "@/shared/types";
 
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "GameDetailService" });

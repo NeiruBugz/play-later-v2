@@ -1,5 +1,4 @@
 import { type Game } from "igdb-api-types";
-import { describe, expect, it } from "vitest";
 
 import { getUniquePlatforms } from "./get-unique-platforms";
 

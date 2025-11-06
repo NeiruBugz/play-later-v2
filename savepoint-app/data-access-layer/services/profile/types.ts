@@ -16,26 +16,12 @@ export type Profile = {
   createdAt: Date;
 };
 
-export type RecentGame = {
-  gameId: string;
-  title: string;
-  coverImage: string | null;
-  lastPlayed: Date;
-};
-
-export type LibraryStats = {
-  statusCounts: Record<string, number>;
-  recentGames: RecentGame[];
-};
-
-export type ProfileWithStats = {
-  username: string | null;
-  image: string | null;
-  email: string | null;
-  name: string | null;
-  createdAt: Date;
-  stats: LibraryStats;
-};
+// Re-export from shared types for backward compatibility
+export type {
+  RecentGame,
+  LibraryStats,
+  ProfileWithStats,
+} from "@/shared/types/profile";
 
 export type GetProfileResult = ServiceResult<{ profile: Profile }>;
 
