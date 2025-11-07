@@ -287,7 +287,10 @@ export interface GetTimesToBeatParams {
 }
 
 // Re-export from shared types for backward compatibility
-export type { TimesToBeatData } from "@/shared/types/game";
+export interface TimesToBeatData {
+  mainStory?: number;
+  completionist?: number;
+}
 
 export interface TimesToBeatResult {
   timesToBeat: TimesToBeatData;

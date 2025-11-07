@@ -1,10 +1,10 @@
-import type { ProfileWithStats } from "@/shared/types/profile";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/shared/components/ui/button";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
+import type { ProfileWithStats } from "@/shared/types/profile";
 
 import { statusLabels } from "../lib/constants";
 import { prepareProfileData } from "../lib/prepare-profile-data";

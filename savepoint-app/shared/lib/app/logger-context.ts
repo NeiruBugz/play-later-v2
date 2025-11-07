@@ -7,6 +7,7 @@ export const LOGGER_CONTEXT = {
   API_ROUTE: "apiRoute",
   DATABASE: "database",
   HANDLER: "handler",
+  USE_CASE: "useCase",
 } as const;
 
 export type LoggerContextKey =

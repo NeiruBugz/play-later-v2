@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
+import { Mock } from "vitest";
 
 import { completeProfileSetupFormAction } from "../server-actions/complete-profile-setup";
 import { skipProfileSetup } from "../server-actions/skip-profile-setup";

@@ -1,17 +1,13 @@
-import type { NextRequest } from "next/server";
-
 import { isSuccessResult } from "@/data-access-layer/services";
 import { IgdbService } from "@/data-access-layer/services/igdb";
+import type { NextRequest } from "next/server";
 
 import { SearchGamesSchema } from "@/features/game-search/schemas";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
 import type { HandlerResult, RequestContext } from "../types";
-import type {
-  GameSearchHandlerInput,
-  GameSearchHandlerOutput,
-} from "./types";
+import type { GameSearchHandlerInput, GameSearchHandlerOutput } from "./types";
 
 const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GameSearchHandler" });
 

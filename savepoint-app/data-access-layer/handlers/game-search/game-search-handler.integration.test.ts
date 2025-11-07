@@ -1,9 +1,9 @@
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
-import { describe, it, expect, beforeAll, afterEach, afterAll } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
-import { gameSearchHandler } from "./game-search-handler";
 import type { RequestContext } from "../types";
+import { gameSearchHandler } from "./game-search-handler";
 
 /**
  * This test file uses MSW (Mock Service Worker) to intercept HTTP requests.

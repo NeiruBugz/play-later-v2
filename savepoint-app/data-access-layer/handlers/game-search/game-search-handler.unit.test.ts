@@ -1,18 +1,18 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-
 import { IgdbService } from "@/data-access-layer/services/igdb";
-import type { ServiceResult } from "@/data-access-layer/services/types";
 import type { GameSearchResult } from "@/data-access-layer/services/igdb/types";
+import type { ServiceResult } from "@/data-access-layer/services/types";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { gameSearchHandler } from "./game-search-handler";
+// Import mocked functions after mock definitions
+import { checkRateLimit } from "@/shared/lib/rate-limit";
+import { GAME_TYPE } from "@/shared/types";
+
 import type { RequestContext } from "../types";
+import { gameSearchHandler } from "./game-search-handler";
 
 // Mock dependencies
 vi.mock("@/data-access-layer/services/igdb");
 vi.mock("@/shared/lib/rate-limit");
-
-// Import mocked functions after mock definitions
-import { checkRateLimit } from "@/shared/lib/rate-limit";
 
 const mockIgdbService = vi.mocked(IgdbService);
 const mockCheckRateLimit = vi.mocked(checkRateLimit);
@@ -45,9 +45,11 @@ describe("gameSearchHandler", () => {
             {
               id: 1,
               name: "The Legend of Zelda: Breath of the Wild",
-              cover: { image_id: "co3p2d" },
-              platforms: [{ name: "Nintendo Switch" }],
+              cover: { id: 123, image_id: "co3p2d" },
+              platforms: [{ id: 1, name: "Nintendo Switch" }],
               first_release_date: 1488326400,
+              slug: "the-legend-of-zelda-breath-of-the-wild",
+              game_type: GAME_TYPE.MAIN_GAME,
             },
           ],
           count: 1,
@@ -130,18 +132,18 @@ describe("gameSearchHandler", () => {
             {
               id: 100,
               name: "Game from page 2",
-              cover: { image_id: "test" },
-              platforms: [{ name: "PC" }],
+              cover: { id: 123, image_id: "test" },
+              platforms: [{ id: 123, name: "PC" }],
               first_release_date: 1234567890,
+              slug: "game-from-page-2",
+              game_type: GAME_TYPE.MAIN_GAME,
             },
           ],
           count: 1,
         },
       };
 
-      const searchSpy = vi
-        .fn()
-        .mockResolvedValue(mockSearchResult);
+      const searchSpy = vi.fn().mockResolvedValue(mockSearchResult);
       mockIgdbService.prototype.searchGamesByName = searchSpy;
 
       // Act

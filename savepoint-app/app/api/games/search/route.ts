@@ -17,7 +17,9 @@ const getCachedGameSearch = unstable_cache(
       {
         ip,
         headers,
-        url: new URL(`http://localhost/api/games/search?q=${query}&offset=${offset}`),
+        url: new URL(
+          `http://localhost/api/games/search?q=${query}&offset=${offset}`
+        ),
       }
     );
   },

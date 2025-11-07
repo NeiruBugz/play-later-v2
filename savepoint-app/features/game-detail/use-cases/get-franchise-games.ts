@@ -97,7 +97,10 @@ export async function getFranchiseGames(
     }
 
     logger.info(
-      { franchiseCount: franchises.length, totalGames: franchises.reduce((acc, f) => acc + f.games.length, 0) },
+      {
+        franchiseCount: franchises.length,
+        totalGames: franchises.reduce((acc, f) => acc + f.games.length, 0),
+      },
       "Successfully fetched franchise games"
     );
 

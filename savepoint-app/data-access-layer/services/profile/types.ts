@@ -17,13 +17,31 @@ export type Profile = {
 };
 
 // Re-export from shared types for backward compatibility
-export type {
-  RecentGame,
-  LibraryStats,
-  ProfileWithStats,
-} from "@/shared/types/profile";
+export type RecentGame = {
+  gameId: string;
+  title: string;
+  coverImage: string | null;
+  lastPlayed: Date;
+};
+
+/**
+ * Library statistics aggregated by status
+ */
+export type LibraryStats = {
+  statusCounts: Record<string, number>;
+  recentGames: RecentGame[];
+};
 
 export type GetProfileResult = ServiceResult<{ profile: Profile }>;
+
+export type ProfileWithStats = {
+  username: string | null;
+  image: string | null;
+  email: string | null;
+  name: string | null;
+  createdAt: Date;
+  stats: LibraryStats;
+};
 
 export type GetProfileWithStatsResult = ServiceResult<{
   profile: ProfileWithStats;
