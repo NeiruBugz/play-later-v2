@@ -23,6 +23,7 @@ import { getStatusLabel } from "./constants";
 import { EditEntryForm } from "./edit-entry-form";
 
 type LibraryModalProps = {
+  gameId?: string;
   isOpen: boolean;
   onClose: () => void;
   igdbId: number;
@@ -32,6 +33,7 @@ type LibraryModalProps = {
 };
 
 export const LibraryModal = ({
+  gameId,
   isOpen,
   onClose,
   igdbId,
@@ -80,6 +82,7 @@ export const LibraryModal = ({
 
         {mode === "add" ? (
           <AddEntryForm
+            gameId={gameId}
             igdbId={igdbId}
             gameTitle={gameTitle}
             onSuccess={handleSuccess}

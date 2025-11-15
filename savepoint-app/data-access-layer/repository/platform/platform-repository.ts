@@ -136,3 +136,48 @@ export async function findPlatformByIgdbId(
     );
   }
 }
+
+/**
+ * Find platforms for a specific game
+ * Returns platforms grouped into supported (linked via GamePlatform) and other platforms
+ */
+export async function findPlatformsForGame(gameId: string): Promise<
+  RepositoryResult<{
+    supportedPlatforms: PrismaPlatform[];
+    otherPlatforms: PrismaPlatform[];
+  }>
+> {
+  try {
+    const [gamePlatforms, allPlatforms] = await Promise.all([
+      prisma.gamePlatform.findMany({
+        where: { gameId },
+        select: { platformId: true },
+      }),
+      prisma.platform.findMany({
+        orderBy: { name: "asc" },
+      }),
+    ]);
+
+    const supportedPlatformIds = new Set(
+      gamePlatforms.map((gp) => gp.platformId)
+    );
+
+    const supportedPlatforms = allPlatforms.filter((platform) =>
+      supportedPlatformIds.has(platform.id)
+    );
+
+    const otherPlatforms = allPlatforms.filter(
+      (platform) => !supportedPlatformIds.has(platform.id)
+    );
+
+    return repositorySuccess({
+      supportedPlatforms,
+      otherPlatforms,
+    });
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find platforms for game: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}

@@ -13,6 +13,7 @@ export {
 export {
   createLibraryItem,
   deleteLibraryItem,
+  findLibraryItemById,
   updateLibraryItem,
   getLibraryItemsForUserByIgdbId,
   getManyLibraryItems,
@@ -32,6 +33,7 @@ export {
   getLibraryStatsByUserId,
   findMostRecentLibraryItemByGameId,
   findAllLibraryItemsByGameId,
+  findLibraryItemsWithFilters,
 } from "./library/library-repository";
 
 export {
@@ -60,6 +62,7 @@ export {
   upsertPlatform,
   upsertPlatforms,
   findPlatformByIgdbId,
+  findPlatformsForGame,
 } from "./platform/platform-repository";
 
 export {

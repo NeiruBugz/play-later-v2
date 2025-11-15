@@ -33,24 +33,19 @@ const elements = {
 
 const actions = {
   toggleSignUpMode: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getSignUpToggle());
+    await userEvent.click(elements.getSignUpToggle());
   },
   toggleSignInMode: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getSignInToggle());
+    await userEvent.click(elements.getSignInToggle());
   },
   typeInEmailField: async (emailValue: string = "test@example.com") => {
-    const user = userEvent.setup();
-    await user.type(elements.getEmailInput(), emailValue);
+    await userEvent.type(elements.getEmailInput(), emailValue);
   },
   typeInPasswordField: async (passwordValue: string = "password") => {
-    const user = userEvent.setup();
-    await user.type(elements.getPasswordInput(), passwordValue);
+    await userEvent.type(elements.getPasswordInput(), passwordValue);
   },
   clickSignInSubmit: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getSignInSubmitButton());
+    await userEvent.click(elements.getSignInSubmitButton());
   },
 };
 
@@ -138,12 +133,11 @@ describe("CredentialsForm", () => {
     });
 
     it("should call sign in action with correct data", async () => {
-      const user = userEvent.setup();
       render(<CredentialsForm />);
 
-      await user.type(elements.getEmailInput(), "test@example.com");
-      await user.type(elements.getPasswordInput(), "password");
-      await user.click(elements.getSignInSubmitButton());
+      await userEvent.type(elements.getEmailInput(), "test@example.com");
+      await userEvent.type(elements.getPasswordInput(), "password");
+      await userEvent.click(elements.getSignInSubmitButton());
 
       await waitFor(() => {
         expect(mockSignInAction).toHaveBeenCalledWith({
@@ -163,14 +157,13 @@ describe("CredentialsForm", () => {
     });
 
     it("should call sign up action with correct data", async () => {
-      const user = userEvent.setup();
       render(<CredentialsForm />);
 
       await actions.toggleSignUpMode();
-      await user.type(elements.getEmailInput(), "test@example.com");
-      await user.type(elements.getPasswordInput(), "password123");
-      await user.type(elements.getNameInput()!, "John Doe");
-      await user.click(elements.getSignUpSubmitButton());
+      await userEvent.type(elements.getEmailInput(), "test@example.com");
+      await userEvent.type(elements.getPasswordInput(), "password123");
+      await userEvent.type(elements.getNameInput()!, "John Doe");
+      await userEvent.click(elements.getSignUpSubmitButton());
 
       await waitFor(() => {
         expect(mockSignUpAction).toHaveBeenCalledWith({
@@ -191,12 +184,11 @@ describe("CredentialsForm", () => {
     });
 
     it("should display error message", async () => {
-      const user = userEvent.setup();
       render(<CredentialsForm />);
 
-      await user.type(elements.getEmailInput(), "test@example.com");
-      await user.type(elements.getPasswordInput(), "wrongpassword");
-      await user.click(elements.getSignInSubmitButton());
+      await userEvent.type(elements.getEmailInput(), "test@example.com");
+      await userEvent.type(elements.getPasswordInput(), "wrongpassword");
+      await userEvent.click(elements.getSignInSubmitButton());
 
       await waitFor(() => {
         expect(elements.getErrorMessage()).toBeVisible();
@@ -216,13 +208,12 @@ describe("CredentialsForm", () => {
     });
 
     it("should display error message", async () => {
-      const user = userEvent.setup();
       render(<CredentialsForm />);
 
       await actions.toggleSignUpMode();
-      await user.type(elements.getEmailInput(), "existing@example.com");
-      await user.type(elements.getPasswordInput(), "password123");
-      await user.click(elements.getSignUpSubmitButton());
+      await userEvent.type(elements.getEmailInput(), "existing@example.com");
+      await userEvent.type(elements.getPasswordInput(), "password123");
+      await userEvent.click(elements.getSignUpSubmitButton());
 
       await waitFor(() => {
         expect(elements.getErrorMessage()).toBeVisible();

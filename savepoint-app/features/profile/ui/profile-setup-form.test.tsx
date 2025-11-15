@@ -128,11 +128,10 @@ describe("ProfileSetupForm", () => {
 
   describe("given user clicks Skip button", () => {
     it("should persist completion via server action and redirect to dashboard", async () => {
-      const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
       const skipButton = screen.getByRole("button", { name: /skip for now/i });
-      await user.click(skipButton);
+      await userEvent.click(skipButton);
 
       expect(mockSkipAction).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
@@ -140,15 +139,14 @@ describe("ProfileSetupForm", () => {
     });
 
     it("should persist completion and redirect when skip clicked with modified username", async () => {
-      const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.clear(usernameInput);
-      await user.type(usernameInput, "ModifiedUser");
+      await userEvent.clear(usernameInput);
+      await userEvent.type(usernameInput, "ModifiedUser");
 
       const skipButton = screen.getByRole("button", { name: /skip for now/i });
-      await user.click(skipButton);
+      await userEvent.click(skipButton);
 
       expect(mockSkipAction).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
@@ -158,7 +156,6 @@ describe("ProfileSetupForm", () => {
 
   describe("given user submits with valid username", () => {
     it("should call server action with username and redirect on success", async () => {
-      const user = userEvent.setup();
       mockFormAction.mockResolvedValue({
         status: "success",
         message: "Profile setup complete!",
@@ -168,13 +165,13 @@ describe("ProfileSetupForm", () => {
       render(<ProfileSetupForm defaultUsername="TestUser" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.clear(usernameInput);
-      await user.type(usernameInput, "ValidUser");
+      await userEvent.clear(usernameInput);
+      await userEvent.type(usernameInput, "ValidUser");
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFormAction).toHaveBeenCalled();
@@ -186,7 +183,6 @@ describe("ProfileSetupForm", () => {
     });
 
     it("should submit with default username when not modified", async () => {
-      const user = userEvent.setup();
       mockFormAction.mockResolvedValue({
         status: "success",
         message: "Profile setup complete!",
@@ -198,7 +194,7 @@ describe("ProfileSetupForm", () => {
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFormAction).toHaveBeenCalled();
@@ -210,7 +206,6 @@ describe("ProfileSetupForm", () => {
     });
 
     it("should trim whitespace from username before submission", async () => {
-      const user = userEvent.setup();
       mockFormAction.mockResolvedValue({
         status: "success",
         message: "Profile setup complete!",
@@ -220,12 +215,12 @@ describe("ProfileSetupForm", () => {
       render(<ProfileSetupForm defaultUsername="" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.type(usernameInput, "  TrimmedUser  ");
+      await userEvent.type(usernameInput, "  TrimmedUser  ");
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFormAction).toHaveBeenCalled();
@@ -235,32 +230,30 @@ describe("ProfileSetupForm", () => {
 
   describe("given user submits with empty username", () => {
     it("should prevent submission with empty username due to validation", async () => {
-      const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="DefaultUser" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.clear(usernameInput);
+      await userEvent.clear(usernameInput);
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
 
     it("should prevent submission with whitespace-only username", async () => {
-      const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.type(usernameInput, "   ");
+      await userEvent.type(usernameInput, "   ");
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
@@ -269,11 +262,10 @@ describe("ProfileSetupForm", () => {
 
   describe("given user submits with invalid username", () => {
     it("should prevent submission when username is too short", async () => {
-      const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.type(usernameInput, "ab");
+      await userEvent.type(usernameInput, "ab");
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
@@ -283,18 +275,17 @@ describe("ProfileSetupForm", () => {
         expect(submitButton).toBeDisabled();
       });
 
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
 
     it("should prevent submission when username is too long", async () => {
-      const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.type(usernameInput, "a".repeat(26));
+      await userEvent.type(usernameInput, "a".repeat(26));
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
@@ -304,14 +295,13 @@ describe("ProfileSetupForm", () => {
         expect(submitButton).toBeDisabled();
       });
 
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
 
     it("should display server error when username validation fails", async () => {
-      const user = userEvent.setup();
       mockFormAction.mockResolvedValue({
         status: "error",
         message: "Username already exists",
@@ -321,12 +311,12 @@ describe("ProfileSetupForm", () => {
       render(<ProfileSetupForm defaultUsername="" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.type(usernameInput, "TakenUser");
+      await userEvent.type(usernameInput, "TakenUser");
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFormAction).toHaveBeenCalled();
@@ -342,7 +332,6 @@ describe("ProfileSetupForm", () => {
     });
 
     it("should not display server error if username has been modified", async () => {
-      const user = userEvent.setup();
       mockFormAction.mockResolvedValue({
         status: "error",
         message: "Username already exists",
@@ -352,12 +341,12 @@ describe("ProfileSetupForm", () => {
       render(<ProfileSetupForm defaultUsername="" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.type(usernameInput, "TakenUser");
+      await userEvent.type(usernameInput, "TakenUser");
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(screen.getByRole("alert")).toHaveTextContent(
@@ -365,8 +354,8 @@ describe("ProfileSetupForm", () => {
         );
       });
 
-      await user.clear(usernameInput);
-      await user.type(usernameInput, "DifferentUser");
+      await userEvent.clear(usernameInput);
+      await userEvent.type(usernameInput, "DifferentUser");
 
       await waitFor(() => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -376,7 +365,6 @@ describe("ProfileSetupForm", () => {
 
   describe("given form is submitting", () => {
     it("should disable all inputs and buttons during submission", async () => {
-      const user = userEvent.setup();
       mockFormAction.mockImplementation(
         () =>
           new Promise((resolve) => {
@@ -397,7 +385,7 @@ describe("ProfileSetupForm", () => {
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       const usernameInput = screen.getByLabelText("Username");
       expect(usernameInput).toBeDisabled();
@@ -407,7 +395,6 @@ describe("ProfileSetupForm", () => {
     });
 
     it("should show loading text on submit button during submission", async () => {
-      const user = userEvent.setup();
       mockFormAction.mockImplementation(
         () =>
           new Promise((resolve) => {
@@ -428,7 +415,7 @@ describe("ProfileSetupForm", () => {
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       // Check for "Saving..." text
       expect(screen.getByRole("button", { name: /saving.../i })).toBeVisible();
@@ -437,7 +424,6 @@ describe("ProfileSetupForm", () => {
 
   describe("given edge cases", () => {
     it("should handle server action returning idle state", async () => {
-      const user = userEvent.setup();
       mockFormAction.mockResolvedValue({ status: "idle" });
 
       render(<ProfileSetupForm defaultUsername="TestUser" />);
@@ -445,7 +431,7 @@ describe("ProfileSetupForm", () => {
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       await waitFor(() => {
         expect(mockFormAction).toHaveBeenCalled();
@@ -455,30 +441,28 @@ describe("ProfileSetupForm", () => {
     });
 
     it("should prevent submission when no defaultUsername provided and field is empty", async () => {
-      const user = userEvent.setup();
       render(<ProfileSetupForm />);
 
       const submitButton = screen.getByRole("button", {
         name: /complete setup/i,
       });
-      await user.click(submitButton);
+      await userEvent.click(submitButton);
 
       expect(mockFormAction).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
     });
 
     it("should allow skip button even when username validation fails", async () => {
-      const user = userEvent.setup();
       render(<ProfileSetupForm defaultUsername="" />);
 
       const usernameInput = screen.getByLabelText("Username");
-      await user.type(usernameInput, "ab");
+      await userEvent.type(usernameInput, "ab");
 
       const skipButton = screen.getByRole("button", { name: /skip for now/i });
 
       expect(skipButton).toBeEnabled();
 
-      await user.click(skipButton);
+      await userEvent.click(skipButton);
 
       expect(mockSkipAction).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith("/dashboard");

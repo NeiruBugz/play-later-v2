@@ -1,6 +1,6 @@
 # Component Testing Guide
 
->[toc]
+> [toc]
 
 ## Quick Start
 
@@ -9,14 +9,15 @@ Component tests verify React components work correctly from the user's perspecti
 **Philosophy:** "The more your tests resemble the way your software is used, the more confidence they can give you." — Kent C. Dodds
 
 **Key Principles:**
+
 - ✅ Test behavior, not implementation details
 - ✅ Use semantic queries (roles, labels) over test IDs
 - ✅ Simulate real user interactions with `userEvent`
 - ✅ Focus on accessibility
 - ✅ Keep tests simple and readable
 
-
 ## File Naming & Location
+
 ---
 
 Component tests live next to the component they test:
@@ -29,8 +30,8 @@ features/profile/ui/
 
 **Naming convention:** `[component-name].test.tsx`
 
-
 ## Test Structure Template
+
 ---
 
 ```typescript
@@ -67,13 +68,13 @@ const elements = {
 // 4. Define user actions (BDD style)
 const actions = {
   typeEmail: async (value: string) => {
-    const user = userEvent.setup();
-    await user.type(elements.getInput(), value);
+
+    await userEventtype(elements.getInput(), value);
   },
 
   clickSubmit: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getButton());
+
+    await userEventclick(elements.getButton());
   },
 
   fillAndSubmit: async (email: string) => {
@@ -140,8 +141,8 @@ describe("ComponentName", () => {
 });
 ```
 
-
 ## Query Methods & Priority
+
 ---
 
 ### Query Priority Hierarchy
@@ -160,11 +161,11 @@ Always prefer queries in this order:
 
 ### Query Variants
 
-| Variant | Returns | Use Case |
-|---------|---------|----------|
-| `getBy*` | Element or throws | Element should exist |
-| `queryBy*` | Element or null | Checking absence |
-| `findBy*` | Promise<Element> | Async/awaited elements |
+| Variant    | Returns           | Use Case               |
+| ---------- | ----------------- | ---------------------- |
+| `getBy*`   | Element or throws | Element should exist   |
+| `queryBy*` | Element or null   | Checking absence       |
+| `findBy*`  | Promise<Element>  | Async/awaited elements |
 
 ### Examples
 
@@ -221,7 +222,7 @@ await waitFor(() => {
 
 **⚠️ IMPORTANT: Prefer `toBeVisible()` over `toBeInTheDocument()` for user-facing elements**
 
-Users care whether they can *see* elements, not just whether they exist in the DOM. Hidden elements (`display: none`, `visibility: hidden`, `opacity: 0`, or `hidden` attribute) will pass `toBeInTheDocument()` but fail `toBeVisible()`, making `toBeVisible()` the more accurate assertion for most cases.
+Users care whether they can _see_ elements, not just whether they exist in the DOM. Hidden elements (`display: none`, `visibility: hidden`, `opacity: 0`, or `hidden` attribute) will pass `toBeInTheDocument()` but fail `toBeVisible()`, making `toBeVisible()` the more accurate assertion for most cases.
 
 **✅ Migration Completed (Nov 2025):** All component tests have been systematically migrated to use `toBeVisible()` for user-facing elements. 181 assertions were updated across 25 test files, with 61 absence checks correctly preserved as `not.toBeInTheDocument()`.
 
@@ -238,11 +239,13 @@ expect(screen.queryByText("Hidden content")).not.toBeInTheDocument();
 ```
 
 **When to use each:**
+
 - **`toBeVisible()`**: When testing UI elements users should see (buttons, text, images, icons)
 - **`toBeInTheDocument()`**: When checking element presence in DOM (structural tests, presence/absence)
 - **`not.toBeInTheDocument()`**: When asserting elements should not exist at all
 
 **Example:**
+
 ```typescript
 // ✅ Good: Test visibility for user-facing elements
 const submitButton = screen.getByRole("button", { name: "Submit" });
@@ -288,19 +291,21 @@ expect(screen.queryByText("Error")).not.toBeInTheDocument();
 **Quick Search & Replace Guide:**
 
 Search your test file for these patterns and evaluate each:
+
 - `expect(button).toBeInTheDocument()` → `expect(button).toBeVisible()`
 - `expect(icon).toBeInTheDocument()` → `expect(icon).toBeVisible()`
 - `expect(text).toBeInTheDocument()` → `expect(text).toBeVisible()`
 - `expect(image).toBeInTheDocument()` → `expect(image).toBeVisible()`
 - `expect(element).not.toBeInTheDocument()` → Keep as-is (correct)
 
-
 ## BDD-Style Pattern (elements & actions)
+
 ---
 
 ### Why BDD Style?
 
 The `elements` and `actions` pattern provides:
+
 - **Clarity:** Test intent is obvious
 - **Reusability:** Avoid query duplication
 - **Maintainability:** Update queries in one place
@@ -311,6 +316,7 @@ The `elements` and `actions` pattern provides:
 **Purpose:** Encapsulate all DOM queries
 
 **Naming conventions:**
+
 - `get*` → Element should exist (throws if not found)
 - `query*` → Element may not exist (returns null)
 - `find*` → Async element (returns Promise)
@@ -343,6 +349,7 @@ const elements = {
 **Purpose:** Encapsulate user interactions
 
 **Naming conventions:**
+
 - Use verb + noun: `typeUsername`, `clickSubmit`, `selectOption`
 - Make async with `async/await`
 - Always call `userEvent.setup()` per action
@@ -351,13 +358,11 @@ const elements = {
 const actions = {
   // Simple actions
   typeUsername: async (value: string) => {
-    const user = userEvent.setup();
-    await user.type(elements.getUsernameInput(), value);
+    await userEventtype(elements.getUsernameInput(), value);
   },
 
   clickSubmit: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getSubmitButton());
+    await userEventclick(elements.getSubmitButton());
   },
 
   // Complex actions (combining multiple steps)
@@ -369,9 +374,8 @@ const actions = {
 
   // Actions with options
   selectStatus: async (statusLabel: string) => {
-    const user = userEvent.setup();
-    await user.click(elements.getStatusDropdown());
-    await user.click(screen.getByRole("option", { name: statusLabel }));
+    await userEventclick(elements.getStatusDropdown());
+    await userEventclick(screen.getByRole("option", { name: statusLabel }));
   },
 };
 ```
@@ -389,10 +393,10 @@ const elements = {
 
 const actions = {
   typeUsername: async (value: string) => {
-    const user = userEvent.setup();
+
     const input = elements.getUsernameInput();
-    await user.clear(input);
-    await user.type(input, value);
+    await userEventclear(input);
+    await userEventtype(input, value);
   },
 
   typeAndSubmit: async (username: string) => {
@@ -418,8 +422,8 @@ describe("ProfileSettingsForm", () => {
 });
 ```
 
-
 ## User Interactions (userEvent)
+
 ---
 
 ### Always Use userEvent (Not fireEvent)
@@ -427,7 +431,7 @@ describe("ProfileSettingsForm", () => {
 ```typescript
 // ✅ Good: userEvent simulates real user behavior
 const user = userEvent.setup();
-await user.type(input, "text");
+await userEventtype(input, "text");
 
 // ❌ Bad: fireEvent is too low-level
 fireEvent.change(input, { target: { value: "text" } });
@@ -439,30 +443,30 @@ fireEvent.change(input, { target: { value: "text" } });
 const user = userEvent.setup();
 
 // Typing
-await user.type(input, "hello");
-await user.clear(input);
-await user.type(input, "{Enter}"); // Special keys
+await userEventtype(input, "hello");
+await userEventclear(input);
+await userEventtype(input, "{Enter}"); // Special keys
 
 // Clicking
-await user.click(button);
-await user.dblClick(button);
+await userEventclick(button);
+await userEventdblClick(button);
 
 // Selection
-await user.selectOptions(select, "option1");
-await user.selectOptions(select, ["option1", "option2"]); // Multi-select
+await userEventselectOptions(select, "option1");
+await userEventselectOptions(select, ["option1", "option2"]); // Multi-select
 
 // Keyboard navigation
-await user.tab(); // Focus next element
-await user.tab({ shift: true }); // Focus previous
-await user.keyboard("{Escape}"); // Press Escape
+await userEventtab(); // Focus next element
+await userEventtab({ shift: true }); // Focus previous
+await userEventkeyboard("{Escape}"); // Press Escape
 
 // Hover
-await user.hover(element);
-await user.unhover(element);
+await userEventhover(element);
+await userEventunhover(element);
 
 // Upload files
 const file = new File(["hello"], "hello.png", { type: "image/png" });
-await user.upload(input, file);
+await userEventupload(input, file);
 ```
 
 ### Setup Once Per Test vs. Per Action
@@ -471,12 +475,12 @@ await user.upload(input, file);
 
 ```typescript
 it("should handle complete form flow", async () => {
-  const user = userEvent.setup();
+
   render(<Form />);
 
-  await user.type(screen.getByLabelText("Email"), "test@example.com");
-  await user.type(screen.getByLabelText("Password"), "password123");
-  await user.click(screen.getByRole("button", { name: "Submit" }));
+  await userEventtype(screen.getByLabelText("Email"), "test@example.com");
+  await userEventtype(screen.getByLabelText("Password"), "password123");
+  await userEventclick(screen.getByRole("button", { name: "Submit" }));
 
   await waitFor(() => {
     expect(mockSubmit).toHaveBeenCalled();
@@ -489,8 +493,8 @@ it("should handle complete form flow", async () => {
 ```typescript
 const actions = {
   typeEmail: async (value: string) => {
-    const user = userEvent.setup(); // ← Setup inside action
-    await user.type(elements.getEmailInput(), value);
+    // ← Setup inside action
+    await userEventtype(elements.getEmailInput(), value);
   },
 };
 
@@ -502,8 +506,8 @@ it("should handle email input", async () => {
 
 **Both patterns work.** Use per-test setup for complex flows, per-action setup for reusable helpers.
 
-
 ## Mocking Dependencies
+
 ---
 
 ### Server Actions
@@ -523,7 +527,7 @@ beforeEach(() => {
 it("should call server action", async () => {
   render(<Component />);
 
-  await user.click(screen.getByRole("button", { name: "Submit" }));
+  await userEventclick(screen.getByRole("button", { name: "Submit" }));
 
   await waitFor(() => {
     expect(mockServerAction).toHaveBeenCalledWith({ id: 123 });
@@ -570,8 +574,8 @@ beforeEach(() => {
 });
 ```
 
-
 ## Testing Async Behavior
+
 ---
 
 ### Use waitFor for Async Updates
@@ -580,7 +584,7 @@ beforeEach(() => {
 it("should display success message after submission", async () => {
   render(<Form />);
 
-  await user.click(screen.getByRole("button", { name: "Submit" }));
+  await userEventclick(screen.getByRole("button", { name: "Submit" }));
 
   // ✅ Good: Wait for async update
   await waitFor(() => {
@@ -594,18 +598,18 @@ it("should display success message after submission", async () => {
 ```typescript
 // ❌ Bad: Side effect inside waitFor (may execute multiple times)
 await waitFor(async () => {
-  await user.click(button); // May click multiple times!
+  await userEventclick(button); // May click multiple times!
   expect(mockAction).toHaveBeenCalled();
 });
 
 // ✅ Good: Side effect outside, assertion inside
-await user.click(button);
+await userEventclick(button);
 await waitFor(() => {
   expect(mockAction).toHaveBeenCalled();
 });
 ```
 
-### Use findBy* for Async Elements
+### Use findBy\* for Async Elements
 
 ```typescript
 // ✅ Best: findBy* (built-in wait)
@@ -618,8 +622,8 @@ await waitFor(() => {
 });
 ```
 
-
 ## Accessibility Testing
+
 ---
 
 ### ARIA Attributes
@@ -636,7 +640,7 @@ describe("given accessibility features", () => {
   it("should link error to input via aria-describedby", async () => {
     render(<Form />);
 
-    await user.type(screen.getByLabelText("Username"), "ab");
+    await userEventtype(screen.getByLabelText("Username"), "ab");
 
     await waitFor(() => {
       const input = screen.getByLabelText("Username");
@@ -653,19 +657,19 @@ describe("given accessibility features", () => {
 
 ```typescript
 it("should be keyboard navigable", async () => {
-  const user = userEvent.setup();
+
   render(<Form />);
 
   const usernameInput = screen.getByLabelText("Username");
   const submitButton = screen.getByRole("button", { name: "Submit" });
 
-  await user.tab();
+  await userEventtab();
   expect(usernameInput).toHaveFocus();
 
-  await user.tab();
+  await userEventtab();
   expect(submitButton).toHaveFocus();
 
-  await user.keyboard("{Enter}");
+  await userEventkeyboard("{Enter}");
 
   await waitFor(() => {
     expect(mockSubmit).toHaveBeenCalled();
@@ -688,8 +692,8 @@ it("should have accessible button labels", () => {
 });
 ```
 
-
 ## API Mocking with MSW
+
 ---
 
 ### Setup MSW Server
@@ -705,9 +709,7 @@ const handlers = [
 
     if (query === "zelda") {
       return HttpResponse.json({
-        games: [
-          { id: 1, name: "The Legend of Zelda: Breath of the Wild" },
-        ],
+        games: [{ id: 1, name: "The Legend of Zelda: Breath of the Wild" }],
       });
     }
 
@@ -726,8 +728,8 @@ afterAll(() => server.close());
 
 See [game-search-input.test.tsx](../../features/game-search/ui/game-search-input.test.tsx) for full MSW setup.
 
-
 ## Common Patterns
+
 ---
 
 ### Testing Form Validation
@@ -737,8 +739,8 @@ describe("given user submits invalid data", () => {
   it("should display validation error for short username", async () => {
     render(<Form />);
 
-    await user.type(screen.getByLabelText("Username"), "ab");
-    await user.click(screen.getByRole("button", { name: "Submit" }));
+    await userEventtype(screen.getByLabelText("Username"), "ab");
+    await userEventclick(screen.getByRole("button", { name: "Submit" }));
 
     await waitFor(() => {
       expect(screen.getByText(/must be at least 3 characters/i)).toBeInTheDocument();
@@ -748,7 +750,7 @@ describe("given user submits invalid data", () => {
   it("should disable submit button when validation fails", async () => {
     render(<Form />);
 
-    await user.type(screen.getByLabelText("Username"), "ab");
+    await userEventtype(screen.getByLabelText("Username"), "ab");
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
@@ -767,7 +769,7 @@ it("should show loading state during submission", async () => {
 
   render(<Form />);
 
-  await user.click(screen.getByRole("button", { name: "Submit" }));
+  await userEventclick(screen.getByRole("button", { name: "Submit" }));
 
   expect(screen.getByRole("button", { name: "Submitting..." })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Submitting..." })).toBeDisabled();
@@ -785,8 +787,8 @@ it("should display server error message", async () => {
 
   render(<Form />);
 
-  await user.type(screen.getByLabelText("Username"), "taken");
-  await user.click(screen.getByRole("button", { name: "Submit" }));
+  await userEventtype(screen.getByLabelText("Username"), "taken");
+  await userEventclick(screen.getByRole("button", { name: "Submit" }));
 
   await waitFor(() => {
     expect(screen.getByText("Username already exists")).toBeInTheDocument();
@@ -794,8 +796,8 @@ it("should display server error message", async () => {
 });
 ```
 
-
 ## Anti-Patterns to Avoid
+
 ---
 
 ### ❌ Testing Implementation Details
@@ -846,18 +848,18 @@ expect(screen.getByRole("heading")).toHaveTextContent("Profile Settings");
 
 ```typescript
 // ❌ Bad: Race condition
-await user.click(button);
+await userEventclick(button);
 expect(screen.getByText("Success")).toBeInTheDocument(); // May fail
 
 // ✅ Good: Wait for async update
-await user.click(button);
+await userEventclick(button);
 await waitFor(() => {
   expect(screen.getByText("Success")).toBeInTheDocument();
 });
 ```
 
-
 ## Running Tests
+
 ---
 
 ```bash
@@ -877,8 +879,8 @@ pnpm test --ui
 pnpm test:coverage
 ```
 
-
 ## Further Reading
+
 ---
 
 - [React Testing Library Docs](https://testing-library.com/docs/react-testing-library/intro)

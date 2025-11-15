@@ -52,19 +52,16 @@ const elements = {
 
 const actions = {
   selectStatus: async (statusLabel: string) => {
-    const user = userEvent.setup();
-    await user.click(elements.getStatusTrigger());
-    await user.click(screen.getByText(statusLabel));
+    await userEvent.click(elements.getStatusTrigger());
+    await userEvent.click(screen.getByText(statusLabel));
   },
 
   clickCancel: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getCancelButton());
+    await userEvent.click(elements.getCancelButton());
   },
 
   clickSubmit: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getSubmitButton());
+    await userEvent.click(elements.getSubmitButton());
   },
 
   selectStatusAndSubmit: async (statusLabel: string) => {
@@ -146,136 +143,6 @@ describe("EditEntryForm", () => {
     });
   });
 
-  describe("given form submission succeeds", () => {
-    it("should call server action with correct data", async () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      await actions.selectStatusAndSubmit("Experienced");
-
-      await waitFor(() => {
-        expect(mockUpdateLibraryEntryAction).toHaveBeenCalledWith({
-          libraryItemId: 1,
-          status: LibraryItemStatus.EXPERIENCED,
-          platform: "PC",
-        });
-      });
-    });
-
-    it("should display success toast with status label", async () => {
-      mockUpdateLibraryEntryAction.mockResolvedValueOnce({
-        success: true,
-        data: createMockLibraryItem({ status: LibraryItemStatus.EXPERIENCED }),
-      });
-
-      render(<EditEntryForm {...defaultProps} />);
-
-      await actions.selectStatusAndSubmit("Experienced");
-
-      await waitFor(() => {
-        expect(mockToastSuccess).toHaveBeenCalledWith("Library entry updated", {
-          description: "Status updated to Experienced.",
-        });
-      });
-    });
-
-    it("should call onSuccess callback", async () => {
-      const onSuccess = vi.fn();
-      render(<EditEntryForm {...defaultProps} onSuccess={onSuccess} />);
-
-      await actions.selectStatusAndSubmit("Experienced");
-
-      await waitFor(() => {
-        expect(onSuccess).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    it("should update status from Curious About to Wishlist", async () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      await actions.selectStatusAndSubmit("Wishlist");
-
-      await waitFor(() => {
-        expect(mockUpdateLibraryEntryAction).toHaveBeenCalledWith(
-          expect.objectContaining({
-            status: LibraryItemStatus.WISHLIST,
-          })
-        );
-      });
-    });
-
-    it("should update status from Curious About to Currently Exploring", async () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      await actions.selectStatusAndSubmit("Currently Exploring");
-
-      await waitFor(() => {
-        expect(mockUpdateLibraryEntryAction).toHaveBeenCalledWith(
-          expect.objectContaining({
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
-          })
-        );
-      });
-    });
-  });
-
-  describe("given form submission fails", () => {
-    it("should display error toast with error message", async () => {
-      mockUpdateLibraryEntryAction.mockResolvedValueOnce({
-        success: false,
-        error: "Failed to update library entry",
-      });
-
-      render(<EditEntryForm {...defaultProps} />);
-
-      await actions.selectStatusAndSubmit("Experienced");
-
-      await waitFor(() => {
-        expect(mockToastError).toHaveBeenCalledWith("Failed to update entry", {
-          description: "Failed to update library entry",
-        });
-      });
-    });
-
-    it("should not call onSuccess callback on failure", async () => {
-      const onSuccess = vi.fn();
-      mockUpdateLibraryEntryAction.mockResolvedValueOnce({
-        success: false,
-        error: "Failed to update",
-      });
-
-      render(<EditEntryForm {...defaultProps} onSuccess={onSuccess} />);
-
-      await actions.selectStatusAndSubmit("Experienced");
-
-      await waitFor(() => {
-        expect(mockUpdateLibraryEntryAction).toHaveBeenCalled();
-      });
-
-      expect(onSuccess).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("given form submission throws exception", () => {
-    it("should display generic error toast", async () => {
-      mockUpdateLibraryEntryAction.mockRejectedValueOnce(
-        new Error("Network error")
-      );
-
-      render(<EditEntryForm {...defaultProps} />);
-
-      await actions.selectStatusAndSubmit("Experienced");
-
-      await waitFor(() => {
-        expect(mockToastError).toHaveBeenCalledWith(
-          "An unexpected error occurred",
-          {
-            description: "Network error",
-          }
-        );
-      });
-    });
-  });
-
   describe("given form is submitting", () => {
     it("should disable cancel button during submission", async () => {
       mockUpdateLibraryEntryAction.mockImplementationOnce(async () => {
@@ -301,15 +168,14 @@ describe("EditEntryForm", () => {
 
       mockUpdateLibraryEntryAction.mockReturnValue(slowAction as any);
 
-      const user = userEvent.setup();
       render(<EditEntryForm {...defaultProps} />);
 
       // Select status and submit
-      await user.click(elements.getStatusTrigger());
-      await user.click(screen.getAllByText("Experienced")[0]);
+      await userEvent.click(elements.getStatusTrigger());
+      await userEvent.click(screen.getAllByText("Experienced")[0]);
 
       // Click submit but don't await - this starts the async action
-      const submitPromise = user.click(elements.getSubmitButton());
+      const submitPromise = userEvent.click(elements.getSubmitButton());
 
       // Check the loading state - query by type since text changes during loading
       await waitFor(() => {

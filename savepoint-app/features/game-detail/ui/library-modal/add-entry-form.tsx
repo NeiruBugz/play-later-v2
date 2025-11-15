@@ -1,19 +1,23 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LibraryItemStatus } from "@prisma/client";
-import { useState } from "react";
+import { LibraryItemStatus, type Platform } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { useGetPlatforms } from "@/features/game-detail/hooks/use-get-platforms";
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
 
 import { AddToLibrarySchema, type AddToLibraryInput } from "../../schemas";
 import { addToLibraryAction } from "../../server-actions";
+import { PlatformCombobox } from "./platform-combobox";
 import { StatusSelect } from "./status-select";
 
 type AddEntryFormProps = {
   igdbId: number;
+  gameId?: string;
   gameTitle: string;
   isEditMode?: boolean;
   onSuccess: () => void;
@@ -34,9 +38,30 @@ export const AddEntryForm = ({
     defaultValues: {
       igdbId,
       status: LibraryItemStatus.CURIOUS_ABOUT,
-      platform: undefined,
+      platform: "",
     },
   });
+
+  const {
+    data: platformsData,
+    isLoading: isLoadingPlatforms,
+    error: platformsError,
+  } = useGetPlatforms(igdbId);
+
+  // Handle error with toast notification
+  useEffect(() => {
+    if (platformsError) {
+      toast.error("Failed to load platforms", {
+        description:
+          platformsError instanceof Error
+            ? platformsError.message
+            : "Please try again later.",
+      });
+    }
+  }, [platformsError]);
+
+  const supportedPlatforms = platformsData?.supportedPlatforms ?? [];
+  const otherPlatforms = platformsData?.otherPlatforms ?? [];
 
   const onSubmit = async (data: AddToLibraryInput) => {
     try {
@@ -57,7 +82,7 @@ export const AddEntryForm = ({
         form.reset({
           igdbId,
           status: LibraryItemStatus.CURIOUS_ABOUT,
-          platform: undefined,
+          platform: "",
         });
         onSuccess();
       } else {
@@ -93,6 +118,19 @@ export const AddEntryForm = ({
             <StatusSelect
               field={field}
               className={isEditMode ? "py-6 text-left" : undefined}
+            />
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="platform"
+          render={({ field }) => (
+            <PlatformCombobox
+              field={field}
+              supportedPlatforms={supportedPlatforms}
+              otherPlatforms={otherPlatforms}
+              isLoading={isLoadingPlatforms}
             />
           )}
         />

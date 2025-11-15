@@ -38,15 +38,13 @@ const elements = {
 
 const actions = {
   typeUsername: async (value: string) => {
-    const user = userEvent.setup();
     const input = elements.getUsernameInput();
-    await user.clear(input);
-    await user.type(input, value);
+    await userEvent.clear(input);
+    await userEvent.type(input, value);
   },
 
   submitForm: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getSubmitButton());
+    await userEvent.click(elements.getSubmitButton());
   },
 
   typeAndSubmit: async (username: string) => {

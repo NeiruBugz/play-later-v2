@@ -45,11 +45,10 @@ describe("GlobalError (Error Boundary)", () => {
   });
 
   it("should call reset function when 'Try again' button is clicked", async () => {
-    const user = userEvent.setup();
     render(<GlobalError error={mockError} reset={mockReset} />);
 
     const tryAgainButton = screen.getByRole("button", { name: /try again/i });
-    await user.click(tryAgainButton);
+    await userEvent.click(tryAgainButton);
 
     expect(mockReset).toHaveBeenCalledOnce();
   });

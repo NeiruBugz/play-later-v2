@@ -68,7 +68,6 @@ describe("GameNotFound", () => {
   });
 
   it("disables search button when query is less than 3 characters", async () => {
-    const user = userEvent.setup();
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
@@ -78,29 +77,27 @@ describe("GameNotFound", () => {
     expect(searchButton).toBeDisabled();
 
     // Type 2 characters - still disabled
-    await user.type(searchInput, "ab");
+    await userEvent.type(searchInput, "ab");
     expect(searchButton).toBeDisabled();
   });
 
   it("enables search button when query is 3+ characters", async () => {
-    const user = userEvent.setup();
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
     const searchButton = screen.getByRole("button", { name: /search/i });
 
-    await user.type(searchInput, "zelda");
+    await userEvent.type(searchInput, "zelda");
 
     expect(searchButton).toBeEnabled();
   });
 
   it("shows validation message when typing less than 3 characters", async () => {
-    const user = userEvent.setup();
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
 
-    await user.type(searchInput, "ab");
+    await userEvent.type(searchInput, "ab");
 
     expect(
       screen.getByText(/please enter at least 3 characters to search/i)
@@ -116,12 +113,11 @@ describe("GameNotFound", () => {
   });
 
   it("hides validation message when query is 3+ characters", async () => {
-    const user = userEvent.setup();
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
 
-    await user.type(searchInput, "zelda");
+    await userEvent.type(searchInput, "zelda");
 
     expect(
       screen.queryByText(/please enter at least 3 characters to search/i)
@@ -129,14 +125,13 @@ describe("GameNotFound", () => {
   });
 
   it("navigates to search page with query on form submit", async () => {
-    const user = userEvent.setup();
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
     const searchButton = screen.getByRole("button", { name: /search/i });
 
-    await user.type(searchInput, "zelda");
-    await user.click(searchButton);
+    await userEvent.type(searchInput, "zelda");
+    await userEvent.click(searchButton);
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/games/search?q=zelda");
@@ -144,14 +139,13 @@ describe("GameNotFound", () => {
   });
 
   it("trims whitespace from search query", async () => {
-    const user = userEvent.setup();
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
     const searchButton = screen.getByRole("button", { name: /search/i });
 
-    await user.type(searchInput, "  zelda  ");
-    await user.click(searchButton);
+    await userEvent.type(searchInput, "  zelda  ");
+    await userEvent.click(searchButton);
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/games/search?q=zelda");
@@ -159,14 +153,13 @@ describe("GameNotFound", () => {
   });
 
   it("URL-encodes special characters in search query", async () => {
-    const user = userEvent.setup();
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
     const searchButton = screen.getByRole("button", { name: /search/i });
 
-    await user.type(searchInput, "mario & luigi");
-    await user.click(searchButton);
+    await userEvent.type(searchInput, "mario & luigi");
+    await userEvent.click(searchButton);
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith(
@@ -176,13 +169,12 @@ describe("GameNotFound", () => {
   });
 
   it("does not submit form with less than 3 characters", async () => {
-    const user = userEvent.setup();
     render(<GameNotFound />);
 
     const searchInput = screen.getByLabelText(/search for games by name/i);
 
-    await user.type(searchInput, "ab");
-    await user.keyboard("{Enter}");
+    await userEvent.type(searchInput, "ab");
+    await userEvent.keyboard("{Enter}");
 
     expect(mockPush).not.toHaveBeenCalled();
   });
@@ -219,27 +211,25 @@ describe("GameNotFound", () => {
     });
 
     it("allows user to modify pre-populated query", async () => {
-      const user = userEvent.setup();
       render(<GameNotFound initialQuery="zelda" />);
 
       const searchInput = screen.getByLabelText(/search for games by name/i);
 
-      await user.clear(searchInput);
-      await user.type(searchInput, "mario");
+      await userEvent.clear(searchInput);
+      await userEvent.type(searchInput, "mario");
 
       expect(searchInput).toHaveValue("mario");
     });
 
     it("navigates with modified query on submit", async () => {
-      const user = userEvent.setup();
       render(<GameNotFound initialQuery="zelda" />);
 
       const searchInput = screen.getByLabelText(/search for games by name/i);
       const searchButton = screen.getByRole("button", { name: /search/i });
 
-      await user.clear(searchInput);
-      await user.type(searchInput, "mario");
-      await user.click(searchButton);
+      await userEvent.clear(searchInput);
+      await userEvent.type(searchInput, "mario");
+      await userEvent.click(searchButton);
 
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith("/games/search?q=mario");

@@ -26,6 +26,7 @@ import { AddToLibraryButton } from "./add-to-library-button";
 import { LibraryModal } from "./library-modal";
 
 type LibraryStatusDisplayProps = {
+  gameId?: string;
   userLibraryStatus?: {
     mostRecent: {
       status: LibraryItemStatus;
@@ -50,6 +51,7 @@ const STATUS_CONFIG: Record<
 };
 
 export const LibraryStatusDisplay = ({
+  gameId,
   userLibraryStatus,
   igdbId,
   gameTitle,
@@ -65,7 +67,11 @@ export const LibraryStatusDisplay = ({
           <CardDescription>Add this game to your library</CardDescription>
         </CardHeader>
         <CardContent>
-          <AddToLibraryButton igdbId={igdbId} gameTitle={gameTitle} />
+          <AddToLibraryButton
+            igdbId={igdbId}
+            gameTitle={gameTitle}
+            gameId={gameId}
+          />
         </CardContent>
       </Card>
     );
@@ -111,6 +117,7 @@ export const LibraryStatusDisplay = ({
       </Card>
 
       <LibraryModal
+        gameId={gameId}
         isOpen={isManageModalOpen}
         onClose={() => setIsManageModalOpen(false)}
         igdbId={igdbId}

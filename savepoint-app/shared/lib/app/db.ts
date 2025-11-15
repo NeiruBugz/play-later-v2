@@ -30,8 +30,6 @@ const prismaFactory = () => {
   });
 
   // Enable query logging in development when DATABASE_LOGGING=true
-  console.log("env.NODE_ENV", env.NODE_ENV);
-  console.log("env.DATABASE_LOGGING", env.DATABASE_LOGGING);
   const isDatabaseLoggingEnabled =
     env.NODE_ENV === "development" && env.DATABASE_LOGGING === "true";
 

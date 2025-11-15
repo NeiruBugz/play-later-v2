@@ -12,6 +12,7 @@ export type GameFactoryOptions = {
   description?: string;
   coverImage?: string;
   steamAppId?: number;
+  releaseDate?: Date;
 };
 
 export const createGame = async (

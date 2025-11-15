@@ -65,21 +65,19 @@ describe("GlobalError (Root Error Boundary)", () => {
   });
 
   it("should call window.location.reload when 'Refresh page' button is clicked", async () => {
-    const user = userEvent.setup();
     render(<GlobalError error={mockError} reset={mockReset} />);
 
     const refreshButton = screen.getByRole("button", { name: /refresh page/i });
-    await user.click(refreshButton);
+    await userEvent.click(refreshButton);
 
     expect(window.location.reload).toHaveBeenCalledOnce();
   });
 
   it("should call reset function when 'Try again' button is clicked", async () => {
-    const user = userEvent.setup();
     render(<GlobalError error={mockError} reset={mockReset} />);
 
     const tryAgainButton = screen.getByRole("button", { name: /try again/i });
-    await user.click(tryAgainButton);
+    await userEvent.click(tryAgainButton);
 
     expect(mockReset).toHaveBeenCalledOnce();
   });

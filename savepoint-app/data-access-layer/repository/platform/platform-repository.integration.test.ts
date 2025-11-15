@@ -3,10 +3,12 @@ import {
   resetTestDatabase,
   setupDatabase,
 } from "@/test/setup/database";
+import { createGame } from "@/test/setup/db-factories";
 
 import { isRepositorySuccess } from "../types";
 import {
   findPlatformByIgdbId,
+  findPlatformsForGame,
   upsertPlatform,
   upsertPlatforms,
 } from "./platform-repository";
@@ -233,6 +235,238 @@ describe("PlatformRepository - Integration Tests", () => {
         expect(result.data?.abbreviation).toBe("NSW");
         expect(result.data?.generation).toBe(8);
         expect(result.data?.checksum).toBe("xyz789");
+      }
+    });
+  });
+
+  describe("findPlatformsForGame", () => {
+    it("should return platforms grouped into supported and other for a game", async () => {
+      // Create platforms
+      await upsertPlatforms([
+        { id: 48, name: "PlayStation 5", slug: "ps5", abbreviation: "PS5" },
+        { id: 169, name: "Xbox Series X|S", slug: "xsx", abbreviation: "XSX" },
+        {
+          id: 6,
+          name: "PC (Microsoft Windows)",
+          slug: "win",
+          abbreviation: "PC",
+        },
+        {
+          id: 49,
+          name: "PlayStation 4",
+          slug: "ps4",
+          abbreviation: "PS4",
+        },
+      ]);
+
+      // Create a game and link it to some platforms
+      const game = await createGame({ title: "Test Game", igdbId: 12345 });
+
+      // Get platform IDs
+      const ps5Result = await findPlatformByIgdbId(48);
+      const xsxResult = await findPlatformByIgdbId(169);
+
+      if (!isRepositorySuccess(ps5Result) || !isRepositorySuccess(xsxResult)) {
+        throw new Error("Failed to find platforms");
+      }
+
+      const ps5Id = ps5Result.data!.id;
+      const xsxId = xsxResult.data!.id;
+
+      // Link game to PS5 and Xbox Series X|S (these will be "supported")
+      const { prisma } = await import("@/shared/lib");
+      await prisma.gamePlatform.createMany({
+        data: [
+          { gameId: game.id, platformId: ps5Id },
+          { gameId: game.id, platformId: xsxId },
+        ],
+      });
+
+      // Execute findPlatformsForGame
+      const result = await findPlatformsForGame(game.id);
+
+      // Assertions
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data.supportedPlatforms).toHaveLength(2);
+        expect(result.data.otherPlatforms).toHaveLength(2);
+
+        // Supported platforms should include PS5 and Xbox Series X|S
+        const supportedNames = result.data.supportedPlatforms.map((p) => p.name);
+        expect(supportedNames).toContain("PlayStation 5");
+        expect(supportedNames).toContain("Xbox Series X|S");
+
+        // Other platforms should include PC and PS4
+        const otherNames = result.data.otherPlatforms.map((p) => p.name);
+        expect(otherNames).toContain("PC (Microsoft Windows)");
+        expect(otherNames).toContain("PlayStation 4");
+      }
+    });
+
+    it("should return all platforms as 'other' when game has no linked platforms", async () => {
+      // Create platforms
+      await upsertPlatforms([
+        { id: 48, name: "PlayStation 5", slug: "ps5", abbreviation: "PS5" },
+        { id: 169, name: "Xbox Series X|S", slug: "xsx", abbreviation: "XSX" },
+      ]);
+
+      // Create a game but don't link it to any platforms
+      const game = await createGame({ title: "Game Without Platforms", igdbId: 67890 });
+
+      const result = await findPlatformsForGame(game.id);
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data.supportedPlatforms).toHaveLength(0);
+        expect(result.data.otherPlatforms).toHaveLength(2);
+
+        const otherNames = result.data.otherPlatforms.map((p) => p.name);
+        expect(otherNames).toContain("PlayStation 5");
+        expect(otherNames).toContain("Xbox Series X|S");
+      }
+    });
+
+    it("should return empty arrays when no platforms exist in database", async () => {
+      const game = await createGame({ title: "Game In Empty DB", igdbId: 11111 });
+
+      const result = await findPlatformsForGame(game.id);
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data.supportedPlatforms).toHaveLength(0);
+        expect(result.data.otherPlatforms).toHaveLength(0);
+      }
+    });
+
+    it("should sort platforms alphabetically by name", async () => {
+      await upsertPlatforms([
+        {
+          id: 130,
+          name: "Nintendo Switch",
+          slug: "switch",
+          abbreviation: "NSW",
+        },
+        { id: 48, name: "PlayStation 5", slug: "ps5", abbreviation: "PS5" },
+        { id: 169, name: "Xbox Series X|S", slug: "xsx", abbreviation: "XSX" },
+        { id: 6, name: "PC (Microsoft Windows)", slug: "win", abbreviation: "PC" },
+      ]);
+
+      const game = await createGame({ title: "Sorting Test", igdbId: 22222 });
+
+      const result = await findPlatformsForGame(game.id);
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        // All should be in "other" since none are linked
+        expect(result.data.otherPlatforms).toHaveLength(4);
+
+        const names = result.data.otherPlatforms.map((p) => p.name);
+        // Check alphabetical order
+        expect(names).toEqual([
+          "Nintendo Switch",
+          "PC (Microsoft Windows)",
+          "PlayStation 5",
+          "Xbox Series X|S",
+        ]);
+      }
+    });
+
+    it("should handle game with all platforms supported (none in other)", async () => {
+      // Create platforms
+      await upsertPlatforms([
+        { id: 48, name: "PlayStation 5", slug: "ps5", abbreviation: "PS5" },
+        { id: 169, name: "Xbox Series X|S", slug: "xsx", abbreviation: "XSX" },
+      ]);
+
+      const game = await createGame({ title: "All Platforms Game", igdbId: 33333 });
+
+      // Link game to all platforms
+      const ps5Result = await findPlatformByIgdbId(48);
+      const xsxResult = await findPlatformByIgdbId(169);
+
+      if (!isRepositorySuccess(ps5Result) || !isRepositorySuccess(xsxResult)) {
+        throw new Error("Failed to find platforms");
+      }
+
+      const { prisma } = await import("@/shared/lib");
+      await prisma.gamePlatform.createMany({
+        data: [
+          { gameId: game.id, platformId: ps5Result.data!.id },
+          { gameId: game.id, platformId: xsxResult.data!.id },
+        ],
+      });
+
+      const result = await findPlatformsForGame(game.id);
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        expect(result.data.supportedPlatforms).toHaveLength(2);
+        expect(result.data.otherPlatforms).toHaveLength(0);
+      }
+    });
+
+    it("should return empty arrays for non-existent game ID", async () => {
+      // Create some platforms
+      await upsertPlatforms([
+        { id: 48, name: "PlayStation 5", slug: "ps5", abbreviation: "PS5" },
+      ]);
+
+      // Use a non-existent game ID
+      const result = await findPlatformsForGame("clx999nonexistent");
+
+      expect(isRepositorySuccess(result)).toBe(true);
+      if (isRepositorySuccess(result)) {
+        // No GamePlatform links exist for this ID, so all platforms should be "other"
+        expect(result.data.supportedPlatforms).toHaveLength(0);
+        expect(result.data.otherPlatforms).toHaveLength(1);
+      }
+    });
+
+    it("should correctly group platforms when multiple games exist", async () => {
+      // Create platforms
+      await upsertPlatforms([
+        { id: 48, name: "PlayStation 5", slug: "ps5", abbreviation: "PS5" },
+        { id: 169, name: "Xbox Series X|S", slug: "xsx", abbreviation: "XSX" },
+        { id: 6, name: "PC (Microsoft Windows)", slug: "win", abbreviation: "PC" },
+      ]);
+
+      // Create two games
+      const game1 = await createGame({ title: "Game 1", igdbId: 44444 });
+      const game2 = await createGame({ title: "Game 2", igdbId: 55555 });
+
+      // Link game1 to PS5
+      const ps5Result = await findPlatformByIgdbId(48);
+      // Link game2 to Xbox
+      const xsxResult = await findPlatformByIgdbId(169);
+
+      if (!isRepositorySuccess(ps5Result) || !isRepositorySuccess(xsxResult)) {
+        throw new Error("Failed to find platforms");
+      }
+
+      const { prisma } = await import("@/shared/lib");
+      await prisma.gamePlatform.create({
+        data: { gameId: game1.id, platformId: ps5Result.data!.id },
+      });
+      await prisma.gamePlatform.create({
+        data: { gameId: game2.id, platformId: xsxResult.data!.id },
+      });
+
+      // Check game1 - should have PS5 as supported
+      const result1 = await findPlatformsForGame(game1.id);
+      expect(isRepositorySuccess(result1)).toBe(true);
+      if (isRepositorySuccess(result1)) {
+        expect(result1.data.supportedPlatforms).toHaveLength(1);
+        expect(result1.data.supportedPlatforms[0].name).toBe("PlayStation 5");
+        expect(result1.data.otherPlatforms).toHaveLength(2);
+      }
+
+      // Check game2 - should have Xbox as supported
+      const result2 = await findPlatformsForGame(game2.id);
+      expect(isRepositorySuccess(result2)).toBe(true);
+      if (isRepositorySuccess(result2)) {
+        expect(result2.data.supportedPlatforms).toHaveLength(1);
+        expect(result2.data.supportedPlatforms[0].name).toBe("Xbox Series X|S");
+        expect(result2.data.otherPlatforms).toHaveLength(2);
       }
     });
   });

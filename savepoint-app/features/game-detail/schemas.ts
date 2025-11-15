@@ -8,7 +8,9 @@ import { z } from "zod";
 export const AddToLibrarySchema = z.object({
   igdbId: z.number().int().positive(),
   status: z.nativeEnum(LibraryItemStatus),
-  platform: z.string().optional(),
+  platform: z.string().min(1, "Platform is required"),
+  startedAt: z.date().optional(),
+  completedAt: z.date().optional(),
 });
 
 /**

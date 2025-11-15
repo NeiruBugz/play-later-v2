@@ -25,7 +25,6 @@ describe("QuickActionButtons - Accessibility", () => {
 
   describe("Keyboard Navigation", () => {
     it("should be fully keyboard navigable with Tab key", async () => {
-      const user = userEvent.setup();
       render(<QuickActionButtons {...defaultProps} />);
 
       // Get all buttons
@@ -33,18 +32,17 @@ describe("QuickActionButtons - Accessibility", () => {
       expect(buttons).toHaveLength(6); // 6 status buttons
 
       // Tab through all buttons
-      await user.tab();
+      await userEvent.tab();
       expect(buttons[0]).toHaveFocus();
 
-      await user.tab();
+      await userEvent.tab();
       expect(buttons[1]).toHaveFocus();
 
-      await user.tab();
+      await userEvent.tab();
       expect(buttons[2]).toHaveFocus();
     });
 
     it("should be activatable with Enter key", async () => {
-      const user = userEvent.setup();
       render(<QuickActionButtons {...defaultProps} />);
 
       const curiousButton = screen.getByRole("button", {
@@ -52,7 +50,7 @@ describe("QuickActionButtons - Accessibility", () => {
       });
 
       curiousButton.focus();
-      await user.keyboard("{Enter}");
+      await userEvent.keyboard("{Enter}");
 
       // Verify button was activated (becomes pressed)
       await waitFor(() => {
@@ -61,7 +59,6 @@ describe("QuickActionButtons - Accessibility", () => {
     });
 
     it("should be activatable with Space key", async () => {
-      const user = userEvent.setup();
       render(<QuickActionButtons {...defaultProps} />);
 
       const playingButton = screen.getByRole("button", {
@@ -69,7 +66,7 @@ describe("QuickActionButtons - Accessibility", () => {
       });
 
       playingButton.focus();
-      await user.keyboard(" ");
+      await userEvent.keyboard(" ");
 
       // Verify button was activated
       await waitFor(() => {
@@ -156,14 +153,13 @@ describe("QuickActionButtons - Accessibility", () => {
     });
 
     it("should announce status changes to screen readers", async () => {
-      const user = userEvent.setup();
       render(<QuickActionButtons {...defaultProps} />);
 
       const curiousButton = screen.getByRole("button", {
         name: "Mark as Curious About",
       });
 
-      await user.click(curiousButton);
+      await userEvent.click(curiousButton);
 
       await waitFor(() => {
         const liveRegion = screen.getByRole("status");
@@ -186,7 +182,6 @@ describe("QuickActionButtons - Accessibility", () => {
     });
 
     it("should not lose focus after status update", async () => {
-      const user = userEvent.setup();
       render(<QuickActionButtons {...defaultProps} />);
 
       const curiousButton = screen.getByRole("button", {
@@ -196,7 +191,7 @@ describe("QuickActionButtons - Accessibility", () => {
       curiousButton.focus();
       expect(curiousButton).toHaveFocus();
 
-      await user.click(curiousButton);
+      await userEvent.click(curiousButton);
 
       await waitFor(() => {
         expect(curiousButton).toHaveFocus();
@@ -214,14 +209,13 @@ describe("QuickActionButtons - Accessibility", () => {
           })
       );
 
-      const user = userEvent.setup();
       render(<QuickActionButtons {...defaultProps} />);
 
       const curiousButton = screen.getByRole("button", {
         name: "Mark as Curious About",
       });
 
-      await user.click(curiousButton);
+      await userEvent.click(curiousButton);
 
       // All buttons should be disabled while pending
       const buttons = screen.getAllByRole("button");

@@ -2,8 +2,11 @@ import "server-only";
 
 import {
   createLibraryItem,
+  deleteLibraryItem,
   findAllLibraryItemsByGameId,
   findGameByIgdbId,
+  findLibraryItemById,
+  findLibraryItemsWithFilters,
   findMostRecentLibraryItemByGameId,
   findUserById,
   updateLibraryItem,
@@ -11,10 +14,11 @@ import {
 import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
+import { z } from "zod";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { BaseService } from "../types";
+import { BaseService, type ServiceResult } from "../types";
 import type {
   AddGameToLibraryInput,
   AddGameToLibraryResult,
@@ -22,6 +26,64 @@ import type {
 } from "./types";
 
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "LibraryService" });
+
+/**
+ * Zod schema for getLibraryItems input validation
+ */
+const GetLibraryItemsSchema = z.object({
+  userId: z.string().cuid(),
+  status: z.nativeEnum(LibraryItemStatus).optional(),
+  platform: z.string().optional(),
+  search: z.string().optional(),
+  sortBy: z
+    .enum(["createdAt", "releaseDate", "startedAt", "completedAt"])
+    .optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+  distinctByGame: z.boolean().optional(),
+});
+
+/**
+ * Zod schema for deleteLibraryItem input validation
+ */
+const DeleteLibraryItemSchema = z.object({
+  libraryItemId: z.number().int().positive(),
+  userId: z.string().cuid(),
+});
+
+type SortField = "createdAt" | "releaseDate" | "startedAt" | "completedAt";
+
+type GetLibraryItemsParams = {
+  userId: string;
+  status?: LibraryItemStatus;
+  platform?: string;
+  search?: string;
+  sortBy?: SortField;
+  sortOrder?: "asc" | "desc";
+  distinctByGame?: boolean;
+};
+
+type LibraryItemWithGameAndCount = {
+  id: number;
+  userId: string;
+  gameId: string;
+  status: LibraryItemStatus;
+  platform: string | null;
+  acquisitionType: string | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  game: {
+    id: string;
+    title: string;
+    coverImage: string | null;
+    slug: string;
+    releaseDate: Date | null;
+    _count: {
+      libraryItems: number;
+    };
+  };
+};
 
 export class LibraryService extends BaseService implements ILibraryService {
   /**
@@ -37,7 +99,7 @@ export class LibraryService extends BaseService implements ILibraryService {
     input: AddGameToLibraryInput
   ): Promise<AddGameToLibraryResult> {
     try {
-      const { userId, igdbId, status, platform } = input;
+      const { userId, igdbId, status, platform, startedAt, completedAt } = input;
 
       logger.info({ userId, igdbId, status }, "Adding game to library");
 
@@ -105,6 +167,8 @@ export class LibraryService extends BaseService implements ILibraryService {
           status,
           acquisitionType: AcquisitionType.DIGITAL, // Default to DIGITAL
           platform: platform ?? undefined,
+          startedAt: startedAt ?? undefined,
+          completedAt: completedAt ?? undefined,
         },
       });
 
@@ -202,6 +266,32 @@ export class LibraryService extends BaseService implements ILibraryService {
   }
 
   /**
+   * Validate status transition for library items
+   *
+   * Rule: Cannot move TO Wishlist from any other status
+   * All other transitions are allowed (forward progression is flexible)
+   */
+  private validateStatusTransition(
+    currentStatus: LibraryItemStatus,
+    newStatus: LibraryItemStatus
+  ): { valid: boolean; error?: string } {
+    // Rule: Cannot move TO Wishlist from any other status
+    if (
+      newStatus === LibraryItemStatus.WISHLIST &&
+      currentStatus !== LibraryItemStatus.WISHLIST
+    ) {
+      return {
+        valid: false,
+        error:
+          "Cannot move a game back to Wishlist. Create a new library item instead.",
+      };
+    }
+
+    // All other transitions are allowed (forward progression is flexible)
+    return { valid: true };
+  }
+
+  /**
    * Update a library item
    */
   async updateLibraryItem(params: {
@@ -210,6 +300,47 @@ export class LibraryService extends BaseService implements ILibraryService {
   }) {
     try {
       logger.info(params, "Updating library item");
+
+      // 1. Fetch current library item to check status for transition validation
+      const currentItemResult = await findLibraryItemById({
+        libraryItemId: params.libraryItem.id,
+        userId: params.userId,
+      });
+
+      if (!currentItemResult.ok) {
+        logger.error(
+          { error: currentItemResult.error, ...params },
+          "Failed to fetch library item for update"
+        );
+        return this.error("Library item not found");
+      }
+
+      // 2. Validate status transition if status is being updated
+      const currentStatus = currentItemResult.data.status;
+      const newStatus = params.libraryItem.status;
+
+      if (newStatus !== currentStatus) {
+        const transitionValidation = this.validateStatusTransition(
+          currentStatus,
+          newStatus
+        );
+
+        if (!transitionValidation.valid) {
+          logger.warn(
+            {
+              libraryItemId: params.libraryItem.id,
+              currentStatus,
+              requestedStatus: newStatus,
+            },
+            "Invalid status transition attempted"
+          );
+          return this.error(
+            transitionValidation.error ?? "Invalid status transition"
+          );
+        }
+      }
+
+      // 3. Proceed with update
       const result = await updateLibraryItem(params);
 
       if (!result.ok) {
@@ -219,6 +350,15 @@ export class LibraryService extends BaseService implements ILibraryService {
         );
         return this.error("Failed to update library item");
       }
+
+      logger.info(
+        {
+          libraryItemId: params.libraryItem.id,
+          oldStatus: currentStatus,
+          newStatus,
+        },
+        "Library item updated successfully"
+      );
 
       return this.success(result.data);
     } catch (error) {
@@ -256,6 +396,135 @@ export class LibraryService extends BaseService implements ILibraryService {
       logger.error(
         { error, ...params },
         "Unexpected error in findAllLibraryItemsByGameId"
+      );
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    }
+  }
+
+  /**
+   * Get library items with filtering, sorting, and search capabilities
+   *
+   * This service method:
+   * 1. Validates input parameters using Zod schema
+   * 2. Calls the repository to fetch filtered library items
+   * 3. Returns structured ServiceResult with data or error
+   */
+  async getLibraryItems(
+    params: GetLibraryItemsParams
+  ): Promise<
+    | { success: true; data: LibraryItemWithGameAndCount[] }
+    | { success: false; error: string }
+  > {
+    try {
+      logger.info({ userId: params.userId }, "Fetching library items");
+
+      // 1. Validate input parameters
+      const validation = GetLibraryItemsSchema.safeParse(params);
+      if (!validation.success) {
+        logger.warn(
+          { errors: validation.error.errors },
+          "Invalid input parameters"
+        );
+        return this.error(
+          validation.error.errors[0]?.message ?? "Invalid input parameters"
+        );
+      }
+
+      // 2. Call repository function
+      const result = await findLibraryItemsWithFilters(validation.data);
+
+      // 3. Handle repository errors
+      if (!result.ok) {
+        logger.error(
+          { error: result.error, userId: params.userId },
+          "Failed to fetch library items"
+        );
+        return this.error("Failed to fetch library items");
+      }
+
+      // 4. Return success with data
+      logger.info(
+        { count: result.data.length, userId: params.userId },
+        "Library items fetched successfully"
+      );
+      return this.success(result.data);
+    } catch (error) {
+      logger.error({ error, ...params }, "Unexpected error in getLibraryItems");
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    }
+  }
+
+  /**
+   * Delete a library item from a user's library
+   *
+   * This service method:
+   * 1. Validates input parameters using Zod schema
+   * 2. Verifies the user owns the library item (authorization check)
+   * 3. Deletes the library item via repository
+   * 4. Returns structured ServiceResult
+   */
+  async deleteLibraryItem(params: {
+    libraryItemId: number;
+    userId: string;
+  }): Promise<ServiceResult<void>> {
+    try {
+      logger.info(
+        { libraryItemId: params.libraryItemId, userId: params.userId },
+        "Attempting to delete library item"
+      );
+
+      // 1. Validate input parameters
+      const validation = DeleteLibraryItemSchema.safeParse(params);
+      if (!validation.success) {
+        logger.warn(
+          { errors: validation.error.errors },
+          "Invalid input parameters"
+        );
+        return this.error(
+          validation.error.errors[0]?.message ?? "Invalid input parameters"
+        );
+      }
+
+      // 2. Delete the library item (repository handles authorization check)
+      const deleteResult = await deleteLibraryItem({
+        libraryItemId: params.libraryItemId,
+        userId: params.userId,
+      });
+
+      // 3. Handle repository errors
+      if (!deleteResult.ok) {
+        // Handle NOT_FOUND error separately for better error messages
+        if (deleteResult.error.code === "NOT_FOUND") {
+          logger.warn(
+            { libraryItemId: params.libraryItemId, userId: params.userId },
+            "Library item not found or unauthorized delete attempt"
+          );
+          return this.error(
+            "Library item not found or you do not have permission to delete it"
+          );
+        }
+
+        logger.error(
+          { error: deleteResult.error },
+          "Failed to delete library item"
+        );
+        return this.error("Failed to delete library item");
+      }
+
+      // 4. Return success
+      logger.info(
+        { libraryItemId: params.libraryItemId },
+        "Library item deleted successfully"
+      );
+      return this.success(undefined);
+    } catch (error) {
+      logger.error(
+        { error, ...params },
+        "Unexpected error in deleteLibraryItem"
       );
       return this.error(
         error instanceof Error ? error.message : "An unexpected error occurred"

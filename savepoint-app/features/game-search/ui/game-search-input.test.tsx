@@ -127,14 +127,13 @@ describe("GameSearchInput", () => {
 
   describe("when user starts typing in search field", () => {
     it("should not trigger search for 1-2 characters", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "ze");
+      await userEvent.type(input, "ze");
 
       await new Promise((resolve) => setTimeout(resolve, 600));
 
@@ -142,14 +141,13 @@ describe("GameSearchInput", () => {
     });
 
     it("should debounce search input", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "zelda");
+      await userEvent.type(input, "zelda");
 
       expect(screen.queryByText(/Legend of Zelda/i)).not.toBeInTheDocument();
 
@@ -164,14 +162,13 @@ describe("GameSearchInput", () => {
     });
 
     it("should trigger search after debounce delay for ≥3 characters", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "zelda");
+      await userEvent.type(input, "zelda");
 
       await waitFor(
         () => {
@@ -187,17 +184,16 @@ describe("GameSearchInput", () => {
     });
 
     it("should cancel previous search when user continues typing", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "zel");
+      await userEvent.type(input, "zel");
       await new Promise((resolve) => setTimeout(resolve, 200));
 
-      await user.type(input, "da");
+      await userEvent.type(input, "da");
 
       await waitFor(
         () => {
@@ -212,14 +208,13 @@ describe("GameSearchInput", () => {
 
   describe("when user modifies their search", () => {
     it("should hide results when query drops below 3 characters", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "zelda");
+      await userEvent.type(input, "zelda");
 
       await waitFor(
         () => {
@@ -230,8 +225,8 @@ describe("GameSearchInput", () => {
         { timeout: 2000 }
       );
 
-      await user.clear(input);
-      await user.type(input, "ze");
+      await userEvent.clear(input);
+      await userEvent.type(input, "ze");
 
       await waitFor(
         () => {
@@ -244,14 +239,13 @@ describe("GameSearchInput", () => {
     });
 
     it("should show new results when user changes search term", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "zelda");
+      await userEvent.type(input, "zelda");
 
       await waitFor(
         () => {
@@ -262,8 +256,8 @@ describe("GameSearchInput", () => {
         { timeout: 2000 }
       );
 
-      await user.clear(input);
-      await user.type(input, "mario");
+      await userEvent.clear(input);
+      await userEvent.type(input, "mario");
 
       await waitFor(
         () => {
@@ -278,14 +272,13 @@ describe("GameSearchInput", () => {
     });
 
     it("should clear results when user empties the input", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "zelda");
+      await userEvent.type(input, "zelda");
 
       await waitFor(
         () => {
@@ -296,7 +289,7 @@ describe("GameSearchInput", () => {
         { timeout: 2000 }
       );
 
-      await user.clear(input);
+      await userEvent.clear(input);
 
       await waitFor(
         () => {
@@ -341,15 +334,14 @@ describe("GameSearchInput", () => {
     });
 
     it("should allow user to modify pre-populated query", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput initialQuery="zelda" />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.clear(input);
-      await user.type(input, "mario");
+      await userEvent.clear(input);
+      await userEvent.type(input, "mario");
 
       await waitFor(
         () => {
@@ -373,14 +365,13 @@ describe("GameSearchInput", () => {
     });
 
     it("should clean up URL when user modifies query", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput initialQuery="zelda" />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "a");
+      await userEvent.type(input, "a");
 
       await waitFor(() => {
         expect(mockReplace).toHaveBeenCalledWith("/games/search", {
@@ -390,14 +381,13 @@ describe("GameSearchInput", () => {
     });
 
     it("should not clean up URL if no initialQuery was provided", async () => {
-      const user = userEvent.setup();
       renderWithQueryClient(<GameSearchInput />);
 
       const input = screen.getByPlaceholderText(
         /Search for games \(minimum 3 characters\)/i
       );
 
-      await user.type(input, "zelda");
+      await userEvent.type(input, "zelda");
 
       await new Promise((resolve) => setTimeout(resolve, 100));
 

@@ -73,7 +73,7 @@ export async function updateLibraryStatusAction(
         { igdbId, userId },
         "Game not in library, adding with new status"
       );
-      return addToLibraryAction({ igdbId, status });
+      return addToLibraryAction({ igdbId, status, platform: "PC" }); // Default platform when quick-adding
     }
 
     // 5. Find the most recent library item and update its status
@@ -101,7 +101,7 @@ export async function updateLibraryStatusAction(
         { igdbId, userId },
         "No library item found, adding game to library"
       );
-      return addToLibraryAction({ igdbId, status });
+      return addToLibraryAction({ igdbId, status, platform: "PC" }); // Default platform when quick-adding
     }
 
     // Update the most recent library item

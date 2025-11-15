@@ -81,6 +81,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       const result = await addToLibraryAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.CURIOUS_ABOUT,
+        platform: "PlayStation 5",
       });
 
       expect(result.success).toBe(true);
@@ -135,6 +136,7 @@ describe("addToLibraryAction - Integration Tests", () => {
         const result = await addToLibraryAction({
           igdbId: testGame.igdbId,
           status,
+          platform: "PC",
         });
 
         expect(result.success).toBe(true);
@@ -152,6 +154,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       const result = await addToLibraryAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.CURIOUS_ABOUT,
+        platform: "PC",
       });
 
       expect(result.success).toBe(false);
@@ -164,6 +167,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       const firstResult = await addToLibraryAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.CURIOUS_ABOUT,
+        platform: "PC",
       });
 
       expect(firstResult.success).toBe(true);
@@ -175,6 +179,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       const secondResult = await addToLibraryAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.WISHLIST,
+        platform: "PlayStation 5",
       });
 
       expect(secondResult.success).toBe(true);
@@ -190,6 +195,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       const result = await addToLibraryAction({
         igdbId: -1, // Invalid IGDB ID
         status: LibraryItemStatus.CURIOUS_ABOUT,
+        platform: "PC",
       });
 
       expect(result.success).toBe(false);
@@ -205,6 +211,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       const result = await addToLibraryAction({
         igdbId: newIgdbId,
         status: LibraryItemStatus.CURIOUS_ABOUT,
+        platform: "PC",
       });
 
       expect(result.success).toBe(true);

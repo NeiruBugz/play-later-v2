@@ -10,6 +10,8 @@ export type AddGameToLibraryInput = {
   igdbId: number;
   status: LibraryItemStatus;
   platform?: string;
+  startedAt?: Date;
+  completedAt?: Date;
 };
 
 /**

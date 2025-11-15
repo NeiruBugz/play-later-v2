@@ -82,6 +82,34 @@ export async function deleteLibraryItem({
   }
 }
 
+export async function findLibraryItemById({
+  libraryItemId,
+  userId,
+}: {
+  libraryItemId: number;
+  userId: string;
+}): Promise<RepositoryResult<LibraryItem>> {
+  try {
+    const item = await prisma.libraryItem.findFirst({
+      where: { id: libraryItemId, userId },
+    });
+
+    if (!item) {
+      return repositoryError(
+        RepositoryErrorCode.NOT_FOUND,
+        "Library item not found"
+      );
+    }
+
+    return repositorySuccess(item);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find library item: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
 export async function updateLibraryItem({
   userId,
   libraryItem,
@@ -727,6 +755,119 @@ export async function findAllLibraryItemsByGameId(params: {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to find all library items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+type LibraryItemWithGameAndCount = LibraryItem & {
+  game: {
+    id: string;
+    title: string;
+    coverImage: string | null;
+    slug: string;
+    releaseDate: Date | null;
+    _count: {
+      libraryItems: number;
+    };
+  };
+};
+
+/**
+ * Find library items with filtering and sorting capabilities
+ * Supports deduplication to show only the most recently modified item per game
+ */
+export async function findLibraryItemsWithFilters(params: {
+  userId: string;
+  status?: LibraryItemStatus;
+  platform?: string;
+  search?: string;
+  sortBy?: "createdAt" | "releaseDate" | "startedAt" | "completedAt";
+  sortOrder?: "asc" | "desc";
+  distinctByGame?: boolean;
+}): Promise<RepositoryResult<LibraryItemWithGameAndCount[]>> {
+  try {
+    const {
+      userId,
+      status,
+      platform,
+      search,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      distinctByGame = false,
+    } = params;
+
+    const whereClause: Prisma.LibraryItemWhereInput = {
+      userId,
+      ...(status && { status }),
+      ...(platform && { platform }),
+      ...(search && {
+        game: { title: { contains: search, mode: "insensitive" } },
+      }),
+    };
+
+    let orderByClause: Prisma.LibraryItemOrderByWithRelationInput;
+
+    switch (sortBy) {
+      case "releaseDate":
+        orderByClause = { game: { releaseDate: sortOrder } };
+        break;
+      case "startedAt":
+        orderByClause = { startedAt: sortOrder };
+        break;
+      case "completedAt":
+        orderByClause = { completedAt: sortOrder };
+        break;
+      case "createdAt":
+      default:
+        orderByClause = { createdAt: sortOrder };
+        break;
+    }
+
+    const items = await prisma.libraryItem.findMany({
+      where: whereClause,
+      orderBy: orderByClause,
+      include: {
+        game: {
+          select: {
+            id: true,
+            title: true,
+            coverImage: true,
+            slug: true,
+            releaseDate: true,
+            _count: {
+              select: {
+                libraryItems: { where: { userId } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!distinctByGame) {
+      return repositorySuccess(items);
+    }
+
+    const deduplicatedItems = Array.from(
+      items
+        .reduce((map, item) => {
+          const existing = map.get(item.gameId);
+          if (
+            !existing ||
+            item.updatedAt.getTime() > existing.updatedAt.getTime()
+          ) {
+            map.set(item.gameId, item);
+          }
+          return map;
+        }, new Map<string, LibraryItemWithGameAndCount>())
+        .values()
+    );
+
+    return repositorySuccess(deduplicatedItems);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find library items: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }

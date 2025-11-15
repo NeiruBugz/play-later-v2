@@ -23,13 +23,11 @@ const elements = {
 
 const actions = {
   clickTrigger: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getTrigger());
+    await userEvent.click(elements.getTrigger());
   },
   selectOption: async (label: string) => {
-    const user = userEvent.setup();
     await actions.clickTrigger();
-    await user.click(elements.getOptionByLabel(label));
+    await userEvent.click(elements.getOptionByLabel(label));
   },
 };
 

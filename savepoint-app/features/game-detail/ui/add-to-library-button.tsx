@@ -7,11 +7,13 @@ import { Button } from "@/shared/components/ui/button";
 import { LibraryModal } from "./library-modal";
 
 type AddToLibraryButtonProps = {
+  gameId?: string;
   igdbId: number;
   gameTitle: string;
 };
 
 export const AddToLibraryButton = ({
+  gameId,
   igdbId,
   gameTitle,
 }: AddToLibraryButtonProps) => {
@@ -29,6 +31,7 @@ export const AddToLibraryButton = ({
       </Button>
 
       <LibraryModal
+        gameId={gameId}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         igdbId={igdbId}

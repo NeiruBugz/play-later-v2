@@ -42,7 +42,7 @@ export async function addToLibraryAction(
       };
     }
 
-    const { igdbId, status, platform } = parsed.data;
+    const { igdbId, status, platform, startedAt, completedAt } = parsed.data;
 
     // 2. Get authenticated user ID
     const userId = await getServerUserId();
@@ -61,6 +61,8 @@ export async function addToLibraryAction(
       igdbId,
       status,
       platform,
+      startedAt,
+      completedAt,
     });
 
     if (!result.success) {
