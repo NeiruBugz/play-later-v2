@@ -53,6 +53,9 @@ const nextConfig = {
   typedRoutes: true,
   experimental: {
     reactCompiler: true,
+    serverActions: {
+      bodySizeLimit: "4mb",
+    },
   },
 };
 
