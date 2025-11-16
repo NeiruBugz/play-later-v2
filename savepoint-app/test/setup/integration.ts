@@ -15,11 +15,11 @@ import { afterEach, beforeAll, vi } from "vitest";
 // Import common mocks shared across all test types
 import "./common-mocks";
 
-// Import database cleanup function for test isolation
-import { resetTestDatabase } from "./database";
-
 // Import S3 utilities for bucket setup
 import { CreateBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
+
+// Import database cleanup function for test isolation
+import { resetTestDatabase } from "./database";
 
 // Set up environment variables BEFORE any modules that use them are imported
 process.env.NEXTAUTH_SECRET = "test-secret";
@@ -105,7 +105,10 @@ async function ensureS3BucketExists(): Promise<void> {
         );
         console.log(`Created S3 bucket '${bucketName}' for integration tests`);
       } catch (createError) {
-        console.error(`Failed to create S3 bucket '${bucketName}':`, createError);
+        console.error(
+          `Failed to create S3 bucket '${bucketName}':`,
+          createError
+        );
         throw createError;
       }
     } else {

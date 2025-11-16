@@ -193,7 +193,7 @@ export function LibraryFilters() {
             variant="ghost"
             size="default"
             onClick={clearAllFilters}
-            className="w-full md:w-auto md:mb-0"
+            className="w-full md:mb-0 md:w-auto"
             aria-label="Clear all filters"
           >
             <X className="mr-2 h-4 w-4" aria-hidden="true" />

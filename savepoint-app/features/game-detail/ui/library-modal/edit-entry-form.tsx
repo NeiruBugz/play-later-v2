@@ -90,7 +90,7 @@ export const EditEntryForm = ({
             id="platform-readonly"
             value={item.platform ?? "Not specified"}
             disabled
-            className="cursor-not-allowed bg-muted"
+            className="bg-muted cursor-not-allowed"
             aria-readonly="true"
           />
           <p className="text-muted-foreground text-sm">
