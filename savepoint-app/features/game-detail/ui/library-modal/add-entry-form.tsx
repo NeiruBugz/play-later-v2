@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LibraryItemStatus } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -8,6 +8,7 @@ import { useGetPlatforms } from "@/features/game-detail/hooks/use-get-platforms"
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
+import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 
 import { AddToLibrarySchema, type AddToLibraryInput } from "../../schemas";
 import { addToLibraryAction } from "../../server-actions";
@@ -31,8 +32,6 @@ export const AddEntryForm = ({
   onSuccess,
   onCancel,
 }: AddEntryFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<AddToLibraryInput>({
     resolver: zodResolver(AddToLibrarySchema),
     defaultValues: {
@@ -48,7 +47,6 @@ export const AddEntryForm = ({
     error: platformsError,
   } = useGetPlatforms(igdbId);
 
-  // Handle error with toast notification
   useEffect(() => {
     if (platformsError) {
       toast.error("Failed to load platforms", {
@@ -63,44 +61,26 @@ export const AddEntryForm = ({
   const supportedPlatforms = platformsData?.supportedPlatforms ?? [];
   const otherPlatforms = platformsData?.otherPlatforms ?? [];
 
-  const onSubmit = async (data: AddToLibraryInput) => {
-    try {
-      setIsSubmitting(true);
-
-      const result = await addToLibraryAction(data);
-
-      if (result.success) {
-        const toastTitle = isEditMode
-          ? "New entry added"
-          : "Game added to library";
-        const toastDescription = isEditMode
-          ? "A new library entry has been created."
-          : `${gameTitle} has been added to your library.`;
-
-        toast.success(toastTitle, { description: toastDescription });
-
-        form.reset({
-          igdbId,
-          status: LibraryItemStatus.CURIOUS_ABOUT,
-          platform: "",
-        });
-        onSuccess();
-      } else {
-        toast.error("Failed to add game", { description: result.error });
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred", {
-        description:
-          error instanceof Error ? error.message : "Please try again later.",
+  const { isSubmitting, handleSubmit } = useFormSubmission({
+    action: addToLibraryAction,
+    successMessage: isEditMode ? "New entry added" : "Game added to library",
+    successDescription: isEditMode
+      ? "A new library entry has been created."
+      : `${gameTitle} has been added to your library.`,
+    errorMessage: "Failed to add game",
+    onSuccess: () => {
+      form.reset({
+        igdbId,
+        status: LibraryItemStatus.CURIOUS_ABOUT,
+        platform: "",
       });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      onSuccess();
+    },
+  });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {isEditMode && (
           <div className="bg-muted/50 border-primary/20 rounded-md border-2 border-dashed p-3 text-sm">
             <p className="text-muted-foreground">

@@ -1,14 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { LibraryItem } from "@prisma/client";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 
 import {
   UpdateLibraryEntrySchema,
@@ -31,8 +30,6 @@ export const EditEntryForm = ({
   onSuccess,
   onCancel,
 }: EditEntryFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<UpdateLibraryEntryInput>({
     resolver: zodResolver(UpdateLibraryEntrySchema),
     defaultValues: {
@@ -43,33 +40,18 @@ export const EditEntryForm = ({
     },
   });
 
-  const onSubmit = async (data: UpdateLibraryEntryInput) => {
-    try {
-      setIsSubmitting(true);
-
-      const result = await updateLibraryEntryAction(data);
-
-      if (result.success) {
-        toast.success("Library entry updated", {
-          description: `Status updated to ${getStatusLabel(data.status)}.`,
-        });
-        onSuccess();
-      } else {
-        toast.error("Failed to update entry", { description: result.error });
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred", {
-        description:
-          error instanceof Error ? error.message : "Please try again later.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { isSubmitting, handleSubmit } = useFormSubmission({
+    action: updateLibraryEntryAction,
+    successMessage: "Library entry updated",
+    successDescription: (data) =>
+      `Status updated to ${getStatusLabel(data.status)}.`,
+    errorMessage: "Failed to update entry",
+    onSuccess,
+  });
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <LibraryEntryMetadata item={item} />
 
         <FormField
