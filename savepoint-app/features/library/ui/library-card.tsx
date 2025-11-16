@@ -1,10 +1,10 @@
 "use client";
 
 import type { LibraryItemStatus } from "@prisma/client";
-import Image from "next/image";
 import Link from "next/link";
 
 import type { LibraryItemWithGameAndCount } from "@/features/library/hooks/use-library-data";
+import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
 import {
   Tooltip,
@@ -12,7 +12,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
-import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
 
 import { useQuickActionsVariant } from "../hooks/use-quick-actions-variant";
@@ -33,12 +32,6 @@ const statusVariantMap: Record<
   WISHLIST: "outline",
   REVISITING: "default",
 };
-
-/**
- * Blur placeholder for better perceived performance while images load
- */
-const BLUR_DATA_URL =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY0IiBoZWlnaHQ9IjM1MiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjY0IiBoZWlnaHQ9IjM1MiIgZmlsbD0iI2U1ZTdlYiIvPjwvc3ZnPg==";
 
 type LibraryCardProps = {
   item: LibraryItemWithGameAndCount;
@@ -98,38 +91,28 @@ export function LibraryCard({ item }: LibraryCardProps) {
         onMouseDown={handleLinkInteraction}
         aria-label={`${game.title} - ${LibraryStatusMapper[status as LibraryItemStatus]}${hasMultipleEntries ? ` - ${game._count.libraryItems} entries` : ""}`}
       >
-        <div className="bg-muted relative aspect-[3/4] w-full overflow-hidden rounded-md">
-          {coverImageId ? (
-            <Image
-              src={`${IMAGE_API}/${IMAGE_SIZES.hd}/${coverImageId}.jpg`}
-              alt={game.title}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
-              placeholder="blur"
-              blurDataURL={BLUR_DATA_URL}
-            />
-          ) : (
-            <div className="bg-muted text-muted-foreground flex h-full w-full items-center justify-center">
-              <div className="text-center text-xs">No Cover</div>
-            </div>
-          )}
+        <GameCoverImage
+          imageId={coverImageId}
+          gameTitle={game.title}
+          size="hd"
+          className="aspect-[3/4] w-full rounded-md"
+          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
+        />
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                <div className="flex h-full items-end p-3">
-                  <p className="line-clamp-3 text-sm font-semibold text-white">
-                    {game.title}
-                  </p>
-                </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <div className="flex h-full items-end p-3">
+                <p className="line-clamp-3 text-sm font-semibold text-white">
+                  {game.title}
+                </p>
               </div>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{game.title}</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>{game.title}</p>
+          </TooltipContent>
+        </Tooltip>
 
         {variant === "badge" && (
           <div

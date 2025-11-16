@@ -1,16 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { PlatformBadges } from "@/shared/components/platform-badges";
 import { Card } from "@/shared/components/ui/card";
 
 import type { SearchGameResult } from "../types";
 import { GameCategoryBadge } from "./game-category-badge";
 import { GameCoverPlaceholder } from "./game-cover-placeholder";
-
-// Simple blur placeholder for better perceived performance while images load
-const BLUR_DATA_URL =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iMTI4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI5NiIgaGVpZ2h0PSIxMjgiIGZpbGw9IiNlNWU3ZWIiLz48L3N2Zz4=";
 
 export const GameCard = ({ game }: { game: SearchGameResult }) => {
   const releaseYear = game.first_release_date
@@ -23,24 +19,18 @@ export const GameCard = ({ game }: { game: SearchGameResult }) => {
     <Link href={`/games/${game.slug}`}>
       <Card className="group overflow-hidden transition-shadow hover:shadow-md">
         <div className="flex gap-4 p-3">
-          <div className="bg-muted relative h-32 w-24 flex-shrink-0 overflow-hidden rounded-md">
-            {game.cover?.image_id ? (
-              <Image
-                src={`https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`}
-                alt={`${game.name} cover`}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
-                sizes="96px"
-                placeholder="blur"
-                blurDataURL={BLUR_DATA_URL}
-              />
-            ) : (
+          <GameCoverImage
+            imageId={game.cover?.image_id}
+            gameTitle={game.name}
+            size="cover_big"
+            className="h-32 w-24 flex-shrink-0 rounded-md"
+            sizes="96px"
+            placeholderContent={
               <div className="flex h-full w-full items-center justify-center">
                 <GameCoverPlaceholder />
               </div>
-            )}
-          </div>
+            }
+          />
 
           <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
             <div className="flex items-start justify-between gap-2">
