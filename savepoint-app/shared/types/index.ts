@@ -1,6 +1,7 @@
 export * from "./igdb";
 export * from "./ui";
 export * from "./collection";
+export * from "./library";
 export { type SteamAppInfo } from "./steam";
 
 export {

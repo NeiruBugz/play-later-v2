@@ -3,6 +3,8 @@
 import type { LibraryItemStatus } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 
+import type { LibraryItemWithGameAndCount } from "@/shared/types";
+
 /**
  * Filter parameters for library data fetching
  */
@@ -12,33 +14,6 @@ export type LibraryFilters = {
   search?: string;
   sortBy?: "createdAt" | "releaseDate" | "startedAt" | "completedAt";
   sortOrder?: "asc" | "desc";
-};
-
-/**
- * Library item with associated game details and count
- * Matches the structure returned from /api/library endpoint
- */
-export type LibraryItemWithGameAndCount = {
-  id: number;
-  userId: string;
-  gameId: string;
-  status: string;
-  platform: string | null;
-  acquisitionType: string | null;
-  startedAt: Date | null;
-  completedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  game: {
-    id: string;
-    title: string;
-    coverImage: string | null;
-    slug: string;
-    releaseDate: Date | null;
-    _count: {
-      libraryItems: number;
-    };
-  };
 };
 
 /**
