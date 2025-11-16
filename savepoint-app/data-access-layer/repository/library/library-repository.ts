@@ -863,7 +863,42 @@ export async function findLibraryItemsWithFilters(params: {
         .values()
     );
 
-    return repositorySuccess(deduplicatedItems);
+    // Re-sort deduplicated items to preserve requested sort order
+    // Map preserves insertion order, which can break the original sort
+    const sortedItems = deduplicatedItems.sort((a, b) => {
+      let aValue: Date | null | undefined;
+      let bValue: Date | null | undefined;
+
+      switch (sortBy) {
+        case "releaseDate":
+          aValue = a.game.releaseDate;
+          bValue = b.game.releaseDate;
+          break;
+        case "startedAt":
+          aValue = a.startedAt;
+          bValue = b.startedAt;
+          break;
+        case "completedAt":
+          aValue = a.completedAt;
+          bValue = b.completedAt;
+          break;
+        case "createdAt":
+        default:
+          aValue = a.createdAt;
+          bValue = b.createdAt;
+          break;
+      }
+
+      // Handle null/undefined values (push to end)
+      if (!aValue && !bValue) return 0;
+      if (!aValue) return 1;
+      if (!bValue) return -1;
+
+      const comparison = aValue.getTime() - bValue.getTime();
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    return repositorySuccess(sortedItems);
   } catch (error) {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
