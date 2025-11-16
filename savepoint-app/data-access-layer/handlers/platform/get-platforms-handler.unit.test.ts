@@ -37,13 +37,10 @@ describe("getPlatformsHandler", () => {
 
   describe("Input Validation", () => {
     it("should reject invalid igdbId (negative number)", async () => {
-      // Arrange
       const params = { igdbId: -1 };
 
-      // Act
       const result = await getPlatformsHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(400);
@@ -53,13 +50,10 @@ describe("getPlatformsHandler", () => {
     });
 
     it("should reject invalid igdbId (zero)", async () => {
-      // Arrange
       const params = { igdbId: 0 };
 
-      // Act
       const result = await getPlatformsHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(400);
@@ -69,7 +63,6 @@ describe("getPlatformsHandler", () => {
     });
 
     it("should accept valid positive igdbId", async () => {
-      // Arrange
       const params = { igdbId: 12345 };
       const mockPlatforms: Platform[] = [
         {
@@ -96,10 +89,8 @@ describe("getPlatformsHandler", () => {
         },
       });
 
-      // Act
       const result = await getPlatformsHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.status).toBe(200);
@@ -114,7 +105,6 @@ describe("getPlatformsHandler", () => {
     const validIgdbId = 12345;
 
     it("should call PlatformService with correct parameters", async () => {
-      // Arrange
       mockGetPlatformsForGame.mockResolvedValue({
         success: true,
         data: {
@@ -123,16 +113,13 @@ describe("getPlatformsHandler", () => {
         },
       });
 
-      // Act
       await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
 
-      // Assert
       expect(mockGetPlatformsForGame).toHaveBeenCalledWith(validIgdbId);
       expect(mockGetPlatformsForGame).toHaveBeenCalledTimes(1);
     });
 
     it("should return success when service succeeds", async () => {
-      // Arrange
       const mockSupportedPlatforms: Platform[] = [
         {
           id: "plat1",
@@ -175,13 +162,11 @@ describe("getPlatformsHandler", () => {
         },
       });
 
-      // Act
       const result = await getPlatformsHandler(
         { igdbId: validIgdbId },
         mockContext
       );
 
-      // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.status).toBe(200);
@@ -191,19 +176,16 @@ describe("getPlatformsHandler", () => {
     });
 
     it("should return error when service fails", async () => {
-      // Arrange
       mockGetPlatformsForGame.mockResolvedValue({
         success: false,
         error: "Database connection failed",
       });
 
-      // Act
       const result = await getPlatformsHandler(
         { igdbId: validIgdbId },
         mockContext
       );
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(500);
@@ -212,19 +194,16 @@ describe("getPlatformsHandler", () => {
     });
 
     it("should return 404 when game not found", async () => {
-      // Arrange
       mockGetPlatformsForGame.mockResolvedValue({
         success: false,
         error: "Game not found",
       });
 
-      // Act
       const result = await getPlatformsHandler(
         { igdbId: validIgdbId },
         mockContext
       );
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(404);
@@ -233,7 +212,6 @@ describe("getPlatformsHandler", () => {
     });
 
     it("should handle empty platform lists", async () => {
-      // Arrange
       mockGetPlatformsForGame.mockResolvedValue({
         success: true,
         data: {
@@ -242,13 +220,11 @@ describe("getPlatformsHandler", () => {
         },
       });
 
-      // Act
       const result = await getPlatformsHandler(
         { igdbId: validIgdbId },
         mockContext
       );
 
-      // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.status).toBe(200);
@@ -262,19 +238,16 @@ describe("getPlatformsHandler", () => {
     const validIgdbId = 12345;
 
     it("should return 500 when service returns generic error", async () => {
-      // Arrange
       mockGetPlatformsForGame.mockResolvedValue({
         success: false,
         error: "Failed to fetch platforms from database",
       });
 
-      // Act
       const result = await getPlatformsHandler(
         { igdbId: validIgdbId },
         mockContext
       );
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(500);
@@ -287,7 +260,6 @@ describe("getPlatformsHandler", () => {
     const validIgdbId = 12345;
 
     it("should return correct structure for successful response", async () => {
-      // Arrange
       const mockData = {
         supportedPlatforms: [
           {
@@ -313,13 +285,11 @@ describe("getPlatformsHandler", () => {
         data: mockData,
       });
 
-      // Act
       const result = await getPlatformsHandler(
         { igdbId: validIgdbId },
         mockContext
       );
 
-      // Assert
       expect(result).toMatchObject({
         success: true,
         status: 200,
@@ -328,19 +298,16 @@ describe("getPlatformsHandler", () => {
     });
 
     it("should return correct structure for error response", async () => {
-      // Arrange
       mockGetPlatformsForGame.mockResolvedValue({
         success: false,
         error: "Service error",
       });
 
-      // Act
       const result = await getPlatformsHandler(
         { igdbId: validIgdbId },
         mockContext
       );
 
-      // Assert
       expect(result).toMatchObject({
         success: false,
         status: 500,

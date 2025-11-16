@@ -38,13 +38,10 @@ describe("getLibraryHandler", () => {
 
   describe("Input Validation", () => {
     it("should reject invalid userId (not a CUID)", async () => {
-      // Arrange
       const params = { userId: "invalid-id" };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(400);
@@ -54,16 +51,13 @@ describe("getLibraryHandler", () => {
     });
 
     it("should reject invalid status (not in LibraryItemStatus enum)", async () => {
-      // Arrange
       const params = {
         userId: "clx123abc456def789ghi",
         status: "INVALID_STATUS" as any,
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(400);
@@ -73,16 +67,13 @@ describe("getLibraryHandler", () => {
     });
 
     it("should reject invalid sortBy (not in allowed values)", async () => {
-      // Arrange
       const params = {
         userId: "clx123abc456def789ghi",
         sortBy: "invalidSort" as any,
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(400);
@@ -92,16 +83,13 @@ describe("getLibraryHandler", () => {
     });
 
     it("should reject invalid sortOrder (not asc or desc)", async () => {
-      // Arrange
       const params = {
         userId: "clx123abc456def789ghi",
         sortOrder: "random" as any,
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(400);
@@ -111,7 +99,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should accept all valid input combinations", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: true,
         data: [],
@@ -126,16 +113,13 @@ describe("getLibraryHandler", () => {
         sortOrder: "desc" as const,
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(mockGetLibraryItems).toHaveBeenCalled();
     });
 
     it("should handle optional parameters correctly (only userId provided)", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: true,
         data: [],
@@ -145,10 +129,8 @@ describe("getLibraryHandler", () => {
         userId: "clx123abc456def789ghi",
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(true);
       expect(mockGetLibraryItems).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -161,7 +143,6 @@ describe("getLibraryHandler", () => {
 
   describe("Orchestration", () => {
     it("should call LibraryService.getLibraryItems with correct parameters", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: true,
         data: [],
@@ -176,10 +157,8 @@ describe("getLibraryHandler", () => {
         sortOrder: "desc" as const,
       };
 
-      // Act
       await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(mockGetLibraryItems).toHaveBeenCalledWith({
         userId: "clx123abc456def789ghi",
         status: LibraryItemStatus.CURIOUS_ABOUT,
@@ -192,7 +171,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should pass distinctByGame: true to service (library view requirement)", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: true,
         data: [],
@@ -202,10 +180,8 @@ describe("getLibraryHandler", () => {
         userId: "clx123abc456def789ghi",
       };
 
-      // Act
       await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(mockGetLibraryItems).toHaveBeenCalledWith(
         expect.objectContaining({
           distinctByGame: true,
@@ -216,7 +192,6 @@ describe("getLibraryHandler", () => {
 
   describe("Success Path", () => {
     it("should return HandlerResult with data on success", async () => {
-      // Arrange
       const mockData: LibraryItemWithGameAndCount[] = [
         {
           id: 1,
@@ -251,10 +226,8 @@ describe("getLibraryHandler", () => {
         userId: "clx123abc456def789ghi",
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.status).toBe(200);
@@ -267,7 +240,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should return empty array when no library items found", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: true,
         data: [],
@@ -278,10 +250,8 @@ describe("getLibraryHandler", () => {
         status: LibraryItemStatus.PLAYING,
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.status).toBe(200);
@@ -291,7 +261,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should support filtering by status", async () => {
-      // Arrange
       const mockData: LibraryItemWithGameAndCount[] = [
         {
           id: 2,
@@ -327,10 +296,8 @@ describe("getLibraryHandler", () => {
         status: LibraryItemStatus.PLAYING,
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toHaveLength(1);
@@ -339,7 +306,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should support filtering by platform", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: true,
         data: [],
@@ -350,10 +316,8 @@ describe("getLibraryHandler", () => {
         platform: "Nintendo Switch",
       };
 
-      // Act
       await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(mockGetLibraryItems).toHaveBeenCalledWith(
         expect.objectContaining({
           platform: "Nintendo Switch",
@@ -362,7 +326,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should support search filtering", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: true,
         data: [],
@@ -373,10 +336,8 @@ describe("getLibraryHandler", () => {
         search: "mario",
       };
 
-      // Act
       await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(mockGetLibraryItems).toHaveBeenCalledWith(
         expect.objectContaining({
           search: "mario",
@@ -385,7 +346,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should support sorting by different fields", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: true,
         data: [],
@@ -397,10 +357,8 @@ describe("getLibraryHandler", () => {
         sortOrder: "asc" as const,
       };
 
-      // Act
       await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(mockGetLibraryItems).toHaveBeenCalledWith(
         expect.objectContaining({
           sortBy: "releaseDate",
@@ -412,7 +370,6 @@ describe("getLibraryHandler", () => {
 
   describe("Error Handling", () => {
     it("should return HandlerResult with error on service failure", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: false,
         error: "Database connection failed",
@@ -422,10 +379,8 @@ describe("getLibraryHandler", () => {
         userId: "clx123abc456def789ghi",
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(500);
@@ -434,7 +389,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should propagate service error messages", async () => {
-      // Arrange
       mockGetLibraryItems.mockResolvedValue({
         success: false,
         error: "Failed to fetch library items",
@@ -444,10 +398,8 @@ describe("getLibraryHandler", () => {
         userId: "clx123abc456def789ghi",
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(500);
@@ -456,7 +408,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should handle empty service error strings", async () => {
-      // Arrange
       // Note: Handler currently passes empty strings through
       // This test documents current behavior
       mockGetLibraryItems.mockResolvedValue({
@@ -468,10 +419,8 @@ describe("getLibraryHandler", () => {
         userId: "clx123abc456def789ghi",
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(500);
@@ -483,7 +432,6 @@ describe("getLibraryHandler", () => {
 
   describe("Multiple Library Items Per Game", () => {
     it("should return multiple library items with correct game counts", async () => {
-      // Arrange
       const mockData: LibraryItemWithGameAndCount[] = [
         {
           id: 1,
@@ -540,10 +488,8 @@ describe("getLibraryHandler", () => {
         userId: "clx123abc456def789ghi",
       };
 
-      // Act
       const result = await getLibraryHandler(params, mockContext);
 
-      // Assert
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toHaveLength(2);
