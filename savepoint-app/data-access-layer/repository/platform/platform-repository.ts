@@ -22,6 +22,7 @@ type IgdbPlatform = {
   generation?: number;
   platform_family?: number;
   platform_logo?: number;
+  platform_type?: number;
   checksum?: string;
 };
 
@@ -42,7 +43,7 @@ export async function upsertPlatform(
         alternativeName: igdbPlatform.alternative_name ?? null,
         generation: igdbPlatform.generation ?? null,
         platformFamily: igdbPlatform.platform_family ?? null,
-        platformType: igdbPlatform.platform_logo ?? null,
+        platformType: igdbPlatform.platform_type ?? null,
         checksum: igdbPlatform.checksum ?? null,
       },
       create: {
@@ -53,7 +54,7 @@ export async function upsertPlatform(
         alternativeName: igdbPlatform.alternative_name ?? null,
         generation: igdbPlatform.generation ?? null,
         platformFamily: igdbPlatform.platform_family ?? null,
-        platformType: igdbPlatform.platform_logo ?? null,
+        platformType: igdbPlatform.platform_type ?? null,
         checksum: igdbPlatform.checksum ?? null,
       },
     });
@@ -89,7 +90,7 @@ export async function upsertPlatforms(
             alternativeName: p.alternative_name ?? null,
             generation: p.generation ?? null,
             platformFamily: p.platform_family ?? null,
-            platformType: p.platform_logo ?? null,
+            platformType: p.platform_type ?? null,
             checksum: p.checksum ?? null,
           },
           create: {
@@ -100,7 +101,7 @@ export async function upsertPlatforms(
             alternativeName: p.alternative_name ?? null,
             generation: p.generation ?? null,
             platformFamily: p.platform_family ?? null,
-            platformType: p.platform_logo ?? null,
+            platformType: p.platform_type ?? null,
             checksum: p.checksum ?? null,
           },
         })
