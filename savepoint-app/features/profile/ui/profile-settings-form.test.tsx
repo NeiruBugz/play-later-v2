@@ -23,7 +23,7 @@ const mockUpdateProfileFormAction = vi.mocked(updateProfileFormAction);
 const mockToastSuccess = vi.mocked(toast.success);
 
 const elements = {
-  getCard: () => screen.getByText("Profile Settings").closest("div"),
+  getCard: () => screen.getByRole("form"),
   getTitle: () => screen.getByText("Profile Settings"),
   getDescription: () => screen.getByText(/Update your profile information/i),
   getUsernameInput: () => screen.getByLabelText("Username"),
@@ -38,15 +38,13 @@ const elements = {
 
 const actions = {
   typeUsername: async (value: string) => {
-    const user = userEvent.setup();
     const input = elements.getUsernameInput();
-    await user.clear(input);
-    await user.type(input, value);
+    await userEvent.clear(input);
+    await userEvent.type(input, value);
   },
 
   submitForm: async () => {
-    const user = userEvent.setup();
-    await user.click(elements.getSubmitButton());
+    await userEvent.click(elements.getSubmitButton());
   },
 
   typeAndSubmit: async (username: string) => {
@@ -99,29 +97,25 @@ describe("ProfileSettingsForm", () => {
     });
 
     it("should include hidden avatarUrl input", () => {
-      const { container } = render(
+      render(
         <ProfileSettingsForm
           currentUsername="testuser"
           currentAvatar="https://example.com/avatar.jpg"
         />
       );
 
-      const hiddenInput = container.querySelector(
-        'input[name="avatarUrl"]'
-      ) as HTMLInputElement;
+      const hiddenInput = screen.getByTestId("avatar-url-input");
       expect(hiddenInput).toBeInTheDocument();
-      expect(hiddenInput.value).toBe("https://example.com/avatar.jpg");
+      expect(hiddenInput).toHaveValue("https://example.com/avatar.jpg");
     });
 
     it("should handle null avatar URL", () => {
-      const { container } = render(
+      render(
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
 
-      const hiddenInput = container.querySelector(
-        'input[name="avatarUrl"]'
-      ) as HTMLInputElement;
-      expect(hiddenInput?.value).toBe("");
+      const hiddenInput = screen.getByTestId("avatar-url-input");
+      expect(hiddenInput).toHaveValue("");
     });
   });
 
@@ -291,14 +285,12 @@ describe("ProfileSettingsForm", () => {
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
 
-      // First create a validation error
       await actions.typeUsername("ab");
 
       await waitFor(() => {
         expect(elements.getValidationError()).toBeInTheDocument();
       });
 
-      // Then fix it and submit
       await actions.typeAndSubmit("newusername");
 
       await waitFor(() => {
@@ -374,11 +366,9 @@ describe("ProfileSettingsForm", () => {
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
 
-      // Type with whitespace and submit
       await actions.typeAndSubmit("  takenusername  ");
 
       await waitFor(() => {
-        // Should show error because trimmed version matches
         expect(elements.getServerError()).toBeInTheDocument();
       });
     });
@@ -386,7 +376,6 @@ describe("ProfileSettingsForm", () => {
 
   describe("given form is pending", () => {
     it("should disable username input while submitting", async () => {
-      // Mock a long-running submission
       mockUpdateProfileFormAction.mockImplementation(
         () =>
           new Promise((resolve) => {
@@ -408,7 +397,6 @@ describe("ProfileSettingsForm", () => {
 
       await actions.typeAndSubmit("newusername");
 
-      // Input should be disabled during submission
       expect(elements.getUsernameInput()).toBeDisabled();
     });
 

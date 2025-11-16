@@ -8,7 +8,6 @@ import {
 import { ProfileSetupPage } from "./pages/profile-setup.page";
 
 test.describe("[guard] Dashboard redirect for first-time users", () => {
-  // Ensure this suite starts unauthenticated to render the login page
   test.use({ storageState: undefined });
   test.use({ storageState: undefined });
   test.afterAll(async () => {
@@ -29,7 +28,6 @@ test.describe("[guard] Dashboard redirect for first-time users", () => {
 
     await signInWithCredentials(page, email, password);
 
-    // Hitting dashboard should redirect to setup by the server guard
     await page.goto("/dashboard");
     await page.waitForURL(/\/profile\/setup$/, { timeout: 10000 });
 
@@ -49,18 +47,15 @@ test.describe("[guard] Dashboard redirect for first-time users", () => {
 
     await signInWithCredentials(page, email, password);
 
-    // Trigger guard redirect to setup
     await page.goto("/dashboard");
     await page.waitForURL(/\/profile\/setup$/, { timeout: 10000 });
 
     const setup = new ProfileSetupPage(page);
     await expect(setup.heading()).toBeVisible();
 
-    // Click Skip and confirm we land on dashboard
     await setup.skipButton().click();
     await page.waitForURL(/\/dashboard$/, { timeout: 10000 });
 
-    // Navigate to dashboard again; cookie should allow staying
     await page.goto("/dashboard");
     await page.waitForURL(/\/dashboard$/, { timeout: 10000 });
     expect(page.url()).toMatch(/\/dashboard$/);

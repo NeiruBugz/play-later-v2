@@ -1,10 +1,5 @@
 import { clearTestData, disconnectDatabase } from "./helpers/db";
 
-/**
- * Playwright global teardown
- * Runs once after all test files have completed
- * Ensures database cleanup even if individual tests fail
- */
 async function globalTeardown(): Promise<void> {
   console.log("\n🧹 Running global E2E teardown...");
 

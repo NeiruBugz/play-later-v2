@@ -72,5 +72,5 @@ Run from `savepoint-app/` or prefix with `pnpm -C savepoint-app` from the repo r
 ## Local Hooks
 
 - Pre-commit hooks have been removed in favor of CI checks.
-- Run local checks manually with `pnpm code-check` from `savepoint-app/`.
+- Run local checks manually with `pnpm ci:check` from `savepoint-app/`.
 - CI runs formatting, lint, typecheck, and tests on PRs; commit message validation is local-only.

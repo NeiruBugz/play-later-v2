@@ -26,7 +26,6 @@ test.describe("Profile Page", () => {
     const profile = new ProfilePage(page);
     await profile.goto();
 
-    // Validate heading exists and email from session is visible
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const session: any = await getSession(page);
     await expect(profile.heading(2)).toBeVisible();
@@ -86,12 +85,10 @@ test.describe("Profile Page", () => {
 
 test.describe("Profile Page - With Library Items", () => {
   test.beforeAll(async () => {
-    // Seed directly via DB using the known auth user from setup
     const email = process.env.E2E_AUTH_EMAIL ?? "e2e-auth-user@example.com";
     const user = await getUserByEmail(email);
     if (!user) throw new Error("Authenticated user not found in DB");
 
-    // Create test games with different statuses
     const [game1, game2, game3, game4, game5] = await Promise.all([
       createTestGame({
         title: "The Legend of Zelda",
@@ -116,7 +113,6 @@ test.describe("Profile Page - With Library Items", () => {
       }),
     ]);
 
-    // Create library items with different statuses for the authed user
     await Promise.all([
       createTestLibraryItem({
         userId: user.id,

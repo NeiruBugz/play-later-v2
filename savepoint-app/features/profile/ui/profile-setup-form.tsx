@@ -38,7 +38,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Profile setup complete!");
-      // Redirect to dashboard after successful setup
+
       router.push("/dashboard");
     }
   }, [state, router]);
@@ -65,7 +65,6 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
   };
 
   const handleSkip = async () => {
-    // Persist completion to DB to avoid future prompts
     const res = await skipProfileSetup();
     if (!res.success) {
       toast.error(res.error ?? "Failed to complete setup");

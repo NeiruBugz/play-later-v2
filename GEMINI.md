@@ -100,7 +100,7 @@ The project follows a monorepo structure managed by pnpm workspaces.
 
 - **Package Management:** The project uses `pnpm` and its workspace feature to manage the monorepo.
 - **Code Style:** Code formatting is enforced by Prettier and linting by ESLint.
-  - `pnpm -C savepoint-app code-check`: Run all code quality checks.
+  - `pnpm -C savepoint-app ci:check`: Run all code quality checks.
   - `pnpm -C savepoint-app code-fix`: Automatically fix formatting and linting issues.
 - **Commit Messages:** This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification. A `commitlint` configuration is in place to enforce this.
 - **Authentication:** Authentication is handled by NextAuth.js. For local development, a credentials-based login is available. In production, it uses AWS Cognito, which can be federated with providers like Google and Steam.

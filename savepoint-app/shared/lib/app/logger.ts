@@ -1,16 +1,5 @@
 import pino, { type LogFn, type LoggerOptions } from "pino";
 
-/**
- * Production-grade logger using Pino
- *
- * Features:
- * - JSON structured logging in production
- * - Pretty-printed logs in development
- * - Automatic log levels based on environment
- * - Request ID tracking support
- * - Performance optimized (5-10x faster than Winston)
- */
-
 const isBrowser = typeof window !== "undefined";
 const isDevelopment = process.env.NODE_ENV === "development";
 const isTest = process.env.NODE_ENV === "test";
@@ -49,44 +38,10 @@ const SAFE_EXTRA_KEYS = [
 
 export const logger = pino(createLoggerOptions());
 
-/**
- * Create a child logger with additional context.
- *
- * Use standardized context keys from LOGGER_CONTEXT for consistency:
- * - service: Data access layer services
- * - serverAction: Next.js server actions
- * - page: Next.js pages
- * - errorBoundary: React error boundaries
- * - storage: Storage utilities
- *
- * @example
- * // Service
- * const serviceLogger = createLogger({ service: 'GameService' });
- * serviceLogger.info('Game searched', { query: 'zelda' });
- *
- * // Server Action
- * const actionLogger = createLogger({ serverAction: 'addGameAction' });
- * actionLogger.info('Adding game to library', { gameId: 123 });
- *
- * // Page
- * const pageLogger = createLogger({ page: 'ProfilePage' });
- * pageLogger.info('Loading profile', { userId: '456' });
- */
 export const createLogger = (bindings: Record<string, unknown>) => {
   return logger.child(bindings);
 };
 
-/**
- * Log levels (in order of severity):
- * - fatal: System-level failures, application crash
- * - error: Errors that need attention but application continues
- * - warn: Warning messages, recoverable issues
- * - info: Key application events (user actions, major operations)
- * - debug: Detailed debugging information
- * - trace: Very detailed debugging (function entry/exit)
- */
-
-// Export type for usage in services
 export type Logger = typeof logger;
 
 function createLoggerOptions(): LoggerOptions {
@@ -108,7 +63,6 @@ function createLoggerOptions(): LoggerOptions {
       env: process.env.NODE_ENV,
     },
     hooks: {
-      // Normalize errors so server and browser logs share the same shape.
       logMethod(args: unknown[], method: LogFn) {
         const normalizedArgs = normalizeLogArgs(args);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

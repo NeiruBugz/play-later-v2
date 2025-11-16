@@ -66,7 +66,7 @@ export function CredentialsForm() {
     const payload = {
       email: values.email.trim(),
       password: values.password,
-      ...(trimmedName && { name: trimmedName }), // Only include name if it has a value
+      ...(trimmedName && { name: trimmedName }),
     };
 
     try {

@@ -1,5 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import { prisma } from "../db";
 import { verifyPassword } from "../password";
 import { onAuthorize } from "./credentials-callbacks";

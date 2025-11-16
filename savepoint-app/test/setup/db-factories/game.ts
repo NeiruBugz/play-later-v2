@@ -2,23 +2,31 @@ import { type Game, type LibraryItem, type Review } from "@prisma/client";
 
 import { getTestDatabase } from "../database";
 
+// Counter to ensure unique slugs even when created concurrently
+let gameCounter = 0;
+
 export type GameFactoryOptions = {
   title?: string;
+  slug?: string;
   igdbId?: number;
   description?: string;
   coverImage?: string;
   steamAppId?: number;
+  releaseDate?: Date;
 };
 
 export const createGame = async (
   options: GameFactoryOptions = {}
 ): Promise<Game> => {
+  // Increment counter first to get unique value
+  const uniqueId = ++gameCounter;
   const timestamp = Date.now();
   const randomId = Math.floor(Math.random() * 1000000);
 
   const defaultData = {
     title: `Test Game ${timestamp}`,
-    igdbId: randomId,
+    slug: options.slug || `test-game-${timestamp}-${uniqueId}`,
+    igdbId: options.igdbId ?? randomId,
     description: "A test game for testing purposes",
     steamAppId: randomId,
     ...options,
@@ -41,6 +49,9 @@ export type LibraryItemFactoryOptions = {
     | "REVISITING";
   platform?: string;
   acquisitionType?: "DIGITAL" | "PHYSICAL" | "SUBSCRIPTION";
+  createdAt?: Date;
+  startedAt?: Date;
+  completedAt?: Date;
 };
 
 export const createLibraryItem = async (
@@ -52,6 +63,20 @@ export const createLibraryItem = async (
     acquisitionType: "DIGITAL" as const,
     ...options,
   };
+
+  // Validate date constraints to match database check constraints
+  // Only validate that completedAt is not before startedAt
+  // Users can backdate startedAt and completedAt to dates before createdAt
+  if (
+    defaultData.startedAt &&
+    defaultData.completedAt &&
+    defaultData.completedAt < defaultData.startedAt
+  ) {
+    throw new Error(
+      `Invalid test data: completedAt (${defaultData.completedAt.toISOString()}) must be >= startedAt (${defaultData.startedAt.toISOString()}). ` +
+        `This violates the database constraint "completedAt_after_startedAt".`
+    );
+  }
 
   return getTestDatabase().libraryItem.create({
     data: defaultData,

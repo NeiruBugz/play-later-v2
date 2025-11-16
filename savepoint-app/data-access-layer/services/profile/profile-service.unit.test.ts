@@ -222,7 +222,6 @@ describe("ProfileService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        // Now propagates the actual repository error message
         expect(result.error).toBe("Failed to fetch library stats");
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
@@ -729,8 +728,6 @@ describe("ProfileService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          // When checkUsernameAvailability fails, it returns success: false
-          // which is treated as username taken (CONFLICT) by updateProfile
           expect(result.error).toBe("Username already exists");
           expect(result.code).toBe(ServiceErrorCode.CONFLICT);
         }

@@ -371,7 +371,7 @@ pnpm typecheck    # TypeScript type checking
 pnpm format:write # Format code with Prettier
 pnpm format:check # Check code formatting
 pnpm code-fix     # Run format:write and lint:fix
-pnpm code-check   # Run format:check, lint, and typecheck
+pnpm ci:check   # Run format:check, lint, and typecheck
 ```
 
 ## 🏗️ Architecture
@@ -420,7 +420,7 @@ For local development and automated tests, the app includes a Credentials provid
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes and add tests
 4. Run the test suite: `pnpm test`
-5. Run code quality checks: `pnpm code-check`
+5. Run code quality checks: `pnpm ci:check`
 6. Commit your changes using conventional commits (see examples below)
 7. Push to the branch: `git push origin feature/amazing-feature`
 8. Open a Pull Request

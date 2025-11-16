@@ -16,6 +16,7 @@ export type Profile = {
   createdAt: Date;
 };
 
+// Re-export from shared types for backward compatibility
 export type RecentGame = {
   gameId: string;
   title: string;
@@ -23,10 +24,15 @@ export type RecentGame = {
   lastPlayed: Date;
 };
 
+/**
+ * Library statistics aggregated by status
+ */
 export type LibraryStats = {
   statusCounts: Record<string, number>;
   recentGames: RecentGame[];
 };
+
+export type GetProfileResult = ServiceResult<{ profile: Profile }>;
 
 export type ProfileWithStats = {
   username: string | null;
@@ -36,8 +42,6 @@ export type ProfileWithStats = {
   createdAt: Date;
   stats: LibraryStats;
 };
-
-export type GetProfileResult = ServiceResult<{ profile: Profile }>;
 
 export type GetProfileWithStatsResult = ServiceResult<{
   profile: ProfileWithStats;
@@ -89,7 +93,6 @@ export type CompleteSetupResult = ServiceResult<{
   image: string | null;
 }>;
 
-// Determines where to send the user right after auth
 export type GetRedirectAfterAuthInput = {
   userId: string;
 };

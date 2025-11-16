@@ -4,6 +4,7 @@ import { RefreshCw, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect } from "react";
 
+import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { Button } from "@/shared/components/ui/button";
 import { createLogger } from "@/shared/lib/app/logger";
 import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
@@ -36,7 +37,11 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       <div className="from-background via-background to-muted pointer-events-none absolute inset-0 bg-linear-to-br opacity-60" />
       <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-6 text-center">
         <span className="bg-destructive/10 text-destructive inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium">
-          <ShieldAlert className="h-4 w-4" aria-hidden="true" />
+          <ShieldAlert
+            className="h-4 w-4"
+            aria-hidden="true"
+            data-testid="error-shield-icon"
+          />
           Something went wrong
         </span>
 
@@ -50,6 +55,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         </p>
 
         <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center">
+          <BrowserBackButton />
           <Button
             onClick={handleReset}
             size="lg"

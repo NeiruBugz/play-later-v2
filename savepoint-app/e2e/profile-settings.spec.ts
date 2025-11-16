@@ -5,20 +5,8 @@ import { expect, test } from "@playwright/test";
 import { createTestUser, disconnectDatabase } from "./helpers/db";
 import { ProfileSettingsPage } from "./pages/profile-settings.page";
 
-/*
-Story: As an authenticated user, I want to manage my profile settings (username and avatar) so that my identity is clear and consistent across the app.
-Acceptance Criteria:
-- Can change username successfully and see it on profile
-- Real-time username validation shows available/taken states
-- Client-side validation for min/max length
-- Navigating back returns to previous page
-- Can upload avatar, see it on profile, and it persists after reload
-- Validation for large/unsupported avatar files; can cancel selection
-*/
-
 test.describe("[settings] Profile Settings — Manage username and avatar", () => {
   test.afterAll(async () => {
-    // Allow global teardown to clear data at the end of the run.
     await disconnectDatabase();
   });
 
@@ -39,7 +27,7 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     await expect(
       page.getByRole("heading", { level: 2, name: newUsername })
     ).toBeVisible();
-    // Sanity check: joined date still visible
+
     await expect(page.getByText(/Joined/)).toBeVisible();
   });
 
@@ -117,7 +105,6 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     const settings = new ProfileSettingsPage(page);
     await settings.goto();
 
-    // Type the username in a different case to verify case-insensitive behavior
     await settings.typeUsername(takenUser.username.toUpperCase());
     await expect(settings.usernameTakenMessage()).toBeVisible({
       timeout: 5000,
@@ -152,7 +139,7 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     });
 
     await settings.usernameInput().clear();
-    await page.waitForTimeout(600); // allow debounce to settle
+    await page.waitForTimeout(600);
     await expect(settings.usernameAvailableMessage()).not.toBeVisible();
     await expect(settings.usernameTakenMessage()).not.toBeVisible();
   });
@@ -257,7 +244,6 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     const settings = new ProfileSettingsPage(page);
     await settings.goto();
 
-    // Simulate a 6MB file via DOM
     const largeFileBuffer = Buffer.alloc(6 * 1024 * 1024);
     await page.evaluate(
       ({ fileName, buffer }) => {

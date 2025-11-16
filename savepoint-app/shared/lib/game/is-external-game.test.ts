@@ -1,5 +1,3 @@
-import { describe, expect, it } from "vitest";
-
 import { isExternalGameId } from "./is-external-game";
 
 describe("isExternalGameId", () => {

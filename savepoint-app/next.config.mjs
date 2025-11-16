@@ -1,10 +1,8 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   eslint: {
-    dirs: ["app", "features", "shared", "test", "."], // Include all relevant directories and root
+    dirs: ["app", "features", "shared", "test", ".", "data-access-layer"],
   },
-  // Externalize Pino packages for server-side rendering
-  // Pino uses worker threads which need to be handled separately in Next.js
   serverExternalPackages: ["pino", "pino-pretty"],
   async headers() {
     return [
@@ -44,6 +42,10 @@ const nextConfig = {
       {
         hostname: "steamcdn-a.akamaihd.net",
         protocol: "https",
+      },
+      {
+        hostname: "localhost",
+        protocol: "http",
       },
     ],
   },

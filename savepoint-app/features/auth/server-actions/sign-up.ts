@@ -12,15 +12,10 @@ const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "signUpAction",
 });
 
-/**
- * Sign up a new user with email and password
- */
 export async function signUpAction(data: SignUpFormData) {
   try {
-    // Validate input
     const validatedData = signUpSchema.parse(data);
 
-    // Create user via service
     const authService = new AuthService();
     const result = await authService.signUp(validatedData);
 
@@ -32,7 +27,6 @@ export async function signUpAction(data: SignUpFormData) {
       };
     }
 
-    // Automatically sign in the user after successful registration
     await signIn("credentials", {
       email: validatedData.email,
       password: validatedData.password,
@@ -53,13 +47,11 @@ export async function signUpAction(data: SignUpFormData) {
       };
     }
 
-    // NextAuth throws NEXT_REDIRECT on successful auth - re-throw to allow redirect
     if (isNextAuthRedirect(error)) {
       logger.debug("Redirecting user to dashboard after successful sign up");
       throw error;
     }
 
-    // Log actual unexpected errors
     logger.error({ err: error }, "Unexpected error occurred during sign up");
     return {
       success: false as const,

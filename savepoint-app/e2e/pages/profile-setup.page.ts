@@ -12,7 +12,6 @@ export class ProfileSetupPage {
     return this.page.getByText("Complete Your Profile", { exact: true });
   }
 
-  // Username
   usernameInput(): Locator {
     return this.page.getByRole("textbox", { name: /username/i });
   }
@@ -31,7 +30,6 @@ export class ProfileSetupPage {
     return this.page.getByText("Username already exists");
   }
 
-  // Avatar upload (shared selectors with settings page)
   fileInput(): Locator {
     return this.page.locator('input[type="file"]');
   }
@@ -52,7 +50,6 @@ export class ProfileSetupPage {
     await this.avatarUploadButton().click();
   }
 
-  // Actions
   skipButton(): Locator {
     return this.page.getByRole("button", { name: /skip for now/i });
   }
@@ -61,7 +58,6 @@ export class ProfileSetupPage {
     return this.page.getByRole("button", { name: /complete setup/i });
   }
 
-  // Toast helpers
   private toastRegion(): Locator {
     return this.page.getByRole("region", { name: "Notifications alt+T" });
   }

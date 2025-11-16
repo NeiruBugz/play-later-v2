@@ -322,7 +322,7 @@ describe("validateUsername", () => {
       const result = validateUsername("admin'; DROP TABLE users--");
 
       expect(result.valid).toBe(false);
-      // Note: Gets caught by length check first (> 25 chars), which is fine
+
       if (!result.valid) {
         expect(result.error).toBeDefined();
       }
@@ -332,7 +332,7 @@ describe("validateUsername", () => {
       const result = validateUsername("<script>alert('xss')</script>");
 
       expect(result.valid).toBe(false);
-      // Note: Gets caught by length check first (> 25 chars), which is fine
+
       if (!result.valid) {
         expect(result.error).toBeDefined();
       }

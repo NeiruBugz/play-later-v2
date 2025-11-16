@@ -1,4 +1,4 @@
-import { ProfileService } from "@/data-access-layer/services";
+import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
 import { redirect } from "next/navigation";
 
 import { ProfileSettingsForm } from "@/features/profile/ui/profile-settings-form";
@@ -11,7 +11,7 @@ export default async function ProfileSettingsPage() {
   const profileService = new ProfileService();
   const result = await profileService.getProfile({ userId });
 
-  if (!result.success) {
+  if (!isSuccessResult(result)) {
     redirect("/login");
   }
 

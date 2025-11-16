@@ -1,17 +1,11 @@
 import { z } from "zod";
 
-/**
- * Schema for checking username availability
- */
 export const CheckUsernameSchema = z.object({
   username: z.string().min(3).max(25),
 });
 
 export type CheckUsernameInput = z.infer<typeof CheckUsernameSchema>;
 
-/**
- * Schema for updating user profile
- */
 export const UpdateProfileSchema = z.object({
   username: z.string().min(3).max(25),
   avatarUrl: z.string().optional(),
@@ -19,10 +13,6 @@ export const UpdateProfileSchema = z.object({
 
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
 
-/**
- * Schema for uploading avatar
- * Validates file size (max 4MB) and MIME type
- */
 export const UploadAvatarSchema = z.object({
   file: z
     .instanceof(File)
@@ -42,10 +32,6 @@ export const UploadAvatarSchema = z.object({
 
 export type UploadAvatarInput = z.infer<typeof UploadAvatarSchema>;
 
-/**
- * Schema for completing profile setup (first-time users)
- * Both fields are optional - users can skip setup entirely
- */
 export const CompleteProfileSetupSchema = z.object({
   username: z.string().min(3).max(25).optional(),
   avatarUrl: z.string().optional(),

@@ -21,6 +21,11 @@ export class QueryBuilder {
     return this;
   }
 
+  offset(count: number): this {
+    this.query += `offset ${count};`;
+    return this;
+  }
+
   search(term: string): this {
     this.query += `search "${term}";`;
     return this;

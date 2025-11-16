@@ -4,6 +4,7 @@ import type { BaseService, ServiceResult } from "../types";
 
 export interface GameSearchParams {
   name: string;
+  offset?: number;
   fields?: {
     platform?: string;
     platforms?: string;
@@ -21,6 +22,14 @@ export interface GameDetailsParams {
 
 export interface GameDetailsResult {
   game: FullGameInfoResponse | null;
+}
+
+export interface GetGameDetailsBySlugParams {
+  slug: string;
+}
+
+export interface GameDetailsBySlugResult {
+  game: FullGameInfoResponse;
 }
 
 export interface PlatformsResult {
@@ -164,18 +173,37 @@ export interface GameExpansionsResult {
 
 export interface GetFranchiseGamesParams {
   franchiseId: number;
+  currentGameId: number;
+  limit?: number;
+  offset?: number;
 }
 
 export interface FranchiseGamesResult {
   games: Array<{
     id: number;
     name: string;
-    cover: {
-      id: number;
+    slug: string;
+    cover?: {
       image_id: string;
     };
-    game_type: number;
   }>;
+  pagination: {
+    total: number;
+    offset: number;
+    limit: number;
+    hasMore: boolean;
+  };
+}
+
+export interface GetFranchiseDetailsParams {
+  franchiseId: number;
+}
+
+export interface FranchiseDetailsResult {
+  franchise: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface GetGameArtworksParams {
@@ -254,6 +282,20 @@ export interface EventLogoResult {
   };
 }
 
+export interface GetTimesToBeatParams {
+  igdbId: number;
+}
+
+// Re-export from shared types for backward compatibility
+export interface TimesToBeatData {
+  mainStory?: number;
+  completionist?: number;
+}
+
+export interface TimesToBeatResult {
+  timesToBeat: TimesToBeatData;
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -262,6 +304,10 @@ export interface IgdbService extends BaseService {
   getGameDetails(
     params: GameDetailsParams
   ): Promise<ServiceResult<GameDetailsResult>>;
+
+  getGameDetailsBySlug(
+    params: GetGameDetailsBySlugParams
+  ): Promise<ServiceResult<GameDetailsBySlugResult>>;
 
   getPlatforms(): Promise<ServiceResult<PlatformsResult>>;
 
@@ -316,4 +362,8 @@ export interface IgdbService extends BaseService {
   getEventLogo(
     params: GetEventLogoParams
   ): Promise<ServiceResult<EventLogoResult>>;
+
+  getTimesToBeat(
+    params: GetTimesToBeatParams
+  ): Promise<ServiceResult<TimesToBeatResult>>;
 }

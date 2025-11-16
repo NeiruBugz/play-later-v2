@@ -1,6 +1,7 @@
 import { ArrowLeft, Compass } from "lucide-react";
 import Link from "next/link";
 
+import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { Button } from "@/shared/components/ui/button";
 
 export default function NotFoundPage() {
@@ -24,6 +25,7 @@ export default function NotFoundPage() {
         </p>
 
         <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center">
+          <BrowserBackButton />
           <Button
             asChild
             variant="outline"

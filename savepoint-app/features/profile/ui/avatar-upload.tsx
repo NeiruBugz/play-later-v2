@@ -86,7 +86,7 @@ export const AvatarUpload = ({
     if (!selectedFile) return;
 
     setIsUploading(true);
-    onUploadStateChange?.(true); // Notify parent that upload started
+    onUploadStateChange?.(true);
     setError(null);
 
     try {
@@ -111,7 +111,7 @@ export const AvatarUpload = ({
       onUploadError?.(errorMessage);
     } finally {
       setIsUploading(false);
-      onUploadStateChange?.(false); // Notify parent that upload completed
+      onUploadStateChange?.(false);
     }
   };
 

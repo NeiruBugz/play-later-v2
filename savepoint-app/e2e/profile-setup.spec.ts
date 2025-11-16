@@ -9,16 +9,7 @@ import {
 } from "./helpers/db";
 import { ProfileSetupPage } from "./pages/profile-setup.page";
 
-/*
-Story: As a first-time user, I can optionally complete profile setup (username + avatar) or skip it.
-Acceptance Criteria (Slice 10):
-- Setup page shows for new users without a username
-- Can complete setup: set username (validated) and upload avatar, then redirected to dashboard
-- Can skip setup: redirected to dashboard without changes
-*/
-
 test.describe("[setup] Profile Setup — First-time user flow", () => {
-  // Ensure this suite starts unauthenticated to render the login page
   test.use({ storageState: undefined });
   test.afterAll(async () => {
     await disconnectDatabase();
@@ -34,7 +25,6 @@ test.describe("[setup] Profile Setup — First-time user flow", () => {
 
     await createTestUserWithoutUsername({ email, password, name: "E2E User" });
 
-    // Sign in as the new user (credentials enabled in E2E)
     await signInWithCredentials(page, email, password);
 
     const setup = new ProfileSetupPage(page);
@@ -47,18 +37,15 @@ test.describe("[setup] Profile Setup — First-time user flow", () => {
       timeout: 5000,
     });
 
-    // Upload avatar
     const here = path.dirname(fileURLToPath(import.meta.url));
     const testImagePath = path.join(here, "fixtures", "test-avatar.png");
     await setup.selectAvatarFromPath(testImagePath);
     await expect(setup.previewAvatar()).toBeVisible({ timeout: 5000 });
     await setup.submitAvatarUpload();
 
-    // Submit setup
     await setup.completeSetupButton().click();
     await page.waitForURL(/\/dashboard$/, { timeout: 10000 });
 
-    // Sanity: profile shows the chosen username
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
     await expect(
@@ -76,7 +63,6 @@ test.describe("[setup] Profile Setup — First-time user flow", () => {
 
     await createTestUserWithoutUsername({ email, password, name: "Skip User" });
 
-    // Sign in as the new user
     await signInWithCredentials(page, email, password);
 
     const setup = new ProfileSetupPage(page);
@@ -86,7 +72,6 @@ test.describe("[setup] Profile Setup — First-time user flow", () => {
     await setup.skipButton().click();
     await page.waitForURL(/\/dashboard$/, { timeout: 10000 });
 
-    // Sanity: profile uses email as display name (username not set)
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
     await expect(page.getByText(email)).toBeVisible();

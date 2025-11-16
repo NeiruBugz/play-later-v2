@@ -15,12 +15,10 @@ export default async function Page() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="from-muted/30 to-background absolute inset-0 bg-linear-to-b" />
 
         <div className="relative">
-          {/* Navigation */}
           <nav className="container mx-auto flex items-center justify-between px-4 py-6">
             <div className="flex items-center gap-2">
               <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
@@ -55,7 +53,6 @@ export default async function Page() {
             </div>
           </nav>
 
-          {/* Hero Content */}
           <div className="container mx-auto px-4 py-24 md:py-32">
             <div className="mx-auto max-w-4xl space-y-8 text-center">
               <div className="inline-block">
@@ -99,7 +96,6 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Philosophy Section */}
       <section id="philosophy" className="bg-muted/30 py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl space-y-6 text-center">
@@ -115,7 +111,6 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Features Grid */}
       <section id="features" className="py-24">
         <div className="container mx-auto px-4">
           <div className="mb-16 space-y-4 text-center">
@@ -207,7 +202,6 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Visual Feature Showcase */}
       <section className="bg-muted/30 py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-6xl">
@@ -240,7 +234,6 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl space-y-8 text-center">
@@ -270,7 +263,6 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-border bg-muted/30 border-t">
         <div className="container mx-auto px-4 py-12">
           <div className="grid gap-8 md:grid-cols-4">

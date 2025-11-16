@@ -7,20 +7,12 @@ import {
 } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 import {
+  CreateBucketCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadBucketCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
 
 import { s3Client } from "@/shared/lib/storage/s3-client";
 
@@ -85,19 +77,36 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
 
+    // Ensure S3 bucket exists (may already be created by global setup)
     try {
       await s3Client.send(
-        new ListObjectsV2Command({
+        new HeadBucketCommand({
           Bucket: env.S3_BUCKET_NAME,
-          MaxKeys: 1,
         })
       );
-    } catch (error) {
-      throw new Error(
-        `LocalStack S3 is not available on ${env.AWS_ENDPOINT_URL}. ` +
-          `Ensure docker-compose is running: docker-compose up -d\n` +
-          `Error: ${error}`
-      );
+    } catch (error: unknown) {
+      const err = error as { name?: string };
+      if (err.name === "NotFound" || err.name === "NoSuchBucket") {
+        // Bucket doesn't exist, create it
+        try {
+          await s3Client.send(
+            new CreateBucketCommand({
+              Bucket: env.S3_BUCKET_NAME,
+            })
+          );
+        } catch (createError) {
+          throw new Error(
+            `Failed to create S3 bucket '${env.S3_BUCKET_NAME}': ${createError}`
+          );
+        }
+      } else {
+        // LocalStack might not be running
+        throw new Error(
+          `LocalStack S3 is not available on ${env.AWS_ENDPOINT_URL}. ` +
+            `Ensure docker-compose is running: docker-compose up -d\n` +
+            `Error: ${error}`
+        );
+      }
     }
   });
 
@@ -146,7 +155,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        // LocalStack URL format: http://localhost:4568/bucket-name/key
         expect(result.data.url).toMatch(
           new RegExp(
             `^${env.AWS_ENDPOINT_URL}/${env.S3_BUCKET_NAME}/${env.S3_AVATAR_PATH_PREFIX}`
@@ -176,7 +184,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        // Verify database was updated
         const db = getTestDatabase();
         const updatedUser = await db.user.findUnique({
           where: { id: testUserId },
@@ -197,7 +204,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       if (result.success) {
         expect(result.data.url).toContain("avatar.png");
 
-        // Verify file exists
         const key = extractS3Key(result.data.url);
         expect(await fileExistsInS3(key)).toBe(true);
       }
@@ -212,7 +218,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       if (result.success) {
         expect(result.data.url).toContain("avatar.gif");
 
-        // Verify file exists
         const key = extractS3Key(result.data.url);
         expect(await fileExistsInS3(key)).toBe(true);
       }
@@ -227,7 +232,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       if (result.success) {
         expect(result.data.url).toContain("avatar.webp");
 
-        // Verify file exists
         const key = extractS3Key(result.data.url);
         expect(await fileExistsInS3(key)).toBe(true);
       }
@@ -238,7 +242,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     it("should reject file over 4MB with size error", async () => {
       const file = createTestFile(
         "huge.jpg",
-        4 * 1024 * 1024 + 1, // 4MB + 1 byte
+        4 * 1024 * 1024 + 1,
         "image/jpeg"
       );
 
@@ -268,7 +272,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     it("should accept file at exactly 4MB boundary", async () => {
       const file = createTestFile(
         "exact-4mb.jpg",
-        4 * 1024 * 1024, // Exactly 4MB
+        4 * 1024 * 1024,
         "image/jpeg"
       );
 
@@ -382,11 +386,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     });
 
     it("should not update database when file size exceeds limit", async () => {
-      const file = createTestFile(
-        "too-big.jpg",
-        6 * 1024 * 1024, // 6MB
-        "image/jpeg"
-      );
+      const file = createTestFile("too-big.jpg", 6 * 1024 * 1024, "image/jpeg");
 
       const result = await uploadAvatar({ file });
 

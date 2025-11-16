@@ -18,4 +18,4 @@ Pre-commit Hooks
 - Local git hooks have been removed. All code quality checks run in CI on pull requests.
 - To run checks locally before pushing, use from `savepoint-app/`:
 
-pnpm code-check
+pnpm ci:check

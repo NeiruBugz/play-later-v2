@@ -13,9 +13,9 @@ interface UsernameInputProps {
   value: string;
   onChange: (value: string) => void;
   label?: string;
-  error?: string; // External validation errors (optional)
+  error?: string;
   disabled?: boolean;
-  onValidationChange?: (hasError: boolean) => void; // Callback to notify parent of validation state
+  onValidationChange?: (hasError: boolean) => void;
 }
 
 export function UsernameInput({
@@ -33,10 +33,8 @@ export function UsernameInput({
     (externalError || validationStatus === "error") && displayError;
   const showSuccess = !externalError && validationStatus === "available";
 
-  // Notify parent component of validation state changes
   useEffect(() => {
     if (onValidationChange) {
-      // Only report actual errors, not validating state
       const hasError = Boolean(showError);
       onValidationChange(hasError);
     }
@@ -66,13 +64,25 @@ export function UsernameInput({
         />
         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
           {validationStatus === "validating" && (
-            <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
+            <Loader2
+              className="text-muted-foreground h-4 w-4 animate-spin"
+              aria-label="Validating username"
+              data-testid="username-validating-spinner"
+            />
           )}
           {showSuccess && (
-            <Check className="h-4 w-4 text-emerald-500 dark:text-emerald-300" />
+            <Check
+              className="h-4 w-4 text-emerald-500 dark:text-emerald-300"
+              aria-label="Username available"
+              data-testid="username-success-icon"
+            />
           )}
           {showError && validationStatus === "error" && (
-            <X className="h-4 w-4 text-red-500 dark:text-red-400" />
+            <X
+              className="h-4 w-4 text-red-500 dark:text-red-400"
+              aria-label="Username error"
+              data-testid="username-error-icon"
+            />
           )}
         </div>
       </div>

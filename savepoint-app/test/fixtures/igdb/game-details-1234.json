@@ -4,6 +4,7 @@
     "name": "Test Game 1234",
     "summary": "An epic action-adventure game featuring stunning visuals, deep combat mechanics, and an engaging story. Players will explore vast open worlds, defeat challenging bosses, and uncover ancient mysteries.",
     "aggregated_rating": 88.5,
+    "first_release_date": 1584230400,
     "cover": {
       "image_id": "co_test_1234",
       "url": "//images.igdb.com/igdb/image/upload/t_thumb/co_test_1234.jpg"
