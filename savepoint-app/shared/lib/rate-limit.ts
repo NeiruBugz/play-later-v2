@@ -1,11 +1,11 @@
+import { env } from "@/env.mjs";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import type { NextRequest } from "next/server";
 
-import { env } from "@/env.mjs";
-
 let ratelimit: Ratelimit | null = null;
-let inMemoryFallback: Map<string, { count: number; resetAt: number }> | null = null;
+let inMemoryFallback: Map<string, { count: number; resetAt: number }> | null =
+  null;
 
 function initializeRateLimiter(): Ratelimit | null {
   if (ratelimit !== null) {

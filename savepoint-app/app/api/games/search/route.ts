@@ -44,7 +44,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get("q") ?? "";
     const parsedOffset = parseInt(searchParams.get("offset") ?? "0", 10);
-    const offset = Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+    const offset =
+      Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
 
     // Extract request context
     const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
