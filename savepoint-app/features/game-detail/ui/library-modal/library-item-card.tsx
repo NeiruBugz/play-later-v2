@@ -8,31 +8,17 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { formatAbsoluteDate } from "@/shared/lib/date";
+import {
+  getStatusLabel,
+  getStatusVariant,
+} from "@/shared/lib";
 
-import { getStatusLabel } from "./constants";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 
 type LibraryItemCardProps = {
   item: LibraryItem;
   onClick?: () => void;
   onDelete?: (itemId: number) => void;
-};
-
-const getStatusVariant = (
-  status: LibraryItem["status"]
-): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
-    case "CURRENTLY_EXPLORING":
-      return "default";
-    case "EXPERIENCED":
-      return "secondary";
-    case "TOOK_A_BREAK":
-      return "outline";
-    case "WISHLIST":
-      return "outline";
-    default:
-      return "secondary";
-  }
 };
 
 export const LibraryItemCard = ({

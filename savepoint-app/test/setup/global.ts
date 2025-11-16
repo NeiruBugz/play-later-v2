@@ -117,6 +117,82 @@ vi.mock("@/shared/lib", () => {
       ERROR_BOUNDARY: "errorBoundary",
       STORAGE: "storage",
     },
+    LIBRARY_STATUS_CONFIG: [
+      {
+        value: "CURIOUS_ABOUT",
+        label: "Curious About",
+        description: "Interested in trying this game",
+        badgeVariant: "outline",
+      },
+      {
+        value: "CURRENTLY_EXPLORING",
+        label: "Currently Exploring",
+        description: "Actively playing this game",
+        badgeVariant: "default",
+      },
+      {
+        value: "TOOK_A_BREAK",
+        label: "Took a Break",
+        description: "Paused but plan to return",
+        badgeVariant: "secondary",
+      },
+      {
+        value: "EXPERIENCED",
+        label: "Experienced",
+        description: "Finished or thoroughly explored",
+        badgeVariant: "secondary",
+      },
+      {
+        value: "WISHLIST",
+        label: "Wishlist",
+        description: "Want to play in the future",
+        badgeVariant: "outline",
+      },
+      {
+        value: "REVISITING",
+        label: "Revisiting",
+        description: "Playing again after completing",
+        badgeVariant: "default",
+      },
+    ],
+    LIBRARY_STATUS_LABELS: {
+      CURIOUS_ABOUT: "Curious About",
+      CURRENTLY_EXPLORING: "Currently Exploring",
+      TOOK_A_BREAK: "Took a Break",
+      EXPERIENCED: "Experienced",
+      WISHLIST: "Wishlist",
+      REVISITING: "Revisiting",
+    },
+    LIBRARY_STATUS_VARIANTS: {
+      CURIOUS_ABOUT: "outline",
+      CURRENTLY_EXPLORING: "default",
+      TOOK_A_BREAK: "secondary",
+      EXPERIENCED: "secondary",
+      WISHLIST: "outline",
+      REVISITING: "default",
+    },
+    getStatusLabel: vi.fn((status: string) => {
+      const labels: Record<string, string> = {
+        CURIOUS_ABOUT: "Curious About",
+        CURRENTLY_EXPLORING: "Currently Exploring",
+        TOOK_A_BREAK: "Took a Break",
+        EXPERIENCED: "Experienced",
+        WISHLIST: "Wishlist",
+        REVISITING: "Revisiting",
+      };
+      return labels[status] || status;
+    }),
+    getStatusVariant: vi.fn((status: string) => {
+      const variants: Record<string, string> = {
+        CURIOUS_ABOUT: "outline",
+        CURRENTLY_EXPLORING: "default",
+        TOOK_A_BREAK: "secondary",
+        EXPERIENCED: "secondary",
+        WISHLIST: "outline",
+        REVISITING: "default",
+      };
+      return variants[status] || "secondary";
+    }),
   };
 });
 

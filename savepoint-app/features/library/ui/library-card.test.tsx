@@ -116,7 +116,7 @@ describe("LibraryCard", () => {
       expect(image).toBeVisible();
       expect(image).toHaveAttribute(
         "src",
-        "https://images.igdb.com/igdb/image/upload/t_cover_big/co1234.jpg"
+        "https://images.igdb.com/igdb/image/upload/t_720p/co1234.jpg"
       );
     });
 

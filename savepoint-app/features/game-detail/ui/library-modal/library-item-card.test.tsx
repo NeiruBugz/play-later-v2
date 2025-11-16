@@ -106,13 +106,13 @@ describe("LibraryItemCard", () => {
         expect(elements.getStatusBadge("Experienced")).toBeVisible();
       });
 
-      it("should show 'Taking a Break' status badge", () => {
+      it("should show 'Took a Break' status badge", () => {
         const item = createMockLibraryItem({
           status: LibraryItemStatus.TOOK_A_BREAK,
         });
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        expect(elements.getStatusBadge("Taking a Break")).toBeVisible();
+        expect(elements.getStatusBadge("Took a Break")).toBeVisible();
       });
 
       it("should show 'Wishlist' status badge", () => {
@@ -483,7 +483,7 @@ describe("LibraryItemCard", () => {
       });
       render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-      const badge = screen.getByText("Taking a Break");
+      const badge = screen.getByText("Took a Break");
       expect(badge).toBeVisible();
     });
 

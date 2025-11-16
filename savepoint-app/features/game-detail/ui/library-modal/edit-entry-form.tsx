@@ -7,6 +7,7 @@ import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { getStatusLabel } from "@/shared/lib";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 
 import {
@@ -14,7 +15,6 @@ import {
   type UpdateLibraryEntryInput,
 } from "../../schemas";
 import { updateLibraryEntryAction } from "../../server-actions";
-import { getStatusLabel } from "./constants";
 import { DateField } from "./date-field";
 import { LibraryEntryMetadata } from "./library-entry-metadata";
 import { StatusSelect } from "./status-select";

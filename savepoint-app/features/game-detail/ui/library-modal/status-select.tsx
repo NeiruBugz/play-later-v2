@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 
-import { STATUS_OPTIONS } from "./constants";
+import { LIBRARY_STATUS_CONFIG } from "@/shared/lib";
 
 type StatusSelectProps<T extends FieldValues = FieldValues> = {
   field: ControllerRenderProps<T, FieldPath<T>>;
@@ -44,7 +44,7 @@ export const StatusSelect = <T extends FieldValues = FieldValues>({
           </SelectTrigger>
         </FormControl>
         <SelectContent>
-          {STATUS_OPTIONS.map((option) => (
+          {LIBRARY_STATUS_CONFIG.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               <div className="flex flex-col py-1">
                 <span>{option.label}</span>

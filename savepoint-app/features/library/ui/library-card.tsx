@@ -12,26 +12,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
-import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
+import {
+  LIBRARY_STATUS_LABELS,
+  LIBRARY_STATUS_VARIANTS,
+} from "@/shared/lib";
 
 import { useQuickActionsVariant } from "../hooks/use-quick-actions-variant";
 import { LibraryCardActionBar } from "./library-card-action-bar";
 import { LibraryCardInteractiveBadge } from "./library-card-interactive-badge";
-
-/**
- * Map library item status to badge variant for visual differentiation
- */
-const statusVariantMap: Record<
-  LibraryItemStatus,
-  "default" | "secondary" | "outline" | "destructive"
-> = {
-  CURIOUS_ABOUT: "outline",
-  CURRENTLY_EXPLORING: "default",
-  TOOK_A_BREAK: "secondary",
-  EXPERIENCED: "secondary",
-  WISHLIST: "outline",
-  REVISITING: "default",
-};
 
 type LibraryCardProps = {
   item: LibraryItemWithGameAndCount;
@@ -89,7 +77,7 @@ export function LibraryCard({ item }: LibraryCardProps) {
         className="group relative block [&>[data-library-interactive]]:pointer-events-auto"
         onClick={handleLinkInteraction}
         onMouseDown={handleLinkInteraction}
-        aria-label={`${game.title} - ${LibraryStatusMapper[status as LibraryItemStatus]}${hasMultipleEntries ? ` - ${game._count.libraryItems} entries` : ""}`}
+        aria-label={`${game.title} - ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}${hasMultipleEntries ? ` - ${game._count.libraryItems} entries` : ""}`}
       >
         <GameCoverImage
           imageId={coverImageId}
@@ -130,7 +118,7 @@ export function LibraryCard({ item }: LibraryCardProps) {
             <LibraryCardInteractiveBadge
               libraryItemId={item.id}
               currentStatus={status as LibraryItemStatus}
-              statusVariant={statusVariantMap[status as LibraryItemStatus]}
+              statusVariant={LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]}
             />
           </div>
         )}
@@ -138,11 +126,11 @@ export function LibraryCard({ item }: LibraryCardProps) {
         {variant === "actionBar" && (
           <div className="absolute top-2 left-2">
             <Badge
-              variant={statusVariantMap[status as LibraryItemStatus]}
+              variant={LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]}
               role="status"
-              aria-label={`Status: ${LibraryStatusMapper[status as LibraryItemStatus]}`}
+              aria-label={`Status: ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}`}
             >
-              {LibraryStatusMapper[status as LibraryItemStatus]}
+              {LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}
             </Badge>
           </div>
         )}

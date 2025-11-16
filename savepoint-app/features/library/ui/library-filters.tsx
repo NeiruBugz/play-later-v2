@@ -16,7 +16,7 @@ import {
 } from "@/shared/components/ui/select";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
-import { STATUS_OPTIONS } from "../../game-detail/ui/library-modal/constants";
+import { LIBRARY_STATUS_CONFIG } from "@/shared/lib";
 
 /**
  * Library filters component - provides filter controls for the library view
@@ -123,7 +123,7 @@ export function LibraryFilters() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="__all__">All Statuses</SelectItem>
-              {STATUS_OPTIONS.map((option) => (
+              {LIBRARY_STATUS_CONFIG.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>

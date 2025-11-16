@@ -394,7 +394,7 @@ describe("LibraryFilters", () => {
         screen.getByRole("option", { name: "Currently Exploring" })
       ).toBeVisible();
       expect(
-        screen.getByRole("option", { name: "Taking a Break" })
+        screen.getByRole("option", { name: "Took a Break" })
       ).toBeVisible();
       expect(screen.getByRole("option", { name: "Experienced" })).toBeVisible();
       expect(screen.getByRole("option", { name: "Wishlist" })).toBeVisible();
