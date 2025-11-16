@@ -23,14 +23,6 @@ type ActionResult<T> =
 
 /**
  * Server action: Update library status for a game by IGDB ID
- *
- * Flow:
- * 1. Validate input with Zod
- * 2. Get authenticated user ID
- * 3. Find the game in the database by IGDB ID
- * 4. If game not in library, add it with the new status
- * 5. If game in library, find the most recent library item and update its status
- * 6. Revalidate the game detail page
  */
 export async function updateLibraryStatusAction(
   input: UpdateLibraryStatusByIgdbInput
@@ -41,7 +33,6 @@ export async function updateLibraryStatusAction(
       "Updating library status"
     );
 
-    // 1. Validate input
     const parsed = UpdateLibraryStatusByIgdbSchema.safeParse(input);
     if (!parsed.success) {
       logger.warn({ errors: parsed.error.errors }, "Invalid input data");
@@ -53,7 +44,6 @@ export async function updateLibraryStatusAction(
 
     const { igdbId, status } = parsed.data;
 
-    // 2. Get authenticated user ID
     const userId = await getServerUserId();
     if (!userId) {
       logger.warn("Unauthenticated user attempted to update library status");
@@ -63,20 +53,17 @@ export async function updateLibraryStatusAction(
       };
     }
 
-    // 3. Find the game in the database by IGDB ID
     const libraryService = new LibraryService();
     const gameResult = await libraryService.findGameByIgdbId(igdbId);
 
-    // 4. If game not in library, add it with the new status
     if (!gameResult.success || !gameResult.data) {
       logger.info(
         { igdbId, userId },
         "Game not in library, adding with new status"
       );
-      return addToLibraryAction({ igdbId, status, platform: "PC" }); // Default platform when quick-adding
+      return addToLibraryAction({ igdbId, status, platform: "PC" });
     }
 
-    // 5. Find the most recent library item and update its status
     const game = gameResult.data;
     const libraryItemsResult =
       await libraryService.findMostRecentLibraryItemByGameId({
@@ -95,16 +82,14 @@ export async function updateLibraryStatusAction(
       };
     }
 
-    // If no library item exists, add the game to the library
     if (!libraryItemsResult.data) {
       logger.info(
         { igdbId, userId },
         "No library item found, adding game to library"
       );
-      return addToLibraryAction({ igdbId, status, platform: "PC" }); // Default platform when quick-adding
+      return addToLibraryAction({ igdbId, status, platform: "PC" });
     }
 
-    // Update the most recent library item
     const mostRecentItem = libraryItemsResult.data;
     const updateResult = await libraryService.updateLibraryItem({
       userId,
@@ -125,7 +110,6 @@ export async function updateLibraryStatusAction(
       };
     }
 
-    // 6. Revalidate the game detail page
     revalidatePath(`/games/${game.slug}`);
 
     logger.info(

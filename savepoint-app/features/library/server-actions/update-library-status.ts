@@ -38,12 +38,6 @@ type ActionResult<T> =
 /**
  * Server action: Update the status of a library item
  *
- * Flow:
- * 1. Validate input with Zod
- * 2. Get authenticated user ID
- * 3. Call LibraryService to update the library item status
- * 4. Revalidate the library page cache
- *
  * @param input - Library item ID and new status
  * @returns ActionResult with updated library item or error
  */
@@ -56,7 +50,6 @@ export async function updateLibraryStatusAction(
       "Updating library item status"
     );
 
-    // 1. Validate input
     const parsed = UpdateLibraryStatusSchema.safeParse(input);
     if (!parsed.success) {
       logger.warn({ errors: parsed.error.errors }, "Invalid input data");
@@ -68,7 +61,6 @@ export async function updateLibraryStatusAction(
 
     const { libraryItemId, status } = parsed.data;
 
-    // 2. Get authenticated user ID
     const userId = await getServerUserId();
     if (!userId) {
       logger.warn("Unauthenticated user attempted to update library status");
@@ -78,7 +70,6 @@ export async function updateLibraryStatusAction(
       };
     }
 
-    // 3. Call LibraryService to update the library item
     const libraryService = new LibraryService();
     const result = await libraryService.updateLibraryItem({
       userId,
@@ -99,7 +90,6 @@ export async function updateLibraryStatusAction(
       };
     }
 
-    // 4. Revalidate the library page cache
     revalidatePath("/library");
 
     logger.info(

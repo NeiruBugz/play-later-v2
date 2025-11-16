@@ -22,12 +22,6 @@ type ActionResult<T> =
 
 /**
  * Server action: Update a specific library entry by library item ID
- *
- * Flow:
- * 1. Validate input with Zod
- * 2. Get authenticated user ID
- * 3. Call LibraryService to update the library item
- * 4. Revalidate the game detail page
  */
 export async function updateLibraryEntryAction(
   input: UpdateLibraryEntryInput
@@ -38,7 +32,6 @@ export async function updateLibraryEntryAction(
       "Updating library entry"
     );
 
-    // 1. Validate input
     const parsed = UpdateLibraryEntrySchema.safeParse(input);
     if (!parsed.success) {
       logger.warn({ errors: parsed.error.errors }, "Invalid input data");
@@ -50,7 +43,6 @@ export async function updateLibraryEntryAction(
 
     const { libraryItemId, status, startedAt, completedAt } = parsed.data;
 
-    // 2. Get authenticated user ID
     const userId = await getServerUserId();
     if (!userId) {
       logger.warn("Unauthenticated user attempted to update library entry");
@@ -60,7 +52,6 @@ export async function updateLibraryEntryAction(
       };
     }
 
-    // 3. Call LibraryService to update the library item
     const libraryService = new LibraryService();
     const updateResult = await libraryService.updateLibraryItem({
       userId,
@@ -83,10 +74,6 @@ export async function updateLibraryEntryAction(
       };
     }
 
-    // 4. Revalidate the game detail page
-    // We need to get the game to find its slug for revalidation
-    // The library service should return the game info, but for now we'll revalidate all paths
-    // This is a limitation we can improve later
     revalidatePath("/games/[slug]", "page");
 
     logger.info(

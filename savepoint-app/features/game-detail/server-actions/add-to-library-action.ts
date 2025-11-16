@@ -19,12 +19,6 @@ type ActionResult<T> =
 
 /**
  * Server action: Add a game to the user's library
- *
- * Flow:
- * 1. Validate input with Zod
- * 2. Get authenticated user ID
- * 3. Call LibraryService to add game
- * 4. Revalidate the game detail page
  */
 export async function addToLibraryAction(
   input: AddToLibraryInput
@@ -32,7 +26,6 @@ export async function addToLibraryAction(
   try {
     logger.info({ igdbId: input.igdbId }, "Adding game to library");
 
-    // 1. Validate input
     const parsed = AddToLibrarySchema.safeParse(input);
     if (!parsed.success) {
       logger.warn({ errors: parsed.error.errors }, "Invalid input data");
@@ -44,7 +37,6 @@ export async function addToLibraryAction(
 
     const { igdbId, status, platform, startedAt, completedAt } = parsed.data;
 
-    // 2. Get authenticated user ID
     const userId = await getServerUserId();
     if (!userId) {
       logger.warn("Unauthenticated user attempted to add game to library");
@@ -54,7 +46,6 @@ export async function addToLibraryAction(
       };
     }
 
-    // 3. Call LibraryService to add game
     const libraryService = new LibraryService();
     const result = await libraryService.addGameToLibrary({
       userId,
@@ -76,7 +67,6 @@ export async function addToLibraryAction(
       };
     }
 
-    // 4. Revalidate the game detail page
     revalidatePath(`/games/${result.data.gameSlug}`);
 
     logger.info(
