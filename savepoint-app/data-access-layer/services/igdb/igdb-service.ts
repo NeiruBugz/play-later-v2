@@ -1170,7 +1170,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       const countQuery = new QueryBuilder()
         .fields(["id"])
         .where(whereClause)
-        .limit(500)
         .build();
 
       this.logger.info(
