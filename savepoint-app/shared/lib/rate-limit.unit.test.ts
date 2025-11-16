@@ -28,12 +28,12 @@ describe("checkRateLimit", () => {
   }
 
   describe("when user makes requests to rate-limited endpoint", () => {
-    it("should allow first 20 requests within the window", () => {
+    it("should allow first 20 requests within the window", async () => {
       const mockRequest = createMockRequest(getUniqueIP());
 
       const results = [];
       for (let i = 0; i < 20; i++) {
-        results.push(checkRateLimit(mockRequest));
+        results.push(await checkRateLimit(mockRequest));
       }
 
       results.forEach((result, index) => {
@@ -42,50 +42,50 @@ describe("checkRateLimit", () => {
       });
     });
 
-    it("should deny the 21st request within the window", () => {
+    it("should deny the 21st request within the window", async () => {
       const mockRequest = createMockRequest(getUniqueIP());
 
       for (let i = 0; i < 20; i++) {
-        checkRateLimit(mockRequest);
+        await checkRateLimit(mockRequest);
       }
 
-      const result = checkRateLimit(mockRequest);
+      const result = await checkRateLimit(mockRequest);
 
       expect(result.allowed).toBe(false);
       expect(result.remaining).toBe(0);
     });
 
-    it("should reset counter after window expires", () => {
+    it("should reset counter after window expires", async () => {
       const mockRequest = createMockRequest(getUniqueIP());
 
       for (let i = 0; i < 20; i++) {
-        checkRateLimit(mockRequest);
+        await checkRateLimit(mockRequest);
       }
 
-      const deniedResult = checkRateLimit(mockRequest);
+      const deniedResult = await checkRateLimit(mockRequest);
       expect(deniedResult.allowed).toBe(false);
 
       vi.advanceTimersByTime(60 * 60 * 1000 + 1);
 
-      const newResult = checkRateLimit(mockRequest);
+      const newResult = await checkRateLimit(mockRequest);
       expect(newResult.allowed).toBe(true);
       expect(newResult.remaining).toBe(19);
     });
 
-    it("should track different IPs independently", () => {
+    it("should track different IPs independently", async () => {
       const mockRequest1 = createMockRequest(getUniqueIP("1"));
       const mockRequest2 = createMockRequest(getUniqueIP("2"));
 
       for (let i = 0; i < 10; i++) {
-        checkRateLimit(mockRequest1);
+        await checkRateLimit(mockRequest1);
       }
 
       for (let i = 0; i < 5; i++) {
-        checkRateLimit(mockRequest2);
+        await checkRateLimit(mockRequest2);
       }
 
-      const result1 = checkRateLimit(mockRequest1);
-      const result2 = checkRateLimit(mockRequest2);
+      const result1 = await checkRateLimit(mockRequest1);
+      const result2 = await checkRateLimit(mockRequest2);
 
       expect(result1.allowed).toBe(true);
       expect(result1.remaining).toBe(9);
@@ -93,17 +93,17 @@ describe("checkRateLimit", () => {
       expect(result2.remaining).toBe(14);
     });
 
-    it("should respect custom limit and window parameters", () => {
+    it("should respect custom limit and window parameters", async () => {
       const mockRequest = createMockRequest(getUniqueIP());
 
       const customLimit = 5;
       const customWindow = 10 * 1000;
 
       for (let i = 0; i < 5; i++) {
-        checkRateLimit(mockRequest, customLimit, customWindow);
+        await checkRateLimit(mockRequest, customLimit, customWindow);
       }
 
-      const sixthRequest = checkRateLimit(
+      const sixthRequest = await checkRateLimit(
         mockRequest,
         customLimit,
         customWindow
@@ -113,11 +113,11 @@ describe("checkRateLimit", () => {
       expect(sixthRequest.remaining).toBe(0);
     });
 
-    it("should extract IP from x-forwarded-for header when request.ip is unavailable", () => {
+    it("should extract IP from x-forwarded-for header when request.ip is unavailable", async () => {
       const forwardedIP = "203.0.113.1";
       const mockRequest = createMockRequest(forwardedIP);
 
-      const result = checkRateLimit(mockRequest);
+      const result = await checkRateLimit(mockRequest);
 
       expect(mockRequest.headers.get).toHaveBeenCalledWith("x-forwarded-for");
       expect(result.allowed).toBe(true);
@@ -126,60 +126,60 @@ describe("checkRateLimit", () => {
   });
 
   describe("when handling edge cases", () => {
-    it("should handle requests with no IP information", () => {
+    it("should handle requests with no IP information", async () => {
       const mockRequest = {
         headers: {
           get: vi.fn().mockReturnValue(null),
         },
       } as unknown as NextRequest;
 
-      const result = checkRateLimit(mockRequest);
+      const result = await checkRateLimit(mockRequest);
 
       expect(result.allowed).toBe(true);
     });
 
-    it("should maintain rate limit after partial window expiry", () => {
+    it("should maintain rate limit after partial window expiry", async () => {
       const mockRequest = createMockRequest(getUniqueIP());
 
       for (let i = 0; i < 10; i++) {
-        checkRateLimit(mockRequest);
+        await checkRateLimit(mockRequest);
       }
 
       vi.advanceTimersByTime(30 * 60 * 1000);
 
-      const result = checkRateLimit(mockRequest);
+      const result = await checkRateLimit(mockRequest);
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(9);
     });
 
-    it("should handle concurrent requests from different IPs", () => {
+    it("should handle concurrent requests from different IPs", async () => {
       const ips = [getUniqueIP("1"), getUniqueIP("2"), getUniqueIP("3")];
 
       for (let i = 0; i < 10; i++) {
-        ips.forEach((ip) => {
+        for (const ip of ips) {
           const request = createMockRequest(ip);
-          checkRateLimit(request);
-        });
+          await checkRateLimit(request);
+        }
       }
 
-      ips.forEach((ip) => {
+      for (const ip of ips) {
         const request = createMockRequest(ip);
-        const { remaining, allowed } = checkRateLimit(request);
+        const { remaining, allowed } = await checkRateLimit(request);
         expect(allowed).toBe(true);
         expect(remaining).toBe(9);
-      });
+      }
     });
 
-    it("should handle x-forwarded-for with multiple IPs (proxy chain)", () => {
+    it("should handle x-forwarded-for with multiple IPs (proxy chain)", async () => {
       const mockRequest = createMockRequest(
         "10.0.0.1, 172.16.0.1, 192.168.1.1"
       );
 
       for (let i = 0; i < 20; i++) {
-        checkRateLimit(mockRequest);
+        await checkRateLimit(mockRequest);
       }
 
-      const result = checkRateLimit(mockRequest);
+      const result = await checkRateLimit(mockRequest);
 
       expect(result.allowed).toBe(false);
     });

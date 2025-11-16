@@ -52,7 +52,7 @@ export async function gameSearchHandler(
     headers: context.headers,
   } as unknown as NextRequest;
 
-  const rateLimitResult = checkRateLimit(rateLimitRequest);
+  const rateLimitResult = await checkRateLimit(rateLimitRequest);
 
   if (!rateLimitResult.allowed) {
     logger.warn({ query, ip: context.ip }, "Rate limit exceeded");

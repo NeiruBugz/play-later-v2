@@ -29,7 +29,7 @@ describe("gameSearchHandler", () => {
     vi.clearAllMocks();
 
     // Default rate limit mock (allowed)
-    mockCheckRateLimit.mockReturnValue({
+    mockCheckRateLimit.mockResolvedValue({
       allowed: true,
       remaining: 19,
     });
@@ -192,7 +192,7 @@ describe("gameSearchHandler", () => {
   describe("when user encounters rate limiting", () => {
     it("should return 429 when rate limit exceeded", async () => {
       // Arrange
-      mockCheckRateLimit.mockReturnValue({
+      mockCheckRateLimit.mockResolvedValue({
         allowed: false,
         remaining: 0,
       });

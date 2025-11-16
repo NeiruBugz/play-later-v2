@@ -31,6 +31,8 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
     S3_AVATAR_PATH_PREFIX: process.env.S3_AVATAR_PATH_PREFIX,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   },
   server: {
     AUTH_COGNITO_ID: z.string({ message: "AUTH_COGNITO_ID is required" }),
@@ -80,5 +82,8 @@ export const env = createEnv({
       .refine((val) => val.endsWith("/"), {
         message: "S3_AVATAR_PATH_PREFIX must end with '/'",
       }),
+
+    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   },
 });
