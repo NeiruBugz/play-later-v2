@@ -49,12 +49,10 @@ export function LibraryFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Track local search input state for immediate UI feedback
   const [searchInput, setSearchInput] = useState(
     searchParams.get("search") ?? ""
   );
 
-  // Debounce search input to avoid excessive URL updates
   const debouncedSearch = useDebouncedValue(searchInput, 300);
 
   /**
@@ -92,12 +90,10 @@ export function LibraryFilters() {
     setSearchInput("");
   }, [router, searchParams]);
 
-  // Sync debounced search with URL
   const handleSearchChange = useCallback((value: string) => {
     setSearchInput(value);
   }, []);
 
-  // Update URL when debounced search changes
   useEffect(() => {
     const currentSearch = searchParams.get("search");
     if (debouncedSearch !== currentSearch) {
@@ -105,7 +101,6 @@ export function LibraryFilters() {
     }
   }, [debouncedSearch, searchParams, updateFilter]);
 
-  // Check if any filters are active
   const hasActiveFilters = Boolean(
     searchParams.get("status") ||
       searchParams.get("platform") ||
@@ -114,9 +109,7 @@ export function LibraryFilters() {
 
   return (
     <div className="mb-6 space-y-4">
-      {/* Filter Controls Row */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end">
-        {/* Status Filter */}
         <div className="w-full space-y-2 md:w-auto md:flex-1">
           <Label htmlFor="status-filter">Status</Label>
           <Select
@@ -129,7 +122,6 @@ export function LibraryFilters() {
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
-              {/* "All Statuses" option to clear filter */}
               <SelectItem value="__all__">All Statuses</SelectItem>
               {STATUS_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
@@ -140,7 +132,6 @@ export function LibraryFilters() {
           </Select>
         </div>
 
-        {/* Platform Filter */}
         <div className="w-full space-y-2 md:w-auto md:flex-1">
           <Label htmlFor="platform-filter">Platform</Label>
           <Select
@@ -153,10 +144,7 @@ export function LibraryFilters() {
               <SelectValue placeholder="All Platforms" />
             </SelectTrigger>
             <SelectContent>
-              {/* "All Platforms" option to clear filter */}
               <SelectItem value="__all__">All Platforms</SelectItem>
-              {/* TODO: Fetch platforms dynamically from API or database */}
-              {/* For now, using common platform names as placeholders */}
               <SelectItem value="PlayStation 5">PlayStation 5</SelectItem>
               <SelectItem value="PlayStation 4">PlayStation 4</SelectItem>
               <SelectItem value="Xbox Series X/S">Xbox Series X/S</SelectItem>
@@ -167,7 +155,6 @@ export function LibraryFilters() {
           </Select>
         </div>
 
-        {/* Search Input */}
         <div className="w-full space-y-2 md:flex-1">
           <Label htmlFor="search-input">Search</Label>
           <div className="relative">
@@ -187,7 +174,6 @@ export function LibraryFilters() {
           </div>
         </div>
 
-        {/* Clear Filters Button */}
         {hasActiveFilters && (
           <Button
             variant="ghost"

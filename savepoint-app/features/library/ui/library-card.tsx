@@ -66,20 +66,16 @@ export function LibraryCard({ item }: LibraryCardProps) {
   const hasMultipleEntries = game._count.libraryItems > 1;
   const variant = useQuickActionsVariant(item.id);
 
-  // Extract cover image ID from the stored URL or use null
   const coverImageId =
     game.coverImage?.split("/").pop()?.replace(".jpg", "") ?? null;
 
   const handleLinkInteraction = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // If default was already prevented, don't do anything
     if (e.defaultPrevented) {
       return;
     }
 
     const target = e.target as HTMLElement;
 
-    // Check if click originated from an interactive element
-    // Check the target itself first
     if (
       target.tagName === "BUTTON" ||
       target.getAttribute("role") === "toolbar" ||
@@ -102,7 +98,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
         onMouseDown={handleLinkInteraction}
         aria-label={`${game.title} - ${LibraryStatusMapper[status as LibraryItemStatus]}${hasMultipleEntries ? ` - ${game._count.libraryItems} entries` : ""}`}
       >
-        {/* Cover Image */}
         <div className="bg-muted relative aspect-[3/4] w-full overflow-hidden rounded-md">
           {coverImageId ? (
             <Image
@@ -120,7 +115,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
             </div>
           )}
 
-          {/* Overlay on hover to show title */}
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -137,7 +131,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
           </Tooltip>
         </div>
 
-        {/* Status Badge - Variant A: Interactive Badge */}
         {variant === "badge" && (
           <div
             data-library-interactive
@@ -159,7 +152,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
           </div>
         )}
 
-        {/* Status Badge - Variant B: Static Badge (Action Bar at bottom) */}
         {variant === "actionBar" && (
           <div className="absolute top-2 left-2">
             <Badge
@@ -172,7 +164,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
           </div>
         )}
 
-        {/* Library Item Count Badge (conditional) */}
         {hasMultipleEntries && (
           <div className="absolute top-2 right-2">
             <Badge
@@ -185,7 +176,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
           </div>
         )}
 
-        {/* Variant B: Bottom Action Bar */}
         {variant === "actionBar" && (
           <LibraryCardActionBar
             libraryItemId={item.id}

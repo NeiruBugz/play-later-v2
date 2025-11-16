@@ -54,28 +54,21 @@ function LibraryErrorState({ error }: { error: Error }) {
  * ```
  */
 export function LibraryGrid() {
-  // Read filter values from URL search parameters
   const filters = useLibraryFilters();
-
-  // Fetch library data with current filters
   const { data, isLoading, error } = useLibraryData(filters);
 
-  // Loading state - show skeleton placeholders
   if (isLoading) {
     return <LibraryGridSkeleton />;
   }
 
-  // Error state - show error message with retry
   if (error) {
     return <LibraryErrorState error={error} />;
   }
 
-  // Empty state - show CTA to browse games
   if (!data || data.length === 0) {
     return <LibraryEmptyState />;
   }
 
-  // Render grid of library cards
   return (
     <div
       className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
