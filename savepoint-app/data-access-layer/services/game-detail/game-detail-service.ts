@@ -25,7 +25,6 @@ export async function populateGameInDatabase(
       "Starting background game population"
     );
 
-    // Check if already exists
     const existsResult = await gameExistsByIgdbId(igdbGame.id);
     if (existsResult.ok && existsResult.data) {
       logger.debug(
@@ -35,7 +34,6 @@ export async function populateGameInDatabase(
       return;
     }
 
-    // 1. Upsert genres (if any)
     let genreIds: string[] = [];
     if (igdbGame.genres && igdbGame.genres.length > 0) {
       const genresResult = await upsertGenres(igdbGame.genres);
@@ -48,10 +46,8 @@ export async function populateGameInDatabase(
       genreIds = genresResult.data.map((g) => g.id);
     }
 
-    // 2. Upsert platforms (if any)
     let platformIds: string[] = [];
     if (igdbGame.platforms && igdbGame.platforms.length > 0) {
-      // Map IGDB Platform type to the format expected by repository
       const mappedPlatforms = igdbGame.platforms.map((p) => ({
         id: p.id,
         name: p.name,
@@ -77,7 +73,6 @@ export async function populateGameInDatabase(
       platformIds = platformsResult.data.map((p) => p.id);
     }
 
-    // 3. Create game with relations
     const gameResult = await createGameWithRelations({
       igdbGame: {
         id: igdbGame.id,

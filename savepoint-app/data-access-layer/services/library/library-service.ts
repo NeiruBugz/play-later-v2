@@ -86,15 +86,6 @@ type LibraryItemWithGameAndCount = {
 };
 
 export class LibraryService extends BaseService implements ILibraryService {
-  /**
-   * Add a game to a user's library
-   *
-   * This service method:
-   * 1. Verifies the user exists in the database
-   * 2. Checks if the game exists in the database (by IGDB ID)
-   * 3. If game doesn't exist, fetches from IGDB and populates the database
-   * 4. Creates a library item for the user
-   */
   async addGameToLibrary(
     input: AddGameToLibraryInput
   ): Promise<AddGameToLibraryResult> {
@@ -104,7 +95,6 @@ export class LibraryService extends BaseService implements ILibraryService {
 
       logger.info({ userId, igdbId, status }, "Adding game to library");
 
-      // 1. Verify user exists in database
       const userResult = await findUserById(userId, { select: { id: true } });
       if (!userResult.ok) {
         logger.error(
@@ -121,10 +111,8 @@ export class LibraryService extends BaseService implements ILibraryService {
         );
       }
 
-      // 2. Check if game exists in database
       let gameResult = await findGameByIgdbId(igdbId);
 
-      // 3. If game doesn't exist, fetch from IGDB and populate database
       if (!gameResult.ok || !gameResult.data) {
         logger.info(
           { igdbId },
@@ -149,10 +137,8 @@ export class LibraryService extends BaseService implements ILibraryService {
           return this.error("Game not found in IGDB");
         }
 
-        // Populate database synchronously
         await populateGameInDatabase(igdbGameResult.data.game);
 
-        // Re-fetch to get the database record
         gameResult = await findGameByIgdbId(igdbId);
         if (!gameResult.ok || !gameResult.data) {
           logger.error({ igdbId }, "Game still not found after population");
@@ -160,7 +146,6 @@ export class LibraryService extends BaseService implements ILibraryService {
         }
       }
 
-      // 4. Create library item
       const libraryItemResult = await createLibraryItem({
         userId,
         gameId: gameResult.data.id,
@@ -183,7 +168,6 @@ export class LibraryService extends BaseService implements ILibraryService {
           "Failed to create library item"
         );
 
-        // Handle duplicate error
         if (libraryItemResult.error.code === "DUPLICATE") {
           return this.error("This game is already in your library");
         }
@@ -307,7 +291,6 @@ export class LibraryService extends BaseService implements ILibraryService {
     try {
       logger.info(params, "Updating library item");
 
-      // 1. Fetch current library item to check status for transition validation
       const currentItemResult = await findLibraryItemById({
         libraryItemId: params.libraryItem.id,
         userId: params.userId,
@@ -321,7 +304,6 @@ export class LibraryService extends BaseService implements ILibraryService {
         return this.error("Library item not found");
       }
 
-      // 2. Validate status transition if status is being updated
       const currentStatus = currentItemResult.data.status;
       const newStatus = params.libraryItem.status;
 
@@ -346,7 +328,6 @@ export class LibraryService extends BaseService implements ILibraryService {
         }
       }
 
-      // 3. Proceed with update
       const result = await updateLibraryItem(params);
 
       if (!result.ok) {
@@ -426,7 +407,6 @@ export class LibraryService extends BaseService implements ILibraryService {
     try {
       logger.info({ userId: params.userId }, "Fetching library items");
 
-      // 1. Validate input parameters
       const validation = GetLibraryItemsSchema.safeParse(params);
       if (!validation.success) {
         logger.warn(
@@ -438,10 +418,8 @@ export class LibraryService extends BaseService implements ILibraryService {
         );
       }
 
-      // 2. Call repository function
       const result = await findLibraryItemsWithFilters(validation.data);
 
-      // 3. Handle repository errors
       if (!result.ok) {
         logger.error(
           { error: result.error, userId: params.userId },
@@ -450,7 +428,6 @@ export class LibraryService extends BaseService implements ILibraryService {
         return this.error("Failed to fetch library items");
       }
 
-      // 4. Return success with data
       logger.info(
         { count: result.data.length, userId: params.userId },
         "Library items fetched successfully"
@@ -464,15 +441,6 @@ export class LibraryService extends BaseService implements ILibraryService {
     }
   }
 
-  /**
-   * Delete a library item from a user's library
-   *
-   * This service method:
-   * 1. Validates input parameters using Zod schema
-   * 2. Verifies the user owns the library item (authorization check)
-   * 3. Deletes the library item via repository
-   * 4. Returns structured ServiceResult
-   */
   async deleteLibraryItem(params: {
     libraryItemId: number;
     userId: string;
@@ -483,7 +451,6 @@ export class LibraryService extends BaseService implements ILibraryService {
         "Attempting to delete library item"
       );
 
-      // 1. Validate input parameters
       const validation = DeleteLibraryItemSchema.safeParse(params);
       if (!validation.success) {
         logger.warn(
@@ -495,15 +462,12 @@ export class LibraryService extends BaseService implements ILibraryService {
         );
       }
 
-      // 2. Delete the library item (repository handles authorization check)
       const deleteResult = await deleteLibraryItem({
         libraryItemId: params.libraryItemId,
         userId: params.userId,
       });
 
-      // 3. Handle repository errors
       if (!deleteResult.ok) {
-        // Handle NOT_FOUND error separately for better error messages
         if (deleteResult.error.code === "NOT_FOUND") {
           logger.warn(
             { libraryItemId: params.libraryItemId, userId: params.userId },
@@ -521,7 +485,6 @@ export class LibraryService extends BaseService implements ILibraryService {
         return this.error("Failed to delete library item");
       }
 
-      // 4. Return success
       logger.info(
         { libraryItemId: params.libraryItemId },
         "Library item deleted successfully"

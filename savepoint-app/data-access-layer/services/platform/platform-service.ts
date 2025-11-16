@@ -22,7 +22,6 @@ export class PlatformService extends BaseService {
     }>
   > {
     try {
-      // Find game by IGDB ID to get internal database ID
       const gameResult = await findGameByIgdbId(igdbId);
 
       if (!gameResult.ok) {
@@ -33,7 +32,6 @@ export class PlatformService extends BaseService {
         return this.error("Game not found");
       }
 
-      // Fetch platforms using internal game ID
       const result = await findPlatformsForGame(gameResult.data.id);
 
       if (!result.ok) {
