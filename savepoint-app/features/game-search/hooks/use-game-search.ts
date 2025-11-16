@@ -1,8 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
+import { GAME_SEARCH_PAGE_SIZE } from "../constants";
 import type { GameSearchResponse } from "../types";
-
-const PAGE_SIZE = 10;
 
 export const useGameSearch = (query: string) => {
   return useInfiniteQuery({
@@ -28,8 +27,8 @@ export const useGameSearch = (query: string) => {
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     getNextPageParam: (lastPage, allPages) => {
-      return lastPage.games?.length === PAGE_SIZE
-        ? allPages.length * PAGE_SIZE
+      return lastPage.games?.length === GAME_SEARCH_PAGE_SIZE
+        ? allPages.length * GAME_SEARCH_PAGE_SIZE
         : undefined;
     },
     initialPageParam: 0,
