@@ -58,7 +58,7 @@ describe("GET /api/library - Integration Tests", () => {
     it("should return 401 when not authenticated", async () => {
       // Arrange
       const { getServerUserId } = await import("@/auth");
-      vi.mocked(getServerUserId).mockResolvedValue(null);
+      vi.mocked(getServerUserId).mockResolvedValue(undefined);
 
       const url = "http://localhost:6060/api/library";
       const request = new NextRequest(url);
@@ -340,7 +340,7 @@ describe("GET /api/library - Integration Tests", () => {
     it("should return JSON with success: false, error: string on auth error", async () => {
       // Arrange
       const { getServerUserId } = await import("@/auth");
-      vi.mocked(getServerUserId).mockResolvedValue(null);
+      vi.mocked(getServerUserId).mockResolvedValue(undefined);
 
       const url = "http://localhost:6060/api/library";
       const request = new NextRequest(url);
