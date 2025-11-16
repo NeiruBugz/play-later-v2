@@ -1,16 +1,11 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services";
 import type { LibraryItem, LibraryItemStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
-const logger = createLogger({
-  [LOGGER_CONTEXT.SERVER_ACTION]: "updateLibraryStatusAction",
-});
+import { createServerAction } from "@/shared/lib";
 
 /**
  * Zod schema for update library status input validation
@@ -31,48 +26,30 @@ export type UpdateLibraryStatusInput = z.infer<
   typeof UpdateLibraryStatusSchema
 >;
 
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
-
 /**
  * Server action: Update the status of a library item
  *
  * @param input - Library item ID and new status
  * @returns ActionResult with updated library item or error
  */
-export async function updateLibraryStatusAction(
-  input: UpdateLibraryStatusInput
-): Promise<ActionResult<LibraryItem>> {
-  try {
+export const updateLibraryStatusAction = createServerAction<
+  UpdateLibraryStatusInput,
+  LibraryItem
+>({
+  actionName: "updateLibraryStatusAction",
+  schema: UpdateLibraryStatusSchema,
+  requireAuth: true,
+  handler: async ({ input, userId, logger }) => {
+    const { libraryItemId, status } = input;
+
     logger.info(
-      { libraryItemId: input.libraryItemId, status: input.status },
+      { libraryItemId, status, userId },
       "Updating library item status"
     );
 
-    const parsed = UpdateLibraryStatusSchema.safeParse(input);
-    if (!parsed.success) {
-      logger.warn({ errors: parsed.error.errors }, "Invalid input data");
-      return {
-        success: false,
-        error: "Invalid input data",
-      };
-    }
-
-    const { libraryItemId, status } = parsed.data;
-
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn("Unauthenticated user attempted to update library status");
-      return {
-        success: false,
-        error: "You must be logged in to update your library",
-      };
-    }
-
     const libraryService = new LibraryService();
     const result = await libraryService.updateLibraryItem({
-      userId,
+      userId: userId!,
       libraryItem: {
         id: libraryItemId,
         status: status as LibraryItemStatus,
@@ -105,15 +82,5 @@ export async function updateLibraryStatusAction(
       success: true,
       data: result.data,
     };
-  } catch (error) {
-    logger.error(
-      { error, libraryItemId: input.libraryItemId },
-      "Unexpected error in updateLibraryStatusAction"
-    );
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "An unexpected error occurred",
-    };
-  }
-}
+  },
+});

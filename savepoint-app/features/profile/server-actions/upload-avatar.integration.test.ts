@@ -250,7 +250,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("File size exceeds 4MB");
+        expect(result.error).toBe("Invalid input data");
       }
 
       const listResponse = await s3Client.send(
@@ -288,7 +288,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("Unsupported file format");
+        expect(result.error).toBe("Invalid input data");
       }
 
       const listResponse = await s3Client.send(
@@ -307,7 +307,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("Unsupported file format");
+        expect(result.error).toBe("Invalid input data");
       }
     });
   });
@@ -322,7 +322,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("Unauthorized");
+        expect(result.error).toBe("You must be logged in to perform this action");
       }
 
       const listResponse = await s3Client.send(

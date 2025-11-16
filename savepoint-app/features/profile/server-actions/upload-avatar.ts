@@ -1,9 +1,8 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { createServerAction } from "@/shared/lib";
 import { AvatarStorageService } from "@/shared/lib/storage/avatar-storage";
 
 import { UploadAvatarSchema } from "../schemas";
@@ -12,52 +11,22 @@ type UploadAvatarInput = {
   file: File;
 };
 
-type UploadAvatarResult =
-  | {
-      success: true;
-      data: {
-        url: string;
-      };
-    }
-  | {
-      success: false;
-      error: string;
-    };
+type UploadAvatarData = {
+  url: string;
+};
 
-export async function uploadAvatar(
-  data: UploadAvatarInput
-): Promise<UploadAvatarResult> {
-  const logger = createLogger({
-    [LOGGER_CONTEXT.SERVER_ACTION]: "uploadAvatar",
-  });
-  try {
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn({ reason: "unauthorized" }, "Upload avatar denied");
-      return {
-        success: false as const,
-        error: "Unauthorized",
-      };
-    }
-
-    const validationResult = UploadAvatarSchema.safeParse(data);
-    if (!validationResult.success) {
-      logger.warn(
-        { userId, reason: "validation_error" },
-        "Invalid upload avatar input"
-      );
-      return {
-        success: false as const,
-        error: validationResult.error.errors[0]?.message ?? "Validation error",
-      };
-    }
-
-    const validatedData = validationResult.data;
-
+export const uploadAvatar = createServerAction<
+  UploadAvatarInput,
+  UploadAvatarData
+>({
+  actionName: "uploadAvatar",
+  schema: UploadAvatarSchema,
+  requireAuth: true,
+  handler: async ({ input, userId, logger }) => {
     logger.info({ userId }, "Uploading avatar to storage");
     const uploadResult = await AvatarStorageService.uploadAvatar(
-      userId,
-      validatedData.file
+      userId!,
+      input.file
     );
 
     if (!uploadResult.ok) {
@@ -66,7 +35,7 @@ export async function uploadAvatar(
         "Avatar upload failed"
       );
       return {
-        success: false as const,
+        success: false,
         error: uploadResult.error,
       };
     }
@@ -74,7 +43,7 @@ export async function uploadAvatar(
     const profileService = new ProfileService();
     logger.debug({ userId }, "Saving avatar URL to profile");
     const updateResult = await profileService.updateAvatarUrl({
-      userId,
+      userId: userId!,
       avatarUrl: uploadResult.data.url,
     });
 
@@ -84,23 +53,17 @@ export async function uploadAvatar(
         "Saving avatar URL failed"
       );
       return {
-        success: false as const,
+        success: false,
         error: "Failed to save avatar URL",
       };
     }
 
     logger.info({ userId }, "Avatar uploaded and profile updated");
     return {
-      success: true as const,
+      success: true,
       data: {
         url: uploadResult.data.url,
       },
     };
-  } catch (err) {
-    logger.error({ err }, "Unexpected error in uploadAvatar");
-    return {
-      success: false as const,
-      error: "An unexpected error occurred",
-    };
-  }
-}
+  },
+});
