@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { userEvent } from "@testing-library/user-event";
+import userEvent from "@testing-library/user-event";
 
 import GlobalError from "./global-error";
 
@@ -17,6 +17,8 @@ describe("GlobalError (Root Error Boundary)", () => {
   });
 
   afterEach(() => {
+    // Reset the reload mock before restoring location
+    vi.mocked(window.location.reload).mockReset();
     // @ts-expect-error - restoring location
     window.location = originalLocation;
   });
@@ -65,19 +67,21 @@ describe("GlobalError (Root Error Boundary)", () => {
   });
 
   it("should call window.location.reload when 'Refresh page' button is clicked", async () => {
+    const user = userEvent.setup();
     render(<GlobalError error={mockError} reset={mockReset} />);
 
     const refreshButton = screen.getByRole("button", { name: /refresh page/i });
-    await userEvent.click(refreshButton);
+    await user.click(refreshButton);
 
     expect(window.location.reload).toHaveBeenCalledOnce();
   });
 
   it("should call reset function when 'Try again' button is clicked", async () => {
+    const user = userEvent.setup();
     render(<GlobalError error={mockError} reset={mockReset} />);
 
     const tryAgainButton = screen.getByRole("button", { name: /try again/i });
-    await userEvent.click(tryAgainButton);
+    await user.click(tryAgainButton);
 
     expect(mockReset).toHaveBeenCalledOnce();
   });
