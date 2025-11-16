@@ -48,7 +48,7 @@ export async function updateLibraryEntryAction(
       };
     }
 
-    const { libraryItemId, status, platform } = parsed.data;
+    const { libraryItemId, status, startedAt, completedAt } = parsed.data;
 
     // 2. Get authenticated user ID
     const userId = await getServerUserId();
@@ -67,7 +67,8 @@ export async function updateLibraryEntryAction(
       libraryItem: {
         id: libraryItemId,
         status,
-        ...(platform !== undefined && { platform }),
+        ...(startedAt !== undefined && { startedAt }),
+        ...(completedAt !== undefined && { completedAt }),
       },
     });
 

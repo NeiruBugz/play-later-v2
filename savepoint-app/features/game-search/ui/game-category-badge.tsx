@@ -1,6 +1,5 @@
-import { GameCategory } from "@/shared/constants/game";
-
 import { Badge } from "@/shared/components/ui/badge";
+import { GameCategory } from "@/shared/constants/game";
 
 import { getCategoryLabel } from "../lib/get-category-label";
 

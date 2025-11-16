@@ -17,10 +17,10 @@ _The highest priority features that form the core foundation of SavePoint—enab
   - [x] **Credentials-Based Login:** Provide email/password authentication as a secondary option, primarily for testing and development scenarios (E2E tests with Playwright).
   - [x] **Basic Profile Management:** Enable users to view and update their name and basic profile information after signing up.
 
-- [ ] **Game Metadata Foundation**
+- [x] **Game Metadata Foundation**
   - [x] **IGDB Integration:** Connect to IGDB as the primary source for game metadata, covers, descriptions, release dates, and platform information.
   - [x] **Game Search:** Allow users to search for games via IGDB to add to their library.
-  - [ ] **Game Detail Pages:** Create rich game detail pages showing IGDB metadata and user's personal journal entries for that game.
+  - [x] **Game Detail Pages:** Create rich game detail pages showing IGDB metadata and user's personal journal entries for that game.
 
 - [ ] **Personal Gaming Library**
   - [ ] **Add Games to Library:** Enable users to add games from IGDB search results to their personal library.

@@ -117,7 +117,7 @@ export function LibraryFilters() {
       {/* Filter Controls Row */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end">
         {/* Status Filter */}
-        <div className="flex-1 space-y-2">
+        <div className="w-full space-y-2 md:w-auto md:flex-1">
           <Label htmlFor="status-filter">Status</Label>
           <Select
             value={searchParams.get("status") ?? "__all__"}
@@ -125,7 +125,7 @@ export function LibraryFilters() {
               updateFilter("status", value === "__all__" ? undefined : value)
             }
           >
-            <SelectTrigger id="status-filter">
+            <SelectTrigger id="status-filter" aria-label="Filter by status">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
@@ -141,7 +141,7 @@ export function LibraryFilters() {
         </div>
 
         {/* Platform Filter */}
-        <div className="flex-1 space-y-2">
+        <div className="w-full space-y-2 md:w-auto md:flex-1">
           <Label htmlFor="platform-filter">Platform</Label>
           <Select
             value={searchParams.get("platform") ?? "__all__"}
@@ -149,7 +149,7 @@ export function LibraryFilters() {
               updateFilter("platform", value === "__all__" ? undefined : value)
             }
           >
-            <SelectTrigger id="platform-filter">
+            <SelectTrigger id="platform-filter" aria-label="Filter by platform">
               <SelectValue placeholder="All Platforms" />
             </SelectTrigger>
             <SelectContent>
@@ -168,10 +168,13 @@ export function LibraryFilters() {
         </div>
 
         {/* Search Input */}
-        <div className="flex-1 space-y-2">
+        <div className="w-full space-y-2 md:flex-1">
           <Label htmlFor="search-input">Search</Label>
           <div className="relative">
-            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <Search
+              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+              aria-hidden="true"
+            />
             <Input
               id="search-input"
               type="search"
@@ -179,6 +182,7 @@ export function LibraryFilters() {
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10"
+              aria-label="Search games by title"
             />
           </div>
         </div>
@@ -189,9 +193,10 @@ export function LibraryFilters() {
             variant="ghost"
             size="default"
             onClick={clearAllFilters}
-            className="md:mb-0"
+            className="w-full md:w-auto md:mb-0"
+            aria-label="Clear all filters"
           >
-            <X className="h-4 w-4" />
+            <X className="mr-2 h-4 w-4" aria-hidden="true" />
             Clear Filters
           </Button>
         )}

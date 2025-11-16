@@ -68,7 +68,7 @@ export function LibraryCardActionBar({
 
   return (
     <div
-      className="pointer-events-none absolute inset-x-0 bottom-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+      className="pointer-events-none absolute inset-x-0 bottom-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
       role="toolbar"
       aria-label="Change status"
       onClick={(e) => {
@@ -92,7 +92,7 @@ export function LibraryCardActionBar({
                 key={status}
                 variant="secondary"
                 size="sm"
-                className="h-7 rounded-md border border-white/10 bg-white/10 px-2.5 text-xs font-medium text-white shadow-sm transition-all hover:scale-105 hover:border-white/20 hover:bg-white/20 hover:shadow-md disabled:opacity-40 disabled:hover:scale-100"
+                className="h-7 rounded-md border border-white/10 bg-white/10 px-2.5 text-xs font-medium text-white shadow-sm transition-all hover:scale-105 hover:border-white/20 hover:bg-white/20 hover:shadow-md disabled:opacity-40 disabled:hover:scale-100 focus-visible:scale-105 focus-visible:border-white/30 focus-visible:bg-white/30"
                 disabled={isDisabled || updateStatus.isPending}
                 onClick={(e) => {
                   e.preventDefault();
@@ -103,6 +103,11 @@ export function LibraryCardActionBar({
                   e.preventDefault();
                   e.stopPropagation();
                 }}
+                aria-label={
+                  isDisabled
+                    ? `${LibraryStatusMapper[status]} - Cannot move back to Wishlist`
+                    : `Change status to ${LibraryStatusMapper[status]}`
+                }
                 title={
                   isDisabled
                     ? "Cannot move back to Wishlist"

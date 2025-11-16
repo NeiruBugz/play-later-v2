@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 
 import {
   UpdateLibraryEntrySchema,
@@ -14,6 +16,7 @@ import {
 } from "../../schemas";
 import { updateLibraryEntryAction } from "../../server-actions";
 import { getStatusLabel } from "./constants";
+import { DateField } from "./date-field";
 import { LibraryEntryMetadata } from "./library-entry-metadata";
 import { StatusSelect } from "./status-select";
 
@@ -35,7 +38,8 @@ export const EditEntryForm = ({
     defaultValues: {
       libraryItemId: item.id,
       status: item.status,
-      platform: item.platform ?? undefined,
+      startedAt: item.startedAt ?? undefined,
+      completedAt: item.completedAt ?? undefined,
     },
   });
 
@@ -76,6 +80,45 @@ export const EditEntryForm = ({
               field={field}
               description="Update your journey status for this entry"
               className="py-6 text-left"
+            />
+          )}
+        />
+
+        <div className="space-y-2">
+          <Label htmlFor="platform-readonly">Platform</Label>
+          <Input
+            id="platform-readonly"
+            value={item.platform ?? "Not specified"}
+            disabled
+            className="cursor-not-allowed bg-muted"
+            aria-readonly="true"
+          />
+          <p className="text-muted-foreground text-sm">
+            Platform cannot be changed. Create a new entry for a different
+            platform.
+          </p>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="startedAt"
+          render={({ field }) => (
+            <DateField
+              field={field}
+              label="Started At (Optional)"
+              description="When did you start playing?"
+            />
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="completedAt"
+          render={({ field }) => (
+            <DateField
+              field={field}
+              label="Completed At (Optional)"
+              description="When did you finish?"
             />
           )}
         />

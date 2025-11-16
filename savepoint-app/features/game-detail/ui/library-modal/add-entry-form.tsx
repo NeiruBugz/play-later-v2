@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LibraryItemStatus, type Platform } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
+import { LibraryItemStatus } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -12,6 +11,7 @@ import { Form, FormField } from "@/shared/components/ui/form";
 
 import { AddToLibrarySchema, type AddToLibraryInput } from "../../schemas";
 import { addToLibraryAction } from "../../server-actions";
+import { DateField } from "./date-field";
 import { PlatformCombobox } from "./platform-combobox";
 import { StatusSelect } from "./status-select";
 
@@ -131,6 +131,30 @@ export const AddEntryForm = ({
               supportedPlatforms={supportedPlatforms}
               otherPlatforms={otherPlatforms}
               isLoading={isLoadingPlatforms}
+            />
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="startedAt"
+          render={({ field }) => (
+            <DateField
+              field={field}
+              label="Started At (Optional)"
+              description="When did you start playing?"
+            />
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="completedAt"
+          render={({ field }) => (
+            <DateField
+              field={field}
+              label="Completed At (Optional)"
+              description="When did you finish?"
             />
           )}
         />

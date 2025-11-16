@@ -327,12 +327,13 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
         status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
+      // Note: WISHLIST is excluded because business logic prevents
+      // transitioning TO WISHLIST from other statuses
       const statuses = [
         LibraryItemStatus.CURRENTLY_EXPLORING,
         LibraryItemStatus.TOOK_A_BREAK,
         LibraryItemStatus.EXPERIENCED,
         LibraryItemStatus.REVISITING,
-        LibraryItemStatus.WISHLIST,
       ];
 
       for (const status of statuses) {
@@ -484,7 +485,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(dbItem?.status).toBe(LibraryItemStatus.EXPERIENCED);
     });
 
-    it("should update library item platform by ID", async () => {
+    it("should update library item startedAt date", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
@@ -492,52 +493,56 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
         platform: "PC",
       });
 
-      const result = await updateLibraryEntryAction({
-        libraryItemId: libraryItem.id,
-        status: LibraryItemStatus.CURIOUS_ABOUT,
-        platform: "PlayStation 5",
-      });
-
-      expect(result.success).toBe(true);
-      if (!result.success) return;
-
-      expect(result.data.id).toBe(libraryItem.id);
-      expect(result.data.platform).toBe("PlayStation 5");
-
-      // Verify database state
-      const dbItem = await prisma.libraryItem.findUnique({
-        where: { id: libraryItem.id },
-      });
-      expect(dbItem?.platform).toBe("PlayStation 5");
-    });
-
-    it("should update both status and platform simultaneously", async () => {
-      const libraryItem = await createLibraryItem({
-        userId: testUser.id,
-        gameId: testGame.id,
-        status: LibraryItemStatus.CURIOUS_ABOUT,
-        platform: "PC",
-      });
-
+      // Use a date in the future relative to createdAt
+      const startedDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
       const result = await updateLibraryEntryAction({
         libraryItemId: libraryItem.id,
         status: LibraryItemStatus.CURRENTLY_EXPLORING,
-        platform: "Xbox Series X",
+        startedAt: startedDate,
       });
 
       expect(result.success).toBe(true);
       if (!result.success) return;
 
       expect(result.data.id).toBe(libraryItem.id);
-      expect(result.data.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
-      expect(result.data.platform).toBe("Xbox Series X");
+      expect(result.data.startedAt?.getTime()).toBe(startedDate.getTime());
 
       // Verify database state
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
-      expect(dbItem?.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
-      expect(dbItem?.platform).toBe("Xbox Series X");
+      expect(dbItem?.startedAt?.getTime()).toBe(startedDate.getTime());
+    });
+
+    it("should update both status and completedAt date simultaneously", async () => {
+      const libraryItem = await createLibraryItem({
+        userId: testUser.id,
+        gameId: testGame.id,
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        platform: "PC",
+      });
+
+      // Use dates in the future relative to createdAt
+      const completedDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // Tomorrow
+      const result = await updateLibraryEntryAction({
+        libraryItemId: libraryItem.id,
+        status: LibraryItemStatus.EXPERIENCED,
+        completedAt: completedDate,
+      });
+
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+
+      expect(result.data.id).toBe(libraryItem.id);
+      expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
+      expect(result.data.completedAt?.getTime()).toBe(completedDate.getTime());
+
+      // Verify database state
+      const dbItem = await prisma.libraryItem.findUnique({
+        where: { id: libraryItem.id },
+      });
+      expect(dbItem?.status).toBe(LibraryItemStatus.EXPERIENCED);
+      expect(dbItem?.completedAt?.getTime()).toBe(completedDate.getTime());
     });
 
     it("should update specific library item without affecting others", async () => {
@@ -701,7 +706,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.platform).toBe("PC"); // Should remain unchanged
     });
 
-    it("should allow clearing platform by providing undefined", async () => {
+    it("should preserve platform when updating other fields", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
@@ -711,16 +716,15 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
 
       const result = await updateLibraryEntryAction({
         libraryItemId: libraryItem.id,
-        status: LibraryItemStatus.CURIOUS_ABOUT,
-        platform: undefined,
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
       expect(result.success).toBe(true);
       if (!result.success) return;
 
-      // The platform field should remain as "PC" since we're not explicitly setting it to null
-      // The schema doesn't convert undefined to null, so the field should remain unchanged
+      // The platform field should remain unchanged
       expect(result.data.platform).toBe("PC");
+      expect(result.data.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
     });
   });
 });

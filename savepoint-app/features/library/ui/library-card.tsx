@@ -100,13 +100,14 @@ export function LibraryCard({ item }: LibraryCardProps) {
         className="group relative block [&>[data-library-interactive]]:pointer-events-auto"
         onClick={handleLinkInteraction}
         onMouseDown={handleLinkInteraction}
+        aria-label={`${game.title} - ${LibraryStatusMapper[status as LibraryItemStatus]}${hasMultipleEntries ? ` - ${game._count.libraryItems} entries` : ""}`}
       >
         {/* Cover Image */}
         <div className="bg-muted relative aspect-[3/4] w-full overflow-hidden rounded-md">
           {coverImageId ? (
             <Image
-              src={`${IMAGE_API}/${IMAGE_SIZES["c-big"]}/${coverImageId}.jpg`}
-              alt={`${game.title} cover`}
+              src={`${IMAGE_API}/${IMAGE_SIZES.hd}/${coverImageId}.jpg`}
+              alt={game.title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
@@ -161,7 +162,11 @@ export function LibraryCard({ item }: LibraryCardProps) {
         {/* Status Badge - Variant B: Static Badge (Action Bar at bottom) */}
         {variant === "actionBar" && (
           <div className="absolute top-2 left-2">
-            <Badge variant={statusVariantMap[status as LibraryItemStatus]}>
+            <Badge
+              variant={statusVariantMap[status as LibraryItemStatus]}
+              role="status"
+              aria-label={`Status: ${LibraryStatusMapper[status as LibraryItemStatus]}`}
+            >
               {LibraryStatusMapper[status as LibraryItemStatus]}
             </Badge>
           </div>
@@ -170,7 +175,11 @@ export function LibraryCard({ item }: LibraryCardProps) {
         {/* Library Item Count Badge (conditional) */}
         {hasMultipleEntries && (
           <div className="absolute top-2 right-2">
-            <Badge variant="secondary">
+            <Badge
+              variant="secondary"
+              role="status"
+              aria-label={`${game._count.libraryItems} library entries for this game`}
+            >
               {game._count.libraryItems} entries
             </Badge>
           </div>

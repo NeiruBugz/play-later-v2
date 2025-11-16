@@ -10,6 +10,7 @@ import {
   SparklesIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -22,6 +23,7 @@ import {
 } from "@/shared/components/ui/card";
 import { formatAbsoluteDate } from "@/shared/lib/date";
 
+import { deleteLibraryItemAction } from "../server-actions";
 import { AddToLibraryButton } from "./add-to-library-button";
 import { LibraryModal } from "./library-modal";
 
@@ -83,6 +85,17 @@ export const LibraryStatusDisplay = ({
   const Icon = config.icon;
   const updatedDate = formatAbsoluteDate(userLibraryStatus.updatedAt);
 
+  // Handler for deleting library items
+  const handleDeleteItem = async (itemId: number) => {
+    const result = await deleteLibraryItemAction({ libraryItemId: itemId });
+
+    if (result.success) {
+      toast.success("Library entry deleted");
+    } else {
+      toast.error(result.error || "Failed to delete library entry");
+    }
+  };
+
   return (
     <>
       <Card className="w-full">
@@ -124,6 +137,7 @@ export const LibraryStatusDisplay = ({
         gameTitle={gameTitle}
         mode="edit"
         existingItems={userLibraryStatus.allItems}
+        onDeleteItem={handleDeleteItem}
       />
     </>
   );

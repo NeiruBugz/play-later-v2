@@ -18,6 +18,9 @@ import "./common-mocks";
 // Import database cleanup function for test isolation
 import { resetTestDatabase } from "./database";
 
+// Import S3 utilities for bucket setup
+import { CreateBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
+
 // Set up environment variables BEFORE any modules that use them are imported
 process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";
@@ -73,10 +76,53 @@ vi.mock("@/shared/lib", async (importOriginal) => {
  */
 vi.unmock("@/data-access-layer/repository");
 
+/**
+ * Ensures the S3 bucket exists for integration tests.
+ * Creates the bucket if it doesn't exist.
+ */
+async function ensureS3BucketExists(): Promise<void> {
+  // Dynamically import s3Client to avoid import order issues
+  const { s3Client } = await import("@/shared/lib/storage/s3-client");
+  const bucketName = process.env.S3_BUCKET_NAME!;
+
+  try {
+    // Check if bucket exists
+    await s3Client.send(
+      new HeadBucketCommand({
+        Bucket: bucketName,
+      })
+    );
+    console.log(`S3 bucket '${bucketName}' already exists`);
+  } catch (error: unknown) {
+    const err = error as { name?: string };
+    // Bucket doesn't exist, create it
+    if (err.name === "NotFound" || err.name === "NoSuchBucket") {
+      try {
+        await s3Client.send(
+          new CreateBucketCommand({
+            Bucket: bucketName,
+          })
+        );
+        console.log(`Created S3 bucket '${bucketName}' for integration tests`);
+      } catch (createError) {
+        console.error(`Failed to create S3 bucket '${bucketName}':`, createError);
+        throw createError;
+      }
+    } else {
+      // Some other error occurred
+      console.error(`Failed to check S3 bucket '${bucketName}':`, error);
+      throw error;
+    }
+  }
+}
+
 // Set up test-specific configuration before tests run
-beforeAll(() => {
+beforeAll(async () => {
   // @ts-expect-error - NODE_ENV is read-only
   process.env.NODE_ENV = "test";
+
+  // Ensure S3 bucket exists for avatar upload tests
+  await ensureS3BucketExists();
 });
 
 /**

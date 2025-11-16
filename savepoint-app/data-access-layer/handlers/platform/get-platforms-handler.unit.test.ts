@@ -176,7 +176,10 @@ describe("getPlatformsHandler", () => {
       });
 
       // Act
-      const result = await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
+      const result = await getPlatformsHandler(
+        { igdbId: validIgdbId },
+        mockContext
+      );
 
       // Assert
       expect(result.success).toBe(true);
@@ -195,7 +198,10 @@ describe("getPlatformsHandler", () => {
       });
 
       // Act
-      const result = await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
+      const result = await getPlatformsHandler(
+        { igdbId: validIgdbId },
+        mockContext
+      );
 
       // Assert
       expect(result.success).toBe(false);
@@ -213,7 +219,10 @@ describe("getPlatformsHandler", () => {
       });
 
       // Act
-      const result = await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
+      const result = await getPlatformsHandler(
+        { igdbId: validIgdbId },
+        mockContext
+      );
 
       // Assert
       expect(result.success).toBe(false);
@@ -234,7 +243,10 @@ describe("getPlatformsHandler", () => {
       });
 
       // Act
-      const result = await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
+      const result = await getPlatformsHandler(
+        { igdbId: validIgdbId },
+        mockContext
+      );
 
       // Assert
       expect(result.success).toBe(true);
@@ -257,7 +269,10 @@ describe("getPlatformsHandler", () => {
       });
 
       // Act
-      const result = await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
+      const result = await getPlatformsHandler(
+        { igdbId: validIgdbId },
+        mockContext
+      );
 
       // Assert
       expect(result.success).toBe(false);
@@ -299,7 +314,10 @@ describe("getPlatformsHandler", () => {
       });
 
       // Act
-      const result = await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
+      const result = await getPlatformsHandler(
+        { igdbId: validIgdbId },
+        mockContext
+      );
 
       // Assert
       expect(result).toMatchObject({
@@ -317,7 +335,10 @@ describe("getPlatformsHandler", () => {
       });
 
       // Act
-      const result = await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
+      const result = await getPlatformsHandler(
+        { igdbId: validIgdbId },
+        mockContext
+      );
 
       // Assert
       expect(result).toMatchObject({

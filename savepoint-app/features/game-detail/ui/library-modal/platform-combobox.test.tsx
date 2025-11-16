@@ -323,12 +323,8 @@ describe("PlatformCombobox", () => {
       await actions.clickTrigger();
 
       expect(elements.getOtherGroup()).toBeVisible();
-      expect(
-        elements.getOptionByName("PC (Microsoft Windows)")
-      ).toBeVisible();
-      expect(
-        elements.getOptionByName("PlayStation 4")
-      ).toBeVisible();
+      expect(elements.getOptionByName("PC (Microsoft Windows)")).toBeVisible();
+      expect(elements.getOptionByName("PlayStation 4")).toBeVisible();
     });
 
     it("should not display 'Supported Platforms' group", async () => {

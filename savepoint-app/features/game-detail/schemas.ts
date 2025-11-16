@@ -23,11 +23,13 @@ export const UpdateLibraryStatusSchema = z.object({
 
 /**
  * Schema for updating a library entry (uses library item ID)
+ * Note: Platform is intentionally excluded as it cannot be changed after creation
  */
 export const UpdateLibraryEntrySchema = z.object({
   libraryItemId: z.number().int().positive(),
   status: z.nativeEnum(LibraryItemStatus),
-  platform: z.string().optional(),
+  startedAt: z.date().optional(),
+  completedAt: z.date().optional(),
 });
 
 /**

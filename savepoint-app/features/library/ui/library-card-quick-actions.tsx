@@ -78,9 +78,9 @@ export function LibraryCardQuickActions({
       >
         <SelectTrigger
           className="hover:bg-muted/20 h-8 w-8 border-none bg-transparent p-0 shadow-none"
-          aria-label="Change status"
+          aria-label={`Change status from ${LibraryStatusMapper[currentStatus]}`}
         >
-          <MoreVertical className="h-4 w-4" />
+          <MoreVertical className="h-4 w-4" aria-hidden="true" />
         </SelectTrigger>
         <SelectContent>
           {availableStatuses.map((status) => {
@@ -94,6 +94,11 @@ export function LibraryCardQuickActions({
                 value={status}
                 disabled={isDisabled}
                 className={isDisabled ? "opacity-50" : ""}
+                aria-label={
+                  isDisabled
+                    ? `${LibraryStatusMapper[status]} - Cannot move back to Wishlist once progressed`
+                    : `Change status to ${LibraryStatusMapper[status]}`
+                }
               >
                 {LibraryStatusMapper[status]}
                 {isDisabled && (

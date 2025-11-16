@@ -38,26 +38,27 @@ describe("Database Check Constraints - Integration Tests", () => {
   });
 
   describe("LibraryItem constraints", () => {
-    it("should reject startedAt before createdAt", async () => {
+    it("should accept startedAt before createdAt (backdating is allowed)", async () => {
       const prisma = getTestDatabase();
       const user = await createUser();
       const game = await createGame();
 
       const createdAt = new Date("2024-01-15");
-      const startedAt = new Date("2024-01-10"); // Before createdAt
+      const startedAt = new Date("2024-01-10"); // Before createdAt - valid!
 
-      await expect(
-        prisma.libraryItem.create({
-          data: {
-            userId: user.id,
-            gameId: game.id,
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
-            acquisitionType: AcquisitionType.DIGITAL,
-            createdAt,
-            startedAt,
-          },
-        })
-      ).rejects.toThrow();
+      const item = await prisma.libraryItem.create({
+        data: {
+          userId: user.id,
+          gameId: game.id,
+          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          acquisitionType: AcquisitionType.DIGITAL,
+          createdAt,
+          startedAt,
+        },
+      });
+
+      expect(item.startedAt).toEqual(startedAt);
+      expect(item.createdAt).toEqual(createdAt);
     });
 
     it("should accept startedAt after createdAt", async () => {
@@ -82,26 +83,27 @@ describe("Database Check Constraints - Integration Tests", () => {
       expect(item.startedAt).toEqual(startedAt);
     });
 
-    it("should reject completedAt before createdAt", async () => {
+    it("should accept completedAt before createdAt (backdating is allowed)", async () => {
       const prisma = getTestDatabase();
       const user = await createUser();
       const game = await createGame();
 
       const createdAt = new Date("2024-01-15");
-      const completedAt = new Date("2024-01-10"); // Before createdAt
+      const completedAt = new Date("2024-01-10"); // Before createdAt - valid!
 
-      await expect(
-        prisma.libraryItem.create({
-          data: {
-            userId: user.id,
-            gameId: game.id,
-            status: LibraryItemStatus.EXPERIENCED,
-            acquisitionType: AcquisitionType.DIGITAL,
-            createdAt,
-            completedAt,
-          },
-        })
-      ).rejects.toThrow();
+      const item = await prisma.libraryItem.create({
+        data: {
+          userId: user.id,
+          gameId: game.id,
+          status: LibraryItemStatus.EXPERIENCED,
+          acquisitionType: AcquisitionType.DIGITAL,
+          createdAt,
+          completedAt,
+        },
+      });
+
+      expect(item.completedAt).toEqual(completedAt);
+      expect(item.createdAt).toEqual(createdAt);
     });
 
     it("should reject completedAt before startedAt", async () => {

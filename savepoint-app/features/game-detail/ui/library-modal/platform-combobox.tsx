@@ -1,5 +1,6 @@
 "use client";
 
+import type { Platform } from "@prisma/client";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import type {
@@ -30,9 +31,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-
-import type { Platform } from "@prisma/client";
-
 import { cn } from "@/shared/lib/ui/utils";
 
 type PlatformComboboxProps<T extends FieldValues = FieldValues> = {

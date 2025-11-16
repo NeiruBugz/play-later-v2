@@ -4,6 +4,7 @@ import type { LibraryItem } from "@prisma/client";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,16 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/components/ui/tabs";
 
 import { AddEntryForm } from "./add-entry-form";
-import { getStatusLabel } from "./constants";
 import { EditEntryForm } from "./edit-entry-form";
+import { LibraryItemCard } from "./library-item-card";
 
 type LibraryModalProps = {
   gameId?: string;
@@ -30,6 +25,7 @@ type LibraryModalProps = {
   gameTitle: string;
   mode: "add" | "edit";
   existingItems?: LibraryItem[];
+  onDeleteItem?: (itemId: number) => void;
 };
 
 export const LibraryModal = ({
@@ -40,16 +36,18 @@ export const LibraryModal = ({
   gameTitle,
   mode,
   existingItems = [],
+  onDeleteItem,
 }: LibraryModalProps) => {
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("");
 
+  // Reset state when modal is closed
   useEffect(() => {
-    if (mode === "edit" && existingItems.length > 0 && !selectedItemId) {
-      setSelectedItemId(existingItems[0].id);
-      setActiveTab(existingItems[0].id.toString());
+    if (!isOpen) {
+      setSelectedItemId(null);
+      setActiveTab("");
     }
-  }, [mode, existingItems, selectedItemId]);
+  }, [isOpen]);
 
   const handleClose = () => {
     setSelectedItemId(null);
@@ -68,12 +66,15 @@ export const LibraryModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]"
+        aria-describedby="library-modal-description"
+      >
         <DialogHeader>
           <DialogTitle>
             {mode === "add" ? "Add to Library" : "Manage Library"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="library-modal-description">
             {mode === "add"
               ? `Add ${gameTitle} to your library and set your journey status.`
               : `Update your library entries for ${gameTitle}.`}
@@ -94,63 +95,81 @@ export const LibraryModal = ({
               <p className="text-muted-foreground text-sm">
                 No library entries found for this game.
               </p>
-            ) : (
-              <Tabs
-                value={activeTab}
-                onValueChange={(value) => {
-                  setActiveTab(value);
-                  if (value !== "add-new") {
-                    handleItemSelect(Number(value));
+            ) : selectedItemId !== null ? (
+              // Edit mode for a specific item
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium">Edit Entry</h3>
+                  <Button
+                    onClick={() => setSelectedItemId(null)}
+                    className="text-muted-foreground hover:text-foreground text-xs underline"
+                    aria-label="Back to list view"
+                  >
+                    ← Back to all entries
+                  </Button>
+                </div>
+                <EditEntryForm
+                  item={
+                    existingItems.find((item) => item.id === selectedItemId)!
                   }
-                }}
-              >
-                <TabsList className="inline-flex w-auto gap-1 bg-transparent">
+                  onSuccess={handleSuccess}
+                  onCancel={handleClose}
+                />
+              </div>
+            ) : (
+              // List view of all library items
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium">
+                    Your Library Entries ({existingItems.length})
+                  </h3>
+                </div>
+
+                {/* List of library items */}
+                <div className="max-h-[400px] space-y-3 overflow-y-auto">
                   {existingItems.map((item) => (
-                    <TabsTrigger
+                    <LibraryItemCard
                       key={item.id}
-                      value={item.id.toString()}
-                      className="hover:border-secondary data-[state=active]:border-primary cursor-pointer rounded-none border-b border-transparent"
-                    >
-                      <div className="flex flex-col items-center gap-0.5">
-                        <span className="text-muted-foreground overflow-x">
-                          {getStatusLabel(item.status)}
-                        </span>
-                      </div>
-                    </TabsTrigger>
-                  ))}
-                  <TabsTrigger
-                    value="add-new"
-                    className="hover:border-secondary data-[state=active]:border-primary cursor-pointer rounded-none border-b border-transparent"
-                  >
-                    <Plus className="mr-1.5 h-4 w-4" />
-                    <span className="font-medium">Add New</span>
-                  </TabsTrigger>
-                </TabsList>
-
-                {existingItems.map((item) => (
-                  <TabsContent
-                    key={item.id}
-                    value={item.id.toString()}
-                    className="mt-4"
-                  >
-                    <EditEntryForm
                       item={item}
-                      onSuccess={handleSuccess}
-                      onCancel={handleClose}
+                      onClick={() => handleItemSelect(item.id)}
+                      onDelete={onDeleteItem}
                     />
-                  </TabsContent>
-                ))}
+                  ))}
+                </div>
 
-                <TabsContent value="add-new" className="mt-4">
-                  <AddEntryForm
-                    igdbId={igdbId}
-                    gameTitle={gameTitle}
-                    isEditMode
-                    onSuccess={handleSuccess}
-                    onCancel={handleClose}
-                  />
-                </TabsContent>
-              </Tabs>
+                {/* Add new entry button */}
+                <button
+                  onClick={() => setActiveTab("add-new")}
+                  className="border-primary text-primary hover:bg-primary/5 flex w-full items-center justify-center gap-2 rounded-md border border-dashed py-3 text-sm font-medium transition-colors"
+                  aria-label="Add new library entry"
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Add New Entry
+                </button>
+              </div>
+            )}
+
+            {/* Add new entry form (shown when activeTab is "add-new") */}
+            {activeTab === "add-new" && selectedItemId === null && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium">Add New Entry</h3>
+                  <button
+                    onClick={() => setActiveTab("")}
+                    className="text-muted-foreground hover:text-foreground text-xs underline"
+                    aria-label="Back to list view"
+                  >
+                    ← Back to all entries
+                  </button>
+                </div>
+                <AddEntryForm
+                  igdbId={igdbId}
+                  gameTitle={gameTitle}
+                  isEditMode
+                  onSuccess={handleSuccess}
+                  onCancel={handleClose}
+                />
+              </div>
             )}
           </div>
         )}

@@ -117,7 +117,9 @@ describe("PlatformService", () => {
         // Assert
         expect(result.success).toBe(true);
         if (result.success) {
-          expect(result.data.supportedPlatforms).toEqual(mockSupportedPlatforms);
+          expect(result.data.supportedPlatforms).toEqual(
+            mockSupportedPlatforms
+          );
           expect(result.data.otherPlatforms).toEqual(mockOtherPlatforms);
           expect(result.data.supportedPlatforms).toHaveLength(2);
           expect(result.data.otherPlatforms).toHaveLength(1);
@@ -166,7 +168,9 @@ describe("PlatformService", () => {
         // Assert
         expect(result.success).toBe(true);
         if (result.success) {
-          expect(result.data.supportedPlatforms).toEqual(mockSupportedPlatforms);
+          expect(result.data.supportedPlatforms).toEqual(
+            mockSupportedPlatforms
+          );
           expect(result.data.otherPlatforms).toEqual([]);
         }
       });
@@ -393,10 +397,7 @@ describe("PlatformService", () => {
         await service.getPlatformsForGame(validIgdbId);
 
         // Assert
-        expect(callOrder).toEqual([
-          "findGameByIgdbId",
-          "findPlatformsForGame",
-        ]);
+        expect(callOrder).toEqual(["findGameByIgdbId", "findPlatformsForGame"]);
       });
     });
   });

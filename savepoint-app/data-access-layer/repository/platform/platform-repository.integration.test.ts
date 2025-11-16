@@ -292,7 +292,9 @@ describe("PlatformRepository - Integration Tests", () => {
         expect(result.data.otherPlatforms).toHaveLength(2);
 
         // Supported platforms should include PS5 and Xbox Series X|S
-        const supportedNames = result.data.supportedPlatforms.map((p) => p.name);
+        const supportedNames = result.data.supportedPlatforms.map(
+          (p) => p.name
+        );
         expect(supportedNames).toContain("PlayStation 5");
         expect(supportedNames).toContain("Xbox Series X|S");
 
@@ -311,7 +313,10 @@ describe("PlatformRepository - Integration Tests", () => {
       ]);
 
       // Create a game but don't link it to any platforms
-      const game = await createGame({ title: "Game Without Platforms", igdbId: 67890 });
+      const game = await createGame({
+        title: "Game Without Platforms",
+        igdbId: 67890,
+      });
 
       const result = await findPlatformsForGame(game.id);
 
@@ -327,7 +332,10 @@ describe("PlatformRepository - Integration Tests", () => {
     });
 
     it("should return empty arrays when no platforms exist in database", async () => {
-      const game = await createGame({ title: "Game In Empty DB", igdbId: 11111 });
+      const game = await createGame({
+        title: "Game In Empty DB",
+        igdbId: 11111,
+      });
 
       const result = await findPlatformsForGame(game.id);
 
@@ -348,7 +356,12 @@ describe("PlatformRepository - Integration Tests", () => {
         },
         { id: 48, name: "PlayStation 5", slug: "ps5", abbreviation: "PS5" },
         { id: 169, name: "Xbox Series X|S", slug: "xsx", abbreviation: "XSX" },
-        { id: 6, name: "PC (Microsoft Windows)", slug: "win", abbreviation: "PC" },
+        {
+          id: 6,
+          name: "PC (Microsoft Windows)",
+          slug: "win",
+          abbreviation: "PC",
+        },
       ]);
 
       const game = await createGame({ title: "Sorting Test", igdbId: 22222 });
@@ -378,7 +391,10 @@ describe("PlatformRepository - Integration Tests", () => {
         { id: 169, name: "Xbox Series X|S", slug: "xsx", abbreviation: "XSX" },
       ]);
 
-      const game = await createGame({ title: "All Platforms Game", igdbId: 33333 });
+      const game = await createGame({
+        title: "All Platforms Game",
+        igdbId: 33333,
+      });
 
       // Link game to all platforms
       const ps5Result = await findPlatformByIgdbId(48);
@@ -427,7 +443,12 @@ describe("PlatformRepository - Integration Tests", () => {
       await upsertPlatforms([
         { id: 48, name: "PlayStation 5", slug: "ps5", abbreviation: "PS5" },
         { id: 169, name: "Xbox Series X|S", slug: "xsx", abbreviation: "XSX" },
-        { id: 6, name: "PC (Microsoft Windows)", slug: "win", abbreviation: "PC" },
+        {
+          id: 6,
+          name: "PC (Microsoft Windows)",
+          slug: "win",
+          abbreviation: "PC",
+        },
       ]);
 
       // Create two games

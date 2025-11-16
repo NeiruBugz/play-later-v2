@@ -99,7 +99,8 @@ export class LibraryService extends BaseService implements ILibraryService {
     input: AddGameToLibraryInput
   ): Promise<AddGameToLibraryResult> {
     try {
-      const { userId, igdbId, status, platform, startedAt, completedAt } = input;
+      const { userId, igdbId, status, platform, startedAt, completedAt } =
+        input;
 
       logger.info({ userId, igdbId, status }, "Adding game to library");
 
@@ -296,7 +297,12 @@ export class LibraryService extends BaseService implements ILibraryService {
    */
   async updateLibraryItem(params: {
     userId: string;
-    libraryItem: { id: number; status: LibraryItemStatus };
+    libraryItem: {
+      id: number;
+      status: LibraryItemStatus;
+      startedAt?: Date;
+      completedAt?: Date;
+    };
   }) {
     try {
       logger.info(params, "Updating library item");
