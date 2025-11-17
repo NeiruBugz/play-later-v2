@@ -49,6 +49,8 @@ export async function populateGameInDatabase(
         generation: p.generation,
         platform_family:
           typeof p.platform_family === "number" ? p.platform_family : undefined,
+        platform_type:
+          typeof p.platform_type === "number" ? p.platform_type : undefined,
         checksum: p.checksum,
       }));
       const platformsResult = await upsertPlatforms(mappedPlatforms);

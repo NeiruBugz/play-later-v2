@@ -280,7 +280,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
       const { gameId } = params;
       this.logger.info({ gameId }, "Fetching game details");
-      const query = this.queryBuilder
+      const qb = new QueryBuilder();
+      const query = qb
         .fields([
           "name",
           "summary",
@@ -355,7 +356,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
       const { slug } = params;
       this.logger.info({ slug }, "Fetching game details by slug");
-      const query = this.queryBuilder
+      const qb = new QueryBuilder();
+      const query = qb
         .fields([
           "name",
           "slug",
