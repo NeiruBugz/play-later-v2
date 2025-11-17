@@ -4,11 +4,10 @@ import {
   LibraryService,
 } from "@/data-access-layer/services";
 import * as gameDetailService from "@/data-access-layer/services/game-detail/game-detail-service";
-
 import {
   createFullGameFixture,
   createJournalEntryFixture,
-  createLibraryItemFixture,
+  createSimpleLibraryItemFixture,
 } from "@/test/fixtures";
 
 import { getGameDetails } from "./get-game-details";
@@ -39,7 +38,7 @@ describe("getGameDetails", () => {
   let mockPopulateGameInDatabase: ReturnType<typeof vi.fn>;
 
   const mockGame = createFullGameFixture();
-  const mockLibraryItem = createLibraryItemFixture();
+  const mockLibraryItem = createSimpleLibraryItemFixture();
   const mockJournalEntry = createJournalEntryFixture();
 
   beforeEach(() => {

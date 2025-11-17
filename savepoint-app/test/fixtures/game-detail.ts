@@ -1,4 +1,4 @@
-import type { JournalEntry, LibraryItem } from "@prisma/client";
+import type { LibraryItem } from "@prisma/client";
 
 import type { FullGameInfoResponse } from "@/shared/types";
 
@@ -20,7 +20,7 @@ export function createFullGameFixture(
   } as FullGameInfoResponse;
 }
 
-export function createLibraryItemFixture(
+export function createSimpleLibraryItemFixture(
   overrides?: Partial<LibraryItem>
 ): LibraryItem {
   return {
@@ -34,26 +34,6 @@ export function createLibraryItemFixture(
     completedAt: null,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-02"),
-    ...overrides,
-  };
-}
-
-export function createJournalEntryFixture(
-  overrides?: Partial<JournalEntry>
-): JournalEntry {
-  return {
-    id: "journal-1",
-    userId: "user-123",
-    gameId: "game-456",
-    content: "Great game!",
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
-    libraryItemId: null,
-    title: null,
-    mood: null,
-    playSession: null,
-    visibility: "PRIVATE",
-    publishedAt: null,
     ...overrides,
   };
 }

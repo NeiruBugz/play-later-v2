@@ -1,7 +1,7 @@
 import { IgdbService } from "@/data-access-layer/services";
+import { createFranchiseGamesFixture } from "@/test/fixtures";
 
 import { FRANCHISE_GAMES_INITIAL_LIMIT } from "@/shared/constants";
-import { createFranchiseGamesFixture } from "@/test/fixtures";
 
 import { getFranchiseGames } from "./get-franchise-games";
 

@@ -2,13 +2,12 @@ import * as gameDetailService from "@/data-access-layer/services/game-detail/gam
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { AcquisitionType, type LibraryItemStatus } from "@prisma/client";
-
 import {
   createDatabaseGameFixture,
   createFullGameFixture,
   createLibraryItemFixture,
 } from "@/test/fixtures";
+import { AcquisitionType, type LibraryItemStatus } from "@prisma/client";
 
 import { addGameToLibrary } from "./add-game-to-library";
 
@@ -58,7 +57,7 @@ describe("addGameToLibrary", () => {
     name: "Test Game",
     slug: "test-game",
     summary: "A test game",
-    cover: { image_id: "cover123" },
+    cover: { id: 123, image_id: "cover123" },
   });
 
   const mockLibraryItem = createLibraryItemFixture({
