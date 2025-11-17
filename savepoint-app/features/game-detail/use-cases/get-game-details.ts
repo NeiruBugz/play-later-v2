@@ -1,5 +1,4 @@
 "use server";
-
 import {
   IgdbService,
   JournalService,
@@ -7,14 +6,12 @@ import {
 } from "@/data-access-layer/services";
 import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
 import type { JournalEntry, LibraryItem } from "@prisma/client";
-
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { createLogger } from "@/shared/lib/app/logger";
+import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
 import type { FullGameInfoResponse } from "@/shared/types";
-
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVICE]: "getGameDetailsUseCase",
 });
-
 type GameDetailsResult = {
   game: FullGameInfoResponse;
   franchiseIds: number[];
@@ -30,16 +27,6 @@ type GameDetailsResult = {
   journalEntries: JournalEntry[];
 };
 
-/**
- * Use case: Get game details for the game detail page
- *
- * This orchestrates:
- * 1. Fetch game from IGDB (always fresh data)
- * 2. Trigger background database population (fire-and-forget)
- * 3. Fetch times to beat from IGDB
- * 4. Fetch user's library status (if authenticated)
- * 5. Return all data to the page
- */
 export async function getGameDetails(params: {
   slug: string;
   userId?: string;
@@ -48,12 +35,10 @@ export async function getGameDetails(params: {
 > {
   try {
     logger.info({ slug: params.slug }, "Use case: Getting game details");
-
     const igdbService = new IgdbService();
     const igdbResult = await igdbService.getGameDetailsBySlug({
       slug: params.slug,
     });
-
     if (!igdbResult.success) {
       logger.error(
         { slug: params.slug, error: igdbResult.error },
@@ -64,24 +49,19 @@ export async function getGameDetails(params: {
         error: igdbResult.error,
       };
     }
-
     const game = igdbResult.data.game;
-
     populateGameInDatabase(game).catch((err) =>
       logger.error(
         { err, slug: params.slug },
         "Background game population failed"
       )
     );
-
     const franchiseIds: number[] = [];
-
     if (typeof game.franchise === "number" && game.franchise > 0) {
       franchiseIds.push(game.franchise);
     } else if (typeof game.franchise === "object" && game.franchise?.id) {
       franchiseIds.push(game.franchise.id);
     }
-
     if (game.franchises && game.franchises.length > 0) {
       game.franchises.forEach((id) => {
         if (!franchiseIds.includes(id)) {
@@ -89,7 +69,6 @@ export async function getGameDetails(params: {
         }
       });
     }
-
     logger.info(
       {
         franchiseIds,
@@ -100,27 +79,21 @@ export async function getGameDetails(params: {
       },
       "Determined franchise IDs for related games"
     );
-
     const timesToBeatResult = await igdbService.getTimesToBeat({
       igdbId: game.id,
     });
-
     const timesToBeat = timesToBeatResult.success
       ? timesToBeatResult.data.timesToBeat
       : undefined;
-
     let userLibraryStatus:
       | { mostRecent: LibraryItem; updatedAt: Date; allItems: LibraryItem[] }
       | undefined;
     let journalEntries: JournalEntry[] = [];
-
     if (params.userId) {
       const libraryService = new LibraryService();
       const gameResult = await libraryService.findGameByIgdbId(game.id);
-
       if (gameResult.success && gameResult.data) {
         const journalService = new JournalService();
-
         const [libraryItemResult, allLibraryItemsResult, journalEntriesResult] =
           await Promise.all([
             libraryService.findMostRecentLibraryItemByGameId({
@@ -137,7 +110,6 @@ export async function getGameDetails(params: {
               limit: 3,
             }),
           ]);
-
         if (
           libraryItemResult.success &&
           libraryItemResult.data &&
@@ -147,7 +119,6 @@ export async function getGameDetails(params: {
             allLibraryItemsResult.success && allLibraryItemsResult.data
               ? allLibraryItemsResult.data
               : [];
-
           userLibraryStatus = {
             mostRecent: libraryItemResult.data,
             updatedAt: libraryItemResult.data.updatedAt,
@@ -163,7 +134,6 @@ export async function getGameDetails(params: {
             "Found user library status for game"
           );
         }
-
         if (journalEntriesResult.success && journalEntriesResult.data) {
           journalEntries = journalEntriesResult.data;
           logger.debug(
@@ -177,7 +147,6 @@ export async function getGameDetails(params: {
         }
       }
     }
-
     logger.info(
       {
         igdbId: game.id,
@@ -187,7 +156,6 @@ export async function getGameDetails(params: {
       },
       "Game details fetched successfully"
     );
-
     return {
       success: true,
       data: {

@@ -1,9 +1,6 @@
 "use client";
-
 import type { LibraryItemStatus } from "@prisma/client";
 import Link from "next/link";
-
-import type { LibraryItemWithGameAndCount } from "@/features/library/hooks/use-library-data";
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
 import {
@@ -15,48 +12,26 @@ import {
 import {
   LIBRARY_STATUS_LABELS,
   LIBRARY_STATUS_VARIANTS,
-} from "@/shared/lib";
-
+} from "@/shared/lib/library-status";
+import type { LibraryItemWithGameAndCount } from "@/shared/types";
 import { useQuickActionsVariant } from "../hooks/use-quick-actions-variant";
 import { LibraryCardActionBar } from "./library-card-action-bar";
 import { LibraryCardInteractiveBadge } from "./library-card-interactive-badge";
-
 type LibraryCardProps = {
   item: LibraryItemWithGameAndCount;
 };
 
-/**
- * Library card component displaying a game cover with status and metadata
- *
- * Displays:
- * - Game cover image with hover effects
- * - Status badge (colored based on status)
- * - Library item count badge (only when multiple entries exist)
- * - Quick actions placeholder for future functionality
- * - Game title on hover via tooltip
- *
- * @param item - Library item with associated game details and count
- *
- * @example
- * ```tsx
- * <LibraryCard item={libraryItem} />
- * ```
- */
 export function LibraryCard({ item }: LibraryCardProps) {
   const { game, status } = item;
   const hasMultipleEntries = game._count.libraryItems > 1;
   const variant = useQuickActionsVariant(item.id);
-
   const coverImageId =
     game.coverImage?.split("/").pop()?.replace(".jpg", "") ?? null;
-
   const handleLinkInteraction = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.defaultPrevented) {
       return;
     }
-
     const target = e.target as HTMLElement;
-
     if (
       target.tagName === "BUTTON" ||
       target.getAttribute("role") === "toolbar" ||
@@ -69,7 +44,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
       e.stopPropagation();
     }
   };
-
   return (
     <TooltipProvider>
       <Link
@@ -86,7 +60,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
           className="aspect-[3/4] w-full rounded-md"
           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
         />
-
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
@@ -101,7 +74,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
             <p>{game.title}</p>
           </TooltipContent>
         </Tooltip>
-
         {variant === "badge" && (
           <div
             data-library-interactive
@@ -118,11 +90,12 @@ export function LibraryCard({ item }: LibraryCardProps) {
             <LibraryCardInteractiveBadge
               libraryItemId={item.id}
               currentStatus={status as LibraryItemStatus}
-              statusVariant={LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]}
+              statusVariant={
+                LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]
+              }
             />
           </div>
         )}
-
         {variant === "actionBar" && (
           <div className="absolute top-2 left-2">
             <Badge
@@ -134,7 +107,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
             </Badge>
           </div>
         )}
-
         {hasMultipleEntries && (
           <div className="absolute top-2 right-2">
             <Badge
@@ -146,7 +118,6 @@ export function LibraryCard({ item }: LibraryCardProps) {
             </Badge>
           </div>
         )}
-
         {variant === "actionBar" && (
           <LibraryCardActionBar
             libraryItemId={item.id}

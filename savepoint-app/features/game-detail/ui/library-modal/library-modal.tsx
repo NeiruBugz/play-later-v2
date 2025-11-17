@@ -1,9 +1,7 @@
 "use client";
-
 import type { LibraryItem } from "@prisma/client";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -12,11 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-
 import { AddEntryForm } from "./add-entry-form";
 import { EditEntryForm } from "./edit-entry-form";
 import { LibraryItemCard } from "./library-item-card";
-
 type LibraryModalProps = {
   gameId?: string;
   isOpen: boolean;
@@ -27,7 +23,6 @@ type LibraryModalProps = {
   existingItems?: LibraryItem[];
   onDeleteItem?: (itemId: number) => void;
 };
-
 export const LibraryModal = ({
   gameId,
   isOpen,
@@ -40,7 +35,6 @@ export const LibraryModal = ({
 }: LibraryModalProps) => {
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("");
-
   // Reset state when modal is closed
   useEffect(() => {
     if (!isOpen) {
@@ -48,22 +42,18 @@ export const LibraryModal = ({
       setActiveTab("");
     }
   }, [isOpen]);
-
   const handleClose = () => {
     setSelectedItemId(null);
     setActiveTab("");
     onClose();
   };
-
   const handleItemSelect = (itemId: number) => {
     setSelectedItemId(itemId);
     setActiveTab(itemId.toString());
   };
-
   const handleSuccess = () => {
     handleClose();
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent
@@ -80,7 +70,6 @@ export const LibraryModal = ({
               : `Update your library entries for ${gameTitle}.`}
           </DialogDescription>
         </DialogHeader>
-
         {mode === "add" ? (
           <AddEntryForm
             gameId={gameId}
@@ -124,8 +113,7 @@ export const LibraryModal = ({
                     Your Library Entries ({existingItems.length})
                   </h3>
                 </div>
-
-                {/* List of library items */}
+                {}
                 <div className="max-h-[400px] space-y-3 overflow-y-auto">
                   {existingItems.map((item) => (
                     <LibraryItemCard
@@ -136,8 +124,7 @@ export const LibraryModal = ({
                     />
                   ))}
                 </div>
-
-                {/* Add new entry button */}
+                {}
                 <button
                   onClick={() => setActiveTab("add-new")}
                   className="border-primary text-primary hover:bg-primary/5 flex w-full items-center justify-center gap-2 rounded-md border border-dashed py-3 text-sm font-medium transition-colors"
@@ -148,8 +135,7 @@ export const LibraryModal = ({
                 </button>
               </div>
             )}
-
-            {/* Add new entry form (shown when activeTab is "add-new") */}
+            {}
             {activeTab === "add-new" && selectedItemId === null && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">

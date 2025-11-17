@@ -1,5 +1,4 @@
 import { Gamepad2 } from "lucide-react";
-
 export const GameCoverPlaceholder = () => {
   return (
     <div className="flex flex-col items-center justify-center gap-1">

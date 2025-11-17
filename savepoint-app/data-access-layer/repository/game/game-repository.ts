@@ -1,5 +1,4 @@
 import "server-only";
-
 import {
   repositoryError,
   RepositoryErrorCode,
@@ -7,20 +6,11 @@ import {
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import { Prisma, type Game as PrismaGame } from "@prisma/client";
-
-import { prisma } from "@/shared/lib";
-
-/**
- * Game with full relations (genres and platforms)
- */
+import { prisma } from "@/shared/lib/app/db";
 type GameWithRelations = PrismaGame & {
   genres: Array<{ genre: { id: string; name: string; slug: string } }>;
   platforms: Array<{ platform: { id: string; name: string; slug: string } }>;
 };
-
-/**
- * IGDB Game type from their API
- */
 type IgdbGame = {
   id: number;
   name: string;
@@ -30,10 +20,6 @@ type IgdbGame = {
   first_release_date?: number;
   franchise?: { id: number };
 };
-
-/**
- * Find game by slug (for URL routing)
- */
 export async function findGameBySlug(
   slug: string
 ): Promise<RepositoryResult<GameWithRelations | null>> {
@@ -53,10 +39,6 @@ export async function findGameBySlug(
     );
   }
 }
-
-/**
- * Find game by IGDB ID (stored in our database)
- */
 export async function findGameByIgdbId(
   igdbId: number
 ): Promise<RepositoryResult<GameWithRelations | null>> {
@@ -76,10 +58,6 @@ export async function findGameByIgdbId(
     );
   }
 }
-
-/**
- * Check if game exists by IGDB ID
- */
 export async function gameExistsByIgdbId(
   igdbId: number
 ): Promise<RepositoryResult<boolean>> {
@@ -93,10 +71,6 @@ export async function gameExistsByIgdbId(
     );
   }
 }
-
-/**
- * Create game with genres and platforms in a transaction
- */
 export async function createGameWithRelations(params: {
   igdbGame: IgdbGame;
   genreIds: string[];
@@ -104,7 +78,6 @@ export async function createGameWithRelations(params: {
 }): Promise<RepositoryResult<PrismaGame>> {
   try {
     const { igdbGame, genreIds, platformIds } = params;
-
     const game = await prisma.game.create({
       data: {
         igdbId: igdbGame.id,
@@ -124,7 +97,6 @@ export async function createGameWithRelations(params: {
         },
       },
     });
-
     return repositorySuccess(game);
   } catch (error) {
     if (

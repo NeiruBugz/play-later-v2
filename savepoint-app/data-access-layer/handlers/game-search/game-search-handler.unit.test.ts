@@ -1,6 +1,10 @@
 import { IgdbService } from "@/data-access-layer/services/igdb";
 import type { GameSearchResult } from "@/data-access-layer/services/igdb/types";
 import type { ServiceResult } from "@/data-access-layer/services/types";
+import {
+  DEFAULT_RATE_LIMIT_REQUESTS,
+  RATE_LIMIT_RETRY_AFTER_SECONDS,
+} from "@/shared/constants";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Import mocked functions after mock definitions
@@ -191,9 +195,9 @@ describe("gameSearchHandler", () => {
         expect(result.status).toBe(429);
         expect(result.error).toBe("Rate limit exceeded. Try again later.");
         expect(result.headers).toMatchObject({
-          "X-RateLimit-Limit": "20",
+          "X-RateLimit-Limit": String(DEFAULT_RATE_LIMIT_REQUESTS),
           "X-RateLimit-Remaining": "0",
-          "Retry-After": "3600",
+          "Retry-After": String(RATE_LIMIT_RETRY_AFTER_SECONDS),
         });
       }
     });

@@ -1,11 +1,8 @@
 import type { LibraryItem } from "@prisma/client";
-
 import { formatRelativeDate } from "@/shared/lib/date";
-
 type LibraryEntryMetadataProps = {
   item: LibraryItem;
 };
-
 export const LibraryEntryMetadata = ({ item }: LibraryEntryMetadataProps) => {
   return (
     <div

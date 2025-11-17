@@ -1,19 +1,14 @@
 "use server";
-
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
 import { validateUsername } from "../lib/validation";
 import { CheckUsernameSchema } from "../schemas";
-
 export async function checkUsernameAvailability(data: { username: string }) {
   const logger = createLogger({
     [LOGGER_CONTEXT.SERVER_ACTION]: "checkUsernameAvailability",
   });
   try {
     const parsedInput = CheckUsernameSchema.safeParse(data);
-
     if (!parsedInput.success) {
       logger.warn(
         { reason: "validation_error" },
@@ -24,10 +19,8 @@ export async function checkUsernameAvailability(data: { username: string }) {
         error: parsedInput.error.errors[0]?.message ?? "Validation error",
       };
     }
-
     const username = parsedInput.data.username;
     const validation = validateUsername(username);
-
     if (!validation.valid) {
       logger.warn(
         { username, reason: validation.error },
@@ -38,13 +31,11 @@ export async function checkUsernameAvailability(data: { username: string }) {
         error: validation.error,
       };
     }
-
     const profileService = new ProfileService();
     logger.info({ username }, "Checking username availability");
     const result = await profileService.checkUsernameAvailability({
       username,
     });
-
     if (!result.success) {
       logger.error(
         { username, reason: result.error },
@@ -55,7 +46,6 @@ export async function checkUsernameAvailability(data: { username: string }) {
         error: result.error,
       };
     }
-
     logger.info(
       { username, available: result.data.available },
       "Username availability checked"

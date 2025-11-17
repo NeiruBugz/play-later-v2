@@ -1,26 +1,16 @@
 "use client";
-
 import { RefreshCw, ShieldAlert } from "lucide-react";
 import { useCallback, useEffect } from "react";
-
 import { Button } from "@/shared/components/ui/button";
 import { createLogger } from "@/shared/lib/app/logger";
 import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
-
 type GlobalErrorProps = {
   error: Error & { digest?: string };
   reset: () => void;
 };
-
 const logger = createLogger({
   [LOGGER_CONTEXT.ERROR_BOUNDARY]: "RootGlobalError",
 });
-
-/**
- * Global error boundary for the root layout
- * Catches errors that occur in the root layout itself
- * Note: Must reset the entire <html> document
- */
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
     logger.error(
@@ -28,7 +18,6 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
       "Root-level error boundary captured an unhandled error"
     );
   }, [error]);
-
   const handleReset = useCallback(() => {
     logger.info(
       { digest: error.digest },
@@ -36,7 +25,6 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     );
     reset();
   }, [error, reset]);
-
   return (
     <html lang="en">
       <body>
@@ -51,16 +39,13 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               />
               Critical Error
             </span>
-
             <h1 className="font-serif text-4xl font-bold tracking-tight text-balance sm:text-5xl">
               Something went critically wrong.
             </h1>
-
             <p className="text-muted-foreground text-lg leading-relaxed">
               A critical error occurred in the application. You can try again,
               or refresh your browser to restart the application.
             </p>
-
             <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center">
               <Button
                 onClick={() => window.location.reload()}
@@ -79,7 +64,6 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 Try again
               </Button>
             </div>
-
             {error.digest && (
               <p className="text-muted-foreground text-sm">
                 Error reference:{" "}

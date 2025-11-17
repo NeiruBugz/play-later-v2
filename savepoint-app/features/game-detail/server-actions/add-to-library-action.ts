@@ -1,16 +1,10 @@
 "use server";
-
-import { LibraryService } from "@/data-access-layer/services";
 import type { LibraryItem } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-
-import { createServerAction, type ActionResult } from "@/shared/lib";
-
+import { createServerAction } from "@/shared/lib";
+import { addGameToLibrary } from "../../library/use-cases/add-game-to-library";
 import { AddToLibrarySchema, type AddToLibraryInput } from "../schemas";
 
-/**
- * Server action: Add a game to the user's library
- */
 export const addToLibraryAction = createServerAction<
   AddToLibraryInput,
   LibraryItem
@@ -20,11 +14,8 @@ export const addToLibraryAction = createServerAction<
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
     const { igdbId, status, platform, startedAt, completedAt } = input;
-
     logger.info({ igdbId, userId }, "Adding game to library");
-
-    const libraryService = new LibraryService();
-    const result = await libraryService.addGameToLibrary({
+    const result = await addGameToLibrary({
       userId: userId!,
       igdbId,
       status,
@@ -32,20 +23,17 @@ export const addToLibraryAction = createServerAction<
       startedAt,
       completedAt,
     });
-
     if (!result.success) {
       logger.error(
         { error: result.error, userId, igdbId },
-        "LibraryService failed to add game"
+        "Use case failed to add game"
       );
       return {
         success: false,
         error: result.error,
       };
     }
-
     revalidatePath(`/games/${result.data.gameSlug}`);
-
     logger.info(
       {
         userId,
@@ -54,7 +42,6 @@ export const addToLibraryAction = createServerAction<
       },
       "Game added to library successfully"
     );
-
     return {
       success: true,
       data: result.data.libraryItem,

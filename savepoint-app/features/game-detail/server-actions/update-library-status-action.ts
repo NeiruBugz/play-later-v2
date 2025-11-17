@@ -1,29 +1,21 @@
 "use server";
-
 import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services";
 import type { LibraryItem } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
 import {
   UpdateLibraryStatusByIgdbSchema,
   type UpdateLibraryStatusByIgdbInput,
 } from "../schemas";
 import { addToLibraryAction } from "./add-to-library-action";
-
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "updateLibraryStatusAction",
 });
-
 type ActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
 
-/**
- * Server action: Update library status for a game by IGDB ID
- */
 export async function updateLibraryStatusAction(
   input: UpdateLibraryStatusByIgdbInput
 ): Promise<ActionResult<LibraryItem>> {
@@ -32,7 +24,6 @@ export async function updateLibraryStatusAction(
       { igdbId: input.igdbId, status: input.status },
       "Updating library status"
     );
-
     const parsed = UpdateLibraryStatusByIgdbSchema.safeParse(input);
     if (!parsed.success) {
       logger.warn({ errors: parsed.error.errors }, "Invalid input data");
@@ -41,9 +32,7 @@ export async function updateLibraryStatusAction(
         error: "Invalid input data",
       };
     }
-
     const { igdbId, status } = parsed.data;
-
     const userId = await getServerUserId();
     if (!userId) {
       logger.warn("Unauthenticated user attempted to update library status");
@@ -52,10 +41,8 @@ export async function updateLibraryStatusAction(
         error: "You must be logged in to update your library",
       };
     }
-
     const libraryService = new LibraryService();
     const gameResult = await libraryService.findGameByIgdbId(igdbId);
-
     if (!gameResult.success || !gameResult.data) {
       logger.info(
         { igdbId, userId },
@@ -63,14 +50,12 @@ export async function updateLibraryStatusAction(
       );
       return addToLibraryAction({ igdbId, status, platform: "PC" });
     }
-
     const game = gameResult.data;
     const libraryItemsResult =
       await libraryService.findMostRecentLibraryItemByGameId({
         userId,
         gameId: game.id,
       });
-
     if (!libraryItemsResult.success) {
       logger.error(
         { error: libraryItemsResult.error, userId, gameId: game.id },
@@ -81,7 +66,6 @@ export async function updateLibraryStatusAction(
         error: "Failed to find library items",
       };
     }
-
     if (!libraryItemsResult.data) {
       logger.info(
         { igdbId, userId },
@@ -89,7 +73,6 @@ export async function updateLibraryStatusAction(
       );
       return addToLibraryAction({ igdbId, status, platform: "PC" });
     }
-
     const mostRecentItem = libraryItemsResult.data;
     const updateResult = await libraryService.updateLibraryItem({
       userId,
@@ -98,7 +81,6 @@ export async function updateLibraryStatusAction(
         status,
       },
     });
-
     if (!updateResult.success) {
       logger.error(
         { error: updateResult.error, userId, libraryItemId: mostRecentItem.id },
@@ -109,9 +91,7 @@ export async function updateLibraryStatusAction(
         error: "Failed to update library status",
       };
     }
-
     revalidatePath(`/games/${game.slug}`);
-
     logger.info(
       {
         userId,
@@ -120,7 +100,6 @@ export async function updateLibraryStatusAction(
       },
       "Library status updated successfully"
     );
-
     return {
       success: true,
       data: updateResult.data,

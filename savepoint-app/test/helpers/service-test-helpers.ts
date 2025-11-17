@@ -3,7 +3,6 @@ import {
   type ServiceResult,
 } from "@/data-access-layer/services";
 import { expect } from "vitest";
-
 export function expectServiceSuccess<T>(
   result: ServiceResult<T>
 ): asserts result is { success: true; data: T } {
@@ -13,7 +12,6 @@ export function expectServiceSuccess<T>(
   }
   expect(result.data).toBeDefined();
 }
-
 export function expectServiceError<T>(
   result: ServiceResult<T>,
   expectedError?: string,
@@ -28,23 +26,19 @@ export function expectServiceError<T>(
     throw new Error("Expected error result");
   }
   expect(result.error).toBeDefined();
-
   if (expectedError) {
     expect(result.error).toContain(expectedError);
   }
-
   if (expectedCode) {
     expect(result.code).toBe(expectedCode);
   }
 }
-
 export function createSuccessResult<T>(data: T): ServiceResult<T> {
   return {
     success: true,
     data,
   };
 }
-
 export function createErrorResult<T = never>(
   error: string,
   code?: ServiceErrorCode
@@ -55,27 +49,22 @@ export function createErrorResult<T = never>(
     code,
   };
 }
-
 export function isServiceSuccess<T>(
   result: ServiceResult<T>
 ): result is { success: true; data: T } {
   return result.success === true;
 }
-
 export function isServiceError<T>(
   result: ServiceResult<T>
 ): result is { success: false; error: string; code?: ServiceErrorCode } {
   return result.success === false;
 }
-
 export function createMockDate(dateString?: string): Date {
   return new Date(dateString ?? "2024-01-01T00:00:00.000Z");
 }
-
 export function createPartialMock<T>(partial: Partial<T>): Partial<T> {
   return partial;
 }
-
 export function buildMockUser(
   overrides: {
     id?: string;
@@ -106,7 +95,6 @@ export function buildMockUser(
     ...overrides,
   };
 }
-
 export function buildMockGame(
   overrides: {
     id?: string;
@@ -141,7 +129,6 @@ export function buildMockGame(
     ...overrides,
   };
 }
-
 export function buildMockLibraryItem(
   overrides: {
     id?: number;
@@ -176,7 +163,6 @@ export function buildMockLibraryItem(
     ...overrides,
   };
 }
-
 export function buildMockJournalEntry(
   overrides: {
     id?: string;
@@ -216,7 +202,6 @@ export function buildMockJournalEntry(
     ...overrides,
   };
 }
-
 export function buildMockReview(
   overrides: {
     id?: string;
@@ -243,17 +228,14 @@ export function buildMockReview(
     ...overrides,
   };
 }
-
 export async function waitFor(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
 export function createRejectedPromise<T = never>(
   error: string | Error
 ): Promise<T> {
   return Promise.reject(typeof error === "string" ? new Error(error) : error);
 }
-
 export function createResolvedPromise<T>(value: T): Promise<T> {
   return Promise.resolve(value);
 }

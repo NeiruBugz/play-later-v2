@@ -1,7 +1,4 @@
-/**
- * IGDB game category enumeration
- * @see https://api-docs.igdb.com/#game
- */
+
 export enum GameCategory {
   MAIN_GAME = 0,
   DLC_ADDON = 1,
@@ -19,7 +16,6 @@ export enum GameCategory {
   PACK = 13,
   UPDATE = 14,
 }
-
 export const ALLOWED_GAME_CATEGORIES = [
   GameCategory.MAIN_GAME,
   GameCategory.DLC_ADDON,
@@ -30,7 +26,6 @@ export const ALLOWED_GAME_CATEGORIES = [
   GameCategory.EXPANDED_GAME,
   GameCategory.PORT,
 ] as const;
-
 export const ALLOWED_FRANCHISE_GAME_CATEGORIES = [
   GameCategory.MAIN_GAME,
   GameCategory.REMAKE,

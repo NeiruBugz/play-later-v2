@@ -6,7 +6,6 @@ import {
   type Prisma,
   type User,
 } from "@prisma/client";
-
 export type CreateLibraryItemInput = {
   userId: string;
   gameId: string;
@@ -18,12 +17,10 @@ export type CreateLibraryItemInput = {
     completedAt?: Date;
   };
 };
-
 export type DeleteLibraryItemInput = {
   libraryItemId: number;
   userId: string;
 };
-
 export type UpdateLibraryItemInput = {
   userId: string;
   libraryItem: {
@@ -34,28 +31,23 @@ export type UpdateLibraryItemInput = {
     completedAt?: Date;
   };
 };
-
 export type GetLibraryItemsForUserByIgdbIdInput = {
   userId: string;
   igdbId: number;
 };
-
 export type GetManyLibraryItemsInput = {
   userId: string;
   gameId: string;
 };
-
 export type GetLibraryCountInput = {
   userId: string;
   status?: LibraryItemStatus;
   gteClause?: Prisma.LibraryItemWhereInput;
 };
-
 export type UserWithLibraryItemsResponse = {
   user: User;
   libraryItems: Array<LibraryItem & { game: Game }>;
 };
-
 export type AddGameToUserLibraryInput = {
   userId: string;
   igdbId: number;
@@ -65,7 +57,6 @@ export type AddGameToUserLibraryInput = {
     acquisitionType: AcquisitionType;
   };
 };
-
 export type LibraryStatsResult =
   | {
       ok: true;

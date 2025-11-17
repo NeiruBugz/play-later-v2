@@ -1,7 +1,5 @@
 import { Button } from "@/shared/components/ui/button";
-
 import { signInWithGoogleAction } from "../server-actions/sign-in-google";
-
 export function GoogleSignInButton() {
   return (
     <form action={signInWithGoogleAction}>

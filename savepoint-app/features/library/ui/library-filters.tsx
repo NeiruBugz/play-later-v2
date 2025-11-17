@@ -1,9 +1,7 @@
 "use client";
-
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -15,98 +13,52 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
+import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
 
-import { LIBRARY_STATUS_CONFIG } from "@/shared/lib";
-
-/**
- * Library filters component - provides filter controls for the library view
- *
- * Features:
- * - Status dropdown filter (all LibraryItemStatus enum values)
- * - Platform dropdown filter (platform names)
- * - Text search input with debouncing (300ms delay)
- * - Clear filters button (shown when filters are active)
- * - URL state management for bookmarkable filters
- *
- * All filter changes update URL query parameters which triggers
- * TanStack Query to refetch library data automatically.
- *
- * URL Parameters:
- * - status: LibraryItemStatus enum value
- * - platform: Platform name string
- * - search: Game title search string
- * - sortBy: Sort field (createdAt, releaseDate, startedAt, completedAt)
- * - sortOrder: Sort direction (asc, desc)
- *
- * @example
- * ```tsx
- * // In library page
- * <LibraryFilters />
- * <LibraryGrid />
- * ```
- */
 export function LibraryFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const [searchInput, setSearchInput] = useState(
     searchParams.get("search") ?? ""
   );
-
   const debouncedSearch = useDebouncedValue(searchInput, 300);
-
-  /**
-   * Update a single filter parameter in the URL
-   * Preserves other query parameters (sorting, other filters)
-   */
+  
   const updateFilter = useCallback(
     (key: string, value: string | undefined) => {
       const params = new URLSearchParams(searchParams.toString());
-
       if (value && value !== "") {
         params.set(key, value);
       } else {
         params.delete(key);
       }
-
       router.push(`/library?${params.toString()}`, { scroll: false });
     },
     [router, searchParams]
   );
-
-  /**
-   * Clear all filter parameters from URL
-   * Preserves sorting parameters (sortBy, sortOrder)
-   */
+  
   const clearAllFilters = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
-
     // Remove filter params but preserve sorting
     params.delete("status");
     params.delete("platform");
     params.delete("search");
-
     router.push(`/library?${params.toString()}`, { scroll: false });
     setSearchInput("");
   }, [router, searchParams]);
-
   const handleSearchChange = useCallback((value: string) => {
     setSearchInput(value);
   }, []);
-
   useEffect(() => {
     const currentSearch = searchParams.get("search");
     if (debouncedSearch !== currentSearch) {
       updateFilter("search", debouncedSearch || undefined);
     }
   }, [debouncedSearch, searchParams, updateFilter]);
-
   const hasActiveFilters = Boolean(
     searchParams.get("status") ||
       searchParams.get("platform") ||
       searchParams.get("search")
   );
-
   return (
     <div className="mb-6 space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-end">
@@ -131,7 +83,6 @@ export function LibraryFilters() {
             </SelectContent>
           </Select>
         </div>
-
         <div className="w-full space-y-2 md:w-auto md:flex-1">
           <Label htmlFor="platform-filter">Platform</Label>
           <Select
@@ -154,7 +105,6 @@ export function LibraryFilters() {
             </SelectContent>
           </Select>
         </div>
-
         <div className="w-full space-y-2 md:flex-1">
           <Label htmlFor="search-input">Search</Label>
           <div className="relative">
@@ -173,7 +123,6 @@ export function LibraryFilters() {
             />
           </div>
         </div>
-
         {hasActiveFilters && (
           <Button
             variant="ghost"

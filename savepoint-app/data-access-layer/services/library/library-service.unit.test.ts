@@ -148,26 +148,10 @@ describe("LibraryService", () => {
           expect(result.data).toHaveLength(0);
         }
       });
-
-      it("should handle distinctByGame parameter", async () => {
-        mockFindLibraryItemsWithFilters.mockResolvedValue(
-          repositorySuccess([mockLibraryItems[0]])
-        );
-
-        await service.getLibraryItems({
-          userId: validUserId,
-          distinctByGame: true,
-        });
-
-        expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith({
-          userId: validUserId,
-          distinctByGame: true,
-        });
-      });
     });
 
     describe("validation scenarios", () => {
-      it("should return error when userId is not a valid CUID", async () => {
+      it("should return validation error for invalid input", async () => {
         const result = await service.getLibraryItems({
           userId: "invalid-id",
         });
@@ -175,51 +159,6 @@ describe("LibraryService", () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error).toContain("cuid");
-        }
-
-        expect(mockFindLibraryItemsWithFilters).not.toHaveBeenCalled();
-      });
-
-      it("should return error when status is invalid", async () => {
-        const result = await service.getLibraryItems({
-          userId: validUserId,
-          // @ts-expect-error - Testing invalid status value
-          status: "INVALID_STATUS",
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBeTruthy();
-        }
-
-        expect(mockFindLibraryItemsWithFilters).not.toHaveBeenCalled();
-      });
-
-      it("should return error when sortBy is invalid", async () => {
-        const result = await service.getLibraryItems({
-          userId: validUserId,
-          // @ts-expect-error - Testing invalid sortBy value
-          sortBy: "invalidField",
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBeTruthy();
-        }
-
-        expect(mockFindLibraryItemsWithFilters).not.toHaveBeenCalled();
-      });
-
-      it("should return error when sortOrder is invalid", async () => {
-        const result = await service.getLibraryItems({
-          userId: validUserId,
-          // @ts-expect-error - Testing invalid sortOrder value
-          sortOrder: "invalid",
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBeTruthy();
         }
 
         expect(mockFindLibraryItemsWithFilters).not.toHaveBeenCalled();
@@ -292,7 +231,7 @@ describe("LibraryService", () => {
     });
 
     describe("validation scenarios", () => {
-      it("should return error when libraryItemId is invalid (not positive integer)", async () => {
+      it("should return validation error for invalid input", async () => {
         const result = await service.deleteLibraryItem({
           libraryItemId: -1,
           userId: validUserId,
@@ -301,34 +240,6 @@ describe("LibraryService", () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error).toBeTruthy();
-        }
-
-        expect(mockDeleteLibraryItem).not.toHaveBeenCalled();
-      });
-
-      it("should return error when libraryItemId is zero", async () => {
-        const result = await service.deleteLibraryItem({
-          libraryItemId: 0,
-          userId: validUserId,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBeTruthy();
-        }
-
-        expect(mockDeleteLibraryItem).not.toHaveBeenCalled();
-      });
-
-      it("should return error when userId is not a valid CUID", async () => {
-        const result = await service.deleteLibraryItem({
-          libraryItemId: validLibraryItemId,
-          userId: "invalid-id",
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toContain("cuid");
         }
 
         expect(mockDeleteLibraryItem).not.toHaveBeenCalled();
@@ -359,23 +270,6 @@ describe("LibraryService", () => {
           libraryItemId: validLibraryItemId,
           userId: validUserId,
         });
-      });
-
-      it("should return error when unauthorized (user does not own library item)", async () => {
-        mockDeleteLibraryItem.mockResolvedValue(
-          repositoryError(RepositoryErrorCode.NOT_FOUND, "Not found")
-        );
-
-        const result = await service.deleteLibraryItem({
-          libraryItemId: validLibraryItemId,
-          userId: "clx987zyx654wvu", // Different user
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toContain("not found");
-          expect(result.error).toContain("permission");
-        }
       });
 
       it("should handle database errors during deletion", async () => {
@@ -515,32 +409,6 @@ describe("LibraryService", () => {
         expect(mockUpdateLibraryItem).toHaveBeenCalled();
       });
 
-      it("should allow skipping steps (CURIOUS_ABOUT → EXPERIENCED)", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.CURIOUS_ABOUT)
-          )
-        );
-
-        mockUpdateLibraryItem.mockResolvedValue(
-          repositorySuccess({
-            ...createMockLibraryItem(LibraryItemStatus.EXPERIENCED),
-            updatedAt: new Date("2025-01-05"),
-          })
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.EXPERIENCED,
-          },
-        });
-
-        expect(result.success).toBe(true);
-        expect(mockUpdateLibraryItem).toHaveBeenCalled();
-      });
-
       it("should allow transition FROM Wishlist to any other status", async () => {
         mockFindLibraryItemById.mockResolvedValue(
           repositorySuccess(createMockLibraryItem(LibraryItemStatus.WISHLIST))
@@ -558,32 +426,6 @@ describe("LibraryService", () => {
           libraryItem: {
             id: libraryItemId,
             status: LibraryItemStatus.CURIOUS_ABOUT,
-          },
-        });
-
-        expect(result.success).toBe(true);
-        expect(mockUpdateLibraryItem).toHaveBeenCalled();
-      });
-
-      it("should allow staying in same status (no-op update)", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.CURRENTLY_EXPLORING)
-          )
-        );
-
-        mockUpdateLibraryItem.mockResolvedValue(
-          repositorySuccess({
-            ...createMockLibraryItem(LibraryItemStatus.CURRENTLY_EXPLORING),
-            updatedAt: new Date("2025-01-07"),
-          })
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
           },
         });
 

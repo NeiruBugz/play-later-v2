@@ -1,5 +1,4 @@
 "use client";
-
 import type { LibraryItemStatus } from "@prisma/client";
 import {
   BookmarkIcon,
@@ -11,7 +10,6 @@ import {
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -19,15 +17,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-
 import { updateLibraryStatusAction } from "../server-actions";
-
 type QuickActionButtonsProps = {
   igdbId: number;
   gameTitle: string;
   currentStatus?: LibraryItemStatus;
 };
-
 const STATUS_CONFIG: Record<
   LibraryItemStatus,
   {
@@ -67,7 +62,6 @@ const STATUS_CONFIG: Record<
     ariaLabel: "Mark as Revisiting",
   },
 };
-
 const STATUS_ORDER: LibraryItemStatus[] = [
   "CURIOUS_ABOUT",
   "CURRENTLY_EXPLORING",
@@ -76,7 +70,6 @@ const STATUS_ORDER: LibraryItemStatus[] = [
   "WISHLIST",
   "REVISITING",
 ];
-
 export const QuickActionButtons = ({
   igdbId,
   gameTitle,
@@ -87,13 +80,10 @@ export const QuickActionButtons = ({
     LibraryItemStatus | undefined
   >(currentStatus);
   const [announcement, setAnnouncement] = useState<string>("");
-
   const handleStatusChange = (status: LibraryItemStatus) => {
     if (isPending) return;
-
     startTransition(async () => {
       const result = await updateLibraryStatusAction({ igdbId, status });
-
       if (result.success) {
         setActiveStatus(status);
         const statusLabel = STATUS_CONFIG[status].label;
@@ -111,14 +101,13 @@ export const QuickActionButtons = ({
       }
     });
   };
-
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Screen reader announcement for status changes */}
+        {}
         <div
           className="sr-only"
           role="status"
@@ -136,7 +125,6 @@ export const QuickActionButtons = ({
             const config = STATUS_CONFIG[status];
             const Icon = config.icon;
             const isActive = activeStatus === status;
-
             return (
               <Button
                 key={status}

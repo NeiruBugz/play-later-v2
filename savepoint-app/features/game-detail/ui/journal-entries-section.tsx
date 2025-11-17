@@ -1,6 +1,5 @@
 import type { JournalEntry } from "@prisma/client";
 import Link from "next/link";
-
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -9,15 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-
 interface JournalEntriesSectionProps {
   journalEntries: JournalEntry[];
 }
-
-/**
- * Format a date in the format "MMM dd, yyyy"
- * Example: "Jan 15, 2024"
- */
 function formatEntryDate(date: Date): string {
   return new Date(date).toLocaleDateString("en-US", {
     month: "short",
@@ -25,28 +18,17 @@ function formatEntryDate(date: Date): string {
     year: "numeric",
   });
 }
-
-/**
- * Truncate text to a specified number of lines
- * Returns the first N lines with ellipsis if truncated
- */
 function truncateToLines(text: string, maxLines: number): string {
   const lines = text.split("\n").slice(0, maxLines);
   const truncated = lines.join("\n");
-
   // If there's more content after our slice, add ellipsis
   const hasMore =
     text.split("\n").length > maxLines || truncated.length < text.length;
   return hasMore ? `${truncated}...` : truncated;
 }
-
-/**
- * Entry card that displays a single journal entry
- */
 function JournalEntryCard({ entry }: { entry: JournalEntry }) {
   const contentPreview = truncateToLines(entry.content, 2);
   const displayTitle = entry.title || "Untitled Entry";
-
   return (
     <Link href={`/journal/${entry.id}`} className="block">
       <Card className="cursor-pointer">
@@ -67,10 +49,6 @@ function JournalEntryCard({ entry }: { entry: JournalEntry }) {
     </Link>
   );
 }
-
-/**
- * Empty state when no journal entries exist
- */
 function EmptyState() {
   return (
     <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed p-8 text-center">
@@ -81,16 +59,10 @@ function EmptyState() {
     </div>
   );
 }
-
-/**
- * Journal Entries Section
- * Displays the last 3 journal entries for a game
- */
 export function JournalEntriesSection({
   journalEntries,
 }: JournalEntriesSectionProps) {
   const hasEntries = journalEntries.length > 0;
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -101,7 +73,6 @@ export function JournalEntriesSection({
           </Button>
         )}
       </div>
-
       {hasEntries ? (
         <div className="space-y-3">
           {journalEntries.map((entry) => (

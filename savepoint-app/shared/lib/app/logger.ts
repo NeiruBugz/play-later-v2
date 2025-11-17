@@ -1,5 +1,4 @@
 import pino, { type LogFn, type LoggerOptions } from "pino";
-
 const isBrowser = typeof window !== "undefined";
 const isDevelopment = process.env.NODE_ENV === "development";
 const isTest = process.env.NODE_ENV === "test";
@@ -35,20 +34,15 @@ const SAFE_EXTRA_KEYS = [
   "reason",
   "details",
 ];
-
 export const logger = pino(createLoggerOptions());
-
 export const createLogger = (bindings: Record<string, unknown>) => {
   return logger.child(bindings);
 };
-
 export type Logger = typeof logger;
-
 function createLoggerOptions(): LoggerOptions {
   const level =
     (isTest ? "silent" : process.env.LOG_LEVEL) ||
     (isDevelopment ? "debug" : "info");
-
   const options: LoggerOptions = {
     level,
     enabled: !isTest,
@@ -70,7 +64,6 @@ function createLoggerOptions(): LoggerOptions {
       },
     },
   };
-
   if (isBrowser) {
     options.browser = {
       asObject: true,
@@ -90,27 +83,22 @@ function createLoggerOptions(): LoggerOptions {
       };
     }
   }
-
   return options;
 }
-
 function normalizeLogArgs(args: unknown[]) {
   if (args.length === 0) {
     return args;
   }
-
   const argsWithErrorFirst =
     typeof args[0] === "string" && args[1] instanceof Error
       ? [{ err: args[1] }, args[0], ...args.slice(2)]
       : args;
-
   const normalizedArgs = argsWithErrorFirst.map((value, index) => {
     if (value instanceof Error) {
       return index === 0
         ? { err: serializeError(value) }
         : serializeError(value);
     }
-
     if (isRecord(value)) {
       const maybeError = value.err;
       if (maybeError instanceof Error) {
@@ -120,20 +108,16 @@ function normalizeLogArgs(args: unknown[]) {
         };
       }
     }
-
     return value;
   });
-
   return normalizedArgs;
 }
-
 function serializeError(error: Error): Record<string, unknown> {
   const out: Record<string, unknown> = {
     type: error.name,
     message: error.message,
   };
   if ((error as Error).stack) out.stack = (error as Error).stack;
-
   const src = error as unknown as Record<string, unknown>;
   for (const key of Object.keys(src)) {
     if (key === "name" || key === "message" || key === "stack") continue;
@@ -156,18 +140,15 @@ function serializeError(error: Error): Record<string, unknown> {
       out[key] = v;
     }
   }
-
   const cause = (error as unknown as { cause?: unknown }).cause;
   if (cause !== undefined) {
     out.cause = cause instanceof Error ? serializeError(cause) : cause;
   }
   return out;
 }
-
 function browserIsoTime() {
   return new Date().toISOString();
 }
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }

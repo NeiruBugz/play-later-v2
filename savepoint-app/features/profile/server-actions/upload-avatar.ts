@@ -1,20 +1,14 @@
 "use server";
-
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-
 import { createServerAction } from "@/shared/lib";
 import { AvatarStorageService } from "@/shared/lib/storage/avatar-storage";
-
 import { UploadAvatarSchema } from "../schemas";
-
 type UploadAvatarInput = {
   file: File;
 };
-
 type UploadAvatarData = {
   url: string;
 };
-
 export const uploadAvatar = createServerAction<
   UploadAvatarInput,
   UploadAvatarData
@@ -28,7 +22,6 @@ export const uploadAvatar = createServerAction<
       userId!,
       input.file
     );
-
     if (!uploadResult.ok) {
       logger.error(
         { userId, reason: uploadResult.error },
@@ -39,14 +32,12 @@ export const uploadAvatar = createServerAction<
         error: uploadResult.error,
       };
     }
-
     const profileService = new ProfileService();
     logger.debug({ userId }, "Saving avatar URL to profile");
     const updateResult = await profileService.updateAvatarUrl({
       userId: userId!,
       avatarUrl: uploadResult.data.url,
     });
-
     if (!updateResult.success) {
       logger.error(
         { userId, reason: "failed_to_save_avatar_url" },
@@ -57,7 +48,6 @@ export const uploadAvatar = createServerAction<
         error: "Failed to save avatar URL",
       };
     }
-
     logger.info({ userId }, "Avatar uploaded and profile updated");
     return {
       success: true,

@@ -1,5 +1,4 @@
 "use client";
-
 import type { LibraryItem, LibraryItemStatus } from "@prisma/client";
 import {
   BookmarkIcon,
@@ -11,7 +10,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -22,11 +20,9 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatAbsoluteDate } from "@/shared/lib/date";
-
 import { deleteLibraryItemAction } from "../server-actions";
 import { AddToLibraryButton } from "./add-to-library-button";
 import { LibraryModal } from "./library-modal";
-
 type LibraryStatusDisplayProps = {
   gameId?: string;
   userLibraryStatus?: {
@@ -39,7 +35,6 @@ type LibraryStatusDisplayProps = {
   igdbId: number;
   gameTitle: string;
 };
-
 const STATUS_CONFIG: Record<
   LibraryItemStatus,
   { label: string; icon: React.ComponentType<{ className?: string }> }
@@ -51,7 +46,6 @@ const STATUS_CONFIG: Record<
   WISHLIST: { label: "Wishlist", icon: BookmarkIcon },
   REVISITING: { label: "Revisiting", icon: ClockIcon },
 };
-
 export const LibraryStatusDisplay = ({
   gameId,
   userLibraryStatus,
@@ -59,7 +53,6 @@ export const LibraryStatusDisplay = ({
   gameTitle,
 }: LibraryStatusDisplayProps) => {
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-
   // If no library status, show "Add to Library" button
   if (!userLibraryStatus) {
     return (
@@ -78,24 +71,20 @@ export const LibraryStatusDisplay = ({
       </Card>
     );
   }
-
   // Show library status with "Manage Library" button
   const status = userLibraryStatus.mostRecent.status;
   const config = STATUS_CONFIG[status];
   const Icon = config.icon;
   const updatedDate = formatAbsoluteDate(userLibraryStatus.updatedAt);
-
   // Handler for deleting library items
   const handleDeleteItem = async (itemId: number) => {
     const result = await deleteLibraryItemAction({ libraryItemId: itemId });
-
     if (result.success) {
       toast.success("Library entry deleted");
     } else {
       toast.error(result.error || "Failed to delete library entry");
     }
   };
-
   return (
     <>
       <Card className="w-full">
@@ -128,7 +117,6 @@ export const LibraryStatusDisplay = ({
           </Button>
         </CardContent>
       </Card>
-
       <LibraryModal
         gameId={gameId}
         isOpen={isManageModalOpen}

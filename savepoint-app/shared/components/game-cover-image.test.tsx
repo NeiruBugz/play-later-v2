@@ -46,7 +46,7 @@ describe("GameCoverImage", () => {
   });
 
   it("should not render anything when imageId is null and showPlaceholder is false", () => {
-    const { container } = render(
+    render(
       <GameCoverImage
         imageId={null}
         gameTitle="Test Game"
@@ -55,11 +55,11 @@ describe("GameCoverImage", () => {
       />
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 
   it("should apply custom className to container", () => {
-    const { container } = render(
+    render(
       <GameCoverImage
         imageId="abc123"
         gameTitle="Test Game"
@@ -68,9 +68,8 @@ describe("GameCoverImage", () => {
       />
     );
 
-    const imageContainer = container.querySelector(".custom-class");
-    expect(imageContainer).toBeInTheDocument();
-    expect(imageContainer).toHaveClass("h-32", "w-24");
+    const container = screen.getByTestId('game-cover-container');
+    expect(container).toHaveClass("custom-class", "h-32", "w-24");
   });
 
   it("should apply hover effect by default", () => {

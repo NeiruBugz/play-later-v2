@@ -6,7 +6,7 @@ import {
 } from "@/test/setup/db-factories";
 import { LibraryItemStatus } from "@prisma/client";
 
-import { prisma } from "@/shared/lib";
+import { prisma } from "@/shared/lib/app/db";
 
 import { addToLibraryAction } from "./add-to-library-action";
 import { updateLibraryEntryAction } from "./update-library-entry-action";

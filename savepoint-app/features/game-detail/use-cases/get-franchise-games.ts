@@ -1,13 +1,11 @@
 "use server";
-
 import { IgdbService } from "@/data-access-layer/services";
-
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
+import { FRANCHISE_GAMES_INITIAL_LIMIT } from "@/shared/constants";
+import { createLogger } from "@/shared/lib/app/logger";
+import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
 const logger = createLogger({
   [LOGGER_CONTEXT.USE_CASE]: "getFranchiseGames",
 });
-
 type FranchiseGame = {
   id: number;
   name: string;
@@ -16,7 +14,6 @@ type FranchiseGame = {
     image_id: string;
   };
 };
-
 type FranchiseData = {
   franchiseId: number;
   franchiseName: string;
@@ -24,39 +21,29 @@ type FranchiseData = {
   hasMore: boolean;
   totalCount: number;
 };
-
 type GetFranchiseGamesInput = {
   igdbId: number;
   franchiseIds: number[];
 };
-
 type GetFranchiseGamesResult =
   | { success: true; data: FranchiseData[] }
   | { success: false; error: string };
 
-/**
- * Use-case: Fetch franchise games for display on game detail page
- * Orchestrates IgdbService to fetch franchise details and games in parallel
- */
 export async function getFranchiseGames(
   input: GetFranchiseGamesInput
 ): Promise<GetFranchiseGamesResult> {
   const { igdbId, franchiseIds } = input;
-
   logger.info(
     { igdbId, franchiseCount: franchiseIds.length },
     "Fetching franchise games"
   );
-
   if (franchiseIds.length === 0) {
     logger.debug("No franchise IDs provided, returning empty result");
     return { success: true, data: [] };
   }
-
   try {
     const igdbService = new IgdbService();
     const franchises: FranchiseData[] = [];
-
     // Fetch initial page (20 games) for each franchise in parallel
     for (const franchiseId of franchiseIds) {
       const [detailsResult, gamesResult] = await Promise.all([
@@ -64,11 +51,10 @@ export async function getFranchiseGames(
         igdbService.getFranchiseGames({
           franchiseId,
           currentGameId: igdbId,
-          limit: 20,
+          limit: FRANCHISE_GAMES_INITIAL_LIMIT,
           offset: 0,
         }),
       ]);
-
       if (!detailsResult.success) {
         logger.warn(
           { franchiseId, error: detailsResult.error },
@@ -76,7 +62,6 @@ export async function getFranchiseGames(
         );
         continue;
       }
-
       if (!gamesResult.success) {
         logger.warn(
           { franchiseId, error: gamesResult.error },
@@ -84,7 +69,6 @@ export async function getFranchiseGames(
         );
         continue;
       }
-
       if (gamesResult.data.games.length > 0) {
         franchises.push({
           franchiseId,
@@ -95,7 +79,6 @@ export async function getFranchiseGames(
         });
       }
     }
-
     logger.info(
       {
         franchiseCount: franchises.length,
@@ -103,7 +86,6 @@ export async function getFranchiseGames(
       },
       "Successfully fetched franchise games"
     );
-
     return { success: true, data: franchises };
   } catch (error) {
     logger.error(

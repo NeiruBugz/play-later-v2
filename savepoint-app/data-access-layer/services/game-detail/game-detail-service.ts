@@ -1,39 +1,29 @@
 import "server-only";
-
 import {
   createGameWithRelations,
   gameExistsByIgdbId,
   upsertGenres,
   upsertPlatforms,
 } from "@/data-access-layer/repository";
-
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import type { FullGameInfoResponse } from "@/shared/types";
-
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "GameDetailService" });
-
-/**
- * Background job: Populate game in database with genres and platforms
- * This is a fire-and-forget operation - errors are logged but not thrown
- */
 export async function populateGameInDatabase(
   igdbGame: FullGameInfoResponse
-): Promise<void> {
+): Promise<{ ok: boolean; error?: string }> {
   try {
     logger.debug(
       { igdbId: igdbGame.id, slug: igdbGame.slug },
       "Starting background game population"
     );
-
     const existsResult = await gameExistsByIgdbId(igdbGame.id);
     if (existsResult.ok && existsResult.data) {
       logger.debug(
         { igdbId: igdbGame.id },
         "Game already in database, skipping"
       );
-      return;
+      return { ok: true };
     }
-
     let genreIds: string[] = [];
     if (igdbGame.genres && igdbGame.genres.length > 0) {
       const genresResult = await upsertGenres(igdbGame.genres);
@@ -45,7 +35,6 @@ export async function populateGameInDatabase(
       }
       genreIds = genresResult.data.map((g) => g.id);
     }
-
     let platformIds: string[] = [];
     if (igdbGame.platforms && igdbGame.platforms.length > 0) {
       const mappedPlatforms = igdbGame.platforms.map((p) => ({
@@ -59,7 +48,6 @@ export async function populateGameInDatabase(
           typeof p.platform_family === "number" ? p.platform_family : undefined,
         checksum: p.checksum,
       }));
-
       const platformsResult = await upsertPlatforms(mappedPlatforms);
       if (!platformsResult.ok) {
         logger.error(
@@ -72,7 +60,6 @@ export async function populateGameInDatabase(
       }
       platformIds = platformsResult.data.map((p) => p.id);
     }
-
     const gameResult = await createGameWithRelations({
       igdbGame: {
         id: igdbGame.id,
@@ -89,21 +76,21 @@ export async function populateGameInDatabase(
       genreIds,
       platformIds,
     });
-
     if (!gameResult.ok) {
       logger.error({ error: gameResult.error }, "Failed to create game");
       throw new Error(`Failed to create game: ${gameResult.error.message}`);
     }
-
     logger.info(
       { igdbId: igdbGame.id, gameId: gameResult.data.id, slug: igdbGame.slug },
       "Game populated in database successfully"
     );
+    return { ok: true };
   } catch (error) {
-    // Log error but don't throw (fire-and-forget pattern)
-    logger.error(
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.warn(
       { error, igdbId: igdbGame.id, slug: igdbGame.slug },
-      "Failed to populate game in database (background job)"
+      "Background game population failed - will retry on next access"
     );
+    return { ok: false, error: errorMessage };
   }
 }

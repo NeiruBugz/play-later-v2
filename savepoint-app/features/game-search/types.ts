@@ -11,7 +11,6 @@ export interface SearchGameResult {
   }>;
   first_release_date?: number;
 }
-
 export interface GameSearchResponse {
   games: SearchGameResult[];
   count: number;

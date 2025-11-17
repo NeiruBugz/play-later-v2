@@ -9,6 +9,5 @@ export const LOGGER_CONTEXT = {
   HANDLER: "handler",
   USE_CASE: "useCase",
 } as const;
-
 export type LoggerContextKey =
   (typeof LOGGER_CONTEXT)[keyof typeof LOGGER_CONTEXT];

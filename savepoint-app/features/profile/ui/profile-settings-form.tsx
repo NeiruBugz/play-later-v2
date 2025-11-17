@@ -1,8 +1,6 @@
 "use client";
-
 import { useActionState, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -12,13 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-
 import { initialFormState } from "../lib/constants";
 import { ProfileSettingsFormProps } from "../lib/types";
 import { updateProfileFormAction } from "../server-actions/update-profile";
 import { AvatarUpload } from "./avatar-upload";
 import { UsernameInput } from "./username-input";
-
 export function ProfileSettingsForm({
   currentUsername,
   currentAvatar,
@@ -32,37 +28,31 @@ export function ProfileSettingsForm({
     updateProfileFormAction,
     initialFormState
   );
-
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Profile updated successfully!");
       setUsername((current) => state.submittedUsername ?? current.trim());
     }
   }, [state]);
-
   const handleAvatarUploadSuccess = (url: string) => {
     setAvatarUrl(url);
     toast.success("Profile image uploaded successfully.");
   };
-
   const handleAvatarUploadError = (error: string) => {
     toast.error(error, {
       description: "Please try again or choose a different image.",
     });
   };
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (username.trim().length < 3 || username.trim().length > 25) {
       event.preventDefault();
     }
   };
-
   const trimmedUsername = username.trim();
   const showServerError =
     state.status === "error" &&
     !!state.message &&
     state.submittedUsername === trimmedUsername;
-
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
@@ -91,7 +81,6 @@ export function ProfileSettingsForm({
               onUploadError={handleAvatarUploadError}
             />
           </div>
-
           <div className="space-y-2">
             <label className="text-foreground text-sm font-medium">
               Username

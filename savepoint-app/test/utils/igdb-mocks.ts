@@ -1,14 +1,11 @@
 import { vi } from "vitest";
-
 type JsonLike = Record<string, unknown> | unknown[] | null;
-
 export type FetchResponseSpec = {
   ok?: boolean;
   status?: number;
   statusText?: string;
   json?: JsonLike;
 };
-
 export function mockFetchSequence(sequence: FetchResponseSpec[]) {
   const mock = vi.fn();
   sequence.forEach((spec) => {
@@ -22,7 +19,6 @@ export function mockFetchSequence(sequence: FetchResponseSpec[]) {
   Object.defineProperty(global, "fetch", { writable: true, value: mock });
   return mock;
 }
-
 export function mockFetchSuccess<T>(data: T) {
   globalThis.fetch = vi.fn().mockResolvedValue({
     ok: true,
@@ -31,7 +27,6 @@ export function mockFetchSuccess<T>(data: T) {
     json: async () => data,
   });
 }
-
 export function mockFetchError(status: number, statusText: string) {
   globalThis.fetch = vi.fn().mockResolvedValue({
     ok: false,
@@ -40,7 +35,6 @@ export function mockFetchError(status: number, statusText: string) {
     json: async () => null,
   });
 }
-
 export function mockTokenFetchFailure() {
   globalThis.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 }

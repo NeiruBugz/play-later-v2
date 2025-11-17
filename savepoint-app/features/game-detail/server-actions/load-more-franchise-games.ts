@@ -1,21 +1,16 @@
 "use server";
-
 import { IgdbService } from "@/data-access-layer/services";
 import { z } from "zod";
-
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "loadMoreFranchiseGames",
 });
-
 const LoadMoreSchema = z.object({
   franchiseId: z.number().positive(),
   currentGameId: z.number().positive(),
   offset: z.number().min(0),
   limit: z.number().min(1).max(50).default(20),
 });
-
 export type LoadMoreResult =
   | {
       success: true;
@@ -34,26 +29,21 @@ export type LoadMoreResult =
       success: false;
       error: string;
     };
-
 export async function loadMoreFranchiseGames(
   input: z.infer<typeof LoadMoreSchema>
 ): Promise<LoadMoreResult> {
   try {
     const validated = LoadMoreSchema.parse(input);
-
     logger.info(
       { franchiseId: validated.franchiseId, offset: validated.offset },
       "Loading more franchise games"
     );
-
     const igdbService = new IgdbService();
     const result = await igdbService.getFranchiseGames(validated);
-
     if (!result.success) {
       logger.error({ error: result.error }, "Failed to fetch franchise games");
       return { success: false, error: result.error };
     }
-
     logger.info(
       {
         franchiseId: validated.franchiseId,
@@ -62,7 +52,6 @@ export async function loadMoreFranchiseGames(
       },
       "Franchise games loaded successfully"
     );
-
     return {
       success: true,
       data: {
@@ -76,7 +65,6 @@ export async function loadMoreFranchiseGames(
       logger.error({ error: error.errors }, "Validation error");
       return { success: false, error: "Invalid input parameters" };
     }
-
     logger.error({ error }, "Server action failed");
     return { success: false, error: "Failed to load games" };
   }

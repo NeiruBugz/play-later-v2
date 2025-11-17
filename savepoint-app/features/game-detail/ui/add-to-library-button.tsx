@@ -1,24 +1,18 @@
 "use client";
-
 import { useState } from "react";
-
 import { Button } from "@/shared/components/ui/button";
-
 import { LibraryModal } from "./library-modal";
-
 type AddToLibraryButtonProps = {
   gameId?: string;
   igdbId: number;
   gameTitle: string;
 };
-
 export const AddToLibraryButton = ({
   gameId,
   igdbId,
   gameTitle,
 }: AddToLibraryButtonProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   return (
     <>
       <Button
@@ -29,7 +23,6 @@ export const AddToLibraryButton = ({
       >
         Add to Library
       </Button>
-
       <LibraryModal
         gameId={gameId}
         isOpen={isModalOpen}

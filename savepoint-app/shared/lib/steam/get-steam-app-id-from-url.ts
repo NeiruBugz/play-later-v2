@@ -1,5 +1,4 @@
 import { z } from "zod";
-
 const steamAppUrlSchema = z
   .string()
   .url()
@@ -11,15 +10,12 @@ const steamAppUrlSchema = z
     if (match?.[1] == null) {
       throw new Error("Could not extract app ID from URL");
     }
-
     const appId = parseInt(match[1], 10);
     if (isNaN(appId)) {
       throw new Error("Extracted app ID is not a valid number");
     }
-
     return appId;
   });
-
 export function getSteamAppIdFromUrl(url?: string) {
   const result = steamAppUrlSchema.safeParse(url);
   return result.success ? result.data : undefined;

@@ -1,13 +1,10 @@
 import type { TimesToBeatData } from "@/shared/types/game";
-
 interface TimesToBeatSectionProps {
   timesToBeat?: TimesToBeatData;
 }
-
 export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
   const mainStory = timesToBeat?.mainStory;
   const completionist = timesToBeat?.completionist;
-
   return (
     <section className="space-y-2" aria-labelledby="times-to-beat-heading">
       <h2 id="times-to-beat-heading" className="text-lg font-semibold">

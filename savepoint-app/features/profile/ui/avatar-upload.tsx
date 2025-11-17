@@ -1,23 +1,18 @@
 "use client";
-
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
-
 import { uploadAvatar } from "@/features/profile/server-actions";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
-
 interface AvatarUploadProps {
   currentAvatar?: string | null;
   onUploadSuccess?: (url: string) => void;
   onUploadError?: (error: string) => void;
   onUploadStateChange?: (isUploading: boolean) => void;
 }
-
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-
 export const AvatarUpload = ({
   currentAvatar,
   onUploadSuccess,
@@ -30,19 +25,15 @@ export const AvatarUpload = ({
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const validateFile = (file: File): string | null => {
     if (file.size > MAX_FILE_SIZE) {
       return "File size exceeds 4MB. Please upload a smaller image.";
     }
-
     if (!ALLOWED_TYPES.includes(file.type)) {
       return "Unsupported file format. Please upload a JPG, PNG, GIF, or WebP image.";
     }
-
     return null;
   };
-
   const handleFileSelect = (file: File) => {
     const validationError = validateFile(file);
     if (validationError) {
@@ -50,48 +41,38 @@ export const AvatarUpload = ({
       onUploadError?.(validationError);
       return;
     }
-
     setError(null);
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
-
   const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       handleFileSelect(file);
     }
   };
-
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
-
   const handleDragLeave = () => {
     setIsDragging(false);
   };
-
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-
     const file = e.dataTransfer.files?.[0];
     if (file) {
       handleFileSelect(file);
     }
   };
-
   const handleUpload = async () => {
     if (!selectedFile) return;
-
     setIsUploading(true);
     onUploadStateChange?.(true);
     setError(null);
-
     try {
       const result = await uploadAvatar({ file: selectedFile });
-
       if (result.success) {
         onUploadSuccess?.(result.data.url);
         setSelectedFile(null);
@@ -114,7 +95,6 @@ export const AvatarUpload = ({
       onUploadStateChange?.(false);
     }
   };
-
   const handleCancel = () => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -123,16 +103,13 @@ export const AvatarUpload = ({
     setPreviewUrl(null);
     setError(null);
   };
-
   const handleClickToSelect = () => {
     if (!isUploading) {
       fileInputRef.current?.click();
     }
   };
-
   const displayImageUrl = previewUrl || currentAvatar;
   const hasImage = !!displayImageUrl;
-
   return (
     <div className="space-y-4">
       <div
@@ -193,7 +170,6 @@ export const AvatarUpload = ({
           </div>
         )}
       </div>
-
       <input
         ref={fileInputRef}
         type="file"
@@ -203,7 +179,6 @@ export const AvatarUpload = ({
         disabled={isUploading}
         aria-label="File input for avatar upload"
       />
-
       {error && (
         <div
           className="border-destructive/30 bg-destructive/10 flex items-start gap-2 rounded-md border p-3"
@@ -213,7 +188,6 @@ export const AvatarUpload = ({
           <p className="text-destructive text-sm">{error}</p>
         </div>
       )}
-
       {selectedFile && (
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button
@@ -237,7 +211,6 @@ export const AvatarUpload = ({
           </Button>
         </div>
       )}
-
       {isUploading && (
         <div className="space-y-2">
           <div className="bg-muted h-2 w-full overflow-hidden rounded-full">

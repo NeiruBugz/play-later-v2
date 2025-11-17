@@ -1,9 +1,7 @@
 import { PropsWithChildren } from "react";
-
 import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { Header } from "@/shared/components/header";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
-
 export default async function GameDetailsLayout({
   children,
 }: PropsWithChildren) {

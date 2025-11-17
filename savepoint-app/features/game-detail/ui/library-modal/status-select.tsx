@@ -1,11 +1,9 @@
 "use client";
-
 import type {
   ControllerRenderProps,
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-
 import {
   FormControl,
   FormDescription,
@@ -20,15 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-
-import { LIBRARY_STATUS_CONFIG } from "@/shared/lib";
-
+import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
 type StatusSelectProps<T extends FieldValues = FieldValues> = {
   field: ControllerRenderProps<T, FieldPath<T>>;
   description?: string;
   className?: string;
 };
-
 export const StatusSelect = <T extends FieldValues = FieldValues>({
   field,
   description = "Select your current journey status with this game",

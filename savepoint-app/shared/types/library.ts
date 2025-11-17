@@ -1,11 +1,5 @@
-/**
- * Shared library types used across the application
- */
 
-/**
- * Library item with associated game details and count
- * Used by API responses, handlers, and client-side hooks
- */
+
 export interface LibraryItemWithGameAndCount {
   id: number;
   userId: string;

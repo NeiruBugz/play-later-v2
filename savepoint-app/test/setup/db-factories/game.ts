@@ -1,10 +1,7 @@
 import { type Game, type LibraryItem, type Review } from "@prisma/client";
-
 import { getTestDatabase } from "../database";
-
 // Counter to ensure unique slugs even when created concurrently
 let gameCounter = 0;
-
 export type GameFactoryOptions = {
   title?: string;
   slug?: string;
@@ -14,7 +11,6 @@ export type GameFactoryOptions = {
   steamAppId?: number;
   releaseDate?: Date;
 };
-
 export const createGame = async (
   options: GameFactoryOptions = {}
 ): Promise<Game> => {
@@ -22,7 +18,6 @@ export const createGame = async (
   const uniqueId = ++gameCounter;
   const timestamp = Date.now();
   const randomId = Math.floor(Math.random() * 1000000);
-
   const defaultData = {
     title: `Test Game ${timestamp}`,
     slug: options.slug || `test-game-${timestamp}-${uniqueId}`,
@@ -31,12 +26,10 @@ export const createGame = async (
     steamAppId: randomId,
     ...options,
   };
-
   return getTestDatabase().game.create({
     data: defaultData,
   });
 };
-
 export type LibraryItemFactoryOptions = {
   userId: string;
   gameId: string;
@@ -53,7 +46,6 @@ export type LibraryItemFactoryOptions = {
   startedAt?: Date;
   completedAt?: Date;
 };
-
 export const createLibraryItem = async (
   options: LibraryItemFactoryOptions
 ): Promise<LibraryItem> => {
@@ -63,7 +55,6 @@ export const createLibraryItem = async (
     acquisitionType: "DIGITAL" as const,
     ...options,
   };
-
   // Validate date constraints to match database check constraints
   // Only validate that completedAt is not before startedAt
   // Users can backdate startedAt and completedAt to dates before createdAt
@@ -77,12 +68,10 @@ export const createLibraryItem = async (
         `This violates the database constraint "completedAt_after_startedAt".`
     );
   }
-
   return getTestDatabase().libraryItem.create({
     data: defaultData,
   });
 };
-
 export type ReviewFactoryOptions = {
   userId: string;
   gameId: string;
@@ -90,7 +79,6 @@ export type ReviewFactoryOptions = {
   content?: string;
   completedOn?: string;
 };
-
 export const createReview = async (
   options: ReviewFactoryOptions
 ): Promise<Review> => {
@@ -100,7 +88,6 @@ export const createReview = async (
     completedOn: "PC",
     ...options,
   };
-
   return getTestDatabase().review.create({
     data: defaultData,
   });

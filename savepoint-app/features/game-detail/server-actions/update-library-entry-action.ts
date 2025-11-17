@@ -1,19 +1,13 @@
 "use server";
-
 import { LibraryService } from "@/data-access-layer/services";
 import type { LibraryItem } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-
 import { createServerAction } from "@/shared/lib";
-
 import {
   UpdateLibraryEntrySchema,
   type UpdateLibraryEntryInput,
 } from "../schemas";
 
-/**
- * Server action: Update a specific library entry by library item ID
- */
 export const updateLibraryEntryAction = createServerAction<
   UpdateLibraryEntryInput,
   LibraryItem
@@ -23,12 +17,10 @@ export const updateLibraryEntryAction = createServerAction<
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
     const { libraryItemId, status, startedAt, completedAt } = input;
-
     logger.info(
       { libraryItemId, status, userId },
       "Updating library entry"
     );
-
     const libraryService = new LibraryService();
     const updateResult = await libraryService.updateLibraryItem({
       userId: userId!,
@@ -39,7 +31,6 @@ export const updateLibraryEntryAction = createServerAction<
         ...(completedAt !== undefined && { completedAt }),
       },
     });
-
     if (!updateResult.success) {
       logger.error(
         { error: updateResult.error, userId, libraryItemId },
@@ -50,9 +41,7 @@ export const updateLibraryEntryAction = createServerAction<
         error: "Failed to update library entry",
       };
     }
-
     revalidatePath("/games/[slug]", "page");
-
     logger.info(
       {
         userId,
@@ -61,7 +50,6 @@ export const updateLibraryEntryAction = createServerAction<
       },
       "Library entry updated successfully"
     );
-
     return {
       success: true,
       data: updateResult.data,

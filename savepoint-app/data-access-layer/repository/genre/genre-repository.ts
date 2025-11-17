@@ -1,5 +1,4 @@
 import "server-only";
-
 import {
   repositoryError,
   RepositoryErrorCode,
@@ -7,12 +6,8 @@ import {
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import type { Genre as PrismaGenre } from "@prisma/client";
+import { prisma } from "@/shared/lib/app/db";
 
-import { prisma } from "@/shared/lib";
-
-/**
- * IGDB Genre type from their API
- */
 type IgdbGenre = {
   id: number;
   name?: string;
@@ -20,10 +15,6 @@ type IgdbGenre = {
   checksum?: string;
 };
 
-/**
- * Upserts a single genre from IGDB data
- * Creates a new genre if it doesn't exist, updates it if it does
- */
 export async function upsertGenre(
   igdbGenre: IgdbGenre
 ): Promise<RepositoryResult<PrismaGenre>> {
@@ -42,7 +33,6 @@ export async function upsertGenre(
         checksum: igdbGenre.checksum ?? null,
       },
     });
-
     return repositorySuccess(genre);
   } catch (error) {
     return repositoryError(
@@ -52,11 +42,6 @@ export async function upsertGenre(
   }
 }
 
-/**
- * Upserts multiple genres from IGDB data
- * Uses a transaction to batch all upsert operations for better performance
- * Reduces database round trips from N queries to 1 transaction
- */
 export async function upsertGenres(
   igdbGenres: IgdbGenre[]
 ): Promise<RepositoryResult<PrismaGenre[]>> {
@@ -81,7 +66,6 @@ export async function upsertGenres(
         })
       )
     );
-
     return repositorySuccess(genres);
   } catch (error) {
     return repositoryError(
@@ -91,10 +75,6 @@ export async function upsertGenres(
   }
 }
 
-/**
- * Finds a genre by its IGDB ID
- * Returns null if not found
- */
 export async function findGenreByIgdbId(
   igdbId: number
 ): Promise<RepositoryResult<PrismaGenre | null>> {
@@ -102,7 +82,6 @@ export async function findGenreByIgdbId(
     const genre = await prisma.genre.findUnique({
       where: { igdbId },
     });
-
     return repositorySuccess(genre);
   } catch (error) {
     return repositoryError(

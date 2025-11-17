@@ -1,33 +1,27 @@
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { type Metadata, type Viewport } from "next";
-
 import { LoadingScreen } from "@/shared/components/loading-screen";
 import { cn } from "@/shared/lib";
 import { Providers } from "@/shared/providers";
-
 import "@/shared/globals.css";
-
 import {
   DM_Mono as FontMono,
   Roboto as FontSans,
   Playfair_Display as FontSerif,
 } from "next/font/google";
 import { Suspense } from "react";
-
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
   preload: true,
 });
-
 const fontSerif = FontSerif({
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
   preload: true,
 });
-
 const fontMono = FontMono({
   subsets: ["latin"],
   variable: "--font-mono",
@@ -35,7 +29,6 @@ const fontMono = FontMono({
   preload: true,
   weight: ["300", "400", "500"],
 });
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -46,7 +39,6 @@ export const viewport: Viewport = {
   ],
   colorScheme: "light dark",
 };
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://savepoint-app.vercel.app"),
   title: "SavePoint - Your Personal Gaming Library & Journal",
@@ -101,7 +93,6 @@ export const metadata: Metadata = {
   },
   category: "entertainment",
 };
-
 export default function RootLayout({
   children,
 }: {

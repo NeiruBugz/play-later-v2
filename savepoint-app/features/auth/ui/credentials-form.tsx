@@ -1,13 +1,10 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-
 import {
   signInSchema,
   signUpSchema,
@@ -15,14 +12,12 @@ import {
 } from "../lib/validation";
 import { signInAction } from "../server-actions/sign-in";
 import { signUpAction } from "../server-actions/sign-up";
-
 export function CredentialsForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const schema = useMemo(
     () => (mode === "signup" ? signUpSchema : signInSchema),
     [mode]
   );
-
   const {
     register,
     handleSubmit,
@@ -41,7 +36,6 @@ export function CredentialsForm() {
     },
     shouldUnregister: true,
   });
-
   const toggleMode = useCallback(() => {
     clearErrors();
     setMode((prevMode) => {
@@ -52,29 +46,24 @@ export function CredentialsForm() {
       return nextMode;
     });
   }, [clearErrors, getValues, reset]);
-
   useEffect(() => {
     if (mode === "signup") {
       trigger("password");
     }
   }, [mode, trigger]);
-
   const onSubmit = handleSubmit(async (values) => {
     clearErrors("root");
-
     const trimmedName = values.name?.trim();
     const payload = {
       email: values.email.trim(),
       password: values.password,
       ...(trimmedName && { name: trimmedName }),
     };
-
     try {
       const result =
         mode === "signup"
           ? await signUpAction(payload)
           : await signInAction(payload);
-
       if (!result.success) {
         setError("root", {
           type: "server",
@@ -88,11 +77,9 @@ export function CredentialsForm() {
       });
     }
   });
-
   const passwordHint =
     errors.password?.message ??
     (mode === "signup" ? "Must be at least 8 characters" : undefined);
-
   return (
     <div>
       {errors.root?.message && (
@@ -100,7 +87,6 @@ export function CredentialsForm() {
           {errors.root.message}
         </div>
       )}
-
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         {mode === "signup" && (
           <div className="space-y-2">
@@ -128,7 +114,6 @@ export function CredentialsForm() {
             )}
           </div>
         )}
-
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -151,7 +136,6 @@ export function CredentialsForm() {
             </p>
           )}
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input
@@ -175,7 +159,6 @@ export function CredentialsForm() {
             </p>
           ) : null}
         </div>
-
         <Button
           type="submit"
           className="w-full cursor-pointer"
@@ -188,7 +171,6 @@ export function CredentialsForm() {
               : "Sign Up"}
         </Button>
       </form>
-
       <div className="mt-6 text-center text-sm">
         {mode === "signin" ? (
           <p>

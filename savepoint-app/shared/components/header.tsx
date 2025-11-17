@@ -1,5 +1,4 @@
 import Link from "next/link";
-
 export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   if (isAuthorised) {
     return (
@@ -38,7 +37,6 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
       </header>
     );
   }
-
   return (
     <header className="border-border container mx-auto border-b py-4">
       <div className="flex items-center justify-between">

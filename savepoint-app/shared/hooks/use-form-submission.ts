@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
-
 type ActionResult<T = unknown> =
   | { success: true; data: T }
   | { success: false; error: string };
-
 type UseFormSubmissionOptions<TInput, TOutput> = {
   action: (input: TInput) => Promise<ActionResult<TOutput>>;
   onSuccess?: (data: TOutput) => void;
@@ -13,40 +11,11 @@ type UseFormSubmissionOptions<TInput, TOutput> = {
   errorMessage?: string;
   onError?: (error: string) => void;
 };
-
 type UseFormSubmissionReturn<TInput> = {
   isSubmitting: boolean;
   handleSubmit: (data: TInput) => Promise<void>;
 };
 
-/**
- * Reusable hook for handling form submissions with server actions
- *
- * Provides:
- * - Loading state management (isSubmitting)
- * - Automatic error handling with toast notifications
- * - Success callbacks and toast notifications
- * - Try-catch error boundary for unexpected errors
- *
- * @example
- * ```tsx
- * const { isSubmitting, handleSubmit } = useFormSubmission({
- *   action: addToLibraryAction,
- *   onSuccess: () => {
- *     form.reset();
- *     onClose();
- *   },
- *   successMessage: "Game added to library",
- *   successDescription: (data) => `${data.gameTitle} has been added`,
- * });
- *
- * <form onSubmit={form.handleSubmit(handleSubmit)}>
- *   <Button type="submit" disabled={isSubmitting}>
- *     {isSubmitting ? "Adding..." : "Add to Library"}
- *   </Button>
- * </form>
- * ```
- */
 export function useFormSubmission<TInput, TOutput = unknown>({
   action,
   onSuccess,
@@ -56,28 +25,22 @@ export function useFormSubmission<TInput, TOutput = unknown>({
   onError,
 }: UseFormSubmissionOptions<TInput, TOutput>): UseFormSubmissionReturn<TInput> {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleSubmit = async (data: TInput) => {
     try {
       setIsSubmitting(true);
-
       const result = await action(data);
-
       if (result.success) {
         const message =
           typeof successMessage === "function"
             ? successMessage(result.data)
             : successMessage;
-
         const description =
           typeof successDescription === "function"
             ? successDescription(result.data)
             : successDescription;
-
         if (message) {
           toast.success(message, { description });
         }
-
         onSuccess?.(result.data);
       } else {
         toast.error(errorMessage, { description: result.error });
@@ -92,7 +55,6 @@ export function useFormSubmission<TInput, TOutput = unknown>({
       setIsSubmitting(false);
     }
   };
-
   return {
     isSubmitting,
     handleSubmit,

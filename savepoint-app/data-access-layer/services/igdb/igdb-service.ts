@@ -1,6 +1,13 @@
 import { env } from "@/env.mjs";
-
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
+import {
+  IGDB_ARTWORK_LIMIT,
+  IGDB_PLATFORM_SEARCH_LIMIT,
+  IGDB_SCREENSHOT_LIMIT,
+  IGDB_SINGLE_RESULT_LIMIT,
+  SECONDS_PER_HOUR,
+  TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS,
+} from "@/shared/constants";
 import {
   createLogger,
   getTimeStamp,
@@ -14,7 +21,6 @@ import {
   TwitchTokenResponse,
   type SearchResponse,
 } from "@/shared/types";
-
 import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import {
   ALLOWED_FRANCHISE_GAME_CATEGORIES,
@@ -64,26 +70,22 @@ import type {
   UpcomingGamingEventsResult,
   UpcomingReleasesResult,
 } from "./types";
-
 export class IgdbService extends BaseService implements IgdbServiceInterface {
   private token: TwitchTokenResponse | null = null;
   private tokenExpiry: number = 0;
   private queryBuilder: QueryBuilder;
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "IgdbService" });
-
   constructor() {
     super();
     this.queryBuilder = new QueryBuilder();
     this.logger.debug("IgdbService initialized");
   }
-
   private async requestTwitchToken() {
     try {
       this.logger.debug("Requesting new Twitch access token");
       const res = await fetch(TOKEN_URL, {
         method: "POST",
       });
-
       if (!res.ok) {
         this.logger.error(
           { status: res.status, statusText: res.statusText },
@@ -93,9 +95,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
       const token = (await res.json()) as unknown as TwitchTokenResponse;
       this.token = token;
-      const SAFETY_MARGIN_SECONDS = 60;
       this.tokenExpiry =
-        getTimeStamp() + token.expires_in - SAFETY_MARGIN_SECONDS;
+        getTimeStamp() + token.expires_in - TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS;
       this.logger.info(
         { expiresIn: token.expires_in },
         "Twitch access token acquired"
@@ -106,24 +107,19 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       this.handleError(thrown);
     }
   }
-
   private async getToken() {
     if (this.token && getTimeStamp() < this.tokenExpiry) {
       return this.token.access_token;
     }
-
     const token = await this.requestTwitchToken();
     if (token) {
       this.token = token;
-      const SAFETY_MARGIN_SECONDS = 60;
       this.tokenExpiry =
-        getTimeStamp() + token.expires_in - SAFETY_MARGIN_SECONDS;
+        getTimeStamp() + token.expires_in - TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS;
       return token.access_token;
     }
-
     return null;
   }
-
   private async makeRequest<T>(
     options: RequestOptions
   ): Promise<T | undefined> {
@@ -133,13 +129,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Making IGDB API request"
       );
       const accessToken = await this.getToken();
-
       if (accessToken === undefined) {
         this.logger.error("No valid access token available for IGDB request");
         this.handleError(new Error("Unauthorized: No valid token available."));
         return undefined;
       }
-
       const response = await fetch(`${API_URL}${options.resource}`, {
         headers: {
           Accept: "application/json",
@@ -149,7 +143,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         method: "POST",
         body: options.body,
       });
-
       if (!response.ok) {
         this.logger.error(
           {
@@ -163,7 +156,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
         );
       }
-
       this.logger.debug(
         { resource: options.resource, status: response.status },
         "IGDB API request successful"
@@ -178,7 +170,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return undefined;
     }
   }
-
   private buildSearchFilterConditions(
     fields: Record<string, string | undefined>
   ): string {
@@ -190,7 +181,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       })
       .join(" & ");
   }
-
   async searchGamesByName(
     params: GameSearchParams
   ): Promise<ServiceResult<GameSearchResult>> {
@@ -202,14 +192,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const fields = params.fields ?? {};
       const filterConditions = this.buildSearchFilterConditions(fields);
       const filters = filterConditions ? ` & ${filterConditions}` : "";
       const normalizedSearchQuery = normalizeGameTitle(
         normalizeString(params.name)
       );
-
       this.logger.info(
         {
           searchQuery: params.name,
@@ -218,20 +206,17 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         },
         "Searching games by name"
       );
-
       const gameTypeFilter = `game_type = (${ALLOWED_GAME_CATEGORIES.join(",")})`;
       const baseConditions = `cover.image_id != null & ${gameTypeFilter}`;
       const whereClause = filters
         ? `${baseConditions} & ${filters}`
         : baseConditions;
-
       this.logger.debug(
         {
           whereClause,
         },
         "search query filters"
       );
-
       const queryBuilder = this.queryBuilder
         .fields([
           "name",
@@ -245,18 +230,14 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .where(whereClause)
         .search(normalizedSearchQuery)
         .limit(SEARCH_RESULTS_LIMIT);
-
       if (params.offset && params.offset > 0) {
         queryBuilder.offset(params.offset);
       }
-
       const query = queryBuilder.build();
-
       const games = await this.makeRequest<SearchResponse[]>({
         body: query,
         resource: "/games",
       });
-
       if (!games) {
         this.logger.warn(
           { searchQuery: params.name },
@@ -264,12 +245,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
         return this.error("Failed to find games", ServiceErrorCode.NOT_FOUND);
       }
-
       this.logger.info(
         { searchQuery: params.name, resultCount: games.length },
         "Game search completed"
       );
-
       return this.success({
         games,
         count: games.length,
@@ -282,7 +261,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to find games");
     }
   }
-
   async getGameDetails(
     params: GameDetailsParams
   ): Promise<ServiceResult<GameDetailsResult>> {
@@ -297,11 +275,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { gameId } = params;
-
       this.logger.info({ gameId }, "Fetching game details");
-
       const query = this.queryBuilder
         .fields([
           "name",
@@ -335,14 +310,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           "game_type.type",
         ])
         .where(`id = (${gameId})`)
-        .limit(1)
+        .limit(IGDB_SINGLE_RESULT_LIMIT)
         .build();
-
       const resultGame = await this.makeRequest<FullGameInfoResponse[]>({
         body: query,
         resource: "/games",
       });
-
       if (resultGame && resultGame[0]) {
         this.logger.info(
           { gameId, gameName: resultGame[0].name },
@@ -363,7 +336,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game details");
     }
   }
-
   async getGameDetailsBySlug(
     params: GetGameDetailsBySlugParams
   ): Promise<ServiceResult<GameDetailsBySlugResult>> {
@@ -378,11 +350,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { slug } = params;
-
       this.logger.info({ slug }, "Fetching game details by slug");
-
       const query = this.queryBuilder
         .fields([
           "name",
@@ -419,24 +388,20 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           "game_type",
         ])
         .where(`slug = "${slug}"`)
-        .limit(1)
+        .limit(IGDB_SINGLE_RESULT_LIMIT)
         .build();
-
       const resultGame = await this.makeRequest<FullGameInfoResponse[]>({
         body: query,
         resource: "/games",
       });
-
       if (!resultGame || resultGame.length === 0) {
         this.logger.warn({ slug }, "Game not found by slug");
         return this.error("Game not found", ServiceErrorCode.NOT_FOUND);
       }
-
       this.logger.info(
         { slug, gameId: resultGame[0].id, gameName: resultGame[0].name },
         "Game details fetched successfully by slug"
       );
-
       return this.success({
         game: resultGame[0],
       });
@@ -448,25 +413,21 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game by slug");
     }
   }
-
   async getPlatforms(): Promise<ServiceResult<PlatformsResult>> {
     try {
       const query = this.queryBuilder.fields(["name"]).build();
-
       const platforms = await this.makeRequest<
         Array<{ id: number; name: string }>
       >({
         body: query,
         resource: "/platforms",
       });
-
       if (!platforms) {
         return this.error(
           "Failed to fetch platforms",
           ServiceErrorCode.NOT_FOUND
         );
       }
-
       return this.success({
         platforms,
       });
@@ -474,7 +435,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch platforms");
     }
   }
-
   async getGameBySteamAppId(
     params: GetGameBySteamAppIdParams
   ): Promise<ServiceResult<GameBySteamAppIdResult>> {
@@ -489,27 +449,22 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { steamAppId } = params;
-
       this.logger.info({ steamAppId }, "Looking up game by Steam app ID");
-
       const steamUrl = `https://store.steampowered.com/app/${steamAppId}`;
       const query = new QueryBuilder()
         .fields(["name"])
         .where(
           `external_games.category = 1 & external_games.url = "${steamUrl}"`
         )
-        .limit(1)
+        .limit(IGDB_SINGLE_RESULT_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{ id: number; name: string }>
       >({
         body: query,
         resource: "/games",
       });
-
       if (!response || response.length === 0) {
         this.logger.warn({ steamAppId }, "No IGDB game found for Steam app ID");
         return this.error(
@@ -517,12 +472,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.NOT_FOUND
         );
       }
-
       this.logger.info(
         { steamAppId, gameId: response[0].id, gameName: response[0].name },
         "Game found by Steam app ID"
       );
-
       return this.success({
         game: response[0],
       });
@@ -534,11 +487,9 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game by Steam app ID");
     }
   }
-
   async getTopRatedGames(): Promise<ServiceResult<TopRatedGamesResult>> {
     try {
       this.logger.info("Fetching top-rated games");
-
       const query = new QueryBuilder()
         .fields(["name", "cover.image_id", "aggregated_rating"])
         .where(
@@ -547,7 +498,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .sort("aggregated_rating", "desc")
         .limit(TOP_RATED_GAMES_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -561,7 +511,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/games",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch top-rated games from IGDB API");
         return this.error(
@@ -569,19 +518,16 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0) {
         this.logger.info("No top-rated games found (empty response)");
         return this.success({
           games: [],
         });
       }
-
       this.logger.info(
         { count: response.length },
         "Top-rated games fetched successfully"
       );
-
       return this.success({
         games: response,
       });
@@ -590,7 +536,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch top-rated games");
     }
   }
-
   async searchPlatformByName(
     params: SearchPlatformByNameParams
   ): Promise<ServiceResult<PlatformSearchResult>> {
@@ -605,17 +550,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { platformName } = params;
-
       this.logger.info({ platformName }, "Searching platforms by name");
-
       const query = new QueryBuilder()
         .fields(["id", "name", "abbreviation"])
         .search(platformName)
-        .limit(10)
+        .limit(IGDB_PLATFORM_SEARCH_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -626,7 +567,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/platforms",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to search platforms from IGDB API");
         return this.error(
@@ -634,7 +574,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0) {
         this.logger.warn(
           { platformName },
@@ -645,12 +584,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.NOT_FOUND
         );
       }
-
       this.logger.info(
         { platformName, count: response.length },
         "Platforms found successfully"
       );
-
       return this.success({
         platforms: response,
       });
@@ -662,7 +599,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to search platforms");
     }
   }
-
   async getGameScreenshots(
     params: GetGameScreenshotsParams
   ): Promise<ServiceResult<GameScreenshotsResult>> {
@@ -677,17 +613,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { gameId } = params;
-
       this.logger.info({ gameId }, "Fetching game screenshots");
-
       const query = new QueryBuilder()
         .fields(["id", "game", "image_id", "url", "width", "height"])
         .where(`game = ${gameId}`)
-        .limit(50)
+        .limit(IGDB_SCREENSHOT_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -701,7 +633,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/screenshots",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch game screenshots from IGDB API");
         return this.error(
@@ -709,19 +640,16 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0) {
         this.logger.info({ gameId }, "No screenshots found for game");
         return this.success({
           screenshots: [],
         });
       }
-
       this.logger.info(
         { gameId, count: response.length },
         "Successfully fetched game screenshots"
       );
-
       return this.success({
         screenshots: response,
       });
@@ -733,7 +661,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game screenshots");
     }
   }
-
   async getGameAggregatedRating(
     params: GetGameAggregatedRatingParams
   ): Promise<ServiceResult<GameAggregatedRatingResult>> {
@@ -748,17 +675,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { gameId } = params;
-
       this.logger.info({ gameId }, "Fetching game aggregated rating");
-
       const query = new QueryBuilder()
         .fields(["id", "aggregated_rating", "aggregated_rating_count"])
         .where(`id = ${gameId}`)
-        .limit(1)
+        .limit(IGDB_SINGLE_RESULT_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -769,7 +692,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/games",
       });
-
       if (response === undefined) {
         this.logger.error(
           "Failed to fetch game aggregated rating from IGDB API"
@@ -779,7 +701,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0) {
         this.logger.warn({ gameId }, "No game found with ID");
         return this.error(
@@ -787,7 +708,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.NOT_FOUND
         );
       }
-
       const game = response[0];
       this.logger.info(
         {
@@ -797,7 +717,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         },
         "Successfully fetched game aggregated rating"
       );
-
       return this.success({
         gameId: game.id,
         rating: game.aggregated_rating,
@@ -811,7 +730,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game aggregated rating");
     }
   }
-
   async getSimilarGames(
     params: GetSimilarGamesParams
   ): Promise<ServiceResult<SimilarGamesResult>> {
@@ -826,16 +744,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { gameId } = params;
-
       this.logger.info({ gameId }, "Fetching similar games");
-
       const query = new QueryBuilder()
         .fields(["similar_games.*"])
         .where(`id = ${gameId}`)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -845,7 +759,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/games",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch similar games from IGDB API");
         return this.error(
@@ -853,19 +766,16 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0 || !response[0] || !response[0].similar_games) {
         this.logger.info({ gameId }, "No similar games found for game");
         return this.success({
           similarGames: [],
         });
       }
-
       this.logger.info(
         { gameId, count: response[0].similar_games.length },
         "Successfully fetched similar games"
       );
-
       return this.success({
         similarGames: response[0].similar_games,
       });
@@ -877,7 +787,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch similar games");
     }
   }
-
   async getGameGenres(
     params: GetGameGenresParams
   ): Promise<ServiceResult<GameGenresResult>> {
@@ -892,16 +801,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { gameId } = params;
-
       this.logger.info({ gameId }, "Fetching game genres");
-
       const query = new QueryBuilder()
         .fields(["genres.id", "genres.name"])
         .where(`id = ${gameId}`)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -911,7 +816,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/games",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch game genres from IGDB API");
         return this.error(
@@ -919,19 +823,16 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0 || !response[0] || !response[0].genres) {
         this.logger.info({ gameId }, "No genres found for game");
         return this.success({
           genres: [],
         });
       }
-
       this.logger.info(
         { gameId, count: response[0].genres.length },
         "Successfully fetched game genres"
       );
-
       return this.success({
         genres: response[0].genres,
       });
@@ -943,7 +844,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game genres");
     }
   }
-
   async getGameCompletionTimes(
     params: GetGameCompletionTimesParams
   ): Promise<ServiceResult<GameCompletionTimesResult>> {
@@ -958,11 +858,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { gameId } = params;
-
       this.logger.info({ gameId }, "Fetching game completion times");
-
       const query = new QueryBuilder()
         .fields([
           "completeness",
@@ -973,9 +870,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           "gameplay_main_extra",
         ])
         .where(`game = ${gameId}`)
-        .limit(1)
+        .limit(IGDB_SINGLE_RESULT_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -990,7 +886,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/game_time_to_beats",
       });
-
       if (response === undefined) {
         this.logger.error(
           "Failed to fetch game completion times from IGDB API"
@@ -1000,19 +895,16 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (!response || response.length === 0) {
         this.logger.info({ gameId }, "No completion time data found for game");
         return this.success({
           completionTimes: null,
         });
       }
-
       this.logger.info(
         { gameId, hasData: true },
         "Successfully fetched game completion times"
       );
-
       return this.success({
         completionTimes: response[0],
       });
@@ -1024,7 +916,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game completion times");
     }
   }
-
   async getGameExpansions(
     params: GetGameExpansionsParams
   ): Promise<ServiceResult<GameExpansionsResult>> {
@@ -1039,11 +930,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { gameId } = params;
-
       this.logger.info({ gameId }, "Fetching game expansions");
-
       const query = new QueryBuilder()
         .fields([
           "expansions",
@@ -1054,7 +942,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         ])
         .where(`id = ${gameId}`)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1081,7 +968,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/games",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch game expansions from IGDB API");
         return this.error(
@@ -1089,7 +975,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (
         !response ||
         response.length === 0 ||
@@ -1101,12 +986,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           expansions: [],
         });
       }
-
       this.logger.info(
         { gameId, count: response[0].expansions.length },
         "Successfully fetched game expansions"
       );
-
       return this.success({
         expansions: response[0].expansions,
       });
@@ -1118,7 +1001,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game expansions");
     }
   }
-
   async getFranchiseGames(
     params: GetFranchiseGamesParams
   ): Promise<ServiceResult<FranchiseGamesResult>> {
@@ -1133,7 +1015,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       if (!params.currentGameId || params.currentGameId <= 0) {
         this.logger.warn(
           { currentGameId: params.currentGameId },
@@ -1144,39 +1025,29 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { franchiseId, currentGameId } = params;
       const limit = params.limit ?? 20;
       const offset = params.offset ?? 0;
-
       this.logger.info(
         { franchiseId, currentGameId, limit, offset },
         "Fetching franchise games from IGDB"
       );
-
       const gameTypeFilter = `game_type = (${ALLOWED_FRANCHISE_GAME_CATEGORIES.join(",")})`;
       const whereClause = `franchises = [${franchiseId}] & id != ${currentGameId} & ${gameTypeFilter}`;
-
-      // Search for games where franchises array contains this franchise ID
-      // Using 'franchises' instead of 'franchise' because not all games have the franchise field set
       const gamesQuery = new QueryBuilder()
         .fields(["id", "name", "slug", "cover.image_id"])
         .where(whereClause)
         .limit(limit)
         .offset(offset)
         .build();
-
-      // Query for total count
       const countQuery = new QueryBuilder()
         .fields(["id"])
         .where(whereClause)
         .build();
-
       this.logger.info(
         { gamesQuery, countQuery, franchiseId },
         "IGDB franchise games queries"
       );
-
       const [gamesResponse, countResponse] = await Promise.all([
         this.makeRequest<
           Array<{
@@ -1196,7 +1067,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           resource: "/games",
         }),
       ]);
-
       if (gamesResponse === undefined || countResponse === undefined) {
         this.logger.error("Failed to fetch franchise games from IGDB API");
         return this.error(
@@ -1204,22 +1074,18 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       const total = countResponse?.length ?? 0;
       const games = gamesResponse ?? [];
-
       if (games.length === 0 && offset === 0) {
         this.logger.warn(
           { franchiseId, currentGameId },
           "No games found for franchise - this might indicate the franchise field is not properly linked in IGDB"
         );
       }
-
       this.logger.info(
         { franchiseId, gamesCount: games.length, total, offset, limit },
         "Franchise games fetched successfully"
       );
-
       return this.success({
         games,
         pagination: {
@@ -1237,7 +1103,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch franchise games");
     }
   }
-
   async getFranchiseDetails(
     params: GetFranchiseDetailsParams
   ): Promise<ServiceResult<FranchiseDetailsResult>> {
@@ -1252,17 +1117,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { franchiseId } = params;
-
       this.logger.info({ franchiseId }, "Fetching franchise details from IGDB");
-
       const query = new QueryBuilder()
         .fields(["id", "name"])
         .where(`id = ${franchiseId}`)
-        .limit(1)
+        .limit(IGDB_SINGLE_RESULT_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1272,17 +1133,14 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/franchises",
       });
-
       if (response === undefined || response.length === 0) {
         this.logger.warn({ franchiseId }, "Franchise not found in IGDB");
         return this.error("Franchise not found", ServiceErrorCode.NOT_FOUND);
       }
-
       this.logger.info(
         { franchiseId, franchiseName: response[0].name },
         "Franchise details fetched successfully"
       );
-
       return this.success({
         franchise: response[0],
       });
@@ -1294,7 +1152,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch franchise details");
     }
   }
-
   async getGameArtworks(
     params: GetGameArtworksParams
   ): Promise<ServiceResult<GameArtworksResult>> {
@@ -1309,11 +1166,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { gameId } = params;
-
       this.logger.info({ gameId }, "Fetching game artworks");
-
       const query = new QueryBuilder()
         .fields([
           "alpha_channel",
@@ -1326,9 +1180,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           "width",
         ])
         .where(`game = ${gameId}`)
-        .limit(50)
+        .limit(IGDB_ARTWORK_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1345,7 +1198,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/artworks",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch game artworks from IGDB API");
         return this.error(
@@ -1353,19 +1205,16 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0) {
         this.logger.info({ gameId }, "No artworks found for game");
         return this.success({
           artworks: [],
         });
       }
-
       this.logger.info(
         { gameId, count: response.length },
         "Successfully fetched game artworks"
       );
-
       return this.success({
         artworks: response,
       });
@@ -1377,7 +1226,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch game artworks");
     }
   }
-
   async getUpcomingReleasesByIds(
     params: GetUpcomingReleasesByIdsParams
   ): Promise<ServiceResult<UpcomingReleasesResult>> {
@@ -1389,7 +1237,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       if (params.ids.some((id) => !id || id <= 0)) {
         this.logger.warn({ ids: params.ids }, "Invalid game IDs provided");
         return this.error(
@@ -1397,12 +1244,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       this.logger.info(
         { ids: params.ids, count: params.ids.length },
         "Fetching upcoming releases"
       );
-
       const query = this.queryBuilder
         .fields([
           "name",
@@ -1414,7 +1259,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .sort("first_release_date", "asc")
         .where(`id = (${params.ids.join(",")})`)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1438,7 +1282,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/games",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch upcoming releases from IGDB API");
         return this.error(
@@ -1446,19 +1289,16 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0) {
         this.logger.info({ ids: params.ids }, "No upcoming releases found");
         return this.success({
           releases: [],
         });
       }
-
       this.logger.info(
         { ids: params.ids, count: response.length },
         "Successfully fetched upcoming releases"
       );
-
       return this.success({
         releases: response,
       });
@@ -1470,13 +1310,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch upcoming releases");
     }
   }
-
   async getUpcomingGamingEvents(): Promise<
     ServiceResult<UpcomingGamingEventsResult>
   > {
     try {
       this.logger.info("Fetching upcoming gaming events");
-
       const currentTimestamp = Math.floor(Date.now() / 1000);
       const query = new QueryBuilder()
         .fields([
@@ -1499,7 +1337,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         .sort("start_time", "asc")
         .limit(UPCOMING_EVENTS_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1522,7 +1359,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/events",
       });
-
       if (response === undefined) {
         this.logger.error(
           "Failed to fetch upcoming gaming events from IGDB API"
@@ -1532,19 +1368,16 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (response.length === 0) {
         this.logger.info("No upcoming gaming events found");
         return this.success({
           events: [],
         });
       }
-
       this.logger.info(
         { count: response.length },
         "Successfully fetched upcoming gaming events"
       );
-
       return this.success({
         events: response,
       });
@@ -1553,7 +1386,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch upcoming gaming events");
     }
   }
-
   async getEventLogo(
     params: GetEventLogoParams
   ): Promise<ServiceResult<EventLogoResult>> {
@@ -1568,17 +1400,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { logoId } = params;
-
       this.logger.info({ logoId }, "Fetching event logo");
-
       const query = new QueryBuilder()
         .fields(["id", "width", "height", "image_id"])
         .where(`id = ${logoId}`)
-        .limit(1)
+        .limit(IGDB_SINGLE_RESULT_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1590,7 +1418,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/event_logos",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch event logo from IGDB API");
         return this.error(
@@ -1598,7 +1425,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (!response || response.length === 0) {
         this.logger.warn({ logoId }, "Event logo not found");
         return this.error(
@@ -1606,12 +1432,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.NOT_FOUND
         );
       }
-
       this.logger.info(
         { logoId, imageId: response[0].image_id },
         "Successfully fetched event logo"
       );
-
       return this.success({
         logo: response[0],
       });
@@ -1623,7 +1447,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       return this.handleError(error, "Failed to fetch event logo");
     }
   }
-
   async getTimesToBeat(
     params: GetTimesToBeatParams
   ): Promise<ServiceResult<TimesToBeatResult>> {
@@ -1638,17 +1461,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
-
       const { igdbId } = params;
-
       this.logger.info({ igdbId }, "Fetching times to beat");
-
       const query = new QueryBuilder()
         .fields(["normally", "completely"])
         .where(`game_id = ${igdbId}`)
-        .limit(1)
+        .limit(IGDB_SINGLE_RESULT_LIMIT)
         .build();
-
       const response = await this.makeRequest<
         Array<{
           id: number;
@@ -1659,7 +1478,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         body: query,
         resource: "/game_time_to_beats",
       });
-
       if (response === undefined) {
         this.logger.error("Failed to fetch times to beat from IGDB API");
         return this.error(
@@ -1667,27 +1485,23 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (!response || response.length === 0) {
         this.logger.info({ igdbId }, "No times to beat data found for game");
         return this.success({
           timesToBeat: {},
         });
       }
-
       const data = response[0];
       const mainStory = data.normally
-        ? Math.round(data.normally / 3600)
+        ? Math.round(data.normally / SECONDS_PER_HOUR)
         : undefined;
       const completionist = data.completely
-        ? Math.round(data.completely / 3600)
+        ? Math.round(data.completely / SECONDS_PER_HOUR)
         : undefined;
-
       this.logger.info(
         { igdbId, mainStory, completionist },
         "Successfully fetched times to beat"
       );
-
       return this.success({
         timesToBeat: {
           mainStory,

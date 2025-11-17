@@ -35,7 +35,7 @@ const createMockSearchParams = (params: Record<string, string | null>) => {
           ][]
         )
       ).toString(),
-  } as URLSearchParams;
+  } as any; // Cast to any to avoid ReadonlyURLSearchParams type mismatch
 };
 
 describe("LibraryFilters", () => {

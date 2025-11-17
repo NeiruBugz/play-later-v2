@@ -9,13 +9,10 @@ import {
   getPlatformBadgeVariant,
   getPlatformIcon,
 } from "@/shared/lib/platform";
-
 const MAX_VISIBLE_PLATFORMS = 5;
-
 export const PlatformBadges = ({ platforms }: { platforms: string[] }) => {
   const visible = platforms.slice(0, MAX_VISIBLE_PLATFORMS);
   const remaining = platforms.slice(MAX_VISIBLE_PLATFORMS);
-
   return (
     <TooltipProvider>
       <div className="flex flex-wrap items-center gap-1.5">

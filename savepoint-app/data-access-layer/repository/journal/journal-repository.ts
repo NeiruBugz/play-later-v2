@@ -1,5 +1,4 @@
 import "server-only";
-
 import {
   repositoryError,
   RepositoryErrorCode,
@@ -7,19 +6,7 @@ import {
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import type { JournalEntry } from "@prisma/client";
-
-import { prisma } from "@/shared/lib";
-
-/**
- * Find journal entries for a specific game by game ID
- * Returns entries in reverse chronological order (newest first)
- *
- * @param params - Object containing gameId, userId, and optional limit
- * @param params.gameId - The database ID of the game
- * @param params.userId - The user ID to filter entries
- * @param params.limit - Maximum number of entries to return (default: 3)
- * @returns Repository result containing array of journal entries
- */
+import { prisma } from "@/shared/lib/app/db";
 export async function findJournalEntriesByGameId(params: {
   gameId: string;
   userId: string;
@@ -27,7 +14,6 @@ export async function findJournalEntriesByGameId(params: {
 }): Promise<RepositoryResult<JournalEntry[]>> {
   try {
     const { gameId, userId, limit = 3 } = params;
-
     const entries = await prisma.journalEntry.findMany({
       where: {
         gameId,
@@ -38,7 +24,6 @@ export async function findJournalEntriesByGameId(params: {
       },
       take: limit,
     });
-
     return repositorySuccess(entries);
   } catch (error) {
     return repositoryError(
@@ -47,15 +32,6 @@ export async function findJournalEntriesByGameId(params: {
     );
   }
 }
-
-/**
- * Count total journal entries for a specific game
- *
- * @param params - Object containing gameId and userId
- * @param params.gameId - The database ID of the game
- * @param params.userId - The user ID to filter entries
- * @returns Repository result containing the count of journal entries
- */
 export async function countJournalEntriesByGameId(params: {
   gameId: string;
   userId: string;
@@ -67,7 +43,6 @@ export async function countJournalEntriesByGameId(params: {
         userId: params.userId,
       },
     });
-
     return repositorySuccess(count);
   } catch (error) {
     return repositoryError(

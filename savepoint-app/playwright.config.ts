@@ -1,5 +1,4 @@
 import { defineConfig, devices } from "@playwright/test";
-
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -7,11 +6,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "github" : "html",
-
   // Global setup and teardown for database cleanup
   globalSetup: "./e2e/global-setup.ts",
   globalTeardown: "./e2e/global-teardown.ts",
-
   use: {
     baseURL: "http://localhost:6060",
     trace: "on-first-retry",

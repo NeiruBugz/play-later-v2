@@ -1,10 +1,8 @@
 import { Badge } from "@/shared/components/ui/badge";
-
 export const GenreBadges = ({ genres }: { genres?: string[] }) => {
   if (!genres || genres.length === 0) {
     return null;
   }
-
   return (
     <div
       className="flex flex-wrap items-center gap-1.5"

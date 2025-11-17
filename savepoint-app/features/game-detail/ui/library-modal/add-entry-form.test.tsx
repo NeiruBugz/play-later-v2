@@ -195,71 +195,40 @@ describe("AddEntryForm", () => {
   });
 
   describe("given form just rendered in add mode", () => {
-    it("should display status selector", async () => {
+    it("should display all required form fields", async () => {
       renderWithQueryClient(<AddEntryForm {...defaultProps} />);
 
       await waitFor(() => {
-        expect(elements.getStatusTrigger()).toBeInTheDocument();
+        expect(elements.getStatusTrigger()).toBeVisible();
+        expect(elements.getPlatformTrigger()).toBeVisible();
+        expect(elements.getStartedAtInput()).toBeVisible();
+        expect(elements.getCompletedAtInput()).toBeVisible();
+        expect(elements.getCancelButton()).toBeVisible();
+        expect(elements.getSubmitButton()).toBeVisible();
+        expect(elements.getFormDescription()).toBeVisible();
+        expect(elements.getEditModeInfo()).not.toBeInTheDocument();
       });
     });
 
-    it("should display form description", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(elements.getFormDescription()).toBeInTheDocument();
-      });
-    });
-
-    it("should display cancel button", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(elements.getCancelButton()).toBeInTheDocument();
-      });
-    });
-
-    it("should display 'Add to Library' submit button", async () => {
+    it("should display correct button text in add mode", async () => {
       renderWithQueryClient(<AddEntryForm {...defaultProps} />);
 
       await waitFor(() => {
         expect(elements.getSubmitButton()).toHaveTextContent("Add to Library");
       });
     });
-
-    it("should not display edit mode info message", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(elements.getEditModeInfo()).not.toBeInTheDocument();
-      });
-    });
   });
 
   describe("given form rendered in edit mode", () => {
-    it("should display 'Add Entry' submit button", async () => {
+    it("should display edit mode UI with correct button text and info message", async () => {
       renderWithQueryClient(<AddEntryForm {...defaultProps} isEditMode />);
 
       await waitFor(() => {
         expect(elements.getSubmitButton()).toHaveTextContent("Add Entry");
-      });
-    });
-
-    it("should display edit mode info message with game title", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} isEditMode />);
-
-      await waitFor(() => {
-        expect(elements.getEditModeInfo()).toBeInTheDocument();
+        expect(elements.getEditModeInfo()).toBeVisible();
         expect(
           screen.getByText(/The Legend of Zelda: Breath of the Wild/)
         ).toBeVisible();
-      });
-    });
-
-    it("should explain multiple platform use case", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} isEditMode />);
-
-      await waitFor(() => {
         expect(
           screen.getByText(/own the game on multiple platforms/)
         ).toBeVisible();
@@ -280,209 +249,36 @@ describe("AddEntryForm", () => {
     });
   });
 
-  describe("given date fields rendering (Slice 9)", () => {
-    it("should display 'Started At' date field with optional label", async () => {
+  describe("given date field interactions", () => {
+    it("should allow user to input and clear dates", async () => {
       renderWithQueryClient(<AddEntryForm {...defaultProps} />);
 
-      await waitFor(() => {
-        const label = screen.getByText(/started at \(optional\)/i);
-        expect(label).toBeVisible();
-      });
-    });
-
-    it("should display 'Completed At' date field with optional label", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await waitFor(() => {
-        const label = screen.getByText(/completed at \(optional\)/i);
-        expect(label).toBeVisible();
-      });
-    });
-
-    it("should display helper text for Started At field", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(elements.getStartedAtDescription()).toBeVisible();
-      });
-    });
-
-    it("should display helper text for Completed At field", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(elements.getCompletedAtDescription()).toBeVisible();
-      });
-    });
-
-    it("should render both date inputs as type='date'", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveAttribute("type", "date");
-        expect(elements.getCompletedAtInput()).toHaveAttribute("type", "date");
-      });
-    });
-
-    it("should render date fields with empty values initially", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("");
-        expect(elements.getCompletedAtInput()).toHaveValue("");
-      });
-    });
-  });
-
-  describe("given user fills date fields (Slice 9)", () => {
-    it("should allow user to set Started At date", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
+      expect(elements.getStartedAtInput()).toHaveValue("");
+      expect(elements.getCompletedAtInput()).toHaveValue("");
 
       await actions.typeStartedAtDate("2025-01-15");
-
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("2025-01-15");
-      });
-    });
-
-    it("should allow user to set Completed At date", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
       await actions.typeCompletedAtDate("2025-02-20");
 
       await waitFor(() => {
-        expect(elements.getCompletedAtInput()).toHaveValue("2025-02-20");
-      });
-    });
-
-    it("should allow user to set both dates", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await actions.typeStartedAtDate("2025-01-10");
-      await actions.typeCompletedAtDate("2025-01-25");
-
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("2025-01-10");
-        expect(elements.getCompletedAtInput()).toHaveValue("2025-01-25");
-      });
-    });
-
-    it("should allow user to clear Started At date", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await actions.typeStartedAtDate("2025-01-15");
-      await waitFor(() => {
         expect(elements.getStartedAtInput()).toHaveValue("2025-01-15");
+        expect(elements.getCompletedAtInput()).toHaveValue("2025-02-20");
       });
 
       await actions.clearStartedAtDate();
 
       await waitFor(() => {
         expect(elements.getStartedAtInput()).toHaveValue("");
-      });
-    });
-
-    it("should allow user to clear Completed At date", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await actions.typeCompletedAtDate("2025-02-20");
-      await waitFor(() => {
-        expect(elements.getCompletedAtInput()).toHaveValue("2025-02-20");
-      });
-
-      await actions.clearCompletedAtDate();
-
-      await waitFor(() => {
-        expect(elements.getCompletedAtInput()).toHaveValue("");
-      });
-    });
-  });
-
-  describe("given form submission with date fields (Slice 9)", () => {
-    it("should include date fields in form data when filled", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      // Fill form including dates
-      await actions.typeStartedAtDate("2025-01-15");
-      await actions.typeCompletedAtDate("2025-02-20");
-
-      // Verify dates are set in form
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("2025-01-15");
         expect(elements.getCompletedAtInput()).toHaveValue("2025-02-20");
       });
     });
 
-    it("should allow submitting form with startedAt date only", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await actions.typeStartedAtDate("2025-01-15");
-
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("2025-01-15");
-        expect(elements.getCompletedAtInput()).toHaveValue("");
-      });
-    });
-
-    it("should allow submitting form with completedAt date only", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await actions.typeCompletedAtDate("2025-02-20");
-
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("");
-        expect(elements.getCompletedAtInput()).toHaveValue("2025-02-20");
-      });
-    });
-
-    it("should allow submitting form with both date fields", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await actions.typeStartedAtDate("2025-01-10");
-      await actions.typeCompletedAtDate("2025-02-15");
-
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("2025-01-10");
-        expect(elements.getCompletedAtInput()).toHaveValue("2025-02-15");
-      });
-    });
-
-    it("should allow submitting form without any dates (optional behavior)", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      // Do not fill date fields - verify they remain empty
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("");
-        expect(elements.getCompletedAtInput()).toHaveValue("");
-      });
-    });
-
-    it("should handle clearing date after it was set", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
-
-      await actions.typeStartedAtDate("2025-01-15");
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("2025-01-15");
-      });
-
-      // Clear the date
-      await actions.clearStartedAtDate();
-
-      await waitFor(() => {
-        expect(elements.getStartedAtInput()).toHaveValue("");
-      });
-    });
-
-    it("should maintain date values when user interacts with other fields", async () => {
+    it("should maintain date values when interacting with other form fields", async () => {
       renderWithQueryClient(<AddEntryForm {...defaultProps} />);
 
       await actions.typeStartedAtDate("2025-01-15");
       await actions.typeCompletedAtDate("2025-02-20");
-
-      // Click on status dropdown (to check dates persist)
       await userEvent.click(elements.getStatusTrigger());
 
-      // Dates should still be set
       await waitFor(() => {
         expect(elements.getStartedAtInput()).toHaveValue("2025-01-15");
         expect(elements.getCompletedAtInput()).toHaveValue("2025-02-20");

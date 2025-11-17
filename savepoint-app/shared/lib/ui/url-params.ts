@@ -7,7 +7,6 @@ export type ListParams = {
   storefront?: string;
   status?: string;
 };
-
 export function parseListParams(input: URLSearchParams): ListParams {
   const page = Number(input.get("page") || 1);
   const search = input.get("search") || undefined;
@@ -16,10 +15,8 @@ export function parseListParams(input: URLSearchParams): ListParams {
   const platform = input.get("platform") || undefined;
   const storefront = input.get("storefront") || undefined;
   const status = input.get("status") || undefined;
-
   return { page, search, sort, order, platform, storefront, status };
 }
-
 export function updateListParams(
   current: URLSearchParams,
   updates: Partial<ListParams>

@@ -1,5 +1,4 @@
 import "server-only";
-
 import {
   repositoryError,
   RepositoryErrorCode,
@@ -7,12 +6,7 @@ import {
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import type { Platform as PrismaPlatform } from "@prisma/client";
-
-import { prisma } from "@/shared/lib";
-
-/**
- * IGDB Platform type from their API
- */
+import { prisma } from "@/shared/lib/app/db";
 type IgdbPlatform = {
   id: number;
   name?: string;
@@ -25,11 +19,6 @@ type IgdbPlatform = {
   platform_type?: number;
   checksum?: string;
 };
-
-/**
- * Upserts a single platform from IGDB data
- * Creates a new platform if it doesn't exist, updates it if it does
- */
 export async function upsertPlatform(
   igdbPlatform: IgdbPlatform
 ): Promise<RepositoryResult<PrismaPlatform>> {
@@ -58,7 +47,6 @@ export async function upsertPlatform(
         checksum: igdbPlatform.checksum ?? null,
       },
     });
-
     return repositorySuccess(platform);
   } catch (error) {
     return repositoryError(
@@ -67,18 +55,10 @@ export async function upsertPlatform(
     );
   }
 }
-
-/**
- * Upserts multiple platforms from IGDB data
- * Uses a transaction to batch all upsert operations for better performance
- * Reduces database round trips from N queries to 1 transaction
- */
 export async function upsertPlatforms(
   igdbPlatforms: IgdbPlatform[]
 ): Promise<RepositoryResult<PrismaPlatform[]>> {
   try {
-    // Use $transaction to batch all upserts into a single operation
-    // This is more efficient than Promise.all with individual queries
     const platforms = await prisma.$transaction(
       igdbPlatforms.map((p) =>
         prisma.platform.upsert({
@@ -107,7 +87,6 @@ export async function upsertPlatforms(
         })
       )
     );
-
     return repositorySuccess(platforms);
   } catch (error) {
     return repositoryError(
@@ -116,11 +95,6 @@ export async function upsertPlatforms(
     );
   }
 }
-
-/**
- * Finds a platform by its IGDB ID
- * Returns null if not found
- */
 export async function findPlatformByIgdbId(
   igdbId: number
 ): Promise<RepositoryResult<PrismaPlatform | null>> {
@@ -128,7 +102,6 @@ export async function findPlatformByIgdbId(
     const platform = await prisma.platform.findUnique({
       where: { igdbId },
     });
-
     return repositorySuccess(platform);
   } catch (error) {
     return repositoryError(
@@ -137,11 +110,6 @@ export async function findPlatformByIgdbId(
     );
   }
 }
-
-/**
- * Find platforms for a specific game
- * Returns platforms grouped into supported (linked via GamePlatform) and other platforms
- */
 export async function findPlatformsForGame(gameId: string): Promise<
   RepositoryResult<{
     supportedPlatforms: PrismaPlatform[];
@@ -158,19 +126,15 @@ export async function findPlatformsForGame(gameId: string): Promise<
         orderBy: { name: "asc" },
       }),
     ]);
-
     const supportedPlatformIds = new Set(
       gamePlatforms.map((gp) => gp.platformId)
     );
-
     const supportedPlatforms = allPlatforms.filter((platform) =>
       supportedPlatformIds.has(platform.id)
     );
-
     const otherPlatforms = allPlatforms.filter(
       (platform) => !supportedPlatformIds.has(platform.id)
     );
-
     return repositorySuccess({
       supportedPlatforms,
       otherPlatforms,

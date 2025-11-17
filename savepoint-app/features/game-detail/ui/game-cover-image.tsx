@@ -1,14 +1,11 @@
 import { Gamepad2 } from "lucide-react";
 import Image from "next/image";
-
 import { cn } from "@/shared/lib/ui";
-
 type GameCoverImageProps = {
   imageId?: string | null;
   gameTitle: string;
   className?: string;
 };
-
 export const GameCoverImage = ({
   imageId,
   gameTitle,
@@ -16,7 +13,6 @@ export const GameCoverImage = ({
 }: GameCoverImageProps) => {
   // Check if image ID exists and is not empty
   const hasCover = imageId && imageId.trim() !== "";
-
   // If no cover, show placeholder
   if (!hasCover) {
     return (
@@ -38,10 +34,8 @@ export const GameCoverImage = ({
       </div>
     );
   }
-
   // Build IGDB image URL from image_id
   const imageUrl = `https://images.igdb.com/igdb/image/upload/t_720p/${imageId}.jpg`;
-
   return (
     <div
       className={cn(

@@ -1,5 +1,4 @@
 import type { JWT } from "next-auth/jwt";
-
 export async function onSignIn({
   account,
 }: {
@@ -8,7 +7,6 @@ export async function onSignIn({
   if (!account) return true;
   return true;
 }
-
 export async function onRedirect({
   url,
   baseUrl,
@@ -29,7 +27,6 @@ export async function onRedirect({
       }
       return target.toString();
     }
-
     if (url.startsWith(baseUrl)) {
       const target = new URL(url);
       if (
@@ -42,13 +39,11 @@ export async function onRedirect({
       }
       return target.toString();
     }
-
     return baseUrl;
   } catch {
     return baseUrl;
   }
 }
-
 export async function onJwt({
   token,
   user,
@@ -61,7 +56,6 @@ export async function onJwt({
   }
   return token;
 }
-
 export async function onSession({
   session,
   token,

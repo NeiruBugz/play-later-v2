@@ -1,17 +1,11 @@
 import type { LibraryItemStatus } from "@prisma/client";
 
-/**
- * Badge variant type for library status displays
- */
 export type StatusBadgeVariant =
   | "default"
   | "secondary"
   | "outline"
   | "destructive";
 
-/**
- * Complete status configuration with label, description, and badge variant
- */
 export type StatusConfig = {
   value: LibraryItemStatus;
   label: string;
@@ -19,27 +13,6 @@ export type StatusConfig = {
   badgeVariant: StatusBadgeVariant;
 };
 
-/**
- * Centralized library status configurations
- *
- * Defines all library item statuses with:
- * - Display labels for UI
- * - Descriptions for tooltips and help text
- * - Badge variants for visual differentiation
- *
- * @example
- * ```tsx
- * import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
- *
- * // Get all statuses for a select dropdown
- * const statusOptions = LIBRARY_STATUS_CONFIG;
- *
- * // Find specific status config
- * const config = LIBRARY_STATUS_CONFIG.find(s => s.value === "CURRENTLY_EXPLORING");
- * console.log(config.label); // "Currently Exploring"
- * console.log(config.badgeVariant); // "default"
- * ```
- */
 export const LIBRARY_STATUS_CONFIG: readonly StatusConfig[] = [
   {
     value: "CURIOUS_ABOUT",
@@ -79,14 +52,6 @@ export const LIBRARY_STATUS_CONFIG: readonly StatusConfig[] = [
   },
 ] as const;
 
-/**
- * Map of library status values to display labels
- *
- * @example
- * ```tsx
- * const label = LIBRARY_STATUS_LABELS.CURRENTLY_EXPLORING; // "Currently Exploring"
- * ```
- */
 export const LIBRARY_STATUS_LABELS: Record<LibraryItemStatus, string> = {
   CURIOUS_ABOUT: "Curious About",
   CURRENTLY_EXPLORING: "Currently Exploring",
@@ -96,18 +61,6 @@ export const LIBRARY_STATUS_LABELS: Record<LibraryItemStatus, string> = {
   REVISITING: "Revisiting",
 };
 
-/**
- * Map of library status values to badge variants
- *
- * Used to determine the visual style of status badges throughout the UI.
- * Provides consistent color coding for status visualization.
- *
- * @example
- * ```tsx
- * const variant = LIBRARY_STATUS_VARIANTS.CURRENTLY_EXPLORING; // "default"
- * <Badge variant={variant}>Currently Exploring</Badge>
- * ```
- */
 export const LIBRARY_STATUS_VARIANTS: Record<
   LibraryItemStatus,
   StatusBadgeVariant
@@ -120,33 +73,10 @@ export const LIBRARY_STATUS_VARIANTS: Record<
   REVISITING: "default",
 };
 
-/**
- * Get display label for a library status
- *
- * @param status - Library item status enum value
- * @returns Human-readable label for the status
- *
- * @example
- * ```tsx
- * const label = getStatusLabel("CURRENTLY_EXPLORING"); // "Currently Exploring"
- * ```
- */
 export function getStatusLabel(status: LibraryItemStatus): string {
   return LIBRARY_STATUS_LABELS[status];
 }
 
-/**
- * Get badge variant for a library status
- *
- * @param status - Library item status enum value
- * @returns Badge variant for visual styling
- *
- * @example
- * ```tsx
- * const variant = getStatusVariant("CURRENTLY_EXPLORING"); // "default"
- * <Badge variant={variant}>...</Badge>
- * ```
- */
 export function getStatusVariant(status: LibraryItemStatus): StatusBadgeVariant {
   return LIBRARY_STATUS_VARIANTS[status];
 }

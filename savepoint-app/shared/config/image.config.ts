@@ -6,7 +6,6 @@
 // screenshot_huge	1280 x 720
 // thumb	90 x 90
 // micro	35 x 35
-
 export const NEXT_IMAGE_SIZES = {
   "c-big": {
     height: 352,
@@ -49,7 +48,6 @@ export const NEXT_IMAGE_SIZES = {
     width: 90,
   },
 } as const;
-
 export const IMAGE_SIZES = {
   "c-big": "t_cover_big",
   "c-sm": "t_cover_small",
@@ -62,5 +60,4 @@ export const IMAGE_SIZES = {
   "s-md": "t_screenshot_med",
   thumb: "t_thumb",
 } as const;
-
 export const IMAGE_API = "https://images.igdb.com/igdb/image/upload";

@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -9,14 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-
 type DeleteConfirmationDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
   itemDescription: string;
 };
-
 export const DeleteConfirmationDialog = ({
   open,
   onOpenChange,
@@ -27,11 +24,9 @@ export const DeleteConfirmationDialog = ({
     onConfirm();
     onOpenChange(false);
   };
-
   const handleCancel = () => {
     onOpenChange(false);
   };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -42,14 +37,12 @@ export const DeleteConfirmationDialog = ({
             <strong>{itemDescription}</strong> entry?
           </DialogDescription>
         </DialogHeader>
-
         <div className="py-4">
           <p className="text-muted-foreground text-sm">
             This action cannot be undone. This will permanently delete this
             library entry.
           </p>
         </div>
-
         <DialogFooter>
           <Button
             variant="outline"

@@ -1,7 +1,5 @@
 import { type User } from "@prisma/client";
-
 import { getTestDatabase } from "../database";
-
 export type UserFactoryOptions = {
   email?: string;
   name?: string;
@@ -11,15 +9,12 @@ export type UserFactoryOptions = {
   steamUsername?: string;
   password?: string;
 };
-
 export const createUser = async (
   options: UserFactoryOptions = {}
 ): Promise<User> => {
   const timestamp = Date.now();
   const randomSuffix = Math.random().toString(36).substring(2, 8);
-
   const username = options.username ?? `testuser${timestamp}${randomSuffix}`;
-
   const defaultData = {
     email: `user-${timestamp}-${randomSuffix}@example.com`,
     name: `Test User ${timestamp}`,
@@ -28,12 +23,10 @@ export const createUser = async (
     password: options.password,
     ...options,
   };
-
   return getTestDatabase().user.create({
     data: defaultData,
   });
 };
-
 export const createUsers = async (
   count: number,
   options: UserFactoryOptions = {}
@@ -42,7 +35,6 @@ export const createUsers = async (
   for (let i = 0; i < count; i++) {
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 8);
-
     users.push(
       await createUser({
         ...options,

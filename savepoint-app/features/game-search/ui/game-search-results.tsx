@@ -1,18 +1,13 @@
 "use client";
-
 import { Button } from "@/shared/components/ui/button";
-
 import { useGameSearch } from "../hooks/use-game-search";
 import { GameCard } from "./game-card";
-
 interface GameSearchResultsProps {
   query: string;
 }
-
 export const GameSearchResults = ({ query }: GameSearchResultsProps) => {
   const { data, isLoading, isError, error, fetchNextPage, hasNextPage } =
     useGameSearch(query);
-
   if (isLoading) {
     return (
       <div
@@ -26,15 +21,12 @@ export const GameSearchResults = ({ query }: GameSearchResultsProps) => {
       </div>
     );
   }
-
   if (isError) {
     const errorMessage =
       error instanceof Error
         ? error.message
         : "Game search is temporarily unavailable. Please try again later.";
-
     const isRateLimitError = errorMessage.includes("Rate limit exceeded");
-
     return (
       <div className="text-destructive border-destructive/20 bg-destructive/5 rounded-lg border p-6">
         <p className="font-medium">
@@ -48,9 +40,7 @@ export const GameSearchResults = ({ query }: GameSearchResultsProps) => {
       </div>
     );
   }
-
   const games = data?.pages.flatMap((page) => page.games) ?? [];
-
   if (games.length === 0) {
     return (
       <div className="text-muted-foreground border-border/30 bg-muted/30 rounded-lg border p-6 text-center">
@@ -59,7 +49,6 @@ export const GameSearchResults = ({ query }: GameSearchResultsProps) => {
       </div>
     );
   }
-
   return (
     <div className="space-y-8" aria-live="polite" aria-atomic="false">
       <div className="flex flex-col gap-3">
@@ -67,7 +56,6 @@ export const GameSearchResults = ({ query }: GameSearchResultsProps) => {
           <GameCard key={game.id} game={game} />
         ))}
       </div>
-
       {hasNextPage && (
         <div className="flex justify-center pt-2">
           <Button onClick={() => fetchNextPage()} variant="outline" size="lg">

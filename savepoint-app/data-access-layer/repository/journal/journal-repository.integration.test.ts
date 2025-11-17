@@ -12,13 +12,10 @@ import {
   findJournalEntriesByGameId,
 } from "./journal-repository";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
+vi.mock("@/shared/lib/app/db", async () => {
   const { getTestDatabase } = await import("@/test/setup/database");
 
   return {
-    ...actual,
     get prisma() {
       return getTestDatabase();
     },
@@ -41,7 +38,7 @@ describe("Journal Repository Integration Tests", () => {
     await resetTestDatabase();
 
     // Import prisma from the mocked lib
-    const { prisma } = await import("@/shared/lib");
+    const { prisma } = await import("@/shared/lib/app/db");
 
     // Create test user
     const user = await prisma.user.create({
@@ -102,7 +99,7 @@ describe("Journal Repository Integration Tests", () => {
     });
 
     it("should return journal entries in reverse chronological order", async () => {
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
 
       // Create 3 journal entries with different timestamps
       const entry1 = await prisma.journalEntry.create({
@@ -152,7 +149,7 @@ describe("Journal Repository Integration Tests", () => {
     });
 
     it("should limit results to specified number", async () => {
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
 
       // Create 5 journal entries
       for (let i = 0; i < 5; i++) {
@@ -184,7 +181,7 @@ describe("Journal Repository Integration Tests", () => {
     });
 
     it("should only return entries for the specified user", async () => {
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
 
       // Create another user
       const otherUser = await prisma.user.create({
@@ -229,7 +226,7 @@ describe("Journal Repository Integration Tests", () => {
     });
 
     it("should only return entries for the specified game", async () => {
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
 
       // Create another game
       const otherGameResult = await createGameWithRelations({
@@ -280,7 +277,7 @@ describe("Journal Repository Integration Tests", () => {
     });
 
     it("should use default limit of 3 when not specified", async () => {
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
 
       // Create 5 journal entries
       for (let i = 0; i < 5; i++) {
@@ -321,7 +318,7 @@ describe("Journal Repository Integration Tests", () => {
     });
 
     it("should return correct count of journal entries", async () => {
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
 
       // Create 5 journal entries
       for (let i = 0; i < 5; i++) {
@@ -347,7 +344,7 @@ describe("Journal Repository Integration Tests", () => {
     });
 
     it("should only count entries for the specified user", async () => {
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
 
       // Create another user
       const otherUser = await prisma.user.create({
@@ -389,7 +386,7 @@ describe("Journal Repository Integration Tests", () => {
     });
 
     it("should only count entries for the specified game", async () => {
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
 
       // Create another game
       const otherGameResult = await createGameWithRelations({

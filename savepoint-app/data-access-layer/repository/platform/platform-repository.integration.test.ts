@@ -13,13 +13,10 @@ import {
   upsertPlatforms,
 } from "./platform-repository";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
+vi.mock("@/shared/lib/app/db", async () => {
   const { getTestDatabase } = await import("@/test/setup/database");
 
   return {
-    ...actual,
     get prisma() {
       return getTestDatabase();
     },
@@ -274,7 +271,7 @@ describe("PlatformRepository - Integration Tests", () => {
       const xsxId = xsxResult.data!.id;
 
       // Link game to PS5 and Xbox Series X|S (these will be "supported")
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
       await prisma.gamePlatform.createMany({
         data: [
           { gameId: game.id, platformId: ps5Id },
@@ -404,7 +401,7 @@ describe("PlatformRepository - Integration Tests", () => {
         throw new Error("Failed to find platforms");
       }
 
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
       await prisma.gamePlatform.createMany({
         data: [
           { gameId: game.id, platformId: ps5Result.data!.id },
@@ -464,7 +461,7 @@ describe("PlatformRepository - Integration Tests", () => {
         throw new Error("Failed to find platforms");
       }
 
-      const { prisma } = await import("@/shared/lib");
+      const { prisma } = await import("@/shared/lib/app/db");
       await prisma.gamePlatform.create({
         data: { gameId: game1.id, platformId: ps5Result.data!.id },
       });

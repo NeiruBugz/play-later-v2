@@ -90,8 +90,9 @@ const elements = {
     ),
   getCountBadge: () => screen.queryByText(/\d+ entries/i),
   // Variant A: Interactive badge (clickable button)
+  // Use document.querySelector to find button inside data-library-interactive div
   getInteractiveBadgeButton: () =>
-    screen.queryByRole("button", { name: /change status/i }),
+    screen.queryByRole('button', { name: /wishlist|backlog|playing|completed|dropped/i }),
   // Variant B: Action bar (toolbar with multiple buttons)
   getActionBar: () => screen.queryByRole("toolbar", { name: /change status/i }),
   getGameTitle: () =>

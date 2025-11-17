@@ -1,14 +1,10 @@
 "use client";
-
 import { Check, Loader2, X } from "lucide-react";
 import { useEffect } from "react";
-
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/shared/lib/ui/utils";
-
 import { useUsernameValidation } from "../hooks/use-username-validation";
-
 interface UsernameInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -17,7 +13,6 @@ interface UsernameInputProps {
   disabled?: boolean;
   onValidationChange?: (hasError: boolean) => void;
 }
-
 export function UsernameInput({
   value,
   onChange,
@@ -27,19 +22,16 @@ export function UsernameInput({
   onValidationChange,
 }: UsernameInputProps) {
   const { validationStatus, validationMessage } = useUsernameValidation(value);
-
   const displayError = externalError || validationMessage;
   const showError =
     (externalError || validationStatus === "error") && displayError;
   const showSuccess = !externalError && validationStatus === "available";
-
   useEffect(() => {
     if (onValidationChange) {
       const hasError = Boolean(showError);
       onValidationChange(hasError);
     }
   }, [showError, onValidationChange]);
-
   return (
     <div className="space-y-2">
       <Label htmlFor="username">{label}</Label>

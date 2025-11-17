@@ -1,50 +1,38 @@
 "use client";
-
 import type { LibraryItem } from "@prisma/client";
 import { CalendarIcon, CheckCircleIcon, PlayIcon, Trash2 } from "lucide-react";
 import { useState } from "react";
-
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { formatAbsoluteDate } from "@/shared/lib/date";
-import {
-  getStatusLabel,
-  getStatusVariant,
-} from "@/shared/lib";
-
+import { getStatusLabel, getStatusVariant } from "@/shared/lib/library-status";
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
-
 type LibraryItemCardProps = {
   item: LibraryItem;
   onClick?: () => void;
   onDelete?: (itemId: number) => void;
 };
-
 export const LibraryItemCard = ({
   item,
   onClick,
   onDelete,
 }: LibraryItemCardProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
   const handleCardClick = () => {
     if (onClick) {
       onClick();
     }
   };
-
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDeleteDialogOpen(true);
   };
-
   const handleConfirmDelete = () => {
     if (onDelete) {
       onDelete(item.id);
     }
   };
-
   return (
     <>
       <Card
@@ -65,7 +53,7 @@ export const LibraryItemCard = ({
       >
         <CardContent className="p-4">
           <div className="space-y-3">
-            {/* Platform and Status Row */}
+            {}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium" aria-label="Platform">
@@ -91,10 +79,9 @@ export const LibraryItemCard = ({
                 )}
               </div>
             </div>
-
-            {/* Date Information */}
+            {}
             <div className="text-muted-foreground space-y-1.5 text-sm">
-              {/* Started Date */}
+              {}
               <div className="flex items-center gap-2">
                 <PlayIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
@@ -110,8 +97,7 @@ export const LibraryItemCard = ({
                   )}
                 </span>
               </div>
-
-              {/* Completed Date */}
+              {}
               <div className="flex items-center gap-2">
                 <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
@@ -126,8 +112,7 @@ export const LibraryItemCard = ({
                 </span>
               </div>
             </div>
-
-            {/* Metadata Row */}
+            {}
             <div className="text-muted-foreground flex items-center gap-1 text-xs">
               <CalendarIcon className="h-3 w-3" aria-hidden="true" />
               <span>
@@ -147,7 +132,6 @@ export const LibraryItemCard = ({
           </div>
         </CardContent>
       </Card>
-
       <DeleteConfirmationDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

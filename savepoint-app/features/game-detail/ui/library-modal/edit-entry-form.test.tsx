@@ -95,139 +95,64 @@ describe("EditEntryForm", () => {
   });
 
   describe("given form just rendered", () => {
-    it("should display LibraryEntryMetadata component", () => {
+    it("should display all form elements with correct content", () => {
       render(<EditEntryForm {...defaultProps} />);
 
-      expect(elements.getMetadataSection()).toBeInTheDocument();
+      expect(elements.getMetadataSection()).toBeVisible();
       expect(screen.getByText("Created:")).toBeVisible();
-    });
-
-    it("should display created date from metadata", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      expect(elements.getCreatedDate()).toBeInTheDocument();
-    });
-
-    it("should display platform from item in metadata", () => {
-      render(<EditEntryForm {...defaultProps} />);
+      expect(elements.getCreatedDate()).toBeVisible();
 
       const metadataSection = elements.getMetadataSection();
-      expect(within(metadataSection).getByText("PC")).toBeInTheDocument();
-    });
+      expect(within(metadataSection).getByText("PC")).toBeVisible();
 
-    it("should display status selector with current status", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      expect(elements.getStatusTrigger()).toBeInTheDocument();
-    });
-
-    it("should display cancel button", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      expect(elements.getCancelButton()).toBeInTheDocument();
-    });
-
-    it("should display 'Update Entry' submit button", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
+      expect(elements.getStatusTrigger()).toBeVisible();
+      expect(elements.getCancelButton()).toBeVisible();
       expect(elements.getSubmitButton()).toHaveTextContent("Update Entry");
-    });
-
-    it("should display custom form description", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
       expect(
         screen.getByText("Update your journey status for this entry")
       ).toBeVisible();
     });
   });
 
-  describe("Platform Field Restrictions", () => {
-    it("should disable platform field in edit mode", () => {
+  describe("Field restrictions and editability", () => {
+    it("should have read-only platform field with explanatory message", () => {
       render(<EditEntryForm {...defaultProps} />);
 
       const platformField = elements.getPlatformField();
       expect(platformField).toBeDisabled();
       expect(platformField).toHaveAttribute("aria-readonly", "true");
-    });
-
-    it("should show current platform value in read-only field", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      const platformField = elements.getPlatformField();
       expect(platformField).toHaveValue("PC");
-    });
-
-    it("should display explanatory message below platform field", () => {
-      render(<EditEntryForm {...defaultProps} />);
+      expect(platformField).toHaveClass("cursor-not-allowed", "bg-muted");
 
       const message = elements.getPlatformMessage();
-      expect(message).toBeInTheDocument();
+      expect(message).toBeVisible();
       expect(message).toHaveClass("text-muted-foreground", "text-sm");
     });
 
-    it("should apply disabled styling to platform field", () => {
-      render(<EditEntryForm {...defaultProps} />);
+    it("should handle different platform values including null", () => {
+      const nullItem = createMockLibraryItem({ platform: null });
+      const { rerender } = render(<EditEntryForm {...defaultProps} item={nullItem} />);
+      expect(elements.getPlatformField()).toHaveValue("Not specified");
 
-      const platformField = elements.getPlatformField();
-      expect(platformField).toHaveClass("cursor-not-allowed", "bg-muted");
+      const switchItem = createMockLibraryItem({ platform: "Nintendo Switch" });
+      rerender(<EditEntryForm {...defaultProps} item={switchItem} />);
+      expect(elements.getPlatformField()).toHaveValue("Nintendo Switch");
     });
 
-    it("should show 'Not specified' when platform is null", () => {
-      const item = createMockLibraryItem({ platform: null });
-      render(<EditEntryForm {...defaultProps} item={item} />);
-
-      const platformField = elements.getPlatformField();
-      expect(platformField).toHaveValue("Not specified");
-    });
-
-    it("should show different platform value for Nintendo Switch", () => {
-      const item = createMockLibraryItem({ platform: "Nintendo Switch" });
-      render(<EditEntryForm {...defaultProps} item={item} />);
-
-      const platformField = elements.getPlatformField();
-      expect(platformField).toHaveValue("Nintendo Switch");
-    });
-  });
-
-  describe("Editable Fields in Edit Mode", () => {
-    it("should allow editing status field in edit mode", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      const statusTrigger = elements.getStatusTrigger();
-      expect(statusTrigger).toBeEnabled();
-    });
-
-    it("should allow editing startedAt date field", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      const startedAtField = elements.getStartedAtField();
-      expect(startedAtField).toBeEnabled();
-    });
-
-    it("should allow editing completedAt date field", () => {
-      render(<EditEntryForm {...defaultProps} />);
-
-      const completedAtField = elements.getCompletedAtField();
-      expect(completedAtField).toBeEnabled();
-    });
-
-    it("should display existing startedAt date when provided", () => {
+    it("should allow editing status and date fields with existing values", () => {
       const startedDate = new Date("2025-01-20T00:00:00Z");
-      const item = createMockLibraryItem({ startedAt: startedDate });
-      render(<EditEntryForm {...defaultProps} item={item} />);
-
-      const startedAtField = elements.getStartedAtField();
-      expect(startedAtField).toHaveValue("2025-01-20");
-    });
-
-    it("should display existing completedAt date when provided", () => {
       const completedDate = new Date("2025-01-25T00:00:00Z");
-      const item = createMockLibraryItem({ completedAt: completedDate });
+      const item = createMockLibraryItem({
+        startedAt: startedDate,
+        completedAt: completedDate,
+      });
       render(<EditEntryForm {...defaultProps} item={item} />);
 
-      const completedAtField = elements.getCompletedAtField();
-      expect(completedAtField).toHaveValue("2025-01-25");
+      expect(elements.getStatusTrigger()).toBeEnabled();
+      expect(elements.getStartedAtField()).toBeEnabled();
+      expect(elements.getStartedAtField()).toHaveValue("2025-01-20");
+      expect(elements.getCompletedAtField()).toBeEnabled();
+      expect(elements.getCompletedAtField()).toHaveValue("2025-01-25");
     });
   });
 
@@ -333,27 +258,6 @@ describe("EditEntryForm", () => {
         const callArgs = mockUpdateLibraryEntryAction.mock.calls[0][0];
         expect(callArgs).not.toHaveProperty("platform");
       });
-    });
-  });
-
-  describe("given item with different platform", () => {
-    it("should display Nintendo Switch in read-only field", () => {
-      const item = createMockLibraryItem({ platform: "Nintendo Switch" });
-      render(<EditEntryForm {...defaultProps} item={item} />);
-
-      const platformField = elements.getPlatformField();
-      expect(platformField).toHaveValue("Nintendo Switch");
-      expect(platformField).toBeDisabled();
-    });
-
-    it("should display PlayStation 5 in metadata section", () => {
-      const item = createMockLibraryItem({ platform: "PlayStation 5" });
-      render(<EditEntryForm {...defaultProps} item={item} />);
-
-      const metadataSection = elements.getMetadataSection();
-      expect(
-        within(metadataSection).getByText("PlayStation 5")
-      ).toBeInTheDocument();
     });
   });
 });

@@ -2,22 +2,17 @@ import { auth } from "@/auth";
 import { BookOpen, Clock, Heart, Library, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-
 export default async function Page() {
   const session = await auth();
-
   if (session?.user) {
     redirect("/dashboard");
   }
-
   return (
     <div className="min-h-screen">
       <section className="relative overflow-hidden">
         <div className="from-muted/30 to-background absolute inset-0 bg-linear-to-b" />
-
         <div className="relative">
           <nav className="container mx-auto flex items-center justify-between px-4 py-6">
             <div className="flex items-center gap-2">
@@ -52,7 +47,6 @@ export default async function Page() {
               </Button>
             </div>
           </nav>
-
           <div className="container mx-auto px-4 py-24 md:py-32">
             <div className="mx-auto max-w-4xl space-y-8 text-center">
               <div className="inline-block">
@@ -61,16 +55,13 @@ export default async function Page() {
                   For Patient Gamers
                 </span>
               </div>
-
               <h1 className="font-serif text-5xl leading-tight font-bold text-balance md:text-7xl">
                 Your Personal Gaming Library & Journal
               </h1>
-
               <p className="text-muted-foreground mx-auto max-w-2xl text-xl leading-relaxed text-pretty md:text-2xl">
                 Curate your collection and journal your experiences. Games are
                 not chores to complete—they're worlds to explore and remember.
               </p>
-
               <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
                 <Button
                   size="lg"
@@ -87,7 +78,6 @@ export default async function Page() {
                   Learn More
                 </Button>
               </div>
-
               <p className="text-muted-foreground text-sm">
                 Free to start • No credit card required
               </p>
@@ -95,7 +85,6 @@ export default async function Page() {
           </div>
         </div>
       </section>
-
       <section id="philosophy" className="bg-muted/30 py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl space-y-6 text-center">
@@ -110,7 +99,6 @@ export default async function Page() {
           </div>
         </div>
       </section>
-
       <section id="features" className="py-24">
         <div className="container mx-auto px-4">
           <div className="mb-16 space-y-4 text-center">
@@ -121,7 +109,6 @@ export default async function Page() {
               Thoughtfully designed features for patient gamers
             </p>
           </div>
-
           <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
             <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
@@ -135,7 +122,6 @@ export default async function Page() {
                 and other services, or add games manually.
               </p>
             </Card>
-
             <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <BookOpen className="text-secondary h-6 w-6" />
@@ -148,7 +134,6 @@ export default async function Page() {
                 game special to you.
               </p>
             </Card>
-
             <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Clock className="text-primary h-6 w-6" />
@@ -161,7 +146,6 @@ export default async function Page() {
                 Experienced. No pressure, just progress.
               </p>
             </Card>
-
             <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Heart className="text-secondary h-6 w-6" />
@@ -174,7 +158,6 @@ export default async function Page() {
                 That Made Me Think."
               </p>
             </Card>
-
             <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Sparkles className="text-primary h-6 w-6" />
@@ -185,7 +168,6 @@ export default async function Page() {
                 adventure thoughtfully.
               </p>
             </Card>
-
             <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Users className="text-secondary h-6 w-6" />
@@ -201,7 +183,6 @@ export default async function Page() {
           </div>
         </div>
       </section>
-
       <section className="bg-muted/30 py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-6xl">
@@ -233,7 +214,6 @@ export default async function Page() {
           </div>
         </div>
       </section>
-
       <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl space-y-8 text-center">
@@ -262,7 +242,6 @@ export default async function Page() {
           </div>
         </div>
       </section>
-
       <footer className="border-border bg-muted/30 border-t">
         <div className="container mx-auto px-4 py-12">
           <div className="grid gap-8 md:grid-cols-4">
@@ -280,7 +259,6 @@ export default async function Page() {
               </p>
             </div>
           </div>
-
           <div className="border-border text-muted-foreground mt-12 border-t pt-8 text-center text-sm">
             <p>
               2025 SavePoint. For patient gamers who view games as worlds to

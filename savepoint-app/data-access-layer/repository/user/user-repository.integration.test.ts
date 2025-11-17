@@ -8,13 +8,10 @@ import { createUser } from "@/test/setup/db-factories";
 import { isRepositorySuccess } from "../types";
 import { findUserById, updateUserProfile } from "./user-repository";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
+vi.mock("@/shared/lib/app/db", async () => {
   const { getTestDatabase } = await import("@/test/setup/database");
 
   return {
-    ...actual,
     get prisma() {
       return getTestDatabase();
     },

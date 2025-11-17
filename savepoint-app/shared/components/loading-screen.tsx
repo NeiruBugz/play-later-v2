@@ -1,5 +1,4 @@
 import { Loader2 } from "lucide-react";
-
 export function LoadingScreen() {
   return (
     <div className="bg-background relative flex min-h-screen items-center justify-center px-6">

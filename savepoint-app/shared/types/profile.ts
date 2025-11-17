@@ -1,6 +1,4 @@
-/**
- * Recent game information for profile display
- */
+
 export type RecentGame = {
   gameId: string;
   title: string;
@@ -8,17 +6,11 @@ export type RecentGame = {
   lastPlayed: Date;
 };
 
-/**
- * Library statistics aggregated by status
- */
 export type LibraryStats = {
   statusCounts: Record<string, number>;
   recentGames: RecentGame[];
 };
 
-/**
- * Profile with aggregated library statistics
- */
 export type ProfileWithStats = {
   username: string | null;
   image: string | null;

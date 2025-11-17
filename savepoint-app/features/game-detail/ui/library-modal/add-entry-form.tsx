@@ -3,19 +3,16 @@ import { LibraryItemStatus } from "@prisma/client";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-
 import { useGetPlatforms } from "@/features/game-detail/hooks/use-get-platforms";
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
-
 import { AddToLibrarySchema, type AddToLibraryInput } from "../../schemas";
 import { addToLibraryAction } from "../../server-actions";
 import { DateField } from "./date-field";
 import { PlatformCombobox } from "./platform-combobox";
 import { StatusSelect } from "./status-select";
-
 type AddEntryFormProps = {
   igdbId: number;
   gameId?: string;
@@ -24,7 +21,6 @@ type AddEntryFormProps = {
   onSuccess: () => void;
   onCancel: () => void;
 };
-
 export const AddEntryForm = ({
   igdbId,
   gameTitle,
@@ -40,13 +36,11 @@ export const AddEntryForm = ({
       platform: "",
     },
   });
-
   const {
     data: platformsData,
     isLoading: isLoadingPlatforms,
     error: platformsError,
   } = useGetPlatforms(igdbId);
-
   useEffect(() => {
     if (platformsError) {
       toast.error("Failed to load platforms", {
@@ -57,10 +51,8 @@ export const AddEntryForm = ({
       });
     }
   }, [platformsError]);
-
   const supportedPlatforms = platformsData?.supportedPlatforms ?? [];
   const otherPlatforms = platformsData?.otherPlatforms ?? [];
-
   const { isSubmitting, handleSubmit } = useFormSubmission({
     action: addToLibraryAction,
     successMessage: isEditMode ? "New entry added" : "Game added to library",
@@ -77,7 +69,6 @@ export const AddEntryForm = ({
       onSuccess();
     },
   });
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -90,7 +81,6 @@ export const AddEntryForm = ({
             </p>
           </div>
         )}
-
         <FormField
           control={form.control}
           name="status"
@@ -101,7 +91,6 @@ export const AddEntryForm = ({
             />
           )}
         />
-
         <FormField
           control={form.control}
           name="platform"
@@ -114,7 +103,6 @@ export const AddEntryForm = ({
             />
           )}
         />
-
         <FormField
           control={form.control}
           name="startedAt"
@@ -126,7 +114,6 @@ export const AddEntryForm = ({
             />
           )}
         />
-
         <FormField
           control={form.control}
           name="completedAt"
@@ -138,7 +125,6 @@ export const AddEntryForm = ({
             />
           )}
         />
-
         <DialogFooter>
           <Button
             type="button"

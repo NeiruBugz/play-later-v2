@@ -1,10 +1,8 @@
 "use client";
-
 import { Gamepad2, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-
 import { Card } from "@/shared/components/ui/card";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import {
@@ -13,17 +11,14 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
-
 import { loadMoreFranchiseGames } from "../../server-actions/load-more-franchise-games";
 import { useInfiniteScroll } from "./use-infinite-scroll";
-
 type RelatedGame = {
   id: number;
   name: string;
   slug: string;
   cover?: { image_id: string };
 };
-
 type FranchiseWithGames = {
   franchiseId: number;
   franchiseName: string;
@@ -31,23 +26,19 @@ type FranchiseWithGames = {
   hasMore: boolean;
   totalCount: number;
 };
-
 type Props = {
   igdbId: number;
   franchises: FranchiseWithGames[];
 };
-
 export function RelatedGamesClient({
   igdbId,
   franchises: initialFranchises,
 }: Props) {
   const [franchises, setFranchises] = useState(initialFranchises);
   const [isPending, startTransition] = useTransition();
-
   const loadMore = async (franchiseId: number) => {
     const franchise = franchises.find((f) => f.franchiseId === franchiseId);
     if (!franchise || !franchise.hasMore) return;
-
     startTransition(async () => {
       const result = await loadMoreFranchiseGames({
         franchiseId,
@@ -55,7 +46,6 @@ export function RelatedGamesClient({
         offset: franchise.games.length,
         limit: 20,
       });
-
       if (result.success) {
         setFranchises((prev) =>
           prev.map((f) =>
@@ -80,7 +70,6 @@ export function RelatedGamesClient({
       }
     });
   };
-
   // Single franchise (no tabs)
   if (franchises.length === 1) {
     return (
@@ -106,7 +95,6 @@ export function RelatedGamesClient({
       </section>
     );
   }
-
   // Multiple franchises (tabs)
   return (
     <section className="space-y-4" aria-labelledby="related-games-heading">
@@ -128,7 +116,6 @@ export function RelatedGamesClient({
             </TabsTrigger>
           ))}
         </TabsList>
-
         {franchises.map((franchise) => (
           <TabsContent
             key={franchise.franchiseId}
@@ -152,7 +139,6 @@ export function RelatedGamesClient({
     </section>
   );
 }
-
 // Separate component for game grid with infinite scroll
 function GameGrid({
   franchiseId,
@@ -172,14 +158,12 @@ function GameGrid({
     hasMore,
     enabled: !isPending,
   });
-
   return (
     <div className="grid grid-cols-2 gap-4 pr-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {games.map((game) => (
         <GameCard key={`${franchiseId}-${game.id}`} game={game} />
       ))}
-
-      {/* Intersection Observer trigger element */}
+      {}
       {hasMore && (
         <div ref={ref} className="col-span-full flex justify-center py-4">
           {isPending && (
@@ -193,7 +177,6 @@ function GameGrid({
     </div>
   );
 }
-
 // Game card component with accessibility improvements
 function GameCard({ game }: { game: RelatedGame }) {
   return (

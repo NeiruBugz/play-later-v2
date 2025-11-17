@@ -1,23 +1,18 @@
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
-
 import { Button } from "@/shared/components/ui/button";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 import type { ProfileWithStats } from "@/shared/types/profile";
-
 import { statusLabels } from "../lib/constants";
 import { prepareProfileData } from "../lib/prepare-profile-data";
 import { LogoutButton } from "./logout-button";
-
 type ProfileViewProps = {
   profile: ProfileWithStats;
 };
-
 export function ProfileView({ profile }: ProfileViewProps) {
   const { displayName, joinDateFormatted, statusEntries } =
     prepareProfileData(profile);
-
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between gap-6">
@@ -41,7 +36,6 @@ export function ProfileView({ profile }: ProfileViewProps) {
               </div>
             )}
           </div>
-
           <div className="flex-1">
             <h2 className="text-foreground font-serif text-3xl font-bold">
               {displayName}
@@ -56,7 +50,6 @@ export function ProfileView({ profile }: ProfileViewProps) {
             </p>
           </div>
         </div>
-
         <div className="flex flex-col gap-2">
           <Button variant="outline" className="shrink-0" asChild>
             <Link href="/profile/settings">Edit Profile</Link>
@@ -64,7 +57,6 @@ export function ProfileView({ profile }: ProfileViewProps) {
           <LogoutButton />
         </div>
       </div>
-
       {statusEntries.length > 0 && (
         <div>
           <h2 className="text-foreground mb-4 font-serif text-2xl font-bold">
@@ -97,7 +89,6 @@ export function ProfileView({ profile }: ProfileViewProps) {
           </div>
         </div>
       )}
-
       {profile.stats.recentGames.length > 0 && (
         <div>
           <h2 className="text-foreground mb-4 font-serif text-2xl font-bold">
@@ -131,7 +122,6 @@ export function ProfileView({ profile }: ProfileViewProps) {
                       data-testid="profile-game-cover-fallback"
                     ></div>
                   )}
-
                   <div className="p-3">
                     <h3
                       className="text-foreground line-clamp-2 text-sm font-medium"
@@ -154,7 +144,6 @@ export function ProfileView({ profile }: ProfileViewProps) {
           </div>
         </div>
       )}
-
       {statusEntries.length === 0 && profile.stats.recentGames.length === 0 && (
         <div className="border-border bg-muted rounded-lg border p-12 text-center">
           <p className="text-muted-foreground text-lg">

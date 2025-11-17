@@ -9,7 +9,6 @@ export {
   isRepositorySuccess,
   isRepositoryError,
 } from "./types";
-
 export {
   createLibraryItem,
   deleteLibraryItem,
@@ -35,7 +34,6 @@ export {
   findAllLibraryItemsByGameId,
   findLibraryItemsWithFilters,
 } from "./library/library-repository";
-
 export {
   getUserBySteamId,
   getUserByUsername,
@@ -51,27 +49,23 @@ export {
   findUserByEmail,
   createUserWithCredentials,
 } from "./user/user-repository";
-
 export {
   upsertGenre,
   upsertGenres,
   findGenreByIgdbId,
 } from "./genre/genre-repository";
-
 export {
   upsertPlatform,
   upsertPlatforms,
   findPlatformByIgdbId,
   findPlatformsForGame,
 } from "./platform/platform-repository";
-
 export {
   createGameWithRelations,
   findGameBySlug,
   findGameByIgdbId,
   gameExistsByIgdbId,
 } from "./game/game-repository";
-
 export {
   findJournalEntriesByGameId,
   countJournalEntriesByGameId,

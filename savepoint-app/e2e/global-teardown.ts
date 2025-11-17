@@ -1,8 +1,6 @@
 import { clearTestData, disconnectDatabase } from "./helpers/db";
-
 async function globalTeardown(): Promise<void> {
   console.log("\n🧹 Running global E2E teardown...");
-
   try {
     await clearTestData();
     console.log("✅ Test data cleared successfully");
@@ -14,5 +12,4 @@ async function globalTeardown(): Promise<void> {
     console.log("✅ Database connection closed");
   }
 }
-
 export default globalTeardown;

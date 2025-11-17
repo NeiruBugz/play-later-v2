@@ -1,6 +1,5 @@
 import { Card } from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-
 export function RelatedGamesSkeleton() {
   return (
     <section className="space-y-4">

@@ -1,10 +1,7 @@
 "use client";
-
 import { Library } from "lucide-react";
 import Link from "next/link";
-
 import { Button } from "@/shared/components/ui/button";
-
 export function LibraryEmptyState() {
   return (
     <div className="flex flex-col items-center justify-center px-4 py-16 text-center">

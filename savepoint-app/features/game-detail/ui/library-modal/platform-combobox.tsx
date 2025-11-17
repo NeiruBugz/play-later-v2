@@ -1,5 +1,4 @@
 "use client";
-
 import type { Platform } from "@prisma/client";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
@@ -8,7 +7,6 @@ import type {
   FieldPath,
   FieldValues,
 } from "react-hook-form";
-
 import { Button } from "@/shared/components/ui/button";
 import {
   Command,
@@ -32,7 +30,6 @@ import {
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
 import { cn } from "@/shared/lib/ui/utils";
-
 type PlatformComboboxProps<T extends FieldValues = FieldValues> = {
   field: ControllerRenderProps<T, FieldPath<T>>;
   supportedPlatforms: Platform[];
@@ -40,7 +37,6 @@ type PlatformComboboxProps<T extends FieldValues = FieldValues> = {
   isLoading?: boolean;
   description?: string;
 };
-
 export const PlatformCombobox = <T extends FieldValues = FieldValues>({
   field,
   supportedPlatforms,
@@ -49,10 +45,8 @@ export const PlatformCombobox = <T extends FieldValues = FieldValues>({
   description = "Select the platform you own this game on",
 }: PlatformComboboxProps<T>) => {
   const [open, setOpen] = useState(false);
-
   const allPlatforms = [...supportedPlatforms, ...otherPlatforms];
   const selectedPlatform = allPlatforms.find((p) => p.name === field.value);
-
   return (
     <FormItem className="flex flex-col">
       <FormLabel>Platform *</FormLabel>
@@ -83,7 +77,6 @@ export const PlatformCombobox = <T extends FieldValues = FieldValues>({
             <CommandInput placeholder="Search platforms..." />
             <CommandList>
               <CommandEmpty>No platform found.</CommandEmpty>
-
               {supportedPlatforms.length > 0 && (
                 <CommandGroup heading="Supported Platforms">
                   {supportedPlatforms.map((platform) => (
@@ -108,11 +101,9 @@ export const PlatformCombobox = <T extends FieldValues = FieldValues>({
                   ))}
                 </CommandGroup>
               )}
-
               {supportedPlatforms.length > 0 && otherPlatforms.length > 0 && (
                 <CommandSeparator />
               )}
-
               {otherPlatforms.length > 0 && (
                 <CommandGroup heading="Other Platforms">
                   {otherPlatforms.map((platform) => (
