@@ -1,24 +1,11 @@
-/**
- * Integration Test Setup
- *
- * This file configures the test environment for integration tests that use a real database.
- * Unlike unit tests, integration tests do NOT mock Prisma - they use a real PostgreSQL database.
- *
- * Key differences from unit tests (global.ts):
- * - Uses real database via getTestDatabase() instead of mocked Prisma
- * - Runs in single-fork mode to prevent database conflicts
- * - Has longer timeout (15s vs 10s) for database operations
- */
-
 import { afterEach, beforeAll, vi } from "vitest";
 
-// Import common mocks shared across all test types
 import "./common-mocks";
 
-// Import database cleanup function for test isolation
+import { CreateBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
+
 import { resetTestDatabase } from "./database";
 
-// Set up environment variables BEFORE any modules that use them are imported
 process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";
 process.env.AUTH_URL = "http://localhost:3000";
@@ -41,44 +28,61 @@ process.env.POSTGRES_PASSWORD = "postgres";
 process.env.POSTGRES_DATABASE = "test";
 process.env.STEAM_API_KEY = "test-steam-key";
 
-// S3 / LocalStack configuration for integration tests
 process.env.AWS_REGION = "us-east-1";
 process.env.AWS_ENDPOINT_URL = "http://localhost:4568";
 process.env.AWS_ACCESS_KEY_ID = "test";
 process.env.AWS_SECRET_ACCESS_KEY = "test";
 process.env.S3_BUCKET_NAME = "savepoint-dev";
 process.env.S3_AVATAR_PATH_PREFIX = "user-avatars/";
-
-/**
- * Override @/shared/lib to use REAL database for integration tests.
- * This replaces the mocked Prisma from global.ts with a real database client.
- */
-vi.mock("@/shared/lib", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/shared/lib")>();
+vi.mock("@/shared/lib/app/db", async () => {
   const { getTestDatabase } = await import("./database");
-
   return {
-    ...actual,
-    // Replace prisma with test database client
     get prisma() {
       return getTestDatabase();
     },
   };
 });
+vi.unmock("@/data-access-layer/repository");
+async function ensureS3BucketExists(): Promise<void> {
+  const { s3Client } = await import("@/shared/lib/storage/s3-client");
+  const bucketName = process.env.S3_BUCKET_NAME!;
+  try {
+    await s3Client.send(
+      new HeadBucketCommand({
+        Bucket: bucketName,
+      })
+    );
+    console.log(`S3 bucket '${bucketName}' already exists`);
+  } catch (error: unknown) {
+    const err = error as { name?: string };
 
-// Set up test-specific configuration before tests run
-beforeAll(() => {
-  // @ts-expect-error - NODE_ENV is read-only
-  process.env.NODE_ENV = "test";
+    if (err.name === "NotFound" || err.name === "NoSuchBucket") {
+      try {
+        await s3Client.send(
+          new CreateBucketCommand({
+            Bucket: bucketName,
+          })
+        );
+        console.log(`Created S3 bucket '${bucketName}' for integration tests`);
+      } catch (createError) {
+        console.error(
+          `Failed to create S3 bucket '${bucketName}':`,
+          createError
+        );
+        throw createError;
+      }
+    } else {
+      console.error(`Failed to check S3 bucket '${bucketName}':`, error);
+      throw error;
+    }
+  }
+}
+
+beforeAll(async () => {
+  await ensureS3BucketExists();
 });
-
-/**
- * Clean up after each test to ensure test isolation.
- * This prevents data leakage between tests and eliminates test interdependencies.
- */
 afterEach(async () => {
   vi.clearAllMocks();
 
-  // Reset database state between tests
   await resetTestDatabase();
 });

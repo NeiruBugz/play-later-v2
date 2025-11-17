@@ -8,7 +8,6 @@ export const LibraryStatusMapper: Record<LibraryItemStatus, string> = {
   WISHLIST: "Wishlist",
   REVISITING: "Revisiting",
 };
-
 export const AcquisitionStatusMapper: Record<AcquisitionType, string> = {
   DIGITAL: "Digital",
   PHYSICAL: "Physical",

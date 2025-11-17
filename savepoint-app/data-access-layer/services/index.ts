@@ -10,8 +10,6 @@ export {
   isErrorResult,
   type ExtractServiceData,
 } from "./types";
-
-// Keep IGDB service available as part of the public API
 export {
   type GameSearchParams,
   type GameSearchResult,
@@ -21,19 +19,13 @@ export {
   type TopRatedGamesResult,
   type IgdbService as IgdbServiceInterface,
 } from "./igdb/types";
-
 export { IgdbService } from "./igdb/igdb-service";
-
 export {
   type SignUpInput,
-  type SignInInput,
   type AuthUserData,
   type SignUpResult,
-  type SignInResult,
 } from "./auth/types";
-
 export { AuthService } from "./auth/auth-service";
-
 export {
   type GetProfileInput,
   type GetProfileResult,
@@ -54,5 +46,10 @@ export {
   type LibraryStats,
   type RecentGame,
 } from "./profile/types";
-
 export { ProfileService } from "./profile/profile-service";
+export { LibraryService } from "./library/library-service";
+export {
+  type FindJournalEntriesResult,
+  type JournalService as IJournalService,
+} from "./journal/types";
+export { JournalService } from "./journal/journal-service";

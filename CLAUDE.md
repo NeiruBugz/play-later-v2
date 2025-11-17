@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ✅ Monorepo restructuring complete (`savepoint-app/` for main app)
 - ✅ AWS Cognito integration complete (primary auth provider)
 - ✅ Terraform infrastructure setup for dev/prod environments
+- ✅ Service layer architecture clarified (use-case pattern for multi-service orchestration)
 - 🚧 Google OAuth being phased out (legacy support maintained)
-- 🚧 Service layer refactoring in progress (eliminating boundary violations)
 
 ## Project Overview
 
@@ -45,6 +45,7 @@ tree -L 2 -I 'node_modules|.git|.next' --gitignore
 
 **2. Data Access Layer (`data-access-layer/`)**
 
+- `handlers/`: Request handlers for API routes (validation, rate limiting, orchestration)
 - `repository/`: Direct Prisma operations organized by domain (game, library, user, review, journal, imported-game)
 - `services/`: Business logic services implementing service patterns with Result types
 - `domain/`: Domain models and types (planned for future enhancement)
@@ -101,7 +102,7 @@ pnpm lint:fix         # Auto-fix ESLint issues
 pnpm typecheck        # TypeScript type checking
 pnpm format:check     # Check Prettier formatting
 pnpm format:write     # Auto-format with Prettier
-pnpm code-check       # Run all checks: format + lint + typecheck
+pnpm ci:check       # Run all checks: format + lint + typecheck
 pnpm code-fix         # Auto-fix: format + lint
 pnpm knip             # Detect unused dependencies and exports
 ```
@@ -145,14 +146,24 @@ pnpm exec prisma generate         # Regenerate Prisma client
 
 ## Architecture Guidelines
 
-### Three-Layer Data Flow
+### Four-Layer Data Flow
 
 ```
-App Router Pages/API Routes
+App Router Pages/API Routes (HTTP adapter)
+  - NextResponse transformation
+  - Server-side caching (unstable_cache)
+  - Security headers
+         ↓
+Handler Layer (data-access-layer/handlers/)
+  - Input validation with Zod
+  - Rate limiting
+  - Request orchestration
+  - Returns HandlerResult<TData> types
+  - ⚠️ ONLY imported by API routes (enforced by ESLint)
          ↓
 Service Layer (data-access-layer/services/)
   - Business logic with Zod validation
-  - Returns Result<TData, TError> types
+  - Returns ServiceResult<TData, TError> types
   - Stateless, injectable services
          ↓
 Repository Layer (data-access-layer/repository/)
@@ -214,6 +225,118 @@ export const searchGames = authorizedActionClient
     const result = await GameService.searchGames(parsedInput);
     return result; // Service already returns Result type
   });
+```
+
+### Use-Case Pattern
+
+**Use-cases** are the orchestration layer for coordinating multiple services to fulfill complex business operations. They sit between the presentation layer (pages, server actions) and the service layer.
+
+**Architecture Rule**: Services should NEVER call other services. When multiple services need to be coordinated, use a use-case.
+
+```
+App Router / Server Actions
+         ↓
+Use-Cases (features/*/use-cases/)
+  - Orchestrate multiple services
+  - Handle cross-domain business logic
+  - Return structured results
+         ↓
+Services (data-access-layer/services/)
+  - Single-domain operations only
+  - Never call other services
+```
+
+**Example: Game Details Use-Case**
+
+See [features/game-detail/use-cases/get-game-details.ts](savepoint-app/features/game-detail/use-cases/get-game-details.ts) for a real-world example.
+
+```typescript
+// features/game-detail/use-cases/get-game-details.ts
+export async function getGameDetails(params: {
+  slug: string;
+  userId?: string;
+}): Promise<
+  { success: true; data: GameDetailsResult } | { success: false; error: string }
+> {
+  // Orchestrate multiple services
+  const igdbService = new IgdbService();
+  const igdbResult = await igdbService.getGameDetailsBySlug({ slug: params.slug });
+
+  if (!igdbResult.ok) {
+    return { success: false, error: igdbResult.error.message };
+  }
+
+  // Coordinate library and journal services if user is authenticated
+  if (params.userId) {
+    const libraryService = new LibraryService();
+    const journalService = new JournalService();
+
+    const [libraryResult, journalResult] = await Promise.all([
+      libraryService.getLibraryItemsForGame({ userId: params.userId, gameId: game.id }),
+      journalService.getEntriesForGame({ userId: params.userId, gameId: game.id }),
+    ]);
+
+    // Combine results from all three services
+    return {
+      success: true,
+      data: {
+        game: igdbResult.data,
+        libraryItems: libraryResult.ok ? libraryResult.data : [],
+        journalEntries: journalResult.ok ? journalResult.data : [],
+      },
+    };
+  }
+
+  return { success: true, data: { game: igdbResult.data } };
+}
+```
+
+**When to Use Handlers vs Use-Cases vs Services**:
+
+| Scenario | Use | Import Allowed By |
+|----------|-----|-------------------|
+| API route logic (validation, rate limiting, orchestration) | **Handler** | API routes only |
+| Single-domain operation (e.g., search games) | **Service** | Handlers, use-cases, server actions |
+| Multi-service coordination (e.g., game details with library + journal) | **Use-Case** | Handlers, server actions, pages |
+| External API call (IGDB, Steam) | **Service** | Handlers, use-cases, other services (types only) |
+| Complex business workflow spanning domains | **Use-Case** | Handlers, server actions, pages |
+| CRUD operations on single entity | **Repository** | Services only |
+
+**Use-Case Guidelines**:
+
+1. **Location**: Place use-cases in `features/[feature-name]/use-cases/`
+2. **Naming**: Use descriptive verb-noun patterns (e.g., `getGameDetails`, `importSteamLibrary`)
+3. **Return Types**: Use structured results similar to services (`{ success: boolean, data?: T, error?: string }`)
+4. **Error Handling**: Aggregate errors from multiple services gracefully
+5. **Testing**: Mock services at the boundary, test orchestration logic
+
+**Anti-Patterns to Avoid**:
+
+```typescript
+// ❌ BAD: Service calling another service
+class LibraryService {
+  async addGameToLibrary(params) {
+    const gameService = new GameService(); // ❌ Service-to-service call
+    const game = await gameService.getGame(params.gameId);
+    // ...
+  }
+}
+
+// ✅ GOOD: Use-case orchestrating services
+async function addGameToLibrary(params) {
+  const gameService = new GameService();
+  const libraryService = new LibraryService();
+
+  const gameResult = await gameService.getGame(params.gameId);
+  if (!gameResult.ok) return { success: false, error: gameResult.error };
+
+  const addResult = await libraryService.createLibraryItem({
+    userId: params.userId,
+    game: gameResult.data,
+  });
+
+  return addResult;
+}
 ```
 
 ## TypeScript Conventions
@@ -353,6 +476,13 @@ The project uses Vitest with two distinct test modes:
 
 - Node environment (excluded from jsdom project)
 - Can be unit or integration style
+
+**Handler Tests** (located in `data-access-layer/handlers/`):
+
+- **Unit tests** (`*.unit.test.ts`): Mock services, fast execution, test validation/error handling
+- **Integration tests** (`*.integration.test.ts`): Real services with MSW-mocked external APIs
+- Run in "backend" (unit) and "integration" (integration) Vitest projects
+- No tests in `app/` directory - handler tests live with handler code
 
 ### Test Factories
 
@@ -509,6 +639,71 @@ features/feature-name/
 3. Export from `data-access-layer/repository/index.ts`
 4. Add integration tests with real database
 
+### API Routes vs Server Actions - Architectural Decision
+
+**When to Use API Routes:**
+- ✅ Public endpoints requiring rate limiting (e.g., `/api/games/search`)
+- ✅ Webhook handlers from external services
+- ✅ Non-React consumers (mobile apps, external integrations)
+- ✅ Explicit HTTP semantics (REST-style endpoints)
+
+**When to Use Server Actions:**
+- ✅ Form submissions and mutations from React components
+- ✅ Authenticated user operations
+- ✅ Data fetching consumed only by React Server Components
+- ✅ Operations requiring progressive enhancement
+
+**Current Game Search Implementation:**
+The game search feature (`/api/games/search`) uses an API Route instead of Server Actions because:
+1. Public access with IP-based rate limiting
+2. Standard REST-style GET endpoint
+3. May be consumed by non-React clients in the future
+4. Explicit caching control with `unstable_cache`
+
+**Future Migration Path:**
+When rate limiting moves to middleware, consider migrating to Server Actions for:
+- Server-side rendering of initial search results
+- Simplified data flow with React `cache()`
+- Better integration with Next.js 15 data fetching patterns
+
+### Caching Strategy
+
+**Client-Side Caching (TanStack Query):**
+```typescript
+// Used for client-side state management and infinite scroll
+staleTime: 5 * 60 * 1000,  // 5 minutes
+gcTime: 10 * 60 * 1000,     // 10 minutes garbage collection
+```
+
+**Server-Side Caching (Next.js `unstable_cache`):**
+```typescript
+// API routes use unstable_cache for server-side caching
+const getCachedGameSearch = unstable_cache(
+  async (query: string, offset: number) => {
+    // ... IGDB service call
+  },
+  ["game-search"],
+  {
+    revalidate: 300,  // Cache for 5 minutes
+    tags: ["game-search"]  // Enable cache invalidation
+  }
+);
+```
+
+**Cache Invalidation:**
+```typescript
+import { revalidateTag } from 'next/cache';
+
+// Invalidate all game search caches
+revalidateTag('game-search');
+```
+
+**Benefits:**
+- Reduced external API calls (IGDB)
+- Faster response times for repeated searches
+- Cost savings on API usage
+- Works across server instances (when deployed with proper cache backend)
+
 ## Important Notes
 
 ### Package Manager
@@ -646,7 +841,17 @@ export async function addGameAction(data: AddGameInput) {
 
 - ESLint plugin `eslint-plugin-boundaries` enforces architectural boundaries
 - Prevents cross-feature imports and maintains clean architecture
-- Service layer (in progress) helps eliminate violations
+- Handler layer enforces that only API routes can import handlers
+
+**Handler Layer Restrictions** (enforced by ESLint):
+- ✅ Handlers can import: other handlers, use-cases, services, shared utilities
+- ❌ Handlers cannot import: repositories, Prisma client
+- ⚠️ Only API routes (`app/api/**`) can import handlers
+
+**Violations will fail ESLint checks in CI**. This prevents:
+- Services from calling handlers (wrong direction)
+- Handlers from bypassing services to call repositories
+- UI components from directly using handler logic
 
 ### Current Development Focus
 

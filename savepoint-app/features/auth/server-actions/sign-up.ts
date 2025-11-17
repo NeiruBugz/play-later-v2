@@ -11,19 +11,11 @@ import { isNextAuthRedirect } from "@/shared/lib/auth/handle-next-auth-error";
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "signUpAction",
 });
-
-/**
- * Sign up a new user with email and password
- */
 export async function signUpAction(data: SignUpFormData) {
   try {
-    // Validate input
     const validatedData = signUpSchema.parse(data);
-
-    // Create user via service
     const authService = new AuthService();
     const result = await authService.signUp(validatedData);
-
     if (!result.success) {
       logger.error({ err: result.error }, "Failed to sign up user");
       return {
@@ -31,15 +23,12 @@ export async function signUpAction(data: SignUpFormData) {
         error: result.error,
       };
     }
-
-    // Automatically sign in the user after successful registration
     await signIn("credentials", {
       email: validatedData.email,
       password: validatedData.password,
       redirectTo: "/dashboard",
     });
     logger.info({}, "User signed up successfully");
-
     return {
       success: true as const,
       message: result.data.message,
@@ -52,14 +41,10 @@ export async function signUpAction(data: SignUpFormData) {
         error: error.errors[0]?.message ?? "Validation error",
       };
     }
-
-    // NextAuth throws NEXT_REDIRECT on successful auth - re-throw to allow redirect
     if (isNextAuthRedirect(error)) {
       logger.debug("Redirecting user to dashboard after successful sign up");
       throw error;
     }
-
-    // Log actual unexpected errors
     logger.error({ err: error }, "Unexpected error occurred during sign up");
     return {
       success: false as const,

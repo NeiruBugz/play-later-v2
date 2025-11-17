@@ -9,3 +9,10 @@ export const requireServerUserId = cache(async () => {
   if (!userId) redirect("/login");
   return userId;
 });
+
+export const getOptionalServerUserId = cache(
+  async (): Promise<string | null> => {
+    const userId = await getServerUserId();
+    return userId ?? null;
+  }
+);

@@ -2,33 +2,34 @@ import { type Game, type LibraryItem, type Review } from "@prisma/client";
 
 import { getTestDatabase } from "../database";
 
+let gameCounter = 0;
 export type GameFactoryOptions = {
   title?: string;
+  slug?: string;
   igdbId?: number;
   description?: string;
   coverImage?: string;
   steamAppId?: number;
+  releaseDate?: Date;
 };
-
 export const createGame = async (
   options: GameFactoryOptions = {}
 ): Promise<Game> => {
+  const uniqueId = ++gameCounter;
   const timestamp = Date.now();
   const randomId = Math.floor(Math.random() * 1000000);
-
   const defaultData = {
     title: `Test Game ${timestamp}`,
-    igdbId: randomId,
+    slug: options.slug || `test-game-${timestamp}-${uniqueId}`,
+    igdbId: options.igdbId ?? randomId,
     description: "A test game for testing purposes",
     steamAppId: randomId,
     ...options,
   };
-
   return getTestDatabase().game.create({
     data: defaultData,
   });
 };
-
 export type LibraryItemFactoryOptions = {
   userId: string;
   gameId: string;
@@ -41,8 +42,10 @@ export type LibraryItemFactoryOptions = {
     | "REVISITING";
   platform?: string;
   acquisitionType?: "DIGITAL" | "PHYSICAL" | "SUBSCRIPTION";
+  createdAt?: Date;
+  startedAt?: Date;
+  completedAt?: Date;
 };
-
 export const createLibraryItem = async (
   options: LibraryItemFactoryOptions
 ): Promise<LibraryItem> => {
@@ -53,11 +56,20 @@ export const createLibraryItem = async (
     ...options,
   };
 
+  if (
+    defaultData.startedAt &&
+    defaultData.completedAt &&
+    defaultData.completedAt < defaultData.startedAt
+  ) {
+    throw new Error(
+      `Invalid test data: completedAt (${defaultData.completedAt.toISOString()}) must be >= startedAt (${defaultData.startedAt.toISOString()}). ` +
+        `This violates the database constraint "completedAt_after_startedAt".`
+    );
+  }
   return getTestDatabase().libraryItem.create({
     data: defaultData,
   });
 };
-
 export type ReviewFactoryOptions = {
   userId: string;
   gameId: string;
@@ -65,7 +77,6 @@ export type ReviewFactoryOptions = {
   content?: string;
   completedOn?: string;
 };
-
 export const createReview = async (
   options: ReviewFactoryOptions
 ): Promise<Review> => {
@@ -75,7 +86,6 @@ export const createReview = async (
     completedOn: "PC",
     ...options,
   };
-
   return getTestDatabase().review.create({
     data: defaultData,
   });

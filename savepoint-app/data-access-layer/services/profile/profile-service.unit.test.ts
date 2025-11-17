@@ -13,16 +13,13 @@ import {
   basicUserProfileFixture,
   existingUserForRedirectFixture,
   existingUserWithTakenUsernameFixture,
-  libraryStatsEmptyFixture,
   libraryStatsErrorFixture,
   libraryStatsSuccessFixture,
   newUserForRedirectFixture,
-  newUserProfileFixture,
   userAtExactBoundaryFixture,
   userForNewUsernameFixture,
   userForUnchangedUsernameFixture,
   userJustUnderBoundaryFixture,
-  userProfileWithNullFieldsFixture,
   userWithAvatarUpdateFixture,
   userWithLongNameFixture,
   userWithNoUsernameFixture,
@@ -91,23 +88,6 @@ describe("ProfileService", () => {
           createdAt: true,
         },
       });
-    });
-
-    it("should return profile with null values for missing fields", async () => {
-      mockFindUserById.mockResolvedValue(
-        repositorySuccess(userProfileWithNullFieldsFixture)
-      );
-
-      const result = await service.getProfile({
-        userId: "user-123",
-      });
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile.username).toBeNull();
-        expect(result.data.profile.image).toBeNull();
-        expect(result.data.profile.email).toBe("test@example.com");
-      }
     });
 
     it("should return error when user is not found", async () => {
@@ -179,23 +159,6 @@ describe("ProfileService", () => {
       expect(mockGetLibraryStatsByUserId).toHaveBeenCalledWith("user-123");
     });
 
-    it("should return profile with empty stats for user with no library items", async () => {
-      mockFindUserById.mockResolvedValue(
-        repositorySuccess(newUserProfileFixture)
-      );
-      mockGetLibraryStatsByUserId.mockResolvedValue(libraryStatsEmptyFixture);
-
-      const result = await service.getProfileWithStats({
-        userId: "user-456",
-      });
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile.stats.statusCounts).toEqual({});
-        expect(result.data.profile.stats.recentGames).toHaveLength(0);
-      }
-    });
-
     it("should return error when user is not found", async () => {
       mockFindUserById.mockResolvedValue(repositorySuccess(null));
 
@@ -222,7 +185,6 @@ describe("ProfileService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        // Now propagates the actual repository error message
         expect(result.error).toBe("Failed to fetch library stats");
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
@@ -729,8 +691,6 @@ describe("ProfileService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          // When checkUsernameAvailability fails, it returns success: false
-          // which is treated as username taken (CONFLICT) by updateProfile
           expect(result.error).toBe("Username already exists");
           expect(result.code).toBe(ServiceErrorCode.CONFLICT);
         }

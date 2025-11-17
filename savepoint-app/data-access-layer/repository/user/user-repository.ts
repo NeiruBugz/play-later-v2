@@ -8,7 +8,7 @@ import {
 } from "@/data-access-layer/repository/types";
 import { Prisma, type User } from "@prisma/client";
 
-import { prisma } from "@/shared/lib";
+import { prisma } from "@/shared/lib/app/db";
 
 import {
   type GetUserBySteamIdInput,
@@ -28,7 +28,6 @@ export async function getUserBySteamId({
         id: { not: userId },
       },
     });
-
     return repositorySuccess(user);
   } catch (error) {
     return repositoryError(
@@ -37,7 +36,6 @@ export async function getUserBySteamId({
     );
   }
 }
-
 export async function updateUserSteamData({
   userId,
   steamId,
@@ -53,48 +51,35 @@ export async function updateUserSteamData({
         steamAvatar: avatar,
       },
     });
-
     return repositorySuccess(updated);
   } catch (error) {
-    // Prisma throws P2025 when record to update is not found
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
       return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
     }
-
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to update user Steam data: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
-
-/**
- * @deprecated This function appears to have no practical use case.
- * It returns only the username field when the username is already known (it's the input).
- * Consider using findUserByNormalizedUsername() for actual user lookups.
- * This function is kept for backward compatibility but should not be used in new code.
- */
 export async function getUserByUsername({
   username,
 }: GetUserByUsernameInput): Promise<
   RepositoryResult<{ username: string | null }>
 > {
   try {
-    // Use normalized username for case-insensitive lookup
     const user = await prisma.user.findUnique({
       where: { usernameNormalized: username.toLowerCase().trim() },
       select: {
         username: true,
       },
     });
-
     if (!user) {
       return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
     }
-
     return repositorySuccess(user);
   } catch (error) {
     return repositoryError(
@@ -103,7 +88,6 @@ export async function getUserByUsername({
     );
   }
 }
-
 export async function getUserSteamData({ userId }: { userId: string }): Promise<
   RepositoryResult<{
     steamId64: string | null;
@@ -130,7 +114,6 @@ export async function getUserSteamData({ userId }: { userId: string }): Promise<
     );
   }
 }
-
 export async function getUserInfo({ userId }: { userId: string }): Promise<
   RepositoryResult<{
     id: string;
@@ -161,7 +144,6 @@ export async function getUserInfo({ userId }: { userId: string }): Promise<
     );
   }
 }
-
 export async function updateUserData({
   userId,
   username,
@@ -183,14 +165,12 @@ export async function updateUserData({
     ) {
       return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
     }
-
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to update user data: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
-
 export async function getUserSteamId({
   steamUsername,
   userId,
@@ -211,7 +191,6 @@ export async function getUserSteamId({
     );
   }
 }
-
 export async function disconnectSteam({
   userId,
 }: {
@@ -236,14 +215,12 @@ export async function disconnectSteam({
     ) {
       return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
     }
-
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to disconnect Steam: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
-
 export async function findUserByEmail(
   email: string
 ): Promise<RepositoryResult<{ id: string } | null>> {
@@ -252,7 +229,6 @@ export async function findUserByEmail(
       where: { email: email.trim().toLowerCase() },
       select: { id: true },
     });
-
     return repositorySuccess(user);
   } catch (error) {
     return repositoryError(
@@ -261,7 +237,6 @@ export async function findUserByEmail(
     );
   }
 }
-
 export async function createUserWithCredentials(input: {
   email: string;
   password: string;
@@ -282,7 +257,6 @@ export async function createUserWithCredentials(input: {
         name: true,
       },
     });
-
     return repositorySuccess(user);
   } catch (error) {
     if (
@@ -294,20 +268,12 @@ export async function createUserWithCredentials(input: {
         "User with this email already exists"
       );
     }
-
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to create user: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
-
-/**
- * Find user by ID with custom field selection
- * @param userId - User ID to find
- * @param options - Required select option to specify which fields to return
- * @returns RepositoryResult with user data (with selected fields) or null if not found
- */
 export async function findUserById<T extends Prisma.UserSelect>(
   userId: string,
   options: { select: T }
@@ -317,7 +283,6 @@ export async function findUserById<T extends Prisma.UserSelect>(
       where: { id: userId },
       select: options.select,
     });
-
     return repositorySuccess(user);
   } catch (error) {
     return repositoryError(
@@ -326,7 +291,6 @@ export async function findUserById<T extends Prisma.UserSelect>(
     );
   }
 }
-
 export async function findUserByNormalizedUsername(
   usernameNormalized: string
 ): Promise<RepositoryResult<{ id: string } | null>> {
@@ -343,10 +307,6 @@ export async function findUserByNormalizedUsername(
     );
   }
 }
-
-/**
- * Update user profile fields
- */
 export async function updateUserProfile(
   userId: string,
   data: {
@@ -386,7 +346,6 @@ export async function updateUserProfile(
     ) {
       return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
     }
-
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to update user profile: ${error instanceof Error ? error.message : "Unknown error"}`

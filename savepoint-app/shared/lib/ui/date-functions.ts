@@ -7,26 +7,21 @@ const LAST_HOUR_OF_DAY = 23;
 const LAST_MINUTE_OF_HOUR = 59;
 const LAST_SECOND_OF_MINUTE = 59;
 const LAST_MILLISECOND_OF_SECOND = 999;
-
 export function isoToReadable(iso: string) {
   return format(parseISO(iso), "yyyy");
 }
-
 export const getTimeStamp = (): number =>
   Math.floor(Date.now() / MILLISECONDS_TO_SECONDS);
-
 export function convertUnixToHumanReadable(unixTimestamp: number) {
   const date = new Date(unixTimestamp * MILLISECONDS_TO_SECONDS);
   return format(date, "MMM dd, yyyy");
 }
-
 export function convertReleaseDateToIsoStringDate(
   releaseDate: string | undefined
 ): string | null {
   if (releaseDate === undefined) {
     return null;
   }
-
   try {
     const fullDate = parse(releaseDate, "MMM dd, yyyy", new Date());
     return fullDate.toISOString();
@@ -48,6 +43,5 @@ export function convertReleaseDateToIsoStringDate(
       return yearEndDate.toISOString();
     }
   }
-
   return null;
 }

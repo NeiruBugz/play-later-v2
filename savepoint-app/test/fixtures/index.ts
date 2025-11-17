@@ -1,4 +1,7 @@
 export * from "./search";
-
-// Example: export JSON fixtures directly when needed
-// export { default as igdbGameDetails1234 } from "./igdb/game-details-1234.json";
+export * from "./library";
+export * from "./profile";
+export * from "./journal";
+export * from "./game-search";
+export * from "./platform";
+export * from "./game-detail";

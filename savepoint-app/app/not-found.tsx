@@ -1,6 +1,7 @@
 import { ArrowLeft, Compass } from "lucide-react";
 import Link from "next/link";
 
+import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { Button } from "@/shared/components/ui/button";
 
 export default function NotFoundPage() {
@@ -12,18 +13,16 @@ export default function NotFoundPage() {
           <Compass className="h-4 w-4" aria-hidden="true" />
           Lost in the library
         </span>
-
         <h1 className="font-serif text-4xl font-bold tracking-tight text-balance sm:text-5xl">
           This save point doesn&apos;t exist.
         </h1>
-
         <p className="text-muted-foreground text-lg leading-relaxed">
           The page you&apos;re looking for might have been removed, renamed, or
           is temporarily unavailable. Let&apos;s guide you back to familiar
           territory.
         </p>
-
         <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center">
+          <BrowserBackButton />
           <Button
             asChild
             variant="outline"
@@ -39,7 +38,6 @@ export default function NotFoundPage() {
             </Link>
           </Button>
         </div>
-
         <p className="text-muted-foreground text-sm">
           Still stuck?{" "}
           <Link

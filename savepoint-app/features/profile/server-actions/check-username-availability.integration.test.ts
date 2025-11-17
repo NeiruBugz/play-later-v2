@@ -7,7 +7,6 @@ import { createUser } from "@/test/setup/db-factories";
 
 import { checkUsernameAvailability } from "./check-username-availability";
 
-// Mock the prisma client to use testDataBase
 vi.mock("@/shared/lib", async () => {
   const actual =
     await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
@@ -51,7 +50,6 @@ describe("checkUsernameAvailability server action", () => {
     });
 
     it("should return available: false when username is already taken", async () => {
-      // Create a user with username
       await createUser({
         username: "existinguser",
       });
@@ -67,12 +65,10 @@ describe("checkUsernameAvailability server action", () => {
     });
 
     it("should check username case-insensitively", async () => {
-      // Create a user with lowercase username
       await createUser({
         username: "testuser",
       });
 
-      // Check with different case
       const result = await checkUsernameAvailability({
         username: "TestUser",
       });
@@ -84,7 +80,6 @@ describe("checkUsernameAvailability server action", () => {
     });
 
     it("should handle multiple users and only check exact username match", async () => {
-      // Create multiple users
       await createUser({
         username: "user1",
       });
@@ -95,7 +90,6 @@ describe("checkUsernameAvailability server action", () => {
         username: "user3",
       });
 
-      // Check for a username that doesn't exist
       const result = await checkUsernameAvailability({
         username: "user4",
       });

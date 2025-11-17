@@ -1,18 +1,7 @@
-/**
- * Global Test Setup for Unit Tests
- *
- * This file configures the test environment for unit tests (utilities, backend, components).
- * It mocks Prisma and other dependencies to provide fast, isolated tests.
- *
- * For integration tests that use a real database, see test/setup/integration.ts
- */
-
 import { afterEach, beforeAll, vi } from "vitest";
 
-// Import common mocks shared across all test types
 import "./common-mocks";
 
-// Set up environment variables BEFORE any modules that use them are imported
 process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";
 process.env.AUTH_URL = "http://localhost:3000";
@@ -35,18 +24,12 @@ process.env.POSTGRES_PASSWORD = "postgres";
 process.env.POSTGRES_DATABASE = "test";
 process.env.STEAM_API_KEY = "test-steam-key";
 
-// S3 / LocalStack configuration
 process.env.AWS_REGION = "us-east-1";
 process.env.AWS_ENDPOINT_URL = "http://localhost:4568";
 process.env.AWS_ACCESS_KEY_ID = "test";
 process.env.AWS_SECRET_ACCESS_KEY = "test";
 process.env.S3_BUCKET_NAME = "savepoint-dev";
 process.env.S3_AVATAR_PATH_PREFIX = "user-avatars/";
-
-/**
- * Mock @/shared/lib with mocked Prisma client for unit tests.
- * Integration tests override this to use a real database.
- */
 vi.mock("@/shared/lib", () => {
   const mockLogger = {
     fatal: vi.fn(),
@@ -57,7 +40,6 @@ vi.mock("@/shared/lib", () => {
     trace: vi.fn(),
     child: vi.fn(() => mockLogger),
   };
-
   return {
     prisma: {
       $transaction: vi.fn(),
@@ -117,49 +99,172 @@ vi.mock("@/shared/lib", () => {
       ERROR_BOUNDARY: "errorBoundary",
       STORAGE: "storage",
     },
+    LIBRARY_STATUS_CONFIG: [
+      {
+        value: "CURIOUS_ABOUT",
+        label: "Curious About",
+        description: "Interested in trying this game",
+        badgeVariant: "outline",
+      },
+      {
+        value: "CURRENTLY_EXPLORING",
+        label: "Currently Exploring",
+        description: "Actively playing this game",
+        badgeVariant: "default",
+      },
+      {
+        value: "TOOK_A_BREAK",
+        label: "Took a Break",
+        description: "Paused but plan to return",
+        badgeVariant: "secondary",
+      },
+      {
+        value: "EXPERIENCED",
+        label: "Experienced",
+        description: "Finished or thoroughly explored",
+        badgeVariant: "secondary",
+      },
+      {
+        value: "WISHLIST",
+        label: "Wishlist",
+        description: "Want to play in the future",
+        badgeVariant: "outline",
+      },
+      {
+        value: "REVISITING",
+        label: "Revisiting",
+        description: "Playing again after completing",
+        badgeVariant: "default",
+      },
+    ],
+    LIBRARY_STATUS_LABELS: {
+      CURIOUS_ABOUT: "Curious About",
+      CURRENTLY_EXPLORING: "Currently Exploring",
+      TOOK_A_BREAK: "Took a Break",
+      EXPERIENCED: "Experienced",
+      WISHLIST: "Wishlist",
+      REVISITING: "Revisiting",
+    },
+    LIBRARY_STATUS_VARIANTS: {
+      CURIOUS_ABOUT: "outline",
+      CURRENTLY_EXPLORING: "default",
+      TOOK_A_BREAK: "secondary",
+      EXPERIENCED: "secondary",
+      WISHLIST: "outline",
+      REVISITING: "default",
+    },
+    getStatusLabel: vi.fn((status: string) => {
+      const labels: Record<string, string> = {
+        CURIOUS_ABOUT: "Curious About",
+        CURRENTLY_EXPLORING: "Currently Exploring",
+        TOOK_A_BREAK: "Took a Break",
+        EXPERIENCED: "Experienced",
+        WISHLIST: "Wishlist",
+        REVISITING: "Revisiting",
+      };
+      return labels[status] || status;
+    }),
+    getStatusVariant: vi.fn((status: string) => {
+      const variants: Record<string, string> = {
+        CURIOUS_ABOUT: "outline",
+        CURRENTLY_EXPLORING: "default",
+        TOOK_A_BREAK: "secondary",
+        EXPERIENCED: "secondary",
+        WISHLIST: "outline",
+        REVISITING: "default",
+      };
+      return variants[status] || "secondary";
+    }),
   };
 });
 
-/**
- * Mock NextAuth functions for authentication tests
- */
+vi.mock("@/shared/lib/app/db", () => {
+  return {
+    prisma: {
+      $transaction: vi.fn(),
+      game: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+        findFirst: vi.fn(),
+      },
+      libraryItem: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        findFirst: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+        count: vi.fn(),
+        groupBy: vi.fn(),
+      },
+      user: {
+        findUnique: vi.fn(),
+        findFirst: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+      },
+      review: {
+        create: vi.fn(),
+        findMany: vi.fn(),
+      },
+      genre: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        upsert: vi.fn(),
+      },
+      platform: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        upsert: vi.fn(),
+      },
+      journal: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        findMany: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+      },
+    },
+  };
+});
 vi.mock("@/auth", () => ({
   auth: vi.fn(),
   getServerUserId: vi.fn(),
 }));
 
-// Add the repository mocks that were in individual test files
 vi.mock("@/data-access-layer/repository", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/data-access-layer/repository")>();
   return {
     ...actual,
+
     createLibraryItem: vi.fn(),
     deleteLibraryItem: vi.fn(),
     updateLibraryItem: vi.fn(),
     getManyLibraryItems: vi.fn(),
+
+    findUserByEmail: vi.fn(),
+    createUserWithCredentials: vi.fn(),
     updateUserData: vi.fn(),
+
     createReview: vi.fn(),
   };
 });
 
-// Add the add-game mock
 vi.mock("@/features/add-game/server-actions/add-game", () => ({
   saveGameAndAddToLibrary: vi.fn(),
 }));
-
-// Set up test-specific configuration before tests run
-beforeAll(() => {
-  // @ts-expect-error - NODE_ENV is read-only
-  process.env.NODE_ENV = "test";
-});
 
 declare global {
   var testUtils: {
     createMockFormData: (data: Record<string, string>) => FormData;
   };
 }
-
 global.testUtils = {
   createMockFormData: (data: Record<string, string>) => {
     const formData = new FormData();
@@ -169,7 +274,6 @@ global.testUtils = {
     return formData;
   },
 };
-
 afterEach(() => {
   vi.clearAllMocks();
 });

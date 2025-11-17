@@ -8,7 +8,6 @@ export const statusLabels: Record<string, string> = {
   WISHLIST: "Wishlist",
   REVISITING: "Revisiting",
 };
-
 export const initialFormState: UpdateProfileFormState = {
   status: "idle",
 };

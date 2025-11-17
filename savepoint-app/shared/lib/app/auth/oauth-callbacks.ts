@@ -1,17 +1,14 @@
+import type { Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
-
-// Keep callbacks isolated for clarity and reuse
 
 export async function onSignIn({
   account,
 }: {
   account?: { provider?: string } | null;
 }): Promise<boolean> {
-  // Allow OAuth (Cognito) and credentials to proceed; redirect decided later.
   if (!account) return true;
   return true;
 }
-
 export async function onRedirect({
   url,
   baseUrl,
@@ -20,7 +17,6 @@ export async function onRedirect({
   baseUrl: string;
 }): Promise<string> {
   try {
-    // Only allow relative or same-origin URLs. Cross-origin -> baseUrl.
     if (url.startsWith("/")) {
       const target = new URL(url, baseUrl);
       if (
@@ -33,7 +29,6 @@ export async function onRedirect({
       }
       return target.toString();
     }
-
     if (url.startsWith(baseUrl)) {
       const target = new URL(url);
       if (
@@ -46,14 +41,11 @@ export async function onRedirect({
       }
       return target.toString();
     }
-
-    // Cross-origin – return baseUrl verbatim (no trailing slash changes)
     return baseUrl;
   } catch {
     return baseUrl;
   }
 }
-
 export async function onJwt({
   token,
   user,
@@ -66,16 +58,13 @@ export async function onJwt({
   }
   return token;
 }
-
 export async function onSession({
   session,
   token,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  session: any;
+  session: Session;
   token: JWT;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}): Promise<any> {
+}): Promise<Session> {
   return {
     ...session,
     user: {

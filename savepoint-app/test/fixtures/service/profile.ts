@@ -1,4 +1,3 @@
-// Basic profile fixtures
 export const basicUserProfileFixture = {
   username: "testuser",
   image: "https://example.com/avatar.jpg",
@@ -6,7 +5,6 @@ export const basicUserProfileFixture = {
   name: "Test User",
   createdAt: new Date("2024-01-15"),
 };
-
 export const userProfileWithNullFieldsFixture = {
   username: null,
   image: null,
@@ -14,7 +12,6 @@ export const userProfileWithNullFieldsFixture = {
   name: "Test User",
   createdAt: new Date("2024-01-15"),
 };
-
 export const newUserProfileFixture = {
   username: "newuser",
   image: null,
@@ -22,8 +19,6 @@ export const newUserProfileFixture = {
   name: "New User",
   createdAt: new Date("2024-03-01"),
 };
-
-// Profile with stats fixtures
 export const libraryStatsSuccessFixture = {
   ok: true as const,
   data: {
@@ -48,7 +43,6 @@ export const libraryStatsSuccessFixture = {
     ],
   },
 };
-
 export const libraryStatsEmptyFixture = {
   ok: true as const,
   data: {
@@ -56,7 +50,6 @@ export const libraryStatsEmptyFixture = {
     recentGames: [],
   },
 };
-
 export const libraryStatsErrorFixture = {
   ok: false as const,
   error: {
@@ -64,96 +57,78 @@ export const libraryStatsErrorFixture = {
     message: "Failed to fetch library stats",
   },
 };
-
-// Update profile fixtures
 export const userForUnchangedUsernameFixture = {
   id: "user-123",
   username: "existinguser",
   usernameNormalized: "existinguser",
   image: null,
 };
-
 export const userForNewUsernameFixture = {
   id: "user-123",
   username: "newuser123",
   usernameNormalized: "newuser123",
   image: null,
 };
-
 export const userWithAvatarUpdateFixture = {
   id: "user-123",
   username: "testuser",
   usernameNormalized: "testuser",
   image: "https://example.com/avatar.jpg",
 };
-
 export const existingUserWithTakenUsernameFixture = {
   id: "user-456",
 };
-
-// Setup status fixtures
 export const userWithNoUsernameFixture = {
   username: null,
   name: "John Doe",
   createdAt: new Date("2025-01-20T11:50:00Z"),
 };
-
 export const userWithUsernameAndRecentCreationFixture = {
   username: "existinguser",
   name: "John Doe",
   createdAt: new Date("2025-01-20T11:58:00Z"),
 };
-
 export const userWithoutUsernameRecentCreationFixture = {
   username: null,
   name: "Jane Smith",
   createdAt: new Date("2025-01-20T11:57:00Z"),
 };
-
 export const userWithUsernameNotRecentFixture = {
   username: "existinguser",
   name: "John Doe",
   createdAt: new Date("2025-01-20T11:50:00Z"),
 };
-
 export const userAtExactBoundaryFixture = {
   username: "boundaryuser",
   name: "Boundary Test",
   createdAt: new Date("2025-01-20T11:55:00Z"),
 };
-
 export const userJustUnderBoundaryFixture = {
   username: "recentuser",
   name: "Recent User",
   createdAt: new Date("2025-01-20T11:55:01Z"),
 };
-
 export const userWithSpecialCharactersNameFixture = {
   username: null,
   name: "John-Paul O'Brien",
   createdAt: new Date("2025-01-20T11:50:00Z"),
 };
-
 export const userWithLongNameFixture = {
   username: null,
   name: "Christopher Alexander Montgomery",
   createdAt: new Date("2025-01-20T11:50:00Z"),
 };
-
 export const userWithNullNameFixture = {
   username: null,
   name: null,
   createdAt: new Date("2025-01-20T11:50:00Z"),
 };
-
-// Redirect after auth fixtures
 export const newUserForRedirectFixture = {
   username: null,
   name: "New User",
   profileSetupCompletedAt: null,
   createdAt: new Date("2025-01-20T11:58:00Z"),
 };
-
 export const existingUserForRedirectFixture = {
   username: "existing",
   name: "Existing User",

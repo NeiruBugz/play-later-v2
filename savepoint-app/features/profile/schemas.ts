@@ -1,32 +1,24 @@
 import { z } from "zod";
 
-/**
- * Schema for checking username availability
- */
+import {
+  MAX_AVATAR_FILE_SIZE_BYTES,
+  USERNAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+} from "@/shared/constants";
+
 export const CheckUsernameSchema = z.object({
-  username: z.string().min(3).max(25),
+  username: z.string().min(USERNAME_MIN_LENGTH).max(USERNAME_MAX_LENGTH),
 });
-
 export type CheckUsernameInput = z.infer<typeof CheckUsernameSchema>;
-
-/**
- * Schema for updating user profile
- */
 export const UpdateProfileSchema = z.object({
-  username: z.string().min(3).max(25),
+  username: z.string().min(USERNAME_MIN_LENGTH).max(USERNAME_MAX_LENGTH),
   avatarUrl: z.string().optional(),
 });
-
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
-
-/**
- * Schema for uploading avatar
- * Validates file size (max 4MB) and MIME type
- */
 export const UploadAvatarSchema = z.object({
   file: z
     .instanceof(File)
-    .refine((file) => file.size <= 4 * 1024 * 1024, {
+    .refine((file) => file.size <= MAX_AVATAR_FILE_SIZE_BYTES, {
       message: "File size exceeds 4MB",
     })
     .refine(
@@ -39,18 +31,15 @@ export const UploadAvatarSchema = z.object({
       }
     ),
 });
-
 export type UploadAvatarInput = z.infer<typeof UploadAvatarSchema>;
-
-/**
- * Schema for completing profile setup (first-time users)
- * Both fields are optional - users can skip setup entirely
- */
 export const CompleteProfileSetupSchema = z.object({
-  username: z.string().min(3).max(25).optional(),
+  username: z
+    .string()
+    .min(USERNAME_MIN_LENGTH)
+    .max(USERNAME_MAX_LENGTH)
+    .optional(),
   avatarUrl: z.string().optional(),
 });
-
 export type CompleteProfileSetupInput = z.infer<
   typeof CompleteProfileSetupSchema
 >;

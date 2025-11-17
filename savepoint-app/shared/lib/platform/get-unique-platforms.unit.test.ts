@@ -1,5 +1,4 @@
 import { type Game } from "igdb-api-types";
-import { describe, expect, it } from "vitest";
 
 import { getUniquePlatforms } from "./get-unique-platforms";
 
@@ -27,8 +26,6 @@ describe("getUniquePlatforms", () => {
   });
 
   it("should handle a mix of ReleaseDate objects and number IDs", () => {
-    // we want to test the function with an array of mixed types
-
     const releaseDates: any[] = [
       { id: 1, platform: { id: 1, name: "PC" } },
       12345,

@@ -1,4 +1,4 @@
-import { ProfileService } from "@/data-access-layer/services";
+import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -9,21 +9,15 @@ export const metadata: Metadata = {
   title: "Complete Your Profile - SavePoint",
   description: "Set up your username and profile image",
 };
-
 export default async function ProfileSetupPage() {
   const userId = await requireServerUserId();
-
   const profileService = new ProfileService();
   const result = await profileService.checkSetupStatus({ userId });
-
-  if (!result.success) {
+  if (!isSuccessResult(result)) {
     redirect("/login");
   }
-
-  // If setup already completed, redirect to dashboard
   if (!result.data.needsSetup) {
     redirect("/dashboard");
   }
-
   return <ProfileSetupForm defaultUsername={result.data.suggestedUsername} />;
 }

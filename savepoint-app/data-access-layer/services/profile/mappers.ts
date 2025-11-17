@@ -12,7 +12,6 @@ type MinimalUser = {
   name: string | null;
   createdAt: Date;
 };
-
 type LibraryStatsRepo = {
   statusCounts: Record<string, number>;
   recentGames: Array<{
@@ -22,7 +21,6 @@ type LibraryStatsRepo = {
     lastPlayed: Date;
   }>;
 };
-
 export function mapUserToProfile(user: MinimalUser): Profile {
   return {
     username: user.username,
@@ -32,7 +30,6 @@ export function mapUserToProfile(user: MinimalUser): Profile {
     createdAt: user.createdAt,
   };
 }
-
 export function mapRecentGame(item: {
   gameId: string;
   title: string;
@@ -46,14 +43,12 @@ export function mapRecentGame(item: {
     lastPlayed: item.lastPlayed,
   };
 }
-
 export function mapLibraryStats(stats: LibraryStatsRepo): LibraryStats {
   return {
     statusCounts: stats.statusCounts,
     recentGames: stats.recentGames.map(mapRecentGame),
   };
 }
-
 export function mapUserToProfileWithStats(
   user: MinimalUser,
   stats: LibraryStatsRepo

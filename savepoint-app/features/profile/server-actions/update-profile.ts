@@ -20,7 +20,6 @@ type PerformUpdateProfileResult =
       success: false;
       error: string;
     };
-
 async function performUpdateProfile(
   data: UpdateProfileInput
 ): Promise<PerformUpdateProfileResult> {
@@ -36,12 +35,10 @@ async function performUpdateProfile(
         error: "Unauthorized",
       };
     }
-
     const sanitizedData: UpdateProfileInput = {
       username: data.username.trim(),
       avatarUrl: data.avatarUrl,
     };
-
     const validationResult = UpdateProfileSchema.safeParse(sanitizedData);
     if (!validationResult.success) {
       logger.warn(
@@ -53,9 +50,7 @@ async function performUpdateProfile(
         error: validationResult.error.errors[0]?.message ?? "Validation error",
       };
     }
-
     const validatedData = validationResult.data;
-
     const profileService = new ProfileService();
     logger.info({ userId }, "Updating user profile");
     const result = await profileService.updateProfile({
@@ -63,7 +58,6 @@ async function performUpdateProfile(
       username: validatedData.username,
       avatarUrl: validatedData.avatarUrl,
     });
-
     if (!result.success) {
       logger.error({ userId, reason: result.error }, "Profile update failed");
       return {
@@ -71,7 +65,6 @@ async function performUpdateProfile(
         error: result.error,
       };
     }
-
     logger.info({ userId }, "Profile updated successfully");
     return {
       success: true as const,
@@ -85,26 +78,22 @@ async function performUpdateProfile(
     };
   }
 }
-
 export async function updateProfile(
   data: UpdateProfileInput
 ): Promise<PerformUpdateProfileResult> {
   return performUpdateProfile(data);
 }
-
 export type UpdateProfileFormState = {
   status: "idle" | "success" | "error";
   message?: string;
   submittedUsername?: string;
 };
-
 export async function updateProfileFormAction(
   _prevState: UpdateProfileFormState,
   formData: FormData
 ): Promise<UpdateProfileFormState> {
   const rawUsername = formData.get("username");
   const rawAvatar = formData.get("avatarUrl");
-
   if (typeof rawUsername !== "string") {
     return {
       status: "error",
@@ -112,7 +101,6 @@ export async function updateProfileFormAction(
       submittedUsername: undefined,
     };
   }
-
   const trimmedUsername = rawUsername.trim();
   if (!trimmedUsername) {
     return {
@@ -121,7 +109,6 @@ export async function updateProfileFormAction(
       submittedUsername: undefined,
     };
   }
-
   const result = await performUpdateProfile({
     username: trimmedUsername,
     avatarUrl:
@@ -129,7 +116,6 @@ export async function updateProfileFormAction(
         ? rawAvatar.trim()
         : undefined,
   });
-
   if (result.success) {
     revalidatePath("/profile");
     return {
@@ -138,7 +124,6 @@ export async function updateProfileFormAction(
       submittedUsername: trimmedUsername,
     };
   }
-
   return {
     status: "error",
     message: result.error,

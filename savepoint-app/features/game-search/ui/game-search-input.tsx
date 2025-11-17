@@ -1,0 +1,42 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { Input } from "@/shared/components/ui/input";
+import {
+  MIN_SEARCH_QUERY_LENGTH,
+  SEARCH_INPUT_DEBOUNCE_MS,
+} from "@/shared/constants";
+import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
+
+import type { GameSearchInputProps } from "./game-search-input.types";
+import { GameSearchResults } from "./game-search-results";
+
+export const GameSearchInput = ({
+  initialQuery = "",
+}: GameSearchInputProps) => {
+  const router = useRouter();
+  const [query, setQuery] = useState(initialQuery);
+  const debouncedQuery = useDebouncedValue(query, SEARCH_INPUT_DEBOUNCE_MS);
+  useEffect(() => {
+    if (initialQuery && query !== initialQuery) {
+      router.replace("/games/search", { scroll: false });
+    }
+  }, [query, initialQuery, router]);
+  return (
+    <div className="space-y-8">
+      <Input
+        type="search"
+        placeholder="Search for games (minimum 3 characters)..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        aria-label="Search for games by name"
+        className="h-12 text-base"
+      />
+      {debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH && (
+        <GameSearchResults query={debouncedQuery} />
+      )}
+    </div>
+  );
+};

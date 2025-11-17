@@ -1,16 +1,13 @@
 import { env } from "@/env.mjs";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
+import { MAX_AVATAR_FILE_SIZE_BYTES } from "@/shared/constants";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { s3Client } from "./s3-client";
 
 const logger = createLogger({ [LOGGER_CONTEXT.STORAGE]: "AvatarStorage" });
-
 export class AvatarStorageService {
-  /**
-   * Upload avatar to S3 and return URL
-   */
   static async uploadAvatar(
     userId: string,
     file: File
@@ -18,12 +15,9 @@ export class AvatarStorageService {
     { ok: true; data: { url: string } } | { ok: false; error: string }
   > {
     try {
-      // Validate file
-      const maxSize = 4 * 1024 * 1024; // 4MB
-      if (file.size > maxSize) {
+      if (file.size > MAX_AVATAR_FILE_SIZE_BYTES) {
         return { ok: false, error: "File size exceeds 4MB" };
       }
-
       const allowedTypes = [
         "image/jpeg",
         "image/png",
@@ -33,16 +27,10 @@ export class AvatarStorageService {
       if (!allowedTypes.includes(file.type)) {
         return { ok: false, error: "Unsupported file format" };
       }
-
-      // Generate unique key
       const timestamp = Date.now();
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
       const key = `${env.S3_AVATAR_PATH_PREFIX}${userId}/${timestamp}-${sanitizedName}`;
-
-      // Convert File to Buffer
       const buffer = Buffer.from(await file.arrayBuffer());
-
-      // Upload to S3
       await s3Client.send(
         new PutObjectCommand({
           Bucket: env.S3_BUCKET_NAME,
@@ -51,12 +39,9 @@ export class AvatarStorageService {
           ContentType: file.type,
         })
       );
-
-      // Construct URL
       const url = env.AWS_ENDPOINT_URL
-        ? `${env.AWS_ENDPOINT_URL}/${env.S3_BUCKET_NAME}/${key}` // LocalStack
-        : `https://${env.S3_BUCKET_NAME}.s3.${env.AWS_REGION}.amazonaws.com/${key}`; // AWS
-
+        ? `${env.AWS_ENDPOINT_URL}/${env.S3_BUCKET_NAME}/${key}`
+        : `https://${env.S3_BUCKET_NAME}.s3.${env.AWS_REGION}.amazonaws.com/${key}`;
       logger.info({ userId, key }, "Avatar uploaded successfully");
       return { ok: true, data: { url } };
     } catch (error) {

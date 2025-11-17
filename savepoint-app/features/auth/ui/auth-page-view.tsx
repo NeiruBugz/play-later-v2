@@ -8,7 +8,6 @@ import { GoogleSignInButton } from "./google-sign-in-button";
 export function AuthPageView() {
   const shouldIncludeCredentialsSignIn =
     env.NODE_ENV !== "production" || env.AUTH_ENABLE_CREDENTIALS === "true";
-
   return (
     <div className="from-muted/40 via-background to-background dark:from-muted/20 dark:via-background dark:to-background flex min-h-screen items-center justify-center bg-linear-to-br p-4">
       <Card className="w-full max-w-md p-8">
@@ -18,11 +17,9 @@ export function AuthPageView() {
             Manage your gaming experiences
           </p>
         </div>
-
         {shouldIncludeCredentialsSignIn && (
           <>
             <CredentialsForm />
-
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="border-border w-full border-t" />
@@ -35,7 +32,6 @@ export function AuthPageView() {
             </div>
           </>
         )}
-
         <GoogleSignInButton />
       </Card>
     </div>

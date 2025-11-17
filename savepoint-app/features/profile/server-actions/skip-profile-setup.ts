@@ -18,7 +18,6 @@ export async function skipProfileSetup(): Promise<{
       logger.warn({ reason: "unauthorized" }, "Skip profile setup denied");
       return { success: false, error: "Unauthorized" };
     }
-
     const service = new ProfileService();
     logger.info({ userId }, "Marking profile setup as complete (skip)");
     const result = await service.completeSetup({ userId });

@@ -7,7 +7,16 @@ import {
 } from "next-themes";
 import { type PropsWithChildren } from "react";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});
 
 export default function TestProviders({
   children,
@@ -34,9 +43,11 @@ export function createQueryWrapper() {
       queries: {
         retry: false,
       },
+      mutations: {
+        retry: false,
+      },
     },
   });
-
   return ({ children }: PropsWithChildren) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

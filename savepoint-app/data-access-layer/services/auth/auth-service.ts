@@ -9,23 +9,15 @@ import { createLogger, hashPassword, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode } from "../types";
 import { mapToAuthUserData } from "./mappers";
-import type {
-  SignInInput,
-  SignInResult,
-  SignUpInput,
-  SignUpResult,
-} from "./types";
+import type { SignUpInput, SignUpResult } from "./types";
 
 export class AuthService extends BaseService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "AuthService" });
-
   async signUp(input: SignUpInput): Promise<SignUpResult> {
     try {
       this.logger.info({ userId: "unknown" }, "User sign up attempt");
-
       const normalizedEmail = input.email.trim().toLowerCase();
       const existingUserResult = await findUserByEmail(normalizedEmail);
-
       if (!existingUserResult.ok) {
         this.logger.error(
           { userId: "unknown", error: existingUserResult.error },
@@ -36,7 +28,6 @@ export class AuthService extends BaseService {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       if (existingUserResult.data) {
         this.logger.warn(
           { userId: "unknown" },
@@ -47,15 +38,12 @@ export class AuthService extends BaseService {
           ServiceErrorCode.CONFLICT
         );
       }
-
       const hashedPassword = await hashPassword(input.password);
-
       const createUserResult = await createUserWithCredentials({
         email: normalizedEmail,
         password: hashedPassword,
         name: input.name ?? null,
       });
-
       if (!createUserResult.ok) {
         this.logger.error(
           { userId: "unknown", error: createUserResult.error },
@@ -66,14 +54,11 @@ export class AuthService extends BaseService {
           ServiceErrorCode.INTERNAL_ERROR
         );
       }
-
       const user = createUserResult.data;
-
       this.logger.info(
         { userId: user.id },
         "User account created successfully"
       );
-
       return this.success({
         user: mapToAuthUserData({
           id: user.id,
@@ -97,24 +82,11 @@ export class AuthService extends BaseService {
           ServiceErrorCode.CONFLICT
         );
       }
-
       this.logger.error(
         { error, userId: "unknown" },
         "Error creating user account"
       );
       return this.handleError(error, "Failed to create account");
-    }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async signIn(_input: SignInInput): Promise<SignInResult> {
-    try {
-      return this.error(
-        "Sign in should be handled through NextAuth",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    } catch (error) {
-      return this.handleError(error, "Failed to sign in");
     }
   }
 }

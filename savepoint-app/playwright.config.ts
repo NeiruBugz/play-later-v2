@@ -8,10 +8,8 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "github" : "html",
 
-  // Global setup and teardown for database cleanup
   globalSetup: "./e2e/global-setup.ts",
   globalTeardown: "./e2e/global-teardown.ts",
-
   use: {
     baseURL: "http://localhost:6060",
     trace: "on-first-retry",
@@ -21,12 +19,11 @@ export default defineConfig({
   },
   timeout: 60 * 1000,
   projects: [
-    // Setup project to authenticate and save storage state
     {
       name: "setup",
       testMatch: /.*auth\.setup\.ts/,
     },
-    // Main browser project depends on setup and reuses authenticated storage
+
     {
       name: "chromium",
       use: {

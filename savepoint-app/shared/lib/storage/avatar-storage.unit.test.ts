@@ -1,5 +1,4 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AvatarStorageService } from "./avatar-storage";
 
@@ -14,7 +13,7 @@ vi.mock("@/env.mjs", () => ({
     S3_BUCKET_NAME: "test-bucket",
     S3_AVATAR_PATH_PREFIX: "user-avatars/",
     AWS_REGION: "us-east-1",
-    AWS_ENDPOINT_URL: undefined, // Will be overridden in specific tests
+    AWS_ENDPOINT_URL: undefined,
   },
 }));
 

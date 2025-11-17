@@ -2,14 +2,12 @@ import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
-
 export interface TestUser {
   id: string;
   email: string;
   username: string;
   password: string;
 }
-
 export async function createTestUser(data: {
   email: string;
   username: string;
@@ -17,28 +15,21 @@ export async function createTestUser(data: {
 }): Promise<TestUser> {
   const hashedPassword = await bcrypt.hash(data.password, 10);
   const email = data.email.trim().toLowerCase();
-
   const user = await prisma.user.create({
     data: {
       email: email,
       username: data.username,
-      usernameNormalized: data.username.toLowerCase(), // Important: set normalized username for uniqueness check
+      usernameNormalized: data.username.toLowerCase(),
       password: hashedPassword,
     },
   });
-
   return {
     id: user.id,
-    email: user.email ?? email, // Fallback to normalized input if null
-    username: user.username ?? data.username, // Fallback to input if null
-    password: data.password, // Return original password for test usage
+    email: user.email ?? email,
+    username: user.username ?? data.username,
+    password: data.password,
   };
 }
-
-/**
- * Create a test user without a username to trigger first-time setup flow.
- * Useful for E2E tests that verify the optional profile setup page.
- */
 export async function createTestUserWithoutUsername(data: {
   email: string;
   password: string;
@@ -46,24 +37,20 @@ export async function createTestUserWithoutUsername(data: {
 }): Promise<TestUser> {
   const hashedPassword = await bcrypt.hash(data.password, 10);
   const email = data.email.trim().toLowerCase();
-
   const user = await prisma.user.create({
     data: {
       email,
       password: hashedPassword,
-      // Explicitly omit username and usernameNormalized to keep them NULL
       name: data.name ?? null,
     },
   });
-
   return {
     id: user.id,
     email: user.email ?? email,
-    username: user.username ?? "", // return empty for convenience
+    username: user.username ?? "",
     password: data.password,
   };
 }
-
 export async function deleteTestUser(email: string): Promise<void> {
   await prisma.user.delete({
     where: { email: email.trim().toLowerCase() },
@@ -80,7 +67,6 @@ export async function deleteTestUsersByPattern(
     },
   });
 }
-
 export async function getUserByEmail(email: string): Promise<{
   id: string;
   email: string | null;
@@ -92,50 +78,35 @@ export async function getUserByEmail(email: string): Promise<{
   });
   return user;
 }
-
 export async function clearTestData(): Promise<void> {
-  // Define test user pattern for cleanup
   const testUserPattern = {
     OR: [{ email: { contains: "test-" } }, { email: { contains: "e2e-" } }],
   };
-
-  // 1. Delete JournalEntry records for test users
   await prisma.journalEntry.deleteMany({
     where: {
       user: testUserPattern,
     },
   });
-
-  // 2. Delete Review records for test users
   await prisma.review.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
-
-  // 3. Delete ImportedGame records for test users
   await prisma.importedGame.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
-
-  // 4. Delete IgnoredImportedGames records for test users
   await prisma.ignoredImportedGames.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
-
-  // 5. Delete LibraryItem records for test users
   await prisma.libraryItem.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
-
-  // 6. Delete test games (no time filter - delete all test games)
-  // Only delete games that have no remaining library items
   await prisma.game.deleteMany({
     where: {
       title: {
@@ -146,30 +117,23 @@ export async function clearTestData(): Promise<void> {
       },
     },
   });
-
-  // 7. Delete test users (Account and Session will cascade)
   await deleteTestUsersByPattern("test-");
   await deleteTestUsersByPattern("e2e-");
 }
-
 export async function seedDefaultTestUser(): Promise<TestUser> {
   const defaultUser = {
     email: "test-user@example.com",
     username: "testuser",
     password: "TestPassword123!",
   };
-
   try {
     await deleteTestUser(defaultUser.email);
   } catch {}
-
   return createTestUser(defaultUser);
 }
-
 export async function disconnectDatabase(): Promise<void> {
   await prisma.$disconnect();
 }
-
 export async function verifyDatabaseConnection(): Promise<boolean> {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -178,7 +142,6 @@ export async function verifyDatabaseConnection(): Promise<boolean> {
     return false;
   }
 }
-
 export interface TestGame {
   id: string;
   igdbId: number;
@@ -188,19 +151,20 @@ export interface TestGame {
 export async function createTestGame(data?: {
   igdbId?: number;
   title?: string;
+  slug?: string;
   coverImage?: string | null;
 }): Promise<TestGame> {
   const igdbId = data?.igdbId ?? Math.floor(Math.random() * 1000000);
   const title = data?.title ?? `Test Game ${igdbId}`;
-
+  const slug = data?.slug ?? `test-game-${igdbId}`;
   const game = await prisma.game.create({
     data: {
       igdbId,
       title,
+      slug,
       coverImage: data?.coverImage ?? null,
     },
   });
-
   return {
     id: game.id,
     igdbId: game.igdbId,
@@ -208,14 +172,12 @@ export async function createTestGame(data?: {
     coverImage: game.coverImage,
   };
 }
-
 export interface TestLibraryItem {
   id: number;
   userId: string;
   gameId: string;
   status: string;
 }
-
 export async function createTestLibraryItem(data: {
   userId: string;
   gameId: string;
@@ -234,7 +196,6 @@ export async function createTestLibraryItem(data: {
       status: data.status ?? "CURIOUS_ABOUT",
     },
   });
-
   return {
     id: libraryItem.id,
     userId: libraryItem.userId,

@@ -1,9 +1,17 @@
 import {
+  createUserWithCredentials,
+  findUserByEmail,
+} from "@/data-access-layer/repository";
+import {
+  repositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+} from "@/data-access-layer/repository/types";
+import {
   createdUserFixture,
   createdUserWithNullEmailFixture,
   createdUserWithoutNameFixture,
   existingUserFixture,
-  signInInputFixture,
   signUpInputFixture,
   signUpInputForExistingUserFixture,
   signUpInputForUniqueConstraintViolationFixture,
@@ -11,7 +19,7 @@ import {
 } from "@fixtures/service/auth";
 import { Prisma } from "@prisma/client";
 
-import { hashPassword, prisma } from "@/shared/lib";
+import { hashPassword } from "@/shared/lib";
 
 import { ServiceErrorCode } from "../types";
 import { AuthService } from "./auth-service";
@@ -19,23 +27,25 @@ import { AuthService } from "./auth-service";
 describe("AuthService", () => {
   let service: AuthService;
   let mockHashPassword: ReturnType<typeof vi.fn>;
-  let mockPrismaFindUnique: ReturnType<typeof vi.fn>;
-  let mockPrismaCreate: ReturnType<typeof vi.fn>;
+  let mockFindUserByEmail: ReturnType<typeof vi.fn>;
+  let mockCreateUserWithCredentials: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     service = new AuthService();
     mockHashPassword = vi.mocked(hashPassword);
-    mockPrismaFindUnique = vi.mocked(prisma.user.findUnique);
-    mockPrismaCreate = vi.mocked(prisma.user.create);
+    mockFindUserByEmail = vi.mocked(findUserByEmail);
+    mockCreateUserWithCredentials = vi.mocked(createUserWithCredentials);
   });
 
   describe("signUp", () => {
     const givenHashedPassword = "$2a$10$hashedpassword";
     it("should normalize email casing before lookup and creation", async () => {
-      mockPrismaFindUnique.mockResolvedValue(null);
+      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockPrismaCreate.mockResolvedValue(createdUserFixture);
+      mockCreateUserWithCredentials.mockResolvedValue(
+        repositorySuccess(createdUserFixture)
+      );
 
       const result = await service.signUp(signUpInputFixture);
 
@@ -44,28 +54,20 @@ describe("AuthService", () => {
         expect(result.data.user.email).toBe("newuser@example.com");
       }
 
-      expect(mockPrismaFindUnique).toHaveBeenCalledWith({
-        select: { id: true },
-        where: { email: "newuser@example.com" },
-      });
-      expect(mockPrismaCreate).toHaveBeenCalledWith({
-        data: {
-          email: "newuser@example.com",
-          password: givenHashedPassword,
-          name: "John Doe",
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-        },
+      expect(mockFindUserByEmail).toHaveBeenCalledWith("newuser@example.com");
+      expect(mockCreateUserWithCredentials).toHaveBeenCalledWith({
+        email: "newuser@example.com",
+        password: givenHashedPassword,
+        name: "John Doe",
       });
     });
 
     it("should successfully create a new user with hashed password", async () => {
-      mockPrismaFindUnique.mockResolvedValue(null);
+      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockPrismaCreate.mockResolvedValue(createdUserFixture);
+      mockCreateUserWithCredentials.mockResolvedValue(
+        repositorySuccess(createdUserFixture)
+      );
 
       const result = await service.signUp(signUpInputFixture);
 
@@ -75,29 +77,21 @@ describe("AuthService", () => {
         expect(result.data.message).toBe("Account created successfully");
       }
 
-      expect(mockPrismaFindUnique).toHaveBeenCalledWith({
-        select: { id: true },
-        where: { email: "newuser@example.com" },
-      });
+      expect(mockFindUserByEmail).toHaveBeenCalledWith("newuser@example.com");
       expect(mockHashPassword).toHaveBeenCalledWith("securepassword123");
-      expect(mockPrismaCreate).toHaveBeenCalledWith({
-        data: {
-          email: "newuser@example.com",
-          password: givenHashedPassword,
-          name: "John Doe",
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-        },
+      expect(mockCreateUserWithCredentials).toHaveBeenCalledWith({
+        email: "newuser@example.com",
+        password: givenHashedPassword,
+        name: "John Doe",
       });
     });
 
     it("should create user without name when name is not provided", async () => {
-      mockPrismaFindUnique.mockResolvedValue(null);
+      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockPrismaCreate.mockResolvedValue(createdUserWithoutNameFixture);
+      mockCreateUserWithCredentials.mockResolvedValue(
+        repositorySuccess(createdUserWithoutNameFixture)
+      );
 
       const result = await service.signUp(signUpInputWithoutNameFixture);
 
@@ -106,22 +100,17 @@ describe("AuthService", () => {
         expect(result.data.user.name).toBeNull();
       }
 
-      expect(mockPrismaCreate).toHaveBeenCalledWith({
-        data: {
-          email: "newuser@example.com",
-          password: givenHashedPassword,
-          name: null,
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-        },
+      expect(mockCreateUserWithCredentials).toHaveBeenCalledWith({
+        email: "newuser@example.com",
+        password: givenHashedPassword,
+        name: null,
       });
     });
 
     it("should return error when user already exists", async () => {
-      mockPrismaFindUnique.mockResolvedValue(existingUserFixture);
+      mockFindUserByEmail.mockResolvedValue(
+        repositorySuccess(existingUserFixture)
+      );
 
       const result = await service.signUp(signUpInputForExistingUserFixture);
 
@@ -131,18 +120,15 @@ describe("AuthService", () => {
         expect(result.code).toBe(ServiceErrorCode.CONFLICT);
       }
 
-      expect(mockPrismaFindUnique).toHaveBeenCalledWith({
-        select: { id: true },
-        where: { email: "existing@example.com" },
-      });
+      expect(mockFindUserByEmail).toHaveBeenCalledWith("existing@example.com");
       expect(mockHashPassword).not.toHaveBeenCalled();
-      expect(mockPrismaCreate).not.toHaveBeenCalled();
+      expect(mockCreateUserWithCredentials).not.toHaveBeenCalled();
     });
 
     it("should handle unique constraint violation from database", async () => {
-      mockPrismaFindUnique.mockResolvedValue(null);
+      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      // Simulate Prisma P2002 error (unique constraint violation)
+
       const prismaError = new Prisma.PrismaClientKnownRequestError(
         "Unique constraint failed on the fields: (`email`)",
         {
@@ -150,7 +136,9 @@ describe("AuthService", () => {
           clientVersion: "5.0.0",
         }
       );
-      mockPrismaCreate.mockRejectedValue(prismaError);
+      mockCreateUserWithCredentials.mockResolvedValue(
+        repositoryError(RepositoryErrorCode.DUPLICATE, prismaError.message)
+      );
 
       const result = await service.signUp(
         signUpInputForUniqueConstraintViolationFixture
@@ -158,13 +146,13 @@ describe("AuthService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("User with this email already exists");
+        expect(result.error).toContain("Unique constraint");
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
     });
 
     it("should handle password hashing errors", async () => {
-      mockPrismaFindUnique.mockResolvedValue(null);
+      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
       mockHashPassword.mockRejectedValue(new Error("Hashing failed"));
 
       const result = await service.signUp(signUpInputFixture);
@@ -175,31 +163,34 @@ describe("AuthService", () => {
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
 
-      expect(mockPrismaCreate).not.toHaveBeenCalled();
+      expect(mockCreateUserWithCredentials).not.toHaveBeenCalled();
     });
 
     it("should handle database errors during user creation", async () => {
-      mockPrismaFindUnique.mockResolvedValue(null);
+      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockPrismaCreate.mockRejectedValue(
-        new Error("Database connection failed")
+      mockCreateUserWithCredentials.mockResolvedValue(
+        repositoryError(
+          RepositoryErrorCode.DATABASE_ERROR,
+          "Database connection failed"
+        )
       );
 
       const result = await service.signUp(signUpInputFixture);
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe(
-          "Failed to create user: Database connection failed"
-        );
+        expect(result.error).toBe("Database connection failed");
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
     });
 
     it("should handle case when database returns user with null email", async () => {
-      mockPrismaFindUnique.mockResolvedValue(null);
+      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockPrismaCreate.mockResolvedValue(createdUserWithNullEmailFixture);
+      mockCreateUserWithCredentials.mockResolvedValue(
+        repositorySuccess(createdUserWithNullEmailFixture)
+      );
 
       const result = await service.signUp(signUpInputFixture);
 
@@ -207,25 +198,6 @@ describe("AuthService", () => {
       if (result.success) {
         expect(result.data.user.id).toBe("user-123");
       }
-    });
-  });
-
-  describe("signIn", () => {
-    it("should return error indicating to use NextAuth", async () => {
-      const result = await service.signIn(signInInputFixture);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Sign in should be handled through NextAuth");
-        expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-      }
-    });
-
-    it("should not call any external dependencies", async () => {
-      await service.signIn(signInInputFixture);
-
-      expect(mockPrismaFindUnique).not.toHaveBeenCalled();
-      expect(mockHashPassword).not.toHaveBeenCalled();
     });
   });
 });

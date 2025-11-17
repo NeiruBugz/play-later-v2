@@ -7,11 +7,9 @@ import { Button } from "./ui/button";
 
 export function BrowserBackButton() {
   const router = useRouter();
-
   const handleBackButtonClick = () => {
     router.back();
   };
-
   return (
     <Button
       variant="ghost"

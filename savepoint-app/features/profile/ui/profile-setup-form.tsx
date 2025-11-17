@@ -18,11 +18,8 @@ import { initialFormState } from "../lib/constants";
 import { completeProfileSetupFormAction } from "../server-actions/complete-profile-setup";
 import { skipProfileSetup } from "../server-actions/skip-profile-setup";
 import { AvatarUpload } from "./avatar-upload";
+import type { ProfileSetupFormProps } from "./profile-setup-form.types";
 import { UsernameInput } from "./username-input";
-
-type ProfileSetupFormProps = {
-  defaultUsername?: string;
-};
 
 export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
   const router = useRouter();
@@ -34,38 +31,30 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
     completeProfileSetupFormAction,
     initialFormState
   );
-
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Profile setup complete!");
-      // Redirect to dashboard after successful setup
       router.push("/dashboard");
     }
   }, [state, router]);
-
   const handleAvatarUploadSuccess = (url: string) => {
     setAvatarUrl(url);
     toast.success("Profile image uploaded successfully.");
   };
-
   const handleAvatarUploadError = (error: string) => {
     toast.error(error, {
       description: "Please try again or choose a different image.",
     });
   };
-
   const handleAvatarUploadStateChange = (uploading: boolean) => {
     setIsAvatarUploading(uploading);
   };
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (username.trim().length < 3 || username.trim().length > 25) {
       event.preventDefault();
     }
   };
-
   const handleSkip = async () => {
-    // Persist completion to DB to avoid future prompts
     const res = await skipProfileSetup();
     if (!res.success) {
       toast.error(res.error ?? "Failed to complete setup");
@@ -73,13 +62,11 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
     }
     router.push("/dashboard");
   };
-
   const trimmedUsername = username.trim();
   const showServerError =
     state.status === "error" &&
     !!state.message &&
     state.submittedUsername === trimmedUsername;
-
   return (
     <div className="container flex min-h-[calc(100vh-200px)] items-center justify-center py-8">
       <Card className="w-full max-w-2xl">
@@ -105,7 +92,6 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
                 onUploadStateChange={handleAvatarUploadStateChange}
               />
             </div>
-
             <div className="space-y-2">
               <label className="text-foreground text-sm font-medium">
                 Username <span className="text-destructive">*</span>

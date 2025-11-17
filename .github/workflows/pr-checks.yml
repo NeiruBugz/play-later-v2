@@ -69,7 +69,7 @@ jobs:
         run: pnpm --filter savepoint typecheck
 
   components-test:
-    name: Test
+    name: Components Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -89,7 +89,7 @@ jobs:
         run: pnpm --filter savepoint test:components
 
   backend-test:
-    name: Test
+    name: Backend Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -109,7 +109,7 @@ jobs:
         run: pnpm --filter savepoint test:backend
 
   utilities-test:
-    name: Test
+    name: Utilities Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

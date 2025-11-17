@@ -1,16 +1,5 @@
 import pino, { type LogFn, type LoggerOptions } from "pino";
 
-/**
- * Production-grade logger using Pino
- *
- * Features:
- * - JSON structured logging in production
- * - Pretty-printed logs in development
- * - Automatic log levels based on environment
- * - Request ID tracking support
- * - Performance optimized (5-10x faster than Winston)
- */
-
 const isBrowser = typeof window !== "undefined";
 const isDevelopment = process.env.NODE_ENV === "development";
 const isTest = process.env.NODE_ENV === "test";
@@ -46,54 +35,15 @@ const SAFE_EXTRA_KEYS = [
   "reason",
   "details",
 ];
-
 export const logger = pino(createLoggerOptions());
-
-/**
- * Create a child logger with additional context.
- *
- * Use standardized context keys from LOGGER_CONTEXT for consistency:
- * - service: Data access layer services
- * - serverAction: Next.js server actions
- * - page: Next.js pages
- * - errorBoundary: React error boundaries
- * - storage: Storage utilities
- *
- * @example
- * // Service
- * const serviceLogger = createLogger({ service: 'GameService' });
- * serviceLogger.info('Game searched', { query: 'zelda' });
- *
- * // Server Action
- * const actionLogger = createLogger({ serverAction: 'addGameAction' });
- * actionLogger.info('Adding game to library', { gameId: 123 });
- *
- * // Page
- * const pageLogger = createLogger({ page: 'ProfilePage' });
- * pageLogger.info('Loading profile', { userId: '456' });
- */
 export const createLogger = (bindings: Record<string, unknown>) => {
   return logger.child(bindings);
 };
-
-/**
- * Log levels (in order of severity):
- * - fatal: System-level failures, application crash
- * - error: Errors that need attention but application continues
- * - warn: Warning messages, recoverable issues
- * - info: Key application events (user actions, major operations)
- * - debug: Detailed debugging information
- * - trace: Very detailed debugging (function entry/exit)
- */
-
-// Export type for usage in services
 export type Logger = typeof logger;
-
 function createLoggerOptions(): LoggerOptions {
   const level =
     (isTest ? "silent" : process.env.LOG_LEVEL) ||
     (isDevelopment ? "debug" : "info");
-
   const options: LoggerOptions = {
     level,
     enabled: !isTest,
@@ -108,15 +58,13 @@ function createLoggerOptions(): LoggerOptions {
       env: process.env.NODE_ENV,
     },
     hooks: {
-      // Normalize errors so server and browser logs share the same shape.
       logMethod(args: unknown[], method: LogFn) {
         const normalizedArgs = normalizeLogArgs(args);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        method.apply(this, normalizedArgs as any);
+
+        method.apply(this, normalizedArgs as Parameters<LogFn>);
       },
     },
   };
-
   if (isBrowser) {
     options.browser = {
       asObject: true,
@@ -136,27 +84,22 @@ function createLoggerOptions(): LoggerOptions {
       };
     }
   }
-
   return options;
 }
-
 function normalizeLogArgs(args: unknown[]) {
   if (args.length === 0) {
     return args;
   }
-
   const argsWithErrorFirst =
     typeof args[0] === "string" && args[1] instanceof Error
       ? [{ err: args[1] }, args[0], ...args.slice(2)]
       : args;
-
   const normalizedArgs = argsWithErrorFirst.map((value, index) => {
     if (value instanceof Error) {
       return index === 0
         ? { err: serializeError(value) }
         : serializeError(value);
     }
-
     if (isRecord(value)) {
       const maybeError = value.err;
       if (maybeError instanceof Error) {
@@ -166,20 +109,16 @@ function normalizeLogArgs(args: unknown[]) {
         };
       }
     }
-
     return value;
   });
-
   return normalizedArgs;
 }
-
 function serializeError(error: Error): Record<string, unknown> {
   const out: Record<string, unknown> = {
     type: error.name,
     message: error.message,
   };
   if ((error as Error).stack) out.stack = (error as Error).stack;
-
   const src = error as unknown as Record<string, unknown>;
   for (const key of Object.keys(src)) {
     if (key === "name" || key === "message" || key === "stack") continue;
@@ -202,18 +141,15 @@ function serializeError(error: Error): Record<string, unknown> {
       out[key] = v;
     }
   }
-
   const cause = (error as unknown as { cause?: unknown }).cause;
   if (cause !== undefined) {
     out.cause = cause instanceof Error ? serializeError(cause) : cause;
   }
   return out;
 }
-
 function browserIsoTime() {
   return new Date().toISOString();
 }
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }

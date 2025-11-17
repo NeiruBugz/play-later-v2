@@ -1,10 +1,12 @@
 import { env } from "@/env.mjs";
 import { PrismaClient } from "@prisma/client";
 
+import { createLogger } from "./logger";
+import { LOGGER_CONTEXT } from "./logger-context";
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
-
 const prismaFactory = () => {
   const prisma = new PrismaClient({
     log: [
@@ -27,9 +29,23 @@ const prismaFactory = () => {
     ],
   });
 
+  const isDatabaseLoggingEnabled =
+    env.NODE_ENV === "development" && env.DATABASE_LOGGING === "true";
+  if (isDatabaseLoggingEnabled) {
+    const logger = createLogger({ [LOGGER_CONTEXT.DATABASE]: "Prisma" });
+    prisma.$on("query", (e) => {
+      logger.debug(
+        {
+          query: e.query,
+          params: e.params,
+          duration: `${e.duration}ms`,
+          target: e.target,
+        },
+        "Database query executed"
+      );
+    });
+  }
   return prisma as PrismaClient;
 };
-
 export const prisma = globalForPrisma.prisma ?? prismaFactory();
-
 if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

@@ -1,28 +1,20 @@
 import { env } from "@/env.mjs";
 import {
+  CreateBucketCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadBucketCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { AvatarStorageService } from "./avatar-storage";
 import { s3Client } from "./s3-client";
 
-/**
- * Integration tests for AvatarStorageService
- *
- * These tests verify actual S3 operations against LocalStack.
- * LocalStack endpoint is taken from env.AWS_ENDPOINT_URL (e.g., http://localhost:4566).
- *
- * Run: pnpm test avatar-storage.integration.test.ts
- */
 describe("AvatarStorageService - Integration Tests", () => {
   const TEST_USER_ID_1 = "test-user-integration-1";
   const TEST_USER_ID_2 = "test-user-integration-2";
 
-  // Helper function to create a test File object
   const createTestFile = (
     name: string,
     content: string,
@@ -32,7 +24,6 @@ describe("AvatarStorageService - Integration Tests", () => {
     return new File([blob], name, { type });
   };
 
-  // Helper function to verify if a file exists in S3
   const fileExistsInS3 = async (key: string): Promise<boolean> => {
     try {
       await s3Client.send(
@@ -47,7 +38,6 @@ describe("AvatarStorageService - Integration Tests", () => {
     }
   };
 
-  // Helper function to get file content from S3
   const getFileFromS3 = async (key: string): Promise<string> => {
     const response = await s3Client.send(
       new GetObjectCommand({
@@ -58,15 +48,13 @@ describe("AvatarStorageService - Integration Tests", () => {
     return await response.Body!.transformToString();
   };
 
-  // Helper function to extract S3 key from URL
   const extractKeyFromUrl = (url: string): string => {
     const urlObj = new URL(url);
     const pathParts = urlObj.pathname.split("/");
-    // Remove empty string and bucket name
+
     return pathParts.slice(2).join("/");
   };
 
-  // Helper function to delete a file from S3
   const deleteFileFromS3 = async (key: string): Promise<void> => {
     await s3Client.send(
       new DeleteObjectCommand({
@@ -76,7 +64,6 @@ describe("AvatarStorageService - Integration Tests", () => {
     );
   };
 
-  // Helper function to list all test files
   const listTestFiles = async (): Promise<string[]> => {
     const response = await s3Client.send(
       new ListObjectsV2Command({
@@ -92,25 +79,36 @@ describe("AvatarStorageService - Integration Tests", () => {
     );
   };
 
-  // Verify LocalStack is running and clean up before all tests
   beforeAll(async () => {
-    // First, verify LocalStack is running
     try {
       await s3Client.send(
-        new ListObjectsV2Command({
+        new HeadBucketCommand({
           Bucket: env.S3_BUCKET_NAME,
-          MaxKeys: 1,
         })
       );
-    } catch (error) {
-      throw new Error(
-        `LocalStack S3 is not available on ${env.AWS_ENDPOINT_URL}. ` +
-          `Ensure docker-compose is running: docker-compose up -d\n` +
-          `Error: ${error}`
-      );
+    } catch (error: unknown) {
+      const err = error as { name?: string };
+      if (err.name === "NotFound" || err.name === "NoSuchBucket") {
+        try {
+          await s3Client.send(
+            new CreateBucketCommand({
+              Bucket: env.S3_BUCKET_NAME,
+            })
+          );
+        } catch (createError) {
+          throw new Error(
+            `Failed to create S3 bucket '${env.S3_BUCKET_NAME}': ${createError}`
+          );
+        }
+      } else {
+        throw new Error(
+          `LocalStack S3 is not available on ${env.AWS_ENDPOINT_URL}. ` +
+            `Ensure docker-compose is running: docker-compose up -d\n` +
+            `Error: ${error}`
+        );
+      }
     }
 
-    // Clean up any leftover files from previous test runs
     const keys = await listTestFiles();
     for (const key of keys) {
       try {
@@ -133,7 +131,6 @@ describe("AvatarStorageService - Integration Tests", () => {
     }
   });
 
-  // Verify cleanup was successful after all tests
   afterAll(async () => {
     const remainingKeys = await listTestFiles();
     if (remainingKeys.length > 0) {
@@ -156,11 +153,9 @@ describe("AvatarStorageService - Integration Tests", () => {
 
       expect(result.ok).toBe(true);
       if (result.ok) {
-        // Verify URL is returned
         expect(result.data.url).toBeDefined();
         expect(result.data.url).toContain(env.S3_BUCKET_NAME);
 
-        // Extract key and verify file exists
         const key = extractKeyFromUrl(result.data.url);
         const exists = await fileExistsInS3(key);
         expect(exists).toBe(true);
@@ -177,7 +172,6 @@ describe("AvatarStorageService - Integration Tests", () => {
 
       expect(result.ok).toBe(true);
       if (result.ok) {
-        // LocalStack URL format: http://localhost:4568/bucket-name/key
         expect(result.data.url).toMatch(
           new RegExp(
             `^${env.AWS_ENDPOINT_URL}/${env.S3_BUCKET_NAME}/${env.S3_AVATAR_PATH_PREFIX}`
@@ -234,7 +228,6 @@ describe("AvatarStorageService - Integration Tests", () => {
       const allKeys = await listTestFiles();
       expect(allKeys.length).toBeGreaterThanOrEqual(3);
 
-      // Verify each file exists
       if (result1.ok && result2.ok && result3.ok) {
         const key1 = extractKeyFromUrl(result1.data.url);
         const key2 = extractKeyFromUrl(result2.data.url);
@@ -307,7 +300,6 @@ describe("AvatarStorageService - Integration Tests", () => {
         const key1 = extractKeyFromUrl(result1.data.url);
         const key2 = extractKeyFromUrl(result2.data.url);
 
-        // Retrieve both files and verify content
         const retrieved1 = await getFileFromS3(key1);
         const retrieved2 = await getFileFromS3(key2);
 
@@ -358,7 +350,6 @@ describe("AvatarStorageService - Integration Tests", () => {
       if (result.ok) {
         const key = extractKeyFromUrl(result.data.url);
 
-        // Use HeadObject to check ContentType metadata
         const headResponse = await s3Client.send(
           new HeadObjectCommand({
             Bucket: env.S3_BUCKET_NAME,
@@ -384,19 +375,15 @@ describe("AvatarStorageService - Integration Tests", () => {
       if (result.ok) {
         const key = extractKeyFromUrl(result.data.url);
 
-        // Verify file exists before deletion
         expect(await fileExistsInS3(key)).toBe(true);
 
-        // Delete the file
         await deleteFileFromS3(key);
 
-        // Verify file no longer exists
         expect(await fileExistsInS3(key)).toBe(false);
       }
     });
 
     it("should list bucket contents - verify expected files present", async () => {
-      // Upload multiple files for different users
       const file1 = createTestFile("user1-avatar.jpg", "u1", "image/jpeg");
       const file2 = createTestFile("user2-avatar.png", "u2", "image/png");
       const file3 = createTestFile("user1-second.gif", "u1-2", "image/gif");
@@ -405,18 +392,14 @@ describe("AvatarStorageService - Integration Tests", () => {
       await AvatarStorageService.uploadAvatar(TEST_USER_ID_2, file2);
       await AvatarStorageService.uploadAvatar(TEST_USER_ID_1, file3);
 
-      // List all files
       const allKeys = await listTestFiles();
 
-      // Should have 3 files
       expect(allKeys.length).toBe(3);
 
-      // All keys should start with the prefix
       allKeys.forEach((key) => {
         expect(key).toMatch(new RegExp(`^${env.S3_AVATAR_PATH_PREFIX}`));
       });
 
-      // Verify user-specific files
       const user1Files = allKeys.filter((key) => key.includes(TEST_USER_ID_1));
       const user2Files = allKeys.filter((key) => key.includes(TEST_USER_ID_2));
 
@@ -427,18 +410,13 @@ describe("AvatarStorageService - Integration Tests", () => {
 
   describe("Error Handling", () => {
     it("should handle invalid bucket gracefully", async () => {
-      // This test verifies the service handles S3 errors properly
-      // We can't easily simulate this without mocking, but we document expected behavior
       const file = createTestFile("test.jpg", "content", "image/jpeg");
 
-      // If bucket doesn't exist or is misconfigured, upload should fail gracefully
       const result = await AvatarStorageService.uploadAvatar(
         TEST_USER_ID_1,
         file
       );
 
-      // Since our LocalStack is properly configured, this should succeed
-      // In a real error scenario, result.ok would be false
       expect(result.ok).toBe(true);
     });
   });
@@ -448,13 +426,11 @@ describe("AvatarStorageService - Integration Tests", () => {
       const file1 = createTestFile("user1.jpg", "user1-content", "image/jpeg");
       const file2 = createTestFile("user2.png", "user2-content", "image/png");
 
-      // Upload concurrently
       const [result1, result2] = await Promise.all([
         AvatarStorageService.uploadAvatar(TEST_USER_ID_1, file1),
         AvatarStorageService.uploadAvatar(TEST_USER_ID_2, file2),
       ]);
 
-      // Both should succeed
       expect(result1.ok).toBe(true);
       expect(result2.ok).toBe(true);
 
@@ -462,15 +438,12 @@ describe("AvatarStorageService - Integration Tests", () => {
         const key1 = extractKeyFromUrl(result1.data.url);
         const key2 = extractKeyFromUrl(result2.data.url);
 
-        // Both files should exist
         expect(await fileExistsInS3(key1)).toBe(true);
         expect(await fileExistsInS3(key2)).toBe(true);
 
-        // Keys should be in separate user directories
         expect(key1).toContain(TEST_USER_ID_1);
         expect(key2).toContain(TEST_USER_ID_2);
 
-        // Content should be correct
         expect(await getFileFromS3(key1)).toBe("user1-content");
         expect(await getFileFromS3(key2)).toBe("user2-content");
       }

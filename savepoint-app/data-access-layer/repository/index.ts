@@ -1,4 +1,3 @@
-// Repository types
 export {
   type RepositoryResult,
   type RepositorySuccess,
@@ -10,11 +9,10 @@ export {
   isRepositorySuccess,
   isRepositoryError,
 } from "./types";
-
-// Library repository
 export {
   createLibraryItem,
   deleteLibraryItem,
+  findLibraryItemById,
   updateLibraryItem,
   getLibraryItemsForUserByIgdbId,
   getManyLibraryItems,
@@ -32,9 +30,10 @@ export {
   findCurrentlyPlayingGames,
   buildCollectionFilter,
   getLibraryStatsByUserId,
+  findMostRecentLibraryItemByGameId,
+  findAllLibraryItemsByGameId,
+  findLibraryItemsWithFilters,
 } from "./library/library-repository";
-
-// User repository
 export {
   getUserBySteamId,
   getUserByUsername,
@@ -50,3 +49,25 @@ export {
   findUserByEmail,
   createUserWithCredentials,
 } from "./user/user-repository";
+export {
+  upsertGenre,
+  upsertGenres,
+  findGenreByIgdbId,
+} from "./genre/genre-repository";
+export {
+  upsertPlatform,
+  upsertPlatforms,
+  findPlatformByIgdbId,
+  findPlatformsForGame,
+  findSystemPlatforms,
+} from "./platform/platform-repository";
+export {
+  createGameWithRelations,
+  findGameBySlug,
+  findGameByIgdbId,
+  gameExistsByIgdbId,
+} from "./game/game-repository";
+export {
+  findJournalEntriesByGameId,
+  countJournalEntriesByGameId,
+} from "./journal/journal-repository";

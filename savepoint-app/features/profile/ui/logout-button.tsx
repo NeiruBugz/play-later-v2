@@ -8,7 +8,6 @@ export function LogoutButton() {
   const handleLogoutClick = async () => {
     signOut();
   };
-
   return (
     <Button onClick={handleLogoutClick} variant="destructive">
       Logout

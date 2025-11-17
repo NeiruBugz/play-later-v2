@@ -20,14 +20,12 @@ const fontSans = FontSans({
   display: "swap",
   preload: true,
 });
-
 const fontSerif = FontSerif({
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
   preload: true,
 });
-
 const fontMono = FontMono({
   subsets: ["latin"],
   variable: "--font-mono",
@@ -35,7 +33,6 @@ const fontMono = FontMono({
   preload: true,
   weight: ["300", "400", "500"],
 });
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -46,7 +43,6 @@ export const viewport: Viewport = {
   ],
   colorScheme: "light dark",
 };
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://savepoint-app.vercel.app"),
   title: "SavePoint - Your Personal Gaming Library & Journal",
@@ -101,7 +97,6 @@ export const metadata: Metadata = {
   },
   category: "entertainment",
 };
-
 export default function RootLayout({
   children,
 }: {

@@ -1,5 +1,3 @@
-import { describe, expect, it } from "vitest";
-
 import { onJwt, onRedirect, onSession, onSignIn } from "./oauth-callbacks";
 
 describe("oauth callbacks", () => {
@@ -11,15 +9,12 @@ describe("oauth callbacks", () => {
   it("onRedirect enforces same-origin and handles relative URLs", async () => {
     const base = "http://localhost:6060";
 
-    // relative → expands and adds r=1 for dashboard
     const dash = await onRedirect({ url: "/dashboard", baseUrl: base });
     expect(dash).toMatch(/^http:\/\/localhost:6060\/dashboard/);
 
-    // cross-origin → falls back to baseUrl
     const evil = await onRedirect({ url: "https://evil.com", baseUrl: base });
     expect(evil).toBe(base);
 
-    // invalid absolute URL → catch branch → baseUrl
     const invalid = await onRedirect({ url: "not-a-url", baseUrl: base });
     expect(invalid).toBe(base);
   });
@@ -33,7 +28,6 @@ describe("oauth callbacks", () => {
     const step2 = await onRedirect({ url: step1, baseUrl: base });
     expect(new URL(step2).searchParams.get("r")).toBe("2");
 
-    // Next hop should force dashboard without increasing r
     const step3 = await onRedirect({ url: step2, baseUrl: base });
     expect(step3).toBe(`${base}/dashboard`);
   });
@@ -50,10 +44,13 @@ describe("oauth callbacks", () => {
 
   it("onSession exposes token id on session.user.id", async () => {
     const session = await onSession({
-      session: { user: { name: "Test" } },
+      session: {
+        user: { name: "Test", id: "u42" },
+        expires: "",
+      },
       token: { id: "u42" },
     });
-    expect(session.user.id).toBe("u42");
-    expect(session.user.name).toBe("Test");
+    expect(session.user!.id).toBe("u42");
+    expect(session.user!.name).toBe("Test");
   });
 });
