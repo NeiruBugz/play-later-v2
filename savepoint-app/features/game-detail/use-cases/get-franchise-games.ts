@@ -1,6 +1,7 @@
 "use server";
 
 import { IgdbService } from "@/data-access-layer/services";
+import { cache } from "react";
 
 import { FRANCHISE_GAMES_INITIAL_LIMIT } from "@/shared/constants";
 import { createLogger } from "@/shared/lib/app/logger";
@@ -32,7 +33,7 @@ type GetFranchiseGamesResult =
   | { success: true; data: FranchiseData[] }
   | { success: false; error: string };
 
-export async function getFranchiseGames(
+export const getFranchiseGames = cache(async function getFranchiseGames(
   input: GetFranchiseGamesInput
 ): Promise<GetFranchiseGamesResult> {
   const { igdbId, franchiseIds } = input;
@@ -100,4 +101,4 @@ export async function getFranchiseGames(
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
-}
+});

@@ -9,6 +9,7 @@ import {
 import type { Platform as PrismaPlatform } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
+import { UniquePlatformResult } from "@/shared/types/platform";
 
 type IgdbPlatform = {
   id: number;
@@ -146,6 +147,26 @@ export async function findPlatformsForGame(gameId: string): Promise<
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to find platforms for game: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+export async function findSystemPlatforms(): Promise<
+  RepositoryResult<UniquePlatformResult[]>
+> {
+  try {
+    const platforms = await prisma.$queryRaw<UniquePlatformResult[]>`
+      SELECT p.id, p.name, p.slug
+      FROM "Platform" p
+      LEFT JOIN "GamePlatform" gp ON p.id = gp."platformId"
+      GROUP BY p.id, p.name, p.slug
+      ORDER BY COUNT(gp."gameId") DESC, p.name ASC
+    `;
+    return repositorySuccess(platforms);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find system platforms: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }

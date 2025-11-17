@@ -59,6 +59,7 @@ export {
   upsertPlatforms,
   findPlatformByIgdbId,
   findPlatformsForGame,
+  findSystemPlatforms,
 } from "./platform/platform-repository";
 export {
   createGameWithRelations,

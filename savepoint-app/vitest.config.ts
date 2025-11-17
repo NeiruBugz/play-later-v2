@@ -105,6 +105,7 @@ export default defineConfig({
           include: [
             "**/features/**/server-actions/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/features/**/lib/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/features/**/use-cases/*.unit.test.{js,ts,jsx,tsx}",
             "**/*.server-action.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/data-access-layer/services/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/data-access-layer/repository/**/*.unit.test.{js,ts,jsx,tsx}",

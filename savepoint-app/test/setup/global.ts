@@ -260,9 +260,6 @@ vi.mock("@/features/add-game/server-actions/add-game", () => ({
   saveGameAndAddToLibrary: vi.fn(),
 }));
 
-beforeAll(() => {
-  process.env.NODE_ENV = "test";
-});
 declare global {
   var testUtils: {
     createMockFormData: (data: Record<string, string>) => FormData;

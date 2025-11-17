@@ -7,6 +7,7 @@ import {
 } from "@/data-access-layer/services";
 import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
 import type { JournalEntry, LibraryItem } from "@prisma/client";
+import { cache } from "react";
 
 import { createLogger } from "@/shared/lib/app/logger";
 import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
@@ -30,7 +31,7 @@ type GameDetailsResult = {
   journalEntries: JournalEntry[];
 };
 
-export async function getGameDetails(params: {
+export const getGameDetails = cache(async function getGameDetails(params: {
   slug: string;
   userId?: string;
 }): Promise<
@@ -179,4 +180,4 @@ export async function getGameDetails(params: {
       error: error instanceof Error ? error.message : "Unknown error",
     };
   }
-}
+});

@@ -92,15 +92,17 @@ export async function addGameToLibrary(
         };
       }
     }
-    const existingItemsResult = await libraryService.findAllLibraryItemsByGameId({
-      userId,
-      gameId: gameResult.data.id,
-    });
+    const existingItemsResult =
+      await libraryService.findAllLibraryItemsByGameId({
+        userId,
+        gameId: gameResult.data.id,
+      });
     if (existingItemsResult.success && existingItemsResult.data) {
       const exactDuplicate = existingItemsResult.data.find(
         (item) =>
           item.status === status &&
-          (item.platform === platform || (item.platform === null && platform === undefined))
+          (item.platform === platform ||
+            (item.platform === null && platform === undefined))
       );
       if (exactDuplicate) {
         logger.warn(

@@ -1,31 +1,11 @@
 import { gameSearchHandler } from "@/data-access-layer/handlers";
-import { unstable_cache } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
-import { GAME_SEARCH_CACHE_TTL_SECONDS } from "@/shared/constants";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 const logger = createLogger({ [LOGGER_CONTEXT.API_ROUTE]: "GameSearchAPI" });
-const getCachedGameSearch = unstable_cache(
-  async (query: string, offset: number, ip: string, headers: Headers) => {
-    return await gameSearchHandler(
-      { query, offset },
-      {
-        ip,
-        headers,
-        url: new URL(
-          `http://localhost/api/games/search?q=${query}&offset=${offset}`
-        ),
-      }
-    );
-  },
-  ["game-search"],
-  {
-    revalidate: GAME_SEARCH_CACHE_TTL_SECONDS,
-    tags: ["game-search"],
-  }
-);
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -36,7 +16,10 @@ export async function GET(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
     const headers = request.headers;
     logger.info({ query, offset, ip }, "Game search API request received");
-    const result = await getCachedGameSearch(query, offset, ip, headers);
+    const result = await gameSearchHandler(
+      { query, offset },
+      { ip, headers, url: request.nextUrl }
+    );
     if (!result.success) {
       const response = NextResponse.json(
         { error: result.error },

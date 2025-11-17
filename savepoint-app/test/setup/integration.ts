@@ -79,8 +79,6 @@ async function ensureS3BucketExists(): Promise<void> {
 }
 
 beforeAll(async () => {
-  process.env.NODE_ENV = "test";
-
   await ensureS3BucketExists();
 });
 afterEach(async () => {

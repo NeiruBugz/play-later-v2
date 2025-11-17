@@ -17,6 +17,9 @@ import {
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
 
+import { useUniquePlatforms } from "../hooks/use-unique-platforms";
+import { PlatformFilterCombobox } from "./platform-filter-combobox";
+
 export function LibraryFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,6 +27,8 @@ export function LibraryFilters() {
     searchParams.get("search") ?? ""
   );
   const debouncedSearch = useDebouncedValue(searchInput, 300);
+  const { data: platforms, isLoading: isLoadingPlatforms } =
+    useUniquePlatforms();
 
   const updateFilter = useCallback(
     (key: string, value: string | undefined) => {
@@ -61,13 +66,17 @@ export function LibraryFilters() {
       searchParams.get("platform") ||
       searchParams.get("search")
   );
+  const currentStatus = searchParams.get("status") ?? "__all__";
+
   return (
     <div className="mb-6 space-y-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end">
-        <div className="w-full space-y-2 md:w-auto md:flex-1">
-          <Label htmlFor="status-filter">Status</Label>
+      {/* Status filter - full width row */}
+      <div className="space-y-2">
+        <Label htmlFor="status-filter">Status</Label>
+        {/* Mobile: Select dropdown */}
+        <div className="md:hidden">
           <Select
-            value={searchParams.get("status") ?? "__all__"}
+            value={currentStatus}
             onValueChange={(value) =>
               updateFilter("status", value === "__all__" ? undefined : value)
             }
@@ -85,27 +94,47 @@ export function LibraryFilters() {
             </SelectContent>
           </Select>
         </div>
+        {/* Desktop: Button group */}
+        <div className="hidden md:flex md:flex-wrap md:gap-2">
+          <Button
+            variant={currentStatus === "__all__" ? "default" : "outline"}
+            size="sm"
+            onClick={() => updateFilter("status", undefined)}
+            aria-label="Show all statuses"
+            aria-pressed={currentStatus === "__all__"}
+          >
+            All Statuses
+          </Button>
+          {LIBRARY_STATUS_CONFIG.map((option) => {
+            const isActive = currentStatus === option.value;
+            return (
+              <Button
+                key={option.value}
+                variant={isActive ? "default" : "outline"}
+                size="sm"
+                onClick={() => updateFilter("status", option.value)}
+                aria-label={`Filter by ${option.label}`}
+                aria-pressed={isActive}
+              >
+                {option.label}
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Other filters - row layout */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end">
         <div className="w-full space-y-2 md:w-auto md:flex-1">
           <Label htmlFor="platform-filter">Platform</Label>
-          <Select
+          <PlatformFilterCombobox
             value={searchParams.get("platform") ?? "__all__"}
             onValueChange={(value) =>
               updateFilter("platform", value === "__all__" ? undefined : value)
             }
-          >
-            <SelectTrigger id="platform-filter" aria-label="Filter by platform">
-              <SelectValue placeholder="All Platforms" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="__all__">All Platforms</SelectItem>
-              <SelectItem value="PlayStation 5">PlayStation 5</SelectItem>
-              <SelectItem value="PlayStation 4">PlayStation 4</SelectItem>
-              <SelectItem value="Xbox Series X/S">Xbox Series X/S</SelectItem>
-              <SelectItem value="Xbox One">Xbox One</SelectItem>
-              <SelectItem value="Nintendo Switch">Nintendo Switch</SelectItem>
-              <SelectItem value="PC">PC</SelectItem>
-            </SelectContent>
-          </Select>
+            platforms={platforms}
+            isLoading={isLoadingPlatforms}
+          />
         </div>
         <div className="w-full space-y-2 md:flex-1">
           <Label htmlFor="search-input">Search</Label>
