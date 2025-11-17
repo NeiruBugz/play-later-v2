@@ -11,7 +11,6 @@ type TestFormData = {
   platform: string;
 };
 
-// Mock platform data
 const mockSupportedPlatforms: Platform[] = [
   {
     id: "plat1",
@@ -115,7 +114,6 @@ const actions = {
   },
 };
 
-// Helper to wrap PlatformCombobox in a Form
 function renderPlatformComboboxInForm(
   props: {
     supportedPlatforms?: Platform[];
@@ -251,8 +249,6 @@ describe("PlatformCombobox", () => {
 
       await userEvent.click(trigger);
 
-      // After clicking, the trigger button should have aria-expanded="true"
-      // Note: There are now two elements with role="combobox" (button and search input)
       const buttons = elements.getAllComboboxes();
       const triggerButton = buttons.find((el) => el.tagName === "BUTTON");
       expect(triggerButton).toHaveAttribute("aria-expanded", "true");
@@ -449,7 +445,6 @@ describe("PlatformCombobox", () => {
 
       const selectedOption = elements.getOptionByName("PlayStation 5");
 
-      // Verify the option is marked as selected via aria-selected or data-selected attributes
       expect(selectedOption).toHaveAttribute("aria-selected", "true");
     });
 
@@ -475,7 +470,7 @@ describe("PlatformCombobox", () => {
       await actions.searchPlatform("PlayStation");
 
       const options = elements.getAllOptions();
-      expect(options).toHaveLength(2); // PlayStation 5 and PlayStation 4
+      expect(options).toHaveLength(2);
     });
 
     it("should search case-insensitively", async () => {

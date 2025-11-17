@@ -7,13 +7,11 @@ import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
 import { LibraryFilters } from "./library-filters";
 
-// Mock Next.js navigation
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
   useSearchParams: vi.fn(),
 }));
 
-// Mock debounced value hook
 vi.mock("@/shared/hooks/use-debounced-value", () => ({
   useDebouncedValue: vi.fn(),
 }));
@@ -35,54 +33,54 @@ const createMockSearchParams = (params: Record<string, string | null>) => {
           ][]
         )
       ).toString(),
-  } as any; // Cast to any to avoid ReadonlyURLSearchParams type mismatch
+  } as any;
+};
+
+const elements = {
+  getStatusSelect: () => screen.getByLabelText("Status"),
+  getPlatformSelect: () => screen.getByLabelText("Platform"),
+  getSearchInput: () => screen.getByLabelText("Search"),
+  queryClearFiltersButton: () =>
+    screen.queryByRole("button", { name: /clear filters/i }),
+  getClearFiltersButton: () =>
+    screen.getByRole("button", { name: "Clear all filters" }),
+  querySelectedStatusValue: (status: string) => screen.queryByText(status),
+};
+
+const actions = {
+  openStatusDropdown: async () => {
+    const select = elements.getStatusSelect();
+    await userEvent.click(select);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { name: "All Statuses" })
+      ).toBeVisible();
+    });
+  },
+  openPlatformDropdown: async () => {
+    const select = elements.getPlatformSelect();
+    await userEvent.click(select);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("option", { name: "All Platforms" })
+      ).toBeVisible();
+    });
+  },
+  typeSearch: async (value: string) => {
+    const input = elements.getSearchInput();
+    await userEvent.clear(input);
+    await userEvent.type(input, value);
+  },
+  clickClearFilters: async () => {
+    const button = elements.getClearFiltersButton();
+    await userEvent.click(button);
+  },
 };
 
 describe("LibraryFilters", () => {
   let mockPush: ReturnType<typeof vi.fn>;
-
-  const elements = {
-    getStatusSelect: () => screen.getByLabelText("Status"),
-    getPlatformSelect: () => screen.getByLabelText("Platform"),
-    getSearchInput: () => screen.getByLabelText("Search"),
-    queryClearFiltersButton: () =>
-      screen.queryByRole("button", { name: /clear filters/i }),
-    getClearFiltersButton: () =>
-      screen.getByRole("button", { name: /clear filters/i }),
-  };
-
-  const actions = {
-    openStatusDropdown: async () => {
-      const select = elements.getStatusSelect();
-      await userEvent.click(select);
-
-      // Wait for dropdown to open
-      await waitFor(() => {
-        expect(
-          screen.getByRole("option", { name: "All Statuses" })
-        ).toBeVisible();
-      });
-    },
-    openPlatformDropdown: async () => {
-      const select = elements.getPlatformSelect();
-      await userEvent.click(select);
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole("option", { name: "All Platforms" })
-        ).toBeVisible();
-      });
-    },
-    typeSearch: async (value: string) => {
-      const input = elements.getSearchInput();
-      await userEvent.clear(input);
-      await userEvent.type(input, value);
-    },
-    clickClearFilters: async () => {
-      const button = elements.getClearFiltersButton();
-      await userEvent.click(button);
-    },
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -97,10 +95,8 @@ describe("LibraryFilters", () => {
       refresh: vi.fn(),
     } as any);
 
-    // Default: no filters applied
     mockUseSearchParams.mockReturnValue(createMockSearchParams({}) as any);
 
-    // Mock debounced value to return the same value immediately (for simplicity)
     mockUseDebouncedValue.mockImplementation((value) => value);
   });
 
@@ -127,7 +123,7 @@ describe("LibraryFilters", () => {
   });
 
   describe("given component renders with active filters", () => {
-    it("should show clear filters button when status filter is active", () => {
+    it("should show clear filters button when status filter is active", async () => {
       mockUseSearchParams.mockReturnValue(
         createMockSearchParams({
           status: LibraryItemStatus.CURRENTLY_EXPLORING,
@@ -135,6 +131,12 @@ describe("LibraryFilters", () => {
       );
 
       render(<LibraryFilters />);
+
+      await waitFor(() => {
+        expect(
+          elements.querySelectedStatusValue("Currently Exploring")
+        ).toBeVisible();
+      });
 
       expect(elements.getClearFiltersButton()).toBeVisible();
     });
@@ -180,7 +182,6 @@ describe("LibraryFilters", () => {
 
       render(<LibraryFilters />);
 
-      // The Select component should show the current value
       expect(elements.getStatusSelect()).toBeInTheDocument();
     });
 
@@ -229,11 +230,9 @@ describe("LibraryFilters", () => {
     });
 
     it("should update URL when debounced value changes", async () => {
-      // First render with empty search
       const { rerender } = render(<LibraryFilters />);
       expect(mockUseDebouncedValue).toHaveBeenCalledWith("", 300);
 
-      // Simulate debounced value change
       mockUseDebouncedValue.mockReturnValue("zelda");
 
       rerender(<LibraryFilters />);
@@ -254,11 +253,9 @@ describe("LibraryFilters", () => {
         })
       );
 
-      // Start with empty search, then simulate debounce completing
       mockUseDebouncedValue.mockReturnValue("");
       const { rerender } = render(<LibraryFilters />);
 
-      // Simulate typing and debounce completing
       mockUseDebouncedValue.mockReturnValue("mario");
       rerender(<LibraryFilters />);
 
@@ -286,7 +283,6 @@ describe("LibraryFilters", () => {
 
       const { rerender } = render(<LibraryFilters />);
 
-      // Simulate clearing search and debounce completing
       mockUseDebouncedValue.mockReturnValue("");
       rerender(<LibraryFilters />);
 
@@ -316,12 +312,10 @@ describe("LibraryFilters", () => {
       await waitFor(() => {
         const callUrl = mockPush.mock.calls[0]?.[0] as string;
 
-        // Filter params should be removed
         expect(callUrl).not.toContain("status=");
         expect(callUrl).not.toContain("platform=");
         expect(callUrl).not.toContain("search=");
 
-        // Sort params should be preserved
         expect(callUrl).toContain("sortBy=releaseDate");
         expect(callUrl).toContain("sortOrder=asc");
       });
@@ -383,7 +377,6 @@ describe("LibraryFilters", () => {
 
       await actions.openStatusDropdown();
 
-      // Verify all 6 status options plus "All Statuses" are present
       expect(
         screen.getByRole("option", { name: "All Statuses" })
       ).toBeVisible();
@@ -394,7 +387,7 @@ describe("LibraryFilters", () => {
         screen.getByRole("option", { name: "Currently Exploring" })
       ).toBeVisible();
       expect(
-        screen.getByRole("option", { name: "Took a Break" })
+        screen.getByRole("option", { name: "Taking a Break" })
       ).toBeVisible();
       expect(screen.getByRole("option", { name: "Experienced" })).toBeVisible();
       expect(screen.getByRole("option", { name: "Wishlist" })).toBeVisible();
@@ -408,7 +401,6 @@ describe("LibraryFilters", () => {
 
       await actions.openPlatformDropdown();
 
-      // Verify all platform options are present
       expect(
         screen.getByRole("option", { name: "All Platforms" })
       ).toBeVisible();
@@ -437,8 +429,6 @@ describe("LibraryFilters", () => {
 
       render(<LibraryFilters />);
 
-      // The component should read from searchParams - verify it doesn't crash
-      // and renders correctly (value tested by URL encoding when changed)
       expect(elements.getStatusSelect()).toBeVisible();
     });
 

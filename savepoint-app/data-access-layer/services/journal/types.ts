@@ -1,4 +1,5 @@
 import type { JournalEntry } from "@prisma/client";
+
 import type { ServiceResult } from "../types";
 
 export type FindJournalEntriesResult = ServiceResult<JournalEntry[]>;

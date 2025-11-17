@@ -1,10 +1,13 @@
 "use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+
 import {
   signInSchema,
   signUpSchema,
@@ -12,6 +15,7 @@ import {
 } from "../lib/validation";
 import { signInAction } from "../server-actions/sign-in";
 import { signUpAction } from "../server-actions/sign-up";
+
 export function CredentialsForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const schema = useMemo(

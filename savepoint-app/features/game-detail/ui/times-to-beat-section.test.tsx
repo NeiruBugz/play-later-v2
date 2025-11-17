@@ -49,7 +49,7 @@ describe("TimesToBeatSection", () => {
       render(<TimesToBeatSection timesToBeat={{ completionist: 80 }} />);
 
       expect(screen.getByText("80 hours")).toBeVisible();
-      // One dash for main story
+
       const dashes = screen.getAllByText("—");
       expect(dashes).toHaveLength(1);
     });
@@ -58,7 +58,7 @@ describe("TimesToBeatSection", () => {
       render(<TimesToBeatSection timesToBeat={{ mainStory: 30 }} />);
 
       expect(screen.getByText("30 hours")).toBeVisible();
-      // One dash for completionist
+
       const dashes = screen.getAllByText("—");
       expect(dashes).toHaveLength(1);
     });

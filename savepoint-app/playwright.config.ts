@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -6,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "github" : "html",
-  // Global setup and teardown for database cleanup
+
   globalSetup: "./e2e/global-setup.ts",
   globalTeardown: "./e2e/global-teardown.ts",
   use: {
@@ -18,12 +19,11 @@ export default defineConfig({
   },
   timeout: 60 * 1000,
   projects: [
-    // Setup project to authenticate and save storage state
     {
       name: "setup",
       testMatch: /.*auth\.setup\.ts/,
     },
-    // Main browser project depends on setup and reuses authenticated storage
+
     {
       name: "chromium",
       use: {

@@ -1,4 +1,5 @@
 import type { AuthUserData } from "./types";
+
 export function mapToAuthUserData(
   user: {
     id: string;

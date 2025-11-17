@@ -3,24 +3,20 @@ import { LibraryItemStatus } from "@prisma/client";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
 import { useGetPlatforms } from "@/features/game-detail/hooks/use-get-platforms";
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
+
 import { AddToLibrarySchema, type AddToLibraryInput } from "../../schemas";
 import { addToLibraryAction } from "../../server-actions";
+import type { AddEntryFormProps } from "./add-entry-form.types";
 import { DateField } from "./date-field";
 import { PlatformCombobox } from "./platform-combobox";
 import { StatusSelect } from "./status-select";
-type AddEntryFormProps = {
-  igdbId: number;
-  gameId?: string;
-  gameTitle: string;
-  isEditMode?: boolean;
-  onSuccess: () => void;
-  onCancel: () => void;
-};
+
 export const AddEntryForm = ({
   igdbId,
   gameTitle,

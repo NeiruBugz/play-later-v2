@@ -1,12 +1,13 @@
 import { getServerUserId } from "@/auth";
 import { getLibraryHandler } from "@/data-access-layer/handlers/library/get-library-handler";
 import { NextResponse, type NextRequest } from "next/server";
+
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 const logger = createLogger({ [LOGGER_CONTEXT.API_ROUTE]: "LibraryAPI" });
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // 1. Authentication check
     const userId = await getServerUserId();
     if (!userId) {
       logger.warn("Unauthorized library access attempt");
@@ -15,14 +16,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         { status: HTTP_STATUS.UNAUTHORIZED }
       );
     }
-    // 2. Extract query parameters
     const searchParams = request.nextUrl.searchParams;
     const rawStatus = searchParams.get("status");
     const rawPlatform = searchParams.get("platform");
     const rawSearch = searchParams.get("search");
     const rawSortBy = searchParams.get("sortBy");
     const rawSortOrder = searchParams.get("sortOrder");
-    // Extract request context
     const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
     const url = new URL(request.url);
     logger.info(
@@ -37,8 +36,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
       "Library API request received"
     );
-    // 3. Call handler with full context
-    // Handler validates types with Zod schema
     const result = await getLibraryHandler(
       {
         userId,
@@ -60,7 +57,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         url,
       }
     );
-    // 4. Transform handler result to NextResponse
     if (!result.success) {
       logger.warn(
         { userId, error: result.error, status: result.status },
@@ -70,7 +66,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         { success: false, error: result.error },
         { status: result.status }
       );
-      // Add any custom headers from handler (e.g., rate limit headers)
       if (result.headers) {
         Object.entries(result.headers).forEach(([key, value]) => {
           response.headers.set(key, String(value));
@@ -89,7 +84,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
       { status: result.status }
     );
-    // Add security headers
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("X-Frame-Options", "DENY");
     response.headers.set("X-XSS-Protection", "1; mode=block");

@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import { PrismaClient } from "@prisma/client";
 import { nanoid } from "nanoid";
+
 let testDataBase: PrismaClient | undefined;
 export const setupDatabase = async (): Promise<PrismaClient> => {
   const testDatabaseName = `test_${nanoid()}`;
@@ -9,7 +10,6 @@ export const setupDatabase = async (): Promise<PrismaClient> => {
   process.env.POSTGRES_PRISMA_URL = databaseUrl;
   process.env.POSTGRES_URL_NON_POOLING = databaseUrl;
   try {
-    // Use Docker to run PostgreSQL commands
     execSync(
       `docker exec savepoint-postgres dropdb --if-exists -U postgres ${testDatabaseName}`,
       { stdio: "ignore" }
@@ -68,7 +68,7 @@ export const resetTestDatabase = async (): Promise<void> => {
     await testDataBase.$executeRaw`SET session_replication_role = DEFAULT;`;
   }
 };
-// Export a getter function to ensure testDataBase is initialized
+
 export const getTestDatabase = (): PrismaClient => {
   if (!testDataBase) {
     throw new Error(
@@ -77,5 +77,5 @@ export const getTestDatabase = (): PrismaClient => {
   }
   return testDataBase;
 };
-// Direct export for backward compatibility (use with caution)
+
 export { testDataBase };

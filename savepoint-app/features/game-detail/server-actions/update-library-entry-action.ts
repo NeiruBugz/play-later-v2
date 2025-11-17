@@ -1,8 +1,11 @@
 "use server";
+
 import { LibraryService } from "@/data-access-layer/services";
 import type { LibraryItem } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+
 import { createServerAction } from "@/shared/lib";
+
 import {
   UpdateLibraryEntrySchema,
   type UpdateLibraryEntryInput,
@@ -17,10 +20,7 @@ export const updateLibraryEntryAction = createServerAction<
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
     const { libraryItemId, status, startedAt, completedAt } = input;
-    logger.info(
-      { libraryItemId, status, userId },
-      "Updating library entry"
-    );
+    logger.info({ libraryItemId, status, userId }, "Updating library entry");
     const libraryService = new LibraryService();
     const updateResult = await libraryService.updateLibraryItem({
       userId: userId!,

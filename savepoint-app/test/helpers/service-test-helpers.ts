@@ -3,6 +3,7 @@ import {
   type ServiceResult,
 } from "@/data-access-layer/services";
 import { expect } from "vitest";
+
 export function expectServiceSuccess<T>(
   result: ServiceResult<T>
 ): asserts result is { success: true; data: T } {

@@ -1,10 +1,8 @@
 "use client";
+
 import { format } from "date-fns";
-import type {
-  ControllerRenderProps,
-  FieldPath,
-  FieldValues,
-} from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
+
 import {
   FormControl,
   FormDescription,
@@ -13,11 +11,9 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
-type DateFieldProps<T extends FieldValues = FieldValues> = {
-  field: ControllerRenderProps<T, FieldPath<T>>;
-  label: string;
-  description?: string;
-};
+
+import type { DateFieldProps } from "./date-field.types";
+
 export const DateField = <T extends FieldValues = FieldValues>({
   field,
   label,
@@ -26,15 +22,12 @@ export const DateField = <T extends FieldValues = FieldValues>({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = e.target.value;
     if (dateValue) {
-      // Convert string to Date object
       field.onChange(new Date(dateValue));
     } else {
-      // Clear the field if empty
       field.onChange(undefined);
     }
   };
-  // Format Date object to yyyy-MM-dd string for input value
-  // Type guard: check if value exists and is a Date instance
+
   const isDateValue = (value: unknown): value is Date => {
     return value !== null && value !== undefined && value instanceof Date;
   };

@@ -131,7 +131,9 @@ describe("EditEntryForm", () => {
 
     it("should handle different platform values including null", () => {
       const nullItem = createMockLibraryItem({ platform: null });
-      const { rerender } = render(<EditEntryForm {...defaultProps} item={nullItem} />);
+      const { rerender } = render(
+        <EditEntryForm {...defaultProps} item={nullItem} />
+      );
       expect(elements.getPlatformField()).toHaveValue("Not specified");
 
       const switchItem = createMockLibraryItem({ platform: "Nintendo Switch" });

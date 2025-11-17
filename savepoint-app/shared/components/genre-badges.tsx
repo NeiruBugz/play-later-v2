@@ -1,4 +1,5 @@
 import { Badge } from "@/shared/components/ui/badge";
+
 export const GenreBadges = ({ genres }: { genres?: string[] }) => {
   if (!genres || genres.length === 0) {
     return null;

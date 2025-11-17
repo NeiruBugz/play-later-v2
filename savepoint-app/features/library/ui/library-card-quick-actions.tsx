@@ -1,6 +1,8 @@
 "use client";
+
 import type { LibraryItemStatus } from "@prisma/client";
 import { MoreVertical } from "lucide-react";
+
 import {
   Select,
   SelectContent,
@@ -8,11 +10,9 @@ import {
   SelectTrigger,
 } from "@/shared/components/ui/select";
 import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
+
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
-type LibraryCardQuickActionsProps = {
-  libraryItemId: number;
-  currentStatus: LibraryItemStatus;
-};
+import type { LibraryCardQuickActionsProps } from "./library-card-quick-actions.types";
 
 const STATUS_OPTIONS: LibraryItemStatus[] = [
   "WISHLIST",
@@ -34,7 +34,7 @@ export function LibraryCardQuickActions({
       status: newStatus as LibraryItemStatus,
     });
   };
-  // Determine which status options to show and which to disable
+
   const availableStatuses = STATUS_OPTIONS.filter(
     (status) => status !== currentStatus
   );
@@ -53,7 +53,6 @@ export function LibraryCardQuickActions({
         </SelectTrigger>
         <SelectContent>
           {availableStatuses.map((status) => {
-            // Disable Wishlist option if current status is not Wishlist (enforce transition rule)
             const isDisabled =
               status === "WISHLIST" && currentStatus !== "WISHLIST";
             return (

@@ -1,6 +1,8 @@
 "use client";
+
 import type { LibraryItemStatus } from "@prisma/client";
 import { useState } from "react";
+
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -9,12 +11,9 @@ import {
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
 import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
+
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
-type LibraryCardInteractiveBadgeProps = {
-  libraryItemId: number;
-  currentStatus: LibraryItemStatus;
-  statusVariant: "default" | "secondary" | "outline" | "destructive";
-};
+import type { LibraryCardInteractiveBadgeProps } from "./library-card-interactive-badge.types";
 
 const STATUS_OPTIONS: LibraryItemStatus[] = [
   "WISHLIST",
@@ -39,7 +38,7 @@ export function LibraryCardInteractiveBadge({
     });
     setOpen(false);
   };
-  // Determine which status options to show and which to disable
+
   const availableStatuses = STATUS_OPTIONS.filter(
     (status) => status !== currentStatus
   );
@@ -82,7 +81,6 @@ export function LibraryCardInteractiveBadge({
             Change status
           </p>
           {availableStatuses.map((status) => {
-            // Disable Wishlist option if current status is not Wishlist (enforce transition rule)
             const isDisabled =
               status === "WISHLIST" && currentStatus !== "WISHLIST";
             return (

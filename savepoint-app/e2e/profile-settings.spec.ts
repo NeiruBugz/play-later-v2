@@ -150,7 +150,6 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     const settings = new ProfileSettingsPage(page);
     await settings.goto();
 
-    // "admin" is reserved according to validation rules
     await settings.typeUsername("admin");
     await expect(page.getByText("Username is not allowed")).toBeVisible({
       timeout: 3000,
@@ -164,7 +163,6 @@ test.describe("[settings] Profile Settings — Manage username and avatar", () =
     const settings = new ProfileSettingsPage(page);
     await settings.goto();
 
-    // "damn" is included in additional profanity checks
     await settings.typeUsername(`damnuser${Date.now()}`);
     await expect(page.getByText("Username is not allowed")).toBeVisible({
       timeout: 3000,

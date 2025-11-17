@@ -4,6 +4,7 @@ import type {
   ProfileWithStats,
   RecentGame,
 } from "./types";
+
 type MinimalUser = {
   username: string | null;
   image: string | null;

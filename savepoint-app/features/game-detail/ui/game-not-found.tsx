@@ -1,11 +1,14 @@
 "use client";
+
 import { ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+
 type GameNotFoundProps = {
   initialQuery?: string;
 };

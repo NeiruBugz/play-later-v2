@@ -2,11 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
 import { test } from "@playwright/test";
+
 import {
   clearTestData,
   createTestUser,
   disconnectDatabase,
 } from "./helpers/db";
+
 const AUTH_USER = {
   email: "e2e-auth-user@example.com",
   username: "e2eauthuser",

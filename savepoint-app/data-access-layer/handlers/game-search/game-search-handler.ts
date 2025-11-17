@@ -1,16 +1,19 @@
 import { isSuccessResult } from "@/data-access-layer/services";
 import { IgdbService } from "@/data-access-layer/services/igdb";
 import type { NextRequest } from "next/server";
+
 import { SearchGamesSchema } from "@/features/game-search/schemas";
+import { HTTP_STATUS } from "@/shared/config/http-codes";
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,
   RATE_LIMIT_RETRY_AFTER_SECONDS,
 } from "@/shared/constants";
-import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
+
 import type { HandlerResult, RequestContext } from "../types";
 import type { GameSearchHandlerInput, GameSearchHandlerOutput } from "./types";
+
 const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GameSearchHandler" });
 
 export async function gameSearchHandler(
@@ -19,7 +22,7 @@ export async function gameSearchHandler(
 ): Promise<HandlerResult<GameSearchHandlerOutput>> {
   const { query, offset = 0 } = input;
   logger.info({ query, offset, ip: context.ip }, "Processing game search");
-  // Validate input
+
   const validation = SearchGamesSchema.safeParse({ query, offset });
   if (!validation.success) {
     logger.warn(
@@ -32,8 +35,7 @@ export async function gameSearchHandler(
       status: HTTP_STATUS.BAD_REQUEST,
     };
   }
-  // Check rate limiting
-  // Create a minimal NextRequest-like object for rate limiting
+
   const rateLimitRequest = {
     headers: context.headers,
   } as unknown as NextRequest;
@@ -51,7 +53,7 @@ export async function gameSearchHandler(
       },
     };
   }
-  // Call IGDB service
+
   const igdbService = new IgdbService();
   const result = await igdbService.searchGamesByName({
     name: validation.data.query,
@@ -76,7 +78,7 @@ export async function gameSearchHandler(
   );
   return {
     success: true,
-    data: result.data, // Already in correct shape: { games: SearchResponse[], count: number }
+    data: result.data,
     status: HTTP_STATUS.OK,
   };
 }

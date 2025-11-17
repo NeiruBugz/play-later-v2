@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { LibraryItem } from "@prisma/client";
 import { useForm } from "react-hook-form";
+
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
@@ -8,19 +8,17 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 import { getStatusLabel } from "@/shared/lib/library-status";
+
 import {
   UpdateLibraryEntrySchema,
   type UpdateLibraryEntryInput,
 } from "../../schemas";
 import { updateLibraryEntryAction } from "../../server-actions";
 import { DateField } from "./date-field";
+import type { EditEntryFormProps } from "./edit-entry-form.types";
 import { LibraryEntryMetadata } from "./library-entry-metadata";
 import { StatusSelect } from "./status-select";
-type EditEntryFormProps = {
-  item: LibraryItem;
-  onSuccess: () => void;
-  onCancel: () => void;
-};
+
 export const EditEntryForm = ({
   item,
   onSuccess,

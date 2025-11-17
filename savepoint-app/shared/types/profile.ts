@@ -1,4 +1,3 @@
-
 export type RecentGame = {
   gameId: string;
   title: string;

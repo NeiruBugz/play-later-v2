@@ -42,7 +42,6 @@ describe("Game Repository Integration Tests", () => {
   let testPlatformId: string;
 
   beforeEach(async () => {
-    // Create test genre and platform
     const genreResult = await upsertGenre({
       id: 999,
       name: "Test Genre",
@@ -69,7 +68,7 @@ describe("Game Repository Integration Tests", () => {
       slug: "test-game",
       summary: "A test game",
       cover: { image_id: "abc123" },
-      first_release_date: 1609459200, // 2021-01-01
+      first_release_date: 1609459200,
     };
 
     const result = await createGameWithRelations({
@@ -218,7 +217,6 @@ describe("Game Repository Integration Tests", () => {
     if (result.ok) {
       expect(result.data.title).toBe("Game Without Relations");
 
-      // Verify no relations were created
       const gameWithRelations = await findGameByIgdbId(11111);
       if (gameWithRelations.ok && gameWithRelations.data) {
         expect(gameWithRelations.data.genres).toHaveLength(0);

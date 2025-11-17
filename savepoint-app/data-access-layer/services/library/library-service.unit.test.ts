@@ -14,13 +14,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LibraryService } from "./library-service";
 
-// Mock repository functions
 vi.mock("@/data-access-layer/repository", () => ({
   findLibraryItemsWithFilters: vi.fn(),
   findLibraryItemById: vi.fn(),
   deleteLibraryItem: vi.fn(),
   updateLibraryItem: vi.fn(),
-  // Other repository functions that might be imported
+
   createLibraryItem: vi.fn(),
   findAllLibraryItemsByGameId: vi.fn(),
   findGameByIgdbId: vi.fn(),

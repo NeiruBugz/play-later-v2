@@ -198,7 +198,6 @@ describe("DeleteConfirmationDialog", () => {
         expect(onConfirm).toHaveBeenCalled();
         expect(onOpenChange).toHaveBeenCalled();
 
-        // Verify order: onConfirm should be called before onOpenChange
         const confirmOrder = onConfirm.mock.invocationCallOrder[0];
         const openChangeOrder = onOpenChange.mock.invocationCallOrder[0];
         expect(confirmOrder).toBeLessThan(openChangeOrder);
@@ -215,12 +214,9 @@ describe("DeleteConfirmationDialog", () => {
           />
         );
 
-        // Simulate closing via the Dialog's onOpenChange
-        // This would normally be triggered by clicking overlay or pressing Escape
         const dialog = screen.getByRole("dialog");
         expect(dialog).toBeVisible();
 
-        // When the Dialog component calls onOpenChange
         onOpenChange(false);
         expect(onOpenChange).toHaveBeenCalledWith(false);
       });
@@ -265,7 +261,6 @@ describe("DeleteConfirmationDialog", () => {
       it("should have accessible dialog description", () => {
         render(<DeleteConfirmationDialog {...defaultProps} />);
 
-        // The description should be present and readable
         const description = screen.getByText(
           /are you sure you want to delete your/i
         );
@@ -279,7 +274,6 @@ describe("DeleteConfirmationDialog", () => {
 
         await userEvent.tab();
 
-        // One of the buttons should have focus (dialog traps focus)
         const cancelButton = screen.getByRole("button", {
           name: /cancel deletion/i,
         });
@@ -287,7 +281,6 @@ describe("DeleteConfirmationDialog", () => {
           name: /confirm deletion/i,
         });
 
-        // Check if one of the buttons has focus - use try-catch since we don't know which one
         try {
           expect(cancelButton).toHaveFocus();
         } catch {
@@ -374,7 +367,6 @@ describe("DeleteConfirmationDialog", () => {
     it("should have proper dialog content structure", () => {
       render(<DeleteConfirmationDialog {...defaultProps} />);
 
-      // Verify the dialog contains the expected sections
       expect(screen.getByRole("heading")).toBeVisible();
       expect(screen.getByText(/are you sure/i)).toBeVisible();
       expect(screen.getByText(/this action cannot be undone/i)).toBeVisible();
@@ -419,7 +411,6 @@ describe("DeleteConfirmationDialog", () => {
         />
       );
 
-      // Each instance should have its own callbacks
       expect(onConfirm1).not.toBe(onConfirm2);
     });
   });

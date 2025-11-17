@@ -1,6 +1,3 @@
-/**
- * @vitest-environment jsdom
- */
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
@@ -9,19 +6,12 @@ import { GameCoverImage } from "./game-cover-image";
 describe("GameCoverImage", () => {
   it("should render image when imageId is provided", () => {
     render(
-      <GameCoverImage
-        imageId="abc123"
-        gameTitle="Test Game"
-        size="cover_big"
-      />
+      <GameCoverImage imageId="abc123" gameTitle="Test Game" size="cover_big" />
     );
 
     const image = screen.getByAltText("Test Game cover");
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute(
-      "src",
-      expect.stringContaining("abc123.jpg")
-    );
+    expect(image).toHaveAttribute("src", expect.stringContaining("abc123.jpg"));
   });
 
   it("should render placeholder when imageId is null", () => {
@@ -55,7 +45,7 @@ describe("GameCoverImage", () => {
       />
     );
 
-    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
   it("should apply custom className to container", () => {
@@ -68,7 +58,7 @@ describe("GameCoverImage", () => {
       />
     );
 
-    const container = screen.getByTestId('game-cover-container');
+    const container = screen.getByTestId("game-cover-container");
     expect(container).toHaveClass("custom-class", "h-32", "w-24");
   });
 

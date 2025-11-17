@@ -1,5 +1,7 @@
 import { type User } from "@prisma/client";
+
 import { getTestDatabase } from "../database";
+
 export type UserFactoryOptions = {
   email?: string;
   name?: string;

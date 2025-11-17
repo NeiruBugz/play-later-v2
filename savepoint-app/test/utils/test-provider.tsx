@@ -6,7 +6,18 @@ import {
   type ThemeProviderProps,
 } from "next-themes";
 import { type PropsWithChildren } from "react";
-const queryClient = new QueryClient();
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});
+
 export default function TestProviders({
   children,
   ...props
@@ -21,13 +32,18 @@ export default function TestProviders({
     </NextThemesProvider>
   );
 }
+
 export function renderWithTestProviders(ui: React.ReactElement) {
   return render(ui, { wrapper: TestProviders });
 }
+
 export function createQueryWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
+        retry: false,
+      },
+      mutations: {
         retry: false,
       },
     },

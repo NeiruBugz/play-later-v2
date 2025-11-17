@@ -1,18 +1,15 @@
 "use client";
+
 import { Check, Loader2, X } from "lucide-react";
 import { useEffect } from "react";
+
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/shared/lib/ui/utils";
+
 import { useUsernameValidation } from "../hooks/use-username-validation";
-interface UsernameInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  label?: string;
-  error?: string;
-  disabled?: boolean;
-  onValidationChange?: (hasError: boolean) => void;
-}
+import type { UsernameInputProps } from "./username-input.types";
+
 export function UsernameInput({
   value,
   onChange,

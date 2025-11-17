@@ -41,7 +41,9 @@ vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
         igdbId: game.id,
         slug: game.slug,
         description: game.summary,
-        coverImage: game.cover?.image_id ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg` : null,
+        coverImage: game.cover?.image_id
+          ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+          : null,
         releaseDate: game.first_release_date
           ? new Date(game.first_release_date * 1000)
           : null,
@@ -84,9 +86,13 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
 
       expect(result.data.libraryItem.userId).toBe(testUser.id);
       expect(result.data.libraryItem.gameId).toBe(testGame.id);
-      expect(result.data.libraryItem.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
+      expect(result.data.libraryItem.status).toBe(
+        LibraryItemStatus.CURIOUS_ABOUT
+      );
       expect(result.data.libraryItem.platform).toBe("PlayStation 5");
-      expect(result.data.libraryItem.acquisitionType).toBe(AcquisitionType.DIGITAL);
+      expect(result.data.libraryItem.acquisitionType).toBe(
+        AcquisitionType.DIGITAL
+      );
       expect(result.data.gameSlug).toBe(testGame.slug);
 
       const libraryItem = await prisma.libraryItem.findUnique({
@@ -103,7 +109,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.COMPLETED,
+        status: LibraryItemStatus.EXPERIENCED,
         platform: "PC",
         startedAt,
         completedAt,
@@ -130,7 +136,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.PLAYING,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -273,10 +279,10 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const statuses = [
         LibraryItemStatus.WISHLIST,
         LibraryItemStatus.CURIOUS_ABOUT,
-        LibraryItemStatus.PLAYING,
-        LibraryItemStatus.COMPLETED,
-        LibraryItemStatus.ON_HOLD,
-        LibraryItemStatus.ABANDONED,
+        LibraryItemStatus.CURRENTLY_EXPLORING,
+        LibraryItemStatus.EXPERIENCED,
+        LibraryItemStatus.TOOK_A_BREAK,
+        LibraryItemStatus.REVISITING,
       ];
 
       for (const status of statuses) {

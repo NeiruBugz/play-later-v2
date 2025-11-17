@@ -1,5 +1,3 @@
-
-
 export type HandlerResult<TData> =
   | {
       success: true;
@@ -14,11 +12,10 @@ export type HandlerResult<TData> =
     };
 
 export interface RequestContext {
-  
   ip: string;
-  
+
   headers: Headers;
-  
+
   url: URL;
 }
 

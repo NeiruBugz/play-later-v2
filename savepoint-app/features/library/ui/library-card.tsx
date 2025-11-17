@@ -1,6 +1,8 @@
 "use client";
+
 import type { LibraryItemStatus } from "@prisma/client";
 import Link from "next/link";
+
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
 import {
@@ -13,20 +15,16 @@ import {
   LIBRARY_STATUS_LABELS,
   LIBRARY_STATUS_VARIANTS,
 } from "@/shared/lib/library-status";
-import type { LibraryItemWithGameAndCount } from "@/shared/types";
-import { useQuickActionsVariant } from "../hooks/use-quick-actions-variant";
+
 import { LibraryCardActionBar } from "./library-card-action-bar";
-import { LibraryCardInteractiveBadge } from "./library-card-interactive-badge";
-type LibraryCardProps = {
-  item: LibraryItemWithGameAndCount;
-};
+import type { LibraryCardProps } from "./library-card.types";
 
 export function LibraryCard({ item }: LibraryCardProps) {
   const { game, status } = item;
   const hasMultipleEntries = game._count.libraryItems > 1;
-  const variant = useQuickActionsVariant(item.id);
   const coverImageId =
     game.coverImage?.split("/").pop()?.replace(".jpg", "") ?? null;
+
   const handleLinkInteraction = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.defaultPrevented) {
       return;
@@ -74,39 +72,15 @@ export function LibraryCard({ item }: LibraryCardProps) {
             <p>{game.title}</p>
           </TooltipContent>
         </Tooltip>
-        {variant === "badge" && (
-          <div
-            data-library-interactive
-            className="absolute top-2 left-2"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
+        <div className="absolute top-2 left-2">
+          <Badge
+            variant={LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]}
+            role="status"
+            aria-label={`Status: ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}`}
           >
-            <LibraryCardInteractiveBadge
-              libraryItemId={item.id}
-              currentStatus={status as LibraryItemStatus}
-              statusVariant={
-                LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]
-              }
-            />
-          </div>
-        )}
-        {variant === "actionBar" && (
-          <div className="absolute top-2 left-2">
-            <Badge
-              variant={LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]}
-              role="status"
-              aria-label={`Status: ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}`}
-            >
-              {LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}
-            </Badge>
-          </div>
-        )}
+            {LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}
+          </Badge>
+        </div>
         {hasMultipleEntries && (
           <div className="absolute top-2 right-2">
             <Badge
@@ -118,12 +92,10 @@ export function LibraryCard({ item }: LibraryCardProps) {
             </Badge>
           </div>
         )}
-        {variant === "actionBar" && (
-          <LibraryCardActionBar
-            libraryItemId={item.id}
-            currentStatus={status as LibraryItemStatus}
-          />
-        )}
+        <LibraryCardActionBar
+          libraryItemId={item.id}
+          currentStatus={status as LibraryItemStatus}
+        />
       </Link>
     </TooltipProvider>
   );

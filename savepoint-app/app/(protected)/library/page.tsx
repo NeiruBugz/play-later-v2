@@ -2,6 +2,7 @@ import { LibraryFilters } from "@/features/library/ui/library-filters";
 import { LibraryGrid } from "@/features/library/ui/library-grid";
 import { LibrarySortSelect } from "@/features/library/ui/library-sort-select";
 import { requireServerUserId } from "@/shared/lib/app/auth";
+
 export const dynamic = "force-dynamic";
 export default async function LibraryPage() {
   await requireServerUserId();

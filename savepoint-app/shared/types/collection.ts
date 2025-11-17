@@ -1,5 +1,6 @@
 import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
+
 export const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),
   status: z.union([z.nativeEnum(LibraryItemStatus), z.string()]).optional(),
@@ -14,6 +15,6 @@ export const validateFilterParams = (
     platform: params.platform,
     status: params.status,
     search: params.search,
-    page: Number(params.page), // Ensure 'page' is a number
+    page: Number(params.page),
   });
 };

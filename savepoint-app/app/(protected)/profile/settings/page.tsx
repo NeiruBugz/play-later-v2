@@ -1,8 +1,10 @@
 import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
 import { redirect } from "next/navigation";
+
 import { ProfileSettingsForm } from "@/features/profile/ui/profile-settings-form";
 import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { requireServerUserId } from "@/shared/lib/app/auth";
+
 export default async function ProfileSettingsPage() {
   const userId = await requireServerUserId();
   const profileService = new ProfileService();

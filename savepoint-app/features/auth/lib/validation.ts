@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import {
   PASSWORD_MIN_LENGTH,
   USER_NAME_MAX_LENGTH,
@@ -12,7 +13,10 @@ export const signInSchema = z.object({
 export const signUpSchema = signInSchema.extend({
   password: z
     .string()
-    .min(PASSWORD_MIN_LENGTH, `Must be at least ${PASSWORD_MIN_LENGTH} characters`),
+    .min(
+      PASSWORD_MIN_LENGTH,
+      `Must be at least ${PASSWORD_MIN_LENGTH} characters`
+    ),
   name: z
     .string()
     .trim()

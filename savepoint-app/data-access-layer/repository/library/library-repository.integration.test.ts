@@ -11,14 +11,8 @@ import {
 } from "@/test/setup/db-factories";
 import { LibraryItemStatus } from "@prisma/client";
 
-import { findPlatformsForGame } from "../platform/platform-repository";
 import { isRepositorySuccess } from "../types";
-import {
-  findAllLibraryItemsByGameId,
-  findLibraryItemsWithFilters,
-  findMostRecentLibraryItemByGameId,
-  getLibraryStatsByUserId,
-} from "./library-repository";
+import { findLibraryItemsWithFilters } from "./library-repository";
 
 vi.mock("@/shared/lib/app/db", async () => {
   const { getTestDatabase } = await import("@/test/setup/database");

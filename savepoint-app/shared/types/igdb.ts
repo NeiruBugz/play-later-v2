@@ -13,6 +13,7 @@ import {
   type Theme,
   type Website,
 } from "igdb-api-types";
+
 type PlatformWithReleaseDate = {
   human: string;
   id: number;
@@ -74,7 +75,7 @@ export type FullGameInfoResponse = {
   summary?: string;
   themes: Theme[];
   websites: Website[];
-  franchise?: Franchise | number; // Can be either a Franchise object or franchise ID
+  franchise?: Franchise | number;
   franchises: number[];
   game_type: number;
 };

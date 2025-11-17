@@ -1,7 +1,10 @@
 import { env } from "@/env.mjs";
+
 import { Card } from "@/shared/components/ui/card";
+
 import { CredentialsForm } from "./credentials-form";
 import { GoogleSignInButton } from "./google-sign-in-button";
+
 export function AuthPageView() {
   const shouldIncludeCredentialsSignIn =
     env.NODE_ENV !== "production" || env.AUTH_ENABLE_CREDENTIALS === "true";

@@ -159,11 +159,9 @@ describe("LibraryEntryMetadata", () => {
       const item = createMockLibraryItem();
       render(<LibraryEntryMetadata item={item} />);
 
-      // The metadata card contains flex containers for each label-value pair
       const card = screen.getByTestId("library-entry-metadata-card");
       expect(card).toBeInTheDocument();
 
-      // Verify the Created label exists (it's within a flex container)
       expect(screen.getByText("Created:")).toBeVisible();
     });
   });

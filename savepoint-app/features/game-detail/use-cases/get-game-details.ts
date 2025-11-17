@@ -1,4 +1,5 @@
 "use server";
+
 import {
   IgdbService,
   JournalService,
@@ -6,9 +7,11 @@ import {
 } from "@/data-access-layer/services";
 import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
 import type { JournalEntry, LibraryItem } from "@prisma/client";
+
 import { createLogger } from "@/shared/lib/app/logger";
 import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
 import type { FullGameInfoResponse } from "@/shared/types";
+
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVICE]: "getGameDetailsUseCase",
 });

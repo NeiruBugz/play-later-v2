@@ -2,8 +2,10 @@ import { auth } from "@/auth";
 import { BookOpen, Clock, Heart, Library, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
+
 export default async function Page() {
   const session = await auth();
   if (session?.user) {

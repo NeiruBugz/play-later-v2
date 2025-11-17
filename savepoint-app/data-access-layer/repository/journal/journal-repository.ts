@@ -1,4 +1,5 @@
 import "server-only";
+
 import {
   repositoryError,
   RepositoryErrorCode,
@@ -6,7 +7,9 @@ import {
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import type { JournalEntry } from "@prisma/client";
+
 import { prisma } from "@/shared/lib/app/db";
+
 export async function findJournalEntriesByGameId(params: {
   gameId: string;
   userId: string;

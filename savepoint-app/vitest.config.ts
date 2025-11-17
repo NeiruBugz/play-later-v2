@@ -2,6 +2,7 @@ import path from "path";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
+
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
@@ -69,6 +70,7 @@ export default defineConfig({
             "**/coverage/**",
             "**/*.integration.test.{js,ts,jsx,tsx}",
             "**/shared/components/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/hooks/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
         },
       },
@@ -84,6 +86,7 @@ export default defineConfig({
             "**/features/**/hooks/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/shared/components/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/shared/hooks/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
           exclude: [
             "**/node_modules/**",

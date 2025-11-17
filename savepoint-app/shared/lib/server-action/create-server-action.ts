@@ -1,7 +1,8 @@
 import { getServerUserId } from "@/auth";
 import type { ZodSchema } from "zod";
-import { createLogger } from "@/shared/lib/app/logger";
-import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
+
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 export type ActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };

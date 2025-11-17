@@ -1,18 +1,17 @@
 "use client";
-import type { LibraryItem } from "@prisma/client";
+
 import { CalendarIcon, CheckCircleIcon, PlayIcon, Trash2 } from "lucide-react";
 import { useState } from "react";
+
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { formatAbsoluteDate } from "@/shared/lib/date";
 import { getStatusLabel, getStatusVariant } from "@/shared/lib/library-status";
+
 import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
-type LibraryItemCardProps = {
-  item: LibraryItem;
-  onClick?: () => void;
-  onDelete?: (itemId: number) => void;
-};
+import type { LibraryItemCardProps } from "./library-item-card.types";
+
 export const LibraryItemCard = ({
   item,
   onClick,

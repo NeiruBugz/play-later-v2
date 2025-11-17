@@ -1,4 +1,5 @@
 import type { BadgeProps } from "@/shared/components/ui/badge";
+
 type PlatformBadgeVariant = NonNullable<BadgeProps["variant"]>;
 export function getPlatformBadgeVariant(
   platformName: string
@@ -10,7 +11,7 @@ export function getPlatformBadgeVariant(
   if (lowerName.includes("xbox")) {
     return "xbox";
   }
-  // Nintendo variants - special handling for platforms without "Nintendo" in the name
+
   const nintendoPlatforms = [
     "switch",
     "wii",

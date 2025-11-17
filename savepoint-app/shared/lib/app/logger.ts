@@ -1,4 +1,5 @@
 import pino, { type LogFn, type LoggerOptions } from "pino";
+
 const isBrowser = typeof window !== "undefined";
 const isDevelopment = process.env.NODE_ENV === "development";
 const isTest = process.env.NODE_ENV === "test";
@@ -59,8 +60,8 @@ function createLoggerOptions(): LoggerOptions {
     hooks: {
       logMethod(args: unknown[], method: LogFn) {
         const normalizedArgs = normalizeLogArgs(args);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        method.apply(this, normalizedArgs as any);
+
+        method.apply(this, normalizedArgs as Parameters<LogFn>);
       },
     },
   };

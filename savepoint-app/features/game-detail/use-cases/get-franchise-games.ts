@@ -1,8 +1,11 @@
 "use server";
+
 import { IgdbService } from "@/data-access-layer/services";
+
 import { FRANCHISE_GAMES_INITIAL_LIMIT } from "@/shared/constants";
 import { createLogger } from "@/shared/lib/app/logger";
 import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
+
 const logger = createLogger({
   [LOGGER_CONTEXT.USE_CASE]: "getFranchiseGames",
 });
@@ -44,7 +47,7 @@ export async function getFranchiseGames(
   try {
     const igdbService = new IgdbService();
     const franchises: FranchiseData[] = [];
-    // Fetch initial page (20 games) for each franchise in parallel
+
     for (const franchiseId of franchiseIds) {
       const [detailsResult, gamesResult] = await Promise.all([
         igdbService.getFranchiseDetails({ franchiseId }),

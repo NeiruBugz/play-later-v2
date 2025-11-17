@@ -12,17 +12,27 @@ import { addToLibraryAction } from "./add-to-library-action";
 import { updateLibraryEntryAction } from "./update-library-entry-action";
 import { updateLibraryStatusAction } from "./update-library-status-action";
 
-// Mock Next.js cache revalidation
+vi.mock("@/shared/lib", async () => {
+  const actual =
+    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
+  const { getTestDatabase } = await import("@/test/setup/database");
+
+  return {
+    ...actual,
+    get prisma() {
+      return getTestDatabase();
+    },
+  };
+});
+
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-// Mock auth module
 vi.mock("@/auth", () => ({
   getServerUserId: vi.fn(),
 }));
 
-// Mock only IgdbService - don't mock the entire services module
 vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
   IgdbService: vi.fn().mockImplementation(() => ({
     getGameDetails: vi.fn().mockResolvedValue({
@@ -34,7 +44,7 @@ vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
           slug: "test-game",
           summary: "A test game",
           cover: { image_id: "test123" },
-          first_release_date: 1609459200, // 2021-01-01
+          first_release_date: 1609459200,
           genres: [{ id: 1, name: "Action", slug: "action" }],
           platforms: [
             {
@@ -59,19 +69,16 @@ describe("addToLibraryAction - Integration Tests", () => {
   });
 
   beforeEach(async () => {
-    // Create test user
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
     });
 
-    // Create test game
     testGame = await createGame({
       title: "Existing Game",
       igdbId: 12345,
     });
 
-    // Mock getServerUserId to return test user
     const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
@@ -91,7 +98,6 @@ describe("addToLibraryAction - Integration Tests", () => {
       expect(result.data.gameId).toBe(testGame.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      // Verify library item was created in database
       const libraryItem = await prisma.libraryItem.findUnique({
         where: { id: result.data.id },
       });
@@ -123,13 +129,11 @@ describe("addToLibraryAction - Integration Tests", () => {
       ];
 
       for (const status of statuses) {
-        // Create new user for each status to avoid duplicates
         const user = await createUser({
           email: `user-${status}@example.com`,
           username: `user-${status}`,
         });
 
-        // Mock auth for this iteration
         const { getServerUserId } = await import("@/auth");
         vi.mocked(getServerUserId).mockResolvedValue(user.id);
 
@@ -163,7 +167,6 @@ describe("addToLibraryAction - Integration Tests", () => {
     });
 
     it("should allow adding the same game multiple times (current data model supports multiple entries)", async () => {
-      // Add game to library first
       const firstResult = await addToLibraryAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.CURIOUS_ABOUT,
@@ -173,9 +176,6 @@ describe("addToLibraryAction - Integration Tests", () => {
       expect(firstResult.success).toBe(true);
       if (!firstResult.success) return;
 
-      // Add the same game again with different status - should succeed
-      // NOTE: Current data model intentionally allows multiple library entries per game
-      // See: context/spec/002-game-detail-pages/functional-spec.md (Data Model Clarification)
       const secondResult = await addToLibraryAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.WISHLIST,
@@ -185,7 +185,6 @@ describe("addToLibraryAction - Integration Tests", () => {
       expect(secondResult.success).toBe(true);
       if (!secondResult.success) return;
 
-      // Verify both entries exist and are different
       expect(firstResult.data.id).not.toBe(secondResult.data.id);
       expect(firstResult.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
       expect(secondResult.data.status).toBe(LibraryItemStatus.WISHLIST);
@@ -193,7 +192,7 @@ describe("addToLibraryAction - Integration Tests", () => {
 
     it("should return error for invalid input", async () => {
       const result = await addToLibraryAction({
-        igdbId: -1, // Invalid IGDB ID
+        igdbId: -1,
         status: LibraryItemStatus.CURIOUS_ABOUT,
         platform: "PC",
       });
@@ -206,7 +205,7 @@ describe("addToLibraryAction - Integration Tests", () => {
 
   describe("Fetching game from IGDB when not in database", () => {
     it("should fetch and populate game from IGDB when not in database", async () => {
-      const newIgdbId = 999; // Game not in database
+      const newIgdbId = 999;
 
       const result = await addToLibraryAction({
         igdbId: newIgdbId,
@@ -217,11 +216,9 @@ describe("addToLibraryAction - Integration Tests", () => {
       expect(result.success).toBe(true);
       if (!result.success) return;
 
-      // Verify game was added to library
       expect(result.data.userId).toBe(testUser.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      // Verify game was created in database
       const game = await prisma.game.findUnique({
         where: { igdbId: newIgdbId },
       });
@@ -239,33 +236,28 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   });
 
   beforeEach(async () => {
-    // Create test user
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
     });
 
-    // Create test game
     testGame = await createGame({
       title: "Existing Game",
       igdbId: 12345,
     });
 
-    // Mock getServerUserId to return test user
     const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
 
   describe("Updating existing library item status", () => {
     it("should update existing library item's status", async () => {
-      // Create initial library item
       const initialLibraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
         status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
-      // Update status
       const result = await updateLibraryStatusAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.CURRENTLY_EXPLORING,
@@ -277,7 +269,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.id).toBe(initialLibraryItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
 
-      // Verify database state
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: initialLibraryItem.id },
       });
@@ -285,14 +276,12 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     });
 
     it("should update the most recently modified library item", async () => {
-      // Create multiple library items for the same game
       const oldItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
         status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
-      // Wait a bit to ensure different timestamps
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       const recentItem = await createLibraryItem({
@@ -301,7 +290,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
         status: LibraryItemStatus.WISHLIST,
       });
 
-      // Update status - should update the most recent item
       const result = await updateLibraryStatusAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.EXPERIENCED,
@@ -313,7 +301,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.id).toBe(recentItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      // Verify old item remains unchanged
       const dbOldItem = await prisma.libraryItem.findUnique({
         where: { id: oldItem.id },
       });
@@ -327,8 +314,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
         status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
-      // Note: WISHLIST is excluded because business logic prevents
-      // transitioning TO WISHLIST from other statuses
       const statuses = [
         LibraryItemStatus.CURRENTLY_EXPLORING,
         LibraryItemStatus.TOOK_A_BREAK,
@@ -352,7 +337,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
   describe("Creating library item when none exists", () => {
     it("should create new library item if game exists but not in library", async () => {
-      // Game exists but no library item
       const result = await updateLibraryStatusAction({
         igdbId: testGame.igdbId,
         status: LibraryItemStatus.CURIOUS_ABOUT,
@@ -365,7 +349,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.gameId).toBe(testGame.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      // Verify library item was created in database
       const libraryItem = await prisma.libraryItem.findUnique({
         where: { id: result.data.id },
       });
@@ -373,7 +356,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     });
 
     it("should fetch game from IGDB and create library item if game doesn't exist", async () => {
-      const newIgdbId = 999; // Game not in database
+      const newIgdbId = 999;
 
       const result = await updateLibraryStatusAction({
         igdbId: newIgdbId,
@@ -386,7 +369,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.userId).toBe(testUser.id);
       expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
 
-      // Verify game was created in database
       const game = await prisma.game.findUnique({
         where: { igdbId: newIgdbId },
       });
@@ -411,7 +393,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
     it("should return error for invalid input", async () => {
       const result = await updateLibraryStatusAction({
-        igdbId: -1, // Invalid IGDB ID
+        igdbId: -1,
         status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
@@ -442,19 +424,16 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
   });
 
   beforeEach(async () => {
-    // Create test user
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
     });
 
-    // Create test game
     testGame = await createGame({
       title: "Existing Game",
       igdbId: 12345,
     });
 
-    // Mock getServerUserId to return test user
     const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
@@ -478,7 +457,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(libraryItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      // Verify database state
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
@@ -493,8 +471,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
         platform: "PC",
       });
 
-      // Use a date in the future relative to createdAt
-      const startedDate = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+      const startedDate = new Date(Date.now() + 60 * 60 * 1000);
       const result = await updateLibraryEntryAction({
         libraryItemId: libraryItem.id,
         status: LibraryItemStatus.CURRENTLY_EXPLORING,
@@ -507,7 +484,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(libraryItem.id);
       expect(result.data.startedAt?.getTime()).toBe(startedDate.getTime());
 
-      // Verify database state
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
@@ -522,8 +498,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
         platform: "PC",
       });
 
-      // Use dates in the future relative to createdAt
-      const completedDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // Tomorrow
+      const completedDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
       const result = await updateLibraryEntryAction({
         libraryItemId: libraryItem.id,
         status: LibraryItemStatus.EXPERIENCED,
@@ -537,7 +512,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
       expect(result.data.completedAt?.getTime()).toBe(completedDate.getTime());
 
-      // Verify database state
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
@@ -546,7 +520,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
     });
 
     it("should update specific library item without affecting others", async () => {
-      // Create multiple library items
       const item1 = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
@@ -559,7 +532,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
         status: LibraryItemStatus.WISHLIST,
       });
 
-      // Update only item1
       const result = await updateLibraryEntryAction({
         libraryItemId: item1.id,
         status: LibraryItemStatus.EXPERIENCED,
@@ -571,7 +543,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(item1.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      // Verify item2 remains unchanged
       const dbItem2 = await prisma.libraryItem.findUnique({
         where: { id: item2.id },
       });
@@ -636,20 +607,17 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
     });
 
     it("should return error when library item belongs to different user", async () => {
-      // Create another user
       const otherUser = await createUser({
         email: "other@example.com",
         username: "otheruser",
       });
 
-      // Create library item for other user
       const libraryItem = await createLibraryItem({
         userId: otherUser.id,
         gameId: testGame.id,
         status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
-      // Try to update as testUser (mocked in beforeEach)
       const result = await updateLibraryEntryAction({
         libraryItemId: libraryItem.id,
         status: LibraryItemStatus.EXPERIENCED,
@@ -659,7 +627,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       if (result.success) return;
       expect(result.error).toContain("Failed to update library entry");
 
-      // Verify library item was not modified
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
@@ -696,14 +663,13 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const result = await updateLibraryEntryAction({
         libraryItemId: libraryItem.id,
         status: LibraryItemStatus.CURRENTLY_EXPLORING,
-        // platform not provided
       });
 
       expect(result.success).toBe(true);
       if (!result.success) return;
 
       expect(result.data.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
-      expect(result.data.platform).toBe("PC"); // Should remain unchanged
+      expect(result.data.platform).toBe("PC");
     });
 
     it("should preserve platform when updating other fields", async () => {
@@ -722,7 +688,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.success).toBe(true);
       if (!result.success) return;
 
-      // The platform field should remain unchanged
       expect(result.data.platform).toBe("PC");
       expect(result.data.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
     });

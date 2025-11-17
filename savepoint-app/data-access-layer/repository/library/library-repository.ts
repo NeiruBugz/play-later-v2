@@ -1,10 +1,13 @@
 import "server-only";
+
 import {
   repositoryError,
   RepositoryErrorCode,
   repositorySuccess,
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
+import { LibraryItemStatus, Prisma, type LibraryItem } from "@prisma/client";
+
 import {
   DEFAULT_ITEMS_PER_PAGE,
   PLATFORM_BREAKDOWN_LIMIT,
@@ -12,8 +15,8 @@ import {
   RECENT_GAMES_LIMIT,
   USER_PREVIEW_ITEMS_LIMIT,
 } from "@/shared/constants";
-import { LibraryItemStatus, Prisma, type LibraryItem } from "@prisma/client";
 import { prisma } from "@/shared/lib/app/db";
+
 import type {
   CreateLibraryItemInput,
   DeleteLibraryItemInput,
@@ -23,6 +26,7 @@ import type {
   UpdateLibraryItemInput,
   UserWithLibraryItemsResponse,
 } from "./types";
+
 export async function createLibraryItem({
   libraryItem,
   userId,
@@ -780,8 +784,7 @@ export async function findLibraryItemsWithFilters(params: {
         }, new Map<string, LibraryItemWithGameAndCount>())
         .values()
     );
-    // Re-sort deduplicated items to preserve requested sort order
-    // Map preserves insertion order, which can break the original sort
+
     const sortedItems = deduplicatedItems.sort((a, b) => {
       let aValue: Date | null | undefined;
       let bValue: Date | null | undefined;
@@ -804,7 +807,7 @@ export async function findLibraryItemsWithFilters(params: {
           bValue = b.createdAt;
           break;
       }
-      // Handle null/undefined values (push to end)
+
       if (!aValue && !bValue) return 0;
       if (!aValue) return 1;
       if (!bValue) return -1;

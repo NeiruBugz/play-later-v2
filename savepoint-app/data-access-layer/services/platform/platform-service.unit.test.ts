@@ -7,12 +7,11 @@ import {
   RepositoryErrorCode,
   repositorySuccess,
 } from "@/data-access-layer/repository/types";
-import type { Game, Platform } from "@prisma/client";
+import type { Platform } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PlatformService } from "./platform-service";
 
-// Mock repository functions
 vi.mock("@/data-access-layer/repository", () => ({
   findGameByIgdbId: vi.fn(),
   findPlatformsForGame: vi.fn(),
@@ -34,7 +33,7 @@ describe("PlatformService", () => {
     const validIgdbId = 12345;
     const mockGameId = "clx123abc456def";
 
-    const mockGame: Game = {
+    const mockGame = {
       id: mockGameId,
       igdbId: validIgdbId,
       title: "Test Game",
@@ -331,7 +330,6 @@ describe("PlatformService", () => {
 
         await service.getPlatformsForGame(inputIgdbId);
 
-        // Assert - input should remain unchanged
         expect(inputIgdbId).toBe(12345);
       });
 

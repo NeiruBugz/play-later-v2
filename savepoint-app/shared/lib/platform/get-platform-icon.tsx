@@ -8,6 +8,7 @@ import {
   SiSteam,
 } from "react-icons/si";
 import { TbBrandWindows, TbDeviceGamepad2 } from "react-icons/tb";
+
 export function getPlatformIcon(platformName: string): IconType {
   const lowerName = platformName.toLowerCase();
   if (lowerName.includes("playstation") || /\bps\b/.test(lowerName)) {

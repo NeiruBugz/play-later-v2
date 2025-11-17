@@ -1,4 +1,5 @@
 import * as filter from "leo-profanity";
+
 import {
   PROFANITY_MIN_WORD_LENGTH,
   USERNAME_MAX_LENGTH,
@@ -34,7 +35,7 @@ export const validateUsername = (username: string): ValidationResult => {
   if (filter.check(username)) {
     return { valid: false, error: "Username is not allowed" };
   }
-  // b) Token check with camelCase splitting (e.g., "damnUser" -> "damn user")
+
   const camelSplit = username.replace(/([a-z])([A-Z])/g, "$1 $2");
   const lower = camelSplit.toLowerCase();
   const tokens = lower.match(/[a-z]+/g) ?? [];
@@ -44,7 +45,7 @@ export const validateUsername = (username: string): ValidationResult => {
       return { valid: false, error: "Username is not allowed" };
     }
   }
-  //    like "class" containing "ass" (len 3).
+
   const compact = lower.replace(/[^a-z0-9]/g, "");
   const profaneWords = filter
     .list()

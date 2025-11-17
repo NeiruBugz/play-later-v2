@@ -1,11 +1,14 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+
 import {
   GAME_SEARCH_GC_TIME_MS,
   GAME_SEARCH_STALE_TIME_MS,
   MIN_SEARCH_QUERY_LENGTH,
 } from "@/shared/constants";
+
 import { GAME_SEARCH_PAGE_SIZE } from "../constants";
 import type { GameSearchResponse } from "../types";
+
 export const useGameSearch = (query: string) => {
   return useInfiniteQuery({
     queryKey: ["game-search", query],

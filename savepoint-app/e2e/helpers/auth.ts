@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+
 export async function signInWithCredentials(
   page: Page,
   email: string,

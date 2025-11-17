@@ -1,6 +1,8 @@
 "use client";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+
 import { Label } from "@/shared/components/ui/label";
 import {
   Select,
@@ -71,13 +73,13 @@ const SORT_OPTIONS: SortOption[] = [
 export function LibrarySortSelect() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const getCurrentSortValue = useCallback((): string => {
     const sortBy = searchParams.get("sortBy") ?? "createdAt";
     const sortOrder = searchParams.get("sortOrder") ?? "desc";
     return `${sortBy}-${sortOrder}`;
   }, [searchParams]);
-  
+
   const handleSortChange = useCallback(
     (value: string) => {
       const selectedOption = SORT_OPTIONS.find((opt) => opt.value === value);
@@ -85,7 +87,7 @@ export function LibrarySortSelect() {
         return;
       }
       const params = new URLSearchParams(searchParams.toString());
-      // Update both sortBy and sortOrder parameters
+
       params.set("sortBy", selectedOption.sortBy);
       params.set("sortOrder", selectedOption.sortOrder);
       router.push(`/library?${params.toString()}`, { scroll: false });

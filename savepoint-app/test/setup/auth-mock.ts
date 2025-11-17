@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+
 export const mockAuthenticatedUser = {
   id: "test-user-id",
   email: "test@example.com",
@@ -16,7 +17,6 @@ export function mockAuth(user = mockAuthenticatedUser) {
   );
 }
 export function setupAuthMocks() {
-  // Check if vi is available (jsdom environment)
   if (typeof vi !== "undefined") {
     vi.mock("@/auth", () => ({
       auth: mockAuth(),

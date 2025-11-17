@@ -1,6 +1,8 @@
 "use client";
+
 import type { LibraryItemStatus } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
+
 import {
   LIBRARY_DATA_GC_TIME_MS,
   LIBRARY_DATA_STALE_TIME_MS,
@@ -29,20 +31,19 @@ export function useLibraryData(filters: LibraryFilters = {}) {
   return useQuery({
     queryKey: ["library", filters],
     queryFn: async (): Promise<LibraryItemWithGameAndCount[]> => {
-      // Build query parameters from filters, excluding undefined values
       const params = new URLSearchParams(
         Object.entries(filters)
           .filter(([, value]) => value !== undefined)
           .map(([key, value]) => [key, String(value)])
       );
-      // Fetch from API endpoint
+
       const response = await fetch(`/api/library?${params.toString()}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch library: ${response.statusText}`);
       }
-      // Parse JSON response
+
       const json = (await response.json()) as LibraryApiResponse;
-      // Handle API-level errors (type narrowing)
+
       if ("error" in json) {
         throw new Error(json.error);
       }

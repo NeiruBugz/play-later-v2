@@ -1,4 +1,5 @@
 import "server-only";
+
 import {
   repositoryError,
   RepositoryErrorCode,
@@ -6,6 +7,7 @@ import {
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import type { Genre as PrismaGenre } from "@prisma/client";
+
 import { prisma } from "@/shared/lib/app/db";
 
 type IgdbGenre = {
@@ -46,8 +48,6 @@ export async function upsertGenres(
   igdbGenres: IgdbGenre[]
 ): Promise<RepositoryResult<PrismaGenre[]>> {
   try {
-    // Use $transaction to batch all upserts into a single operation
-    // This is more efficient than Promise.all with individual queries
     const genres = await prisma.$transaction(
       igdbGenres.map((g) =>
         prisma.genre.upsert({

@@ -4,7 +4,6 @@ import userEvent from "@testing-library/user-event";
 
 import { LibraryModal } from "./library-modal";
 
-// Mock child components to isolate modal logic
 vi.mock("./library-item-card", () => ({
   LibraryItemCard: ({
     item,
@@ -112,7 +111,7 @@ const actions = {
   },
 };
 
-describe("LibraryModal - List View (Slice 10)", () => {
+describe("LibraryModal - List View", () => {
   const defaultProps = {
     gameId: "game-456",
     isOpen: true,
@@ -168,7 +167,6 @@ describe("LibraryModal - List View (Slice 10)", () => {
 
         render(<LibraryModal {...defaultProps} existingItems={mockItems} />);
 
-        // Verify all 10 items are rendered
         mockItems.forEach((item) => {
           expect(elements.getLibraryCard(item.id)).toBeVisible();
         });
@@ -283,7 +281,7 @@ describe("LibraryModal - List View (Slice 10)", () => {
 
         expect(
           screen.getByText(
-            /add .* to your library and set your journey status/i
+            "Add The Legend of Zelda: Breath of the Wild to your library and set your journey status."
           )
         ).toBeVisible();
       });
@@ -304,7 +302,9 @@ describe("LibraryModal - List View (Slice 10)", () => {
         render(<LibraryModal {...defaultProps} existingItems={mockItems} />);
 
         expect(
-          screen.getByText(/update your library entries for/i)
+          screen.getByText(
+            "Update your library entries for The Legend of Zelda: Breath of the Wild."
+          )
         ).toBeVisible();
       });
     });
@@ -531,13 +531,11 @@ describe("LibraryModal - List View (Slice 10)", () => {
           <LibraryModal {...defaultProps} existingItems={mockItems} />
         );
 
-        // Navigate to edit mode
         await actions.clickLibraryCard(1);
         await waitFor(() => {
           expect(elements.getEditEntryForm()).toBeVisible();
         });
 
-        // Close modal
         rerender(
           <LibraryModal
             {...defaultProps}
@@ -546,10 +544,8 @@ describe("LibraryModal - List View (Slice 10)", () => {
           />
         );
 
-        // Reopen modal
         rerender(<LibraryModal {...defaultProps} existingItems={mockItems} />);
 
-        // Should be back in list view
         await waitFor(() => {
           expect(elements.getEntryCountTitle()).toBeVisible();
         });
@@ -569,11 +565,7 @@ describe("LibraryModal - List View (Slice 10)", () => {
           />
         );
 
-        // Close via escape key (simulating dialog close)
         await actions.closeDialog();
-
-        // Note: Since we're using shadcn Dialog component, the actual close
-        // mechanism depends on Dialog's implementation
       });
 
       it("should reset state when onClose is called", async () => {
@@ -588,13 +580,11 @@ describe("LibraryModal - List View (Slice 10)", () => {
           />
         );
 
-        // Navigate to edit mode
         await actions.clickLibraryCard(1);
         await waitFor(() => {
           expect(elements.getEditEntryForm()).toBeVisible();
         });
 
-        // Simulate modal close and reopen
         rerender(
           <LibraryModal
             {...defaultProps}
@@ -611,7 +601,6 @@ describe("LibraryModal - List View (Slice 10)", () => {
           />
         );
 
-        // Should return to list view
         await waitFor(() => {
           expect(elements.getEntryCountTitle()).toBeVisible();
         });
@@ -679,28 +668,23 @@ describe("LibraryModal - List View (Slice 10)", () => {
 
       render(<LibraryModal {...defaultProps} existingItems={mockItems} />);
 
-      // Start in list view
       expect(elements.getEntryCountTitle()).toBeVisible();
 
-      // Go to edit mode
       await actions.clickLibraryCard(1);
       await waitFor(() => {
         expect(elements.getEditEntryForm()).toBeVisible();
       });
 
-      // Back to list view
       await actions.clickBackToList();
       await waitFor(() => {
         expect(elements.getEntryCountTitle()).toBeVisible();
       });
 
-      // Go to add mode
       await actions.clickAddNewEntry();
       await waitFor(() => {
         expect(elements.getAddEntryForm()).toBeVisible();
       });
 
-      // Back to list view
       await actions.clickBackToList();
       await waitFor(() => {
         expect(elements.getEntryCountTitle()).toBeVisible();
@@ -716,16 +700,13 @@ describe("LibraryModal - List View (Slice 10)", () => {
 
       render(<LibraryModal {...defaultProps} existingItems={mockItems} />);
 
-      // Select first item
       await actions.clickLibraryCard(1);
       await waitFor(() => {
         expect(screen.getByText("Edit Entry Form for item 1")).toBeVisible();
       });
 
-      // Go back to list
       await actions.clickBackToList();
 
-      // Select third item
       await actions.clickLibraryCard(3);
       await waitFor(() => {
         expect(screen.getByText("Edit Entry Form for item 3")).toBeVisible();

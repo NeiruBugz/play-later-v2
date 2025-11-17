@@ -80,7 +80,6 @@ describe("AvatarStorageService - Integration Tests", () => {
   };
 
   beforeAll(async () => {
-    // Ensure S3 bucket exists (may already be created by global setup)
     try {
       await s3Client.send(
         new HeadBucketCommand({
@@ -90,7 +89,6 @@ describe("AvatarStorageService - Integration Tests", () => {
     } catch (error: unknown) {
       const err = error as { name?: string };
       if (err.name === "NotFound" || err.name === "NoSuchBucket") {
-        // Bucket doesn't exist, create it
         try {
           await s3Client.send(
             new CreateBucketCommand({
@@ -103,7 +101,6 @@ describe("AvatarStorageService - Integration Tests", () => {
           );
         }
       } else {
-        // LocalStack might not be running
         throw new Error(
           `LocalStack S3 is not available on ${env.AWS_ENDPOINT_URL}. ` +
             `Ensure docker-compose is running: docker-compose up -d\n` +
@@ -413,10 +410,8 @@ describe("AvatarStorageService - Integration Tests", () => {
 
   describe("Error Handling", () => {
     it("should handle invalid bucket gracefully", async () => {
-      // We can't easily simulate this without mocking, but we document expected behavior
       const file = createTestFile("test.jpg", "content", "image/jpeg");
 
-      // If bucket doesn't exist or is misconfigured, upload should fail gracefully
       const result = await AvatarStorageService.uploadAvatar(
         TEST_USER_ID_1,
         file

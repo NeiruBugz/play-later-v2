@@ -1,4 +1,5 @@
 import { type AcquisitionType, type LibraryItemStatus } from "@prisma/client";
+
 export const LibraryStatusMapper: Record<LibraryItemStatus, string> = {
   CURIOUS_ABOUT: "Curious About",
   CURRENTLY_EXPLORING: "Currently Exploring",

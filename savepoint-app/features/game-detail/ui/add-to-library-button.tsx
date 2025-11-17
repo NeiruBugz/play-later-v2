@@ -1,12 +1,12 @@
 "use client";
+
 import { useState } from "react";
+
 import { Button } from "@/shared/components/ui/button";
+
+import type { AddToLibraryButtonProps } from "./add-to-library-button.types";
 import { LibraryModal } from "./library-modal";
-type AddToLibraryButtonProps = {
-  gameId?: string;
-  igdbId: number;
-  gameTitle: string;
-};
+
 export const AddToLibraryButton = ({
   gameId,
   igdbId,

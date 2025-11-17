@@ -1,4 +1,3 @@
-
 export enum GameCategory {
   MAIN_GAME = 0,
   DLC_ADDON = 1,

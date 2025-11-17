@@ -1,14 +1,34 @@
 import { LibraryItemStatus } from "@prisma/client";
 import { render, screen } from "@testing-library/react";
 
+import { deleteLibraryItemAction } from "../server-actions";
 import { LibraryStatusDisplay } from "./library-status-display";
+
+vi.mock("../server-actions", () => ({
+  deleteLibraryItemAction: vi.fn(),
+}));
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}));
 
 const defaultProps = {
   igdbId: 12345,
   gameTitle: "Test Game",
 };
 
+const mockDeleteLibraryItemAction = vi.mocked(deleteLibraryItemAction);
+
 describe("LibraryStatusDisplay", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDeleteLibraryItemAction.mockResolvedValue({
+      success: true,
+    });
+  });
   describe("No library status", () => {
     it("should display 'Add to Library' button when userLibraryStatus is undefined", () => {
       render(
@@ -192,7 +212,6 @@ describe("LibraryStatusDisplay", () => {
         />
       );
 
-      // lucide-react icons render as SVG elements
       const icon = screen.getByTestId("library-status-icon");
       expect(icon).toBeVisible();
     });

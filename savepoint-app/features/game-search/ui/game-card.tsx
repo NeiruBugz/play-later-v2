@@ -1,11 +1,14 @@
 import Link from "next/link";
+
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { PlatformBadges } from "@/shared/components/platform-badges";
 import { Card } from "@/shared/components/ui/card";
-import type { SearchGameResult } from "../types";
+
+import type { GameCardProps } from "./game-card.types";
 import { GameCategoryBadge } from "./game-category-badge";
 import { GameCoverPlaceholder } from "./game-cover-placeholder";
-export const GameCard = ({ game }: { game: SearchGameResult }) => {
+
+export const GameCard = ({ game }: GameCardProps) => {
   const releaseYear = game.first_release_date
     ? new Date(game.first_release_date * 1000).getFullYear()
     : null;

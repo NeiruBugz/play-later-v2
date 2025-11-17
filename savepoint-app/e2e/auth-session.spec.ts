@@ -13,20 +13,19 @@ test.describe("[auth] Session persistence", () => {
     await page.goto("/profile");
     await page.waitForLoadState("networkidle");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sessionBefore: any = await getSession(page);
     expect(sessionBefore?.user?.id).toBeTruthy();
 
     await page.reload();
     await page.waitForLoadState("networkidle");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const sessionAfterReload: any = await getSession(page);
     expect(sessionAfterReload?.user?.id).toBeTruthy();
 
     await page.goto("/dashboard");
     await page.waitForLoadState("networkidle");
     expect(page.url()).toMatch("http://localhost:6060/profile/setup");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const sessionOnDashboard: any = await getSession(page);
     expect(sessionOnDashboard?.user?.id).toBeTruthy();
   });

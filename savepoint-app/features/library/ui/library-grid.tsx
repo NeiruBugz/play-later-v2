@@ -1,11 +1,14 @@
 "use client";
+
 import { useLibraryData } from "@/features/library/hooks/use-library-data";
 import { useLibraryFilters } from "@/features/library/hooks/use-library-filters";
+
 import { LibraryCard } from "./library-card";
 import { LibraryEmptyState } from "./library-empty-state";
 import { LibraryGridSkeleton } from "./library-grid-skeleton";
+import type { LibraryErrorStateProps } from "./library-grid.types";
 
-function LibraryErrorState({ error }: { error: Error }) {
+function LibraryErrorState({ error }: LibraryErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
       <div className="text-destructive mb-4 text-5xl">⚠</div>

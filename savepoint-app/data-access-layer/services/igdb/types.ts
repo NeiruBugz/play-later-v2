@@ -1,5 +1,7 @@
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
+
 import type { BaseService, ServiceResult } from "../types";
+
 export interface GameSearchParams {
   name: string;
   offset?: number;
@@ -245,7 +247,7 @@ export interface EventLogoResult {
 export interface GetTimesToBeatParams {
   igdbId: number;
 }
-// Re-export from shared types for backward compatibility
+
 export interface TimesToBeatData {
   mainStory?: number;
   completionist?: number;

@@ -1,4 +1,5 @@
 "use client";
+
 import type { LibraryItemStatus } from "@prisma/client";
 import {
   BookmarkIcon,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -17,12 +19,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+
 import { updateLibraryStatusAction } from "../server-actions";
-type QuickActionButtonsProps = {
-  igdbId: number;
-  gameTitle: string;
-  currentStatus?: LibraryItemStatus;
-};
+import type { QuickActionButtonsProps } from "./quick-action-buttons.types";
+
 const STATUS_CONFIG: Record<
   LibraryItemStatus,
   {

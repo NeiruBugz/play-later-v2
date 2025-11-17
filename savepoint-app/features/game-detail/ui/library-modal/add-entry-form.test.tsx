@@ -1,6 +1,7 @@
+import { renderWithTestProviders } from "@/test/utils/test-provider";
+import { platformApiResponseFixture } from "@fixtures/platform";
 import { LibraryItemStatus } from "@prisma/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { addToLibraryAction } from "../../server-actions";
@@ -17,28 +18,10 @@ vi.mock("../../server-actions", () => ({
   addToLibraryAction: vi.fn(),
 }));
 
-// Mock fetch API
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 const mockAddToLibraryAction = vi.mocked(addToLibraryAction);
-
-// Helper to create a fresh QueryClient for each test
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-
-// Helper to render component with QueryClient wrapper
-const renderWithQueryClient = (ui: React.ReactElement) => {
-  const queryClient = createTestQueryClient();
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
-};
 
 const elements = {
   getStatusTrigger: () =>
@@ -60,13 +43,12 @@ const elements = {
 const actions = {
   selectStatus: async (statusLabel: string) => {
     await userEvent.click(elements.getStatusTrigger());
-    // Use getAllByText and select the first one (inside the dropdown)
+
     const statusOptions = screen.getAllByText(statusLabel);
     await userEvent.click(statusOptions[statusOptions.length - 1]);
   },
 
   selectPlatform: async (platformName: string) => {
-    // Wait for platforms to load
     await waitFor(
       () => {
         expect(elements.getPlatformTrigger()).toBeEnabled();
@@ -74,7 +56,7 @@ const actions = {
       { timeout: 3000 }
     );
     await userEvent.click(elements.getPlatformTrigger());
-    // Wait for the command menu to appear
+
     await waitFor(
       () => {
         const options = screen.queryAllByRole("option");
@@ -82,7 +64,7 @@ const actions = {
       },
       { timeout: 3000 }
     );
-    // Find and click the platform option
+
     const platformOption = screen.getByRole("option", { name: platformName });
     await userEvent.click(platformOption);
   },
@@ -151,52 +133,15 @@ describe("AddEntryForm", () => {
       },
     });
 
-    // Mock fetch for platforms API
     mockFetch.mockResolvedValue({
       ok: true,
-      json: async () => ({
-        success: true,
-        data: {
-          supportedPlatforms: [
-            {
-              id: "1",
-              igdbId: 167,
-              name: "PlayStation 5",
-              slug: "ps5",
-              abbreviation: "PS5",
-              alternativeName: null,
-              generation: 9,
-              platformFamily: null,
-              platformType: null,
-              checksum: null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ],
-          otherPlatforms: [
-            {
-              id: "2",
-              igdbId: 6,
-              name: "PC",
-              slug: "pc",
-              abbreviation: "PC",
-              alternativeName: null,
-              generation: null,
-              platformFamily: null,
-              platformType: null,
-              checksum: null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ],
-        },
-      }),
+      json: async () => platformApiResponseFixture,
     });
   });
 
   describe("given form just rendered in add mode", () => {
     it("should display all required form fields", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
+      renderWithTestProviders(<AddEntryForm {...defaultProps} />);
 
       await waitFor(() => {
         expect(elements.getStatusTrigger()).toBeVisible();
@@ -211,7 +156,7 @@ describe("AddEntryForm", () => {
     });
 
     it("should display correct button text in add mode", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
+      renderWithTestProviders(<AddEntryForm {...defaultProps} />);
 
       await waitFor(() => {
         expect(elements.getSubmitButton()).toHaveTextContent("Add to Library");
@@ -221,7 +166,7 @@ describe("AddEntryForm", () => {
 
   describe("given form rendered in edit mode", () => {
     it("should display edit mode UI with correct button text and info message", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} isEditMode />);
+      renderWithTestProviders(<AddEntryForm {...defaultProps} isEditMode />);
 
       await waitFor(() => {
         expect(elements.getSubmitButton()).toHaveTextContent("Add Entry");
@@ -239,7 +184,7 @@ describe("AddEntryForm", () => {
   describe("given user cancels form", () => {
     it("should call onCancel callback", async () => {
       const onCancel = vi.fn();
-      renderWithQueryClient(
+      renderWithTestProviders(
         <AddEntryForm {...defaultProps} onCancel={onCancel} />
       );
 
@@ -251,7 +196,7 @@ describe("AddEntryForm", () => {
 
   describe("given date field interactions", () => {
     it("should allow user to input and clear dates", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
+      renderWithTestProviders(<AddEntryForm {...defaultProps} />);
 
       expect(elements.getStartedAtInput()).toHaveValue("");
       expect(elements.getCompletedAtInput()).toHaveValue("");
@@ -273,7 +218,7 @@ describe("AddEntryForm", () => {
     });
 
     it("should maintain date values when interacting with other form fields", async () => {
-      renderWithQueryClient(<AddEntryForm {...defaultProps} />);
+      renderWithTestProviders(<AddEntryForm {...defaultProps} />);
 
       await actions.typeStartedAtDate("2025-01-15");
       await actions.typeCompletedAtDate("2025-02-20");

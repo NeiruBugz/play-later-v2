@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+
 import { GameSearchInput } from "@/features/game-search/ui/game-search-input";
+
 export const metadata: Metadata = {
   title: "Search Games | SavePoint",
   description: "Search our extensive game database powered by IGDB",

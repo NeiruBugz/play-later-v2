@@ -1,4 +1,5 @@
 import "server-only";
+
 import {
   createLibraryItem,
   deleteLibraryItem,
@@ -11,8 +12,11 @@ import {
 } from "@/data-access-layer/repository";
 import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
+
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 import { BaseService, type ServiceResult } from "../types";
+
 const GetLibraryItemsSchema = z.object({
   userId: z.string().cuid(),
   status: z.nativeEnum(LibraryItemStatus).optional(),
@@ -67,12 +71,18 @@ export class LibraryService extends BaseService {
       this.logger.info({ igdbId }, "Finding game by IGDB ID");
       const result = await findGameByIgdbId(igdbId);
       if (!result.ok) {
-        this.logger.error({ error: result.error, igdbId }, "Failed to find game");
+        this.logger.error(
+          { error: result.error, igdbId },
+          "Failed to find game"
+        );
         return this.error("Failed to find game");
       }
       return this.success(result.data);
     } catch (error) {
-      this.logger.error({ error, igdbId }, "Unexpected error in findGameByIgdbId");
+      this.logger.error(
+        { error, igdbId },
+        "Unexpected error in findGameByIgdbId"
+      );
       return this.error(
         error instanceof Error ? error.message : "An unexpected error occurred"
       );
@@ -246,7 +256,10 @@ export class LibraryService extends BaseService {
       );
       return this.success(result.data);
     } catch (error) {
-      this.logger.error({ error, ...params }, "Unexpected error in getLibraryItems");
+      this.logger.error(
+        { error, ...params },
+        "Unexpected error in getLibraryItems"
+      );
       return this.error(
         error instanceof Error ? error.message : "An unexpected error occurred"
       );

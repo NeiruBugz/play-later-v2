@@ -1,7 +1,9 @@
 import { env } from "@/env.mjs";
 import { PrismaClient } from "@prisma/client";
+
 import { createLogger } from "./logger";
 import { LOGGER_CONTEXT } from "./logger-context";
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -26,7 +28,7 @@ const prismaFactory = () => {
       },
     ],
   });
-  // Enable query logging in development when DATABASE_LOGGING=true
+
   const isDatabaseLoggingEnabled =
     env.NODE_ENV === "development" && env.DATABASE_LOGGING === "true";
   if (isDatabaseLoggingEnabled) {

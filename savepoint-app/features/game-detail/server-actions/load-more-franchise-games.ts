@@ -1,7 +1,10 @@
 "use server";
+
 import { IgdbService } from "@/data-access-layer/services";
 import { z } from "zod";
+
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "loadMoreFranchiseGames",
 });

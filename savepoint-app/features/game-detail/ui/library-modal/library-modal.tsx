@@ -1,7 +1,8 @@
 "use client";
-import type { LibraryItem } from "@prisma/client";
+
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -10,19 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
+
 import { AddEntryForm } from "./add-entry-form";
 import { EditEntryForm } from "./edit-entry-form";
 import { LibraryItemCard } from "./library-item-card";
-type LibraryModalProps = {
-  gameId?: string;
-  isOpen: boolean;
-  onClose: () => void;
-  igdbId: number;
-  gameTitle: string;
-  mode: "add" | "edit";
-  existingItems?: LibraryItem[];
-  onDeleteItem?: (itemId: number) => void;
-};
+import type { LibraryModalProps } from "./library-modal.types";
+
 export const LibraryModal = ({
   gameId,
   isOpen,
@@ -35,7 +29,7 @@ export const LibraryModal = ({
 }: LibraryModalProps) => {
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("");
-  // Reset state when modal is closed
+
   useEffect(() => {
     if (!isOpen) {
       setSelectedItemId(null);
@@ -56,15 +50,12 @@ export const LibraryModal = ({
   };
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent
-        className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]"
-        aria-describedby="library-modal-description"
-      >
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
             {mode === "add" ? "Add to Library" : "Manage Library"}
           </DialogTitle>
-          <DialogDescription id="library-modal-description">
+          <DialogDescription>
             {mode === "add"
               ? `Add ${gameTitle} to your library and set your journey status.`
               : `Update your library entries for ${gameTitle}.`}
@@ -85,7 +76,6 @@ export const LibraryModal = ({
                 No library entries found for this game.
               </p>
             ) : selectedItemId !== null ? (
-              // Edit mode for a specific item
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium">Edit Entry</h3>
@@ -106,7 +96,6 @@ export const LibraryModal = ({
                 />
               </div>
             ) : (
-              // List view of all library items
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium">

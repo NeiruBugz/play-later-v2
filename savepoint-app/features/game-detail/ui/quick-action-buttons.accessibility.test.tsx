@@ -3,12 +3,10 @@ import userEvent from "@testing-library/user-event";
 
 import { QuickActionButtons } from "./quick-action-buttons";
 
-// Mock the server action
 vi.mock("../server-actions", () => ({
   updateLibraryStatusAction: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-// Mock sonner toast
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -27,11 +25,9 @@ describe("QuickActionButtons - Accessibility", () => {
     it("should be fully keyboard navigable with Tab key", async () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      // Get all buttons
       const buttons = screen.getAllByRole("button");
-      expect(buttons).toHaveLength(6); // 6 status buttons
+      expect(buttons).toHaveLength(6);
 
-      // Tab through all buttons
       await userEvent.tab();
       expect(buttons[0]).toHaveFocus();
 
@@ -52,7 +48,6 @@ describe("QuickActionButtons - Accessibility", () => {
       curiousButton.focus();
       await userEvent.keyboard("{Enter}");
 
-      // Verify button was activated (becomes pressed)
       await waitFor(() => {
         expect(curiousButton).toHaveAttribute("aria-pressed", "true");
       });
@@ -68,7 +63,6 @@ describe("QuickActionButtons - Accessibility", () => {
       playingButton.focus();
       await userEvent.keyboard(" ");
 
-      // Verify button was activated
       await waitFor(() => {
         expect(playingButton).toHaveAttribute("aria-pressed", "true");
       });
@@ -120,15 +114,12 @@ describe("QuickActionButtons - Accessibility", () => {
     it("should have aria-hidden on icons", () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      // Find all buttons with accessible names
       const buttons = screen.getAllByRole("button");
 
-      // Verify all buttons have accessible names (icons should be aria-hidden)
       buttons.forEach((button) => {
         expect(button).toHaveAccessibleName();
       });
 
-      // Buttons render with lucide-react icons which include aria-hidden by default
       expect(buttons.length).toBeGreaterThan(0);
     });
 
@@ -174,7 +165,6 @@ describe("QuickActionButtons - Accessibility", () => {
 
       const buttons = screen.getAllByRole("button");
       buttons.forEach((button) => {
-        // Check for focus-visible classes
         expect(button.className).toContain("focus-visible:ring-2");
         expect(button.className).toContain("focus-visible:ring-primary");
         expect(button.className).toContain("focus-visible:ring-offset-2");
@@ -217,7 +207,6 @@ describe("QuickActionButtons - Accessibility", () => {
 
       await userEvent.click(curiousButton);
 
-      // All buttons should be disabled while pending
       const buttons = screen.getAllByRole("button");
       buttons.forEach((button) => {
         expect(button).toBeDisabled();

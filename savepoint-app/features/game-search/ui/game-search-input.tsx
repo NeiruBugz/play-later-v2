@@ -1,16 +1,18 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { Input } from "@/shared/components/ui/input";
 import {
   MIN_SEARCH_QUERY_LENGTH,
   SEARCH_INPUT_DEBOUNCE_MS,
 } from "@/shared/constants";
-import { Input } from "@/shared/components/ui/input";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
+
+import type { GameSearchInputProps } from "./game-search-input.types";
 import { GameSearchResults } from "./game-search-results";
-type GameSearchInputProps = {
-  initialQuery?: string;
-};
+
 export const GameSearchInput = ({
   initialQuery = "",
 }: GameSearchInputProps) => {

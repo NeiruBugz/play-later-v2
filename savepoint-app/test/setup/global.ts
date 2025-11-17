@@ -1,7 +1,7 @@
 import { afterEach, beforeAll, vi } from "vitest";
-// Import common mocks shared across all test types
+
 import "./common-mocks";
-// Set up environment variables BEFORE any modules that use them are imported
+
 process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";
 process.env.AUTH_URL = "http://localhost:3000";
@@ -23,7 +23,7 @@ process.env.POSTGRES_USER = "postgres";
 process.env.POSTGRES_PASSWORD = "postgres";
 process.env.POSTGRES_DATABASE = "test";
 process.env.STEAM_API_KEY = "test-steam-key";
-// S3 / LocalStack configuration
+
 process.env.AWS_REGION = "us-east-1";
 process.env.AWS_ENDPOINT_URL = "http://localhost:4568";
 process.env.AWS_ACCESS_KEY_ID = "test";
@@ -177,7 +177,7 @@ vi.mock("@/shared/lib", () => {
     }),
   };
 });
-// Mock the new import path for prisma (added after refactoring)
+
 vi.mock("@/shared/lib/app/db", () => {
   return {
     prisma: {
@@ -236,32 +236,31 @@ vi.mock("@/auth", () => ({
   auth: vi.fn(),
   getServerUserId: vi.fn(),
 }));
-// Add the repository mocks that were in individual test files
+
 vi.mock("@/data-access-layer/repository", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/data-access-layer/repository")>();
   return {
     ...actual,
-    // Library repository functions
+
     createLibraryItem: vi.fn(),
     deleteLibraryItem: vi.fn(),
     updateLibraryItem: vi.fn(),
     getManyLibraryItems: vi.fn(),
-    // User repository functions
+
     findUserByEmail: vi.fn(),
     createUserWithCredentials: vi.fn(),
     updateUserData: vi.fn(),
-    // Review repository functions
+
     createReview: vi.fn(),
   };
 });
-// Add the add-game mock
+
 vi.mock("@/features/add-game/server-actions/add-game", () => ({
   saveGameAndAddToLibrary: vi.fn(),
 }));
-// Set up test-specific configuration before tests run
+
 beforeAll(() => {
-  // @ts-expect-error - NODE_ENV is read-only
   process.env.NODE_ENV = "test";
 });
 declare global {

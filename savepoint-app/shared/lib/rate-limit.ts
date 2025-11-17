@@ -1,12 +1,14 @@
 import { env } from "@/env.mjs";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import type { NextRequest } from "next/server";
+
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,
   DEFAULT_RATE_LIMIT_WINDOW_MS,
   RATE_LIMIT_CLEANUP_INTERVAL_MS,
 } from "@/shared/constants";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
-import type { NextRequest } from "next/server";
+
 let ratelimit: Ratelimit | null = null;
 let inMemoryFallback: Map<string, { count: number; resetAt: number }> | null =
   null;
@@ -35,17 +37,14 @@ function initializeRateLimiter(): Ratelimit | null {
   if (!inMemoryFallback) {
     inMemoryFallback = new Map();
     if (typeof setInterval !== "undefined") {
-      setInterval(
-        () => {
-          const now = Date.now();
-          for (const [key, record] of inMemoryFallback!.entries()) {
-            if (now > record.resetAt) {
-              inMemoryFallback!.delete(key);
-            }
+      setInterval(() => {
+        const now = Date.now();
+        for (const [key, record] of inMemoryFallback!.entries()) {
+          if (now > record.resetAt) {
+            inMemoryFallback!.delete(key);
           }
-        },
-        RATE_LIMIT_CLEANUP_INTERVAL_MS
-      );
+        }
+      }, RATE_LIMIT_CLEANUP_INTERVAL_MS);
     }
   }
   return null;

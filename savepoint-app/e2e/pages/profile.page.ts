@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+
 export class ProfilePage {
   constructor(private readonly page: Page) {}
   async goto(): Promise<void> {

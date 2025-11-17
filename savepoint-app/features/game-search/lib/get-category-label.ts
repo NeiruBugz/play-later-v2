@@ -1,4 +1,5 @@
 import { GameCategory } from "@/data-access-layer/services/igdb/constants";
+
 export function getCategoryLabel(category: number): string | null {
   switch (category) {
     case GameCategory.MAIN_GAME:

@@ -1,8 +1,3 @@
-/**
- * Centralized Constants Barrel Export
- * Re-exports all application constants for easy importing
- */
-
 export * from "./api";
 export * from "./game";
 export * from "./pagination";

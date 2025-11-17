@@ -106,13 +106,13 @@ describe("LibraryItemCard", () => {
         expect(elements.getStatusBadge("Experienced")).toBeVisible();
       });
 
-      it("should show 'Took a Break' status badge", () => {
+      it("should show 'Taking a Break' status badge", () => {
         const item = createMockLibraryItem({
           status: LibraryItemStatus.TOOK_A_BREAK,
         });
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        expect(elements.getStatusBadge("Took a Break")).toBeVisible();
+        expect(elements.getStatusBadge("Taking a Break")).toBeVisible();
       });
 
       it("should show 'Wishlist' status badge", () => {
@@ -184,7 +184,6 @@ describe("LibraryItemCard", () => {
         const item = createMockLibraryItem({ completedAt: completedDate });
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        // Query for all time elements and find the one with the completed date
         const timeElements = screen.getAllByRole("time");
         const completedTimeElement = timeElements.find(
           (el) => el.getAttribute("dateTime") === completedDate.toISOString()
@@ -234,7 +233,6 @@ describe("LibraryItemCard", () => {
         });
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        // Query for all time elements and find by dateTime attribute
         const timeElements = screen.getAllByRole("time");
 
         const createdTime = timeElements.find(
@@ -263,7 +261,6 @@ describe("LibraryItemCard", () => {
 
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        // Should be called for startedAt, completedAt, createdAt, updatedAt
         expect(mockFormatAbsoluteDate).toHaveBeenCalledTimes(4);
       });
 
@@ -278,7 +275,6 @@ describe("LibraryItemCard", () => {
 
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        // Should only be called for createdAt and updatedAt (not startedAt/completedAt)
         expect(mockFormatAbsoluteDate).toHaveBeenCalledTimes(2);
       });
     });
@@ -362,8 +358,6 @@ describe("LibraryItemCard", () => {
         const item = createMockLibraryItem();
         render(<LibraryItemCard item={item} />);
 
-        // When no onClick is provided, there should be no button role
-        // and thus no cursor-pointer styling
         const card = screen.queryByRole("button");
         expect(card).not.toBeInTheDocument();
       });
@@ -372,8 +366,6 @@ describe("LibraryItemCard", () => {
         const item = createMockLibraryItem();
         render(<LibraryItemCard item={item} />);
 
-        // When no onClick is provided, there should be no button role
-        // and thus no tabIndex
         const card = screen.queryByRole("button");
         expect(card).not.toBeInTheDocument();
       });
@@ -414,7 +406,6 @@ describe("LibraryItemCard", () => {
         });
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        // Should have 4 time elements: startedAt, completedAt, createdAt, updatedAt
         const timeElements = screen.getAllByRole("time");
         expect(timeElements).toHaveLength(4);
       });
@@ -448,8 +439,6 @@ describe("LibraryItemCard", () => {
         });
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        // Verify the component renders (icons are decorative and have aria-hidden)
-        // We can indirectly verify this by checking that the content is accessible
         expect(screen.getByText(/started:/i)).toBeVisible();
         expect(screen.getByLabelText("Platform")).toBeVisible();
       });
@@ -483,7 +472,7 @@ describe("LibraryItemCard", () => {
       });
       render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-      const badge = screen.getByText("Took a Break");
+      const badge = screen.getByText("Taking a Break");
       expect(badge).toBeVisible();
     });
 
@@ -523,8 +512,6 @@ describe("LibraryItemCard", () => {
         });
         expect(deleteButton).toBeVisible();
 
-        // The button contains the Trash2 icon from lucide-react
-        // Icon rendering is verified by the button being visible with correct aria-label
         expect(deleteButton).toHaveAccessibleName(/delete.*entry/i);
       });
 
@@ -539,7 +526,6 @@ describe("LibraryItemCard", () => {
         });
         await userEvent.click(deleteButton);
 
-        // Confirmation dialog should appear
         expect(
           screen.getByRole("heading", { name: /delete library entry/i })
         ).toBeVisible();
@@ -562,7 +548,6 @@ describe("LibraryItemCard", () => {
         });
         await userEvent.click(deleteButton);
 
-        // Card onClick should NOT be called (event propagation stopped)
         expect(handleCardClick).not.toHaveBeenCalled();
       });
 
@@ -580,19 +565,16 @@ describe("LibraryItemCard", () => {
           />
         );
 
-        // Click delete button
         const deleteButton = screen.getByRole("button", {
           name: /delete playstation 5 entry/i,
         });
         await userEvent.click(deleteButton);
 
-        // Confirm deletion in dialog
         const confirmButton = screen.getByRole("button", {
           name: /confirm deletion/i,
         });
         await userEvent.click(confirmButton);
 
-        // onDelete should be called with item ID
         expect(handleDelete).toHaveBeenCalledWith(42);
         expect(handleDelete).toHaveBeenCalledTimes(1);
       });
@@ -608,19 +590,16 @@ describe("LibraryItemCard", () => {
           />
         );
 
-        // Click delete button
         const deleteButton = screen.getByRole("button", {
           name: /delete playstation 5 entry/i,
         });
         await userEvent.click(deleteButton);
 
-        // Cancel deletion in dialog
         const cancelButton = screen.getByRole("button", {
           name: /cancel deletion/i,
         });
         await userEvent.click(cancelButton);
 
-        // onDelete should NOT be called
         expect(handleDelete).not.toHaveBeenCalled();
       });
 
@@ -630,19 +609,16 @@ describe("LibraryItemCard", () => {
           <LibraryItemCard item={item} onClick={vi.fn()} onDelete={vi.fn()} />
         );
 
-        // Open dialog
         const deleteButton = screen.getByRole("button", {
           name: /delete playstation 5 entry/i,
         });
         await userEvent.click(deleteButton);
 
-        // Confirm deletion
         const confirmButton = screen.getByRole("button", {
           name: /confirm deletion/i,
         });
         await userEvent.click(confirmButton);
 
-        // Dialog should be closed
         expect(
           screen.queryByRole("heading", { name: /delete library entry/i })
         ).not.toBeInTheDocument();
@@ -654,19 +630,16 @@ describe("LibraryItemCard", () => {
           <LibraryItemCard item={item} onClick={vi.fn()} onDelete={vi.fn()} />
         );
 
-        // Open dialog
         const deleteButton = screen.getByRole("button", {
           name: /delete playstation 5 entry/i,
         });
         await userEvent.click(deleteButton);
 
-        // Cancel deletion
         const cancelButton = screen.getByRole("button", {
           name: /cancel deletion/i,
         });
         await userEvent.click(cancelButton);
 
-        // Dialog should be closed
         expect(
           screen.queryByRole("heading", { name: /delete library entry/i })
         ).not.toBeInTheDocument();
@@ -705,7 +678,6 @@ describe("LibraryItemCard", () => {
         });
         await userEvent.click(deleteButton);
 
-        // Dialog should show PC in the description
         expect(screen.getByText("PC")).toBeVisible();
         expect(
           screen.getByText(/are you sure you want to delete your/i)
@@ -726,7 +698,6 @@ describe("LibraryItemCard", () => {
           />
         );
 
-        // First attempt - cancel
         const deleteButton = screen.getByRole("button", {
           name: /delete playstation 5 entry/i,
         });
@@ -739,7 +710,6 @@ describe("LibraryItemCard", () => {
 
         expect(handleDelete).not.toHaveBeenCalled();
 
-        // Second attempt - confirm
         await userEvent.click(deleteButton);
 
         const confirmButton = screen.getByRole("button", {
@@ -775,7 +745,6 @@ describe("LibraryItemCard", () => {
         const item = createMockLibraryItem();
         render(<LibraryItemCard item={item} onClick={vi.fn()} />);
 
-        // Try to find dialog (should not exist)
         expect(
           screen.queryByRole("heading", { name: /delete library entry/i })
         ).not.toBeInTheDocument();
@@ -808,7 +777,6 @@ describe("LibraryItemCard", () => {
           name: /delete.*entry/i,
         });
 
-        // Ghost variant typically doesn't have strong background
         expect(deleteButton).toBeVisible();
       });
     });
@@ -842,12 +810,10 @@ describe("LibraryItemCard", () => {
           screen.getByRole("heading", { name: /delete library entry/i })
         ).toBeVisible();
 
-        // Rerender with different item
         rerender(
           <LibraryItemCard item={item2} onClick={vi.fn()} onDelete={vi.fn()} />
         );
 
-        // Each card should have its own dialog state
         expect(screen.queryByText("PS5")).not.toBeInTheDocument();
       });
     });

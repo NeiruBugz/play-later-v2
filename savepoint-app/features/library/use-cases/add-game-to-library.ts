@@ -1,10 +1,17 @@
 "use server";
+
 import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { AcquisitionType, type LibraryItem, type LibraryItemStatus } from "@prisma/client";
+import {
+  AcquisitionType,
+  type LibraryItem,
+  type LibraryItemStatus,
+} from "@prisma/client";
+
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVICE]: "addGameToLibraryUseCase",
 });
@@ -85,6 +92,27 @@ export async function addGameToLibrary(
         };
       }
     }
+    const existingItemsResult = await libraryService.findAllLibraryItemsByGameId({
+      userId,
+      gameId: gameResult.data.id,
+    });
+    if (existingItemsResult.success && existingItemsResult.data) {
+      const exactDuplicate = existingItemsResult.data.find(
+        (item) =>
+          item.status === status &&
+          (item.platform === platform || (item.platform === null && platform === undefined))
+      );
+      if (exactDuplicate) {
+        logger.warn(
+          { userId, gameId: gameResult.data.id, status, platform },
+          "Attempted to add duplicate game to library"
+        );
+        return {
+          success: false,
+          error: "This game is already in your library",
+        };
+      }
+    }
     const libraryItemResult = await libraryService.createLibraryItem({
       userId,
       gameId: gameResult.data.id,
@@ -130,7 +158,8 @@ export async function addGameToLibrary(
     logger.error({ error, input }, "Use case failed: Add game to library");
     return {
       success: false,
-      error: error instanceof Error ? error.message : "An unexpected error occurred",
+      error:
+        error instanceof Error ? error.message : "An unexpected error occurred",
     };
   }
 }

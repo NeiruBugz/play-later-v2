@@ -25,7 +25,7 @@ export const UpdateLibraryStatusByIgdbSchema = z.object({
   igdbId: z.number().int().positive(),
   status: z.nativeEnum(LibraryItemStatus),
 });
-// Export TypeScript types
+
 export type AddToLibraryInput = z.infer<typeof AddToLibrarySchema>;
 export type UpdateLibraryStatusInput = z.infer<
   typeof UpdateLibraryStatusSchema

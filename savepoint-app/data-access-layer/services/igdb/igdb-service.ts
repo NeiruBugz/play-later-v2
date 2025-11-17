@@ -1,4 +1,5 @@
 import { env } from "@/env.mjs";
+
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import {
   IGDB_ARTWORK_LIMIT,
@@ -21,6 +22,7 @@ import {
   TwitchTokenResponse,
   type SearchResponse,
 } from "@/shared/types";
+
 import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import {
   ALLOWED_FRANCHISE_GAME_CATEGORIES,
@@ -70,6 +72,7 @@ import type {
   UpcomingGamingEventsResult,
   UpcomingReleasesResult,
 } from "./types";
+
 export class IgdbService extends BaseService implements IgdbServiceInterface {
   private token: TwitchTokenResponse | null = null;
   private tokenExpiry: number = 0;

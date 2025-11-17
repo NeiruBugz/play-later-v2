@@ -1,9 +1,12 @@
 "use client";
+
 import { RefreshCw, ShieldAlert } from "lucide-react";
 import { useCallback, useEffect } from "react";
+
 import { Button } from "@/shared/components/ui/button";
 import { createLogger } from "@/shared/lib/app/logger";
 import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
+
 type GlobalErrorProps = {
   error: Error & { digest?: string };
   reset: () => void;

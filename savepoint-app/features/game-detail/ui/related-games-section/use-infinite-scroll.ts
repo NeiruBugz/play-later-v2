@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+
 type UseInfiniteScrollOptions = {
   onLoadMore: () => void;
   hasMore: boolean;
@@ -26,7 +27,7 @@ export function useInfiniteScroll({
     if (!elementRef.current) return;
     observerRef.current = new IntersectionObserver(handleIntersect, {
       threshold,
-      rootMargin: "100px", // Trigger 100px before element enters viewport
+      rootMargin: "100px",
     });
     observerRef.current.observe(elementRef.current);
     return () => {

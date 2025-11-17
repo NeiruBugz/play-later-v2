@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 
 import { useLibraryFilters } from "./use-library-filters";
 
-// Mock Next.js navigation
 vi.mock("next/navigation", () => ({
   useSearchParams: vi.fn(),
 }));
@@ -144,7 +143,6 @@ describe("useLibraryFilters", () => {
 
       const { result } = renderHook(() => useLibraryFilters());
 
-      // Invalid status should still be cast but won't match enum
       expect(result.current.status).toBe("INVALID_STATUS");
     });
   });
@@ -215,7 +213,6 @@ describe("useLibraryFilters", () => {
 
       const { result } = renderHook(() => useLibraryFilters());
 
-      // Empty string is kept as-is (API handler will handle it)
       expect(result.current.search).toBe("");
     });
   });
@@ -342,7 +339,7 @@ describe("useLibraryFilters", () => {
         platform: undefined,
         search: undefined,
         sortBy: "completedAt",
-        sortOrder: "desc", // Default value
+        sortOrder: "desc",
       });
     });
   });
@@ -358,7 +355,6 @@ describe("useLibraryFilters", () => {
 
       expect(result.current.status).toBe(LibraryItemStatus.WISHLIST);
 
-      // Update search params
       const updatedParams = createMockSearchParams({
         status: LibraryItemStatus.EXPERIENCED,
       });
@@ -377,7 +373,6 @@ describe("useLibraryFilters", () => {
       expect(result.current.status).toBeUndefined();
       expect(result.current.platform).toBeUndefined();
 
-      // Add filters
       mockUseSearchParams.mockReturnValue(
         createMockSearchParams({
           status: LibraryItemStatus.CURIOUS_ABOUT,
@@ -406,7 +401,6 @@ describe("useLibraryFilters", () => {
       expect(result.current.platform).toBe("Nintendo Switch");
       expect(result.current.search).toBe("mario");
 
-      // Clear all filters
       mockUseSearchParams.mockReturnValue(createMockSearchParams({}));
 
       rerender();
@@ -414,7 +408,7 @@ describe("useLibraryFilters", () => {
       expect(result.current.status).toBeUndefined();
       expect(result.current.platform).toBeUndefined();
       expect(result.current.search).toBeUndefined();
-      expect(result.current.sortBy).toBe("createdAt"); // Defaults maintained
+      expect(result.current.sortBy).toBe("createdAt");
       expect(result.current.sortOrder).toBe("desc");
     });
   });

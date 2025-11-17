@@ -1,15 +1,19 @@
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { type Metadata, type Viewport } from "next";
+
 import { LoadingScreen } from "@/shared/components/loading-screen";
 import { cn } from "@/shared/lib";
 import { Providers } from "@/shared/providers";
+
 import "@/shared/globals.css";
+
 import {
   DM_Mono as FontMono,
   Roboto as FontSans,
   Playfair_Display as FontSerif,
 } from "next/font/google";
 import { Suspense } from "react";
+
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",

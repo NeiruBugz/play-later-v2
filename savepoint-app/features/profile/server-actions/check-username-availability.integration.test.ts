@@ -90,7 +90,6 @@ describe("checkUsernameAvailability server action", () => {
         username: "user3",
       });
 
-      // Check for a username that doesn't exist
       const result = await checkUsernameAvailability({
         username: "user4",
       });

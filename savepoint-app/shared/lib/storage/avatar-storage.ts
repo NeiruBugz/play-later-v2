@@ -1,8 +1,11 @@
 import { env } from "@/env.mjs";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+
 import { MAX_AVATAR_FILE_SIZE_BYTES } from "@/shared/constants";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 import { s3Client } from "./s3-client";
+
 const logger = createLogger({ [LOGGER_CONTEXT.STORAGE]: "AvatarStorage" });
 export class AvatarStorageService {
   static async uploadAvatar(

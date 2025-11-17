@@ -167,7 +167,6 @@ describe("UserRepository - Integration Tests", () => {
       const user = await createUser({
         username: "testuser",
         usernameNormalized: "testuser",
-        // image: "https://example.com/avatar.jpg",
       });
 
       const result = await updateUserProfile(user.id, {});
@@ -178,7 +177,6 @@ describe("UserRepository - Integration Tests", () => {
           id: user.id,
           username: "testuser",
           usernameNormalized: "testuser",
-          // image: "https://example.com/avatar.jpg",
         });
       }
 
@@ -196,7 +194,6 @@ describe("UserRepository - Integration Tests", () => {
           id: user.id,
           username: "testuser",
           usernameNormalized: "testuser",
-          // image: "https://example.com/avatar.jpg",
         });
       }
     });
@@ -232,9 +229,7 @@ describe("UserRepository - Integration Tests", () => {
     });
 
     it("should handle updating image to null", async () => {
-      const user = await createUser({
-        // image: "https://example.com/avatar.jpg",
-      });
+      const user = await createUser({});
 
       const result = await updateUserProfile(user.id, {
         image: null as unknown as string,

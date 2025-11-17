@@ -69,7 +69,6 @@ describe("GameDescription", () => {
       const summary = "  A game with leading spaces";
       render(<GameDescription summary={summary} />);
 
-      // Should display trimmed version
       expect(screen.getByText("A game with leading spaces")).toBeVisible();
     });
 
@@ -77,7 +76,6 @@ describe("GameDescription", () => {
       const summary = "A game with trailing spaces  ";
       render(<GameDescription summary={summary} />);
 
-      // Should display trimmed version
       expect(screen.getByText("A game with trailing spaces")).toBeVisible();
     });
 
@@ -96,8 +94,6 @@ describe("GameDescription", () => {
         "First paragraph.\n\nSecond paragraph with more details.";
       render(<GameDescription summary={summaryWithLineBreaks} />);
 
-      // Verify that the text content includes the line breaks
-      // The paragraph is rendered as a single text block
       const textElement = screen.getByText((content, element) => {
         return (
           element?.tagName.toLowerCase() === "p" &&

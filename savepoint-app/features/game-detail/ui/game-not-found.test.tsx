@@ -4,12 +4,10 @@ import { useRouter } from "next/navigation";
 
 import { GameNotFound } from "./game-not-found";
 
-// Mock Next.js navigation
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
 }));
 
-// Mock BrowserBackButton component
 vi.mock("@/shared/components/browser-back-button", () => ({
   BrowserBackButton: () => <button>Back</button>,
 }));
@@ -73,10 +71,8 @@ describe("GameNotFound", () => {
     const searchInput = screen.getByLabelText(/search for games by name/i);
     const searchButton = screen.getByRole("button", { name: /search/i });
 
-    // Initially disabled (empty)
     expect(searchButton).toBeDisabled();
 
-    // Type 2 characters - still disabled
     await userEvent.type(searchInput, "ab");
     expect(searchButton).toBeDisabled();
   });

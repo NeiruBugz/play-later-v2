@@ -1,16 +1,15 @@
 "use client";
+
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+
 import { uploadAvatar } from "@/features/profile/server-actions";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
-interface AvatarUploadProps {
-  currentAvatar?: string | null;
-  onUploadSuccess?: (url: string) => void;
-  onUploadError?: (error: string) => void;
-  onUploadStateChange?: (isUploading: boolean) => void;
-}
+
+import type { AvatarUploadProps } from "./avatar-upload.types";
+
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 export const AvatarUpload = ({

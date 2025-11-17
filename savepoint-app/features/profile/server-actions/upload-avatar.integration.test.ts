@@ -18,6 +18,19 @@ import { s3Client } from "@/shared/lib/storage/s3-client";
 
 import { uploadAvatar } from "./upload-avatar";
 
+vi.mock("@/shared/lib", async () => {
+  const actual =
+    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
+  const { getTestDatabase } = await import("@/test/setup/database");
+
+  return {
+    ...actual,
+    get prisma() {
+      return getTestDatabase();
+    },
+  };
+});
+
 vi.mock("@/auth", () => ({
   getServerUserId: vi.fn(),
 }));
@@ -77,7 +90,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
 
-    // Ensure S3 bucket exists (may already be created by global setup)
     try {
       await s3Client.send(
         new HeadBucketCommand({
@@ -87,7 +99,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     } catch (error: unknown) {
       const err = error as { name?: string };
       if (err.name === "NotFound" || err.name === "NoSuchBucket") {
-        // Bucket doesn't exist, create it
         try {
           await s3Client.send(
             new CreateBucketCommand({
@@ -100,7 +111,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
           );
         }
       } else {
-        // LocalStack might not be running
         throw new Error(
           `LocalStack S3 is not available on ${env.AWS_ENDPOINT_URL}. ` +
             `Ensure docker-compose is running: docker-compose up -d\n` +
@@ -322,7 +332,9 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("You must be logged in to perform this action");
+        expect(result.error).toBe(
+          "You must be logged in to perform this action"
+        );
       }
 
       const listResponse = await s3Client.send(

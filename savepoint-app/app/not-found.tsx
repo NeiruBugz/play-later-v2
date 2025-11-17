@@ -1,7 +1,9 @@
 import { ArrowLeft, Compass } from "lucide-react";
 import Link from "next/link";
+
 import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { Button } from "@/shared/components/ui/button";
+
 export default function NotFoundPage() {
   return (
     <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-24 sm:px-6 lg:px-8">

@@ -1,4 +1,6 @@
+import type { Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
+
 export async function onSignIn({
   account,
 }: {
@@ -60,11 +62,9 @@ export async function onSession({
   session,
   token,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  session: any;
+  session: Session;
   token: JWT;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-}): Promise<any> {
+}): Promise<Session> {
   return {
     ...session,
     user: {

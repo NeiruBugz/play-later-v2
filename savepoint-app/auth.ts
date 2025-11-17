@@ -3,8 +3,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Cognito from "next-auth/providers/cognito";
 import Credentials from "next-auth/providers/credentials";
+
 import { sessionErrorHandler } from "@/shared/lib";
-import { prisma } from "@/shared/lib/app/db";
 import { onAuthorize } from "@/shared/lib/app/auth/credentials-callbacks";
 import {
   onJwt,
@@ -12,6 +12,8 @@ import {
   onSession,
   onSignIn,
 } from "@/shared/lib/app/auth/oauth-callbacks";
+import { prisma } from "@/shared/lib/app/db";
+
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
 const SESSION_UPDATE_AGE = 24 * 60 * 60;
 const enableCredentials =

@@ -1,4 +1,5 @@
 import { cn } from "@/shared/lib/ui/utils";
+
 function Skeleton({
   className,
   ...props

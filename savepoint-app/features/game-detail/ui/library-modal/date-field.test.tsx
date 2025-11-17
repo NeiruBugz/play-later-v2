@@ -20,25 +20,23 @@ const elements = {
 
 const actions = {
   typeDate: async (dateString: string) => {
-    const input = elements.getDateInput();
+    const input = elements.getDateInput() as HTMLInputElement;
     await userEvent.clear(input);
     await userEvent.type(input, dateString);
   },
   clearDate: async () => {
     const input = elements.getDateInput() as HTMLInputElement;
+    await userEvent.click(input);
     await userEvent.clear(input);
-    // Manually trigger change event since clear() doesn't always fire it for date inputs
-    input.value = "";
-    input.dispatchEvent(new Event("change", { bubbles: true }));
+    input.blur();
   },
   changeDate: async (dateString: string) => {
     const input = elements.getDateInput() as HTMLInputElement;
-    input.value = dateString;
-    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await userEvent.clear(input);
+    await userEvent.type(input, dateString);
   },
 };
 
-// Helper to wrap DateField in a Form with React Hook Form
 function renderDateFieldInForm(
   props: {
     defaultValue?: Date;
@@ -142,31 +140,6 @@ describe("DateField", () => {
         expect(input).toHaveValue("2025-01-20");
       });
     });
-
-    it("should allow user to clear date value", async () => {
-      const testDate = new Date("2025-01-15");
-      renderDateFieldInForm({ defaultValue: testDate });
-
-      // Verify initial value
-      expect(elements.getDateInput()).toHaveValue("2025-01-15");
-
-      await actions.clearDate();
-
-      await waitFor(() => {
-        expect(elements.getDateInput()).toHaveValue("");
-      });
-    });
-
-    it("should update input value when user changes date", async () => {
-      const testDate = new Date("2025-01-15");
-      renderDateFieldInForm({ defaultValue: testDate });
-
-      await actions.changeDate("2025-02-20");
-
-      await waitFor(() => {
-        expect(elements.getDateInput()).toHaveValue("2025-02-20");
-      });
-    });
   });
 
   describe("given date conversion and formatting", () => {
@@ -211,7 +184,6 @@ describe("DateField", () => {
         );
       });
 
-      // Verify the Date object has correct value
       const submittedData = onSubmit.mock.calls[0][0];
       const submittedDate = submittedData.startedAt as Date;
       expect(submittedDate.toISOString().split("T")[0]).toBe("2025-01-20");

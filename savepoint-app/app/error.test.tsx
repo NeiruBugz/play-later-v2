@@ -68,7 +68,6 @@ describe("GlobalError (Error Boundary)", () => {
     render(<GlobalError error={errorWithoutDigest} reset={mockReset} />);
 
     expect(screen.getByText("Error reference:")).toBeVisible();
-    // Look for the text content including "N/A"
     expect(
       screen.getByText((content) => content.includes("N/A"))
     ).toBeVisible();
@@ -84,7 +83,6 @@ describe("GlobalError (Error Boundary)", () => {
   it("should render BrowserBackButton component", () => {
     render(<GlobalError error={mockError} reset={mockReset} />);
 
-    // BrowserBackButton contains "Back" text
     const backButton = screen.getByRole("button", { name: /back/i });
     expect(backButton).toBeVisible();
   });

@@ -4,7 +4,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { LibrarySortSelect } from "./library-sort-select";
 
-// Mock Next.js navigation
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
   useSearchParams: vi.fn(),
@@ -48,8 +47,7 @@ describe("LibrarySortSelect", () => {
       });
 
       const option = screen.getByRole("option", { name: label });
-      // Note: In jsdom, clicking Radix UI Select options doesn't always trigger onChange
-      // This is a known limitation of testing Radix UI components
+
       await userEvent.click(option);
     },
   };
@@ -67,7 +65,6 @@ describe("LibrarySortSelect", () => {
       refresh: vi.fn(),
     } as any);
 
-    // Default: no sort params (should use defaults)
     mockUseSearchParams.mockReturnValue(createMockSearchParams({}) as any);
   });
 
@@ -232,12 +229,10 @@ describe("LibrarySortSelect", () => {
 
   describe("given user changes sort option", () => {
     it("should not update URL when selecting same sort option already selected", async () => {
-      // Default is "Recently Added" (createdAt desc)
       render(<LibrarySortSelect />);
 
       await actions.selectSortOption("Recently Added");
 
-      // Clicking the same option shouldn't trigger onChange
       expect(mockPush).not.toHaveBeenCalled();
     });
 
@@ -535,7 +530,6 @@ describe("LibrarySortSelect", () => {
 
       render(<LibrarySortSelect />);
 
-      // createdAt + asc = "Oldest First"
       expect(elements.getSortTrigger()).toHaveTextContent("Oldest First");
     });
 
@@ -546,7 +540,6 @@ describe("LibrarySortSelect", () => {
 
       render(<LibrarySortSelect />);
 
-      // releaseDate + desc = "Release Date (Newest)"
       expect(elements.getSortTrigger()).toHaveTextContent(
         "Release Date (Newest)"
       );
@@ -591,7 +584,7 @@ describe("LibrarySortSelect", () => {
         const callUrl = mockPush.mock.calls[0]?.[0] as string;
         expect(callUrl).toContain("sortBy=completedAt");
         expect(callUrl).toContain("sortOrder=asc");
-        // Should not contain old values
+
         expect(callUrl).not.toContain("sortBy=createdAt");
       });
     });

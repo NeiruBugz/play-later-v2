@@ -1,12 +1,9 @@
 "use client";
-import type { Platform } from "@prisma/client";
+
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
-import type {
-  ControllerRenderProps,
-  FieldPath,
-  FieldValues,
-} from "react-hook-form";
+import type { FieldValues } from "react-hook-form";
+
 import { Button } from "@/shared/components/ui/button";
 import {
   Command,
@@ -30,13 +27,9 @@ import {
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
 import { cn } from "@/shared/lib/ui/utils";
-type PlatformComboboxProps<T extends FieldValues = FieldValues> = {
-  field: ControllerRenderProps<T, FieldPath<T>>;
-  supportedPlatforms: Platform[];
-  otherPlatforms: Platform[];
-  isLoading?: boolean;
-  description?: string;
-};
+
+import type { PlatformComboboxProps } from "./platform-combobox.types";
+
 export const PlatformCombobox = <T extends FieldValues = FieldValues>({
   field,
   supportedPlatforms,

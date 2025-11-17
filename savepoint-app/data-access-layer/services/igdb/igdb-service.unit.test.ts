@@ -465,7 +465,6 @@ describe("IgdbService", () => {
   describe("searchPlatformByName", () => {
     describe("when service returns", () => {
       it("should return matching platforms when valid platform name is provided", async () => {
-        // Given: Valid platform name "PlayStation"
         const params = { platformName: "PlayStation" };
         const mockPlatforms = [
           { id: 167, name: "PlayStation 5", abbreviation: "PS5" },
@@ -515,7 +514,6 @@ describe("IgdbService", () => {
       });
 
       it("should return NOT_FOUND when no platforms match the search", async () => {
-        // Given: Platform name that doesn't exist
         const params = { platformName: "NonexistentPlatform" };
 
         mockFetch.mockResolvedValueOnce({
@@ -1185,7 +1183,6 @@ describe("IgdbService", () => {
           json: async () => mockResponse,
         });
 
-        // When: We request the game's aggregated rating
         const result = await service.getGameAggregatedRating(params);
 
         expect(result.success).toBe(true);
@@ -1306,7 +1303,6 @@ describe("IgdbService", () => {
       });
 
       it("should return NOT_FOUND when game does not exist", async () => {
-        // Given: Game ID that doesn't exist
         const params = { gameId: 999999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1704,7 +1700,6 @@ describe("IgdbService", () => {
       });
 
       it("should handle API returning empty array (game not found)", async () => {
-        // Given: Game doesn't exist
         const params = { gameId: 9999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -1991,7 +1986,6 @@ describe("IgdbService", () => {
           },
         ];
 
-        // Mock token for first request
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2000,7 +1994,6 @@ describe("IgdbService", () => {
           }),
         });
 
-        // Mock token for second request (parallel race condition)
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2009,13 +2002,11 @@ describe("IgdbService", () => {
           }),
         });
 
-        // Mock games response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => mockResponse,
         });
 
-        // Mock count response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => [{ id: 1 }, { id: 2 }],
@@ -2049,7 +2040,6 @@ describe("IgdbService", () => {
       it("should handle empty response (no games in franchise) gracefully", async () => {
         const params = { franchiseId: 999, currentGameId: 1 };
 
-        // Mock token for first request
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2058,7 +2048,6 @@ describe("IgdbService", () => {
           }),
         });
 
-        // Mock token for second request (parallel race condition)
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2067,13 +2056,11 @@ describe("IgdbService", () => {
           }),
         });
 
-        // Mock games response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => [],
         });
 
-        // Mock count response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => [],
@@ -2103,7 +2090,6 @@ describe("IgdbService", () => {
           },
         ];
 
-        // Mock token for first request
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2112,7 +2098,6 @@ describe("IgdbService", () => {
           }),
         });
 
-        // Mock token for second request (parallel race condition)
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2121,13 +2106,11 @@ describe("IgdbService", () => {
           }),
         });
 
-        // Mock games response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => mockResponse,
         });
 
-        // Mock count response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => [{ id: 10 }],
@@ -2151,7 +2134,6 @@ describe("IgdbService", () => {
       it("should handle API returning empty array", async () => {
         const params = { franchiseId: 777, currentGameId: 5 };
 
-        // Mock token for first request
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2160,7 +2142,6 @@ describe("IgdbService", () => {
           }),
         });
 
-        // Mock token for second request (parallel race condition)
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => ({
@@ -2169,13 +2150,11 @@ describe("IgdbService", () => {
           }),
         });
 
-        // Mock games response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => [],
         });
 
-        // Mock count response
         mockFetch.mockResolvedValueOnce({
           ok: true,
           json: async () => [],

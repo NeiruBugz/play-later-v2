@@ -1,14 +1,11 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { renderWithTestProviders } from "@/test/utils/test-provider";
+import { createLibraryItemFixture } from "@fixtures/library";
+import { screen, waitFor } from "@testing-library/react";
 
-import {
-  useLibraryData,
-  type LibraryItemWithGameAndCount,
-} from "../hooks/use-library-data";
+import { useLibraryData } from "../hooks/use-library-data";
 import { useLibraryFilters } from "../hooks/use-library-filters";
 import { LibraryGrid } from "./library-grid";
 
-// Mock hooks
 vi.mock("../hooks/use-library-data", () => ({
   useLibraryData: vi.fn(),
 }));
@@ -17,7 +14,6 @@ vi.mock("../hooks/use-library-filters", () => ({
   useLibraryFilters: vi.fn(),
 }));
 
-// Mock the server action and toast
 vi.mock("../server-actions/update-library-status", () => ({
   updateLibraryStatusAction: vi.fn(),
 }));
@@ -28,23 +24,6 @@ vi.mock("sonner", () => ({
     error: vi.fn(),
   },
 }));
-
-// Helper to create a fresh QueryClient for each test
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-
-// Helper to render component with QueryClient wrapper
-const renderWithQueryClient = (ui: React.ReactElement) => {
-  const queryClient = createTestQueryClient();
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
-};
 
 const mockUseLibraryData = vi.mocked(useLibraryData);
 const mockUseLibraryFilters = vi.mocked(useLibraryFilters);
@@ -57,34 +36,6 @@ const elements = {
   getBrowseGamesButton: () =>
     screen.queryByRole("link", { name: /Browse Games/i }),
 };
-
-const mockLibraryItem = (
-  id: number,
-  gameTitle: string,
-  status: string
-): LibraryItemWithGameAndCount => ({
-  id,
-  userId: "user-123",
-  gameId: `game-${id}`,
-  status,
-  platform: "PlayStation 5",
-  acquisitionType: "DIGITAL",
-  startedAt: null,
-  completedAt: null,
-  createdAt: new Date("2025-01-10"),
-  updatedAt: new Date("2025-01-20"),
-  game: {
-    id: `game-${id}`,
-    title: gameTitle,
-    coverImage:
-      "https://images.igdb.com/igdb/image/upload/t_cover_big/co1234.jpg",
-    slug: gameTitle.toLowerCase().replace(/\s+/g, "-"),
-    releaseDate: new Date("2020-01-01"),
-    _count: {
-      libraryItems: 1,
-    },
-  },
-});
 
 describe("LibraryGrid", () => {
   const defaultFilters = {
@@ -108,10 +59,8 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
-      // LibraryGridSkeleton should render with skeleton cards
-      // Check that error and empty states are not visible
       expect(elements.getErrorMessage()).not.toBeInTheDocument();
       expect(elements.getEmptyStateMessage()).not.toBeInTheDocument();
     });
@@ -123,7 +72,7 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getErrorMessage()).not.toBeInTheDocument();
     });
@@ -135,7 +84,7 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getEmptyStateMessage()).not.toBeInTheDocument();
     });
@@ -150,7 +99,7 @@ describe("LibraryGrid", () => {
         error: new Error(errorMessage),
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getErrorMessage()).toBeVisible();
       expect(screen.getByText(errorMessage)).toBeVisible();
@@ -163,7 +112,7 @@ describe("LibraryGrid", () => {
         error: new Error("Failed to fetch"),
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getReloadButton()).toBeVisible();
     });
@@ -175,9 +124,8 @@ describe("LibraryGrid", () => {
         error: new Error("Failed to fetch"),
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
-      // Grid should not be rendered - check that game titles are not present
       expect(screen.queryByText("Game 1")).not.toBeInTheDocument();
       expect(screen.queryByText("Game 2")).not.toBeInTheDocument();
     });
@@ -191,7 +139,7 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getEmptyStateMessage()).toBeVisible();
     });
@@ -203,7 +151,7 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getEmptyStateMessage()).toBeVisible();
     });
@@ -215,7 +163,7 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getBrowseGamesButton()).toBeVisible();
       expect(elements.getBrowseGamesButton()).toHaveAttribute(
@@ -228,8 +176,32 @@ describe("LibraryGrid", () => {
   describe("given user has games in library", () => {
     it("should render grid of game cards", () => {
       const mockData = [
-        mockLibraryItem(1, "The Legend of Zelda", "CURRENTLY_EXPLORING"),
-        mockLibraryItem(2, "Super Mario Odyssey", "EXPERIENCED"),
+        createLibraryItemFixture({
+          id: 1,
+          gameId: "game-1",
+          status: "CURRENTLY_EXPLORING",
+          game: {
+            id: "game-1",
+            title: "The Legend of Zelda",
+            slug: "the-legend-of-zelda",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+        createLibraryItemFixture({
+          id: 2,
+          gameId: "game-2",
+          status: "EXPERIENCED",
+          game: {
+            id: "game-2",
+            title: "Super Mario Odyssey",
+            slug: "super-mario-odyssey",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
       ];
 
       mockUseLibraryData.mockReturnValue({
@@ -238,18 +210,53 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
-      // Grid should be rendered with game cards visible
       expect(screen.getByText("The Legend of Zelda")).toBeVisible();
       expect(screen.getByText("Super Mario Odyssey")).toBeVisible();
     });
 
     it("should display correct number of cards based on data", () => {
       const mockData = [
-        mockLibraryItem(1, "Game 1", "CURIOUS_ABOUT"),
-        mockLibraryItem(2, "Game 2", "WISHLIST"),
-        mockLibraryItem(3, "Game 3", "EXPERIENCED"),
+        createLibraryItemFixture({
+          id: 1,
+          gameId: "game-1",
+          status: "CURIOUS_ABOUT",
+          game: {
+            id: "game-1",
+            title: "Game 1",
+            slug: "game-1",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+        createLibraryItemFixture({
+          id: 2,
+          gameId: "game-2",
+          status: "WISHLIST",
+          game: {
+            id: "game-2",
+            title: "Game 2",
+            slug: "game-2",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+        createLibraryItemFixture({
+          id: 3,
+          gameId: "game-3",
+          status: "EXPERIENCED",
+          game: {
+            id: "game-3",
+            title: "Game 3",
+            slug: "game-3",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
       ];
 
       mockUseLibraryData.mockReturnValue({
@@ -258,16 +265,29 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
-      // Each game should render a card with title visible
       expect(screen.getByText("Game 1")).toBeVisible();
       expect(screen.getByText("Game 2")).toBeVisible();
       expect(screen.getByText("Game 3")).toBeVisible();
     });
 
     it("should apply responsive grid layout classes", () => {
-      const mockData = [mockLibraryItem(1, "Test Game", "CURIOUS_ABOUT")];
+      const mockData = [
+        createLibraryItemFixture({
+          id: 1,
+          gameId: "game-1",
+          status: "CURIOUS_ABOUT",
+          game: {
+            id: "game-1",
+            title: "Test Game",
+            slug: "test-game",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+      ];
 
       mockUseLibraryData.mockReturnValue({
         data: mockData,
@@ -275,14 +295,27 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
-      // Grid should render game cards
       expect(screen.getByText("Test Game")).toBeVisible();
     });
 
     it("should not show loading skeleton when data is loaded", () => {
-      const mockData = [mockLibraryItem(1, "Test Game", "CURIOUS_ABOUT")];
+      const mockData = [
+        createLibraryItemFixture({
+          id: 1,
+          gameId: "game-1",
+          status: "CURIOUS_ABOUT",
+          game: {
+            id: "game-1",
+            title: "Test Game",
+            slug: "test-game",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+      ];
 
       mockUseLibraryData.mockReturnValue({
         data: mockData,
@@ -290,14 +323,27 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
-      // Game should be visible, not skeleton
       expect(screen.getByText("Test Game")).toBeVisible();
     });
 
     it("should not show error state when data is loaded", () => {
-      const mockData = [mockLibraryItem(1, "Test Game", "CURIOUS_ABOUT")];
+      const mockData = [
+        createLibraryItemFixture({
+          id: 1,
+          gameId: "game-1",
+          status: "CURIOUS_ABOUT",
+          game: {
+            id: "game-1",
+            title: "Test Game",
+            slug: "test-game",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+      ];
 
       mockUseLibraryData.mockReturnValue({
         data: mockData,
@@ -305,13 +351,27 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getErrorMessage()).not.toBeInTheDocument();
     });
 
     it("should not show empty state when data is loaded", () => {
-      const mockData = [mockLibraryItem(1, "Test Game", "CURIOUS_ABOUT")];
+      const mockData = [
+        createLibraryItemFixture({
+          id: 1,
+          gameId: "game-1",
+          status: "CURIOUS_ABOUT",
+          game: {
+            id: "game-1",
+            title: "Test Game",
+            slug: "test-game",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+      ];
 
       mockUseLibraryData.mockReturnValue({
         data: mockData,
@@ -319,7 +379,7 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
       expect(elements.getEmptyStateMessage()).not.toBeInTheDocument();
     });
@@ -327,10 +387,37 @@ describe("LibraryGrid", () => {
 
   describe("given filters change", () => {
     it("should update when filters change", async () => {
-      const initialData = [mockLibraryItem(1, "Game 1", "CURIOUS_ABOUT")];
-      const filteredData = [mockLibraryItem(2, "Game 2", "EXPERIENCED")];
+      const initialData = [
+        createLibraryItemFixture({
+          id: 1,
+          gameId: "game-1",
+          status: "CURIOUS_ABOUT",
+          game: {
+            id: "game-1",
+            title: "Game 1",
+            slug: "game-1",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+      ];
+      const filteredData = [
+        createLibraryItemFixture({
+          id: 2,
+          gameId: "game-2",
+          status: "EXPERIENCED",
+          game: {
+            id: "game-2",
+            title: "Game 2",
+            slug: "game-2",
+            _count: { libraryItems: 1 },
+            coverImage: null,
+            releaseDate: null,
+          },
+        }),
+      ];
 
-      // Initial render with filters
       mockUseLibraryFilters.mockReturnValue(defaultFilters);
       mockUseLibraryData.mockReturnValue({
         data: initialData,
@@ -338,11 +425,10 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      const { rerender } = renderWithQueryClient(<LibraryGrid />);
+      const { rerender } = renderWithTestProviders(<LibraryGrid />);
 
       expect(screen.getByText("Game 1")).toBeInTheDocument();
 
-      // Update filters
       const newFilters = {
         ...defaultFilters,
         status: "EXPERIENCED" as any,
@@ -354,11 +440,7 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      rerender(
-        <QueryClientProvider client={createTestQueryClient()}>
-          <LibraryGrid />
-        </QueryClientProvider>
-      );
+      rerender(<LibraryGrid />);
 
       await waitFor(() => {
         expect(screen.queryByText("Game 1")).not.toBeInTheDocument();
@@ -382,9 +464,8 @@ describe("LibraryGrid", () => {
         error: null,
       } as any);
 
-      renderWithQueryClient(<LibraryGrid />);
+      renderWithTestProviders(<LibraryGrid />);
 
-      // Verify that useLibraryData was called with the correct filters
       expect(mockUseLibraryData).toHaveBeenCalledWith(filters);
     });
   });

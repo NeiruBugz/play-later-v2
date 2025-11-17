@@ -1,11 +1,11 @@
 import { afterEach, beforeAll, vi } from "vitest";
-// Import common mocks shared across all test types
+
 import "./common-mocks";
-// Import S3 utilities for bucket setup
+
 import { CreateBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
-// Import database cleanup function for test isolation
+
 import { resetTestDatabase } from "./database";
-// Set up environment variables BEFORE any modules that use them are imported
+
 process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";
 process.env.AUTH_URL = "http://localhost:3000";
@@ -27,7 +27,7 @@ process.env.POSTGRES_USER = "postgres";
 process.env.POSTGRES_PASSWORD = "postgres";
 process.env.POSTGRES_DATABASE = "test";
 process.env.STEAM_API_KEY = "test-steam-key";
-// S3 / LocalStack configuration for integration tests
+
 process.env.AWS_REGION = "us-east-1";
 process.env.AWS_ENDPOINT_URL = "http://localhost:4568";
 process.env.AWS_ACCESS_KEY_ID = "test";
@@ -37,7 +37,6 @@ process.env.S3_AVATAR_PATH_PREFIX = "user-avatars/";
 vi.mock("@/shared/lib/app/db", async () => {
   const { getTestDatabase } = await import("./database");
   return {
-    // Replace prisma with test database client
     get prisma() {
       return getTestDatabase();
     },
@@ -45,11 +44,9 @@ vi.mock("@/shared/lib/app/db", async () => {
 });
 vi.unmock("@/data-access-layer/repository");
 async function ensureS3BucketExists(): Promise<void> {
-  // Dynamically import s3Client to avoid import order issues
   const { s3Client } = await import("@/shared/lib/storage/s3-client");
   const bucketName = process.env.S3_BUCKET_NAME!;
   try {
-    // Check if bucket exists
     await s3Client.send(
       new HeadBucketCommand({
         Bucket: bucketName,
@@ -58,7 +55,7 @@ async function ensureS3BucketExists(): Promise<void> {
     console.log(`S3 bucket '${bucketName}' already exists`);
   } catch (error: unknown) {
     const err = error as { name?: string };
-    // Bucket doesn't exist, create it
+
     if (err.name === "NotFound" || err.name === "NoSuchBucket") {
       try {
         await s3Client.send(
@@ -75,21 +72,19 @@ async function ensureS3BucketExists(): Promise<void> {
         throw createError;
       }
     } else {
-      // Some other error occurred
       console.error(`Failed to check S3 bucket '${bucketName}':`, error);
       throw error;
     }
   }
 }
-// Set up test-specific configuration before tests run
+
 beforeAll(async () => {
-  // @ts-expect-error - NODE_ENV is read-only
   process.env.NODE_ENV = "test";
-  // Ensure S3 bucket exists for avatar upload tests
+
   await ensureS3BucketExists();
 });
 afterEach(async () => {
   vi.clearAllMocks();
-  // Reset database state between tests
+
   await resetTestDatabase();
 });

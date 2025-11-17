@@ -6,13 +6,11 @@ import type { RequestContext } from "../types";
 import { getLibraryHandler } from "./get-library-handler";
 import type { LibraryItemWithGameAndCount } from "./types";
 
-// Mock dependencies
 vi.mock("@/data-access-layer/services/library/library-service");
 
 const mockLibraryService = vi.mocked(LibraryService);
 
 describe("getLibraryHandler", () => {
-  // Mock request context
   const mockContext: RequestContext = {
     ip: "192.168.1.1",
     headers: new Headers(),
@@ -24,10 +22,8 @@ describe("getLibraryHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Create mock function for getLibraryItems
     mockGetLibraryItems = vi.fn();
 
-    // Mock LibraryService instance
     mockLibraryService.mockImplementation(
       () =>
         ({
@@ -166,7 +162,7 @@ describe("getLibraryHandler", () => {
         search: "zelda",
         sortBy: "createdAt",
         sortOrder: "desc",
-        distinctByGame: true, // CRITICAL: Must be true for library view
+        distinctByGame: true,
       });
     });
 
@@ -410,8 +406,6 @@ describe("getLibraryHandler", () => {
     });
 
     it("should handle empty service error strings", async () => {
-      // Note: Handler currently passes empty strings through
-      // This test documents current behavior
       mockGetLibraryItems.mockResolvedValue({
         success: false,
         error: "",
@@ -426,7 +420,7 @@ describe("getLibraryHandler", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(500);
-        // Handler currently passes empty error string through
+
         expect(result.error).toBe("");
       }
     });
@@ -453,7 +447,7 @@ describe("getLibraryHandler", () => {
             slug: "the-legend-of-zelda-breath-of-the-wild",
             releaseDate: new Date("2017-03-03"),
             _count: {
-              libraryItems: 2, // User has 2 library items for this game
+              libraryItems: 2,
             },
           },
         },

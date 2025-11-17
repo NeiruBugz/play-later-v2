@@ -1,8 +1,12 @@
 "use server";
+
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
+
 import { createServerAction } from "@/shared/lib";
 import { AvatarStorageService } from "@/shared/lib/storage/avatar-storage";
+
 import { UploadAvatarSchema } from "../schemas";
+
 type UploadAvatarInput = {
   file: File;
 };

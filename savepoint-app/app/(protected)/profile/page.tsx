@@ -4,9 +4,11 @@ import {
   ServiceErrorCode,
 } from "@/data-access-layer/services";
 import { redirect } from "next/navigation";
+
 import { ProfileView } from "@/features/profile/ui/profile-view";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { requireServerUserId } from "@/shared/lib/app/auth";
+
 export default async function ProfilePage() {
   const userId = await requireServerUserId();
   const logger = createLogger({ [LOGGER_CONTEXT.PAGE]: "ProfilePage" });

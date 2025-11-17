@@ -44,7 +44,7 @@ describe("Database Check Constraints - Integration Tests", () => {
       const game = await createGame();
 
       const createdAt = new Date("2024-01-15");
-      const startedAt = new Date("2024-01-10"); // Before createdAt - valid!
+      const startedAt = new Date("2024-01-10");
 
       const item = await prisma.libraryItem.create({
         data: {
@@ -67,7 +67,7 @@ describe("Database Check Constraints - Integration Tests", () => {
       const game = await createGame();
 
       const createdAt = new Date("2024-01-10");
-      const startedAt = new Date("2024-01-15"); // After createdAt
+      const startedAt = new Date("2024-01-15");
 
       const item = await prisma.libraryItem.create({
         data: {
@@ -89,7 +89,7 @@ describe("Database Check Constraints - Integration Tests", () => {
       const game = await createGame();
 
       const createdAt = new Date("2024-01-15");
-      const completedAt = new Date("2024-01-10"); // Before createdAt - valid!
+      const completedAt = new Date("2024-01-10");
 
       const item = await prisma.libraryItem.create({
         data: {
@@ -113,7 +113,7 @@ describe("Database Check Constraints - Integration Tests", () => {
 
       const createdAt = new Date("2024-01-10");
       const startedAt = new Date("2024-01-15");
-      const completedAt = new Date("2024-01-12"); // Before startedAt
+      const completedAt = new Date("2024-01-12");
 
       await expect(
         prisma.libraryItem.create({
@@ -188,7 +188,7 @@ describe("Database Check Constraints - Integration Tests", () => {
           data: {
             userId: user.id,
             gameId: game.id,
-            rating: -1, // Invalid: below 0
+            rating: -1,
             content: "Great game!",
           },
         })
@@ -205,7 +205,7 @@ describe("Database Check Constraints - Integration Tests", () => {
           data: {
             userId: user.id,
             gameId: game.id,
-            rating: 11, // Invalid: above 10
+            rating: 11,
             content: "Amazing game!",
           },
         })
@@ -276,7 +276,7 @@ describe("Database Check Constraints - Integration Tests", () => {
             userId: user.id,
             gameId: game.id,
             content: "First session",
-            playSession: 0, // Invalid: must be > 0
+            playSession: 0,
             visibility: JournalVisibility.PRIVATE,
           },
         })
@@ -294,7 +294,7 @@ describe("Database Check Constraints - Integration Tests", () => {
             userId: user.id,
             gameId: game.id,
             content: "First session",
-            playSession: -5, // Invalid: must be > 0
+            playSession: -5,
             visibility: JournalVisibility.PRIVATE,
           },
         })
@@ -343,7 +343,7 @@ describe("Database Check Constraints - Integration Tests", () => {
       const game = await createGame();
 
       const createdAt = new Date("2024-01-15");
-      const publishedAt = new Date("2024-01-10"); // Before createdAt
+      const publishedAt = new Date("2024-01-10");
 
       await expect(
         prisma.journalEntry.create({
@@ -365,7 +365,7 @@ describe("Database Check Constraints - Integration Tests", () => {
       const game = await createGame();
 
       const createdAt = new Date("2024-01-10");
-      const publishedAt = new Date("2024-01-15"); // After createdAt
+      const publishedAt = new Date("2024-01-15");
 
       const entry = await prisma.journalEntry.create({
         data: {

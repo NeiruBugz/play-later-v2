@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+
 import { GameCoverImage } from "@/features/game-detail/ui/game-cover-image";
 import { GameDescription } from "@/features/game-detail/ui/game-description";
 import { GameReleaseDate } from "@/features/game-detail/ui/game-release-date";
@@ -15,6 +16,7 @@ import { getGameDetails } from "@/features/game-detail/use-cases/get-game-detail
 import { GenreBadges } from "@/shared/components/genre-badges";
 import { PlatformBadges } from "@/shared/components/platform-badges";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
+
 export default async function GameDetailPage({
   params,
 }: {
@@ -28,12 +30,10 @@ export default async function GameDetailPage({
   }
   const { game, franchiseIds, timesToBeat, userLibraryStatus, journalEntries } =
     result.data;
-  // Extract platform names from the platforms array
   const platforms =
     game.platforms
       ?.map((p) => p.name)
       .filter((name): name is string => name !== undefined) ?? [];
-  // Extract genre names from the genres array
   const genres =
     game.genres
       ?.map((g) => g.name)
@@ -65,7 +65,6 @@ export default async function GameDetailPage({
             </>
           )}
         </aside>
-        {}
         <main className="space-y-6" aria-label="Game information">
           <header className="space-y-2">
             <h1 className="text-3xl font-bold md:text-4xl">{game.name}</h1>

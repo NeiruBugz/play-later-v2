@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
@@ -8,12 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-type DeleteConfirmationDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
-  itemDescription: string;
-};
+
+import type { DeleteConfirmationDialogProps } from "./delete-confirmation-dialog.types";
+
 export const DeleteConfirmationDialog = ({
   open,
   onOpenChange,

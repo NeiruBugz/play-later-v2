@@ -1,6 +1,8 @@
 import Image from "next/image";
+
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 import { cn } from "@/shared/lib/ui/utils";
+
 type ImageSize = "thumbnail" | "cover_small" | "cover_big" | "hd";
 type GameCoverImageProps = {
   imageId: string | null | undefined;
@@ -79,7 +81,10 @@ export function GameCoverImage({
     ? imageId
     : `${IMAGE_API}/${config.apiSize}/${imageId}.jpg`;
   return (
-    <div className={cn("bg-muted relative overflow-hidden", className)} data-testid="game-cover-container">
+    <div
+      className={cn("bg-muted relative overflow-hidden", className)}
+      data-testid="game-cover-container"
+    >
       <Image
         src={src}
         alt={`${gameTitle} cover`}

@@ -1,10 +1,13 @@
 import "server-only";
+
 import {
   findGameByIgdbId,
   findPlatformsForGame,
 } from "@/data-access-layer/repository";
 import type { Platform } from "@prisma/client";
+
 import { BaseService, type ServiceResult } from "../types";
+
 export class PlatformService extends BaseService {
   async getPlatformsForGame(igdbId: number): Promise<
     ServiceResult<{

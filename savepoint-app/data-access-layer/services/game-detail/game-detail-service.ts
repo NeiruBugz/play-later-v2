@@ -1,12 +1,15 @@
 import "server-only";
+
 import {
   createGameWithRelations,
   gameExistsByIgdbId,
   upsertGenres,
   upsertPlatforms,
 } from "@/data-access-layer/repository";
+
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import type { FullGameInfoResponse } from "@/shared/types";
+
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "GameDetailService" });
 export async function populateGameInDatabase(
   igdbGame: FullGameInfoResponse
@@ -86,7 +89,8 @@ export async function populateGameInDatabase(
     );
     return { ok: true };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     logger.warn(
       { error, igdbId: igdbGame.id, slug: igdbGame.slug },
       "Background game population failed - will retry on next access"

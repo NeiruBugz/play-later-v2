@@ -66,7 +66,6 @@ describe("GameDetailService Integration Tests", () => {
 
     await populateGameInDatabase(igdbGame);
 
-    // Give it a moment for async operation
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     const result = await findGameByIgdbId(54321);
@@ -103,15 +102,12 @@ describe("GameDetailService Integration Tests", () => {
       game_type: 0,
     };
 
-    // Populate once
     await populateGameInDatabase(igdbGame);
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Try to populate again
     await populateGameInDatabase(igdbGame);
     await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Verify only one game exists
     const prisma = getTestDatabase();
     const count = await prisma.game.count({ where: { igdbId: 11111 } });
     expect(count).toBe(1);

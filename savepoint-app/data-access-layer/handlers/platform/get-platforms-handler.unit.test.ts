@@ -5,13 +5,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RequestContext } from "../types";
 import { getPlatformsHandler } from "./get-platforms-handler";
 
-// Mock dependencies
 vi.mock("@/data-access-layer/services/platform/platform-service");
 
 const mockPlatformService = vi.mocked(PlatformService);
 
 describe("getPlatformsHandler", () => {
-  // Mock request context
   const mockContext: RequestContext = {
     ip: "192.168.1.1",
     headers: new Headers(),
@@ -23,10 +21,8 @@ describe("getPlatformsHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Create mock function for getPlatformsForGame
     mockGetPlatformsForGame = vi.fn();
 
-    // Mock PlatformService instance
     mockPlatformService.mockImplementation(
       () =>
         ({

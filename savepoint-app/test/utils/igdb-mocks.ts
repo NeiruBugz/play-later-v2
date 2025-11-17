@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+
 type JsonLike = Record<string, unknown> | unknown[] | null;
 export type FetchResponseSpec = {
   ok?: boolean;

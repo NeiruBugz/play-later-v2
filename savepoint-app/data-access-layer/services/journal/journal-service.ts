@@ -1,7 +1,11 @@
 import "server-only";
+
 import { findJournalEntriesByGameId } from "@/data-access-layer/repository";
+
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 import { BaseService } from "../types";
+
 export class JournalService extends BaseService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "JournalService" });
   async findJournalEntriesByGameId(params: {

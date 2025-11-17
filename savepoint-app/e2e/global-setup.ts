@@ -1,4 +1,5 @@
 import { clearTestData, disconnectDatabase } from "./helpers/db";
+
 async function globalSetup(): Promise<void> {
   console.log("\n🚀 Running global E2E setup...");
   try {

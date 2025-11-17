@@ -5,14 +5,8 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { RequestContext } from "../types";
 import { gameSearchHandler } from "./game-search-handler";
 
-/**
- * This test file uses MSW (Mock Service Worker) to intercept HTTP requests.
- * We need to unmock IgdbService to ensure the real service makes HTTP calls
- * that MSW can intercept.
- */
 vi.unmock("@/data-access-layer/services/igdb/igdb-service");
 
-// Set up MSW server for HTTP mocking
 const igdbHandlers = [
   http.post("https://id.twitch.tv/oauth2/token", () => {
     return HttpResponse.json({
@@ -53,17 +47,14 @@ const igdbHandlers = [
 const server = setupServer(...igdbHandlers);
 
 beforeAll(() => {
-  // Start MSW server with strict error handling to catch unhandled requests
   server.listen({ onUnhandledRequest: "error" });
 });
 
 afterEach(() => {
-  // Reset any runtime handlers added during tests
   server.resetHandlers();
 });
 
 afterAll(() => {
-  // Clean up and close the MSW server
   server.close();
 });
 
@@ -71,7 +62,7 @@ function createMockContext(ip: string = "127.0.0.1"): RequestContext {
   return {
     ip,
     headers: new Headers({ "x-forwarded-for": ip }),
-    url: new URL("http://localhost:6060/api/games/search"),
+    url: new URL("http://localhost/api/games/search"),
   };
 }
 
@@ -201,7 +192,6 @@ describe("gameSearchHandler Integration Tests", () => {
       const ip = getUniqueIP();
       const context = createMockContext(ip);
 
-      // Make 20 successful requests
       for (let i = 0; i < 20; i++) {
         const result = await gameSearchHandler(
           { query: "zelda", offset: 0 },
@@ -210,7 +200,6 @@ describe("gameSearchHandler Integration Tests", () => {
         expect(result.success).toBe(true);
       }
 
-      // 21st request should be rate limited
       const result = await gameSearchHandler(
         { query: "zelda", offset: 0 },
         context

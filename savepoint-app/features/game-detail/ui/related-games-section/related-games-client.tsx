@@ -1,8 +1,10 @@
 "use client";
+
 import { Gamepad2, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
+
 import { Card } from "@/shared/components/ui/card";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import {
@@ -11,29 +13,19 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
+
 import { loadMoreFranchiseGames } from "../../server-actions/load-more-franchise-games";
+import type {
+  GameCardProps,
+  GameGridProps,
+  RelatedGamesClientProps,
+} from "./related-games-client.types";
 import { useInfiniteScroll } from "./use-infinite-scroll";
-type RelatedGame = {
-  id: number;
-  name: string;
-  slug: string;
-  cover?: { image_id: string };
-};
-type FranchiseWithGames = {
-  franchiseId: number;
-  franchiseName: string;
-  games: RelatedGame[];
-  hasMore: boolean;
-  totalCount: number;
-};
-type Props = {
-  igdbId: number;
-  franchises: FranchiseWithGames[];
-};
+
 export function RelatedGamesClient({
   igdbId,
   franchises: initialFranchises,
-}: Props) {
+}: RelatedGamesClientProps) {
   const [franchises, setFranchises] = useState(initialFranchises);
   const [isPending, startTransition] = useTransition();
   const loadMore = async (franchiseId: number) => {
@@ -54,7 +46,7 @@ export function RelatedGamesClient({
                   ...f,
                   games: [
                     ...f.games,
-                    // Filter out any games that already exist to prevent duplicates
+
                     ...result.data.games.filter(
                       (newGame) =>
                         !f.games.some(
@@ -70,7 +62,7 @@ export function RelatedGamesClient({
       }
     });
   };
-  // Single franchise (no tabs)
+
   if (franchises.length === 1) {
     return (
       <section className="space-y-4" aria-labelledby="related-games-heading">
@@ -95,7 +87,7 @@ export function RelatedGamesClient({
       </section>
     );
   }
-  // Multiple franchises (tabs)
+
   return (
     <section className="space-y-4" aria-labelledby="related-games-heading">
       <h2 id="related-games-heading" className="text-2xl font-bold">
@@ -139,20 +131,14 @@ export function RelatedGamesClient({
     </section>
   );
 }
-// Separate component for game grid with infinite scroll
+
 function GameGrid({
   franchiseId,
   games,
   hasMore,
   onLoadMore,
   isPending,
-}: {
-  franchiseId: number;
-  games: RelatedGame[];
-  hasMore: boolean;
-  onLoadMore: () => void;
-  isPending: boolean;
-}) {
+}: GameGridProps) {
   const { ref } = useInfiniteScroll({
     onLoadMore,
     hasMore,
@@ -177,8 +163,8 @@ function GameGrid({
     </div>
   );
 }
-// Game card component with accessibility improvements
-function GameCard({ game }: { game: RelatedGame }) {
+
+function GameCard({ game }: GameCardProps) {
   return (
     <Link
       href={`/games/${game.slug}`}

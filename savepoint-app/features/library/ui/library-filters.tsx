@@ -1,7 +1,9 @@
 "use client";
+
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -22,7 +24,7 @@ export function LibraryFilters() {
     searchParams.get("search") ?? ""
   );
   const debouncedSearch = useDebouncedValue(searchInput, 300);
-  
+
   const updateFilter = useCallback(
     (key: string, value: string | undefined) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -35,10 +37,10 @@ export function LibraryFilters() {
     },
     [router, searchParams]
   );
-  
+
   const clearAllFilters = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
-    // Remove filter params but preserve sorting
+
     params.delete("status");
     params.delete("platform");
     params.delete("search");

@@ -1,4 +1,5 @@
 import type { ProfileWithStats } from "@/data-access-layer/services";
+
 export function prepareProfileData(profile: ProfileWithStats) {
   const displayName =
     profile.username || profile.name || profile.email || "User";

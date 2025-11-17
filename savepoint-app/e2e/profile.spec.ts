@@ -26,7 +26,6 @@ test.describe("Profile Page", () => {
     const profile = new ProfilePage(page);
     await profile.goto();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const session: any = await getSession(page);
     await expect(profile.heading(2)).toBeVisible();
 

@@ -1,4 +1,5 @@
 import { type Game, type Platform, type ReleaseDate } from "igdb-api-types";
+
 const isReleaseDate = (value: number | ReleaseDate): value is ReleaseDate =>
   typeof value === "object";
 const isPlatform = (value: number | Platform): value is Platform =>

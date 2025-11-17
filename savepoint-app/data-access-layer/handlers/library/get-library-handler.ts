@@ -1,10 +1,13 @@
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
+
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 import type { HandlerResult, RequestContext } from "../types";
 import type { GetLibraryHandlerInput, GetLibraryHandlerOutput } from "./types";
+
 const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GetLibraryHandler" });
 
 const GetLibrarySchema = z.object({
@@ -27,7 +30,7 @@ export async function getLibraryHandler(
     { userId, status, platform, search, sortBy, sortOrder, ip: context.ip },
     "Processing library fetch request"
   );
-  // 1. Validate input
+
   const validation = GetLibrarySchema.safeParse(input);
   if (!validation.success) {
     logger.warn(
@@ -40,13 +43,13 @@ export async function getLibraryHandler(
       status: HTTP_STATUS.BAD_REQUEST,
     };
   }
-  // 2. Call service
+
   const libraryService = new LibraryService();
   const result = await libraryService.getLibraryItems({
     ...validation.data,
-    distinctByGame: true, // Library view shows one item per game
+    distinctByGame: true,
   });
-  // 3. Handle service result
+
   if (!result.success) {
     logger.error(
       { userId, error: result.error },
@@ -58,7 +61,7 @@ export async function getLibraryHandler(
       status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     };
   }
-  // 4. Return success
+
   logger.info(
     { userId, count: result.data.length },
     "Library items fetched successfully"

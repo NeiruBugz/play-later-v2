@@ -1,12 +1,16 @@
 import "server-only";
+
 import {
   createUserWithCredentials,
   findUserByEmail,
 } from "@/data-access-layer/repository";
+
 import { createLogger, hashPassword, LOGGER_CONTEXT } from "@/shared/lib";
+
 import { BaseService, ServiceErrorCode } from "../types";
 import { mapToAuthUserData } from "./mappers";
 import type { SignUpInput, SignUpResult } from "./types";
+
 export class AuthService extends BaseService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "AuthService" });
   async signUp(input: SignUpInput): Promise<SignUpResult> {

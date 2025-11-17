@@ -1,4 +1,5 @@
 import "server-only";
+
 import {
   repositoryError,
   RepositoryErrorCode,
@@ -6,7 +7,9 @@ import {
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import { Prisma, type Game as PrismaGame } from "@prisma/client";
+
 import { prisma } from "@/shared/lib/app/db";
+
 type GameWithRelations = PrismaGame & {
   genres: Array<{ genre: { id: string; name: string; slug: string } }>;
   platforms: Array<{ platform: { id: string; name: string; slug: string } }>;

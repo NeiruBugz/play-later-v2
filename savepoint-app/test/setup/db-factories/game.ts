@@ -1,6 +1,7 @@
 import { type Game, type LibraryItem, type Review } from "@prisma/client";
+
 import { getTestDatabase } from "../database";
-// Counter to ensure unique slugs even when created concurrently
+
 let gameCounter = 0;
 export type GameFactoryOptions = {
   title?: string;
@@ -14,7 +15,6 @@ export type GameFactoryOptions = {
 export const createGame = async (
   options: GameFactoryOptions = {}
 ): Promise<Game> => {
-  // Increment counter first to get unique value
   const uniqueId = ++gameCounter;
   const timestamp = Date.now();
   const randomId = Math.floor(Math.random() * 1000000);
@@ -55,9 +55,7 @@ export const createLibraryItem = async (
     acquisitionType: "DIGITAL" as const,
     ...options,
   };
-  // Validate date constraints to match database check constraints
-  // Only validate that completedAt is not before startedAt
-  // Users can backdate startedAt and completedAt to dates before createdAt
+
   if (
     defaultData.startedAt &&
     defaultData.completedAt &&

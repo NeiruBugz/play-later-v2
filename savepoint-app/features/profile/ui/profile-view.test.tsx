@@ -1,39 +1,7 @@
-import type { ProfileWithStats } from "@/data-access-layer/services";
+import { createProfileFixture } from "@fixtures/profile";
 import { render, screen } from "@testing-library/react";
 
 import { ProfileView } from "./profile-view";
-
-const createMockProfile = (
-  overrides?: Partial<ProfileWithStats>
-): ProfileWithStats => ({
-  username: "testuser",
-  name: "Test User",
-  email: "test@example.com",
-  image: "https://example.com/avatar.jpg",
-  createdAt: new Date("2024-01-15T00:00:00.000Z"),
-  stats: {
-    statusCounts: {
-      CURIOUS_ABOUT: 5,
-      CURRENTLY_EXPLORING: 3,
-      EXPERIENCED: 10,
-    },
-    recentGames: [
-      {
-        gameId: "1",
-        title: "The Legend of Zelda",
-        coverImage: "zelda-cover",
-        lastPlayed: new Date("2025-01-15T12:00:00.000Z"),
-      },
-      {
-        gameId: "2",
-        title: "Super Mario Bros",
-        coverImage: "mario-cover",
-        lastPlayed: new Date("2025-01-10T12:00:00.000Z"),
-      },
-    ],
-  },
-  ...overrides,
-});
 
 const elements = {
   getHeading: (name: string) => screen.getByRole("heading", { name, level: 2 }),
@@ -73,7 +41,7 @@ describe("ProfileView", () => {
 
   describe("given profile with username", () => {
     it("should display username as heading", () => {
-      const profile = createMockProfile({ username: "cooluser123" });
+      const profile = createProfileFixture({ username: "cooluser123" });
       render(<ProfileView profile={profile} />);
 
       expect(elements.getHeading("cooluser123")).toBeVisible();
@@ -82,7 +50,7 @@ describe("ProfileView", () => {
 
   describe("given profile without username", () => {
     it("should display name when username is null", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         username: null,
         name: "John Doe",
       });
@@ -92,7 +60,7 @@ describe("ProfileView", () => {
     });
 
     it("should display email when username and name are null", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         username: null,
         name: null,
         email: "fallback@example.com",
@@ -103,7 +71,7 @@ describe("ProfileView", () => {
     });
 
     it("should display 'User' when all identity fields are null", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         username: null,
         name: null,
         email: null,
@@ -116,7 +84,7 @@ describe("ProfileView", () => {
 
   describe("given profile with avatar image", () => {
     it("should render avatar image", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         username: "testuser",
         image: "https://example.com/avatar.jpg",
       });
@@ -133,7 +101,7 @@ describe("ProfileView", () => {
 
   describe("given profile without avatar image", () => {
     it("should render initial from username", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         username: "testuser",
         image: null,
       });
@@ -144,7 +112,7 @@ describe("ProfileView", () => {
     });
 
     it("should render initial from name when username is null", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         username: null,
         name: "Alice",
         image: null,
@@ -157,7 +125,7 @@ describe("ProfileView", () => {
 
   describe("given profile with email", () => {
     it("should display email address", () => {
-      const profile = createMockProfile({ email: "user@example.com" });
+      const profile = createProfileFixture({ email: "user@example.com" });
       render(<ProfileView profile={profile} />);
 
       expect(elements.getEmail("user@example.com")).toBeVisible();
@@ -166,7 +134,7 @@ describe("ProfileView", () => {
 
   describe("given profile without email", () => {
     it("should not display email section", () => {
-      const profile = createMockProfile({ email: null });
+      const profile = createProfileFixture({ email: null });
       render(<ProfileView profile={profile} />);
 
       expect(screen.queryByText(/@/)).not.toBeInTheDocument();
@@ -175,7 +143,7 @@ describe("ProfileView", () => {
 
   describe("given profile with creation date", () => {
     it("should display formatted join date", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         createdAt: new Date("2024-01-15T00:00:00.000Z"),
       });
       render(<ProfileView profile={profile} />);
@@ -184,7 +152,7 @@ describe("ProfileView", () => {
     });
 
     it("should handle different date formats correctly", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         createdAt: new Date("2023-12-01T00:00:00.000Z"),
       });
       render(<ProfileView profile={profile} />);
@@ -195,7 +163,7 @@ describe("ProfileView", () => {
 
   describe("given profile with library stats", () => {
     beforeEach(() => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: {
             CURIOUS_ABOUT: 5,
@@ -224,7 +192,7 @@ describe("ProfileView", () => {
 
   describe("given profile with zero status counts", () => {
     it("should filter out statuses with zero counts", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: {
             CURIOUS_ABOUT: 5,
@@ -244,7 +212,7 @@ describe("ProfileView", () => {
     });
 
     it("should not display library stats section when all counts are zero", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: {
             CURIOUS_ABOUT: 0,
@@ -262,7 +230,7 @@ describe("ProfileView", () => {
 
   describe("given profile with unknown status type", () => {
     it("should display raw status key for unmapped statuses", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: {
             UNKNOWN_STATUS: 7,
@@ -279,7 +247,7 @@ describe("ProfileView", () => {
 
   describe("given profile with recent games", () => {
     beforeEach(() => {
-      const profile = createMockProfile();
+      const profile = createProfileFixture();
       render(<ProfileView profile={profile} />);
     });
 
@@ -316,7 +284,7 @@ describe("ProfileView", () => {
 
   describe("given profile with game without cover image", () => {
     it("should display placeholder for missing cover", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: {},
           recentGames: [
@@ -340,7 +308,7 @@ describe("ProfileView", () => {
 
   describe("given profile without recent games", () => {
     it("should not display recently played section", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: { EXPERIENCED: 5 },
           recentGames: [],
@@ -354,7 +322,7 @@ describe("ProfileView", () => {
 
   describe("given profile with empty library", () => {
     beforeEach(() => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: {},
           recentGames: [],
@@ -378,7 +346,7 @@ describe("ProfileView", () => {
 
   describe("given profile with stats but no recent games", () => {
     it("should not display empty state", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: { EXPERIENCED: 5 },
           recentGames: [],
@@ -392,7 +360,7 @@ describe("ProfileView", () => {
 
   describe("given profile with recent games but no stats", () => {
     it("should not display empty state", () => {
-      const profile = createMockProfile({
+      const profile = createProfileFixture({
         stats: {
           statusCounts: {},
           recentGames: [
@@ -413,7 +381,7 @@ describe("ProfileView", () => {
 
   describe("given complete profile with all data", () => {
     beforeEach(() => {
-      const profile = createMockProfile();
+      const profile = createProfileFixture();
       render(<ProfileView profile={profile} />);
     });
 

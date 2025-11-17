@@ -1,12 +1,15 @@
 "use server";
+
 import { signIn } from "@/auth";
 import { z } from "zod";
+
 import { SignInFormData, signInSchema } from "@/features/auth/lib/types";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import {
   isAuthenticationError,
   isNextAuthRedirect,
 } from "@/shared/lib/auth/handle-next-auth-error";
+
 export async function signInAction(data: SignInFormData) {
   const logger = createLogger({
     [LOGGER_CONTEXT.SERVER_ACTION]: "signInAction",

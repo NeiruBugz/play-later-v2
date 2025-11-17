@@ -1,9 +1,9 @@
 import { Badge } from "@/shared/components/ui/badge";
 import { GameCategory } from "@/shared/constants/game";
+
 import { getCategoryLabel } from "../lib/get-category-label";
-interface GameCategoryBadgeProps {
-  category: number;
-}
+import type { GameCategoryBadgeProps } from "./game-category-badge.types";
+
 export const GameCategoryBadge = ({ category }: GameCategoryBadgeProps) => {
   const label = getCategoryLabel(category);
   if (!label) {

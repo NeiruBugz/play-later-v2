@@ -42,8 +42,14 @@ const eslintConfig = [
       ],
       "boundaries/elements": [
         {
+          type: "prisma",
+          pattern: "shared/lib/app/db.ts",
+          mode: "file",
+        },
+        { type: "shared", pattern: "shared/**/*", mode: "file" },
+        {
           type: "app-route",
-          pattern: "app/**/*",
+          pattern: ["app/**/*", "!shared/**/*"],
           mode: "file",
         },
         {
@@ -76,8 +82,6 @@ const eslintConfig = [
           pattern: "data-access-layer/repository/**/*",
           mode: "file",
         },
-        { type: "shared", pattern: "shared/**/*", mode: "file" },
-        { type: "prisma", pattern: "shared/lib/app/db.ts", mode: "file" },
       ],
     },
     rules: {

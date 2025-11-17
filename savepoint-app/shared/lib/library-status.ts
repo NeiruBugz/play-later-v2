@@ -77,6 +77,8 @@ export function getStatusLabel(status: LibraryItemStatus): string {
   return LIBRARY_STATUS_LABELS[status];
 }
 
-export function getStatusVariant(status: LibraryItemStatus): StatusBadgeVariant {
+export function getStatusVariant(
+  status: LibraryItemStatus
+): StatusBadgeVariant {
   return LIBRARY_STATUS_VARIANTS[status];
 }

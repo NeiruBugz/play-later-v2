@@ -1,4 +1,5 @@
 import { UpdateProfileFormState } from "../server-actions/update-profile";
+
 export const statusLabels: Record<string, string> = {
   CURIOUS_ABOUT: "Curious About",
   CURRENTLY_EXPLORING: "Currently Exploring",

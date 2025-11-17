@@ -1,7 +1,5 @@
-import type { TimesToBeatData } from "@/shared/types/game";
-interface TimesToBeatSectionProps {
-  timesToBeat?: TimesToBeatData;
-}
+import type { TimesToBeatSectionProps } from "./times-to-beat-section.types";
+
 export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
   const mainStory = timesToBeat?.mainStory;
   const completionist = timesToBeat?.completionist;

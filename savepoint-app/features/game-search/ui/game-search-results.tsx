@@ -1,10 +1,11 @@
 "use client";
+
 import { Button } from "@/shared/components/ui/button";
+
 import { useGameSearch } from "../hooks/use-game-search";
 import { GameCard } from "./game-card";
-interface GameSearchResultsProps {
-  query: string;
-}
+import type { GameSearchResultsProps } from "./game-search-results.types";
+
 export const GameSearchResults = ({ query }: GameSearchResultsProps) => {
   const { data, isLoading, isError, error, fetchNextPage, hasNextPage } =
     useGameSearch(query);

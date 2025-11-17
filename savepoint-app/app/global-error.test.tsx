@@ -7,7 +7,6 @@ describe("GlobalError (Root Error Boundary)", () => {
   const mockError = new Error("Critical test error");
   const mockReset = vi.fn();
 
-  // Mock window.location.reload
   const originalLocation = window.location;
   beforeEach(() => {
     // @ts-expect-error - mocking location
@@ -17,7 +16,6 @@ describe("GlobalError (Root Error Boundary)", () => {
   });
 
   afterEach(() => {
-    // Reset the reload mock before restoring location
     vi.mocked(window.location.reload).mockReset();
     // @ts-expect-error - restoring location
     window.location = originalLocation;
@@ -113,7 +111,6 @@ describe("GlobalError (Root Error Boundary)", () => {
   it("should render all critical UI elements", () => {
     render(<GlobalError error={mockError} reset={mockReset} />);
 
-    // Verify all critical elements are present
     expect(screen.getByText("Critical Error")).toBeVisible();
     expect(screen.getByRole("button", { name: /refresh page/i })).toBeVisible();
     expect(screen.getByRole("button", { name: /try again/i })).toBeVisible();

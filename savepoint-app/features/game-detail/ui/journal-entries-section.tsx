@@ -1,5 +1,5 @@
-import type { JournalEntry } from "@prisma/client";
 import Link from "next/link";
+
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -8,9 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-interface JournalEntriesSectionProps {
-  journalEntries: JournalEntry[];
-}
+
+import type {
+  JournalEntriesSectionProps,
+  JournalEntryCardProps,
+} from "./journal-entries-section.types";
+
 function formatEntryDate(date: Date): string {
   return new Date(date).toLocaleDateString("en-US", {
     month: "short",
@@ -21,12 +24,12 @@ function formatEntryDate(date: Date): string {
 function truncateToLines(text: string, maxLines: number): string {
   const lines = text.split("\n").slice(0, maxLines);
   const truncated = lines.join("\n");
-  // If there's more content after our slice, add ellipsis
+
   const hasMore =
     text.split("\n").length > maxLines || truncated.length < text.length;
   return hasMore ? `${truncated}...` : truncated;
 }
-function JournalEntryCard({ entry }: { entry: JournalEntry }) {
+function JournalEntryCard({ entry }: JournalEntryCardProps) {
   const contentPreview = truncateToLines(entry.content, 2);
   const displayTitle = entry.title || "Untitled Entry";
   return (

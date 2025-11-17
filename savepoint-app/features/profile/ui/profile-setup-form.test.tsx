@@ -417,7 +417,6 @@ describe("ProfileSetupForm", () => {
       });
       await userEvent.click(submitButton);
 
-      // Check for "Saving..." text
       expect(screen.getByRole("button", { name: /saving.../i })).toBeVisible();
     });
   });

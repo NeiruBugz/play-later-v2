@@ -1,4 +1,5 @@
 import "server-only";
+
 import {
   repositoryError,
   RepositoryErrorCode,
@@ -6,13 +7,16 @@ import {
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import { Prisma, type User } from "@prisma/client";
+
 import { prisma } from "@/shared/lib/app/db";
+
 import {
   type GetUserBySteamIdInput,
   type GetUserByUsernameInput,
   type UpdateUserDataInput,
   type UpdateUserSteamDataInput,
 } from "./types";
+
 export async function getUserBySteamId({
   userId,
   steamId,

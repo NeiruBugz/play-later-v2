@@ -1,5 +1,7 @@
 import { Prisma } from "@prisma/client";
+
 import { logger } from "@/shared/lib";
+
 export type ServiceResult<TData> =
   | {
       success: true;

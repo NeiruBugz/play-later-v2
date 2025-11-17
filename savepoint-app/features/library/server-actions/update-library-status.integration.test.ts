@@ -10,12 +10,23 @@ import { prisma } from "@/shared/lib/app/db";
 
 import { updateLibraryStatusAction } from "./update-library-status";
 
-// Mock Next.js cache revalidation
+vi.mock("@/shared/lib", async () => {
+  const actual =
+    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
+  const { getTestDatabase } = await import("@/test/setup/database");
+
+  return {
+    ...actual,
+    get prisma() {
+      return getTestDatabase();
+    },
+  };
+});
+
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-// Mock auth module
 vi.mock("@/auth", () => ({
   getServerUserId: vi.fn(),
 }));
@@ -29,19 +40,16 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   });
 
   beforeEach(async () => {
-    // Create test user
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
     });
 
-    // Create test game
     testGame = await createGame({
       title: "Test Game",
       igdbId: 12345,
     });
 
-    // Mock getServerUserId to return test user
     const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
@@ -65,7 +73,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.id).toBe(libraryItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
 
-      // Verify database state
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
@@ -116,7 +123,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       if (result.success) return;
       expect(result.error).toContain("Cannot move a game back to Wishlist");
 
-      // Verify status unchanged
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
@@ -180,20 +186,17 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     });
 
     it("should prevent users from updating other users' library items", async () => {
-      // Create another user
       const otherUser = await createUser({
         email: "other@example.com",
         username: "otheruser",
       });
 
-      // Create library item for other user
       const libraryItem = await createLibraryItem({
         userId: otherUser.id,
         gameId: testGame.id,
         status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
-      // Try to update as testUser (mocked in beforeEach)
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
         status: "CURRENTLY_EXPLORING",
@@ -203,7 +206,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       if (result.success) return;
       expect(result.error).toBe("Library item not found");
 
-      // Verify library item was not modified
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
@@ -256,8 +258,8 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        // @ts-expect-error - Testing invalid status
-        status: "INVALID_STATUS",
+
+        status: "INVALID_STATUS" as any as LibraryItemStatus,
       });
 
       expect(result.success).toBe(false);
@@ -289,7 +291,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       vi.mocked(revalidatePath).mockClear();
 
       await updateLibraryStatusAction({
-        libraryItemId: 999999, // Non-existent ID
+        libraryItemId: 999999,
         status: "CURRENTLY_EXPLORING",
       });
 

@@ -31,7 +31,6 @@ const actions = {
   },
 };
 
-// Helper to wrap StatusSelect in a Form
 function renderStatusSelectInForm(props = {}) {
   const TestForm = () => {
     const methods = useForm<TestFormData>({
@@ -120,12 +119,12 @@ describe("StatusSelect", () => {
       ).toBeVisible();
     });
 
-    it("should display 'Took a Break' option with description", async () => {
+    it("should display 'Taking a Break' option with description", async () => {
       renderStatusSelectInForm();
 
       await actions.clickTrigger();
 
-      expect(elements.getOptionByLabel("Took a Break")).toBeInTheDocument();
+      expect(elements.getOptionByLabel("Taking a Break")).toBeInTheDocument();
       expect(screen.getAllByText("Paused but plan to return")[0]).toBeVisible();
     });
 
@@ -136,7 +135,7 @@ describe("StatusSelect", () => {
 
       expect(elements.getOptionByLabel("Experienced")).toBeInTheDocument();
       expect(
-        screen.getAllByText("Finished or thoroughly explored")[0]
+        screen.getAllByText("Finished or completed this game")[0]
       ).toBeVisible();
     });
 
@@ -158,7 +157,7 @@ describe("StatusSelect", () => {
 
       expect(elements.getOptionByLabel("Revisiting")).toBeInTheDocument();
       expect(
-        screen.getAllByText("Playing again after completing")[0]
+        screen.getAllByText("Playing again after a break")[0]
       ).toBeVisible();
     });
   });

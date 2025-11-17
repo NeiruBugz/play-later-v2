@@ -1,12 +1,12 @@
 "use client";
+
 import type { LibraryItemStatus } from "@prisma/client";
+
 import { Button } from "@/shared/components/ui/button";
 import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
+
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
-type LibraryCardActionBarProps = {
-  libraryItemId: number;
-  currentStatus: LibraryItemStatus;
-};
+import type { LibraryCardActionBarProps } from "./library-card-action-bar.types";
 
 const STATUS_OPTIONS: LibraryItemStatus[] = [
   "WISHLIST",
@@ -28,7 +28,7 @@ export function LibraryCardActionBar({
       status: newStatus,
     });
   };
-  // Determine which status options to show and which to disable
+
   const availableStatuses = STATUS_OPTIONS.filter(
     (status) => status !== currentStatus
   );
@@ -49,7 +49,6 @@ export function LibraryCardActionBar({
       <div className="pointer-events-auto rounded-b-md bg-gradient-to-t from-black/80 via-black/70 to-transparent p-3 pt-8 backdrop-blur-sm">
         <div className="flex flex-wrap gap-1.5">
           {availableStatuses.map((status) => {
-            // Disable Wishlist option if current status is not Wishlist (enforce transition rule)
             const isDisabled =
               status === "WISHLIST" && currentStatus !== "WISHLIST";
             return (

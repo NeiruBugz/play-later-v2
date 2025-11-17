@@ -1,20 +1,18 @@
 import { IgdbService } from "@/data-access-layer/services/igdb";
 import type { GameSearchResult } from "@/data-access-layer/services/igdb/types";
 import type { ServiceResult } from "@/data-access-layer/services/types";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,
   RATE_LIMIT_RETRY_AFTER_SECONDS,
 } from "@/shared/constants";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-// Import mocked functions after mock definitions
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 import { GAME_TYPE } from "@/shared/types";
 
 import type { RequestContext } from "../types";
 import { gameSearchHandler } from "./game-search-handler";
 
-// Mock dependencies
 vi.mock("@/data-access-layer/services/igdb");
 vi.mock("@/shared/lib/rate-limit");
 
@@ -22,7 +20,6 @@ const mockIgdbService = vi.mocked(IgdbService);
 const mockCheckRateLimit = vi.mocked(checkRateLimit);
 
 describe("gameSearchHandler", () => {
-  // Mock request context
   const mockContext: RequestContext = {
     ip: "192.168.1.1",
     headers: new Headers(),
@@ -32,7 +29,6 @@ describe("gameSearchHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Default rate limit mock (allowed)
     mockCheckRateLimit.mockResolvedValue({
       allowed: true,
       remaining: 19,

@@ -1,12 +1,15 @@
 import { PlatformService } from "@/data-access-layer/services/platform/platform-service";
 import { z } from "zod";
+
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 import type { HandlerResult, RequestContext } from "../types";
 import type {
   GetPlatformsHandlerInput,
   GetPlatformsHandlerOutput,
 } from "./types";
+
 const logger = createLogger({
   [LOGGER_CONTEXT.HANDLER]: "GetPlatformsHandler",
 });
@@ -21,7 +24,7 @@ export async function getPlatformsHandler(
 ): Promise<HandlerResult<GetPlatformsHandlerOutput>> {
   const { igdbId } = input;
   logger.info({ igdbId, ip: context.ip }, "Processing platforms fetch request");
-  // 1. Validate input
+
   const validation = GetPlatformsSchema.safeParse(input);
   if (!validation.success) {
     logger.warn(
@@ -34,14 +37,13 @@ export async function getPlatformsHandler(
       status: HTTP_STATUS.BAD_REQUEST,
     };
   }
-  // 2. Call service
+
   const platformService = new PlatformService();
   const result = await platformService.getPlatformsForGame(
     validation.data.igdbId
   );
-  // 3. Handle service result
+
   if (!result.success) {
-    // Return 404 if game not found, 500 for other errors
     const status =
       result.error === "Game not found"
         ? HTTP_STATUS.NOT_FOUND
@@ -56,7 +58,7 @@ export async function getPlatformsHandler(
       status,
     };
   }
-  // 4. Return success
+
   logger.info(
     {
       igdbId,

@@ -1,4 +1,5 @@
 "use client";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
 import {
@@ -6,6 +7,7 @@ import {
   type ThemeProviderProps,
 } from "next-themes";
 import { type PropsWithChildren } from "react";
+
 const queryClient = new QueryClient();
 export function Providers({
   children,

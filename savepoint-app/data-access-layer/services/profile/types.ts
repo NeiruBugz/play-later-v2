@@ -1,4 +1,5 @@
 import type { ServiceResult } from "../types";
+
 export type GetProfileInput = {
   userId: string;
 };
@@ -12,7 +13,7 @@ export type Profile = {
   name: string | null;
   createdAt: Date;
 };
-// Re-export from shared types for backward compatibility
+
 export type RecentGame = {
   gameId: string;
   title: string;
@@ -76,6 +77,6 @@ export type GetRedirectAfterAuthInput = {
   userId: string;
 };
 export type GetRedirectAfterAuthResult = ServiceResult<{
-  redirectTo: string; // "/profile/setup" or "/dashboard"
+  redirectTo: string;
   isNewUser: boolean;
 }>;

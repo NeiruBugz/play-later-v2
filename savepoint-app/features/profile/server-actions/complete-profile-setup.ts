@@ -1,12 +1,16 @@
 "use server";
+
 import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
+
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 import {
   CompleteProfileSetupSchema,
   type CompleteProfileSetupInput,
 } from "../schemas";
+
 type PerformCompleteSetupResult =
   | {
       success: true;
@@ -94,7 +98,7 @@ export async function completeProfileSetupFormAction(
 ): Promise<CompleteProfileSetupFormState> {
   const rawUsername = formData.get("username");
   const rawAvatar = formData.get("avatarUrl");
-  // IMPORTANT: Username is optional for setup - don't return error if missing
+
   const trimmedUsername =
     typeof rawUsername === "string" ? rawUsername.trim() : undefined;
   const result = await performCompleteSetup({

@@ -1,5 +1,6 @@
 import { Platform } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
+
 type PlatformsApiResponse =
   | {
       success: true;
@@ -30,7 +31,7 @@ export function useGetPlatforms(igdbId: number) {
   }>({
     queryKey: ["game-platforms", igdbId],
     queryFn: () => queryFn(igdbId),
-    staleTime: 5 * 60 * 1000, // 5 minutes - platforms don't change often
-    gcTime: 10 * 60 * 1000, // 10 minutes - cache garbage collection time
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }

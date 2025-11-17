@@ -1,10 +1,13 @@
 "use server";
+
 import { signIn } from "@/auth";
 import { AuthService } from "@/data-access-layer/services";
 import z from "zod";
+
 import { SignUpFormData, signUpSchema } from "@/features/auth/lib/types";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { isNextAuthRedirect } from "@/shared/lib/auth/handle-next-auth-error";
+
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "signUpAction",
 });

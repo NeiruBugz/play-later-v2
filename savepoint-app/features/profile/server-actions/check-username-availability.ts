@@ -1,8 +1,12 @@
 "use server";
+
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
+
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+
 import { validateUsername } from "../lib/validation";
 import { CheckUsernameSchema } from "../schemas";
+
 export async function checkUsernameAvailability(data: { username: string }) {
   const logger = createLogger({
     [LOGGER_CONTEXT.SERVER_ACTION]: "checkUsernameAvailability",

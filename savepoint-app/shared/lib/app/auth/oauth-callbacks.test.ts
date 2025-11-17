@@ -44,10 +44,13 @@ describe("oauth callbacks", () => {
 
   it("onSession exposes token id on session.user.id", async () => {
     const session = await onSession({
-      session: { user: { name: "Test" } },
+      session: {
+        user: { name: "Test", id: "u42" },
+        expires: "",
+      },
       token: { id: "u42" },
     });
-    expect(session.user.id).toBe("u42");
-    expect(session.user.name).toBe("Test");
+    expect(session.user!.id).toBe("u42");
+    expect(session.user!.name).toBe("Test");
   });
 });

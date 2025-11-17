@@ -1,5 +1,7 @@
 import { type JournalEntry } from "@prisma/client";
+
 import { getTestDatabase } from "../database";
+
 export type JournalEntryFactoryOptions = {
   userId: string;
   gameId: string;
