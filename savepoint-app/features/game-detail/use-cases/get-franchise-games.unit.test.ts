@@ -1,6 +1,7 @@
 import { IgdbService } from "@/data-access-layer/services";
 
 import { FRANCHISE_GAMES_INITIAL_LIMIT } from "@/shared/constants";
+import { createFranchiseGamesFixture } from "@/test/fixtures";
 
 import { getFranchiseGames } from "./get-franchise-games";
 
@@ -14,20 +15,7 @@ describe("getFranchiseGames", () => {
     getFranchiseGames: ReturnType<typeof vi.fn>;
   };
 
-  const mockFranchiseGames = [
-    {
-      id: 1942,
-      name: "The Legend of Zelda: Breath of the Wild",
-      slug: "the-legend-of-zelda-breath-of-the-wild",
-      cover: { image_id: "co1wyc" },
-    },
-    {
-      id: 119171,
-      name: "The Legend of Zelda: Tears of the Kingdom",
-      slug: "the-legend-of-zelda-tears-of-the-kingdom",
-      cover: { image_id: "co5rmg" },
-    },
-  ];
+  const mockFranchiseGames = createFranchiseGamesFixture();
 
   beforeEach(() => {
     vi.clearAllMocks();

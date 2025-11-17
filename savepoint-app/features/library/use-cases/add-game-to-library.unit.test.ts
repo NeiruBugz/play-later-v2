@@ -4,7 +4,11 @@ import { LibraryService } from "@/data-access-layer/services/library/library-ser
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { AcquisitionType, type LibraryItemStatus } from "@prisma/client";
 
-import type { FullGameInfoResponse } from "@/shared/types";
+import {
+  createDatabaseGameFixture,
+  createFullGameFixture,
+  createLibraryItemFixture,
+} from "@/test/fixtures";
 
 import { addGameToLibrary } from "./add-game-to-library";
 
@@ -42,22 +46,22 @@ describe("addGameToLibrary", () => {
   const validIgdbId = 12345;
   const validStatus: LibraryItemStatus = "CURIOUS_ABOUT";
 
-  const mockGame = {
+  const mockGame = createDatabaseGameFixture({
     id: "game-456",
     igdbId: validIgdbId,
     slug: "test-game",
     title: "Test Game",
-  };
+  });
 
-  const mockIgdbGame: FullGameInfoResponse = {
+  const mockIgdbGame = createFullGameFixture({
     id: validIgdbId,
     name: "Test Game",
     slug: "test-game",
     summary: "A test game",
     cover: { image_id: "cover123" },
-  } as FullGameInfoResponse;
+  });
 
-  const mockLibraryItem = {
+  const mockLibraryItem = createLibraryItemFixture({
     id: 1,
     userId: validUserId,
     gameId: mockGame.id,
@@ -68,7 +72,7 @@ describe("addGameToLibrary", () => {
     completedAt: null,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-01"),
-  };
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();

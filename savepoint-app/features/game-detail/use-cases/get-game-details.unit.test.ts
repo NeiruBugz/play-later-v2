@@ -4,9 +4,12 @@ import {
   LibraryService,
 } from "@/data-access-layer/services";
 import * as gameDetailService from "@/data-access-layer/services/game-detail/game-detail-service";
-import type { JournalEntry, LibraryItem } from "@prisma/client";
 
-import type { FullGameInfoResponse } from "@/shared/types";
+import {
+  createFullGameFixture,
+  createJournalEntryFixture,
+  createLibraryItemFixture,
+} from "@/test/fixtures";
 
 import { getGameDetails } from "./get-game-details";
 
@@ -35,46 +38,9 @@ describe("getGameDetails", () => {
   };
   let mockPopulateGameInDatabase: ReturnType<typeof vi.fn>;
 
-  const mockGame: FullGameInfoResponse = {
-    id: 12345,
-    name: "The Legend of Zelda: Breath of the Wild",
-    slug: "the-legend-of-zelda-breath-of-the-wild",
-    summary: "An open-world adventure",
-    cover: { image_id: "co1wyc" },
-    first_release_date: 1488326400,
-    genres: [{ id: 12, name: "Role-playing (RPG)" }],
-    platforms: [{ id: 130, name: "Nintendo Switch" }],
-    franchise: 169,
-    franchises: [169, 234],
-  } as FullGameInfoResponse;
-
-  const mockLibraryItem: LibraryItem = {
-    id: 1,
-    userId: "user-123",
-    gameId: "game-456",
-    status: "CURRENTLY_EXPLORING",
-    platform: "Nintendo Switch",
-    acquisitionType: "DIGITAL",
-    startedAt: new Date("2025-01-01"),
-    completedAt: null,
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-02"),
-  };
-
-  const mockJournalEntry: JournalEntry = {
-    id: "journal-1",
-    userId: "user-123",
-    gameId: "game-456",
-    content: "Great game!",
-    createdAt: new Date("2025-01-01"),
-    updatedAt: new Date("2025-01-01"),
-    libraryItemId: null,
-    title: null,
-    mood: null,
-    playSession: null,
-    visibility: "PRIVATE",
-    publishedAt: null,
-  };
+  const mockGame = createFullGameFixture();
+  const mockLibraryItem = createLibraryItemFixture();
+  const mockJournalEntry = createJournalEntryFixture();
 
   beforeEach(() => {
     vi.clearAllMocks();
