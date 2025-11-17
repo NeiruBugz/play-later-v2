@@ -22,20 +22,58 @@
 
 **Data Flow Architecture (Enforced via ESLint boundaries):**
 
+SavePoint implements a **pragmatic four-layer architecture** where layers are used selectively based on need:
+
 ```
-Server Action / Server Component / Route Handler
-  ↓ Input validation (Zod schemas)
-  ↓ Authorization check (user session via NextAuth)
-  ↓
-Service Layer (data-access-layer/services/)
-  ↓ Business logic implementation
-  ↓ Returns Result<TData, TError> types
-  ↓
-Repository Layer (data-access-layer/repository/)
-  ↓ Pure Prisma operations (domain-organized)
-  ↓
-Prisma ORM → PostgreSQL
+┌─────────────────────────────────────────────────────────┐
+│ App Router (Pages, Layouts, API Routes)                │
+│ - Server Components (RSC) for data fetching            │
+│ - Server Actions for mutations                         │
+│ - API Routes (only for client-side fetching patterns)  │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│ Handler Layer (OPTIONAL - only for API routes)         │
+│ - HTTP boundary concerns (validation, rate limiting)   │
+│ - Used when: Client-side fetching with TanStack Query  │
+│ - Returns HandlerResult<TData> with HTTP status codes  │
+│ - Examples: game-search, library, platform handlers    │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│ Use-Case Layer (OPTIONAL - only when needed)           │
+│ - Orchestrates multiple services for complex operations│
+│ - Used when: Coordinating 2+ services in a feature     │
+│ - Examples: getGameDetails (IGDB + Library + Journal)  │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│ Service Layer (ALWAYS - core business logic)           │
+│ - Single-domain business logic operations              │
+│ - Returns ServiceResult<TData> types                   │
+│ - Never calls other services (delegates to use-cases)  │
+│ - Examples: IgdbService, LibraryService, AuthService   │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│ Repository Layer (ALWAYS - data access)                │
+│ - Pure Prisma operations (domain-organized)            │
+│ - Returns RepositoryResult<TData> types                │
+│ - No business logic, only data access                  │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+                 Prisma ORM → PostgreSQL
 ```
+
+**Layer Selection Decision Matrix:**
+
+| Scenario | Use Handler? | Use Use-Case? | Example |
+|----------|-------------|---------------|---------|
+| Server Component fetches data | ❌ No | ✅ If multi-service | Game detail page → getGameDetails use-case |
+| Server Action mutates data | ❌ No | ✅ If multi-service | Add to library → addGameToLibrary use-case |
+| Client-side fetching (TanStack Query) | ✅ Yes | ✅ If multi-service | Search games → gameSearchHandler |
+| Single service operation | ❌ No | ❌ No | Profile update → ProfileService directly |
+| Public API with rate limiting | ✅ Yes | Depends | Game search API → handler → service |
 
 **Server Action Framework:** next-safe-action
 
@@ -43,8 +81,30 @@ Prisma ORM → PostgreSQL
 - Built-in authorization middleware (`authorizedActionClient`)
 - Reduces boilerplate for validation/auth before service layer
 - Consistent error handling patterns
+- Factory pattern: `createServerAction` standardizes all server actions
 
-**Import Aliases:** All imports use `@/` alias from repository root for clean, relocatable imports
+**Result Type Patterns:**
+
+Each layer has its own discriminated union result type to prevent layer confusion:
+
+```typescript
+// Handler Layer (HTTP boundary)
+type HandlerResult<T> =
+  | { success: true; data: T; status: number }
+  | { success: false; error: string; status: number }
+
+// Service Layer (business logic)
+type ServiceResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: string; code?: ServiceErrorCode }
+
+// Repository Layer (data access)
+type RepositoryResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: RepositoryError }
+```
+
+**Import Aliases:** All imports use `@/` alias from `savepoint-app/` directory for clean, relocatable imports
 
 ---
 
@@ -453,12 +513,14 @@ export default defineConfig({
 - Built-in caching and revalidation for optimal performance
 - Strong TypeScript integration for full-stack type safety
 
-**ADR-002: Why three-layer architecture (Consumer → Service → Repository)?**
+**ADR-002: Why pragmatic four-layer architecture?**
 
-- Enforces separation of concerns via ESLint boundaries
-- Service layer centralizes business logic and validation
-- Repository layer provides clean abstraction over Prisma
-- Prevents scattered authorization checks and Prisma queries throughout app
+- **Base layers (always used):** Service → Repository ensures clean separation
+- **Optional layers:** Handlers (HTTP boundary) and Use-Cases (orchestration) added only when needed
+- **Enforced via ESLint:** `eslint-plugin-boundaries` prevents layer violations at compile time
+- **Service layer:** Centralizes single-domain business logic, never calls other services
+- **Repository layer:** Clean Prisma abstraction, only data access (no business logic)
+- **Pragmatic approach:** Patterns applied based on need, not dogmatically everywhere
 
 **ADR-003: Why Result types instead of throwing errors?**
 
@@ -487,12 +549,104 @@ export default defineConfig({
 - Test environment parity with production S3 API
 - Supports CI pipeline testing without external dependencies
 
+**ADR-007: Why selective handler layer (only for client-side fetching)?**
+
+**Context:** Handler layer exists for only 3 API routes (game-search, library, platform) used by TanStack Query.
+
+**Decision:** Handlers are HTTP boundary layer, used only when:
+- Client-side data fetching with TanStack Query (requires API routes)
+- Public API endpoints requiring rate limiting
+- Explicit REST-style HTTP semantics needed
+
+**Rationale:**
+- Server Actions are preferred for mutations (type-safe, no manual API routes)
+- Server Components are preferred for data fetching (RSC, no client bundle)
+- Handlers add value only when HTTP boundary concerns (rate limiting, caching, public access) are needed
+- Avoids unnecessary abstraction for authenticated operations
+
+**Alternatives Considered:**
+- ❌ Handlers everywhere: Adds boilerplate for authenticated mutations (Server Actions are simpler)
+- ❌ No handlers: Can't rate-limit public APIs, client-side fetching requires manual API routes
+
+**Status:** Accepted (2025-01)
+
+**ADR-008: Why selective use-case pattern (only for multi-service coordination)?**
+
+**Context:** Use-cases exist in 2 features (game-detail, library) where multiple services must be coordinated.
+
+**Decision:** Use-cases are orchestration layer, created only when:
+- Feature requires coordinating 2+ services (e.g., IGDB + Library + Journal)
+- Complex business workflow spans multiple domains
+- Server Action or Server Component needs multi-service coordination
+
+**Rationale:**
+- Services should never call other services (violates single responsibility)
+- Use-cases centralize orchestration logic, making it testable and reusable
+- Most operations are single-service (e.g., ProfileService.updateProfile) and don't need use-cases
+- Avoids over-engineering for simple operations
+
+**Examples:**
+- ✅ `getGameDetails`: Coordinates IgdbService + LibraryService + JournalService
+- ✅ `addGameToLibrary`: Coordinates GameService (find/create) + LibraryService (create item)
+- ❌ Profile update: Single service operation, no use-case needed
+
+**Alternatives Considered:**
+- ❌ Use-cases everywhere: Adds boilerplate for single-service operations
+- ❌ Services call services: Violates SRP, creates tight coupling, hard to test
+
+**Status:** Accepted (2025-01)
+
+**ADR-009: Why pragmatic testing (test user flows, not coverage metrics)?**
+
+**Context:** 77 test files for 278 source files (~28% file coverage ratio), but 80%+ code coverage on critical paths.
+
+**Decision:** Test strategy prioritizes:
+1. **Repository layer:** 100% integration test coverage with real PostgreSQL (validates data access correctness)
+2. **Service layer:** Comprehensive unit tests for business logic, edge cases, error handling
+3. **Use-cases:** Integration tests for multi-service orchestration (planned, currently 0 tests)
+4. **Components:** Tests for critical UI components with user interactions (library modal, profile forms)
+5. **E2E:** Tests for primary user journeys (auth, profile, game search, library management)
+6. **Excluded:** App Router pages (thin wrappers), shadcn/ui components (third-party), trivial utilities
+
+**Rationale:**
+- **Solo developer context:** Limited time, maximize ROI on testing effort
+- **Quality over quantity:** 80% coverage on critical paths > 100% coverage on everything
+- **User flow focus:** Tests should catch regressions in features users depend on
+- **Maintenance burden:** Every test must justify its maintenance cost
+- **Coverage metrics secondary:** 80% threshold enforced, but not the primary goal
+
+**Anti-Patterns Avoided:**
+- ❌ Testing for sake of coverage numbers (e.g., testing trivial getters)
+- ❌ Testing implementation details (e.g., internal component state)
+- ❌ Brittle snapshot tests without clear purpose
+- ❌ Mocking everything (integration tests use real DB)
+
+**Key Metrics:**
+- **Repository integration tests:** 7/7 repositories (100%)
+- **Service unit tests:** 6/8 services (~75%)
+- **E2E tests:** 6 critical user flows (auth, profile)
+- **Code coverage:** ≥80% on branches, functions, lines, statements (enforced in CI)
+
+**Alternatives Considered:**
+- ❌ 100% code coverage: Not pragmatic for solo developer, diminishing returns
+- ❌ Only E2E tests: Too slow, low isolation, hard to debug failures
+- ❌ No integration tests: Misses database constraints, query correctness
+
+**Status:** Accepted (2025-01)
+
 ---
 
 **Document Metadata:**
 
-- **Version:** 1.0
-- **Last Updated:** 2025-10-09
+- **Version:** 2.0
+- **Last Updated:** 2025-01-17 (Comprehensive architecture review with expert agents)
 - **Status:** Active
 - **Maintained By:** Solo developer with AI assistance
 - **Review Cadence:** After each major phase completion
+- **Changes in v2.0:**
+  - Added four-layer architecture diagram with layer selection matrix
+  - Documented Result type patterns for each layer
+  - Added ADR-007 (selective handler layer)
+  - Added ADR-008 (selective use-case pattern)
+  - Added ADR-009 (pragmatic testing philosophy)
+  - Updated ADR-002 to reflect four-layer architecture
