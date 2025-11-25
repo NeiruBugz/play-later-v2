@@ -68,8 +68,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
     !!state.message &&
     state.submittedUsername === trimmedUsername;
   return (
-    <div className="container flex min-h-[calc(100vh-200px)] items-center justify-center py-3xl">
-      <Card className="w-full max-w-2xl">
+    <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle>Complete Your Profile</CardTitle>
           <CardDescription>
@@ -133,6 +132,5 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
           </CardFooter>
         </form>
       </Card>
-    </div>
   );
 }

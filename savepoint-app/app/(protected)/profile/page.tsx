@@ -3,11 +3,17 @@ import {
   ProfileService,
   ServiceErrorCode,
 } from "@/data-access-layer/services";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ProfileView } from "@/features/profile/ui/profile-view";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { requireServerUserId } from "@/shared/lib/app/auth";
+
+export const metadata: Metadata = {
+  title: "Profile",
+  description: "Your SavePoint profile and library stats",
+};
 
 export default async function ProfilePage() {
   const userId = await requireServerUserId();
@@ -25,7 +31,7 @@ export default async function ProfilePage() {
     redirect("/error");
   }
   return (
-    <main className="container py-3xl" data-testid="profile-page">
+    <main className="container mx-auto py-3xl" data-testid="profile-page">
       <ProfileView profile={result.data.profile} />
     </main>
   );

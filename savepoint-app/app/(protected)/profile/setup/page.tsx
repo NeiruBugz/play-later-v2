@@ -19,5 +19,9 @@ export default async function ProfileSetupPage() {
   if (!result.data.needsSetup) {
     redirect("/dashboard");
   }
-  return <ProfileSetupForm defaultUsername={result.data.suggestedUsername} />;
+  return (
+    <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center py-3xl">
+      <ProfileSetupForm defaultUsername={result.data.suggestedUsername} />
+    </div>
+  );
 }

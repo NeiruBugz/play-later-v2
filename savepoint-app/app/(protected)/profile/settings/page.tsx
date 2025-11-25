@@ -1,9 +1,15 @@
 import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ProfileSettingsForm } from "@/features/profile/ui/profile-settings-form";
 import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { requireServerUserId } from "@/shared/lib/app/auth";
+
+export const metadata: Metadata = {
+  title: "Profile Settings",
+  description: "Edit your SavePoint profile",
+};
 
 export default async function ProfileSettingsPage() {
   const userId = await requireServerUserId();
@@ -13,12 +19,14 @@ export default async function ProfileSettingsPage() {
     redirect("/login");
   }
   return (
-    <div className="flex items-start gap-lg">
-      <BrowserBackButton />
-      <ProfileSettingsForm
-        currentUsername={result.data.profile.username}
-        currentAvatar={result.data.profile.image}
-      />
-    </div>
+    <main className="container mx-auto py-3xl">
+      <div className="flex items-start gap-lg">
+        <BrowserBackButton />
+        <ProfileSettingsForm
+          currentUsername={result.data.profile.username}
+          currentAvatar={result.data.profile.image}
+        />
+      </div>
+    </main>
   );
 }

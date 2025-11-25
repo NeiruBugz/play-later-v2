@@ -1,8 +1,15 @@
+"use client";
+
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import {
+  mapLibraryStatusToGameStatus,
+  ProgressRing,
+} from "@/shared/components/ui/progress-ring";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 
 import { statusLabels } from "../lib/constants";
@@ -13,10 +20,13 @@ import type { ProfileViewProps } from "./profile-view.types";
 export function ProfileView({ profile }: ProfileViewProps) {
   const { displayName, joinDateFormatted, statusEntries } =
     prepareProfileData(profile);
+
+  const totalGames = statusEntries.reduce((sum, [, count]) => sum + count, 0);
+
   return (
     <div className="space-y-3xl">
-      <div className="flex items-start justify-between gap-2xl">
-        <div className="flex items-start gap-2xl">
+      <div className="gap-2xl flex items-start justify-between">
+        <div className="gap-2xl flex items-start">
           <div className="shrink-0">
             {profile.image ? (
               <Image
@@ -37,9 +47,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
             )}
           </div>
           <div className="flex-1">
-            <h2 className="heading-xl font-serif">
-              {displayName}
-            </h2>
+            <h2 className="heading-xl font-serif">{displayName}</h2>
             {profile.email && (
               <p className="text-muted-foreground mt-xs text-sm">
                 {profile.email}
@@ -50,7 +58,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
             </p>
           </div>
         </div>
-        <div className="flex flex-col gap-md">
+        <div className="gap-md flex flex-col">
           <Button variant="outline" className="shrink-0" asChild>
             <Link href="/profile/settings">Edit Profile</Link>
           </Button>
@@ -59,53 +67,69 @@ export function ProfileView({ profile }: ProfileViewProps) {
       </div>
       {statusEntries.length > 0 && (
         <div>
-          <h2 className="heading-lg font-serif mb-xl">
-            Library Stats
-          </h2>
+          <h2 className="heading-lg mb-xl font-serif">Library Stats</h2>
           <div
-            className="grid grid-cols-2 gap-xl sm:grid-cols-3 md:grid-cols-4"
+            className="gap-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
             data-testid="profile-stats-grid"
           >
-            {statusEntries.map(([status, count]) => (
-              <div
-                key={status}
-                className="border-border bg-card rounded-lg border p-xl shadow-sm"
-                data-testid="profile-status-card"
-              >
-                <p
-                  className="body-sm text-muted-foreground font-medium"
-                  data-testid="profile-status-label"
+            {statusEntries.map(([status, count], index) => {
+              const gameStatus = mapLibraryStatusToGameStatus(status);
+              const percentage =
+                totalGames > 0 ? Math.round((count / totalGames) * 100) : 0;
+
+              return (
+                <Card
+                  key={status}
+                  variant="interactive"
+                  className="animate-fade-in p-xl hover:shadow-paper-md hover:scale-[1.02]"
+                  style={{ animationDelay: `${(index + 1) * 50}ms` }}
+                  data-testid="profile-status-card"
                 >
-                  {statusLabels[status] || status}
-                </p>
-                <p
-                  className="heading-lg mt-xs"
-                  data-testid="profile-status-count"
-                >
-                  {count}
-                </p>
-              </div>
-            ))}
+                  <div className="gap-md flex flex-col items-center">
+                    <ProgressRing
+                      status={gameStatus}
+                      progress={percentage}
+                      size="lg"
+                      showPercentage
+                    />
+                    <div className="text-center">
+                      <p
+                        className="body-sm text-muted-foreground font-medium"
+                        data-testid="profile-status-label"
+                      >
+                        {statusLabels[status] || status}
+                      </p>
+                      <p
+                        className="heading-lg mt-xs"
+                        data-testid="profile-status-count"
+                      >
+                        {count}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </div>
       )}
       {profile.stats.recentGames.length > 0 && (
         <div>
-          <h2 className="heading-lg font-serif mb-xl">
-            Recently Played
-          </h2>
+          <h2 className="heading-lg mb-xl font-serif">Recently Played</h2>
           <div
-            className="grid grid-cols-2 gap-xl sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+            className="gap-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
             data-testid="profile-recent-games-grid"
           >
-            {profile.stats.recentGames.map((game) => {
+            {profile.stats.recentGames.map((game, index) => {
               const src = game.coverImage
                 ? `${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`
                 : "";
               return (
-                <div
+                <Card
                   key={game.gameId}
-                  className="group border-border bg-card overflow-hidden rounded-lg border shadow-sm transition-shadow hover:shadow-md"
+                  variant="interactive"
+                  className="animate-fade-in group duration-normal ease-out-expo hover:shadow-paper-md overflow-hidden p-0 transition-all hover:scale-[1.01]"
+                  style={{ animationDelay: `${(index + 1) * 50}ms` }}
                   data-testid="profile-recent-game-card"
                 >
                   {game.coverImage ? (
@@ -138,14 +162,14 @@ export function ProfileView({ profile }: ProfileViewProps) {
                       })}
                     </p>
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>
         </div>
       )}
       {statusEntries.length === 0 && profile.stats.recentGames.length === 0 && (
-        <div className="border-border bg-muted rounded-lg border p-4xl text-center">
+        <div className="border-border bg-muted p-4xl rounded-lg border text-center">
           <p className="body-lg text-muted-foreground">
             Your library is empty. Start adding games to your collection!
           </p>
