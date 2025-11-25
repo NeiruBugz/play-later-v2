@@ -1,22 +1,15 @@
 "use server";
 
 import { LibraryService } from "@/data-access-layer/services";
-import type { LibraryItem, LibraryItemStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { createServerAction } from "@/shared/lib";
+import { LibraryItemStatus, type LibraryItemDomain } from "@/shared/types";
 
 const UpdateLibraryStatusSchema = z.object({
   libraryItemId: z.number().int().positive(),
-  status: z.enum([
-    "CURIOUS_ABOUT",
-    "CURRENTLY_EXPLORING",
-    "TOOK_A_BREAK",
-    "EXPERIENCED",
-    "WISHLIST",
-    "REVISITING",
-  ]),
+  status: z.nativeEnum(LibraryItemStatus),
 });
 export type UpdateLibraryStatusInput = z.infer<
   typeof UpdateLibraryStatusSchema
@@ -24,7 +17,7 @@ export type UpdateLibraryStatusInput = z.infer<
 
 export const updateLibraryStatusAction = createServerAction<
   UpdateLibraryStatusInput,
-  LibraryItem
+  LibraryItemDomain
 >({
   actionName: "updateLibraryStatusAction",
   schema: UpdateLibraryStatusSchema,
@@ -40,7 +33,7 @@ export const updateLibraryStatusAction = createServerAction<
       userId: userId!,
       libraryItem: {
         id: libraryItemId,
-        status: status as LibraryItemStatus,
+        status,
       },
     });
     if (!result.success) {

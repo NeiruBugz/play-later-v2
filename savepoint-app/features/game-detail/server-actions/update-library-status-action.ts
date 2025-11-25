@@ -2,10 +2,10 @@
 
 import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services";
-import type { LibraryItem } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import type { LibraryItemDomain } from "@/shared/types";
 
 import {
   UpdateLibraryStatusByIgdbSchema,
@@ -22,7 +22,7 @@ type ActionResult<T> =
 
 export async function updateLibraryStatusAction(
   input: UpdateLibraryStatusByIgdbInput
-): Promise<ActionResult<LibraryItem>> {
+): Promise<ActionResult<LibraryItemDomain>> {
   try {
     logger.info(
       { igdbId: input.igdbId, status: input.status },

@@ -4,13 +4,13 @@ import { populateGameInDatabase } from "@/data-access-layer/services/game-detail
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import {
-  AcquisitionType,
-  type LibraryItem,
-  type LibraryItemStatus,
-} from "@prisma/client";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import {
+  AcquisitionType,
+  type LibraryItemDomain,
+  type LibraryItemStatus,
+} from "@/shared/types";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVICE]: "addGameToLibraryUseCase",
@@ -27,7 +27,7 @@ export type AddGameToLibraryResult =
   | {
       success: true;
       data: {
-        libraryItem: LibraryItem;
+        libraryItem: LibraryItemDomain;
         gameSlug: string;
       };
     }

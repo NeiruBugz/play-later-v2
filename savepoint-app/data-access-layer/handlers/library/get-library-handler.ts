@@ -1,5 +1,5 @@
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
-import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";

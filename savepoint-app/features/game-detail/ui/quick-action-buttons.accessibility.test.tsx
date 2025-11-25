@@ -1,3 +1,4 @@
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -95,7 +96,7 @@ describe("QuickActionButtons - Accessibility", () => {
 
     it("should have aria-pressed attribute reflecting current state", () => {
       render(
-        <QuickActionButtons {...defaultProps} currentStatus="CURIOUS_ABOUT" />
+        <QuickActionButtons {...defaultProps} currentStatus={LibraryItemStatus.CURIOUS_ABOUT} />
       );
 
       const curiousButton = screen.getByRole("button", {

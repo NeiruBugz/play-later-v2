@@ -8,7 +8,7 @@ export function GameDescription({ summary }: GameDescriptionProps) {
   return (
     <p
       className={cn(
-        "body-lg text-muted-foreground",
+        "body-lg text-muted-foreground animate-fade-in",
         isPlaceholder && "italic"
       )}
     >

@@ -4,7 +4,7 @@ import {
   createLibraryItem,
   createUser,
 } from "@/test/setup/db-factories";
-import { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 
 import { prisma } from "@/shared/lib/app/db";
 

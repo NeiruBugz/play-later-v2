@@ -49,6 +49,7 @@ export default async function GameDetailPage({
           <GameCoverImage
             imageId={game.cover?.image_id}
             gameTitle={game.name}
+            libraryStatus={userLibraryStatus?.mostRecent.status}
           />
           {userId && (
             <>

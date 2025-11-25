@@ -1,4 +1,4 @@
-import type { LibraryItemStatus } from "@prisma/client";
+import type { LibraryItemStatus } from "@/shared/types";
 
 export interface LibraryCardQuickActionsProps {
   libraryItemId: number;

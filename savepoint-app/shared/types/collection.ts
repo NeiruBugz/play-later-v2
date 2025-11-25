@@ -1,5 +1,6 @@
-import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
+
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 
 export const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),

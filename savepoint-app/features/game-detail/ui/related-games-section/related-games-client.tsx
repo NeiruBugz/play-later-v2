@@ -144,10 +144,9 @@ function GameGrid({
   });
   return (
     <div className="grid grid-cols-2 gap-xl pr-xl sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-      {games.map((game) => (
-        <GameCard key={`${franchiseId}-${game.id}`} game={game} />
+      {games.map((game, index) => (
+        <GameCard key={`${franchiseId}-${game.id}`} game={game} index={index} />
       ))}
-      {}
       {hasMore && (
         <div ref={ref} className="col-span-full flex justify-center py-xl">
           {isPending && (
@@ -162,19 +161,26 @@ function GameGrid({
   );
 }
 
-function GameCard({ game }: GameCardProps) {
+function GameCard({ game, index = 0 }: GameCardProps & { index?: number }) {
+  const staggerIndex = Math.min(index + 1, 12);
+
   return (
-    <UnifiedGameCard
-      game={{
-        id: game.id,
-        name: game.name,
-        slug: game.slug,
-        coverImageId: game.cover?.image_id,
-      }}
-      layout="vertical-compact"
-      density="minimal"
-      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-      className="transition-transform hover:scale-105"
-    />
+    <div
+      className="animate-stagger-in"
+      style={{ animationDelay: `${staggerIndex * 50}ms` }}
+    >
+      <UnifiedGameCard
+        game={{
+          id: game.id,
+          name: game.name,
+          slug: game.slug,
+          coverImageId: game.cover?.image_id,
+        }}
+        layout="vertical-compact"
+        density="minimal"
+        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+        className="transition-all duration-normal ease-out-expo hover:scale-105 hover:shadow-paper-md"
+      />
+    </div>
   );
 }

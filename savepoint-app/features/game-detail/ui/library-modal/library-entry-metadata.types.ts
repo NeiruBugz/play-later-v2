@@ -1,5 +1,5 @@
-import type { LibraryItem } from "@prisma/client";
+import type { LibraryItemDomain } from "@/shared/types";
 
 export interface LibraryEntryMetadataProps {
-  item: LibraryItem;
+  item: LibraryItemDomain;
 }

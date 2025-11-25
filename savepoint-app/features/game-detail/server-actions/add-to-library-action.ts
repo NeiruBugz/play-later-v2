@@ -1,16 +1,16 @@
 "use server";
 
-import type { LibraryItem } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { createServerAction } from "@/shared/lib";
+import type { LibraryItemDomain } from "@/shared/types";
 
 import { addGameToLibrary } from "../../library/use-cases/add-game-to-library";
 import { AddToLibrarySchema, type AddToLibraryInput } from "../schemas";
 
 export const addToLibraryAction = createServerAction<
   AddToLibraryInput,
-  LibraryItem
+  LibraryItemDomain
 >({
   actionName: "addToLibraryAction",
   schema: AddToLibrarySchema,

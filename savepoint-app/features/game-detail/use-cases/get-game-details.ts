@@ -6,12 +6,15 @@ import {
   LibraryService,
 } from "@/data-access-layer/services";
 import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
-import type { JournalEntry, LibraryItem } from "@prisma/client";
 import { cache } from "react";
 
 import { createLogger } from "@/shared/lib/app/logger";
 import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
-import type { FullGameInfoResponse } from "@/shared/types";
+import type {
+  FullGameInfoResponse,
+  JournalEntryDomain,
+  LibraryItemDomain,
+} from "@/shared/types";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVICE]: "getGameDetailsUseCase",
@@ -24,11 +27,11 @@ type GameDetailsResult = {
     completionist?: number;
   };
   userLibraryStatus?: {
-    mostRecent: LibraryItem;
+    mostRecent: LibraryItemDomain;
     updatedAt: Date;
-    allItems: LibraryItem[];
+    allItems: LibraryItemDomain[];
   };
-  journalEntries: JournalEntry[];
+  journalEntries: JournalEntryDomain[];
 };
 
 export const getGameDetails = cache(async function getGameDetails(params: {
@@ -90,9 +93,13 @@ export const getGameDetails = cache(async function getGameDetails(params: {
       ? timesToBeatResult.data.timesToBeat
       : undefined;
     let userLibraryStatus:
-      | { mostRecent: LibraryItem; updatedAt: Date; allItems: LibraryItem[] }
+      | {
+          mostRecent: LibraryItemDomain;
+          updatedAt: Date;
+          allItems: LibraryItemDomain[];
+        }
       | undefined;
-    let journalEntries: JournalEntry[] = [];
+    let journalEntries: JournalEntryDomain[] = [];
     if (params.userId) {
       const libraryService = new LibraryService();
       const gameResult = await libraryService.findGameByIgdbId(game.id);

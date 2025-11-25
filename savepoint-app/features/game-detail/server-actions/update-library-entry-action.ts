@@ -1,10 +1,10 @@
 "use server";
 
 import { LibraryService } from "@/data-access-layer/services";
-import type { LibraryItem } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { createServerAction } from "@/shared/lib";
+import type { LibraryItemDomain } from "@/shared/types";
 
 import {
   UpdateLibraryEntrySchema,
@@ -13,7 +13,7 @@ import {
 
 export const updateLibraryEntryAction = createServerAction<
   UpdateLibraryEntryInput,
-  LibraryItem
+  LibraryItemDomain
 >({
   actionName: "updateLibraryEntryAction",
   schema: UpdateLibraryEntrySchema,

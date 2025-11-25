@@ -1,7 +1,7 @@
-import type { LibraryItem } from "@prisma/client";
+import type { LibraryItemDomain } from "@/shared/types";
 
 export interface LibraryItemCardProps {
-  item: LibraryItem;
+  item: LibraryItemDomain;
   onClick?: () => void;
   onDelete?: (itemId: number) => void;
 }

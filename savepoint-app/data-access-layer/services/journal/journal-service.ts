@@ -1,5 +1,6 @@
 import "server-only";
 
+import { JournalEntryMapper } from "@/data-access-layer/domain/journal";
 import { findJournalEntriesByGameId } from "@/data-access-layer/repository";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -23,7 +24,8 @@ export class JournalService extends BaseService {
         );
         return this.error("Failed to find journal entries");
       }
-      return this.success(result.data);
+      const domainEntries = JournalEntryMapper.toDomainList(result.data);
+      return this.success(domainEntries);
     } catch (error) {
       this.logger.error(
         { error, ...params },

@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react";
 
 import { Header } from "@/shared/components/header";
+import { MobileNav } from "@/shared/components/mobile-nav";
 import { Toaster } from "@/shared/components/ui/sonner";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
@@ -10,7 +11,8 @@ export default async function ProtectedLayout({ children }: PropsWithChildren) {
   return (
     <>
       <Header isAuthorised={Boolean(userId)} />
-      <main className="container mx-auto py-lg">{children}</main>
+      <main className="container mx-auto py-lg pb-24 md:pb-lg">{children}</main>
+      <MobileNav />
       <Toaster />
     </>
   );

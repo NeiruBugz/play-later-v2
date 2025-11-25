@@ -11,10 +11,14 @@ import {
   updateLibraryItem,
 } from "@/data-access-layer/repository";
 import {
+  AcquisitionType,
   LibraryItemMapper,
+  LibraryItemStatus,
+  mapAcquisitionTypeToPrisma,
+  mapLibraryItemStatusToPrisma,
+  type LibraryItemDomain,
   type LibraryItemWithGameDomain,
 } from "@/data-access-layer/domain/library";
-import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -74,7 +78,7 @@ export class LibraryService extends BaseService {
   async findMostRecentLibraryItemByGameId(params: {
     userId: string;
     gameId: string;
-  }) {
+  }): Promise<ServiceResult<LibraryItemDomain | null>> {
     try {
       this.logger.info(params, "Finding most recent library item");
       const result = await findMostRecentLibraryItemByGameId(params);
@@ -85,7 +89,10 @@ export class LibraryService extends BaseService {
         );
         return this.error("Failed to find library item");
       }
-      return this.success(result.data);
+      const domainItem = result.data
+        ? LibraryItemMapper.toDomain(result.data)
+        : null;
+      return this.success(domainItem);
     } catch (error) {
       this.logger.error(
         { error, ...params },
@@ -134,7 +141,8 @@ export class LibraryService extends BaseService {
         );
         return this.error("Library item not found");
       }
-      const currentStatus = currentItemResult.data.status;
+      const currentDomainItem = LibraryItemMapper.toDomain(currentItemResult.data);
+      const currentStatus = currentDomainItem.status;
       const newStatus = params.libraryItem.status;
       if (newStatus !== currentStatus) {
         const transitionValidation = this.validateStatusTransition(
@@ -155,7 +163,15 @@ export class LibraryService extends BaseService {
           );
         }
       }
-      const result = await updateLibraryItem(params);
+      const result = await updateLibraryItem({
+        userId: params.userId,
+        libraryItem: {
+          id: params.libraryItem.id,
+          status: mapLibraryItemStatusToPrisma(params.libraryItem.status),
+          startedAt: params.libraryItem.startedAt,
+          completedAt: params.libraryItem.completedAt,
+        },
+      });
       if (!result.ok) {
         this.logger.error(
           { error: result.error, ...params },
@@ -171,7 +187,7 @@ export class LibraryService extends BaseService {
         },
         "Library item updated successfully"
       );
-      return this.success(result.data);
+      return this.success(LibraryItemMapper.toDomain(result.data));
     } catch (error) {
       this.logger.error(
         { error, ...params },
@@ -185,7 +201,7 @@ export class LibraryService extends BaseService {
   async findAllLibraryItemsByGameId(params: {
     userId: string;
     gameId: string;
-  }) {
+  }): Promise<ServiceResult<LibraryItemDomain[]>> {
     try {
       this.logger.info(params, "Finding all library items for game");
       const result = await findAllLibraryItemsByGameId(params);
@@ -196,7 +212,10 @@ export class LibraryService extends BaseService {
         );
         return this.error("Failed to find library items");
       }
-      return this.success(result.data);
+      const domainItems = result.data.map((item) =>
+        LibraryItemMapper.toDomain(item)
+      );
+      return this.success(domainItems);
     } catch (error) {
       this.logger.error(
         { error, ...params },
@@ -325,7 +344,19 @@ export class LibraryService extends BaseService {
         },
         "Creating library item"
       );
-      const result = await createLibraryItem(params);
+      const result = await createLibraryItem({
+        userId: params.userId,
+        gameId: params.gameId,
+        libraryItem: {
+          status: mapLibraryItemStatusToPrisma(params.libraryItem.status),
+          acquisitionType: mapAcquisitionTypeToPrisma(
+            params.libraryItem.acquisitionType
+          ),
+          platform: params.libraryItem.platform,
+          startedAt: params.libraryItem.startedAt,
+          completedAt: params.libraryItem.completedAt,
+        },
+      });
       if (!result.ok) {
         if (result.error.code === "DUPLICATE") {
           this.logger.warn(
@@ -344,7 +375,7 @@ export class LibraryService extends BaseService {
         { libraryItemId: result.data.id, userId: params.userId },
         "Library item created successfully"
       );
-      return this.success(result.data);
+      return this.success(LibraryItemMapper.toDomain(result.data));
     } catch (error) {
       this.logger.error(
         { error, ...params },

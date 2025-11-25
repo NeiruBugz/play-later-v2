@@ -1,12 +1,13 @@
-import { Platform } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
+
+import type { PlatformDomain } from "@/shared/types";
 
 type PlatformsApiResponse =
   | {
       success: true;
       data: {
-        supportedPlatforms: Platform[];
-        otherPlatforms: Platform[];
+        supportedPlatforms: PlatformDomain[];
+        otherPlatforms: PlatformDomain[];
       };
     }
   | {
@@ -26,8 +27,8 @@ const queryFn = async (igdbId: number) => {
 };
 export function useGetPlatforms(igdbId: number) {
   return useQuery<{
-    supportedPlatforms: Platform[];
-    otherPlatforms: Platform[];
+    supportedPlatforms: PlatformDomain[];
+    otherPlatforms: PlatformDomain[];
   }>({
     queryKey: ["game-platforms", igdbId],
     queryFn: () => queryFn(igdbId),

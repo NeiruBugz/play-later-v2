@@ -2,11 +2,13 @@ export * from "./igdb";
 export * from "./ui";
 export * from "./collection";
 export * from "./library";
+export * from "./journal";
+export * from "./platform";
 export { type SteamAppInfo } from "./steam";
 export {
   type Company,
   type Cover,
-  type Platform,
+  type Platform as IgdbPlatform,
   type Game,
   type Genre,
   type ExternalGame,

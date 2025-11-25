@@ -1,4 +1,8 @@
-import type { LibraryItem } from "@prisma/client";
+import {
+  AcquisitionType,
+  LibraryItemStatus,
+  type LibraryItemDomain,
+} from "@/data-access-layer/domain/library";
 import { render, screen } from "@testing-library/react";
 
 import { LibraryEntryMetadata } from "./library-entry-metadata";
@@ -23,14 +27,14 @@ vi.mock("@/shared/lib/date", () => ({
 }));
 
 const createMockLibraryItem = (
-  overrides: Partial<LibraryItem> = {}
-): LibraryItem => ({
+  overrides: Partial<LibraryItemDomain> = {}
+): LibraryItemDomain => ({
   id: 1,
   userId: "user1",
   gameId: "game1",
-  status: "CURIOUS_ABOUT",
+  status: LibraryItemStatus.CURIOUS_ABOUT,
   platform: "PC",
-  acquisitionType: "DIGITAL",
+  acquisitionType: AcquisitionType.DIGITAL,
   createdAt: new Date("2025-01-27T12:00:00Z"),
   updatedAt: new Date("2025-01-27T12:00:00Z"),
   startedAt: null,

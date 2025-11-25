@@ -1,12 +1,15 @@
 import "server-only";
 
 import {
+  PlatformMapper,
+  type PlatformDomain,
+} from "@/data-access-layer/domain/platform";
+import {
   findGameByIgdbId,
   findPlatformsForGame,
   findSystemPlatforms,
   isRepositorySuccess,
 } from "@/data-access-layer/repository";
-import type { Platform } from "@prisma/client";
 
 import { UniquePlatformResult } from "@/shared/types/platform";
 
@@ -36,8 +39,8 @@ export class PlatformService extends BaseService {
 
   async getPlatformsForGame(igdbId: number): Promise<
     ServiceResult<{
-      supportedPlatforms: Platform[];
-      otherPlatforms: Platform[];
+      supportedPlatforms: PlatformDomain[];
+      otherPlatforms: PlatformDomain[];
     }>
   > {
     try {
@@ -52,7 +55,13 @@ export class PlatformService extends BaseService {
       if (!result.ok) {
         return this.error("Failed to fetch platforms");
       }
-      return this.success(result.data);
+      const supportedPlatforms = PlatformMapper.toDomainList(
+        result.data.supportedPlatforms
+      );
+      const otherPlatforms = PlatformMapper.toDomainList(
+        result.data.otherPlatforms
+      );
+      return this.success({ supportedPlatforms, otherPlatforms });
     } catch (error) {
       return this.error(
         error instanceof Error ? error.message : "An unexpected error occurred"

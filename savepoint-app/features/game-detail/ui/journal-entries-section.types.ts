@@ -1,9 +1,9 @@
-import type { JournalEntry } from "@prisma/client";
+import type { JournalEntryDomain } from "@/shared/types";
 
 export interface JournalEntriesSectionProps {
-  journalEntries: JournalEntry[];
+  journalEntries: JournalEntryDomain[];
 }
 
 export interface JournalEntryCardProps {
-  entry: JournalEntry;
+  entry: JournalEntryDomain;
 }

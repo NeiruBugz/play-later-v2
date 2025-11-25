@@ -52,6 +52,28 @@ function mapAcquisitionTypeToDomain(
 }
 
 /**
+ * Maps domain LibraryItemStatus enum to Prisma LibraryItemStatus enum.
+ * Since the enum values are identical strings, this is a type-safe cast.
+ * Used at service-repository boundary.
+ */
+export function mapLibraryItemStatusToPrisma(
+  status: LibraryItemStatus
+): PrismaLibraryItemStatus {
+  return status as unknown as PrismaLibraryItemStatus;
+}
+
+/**
+ * Maps domain AcquisitionType enum to Prisma AcquisitionType enum.
+ * Since the enum values are identical strings, this is a type-safe cast.
+ * Used at service-repository boundary.
+ */
+export function mapAcquisitionTypeToPrisma(
+  type: AcquisitionType
+): PrismaAcquisitionType {
+  return type as unknown as PrismaAcquisitionType;
+}
+
+/**
  * Mapper class for transforming LibraryItem between different type layers.
  * Handles conversions: Prisma types ↔ Domain models ↔ DTOs
  */

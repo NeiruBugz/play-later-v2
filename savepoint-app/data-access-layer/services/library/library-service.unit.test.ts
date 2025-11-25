@@ -9,7 +9,7 @@ import {
   RepositoryErrorCode,
   repositorySuccess,
 } from "@/data-access-layer/repository/types";
-import { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LibraryService } from "./library-service";

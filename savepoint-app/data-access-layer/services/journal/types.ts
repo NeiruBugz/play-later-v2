@@ -1,8 +1,8 @@
-import type { JournalEntry } from "@prisma/client";
+import type { JournalEntryDomain } from "@/data-access-layer/domain/journal";
 
 import type { ServiceResult } from "../types";
 
-export type FindJournalEntriesResult = ServiceResult<JournalEntry[]>;
+export type FindJournalEntriesResult = ServiceResult<JournalEntryDomain[]>;
 
 export interface JournalService {
   findJournalEntriesByGameId(params: {

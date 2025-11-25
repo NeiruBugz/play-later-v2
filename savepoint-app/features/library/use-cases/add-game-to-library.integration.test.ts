@@ -1,6 +1,6 @@
 import { setupDatabase } from "@/test/setup/database";
 import { createGame, createUser } from "@/test/setup/db-factories";
-import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
+import { AcquisitionType, LibraryItemStatus } from "@/data-access-layer/domain/library";
 
 import { prisma } from "@/shared/lib/app/db";
 

@@ -1,4 +1,4 @@
-import type { LibraryItem } from "@prisma/client";
+import type { LibraryItemDomain } from "@/shared/types";
 
 export interface LibraryModalProps {
   gameId?: string;
@@ -7,6 +7,6 @@ export interface LibraryModalProps {
   igdbId: number;
   gameTitle: string;
   mode: "add" | "edit";
-  existingItems?: LibraryItem[];
+  existingItems?: LibraryItemDomain[];
   onDeleteItem?: (itemId: number) => void;
 }

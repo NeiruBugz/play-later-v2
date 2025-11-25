@@ -1,5 +1,6 @@
-import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
+
+import { LibraryItemStatus } from "@/shared/types";
 
 export const AddToLibrarySchema = z.object({
   igdbId: z.number().int().positive(),

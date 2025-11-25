@@ -67,9 +67,9 @@ export function JournalEntriesSection({
 }: JournalEntriesSectionProps) {
   const hasEntries = journalEntries.length > 0;
   return (
-    <div className="space-y-xl">
+    <section className="animate-fade-in space-y-xl" aria-labelledby="journal-heading">
       <div className="flex items-center justify-between">
-        <h2 className="heading-md">Journal Entries</h2>
+        <h2 id="journal-heading" className="heading-md font-serif">Journal Entries</h2>
         {hasEntries && (
           <Button variant="secondary" size="sm" disabled>
             Write New Entry
@@ -78,13 +78,19 @@ export function JournalEntriesSection({
       </div>
       {hasEntries ? (
         <div className="space-y-lg">
-          {journalEntries.map((entry) => (
-            <JournalEntryCard key={entry.id} entry={entry} />
+          {journalEntries.map((entry, index) => (
+            <div
+              key={entry.id}
+              className="animate-stagger-in"
+              style={{ animationDelay: `${(index + 1) * 50}ms` }}
+            >
+              <JournalEntryCard entry={entry} />
+            </div>
           ))}
         </div>
       ) : (
         <EmptyState />
       )}
-    </div>
+    </section>
   );
 }

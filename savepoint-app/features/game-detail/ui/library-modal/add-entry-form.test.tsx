@@ -1,6 +1,6 @@
 import { renderWithTestProviders } from "@/test/utils/test-provider";
 import { platformApiResponseFixture } from "@fixtures/platform";
-import { LibraryItemStatus } from "@prisma/client";
+import { AcquisitionType, LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -125,7 +125,7 @@ describe("AddEntryForm", () => {
         gameId: "game1",
         status: LibraryItemStatus.CURIOUS_ABOUT,
         platform: null,
-        acquisitionType: "DIGITAL",
+        acquisitionType: AcquisitionType.DIGITAL,
         createdAt: new Date(),
         updatedAt: new Date(),
         startedAt: null,

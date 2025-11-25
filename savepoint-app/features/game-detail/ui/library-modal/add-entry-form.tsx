@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LibraryItemStatus } from "@prisma/client";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { useGetPlatforms } from "@/features/game-detail/hooks/use-get-platforms";
+import { LibraryItemStatus } from "@/shared/types";
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";

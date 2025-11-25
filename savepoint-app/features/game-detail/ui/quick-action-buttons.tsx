@@ -1,6 +1,6 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/shared/types";
 import {
   BookmarkIcon,
   ClockIcon,
@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { cn } from "@/shared/lib/ui";
 
 import { updateLibraryStatusAction } from "../server-actions";
 import type { QuickActionButtonsProps } from "./quick-action-buttons.types";
@@ -29,46 +30,59 @@ const STATUS_CONFIG: Record<
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     ariaLabel: string;
+    activeClass: string;
   }
 > = {
-  CURIOUS_ABOUT: {
+  [LibraryItemStatus.CURIOUS_ABOUT]: {
     label: "Curious",
     icon: SparklesIcon,
     ariaLabel: "Mark as Curious About",
+    activeClass:
+      "bg-[var(--status-curious)] text-[var(--status-curious-foreground)] hover:bg-[var(--status-curious)]/90",
   },
-  CURRENTLY_EXPLORING: {
+  [LibraryItemStatus.CURRENTLY_EXPLORING]: {
     label: "Playing",
     icon: GamepadIcon,
     ariaLabel: "Mark as Currently Exploring",
+    activeClass:
+      "bg-[var(--status-playing)] text-[var(--status-playing-foreground)] hover:bg-[var(--status-playing)]/90",
   },
-  TOOK_A_BREAK: {
+  [LibraryItemStatus.TOOK_A_BREAK]: {
     label: "Break",
     icon: PauseIcon,
     ariaLabel: "Mark as Taking a Break",
+    activeClass:
+      "bg-[var(--status-break)] text-[var(--status-break-foreground)] hover:bg-[var(--status-break)]/90",
   },
-  EXPERIENCED: {
+  [LibraryItemStatus.EXPERIENCED]: {
     label: "Finished",
     icon: HeartIcon,
     ariaLabel: "Mark as Experienced",
+    activeClass:
+      "bg-[var(--status-experienced)] text-[var(--status-experienced-foreground)] hover:bg-[var(--status-experienced)]/90",
   },
-  WISHLIST: {
+  [LibraryItemStatus.WISHLIST]: {
     label: "Wishlist",
     icon: BookmarkIcon,
     ariaLabel: "Add to Wishlist",
+    activeClass:
+      "bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)] hover:bg-[var(--status-wishlist)]/90",
   },
-  REVISITING: {
+  [LibraryItemStatus.REVISITING]: {
     label: "Replay",
     icon: ClockIcon,
     ariaLabel: "Mark as Revisiting",
+    activeClass:
+      "bg-[var(--status-revisiting)] text-[var(--status-revisiting-foreground)] hover:bg-[var(--status-revisiting)]/90",
   },
 };
 const STATUS_ORDER: LibraryItemStatus[] = [
-  "CURIOUS_ABOUT",
-  "CURRENTLY_EXPLORING",
-  "TOOK_A_BREAK",
-  "EXPERIENCED",
-  "WISHLIST",
-  "REVISITING",
+  LibraryItemStatus.CURIOUS_ABOUT,
+  LibraryItemStatus.CURRENTLY_EXPLORING,
+  LibraryItemStatus.TOOK_A_BREAK,
+  LibraryItemStatus.EXPERIENCED,
+  LibraryItemStatus.WISHLIST,
+  LibraryItemStatus.REVISITING,
 ];
 export const QuickActionButtons = ({
   igdbId,
@@ -102,9 +116,9 @@ export const QuickActionButtons = ({
     });
   };
   return (
-    <Card className="w-full">
+    <Card className="animate-fade-in w-full" style={{ animationDelay: "100ms" }}>
       <CardHeader className="pb-lg">
-        <CardTitle>Quick Actions</CardTitle>
+        <CardTitle className="font-serif">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
         {}
@@ -128,18 +142,19 @@ export const QuickActionButtons = ({
             return (
               <Button
                 key={status}
-                variant={isActive ? "default" : "outline"}
+                variant="outline"
                 size="sm"
-                className="focus-visible:ring-primary flex h-auto flex-col gap-xs py-lg focus-visible:ring-2 focus-visible:ring-offset-2"
+                className={cn(
+                  "focus-visible:ring-ring flex h-auto flex-col gap-xs border py-lg focus-visible:ring-2 focus-visible:ring-offset-2",
+                  "duration-normal transition-all ease-out-expo",
+                  isActive && config.activeClass
+                )}
                 onClick={() => handleStatusChange(status)}
                 disabled={isPending}
                 aria-label={config.ariaLabel}
                 aria-pressed={isActive}
               >
-                <Icon
-                  className={`h-5 w-5 ${isActive ? "text-primary-foreground" : "text-primary"}`}
-                  aria-hidden="true"
-                />
+                <Icon className="h-5 w-5" aria-hidden="true" />
                 <span className="caption">{config.label}</span>
               </Button>
             );

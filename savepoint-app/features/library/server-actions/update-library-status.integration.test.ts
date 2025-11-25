@@ -4,7 +4,7 @@ import {
   createLibraryItem,
   createUser,
 } from "@/test/setup/db-factories";
-import { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 
 import { prisma } from "@/shared/lib/app/db";
 
@@ -64,7 +64,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: "CURRENTLY_EXPLORING",
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
       expect(result.success).toBe(true);
@@ -116,7 +116,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: "WISHLIST",
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -138,7 +138,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: "CURIOUS_ABOUT",
+        status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
       expect(result.success).toBe(true);
@@ -155,7 +155,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: "WISHLIST",
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
@@ -177,7 +177,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: "CURRENTLY_EXPLORING",
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
       expect(result.success).toBe(false);
@@ -199,7 +199,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: "CURRENTLY_EXPLORING",
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
       expect(result.success).toBe(false);
@@ -217,7 +217,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: nonExistentId,
-        status: "CURRENTLY_EXPLORING",
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
       expect(result.success).toBe(false);
@@ -230,7 +230,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     it("should return error for invalid input - negative library item ID", async () => {
       const result = await updateLibraryStatusAction({
         libraryItemId: -1,
-        status: "CURIOUS_ABOUT",
+        status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
       expect(result.success).toBe(false);
@@ -241,7 +241,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     it("should return error for invalid input - zero library item ID", async () => {
       const result = await updateLibraryStatusAction({
         libraryItemId: 0,
-        status: "CURIOUS_ABOUT",
+        status: LibraryItemStatus.CURIOUS_ABOUT,
       });
 
       expect(result.success).toBe(false);
@@ -280,7 +280,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: "CURRENTLY_EXPLORING",
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
       expect(revalidatePath).toHaveBeenCalledWith("/library");
@@ -292,7 +292,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       await updateLibraryStatusAction({
         libraryItemId: 999999,
-        status: "CURRENTLY_EXPLORING",
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
       expect(revalidatePath).not.toHaveBeenCalled();

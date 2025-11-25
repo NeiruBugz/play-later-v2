@@ -1,4 +1,8 @@
-export { LibraryItemMapper } from "./library-item.mapper";
+export {
+  LibraryItemMapper,
+  mapLibraryItemStatusToPrisma,
+  mapAcquisitionTypeToPrisma,
+} from "./library-item.mapper";
 export type {
   LibraryItemDomain,
   LibraryItemWithGameDomain,

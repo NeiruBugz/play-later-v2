@@ -1,6 +1,6 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
+import type { LibraryItemStatus } from "@/shared/types";
 import {
   BookmarkIcon,
   ClockIcon,
@@ -22,22 +22,26 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatAbsoluteDate } from "@/shared/lib/date";
+import {
+  LIBRARY_STATUS_LABELS,
+  LIBRARY_STATUS_VARIANTS,
+} from "@/shared/lib/library-status";
 
 import { deleteLibraryItemAction } from "../server-actions";
 import { AddToLibraryButton } from "./add-to-library-button";
 import { LibraryModal } from "./library-modal";
 import type { LibraryStatusDisplayProps } from "./library-status-display.types";
 
-const STATUS_CONFIG: Record<
+const STATUS_ICONS: Record<
   LibraryItemStatus,
-  { label: string; icon: React.ComponentType<{ className?: string }> }
+  React.ComponentType<{ className?: string }>
 > = {
-  CURIOUS_ABOUT: { label: "Curious About", icon: SparklesIcon },
-  CURRENTLY_EXPLORING: { label: "Currently Exploring", icon: GamepadIcon },
-  TOOK_A_BREAK: { label: "Taking a Break", icon: PauseIcon },
-  EXPERIENCED: { label: "Experienced", icon: HeartIcon },
-  WISHLIST: { label: "Wishlist", icon: BookmarkIcon },
-  REVISITING: { label: "Revisiting", icon: ClockIcon },
+  CURIOUS_ABOUT: SparklesIcon,
+  CURRENTLY_EXPLORING: GamepadIcon,
+  TOOK_A_BREAK: PauseIcon,
+  EXPERIENCED: HeartIcon,
+  WISHLIST: BookmarkIcon,
+  REVISITING: ClockIcon,
 };
 
 export const LibraryStatusDisplay = ({
@@ -50,7 +54,7 @@ export const LibraryStatusDisplay = ({
 
   if (!userLibraryStatus) {
     return (
-      <Card className="w-full">
+      <Card className="animate-fade-in w-full">
         <CardHeader className="pb-lg">
           <CardTitle className="text-base">Library Status</CardTitle>
           <CardDescription>Add this game to your library</CardDescription>
@@ -67,8 +71,9 @@ export const LibraryStatusDisplay = ({
   }
 
   const status = userLibraryStatus.mostRecent.status;
-  const config = STATUS_CONFIG[status];
-  const Icon = config.icon;
+  const Icon = STATUS_ICONS[status];
+  const statusLabel = LIBRARY_STATUS_LABELS[status];
+  const badgeVariant = LIBRARY_STATUS_VARIANTS[status];
   const updatedDate = formatAbsoluteDate(userLibraryStatus.updatedAt);
 
   const handleDeleteItem = async (itemId: number) => {
@@ -81,19 +86,23 @@ export const LibraryStatusDisplay = ({
   };
   return (
     <>
-      <Card className="w-full">
+      <Card className="animate-fade-in w-full">
         <CardHeader className="pb-lg">
-          <CardTitle className="text-base">Library Status</CardTitle>
+          <CardTitle className="text-base font-serif">Library Status</CardTitle>
         </CardHeader>
         <CardContent className="space-y-lg">
           <div className="flex items-center gap-md" role="status">
-            <Icon
-              className="text-primary h-5 w-5"
-              aria-hidden="true"
-              data-testid="library-status-icon"
-            />
-            <Badge variant="secondary" className="text-sm">
-              {config.label}
+            <Badge
+              variant={badgeVariant}
+              className="text-sm"
+              aria-label={`Status: ${statusLabel}`}
+            >
+              <Icon
+                className="mr-xs h-3.5 w-3.5"
+                aria-hidden="true"
+                data-testid="library-status-icon"
+              />
+              {statusLabel}
             </Badge>
           </div>
           <p className="text-muted-foreground text-xs">

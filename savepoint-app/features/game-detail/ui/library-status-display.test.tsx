@@ -1,4 +1,4 @@
-import { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { render, screen } from "@testing-library/react";
 
 import { deleteLibraryItemAction } from "../server-actions";

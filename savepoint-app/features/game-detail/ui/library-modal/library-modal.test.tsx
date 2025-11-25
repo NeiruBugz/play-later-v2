@@ -1,4 +1,8 @@
-import { LibraryItemStatus, type LibraryItem } from "@prisma/client";
+import {
+  AcquisitionType,
+  LibraryItemStatus,
+  type LibraryItemDomain,
+} from "@/data-access-layer/domain/library";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -9,7 +13,7 @@ vi.mock("./library-item-card", () => ({
     item,
     onClick,
   }: {
-    item: LibraryItem;
+    item: LibraryItemDomain;
     onClick?: () => void;
   }) => (
     <div
@@ -48,7 +52,7 @@ vi.mock("./edit-entry-form", () => ({
     onSuccess,
     onCancel,
   }: {
-    item: LibraryItem;
+    item: LibraryItemDomain;
     onSuccess: () => void;
     onCancel: () => void;
   }) => (
@@ -61,14 +65,14 @@ vi.mock("./edit-entry-form", () => ({
 }));
 
 const createMockLibraryItem = (
-  overrides: Partial<LibraryItem> = {}
-): LibraryItem => ({
+  overrides: Partial<LibraryItemDomain> = {}
+): LibraryItemDomain => ({
   id: Math.floor(Math.random() * 10000),
   userId: "user-123",
   gameId: "game-456",
   status: LibraryItemStatus.CURIOUS_ABOUT,
   platform: "PlayStation 5",
-  acquisitionType: "DIGITAL",
+  acquisitionType: AcquisitionType.DIGITAL,
   startedAt: null,
   completedAt: null,
   createdAt: new Date("2025-01-10T12:00:00Z"),

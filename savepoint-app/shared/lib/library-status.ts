@@ -1,4 +1,4 @@
-import type { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 
 export type StatusBadgeVariant =
   | "default"
@@ -21,37 +21,37 @@ export type StatusConfig = {
 
 export const LIBRARY_STATUS_CONFIG: readonly StatusConfig[] = [
   {
-    value: "CURIOUS_ABOUT",
+    value: LibraryItemStatus.CURIOUS_ABOUT,
     label: "Curious About",
     description: "Interested in trying this game",
     badgeVariant: "curious",
   },
   {
-    value: "CURRENTLY_EXPLORING",
+    value: LibraryItemStatus.CURRENTLY_EXPLORING,
     label: "Currently Exploring",
     description: "Actively playing this game",
     badgeVariant: "playing",
   },
   {
-    value: "TOOK_A_BREAK",
+    value: LibraryItemStatus.TOOK_A_BREAK,
     label: "Taking a Break",
     description: "Paused but plan to return",
     badgeVariant: "break",
   },
   {
-    value: "EXPERIENCED",
+    value: LibraryItemStatus.EXPERIENCED,
     label: "Experienced",
     description: "Finished or completed this game",
     badgeVariant: "experienced",
   },
   {
-    value: "WISHLIST",
+    value: LibraryItemStatus.WISHLIST,
     label: "Wishlist",
     description: "Want to play in the future",
     badgeVariant: "wishlist",
   },
   {
-    value: "REVISITING",
+    value: LibraryItemStatus.REVISITING,
     label: "Revisiting",
     description: "Playing again after a break",
     badgeVariant: "revisiting",
@@ -59,24 +59,24 @@ export const LIBRARY_STATUS_CONFIG: readonly StatusConfig[] = [
 ] as const;
 
 export const LIBRARY_STATUS_LABELS: Record<LibraryItemStatus, string> = {
-  CURIOUS_ABOUT: "Curious About",
-  CURRENTLY_EXPLORING: "Currently Exploring",
-  TOOK_A_BREAK: "Taking a Break",
-  EXPERIENCED: "Experienced",
-  WISHLIST: "Wishlist",
-  REVISITING: "Revisiting",
+  [LibraryItemStatus.CURIOUS_ABOUT]: "Curious About",
+  [LibraryItemStatus.CURRENTLY_EXPLORING]: "Currently Exploring",
+  [LibraryItemStatus.TOOK_A_BREAK]: "Taking a Break",
+  [LibraryItemStatus.EXPERIENCED]: "Experienced",
+  [LibraryItemStatus.WISHLIST]: "Wishlist",
+  [LibraryItemStatus.REVISITING]: "Revisiting",
 };
 
 export const LIBRARY_STATUS_VARIANTS: Record<
   LibraryItemStatus,
   StatusBadgeVariant
 > = {
-  CURIOUS_ABOUT: "curious",
-  CURRENTLY_EXPLORING: "playing",
-  TOOK_A_BREAK: "break",
-  EXPERIENCED: "experienced",
-  WISHLIST: "wishlist",
-  REVISITING: "revisiting",
+  [LibraryItemStatus.CURIOUS_ABOUT]: "curious",
+  [LibraryItemStatus.CURRENTLY_EXPLORING]: "playing",
+  [LibraryItemStatus.TOOK_A_BREAK]: "break",
+  [LibraryItemStatus.EXPERIENCED]: "experienced",
+  [LibraryItemStatus.WISHLIST]: "wishlist",
+  [LibraryItemStatus.REVISITING]: "revisiting",
 };
 
 export function getStatusLabel(status: LibraryItemStatus): string {

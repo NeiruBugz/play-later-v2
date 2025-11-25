@@ -1,4 +1,4 @@
-import type { LibraryItem, LibraryItemStatus } from "@prisma/client";
+import type { LibraryItemDomain, LibraryItemStatus } from "@/shared/types";
 
 export interface LibraryStatusDisplayProps {
   gameId?: string;
@@ -7,7 +7,7 @@ export interface LibraryStatusDisplayProps {
       status: LibraryItemStatus;
     };
     updatedAt: Date;
-    allItems: LibraryItem[];
+    allItems: LibraryItemDomain[];
   };
   igdbId: number;
   gameTitle: string;
