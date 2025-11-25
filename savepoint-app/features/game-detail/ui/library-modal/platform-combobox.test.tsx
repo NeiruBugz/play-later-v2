@@ -1,4 +1,4 @@
-import type { Platform } from "@prisma/client";
+import type { PlatformDomain as Platform } from "@/data-access-layer/domain";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";

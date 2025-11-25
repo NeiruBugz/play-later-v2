@@ -1,4 +1,4 @@
-import { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { renderHook } from "@testing-library/react";
 import { useSearchParams } from "next/navigation";
 
