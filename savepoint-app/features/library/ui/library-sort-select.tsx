@@ -95,8 +95,8 @@ export function LibrarySortSelect() {
     [router, searchParams]
   );
   return (
-    <div className="flex items-center gap-3">
-      <Label htmlFor="sort-select" className="text-muted-foreground text-sm">
+    <div className="flex items-center gap-lg">
+      <Label htmlFor="sort-select" className="body-sm text-muted-foreground">
         Sort by
       </Label>
       <Select value={getCurrentSortValue()} onValueChange={handleSortChange}>

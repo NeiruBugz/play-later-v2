@@ -11,7 +11,7 @@ export const GameCategoryBadge = ({ category }: GameCategoryBadgeProps) => {
   }
   const variant = category === GameCategory.MAIN_GAME ? "default" : "secondary";
   return (
-    <Badge variant={variant} className="text-xs">
+    <Badge variant={variant} className="caption">
       {label}
     </Badge>
   );

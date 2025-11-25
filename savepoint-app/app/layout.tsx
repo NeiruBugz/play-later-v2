@@ -9,7 +9,7 @@ import "@/shared/globals.css";
 
 import {
   DM_Mono as FontMono,
-  Roboto as FontSans,
+  Plus_Jakarta_Sans as FontSans,
   Playfair_Display as FontSerif,
 } from "next/font/google";
 import { Suspense } from "react";
@@ -19,6 +19,7 @@ const fontSans = FontSans({
   variable: "--font-sans",
   display: "swap",
   preload: true,
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 const fontSerif = FontSerif({
   subsets: ["latin"],

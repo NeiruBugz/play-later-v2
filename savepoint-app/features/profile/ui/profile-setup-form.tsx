@@ -68,7 +68,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
     !!state.message &&
     state.submittedUsername === trimmedUsername;
   return (
-    <div className="container flex min-h-[calc(100vh-200px)] items-center justify-center py-8">
+    <div className="container flex min-h-[calc(100vh-200px)] items-center justify-center py-3xl">
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle>Complete Your Profile</CardTitle>
@@ -80,9 +80,9 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
         <form action={formAction} onSubmit={handleSubmit} noValidate>
           <input type="hidden" name="avatarUrl" value={avatarUrl ?? ""} />
           <input type="hidden" name="username" value={username} />
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-foreground text-sm font-medium">
+          <CardContent className="space-y-2xl">
+            <div className="space-y-md">
+              <label className="body-sm text-foreground font-medium">
                 Profile Image (Optional)
               </label>
               <AvatarUpload
@@ -92,8 +92,8 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
                 onUploadStateChange={handleAvatarUploadStateChange}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-foreground text-sm font-medium">
+            <div className="space-y-md">
+              <label className="body-sm text-foreground font-medium">
                 Username <span className="text-destructive">*</span>
               </label>
               <UsernameInput
@@ -103,13 +103,13 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
                 disabled={isPending}
                 onValidationChange={setHasValidationError}
               />
-              <p className="text-muted-foreground text-sm">
+              <p className="body-sm text-muted-foreground">
                 Must be 3-25 characters. Letters, numbers, and (_, -, .)
                 allowed.
               </p>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <CardFooter className="flex flex-col gap-lg sm:flex-row sm:justify-between">
             <Button
               type="button"
               variant="ghost"

@@ -35,16 +35,16 @@ function JournalEntryCard({ entry }: JournalEntryCardProps) {
   return (
     <Link href={`/journal/${entry.id}`} className="block">
       <Card className="cursor-pointer">
-        <CardHeader className="pb-3">
-          <CardTitle className="line-clamp-1 text-base">
+        <CardHeader className="pb-lg">
+          <CardTitle className="line-clamp-1">
             {displayTitle}
           </CardTitle>
-          <CardDescription className="text-xs">
+          <CardDescription className="caption">
             {formatEntryDate(entry.createdAt)}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground line-clamp-2 text-sm">
+          <p className="body-sm text-muted-foreground line-clamp-2">
             {contentPreview}
           </p>
         </CardContent>
@@ -54,8 +54,8 @@ function JournalEntryCard({ entry }: JournalEntryCardProps) {
 }
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed p-8 text-center">
-      <p className="text-muted-foreground text-sm">No journal entries yet</p>
+    <div className="flex flex-col items-center gap-xl rounded-lg border border-dashed p-3xl text-center">
+      <p className="body-sm text-muted-foreground">No journal entries yet</p>
       <Button variant="secondary" size="sm" disabled>
         Write Your First Entry
       </Button>
@@ -67,9 +67,9 @@ export function JournalEntriesSection({
 }: JournalEntriesSectionProps) {
   const hasEntries = journalEntries.length > 0;
   return (
-    <div className="space-y-4">
+    <div className="space-y-xl">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Journal Entries</h2>
+        <h2 className="heading-md">Journal Entries</h2>
         {hasEntries && (
           <Button variant="secondary" size="sm" disabled>
             Write New Entry
@@ -77,7 +77,7 @@ export function JournalEntriesSection({
         )}
       </div>
       {hasEntries ? (
-        <div className="space-y-3">
+        <div className="space-y-lg">
           {journalEntries.map((entry) => (
             <JournalEntryCard key={entry.id} entry={entry} />
           ))}

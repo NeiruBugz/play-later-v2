@@ -1038,12 +1038,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Fetching franchise games from IGDB"
       );
       const gameTypeFilter = `game_type = (${ALLOWED_FRANCHISE_GAME_CATEGORIES.join(",")})`;
-      const whereClause = `franchises = [${franchiseId}] & id != ${currentGameId} & ${gameTypeFilter}`;
+      const whereClause = `franchise = ${franchiseId} & id != ${currentGameId} & ${gameTypeFilter}`;
       const gamesQuery = new QueryBuilder()
         .fields(["id", "name", "slug", "cover.image_id"])
         .where(whereClause)
         .limit(limit)
         .offset(offset)
+        .sort("first_release_date", "asc")
         .build();
       const countQuery = new QueryBuilder()
         .fields(["id"])

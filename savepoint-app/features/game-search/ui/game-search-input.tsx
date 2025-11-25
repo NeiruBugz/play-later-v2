@@ -25,14 +25,14 @@ export const GameSearchInput = ({
     }
   }, [query, initialQuery, router]);
   return (
-    <div className="space-y-8">
+    <div className="space-y-3xl">
       <Input
         type="search"
         placeholder="Search for games (minimum 3 characters)..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         aria-label="Search for games by name"
-        className="h-12 text-base"
+        className="body-md h-12"
       />
       {debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH && (
         <GameSearchResults query={debouncedQuery} />

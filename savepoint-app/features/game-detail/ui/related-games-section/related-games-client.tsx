@@ -1,11 +1,9 @@
 "use client";
 
-import { Gamepad2, Loader2 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { Loader2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
-import { Card } from "@/shared/components/ui/card";
+import { GameCard as UnifiedGameCard } from "@/shared/components/game-card";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import {
   Tabs,
@@ -65,7 +63,7 @@ export function RelatedGamesClient({
 
   if (franchises.length === 1) {
     return (
-      <section className="space-y-4" aria-labelledby="related-games-heading">
+      <section className="space-y-xl" aria-labelledby="related-games-heading">
         <h2 id="related-games-heading" className="text-2xl font-bold">
           Related Games
         </h2>
@@ -89,7 +87,7 @@ export function RelatedGamesClient({
   }
 
   return (
-    <section className="space-y-4" aria-labelledby="related-games-heading">
+    <section className="space-y-xl" aria-labelledby="related-games-heading">
       <h2 id="related-games-heading" className="text-2xl font-bold">
         Related Games
       </h2>
@@ -97,7 +95,7 @@ export function RelatedGamesClient({
         defaultValue={franchises[0].franchiseId.toString()}
         className="w-full"
       >
-        <TabsList className="mb-4" aria-label="Game franchises">
+        <TabsList className="mb-xl" aria-label="Game franchises">
           {franchises.map((franchise) => (
             <TabsTrigger
               key={franchise.franchiseId}
@@ -145,15 +143,15 @@ function GameGrid({
     enabled: !isPending,
   });
   return (
-    <div className="grid grid-cols-2 gap-4 pr-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-xl pr-xl sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {games.map((game) => (
         <GameCard key={`${franchiseId}-${game.id}`} game={game} />
       ))}
       {}
       {hasMore && (
-        <div ref={ref} className="col-span-full flex justify-center py-4">
+        <div ref={ref} className="col-span-full flex justify-center py-xl">
           {isPending && (
-            <div className="text-muted-foreground flex items-center gap-2">
+            <div className="text-muted-foreground flex items-center gap-md">
               <Loader2 className="h-5 w-5 animate-spin" />
               <span className="text-sm">Loading more games...</span>
             </div>
@@ -166,39 +164,17 @@ function GameGrid({
 
 function GameCard({ game }: GameCardProps) {
   return (
-    <Link
-      href={`/games/${game.slug}`}
-      className="group focus-visible:ring-primary block rounded-lg transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-      aria-label={`View details for ${game.name}`}
-    >
-      <Card className="overflow-hidden">
-        <div className="bg-muted relative aspect-[3/4] w-full">
-          {game.cover?.image_id ? (
-            <Image
-              src={`https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`}
-              alt={`${game.name} cover`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-            />
-          ) : (
-            <div
-              className="flex h-full w-full items-center justify-center"
-              aria-label="No cover image available"
-            >
-              <Gamepad2
-                className="text-muted-foreground h-8 w-8"
-                aria-hidden="true"
-              />
-            </div>
-          )}
-        </div>
-        <div className="p-2">
-          <p className="group-hover:text-primary line-clamp-2 text-sm font-medium">
-            {game.name}
-          </p>
-        </div>
-      </Card>
-    </Link>
+    <UnifiedGameCard
+      game={{
+        id: game.id,
+        name: game.name,
+        slug: game.slug,
+        coverImageId: game.cover?.image_id,
+      }}
+      layout="vertical-compact"
+      density="minimal"
+      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+      className="transition-transform hover:scale-105"
+    />
   );
 }

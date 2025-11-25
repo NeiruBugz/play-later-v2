@@ -30,7 +30,7 @@ export function UsernameInput({
     }
   }, [showError, onValidationChange]);
   return (
-    <div className="space-y-2">
+    <div className="space-y-md">
       <Label htmlFor="username">{label}</Label>
       <div className="relative">
         <Input
@@ -41,17 +41,15 @@ export function UsernameInput({
           disabled={disabled}
           className={cn(
             "pr-10",
-            showError &&
-              "border-red-500 focus-visible:ring-red-500 dark:border-red-400 dark:focus-visible:ring-red-400",
-            showSuccess &&
-              "border-emerald-500 focus-visible:ring-emerald-500 dark:border-emerald-400 dark:focus-visible:ring-emerald-400"
+            showError && "border-destructive focus-visible:ring-destructive",
+            showSuccess && "border-success focus-visible:ring-success"
           )}
           aria-invalid={showError ? "true" : "false"}
           aria-describedby="username-error"
           placeholder="Enter username"
           autoComplete="username"
         />
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-lg">
           {validationStatus === "validating" && (
             <Loader2
               className="text-muted-foreground h-4 w-4 animate-spin"
@@ -61,14 +59,14 @@ export function UsernameInput({
           )}
           {showSuccess && (
             <Check
-              className="h-4 w-4 text-emerald-500 dark:text-emerald-300"
+              className="h-4 w-4 text-success"
               aria-label="Username available"
               data-testid="username-success-icon"
             />
           )}
           {showError && validationStatus === "error" && (
             <X
-              className="h-4 w-4 text-red-500 dark:text-red-400"
+              className="h-4 w-4 text-destructive"
               aria-label="Username error"
               data-testid="username-error-icon"
             />
@@ -76,18 +74,12 @@ export function UsernameInput({
         </div>
       </div>
       {showError && (
-        <p
-          className="text-sm text-red-500 dark:text-red-400"
-          id="username-error"
-        >
+        <p className="text-sm text-destructive" id="username-error">
           {displayError}
         </p>
       )}
       {showSuccess && (
-        <p
-          className="text-sm text-emerald-600 dark:text-emerald-300"
-          role="status"
-        >
+        <p className="text-sm text-success" role="status">
           {validationMessage}
         </p>
       )}

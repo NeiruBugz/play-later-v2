@@ -1,21 +1,37 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/shared/types";
 
 import { Button } from "@/shared/components/ui/button";
 import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
+import { cn } from "@/shared/lib/ui";
 
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
 import type { LibraryCardActionBarProps } from "./library-card-action-bar.types";
 
 const STATUS_OPTIONS: LibraryItemStatus[] = [
-  "WISHLIST",
-  "CURIOUS_ABOUT",
-  "CURRENTLY_EXPLORING",
-  "TOOK_A_BREAK",
-  "EXPERIENCED",
-  "REVISITING",
+  LibraryItemStatus.WISHLIST,
+  LibraryItemStatus.CURIOUS_ABOUT,
+  LibraryItemStatus.CURRENTLY_EXPLORING,
+  LibraryItemStatus.TOOK_A_BREAK,
+  LibraryItemStatus.EXPERIENCED,
+  LibraryItemStatus.REVISITING,
 ];
+
+const STATUS_BUTTON_STYLES: Record<LibraryItemStatus, string> = {
+  [LibraryItemStatus.WISHLIST]:
+    "bg-[var(--status-wishlist)]/90 text-[var(--status-wishlist-foreground)] hover:bg-[var(--status-wishlist)]",
+  [LibraryItemStatus.CURIOUS_ABOUT]:
+    "bg-[var(--status-curious)]/90 text-[var(--status-curious-foreground)] hover:bg-[var(--status-curious)]",
+  [LibraryItemStatus.CURRENTLY_EXPLORING]:
+    "bg-[var(--status-playing)]/90 text-[var(--status-playing-foreground)] hover:bg-[var(--status-playing)]",
+  [LibraryItemStatus.TOOK_A_BREAK]:
+    "bg-[var(--status-break)]/90 text-[var(--status-break-foreground)] hover:bg-[var(--status-break)]",
+  [LibraryItemStatus.EXPERIENCED]:
+    "bg-[var(--status-experienced)]/90 text-[var(--status-experienced-foreground)] hover:bg-[var(--status-experienced)]",
+  [LibraryItemStatus.REVISITING]:
+    "bg-[var(--status-revisiting)]/90 text-[var(--status-revisiting-foreground)] hover:bg-[var(--status-revisiting)]",
+};
 
 export function LibraryCardActionBar({
   libraryItemId,
@@ -46,17 +62,23 @@ export function LibraryCardActionBar({
         e.stopPropagation();
       }}
     >
-      <div className="pointer-events-auto rounded-b-md bg-gradient-to-t from-black/80 via-black/70 to-transparent p-3 pt-8 backdrop-blur-sm">
-        <div className="flex flex-wrap gap-1.5">
+      <div className="pointer-events-auto rounded-b-md bg-gradient-to-t from-black/80 via-black/70 to-transparent p-lg pt-3xl backdrop-blur-sm">
+        <div className="flex flex-wrap gap-sm">
           {availableStatuses.map((status) => {
             const isDisabled =
-              status === "WISHLIST" && currentStatus !== "WISHLIST";
+              status === LibraryItemStatus.WISHLIST &&
+              currentStatus !== LibraryItemStatus.WISHLIST;
             return (
               <Button
                 key={status}
                 variant="secondary"
                 size="sm"
-                className="h-7 rounded-md border border-white/10 bg-white/10 px-2.5 text-xs font-medium text-white shadow-sm transition-all hover:scale-105 hover:border-white/20 hover:bg-white/20 hover:shadow-md focus-visible:scale-105 focus-visible:border-white/30 focus-visible:bg-white/30 disabled:opacity-40 disabled:hover:scale-100"
+                className={cn(
+                  "caption h-7 rounded-md border-none px-md font-medium shadow-sm transition-all",
+                  "hover:scale-105 hover:shadow-md focus-visible:scale-105",
+                  "disabled:opacity-40 disabled:hover:scale-100",
+                  STATUS_BUTTON_STYLES[status]
+                )}
                 disabled={isDisabled || updateStatus.isPending}
                 onClick={(e) => {
                   e.preventDefault();

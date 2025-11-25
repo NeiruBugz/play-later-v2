@@ -16,25 +16,25 @@ export default async function Page() {
       <section className="relative overflow-hidden">
         <div className="from-muted/30 to-background absolute inset-0 bg-linear-to-b" />
         <div className="relative">
-          <nav className="container mx-auto flex items-center justify-between px-4 py-6">
-            <div className="flex items-center gap-2">
+          <nav className="container mx-auto flex items-center justify-between px-lg py-2xl">
+            <div className="flex items-center gap-md">
               <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
                 <BookOpen className="text-primary-foreground h-5 w-5" />
               </div>
-              <span className="text-foreground font-serif text-xl font-semibold">
+              <span className="heading-sm font-serif text-foreground">
                 SavePoint
               </span>
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2xl">
               <a
                 href="#features"
-                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                className="body-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Features
               </a>
               <a
                 href="#philosophy"
-                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                className="body-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Philosophy
               </a>
@@ -49,25 +49,25 @@ export default async function Page() {
               </Button>
             </div>
           </nav>
-          <div className="container mx-auto px-4 py-24 md:py-32">
-            <div className="mx-auto max-w-4xl space-y-8 text-center">
+          <div className="container mx-auto px-lg py-5xl md:py-32">
+            <div className="mx-auto max-w-4xl space-y-3xl text-center">
               <div className="inline-block">
-                <span className="bg-secondary/10 text-secondary inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
+                <span className="body-sm bg-secondary/10 text-secondary inline-flex items-center gap-md rounded-full px-lg py-md font-medium">
                   <Sparkles className="h-4 w-4" />
                   For Patient Gamers
                 </span>
               </div>
-              <h1 className="font-serif text-5xl leading-tight font-bold text-balance md:text-7xl">
+              <h1 className="display-2xl font-serif text-balance">
                 Your Personal Gaming Library & Journal
               </h1>
-              <p className="text-muted-foreground mx-auto max-w-2xl text-xl leading-relaxed text-pretty md:text-2xl">
+              <p className="body-lg text-muted-foreground mx-auto max-w-2xl text-pretty">
                 Curate your collection and journal your experiences. Games are
                 not chores to complete—they're worlds to explore and remember.
               </p>
-              <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
+              <div className="flex flex-col items-center justify-center gap-xl pt-xl sm:flex-row">
                 <Button
                   size="lg"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-3xl"
                   asChild
                 >
                   <Link href="/login">Start Your Journey</Link>
@@ -75,25 +75,25 @@ export default async function Page() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="bg-transparent px-8"
+                  className="bg-transparent px-3xl"
                 >
                   Learn More
                 </Button>
               </div>
-              <p className="text-muted-foreground text-sm">
+              <p className="body-sm text-muted-foreground">
                 Free to start • No credit card required
               </p>
             </div>
           </div>
         </div>
       </section>
-      <section id="philosophy" className="bg-muted/30 py-24">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl space-y-6 text-center">
-            <h2 className="font-serif text-4xl font-bold text-balance md:text-5xl">
+      <section id="philosophy" className="bg-muted/30 py-5xl">
+        <div className="container mx-auto px-lg">
+          <div className="mx-auto max-w-3xl space-y-2xl text-center">
+            <h2 className="display-lg font-serif text-balance">
               A Different Approach to Gaming
             </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed text-pretty">
+            <p className="body-lg text-muted-foreground text-pretty">
               Your game collection isn't a backlog—it's a library of
               opportunities. SavePoint helps you be intentional about your
               gaming journey, preserving memories and reflections along the way.
@@ -101,83 +101,83 @@ export default async function Page() {
           </div>
         </div>
       </section>
-      <section id="features" className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="mb-16 space-y-4 text-center">
-            <h2 className="font-serif text-4xl font-bold md:text-5xl">
+      <section id="features" className="py-5xl">
+        <div className="container mx-auto px-lg">
+          <div className="mb-4xl space-y-xl text-center">
+            <h2 className="display-lg font-serif">
               Everything You Need
             </h2>
-            <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
+            <p className="body-lg text-muted-foreground mx-auto max-w-2xl">
               Thoughtfully designed features for patient gamers
             </p>
           </div>
-          <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
+          <div className="mx-auto grid max-w-6xl gap-3xl md:grid-cols-2 lg:grid-cols-3">
+            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Library className="text-primary h-6 w-6" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold">
+              <h3 className="heading-lg font-serif">
                 Personal Library
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="body-md text-muted-foreground">
                 Curate your collection across all platforms. Import from Steam
                 and other services, or add games manually.
               </p>
             </Card>
-            <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
+            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <BookOpen className="text-secondary h-6 w-6" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold">
+              <h3 className="heading-lg font-serif">
                 Gaming Journal
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="body-md text-muted-foreground">
                 Write reflections and preserve memories. Capture what made each
                 game special to you.
               </p>
             </Card>
-            <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
+            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Clock className="text-primary h-6 w-6" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold">
+              <h3 className="heading-lg font-serif">
                 Journey Tracking
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="body-md text-muted-foreground">
                 Mark where you are: Curious About, Currently Exploring,
                 Experienced. No pressure, just progress.
               </p>
             </Card>
-            <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
+            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Heart className="text-secondary h-6 w-6" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold">
+              <h3 className="heading-lg font-serif">
                 Curated Collections
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="body-md text-muted-foreground">
                 Create themed collections like "Cozy Winter Games" or "Games
                 That Made Me Think."
               </p>
             </Card>
-            <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
+            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Sparkles className="text-primary h-6 w-6" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold">Discovery</h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <h3 className="heading-lg font-serif">Discovery</h3>
+              <p className="body-md text-muted-foreground">
                 Find similar games through IGDB integration. Discover your next
                 adventure thoughtfully.
               </p>
             </Card>
-            <Card className="border-border bg-card space-y-4 p-8 transition-shadow hover:shadow-lg">
+            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Users className="text-secondary h-6 w-6" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold">
+              <h3 className="heading-lg font-serif">
                 Community Reflections
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="body-md text-muted-foreground">
                 Read and share perspectives on games. Connect with fellow
                 patient gamers.
               </p>
@@ -185,15 +185,15 @@ export default async function Page() {
           </div>
         </div>
       </section>
-      <section className="bg-muted/30 py-24">
-        <div className="container mx-auto px-4">
+      <section className="bg-muted/30 py-5xl">
+        <div className="container mx-auto px-lg">
           <div className="mx-auto max-w-6xl">
-            <div className="grid items-center gap-12 md:grid-cols-2">
-              <div className="space-y-6">
-                <h2 className="font-serif text-4xl font-bold text-balance md:text-5xl">
+            <div className="grid items-center gap-4xl md:grid-cols-2">
+              <div className="space-y-2xl">
+                <h2 className="display-lg font-serif text-balance">
                   Your Gaming Memories Timeline
                 </h2>
-                <p className="text-muted-foreground text-lg leading-relaxed">
+                <p className="body-lg text-muted-foreground">
                   View your gaming journey chronologically. See how your tastes
                   evolved, revisit cherished memories, and reflect on the worlds
                   you've explored.
@@ -204,9 +204,9 @@ export default async function Page() {
               </div>
               <div className="from-primary/20 to-secondary/20 relative aspect-4/3 overflow-hidden rounded-lg bg-linear-to-br">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="space-y-2 text-center">
+                  <div className="space-y-md text-center">
                     <BookOpen className="text-primary mx-auto h-16 w-16 opacity-50" />
-                    <p className="text-muted-foreground text-sm">
+                    <p className="body-sm text-muted-foreground">
                       Timeline Preview
                     </p>
                   </div>
@@ -216,27 +216,27 @@ export default async function Page() {
           </div>
         </div>
       </section>
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl space-y-8 text-center">
-            <h2 className="font-serif text-4xl font-bold text-balance md:text-5xl">
+      <section className="py-5xl">
+        <div className="container mx-auto px-lg">
+          <div className="mx-auto max-w-3xl space-y-3xl text-center">
+            <h2 className="display-lg font-serif text-balance">
               Ready to Start Your Journey?
             </h2>
-            <p className="text-muted-foreground text-xl text-pretty">
+            <p className="body-lg text-muted-foreground text-pretty">
               Join patient gamers who are building intentional, memorable gaming
               experiences.
             </p>
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="flex flex-col items-center justify-center gap-xl sm:flex-row">
               <Button
                 size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-8"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 px-3xl"
               >
                 Create Your Library
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="bg-transparent px-8"
+                className="bg-transparent px-3xl"
               >
                 View Demo
               </Button>
@@ -245,23 +245,23 @@ export default async function Page() {
         </div>
       </section>
       <footer className="border-border bg-muted/30 border-t">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
+        <div className="container mx-auto px-lg py-4xl">
+          <div className="grid gap-3xl md:grid-cols-4">
+            <div className="space-y-xl">
+              <div className="flex items-center gap-md">
                 <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
                   <BookOpen className="text-primary-foreground h-5 w-5" />
                 </div>
-                <span className="font-serif text-xl font-semibold">
+                <span className="heading-sm font-serif">
                   SavePoint
                 </span>
               </div>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="body-sm text-muted-foreground">
                 Your personal gaming library and journal for patient gamers.
               </p>
             </div>
           </div>
-          <div className="border-border text-muted-foreground mt-12 border-t pt-8 text-center text-sm">
+          <div className="body-sm border-border text-muted-foreground mt-4xl border-t pt-3xl text-center">
             <p>
               2025 SavePoint. For patient gamers who view games as worlds to
               explore.

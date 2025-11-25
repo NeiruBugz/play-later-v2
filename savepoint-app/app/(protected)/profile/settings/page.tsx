@@ -13,7 +13,7 @@ export default async function ProfileSettingsPage() {
     redirect("/login");
   }
   return (
-    <div className="flex items-start gap-3">
+    <div className="flex items-start gap-lg">
       <BrowserBackButton />
       <ProfileSettingsForm
         currentUsername={result.data.profile.username}

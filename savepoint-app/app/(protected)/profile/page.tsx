@@ -25,7 +25,7 @@ export default async function ProfilePage() {
     redirect("/error");
   }
   return (
-    <main className="container py-8" data-testid="profile-page">
+    <main className="container py-3xl" data-testid="profile-page">
       <ProfileView profile={result.data.profile} />
     </main>
   );

@@ -1,13 +1,15 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 
 import {
   LIBRARY_DATA_GC_TIME_MS,
   LIBRARY_DATA_STALE_TIME_MS,
 } from "@/shared/constants";
-import type { LibraryItemWithGameAndCount } from "@/shared/types";
+import type {
+  LibraryItemStatus,
+  LibraryItemWithGameDomain,
+} from "@/shared/types";
 
 export type LibraryFilters = {
   status?: LibraryItemStatus;
@@ -20,7 +22,7 @@ export type LibraryFilters = {
 type LibraryApiResponse =
   | {
       success: true;
-      data: LibraryItemWithGameAndCount[];
+      data: LibraryItemWithGameDomain[];
     }
   | {
       success: false;
@@ -30,7 +32,7 @@ type LibraryApiResponse =
 export function useLibraryData(filters: LibraryFilters = {}) {
   return useQuery({
     queryKey: ["library", filters],
-    queryFn: async (): Promise<LibraryItemWithGameAndCount[]> => {
+    queryFn: async (): Promise<LibraryItemWithGameDomain[]> => {
       const params = new URLSearchParams(
         Object.entries(filters)
           .filter(([, value]) => value !== undefined)

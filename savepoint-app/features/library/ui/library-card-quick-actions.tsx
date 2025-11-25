@@ -1,6 +1,6 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/shared/types";
 import { MoreVertical } from "lucide-react";
 
 import {
@@ -15,12 +15,12 @@ import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
 import type { LibraryCardQuickActionsProps } from "./library-card-quick-actions.types";
 
 const STATUS_OPTIONS: LibraryItemStatus[] = [
-  "WISHLIST",
-  "CURIOUS_ABOUT",
-  "CURRENTLY_EXPLORING",
-  "TOOK_A_BREAK",
-  "EXPERIENCED",
-  "REVISITING",
+  LibraryItemStatus.WISHLIST,
+  LibraryItemStatus.CURIOUS_ABOUT,
+  LibraryItemStatus.CURRENTLY_EXPLORING,
+  LibraryItemStatus.TOOK_A_BREAK,
+  LibraryItemStatus.EXPERIENCED,
+  LibraryItemStatus.REVISITING,
 ];
 
 export function LibraryCardQuickActions({
@@ -54,7 +54,8 @@ export function LibraryCardQuickActions({
         <SelectContent>
           {availableStatuses.map((status) => {
             const isDisabled =
-              status === "WISHLIST" && currentStatus !== "WISHLIST";
+              status === LibraryItemStatus.WISHLIST &&
+              currentStatus !== LibraryItemStatus.WISHLIST;
             return (
               <SelectItem
                 key={status}
@@ -69,7 +70,7 @@ export function LibraryCardQuickActions({
               >
                 {LibraryStatusMapper[status]}
                 {isDisabled && (
-                  <span className="text-muted-foreground ml-2 text-xs">
+                  <span className="caption text-muted-foreground ml-md">
                     (cannot move back)
                   </span>
                 )}

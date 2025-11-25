@@ -1,29 +1,32 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
 import Link from "next/link";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/shared/components/ui/tooltip";
+  mapLibraryStatusToGameStatus,
+  ProgressRing,
+} from "@/shared/components/ui/progress-ring";
 import {
   LIBRARY_STATUS_LABELS,
   LIBRARY_STATUS_VARIANTS,
 } from "@/shared/lib/library-status";
+import { cn } from "@/shared/lib/ui";
+import type { LibraryItemStatus } from "@/shared/types";
 
 import { LibraryCardActionBar } from "./library-card-action-bar";
 import type { LibraryCardProps } from "./library-card.types";
 
-export function LibraryCard({ item }: LibraryCardProps) {
+export function LibraryCard({
+  item,
+  index = 0,
+}: LibraryCardProps & { index?: number }) {
   const { game, status } = item;
-  const hasMultipleEntries = game._count.libraryItems > 1;
+  const hasMultipleEntries = game.entryCount > 1;
   const coverImageId =
     game.coverImage?.split("/").pop()?.replace(".jpg", "") ?? null;
+  const gameStatus = mapLibraryStatusToGameStatus(status);
 
   const handleLinkInteraction = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.defaultPrevented) {
@@ -42,61 +45,79 @@ export function LibraryCard({ item }: LibraryCardProps) {
       e.stopPropagation();
     }
   };
+
+  const staggerIndex = Math.min(index + 1, 12);
+
   return (
-    <TooltipProvider>
-      <Link
+    <Link
         href={`/games/${game.slug}`}
-        className="group relative block [&>[data-library-interactive]]:pointer-events-auto"
+        className={cn(
+          "group relative block [&>[data-library-interactive]]:pointer-events-auto",
+          "animate-stagger-in",
+          `stagger-${staggerIndex}`,
+          "duration-normal ease-out-expo rounded-lg transition-all",
+          "hover:shadow-paper-md hover:scale-[1.02]"
+        )}
         onClick={handleLinkInteraction}
         onMouseDown={handleLinkInteraction}
-        aria-label={`${game.title} - ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}${hasMultipleEntries ? ` - ${game._count.libraryItems} entries` : ""}`}
+        aria-label={`${game.title} - ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}${hasMultipleEntries ? ` - ${game.entryCount} entries` : ""}`}
+        style={{ animationDelay: `${staggerIndex * 50}ms` }}
       >
-        <GameCoverImage
-          imageId={coverImageId}
-          gameTitle={game.title}
-          size="hd"
-          className="aspect-[3/4] w-full rounded-md"
-          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
-        />
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-              <div className="flex h-full items-end p-3">
-                <p className="line-clamp-3 text-sm font-semibold text-white">
-                  {game.title}
-                </p>
-              </div>
+        <div className="relative overflow-hidden rounded-lg">
+          <GameCoverImage
+            imageId={coverImageId}
+            gameTitle={game.title}
+            size="hd"
+            className="aspect-[3/4] w-full"
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
+          />
+
+          <div className="duration-normal pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+            <ProgressRing
+              status={gameStatus}
+              size="lg"
+              animated={false}
+              className="drop-shadow-lg"
+            />
+          </div>
+
+          <div className="duration-normal pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="p-lg flex h-full items-end">
+              <p className="body-sm line-clamp-3 font-semibold text-white drop-shadow-md">
+                {game.title}
+              </p>
             </div>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            <p>{game.title}</p>
-          </TooltipContent>
-        </Tooltip>
-        <div className="absolute top-2 left-2">
-          <Badge
-            variant={LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]}
-            role="status"
-            aria-label={`Status: ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}`}
-          >
-            {LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}
-          </Badge>
-        </div>
-        {hasMultipleEntries && (
-          <div className="absolute top-2 right-2">
+          </div>
+
+          <div className="absolute top-3 left-3 z-10">
             <Badge
-              variant="secondary"
+              variant={LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]}
               role="status"
-              aria-label={`${game._count.libraryItems} library entries for this game`}
+              aria-label={`Status: ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}`}
+              className="shadow-paper-sm backdrop-blur-sm"
             >
-              {game._count.libraryItems} entries
+              {LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}
             </Badge>
           </div>
-        )}
+
+          {hasMultipleEntries && (
+            <div className="absolute top-3 right-3 z-10">
+              <Badge
+                variant="secondary"
+                role="status"
+                aria-label={`${game.entryCount} library entries for this game`}
+                className="shadow-paper-sm backdrop-blur-sm"
+              >
+                {game.entryCount} entries
+              </Badge>
+            </div>
+          )}
+        </div>
+
         <LibraryCardActionBar
           libraryItemId={item.id}
           currentStatus={status as LibraryItemStatus}
         />
       </Link>
-    </TooltipProvider>
   );
 }

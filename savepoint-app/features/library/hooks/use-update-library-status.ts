@@ -1,10 +1,12 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { LibraryItemWithGameAndCount } from "@/shared/types";
+import type {
+  LibraryItemStatus,
+  LibraryItemWithGameDomain,
+} from "@/shared/types";
 
 import { updateLibraryStatusAction } from "../server-actions/update-library-status";
 
@@ -34,7 +36,7 @@ export function useUpdateLibraryStatus() {
         queryKey: ["library"],
       });
 
-      queryClient.setQueriesData<LibraryItemWithGameAndCount[]>(
+      queryClient.setQueriesData<LibraryItemWithGameDomain[]>(
         { queryKey: ["library"] },
         (oldData) => {
           if (!oldData) return oldData;

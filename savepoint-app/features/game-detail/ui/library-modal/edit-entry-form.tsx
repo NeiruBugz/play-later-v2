@@ -43,7 +43,7 @@ export const EditEntryForm = ({
   });
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-xl">
         <LibraryEntryMetadata item={item} />
         <FormField
           control={form.control}
@@ -52,11 +52,11 @@ export const EditEntryForm = ({
             <StatusSelect
               field={field}
               description="Update your journey status for this entry"
-              className="py-6 text-left"
+              className="py-2xl text-left"
             />
           )}
         />
-        <div className="space-y-2">
+        <div className="space-y-md">
           <Label htmlFor="platform-readonly">Platform</Label>
           <Input
             id="platform-readonly"

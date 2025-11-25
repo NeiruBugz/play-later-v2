@@ -1,5 +1,6 @@
 "use client";
 
+import type { LibraryItemStatus } from "@/data-access-layer/domain/library/enums";
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -16,9 +17,52 @@ import {
 } from "@/shared/components/ui/select";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
+import { cn } from "@/shared/lib/ui";
 
 import { useUniquePlatforms } from "../hooks/use-unique-platforms";
 import { PlatformFilterCombobox } from "./platform-filter-combobox";
+
+const STATUS_FILTER_STYLES: Record<
+  LibraryItemStatus,
+  { active: string; inactive: string }
+> = {
+  WISHLIST: {
+    active:
+      "bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)] hover:bg-[var(--status-wishlist)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-wishlist)]/30 text-[var(--status-wishlist)] hover:bg-[var(--status-wishlist)]/10",
+  },
+  CURIOUS_ABOUT: {
+    active:
+      "bg-[var(--status-curious)] text-[var(--status-curious-foreground)] hover:bg-[var(--status-curious)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-curious)]/30 text-[var(--status-curious)] hover:bg-[var(--status-curious)]/10",
+  },
+  CURRENTLY_EXPLORING: {
+    active:
+      "bg-[var(--status-playing)] text-[var(--status-playing-foreground)] hover:bg-[var(--status-playing)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-playing)]/30 text-[var(--status-playing)] hover:bg-[var(--status-playing)]/10",
+  },
+  TOOK_A_BREAK: {
+    active:
+      "bg-[var(--status-break)] text-[var(--status-break-foreground)] hover:bg-[var(--status-break)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-break)]/30 text-[var(--status-break)] hover:bg-[var(--status-break)]/10",
+  },
+  EXPERIENCED: {
+    active:
+      "bg-[var(--status-experienced)] text-[var(--status-experienced-foreground)] hover:bg-[var(--status-experienced)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-experienced)]/30 text-[var(--status-experienced)] hover:bg-[var(--status-experienced)]/10",
+  },
+  REVISITING: {
+    active:
+      "bg-[var(--status-revisiting)] text-[var(--status-revisiting-foreground)] hover:bg-[var(--status-revisiting)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-revisiting)]/30 text-[var(--status-revisiting)] hover:bg-[var(--status-revisiting)]/10",
+  },
+};
 
 export function LibraryFilters() {
   const router = useRouter();
@@ -69,9 +113,9 @@ export function LibraryFilters() {
   const currentStatus = searchParams.get("status") ?? "__all__";
 
   return (
-    <div className="mb-6 space-y-4">
+    <div className="mb-2xl space-y-xl">
       {/* Status filter - full width row */}
-      <div className="space-y-2">
+      <div className="space-y-md">
         <Label htmlFor="status-filter">Status</Label>
         {/* Mobile: Select dropdown */}
         <div className="md:hidden">
@@ -95,7 +139,7 @@ export function LibraryFilters() {
           </Select>
         </div>
         {/* Desktop: Button group */}
-        <div className="hidden md:flex md:flex-wrap md:gap-2">
+        <div className="gap-md md:gap-md hidden md:flex md:flex-wrap">
           <Button
             variant={currentStatus === "__all__" ? "default" : "outline"}
             size="sm"
@@ -107,14 +151,20 @@ export function LibraryFilters() {
           </Button>
           {LIBRARY_STATUS_CONFIG.map((option) => {
             const isActive = currentStatus === option.value;
+            const statusStyles =
+              STATUS_FILTER_STYLES[option.value as LibraryItemStatus];
             return (
               <Button
                 key={option.value}
-                variant={isActive ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => updateFilter("status", option.value)}
                 aria-label={`Filter by ${option.label}`}
                 aria-pressed={isActive}
+                className={cn(
+                  "transition-all",
+                  isActive ? statusStyles.active : statusStyles.inactive
+                )}
               >
                 {option.label}
               </Button>
@@ -124,8 +174,8 @@ export function LibraryFilters() {
       </div>
 
       {/* Other filters - row layout */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-end">
-        <div className="w-full space-y-2 md:w-auto md:flex-1">
+      <div className="gap-xl flex flex-col md:flex-row md:items-end">
+        <div className="space-y-md w-full md:w-auto md:flex-1">
           <Label htmlFor="platform-filter">Platform</Label>
           <PlatformFilterCombobox
             value={searchParams.get("platform") ?? "__all__"}
@@ -136,7 +186,7 @@ export function LibraryFilters() {
             isLoading={isLoadingPlatforms}
           />
         </div>
-        <div className="w-full space-y-2 md:flex-1">
+        <div className="space-y-md w-full md:flex-1">
           <Label htmlFor="search-input">Search</Label>
           <div className="relative">
             <Search
@@ -162,7 +212,7 @@ export function LibraryFilters() {
             className="w-full md:mb-0 md:w-auto"
             aria-label="Clear all filters"
           >
-            <X className="mr-2 h-4 w-4" aria-hidden="true" />
+            <X className="mr-md h-4 w-4" aria-hidden="true" />
             Clear Filters
           </Button>
         )}

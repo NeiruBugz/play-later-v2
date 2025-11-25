@@ -50,18 +50,18 @@ export const LibraryItemCard = ({
             : undefined
         }
       >
-        <CardContent className="p-4">
-          <div className="space-y-3">
+        <CardContent className="p-xl">
+          <div className="space-y-lg">
             {}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-md">
+              <div className="flex items-center gap-md">
                 <span className="text-sm font-medium" aria-label="Platform">
                   {item.platform
                     ? `🎮 ${item.platform}`
                     : "🎮 Platform not set"}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-md">
                 <Badge variant={getStatusVariant(item.status)}>
                   {getStatusLabel(item.status)}
                 </Badge>
@@ -79,9 +79,9 @@ export const LibraryItemCard = ({
               </div>
             </div>
             {}
-            <div className="text-muted-foreground space-y-1.5 text-sm">
+            <div className="text-muted-foreground space-y-sm text-sm">
               {}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-md">
                 <PlayIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
                   Started:{" "}
@@ -97,7 +97,7 @@ export const LibraryItemCard = ({
                 </span>
               </div>
               {}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-md">
                 <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
                   Completed:{" "}
@@ -112,7 +112,7 @@ export const LibraryItemCard = ({
               </div>
             </div>
             {}
-            <div className="text-muted-foreground flex items-center gap-1 text-xs">
+            <div className="text-muted-foreground flex items-center gap-xs text-xs">
               <CalendarIcon className="h-3 w-3" aria-hidden="true" />
               <span>
                 Added:{" "}
@@ -120,7 +120,7 @@ export const LibraryItemCard = ({
                   {formatAbsoluteDate(item.createdAt)}
                 </time>
               </span>
-              <span className="mx-1">•</span>
+              <span className="mx-xs">•</span>
               <span>
                 Updated:{" "}
                 <time dateTime={item.updatedAt.toISOString()}>

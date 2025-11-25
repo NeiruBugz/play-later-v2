@@ -59,14 +59,14 @@ export function PlatformFilterCombobox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "h-9 w-full justify-between text-sm",
+            "body-sm h-9 w-full justify-between",
             (value === "__all__" || !value) && "text-muted-foreground"
           )}
           disabled={isLoading || disabled}
           aria-label="Filter by platform"
         >
           {isLoading ? "Loading platforms..." : displayValue}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-md h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
@@ -78,7 +78,7 @@ export function PlatformFilterCombobox({
               <CommandItem value="__all__" onSelect={handleSelect}>
                 <Check
                   className={cn(
-                    "mr-2 h-4 w-4",
+                    "mr-md h-4 w-4",
                     value === "__all__" || !value ? "opacity-100" : "opacity-0"
                   )}
                 />
@@ -92,7 +92,7 @@ export function PlatformFilterCombobox({
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-md h-4 w-4",
                       value === platform.name ? "opacity-100" : "opacity-0"
                     )}
                   />

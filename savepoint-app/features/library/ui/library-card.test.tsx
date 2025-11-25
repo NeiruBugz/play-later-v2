@@ -1,6 +1,6 @@
 import { renderWithTestProviders } from "@/test/utils/test-provider";
+import { LibraryItemStatus } from "@/shared/types";
 import { createLibraryItemFixture } from "@fixtures/library";
-import { LibraryItemStatus } from "@prisma/client";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -161,9 +161,7 @@ describe("LibraryCard", () => {
       const item = createLibraryItemFixture({
         game: {
           ...createLibraryItemFixture().game,
-          _count: {
-            libraryItems: 3,
-          },
+          entryCount: 3,
         },
       });
 
@@ -178,9 +176,7 @@ describe("LibraryCard", () => {
       const item = createLibraryItemFixture({
         game: {
           ...createLibraryItemFixture().game,
-          _count: {
-            libraryItems: 2,
-          },
+          entryCount: 2,
         },
       });
 
@@ -195,9 +191,7 @@ describe("LibraryCard", () => {
       const item = createLibraryItemFixture({
         game: {
           ...createLibraryItemFixture().game,
-          _count: {
-            libraryItems: 1,
-          },
+          entryCount: 1,
         },
       });
 
@@ -278,9 +272,7 @@ describe("LibraryCard", () => {
       const item = createLibraryItemFixture({
         game: {
           ...createLibraryItemFixture().game,
-          _count: {
-            libraryItems: 2,
-          },
+          entryCount: 2,
         },
       });
 

@@ -1,25 +1,35 @@
-import { Loader2 } from "lucide-react";
+import Image from "next/image";
+
+import { ProgressRingSpinner } from "@/shared/components/ui/progress-ring";
 
 export function LoadingScreen() {
   return (
-    <div className="bg-background relative flex min-h-screen items-center justify-center px-6">
+    <div className="bg-background relative flex min-h-screen items-center justify-center px-2xl">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--primary))/0.15,transparent_55%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,var(--status-playing)/0.15,transparent_55%)]"
       />
       <div
         aria-live="polite"
-        className="relative flex flex-col items-center gap-4 text-center"
+        className="animate-fade-in relative flex flex-col items-center gap-xl text-center"
         role="status"
       >
-        <span className="bg-primary/10 text-primary flex h-14 w-14 items-center justify-center rounded-full">
-          <Loader2 className="h-7 w-7 animate-spin" />
-        </span>
-        <div className="space-y-1.5">
-          <p className="font-serif text-2xl font-semibold tracking-wide">
-            SavePoint
-          </p>
-          <p className="text-muted-foreground text-sm">
+        <div className="relative">
+          <ProgressRingSpinner size="lg" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Image
+              src="/logo.svg"
+              alt="SavePoint Logo"
+              width={40}
+              height={40}
+              className="opacity-80"
+              priority
+            />
+          </div>
+        </div>
+        <div className="space-y-sm">
+          <p className="heading-md font-serif tracking-wide">SavePoint</p>
+          <p className="body-sm text-muted-foreground">
             Loading your gaming library...
           </p>
         </div>

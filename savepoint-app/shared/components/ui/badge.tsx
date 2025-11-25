@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/shared/lib/ui/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-sm border px-lg py-xs text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
@@ -21,6 +21,18 @@ const badgeVariants = cva(
         nintendo:
           "border-transparent bg-[#e60012]/10 text-[#e60012] hover:bg-[#e60012]/20 dark:bg-[#e60012]/20 dark:text-[#f66]",
         pc: "border-transparent bg-[#1b2838]/10 text-[#1b2838] hover:bg-[#1b2838]/20 dark:bg-[#66c0f4]/20 dark:text-[#66c0f4]",
+        curious:
+          "border-transparent bg-[var(--status-curious)] text-[var(--status-curious-foreground)]",
+        playing:
+          "border-transparent bg-[var(--status-playing)] text-[var(--status-playing-foreground)]",
+        break:
+          "border-transparent bg-[var(--status-break)] text-[var(--status-break-foreground)]",
+        experienced:
+          "border-transparent bg-[var(--status-experienced)] text-[var(--status-experienced-foreground)]",
+        wishlist:
+          "border-transparent bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)]",
+        revisiting:
+          "border-transparent bg-[var(--status-revisiting)] text-[var(--status-revisiting-foreground)]",
       },
     },
     defaultVariants: {

@@ -103,8 +103,8 @@ export const QuickActionButtons = ({
   };
   return (
     <Card className="w-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Quick Actions</CardTitle>
+      <CardHeader className="pb-lg">
+        <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
         {}
@@ -117,7 +117,7 @@ export const QuickActionButtons = ({
           {announcement}
         </div>
         <div
-          className="grid grid-cols-2 gap-2"
+          className="grid grid-cols-2 gap-md"
           role="group"
           aria-label="Journey status quick actions"
         >
@@ -130,7 +130,7 @@ export const QuickActionButtons = ({
                 key={status}
                 variant={isActive ? "default" : "outline"}
                 size="sm"
-                className="focus-visible:ring-primary flex h-auto flex-col gap-1 py-3 focus-visible:ring-2 focus-visible:ring-offset-2"
+                className="focus-visible:ring-primary flex h-auto flex-col gap-xs py-lg focus-visible:ring-2 focus-visible:ring-offset-2"
                 onClick={() => handleStatusChange(status)}
                 disabled={isPending}
                 aria-label={config.ariaLabel}
@@ -140,7 +140,7 @@ export const QuickActionButtons = ({
                   className={`h-5 w-5 ${isActive ? "text-primary-foreground" : "text-primary"}`}
                   aria-hidden="true"
                 />
-                <span className="text-xs">{config.label}</span>
+                <span className="caption">{config.label}</span>
               </Button>
             );
           })}

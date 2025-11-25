@@ -87,13 +87,13 @@ export function CredentialsForm() {
   return (
     <div>
       {errors.root?.message && (
-        <div className="bg-destructive/10 text-destructive mb-4 rounded-md p-3 text-sm">
+        <div className="body-sm bg-destructive/10 text-destructive mb-xl rounded-md p-lg">
           {errors.root.message}
         </div>
       )}
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <form onSubmit={onSubmit} className="space-y-xl" noValidate>
         {mode === "signup" && (
-          <div className="space-y-2">
+          <div className="space-y-md">
             <Label htmlFor="name">Name (Optional)</Label>
             <Input
               id="name"
@@ -110,7 +110,7 @@ export function CredentialsForm() {
             {errors.name?.message && (
               <p
                 id="name-error"
-                className="text-destructive text-xs"
+                className="caption text-destructive"
                 role="alert"
               >
                 {errors.name.message}
@@ -118,7 +118,7 @@ export function CredentialsForm() {
             )}
           </div>
         )}
-        <div className="space-y-2">
+        <div className="space-y-md">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -133,14 +133,14 @@ export function CredentialsForm() {
           {errors.email?.message && (
             <p
               id="email-error"
-              className="text-destructive text-xs"
+              className="caption text-destructive"
               role="alert"
             >
               {errors.email.message}
             </p>
           )}
         </div>
-        <div className="space-y-2">
+        <div className="space-y-md">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
@@ -156,7 +156,7 @@ export function CredentialsForm() {
           {passwordHint ? (
             <p
               id="password-hint"
-              className="text-muted-foreground text-xs"
+              className="caption text-muted-foreground"
               role={errors.password ? "alert" : undefined}
             >
               {passwordHint}
@@ -175,7 +175,7 @@ export function CredentialsForm() {
               : "Sign Up"}
         </Button>
       </form>
-      <div className="mt-6 text-center text-sm">
+      <div className="body-sm mt-2xl text-center">
         {mode === "signin" ? (
           <p>
             Don't have an account?{" "}

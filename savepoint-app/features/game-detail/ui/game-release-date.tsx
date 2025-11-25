@@ -6,7 +6,7 @@ export function GameReleaseDate({ firstReleaseDate }: GameReleaseDateProps) {
   const date = firstReleaseDate ? new Date(firstReleaseDate * 1000) : null;
   const releaseDate = date ? formatAbsoluteDate(date) : "N/A";
   return (
-    <p className="text-muted-foreground text-sm">
+    <p className="body-sm text-muted-foreground">
       Release Date:{" "}
       {date ? (
         <time dateTime={date.toISOString()}>{releaseDate}</time>

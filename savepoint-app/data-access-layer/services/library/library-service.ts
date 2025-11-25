@@ -10,6 +10,10 @@ import {
   findMostRecentLibraryItemByGameId,
   updateLibraryItem,
 } from "@/data-access-layer/repository";
+import {
+  LibraryItemMapper,
+  type LibraryItemWithGameDomain,
+} from "@/data-access-layer/domain/library";
 import { AcquisitionType, LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
@@ -32,6 +36,7 @@ const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
   userId: z.string().cuid(),
 });
+
 type SortField = "createdAt" | "releaseDate" | "startedAt" | "completedAt";
 type GetLibraryItemsParams = {
   userId: string;
@@ -41,28 +46,6 @@ type GetLibraryItemsParams = {
   sortBy?: SortField;
   sortOrder?: "asc" | "desc";
   distinctByGame?: boolean;
-};
-type LibraryItemWithGameAndCount = {
-  id: number;
-  userId: string;
-  gameId: string;
-  status: LibraryItemStatus;
-  platform: string | null;
-  acquisitionType: string | null;
-  startedAt: Date | null;
-  completedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  game: {
-    id: string;
-    title: string;
-    coverImage: string | null;
-    slug: string;
-    releaseDate: Date | null;
-    _count: {
-      libraryItems: number;
-    };
-  };
 };
 export class LibraryService extends BaseService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "LibraryService" });
@@ -227,7 +210,7 @@ export class LibraryService extends BaseService {
   async getLibraryItems(
     params: GetLibraryItemsParams
   ): Promise<
-    | { success: true; data: LibraryItemWithGameAndCount[] }
+    | { success: true; data: LibraryItemWithGameDomain[] }
     | { success: false; error: string }
   > {
     try {
@@ -250,11 +233,14 @@ export class LibraryService extends BaseService {
         );
         return this.error("Failed to fetch library items");
       }
+
+      const domainItems = LibraryItemMapper.toWithGameDomainList(result.data);
+
       this.logger.info(
-        { count: result.data.length, userId: params.userId },
+        { count: domainItems.length, userId: params.userId },
         "Library items fetched successfully"
       );
-      return this.success(result.data);
+      return this.success(domainItems);
     } catch (error) {
       this.logger.error(
         { error, ...params },

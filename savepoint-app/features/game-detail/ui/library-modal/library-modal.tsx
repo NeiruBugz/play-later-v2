@@ -70,13 +70,13 @@ export const LibraryModal = ({
             onCancel={handleClose}
           />
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-xl">
             {existingItems.length === 0 ? (
               <p className="text-muted-foreground text-sm">
                 No library entries found for this game.
               </p>
             ) : selectedItemId !== null ? (
-              <div className="space-y-4">
+              <div className="space-y-xl">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium">Edit Entry</h3>
                   <Button
@@ -96,14 +96,14 @@ export const LibraryModal = ({
                 />
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-xl">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium">
                     Your Library Entries ({existingItems.length})
                   </h3>
                 </div>
                 {}
-                <div className="max-h-[400px] space-y-3 overflow-y-auto">
+                <div className="max-h-[400px] space-y-lg overflow-y-auto">
                   {existingItems.map((item) => (
                     <LibraryItemCard
                       key={item.id}
@@ -116,7 +116,7 @@ export const LibraryModal = ({
                 {}
                 <button
                   onClick={() => setActiveTab("add-new")}
-                  className="border-primary text-primary hover:bg-primary/5 flex w-full items-center justify-center gap-2 rounded-md border border-dashed py-3 text-sm font-medium transition-colors"
+                  className="border-primary text-primary hover:bg-primary/5 flex w-full items-center justify-center gap-md rounded-md border border-dashed py-lg text-sm font-medium transition-colors"
                   aria-label="Add new library entry"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
@@ -126,7 +126,7 @@ export const LibraryModal = ({
             )}
             {}
             {activeTab === "add-new" && selectedItemId === null && (
-              <div className="space-y-4">
+              <div className="space-y-xl">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium">Add New Entry</h3>
                   <button

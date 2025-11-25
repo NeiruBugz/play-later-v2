@@ -35,7 +35,7 @@ export const DeleteConfirmationDialog = ({
             <strong>{itemDescription}</strong> entry?
           </DialogDescription>
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-xl">
           <p className="text-muted-foreground text-sm">
             This action cannot be undone. This will permanently delete this
             library entry.

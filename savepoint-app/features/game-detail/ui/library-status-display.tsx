@@ -51,7 +51,7 @@ export const LibraryStatusDisplay = ({
   if (!userLibraryStatus) {
     return (
       <Card className="w-full">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-lg">
           <CardTitle className="text-base">Library Status</CardTitle>
           <CardDescription>Add this game to your library</CardDescription>
         </CardHeader>
@@ -82,11 +82,11 @@ export const LibraryStatusDisplay = ({
   return (
     <>
       <Card className="w-full">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-lg">
           <CardTitle className="text-base">Library Status</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-2" role="status">
+        <CardContent className="space-y-lg">
+          <div className="flex items-center gap-md" role="status">
             <Icon
               className="text-primary h-5 w-5"
               aria-hidden="true"

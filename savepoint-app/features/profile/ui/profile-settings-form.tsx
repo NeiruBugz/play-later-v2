@@ -74,9 +74,9 @@ export function ProfileSettingsForm({
           data-testid="avatar-url-input"
         />
         <input type="hidden" name="username" value={username} />
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-foreground text-sm font-medium">
+        <CardContent className="space-y-2xl">
+          <div className="space-y-md">
+            <label className="body-sm text-foreground font-medium">
               Profile Image
             </label>
             <AvatarUpload
@@ -85,8 +85,8 @@ export function ProfileSettingsForm({
               onUploadError={handleAvatarUploadError}
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-foreground text-sm font-medium">
+          <div className="space-y-md">
+            <label className="body-sm text-foreground font-medium">
               Username
             </label>
             <UsernameInput
@@ -96,7 +96,7 @@ export function ProfileSettingsForm({
               disabled={isPending}
               onValidationChange={setHasValidationError}
             />
-            <p className="text-muted-foreground text-sm">
+            <p className="body-sm text-muted-foreground">
               Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.
             </p>
           </div>

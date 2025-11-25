@@ -59,6 +59,7 @@ export const getFranchiseGames = cache(async function getFranchiseGames(
           offset: 0,
         }),
       ]);
+
       if (!detailsResult.success) {
         logger.warn(
           { franchiseId, error: detailsResult.error },

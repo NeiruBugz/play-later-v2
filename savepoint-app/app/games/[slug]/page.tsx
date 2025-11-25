@@ -39,11 +39,11 @@ export default async function GameDetailPage({
       ?.map((g) => g.name)
       .filter((name): name is string => name !== undefined) ?? [];
   return (
-    <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
-      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(280px,320px)_1fr] lg:gap-8">
+    <div className="container mx-auto px-lg py-2xl md:px-2xl lg:px-3xl">
+      <div className="flex flex-col gap-2xl lg:grid lg:grid-cols-[minmax(280px,320px)_1fr] lg:gap-3xl">
         {}
         <aside
-          className="space-y-4 lg:sticky lg:top-8 lg:self-start"
+          className="space-y-xl lg:sticky lg:top-3xl lg:self-start"
           aria-label="Game details sidebar"
         >
           <GameCoverImage
@@ -65,17 +65,17 @@ export default async function GameDetailPage({
             </>
           )}
         </aside>
-        <main className="space-y-6" aria-label="Game information">
-          <header className="space-y-2">
-            <h1 className="text-3xl font-bold md:text-4xl">{game.name}</h1>
+        <main className="space-y-2xl" aria-label="Game information">
+          <header className="space-y-md">
+            <h1 className="display-lg">{game.name}</h1>
             <GameReleaseDate firstReleaseDate={game.first_release_date} />
             {platforms.length > 0 && (
-              <div className="pt-1">
+              <div className="pt-xs">
                 <PlatformBadges platforms={platforms} />
               </div>
             )}
             {genres.length > 0 && (
-              <div className="pt-1">
+              <div className="pt-xs">
                 <GenreBadges genres={genres} />
               </div>
             )}

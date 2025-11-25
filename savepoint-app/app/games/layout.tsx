@@ -11,7 +11,7 @@ export default async function GameDetailsLayout({
   return (
     <>
       <Header isAuthorised={userId !== null} />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-lg py-3xl">
         <BrowserBackButton />
         <div className="mx-auto max-w-5xl">{children}</div>
       </div>

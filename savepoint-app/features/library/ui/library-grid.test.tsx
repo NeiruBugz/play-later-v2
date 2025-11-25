@@ -1,4 +1,5 @@
 import { renderWithTestProviders } from "@/test/utils/test-provider";
+import { LibraryItemStatus } from "@/shared/types";
 import { createLibraryItemFixture } from "@fixtures/library";
 import { screen, waitFor } from "@testing-library/react";
 
@@ -179,12 +180,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 1,
           gameId: "game-1",
-          status: "CURRENTLY_EXPLORING",
+          status: LibraryItemStatus.CURRENTLY_EXPLORING,
           game: {
             id: "game-1",
             title: "The Legend of Zelda",
             slug: "the-legend-of-zelda",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -192,12 +193,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 2,
           gameId: "game-2",
-          status: "EXPERIENCED",
+          status: LibraryItemStatus.EXPERIENCED,
           game: {
             id: "game-2",
             title: "Super Mario Odyssey",
             slug: "super-mario-odyssey",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -221,12 +222,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 1,
           gameId: "game-1",
-          status: "CURIOUS_ABOUT",
+          status: LibraryItemStatus.CURIOUS_ABOUT,
           game: {
             id: "game-1",
             title: "Game 1",
             slug: "game-1",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -234,12 +235,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 2,
           gameId: "game-2",
-          status: "WISHLIST",
+          status: LibraryItemStatus.WISHLIST,
           game: {
             id: "game-2",
             title: "Game 2",
             slug: "game-2",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -247,12 +248,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 3,
           gameId: "game-3",
-          status: "EXPERIENCED",
+          status: LibraryItemStatus.EXPERIENCED,
           game: {
             id: "game-3",
             title: "Game 3",
             slug: "game-3",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -277,12 +278,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 1,
           gameId: "game-1",
-          status: "CURIOUS_ABOUT",
+          status: LibraryItemStatus.CURIOUS_ABOUT,
           game: {
             id: "game-1",
             title: "Test Game",
             slug: "test-game",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -305,12 +306,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 1,
           gameId: "game-1",
-          status: "CURIOUS_ABOUT",
+          status: LibraryItemStatus.CURIOUS_ABOUT,
           game: {
             id: "game-1",
             title: "Test Game",
             slug: "test-game",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -333,12 +334,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 1,
           gameId: "game-1",
-          status: "CURIOUS_ABOUT",
+          status: LibraryItemStatus.CURIOUS_ABOUT,
           game: {
             id: "game-1",
             title: "Test Game",
             slug: "test-game",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -361,12 +362,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 1,
           gameId: "game-1",
-          status: "CURIOUS_ABOUT",
+          status: LibraryItemStatus.CURIOUS_ABOUT,
           game: {
             id: "game-1",
             title: "Test Game",
             slug: "test-game",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -391,12 +392,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 1,
           gameId: "game-1",
-          status: "CURIOUS_ABOUT",
+          status: LibraryItemStatus.CURIOUS_ABOUT,
           game: {
             id: "game-1",
             title: "Game 1",
             slug: "game-1",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -406,12 +407,12 @@ describe("LibraryGrid", () => {
         createLibraryItemFixture({
           id: 2,
           gameId: "game-2",
-          status: "EXPERIENCED",
+          status: LibraryItemStatus.EXPERIENCED,
           game: {
             id: "game-2",
             title: "Game 2",
             slug: "game-2",
-            _count: { libraryItems: 1 },
+            entryCount: 1,
             coverImage: null,
             releaseDate: null,
           },
@@ -431,7 +432,7 @@ describe("LibraryGrid", () => {
 
       const newFilters = {
         ...defaultFilters,
-        status: "EXPERIENCED" as any,
+        status: LibraryItemStatus.EXPERIENCED,
       };
       mockUseLibraryFilters.mockReturnValue(newFilters);
       mockUseLibraryData.mockReturnValue({
@@ -450,7 +451,7 @@ describe("LibraryGrid", () => {
 
     it("should pass filter values to useLibraryData hook", () => {
       const filters = {
-        status: "CURRENTLY_EXPLORING" as any,
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
         platform: "PlayStation 5",
         search: "zelda",
         sortBy: "releaseDate" as const,

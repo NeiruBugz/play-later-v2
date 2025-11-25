@@ -1,3 +1,5 @@
+import { cn } from "@/shared/lib/ui/utils";
+
 import type { GameDescriptionProps } from "./game-description.types";
 
 export function GameDescription({ summary }: GameDescriptionProps) {
@@ -5,7 +7,10 @@ export function GameDescription({ summary }: GameDescriptionProps) {
   const isPlaceholder = !summary?.trim();
   return (
     <p
-      className={`text-lg ${isPlaceholder ? "text-muted-foreground italic" : "text-muted-foreground"}`}
+      className={cn(
+        "body-lg text-muted-foreground",
+        isPlaceholder && "italic"
+      )}
     >
       {displayText}
     </p>

@@ -1,56 +1,30 @@
-import Link from "next/link";
-
-import { GameCoverImage } from "@/shared/components/game-cover-image";
-import { PlatformBadges } from "@/shared/components/platform-badges";
-import { Card } from "@/shared/components/ui/card";
+import {
+  GameCard as UnifiedGameCard,
+  GameCardFooter,
+} from "@/shared/components/game-card";
 
 import type { GameCardProps } from "./game-card.types";
 import { GameCategoryBadge } from "./game-category-badge";
-import { GameCoverPlaceholder } from "./game-cover-placeholder";
 
 export const GameCard = ({ game }: GameCardProps) => {
-  const releaseYear = game.first_release_date
-    ? new Date(game.first_release_date * 1000).getFullYear()
-    : null;
-  const platforms = game.platforms?.map((p) => p.name) ?? [];
   return (
-    <Link href={`/games/${game.slug}`}>
-      <Card className="group overflow-hidden transition-shadow hover:shadow-md">
-        <div className="flex gap-4 p-3">
-          <GameCoverImage
-            imageId={game.cover?.image_id}
-            gameTitle={game.name}
-            size="cover_big"
-            className="h-32 w-24 flex-shrink-0 rounded-md"
-            sizes="96px"
-            placeholderContent={
-              <div className="flex h-full w-full items-center justify-center">
-                <GameCoverPlaceholder />
-              </div>
-            }
-          />
-          <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="text-base leading-tight font-semibold">
-                {game.name}
-              </h3>
-              <GameCategoryBadge category={game.game_type} />
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {releaseYear && (
-                <span className="text-muted-foreground text-sm">
-                  {releaseYear}
-                </span>
-              )}
-            </div>
-            {platforms.length > 0 && (
-              <div className="mt-auto">
-                <PlatformBadges platforms={platforms} />
-              </div>
-            )}
-          </div>
-        </div>
-      </Card>
-    </Link>
+    <UnifiedGameCard
+      game={{
+        id: game.id,
+        name: game.name,
+        slug: game.slug,
+        coverImageId: game.cover?.image_id,
+        releaseDate: game.first_release_date,
+        platforms: game.platforms,
+        gameType: game.game_type,
+      }}
+      layout="horizontal"
+      density="detailed"
+      sizes="96px"
+    >
+      <GameCardFooter>
+        <GameCategoryBadge category={game.game_type} />
+      </GameCardFooter>
+    </UnifiedGameCard>
   );
 };

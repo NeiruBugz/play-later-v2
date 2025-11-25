@@ -1,10 +1,10 @@
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
-import { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/shared/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { RequestContext } from "../types";
 import { getLibraryHandler } from "./get-library-handler";
-import type { LibraryItemWithGameAndCount } from "./types";
+import type { LibraryItemWithGameDomain } from "./types";
 
 vi.mock("@/data-access-layer/services/library/library-service");
 
@@ -188,7 +188,7 @@ describe("getLibraryHandler", () => {
 
   describe("Success Path", () => {
     it("should return HandlerResult with data on success", async () => {
-      const mockData: LibraryItemWithGameAndCount[] = [
+      const mockData: LibraryItemWithGameDomain[] = [
         {
           id: 1,
           userId: "clx123abc456def789ghi",
@@ -206,9 +206,7 @@ describe("getLibraryHandler", () => {
             coverImage: "https://example.com/cover.jpg",
             slug: "the-legend-of-zelda-breath-of-the-wild",
             releaseDate: new Date("2017-03-03"),
-            _count: {
-              libraryItems: 1,
-            },
+            entryCount: 1,
           },
         },
       ];
@@ -257,7 +255,7 @@ describe("getLibraryHandler", () => {
     });
 
     it("should support filtering by status", async () => {
-      const mockData: LibraryItemWithGameAndCount[] = [
+      const mockData: LibraryItemWithGameDomain[] = [
         {
           id: 2,
           userId: "clx123abc456def789ghi",
@@ -275,9 +273,7 @@ describe("getLibraryHandler", () => {
             coverImage: "https://example.com/elden-ring.jpg",
             slug: "elden-ring",
             releaseDate: new Date("2022-02-25"),
-            _count: {
-              libraryItems: 1,
-            },
+            entryCount: 1,
           },
         },
       ];
@@ -428,7 +424,7 @@ describe("getLibraryHandler", () => {
 
   describe("Multiple Library Items Per Game", () => {
     it("should return multiple library items with correct game counts", async () => {
-      const mockData: LibraryItemWithGameAndCount[] = [
+      const mockData: LibraryItemWithGameDomain[] = [
         {
           id: 1,
           userId: "clx123abc456def789ghi",
@@ -446,9 +442,7 @@ describe("getLibraryHandler", () => {
             coverImage: "https://example.com/cover.jpg",
             slug: "the-legend-of-zelda-breath-of-the-wild",
             releaseDate: new Date("2017-03-03"),
-            _count: {
-              libraryItems: 2,
-            },
+            entryCount: 2,
           },
         },
         {
@@ -468,9 +462,7 @@ describe("getLibraryHandler", () => {
             coverImage: "https://example.com/elden-ring.jpg",
             slug: "elden-ring",
             releaseDate: new Date("2022-02-25"),
-            _count: {
-              libraryItems: 1,
-            },
+            entryCount: 1,
           },
         },
       ];
@@ -489,8 +481,8 @@ describe("getLibraryHandler", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toHaveLength(2);
-        expect(result.data[0]?.game._count.libraryItems).toBe(2);
-        expect(result.data[1]?.game._count.libraryItems).toBe(1);
+        expect(result.data[0]?.game.entryCount).toBe(2);
+        expect(result.data[1]?.game.entryCount).toBe(1);
       }
     });
   });

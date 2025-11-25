@@ -16,14 +16,14 @@ export const PlatformBadges = ({ platforms }: { platforms: string[] }) => {
   const remaining = platforms.slice(MAX_VISIBLE_PLATFORMS);
   return (
     <TooltipProvider>
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-sm">
         {visible.map((name) => {
           const Icon = getPlatformIcon(name);
           return (
             <Badge
               key={name}
               variant={getPlatformBadgeVariant(name)}
-              className="flex h-6 items-center gap-1 px-2 text-xs font-medium"
+              className="flex h-6 items-center gap-xs px-md text-xs font-medium"
             >
               <Icon className="h-3 w-3" />
               <span>{name}</span>
@@ -35,7 +35,7 @@ export const PlatformBadges = ({ platforms }: { platforms: string[] }) => {
             <TooltipTrigger asChild>
               <Badge
                 variant="outline"
-                className="h-6 cursor-help px-2 text-xs font-medium"
+                className="h-6 cursor-help px-md text-xs font-medium"
               >
                 +{remaining.length}
               </Badge>

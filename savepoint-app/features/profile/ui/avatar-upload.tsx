@@ -110,16 +110,15 @@ export const AvatarUpload = ({
   const displayImageUrl = previewUrl || currentAvatar;
   const hasImage = !!displayImageUrl;
   return (
-    <div className="space-y-4">
+    <div className="space-y-xl">
       <div
         className={cn(
-          "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all duration-200",
+          "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all duration-normal",
           {
-            "border-blue-500 bg-blue-50 dark:bg-blue-950/30": isDragging,
-            "border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800":
-              !isDragging,
+            "border-accent bg-accent/10": isDragging,
+            "border-border bg-card": !isDragging,
             "cursor-not-allowed opacity-50": isUploading,
-            "hover:border-gray-400 dark:hover:border-gray-600": !isUploading,
+            "hover:border-muted-foreground": !isUploading,
           }
         )}
         onDragOver={handleDragOver}
@@ -137,7 +136,7 @@ export const AvatarUpload = ({
         }}
       >
         {hasImage ? (
-          <div className="relative aspect-square w-full max-w-xs p-4">
+          <div className="relative aspect-square w-full max-w-xs p-xl">
             <div className="border-border bg-background relative h-full w-full overflow-hidden rounded-full border-4">
               <Image
                 src={displayImageUrl}
@@ -156,11 +155,11 @@ export const AvatarUpload = ({
             )}
           </div>
         ) : (
-          <div className="px-6 py-12 text-center">
-            <div className="bg-muted mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full">
+          <div className="px-2xl py-4xl text-center">
+            <div className="bg-muted mx-auto mb-lg flex h-12 w-12 items-center justify-center rounded-full">
               <Upload className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="text-foreground mb-1 text-sm font-medium">
+            <p className="text-foreground mb-xs text-sm font-medium">
               Click to upload or drag and drop
             </p>
             <p className="text-muted-foreground text-xs">
@@ -180,22 +179,22 @@ export const AvatarUpload = ({
       />
       {error && (
         <div
-          className="border-destructive/30 bg-destructive/10 flex items-start gap-2 rounded-md border p-3"
+          className="border-destructive/30 bg-destructive/10 flex items-start gap-md rounded-md border p-lg"
           role="alert"
         >
-          <X className="text-destructive mt-0.5 h-4 w-4 shrink-0" />
+          <X className="text-destructive mt-xs h-4 w-4 shrink-0" />
           <p className="text-destructive text-sm">{error}</p>
         </div>
       )}
       {selectedFile && (
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-md sm:flex-row">
           <Button
             onClick={handleUpload}
             disabled={isUploading}
             className="flex-1 sm:flex-none"
             aria-label="Upload selected avatar"
           >
-            <Upload className="mr-2 h-4 w-4" />
+            <Upload className="mr-md h-4 w-4" />
             {isUploading ? "Uploading..." : "Upload"}
           </Button>
           <Button
@@ -205,13 +204,13 @@ export const AvatarUpload = ({
             className="flex-1 sm:flex-none"
             aria-label="Cancel avatar upload"
           >
-            <X className="mr-2 h-4 w-4" />
+            <X className="mr-md h-4 w-4" />
             Cancel
           </Button>
         </div>
       )}
       {isUploading && (
-        <div className="space-y-2">
+        <div className="space-y-md">
           <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
             <div className="bg-primary h-full w-3/4 animate-pulse rounded-full"></div>
           </div>

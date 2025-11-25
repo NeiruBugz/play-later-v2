@@ -1,5 +1,5 @@
-import type { LibraryItemWithGameAndCount } from "@/shared/types";
+import type { LibraryItemWithGameDomain } from "@/shared/types";
 
 export interface LibraryCardProps {
-  item: LibraryItemWithGameAndCount;
+  item: LibraryItemWithGameDomain;
 }

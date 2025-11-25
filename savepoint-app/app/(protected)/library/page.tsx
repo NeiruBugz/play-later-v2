@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 export default async function LibraryPage() {
   await requireServerUserId();
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-3xl font-bold">My Library</h1>
+    <div className="container mx-auto py-3xl">
+      <div className="mb-2xl flex flex-col gap-xl md:flex-row md:items-center md:justify-between">
+        <h1 className="heading-xl">My Library</h1>
         <LibrarySortSelect />
       </div>
       <LibraryFilters />

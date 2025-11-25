@@ -7,7 +7,11 @@ import {
   createFullGameFixture,
   createLibraryItemFixture,
 } from "@/test/fixtures";
-import { AcquisitionType, type LibraryItemStatus } from "@prisma/client";
+import {
+  AcquisitionType,
+  LibraryItemStatus,
+  type LibraryItemStatus as LibraryItemStatusType,
+} from "@/shared/types";
 
 import { addGameToLibrary } from "./add-game-to-library";
 
@@ -43,7 +47,7 @@ describe("addGameToLibrary", () => {
 
   const validUserId = "clx123abc456def";
   const validIgdbId = 12345;
-  const validStatus: LibraryItemStatus = "CURIOUS_ABOUT";
+  const validStatus: LibraryItemStatusType = LibraryItemStatus.CURIOUS_ABOUT;
 
   const mockGame = createDatabaseGameFixture({
     id: "game-456",
@@ -192,7 +196,7 @@ describe("addGameToLibrary", () => {
       const result = await addGameToLibrary({
         userId: validUserId,
         igdbId: validIgdbId,
-        status: "EXPERIENCED",
+        status: LibraryItemStatus.EXPERIENCED,
         platform: "PlayStation 5",
         startedAt,
         completedAt,
@@ -204,7 +208,7 @@ describe("addGameToLibrary", () => {
         userId: validUserId,
         gameId: mockGame.id,
         libraryItem: {
-          status: "EXPERIENCED",
+          status: LibraryItemStatus.EXPERIENCED,
           acquisitionType: AcquisitionType.DIGITAL,
           platform: "PlayStation 5",
           startedAt,
@@ -305,7 +309,7 @@ describe("addGameToLibrary", () => {
     it("should allow adding same game with different status", async () => {
       const existingItem = {
         ...mockLibraryItem,
-        status: "WISHLIST" as LibraryItemStatus,
+        status: LibraryItemStatus.WISHLIST,
       };
 
       mockProfileService.verifyUserExists.mockResolvedValue({
@@ -325,7 +329,7 @@ describe("addGameToLibrary", () => {
 
       const newItem = {
         ...mockLibraryItem,
-        status: "CURRENTLY_EXPLORING" as LibraryItemStatus,
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       };
 
       mockLibraryService.createLibraryItem.mockResolvedValue({
@@ -336,7 +340,7 @@ describe("addGameToLibrary", () => {
       const result = await addGameToLibrary({
         userId: validUserId,
         igdbId: validIgdbId,
-        status: "CURRENTLY_EXPLORING",
+        status: LibraryItemStatus.CURRENTLY_EXPLORING,
       });
 
       expect(result.success).toBe(true);

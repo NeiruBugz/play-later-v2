@@ -67,9 +67,9 @@ export const AddEntryForm = ({
   });
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-xl">
         {isEditMode && (
-          <div className="bg-muted/50 border-primary/20 rounded-md border-2 border-dashed p-3 text-sm">
+          <div className="bg-muted/50 border-primary/20 rounded-md border-2 border-dashed p-lg text-sm">
             <p className="text-muted-foreground">
               Add another library entry for {gameTitle}. This is useful if you
               own the game on multiple platforms or want to track separate
@@ -83,7 +83,7 @@ export const AddEntryForm = ({
           render={({ field }) => (
             <StatusSelect
               field={field}
-              className={isEditMode ? "py-6 text-left" : undefined}
+              className={isEditMode ? "py-2xl text-left" : undefined}
             />
           )}
         />

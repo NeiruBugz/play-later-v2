@@ -9,23 +9,23 @@ export function AuthPageView() {
   const shouldIncludeCredentialsSignIn =
     env.NODE_ENV !== "production" || env.AUTH_ENABLE_CREDENTIALS === "true";
   return (
-    <div className="from-muted/40 via-background to-background dark:from-muted/20 dark:via-background dark:to-background flex min-h-screen items-center justify-center bg-linear-to-br p-4">
-      <Card className="w-full max-w-md p-8">
-        <div className="mb-6 text-center">
+    <div className="from-muted/40 via-background to-background dark:from-muted/20 dark:via-background dark:to-background flex min-h-screen items-center justify-center bg-linear-to-br p-lg">
+      <Card className="w-full max-w-md p-3xl">
+        <div className="mb-2xl text-center">
           <h1 className="font-serif text-3xl font-bold">SavePoint</h1>
-          <p className="text-muted-foreground mt-2 text-sm">
+          <p className="body-sm text-muted-foreground mt-md">
             Manage your gaming experiences
           </p>
         </div>
         {shouldIncludeCredentialsSignIn && (
           <>
             <CredentialsForm />
-            <div className="relative my-6">
+            <div className="relative my-2xl">
               <div className="absolute inset-0 flex items-center">
                 <div className="border-border w-full border-t" />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-card text-muted-foreground px-2">
+              <div className="body-sm relative flex justify-center">
+                <span className="bg-card text-muted-foreground px-md">
                   Or continue with
                 </span>
               </div>

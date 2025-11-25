@@ -17,11 +17,11 @@ export default async function GameSearchPage({
   const { q } = await searchParams;
   const initialQuery = q || "";
   return (
-    <div className="container mx-auto px-6">
-      <div className="space-y-8">
-        <div className="space-y-3">
-          <h1 className="text-4xl font-bold tracking-tight">Search Games</h1>
-          <p className="text-muted-foreground text-base">
+    <div className="container mx-auto px-2xl">
+      <div className="space-y-3xl">
+        <div className="space-y-lg">
+          <h1 className="heading-xl">Search Games</h1>
+          <p className="body-md text-muted-foreground">
             Find games to add to your SavePoint library
           </p>
         </div>

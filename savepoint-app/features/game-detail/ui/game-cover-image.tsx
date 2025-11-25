@@ -16,7 +16,7 @@ export const GameCoverImage = ({
     return (
       <div
         className={cn(
-          "bg-muted relative flex aspect-[3/4] w-full max-w-sm flex-col items-center justify-center gap-2 overflow-hidden rounded-lg",
+          "bg-muted relative flex aspect-[3/4] w-full max-w-sm flex-col items-center justify-center gap-md overflow-hidden rounded-lg",
           className
         )}
         aria-label="No cover image available"

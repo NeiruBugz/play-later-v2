@@ -165,11 +165,11 @@ describe("StatusSelect", () => {
   describe("given custom className provided", () => {
     it("should apply className to SelectTrigger", () => {
       renderStatusSelectInForm({
-        className: "py-6 text-left",
+        className: "py-2xl text-left",
       });
 
       const trigger = screen.getByRole("combobox");
-      expect(trigger).toHaveClass("py-6");
+      expect(trigger).toHaveClass("py-2xl");
       expect(trigger).toHaveClass("text-left");
     });
   });

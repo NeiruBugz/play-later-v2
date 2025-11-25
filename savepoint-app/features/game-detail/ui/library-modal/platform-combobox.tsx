@@ -61,7 +61,7 @@ export const PlatformCombobox = <T extends FieldValues = FieldValues>({
                 : selectedPlatform
                   ? selectedPlatform.name
                   : "Select platform"}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ChevronsUpDown className="ml-md h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </FormControl>
         </PopoverTrigger>
@@ -83,7 +83,7 @@ export const PlatformCombobox = <T extends FieldValues = FieldValues>({
                     >
                       <Check
                         className={cn(
-                          "mr-2 h-4 w-4",
+                          "mr-md h-4 w-4",
                           field.value === platform.name
                             ? "opacity-100"
                             : "opacity-0"
@@ -110,7 +110,7 @@ export const PlatformCombobox = <T extends FieldValues = FieldValues>({
                     >
                       <Check
                         className={cn(
-                          "mr-2 h-4 w-4",
+                          "mr-md h-4 w-4",
                           field.value === platform.name
                             ? "opacity-100"
                             : "opacity-0"

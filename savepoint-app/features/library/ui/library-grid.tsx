@@ -10,16 +10,16 @@ import type { LibraryErrorStateProps } from "./library-grid.types";
 
 function LibraryErrorState({ error }: LibraryErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
-      <div className="text-destructive mb-4 text-5xl">⚠</div>
-      <h2 className="mb-2 text-2xl font-semibold">Failed to Load Library</h2>
-      <p className="text-muted-foreground mb-4 max-w-md">
+    <div className="flex flex-col items-center justify-center px-lg py-5xl text-center">
+      <div className="text-destructive mb-xl text-5xl">⚠</div>
+      <h2 className="heading-lg mb-md">Failed to Load Library</h2>
+      <p className="body-md text-muted-foreground mb-xl max-w-md">
         {error.message ||
           "An error occurred while loading your library. Please try again."}
       </p>
       <button
         onClick={() => window.location.reload()}
-        className="text-primary hover:underline"
+        className="body-md text-primary hover:underline"
       >
         Reload Page
       </button>
@@ -41,12 +41,12 @@ export function LibraryGrid() {
   }
   return (
     <div
-      className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+      className="grid grid-cols-2 gap-xl sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
       role="feed"
       aria-label="Your game library"
     >
-      {data.map((item) => (
-        <LibraryCard key={item.id} item={item} />
+      {data.map((item, index) => (
+        <LibraryCard key={item.id} item={item} index={index} />
       ))}
     </div>
   );

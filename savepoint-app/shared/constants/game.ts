@@ -27,7 +27,4 @@ export const ALLOWED_GAME_CATEGORIES = [
 ] as const;
 export const ALLOWED_FRANCHISE_GAME_CATEGORIES = [
   GameCategory.MAIN_GAME,
-  GameCategory.REMAKE,
-  GameCategory.REMASTER,
-  GameCategory.EXPANDED_GAME,
 ] as const;

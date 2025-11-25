@@ -1,6 +1,6 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
+import { LibraryItemStatus } from "@/shared/types";
 import { useState } from "react";
 
 import { Badge } from "@/shared/components/ui/badge";
@@ -16,12 +16,12 @@ import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
 import type { LibraryCardInteractiveBadgeProps } from "./library-card-interactive-badge.types";
 
 const STATUS_OPTIONS: LibraryItemStatus[] = [
-  "WISHLIST",
-  "CURIOUS_ABOUT",
-  "CURRENTLY_EXPLORING",
-  "TOOK_A_BREAK",
-  "EXPERIENCED",
-  "REVISITING",
+  LibraryItemStatus.WISHLIST,
+  LibraryItemStatus.CURIOUS_ABOUT,
+  LibraryItemStatus.CURRENTLY_EXPLORING,
+  LibraryItemStatus.TOOK_A_BREAK,
+  LibraryItemStatus.EXPERIENCED,
+  LibraryItemStatus.REVISITING,
 ];
 
 export function LibraryCardInteractiveBadge({
@@ -69,25 +69,26 @@ export function LibraryCardInteractiveBadge({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-56 p-2"
+        className="w-56 p-md"
         align="start"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
         }}
       >
-        <div className="space-y-1">
-          <p className="text-muted-foreground mb-2 text-xs font-medium">
+        <div className="space-y-xs">
+          <p className="caption text-muted-foreground mb-md font-medium">
             Change status
           </p>
           {availableStatuses.map((status) => {
             const isDisabled =
-              status === "WISHLIST" && currentStatus !== "WISHLIST";
+              status === LibraryItemStatus.WISHLIST &&
+              currentStatus !== LibraryItemStatus.WISHLIST;
             return (
               <Button
                 key={status}
                 variant="ghost"
-                className="w-full justify-start text-sm"
+                className="body-sm w-full justify-start"
                 disabled={isDisabled || updateStatus.isPending}
                 onClick={(e) => {
                   e.preventDefault();
@@ -97,7 +98,7 @@ export function LibraryCardInteractiveBadge({
               >
                 {LibraryStatusMapper[status]}
                 {isDisabled && (
-                  <span className="text-muted-foreground ml-auto text-xs">
+                  <span className="caption text-muted-foreground ml-auto">
                     (cannot move back)
                   </span>
                 )}

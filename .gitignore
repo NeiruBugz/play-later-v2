@@ -78,3 +78,4 @@ override.tf.json
 
 # Note: keep .terraform.lock.hcl committed (provider version lock)
 *.bak
+.playwright-mcp

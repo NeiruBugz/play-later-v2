@@ -1,6 +1,6 @@
-import type { LibraryItemWithGameAndCount } from "@/shared/types";
+import type { LibraryItemWithGameDomain } from "@/shared/types";
 
-export type { LibraryItemWithGameAndCount };
+export type { LibraryItemWithGameDomain };
 
 export interface GetLibraryHandlerInput {
   userId: string;
@@ -16,4 +16,4 @@ export interface GetLibraryHandlerInput {
   sortOrder?: "asc" | "desc";
 }
 
-export type GetLibraryHandlerOutput = LibraryItemWithGameAndCount[];
+export type GetLibraryHandlerOutput = LibraryItemWithGameDomain[];

@@ -29,10 +29,10 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     reset();
   }, [error, reset]);
   return (
-    <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
+    <main className="relative flex flex-1 items-center justify-center overflow-hidden px-lg py-5xl sm:px-2xl lg:px-3xl">
       <div className="from-background via-background to-muted pointer-events-none absolute inset-0 bg-linear-to-br opacity-60" />
-      <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-6 text-center">
-        <span className="bg-destructive/10 text-destructive inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium">
+      <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-2xl text-center">
+        <span className="bg-destructive/10 text-destructive inline-flex items-center gap-md rounded-full px-lg py-sm text-sm font-medium">
           <ShieldAlert
             className="h-4 w-4"
             aria-hidden="true"
@@ -47,7 +47,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
           The action you tried didn&apos;t go as planned. You can try again, or
           head back to a safe spot while we make sure everything is in order.
         </p>
-        <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center">
+        <div className="flex w-full flex-col-reverse gap-lg sm:flex-row sm:items-center sm:justify-center">
           <BrowserBackButton />
           <Button
             onClick={handleReset}

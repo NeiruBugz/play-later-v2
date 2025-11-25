@@ -104,8 +104,11 @@ describe("LibraryService", () => {
 
         expect(result.success).toBe(true);
         if (result.success) {
-          expect(result.data).toEqual(mockLibraryItems);
           expect(result.data).toHaveLength(2);
+          expect(result.data[0]?.game.entryCount).toBe(1);
+          expect(result.data[0]?.game).not.toHaveProperty("_count");
+          expect(result.data[1]?.game.entryCount).toBe(1);
+          expect(result.data[1]?.game).not.toHaveProperty("_count");
         }
 
         expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith({

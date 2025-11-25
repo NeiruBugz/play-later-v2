@@ -22,23 +22,23 @@ export function GameNotFound({ initialQuery = "" }: GameNotFoundProps) {
     }
   };
   return (
-    <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
+    <main className="relative flex flex-1 items-center justify-center overflow-hidden px-lg py-5xl sm:px-2xl lg:px-3xl">
       <div className="pointer-events-none absolute inset-0 bg-linear-to-br opacity-60" />
-      <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-6 text-center">
-        <span className="bg-secondary/20 text-secondary inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium">
+      <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-2xl text-center">
+        <span className="bg-secondary/20 text-secondary inline-flex items-center gap-md rounded-full px-lg py-sm text-sm font-medium">
           <Search className="h-4 w-4" aria-hidden="true" />
           Game not found
         </span>
-        <h1 className="font-serif text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+        <h1 className="display-xl font-serif text-balance">
           This game doesn&apos;t exist in our database.
         </h1>
-        <p className="text-muted-foreground text-lg leading-relaxed">
+        <p className="body-lg text-muted-foreground">
           The game you&apos;re looking for might have been removed, the URL
           might be incorrect, or it doesn&apos;t exist in the IGDB database. Try
           searching for it below.
         </p>
-        <form onSubmit={handleSearch} className="w-full space-y-4">
-          <div className="flex gap-2">
+        <form onSubmit={handleSearch} className="w-full space-y-xl">
+          <div className="flex gap-md">
             <Input
               type="search"
               placeholder="Search for games..."
@@ -63,7 +63,7 @@ export function GameNotFound({ initialQuery = "" }: GameNotFoundProps) {
             </p>
           )}
         </form>
-        <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-center">
+        <div className="flex w-full flex-col-reverse gap-lg sm:flex-row sm:items-center sm:justify-center">
           <BrowserBackButton />
           <Button
             asChild

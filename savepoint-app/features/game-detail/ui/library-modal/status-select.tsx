@@ -37,7 +37,7 @@ export const StatusSelect = <T extends FieldValues = FieldValues>({
         <SelectContent>
           {LIBRARY_STATUS_CONFIG.map((option) => (
             <SelectItem key={option.value} value={option.value}>
-              <div className="flex flex-col py-1">
+              <div className="flex flex-col py-xs">
                 <span>{option.label}</span>
                 <span className="text-muted-foreground text-xs">
                   {option.description}

@@ -1,6 +1,6 @@
 "use client";
 
-import type { LibraryItemStatus } from "@prisma/client";
+import type { LibraryItemStatus } from "@/shared/types";
 import { useSearchParams } from "next/navigation";
 
 export type LibraryFilterValues = {
