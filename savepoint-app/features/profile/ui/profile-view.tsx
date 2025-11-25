@@ -25,7 +25,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
 
   return (
     <div className="space-y-3xl">
-      <div className="gap-2xl flex items-start justify-between">
+      <div className="flex flex-col gap-2xl sm:flex-row sm:items-start sm:justify-between">
         <div className="gap-2xl flex items-start">
           <div className="shrink-0">
             {profile.image ? (
@@ -89,7 +89,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
                     <ProgressRing
                       status={gameStatus}
                       progress={percentage}
-                      size="lg"
+                      size="md"
                       showPercentage
                     />
                     <div className="text-center">

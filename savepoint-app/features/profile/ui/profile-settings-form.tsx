@@ -101,7 +101,7 @@ export function ProfileSettingsForm({
             </p>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex flex-wrap justify-between gap-md">
           <Button
             type="submit"
             disabled={isPending || hasValidationError}
