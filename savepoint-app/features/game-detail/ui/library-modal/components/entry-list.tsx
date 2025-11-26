@@ -26,14 +26,9 @@ export function EntryList({
   className,
 }: EntryListProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col border-r border-border",
-        className
-      )}
-    >
+    <div className={cn("border-border flex flex-col border-r", className)}>
       <div className="p-lg flex-1 overflow-y-auto">
-        <p className="text-muted-foreground mb-md px-xs text-xs font-medium uppercase tracking-wide">
+        <p className="text-muted-foreground mb-md px-xs text-xs font-medium tracking-wide uppercase">
           Entries
         </p>
         <div className="space-y-xs" role="listbox" aria-label="Library entries">
@@ -52,13 +47,13 @@ export function EntryList({
         </div>
       </div>
 
-      <div className="border-t border-border p-lg">
+      <div className="border-border p-lg border-t">
         <Button
           type="button"
           variant="ghost"
           onClick={onAddNew}
           className={cn(
-            "text-muted-foreground w-full justify-start gap-md",
+            "text-muted-foreground gap-md w-full justify-start",
             isAddingNew && "bg-accent text-accent-foreground"
           )}
         >

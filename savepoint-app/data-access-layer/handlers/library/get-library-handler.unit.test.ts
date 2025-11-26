@@ -1,6 +1,7 @@
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
-import { LibraryItemStatus } from "@/shared/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { LibraryItemStatus } from "@/shared/types";
 
 import type { RequestContext } from "../types";
 import { getLibraryHandler } from "./get-library-handler";

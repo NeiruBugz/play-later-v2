@@ -1,7 +1,7 @@
 import "server-only";
 
-import { LibraryService } from "@/data-access-layer/services";
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
+import { LibraryService } from "@/data-access-layer/services";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
@@ -22,7 +22,9 @@ interface DashboardStatsServerProps {
 export async function DashboardStatsServer({
   userId,
 }: DashboardStatsServerProps) {
-  const logger = createLogger({ [LOGGER_CONTEXT.PAGE]: "DashboardStatsServer" });
+  const logger = createLogger({
+    [LOGGER_CONTEXT.PAGE]: "DashboardStatsServer",
+  });
 
   try {
     const service = new LibraryService();

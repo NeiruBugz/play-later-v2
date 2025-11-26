@@ -1,5 +1,8 @@
-import { LibraryItemStatus, AcquisitionType } from "@/shared/types";
-import type { LibraryItemWithGameDomain } from "@/shared/types";
+import {
+  AcquisitionType,
+  LibraryItemStatus,
+  type LibraryItemWithGameDomain,
+} from "@/shared/types";
 
 export function createLibraryItemFixture(
   overrides?: Partial<LibraryItemWithGameDomain>

@@ -1,10 +1,10 @@
 import { cn } from "@/shared/lib/ui/utils";
 
+import type { GameCardHeaderProps } from "./game-card.types";
 import {
   gameCardHeaderVariants,
   gameCardTitleVariants,
 } from "./game-card.variants";
-import type { GameCardHeaderProps } from "./game-card.types";
 
 /**
  * GameCardHeader - Displays game title and optional badge
@@ -21,7 +21,7 @@ export function GameCardHeader({
       <h3
         className={cn(
           gameCardTitleVariants({ clamp: showClamp }),
-          "flex-1 min-w-0"
+          "min-w-0 flex-1"
         )}
       >
         {title}

@@ -25,7 +25,7 @@ export function StatusChipGroup<T extends FieldValues>({
       <FormLabel>Status</FormLabel>
       <FormControl>
         <div
-          className="flex flex-wrap gap-sm"
+          className="gap-sm flex flex-wrap"
           role="radiogroup"
           aria-label="Journey status"
         >
@@ -41,13 +41,13 @@ export function StatusChipGroup<T extends FieldValues>({
                 aria-checked={isSelected}
                 onClick={() => field.onChange(option.value)}
                 className={cn(
-                  "rounded-md border px-md py-xs text-xs sm:px-lg sm:py-sm sm:text-sm font-medium",
-                  "transition-all duration-fast ease-out-expo",
-                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                  "px-md py-xs sm:px-lg sm:py-sm rounded-md border text-xs font-medium sm:text-sm",
+                  "duration-fast ease-out-expo transition-all",
+                  "focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none",
                   isSelected && [
                     `bg-[var(--status-${variant})]`,
                     `text-[var(--status-${variant}-foreground)]`,
-                    "border-transparent shadow-paper-sm",
+                    "shadow-paper-sm border-transparent",
                   ],
                   !isSelected && [
                     "border-border bg-transparent",

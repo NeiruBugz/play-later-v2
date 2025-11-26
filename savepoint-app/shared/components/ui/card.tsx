@@ -3,26 +3,22 @@ import * as React from "react";
 
 import { cn } from "@/shared/lib/ui/utils";
 
-const cardVariants = cva(
-  "rounded-lg border transition-all duration-normal",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-card border-border/20 hover:border-border/40 hover:bg-muted/10",
-        interactive:
-          "bg-card border-border/20 hover:border-border/40 hover:shadow-paper-md hover:scale-[1.01] cursor-pointer",
-        elevated:
-          "bg-card border-border/20 shadow-paper hover:shadow-paper-md",
-        flat: "bg-card border-border",
-        outlined: "bg-card border-border hover:border-primary/40",
-      },
+const cardVariants = cva("rounded-lg border transition-all duration-normal", {
+  variants: {
+    variant: {
+      default:
+        "bg-card border-border/20 hover:border-border/40 hover:bg-muted/10",
+      interactive:
+        "bg-card border-border/20 hover:border-border/40 hover:shadow-paper-md hover:scale-[1.01] cursor-pointer",
+      elevated: "bg-card border-border/20 shadow-paper hover:shadow-paper-md",
+      flat: "bg-card border-border",
+      outlined: "bg-card border-border hover:border-primary/40",
     },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-);
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 const cardHeaderVariants = cva("flex flex-col", {
   variants: {
@@ -97,11 +93,7 @@ const CardTitle = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("heading-sm", className)}
-    {...props}
-  />
+  <div ref={ref} className={cn("heading-sm", className)} {...props} />
 ));
 CardTitle.displayName = "CardTitle";
 

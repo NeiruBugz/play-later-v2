@@ -41,7 +41,7 @@ export function InlineDeleteConfirm({
   return (
     <div
       className={cn(
-        "flex items-center gap-md",
+        "gap-md flex items-center",
         "animate-in fade-in-0 zoom-in-95 duration-fast",
         className
       )}

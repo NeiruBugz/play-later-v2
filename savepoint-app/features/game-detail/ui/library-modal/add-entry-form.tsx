@@ -4,11 +4,11 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { useGetPlatforms } from "@/features/game-detail/hooks/use-get-platforms";
-import { LibraryItemStatus } from "@/shared/types";
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
+import { LibraryItemStatus } from "@/shared/types";
 
 import { AddToLibrarySchema, type AddToLibraryInput } from "../../schemas";
 import { addToLibraryAction } from "../../server-actions";
@@ -69,7 +69,7 @@ export const AddEntryForm = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-xl">
         {isEditMode && (
-          <div className="bg-muted/50 border-primary/20 rounded-md border-2 border-dashed p-lg text-sm">
+          <div className="bg-muted/50 border-primary/20 p-lg rounded-md border-2 border-dashed text-sm">
             <p className="text-muted-foreground">
               Add another library entry for {gameTitle}. This is useful if you
               own the game on multiple platforms or want to track separate

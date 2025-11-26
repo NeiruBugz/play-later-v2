@@ -83,8 +83,10 @@ export function GameCard({
 
   // Extract release year
   const releaseYear = isSearch
-    ? game.releaseYear ??
-      (game.releaseDate ? new Date(game.releaseDate * 1000).getFullYear() : null)
+    ? (game.releaseYear ??
+      (game.releaseDate
+        ? new Date(game.releaseDate * 1000).getFullYear()
+        : null))
     : null;
 
   // Extract platforms
@@ -131,7 +133,7 @@ export function GameCard({
       {density !== "minimal" && (
         <GameCardContent
           className={cn(
-            layout === "horizontal" ? "flex-1 min-w-0 py-xs" : "w-full p-md"
+            layout === "horizontal" ? "py-xs min-w-0 flex-1" : "p-md w-full"
           )}
         >
           {/* Title and optional badge */}
@@ -161,7 +163,7 @@ export function GameCard({
     return (
       <Link
         href={`/games/${gameSlug}`}
-        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
+        className="focus-visible:ring-primary block rounded-lg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
         aria-label={`View ${gameName}`}
       >
         {cardContent}
@@ -175,4 +177,10 @@ export function GameCard({
 GameCard.displayName = "GameCard";
 
 // Export sub-components for composition
-export { GameCardContent, GameCardCover, GameCardFooter, GameCardHeader, GameCardMeta };
+export {
+  GameCardContent,
+  GameCardCover,
+  GameCardFooter,
+  GameCardHeader,
+  GameCardMeta,
+};

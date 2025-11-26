@@ -13,7 +13,11 @@ import { Label } from "@/shared/components/ui/label";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 import { getStatusLabel } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
-import { LibraryItemStatus, type LibraryItemDomain, type PlatformDomain } from "@/shared/types";
+import {
+  LibraryItemStatus,
+  type LibraryItemDomain,
+  type PlatformDomain,
+} from "@/shared/types";
 
 import {
   AddToLibrarySchema,
@@ -21,7 +25,10 @@ import {
   type AddToLibraryInput,
   type UpdateLibraryEntryInput,
 } from "../../../schemas";
-import { addToLibraryAction, updateLibraryEntryAction } from "../../../server-actions";
+import {
+  addToLibraryAction,
+  updateLibraryEntryAction,
+} from "../../../server-actions";
 import { PlatformCombobox } from "../platform-combobox";
 import { DateFieldsCollapsible } from "./date-fields-collapsible";
 import { InlineDeleteConfirm } from "./inline-delete-confirm";
@@ -150,10 +157,12 @@ function AddForm({
 
   const { isSubmitting, handleSubmit } = useFormSubmission({
     action: addToLibraryAction,
-    successMessage: existingPlatforms.length > 0 ? "Entry added" : "Added to library",
-    successDescription: existingPlatforms.length > 0
-      ? "A new library entry has been created."
-      : `${gameTitle} has been added to your library.`,
+    successMessage:
+      existingPlatforms.length > 0 ? "Entry added" : "Added to library",
+    successDescription:
+      existingPlatforms.length > 0
+        ? "A new library entry has been created."
+        : `${gameTitle} has been added to your library.`,
     errorMessage: "Failed to add entry",
     onSuccess: () => {
       form.reset({
@@ -169,7 +178,7 @@ function AddForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn("flex flex-col gap-lg sm:gap-2xl", className)}
+        className={cn("gap-lg sm:gap-2xl flex flex-col", className)}
       >
         <FormField
           control={form.control}
@@ -197,9 +206,9 @@ function AddForm({
           onCompletedChange={(date) => form.setValue("completedAt", date)}
         />
 
-        <div className="flex items-center justify-between pt-md sm:pt-lg">
+        <div className="pt-md sm:pt-lg flex items-center justify-between">
           <div />
-          <div className="flex items-center gap-sm sm:gap-md">
+          <div className="gap-sm sm:gap-md flex items-center">
             {onCancel && (
               <Button
                 type="button"
@@ -212,7 +221,12 @@ function AddForm({
                 Cancel
               </Button>
             )}
-            <Button type="submit" size="sm" disabled={isSubmitting} className="sm:h-10 sm:px-4 sm:text-sm">
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isSubmitting}
+              className="sm:h-10 sm:px-4 sm:text-sm"
+            >
               {isSubmitting
                 ? "Adding..."
                 : existingPlatforms.length > 0
@@ -273,7 +287,7 @@ function EditForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className={cn("flex flex-col gap-lg sm:gap-2xl", className)}
+        className={cn("gap-lg sm:gap-2xl flex flex-col", className)}
       >
         <div className="space-y-sm">
           <Label className="text-muted-foreground text-sm">Platform</Label>
@@ -299,7 +313,7 @@ function EditForm({
           defaultExpanded={!!(entry.startedAt || entry.completedAt)}
         />
 
-        <p className="text-muted-foreground border-t border-border pt-md sm:pt-lg text-xs">
+        <p className="text-muted-foreground border-border pt-md sm:pt-lg border-t text-xs">
           Added{" "}
           {entry.createdAt.toLocaleDateString("en-US", {
             month: "short",
@@ -319,14 +333,14 @@ function EditForm({
           )}
         </p>
 
-        <div className="flex items-center justify-between pt-md sm:pt-lg">
+        <div className="pt-md sm:pt-lg flex items-center justify-between">
           {onDelete ? (
             <InlineDeleteConfirm onConfirm={() => onDelete(entry.id)} />
           ) : (
             <div />
           )}
 
-          <div className="flex items-center gap-sm sm:gap-md">
+          <div className="gap-sm sm:gap-md flex items-center">
             {onCancel && (
               <Button
                 type="button"
@@ -339,7 +353,12 @@ function EditForm({
                 Cancel
               </Button>
             )}
-            <Button type="submit" size="sm" disabled={isSubmitting} className="sm:h-10 sm:px-4 sm:text-sm">
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isSubmitting}
+              className="sm:h-10 sm:px-4 sm:text-sm"
+            >
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>

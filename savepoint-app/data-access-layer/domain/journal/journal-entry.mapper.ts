@@ -1,18 +1,20 @@
-import type { JournalEntry } from "@prisma/client";
 import {
   JournalMood as PrismaJournalMood,
   JournalVisibility as PrismaJournalVisibility,
+  type JournalEntry,
 } from "@prisma/client";
 
-import type { JournalEntryDomain } from "./journal-entry.model";
-import type { JournalEntryDTO } from "./journal-entry.dto";
 import { JournalMood, JournalVisibility } from "./enums";
+import type { JournalEntryDTO } from "./journal-entry.dto";
+import type { JournalEntryDomain } from "./journal-entry.model";
 
 /**
  * Maps Prisma JournalMood enum to domain JournalMood enum.
  * Since the enum values are identical strings, this is a type-safe cast.
  */
-function mapJournalMoodToDomain(mood: PrismaJournalMood | null): JournalMood | null {
+function mapJournalMoodToDomain(
+  mood: PrismaJournalMood | null
+): JournalMood | null {
   return mood === null ? null : (mood as unknown as JournalMood);
 }
 

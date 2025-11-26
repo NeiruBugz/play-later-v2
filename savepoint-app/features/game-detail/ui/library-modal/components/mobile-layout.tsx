@@ -66,9 +66,9 @@ export function MobileLayout({
             "bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-[96%] flex-col rounded-t-xl"
           )}
         >
-          <div className="mx-auto mt-lg h-1.5 w-12 shrink-0 rounded-full bg-muted" />
+          <div className="mt-lg bg-muted mx-auto h-1.5 w-12 shrink-0 rounded-full" />
 
-          <div className="flex items-center justify-between border-b border-border px-lg pb-md pt-sm sm:px-xl sm:pb-lg sm:pt-md">
+          <div className="border-border px-lg pb-md pt-sm sm:px-xl sm:pb-lg sm:pt-md flex items-center justify-between border-b">
             <div className="min-w-0 flex-1">
               <Drawer.Title className="text-base font-semibold sm:text-lg">
                 {isAddMode ? "Add to Library" : "Manage Library"}
@@ -98,7 +98,7 @@ export function MobileLayout({
             />
           )}
 
-          <div className="flex-1 overflow-y-auto p-lg sm:p-xl">
+          <div className="p-lg sm:p-xl flex-1 overflow-y-auto">
             {isAddMode ? (
               <EntryForm
                 igdbId={igdbId}

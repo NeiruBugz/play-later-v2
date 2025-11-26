@@ -1,8 +1,8 @@
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { cn } from "@/shared/lib/ui/utils";
 
-import { gameCardCoverVariants } from "./game-card.variants";
 import type { GameCardCoverProps } from "./game-card.types";
+import { gameCardCoverVariants } from "./game-card.variants";
 
 /**
  * GameCardCover - Handles game cover image display with overlays and badges
@@ -37,7 +37,7 @@ export function GameCardCover({
 
       {/* Badges positioned on top of cover */}
       {badges && (
-        <div className="absolute inset-0 pointer-events-none">{badges}</div>
+        <div className="pointer-events-none absolute inset-0">{badges}</div>
       )}
 
       {/* Overlay (e.g., hover effects with title) */}

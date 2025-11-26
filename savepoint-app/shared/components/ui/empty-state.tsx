@@ -103,11 +103,11 @@ export function EmptyState({
           )}
           aria-hidden="true"
         >
-          {Icon ? <Icon className="h-full w-full" /> : (IconOrNode as ReactNode)}
+          {Icon ? <Icon className="h-full w-full" /> : null}
         </div>
       )}
 
-      <div className={cn("flex flex-col gap-md", maxWidthClasses[maxWidth])}>
+      <div className={cn("gap-md flex flex-col", maxWidthClasses[maxWidth])}>
         <h2 className="heading-lg" id="empty-state-title">
           {title}
         </h2>

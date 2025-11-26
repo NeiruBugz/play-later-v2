@@ -17,7 +17,7 @@ function LibraryCardSkeleton({ index }: { index: number }) {
   return (
     <div
       className={cn(
-        "group relative rounded-lg overflow-hidden",
+        "group relative overflow-hidden rounded-lg",
         "animate-stagger-in",
         `stagger-${staggerIndex}`
       )}

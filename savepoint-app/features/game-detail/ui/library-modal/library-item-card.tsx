@@ -53,15 +53,15 @@ export const LibraryItemCard = ({
         <CardContent className="p-xl">
           <div className="space-y-lg">
             {}
-            <div className="flex items-center justify-between gap-md">
-              <div className="flex items-center gap-md">
+            <div className="gap-md flex items-center justify-between">
+              <div className="gap-md flex items-center">
                 <span className="text-sm font-medium" aria-label="Platform">
                   {item.platform
                     ? `🎮 ${item.platform}`
                     : "🎮 Platform not set"}
                 </span>
               </div>
-              <div className="flex items-center gap-md">
+              <div className="gap-md flex items-center">
                 <Badge variant={getStatusVariant(item.status)}>
                   {getStatusLabel(item.status)}
                 </Badge>
@@ -81,7 +81,7 @@ export const LibraryItemCard = ({
             {}
             <div className="text-muted-foreground space-y-sm text-sm">
               {}
-              <div className="flex items-center gap-md">
+              <div className="gap-md flex items-center">
                 <PlayIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
                   Started:{" "}
@@ -97,7 +97,7 @@ export const LibraryItemCard = ({
                 </span>
               </div>
               {}
-              <div className="flex items-center gap-md">
+              <div className="gap-md flex items-center">
                 <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>
                   Completed:{" "}
@@ -112,7 +112,7 @@ export const LibraryItemCard = ({
               </div>
             </div>
             {}
-            <div className="text-muted-foreground flex items-center gap-xs text-xs">
+            <div className="text-muted-foreground gap-xs flex items-center text-xs">
               <CalendarIcon className="h-3 w-3" aria-hidden="true" />
               <span>
                 Added:{" "}

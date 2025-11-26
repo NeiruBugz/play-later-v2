@@ -1,3 +1,4 @@
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import {
   deleteLibraryItem,
   findLibraryItemById,
@@ -9,7 +10,6 @@ import {
   RepositoryErrorCode,
   repositorySuccess,
 } from "@/data-access-layer/repository/types";
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LibraryService } from "./library-service";

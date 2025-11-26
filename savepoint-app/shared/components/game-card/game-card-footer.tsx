@@ -11,7 +11,7 @@ export function GameCardFooter({
   ...props
 }: GameCardFooterProps) {
   return (
-    <div className={cn("flex flex-col gap-md mt-auto", className)} {...props}>
+    <div className={cn("gap-md mt-auto flex flex-col", className)} {...props}>
       {children}
     </div>
   );

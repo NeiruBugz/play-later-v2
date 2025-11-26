@@ -1,10 +1,9 @@
 "use client";
 
-import { LibraryItemStatus } from "@/shared/types";
-
 import { Button } from "@/shared/components/ui/button";
-import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
 import { cn } from "@/shared/lib/ui";
+import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
+import { LibraryItemStatus } from "@/shared/types";
 
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
 import type { LibraryCardActionBarProps } from "./library-card-action-bar.types";
@@ -62,8 +61,8 @@ export function LibraryCardActionBar({
         e.stopPropagation();
       }}
     >
-      <div className="pointer-events-auto rounded-b-md bg-gradient-to-t from-black/80 via-black/70 to-transparent p-lg pt-3xl backdrop-blur-sm">
-        <div className="flex flex-wrap gap-sm">
+      <div className="p-lg pt-3xl pointer-events-auto rounded-b-md bg-gradient-to-t from-black/80 via-black/70 to-transparent backdrop-blur-sm">
+        <div className="gap-sm flex flex-wrap">
           {availableStatuses.map((status) => {
             const isDisabled =
               status === LibraryItemStatus.WISHLIST &&
@@ -74,7 +73,7 @@ export function LibraryCardActionBar({
                 variant="secondary"
                 size="sm"
                 className={cn(
-                  "caption h-7 rounded-md border-none px-md font-medium shadow-sm transition-all",
+                  "caption px-md h-7 rounded-md border-none font-medium shadow-sm transition-all",
                   "hover:scale-105 hover:shadow-md focus-visible:scale-105",
                   "disabled:opacity-40 disabled:hover:scale-100",
                   STATUS_BUTTON_STYLES[status]

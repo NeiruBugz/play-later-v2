@@ -90,7 +90,9 @@ describe("LibraryItemMapper", () => {
 
       expect(domain.id).toBe(1);
       expect(domain.game.id).toBe("game456");
-      expect(domain.game.title).toBe("The Legend of Zelda: Tears of the Kingdom");
+      expect(domain.game.title).toBe(
+        "The Legend of Zelda: Tears of the Kingdom"
+      );
       expect(domain.game.coverImage).toBe("zelda.jpg");
       expect(domain.game.slug).toBe("zelda-totk");
       expect(domain.game.releaseDate).toEqual(new Date("2023-05-12"));

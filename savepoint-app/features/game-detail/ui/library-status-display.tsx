@@ -1,6 +1,5 @@
 "use client";
 
-import type { LibraryItemStatus } from "@/shared/types";
 import {
   BookmarkIcon,
   ClockIcon,
@@ -26,6 +25,7 @@ import {
   LIBRARY_STATUS_LABELS,
   LIBRARY_STATUS_VARIANTS,
 } from "@/shared/lib/library-status";
+import type { LibraryItemStatus } from "@/shared/types";
 
 import { deleteLibraryItemAction } from "../server-actions";
 import { AddToLibraryButton } from "./add-to-library-button";
@@ -88,10 +88,10 @@ export const LibraryStatusDisplay = ({
     <>
       <Card className="animate-fade-in w-full">
         <CardHeader className="pb-lg">
-          <CardTitle className="text-base font-serif">Library Status</CardTitle>
+          <CardTitle className="font-serif text-base">Library Status</CardTitle>
         </CardHeader>
         <CardContent className="space-y-lg">
-          <div className="flex items-center gap-md" role="status">
+          <div className="gap-md flex items-center" role="status">
             <Badge
               variant={badgeVariant}
               className="text-sm"

@@ -7,7 +7,7 @@ export function RelatedGamesSkeleton() {
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-4 w-32" />
       <div className="h-[500px] w-full">
-        <div className="grid grid-cols-2 gap-xl pr-xl sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div className="gap-xl pr-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {Array.from({ length: 10 }).map((_, i) => (
             <Card key={i} className="overflow-hidden">
               <Skeleton className="aspect-[3/4] w-full" />

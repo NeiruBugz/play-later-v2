@@ -87,7 +87,7 @@ export function CredentialsForm() {
   return (
     <div>
       {errors.root?.message && (
-        <div className="body-sm bg-destructive/10 text-destructive mb-xl rounded-md p-lg">
+        <div className="body-sm bg-destructive/10 text-destructive mb-xl p-lg rounded-md">
           {errors.root.message}
         </div>
       )}

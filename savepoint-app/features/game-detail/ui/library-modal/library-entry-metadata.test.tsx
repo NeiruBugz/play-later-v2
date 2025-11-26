@@ -61,7 +61,7 @@ describe("LibraryEntryMetadata", () => {
       const item = createMockLibraryItem();
       render(<LibraryEntryMetadata item={item} />);
 
-      expect(elements.getCreatedLabel()).toBeInTheDocument();
+      expect(elements.getCreatedLabel()).toBeVisible();
       expect(screen.getByText("today")).toBeVisible();
     });
 
@@ -84,8 +84,8 @@ describe("LibraryEntryMetadata", () => {
 
       render(<LibraryEntryMetadata item={item} />);
 
-      expect(elements.getCreatedLabel()).toBeInTheDocument();
-      expect(elements.getUpdatedLabel()).toBeInTheDocument();
+      expect(elements.getCreatedLabel()).toBeVisible();
+      expect(elements.getUpdatedLabel()).toBeVisible();
     });
 
     it("should format created date as relative time", () => {
@@ -120,22 +120,22 @@ describe("LibraryEntryMetadata", () => {
       const item = createMockLibraryItem({ platform: "Nintendo Switch" });
       render(<LibraryEntryMetadata item={item} />);
 
-      expect(elements.getPlatformLabel()).toBeInTheDocument();
-      expect(elements.getPlatformValue("Nintendo Switch")).toBeInTheDocument();
+      expect(elements.getPlatformLabel()).toBeVisible();
+      expect(elements.getPlatformValue("Nintendo Switch")).toBeVisible();
     });
 
     it("should display PC platform", () => {
       const item = createMockLibraryItem({ platform: "PC" });
       render(<LibraryEntryMetadata item={item} />);
 
-      expect(elements.getPlatformValue("PC")).toBeInTheDocument();
+      expect(elements.getPlatformValue("PC")).toBeVisible();
     });
 
     it("should display PlayStation 5 platform", () => {
       const item = createMockLibraryItem({ platform: "PlayStation 5" });
       render(<LibraryEntryMetadata item={item} />);
 
-      expect(elements.getPlatformValue("PlayStation 5")).toBeInTheDocument();
+      expect(elements.getPlatformValue("PlayStation 5")).toBeVisible();
     });
   });
 
@@ -164,7 +164,7 @@ describe("LibraryEntryMetadata", () => {
       render(<LibraryEntryMetadata item={item} />);
 
       const card = screen.getByTestId("library-entry-metadata-card");
-      expect(card).toBeInTheDocument();
+      expect(card).toBeVisible();
 
       expect(screen.getByText("Created:")).toBeVisible();
     });

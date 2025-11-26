@@ -34,14 +34,7 @@ export interface AlertProps
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   (
-    {
-      className,
-      variant,
-      dismissible = false,
-      onDismiss,
-      children,
-      ...props
-    },
+    { className, variant, dismissible = false, onDismiss, children, ...props },
     ref
   ) => {
     const [isDismissed, setIsDismissed] = React.useState(false);
@@ -62,7 +55,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         className={cn(alertVariants({ variant }), className)}
         {...props}
       >
-        <div className="flex items-start gap-lg">
+        <div className="gap-lg flex items-start">
           {children}
           {dismissible && (
             <button
@@ -86,7 +79,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-xs font-medium leading-none tracking-tight", className)}
+    className={cn("mb-xs leading-none font-medium tracking-tight", className)}
     {...props}
   />
 ));

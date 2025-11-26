@@ -36,9 +36,7 @@ function JournalEntryCard({ entry }: JournalEntryCardProps) {
     <Link href={`/journal/${entry.id}`} className="block">
       <Card className="cursor-pointer">
         <CardHeader className="pb-lg">
-          <CardTitle className="line-clamp-1">
-            {displayTitle}
-          </CardTitle>
+          <CardTitle className="line-clamp-1">{displayTitle}</CardTitle>
           <CardDescription className="caption">
             {formatEntryDate(entry.createdAt)}
           </CardDescription>
@@ -54,7 +52,7 @@ function JournalEntryCard({ entry }: JournalEntryCardProps) {
 }
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center gap-xl rounded-lg border border-dashed p-3xl text-center">
+    <div className="gap-xl p-3xl flex flex-col items-center rounded-lg border border-dashed text-center">
       <p className="body-sm text-muted-foreground">No journal entries yet</p>
       <Button variant="secondary" size="sm" disabled>
         Write Your First Entry
@@ -67,9 +65,14 @@ export function JournalEntriesSection({
 }: JournalEntriesSectionProps) {
   const hasEntries = journalEntries.length > 0;
   return (
-    <section className="animate-fade-in space-y-xl" aria-labelledby="journal-heading">
+    <section
+      className="animate-fade-in space-y-xl"
+      aria-labelledby="journal-heading"
+    >
       <div className="flex items-center justify-between">
-        <h2 id="journal-heading" className="heading-md font-serif">Journal Entries</h2>
+        <h2 id="journal-heading" className="heading-md font-serif">
+          Journal Entries
+        </h2>
         {hasEntries && (
           <Button variant="secondary" size="sm" disabled>
             Write New Entry

@@ -1,6 +1,5 @@
 "use client";
 
-import { LibraryItemStatus } from "@/shared/types";
 import { useState } from "react";
 
 import { Badge } from "@/shared/components/ui/badge";
@@ -11,6 +10,7 @@ import {
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
 import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
+import { LibraryItemStatus } from "@/shared/types";
 
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
 import type { LibraryCardInteractiveBadgeProps } from "./library-card-interactive-badge.types";
@@ -69,7 +69,7 @@ export function LibraryCardInteractiveBadge({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-56 p-md"
+        className="p-md w-56"
         align="start"
         onClick={(e) => {
           e.preventDefault();

@@ -68,7 +68,7 @@ export function DesktopLayout({
           isAddMode ? "max-w-[480px]" : "max-w-[800px]"
         )}
       >
-        <DialogHeader className="border-b border-border px-2xl pb-lg pt-2xl">
+        <DialogHeader className="border-border px-2xl pb-lg pt-2xl border-b">
           <DialogTitle>
             {isAddMode ? "Add to Library" : "Manage Library"}
           </DialogTitle>
@@ -100,7 +100,7 @@ export function DesktopLayout({
               className="w-[240px] shrink-0"
             />
 
-            <div className="flex-1 overflow-y-auto p-2xl">
+            <div className="p-2xl flex-1 overflow-y-auto">
               {state.isAddingNew ? (
                 <EntryForm
                   igdbId={igdbId}

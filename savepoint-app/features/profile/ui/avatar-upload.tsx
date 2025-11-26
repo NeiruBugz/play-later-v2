@@ -113,7 +113,7 @@ export const AvatarUpload = ({
     <div className="space-y-xl">
       <div
         className={cn(
-          "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all duration-normal",
+          "duration-normal relative flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-all",
           {
             "border-accent bg-accent/10": isDragging,
             "border-border bg-card": !isDragging,
@@ -136,7 +136,7 @@ export const AvatarUpload = ({
         }}
       >
         {hasImage ? (
-          <div className="relative aspect-square w-full max-w-xs p-xl">
+          <div className="p-xl relative aspect-square w-full max-w-xs">
             <div className="border-border bg-background relative h-full w-full overflow-hidden rounded-full border-4">
               <Image
                 src={displayImageUrl}
@@ -156,7 +156,7 @@ export const AvatarUpload = ({
           </div>
         ) : (
           <div className="px-2xl py-4xl text-center">
-            <div className="bg-muted mx-auto mb-lg flex h-12 w-12 items-center justify-center rounded-full">
+            <div className="bg-muted mb-lg mx-auto flex h-12 w-12 items-center justify-center rounded-full">
               <Upload className="text-muted-foreground h-6 w-6" />
             </div>
             <p className="text-foreground mb-xs text-sm font-medium">
@@ -179,7 +179,7 @@ export const AvatarUpload = ({
       />
       {error && (
         <div
-          className="border-destructive/30 bg-destructive/10 flex items-start gap-md rounded-md border p-lg"
+          className="border-destructive/30 bg-destructive/10 gap-md p-lg flex items-start rounded-md border"
           role="alert"
         >
           <X className="text-destructive mt-xs h-4 w-4 shrink-0" />
@@ -187,7 +187,7 @@ export const AvatarUpload = ({
         </div>
       )}
       {selectedFile && (
-        <div className="flex flex-col gap-md sm:flex-row">
+        <div className="gap-md flex flex-col sm:flex-row">
           <Button
             onClick={handleUpload}
             disabled={isUploading}

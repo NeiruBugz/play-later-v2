@@ -1,16 +1,13 @@
+import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
-import {
-  isSuccessResult,
-  ProfileService,
-} from "@/data-access-layer/services";
 import { ContinuePlayingServer } from "@/features/dashboard/ui/continue-playing-server";
 import { DashboardStatsServer } from "@/features/dashboard/ui/dashboard-stats-server";
 import { RecentlyAddedServer } from "@/features/dashboard/ui/recently-added-server";
-import { requireServerUserId } from "@/shared/lib/app/auth";
 import { Skeleton } from "@/shared/components/ui/skeleton";
+import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -19,7 +16,7 @@ export const metadata: Metadata = {
 
 function StatsSkeleton() {
   return (
-    <div className="grid gap-lg md:grid-cols-3">
+    <div className="gap-lg grid md:grid-cols-3">
       <Skeleton className="h-32" variant="card" />
       <Skeleton className="h-32" variant="card" />
       <Skeleton className="h-32" variant="card" />
@@ -31,7 +28,7 @@ function SectionSkeleton() {
   return (
     <div className="space-y-lg">
       <Skeleton className="h-8 w-48" variant="title" />
-      <div className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4">
+      <div className="gap-lg grid sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
           <Skeleton key={i} variant="gameCard" />
         ))}
@@ -55,7 +52,7 @@ export default async function DashboardPage() {
     : "there";
 
   return (
-    <main className="container mx-auto py-3xl">
+    <main className="py-3xl container mx-auto">
       <div className="space-y-3xl">
         <header>
           <h1 className="heading-xl font-serif">Welcome back, {username}!</h1>

@@ -1,6 +1,5 @@
 "use client";
 
-import { LibraryItemStatus } from "@/shared/types";
 import {
   BookmarkIcon,
   ClockIcon,
@@ -20,6 +19,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { cn } from "@/shared/lib/ui";
+import { LibraryItemStatus } from "@/shared/types";
 
 import { updateLibraryStatusAction } from "../server-actions";
 import type { QuickActionButtonsProps } from "./quick-action-buttons.types";
@@ -116,7 +116,10 @@ export const QuickActionButtons = ({
     });
   };
   return (
-    <Card className="animate-fade-in w-full" style={{ animationDelay: "100ms" }}>
+    <Card
+      className="animate-fade-in w-full"
+      style={{ animationDelay: "100ms" }}
+    >
       <CardHeader className="pb-lg">
         <CardTitle className="font-serif">Quick Actions</CardTitle>
       </CardHeader>
@@ -131,7 +134,7 @@ export const QuickActionButtons = ({
           {announcement}
         </div>
         <div
-          className="grid grid-cols-2 gap-md"
+          className="gap-md grid grid-cols-2"
           role="group"
           aria-label="Journey status quick actions"
         >
@@ -145,8 +148,8 @@ export const QuickActionButtons = ({
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "focus-visible:ring-ring flex h-auto flex-col gap-xs border py-lg focus-visible:ring-2 focus-visible:ring-offset-2",
-                  "duration-normal transition-all ease-out-expo",
+                  "focus-visible:ring-ring gap-xs py-lg flex h-auto flex-col border focus-visible:ring-2 focus-visible:ring-offset-2",
+                  "duration-normal ease-out-expo transition-all",
                   isActive && config.activeClass
                 )}
                 onClick={() => handleStatusChange(status)}

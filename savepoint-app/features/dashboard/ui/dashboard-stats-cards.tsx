@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import {
   Bookmark,
+  Clock,
   Eye,
   Gamepad2,
-  Clock,
-  Trophy,
-  RotateCcw,
   Library,
+  RotateCcw,
+  Trophy,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Card } from "@/shared/components/ui/card";
 import {
@@ -55,26 +55,26 @@ function StatCard({
       <Card
         variant="interactive"
         className={cn(
-          "relative overflow-hidden p-xl",
-          "transition-all duration-normal ease-out-expo",
+          "p-xl relative overflow-hidden",
+          "duration-normal ease-out-expo transition-all",
           "hover:shadow-paper-md hover:scale-[1.02]"
         )}
       >
-        <div className="flex items-center gap-lg">
+        <div className="gap-lg flex items-center">
           <div className="relative">
             <ProgressRing
               status={status}
               progress={percentage}
               size="sm"
               animated
-              className="transition-transform duration-normal group-hover:scale-110"
+              className="duration-normal transition-transform group-hover:scale-110"
             />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-muted-foreground">{icon}</div>
             </div>
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="heading-lg font-serif tabular-nums">{count}</p>
             <p className="body-sm text-muted-foreground truncate">{label}</p>
           </div>
@@ -87,7 +87,7 @@ function StatCard({
         </div>
 
         <div
-          className="absolute bottom-0 left-0 h-1 transition-all duration-slow ease-out-expo"
+          className="duration-slow ease-out-expo absolute bottom-0 left-0 h-1 transition-all"
           style={{
             width: `${percentage}%`,
             backgroundColor: `var(--status-${status.toLowerCase()})`,
@@ -156,7 +156,7 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
   ];
 
   return (
-    <div className="grid gap-lg sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+    <div className="gap-lg grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
       {statItems.map((item, index) => (
         <StatCard
           key={item.label}

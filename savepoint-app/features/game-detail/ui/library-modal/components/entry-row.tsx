@@ -28,9 +28,9 @@ export function EntryRow({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-md rounded-md px-lg py-md",
-        "text-left transition-all duration-fast",
-        "hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring",
+        "gap-md px-lg py-md flex w-full items-center rounded-md",
+        "duration-fast text-left transition-all",
+        "hover:bg-muted/50 focus:ring-ring focus:ring-2 focus:outline-none",
         isSelected && "bg-accent/30 border-accent border",
         !isSelected && "border border-transparent",
         className

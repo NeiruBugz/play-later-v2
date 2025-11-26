@@ -1,4 +1,7 @@
-import type { AcquisitionType, LibraryItemStatus } from "@/data-access-layer/domain/library";
+import type {
+  AcquisitionType,
+  LibraryItemStatus,
+} from "@/data-access-layer/domain/library";
 
 export const LibraryStatusMapper: Record<LibraryItemStatus, string> = {
   CURIOUS_ABOUT: "Curious About",

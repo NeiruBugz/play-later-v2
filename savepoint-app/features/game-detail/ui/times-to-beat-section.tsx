@@ -16,8 +16,8 @@ function TimeCard({ icon, label, hours, accentColor }: TimeCardProps) {
   const hasTime = hours !== null && hours !== undefined;
 
   return (
-    <Card className="relative overflow-hidden p-lg">
-      <div className="flex items-center gap-lg">
+    <Card className="p-lg relative overflow-hidden">
+      <div className="gap-lg flex items-center">
         <div
           className={cn(
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
@@ -62,7 +62,7 @@ export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
       <h2 id="times-to-beat-heading" className="heading-md font-serif">
         Times to Beat
       </h2>
-      <div className="grid gap-lg sm:grid-cols-2">
+      <div className="gap-lg grid sm:grid-cols-2">
         <TimeCard
           icon={<Clock className="h-5 w-5 text-[var(--status-playing)]" />}
           label="Main Story"

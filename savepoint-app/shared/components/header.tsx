@@ -4,10 +4,13 @@ import Link from "next/link";
 export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   if (isAuthorised) {
     return (
-      <header className="border-border container mx-auto border-b py-lg md:py-xl">
+      <header className="border-border py-lg md:py-xl container mx-auto border-b">
         <div className="flex items-center justify-between">
-          <h1 className="heading-md font-serif md:heading-xl">
-            <Link href="/dashboard" className="flex items-center gap-md md:gap-lg">
+          <h1 className="heading-md md:heading-xl font-serif">
+            <Link
+              href="/dashboard"
+              className="gap-md md:gap-lg flex items-center"
+            >
               <Image
                 src="/logo.svg"
                 alt="SavePoint Logo"
@@ -18,7 +21,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
               <span>SavePoint</span>
             </Link>
           </h1>
-          <nav className="hidden items-center gap-2xl md:flex">
+          <nav className="gap-2xl hidden items-center md:flex">
             <Link
               href="/games/search"
               className="body-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
@@ -49,10 +52,13 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
     );
   }
   return (
-    <header className="border-border container mx-auto border-b py-lg md:py-xl">
+    <header className="border-border py-lg md:py-xl container mx-auto border-b">
       <div className="flex items-center justify-between">
-        <h1 className="heading-md font-serif md:heading-xl">
-          <Link href="/dashboard" className="flex items-center gap-md md:gap-lg">
+        <h1 className="heading-md md:heading-xl font-serif">
+          <Link
+            href="/dashboard"
+            className="gap-md md:gap-lg flex items-center"
+          >
             <Image
               src="/logo.svg"
               alt="SavePoint Logo"
@@ -63,7 +69,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
             <span>SavePoint</span>
           </Link>
         </h1>
-        <nav className="hidden items-center gap-2xl md:flex">
+        <nav className="gap-2xl hidden items-center md:flex">
           <Link
             href="/games/search"
             className="body-sm text-muted-foreground hover:text-foreground font-medium transition-colors"

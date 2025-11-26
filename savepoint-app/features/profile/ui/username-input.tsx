@@ -49,7 +49,7 @@ export function UsernameInput({
           placeholder="Enter username"
           autoComplete="username"
         />
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-lg">
+        <div className="pr-lg pointer-events-none absolute inset-y-0 right-0 flex items-center">
           {validationStatus === "validating" && (
             <Loader2
               className="text-muted-foreground h-4 w-4 animate-spin"
@@ -59,14 +59,14 @@ export function UsernameInput({
           )}
           {showSuccess && (
             <Check
-              className="h-4 w-4 text-success"
+              className="text-success h-4 w-4"
               aria-label="Username available"
               data-testid="username-success-icon"
             />
           )}
           {showError && validationStatus === "error" && (
             <X
-              className="h-4 w-4 text-destructive"
+              className="text-destructive h-4 w-4"
               aria-label="Username error"
               data-testid="username-error-icon"
             />
@@ -74,12 +74,12 @@ export function UsernameInput({
         </div>
       </div>
       {showError && (
-        <p className="text-sm text-destructive" id="username-error">
+        <p className="text-destructive text-sm" id="username-error">
           {displayError}
         </p>
       )}
       {showSuccess && (
-        <p className="text-sm text-success" role="status">
+        <p className="text-success text-sm" role="status">
           {validationMessage}
         </p>
       )}

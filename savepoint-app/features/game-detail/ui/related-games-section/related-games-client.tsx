@@ -143,14 +143,14 @@ function GameGrid({
     enabled: !isPending,
   });
   return (
-    <div className="grid grid-cols-2 gap-xl pr-xl sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+    <div className="gap-xl pr-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {games.map((game, index) => (
         <GameCard key={`${franchiseId}-${game.id}`} game={game} index={index} />
       ))}
       {hasMore && (
-        <div ref={ref} className="col-span-full flex justify-center py-xl">
+        <div ref={ref} className="py-xl col-span-full flex justify-center">
           {isPending && (
-            <div className="text-muted-foreground flex items-center gap-md">
+            <div className="text-muted-foreground gap-md flex items-center">
               <Loader2 className="h-5 w-5 animate-spin" />
               <span className="text-sm">Loading more games...</span>
             </div>
@@ -179,7 +179,7 @@ function GameCard({ game, index = 0 }: GameCardProps & { index?: number }) {
         layout="vertical-compact"
         density="minimal"
         sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-        className="transition-all duration-normal ease-out-expo hover:scale-105 hover:shadow-paper-md"
+        className="duration-normal ease-out-expo hover:shadow-paper-md transition-all hover:scale-105"
       />
     </div>
   );

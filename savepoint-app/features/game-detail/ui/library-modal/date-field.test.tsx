@@ -97,7 +97,7 @@ describe("DateField", () => {
       renderDateFieldInForm();
 
       const input = elements.getDateInput();
-      expect(input).toBeInTheDocument();
+      expect(input).toBeVisible();
       expect(input).toHaveAttribute("type", "date");
     });
 

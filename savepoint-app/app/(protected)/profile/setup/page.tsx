@@ -20,7 +20,7 @@ export default async function ProfileSetupPage() {
     redirect("/dashboard");
   }
   return (
-    <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center py-3xl">
+    <div className="py-3xl container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center">
       <ProfileSetupForm defaultUsername={result.data.suggestedUsername} />
     </div>
   );

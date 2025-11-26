@@ -4,14 +4,14 @@ import { ProgressRingSpinner } from "@/shared/components/ui/progress-ring";
 
 export function LoadingScreen() {
   return (
-    <div className="bg-background relative flex min-h-screen items-center justify-center px-2xl">
+    <div className="bg-background px-2xl relative flex min-h-screen items-center justify-center">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,var(--status-playing)/0.15,transparent_55%)]"
       />
       <div
         aria-live="polite"
-        className="animate-fade-in relative flex flex-col items-center gap-xl text-center"
+        className="animate-fade-in gap-xl relative flex flex-col items-center text-center"
         role="status"
       >
         <div className="relative">

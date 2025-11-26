@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-
 import type { LibraryItemWithGameDomain } from "@/data-access-layer/domain/library";
+import { ChevronRight } from "lucide-react";
+import Link from "next/link";
+
 import { LibraryCard } from "@/features/library/ui/library-card";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui";
@@ -40,7 +40,7 @@ export function DashboardGameSection({
       </div>
 
       {items.length > 0 ? (
-        <div className="grid gap-lg grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <div className="gap-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {items.map((item, index) => (
             <LibraryCard key={item.id} item={item} index={index} />
           ))}
@@ -54,7 +54,7 @@ export function DashboardGameSection({
 
 function EmptySection({ message, href }: { message: string; href: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-border bg-muted/30 p-3xl text-center">
+    <div className="border-border bg-muted/30 p-3xl rounded-lg border border-dashed text-center">
       <p className="body-md text-muted-foreground mb-lg">{message}</p>
       <Button variant="outline" size="sm" asChild>
         <Link href={href}>Browse Games</Link>

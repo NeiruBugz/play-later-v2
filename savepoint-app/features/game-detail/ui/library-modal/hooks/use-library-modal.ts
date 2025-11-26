@@ -1,7 +1,8 @@
 "use client";
 
-import type { LibraryItemDomain } from "@/shared/types";
 import { useCallback, useEffect, useMemo, useReducer } from "react";
+
+import type { LibraryItemDomain } from "@/shared/types";
 
 export type ModalView = "add" | "manage";
 
@@ -65,7 +66,8 @@ function modalReducer(
     case "SET_VIEW":
       return {
         view: action.view,
-        selectedEntryId: action.view === "manage" ? (action.firstEntryId ?? null) : null,
+        selectedEntryId:
+          action.view === "manage" ? (action.firstEntryId ?? null) : null,
         isAddingNew: false,
       };
     default:
@@ -110,7 +112,9 @@ export function useLibraryModal({
 
   const selectedEntry = useMemo(() => {
     if (state.selectedEntryId === null) return null;
-    return existingItems.find((item) => item.id === state.selectedEntryId) ?? null;
+    return (
+      existingItems.find((item) => item.id === state.selectedEntryId) ?? null
+    );
   }, [state.selectedEntryId, existingItems]);
 
   const selectEntry = useCallback((id: number) => {
@@ -138,7 +142,9 @@ export function useLibraryModal({
   }, []);
 
   const existingPlatforms = useMemo(() => {
-    return existingItems.map((item) => item.platform).filter(Boolean) as string[];
+    return existingItems
+      .map((item) => item.platform)
+      .filter(Boolean) as string[];
   }, [existingItems]);
 
   return {

@@ -10,7 +10,7 @@ import type { LibraryErrorStateProps } from "./library-grid.types";
 
 function LibraryErrorState({ error }: LibraryErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center px-lg py-5xl text-center">
+    <div className="px-lg py-5xl flex flex-col items-center justify-center text-center">
       <div className="text-destructive mb-xl text-5xl">⚠</div>
       <h2 className="heading-lg mb-md">Failed to Load Library</h2>
       <p className="body-md text-muted-foreground mb-xl max-w-md">
@@ -41,7 +41,7 @@ export function LibraryGrid() {
   }
   return (
     <div
-      className="grid grid-cols-2 gap-xl sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+      className="gap-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
       role="feed"
       aria-label="Your game library"
     >

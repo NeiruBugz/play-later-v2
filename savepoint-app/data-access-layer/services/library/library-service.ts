@@ -1,6 +1,15 @@
 import "server-only";
 
 import {
+  AcquisitionType,
+  LibraryItemMapper,
+  LibraryItemStatus,
+  mapAcquisitionTypeToPrisma,
+  mapLibraryItemStatusToPrisma,
+  type LibraryItemDomain,
+  type LibraryItemWithGameDomain,
+} from "@/data-access-layer/domain/library";
+import {
   createLibraryItem,
   deleteLibraryItem,
   findAllLibraryItemsByGameId,
@@ -10,15 +19,6 @@ import {
   findMostRecentLibraryItemByGameId,
   updateLibraryItem,
 } from "@/data-access-layer/repository";
-import {
-  AcquisitionType,
-  LibraryItemMapper,
-  LibraryItemStatus,
-  mapAcquisitionTypeToPrisma,
-  mapLibraryItemStatusToPrisma,
-  type LibraryItemDomain,
-  type LibraryItemWithGameDomain,
-} from "@/data-access-layer/domain/library";
 import { z } from "zod";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -141,7 +141,9 @@ export class LibraryService extends BaseService {
         );
         return this.error("Library item not found");
       }
-      const currentDomainItem = LibraryItemMapper.toDomain(currentItemResult.data);
+      const currentDomainItem = LibraryItemMapper.toDomain(
+        currentItemResult.data
+      );
       const currentStatus = currentDomainItem.status;
       const newStatus = params.libraryItem.status;
       if (newStatus !== currentStatus) {

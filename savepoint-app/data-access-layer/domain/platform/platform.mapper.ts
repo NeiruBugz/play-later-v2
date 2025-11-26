@@ -1,7 +1,7 @@
 import type { Platform } from "@prisma/client";
 
-import type { PlatformDomain, PlatformSummaryDomain } from "./platform.model";
 import type { PlatformDTO, PlatformSummaryDTO } from "./platform.dto";
+import type { PlatformDomain, PlatformSummaryDomain } from "./platform.model";
 
 /**
  * Mapper class for transforming Platform between different type layers.
@@ -121,7 +121,9 @@ export class PlatformMapper {
    * @param domainItems - Array of summary domain models
    * @returns Array of summary DTOs
    */
-  static toSummaryDTOList(domainItems: PlatformSummaryDomain[]): PlatformSummaryDTO[] {
+  static toSummaryDTOList(
+    domainItems: PlatformSummaryDomain[]
+  ): PlatformSummaryDTO[] {
     return domainItems.map((item) => this.toSummaryDTO(item));
   }
 }

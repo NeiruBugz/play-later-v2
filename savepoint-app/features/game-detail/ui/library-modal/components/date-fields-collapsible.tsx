@@ -56,9 +56,9 @@ export function DateFieldsCollapsible({
       <CollapsibleTrigger
         type="button"
         className={cn(
-          "flex items-center gap-sm text-sm",
+          "gap-sm flex items-center text-sm",
           "text-muted-foreground hover:text-foreground",
-          "transition-colors duration-fast"
+          "duration-fast transition-colors"
         )}
         aria-expanded={isOpen}
       >
@@ -66,7 +66,7 @@ export function DateFieldsCollapsible({
         <span>{triggerLabel}</span>
         <ChevronDown
           className={cn(
-            "h-4 w-4 transition-transform duration-fast",
+            "duration-fast h-4 w-4 transition-transform",
             isOpen && "rotate-180"
           )}
           aria-hidden
@@ -81,28 +81,38 @@ export function DateFieldsCollapsible({
           "data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2"
         )}
       >
-        <div className="grid grid-cols-2 gap-xl pt-lg">
+        <div className="gap-xl pt-lg grid grid-cols-2">
           <div className="space-y-sm">
-            <Label htmlFor="started-date" className="text-muted-foreground text-xs">
+            <Label
+              htmlFor="started-date"
+              className="text-muted-foreground text-xs"
+            >
               Started
             </Label>
             <Input
               id="started-date"
               type="date"
               value={formatDateForInput(startedValue)}
-              onChange={(e) => onStartedChange(parseDateFromInput(e.target.value))}
+              onChange={(e) =>
+                onStartedChange(parseDateFromInput(e.target.value))
+              }
               className="text-sm"
             />
           </div>
           <div className="space-y-sm">
-            <Label htmlFor="completed-date" className="text-muted-foreground text-xs">
+            <Label
+              htmlFor="completed-date"
+              className="text-muted-foreground text-xs"
+            >
               Completed
             </Label>
             <Input
               id="completed-date"
               type="date"
               value={formatDateForInput(completedValue)}
-              onChange={(e) => onCompletedChange(parseDateFromInput(e.target.value))}
+              onChange={(e) =>
+                onCompletedChange(parseDateFromInput(e.target.value))
+              }
               className="text-sm"
             />
           </div>

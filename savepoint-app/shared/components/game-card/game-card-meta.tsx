@@ -20,7 +20,7 @@ export function GameCardMeta({
   }
 
   return (
-    <div className={cn("flex flex-col gap-md", className)} {...props}>
+    <div className={cn("gap-md flex flex-col", className)} {...props}>
       {/* Release year */}
       {releaseYear && (
         <span className="body-sm text-muted-foreground">{releaseYear}</span>

@@ -1,7 +1,7 @@
 import { cn } from "@/shared/lib/ui/utils";
 
-import { gameCardContentVariants } from "./game-card.variants";
 import type { GameCardContentProps } from "./game-card.types";
+import { gameCardContentVariants } from "./game-card.variants";
 
 /**
  * GameCardContent - Container for card text content

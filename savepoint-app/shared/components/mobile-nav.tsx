@@ -51,11 +51,11 @@ export function MobileNav() {
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 md:hidden",
         "bg-background/95 backdrop-blur-md",
-        "border-t border-border",
+        "border-border border-t",
         "pb-[env(safe-area-inset-bottom)]"
       )}
     >
-      <div className="flex items-center justify-around px-md py-sm">
+      <div className="px-md py-sm flex items-center justify-around">
         {navItems.map((item) => {
           const active = isActive(pathname, item);
           const Icon = item.icon;
@@ -65,9 +65,9 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex flex-col items-center gap-xs px-lg py-sm",
-                "rounded-lg transition-all duration-fast",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "group gap-xs px-lg py-sm flex flex-col items-center",
+                "duration-fast rounded-lg transition-all",
+                "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
                 active
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -76,24 +76,24 @@ export function MobileNav() {
               <div
                 className={cn(
                   "relative flex h-8 w-8 items-center justify-center rounded-full",
-                  "transition-all duration-fast",
+                  "duration-fast transition-all",
                   active && "bg-primary/10"
                 )}
               >
                 <Icon
                   className={cn(
-                    "h-5 w-5 transition-transform duration-fast",
+                    "duration-fast h-5 w-5 transition-transform",
                     active && "scale-110"
                   )}
                   strokeWidth={active ? 2.5 : 2}
                 />
                 {active && (
-                  <span className="absolute -bottom-1 h-1 w-1 rounded-full bg-primary" />
+                  <span className="bg-primary absolute -bottom-1 h-1 w-1 rounded-full" />
                 )}
               </div>
               <span
                 className={cn(
-                  "caption transition-colors duration-fast",
+                  "caption duration-fast transition-colors",
                   active ? "font-semibold" : "font-medium"
                 )}
               >

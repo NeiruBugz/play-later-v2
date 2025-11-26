@@ -17,7 +17,7 @@ export default async function GameSearchPage({
   const { q } = await searchParams;
   const initialQuery = q || "";
   return (
-    <div className="container mx-auto px-2xl">
+    <div className="px-2xl container mx-auto">
       <div className="space-y-3xl">
         <div className="space-y-lg">
           <h1 className="heading-xl">Search Games</h1>

@@ -96,7 +96,7 @@ describe("CredentialsForm", () => {
 
       it("should display sign in form", () => {
         expect(elements.getEmailInput()).toBeVisible();
-        expect(elements.getNameInput()).toBeNull();
+        expect(elements.getNameInput()).not.toBeInTheDocument();
       });
     });
   });
@@ -120,7 +120,7 @@ describe("CredentialsForm", () => {
 
     it("should clear error when toggled into sign up mode", async () => {
       await actions.toggleSignUpMode();
-      expect(elements.getErrorMessage()).toBeNull();
+      expect(elements.getErrorMessage()).not.toBeInTheDocument();
     });
   });
 

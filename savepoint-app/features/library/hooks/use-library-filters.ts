@@ -1,7 +1,8 @@
 "use client";
 
-import type { LibraryItemStatus } from "@/shared/types";
 import { useSearchParams } from "next/navigation";
+
+import type { LibraryItemStatus } from "@/shared/types";
 
 export type LibraryFilterValues = {
   status?: LibraryItemStatus;

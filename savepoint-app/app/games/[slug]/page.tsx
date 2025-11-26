@@ -39,11 +39,11 @@ export default async function GameDetailPage({
       ?.map((g) => g.name)
       .filter((name): name is string => name !== undefined) ?? [];
   return (
-    <div className="container mx-auto px-lg py-2xl md:px-2xl lg:px-3xl">
-      <div className="flex flex-col gap-2xl lg:grid lg:grid-cols-[minmax(280px,320px)_1fr] lg:gap-3xl">
+    <div className="px-lg py-2xl md:px-2xl lg:px-3xl container mx-auto">
+      <div className="gap-2xl lg:gap-3xl flex flex-col lg:grid lg:grid-cols-[minmax(280px,320px)_1fr]">
         {}
         <aside
-          className="space-y-xl lg:sticky lg:top-3xl lg:self-start"
+          className="space-y-xl lg:top-3xl lg:sticky lg:self-start"
           aria-label="Game details sidebar"
         >
           <GameCoverImage

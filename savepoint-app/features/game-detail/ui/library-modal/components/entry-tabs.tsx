@@ -25,7 +25,7 @@ export function EntryTabs({
 }: EntryTabsProps) {
   const activeValue = isAddingNew
     ? "new"
-    : selectedId?.toString() ?? entries[0]?.id.toString() ?? "";
+    : (selectedId?.toString() ?? entries[0]?.id.toString() ?? "");
 
   return (
     <Tabs
@@ -39,14 +39,14 @@ export function EntryTabs({
       }}
       className={className}
     >
-      <TabsList className="h-auto w-full justify-start overflow-x-auto rounded-none border-b border-border bg-transparent p-0">
+      <TabsList className="border-border h-auto w-full justify-start overflow-x-auto rounded-none border-b bg-transparent p-0">
         {entries.map((entry) => (
           <TabsTrigger
             key={entry.id}
             value={entry.id.toString()}
             className={cn(
               "data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-              "rounded-none border-b-2 border-transparent px-md py-sm text-xs sm:px-lg sm:py-md sm:text-sm",
+              "px-md py-sm sm:px-lg sm:py-md rounded-none border-b-2 border-transparent text-xs sm:text-sm",
               "data-[state=active]:border-primary",
               "whitespace-nowrap"
             )}
@@ -59,7 +59,7 @@ export function EntryTabs({
           className={cn(
             "text-muted-foreground",
             "data-[state=active]:bg-transparent data-[state=active]:shadow-none",
-            "rounded-none border-b-2 border-transparent px-md py-sm sm:px-lg sm:py-md",
+            "px-md py-sm sm:px-lg sm:py-md rounded-none border-b-2 border-transparent",
             "data-[state=active]:border-primary data-[state=active]:text-foreground"
           )}
         >

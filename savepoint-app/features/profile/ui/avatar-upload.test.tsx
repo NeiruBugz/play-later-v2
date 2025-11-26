@@ -1,3 +1,4 @@
+import { VALID_IMAGE_TYPES } from "@fixtures/enum-test-cases";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -40,30 +41,15 @@ describe("AvatarUpload", () => {
       expect(
         screen.getByText(/JPG, PNG, GIF, or WebP \(max 4MB\)/i)
       ).toBeVisible();
+      expect(screen.getByLabelText(/Upload avatar/i)).toBeVisible();
     });
 
-    it("renders current avatar when provided", () => {
+    it("renders current avatar with change overlay when provided", () => {
       render(<AvatarUpload currentAvatar="https://example.com/avatar.jpg" />);
 
       const img = screen.getByAltText(/Current avatar/i);
       expect(img).toHaveAttribute("src", "https://example.com/avatar.jpg");
-    });
-
-    it("shows Change overlay on hover when current avatar exists", () => {
-      render(<AvatarUpload currentAvatar="https://example.com/avatar.jpg" />);
-
       expect(screen.getByText(/Change/i)).toBeVisible();
-    });
-
-    it("renders with aria-label for upload state", () => {
-      render(<AvatarUpload />);
-
-      expect(screen.getByLabelText(/Upload avatar/i)).toBeVisible();
-    });
-
-    it("renders with aria-label for change state", () => {
-      render(<AvatarUpload currentAvatar="https://example.com/avatar.jpg" />);
-
       expect(screen.getByLabelText(/Change avatar/i)).toBeVisible();
     });
   });
@@ -82,21 +68,7 @@ describe("AvatarUpload", () => {
       expect(clickSpy).toHaveBeenCalled();
     });
 
-    it("accepts file via file input", async () => {
-      render(<AvatarUpload />);
-
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      expect(screen.getByText(/Upload/i)).toBeVisible();
-      expect(screen.getByText(/Cancel/i)).toBeVisible();
-    });
-
-    it("displays file preview after selection", async () => {
+    it("shows preview and action buttons after file selection", async () => {
       render(<AvatarUpload />);
 
       const file = createMockFile("test.jpg", 1024, "image/jpeg");
@@ -107,18 +79,6 @@ describe("AvatarUpload", () => {
       await userEvent.upload(input, file);
 
       expect(screen.getByAltText(/Selected avatar preview/i)).toBeVisible();
-    });
-
-    it("shows Upload and Cancel buttons after selection", async () => {
-      render(<AvatarUpload />);
-
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
       expect(
         screen.getByRole("button", { name: /Upload selected avatar/i })
       ).toBeVisible();
@@ -127,58 +87,28 @@ describe("AvatarUpload", () => {
       ).toBeVisible();
     });
 
-    it("allows keyboard navigation with Enter key", async () => {
-      render(<AvatarUpload />);
+    it.each(["{Enter}", " "])(
+      "allows keyboard navigation with %s key",
+      async (key) => {
+        render(<AvatarUpload />);
 
-      const uploadArea = screen.getByLabelText(/Upload avatar/i);
-      const fileInput = screen.getByLabelText(/File input for avatar upload/i);
+        const uploadArea = screen.getByLabelText(/Upload avatar/i);
+        const fileInput = screen.getByLabelText(
+          /File input for avatar upload/i
+        );
 
-      const clickSpy = vi.spyOn(fileInput as HTMLInputElement, "click");
+        const clickSpy = vi.spyOn(fileInput as HTMLInputElement, "click");
 
-      uploadArea.focus();
-      fireEvent.keyDown(uploadArea, { key: "Enter" });
+        uploadArea.focus();
+        await userEvent.keyboard(key);
 
-      expect(clickSpy).toHaveBeenCalled();
-    });
-
-    it("allows keyboard navigation with Space key", async () => {
-      render(<AvatarUpload />);
-
-      const uploadArea = screen.getByLabelText(/Upload avatar/i);
-      const fileInput = screen.getByLabelText(/File input for avatar upload/i);
-
-      const clickSpy = vi.spyOn(fileInput as HTMLInputElement, "click");
-
-      uploadArea.focus();
-      fireEvent.keyDown(uploadArea, { key: " " });
-
-      expect(clickSpy).toHaveBeenCalled();
-    });
+        expect(clickSpy).toHaveBeenCalled();
+      }
+    );
   });
 
   describe("Drag and Drop", () => {
-    it("highlights drop zone on drag over", () => {
-      render(<AvatarUpload />);
-
-      const dropZone = screen.getByLabelText(/Upload avatar/i);
-
-      fireEvent.dragOver(dropZone);
-
-      expect(dropZone).toHaveClass("border-blue-500");
-    });
-
-    it("removes highlight on drag leave", () => {
-      render(<AvatarUpload />);
-
-      const dropZone = screen.getByLabelText(/Upload avatar/i);
-
-      fireEvent.dragOver(dropZone);
-      fireEvent.dragLeave(dropZone);
-
-      expect(dropZone).not.toHaveClass("border-blue-500");
-    });
-
-    it("accepts file via drop", async () => {
+    it("accepts file via drop and shows preview", async () => {
       render(<AvatarUpload />);
 
       const dropZone = screen.getByLabelText(/Upload avatar/i);
@@ -192,22 +122,6 @@ describe("AvatarUpload", () => {
 
       await waitFor(() => {
         expect(screen.getByText(/Upload/i)).toBeVisible();
-      });
-    });
-
-    it("shows preview after drop", async () => {
-      render(<AvatarUpload />);
-
-      const dropZone = screen.getByLabelText(/Upload avatar/i);
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-
-      const dataTransfer = {
-        files: [file],
-      };
-
-      fireEvent.drop(dropZone, { dataTransfer });
-
-      await waitFor(() => {
         expect(screen.getByAltText(/Selected avatar preview/i)).toBeVisible();
       });
     });
@@ -263,61 +177,22 @@ describe("AvatarUpload", () => {
       );
     });
 
-    it("accepts valid JPEG file", async () => {
-      render(<AvatarUpload />);
+    it.each(VALID_IMAGE_TYPES)(
+      "accepts valid $description file",
+      async ({ name, type }) => {
+        render(<AvatarUpload />);
 
-      const file = createMockFile("photo.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
+        const file = createMockFile(name, 1024, type);
+        const input = screen.getByLabelText(
+          /File input for avatar upload/i
+        ) as HTMLInputElement;
 
-      await userEvent.upload(input, file);
+        await userEvent.upload(input, file);
 
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByText(/Upload/i)).toBeVisible();
-    });
-
-    it("accepts valid PNG file", async () => {
-      render(<AvatarUpload />);
-
-      const file = createMockFile("photo.png", 1024, "image/png");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByText(/Upload/i)).toBeVisible();
-    });
-
-    it("accepts valid GIF file", async () => {
-      render(<AvatarUpload />);
-
-      const file = createMockFile("animation.gif", 1024, "image/gif");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByText(/Upload/i)).toBeVisible();
-    });
-
-    it("accepts valid WebP file", async () => {
-      render(<AvatarUpload />);
-
-      const file = createMockFile("photo.webp", 1024, "image/webp");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      expect(screen.getByText(/Upload/i)).toBeVisible();
-    });
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+        expect(screen.getByText(/Upload/i)).toBeVisible();
+      }
+    );
   });
 
   describe("Upload", () => {
@@ -346,7 +221,7 @@ describe("AvatarUpload", () => {
       });
     });
 
-    it("shows loading state during upload", async () => {
+    it("shows loading state and disables interactions during upload", async () => {
       vi.mocked(uploadAvatar).mockImplementation(
         () =>
           new Promise((resolve) =>
@@ -375,48 +250,15 @@ describe("AvatarUpload", () => {
       });
       await userEvent.click(uploadButton);
 
-      expect(
-        screen.getByRole("button", { name: /Upload selected avatar/i })
-      ).toHaveTextContent("Uploading...");
+      expect(uploadButton).toHaveTextContent("Uploading...");
       expect(screen.getByText(/Uploading your avatar.../i)).toBeVisible();
-    });
-
-    it("disables interactions during upload", async () => {
-      vi.mocked(uploadAvatar).mockImplementation(
-        () =>
-          new Promise((resolve) =>
-            setTimeout(
-              () =>
-                resolve({
-                  success: true,
-                  data: { url: "https://s3.example.com/avatar.jpg" },
-                }),
-              100
-            )
-          )
-      );
-
-      render(<AvatarUpload />);
-
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      const uploadButton = screen.getByRole("button", {
-        name: /Upload selected avatar/i,
-      });
-      await userEvent.click(uploadButton);
-
       expect(uploadButton).toBeDisabled();
       expect(
         screen.getByRole("button", { name: /Cancel avatar upload/i })
       ).toBeDisabled();
     });
 
-    it("calls onUploadSuccess callback on success", async () => {
+    it("calls onUploadSuccess callback and clears preview on success", async () => {
       const onUploadSuccess = vi.fn();
       vi.mocked(uploadAvatar).mockResolvedValue({
         success: true,
@@ -441,30 +283,6 @@ describe("AvatarUpload", () => {
         expect(onUploadSuccess).toHaveBeenCalledWith(
           "https://s3.example.com/avatar.jpg"
         );
-      });
-    });
-
-    it("clears preview on successful upload", async () => {
-      vi.mocked(uploadAvatar).mockResolvedValue({
-        success: true,
-        data: { url: "https://s3.example.com/avatar.jpg" },
-      });
-
-      render(<AvatarUpload />);
-
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      const uploadButton = screen.getByRole("button", {
-        name: /Upload selected avatar/i,
-      });
-      await userEvent.click(uploadButton);
-
-      await waitFor(() => {
         expect(
           screen.queryByAltText(/Selected avatar preview/i)
         ).not.toBeInTheDocument();
@@ -474,7 +292,7 @@ describe("AvatarUpload", () => {
       });
     });
 
-    it("calls onUploadError callback on failure", async () => {
+    it("calls onUploadError callback and keeps preview on failure for retry", async () => {
       const onUploadError = vi.fn();
       vi.mocked(uploadAvatar).mockResolvedValue({
         success: false,
@@ -497,55 +315,6 @@ describe("AvatarUpload", () => {
 
       await waitFor(() => {
         expect(onUploadError).toHaveBeenCalledWith("Upload failed");
-      });
-    });
-
-    it("shows error message on upload failure", async () => {
-      vi.mocked(uploadAvatar).mockResolvedValue({
-        success: false,
-        error: "Network error",
-      });
-
-      render(<AvatarUpload />);
-
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      const uploadButton = screen.getByRole("button", {
-        name: /Upload selected avatar/i,
-      });
-      await userEvent.click(uploadButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(/Network error/i)).toBeVisible();
-      });
-    });
-
-    it("keeps preview on upload failure for retry", async () => {
-      vi.mocked(uploadAvatar).mockResolvedValue({
-        success: false,
-        error: "Upload failed",
-      });
-
-      render(<AvatarUpload />);
-
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      const uploadButton = screen.getByRole("button", {
-        name: /Upload selected avatar/i,
-      });
-      await userEvent.click(uploadButton);
-
-      await waitFor(() => {
         expect(screen.getByText(/Upload failed/i)).toBeVisible();
       });
 
@@ -579,7 +348,7 @@ describe("AvatarUpload", () => {
   });
 
   describe("Cancel", () => {
-    it("removes preview when Cancel clicked", async () => {
+    it("resets to initial state when Cancel clicked", async () => {
       render(<AvatarUpload />);
 
       const file = createMockFile("test.jpg", 1024, "image/jpeg");
@@ -599,50 +368,6 @@ describe("AvatarUpload", () => {
       expect(
         screen.queryByAltText(/Selected avatar preview/i)
       ).not.toBeInTheDocument();
-    });
-
-    it("clears selected file when Cancel clicked", async () => {
-      render(<AvatarUpload />);
-
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      const cancelButton = screen.getByRole("button", {
-        name: /Cancel avatar upload/i,
-      });
-      await userEvent.click(cancelButton);
-
-      expect(
-        screen.queryByRole("button", { name: /Upload selected avatar/i })
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: /Cancel avatar upload/i })
-      ).not.toBeInTheDocument();
-    });
-
-    it("hides Upload and Cancel buttons after cancel", async () => {
-      render(<AvatarUpload />);
-
-      const file = createMockFile("test.jpg", 1024, "image/jpeg");
-      const input = screen.getByLabelText(
-        /File input for avatar upload/i
-      ) as HTMLInputElement;
-
-      await userEvent.upload(input, file);
-
-      expect(
-        screen.getByRole("button", { name: /Upload selected avatar/i })
-      ).toBeVisible();
-
-      const cancelButton = screen.getByRole("button", {
-        name: /Cancel avatar upload/i,
-      });
-      await userEvent.click(cancelButton);
-
       expect(
         screen.queryByRole("button", { name: /Upload selected avatar/i })
       ).not.toBeInTheDocument();

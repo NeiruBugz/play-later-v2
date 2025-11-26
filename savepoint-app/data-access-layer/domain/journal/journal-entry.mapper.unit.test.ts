@@ -71,8 +71,14 @@ describe("JournalEntryMapper", () => {
       const moods = [
         { prisma: PrismaJournalMood.EXCITED, domain: JournalMood.EXCITED },
         { prisma: PrismaJournalMood.RELAXED, domain: JournalMood.RELAXED },
-        { prisma: PrismaJournalMood.FRUSTRATED, domain: JournalMood.FRUSTRATED },
-        { prisma: PrismaJournalMood.ACCOMPLISHED, domain: JournalMood.ACCOMPLISHED },
+        {
+          prisma: PrismaJournalMood.FRUSTRATED,
+          domain: JournalMood.FRUSTRATED,
+        },
+        {
+          prisma: PrismaJournalMood.ACCOMPLISHED,
+          domain: JournalMood.ACCOMPLISHED,
+        },
         { prisma: PrismaJournalMood.CURIOUS, domain: JournalMood.CURIOUS },
         { prisma: PrismaJournalMood.NOSTALGIC, domain: JournalMood.NOSTALGIC },
       ];
@@ -100,9 +106,18 @@ describe("JournalEntryMapper", () => {
 
     it("should map all JournalVisibility values correctly", () => {
       const visibilities = [
-        { prisma: PrismaJournalVisibility.PRIVATE, domain: JournalVisibility.PRIVATE },
-        { prisma: PrismaJournalVisibility.FRIENDS_ONLY, domain: JournalVisibility.FRIENDS_ONLY },
-        { prisma: PrismaJournalVisibility.PUBLIC, domain: JournalVisibility.PUBLIC },
+        {
+          prisma: PrismaJournalVisibility.PRIVATE,
+          domain: JournalVisibility.PRIVATE,
+        },
+        {
+          prisma: PrismaJournalVisibility.FRIENDS_ONLY,
+          domain: JournalVisibility.FRIENDS_ONLY,
+        },
+        {
+          prisma: PrismaJournalVisibility.PUBLIC,
+          domain: JournalVisibility.PUBLIC,
+        },
       ];
 
       for (const { prisma, domain: expectedVisibility } of visibilities) {

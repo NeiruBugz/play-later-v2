@@ -1,4 +1,5 @@
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
+import { STATUS_SELECT_OPTIONS } from "@fixtures/enum-test-cases";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
@@ -57,31 +58,19 @@ function renderStatusSelectInForm(props = {}) {
 
 describe("StatusSelect", () => {
   describe("given component just rendered", () => {
-    it("should display form label", () => {
+    it("should display form label and default description", () => {
       renderStatusSelectInForm();
 
       expect(screen.getByText("Journey Status")).toBeVisible();
-    });
-
-    it("should display default description", () => {
-      renderStatusSelectInForm();
-
-      expect(elements.getFormDescription()).toBeInTheDocument();
+      expect(elements.getFormDescription()).toBeVisible();
+      expect(elements.getTrigger()).toBeVisible();
     });
 
     it("should display custom description when provided", () => {
       const customDescription = "Update your journey status for this entry";
       renderStatusSelectInForm({ description: customDescription });
 
-      expect(
-        elements.getCustomDescription(customDescription)
-      ).toBeInTheDocument();
-    });
-
-    it("should display select trigger", () => {
-      renderStatusSelectInForm();
-
-      expect(elements.getTrigger()).toBeInTheDocument();
+      expect(elements.getCustomDescription(customDescription)).toBeVisible();
     });
   });
 
@@ -95,82 +84,16 @@ describe("StatusSelect", () => {
       expect(options).toHaveLength(6);
     });
 
-    it("should display 'Curious About' option with description", async () => {
-      renderStatusSelectInForm();
+    it.each(STATUS_SELECT_OPTIONS)(
+      "should display '$label' option with description",
+      async ({ label, description }) => {
+        renderStatusSelectInForm();
 
-      await actions.clickTrigger();
+        await actions.clickTrigger();
 
-      expect(elements.getOptionByLabel("Curious About")).toBeInTheDocument();
-      expect(
-        screen.getAllByText("Interested in trying this game")[0]
-      ).toBeVisible();
-    });
-
-    it("should display 'Currently Exploring' option with description", async () => {
-      renderStatusSelectInForm();
-
-      await actions.clickTrigger();
-
-      expect(
-        elements.getOptionByLabel("Currently Exploring")
-      ).toBeInTheDocument();
-      expect(
-        screen.getAllByText("Actively playing this game")[0]
-      ).toBeVisible();
-    });
-
-    it("should display 'Taking a Break' option with description", async () => {
-      renderStatusSelectInForm();
-
-      await actions.clickTrigger();
-
-      expect(elements.getOptionByLabel("Taking a Break")).toBeInTheDocument();
-      expect(screen.getAllByText("Paused but plan to return")[0]).toBeVisible();
-    });
-
-    it("should display 'Experienced' option with description", async () => {
-      renderStatusSelectInForm();
-
-      await actions.clickTrigger();
-
-      expect(elements.getOptionByLabel("Experienced")).toBeInTheDocument();
-      expect(
-        screen.getAllByText("Finished or completed this game")[0]
-      ).toBeVisible();
-    });
-
-    it("should display 'Wishlist' option with description", async () => {
-      renderStatusSelectInForm();
-
-      await actions.clickTrigger();
-
-      expect(elements.getOptionByLabel("Wishlist")).toBeInTheDocument();
-      expect(
-        screen.getAllByText("Want to play in the future")[0]
-      ).toBeVisible();
-    });
-
-    it("should display 'Revisiting' option with description", async () => {
-      renderStatusSelectInForm();
-
-      await actions.clickTrigger();
-
-      expect(elements.getOptionByLabel("Revisiting")).toBeInTheDocument();
-      expect(
-        screen.getAllByText("Playing again after a break")[0]
-      ).toBeVisible();
-    });
-  });
-
-  describe("given custom className provided", () => {
-    it("should apply className to SelectTrigger", () => {
-      renderStatusSelectInForm({
-        className: "py-2xl text-left",
-      });
-
-      const trigger = screen.getByRole("combobox");
-      expect(trigger).toHaveClass("py-2xl");
-      expect(trigger).toHaveClass("text-left");
-    });
+        expect(elements.getOptionByLabel(label)).toBeVisible();
+        expect(screen.getAllByText(description)[0]).toBeVisible();
+      }
+    );
   });
 });

@@ -2,8 +2,8 @@ import { Card } from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { cn } from "@/shared/lib/ui/utils";
 
-import { gameCardVariants } from "./game-card.variants";
 import type { GameCardProps } from "./game-card.types";
+import { gameCardVariants } from "./game-card.variants";
 
 /**
  * GameCardSkeleton - Loading state for GameCard
@@ -38,8 +38,8 @@ export function GameCardSkeleton({
       {density !== "minimal" && (
         <div
           className={cn(
-            "flex flex-col gap-md",
-            layout === "horizontal" ? "flex-1 min-w-0 py-xs" : "w-full p-md"
+            "gap-md flex flex-col",
+            layout === "horizontal" ? "py-xs min-w-0 flex-1" : "p-md w-full"
           )}
         >
           {/* Title skeleton */}
@@ -49,7 +49,7 @@ export function GameCardSkeleton({
           {density === "detailed" && (
             <>
               <Skeleton variant="text" className="w-1/4" />
-              <div className="flex gap-sm mt-xs">
+              <div className="gap-sm mt-xs flex">
                 <Skeleton className="h-6 w-16 rounded-sm" />
                 <Skeleton className="h-6 w-16 rounded-sm" />
                 <Skeleton className="h-6 w-16 rounded-sm" />

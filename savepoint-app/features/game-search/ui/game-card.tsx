@@ -1,6 +1,6 @@
 import {
-  GameCard as UnifiedGameCard,
   GameCardFooter,
+  GameCard as UnifiedGameCard,
 } from "@/shared/components/game-card";
 
 import type { GameCardProps } from "./game-card.types";

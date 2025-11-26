@@ -95,7 +95,7 @@ export function LibrarySortSelect() {
     [router, searchParams]
   );
   return (
-    <div className="flex items-center gap-lg">
+    <div className="gap-lg flex items-center">
       <Label htmlFor="sort-select" className="body-sm text-muted-foreground">
         Sort by
       </Label>

@@ -1,10 +1,10 @@
 import "server-only";
 
-import { LibraryService } from "@/data-access-layer/services";
 import {
   LibraryItemStatus,
   type LibraryItemWithGameDomain,
 } from "@/data-access-layer/domain/library";
+import { LibraryService } from "@/data-access-layer/services";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 

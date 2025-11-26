@@ -45,10 +45,7 @@ export function SkeletonAvatar({
   };
 
   return (
-    <Skeleton
-      variant="avatar"
-      className={cn(sizeClasses[size], className)}
-    />
+    <Skeleton variant="avatar" className={cn(sizeClasses[size], className)} />
   );
 }
 
@@ -118,9 +115,9 @@ export function SkeletonList({
     >
       <span className="sr-only">Loading...</span>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="flex items-center space-x-xl">
+        <div key={i} className="space-x-xl flex items-center">
           <SkeletonAvatar />
-          <div className="flex-1 space-y-md">
+          <div className="space-y-md flex-1">
             <Skeleton variant="title" />
             <Skeleton variant="text" />
           </div>
@@ -153,7 +150,7 @@ export function SkeletonGrid({
   };
 
   return (
-    <div className={cn("grid gap-xl", gridClasses[columns], className)}>
+    <div className={cn("gap-xl grid", gridClasses[columns], className)}>
       {Array.from({ length: count }).map((_, i) => (
         <div key={i}>{children}</div>
       ))}

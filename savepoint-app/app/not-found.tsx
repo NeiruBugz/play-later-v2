@@ -6,10 +6,10 @@ import { Button } from "@/shared/components/ui/button";
 
 export default function NotFoundPage() {
   return (
-    <main className="relative flex flex-1 items-center justify-center overflow-hidden px-lg py-5xl sm:px-2xl lg:px-3xl">
+    <main className="px-lg py-5xl sm:px-2xl lg:px-3xl relative flex flex-1 items-center justify-center overflow-hidden">
       <div className="from-background via-background to-muted pointer-events-none absolute inset-0 bg-linear-to-br opacity-60" />
-      <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-2xl text-center">
-        <span className="bg-secondary/20 text-secondary inline-flex items-center gap-md rounded-full px-lg py-sm text-sm font-medium">
+      <div className="gap-2xl relative z-10 mx-auto flex max-w-xl flex-col items-center text-center">
+        <span className="bg-secondary/20 text-secondary gap-md px-lg py-sm inline-flex items-center rounded-full text-sm font-medium">
           <Compass className="h-4 w-4" aria-hidden="true" />
           Lost in the library
         </span>
@@ -21,7 +21,7 @@ export default function NotFoundPage() {
           is temporarily unavailable. Let&apos;s guide you back to familiar
           territory.
         </p>
-        <div className="flex w-full flex-col-reverse gap-lg sm:flex-row sm:items-center sm:justify-center">
+        <div className="gap-lg flex w-full flex-col-reverse sm:flex-row sm:items-center sm:justify-center">
           <BrowserBackButton />
           <Button
             asChild

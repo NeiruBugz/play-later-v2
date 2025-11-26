@@ -1,18 +1,18 @@
-import type { LibraryItem } from "@prisma/client";
 import {
   AcquisitionType as PrismaAcquisitionType,
   LibraryItemStatus as PrismaLibraryItemStatus,
+  type LibraryItem,
 } from "@prisma/client";
 
-import type {
-  LibraryItemDomain,
-  LibraryItemWithGameDomain,
-} from "./library-item.model";
+import { AcquisitionType, LibraryItemStatus } from "./enums";
 import type {
   LibraryItemDTO,
   LibraryItemWithGameDTO,
 } from "./library-item.dto";
-import { AcquisitionType, LibraryItemStatus } from "./enums";
+import type {
+  LibraryItemDomain,
+  LibraryItemWithGameDomain,
+} from "./library-item.model";
 
 /**
  * Prisma type for library item with game relation and count.

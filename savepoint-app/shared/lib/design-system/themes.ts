@@ -265,7 +265,8 @@ export interface ThemeConfig {
 export const themePresets: Record<ThemePreset, ThemeConfig> = {
   default: {
     name: "Aged Paper",
-    description: "Warm, cozy tones inspired by aged paper and leather-bound books",
+    description:
+      "Warm, cozy tones inspired by aged paper and leather-bound books",
     className: "", // Default theme, no class needed
   },
   modern: {
@@ -290,7 +291,9 @@ export const themePresets: Record<ThemePreset, ThemeConfig> = {
  */
 export function getCSSVariable(variable: string): string {
   if (typeof window === "undefined") return "";
-  return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(variable)
+    .trim();
 }
 
 /**

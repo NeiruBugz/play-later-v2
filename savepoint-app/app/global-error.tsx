@@ -31,10 +31,10 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   return (
     <html lang="en">
       <body>
-        <main className="bg-background text-foreground relative flex min-h-screen flex-1 items-center justify-center overflow-hidden px-lg py-5xl sm:px-2xl lg:px-3xl">
+        <main className="bg-background text-foreground px-lg py-5xl sm:px-2xl lg:px-3xl relative flex min-h-screen flex-1 items-center justify-center overflow-hidden">
           <div className="from-background via-background to-muted pointer-events-none absolute inset-0 bg-linear-to-br opacity-60" />
-          <div className="relative z-10 mx-auto flex max-w-xl flex-col items-center gap-2xl text-center">
-            <span className="bg-destructive/10 text-destructive inline-flex items-center gap-md rounded-full px-lg py-sm text-sm font-medium">
+          <div className="gap-2xl relative z-10 mx-auto flex max-w-xl flex-col items-center text-center">
+            <span className="bg-destructive/10 text-destructive gap-md px-lg py-sm inline-flex items-center rounded-full text-sm font-medium">
               <ShieldAlert
                 className="h-4 w-4"
                 aria-hidden="true"
@@ -49,7 +49,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               A critical error occurred in the application. You can try again,
               or refresh your browser to restart the application.
             </p>
-            <div className="flex w-full flex-col-reverse gap-lg sm:flex-row sm:items-center sm:justify-center">
+            <div className="gap-lg flex w-full flex-col-reverse sm:flex-row sm:items-center sm:justify-center">
               <Button
                 onClick={() => window.location.reload()}
                 size="lg"

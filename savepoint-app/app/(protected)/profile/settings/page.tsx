@@ -19,8 +19,8 @@ export default async function ProfileSettingsPage() {
     redirect("/login");
   }
   return (
-    <main className="container mx-auto py-3xl">
-      <div className="flex items-start gap-lg">
+    <main className="py-3xl container mx-auto">
+      <div className="gap-lg flex items-start">
         <BrowserBackButton />
         <ProfileSettingsForm
           currentUsername={result.data.profile.username}

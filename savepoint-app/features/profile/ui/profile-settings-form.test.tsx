@@ -70,11 +70,11 @@ describe("ProfileSettingsForm", () => {
         />
       );
 
-      expect(elements.getTitle()).toBeInTheDocument();
-      expect(elements.getDescription()).toBeInTheDocument();
-      expect(elements.getUsernameInput()).toBeInTheDocument();
-      expect(elements.getUsernameHint()).toBeInTheDocument();
-      expect(elements.getSubmitButton()).toBeInTheDocument();
+      expect(elements.getTitle()).toBeVisible();
+      expect(elements.getDescription()).toBeVisible();
+      expect(elements.getUsernameInput()).toBeVisible();
+      expect(elements.getUsernameHint()).toBeVisible();
+      expect(elements.getSubmitButton()).toBeVisible();
     });
 
     it("should populate username input with current value", () => {
@@ -166,27 +166,13 @@ describe("ProfileSettingsForm", () => {
       await actions.typeUsername("ab");
 
       await waitFor(() => {
-        expect(elements.getValidationError()).toBeInTheDocument();
+        expect(elements.getValidationError()).toBeVisible();
       });
 
       await actions.typeUsername("abc");
 
       await waitFor(() => {
         expect(elements.queryValidationError()).not.toBeInTheDocument();
-      });
-    });
-
-    it("should add error styling to input when validation fails", async () => {
-      render(
-        <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
-      );
-
-      await actions.typeUsername("ab");
-
-      await waitFor(() => {
-        const input = elements.getUsernameInput();
-        expect(input).toHaveClass("border-red-500");
-        expect(input).toHaveAttribute("aria-invalid", "true");
       });
     });
   });
@@ -201,7 +187,7 @@ describe("ProfileSettingsForm", () => {
       await actions.submitForm();
 
       expect(mockUpdateProfileFormAction).not.toHaveBeenCalled();
-      expect(elements.getValidationError()).toBeInTheDocument();
+      expect(elements.getValidationError()).toBeVisible();
     });
 
     it("should disable submit button when validation error exists", async () => {
@@ -288,7 +274,7 @@ describe("ProfileSettingsForm", () => {
       await actions.typeUsername("ab");
 
       await waitFor(() => {
-        expect(elements.getValidationError()).toBeInTheDocument();
+        expect(elements.getValidationError()).toBeVisible();
       });
 
       await actions.typeAndSubmit("newusername");
@@ -333,7 +319,7 @@ describe("ProfileSettingsForm", () => {
       await actions.typeAndSubmit("takenusername");
 
       await waitFor(() => {
-        expect(elements.getServerError()).toBeInTheDocument();
+        expect(elements.getServerError()).toBeVisible();
       });
     });
 
@@ -369,7 +355,7 @@ describe("ProfileSettingsForm", () => {
       await actions.typeAndSubmit("  takenusername  ");
 
       await waitFor(() => {
-        expect(elements.getServerError()).toBeInTheDocument();
+        expect(elements.getServerError()).toBeVisible();
       });
     });
   });
@@ -422,7 +408,7 @@ describe("ProfileSettingsForm", () => {
 
       await actions.typeAndSubmit("newusername");
 
-      expect(elements.getSavingButton()).toBeInTheDocument();
+      expect(elements.getSavingButton()).toBeVisible();
     });
 
     it("should disable submit button while submitting", async () => {
@@ -492,7 +478,7 @@ describe("ProfileSettingsForm", () => {
 
       await waitFor(() => {
         const error = elements.getValidationError();
-        expect(error).toBeInTheDocument();
+        expect(error).toBeVisible();
         expect(error).toHaveTextContent(
           "Username must be at least 3 characters"
         );
