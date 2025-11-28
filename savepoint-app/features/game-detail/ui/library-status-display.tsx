@@ -11,6 +11,8 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { deleteLibraryItemAction } from "@/features/manage-library-entry/server-actions";
+import { LibraryModal } from "@/features/manage-library-entry/ui";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -27,9 +29,7 @@ import {
 } from "@/shared/lib/library-status";
 import type { LibraryItemStatus } from "@/shared/types";
 
-import { deleteLibraryItemAction } from "../server-actions";
 import { AddToLibraryButton } from "./add-to-library-button";
-import { LibraryModal } from "./library-modal";
 import type { LibraryStatusDisplayProps } from "./library-status-display.types";
 
 const STATUS_ICONS: Record<

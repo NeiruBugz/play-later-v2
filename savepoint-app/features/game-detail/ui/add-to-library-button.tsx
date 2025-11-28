@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
+import { LibraryModal } from "@/features/manage-library-entry/ui";
 import { Button } from "@/shared/components/ui/button";
 
 import type { AddToLibraryButtonProps } from "./add-to-library-button.types";
-import { LibraryModal } from "./library-modal";
 
 export const AddToLibraryButton = ({
   gameId,

@@ -5,8 +5,11 @@ import { ProfileService } from "@/data-access-layer/services/profile/profile-ser
 import { revalidatePath } from "next/cache";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
-import { UpdateProfileSchema, type UpdateProfileInput } from "../schemas";
+import {
+  UpdateProfileSchema,
+  type UpdateProfileInput,
+} from "@/shared/lib/profile";
+import type { UpdateProfileFormState } from "@/shared/types/profile";
 
 type PerformUpdateProfileResult =
   | {
@@ -83,11 +86,10 @@ export async function updateProfile(
 ): Promise<PerformUpdateProfileResult> {
   return performUpdateProfile(data);
 }
-export type UpdateProfileFormState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-  submittedUsername?: string;
-};
+
+// Re-export for backward compatibility
+export type { UpdateProfileFormState };
+
 export async function updateProfileFormAction(
   _prevState: UpdateProfileFormState,
   formData: FormData

@@ -213,7 +213,7 @@ class LibraryService {
 **Instead, create a use-case**:
 
 ```typescript
-// features/library/use-cases/add-game-to-library.ts
+// features/manage-library-entry/use-cases/add-game-to-library.ts
 export async function addGameToLibrary(params) {
   const gameService = new GameService();
   const libraryService = new LibraryService();

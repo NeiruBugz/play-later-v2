@@ -15,10 +15,6 @@ vi.mock("../server-actions/update-profile", () => ({
   updateProfileFormAction: vi.fn(),
 }));
 
-vi.mock("../server-actions/upload-avatar", () => ({
-  uploadAvatar: vi.fn(),
-}));
-
 const mockUpdateProfileFormAction = vi.mocked(updateProfileFormAction);
 const mockToastSuccess = vi.mocked(toast.success);
 

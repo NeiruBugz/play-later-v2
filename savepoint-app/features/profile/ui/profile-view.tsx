@@ -11,8 +11,8 @@ import {
   ProgressRing,
 } from "@/shared/components/ui/progress-ring";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
+import { statusLabels } from "@/shared/lib/profile";
 
-import { statusLabels } from "../lib/constants";
 import { prepareProfileData } from "../lib/prepare-profile-data";
 import { LogoutButton } from "./logout-button";
 import type { ProfileViewProps } from "./profile-view.types";

@@ -30,7 +30,7 @@ import {
   userWithUsernameNotRecentFixture,
 } from "@/test/fixtures/service/profile";
 
-import { validateUsername } from "@/features/profile/lib/validation";
+import { validateUsername } from "@/shared/lib/profile";
 
 import { ServiceErrorCode } from "../types";
 import { ProfileService } from "./profile-service";
@@ -42,7 +42,7 @@ vi.mock("@/data-access-layer/repository", () => ({
   updateUserProfile: vi.fn(),
 }));
 
-vi.mock("@/features/profile/lib/validation", () => ({
+vi.mock("@/shared/lib/profile", () => ({
   validateUsername: vi.fn(),
 }));
 

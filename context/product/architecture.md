@@ -504,6 +504,139 @@ export default defineConfig({
 
 ---
 
+## 9. Feature-Sliced Design (FSD) Architecture
+
+SavePoint implements a **modified Feature-Sliced Design (FSD)** architecture adapted for Next.js 15 App Router, combining FSD principles with Domain-Driven Design patterns and a custom data-access layer.
+
+### FSD Layer Mapping
+
+**Standard FSD Layers:**
+```
+app → processes → pages → widgets → features → entities → shared
+```
+
+**SavePoint's Adapted Layers:**
+```
+app/ (Next.js App Router)
+    ↓
+features/ (FSD Slices)
+    ↓
+data-access-layer/ (Custom: handlers → services → repository → domain)
+    ↓
+shared/ (FSD Shared)
+    ↓
+Prisma → PostgreSQL
+```
+
+### Key Deviations from Standard FSD
+
+| Standard FSD | SavePoint Implementation | Rationale |
+|--------------|-------------------------|-----------|
+| `entities/` layer | `shared/types/` + `data-access-layer/domain/` | Entities are Prisma models; domain types in shared |
+| `widgets/` layer | Colocated in `features/*/ui/` | Complex components stay within their feature |
+| `pages/` layer | `app/` (Next.js App Router) | Next.js convention takes precedence |
+| `processes/` layer | `features/*/use-cases/` | Use-cases handle multi-service orchestration |
+| Direct feature → entity | Feature → service → repository | Added abstraction for business logic |
+
+### Feature Structure (Per Feature)
+
+```
+features/[feature-name]/
+├── ui/                      # React components
+│   ├── component.tsx
+│   ├── component.types.ts
+│   └── index.ts             # Barrel export
+├── server-actions/          # Next.js server actions
+│   ├── action.ts
+│   └── index.ts
+├── hooks/                   # Feature-specific hooks
+│   └── index.ts
+├── use-cases/               # Business orchestration (optional)
+│   ├── orchestration.ts
+│   └── index.ts
+├── schemas.ts               # Zod validation
+├── types.ts                 # Feature types (if needed)
+└── index.ts                 # Public API barrel
+```
+
+### Existing Features
+
+| Feature | Responsibility |
+|---------|---------------|
+| `auth` | Authentication flows (sign-in/up) |
+| `game-search` | Game search interface |
+| `game-detail` | Game detail page composition |
+| `browse-related-games` | Related/franchise games with infinite scroll |
+| `manage-library-entry` | Library entry CRUD (modal, forms, actions) |
+| `library` | User's game library views |
+| `profile` | User profile display/settings |
+| `setup-profile` | Initial profile creation |
+| `dashboard` | Dashboard overview |
+| `journal` | Journal entry system |
+
+### Cross-Feature Import Rules
+
+**Rule**: Features should NOT import from other features.
+
+**Documented Exception**: `manage-library-entry` is treated as a **shared UI library** for library operations across features:
+
+```typescript
+// Allowed cross-feature imports (architectural exception)
+import { LibraryModal } from "@/features/manage-library-entry/ui";
+import { updateLibraryStatusAction } from "@/features/manage-library-entry/server-actions";
+```
+
+**Consumers of manage-library-entry:**
+- `game-detail/ui/add-to-library-button.tsx`
+- `game-detail/ui/library-status-display.tsx`
+- `game-detail/ui/quick-action-buttons.tsx`
+
+### Barrel Export Strategy
+
+**Two-level exports** enable both deep and barrel imports:
+
+**Level 1** - Sublayer (`features/feature/ui/index.ts`):
+```typescript
+export { ComponentA } from "./component-a";
+export type { ComponentAProps } from "./component-a.types";
+```
+
+**Level 2** - Feature root (`features/feature/index.ts`):
+```typescript
+export * from "./ui";
+export * from "./hooks";
+export * from "./server-actions";
+```
+
+### FSD Compliance Summary
+
+| Principle | Status | Implementation |
+|-----------|--------|----------------|
+| **Layered architecture** | ✅ Applied | app → features → data-access → shared |
+| **Sliced structure** | ✅ Applied | Features organized by business domain |
+| **Public API (barrel exports)** | ✅ Applied | Two-level export strategy |
+| **Unidirectional imports** | ✅ Enforced | ESLint boundaries plugin |
+| **Feature isolation** | ⚠️ Partial | Documented exception for `manage-library-entry` |
+| **Entities layer** | ❌ Modified | Replaced with domain types in shared |
+| **Widgets layer** | ❌ Omitted | Colocated within features |
+
+### Boundary Enforcement
+
+Import rules enforced via `eslint-plugin-boundaries`:
+
+| From | Allowed Imports |
+|------|-----------------|
+| `app-route` | handler, use-case, service, server-action, ui-component, shared |
+| `server-action` | use-case, service, shared |
+| `handler` | use-case, service, shared |
+| `use-case` | service, shared |
+| `ui-component` | use-case, server-action, shared |
+| `service` | repository, shared |
+| `repository` | prisma, shared |
+| `shared` | shared only |
+
+---
+
 ## Architecture Decision Records
 
 **ADR-001: Why Next.js 15 App Router?**
@@ -572,7 +705,7 @@ export default defineConfig({
 
 **ADR-008: Why selective use-case pattern (only for multi-service coordination)?**
 
-**Context:** Use-cases exist in 2 features (game-detail, library) where multiple services must be coordinated.
+**Context:** Use-cases exist in 2 features (game-detail, manage-library-entry) where multiple services must be coordinated.
 
 **Decision:** Use-cases are orchestration layer, created only when:
 - Feature requires coordinating 2+ services (e.g., IGDB + Library + Journal)
@@ -586,8 +719,8 @@ export default defineConfig({
 - Avoids over-engineering for simple operations
 
 **Examples:**
-- ✅ `getGameDetails`: Coordinates IgdbService + LibraryService + JournalService
-- ✅ `addGameToLibrary`: Coordinates GameService (find/create) + LibraryService (create item)
+- ✅ `getGameDetails`: Coordinates IgdbService + LibraryService + JournalService (in `game-detail/use-cases/`)
+- ✅ `addGameToLibrary`: Coordinates GameService (find/create) + LibraryService (create item) (in `manage-library-entry/use-cases/`)
 - ❌ Profile update: Single service operation, no use-case needed
 
 **Alternatives Considered:**

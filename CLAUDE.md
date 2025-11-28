@@ -37,20 +37,29 @@ tree -L 2 -I 'node_modules|.git|.next' --gitignore
 
 ### Key Architecture Layers (within `savepoint-app/`)
 
+The project implements a **modified Feature-Sliced Design (FSD)** architecture adapted for Next.js 15. See [context/product/architecture.md](context/product/architecture.md#9-feature-sliced-design-fsd-architecture) for full FSD documentation.
+
 **1. App Router (`app/`)**
 
 - Next.js 15 App Router with React Server Components
 - Minimal API routes (auth only)
 - Pages delegate to features and services
 
-**2. Data Access Layer (`data-access-layer/`)**
+**2. Features Layer (`features/`)**
+
+- Business domain slices organized by user-facing functionality
+- Each feature contains: `ui/`, `server-actions/`, `hooks/`, `use-cases/`, `schemas.ts`
+- Features are isolated (no cross-feature imports, with documented exceptions)
+- See [features/CLAUDE.md](savepoint-app/features/CLAUDE.md) for detailed rules
+
+**3. Data Access Layer (`data-access-layer/`)**
 
 - `handlers/`: Request handlers for API routes (validation, rate limiting, orchestration)
 - `repository/`: Direct Prisma operations organized by domain (game, library, user, review, journal, imported-game)
 - `services/`: Business logic services implementing service patterns with Result types
 - `domain/`: Domain models and types (planned for future enhancement)
 
-**3. Shared Layer (`shared/`)**
+**4. Shared Layer (`shared/`)**
 
 - `components/`: Reusable UI components (shadcn/ui based)
 - `lib/`: Utilities including IGDB integration, date functions, platform mappers
@@ -58,11 +67,11 @@ tree -L 2 -I 'node_modules|.git|.next' --gitignore
 - `hooks/`: React hooks for common patterns
 - `config/`: Application configuration
 
-**4. Context (`context/product/`)**
+**5. Context (`context/product/`)**
 
 - Product documentation and roadmap (not runtime code)
 
-**5. Tests (`test/`)**
+**6. Tests (`test/`)**
 
 - Vitest setup with dual modes: unit (mocked Prisma) and integration (real DB)
 - Test factories and fixtures for consistent test data
@@ -323,6 +332,7 @@ class LibraryService {
 }
 
 // ✅ GOOD: Use-case orchestrating services
+// See features/manage-library-entry/use-cases/add-game-to-library.ts
 async function addGameToLibrary(params) {
   const gameService = new GameService();
   const libraryService = new LibraryService();
@@ -390,6 +400,10 @@ type Result<T, E extends Error> =
 ```
 
 ## Code Style Preferences
+
+### General
+
+- Use self-descriptive names, instead of JSDoc/TSDoc or inline comments
 
 ### React and Next.js
 
@@ -620,9 +634,18 @@ features/feature-name/
 │   └── feature-action.ts
 ├── hooks/                       # Feature-specific hooks
 │   └── use-feature.ts
+├── use-cases/                   # Business orchestration (optional)
+│   └── feature-use-case.ts
 ├── types.ts                     # Feature types
 └── schemas.ts                   # Zod validation schemas
 ```
+
+**Key Features**:
+
+- **`game-detail`**: Game display and details (imports library modal from `manage-library-entry`)
+- **`manage-library-entry`**: Library entry CRUD operations (modal UI, server actions, add-to-library use-case)
+- **`library`**: User's game library views and management
+- **`journal`**: Journal entry management
 
 ### Adding a New Service
 

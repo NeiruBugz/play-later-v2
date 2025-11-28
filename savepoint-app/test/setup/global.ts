@@ -175,6 +175,7 @@ vi.mock("@/shared/lib", () => {
       };
       return variants[status] || "secondary";
     }),
+    createServerAction: vi.fn(() => vi.fn()),
   };
 });
 

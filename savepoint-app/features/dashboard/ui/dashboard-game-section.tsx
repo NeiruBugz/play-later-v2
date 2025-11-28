@@ -1,5 +1,3 @@
-"use client";
-
 import type { LibraryItemWithGameDomain } from "@/data-access-layer/domain/library";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";

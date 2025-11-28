@@ -7,12 +7,12 @@ import {
   updateUserProfile,
 } from "@/data-access-layer/repository";
 
-import { validateUsername } from "@/features/profile/lib/validation";
 import {
   NEW_USER_THRESHOLD_MS,
   SUGGESTED_USERNAME_MAX_LENGTH,
 } from "@/shared/constants";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { validateUsername } from "@/shared/lib/profile";
 
 import { BaseService, ServiceErrorCode } from "../types";
 import { mapUserToProfile, mapUserToProfileWithStats } from "./mappers";

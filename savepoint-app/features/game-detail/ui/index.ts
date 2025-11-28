@@ -28,6 +28,3 @@ export type { QuickActionButtonsProps } from "./quick-action-buttons.types";
 
 export { TimesToBeatSection } from "./times-to-beat-section";
 export type { TimesToBeatSectionProps } from "./times-to-beat-section.types";
-
-export * from "./library-modal";
-export * from "./related-games-section";

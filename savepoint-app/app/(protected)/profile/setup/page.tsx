@@ -2,7 +2,7 @@ import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { ProfileSetupForm } from "@/features/profile/ui/profile-setup-form";
+import { ProfileSetupForm } from "@/features/setup-profile";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export const metadata: Metadata = {

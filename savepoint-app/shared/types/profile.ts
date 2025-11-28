@@ -18,3 +18,9 @@ export type ProfileWithStats = {
   createdAt: Date;
   stats: LibraryStats;
 };
+
+export type UpdateProfileFormState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+  submittedUsername?: string;
+};

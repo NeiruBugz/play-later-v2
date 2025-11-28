@@ -8,9 +8,10 @@ import {
   PauseIcon,
   SparklesIcon,
 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { updateLibraryStatusAction } from "@/features/manage-library-entry/server-actions";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -21,8 +22,12 @@ import {
 import { cn } from "@/shared/lib/ui";
 import { LibraryItemStatus } from "@/shared/types";
 
-import { updateLibraryStatusAction } from "../server-actions";
 import type { QuickActionButtonsProps } from "./quick-action-buttons.types";
+
+interface OptimisticStatusState {
+  status: LibraryItemStatus | undefined;
+  isOptimistic: boolean;
+}
 
 const STATUS_CONFIG: Record<
   LibraryItemStatus,
@@ -90,16 +95,26 @@ export const QuickActionButtons = ({
   currentStatus,
 }: QuickActionButtonsProps) => {
   const [isPending, startTransition] = useTransition();
-  const [activeStatus, setActiveStatus] = useState<
-    LibraryItemStatus | undefined
-  >(currentStatus);
   const [announcement, setAnnouncement] = useState<string>("");
+
+  // Optimistic state management
+  const [optimisticStatus, setOptimisticStatus] = useOptimistic<
+    OptimisticStatusState,
+    LibraryItemStatus
+  >({ status: currentStatus, isOptimistic: false }, (_, newStatus) => ({
+    status: newStatus,
+    isOptimistic: true,
+  }));
   const handleStatusChange = (status: LibraryItemStatus) => {
     if (isPending) return;
+
+    // 1. Immediate optimistic update (before server call)
+    setOptimisticStatus(status);
+
+    // 2. Server action in transition
     startTransition(async () => {
       const result = await updateLibraryStatusAction({ igdbId, status });
       if (result.success) {
-        setActiveStatus(status);
         const statusLabel = STATUS_CONFIG[status].label;
         const message = `Status updated to ${statusLabel}`;
         setAnnouncement(message);
@@ -107,6 +122,7 @@ export const QuickActionButtons = ({
           description: gameTitle,
         });
       } else {
+        // React automatically reverts optimistic state on error
         const errorMessage = "Failed to update status";
         setAnnouncement(errorMessage);
         toast.error(errorMessage, {
@@ -141,7 +157,9 @@ export const QuickActionButtons = ({
           {STATUS_ORDER.map((status) => {
             const config = STATUS_CONFIG[status];
             const Icon = config.icon;
-            const isActive = activeStatus === status;
+            const isActive = optimisticStatus.status === status;
+            const isOptimisticActive =
+              isActive && optimisticStatus.isOptimistic;
             return (
               <Button
                 key={status}
@@ -150,14 +168,21 @@ export const QuickActionButtons = ({
                 className={cn(
                   "focus-visible:ring-ring gap-xs py-lg flex h-auto flex-col border focus-visible:ring-2 focus-visible:ring-offset-2",
                   "duration-normal ease-out-expo transition-all",
-                  isActive && config.activeClass
+                  isActive && config.activeClass,
+                  isOptimisticActive && "opacity-80"
                 )}
                 onClick={() => handleStatusChange(status)}
                 disabled={isPending}
                 aria-label={config.ariaLabel}
                 aria-pressed={isActive}
               >
-                <Icon className="h-5 w-5" aria-hidden="true" />
+                <Icon
+                  className={cn(
+                    "h-5 w-5",
+                    isOptimisticActive && "animate-pulse"
+                  )}
+                  aria-hidden="true"
+                />
                 <span className="caption">{config.label}</span>
               </Button>
             );

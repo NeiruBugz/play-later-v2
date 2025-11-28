@@ -22,10 +22,10 @@ _The highest priority features that form the core foundation of SavePoint—enab
   - [x] **Game Search:** Allow users to search for games via IGDB to add to their library.
   - [x] **Game Detail Pages:** Create rich game detail pages showing IGDB metadata and user's personal journal entries for that game.
 
-- [ ] **Personal Gaming Library**
-  - [ ] **Add Games to Library:** Enable users to add games from IGDB search results to their personal library.
-  - [ ] **Journey Status Tracking:** Allow users to mark games with status indicators (Curious About, Currently Exploring, Taking a Break, Experienced, Wishlist, Revisiting) to organize their collection by intent.
-  - [ ] **Library View & Organization:** Display the user's gaming library in a clear, browsable format with filtering by status and platform.
+- [x] **Personal Gaming Library**
+  - [x] **Add Games to Library:** Enable users to add games from IGDB search results to their personal library.
+  - [x] **Journey Status Tracking:** Allow users to mark games with status indicators (Curious About, Currently Exploring, Taking a Break, Experienced, Wishlist, Revisiting) to organize their collection by intent.
+  - [x] **Library View & Organization:** Display the user's gaming library in a clear, browsable format with filtering by status and platform.
 
 - [ ] **Gaming Journal**
   - [ ] **Write Journal Entries:** Provide a form for users to write reflections and memories about their gaming experiences, linked to specific games.
