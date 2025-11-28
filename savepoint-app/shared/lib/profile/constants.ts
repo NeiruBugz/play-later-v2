@@ -1,5 +1,3 @@
-import type { UpdateProfileFormState } from "@/shared/types/profile";
-
 export const statusLabels: Record<string, string> = {
   CURIOUS_ABOUT: "Curious About",
   CURRENTLY_EXPLORING: "Currently Exploring",
@@ -9,6 +7,10 @@ export const statusLabels: Record<string, string> = {
   REVISITING: "Revisiting",
 };
 
-export const initialFormState: UpdateProfileFormState = {
+export const initialFormState: {
+  status: "idle" | "success" | "error";
+  message?: string;
+  submittedUsername?: string;
+} = {
   status: "idle",
 };

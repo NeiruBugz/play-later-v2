@@ -127,7 +127,10 @@ export async function getPlatformsForLibraryModal(
     );
 
     const allPlatformsResult = await igdbService.getPlatforms();
-    if (allPlatformsResult.success && allPlatformsResult.data.platforms.length > 0) {
+    if (
+      allPlatformsResult.success &&
+      allPlatformsResult.data.platforms.length > 0
+    ) {
       const mappedPlatforms = allPlatformsResult.data.platforms.map((p) => ({
         id: p.id,
         name: p.name,
@@ -161,10 +164,7 @@ export async function getPlatformsForLibraryModal(
     }
 
     // Return empty arrays if we couldn't get any platforms
-    logger.warn(
-      { igdbId },
-      "Failed to fetch platforms from any source"
-    );
+    logger.warn({ igdbId }, "Failed to fetch platforms from any source");
     return {
       success: true,
       data: { supportedPlatforms: [], otherPlatforms: [] },

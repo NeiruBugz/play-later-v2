@@ -1,8 +1,11 @@
+import * as platformRepository from "@/data-access-layer/repository/platform/platform-repository";
 import * as gameDetailService from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { PlatformService } from "@/data-access-layer/services/platform/platform-service";
-import * as platformRepository from "@/data-access-layer/repository/platform/platform-repository";
-import { createFullGameFixture, platformApiResponseFixture } from "@/test/fixtures";
+import {
+  createFullGameFixture,
+  platformApiResponseFixture,
+} from "@/test/fixtures";
 
 import { getPlatformsForLibraryModal } from "./get-platforms-for-library-modal";
 
@@ -150,7 +153,10 @@ describe("getPlatformsForLibraryModal", () => {
         })
         .mockResolvedValueOnce({
           success: true,
-          data: { supportedPlatforms: [], otherPlatforms: mockPlatformsResponse.otherPlatforms },
+          data: {
+            supportedPlatforms: [],
+            otherPlatforms: mockPlatformsResponse.otherPlatforms,
+          },
         });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
@@ -301,7 +307,10 @@ describe("getPlatformsForLibraryModal", () => {
         })
         .mockResolvedValueOnce({
           success: true,
-          data: { supportedPlatforms: [], otherPlatforms: mockPlatformsResponse.otherPlatforms },
+          data: {
+            supportedPlatforms: [],
+            otherPlatforms: mockPlatformsResponse.otherPlatforms,
+          },
         });
 
       mockIgdbService.getGameDetails.mockResolvedValue({

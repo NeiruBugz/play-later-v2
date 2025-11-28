@@ -87,9 +87,6 @@ export async function updateProfile(
   return performUpdateProfile(data);
 }
 
-// Re-export for backward compatibility
-export type { UpdateProfileFormState };
-
 export async function updateProfileFormAction(
   _prevState: UpdateProfileFormState,
   formData: FormData
