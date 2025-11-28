@@ -1,5 +1,6 @@
-import { PlatformService } from "@/data-access-layer/services/platform/platform-service";
 import { z } from "zod";
+
+import { getPlatformsForLibraryModal } from "@/features/manage-library-entry/use-cases";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -38,24 +39,19 @@ export async function getPlatformsHandler(
     };
   }
 
-  const platformService = new PlatformService();
-  const result = await platformService.getPlatformsForGame(
-    validation.data.igdbId
-  );
+  const result = await getPlatformsForLibraryModal({
+    igdbId: validation.data.igdbId,
+  });
 
   if (!result.success) {
-    const status =
-      result.error === "Game not found"
-        ? HTTP_STATUS.NOT_FOUND
-        : HTTP_STATUS.INTERNAL_SERVER_ERROR;
     logger.error(
-      { igdbId, error: result.error, status },
-      "Service failed to fetch platforms"
+      { igdbId, error: result.error },
+      "Use-case failed to fetch platforms"
     );
     return {
       success: false,
       error: result.error,
-      status,
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     };
   }
 

@@ -59,3 +59,9 @@ variable "s3_ecs_task_role_name" {
   description = "Optional ECS task role name to attach S3 access policy"
   default     = ""
 }
+
+variable "additional_callback_urls" {
+  type        = list(string)
+  description = "Additional callback URLs for OAuth (e.g., Vercel preview deployments)"
+  default     = []
+}
