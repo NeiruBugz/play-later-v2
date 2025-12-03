@@ -15,6 +15,7 @@ type GameCoverImageProps = {
   priority?: boolean;
   sizes?: string;
   enableHoverEffect?: boolean;
+  fetchPriority?: "auto" | "high" | "low";
 };
 const SIZE_CONFIG: Record<
   ImageSize,
@@ -57,6 +58,7 @@ export function GameCoverImage({
   priority = false,
   sizes,
   enableHoverEffect = true,
+  fetchPriority = "auto",
 }: GameCoverImageProps) {
   const config = SIZE_CONFIG[size];
   if (!imageId && !showPlaceholder) {
@@ -100,6 +102,7 @@ export function GameCoverImage({
         sizes={sizes}
         placeholder="blur"
         blurDataURL={config.blurDataUrl}
+        fetchPriority={priority ? "high" : fetchPriority}
       />
     </div>
   );

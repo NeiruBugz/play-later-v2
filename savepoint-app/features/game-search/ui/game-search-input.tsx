@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -11,7 +12,11 @@ import {
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
 import type { GameSearchInputProps } from "./game-search-input.types";
-import { GameSearchResults } from "./game-search-results";
+
+const GameSearchResults = dynamic(
+  () => import("./game-search-results").then((mod) => mod.GameSearchResults),
+  { ssr: false }
+);
 
 export const GameSearchInput = ({
   initialQuery = "",

@@ -1,11 +1,19 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
-import { LibraryModal } from "@/features/manage-library-entry/ui";
 import { Button } from "@/shared/components/ui/button";
 
 import type { AddToLibraryButtonProps } from "./add-to-library-button.types";
+
+const LibraryModal = dynamic(
+  () =>
+    import("@/features/manage-library-entry/ui").then(
+      (mod) => mod.LibraryModal
+    ),
+  { ssr: false }
+);
 
 export const AddToLibraryButton = ({
   gameId,
@@ -23,14 +31,16 @@ export const AddToLibraryButton = ({
       >
         Add to Library
       </Button>
-      <LibraryModal
-        gameId={gameId}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        igdbId={igdbId}
-        gameTitle={gameTitle}
-        mode="add"
-      />
+      {isModalOpen && (
+        <LibraryModal
+          gameId={gameId}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          igdbId={igdbId}
+          gameTitle={gameTitle}
+          mode="add"
+        />
+      )}
     </>
   );
 };

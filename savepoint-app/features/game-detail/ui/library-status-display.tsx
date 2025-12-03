@@ -8,11 +8,11 @@ import {
   PauseIcon,
   SparklesIcon,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { deleteLibraryItemAction } from "@/features/manage-library-entry/server-actions";
-import { LibraryModal } from "@/features/manage-library-entry/ui";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -31,6 +31,14 @@ import type { LibraryItemStatus } from "@/shared/types";
 
 import { AddToLibraryButton } from "./add-to-library-button";
 import type { LibraryStatusDisplayProps } from "./library-status-display.types";
+
+const LibraryModal = dynamic(
+  () =>
+    import("@/features/manage-library-entry/ui").then(
+      (mod) => mod.LibraryModal
+    ),
+  { ssr: false }
+);
 
 const STATUS_ICONS: Record<
   LibraryItemStatus,
@@ -120,16 +128,18 @@ export const LibraryStatusDisplay = ({
           </Button>
         </CardContent>
       </Card>
-      <LibraryModal
-        gameId={gameId}
-        isOpen={isManageModalOpen}
-        onClose={() => setIsManageModalOpen(false)}
-        igdbId={igdbId}
-        gameTitle={gameTitle}
-        mode="edit"
-        existingItems={userLibraryStatus.allItems}
-        onDeleteItem={handleDeleteItem}
-      />
+      {isManageModalOpen && (
+        <LibraryModal
+          gameId={gameId}
+          isOpen={isManageModalOpen}
+          onClose={() => setIsManageModalOpen(false)}
+          igdbId={igdbId}
+          gameTitle={gameTitle}
+          mode="edit"
+          existingItems={userLibraryStatus.allItems}
+          onDeleteItem={handleDeleteItem}
+        />
+      )}
     </>
   );
 };
