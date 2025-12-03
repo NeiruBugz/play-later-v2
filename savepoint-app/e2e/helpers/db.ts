@@ -138,6 +138,9 @@ export async function seedDefaultTestUser(): Promise<TestUser> {
 }
 export async function disconnectDatabase(): Promise<void> {
   await prisma.$disconnect();
+  if (pool) {
+    await pool.end();
+  }
 }
 export async function verifyDatabaseConnection(): Promise<boolean> {
   try {
