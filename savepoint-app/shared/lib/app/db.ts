@@ -1,5 +1,7 @@
 import { env } from "@/env.mjs";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { Pool } from "pg";
 
 import { createLogger } from "./logger";
 import { LOGGER_CONTEXT } from "./logger-context";
@@ -8,7 +10,10 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 const prismaFactory = () => {
+  const pool = new Pool({ connectionString: env.POSTGRES_PRISMA_URL });
+  const adapter = new PrismaPg(pool);
   const prisma = new PrismaClient({
+    adapter,
     log: [
       {
         emit: "event",

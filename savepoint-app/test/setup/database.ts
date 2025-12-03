@@ -1,6 +1,8 @@
 import { execSync } from "child_process";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { nanoid } from "nanoid";
+import { Pool } from "pg";
 
 let testDataBase: PrismaClient | undefined;
 export const setupDatabase = async (): Promise<PrismaClient> => {
@@ -22,9 +24,9 @@ export const setupDatabase = async (): Promise<PrismaClient> => {
       stdio: "ignore",
       env: { ...process.env, POSTGRES_PRISMA_URL: databaseUrl },
     });
-    testDataBase = new PrismaClient({
-      datasources: { db: { url: databaseUrl } },
-    });
+    const pool = new Pool({ connectionString: databaseUrl });
+    const adapter = new PrismaPg(pool);
+    testDataBase = new PrismaClient({ adapter });
     await testDataBase.$connect();
     return testDataBase;
   } catch (error) {

@@ -19,7 +19,9 @@
     "types": ["vitest/globals"],
     "paths": {
       "@/*": ["./*"],
-      "@fixtures/*": ["test/fixtures/*"]
+      "@fixtures/*": ["test/fixtures/*"],
+      "@prisma/client": ["./shared/lib/prisma/client"],
+      "@prisma/client/*": ["./node_modules/@prisma/client/*"]
     },
     "plugins": [
       {
