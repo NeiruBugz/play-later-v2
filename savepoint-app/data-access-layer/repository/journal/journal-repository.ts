@@ -6,7 +6,7 @@ import {
   repositorySuccess,
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
-import type { JournalEntry } from "@prisma/client";
+import type { JournalEntry, JournalMood } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
 
@@ -51,6 +51,36 @@ export async function countJournalEntriesByGameId(params: {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to count journal entries: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+export async function createJournalEntry(params: {
+  userId: string;
+  gameId: string;
+  title: string;
+  content: string;
+  mood?: JournalMood;
+  playSession?: number;
+  libraryItemId?: number;
+}): Promise<RepositoryResult<JournalEntry>> {
+  try {
+    const created = await prisma.journalEntry.create({
+      data: {
+        userId: params.userId,
+        gameId: params.gameId,
+        title: params.title,
+        content: params.content,
+        mood: params.mood ?? null,
+        playSession: params.playSession ?? null,
+        libraryItemId: params.libraryItemId ?? null,
+      },
+    });
+    return repositorySuccess(created);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to create journal entry: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
