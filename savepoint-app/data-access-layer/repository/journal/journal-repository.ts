@@ -226,3 +226,33 @@ export async function updateJournalEntry(params: {
     );
   }
 }
+
+export async function deleteJournalEntry(params: {
+  entryId: string;
+  userId: string;
+}): Promise<RepositoryResult<void>> {
+  try {
+    await prisma.journalEntry.delete({
+      where: {
+        id: params.entryId,
+        userId: params.userId,
+      },
+    });
+
+    return repositorySuccess(undefined);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error) {
+      if (error.code === "P2025") {
+        return repositoryError(
+          RepositoryErrorCode.NOT_FOUND,
+          "Journal entry not found"
+        );
+      }
+    }
+
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to delete journal entry: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}

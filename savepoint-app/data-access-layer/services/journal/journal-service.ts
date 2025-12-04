@@ -7,6 +7,7 @@ import {
 } from "@/data-access-layer/domain/journal";
 import {
   createJournalEntry,
+  deleteJournalEntry,
   findJournalEntriesByGameId,
   findJournalEntryById,
   findJournalEntriesByUserId,
@@ -202,6 +203,40 @@ export class JournalService extends BaseService {
       this.logger.error(
         { error, ...params },
         "Unexpected error in updateJournalEntry"
+      );
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
+  }
+
+  async deleteJournalEntry(params: {
+    userId: string;
+    entryId: string;
+  }): Promise<ServiceResult<void>> {
+    try {
+      const { userId, entryId } = params;
+
+      this.logger.info({ userId, entryId }, "Deleting journal entry");
+
+      const result = await deleteJournalEntry({ entryId, userId });
+
+      if (!result.ok) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to delete journal entry"
+        );
+        return this.error(result.error.message);
+      }
+
+      this.logger.info({ userId, entryId }, "Journal entry deleted successfully");
+
+      return this.success(undefined);
+    } catch (error) {
+      this.logger.error(
+        { error, ...params },
+        "Unexpected error in deleteJournalEntry"
       );
       return this.error(
         error instanceof Error ? error.message : "An unexpected error occurred",

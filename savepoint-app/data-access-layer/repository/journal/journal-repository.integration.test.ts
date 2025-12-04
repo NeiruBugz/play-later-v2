@@ -11,6 +11,7 @@ import { upsertPlatform } from "../platform/platform-repository";
 import {
   countJournalEntriesByGameId,
   createJournalEntry,
+  deleteJournalEntry,
   findJournalEntriesByGameId,
   findJournalEntriesByUserId,
   findJournalEntryById,
@@ -1013,6 +1014,115 @@ describe("Journal Repository Integration Tests", () => {
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.data).toEqual([]);
+      }
+    });
+  });
+
+  describe("deleteJournalEntry", () => {
+    it("should successfully delete entry when entry exists and user owns it", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry to Delete",
+          content: "This entry will be deleted",
+        },
+      });
+
+      const result = await deleteJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+      });
+
+      expect(result.ok).toBe(true);
+    });
+
+    it("should return error when entry doesn't exist", async () => {
+      const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
+
+      const result = await deleteJournalEntry({
+        entryId: nonExistentId,
+        userId: testUserId,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+        expect(result.error.message).toContain("Journal entry not found");
+      }
+    });
+
+    it("should return error when entry exists but user doesn't own it", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const otherUser = await prisma.user.create({
+        data: {
+          email: "otheruser@example.com",
+          username: "otheruser",
+          usernameNormalized: "otheruser",
+        },
+      });
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: otherUser.id,
+          gameId: testGameId,
+          title: "Other User's Entry",
+          content: "This belongs to another user",
+        },
+      });
+
+      const result = await deleteJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+        expect(result.error.message).toContain("Journal entry not found");
+      }
+
+      const dbEntry = await prisma.journalEntry.findUnique({
+        where: { id: entry.id },
+      });
+      expect(dbEntry).not.toBeNull();
+      expect(dbEntry?.userId).toBe(otherUser.id);
+    });
+
+    it("should permanently delete entry from database", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry to Permanently Delete",
+          content: "This entry will be gone forever",
+        },
+      });
+
+      const deleteResult = await deleteJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+      });
+
+      expect(deleteResult.ok).toBe(true);
+
+      const dbEntry = await prisma.journalEntry.findUnique({
+        where: { id: entry.id },
+      });
+      expect(dbEntry).toBeNull();
+
+      const findResult = await findJournalEntryById({
+        entryId: entry.id,
+        userId: testUserId,
+      });
+      expect(findResult.ok).toBe(false);
+      if (!findResult.ok) {
+        expect(findResult.error.code).toBe("NOT_FOUND");
       }
     });
   });
