@@ -103,7 +103,7 @@
 ### **Slice 4: Update Journal Entry (Backend)**
 
 #### Repository Layer (TDD)
-- [ ] Write integration test for `updateJournalEntry()` repository function:
+- [x] Write integration test for `updateJournalEntry()` repository function:
   - Test successful update of all fields (title, content, mood, playSession, libraryItemId)
   - Test partial updates (only some fields provided)
   - Test that `updatedAt` timestamp is automatically updated
@@ -112,20 +112,20 @@
   - Test setting optional fields to null (mood, playSession, libraryItemId)
   **[Agent: testing-expert]**
 
-- [ ] Implement `updateJournalEntry()` function in `journal-repository.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `updateJournalEntry()` function in `journal-repository.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 #### Service Layer (TDD)
-- [ ] Write unit test for `JournalService.updateJournalEntry()` method:
+- [x] Write unit test for `JournalService.updateJournalEntry()` method:
   - Test successful update (mock repository success)
   - Test repository error handling (not found, ownership violation)
   - Test that domain model is correctly mapped after update
   - Test partial update scenarios
   **[Agent: testing-expert]**
 
-- [ ] Implement `updateJournalEntry()` method in `journal-service.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `updateJournalEntry()` method in `journal-service.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 #### Server Action Layer (TDD)
-- [ ] Create Zod schema `UpdateJournalEntrySchema` in `features/journal/schemas.ts`:
+- [x] Create Zod schema `UpdateJournalEntrySchema` in `features/journal/schemas.ts`:
   - `entryId`: string (required)
   - `title`: string (optional, min 1 if provided)
   - `content`: string (optional, min 1 if provided) - plain text initially
@@ -134,7 +134,7 @@
   - `libraryItemId`: number | null (optional, positive integer if provided)
   **[Agent: nextjs-backend-expert]**
 
-- [ ] Write server action test for `updateJournalEntry` in `update-journal-entry.server-action.test.ts`:
+- [x] Write server action test for `updateJournalEntry` in `update-journal-entry.server-action.test.ts`:
   - Test successful update (mock service success)
   - Test authentication requirement
   - Test validation errors (empty title/content if provided)
@@ -142,7 +142,7 @@
   - Test path revalidation (`/journal/[id]`, `/journal`, `/games/[slug]`)
   **[Agent: testing-expert]**
 
-- [ ] Implement `updateJournalEntry` server action in `features/journal/server-actions/update-journal-entry.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `updateJournalEntry` server action in `features/journal/server-actions/update-journal-entry.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 ---
 

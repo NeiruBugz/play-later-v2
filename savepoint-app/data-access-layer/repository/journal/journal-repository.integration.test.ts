@@ -14,6 +14,7 @@ import {
   findJournalEntriesByGameId,
   findJournalEntriesByUserId,
   findJournalEntryById,
+  updateJournalEntry,
 } from "./journal-repository";
 
 vi.mock("@/shared/lib/app/db", async () => {
@@ -1013,6 +1014,276 @@ describe("Journal Repository Integration Tests", () => {
       if (result.ok) {
         expect(result.data).toEqual([]);
       }
+    });
+  });
+
+  describe("updateJournalEntry", () => {
+    it("should successfully update all fields (title, content, mood, playSession, libraryItemId)", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const libraryItem = await createLibraryItem({
+        userId: testUserId,
+        gameId: testGameId,
+        status: "CURRENTLY_EXPLORING",
+      });
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Original Title",
+          content: "Original content",
+          mood: "EXCITED",
+          playSession: 5,
+          libraryItemId: null,
+        },
+      });
+
+      const result = await updateJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+        updates: {
+          title: "Updated Title",
+          content: "Updated content",
+          mood: "RELAXED",
+          playSession: 10,
+          libraryItemId: libraryItem.id,
+        },
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: entry.id,
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Updated Title",
+          content: "Updated content",
+          mood: "RELAXED",
+          playSession: 10,
+          libraryItemId: libraryItem.id,
+        });
+      }
+    });
+
+    it("should successfully perform partial update (only title)", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Original Title",
+          content: "Original content",
+          mood: "EXCITED",
+          playSession: 5,
+        },
+      });
+
+      const result = await updateJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+        updates: {
+          title: "New Title Only",
+        },
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.title).toBe("New Title Only");
+        expect(result.data.content).toBe("Original content");
+        expect(result.data.mood).toBe("EXCITED");
+        expect(result.data.playSession).toBe(5);
+      }
+    });
+
+    it("should successfully perform partial update (only content)", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Original Title",
+          content: "Original content",
+          mood: "FRUSTRATED",
+        },
+      });
+
+      const result = await updateJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+        updates: {
+          content: "Only the content changed",
+        },
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.title).toBe("Original Title");
+        expect(result.data.content).toBe("Only the content changed");
+        expect(result.data.mood).toBe("FRUSTRATED");
+      }
+    });
+
+    it("should automatically update the updatedAt timestamp", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const now = new Date();
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Original Title",
+          content: "Original content",
+          createdAt: now,
+          updatedAt: now,
+        },
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const result = await updateJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+        updates: {
+          title: "Updated Title",
+        },
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.updatedAt.getTime()).toBeGreaterThan(now.getTime());
+        expect(result.data.createdAt.getTime()).toBe(now.getTime());
+      }
+    });
+
+    it("should return error when user doesn't own the entry", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const otherUser = await prisma.user.create({
+        data: {
+          email: "otheruser@example.com",
+          username: "otheruser",
+          usernameNormalized: "otheruser",
+        },
+      });
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: otherUser.id,
+          gameId: testGameId,
+          title: "Other User's Entry",
+          content: "This belongs to another user",
+        },
+      });
+
+      const result = await updateJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+        updates: {
+          title: "Trying to update",
+        },
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+        expect(result.error.message).toContain("Journal entry not found");
+      }
+    });
+
+    it("should return error when entry doesn't exist", async () => {
+      const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
+
+      const result = await updateJournalEntry({
+        entryId: nonExistentId,
+        userId: testUserId,
+        updates: {
+          title: "Trying to update non-existent entry",
+        },
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+        expect(result.error.message).toContain("Journal entry not found");
+      }
+    });
+
+    it("should successfully set optional fields to null", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const libraryItem = await createLibraryItem({
+        userId: testUserId,
+        gameId: testGameId,
+        status: "CURRENTLY_EXPLORING",
+      });
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry with Optional Fields",
+          content: "Content",
+          mood: "EXCITED",
+          playSession: 10,
+          libraryItemId: libraryItem.id,
+        },
+      });
+
+      const result = await updateJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+        updates: {
+          mood: null,
+          playSession: null,
+          libraryItemId: null,
+        },
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.mood).toBeNull();
+        expect(result.data.playSession).toBeNull();
+        expect(result.data.libraryItemId).toBeNull();
+        expect(result.data.title).toBe("Entry with Optional Fields");
+        expect(result.data.content).toBe("Content");
+      }
+    });
+
+    it("should verify changes persist in database", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Original Title",
+          content: "Original content",
+        },
+      });
+
+      const updateResult = await updateJournalEntry({
+        entryId: entry.id,
+        userId: testUserId,
+        updates: {
+          title: "Persisted Title",
+          content: "Persisted content",
+          mood: "ACCOMPLISHED",
+        },
+      });
+
+      expect(updateResult.ok).toBe(true);
+
+      const dbEntry = await prisma.journalEntry.findUnique({
+        where: { id: entry.id },
+      });
+
+      expect(dbEntry).not.toBeNull();
+      expect(dbEntry?.title).toBe("Persisted Title");
+      expect(dbEntry?.content).toBe("Persisted content");
+      expect(dbEntry?.mood).toBe("ACCOMPLISHED");
     });
   });
 });

@@ -10,6 +10,7 @@ import {
   findJournalEntriesByGameId,
   findJournalEntryById,
   findJournalEntriesByUserId,
+  updateJournalEntry,
 } from "@/data-access-layer/repository";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -151,6 +152,56 @@ export class JournalService extends BaseService {
       this.logger.error(
         { error, ...params },
         "Unexpected error in findJournalEntriesByUserId"
+      );
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
+  }
+
+  async updateJournalEntry(params: {
+    userId: string;
+    entryId: string;
+    updates: {
+      title?: string;
+      content?: string;
+      mood?: JournalMood | null;
+      playSession?: number | null;
+      libraryItemId?: number | null;
+    };
+  }): Promise<ServiceResult<JournalEntryDomain>> {
+    try {
+      const { userId, entryId, updates } = params;
+
+      this.logger.info({ userId, entryId }, "Updating journal entry");
+
+      const result = await updateJournalEntry({
+        entryId,
+        userId,
+        updates,
+      });
+
+      if (!result.ok) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to update journal entry"
+        );
+        return this.error(result.error.message);
+      }
+
+      const domainEntry = JournalEntryMapper.toDomain(result.data);
+
+      this.logger.info(
+        { userId, entryId },
+        "Journal entry updated successfully"
+      );
+
+      return this.success(domainEntry);
+    } catch (error) {
+      this.logger.error(
+        { error, ...params },
+        "Unexpected error in updateJournalEntry"
       );
       return this.error(
         error instanceof Error ? error.message : "An unexpected error occurred",

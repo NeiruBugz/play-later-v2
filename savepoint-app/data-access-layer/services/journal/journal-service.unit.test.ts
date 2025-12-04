@@ -3,6 +3,7 @@ import {
   createJournalEntry,
   findJournalEntryById,
   findJournalEntriesByUserId,
+  updateJournalEntry,
 } from "@/data-access-layer/repository/journal/journal-repository";
 import {
   repositoryError,
@@ -18,6 +19,7 @@ vi.mock("@/data-access-layer/repository/journal/journal-repository", () => ({
   createJournalEntry: vi.fn(),
   findJournalEntryById: vi.fn(),
   findJournalEntriesByUserId: vi.fn(),
+  updateJournalEntry: vi.fn(),
 }));
 
 describe("JournalService", () => {
@@ -25,6 +27,7 @@ describe("JournalService", () => {
   let mockCreateJournalEntry: ReturnType<typeof vi.fn>;
   let mockFindJournalEntryById: ReturnType<typeof vi.fn>;
   let mockFindJournalEntriesByUserId: ReturnType<typeof vi.fn>;
+  let mockUpdateJournalEntry: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,6 +35,7 @@ describe("JournalService", () => {
     mockCreateJournalEntry = vi.mocked(createJournalEntry);
     mockFindJournalEntryById = vi.mocked(findJournalEntryById);
     mockFindJournalEntriesByUserId = vi.mocked(findJournalEntriesByUserId);
+    mockUpdateJournalEntry = vi.mocked(updateJournalEntry);
   });
 
   describe("createJournalEntry", () => {
@@ -636,6 +640,370 @@ describe("JournalService", () => {
         userId: "user-123",
         limit: 15,
         cursor: "entry-cursor-123",
+      });
+    });
+  });
+
+  describe("updateJournalEntry", () => {
+    const validParams = {
+      userId: "user-123",
+      entryId: "entry-789",
+      updates: {
+        title: "Updated Title",
+        content: "Updated content",
+      },
+    };
+
+    const mockPrismaJournalEntry: JournalEntry = {
+      id: "entry-789",
+      userId: "user-123",
+      gameId: "game-456",
+      title: "Updated Title",
+      content: "Updated content",
+      mood: "EXCITED",
+      playSession: 5,
+      libraryItemId: 100,
+      visibility: "PRIVATE",
+      createdAt: new Date("2024-01-01T10:00:00Z"),
+      updatedAt: new Date("2024-01-02T15:30:00Z"),
+      publishedAt: null,
+    };
+
+    it("should successfully update journal entry when repository succeeds", async () => {
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockPrismaJournalEntry)
+      );
+
+      const result = await service.updateJournalEntry(validParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
+          id: "entry-789",
+          userId: "user-123",
+          gameId: "game-456",
+          title: "Updated Title",
+          content: "Updated content",
+          mood: JournalMood.EXCITED,
+          playSession: 5,
+          libraryItemId: 100,
+          visibility: "PRIVATE",
+        });
+        expect(result.data.createdAt).toBeInstanceOf(Date);
+        expect(result.data.updatedAt).toBeInstanceOf(Date);
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(validParams);
+    });
+
+    it("should map repository result to domain model correctly", async () => {
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockPrismaJournalEntry)
+      );
+
+      const result = await service.updateJournalEntry(validParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        // Verify domain model structure (not Prisma structure)
+        expect(result.data).toHaveProperty("id");
+        expect(result.data).toHaveProperty("userId");
+        expect(result.data).toHaveProperty("gameId");
+        expect(result.data).toHaveProperty("title");
+        expect(result.data).toHaveProperty("content");
+        expect(result.data).toHaveProperty("mood");
+        expect(result.data).toHaveProperty("playSession");
+        expect(result.data).toHaveProperty("libraryItemId");
+        expect(result.data).toHaveProperty("visibility");
+        expect(result.data).toHaveProperty("createdAt");
+        expect(result.data).toHaveProperty("updatedAt");
+        expect(result.data).toHaveProperty("publishedAt");
+        // Verify it's a domain model, not Prisma model
+        expect(result.data).not.toHaveProperty("user");
+        expect(result.data).not.toHaveProperty("game");
+        expect(result.data).not.toHaveProperty("libraryItem");
+      }
+    });
+
+    it("should return error when entry is not found", async () => {
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositoryError(
+          RepositoryErrorCode.NOT_FOUND,
+          "Journal entry not found"
+        )
+      );
+
+      const result = await service.updateJournalEntry(validParams);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("Journal entry not found");
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(validParams);
+    });
+
+    it("should return error when user doesn't own the entry", async () => {
+      const paramsWithDifferentUser = {
+        userId: "different-user",
+        entryId: "entry-789",
+        updates: { title: "Malicious Update" },
+      };
+
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositoryError(
+          RepositoryErrorCode.NOT_FOUND,
+          "Journal entry not found"
+        )
+      );
+
+      const result = await service.updateJournalEntry(paramsWithDifferentUser);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("Journal entry not found");
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(
+        paramsWithDifferentUser
+      );
+    });
+
+    it("should handle repository DATABASE_ERROR", async () => {
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositoryError(
+          RepositoryErrorCode.DATABASE_ERROR,
+          "Failed to update journal entry: Database connection failed"
+        )
+      );
+
+      const result = await service.updateJournalEntry(validParams);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("Failed to update journal entry");
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(validParams);
+    });
+
+    it("should handle unexpected errors", async () => {
+      mockUpdateJournalEntry.mockRejectedValue(
+        new Error("Unexpected database error")
+      );
+
+      const result = await service.updateJournalEntry(validParams);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Unexpected database error");
+        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+      }
+    });
+
+    it("should update only title field", async () => {
+      const partialUpdateParams = {
+        userId: "user-123",
+        entryId: "entry-789",
+        updates: {
+          title: "Only Title Updated",
+        },
+      };
+
+      const mockUpdatedEntry: JournalEntry = {
+        ...mockPrismaJournalEntry,
+        title: "Only Title Updated",
+      };
+
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockUpdatedEntry)
+      );
+
+      const result = await service.updateJournalEntry(partialUpdateParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.title).toBe("Only Title Updated");
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(partialUpdateParams);
+    });
+
+    it("should update only content field", async () => {
+      const partialUpdateParams = {
+        userId: "user-123",
+        entryId: "entry-789",
+        updates: {
+          content: "Only content updated",
+        },
+      };
+
+      const mockUpdatedEntry: JournalEntry = {
+        ...mockPrismaJournalEntry,
+        content: "Only content updated",
+      };
+
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockUpdatedEntry)
+      );
+
+      const result = await service.updateJournalEntry(partialUpdateParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.content).toBe("Only content updated");
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(partialUpdateParams);
+    });
+
+    it("should update multiple fields at once", async () => {
+      const multiFieldUpdateParams = {
+        userId: "user-123",
+        entryId: "entry-789",
+        updates: {
+          title: "Multi-field Update",
+          content: "Updated content with multiple fields",
+          mood: JournalMood.ACCOMPLISHED,
+          playSession: 10,
+          libraryItemId: 200,
+        },
+      };
+
+      const mockUpdatedEntry: JournalEntry = {
+        ...mockPrismaJournalEntry,
+        title: "Multi-field Update",
+        content: "Updated content with multiple fields",
+        mood: "ACCOMPLISHED",
+        playSession: 10,
+        libraryItemId: 200,
+      };
+
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockUpdatedEntry)
+      );
+
+      const result = await service.updateJournalEntry(multiFieldUpdateParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
+          title: "Multi-field Update",
+          content: "Updated content with multiple fields",
+          mood: JournalMood.ACCOMPLISHED,
+          playSession: 10,
+          libraryItemId: 200,
+        });
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(
+        multiFieldUpdateParams
+      );
+    });
+
+    it("should handle setting mood to null", async () => {
+      const nullMoodParams = {
+        userId: "user-123",
+        entryId: "entry-789",
+        updates: {
+          mood: null,
+        },
+      };
+
+      const mockUpdatedEntry: JournalEntry = {
+        ...mockPrismaJournalEntry,
+        mood: null,
+      };
+
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockUpdatedEntry)
+      );
+
+      const result = await service.updateJournalEntry(nullMoodParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.mood).toBeNull();
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(nullMoodParams);
+    });
+
+    it("should handle setting playSession to null", async () => {
+      const nullPlaySessionParams = {
+        userId: "user-123",
+        entryId: "entry-789",
+        updates: {
+          playSession: null,
+        },
+      };
+
+      const mockUpdatedEntry: JournalEntry = {
+        ...mockPrismaJournalEntry,
+        playSession: null,
+      };
+
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockUpdatedEntry)
+      );
+
+      const result = await service.updateJournalEntry(nullPlaySessionParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.playSession).toBeNull();
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(
+        nullPlaySessionParams
+      );
+    });
+
+    it("should handle setting libraryItemId to null", async () => {
+      const nullLibraryItemParams = {
+        userId: "user-123",
+        entryId: "entry-789",
+        updates: {
+          libraryItemId: null,
+        },
+      };
+
+      const mockUpdatedEntry: JournalEntry = {
+        ...mockPrismaJournalEntry,
+        libraryItemId: null,
+      };
+
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockUpdatedEntry)
+      );
+
+      const result = await service.updateJournalEntry(nullLibraryItemParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.libraryItemId).toBeNull();
+      }
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith(
+        nullLibraryItemParams
+      );
+    });
+
+    it("should call repository with correct parameters", async () => {
+      mockUpdateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockPrismaJournalEntry)
+      );
+
+      await service.updateJournalEntry(validParams);
+
+      expect(mockUpdateJournalEntry).toHaveBeenCalledTimes(1);
+      expect(mockUpdateJournalEntry).toHaveBeenCalledWith({
+        userId: "user-123",
+        entryId: "entry-789",
+        updates: {
+          title: "Updated Title",
+          content: "Updated content",
+        },
       });
     });
   });
