@@ -4,11 +4,13 @@ import {
   setupDatabase,
 } from "@/test/setup/database";
 
+import { createLibraryItem } from "@/test/setup/db-factories";
 import { createGameWithRelations } from "../game/game-repository";
 import { upsertGenre } from "../genre/genre-repository";
 import { upsertPlatform } from "../platform/platform-repository";
 import {
   countJournalEntriesByGameId,
+  createJournalEntry,
   findJournalEntriesByGameId,
 } from "./journal-repository";
 
@@ -414,6 +416,145 @@ describe("Journal Repository Integration Tests", () => {
       expect(result.ok).toBe(true);
       if (result.ok) {
         expect(result.data).toBe(1);
+      }
+    });
+  });
+
+  describe("createJournalEntry", () => {
+    it("should successfully create journal entry with all required fields", async () => {
+      const result = await createJournalEntry({
+        userId: testUserId,
+        gameId: testGameId,
+        title: "My First Entry",
+        content: "This is my first journal entry about this game.",
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          userId: testUserId,
+          gameId: testGameId,
+          title: "My First Entry",
+          content: "This is my first journal entry about this game.",
+          mood: null,
+          playSession: null,
+          libraryItemId: null,
+        });
+        expect(result.data.id).toBeDefined();
+        expect(result.data.createdAt).toBeInstanceOf(Date);
+        expect(result.data.updatedAt).toBeInstanceOf(Date);
+      }
+    });
+
+    it("should successfully create journal entry with optional fields", async () => {
+      const libraryItem = await createLibraryItem({
+        userId: testUserId,
+        gameId: testGameId,
+        status: "CURRENTLY_EXPLORING",
+      });
+
+      const result = await createJournalEntry({
+        userId: testUserId,
+        gameId: testGameId,
+        title: "Entry with Optional Fields",
+        content: "This entry has mood, playSession, and libraryItemId.",
+        mood: "EXCITED",
+        playSession: 5,
+        libraryItemId: libraryItem.id,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry with Optional Fields",
+          content: "This entry has mood, playSession, and libraryItemId.",
+          mood: "EXCITED",
+          playSession: 5,
+          libraryItemId: libraryItem.id,
+        });
+      }
+    });
+
+    it("should set createdAt and updatedAt timestamps correctly", async () => {
+      const beforeCreate = new Date();
+      // Small delay to ensure timestamps are different
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      const result = await createJournalEntry({
+        userId: testUserId,
+        gameId: testGameId,
+        title: "Timestamp Test",
+        content: "Testing timestamp creation.",
+      });
+
+      const afterCreate = new Date();
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.createdAt.getTime()).toBeGreaterThanOrEqual(
+          beforeCreate.getTime()
+        );
+        expect(result.data.createdAt.getTime()).toBeLessThanOrEqual(
+          afterCreate.getTime()
+        );
+        expect(result.data.updatedAt.getTime()).toBeGreaterThanOrEqual(
+          beforeCreate.getTime()
+        );
+        expect(result.data.updatedAt.getTime()).toBeLessThanOrEqual(
+          afterCreate.getTime()
+        );
+        // createdAt and updatedAt should be equal on creation
+        expect(result.data.createdAt.getTime()).toBe(
+          result.data.updatedAt.getTime()
+        );
+      }
+    });
+
+    it("should return error when userId is invalid", async () => {
+      const result = await createJournalEntry({
+        userId: "invalid-user-id",
+        gameId: testGameId,
+        title: "Invalid User Test",
+        content: "This should fail due to invalid userId.",
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("DATABASE_ERROR");
+        expect(result.error.message).toContain("Failed to create journal entry");
+      }
+    });
+
+    it("should return error when gameId is invalid", async () => {
+      const result = await createJournalEntry({
+        userId: testUserId,
+        gameId: "invalid-game-id",
+        title: "Invalid Game Test",
+        content: "This should fail due to invalid gameId.",
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("DATABASE_ERROR");
+        expect(result.error.message).toContain("Failed to create journal entry");
+      }
+    });
+
+    it("should return error when libraryItemId is invalid", async () => {
+      const result = await createJournalEntry({
+        userId: testUserId,
+        gameId: testGameId,
+        title: "Invalid Library Item Test",
+        content: "This should fail due to invalid libraryItemId.",
+        libraryItemId: 99999, // Non-existent library item ID
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("DATABASE_ERROR");
+        expect(result.error.message).toContain("Failed to create journal entry");
       }
     });
   });

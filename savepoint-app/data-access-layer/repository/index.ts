@@ -70,4 +70,5 @@ export {
 export {
   findJournalEntriesByGameId,
   countJournalEntriesByGameId,
+  createJournalEntry,
 } from "./journal/journal-repository";
