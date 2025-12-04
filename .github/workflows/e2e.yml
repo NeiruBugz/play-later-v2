@@ -58,6 +58,9 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
+        env:
+            POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+            POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Browsers
