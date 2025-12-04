@@ -14,9 +14,13 @@
       "js-yaml": "^4.1.1"
     },
     "onlyBuiltDependencies": [
+      "@prisma/engines",
       "@tailwindcss/oxide",
       "@vercel/speed-insights",
-      "prisma"
+      "esbuild",
+      "msw",
+      "sharp",
+      "unrs-resolver"
     ]
   },
   "scripts": {}
