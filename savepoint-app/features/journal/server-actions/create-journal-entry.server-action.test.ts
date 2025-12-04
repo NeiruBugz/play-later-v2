@@ -17,6 +17,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
+vi.unmock("@/shared/lib");
+
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
 const MockJournalService = vi.mocked(JournalService);

@@ -84,3 +84,83 @@ export async function createJournalEntry(params: {
     );
   }
 }
+
+export async function findJournalEntryById(params: {
+  entryId: string;
+  userId: string;
+}): Promise<RepositoryResult<JournalEntry>> {
+  try {
+    const entry = await prisma.journalEntry.findFirst({
+      where: {
+        id: params.entryId,
+        userId: params.userId,
+      },
+    });
+
+    if (!entry) {
+      return repositoryError(
+        RepositoryErrorCode.NOT_FOUND,
+        "Journal entry not found"
+      );
+    }
+
+    return repositorySuccess(entry);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find journal entry: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+export async function findJournalEntriesByUserId(params: {
+  userId: string;
+  limit: number;
+  cursor?: string;
+}): Promise<RepositoryResult<JournalEntry[]>> {
+  try {
+    const { userId, limit, cursor } = params;
+
+    if (limit <= 0) {
+      return repositorySuccess([]);
+    }
+
+    if (cursor) {
+      const cursorEntry = await prisma.journalEntry.findUnique({
+        where: { id: cursor },
+        select: { updatedAt: true },
+      });
+
+      if (!cursorEntry) {
+        return repositoryError(
+          RepositoryErrorCode.NOT_FOUND,
+          "Cursor entry not found"
+        );
+      }
+
+      const entries = await prisma.journalEntry.findMany({
+        where: {
+          userId,
+          updatedAt: { lt: cursorEntry.updatedAt },
+        },
+        orderBy: { updatedAt: "desc" },
+        take: limit,
+      });
+
+      return repositorySuccess(entries);
+    }
+
+    const entries = await prisma.journalEntry.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      take: limit,
+    });
+
+    return repositorySuccess(entries);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find journal entries: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
