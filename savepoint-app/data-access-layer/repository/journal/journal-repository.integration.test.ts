@@ -12,6 +12,8 @@ import {
   countJournalEntriesByGameId,
   createJournalEntry,
   findJournalEntriesByGameId,
+  findJournalEntriesByUserId,
+  findJournalEntryById,
 } from "./journal-repository";
 
 vi.mock("@/shared/lib/app/db", async () => {
@@ -555,6 +557,461 @@ describe("Journal Repository Integration Tests", () => {
       if (!result.ok) {
         expect(result.error.code).toBe("DATABASE_ERROR");
         expect(result.error.message).toContain("Failed to create journal entry");
+      }
+    });
+  });
+
+  describe("findJournalEntryById", () => {
+    it("should successfully retrieve entry when it exists and user owns it", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "My Entry",
+          content: "This is my journal entry.",
+          mood: "EXCITED",
+          playSession: 5,
+        },
+      });
+
+      const result = await findJournalEntryById({
+        entryId: entry.id,
+        userId: testUserId,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toMatchObject({
+          id: entry.id,
+          userId: testUserId,
+          gameId: testGameId,
+          title: "My Entry",
+          content: "This is my journal entry.",
+          mood: "EXCITED",
+          playSession: 5,
+        });
+        expect(result.data.createdAt).toBeInstanceOf(Date);
+        expect(result.data.updatedAt).toBeInstanceOf(Date);
+      }
+    });
+
+    it("should retrieve all fields correctly", async () => {
+      const libraryItem = await createLibraryItem({
+        userId: testUserId,
+        gameId: testGameId,
+        status: "CURRENTLY_EXPLORING",
+      });
+
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Complete Entry",
+          content: "Entry with all fields",
+          mood: "RELAXED",
+          playSession: 10,
+          libraryItemId: libraryItem.id,
+        },
+      });
+
+      const result = await findJournalEntryById({
+        entryId: entry.id,
+        userId: testUserId,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data.id).toBe(entry.id);
+        expect(result.data.userId).toBe(testUserId);
+        expect(result.data.gameId).toBe(testGameId);
+        expect(result.data.title).toBe("Complete Entry");
+        expect(result.data.content).toBe("Entry with all fields");
+        expect(result.data.mood).toBe("RELAXED");
+        expect(result.data.playSession).toBe(10);
+        expect(result.data.libraryItemId).toBe(libraryItem.id);
+        expect(result.data.visibility).toBe("PRIVATE");
+        expect(result.data.createdAt).toBeInstanceOf(Date);
+        expect(result.data.updatedAt).toBeInstanceOf(Date);
+        expect(result.data.publishedAt).toBeNull();
+      }
+    });
+
+    it("should return error when entry doesn't exist", async () => {
+      const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
+
+      const result = await findJournalEntryById({
+        entryId: nonExistentId,
+        userId: testUserId,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+        expect(result.error.message).toContain("Journal entry not found");
+      }
+    });
+
+    it("should return error when entry exists but user doesn't own it", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const otherUser = await prisma.user.create({
+        data: {
+          email: "other@example.com",
+          username: "otheruser",
+          usernameNormalized: "otheruser",
+        },
+      });
+
+      const entry = await prisma.journalEntry.create({
+        data: {
+          userId: otherUser.id,
+          gameId: testGameId,
+          title: "Other User's Entry",
+          content: "This entry belongs to another user.",
+        },
+      });
+
+      const result = await findJournalEntryById({
+        entryId: entry.id,
+        userId: testUserId,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+        expect(result.error.message).toContain("Journal entry not found");
+      }
+    });
+  });
+
+  describe("findJournalEntriesByUserId", () => {
+    it("should return empty array when user has no entries", async () => {
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 10,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toEqual([]);
+      }
+    });
+
+    it("should return entries ordered by updatedAt DESC (most recently updated first)", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const now = new Date();
+      const entry1 = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry 1",
+          content: "First entry",
+          createdAt: new Date(now.getTime() - 3000),
+          updatedAt: new Date(now.getTime() - 3000),
+        },
+      });
+
+      const entry2 = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry 2",
+          content: "Second entry",
+          createdAt: new Date(now.getTime() - 2000),
+          updatedAt: new Date(now.getTime() - 1000),
+        },
+      });
+
+      const entry3 = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry 3",
+          content: "Third entry",
+          createdAt: new Date(now.getTime() - 1000),
+          updatedAt: new Date(now.getTime() - 2000),
+        },
+      });
+
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 10,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toHaveLength(3);
+        expect(result.data[0].id).toBe(entry2.id);
+        expect(result.data[1].id).toBe(entry3.id);
+        expect(result.data[2].id).toBe(entry1.id);
+      }
+    });
+
+    it("should handle cursor-based pagination (first page)", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const now = new Date();
+      const entries = [];
+      for (let i = 0; i < 5; i++) {
+        const entry = await prisma.journalEntry.create({
+          data: {
+            userId: testUserId,
+            gameId: testGameId,
+            title: `Entry ${i + 1}`,
+            content: `Content ${i + 1}`,
+            updatedAt: new Date(now.getTime() - i * 1000),
+          },
+        });
+        entries.push(entry);
+      }
+
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 2,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toHaveLength(2);
+        expect(result.data[0].id).toBe(entries[0].id);
+        expect(result.data[1].id).toBe(entries[1].id);
+      }
+    });
+
+    it("should handle cursor-based pagination (subsequent pages)", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const now = new Date();
+      const entries = [];
+      for (let i = 0; i < 5; i++) {
+        const entry = await prisma.journalEntry.create({
+          data: {
+            userId: testUserId,
+            gameId: testGameId,
+            title: `Entry ${i + 1}`,
+            content: `Content ${i + 1}`,
+            updatedAt: new Date(now.getTime() - i * 1000),
+          },
+        });
+        entries.push(entry);
+      }
+
+      const firstPageResult = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 2,
+      });
+
+      expect(firstPageResult.ok).toBe(true);
+      if (!firstPageResult.ok) return;
+
+      const cursor = firstPageResult.data[firstPageResult.data.length - 1].id;
+
+      const secondPageResult = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 2,
+        cursor,
+      });
+
+      expect(secondPageResult.ok).toBe(true);
+      if (secondPageResult.ok) {
+        expect(secondPageResult.data).toHaveLength(2);
+        expect(secondPageResult.data[0].id).toBe(entries[2].id);
+        expect(secondPageResult.data[1].id).toBe(entries[3].id);
+      }
+    });
+
+    it("should only return entries belonging to the specified user", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const otherUser = await prisma.user.create({
+        data: {
+          email: "other@example.com",
+          username: "otheruser",
+          usernameNormalized: "otheruser",
+        },
+      });
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "User 1 Entry 1",
+          content: "Content for user 1",
+        },
+      });
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "User 1 Entry 2",
+          content: "Another entry for user 1",
+        },
+      });
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: otherUser.id,
+          gameId: testGameId,
+          title: "User 2 Entry",
+          content: "Content for user 2",
+        },
+      });
+
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 10,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toHaveLength(2);
+        expect(
+          result.data.every(
+            (entry: { userId: string }) => entry.userId === testUserId
+          )
+        ).toBe(true);
+      }
+    });
+
+    it("should return error when cursor points to non-existent entry", async () => {
+      const nonExistentCursor = "clxxxxxxxxxxxxxxxxxxxxxxxx";
+
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 10,
+        cursor: nonExistentCursor,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+        expect(result.error.message).toContain("Cursor entry not found");
+      }
+    });
+
+    it("should handle limit boundary case: limit = 0", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Test Entry",
+          content: "Test content",
+        },
+      });
+
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 0,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toEqual([]);
+      }
+    });
+
+    it("should handle limit boundary case: limit = 1", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const now = new Date();
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry 1",
+          content: "Content 1",
+          updatedAt: new Date(now.getTime() - 2000),
+        },
+      });
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry 2",
+          content: "Content 2",
+          updatedAt: new Date(now.getTime() - 1000),
+        },
+      });
+
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 1,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toHaveLength(1);
+        expect(result.data[0].title).toBe("Entry 2");
+      }
+    });
+
+    it("should handle limit boundary case: very high limit", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      for (let i = 0; i < 5; i++) {
+        await prisma.journalEntry.create({
+          data: {
+            userId: testUserId,
+            gameId: testGameId,
+            title: `Entry ${i + 1}`,
+            content: `Content ${i + 1}`,
+          },
+        });
+      }
+
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 1000,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toHaveLength(5);
+      }
+    });
+
+    it("should return empty array when cursor is last entry", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const now = new Date();
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry 1",
+          content: "Content 1",
+          updatedAt: new Date(now.getTime() - 2000),
+        },
+      });
+
+      const lastEntry = await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Entry 2",
+          content: "Content 2",
+          updatedAt: new Date(now.getTime() - 3000),
+        },
+      });
+
+      const result = await findJournalEntriesByUserId({
+        userId: testUserId,
+        limit: 10,
+        cursor: lastEntry.id,
+      });
+
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.data).toEqual([]);
       }
     });
   });

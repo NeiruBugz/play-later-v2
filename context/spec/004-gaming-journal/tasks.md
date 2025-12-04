@@ -55,30 +55,30 @@
 ### **Slice 2: Find Journal Entry by ID (Backend)**
 
 #### Repository Layer (TDD)
-- [ ] Write integration test for `findJournalEntryById()` repository function:
+- [x] Write integration test for `findJournalEntryById()` repository function:
   - Test successful retrieval when entry exists and user owns it
   - Test returns error when entry doesn't exist
   - Test returns error when entry exists but user doesn't own it (ownership check)
   - Test that all fields are correctly retrieved
   **[Agent: testing-expert]**
 
-- [ ] Implement `findJournalEntryById()` function in `journal-repository.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `findJournalEntryById()` function in `journal-repository.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 #### Service Layer (TDD)
-- [ ] Write unit test for `JournalService.findJournalEntryById()` method:
+- [x] Write unit test for `JournalService.findJournalEntryById()` method:
   - Test successful retrieval (mock repository success)
   - Test repository error handling (not found, ownership violation)
   - Test that domain model is correctly mapped
   **[Agent: testing-expert]**
 
-- [ ] Implement `findJournalEntryById()` method in `journal-service.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `findJournalEntryById()` method in `journal-service.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 ---
 
 ### **Slice 3: Find Journal Entries by User ID (Backend)**
 
 #### Repository Layer (TDD)
-- [ ] Write integration test for `findJournalEntriesByUserId()` repository function:
+- [x] Write integration test for `findJournalEntriesByUserId()` repository function:
   - Test returns empty array when user has no entries
   - Test returns entries ordered by `updatedAt DESC` (most recently updated first)
   - Test cursor-based pagination (first page with limit, subsequent pages with cursor)
@@ -86,17 +86,17 @@
   - Test pagination edge cases (cursor points to non-existent entry, limit boundaries)
   **[Agent: testing-expert]**
 
-- [ ] Implement `findJournalEntriesByUserId()` function in `journal-repository.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `findJournalEntriesByUserId()` function in `journal-repository.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 #### Service Layer (TDD)
-- [ ] Write unit test for `JournalService.findJournalEntriesByUserId()` method:
+- [x] Write unit test for `JournalService.findJournalEntriesByUserId()` method:
   - Test successful retrieval with pagination (mock repository success)
   - Test repository error handling
   - Test that domain models are correctly mapped
   - Test default limit handling
   **[Agent: testing-expert]**
 
-- [ ] Implement `findJournalEntriesByUserId()` method in `journal-service.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `findJournalEntriesByUserId()` method in `journal-service.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 ---
 

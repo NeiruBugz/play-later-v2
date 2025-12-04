@@ -37,8 +37,9 @@ _The highest priority features that form the core foundation of SavePoint—enab
 _Once the foundational features are complete, we will move on to these high-value additions that enhance discovery and reduce manual work._
 
 - [ ] **Platform Integration**
+  - [ ] **Monorepo Consolidation:** Migrate `play-later-lambdas` repository into the monorepo under `lambdas/`. Consolidate Terraform configurations (Cognito + Lambda infrastructure) into unified `infra/` directory with shared modules.
   - [ ] **Steam Library Import:** Enable users to securely connect their Steam account and automatically import their game library for awareness and organization.
-  - [ ] **Steam Metadata Sync:** Automatically match imported Steam games with IGDB data for enriched metadata.
+  - [ ] **Steam Metadata Sync:** Automatically match imported Steam games with IGDB data for enriched metadata (2-stage Lambda pipeline: fetch → S3 → IGDB enrichment → database).
 
 - [ ] **Discovery & Exploration**
   - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.
