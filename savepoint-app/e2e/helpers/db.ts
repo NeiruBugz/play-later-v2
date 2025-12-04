@@ -1,7 +1,25 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
+import { Pool } from "pg";
 
-const prisma = new PrismaClient();
+let pool: Pool | undefined;
+let prisma: PrismaClient | undefined;
+
+function getPrisma(): PrismaClient {
+  if (!prisma) {
+    const connectionString = process.env.POSTGRES_PRISMA_URL;
+    if (!connectionString) {
+      throw new Error(
+        "POSTGRES_PRISMA_URL environment variable is not set. Ensure test setup has configured environment variables before importing db helpers."
+      );
+    }
+    pool = new Pool({ connectionString });
+    const adapter = new PrismaPg(pool);
+    prisma = new PrismaClient({ adapter });
+  }
+  return prisma;
+}
 export interface TestUser {
   id: string;
   email: string;
@@ -15,7 +33,7 @@ export async function createTestUser(data: {
 }): Promise<TestUser> {
   const hashedPassword = await bcrypt.hash(data.password, 10);
   const email = data.email.trim().toLowerCase();
-  const user = await prisma.user.create({
+  const user = await getPrisma().user.create({
     data: {
       email: email,
       username: data.username,
@@ -37,7 +55,7 @@ export async function createTestUserWithoutUsername(data: {
 }): Promise<TestUser> {
   const hashedPassword = await bcrypt.hash(data.password, 10);
   const email = data.email.trim().toLowerCase();
-  const user = await prisma.user.create({
+  const user = await getPrisma().user.create({
     data: {
       email,
       password: hashedPassword,
@@ -52,14 +70,14 @@ export async function createTestUserWithoutUsername(data: {
   };
 }
 export async function deleteTestUser(email: string): Promise<void> {
-  await prisma.user.delete({
+  await getPrisma().user.delete({
     where: { email: email.trim().toLowerCase() },
   });
 }
 export async function deleteTestUsersByPattern(
   emailPattern: string
 ): Promise<void> {
-  await prisma.user.deleteMany({
+  await getPrisma().user.deleteMany({
     where: {
       email: {
         contains: emailPattern,
@@ -72,7 +90,7 @@ export async function getUserByEmail(email: string): Promise<{
   email: string | null;
   username: string | null;
 } | null> {
-  const user = await prisma.user.findUnique({
+  const user = await getPrisma().user.findUnique({
     where: { email: email.trim().toLowerCase() },
     select: { id: true, email: true, username: true },
   });
@@ -82,32 +100,33 @@ export async function clearTestData(): Promise<void> {
   const testUserPattern = {
     OR: [{ email: { contains: "test-" } }, { email: { contains: "e2e-" } }],
   };
-  await prisma.journalEntry.deleteMany({
+  const client = getPrisma();
+  await client.journalEntry.deleteMany({
     where: {
       user: testUserPattern,
     },
   });
-  await prisma.review.deleteMany({
+  await client.review.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
-  await prisma.importedGame.deleteMany({
+  await client.importedGame.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
-  await prisma.ignoredImportedGames.deleteMany({
+  await client.ignoredImportedGames.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
-  await prisma.libraryItem.deleteMany({
+  await client.libraryItem.deleteMany({
     where: {
       User: testUserPattern,
     },
   });
-  await prisma.game.deleteMany({
+  await client.game.deleteMany({
     where: {
       title: {
         contains: "Test Game",
@@ -132,11 +151,18 @@ export async function seedDefaultTestUser(): Promise<TestUser> {
   return createTestUser(defaultUser);
 }
 export async function disconnectDatabase(): Promise<void> {
-  await prisma.$disconnect();
+  if (prisma) {
+    await prisma.$disconnect();
+    prisma = undefined;
+  }
+  if (pool) {
+    await pool.end();
+    pool = undefined;
+  }
 }
 export async function verifyDatabaseConnection(): Promise<boolean> {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await getPrisma().$queryRaw`SELECT 1`;
     return true;
   } catch {
     return false;
@@ -157,7 +183,7 @@ export async function createTestGame(data?: {
   const igdbId = data?.igdbId ?? Math.floor(Math.random() * 1000000);
   const title = data?.title ?? `Test Game ${igdbId}`;
   const slug = data?.slug ?? `test-game-${igdbId}`;
-  const game = await prisma.game.create({
+  const game = await getPrisma().game.create({
     data: {
       igdbId,
       title,
@@ -189,7 +215,7 @@ export async function createTestLibraryItem(data: {
     | "WISHLIST"
     | "REVISITING";
 }): Promise<TestLibraryItem> {
-  const libraryItem = await prisma.libraryItem.create({
+  const libraryItem = await getPrisma().libraryItem.create({
     data: {
       userId: data.userId,
       gameId: data.gameId,

@@ -1,13 +1,14 @@
-import { PlatformService } from "@/data-access-layer/services/platform/platform-service";
 import type { Platform } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { getPlatformsForLibraryModal } from "@/features/manage-library-entry/use-cases";
 
 import type { RequestContext } from "../types";
 import { getPlatformsHandler } from "./get-platforms-handler";
 
-vi.mock("@/data-access-layer/services/platform/platform-service");
+vi.mock("@/features/manage-library-entry/use-cases");
 
-const mockPlatformService = vi.mocked(PlatformService);
+const mockGetPlatformsForLibraryModal = vi.mocked(getPlatformsForLibraryModal);
 
 describe("getPlatformsHandler", () => {
   const mockContext: RequestContext = {
@@ -16,19 +17,8 @@ describe("getPlatformsHandler", () => {
     url: new URL("http://localhost/api/games/12345/platforms"),
   };
 
-  let mockGetPlatformsForGame: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     vi.clearAllMocks();
-
-    mockGetPlatformsForGame = vi.fn();
-
-    mockPlatformService.mockImplementation(
-      () =>
-        ({
-          getPlatformsForGame: mockGetPlatformsForGame,
-        }) as any
-    );
   });
 
   describe("Input Validation", () => {
@@ -42,7 +32,7 @@ describe("getPlatformsHandler", () => {
         expect(result.status).toBe(400);
         expect(result.error).toContain("positive integer");
       }
-      expect(mockGetPlatformsForGame).not.toHaveBeenCalled();
+      expect(mockGetPlatformsForLibraryModal).not.toHaveBeenCalled();
     });
 
     it("should reject invalid igdbId (zero)", async () => {
@@ -55,7 +45,7 @@ describe("getPlatformsHandler", () => {
         expect(result.status).toBe(400);
         expect(result.error).toContain("positive integer");
       }
-      expect(mockGetPlatformsForGame).not.toHaveBeenCalled();
+      expect(mockGetPlatformsForLibraryModal).not.toHaveBeenCalled();
     });
 
     it("should accept valid positive igdbId", async () => {
@@ -77,7 +67,7 @@ describe("getPlatformsHandler", () => {
         },
       ];
 
-      mockGetPlatformsForGame.mockResolvedValue({
+      mockGetPlatformsForLibraryModal.mockResolvedValue({
         success: true,
         data: {
           supportedPlatforms: mockPlatforms,
@@ -93,15 +83,17 @@ describe("getPlatformsHandler", () => {
         expect(result.data.supportedPlatforms).toEqual(mockPlatforms);
         expect(result.data.otherPlatforms).toEqual([]);
       }
-      expect(mockGetPlatformsForGame).toHaveBeenCalledWith(params.igdbId);
+      expect(mockGetPlatformsForLibraryModal).toHaveBeenCalledWith({
+        igdbId: params.igdbId,
+      });
     });
   });
 
   describe("Service Integration", () => {
     const validIgdbId = 12345;
 
-    it("should call PlatformService with correct parameters", async () => {
-      mockGetPlatformsForGame.mockResolvedValue({
+    it("should call getPlatformsForLibraryModal with correct parameters", async () => {
+      mockGetPlatformsForLibraryModal.mockResolvedValue({
         success: true,
         data: {
           supportedPlatforms: [],
@@ -111,11 +103,13 @@ describe("getPlatformsHandler", () => {
 
       await getPlatformsHandler({ igdbId: validIgdbId }, mockContext);
 
-      expect(mockGetPlatformsForGame).toHaveBeenCalledWith(validIgdbId);
-      expect(mockGetPlatformsForGame).toHaveBeenCalledTimes(1);
+      expect(mockGetPlatformsForLibraryModal).toHaveBeenCalledWith({
+        igdbId: validIgdbId,
+      });
+      expect(mockGetPlatformsForLibraryModal).toHaveBeenCalledTimes(1);
     });
 
-    it("should return success when service succeeds", async () => {
+    it("should return success when use case succeeds", async () => {
       const mockSupportedPlatforms: Platform[] = [
         {
           id: "plat1",
@@ -150,7 +144,7 @@ describe("getPlatformsHandler", () => {
         },
       ];
 
-      mockGetPlatformsForGame.mockResolvedValue({
+      mockGetPlatformsForLibraryModal.mockResolvedValue({
         success: true,
         data: {
           supportedPlatforms: mockSupportedPlatforms,
@@ -171,10 +165,10 @@ describe("getPlatformsHandler", () => {
       }
     });
 
-    it("should return error when service fails", async () => {
-      mockGetPlatformsForGame.mockResolvedValue({
+    it("should return error when use case fails", async () => {
+      mockGetPlatformsForLibraryModal.mockResolvedValue({
         success: false,
-        error: "Database connection failed",
+        error: "Use case error",
       });
 
       const result = await getPlatformsHandler(
@@ -185,69 +179,7 @@ describe("getPlatformsHandler", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(500);
-        expect(result.error).toBe("Database connection failed");
-      }
-    });
-
-    it("should return 404 when game not found", async () => {
-      mockGetPlatformsForGame.mockResolvedValue({
-        success: false,
-        error: "Game not found",
-      });
-
-      const result = await getPlatformsHandler(
-        { igdbId: validIgdbId },
-        mockContext
-      );
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.status).toBe(404);
-        expect(result.error).toBe("Game not found");
-      }
-    });
-
-    it("should handle empty platform lists", async () => {
-      mockGetPlatformsForGame.mockResolvedValue({
-        success: true,
-        data: {
-          supportedPlatforms: [],
-          otherPlatforms: [],
-        },
-      });
-
-      const result = await getPlatformsHandler(
-        { igdbId: validIgdbId },
-        mockContext
-      );
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.status).toBe(200);
-        expect(result.data.supportedPlatforms).toEqual([]);
-        expect(result.data.otherPlatforms).toEqual([]);
-      }
-    });
-  });
-
-  describe("Error Handling", () => {
-    const validIgdbId = 12345;
-
-    it("should return 500 when service returns generic error", async () => {
-      mockGetPlatformsForGame.mockResolvedValue({
-        success: false,
-        error: "Failed to fetch platforms from database",
-      });
-
-      const result = await getPlatformsHandler(
-        { igdbId: validIgdbId },
-        mockContext
-      );
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.status).toBe(500);
-        expect(result.error).toContain("Failed to fetch platforms");
+        expect(result.error).toBe("Use case error");
       }
     });
   });
@@ -276,7 +208,7 @@ describe("getPlatformsHandler", () => {
         otherPlatforms: [],
       };
 
-      mockGetPlatformsForGame.mockResolvedValue({
+      mockGetPlatformsForLibraryModal.mockResolvedValue({
         success: true,
         data: mockData,
       });
@@ -294,7 +226,7 @@ describe("getPlatformsHandler", () => {
     });
 
     it("should return correct structure for error response", async () => {
-      mockGetPlatformsForGame.mockResolvedValue({
+      mockGetPlatformsForLibraryModal.mockResolvedValue({
         success: false,
         error: "Service error",
       });

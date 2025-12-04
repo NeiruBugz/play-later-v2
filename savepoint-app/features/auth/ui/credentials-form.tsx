@@ -1,7 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/shared/components/ui/button";
@@ -18,6 +24,7 @@ import { signUpAction } from "../server-actions/sign-up";
 
 export function CredentialsForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [isPending, startTransition] = useTransition();
   const schema = useMemo(
     () => (mode === "signup" ? signUpSchema : signInSchema),
     [mode]
@@ -55,31 +62,33 @@ export function CredentialsForm() {
       trigger("password");
     }
   }, [mode, trigger]);
-  const onSubmit = handleSubmit(async (values) => {
-    clearErrors("root");
-    const trimmedName = values.name?.trim();
-    const payload = {
-      email: values.email.trim(),
-      password: values.password,
-      ...(trimmedName && { name: trimmedName }),
-    };
-    try {
-      const result =
-        mode === "signup"
-          ? await signUpAction(payload)
-          : await signInAction(payload);
-      if (!result.success) {
+  const onSubmit = handleSubmit((values) => {
+    startTransition(async () => {
+      clearErrors("root");
+      const trimmedName = values.name?.trim();
+      const payload = {
+        email: values.email.trim(),
+        password: values.password,
+        ...(trimmedName && { name: trimmedName }),
+      };
+      try {
+        const result =
+          mode === "signup"
+            ? await signUpAction(payload)
+            : await signInAction(payload);
+        if (!result.success) {
+          setError("root", {
+            type: "server",
+            message: result.error,
+          });
+        }
+      } catch {
         setError("root", {
           type: "server",
-          message: result.error,
+          message: "An unexpected error occurred",
         });
       }
-    } catch {
-      setError("root", {
-        type: "server",
-        message: "An unexpected error occurred",
-      });
-    }
+    });
   });
   const passwordHint =
     errors.password?.message ??
@@ -99,7 +108,7 @@ export function CredentialsForm() {
               id="name"
               type="text"
               placeholder="John Doe"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isPending}
               aria-invalid={!!errors.name}
               aria-describedby={errors.name ? "name-error" : undefined}
               {...register("name", {
@@ -124,7 +133,7 @@ export function CredentialsForm() {
             id="email"
             type="email"
             placeholder="you@example.com"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isPending}
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? "email-error" : undefined}
             required
@@ -146,7 +155,7 @@ export function CredentialsForm() {
             id="password"
             type="password"
             placeholder="••••••••"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isPending}
             aria-invalid={!!errors.password}
             aria-describedby={passwordHint ? "password-hint" : undefined}
             minLength={mode === "signup" ? 8 : undefined}
@@ -166,9 +175,9 @@ export function CredentialsForm() {
         <Button
           type="submit"
           className="w-full cursor-pointer"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isPending}
         >
-          {isSubmitting
+          {isSubmitting || isPending
             ? "Loading..."
             : mode === "signin"
               ? "Sign In"
@@ -184,7 +193,7 @@ export function CredentialsForm() {
               variant="secondary"
               onClick={toggleMode}
               className="cursor-pointer font-medium"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isPending}
             >
               Sign up
             </Button>
@@ -197,7 +206,7 @@ export function CredentialsForm() {
               onClick={toggleMode}
               variant="secondary"
               className="font-medium"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isPending}
             >
               Sign in
             </Button>

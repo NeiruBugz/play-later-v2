@@ -6,16 +6,39 @@ import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from "next-themes";
-import { type PropsWithChildren } from "react";
+import { useState, type PropsWithChildren } from "react";
 
-const queryClient = new QueryClient();
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+      },
+    },
+  });
+}
+
+let browserQueryClient: QueryClient | undefined = undefined;
+
+function getQueryClient() {
+  if (typeof window === "undefined") {
+    return makeQueryClient();
+  }
+  if (!browserQueryClient) {
+    browserQueryClient = makeQueryClient();
+  }
+  return browserQueryClient;
+}
+
 export function Providers({
   children,
   ...props
 }: PropsWithChildren<ThemeProviderProps>) {
+  const queryClient = useState(() => getQueryClient())[0];
+
   return (
     <NextThemesProvider {...props}>
-      <SessionProvider>
+      <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={false}>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>

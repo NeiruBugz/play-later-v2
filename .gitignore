@@ -4,6 +4,9 @@
 .idea/
 .vscode/
 
+# Prisma generated client
+savepoint-app/shared/lib/prisma
+
 # dependencies
 node_modules
 .pnp

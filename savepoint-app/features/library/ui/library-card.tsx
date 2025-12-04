@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { memo } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
@@ -18,7 +19,7 @@ import type { LibraryItemStatus } from "@/shared/types";
 import { LibraryCardActionBar } from "./library-card-action-bar";
 import type { LibraryCardProps } from "./library-card.types";
 
-export function LibraryCard({
+export const LibraryCard = memo(function LibraryCard({
   item,
   index = 0,
 }: LibraryCardProps & { index?: number }) {
@@ -70,6 +71,8 @@ export function LibraryCard({
           size="hd"
           className="aspect-[3/4] w-full"
           sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
+          priority={index < 6}
+          fetchPriority={index < 6 ? "high" : "low"}
         />
 
         <div className="duration-normal pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
@@ -120,4 +123,4 @@ export function LibraryCard({
       />
     </Link>
   );
-}
+});

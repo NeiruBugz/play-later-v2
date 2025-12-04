@@ -1,8 +1,12 @@
 import { execSync } from "child_process";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { nanoid } from "nanoid";
+import { Pool } from "pg";
 
 let testDataBase: PrismaClient | undefined;
+let pool: Pool | undefined;
+
 export const setupDatabase = async (): Promise<PrismaClient> => {
   const testDatabaseName = `test_${nanoid()}`;
   const databaseUrl = `postgresql://postgres:postgres@localhost:6432/${testDatabaseName}`;
@@ -22,9 +26,9 @@ export const setupDatabase = async (): Promise<PrismaClient> => {
       stdio: "ignore",
       env: { ...process.env, POSTGRES_PRISMA_URL: databaseUrl },
     });
-    testDataBase = new PrismaClient({
-      datasources: { db: { url: databaseUrl } },
-    });
+    pool = new Pool({ connectionString: databaseUrl });
+    const adapter = new PrismaPg(pool);
+    testDataBase = new PrismaClient({ adapter });
     await testDataBase.$connect();
     return testDataBase;
   } catch (error) {
@@ -35,6 +39,9 @@ export const setupDatabase = async (): Promise<PrismaClient> => {
 export const cleanupDatabase = async (): Promise<void> => {
   if (testDataBase) {
     await testDataBase.$disconnect();
+  }
+  if (pool) {
+    await pool.end();
   }
   const dbName = process.env.POSTGRES_PRISMA_URL?.split("/").pop();
   if (dbName) {

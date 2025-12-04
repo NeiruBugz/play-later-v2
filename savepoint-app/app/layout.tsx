@@ -1,7 +1,7 @@
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { type Metadata, type Viewport } from "next";
 
 import { LoadingScreen } from "@/shared/components/loading-screen";
+import { SpeedInsightsClient } from "@/shared/components/speed-insights";
 import { cn } from "@/shared/lib";
 import { Providers } from "@/shared/providers";
 
@@ -121,7 +121,7 @@ export default function RootLayout({
           <div id="root" className="relative flex min-h-screen flex-col">
             <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
           </div>
-          <SpeedInsights />
+          <SpeedInsightsClient />
         </Providers>
       </body>
     </html>

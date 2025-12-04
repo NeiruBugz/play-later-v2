@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 type ActionResult<T = unknown> =
@@ -26,38 +26,43 @@ export function useFormSubmission<TInput, TOutput = unknown>({
   onError,
 }: UseFormSubmissionOptions<TInput, TOutput>): UseFormSubmissionReturn<TInput> {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
   const handleSubmit = async (data: TInput) => {
-    try {
-      setIsSubmitting(true);
-      const result = await action(data);
-      if (result.success) {
-        const message =
-          typeof successMessage === "function"
-            ? successMessage(result.data)
-            : successMessage;
-        const description =
-          typeof successDescription === "function"
-            ? successDescription(result.data)
-            : successDescription;
-        if (message) {
-          toast.success(message, { description });
+    startTransition(async () => {
+      try {
+        setIsSubmitting(true);
+        const result = await action(data);
+        if (result.success) {
+          const message =
+            typeof successMessage === "function"
+              ? successMessage(result.data)
+              : successMessage;
+          const description =
+            typeof successDescription === "function"
+              ? successDescription(result.data)
+              : successDescription;
+          if (message) {
+            toast.success(message, { description });
+          }
+          onSuccess?.(result.data);
+        } else {
+          toast.error(errorMessage, { description: result.error });
+          onError?.(result.error);
         }
-        onSuccess?.(result.data);
-      } else {
-        toast.error(errorMessage, { description: result.error });
-        onError?.(result.error);
+      } catch (error) {
+        const errorMsg =
+          error instanceof Error ? error.message : "Please try again later.";
+        toast.error("An unexpected error occurred", { description: errorMsg });
+        onError?.(errorMsg);
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : "Please try again later.";
-      toast.error("An unexpected error occurred", { description: errorMsg });
-      onError?.(errorMsg);
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
+
   return {
-    isSubmitting,
+    isSubmitting: isSubmitting || isPending,
     handleSubmit,
   };
 }

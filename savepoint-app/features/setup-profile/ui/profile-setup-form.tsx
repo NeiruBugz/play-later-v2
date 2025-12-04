@@ -1,7 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState, type FormEvent } from "react";
+import {
+  useActionState,
+  useEffect,
+  useState,
+  useTransition,
+  type FormEvent,
+} from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/shared/components/ui/button";
@@ -29,10 +35,12 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [hasValidationError, setHasValidationError] = useState(false);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
-  const [state, formAction, isPending] = useActionState(
+  const [isPending, startTransition] = useTransition();
+  const [state, formAction, isActionPending] = useActionState(
     completeProfileSetupFormAction,
     initialFormState
   );
+  const isFormPending = isPending || isActionPending;
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Profile setup complete!");
@@ -56,13 +64,15 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
       event.preventDefault();
     }
   };
-  const handleSkip = async () => {
-    const res = await skipProfileSetup();
-    if (!res.success) {
-      toast.error(res.error ?? "Failed to complete setup");
-      return;
-    }
-    router.push("/dashboard");
+  const handleSkip = () => {
+    startTransition(async () => {
+      const res = await skipProfileSetup();
+      if (!res.success) {
+        toast.error(res.error ?? "Failed to complete setup");
+        return;
+      }
+      router.push("/dashboard");
+    });
   };
   const trimmedUsername = username.trim();
   const showServerError =
@@ -101,7 +111,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
               value={username}
               onChange={setUsername}
               error={showServerError ? state.message : undefined}
-              disabled={isPending}
+              disabled={isFormPending}
               onValidationChange={setHasValidationError}
             />
             <p className="body-sm text-muted-foreground">
@@ -114,17 +124,17 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
             type="button"
             variant="ghost"
             onClick={handleSkip}
-            disabled={isPending || isAvatarUploading}
+            disabled={isFormPending || isAvatarUploading}
             className="w-full sm:w-auto"
           >
             Skip for now
           </Button>
           <Button
             type="submit"
-            disabled={isPending || hasValidationError || isAvatarUploading}
+            disabled={isFormPending || hasValidationError || isAvatarUploading}
             className="w-full sm:w-auto"
           >
-            {isPending
+            {isFormPending
               ? "Saving..."
               : isAvatarUploading
                 ? "Uploading image..."

@@ -1,12 +1,16 @@
 "use client";
 
+import { memo } from "react";
+
 import { Button } from "@/shared/components/ui/button";
 
 import { useGameSearch } from "../hooks/use-game-search";
 import { GameCard } from "./game-card";
 import type { GameSearchResultsProps } from "./game-search-results.types";
 
-export const GameSearchResults = ({ query }: GameSearchResultsProps) => {
+export const GameSearchResults = memo(function GameSearchResults({
+  query,
+}: GameSearchResultsProps) {
   const { data, isLoading, isError, error, fetchNextPage, hasNextPage } =
     useGameSearch(query);
   if (isLoading) {
@@ -66,4 +70,4 @@ export const GameSearchResults = ({ query }: GameSearchResultsProps) => {
       )}
     </div>
   );
-};
+});
