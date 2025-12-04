@@ -164,3 +164,65 @@ export async function findJournalEntriesByUserId(params: {
     );
   }
 }
+
+export async function updateJournalEntry(params: {
+  entryId: string;
+  userId: string;
+  updates: {
+    title?: string;
+    content?: string;
+    mood?: JournalMood | null;
+    playSession?: number | null;
+    libraryItemId?: number | null;
+  };
+}): Promise<RepositoryResult<JournalEntry>> {
+  try {
+    const { entryId, userId, updates } = params;
+
+    const updateData: Record<string, unknown> = {};
+
+    if (updates.title !== undefined) {
+      updateData.title = updates.title;
+    }
+    if (updates.content !== undefined) {
+      updateData.content = updates.content;
+    }
+    if (updates.mood !== undefined) {
+      updateData.mood = updates.mood;
+    }
+    if (updates.playSession !== undefined) {
+      updateData.playSession = updates.playSession;
+    }
+    if (updates.libraryItemId !== undefined) {
+      if (updates.libraryItemId === null) {
+        updateData.libraryItem = { disconnect: true };
+      } else {
+        updateData.libraryItem = { connect: { id: updates.libraryItemId } };
+      }
+    }
+
+    const entry = await prisma.journalEntry.update({
+      where: {
+        id: entryId,
+        userId,
+      },
+      data: updateData,
+    });
+
+    return repositorySuccess(entry);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error) {
+      if (error.code === "P2025") {
+        return repositoryError(
+          RepositoryErrorCode.NOT_FOUND,
+          "Journal entry not found"
+        );
+      }
+    }
+
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to update journal entry: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}

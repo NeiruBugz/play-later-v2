@@ -73,4 +73,5 @@ export {
   createJournalEntry,
   findJournalEntryById,
   findJournalEntriesByUserId,
+  updateJournalEntry,
 } from "./journal/journal-repository";

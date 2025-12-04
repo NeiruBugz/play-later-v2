@@ -13,3 +13,19 @@ export const CreateJournalEntrySchema = z.object({
 
 export type CreateJournalEntryInput = z.infer<typeof CreateJournalEntrySchema>;
 
+export const UpdateJournalEntrySchema = z.object({
+  entryId: z.string().min(1, "Entry ID is required"),
+  title: z.string().min(1, "Title cannot be empty").optional(),
+  content: z.string().min(1, "Content cannot be empty").optional(),
+  mood: z.nativeEnum(JournalMood).nullable().optional(),
+  playSession: z.number().int().positive("Play session must be positive").nullable().optional(),
+  libraryItemId: z
+    .number()
+    .int()
+    .positive("Library item ID must be positive")
+    .nullable()
+    .optional(),
+});
+
+export type UpdateJournalEntryInput = z.infer<typeof UpdateJournalEntrySchema>;
+
