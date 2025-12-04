@@ -10,4 +10,3 @@ const SpeedInsights = dynamic(
 export function SpeedInsightsClient() {
   return <SpeedInsights />;
 }
-

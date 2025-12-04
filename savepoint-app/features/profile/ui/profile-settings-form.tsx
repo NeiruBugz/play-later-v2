@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useActionState,
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { useActionState, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 import { AvatarUpload, UsernameInput } from "@/features/setup-profile";

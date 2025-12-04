@@ -38,7 +38,7 @@ export function Providers({
 
   return (
     <NextThemesProvider {...props}>
-      <SessionProvider>
+      <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={false}>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>
