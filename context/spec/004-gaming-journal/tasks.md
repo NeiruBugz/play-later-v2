@@ -149,36 +149,36 @@
 ### **Slice 5: Delete Journal Entry (Backend)**
 
 #### Repository Layer (TDD)
-- [ ] Write integration test for `deleteJournalEntry()` repository function:
+- [x] Write integration test for `deleteJournalEntry()` repository function:
   - Test successful deletion when entry exists and user owns it
   - Test returns error when entry doesn't exist
   - Test returns error when entry exists but user doesn't own it (ownership check)
   - Test that entry is permanently deleted from database
   **[Agent: testing-expert]**
 
-- [ ] Implement `deleteJournalEntry()` function in `journal-repository.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `deleteJournalEntry()` function in `journal-repository.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 #### Service Layer (TDD)
-- [ ] Write unit test for `JournalService.deleteJournalEntry()` method:
+- [x] Write unit test for `JournalService.deleteJournalEntry()` method:
   - Test successful deletion (mock repository success)
   - Test repository error handling (not found, ownership violation)
   **[Agent: testing-expert]**
 
-- [ ] Implement `deleteJournalEntry()` method in `journal-service.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `deleteJournalEntry()` method in `journal-service.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 #### Server Action Layer (TDD)
-- [ ] Create Zod schema `DeleteJournalEntrySchema` in `features/journal/schemas.ts`:
+- [x] Create Zod schema `DeleteJournalEntrySchema` in `features/journal/schemas.ts`:
   - `entryId`: string (required)
   **[Agent: nextjs-backend-expert]**
 
-- [ ] Write server action test for `deleteJournalEntry` in `delete-journal-entry.server-action.test.ts`:
+- [x] Write server action test for `deleteJournalEntry` in `delete-journal-entry.server-action.test.ts`:
   - Test successful deletion (mock service success)
   - Test authentication requirement
   - Test service error handling (not found, ownership violation)
   - Test path revalidation (`/journal`, `/games/[slug]`)
   **[Agent: testing-expert]**
 
-- [ ] Implement `deleteJournalEntry` server action in `features/journal/server-actions/delete-journal-entry.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
+- [x] Implement `deleteJournalEntry` server action in `features/journal/server-actions/delete-journal-entry.ts` to make tests pass. **[Agent: nextjs-backend-expert]**
 
 ---
 

@@ -4,6 +4,7 @@ import {
   findJournalEntryById,
   findJournalEntriesByUserId,
   updateJournalEntry,
+  deleteJournalEntry,
 } from "@/data-access-layer/repository/journal/journal-repository";
 import {
   repositoryError,
@@ -20,6 +21,7 @@ vi.mock("@/data-access-layer/repository/journal/journal-repository", () => ({
   findJournalEntryById: vi.fn(),
   findJournalEntriesByUserId: vi.fn(),
   updateJournalEntry: vi.fn(),
+  deleteJournalEntry: vi.fn(),
 }));
 
 describe("JournalService", () => {
@@ -28,6 +30,7 @@ describe("JournalService", () => {
   let mockFindJournalEntryById: ReturnType<typeof vi.fn>;
   let mockFindJournalEntriesByUserId: ReturnType<typeof vi.fn>;
   let mockUpdateJournalEntry: ReturnType<typeof vi.fn>;
+  let mockDeleteJournalEntry: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -36,6 +39,7 @@ describe("JournalService", () => {
     mockFindJournalEntryById = vi.mocked(findJournalEntryById);
     mockFindJournalEntriesByUserId = vi.mocked(findJournalEntriesByUserId);
     mockUpdateJournalEntry = vi.mocked(updateJournalEntry);
+    mockDeleteJournalEntry = vi.mocked(deleteJournalEntry);
   });
 
   describe("createJournalEntry", () => {
@@ -1004,6 +1008,117 @@ describe("JournalService", () => {
           title: "Updated Title",
           content: "Updated content",
         },
+      });
+    });
+  });
+
+  describe("deleteJournalEntry", () => {
+    const validParams = {
+      userId: "user-123",
+      entryId: "entry-789",
+    };
+
+    it("should successfully delete journal entry when repository succeeds", async () => {
+      mockDeleteJournalEntry.mockResolvedValue(
+        repositorySuccess(undefined)
+      );
+
+      const result = await service.deleteJournalEntry(validParams);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toBeUndefined();
+      }
+
+      expect(mockDeleteJournalEntry).toHaveBeenCalledWith(validParams);
+    });
+
+    it("should return error when entry is not found", async () => {
+      mockDeleteJournalEntry.mockResolvedValue(
+        repositoryError(
+          RepositoryErrorCode.NOT_FOUND,
+          "Journal entry not found"
+        )
+      );
+
+      const result = await service.deleteJournalEntry(validParams);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("Journal entry not found");
+      }
+
+      expect(mockDeleteJournalEntry).toHaveBeenCalledWith(validParams);
+    });
+
+    it("should return error when user doesn't own the entry", async () => {
+      const paramsWithDifferentUser = {
+        userId: "different-user",
+        entryId: "entry-789",
+      };
+
+      mockDeleteJournalEntry.mockResolvedValue(
+        repositoryError(
+          RepositoryErrorCode.NOT_FOUND,
+          "Journal entry not found"
+        )
+      );
+
+      const result = await service.deleteJournalEntry(paramsWithDifferentUser);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("Journal entry not found");
+      }
+
+      expect(mockDeleteJournalEntry).toHaveBeenCalledWith(
+        paramsWithDifferentUser
+      );
+    });
+
+    it("should handle repository DATABASE_ERROR", async () => {
+      mockDeleteJournalEntry.mockResolvedValue(
+        repositoryError(
+          RepositoryErrorCode.DATABASE_ERROR,
+          "Failed to delete journal entry: Database connection failed"
+        )
+      );
+
+      const result = await service.deleteJournalEntry(validParams);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toContain("Failed to delete journal entry");
+      }
+
+      expect(mockDeleteJournalEntry).toHaveBeenCalledWith(validParams);
+    });
+
+    it("should handle unexpected errors", async () => {
+      mockDeleteJournalEntry.mockRejectedValue(
+        new Error("Unexpected database error")
+      );
+
+      const result = await service.deleteJournalEntry(validParams);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Unexpected database error");
+        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+      }
+    });
+
+    it("should call repository with correct parameters", async () => {
+      mockDeleteJournalEntry.mockResolvedValue(
+        repositorySuccess(undefined)
+      );
+
+      await service.deleteJournalEntry(validParams);
+
+      expect(mockDeleteJournalEntry).toHaveBeenCalledTimes(1);
+      expect(mockDeleteJournalEntry).toHaveBeenCalledWith({
+        userId: "user-123",
+        entryId: "entry-789",
       });
     });
   });

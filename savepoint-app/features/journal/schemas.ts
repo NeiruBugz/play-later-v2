@@ -29,3 +29,9 @@ export const UpdateJournalEntrySchema = z.object({
 
 export type UpdateJournalEntryInput = z.infer<typeof UpdateJournalEntrySchema>;
 
+export const DeleteJournalEntrySchema = z.object({
+  entryId: z.string().min(1, "Entry ID is required"),
+});
+
+export type DeleteJournalEntryInput = z.infer<typeof DeleteJournalEntrySchema>;
+
