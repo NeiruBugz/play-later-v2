@@ -94,3 +94,25 @@ def get_logger(**initial_values: Any) -> Any:
         >>> logger.info("Starting Steam library import")
     """
     return structlog.get_logger().bind(**initial_values)
+
+
+def bind_context(**context_values: Any) -> None:
+    """Bind context values to all subsequent log entries in this context.
+
+    This uses structlog's contextvars to store context that will be automatically
+    included in all log entries within the current execution context (e.g., within
+    a single Lambda invocation).
+
+    Args:
+        **context_values: Context values to bind. Common values include:
+            - user_id: User ID for tracking user-specific operations
+            - steam_id64: Steam ID being processed
+            - request_id: Request ID for distributed tracing
+
+    Example:
+        >>> bind_context(user_id="12345", steam_id64="76561198012345678")
+        >>> logger = get_logger()
+        >>> logger.info("Processing")  # Will include user_id and steam_id64
+    """
+    structlog.contextvars.clear_contextvars()
+    structlog.contextvars.bind_contextvars(**context_values)
