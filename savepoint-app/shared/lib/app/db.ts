@@ -16,7 +16,7 @@ const prismaFactory = () => {
     globalForPrisma.pool ??
     new Pool({ connectionString: env.POSTGRES_PRISMA_URL });
 
-  if (env.NODE_ENV !== "production") {
+  if (!globalForPrisma.pool) {
     globalForPrisma.pool = pool;
   }
 
