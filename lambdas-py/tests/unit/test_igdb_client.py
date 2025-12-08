@@ -7,7 +7,7 @@ import httpx
 import pytest
 import respx
 
-from lambdas.clients.igdb import STEAM_CATEGORY, IgdbClient
+from lambdas.clients.igdb import STEAM_STORE_URL, IgdbClient
 from lambdas.errors import IgdbApiError
 
 
@@ -31,39 +31,25 @@ def mock_token_response() -> dict[str, Any]:
 
 
 @pytest.fixture
-def mock_external_game_response() -> list[dict[str, Any]]:
-    """Mock IGDB external_games response for Steam app ID 570 (Dota 2)."""
-    return [
-        {
-            "id": 12345,
-            "game": 1905,
-            "uid": "570",
-        }
-    ]
-
-
-@pytest.fixture
 def mock_game_response_full() -> list[dict[str, Any]]:
-    """Mock IGDB games response with full game details."""
+    """Mock IGDB games response with full game details (new query format)."""
     return [
         {
             "id": 1905,
             "name": "Dota 2",
-            "slug": "dota-2",
             "summary": "Dota 2 is a multiplayer online battle arena video game.",
-            "first_release_date": 1373328000,  # Jul 9, 2013
             "cover": {
-                "id": 89387,
-                "url": "//images.igdb.com/igdb/image/upload/t_thumb/co1x73.jpg",
+                "image_id": "co1x73",
             },
-            "genres": [
-                {"id": 15, "name": "Strategy"},
-                {"id": 36, "name": "MOBA"},
-            ],
-            "platforms": [
-                {"id": 6, "name": "PC (Microsoft Windows)"},
-                {"id": 14, "name": "Mac"},
-                {"id": 3, "name": "Linux"},
+            "release_dates": [
+                {
+                    "platform": {"name": "PC (Microsoft Windows)"},
+                    "human": "Jul 09, 2013",
+                },
+                {
+                    "platform": {"name": "Mac"},
+                    "human": "Jul 18, 2013",
+                },
             ],
         }
     ]
@@ -89,28 +75,20 @@ class TestIgdbClientTokenManagement:
         self,
         igdb_credentials: dict[str, str],
         mock_token_response: dict[str, Any],
-        mock_external_game_response: list[dict[str, Any]],
+        mock_game_response_full: list[dict[str, Any]],
     ) -> None:
         """Test that token is fetched before first API call."""
-        # Mock token endpoint
         token_route = respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock external_games endpoint
-        respx.post("https://api.igdb.com/v4/external_games").mock(
-            return_value=httpx.Response(200, json=mock_external_game_response)
-        )
-
-        # Mock games endpoint
         respx.post("https://api.igdb.com/v4/games").mock(
-            return_value=httpx.Response(200, json=[{"id": 1905, "name": "Dota 2"}])
+            return_value=httpx.Response(200, json=mock_game_response_full)
         )
 
         async with IgdbClient(**igdb_credentials) as client:
             await client.get_game_by_steam_app_id(570)
 
-        # Token endpoint should have been called
         assert token_route.called
 
     @respx.mock
@@ -118,22 +96,15 @@ class TestIgdbClientTokenManagement:
         self,
         igdb_credentials: dict[str, str],
         mock_token_response: dict[str, Any],
-        mock_external_game_response: list[dict[str, Any]],
+        mock_game_response_full: list[dict[str, Any]],
     ) -> None:
         """Test that token is not refetched when still valid."""
-        # Mock token endpoint
         token_route = respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock external_games endpoint
-        respx.post("https://api.igdb.com/v4/external_games").mock(
-            return_value=httpx.Response(200, json=mock_external_game_response)
-        )
-
-        # Mock games endpoint
         respx.post("https://api.igdb.com/v4/games").mock(
-            return_value=httpx.Response(200, json=[{"id": 1905, "name": "Dota 2"}])
+            return_value=httpx.Response(200, json=mock_game_response_full)
         )
 
         async with IgdbClient(**igdb_credentials) as client:
@@ -208,21 +179,13 @@ class TestIgdbClientGameLookup:
         self,
         igdb_credentials: dict[str, str],
         mock_token_response: dict[str, Any],
-        mock_external_game_response: list[dict[str, Any]],
         mock_game_response_full: list[dict[str, Any]],
     ) -> None:
         """Test successful game lookup by Steam app ID."""
-        # Mock token endpoint
         respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock external_games endpoint
-        external_games_route = respx.post("https://api.igdb.com/v4/external_games").mock(
-            return_value=httpx.Response(200, json=mock_external_game_response)
-        )
-
-        # Mock games endpoint
         games_route = respx.post("https://api.igdb.com/v4/games").mock(
             return_value=httpx.Response(200, json=mock_game_response_full)
         )
@@ -233,22 +196,18 @@ class TestIgdbClientGameLookup:
         assert game is not None
         assert game.id == 1905
         assert game.name == "Dota 2"
-        assert game.slug == "dota-2"
         assert game.summary == "Dota 2 is a multiplayer online battle arena video game."
-        assert game.first_release_date == 1373328000
-        assert len(game.genres) == 2
-        assert len(game.platforms) == 3
+        assert len(game.release_dates) == 2
+        assert game.cover is not None
+        assert game.cover.image_id == "co1x73"
 
-        # Verify correct endpoints were called
-        assert external_games_route.called
         assert games_route.called
 
-        # Verify external_games query body includes Steam app ID and category
-        external_games_call = external_games_route.calls.last
-        assert external_games_call is not None
-        body = external_games_call.request.content.decode()
-        assert "570" in body
-        assert str(STEAM_CATEGORY) in body
+        games_call = games_route.calls.last
+        assert games_call is not None
+        body = games_call.request.content.decode()
+        assert f"{STEAM_STORE_URL}/570" in body
+        assert "external_games.url" in body
 
     @respx.mock
     async def test_get_game_by_steam_app_id_not_found(
@@ -257,13 +216,11 @@ class TestIgdbClientGameLookup:
         mock_token_response: dict[str, Any],
     ) -> None:
         """Test game lookup when Steam app ID not in IGDB."""
-        # Mock token endpoint
         respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock external_games endpoint with empty response
-        respx.post("https://api.igdb.com/v4/external_games").mock(
+        respx.post("https://api.igdb.com/v4/games").mock(
             return_value=httpx.Response(200, json=[])
         )
 
@@ -326,19 +283,17 @@ class TestIgdbClientGameLookup:
         assert game is None
 
     @respx.mock
-    async def test_game_cover_url_conversion(
+    async def test_game_cover_url_from_image_id(
         self,
         igdb_credentials: dict[str, str],
         mock_token_response: dict[str, Any],
         mock_game_response_full: list[dict[str, Any]],
     ) -> None:
-        """Test that cover URLs are converted to HTTPS."""
-        # Mock token endpoint
+        """Test that cover URLs are built from image_id."""
         respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock games endpoint
         respx.post("https://api.igdb.com/v4/games").mock(
             return_value=httpx.Response(200, json=mock_game_response_full)
         )
@@ -348,8 +303,8 @@ class TestIgdbClientGameLookup:
 
         assert game is not None
         assert game.cover is not None
-        assert game.cover.url.startswith("//")
-        assert game.cover_url == "https://images.igdb.com/igdb/image/upload/t_thumb/co1x73.jpg"
+        assert game.cover.image_id == "co1x73"
+        assert game.cover_url == "https://images.igdb.com/igdb/image/upload/t_cover_big/co1x73.jpg"
 
 
 @pytest.mark.unit
@@ -361,46 +316,30 @@ class TestIgdbClientCaching:
         self,
         igdb_credentials: dict[str, str],
         mock_token_response: dict[str, Any],
-        mock_external_game_response: list[dict[str, Any]],
         mock_game_response_full: list[dict[str, Any]],
     ) -> None:
         """Test that second lookup uses cache and does not hit API."""
-        # Mock token endpoint
         respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock external_games endpoint
-        external_games_route = respx.post("https://api.igdb.com/v4/external_games").mock(
-            return_value=httpx.Response(200, json=mock_external_game_response)
-        )
-
-        # Mock games endpoint
         games_route = respx.post("https://api.igdb.com/v4/games").mock(
             return_value=httpx.Response(200, json=mock_game_response_full)
         )
 
         async with IgdbClient(**igdb_credentials) as client:
-            # First call - should hit API
             game1 = await client.get_game_by_steam_app_id(570)
-            first_external_calls = external_games_route.call_count
             first_games_calls = games_route.call_count
 
-            # Second call - should use cache
             game2 = await client.get_game_by_steam_app_id(570)
-            second_external_calls = external_games_route.call_count
             second_games_calls = games_route.call_count
 
-        # Verify results are the same
         assert game1 is not None
         assert game2 is not None
         assert game1.id == game2.id
 
-        # Verify API was only called once
-        assert first_external_calls == 1
         assert first_games_calls == 1
-        assert second_external_calls == 1  # No additional calls
-        assert second_games_calls == 1  # No additional calls
+        assert second_games_calls == 1
 
     @respx.mock
     async def test_negative_caching(
@@ -409,71 +348,52 @@ class TestIgdbClientCaching:
         mock_token_response: dict[str, Any],
     ) -> None:
         """Test that failed lookups are cached (negative caching)."""
-        # Mock token endpoint
         respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock external_games endpoint with empty response
-        external_games_route = respx.post("https://api.igdb.com/v4/external_games").mock(
+        games_route = respx.post("https://api.igdb.com/v4/games").mock(
             return_value=httpx.Response(200, json=[])
         )
 
         async with IgdbClient(**igdb_credentials) as client:
-            # First call - should hit API and get None
             game1 = await client.get_game_by_steam_app_id(999999)
-            first_call_count = external_games_route.call_count
+            first_call_count = games_route.call_count
 
-            # Second call - should use negative cache
             game2 = await client.get_game_by_steam_app_id(999999)
-            second_call_count = external_games_route.call_count
+            second_call_count = games_route.call_count
 
-        # Both should be None
         assert game1 is None
         assert game2 is None
 
-        # API should only be called once
         assert first_call_count == 1
-        assert second_call_count == 1  # No additional calls
+        assert second_call_count == 1
 
     @respx.mock
     async def test_cache_expiry(
         self,
         igdb_credentials: dict[str, str],
         mock_token_response: dict[str, Any],
-        mock_external_game_response: list[dict[str, Any]],
         mock_game_response_full: list[dict[str, Any]],
     ) -> None:
         """Test that cache entries expire after TTL."""
-        # Mock token endpoint
         respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock external_games endpoint
-        external_games_route = respx.post("https://api.igdb.com/v4/external_games").mock(
-            return_value=httpx.Response(200, json=mock_external_game_response)
-        )
-
-        # Mock games endpoint
-        respx.post("https://api.igdb.com/v4/games").mock(
+        games_route = respx.post("https://api.igdb.com/v4/games").mock(
             return_value=httpx.Response(200, json=mock_game_response_full)
         )
 
-        # Use short cache TTL
         async with IgdbClient(**igdb_credentials, cache_ttl=1) as client:
-            # First call - should hit API
             await client.get_game_by_steam_app_id(570)
-            first_call_count = external_games_route.call_count
+            first_call_count = games_route.call_count
 
-            # Wait for cache to expire
             time.sleep(1.1)
 
-            # Second call - cache expired, should hit API again
             await client.get_game_by_steam_app_id(570)
-            second_call_count = external_games_route.call_count
+            second_call_count = games_route.call_count
 
-        # API should be called twice (once before, once after expiry)
         assert first_call_count == 1
         assert second_call_count == 2
 
@@ -482,38 +402,26 @@ class TestIgdbClientCaching:
         self,
         igdb_credentials: dict[str, str],
         mock_token_response: dict[str, Any],
-        mock_external_game_response: list[dict[str, Any]],
         mock_game_response_full: list[dict[str, Any]],
     ) -> None:
         """Test that clear_cache removes all cached entries."""
-        # Mock token endpoint
         respx.post("https://id.twitch.tv/oauth2/token").mock(
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        # Mock external_games endpoint
-        external_games_route = respx.post("https://api.igdb.com/v4/external_games").mock(
-            return_value=httpx.Response(200, json=mock_external_game_response)
-        )
-
-        # Mock games endpoint
-        respx.post("https://api.igdb.com/v4/games").mock(
+        games_route = respx.post("https://api.igdb.com/v4/games").mock(
             return_value=httpx.Response(200, json=mock_game_response_full)
         )
 
         async with IgdbClient(**igdb_credentials) as client:
-            # First call - should hit API
             await client.get_game_by_steam_app_id(570)
-            first_call_count = external_games_route.call_count
+            first_call_count = games_route.call_count
 
-            # Clear cache
             client.clear_cache()
 
-            # Second call - should hit API again
             await client.get_game_by_steam_app_id(570)
-            second_call_count = external_games_route.call_count
+            second_call_count = games_route.call_count
 
-        # API should be called twice
         assert first_call_count == 1
         assert second_call_count == 2
 

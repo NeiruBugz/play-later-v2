@@ -53,14 +53,22 @@ services:
       DEBUG: ${LOCALSTACK_DEBUG:-0}
       DATA_DIR: /var/lib/localstack/data
       PERSISTENCE: 1
+      S3_BUCKET: ${S3_BUCKET:-savepoint-dev-imports}
     ports:
       - "${LOCALSTACK_PORT:-4568}:4566" # LocalStack Gateway
       - "4610-4659:4510-4559" # External services port range
     volumes:
       - localstack_data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./.docker/localstack/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh:ro
     networks:
       - savepoint-network
+    healthcheck:
+      test: ["CMD", "awslocal", "s3", "ls"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 networks:
   savepoint-network:

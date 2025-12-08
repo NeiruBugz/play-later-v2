@@ -120,7 +120,7 @@ class TestSteamImportHandler:
 
             mock_s3_instance = MagicMock()
             mock_s3_instance.upload_games.return_value = (
-                "imports/user-123/20241215-raw.csv"
+                "s3://test-bucket/imports/user-123/20241215-raw.csv"
             )
             mock_s3.return_value = mock_s3_instance
 
@@ -129,7 +129,7 @@ class TestSteamImportHandler:
 
             # Assertions
             assert result["success"] is True
-            assert result["s3_location"] == "imports/user-123/20241215-raw.csv"
+            assert result["s3_location"] == "s3://test-bucket/imports/user-123/20241215-raw.csv"
             assert result["game_count"] == 2
             assert result["error"] is None
 
@@ -190,7 +190,7 @@ class TestSteamImportHandler:
 
             mock_s3_instance = MagicMock()
             mock_s3_instance.upload_games.return_value = (
-                "imports/user-123/20241215-raw.csv"
+                "s3://test-bucket/imports/user-123/20241215-raw.csv"
             )
             mock_s3.return_value = mock_s3_instance
 
@@ -350,7 +350,7 @@ class TestSteamImportHandler:
 
             mock_s3_instance = MagicMock()
             mock_s3_instance.upload_games.return_value = (
-                "imports/user-123/20241215-raw.csv"
+                "s3://test-bucket/imports/user-123/20241215-raw.csv"
             )
             mock_s3.return_value = mock_s3_instance
 
@@ -385,7 +385,7 @@ class TestSteamImportHandler:
 
             mock_s3_instance = MagicMock()
             mock_s3_instance.upload_games.return_value = (
-                "imports/user-123/20241215-raw.csv"
+                "s3://my-test-bucket/imports/user-123/20241215-raw.csv"
             )
             mock_s3.return_value = mock_s3_instance
 

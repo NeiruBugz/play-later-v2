@@ -319,15 +319,16 @@ def test_upload_games_integration(s3_client: S3Client, sample_games: list[SteamO
     with patch("lambdas.clients.s3.datetime") as mock_datetime:
         mock_datetime.now.return_value = fixed_time
 
-        key = s3_client.upload_games(user_id, sample_games)
+        s3_uri = s3_client.upload_games(user_id, sample_games)
 
-    # Verify key format
+    # Verify S3 URI format
     expected_key = "imports/integration_user/20241215160000-raw.csv"
-    assert key == expected_key
+    expected_uri = f"s3://{s3_client.bucket}/{expected_key}"
+    assert s3_uri == expected_uri
 
     # Verify content in S3
     s3 = boto3.client("s3", region_name="us-east-1")
-    response = s3.get_object(Bucket=s3_client.bucket, Key=key)
+    response = s3.get_object(Bucket=s3_client.bucket, Key=expected_key)
     uploaded_content = response["Body"].read().decode("utf-8")
 
     # Parse and verify
@@ -341,7 +342,11 @@ def test_upload_games_with_empty_list(s3_client: S3Client) -> None:
     """Test upload_games with empty game list."""
     user_id = "empty_user"
 
-    key = s3_client.upload_games(user_id, [])
+    s3_uri = s3_client.upload_games(user_id, [])
+
+    # Verify URI format and extract key
+    assert s3_uri.startswith(f"s3://{s3_client.bucket}/")
+    key = s3_uri.replace(f"s3://{s3_client.bucket}/", "")
 
     # Verify file was created
     s3 = boto3.client("s3", region_name="us-east-1")

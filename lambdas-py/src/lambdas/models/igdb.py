@@ -7,12 +7,14 @@ class IgdbCover(BaseModel):
     """IGDB cover image.
 
     Attributes:
-        id: IGDB cover ID
+        id: IGDB cover ID (optional, not returned when querying image_id only)
+        image_id: Cover image ID for building URLs
         url: Cover image URL (may start with // for protocol-relative URLs)
     """
 
-    id: int
-    url: str
+    id: int | None = None
+    image_id: str | None = None
+    url: str | None = None
 
 
 class IgdbGenre(BaseModel):
@@ -35,8 +37,20 @@ class IgdbPlatform(BaseModel):
         name: Platform name (e.g., "PC (Microsoft Windows)")
     """
 
-    id: int
+    id: int | None = None
     name: str
+
+
+class IgdbReleaseDate(BaseModel):
+    """IGDB release date.
+
+    Attributes:
+        platform: Platform for this release
+        human: Human-readable date string (e.g., "Jul 09, 2013")
+    """
+
+    platform: IgdbPlatform | None = None
+    human: str | None = None
 
 
 class IgdbGame(BaseModel):
@@ -51,6 +65,7 @@ class IgdbGame(BaseModel):
         cover: Cover image information
         genres: List of genres
         platforms: List of supported platforms
+        release_dates: List of release dates per platform
     """
 
     id: int
@@ -61,6 +76,7 @@ class IgdbGame(BaseModel):
     cover: IgdbCover | None = None
     genres: list[IgdbGenre] = Field(default_factory=list)
     platforms: list[IgdbPlatform] = Field(default_factory=list)
+    release_dates: list[IgdbReleaseDate] = Field(default_factory=list)
 
     @property
     def cover_url(self) -> str | None:
@@ -70,10 +86,12 @@ class IgdbGame(BaseModel):
             Full HTTPS URL to cover image, or None if no cover exists.
 
         Example:
-            >>> game = IgdbGame(id=1, name="Test", cover=IgdbCover(id=1, url="//images.igdb.com/abc.jpg"))
+            >>> game = IgdbGame(id=1, name="Test", cover=IgdbCover(image_id="abc123"))
             >>> game.cover_url
-            'https://images.igdb.com/abc.jpg'
+            'https://images.igdb.com/igdb/image/upload/t_cover_big/abc123.jpg'
         """
+        if self.cover and self.cover.image_id:
+            return f"https://images.igdb.com/igdb/image/upload/t_cover_big/{self.cover.image_id}.jpg"
         if self.cover and self.cover.url:
             url = self.cover.url
             if url.startswith("//"):

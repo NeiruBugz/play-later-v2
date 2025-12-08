@@ -59,3 +59,41 @@ variable "s3_ecs_task_role_name" {
   description = "Optional ECS task role name to attach S3 access policy"
   default     = ""
 }
+
+# =============================================================================
+# Lambda Configuration
+# =============================================================================
+
+variable "steam_api_key" {
+  type        = string
+  description = "Steam Web API key"
+  sensitive   = true
+  default     = ""
+}
+
+variable "igdb_client_id" {
+  type        = string
+  description = "IGDB/Twitch client ID"
+  sensitive   = true
+  default     = ""
+}
+
+variable "igdb_client_secret" {
+  type        = string
+  description = "IGDB/Twitch client secret"
+  sensitive   = true
+  default     = ""
+}
+
+variable "database_url" {
+  type        = string
+  description = "PostgreSQL database connection URL"
+  sensitive   = true
+  default     = ""
+}
+
+variable "lambda_log_level" {
+  type        = string
+  description = "Log level for Lambda functions (DEBUG, INFO, WARNING, ERROR)"
+  default     = "INFO"
+}

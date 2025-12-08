@@ -20,6 +20,11 @@ class SteamImportEvent(BaseModel):
 
     user_id: str = Field(..., min_length=1, description="The SavePoint user ID")
     steam_id64: str = Field(..., description="The user's 64-bit Steam ID")
+    limit: int | None = Field(
+        default=None,
+        gt=0,
+        description="Optional limit on number of games to import (for testing)",
+    )
 
     @field_validator("steam_id64")
     @classmethod
@@ -62,6 +67,11 @@ async def _import_steam_library(event: SteamImportEvent) -> SteamImportResponse:
             games = await steam_client.get_owned_games(event.steam_id64)
 
         logger.info("Fetched games from Steam", game_count=len(games))
+
+        # Apply limit if specified (for testing)
+        if event.limit is not None and len(games) > event.limit:
+            logger.info("Applying limit", limit=event.limit, original_count=len(games))
+            games = games[: event.limit]
 
         if not games:
             logger.warning("No games found in Steam library")
