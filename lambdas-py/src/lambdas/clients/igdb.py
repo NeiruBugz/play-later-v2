@@ -14,10 +14,10 @@ from tenacity import (
 
 from lambdas.errors import IgdbApiError
 from lambdas.logging import get_logger
-from lambdas.models.igdb import IgdbExternalGame, IgdbGame, IgdbToken
+from lambdas.models.igdb import IgdbGame, IgdbToken
 
-# Steam category in IGDB external games
-STEAM_CATEGORY = 1
+# Steam store URL pattern for IGDB external_games matching
+STEAM_STORE_URL = "https://store.steampowered.com/app"
 
 
 class IgdbClient:
@@ -344,16 +344,20 @@ class IgdbClient:
 
         self._logger.info("Looking up game by Steam app ID", steam_app_id=steam_app_id)
 
-        # Step 1: Query external_games to find IGDB game ID
-        external_games_body = (
-            f"fields game; where uid = \"{steam_app_id}\" & category = {STEAM_CATEGORY};"
+        # Query games directly by Steam store URL
+        # Fields match Game database model: igdbId, title, slug, description, coverImage, releaseDate
+        steam_url = f"{STEAM_STORE_URL}/{steam_app_id}"
+        games_body = (
+            f"fields id, name, slug, summary, cover.image_id, first_release_date, "
+            f"release_dates.platform.name, release_dates.human; "
+            f'where external_games.url = "{steam_url}"; '
+            f"limit 1;"
         )
 
         try:
-            external_games_data = await self._make_request("external_games", external_games_body)
+            games_data = await self._make_request("games", games_body)
 
-            # No matching external game found
-            if not external_games_data:
+            if not games_data:
                 self._logger.info(
                     "No IGDB match found for Steam app ID",
                     steam_app_id=steam_app_id,
@@ -361,21 +365,16 @@ class IgdbClient:
                 self._put_in_cache(steam_app_id, None)
                 return None
 
-            # Parse external game reference
             try:
-                external_game = IgdbExternalGame.model_validate(external_games_data[0])
+                game_result = IgdbGame.model_validate(games_data[0])
             except (ValueError, IndexError) as e:
                 raise IgdbApiError(
-                    message="Failed to parse external_games response",
+                    message="Failed to parse games response",
                     details={
                         "steam_app_id": steam_app_id,
                         "validation_error": str(e),
                     },
                 ) from e
-
-            # Step 2: Query games to get full game details
-            igdb_game_id = external_game.game
-            game_result = await self.get_game_by_id(igdb_game_id)
 
             # Cache the result (may be None if game details not found)
             self._put_in_cache(steam_app_id, game_result)

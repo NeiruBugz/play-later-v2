@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
+import os
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
@@ -27,17 +28,36 @@ class S3Client:
         region: AWS region for S3 operations
     """
 
-    def __init__(self, bucket: str, region: str = "us-east-1") -> None:
+    def __init__(self, bucket: str, region: str = "us-east-1", endpoint_url: str | None = None) -> None:
         """Initialize S3 client.
 
         Args:
             bucket: S3 bucket name
             region: AWS region
+            endpoint_url: Optional custom endpoint URL (for LocalStack or MinIO)
         """
         self.bucket = bucket
         self.region = region
-        self._s3 = boto3.client("s3", region_name=region)
-        self._logger = get_logger(service="S3Client", bucket=bucket)
+
+        # Support LocalStack via environment variable or parameter
+        endpoint = endpoint_url or os.getenv("AWS_ENDPOINT_URL")
+
+        # Build boto3 S3 client with optional LocalStack configuration
+        if endpoint:
+            # For LocalStack, use test credentials if not already set
+            aws_access_key = os.getenv("AWS_ACCESS_KEY_ID") or "test"
+            aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY") or "test"
+            self._s3 = boto3.client(
+                "s3",
+                region_name=region,
+                endpoint_url=endpoint,
+                aws_access_key_id=aws_access_key,
+                aws_secret_access_key=aws_secret_key,
+            )
+        else:
+            self._s3 = boto3.client("s3", region_name=region)
+
+        self._logger = get_logger(service="S3Client", bucket=bucket, endpoint=endpoint or "aws")
 
     def generate_raw_csv_path(self, user_id: str) -> str:
         """Generate S3 path for raw import CSV.
@@ -215,7 +235,8 @@ class S3Client:
             self._logger.info("Downloading CSV from S3", key=key)
 
             response = self._s3.get_object(Bucket=self.bucket, Key=key)
-            csv_content = response["Body"].read().decode("utf-8")
+            body_bytes: bytes = response["Body"].read()
+            csv_content: str = body_bytes.decode("utf-8")
 
             self._logger.info(
                 "CSV downloaded successfully",
@@ -280,10 +301,13 @@ class S3Client:
         key = self.generate_raw_csv_path(user_id)
         self.upload_csv(key, csv_content)
 
+        s3_uri = f"s3://{self.bucket}/{key}"
+
         self._logger.info(
             "Game upload workflow completed",
             user_id=user_id,
             key=key,
+            s3_uri=s3_uri,
         )
 
-        return key
+        return s3_uri
