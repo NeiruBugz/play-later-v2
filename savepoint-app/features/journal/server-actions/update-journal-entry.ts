@@ -1,7 +1,7 @@
 "use server";
 
-import { JournalService } from "@/data-access-layer/services";
 import type { JournalEntryDomain } from "@/data-access-layer/domain/journal";
+import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
 import { createServerAction } from "@/shared/lib";
@@ -24,7 +24,9 @@ export const updateJournalEntryAction = createServerAction<
 
     const journalService = new JournalService();
 
-    const updateParams: Parameters<typeof journalService.updateJournalEntry>[0] = {
+    const updateParams: Parameters<
+      typeof journalService.updateJournalEntry
+    >[0] = {
       userId: userId!,
       entryId,
       updates: {},
@@ -33,8 +35,10 @@ export const updateJournalEntryAction = createServerAction<
     if (title !== undefined) updateParams.updates.title = title;
     if (content !== undefined) updateParams.updates.content = content;
     if (mood !== undefined) updateParams.updates.mood = mood;
-    if (playSession !== undefined) updateParams.updates.playSession = playSession;
-    if (libraryItemId !== undefined) updateParams.updates.libraryItemId = libraryItemId;
+    if (playSession !== undefined)
+      updateParams.updates.playSession = playSession;
+    if (libraryItemId !== undefined)
+      updateParams.updates.libraryItemId = libraryItemId;
 
     const result = await journalService.updateJournalEntry(updateParams);
 

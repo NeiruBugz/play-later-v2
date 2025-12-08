@@ -1,6 +1,6 @@
 import { getServerUserId } from "@/auth";
-import { JournalService } from "@/data-access-layer/services";
 import type { JournalEntryDomain } from "@/data-access-layer/domain/journal";
+import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
 import { updateJournalEntryAction } from "./update-journal-entry";

@@ -3,8 +3,8 @@ import {
   resetTestDatabase,
   setupDatabase,
 } from "@/test/setup/database";
-
 import { createLibraryItem } from "@/test/setup/db-factories";
+
 import { createGameWithRelations } from "../game/game-repository";
 import { upsertGenre } from "../genre/genre-repository";
 import { upsertPlatform } from "../platform/platform-repository";
@@ -527,7 +527,9 @@ describe("Journal Repository Integration Tests", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe("DATABASE_ERROR");
-        expect(result.error.message).toContain("Failed to create journal entry");
+        expect(result.error.message).toContain(
+          "Failed to create journal entry"
+        );
       }
     });
 
@@ -542,7 +544,9 @@ describe("Journal Repository Integration Tests", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe("DATABASE_ERROR");
-        expect(result.error.message).toContain("Failed to create journal entry");
+        expect(result.error.message).toContain(
+          "Failed to create journal entry"
+        );
       }
     });
 
@@ -558,7 +562,9 @@ describe("Journal Repository Integration Tests", () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.error.code).toBe("DATABASE_ERROR");
-        expect(result.error.message).toContain("Failed to create journal entry");
+        expect(result.error.message).toContain(
+          "Failed to create journal entry"
+        );
       }
     });
   });

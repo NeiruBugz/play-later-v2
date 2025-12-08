@@ -9,8 +9,8 @@ import {
   createJournalEntry,
   deleteJournalEntry,
   findJournalEntriesByGameId,
-  findJournalEntryById,
   findJournalEntriesByUserId,
+  findJournalEntryById,
   updateJournalEntry,
 } from "@/data-access-layer/repository";
 
@@ -100,10 +100,7 @@ export class JournalService extends BaseService {
         return this.error(result.error.message);
       }
       const domainEntry = JournalEntryMapper.toDomain(result.data);
-      this.logger.info(
-        { ...params },
-        "Journal entry found successfully"
-      );
+      this.logger.info({ ...params }, "Journal entry found successfully");
       return this.success(domainEntry);
     } catch (error) {
       this.logger.error(
@@ -125,7 +122,10 @@ export class JournalService extends BaseService {
     try {
       const { userId, limit = 20, cursor } = params;
 
-      this.logger.info({ userId, limit, cursor }, "Finding journal entries for user");
+      this.logger.info(
+        { userId, limit, cursor },
+        "Finding journal entries for user"
+      );
 
       const result = await findJournalEntriesByUserId({
         userId,
@@ -230,7 +230,10 @@ export class JournalService extends BaseService {
         return this.error(result.error.message);
       }
 
-      this.logger.info({ userId, entryId }, "Journal entry deleted successfully");
+      this.logger.info(
+        { userId, entryId },
+        "Journal entry deleted successfully"
+      );
 
       return this.success(undefined);
     } catch (error) {

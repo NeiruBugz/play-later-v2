@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import { JournalMood } from "@/data-access-layer/domain/journal";
+import { z } from "zod";
 
 export const CreateJournalEntrySchema = z.object({
   gameId: z.string().min(1, "Game ID is required"),
@@ -18,7 +17,12 @@ export const UpdateJournalEntrySchema = z.object({
   title: z.string().min(1, "Title cannot be empty").optional(),
   content: z.string().min(1, "Content cannot be empty").optional(),
   mood: z.nativeEnum(JournalMood).nullable().optional(),
-  playSession: z.number().int().positive("Play session must be positive").nullable().optional(),
+  playSession: z
+    .number()
+    .int()
+    .positive("Play session must be positive")
+    .nullable()
+    .optional(),
   libraryItemId: z
     .number()
     .int()
@@ -34,4 +38,3 @@ export const DeleteJournalEntrySchema = z.object({
 });
 
 export type DeleteJournalEntryInput = z.infer<typeof DeleteJournalEntrySchema>;
-

@@ -60,7 +60,8 @@ const cardFooterVariants = cva("flex items-center", {
 });
 
 export interface CardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
@@ -75,7 +76,8 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 Card.displayName = "Card";
 
 export interface CardHeaderProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardHeaderVariants> {}
 
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
@@ -110,7 +112,8 @@ const CardDescription = React.forwardRef<
 CardDescription.displayName = "CardDescription";
 
 export interface CardContentProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardContentVariants> {}
 
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
@@ -125,7 +128,8 @@ const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
 CardContent.displayName = "CardContent";
 
 export interface CardFooterProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardFooterVariants> {}
 
 const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(

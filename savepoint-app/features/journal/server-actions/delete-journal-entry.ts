@@ -42,10 +42,7 @@ export const deleteJournalEntryAction = createServerAction<
     revalidatePath("/journal");
     revalidatePath("/games/[slug]", "page");
 
-    logger.info(
-      { userId, entryId },
-      "Journal entry deleted successfully"
-    );
+    logger.info({ userId, entryId }, "Journal entry deleted successfully");
 
     return {
       success: true,

@@ -1,10 +1,10 @@
 import { JournalMood } from "@/data-access-layer/domain/journal";
 import {
   createJournalEntry,
-  findJournalEntryById,
-  findJournalEntriesByUserId,
-  updateJournalEntry,
   deleteJournalEntry,
+  findJournalEntriesByUserId,
+  findJournalEntryById,
+  updateJournalEntry,
 } from "@/data-access-layer/repository/journal/journal-repository";
 import {
   repositoryError,
@@ -13,8 +13,8 @@ import {
 } from "@/data-access-layer/repository/types";
 import type { JournalEntry } from "@prisma/client";
 
-import { JournalService } from "./journal-service";
 import { ServiceErrorCode } from "../types";
+import { JournalService } from "./journal-service";
 
 vi.mock("@/data-access-layer/repository/journal/journal-repository", () => ({
   createJournalEntry: vi.fn(),
@@ -230,10 +230,7 @@ describe("JournalService", () => {
 
     it("should handle repository error with NOT_FOUND code", async () => {
       mockCreateJournalEntry.mockResolvedValue(
-        repositoryError(
-          RepositoryErrorCode.NOT_FOUND,
-          "Game not found"
-        )
+        repositoryError(RepositoryErrorCode.NOT_FOUND, "Game not found")
       );
 
       const result = await service.createJournalEntry(validParams);
@@ -499,9 +496,8 @@ describe("JournalService", () => {
         repositorySuccess(mockPrismaJournalEntries)
       );
 
-      const result = await service.findJournalEntriesByUserId(
-        paramsWithoutLimit
-      );
+      const result =
+        await service.findJournalEntriesByUserId(paramsWithoutLimit);
 
       expect(result.success).toBe(true);
       expect(mockFindJournalEntriesByUserId).toHaveBeenCalledWith({
@@ -548,10 +544,7 @@ describe("JournalService", () => {
       };
 
       mockFindJournalEntriesByUserId.mockResolvedValue(
-        repositoryError(
-          RepositoryErrorCode.NOT_FOUND,
-          "Cursor entry not found"
-        )
+        repositoryError(RepositoryErrorCode.NOT_FOUND, "Cursor entry not found")
       );
 
       const result = await service.findJournalEntriesByUserId(
@@ -1019,9 +1012,7 @@ describe("JournalService", () => {
     };
 
     it("should successfully delete journal entry when repository succeeds", async () => {
-      mockDeleteJournalEntry.mockResolvedValue(
-        repositorySuccess(undefined)
-      );
+      mockDeleteJournalEntry.mockResolvedValue(repositorySuccess(undefined));
 
       const result = await service.deleteJournalEntry(validParams);
 
@@ -1109,9 +1100,7 @@ describe("JournalService", () => {
     });
 
     it("should call repository with correct parameters", async () => {
-      mockDeleteJournalEntry.mockResolvedValue(
-        repositorySuccess(undefined)
-      );
+      mockDeleteJournalEntry.mockResolvedValue(repositorySuccess(undefined));
 
       await service.deleteJournalEntry(validParams);
 
@@ -1123,4 +1112,3 @@ describe("JournalService", () => {
     });
   });
 });
-
