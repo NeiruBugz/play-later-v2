@@ -28,8 +28,14 @@ export default async function GameDetailPage({
   if (!result.success) {
     notFound();
   }
-  const { game, franchiseIds, timesToBeat, userLibraryStatus, journalEntries } =
-    result.data;
+  const {
+    game,
+    gameId,
+    franchiseIds,
+    timesToBeat,
+    userLibraryStatus,
+    journalEntries,
+  } = result.data;
   const platforms =
     game.platforms
       ?.map((p) => p.name)
@@ -83,7 +89,12 @@ export default async function GameDetailPage({
           </header>
           <GameDescription summary={game.summary} />
           <TimesToBeatSection timesToBeat={timesToBeat} />
-          {userId && <JournalEntriesSection journalEntries={journalEntries} />}
+          {userId && (
+            <JournalEntriesSection
+              journalEntries={journalEntries}
+              gameId={gameId}
+            />
+          )}
           <Suspense fallback={<RelatedGamesSkeleton />}>
             <RelatedGamesServer igdbId={game.id} franchiseIds={franchiseIds} />
           </Suspense>

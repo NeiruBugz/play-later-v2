@@ -94,7 +94,55 @@ model Game {
   genres        GameGenre[]
   platforms     GamePlatform[]
 
+  // Relationships
+  outgoingRelationships GameRelationship[] @relation("SourceGame")
+  incomingRelationships GameRelationship[] @relation("TargetGame")
+  franchises            Franchise[]
+
   @@index([slug])
+}
+
+model Franchise {
+  id        Int      @id // Maps to IGDB ID
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  games Game[]
+}
+
+model GameRelationship {
+  id           String               @id @default(cuid())
+  type         GameRelationshipType
+
+  sourceGameId String
+  sourceGame   Game   @relation("SourceGame", fields: [sourceGameId], references: [id])
+
+  targetGameId String
+  targetGame   Game   @relation("TargetGame", fields: [targetGameId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sourceGameId, targetGameId, type])
+  @@index([sourceGameId])
+  @@index([targetGameId])
+}
+
+enum GameRelationshipType {
+  SEQUEL
+  PREQUEL
+  DLC
+  EXPANSION
+  REMAKE
+  REMASTER
+  SPIN_OFF
+  SIDE_STORY
+  PARENT_GAME
+  BUNDLE_PART
+  STANDALONE_EXPANSION
+  SIMILAR
 }
 
 model LibraryItem {

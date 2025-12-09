@@ -186,7 +186,7 @@
 
 ### **Slice 6: Empty Journal Timeline Page**
 
-- [ ] Create `/journal` route page (`app/journal/page.tsx`) that:
+- [x] Create `/journal` route page (`app/journal/page.tsx`) that:
   - Requires authentication (redirects if not logged in)
   - Shows empty state with "No journal entries yet" message
   - Shows disabled "Write Your First Entry" button
@@ -196,7 +196,7 @@
 
 ### **Slice 7: Create Journal Entry Form (Plain Text)**
 
-- [ ] Create `JournalEntryForm` component in `features/journal/ui/journal-entry-form.tsx`:
+- [x] Create `JournalEntryForm` component in `features/journal/ui/journal-entry-form.tsx`:
   - Title input (required)
   - Plain textarea for content (required)
   - Optional mood select dropdown (EXCITED, RELAXED, FRUSTRATED, ACCOMPLISHED, CURIOUS, NOSTALGIC)
@@ -207,7 +207,7 @@
   - Handles create mode (gameId prop or game selection required)
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Create `/journal/new` route page that renders `JournalEntryForm`:
+- [x] Create `/journal/new` route page that renders `JournalEntryForm`:
   - Accepts optional `gameId` query parameter
   - If `gameId` provided, pre-selects game
   - If no `gameId`, shows game selector first
@@ -215,9 +215,9 @@
   - Redirects to `/journal/[id]` on success
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Update `/journal` page to enable "Write Your First Entry" button and link to `/journal/new`. **[Agent: nextjs-ui-expert]**
+- [x] Update `/journal` page to enable "Write Your First Entry" button and link to `/journal/new`. **[Agent: nextjs-ui-expert]**
 
-- [ ] Add component tests for `JournalEntryForm`:
+- [x] Add component tests for `JournalEntryForm`:
   - Form validation (required fields, error states)
   - Submission flow
   - Game selection flow
@@ -227,7 +227,7 @@
 
 ### **Slice 8: View Individual Journal Entry (Plain Text)**
 
-- [ ] Create `JournalEntryDetail` component in `features/journal/ui/journal-entry-detail.tsx`:
+- [x] Create `JournalEntryDetail` component in `features/journal/ui/journal-entry-detail.tsx`:
   - Displays entry title
   - Displays plain text content
   - Displays game information card (name, cover image, link to game detail)
@@ -236,13 +236,13 @@
   - Delete button (placeholder, not functional yet)
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Create `/journal/[id]/page.tsx` route that:
+- [x] Create `/journal/[id]/page.tsx` route that:
   - Fetches entry via `JournalService.findJournalEntryById()`
   - Validates ownership (shows 404 if not found or not owned)
   - Renders `JournalEntryDetail` component
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Add component tests for `JournalEntryDetail`:
+- [x] Add component tests for `JournalEntryDetail`:
   - Renders all entry fields correctly
   - Handles missing optional fields
   - Edit button navigation
@@ -252,7 +252,7 @@
 
 ### **Slice 9: View Journal Timeline with Entries**
 
-- [ ] Create `JournalEntryCard` component in `features/journal/ui/journal-entry-card.tsx`:
+- [x] Create `JournalEntryCard` component in `features/journal/ui/journal-entry-card.tsx`:
   - Displays entry title (or "Untitled Entry" if null)
   - Displays content preview (first 100 characters of plain text)
   - Displays formatted timestamp (last updated date)
@@ -261,16 +261,16 @@
   - Clickable → navigates to `/journal/[id]`
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Create `JournalTimeline` component in `features/journal/ui/journal-timeline.tsx`:
+- [x] Create `JournalTimeline` component in `features/journal/ui/journal-timeline.tsx`:
   - Fetches entries via Server Component using `JournalService.findJournalEntriesByUserId()`
   - Displays paginated list of `JournalEntryCard` components
   - Shows empty state if no entries
   - "Write New Entry" button
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Update `/journal` page to fetch entries and render `JournalTimeline` component. **[Agent: nextjs-ui-expert]**
+- [x] Update `/journal` page to fetch entries and render `JournalTimeline` component. **[Agent: nextjs-ui-expert]**
 
-- [ ] Add component tests for `JournalEntryCard` and `JournalTimeline`:
+- [x] Add component tests for `JournalEntryCard` and `JournalTimeline`:
   - Entry card rendering
   - Timeline pagination display
   - Empty state handling
@@ -280,7 +280,7 @@
 
 ### **Slice 10: Edit Journal Entry (Plain Text)**
 
-- [ ] Create `/journal/[id]/edit/page.tsx` route that:
+- [x] Create `/journal/[id]/edit/page.tsx` route that:
   - Fetches entry via `JournalService.findJournalEntryById()`
   - Validates ownership (shows 404 if not found or not owned)
   - Renders `JournalEntryForm` in edit mode (pre-populated with existing entry values)
@@ -288,15 +288,15 @@
   - Redirects to `/journal/[id]` on success
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Update `JournalEntryForm` component to support edit mode:
+- [x] Update `JournalEntryForm` component to support edit mode:
   - Accepts optional `entry` prop for edit mode
   - Pre-populates all fields when `entry` is provided
   - Calls `updateJournalEntry` server action instead of `createJournalEntry` in edit mode
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Update `JournalEntryDetail` component to enable Edit button and link to `/journal/[id]/edit`. **[Agent: nextjs-ui-expert]**
+- [x] Update `JournalEntryDetail` component to enable Edit button and link to `/journal/[id]/edit`. **[Agent: nextjs-ui-expert]**
 
-- [ ] Add component tests for edit mode:
+- [x] Add component tests for edit mode:
   - Form pre-population
   - Update submission flow
   **[Agent: testing-expert]**
@@ -305,9 +305,9 @@
 
 ### **Slice 11: Delete Journal Entry**
 
-- [ ] Create delete confirmation dialog component (using shadcn/ui Dialog) in `features/journal/ui/delete-entry-dialog.tsx`. **[Agent: nextjs-ui-expert]**
+- [x] Create delete confirmation dialog component (using shadcn/ui Dialog) in `features/journal/ui/delete-entry-dialog.tsx`. **[Agent: nextjs-ui-expert]**
 
-- [ ] Update `JournalEntryDetail` component to:
+- [x] Update `JournalEntryDetail` component to:
   - Enable Delete button
   - Show confirmation dialog on click
   - Call `deleteJournalEntry` server action on confirm
@@ -315,7 +315,7 @@
   - Show success toast message
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Add component tests for delete flow:
+- [x] Add component tests for delete flow:
   - Confirmation dialog display
   - Delete action execution
   - Error handling
@@ -325,14 +325,14 @@
 
 ### **Slice 12: Integrate Rich Text Editor**
 
-- [ ] Install Tiptap dependencies:
+- [x] Install Tiptap dependencies:
   - `@tiptap/react`
   - `@tiptap/starter-kit`
   - `@tiptap/extension-list-item`
   - `@tiptap/extension-character-count`
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Create `RichTextEditor` component in `shared/components/rich-text-editor.tsx`:
+- [x] Create `RichTextEditor` component in `shared/components/rich-text-editor.tsx`:
   - Wrapper around Tiptap with shadcn/ui styling
   - Toolbar with formatting buttons (bold, italic, bulleted lists, numbered lists)
   - Character counter showing remaining characters (1000 limit)
@@ -342,22 +342,22 @@
   - Validation: Enforces 1000 character limit (HTML string length)
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Update content validation in Zod schemas (`CreateJournalEntrySchema`, `UpdateJournalEntrySchema`):
+- [x] Update content validation in Zod schemas (`CreateJournalEntrySchema`, `UpdateJournalEntrySchema`):
   - Add `isContentEmpty()` helper function to strip HTML tags and validate non-empty text
   - Update content validation to check HTML string length (1000 limit)
   - Add refine validation for non-empty content after stripping HTML
   **[Agent: nextjs-backend-expert]**
 
-- [ ] Update `JournalEntryForm` component to use `RichTextEditor` instead of plain textarea. **[Agent: nextjs-ui-expert]**
+- [x] Update `JournalEntryForm` component to use `RichTextEditor` instead of plain textarea. **[Agent: nextjs-ui-expert]**
 
-- [ ] Update `JournalEntryDetail` component to render rich text content as HTML:
+- [x] Update `JournalEntryDetail` component to render rich text content as HTML:
   - Use `dangerouslySetInnerHTML` with sanitized HTML
   - Apply Tailwind prose classes for styling
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Update `JournalEntryCard` component to strip HTML tags from content preview (first 100 chars of plain text). **[Agent: nextjs-ui-expert]**
+- [x] Update `JournalEntryCard` component to strip HTML tags from content preview (first 100 chars of plain text). **[Agent: nextjs-ui-expert]**
 
-- [ ] Add component tests for `RichTextEditor`:
+- [x] Add component tests for `RichTextEditor`:
   - Formatting capabilities (bold, italic, lists)
   - Character limit enforcement
   - Content validation (non-empty after stripping HTML)
@@ -368,7 +368,7 @@
 
 ### **Slice 13: Add Pagination to Timeline**
 
-- [ ] Update `JournalTimeline` component to support "Load More" button:
+- [x] Update `JournalTimeline` component to support "Load More" button:
   - Implement cursor-based pagination using entry ID as cursor
   - Fetch next page when "Load More" is clicked
   - Append new entries to existing list
@@ -376,7 +376,7 @@
   - Add loading state during pagination
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Add component tests for pagination:
+- [x] Add component tests for pagination:
   - Load more functionality
   - Loading states
   - End of list detection
@@ -386,19 +386,19 @@
 
 ### **Slice 14: Integrate with Game Detail Page**
 
-- [ ] Update `JournalEntriesSection` component on game detail page:
+- [x] Update `JournalEntriesSection` component on game detail page:
   - Enable "Write New Entry" button (currently disabled)
   - Link to `/journal/new?gameId=[gameId]`
   **[Agent: nextjs-ui-expert]**
 
-- [ ] Update library item auto-linking logic in `JournalEntryForm`:
+- [x] Update library item auto-linking logic in `JournalEntryForm`:
   - Query library items by gameId: `findLibraryItemsByGameId({ gameId, userId })`
   - If count === 1: Auto-link (automatically set `libraryItemId`)
   - If count > 1: Show dropdown for manual selection
   - If count === 0: Don't show selector (entry still valid without link)
   **[Agent: nextjs-backend-expert]**
 
-- [ ] Add navigation link to Journal in main navigation menu. **[Agent: nextjs-ui-expert]**
+- [x] Add navigation link to Journal in main navigation menu. **[Agent: nextjs-ui-expert]**
 
 ---
 

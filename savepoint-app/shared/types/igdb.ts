@@ -55,6 +55,13 @@ export type GenresResponse = {
   genres: Genre[];
   id: number;
 };
+type RelatedGameBasic = {
+  id: number;
+  name: string;
+  slug: string;
+  cover?: Cover;
+};
+
 export type FullGameInfoResponse = {
   aggregated_rating: number;
   cover: Cover;
@@ -78,6 +85,18 @@ export type FullGameInfoResponse = {
   franchise?: Franchise | number;
   franchises: number[];
   game_type: number;
+  // Relationship fields
+  dlcs?: RelatedGameBasic[];
+  remakes?: RelatedGameBasic[];
+  remasters?: RelatedGameBasic[];
+  expansions?: RelatedGameBasic[];
+  standalone_expansions?: RelatedGameBasic[];
+  parent_game?: RelatedGameBasic;
+  bundles?: RelatedGameBasic[];
+  sequels?: RelatedGameBasic[];
+  prequels?: RelatedGameBasic[];
+  spin_offs?: RelatedGameBasic[];
+  side_stories?: RelatedGameBasic[];
 };
 export type SearchResponse = {
   cover: Cover;

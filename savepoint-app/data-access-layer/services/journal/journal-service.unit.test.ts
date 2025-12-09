@@ -178,11 +178,6 @@ describe("JournalService", () => {
 
     it("should validate required fields are provided", async () => {
       // Test with missing title
-      const paramsWithoutTitle = {
-        userId: validParams.userId,
-        gameId: validParams.gameId,
-        content: validParams.content,
-      };
 
       // TypeScript will catch this, but we test runtime behavior
       // The service should handle validation if needed

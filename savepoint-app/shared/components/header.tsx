@@ -41,6 +41,12 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
               Library
             </Link>
             <Link
+              href="/journal"
+              className="body-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+            >
+              Journal
+            </Link>
+            <Link
               href="/profile"
               className="body-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
             >

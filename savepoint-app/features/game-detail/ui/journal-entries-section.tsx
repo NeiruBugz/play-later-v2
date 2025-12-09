@@ -50,20 +50,27 @@ function JournalEntryCard({ entry }: JournalEntryCardProps) {
     </Link>
   );
 }
-function EmptyState() {
+function EmptyState({ gameId }: { gameId?: string }) {
+  const writeEntryHref = gameId
+    ? `/journal/new?gameId=${gameId}`
+    : "/journal/new";
   return (
     <div className="gap-xl p-3xl flex flex-col items-center rounded-lg border border-dashed text-center">
       <p className="body-sm text-muted-foreground">No journal entries yet</p>
-      <Button variant="secondary" size="sm" disabled>
-        Write Your First Entry
+      <Button variant="secondary" size="sm" asChild>
+        <Link href={writeEntryHref}>Write Your First Entry</Link>
       </Button>
     </div>
   );
 }
 export function JournalEntriesSection({
   journalEntries,
+  gameId,
 }: JournalEntriesSectionProps) {
   const hasEntries = journalEntries.length > 0;
+  const writeEntryHref = gameId
+    ? `/journal/new?gameId=${gameId}`
+    : "/journal/new";
   return (
     <section
       className="animate-fade-in space-y-xl"
@@ -74,8 +81,8 @@ export function JournalEntriesSection({
           Journal Entries
         </h2>
         {hasEntries && (
-          <Button variant="secondary" size="sm" disabled>
-            Write New Entry
+          <Button variant="secondary" size="sm" asChild>
+            <Link href={writeEntryHref}>Write New Entry</Link>
           </Button>
         )}
       </div>
@@ -92,7 +99,7 @@ export function JournalEntriesSection({
           ))}
         </div>
       ) : (
-        <EmptyState />
+        <EmptyState gameId={gameId} />
       )}
     </section>
   );
