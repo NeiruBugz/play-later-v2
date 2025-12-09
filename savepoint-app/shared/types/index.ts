@@ -4,6 +4,7 @@ export * from "./collection";
 export * from "./library";
 export * from "./journal";
 export * from "./platform";
+export * from "./statistics";
 export { type SteamAppInfo } from "./steam";
 export {
   type Company,

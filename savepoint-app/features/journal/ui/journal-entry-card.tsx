@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatRelativeDate } from "@/shared/lib/date";

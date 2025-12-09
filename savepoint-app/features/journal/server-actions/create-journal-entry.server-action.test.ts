@@ -1,5 +1,9 @@
 import { getServerUserId } from "@/auth";
-import type { JournalEntryDomain } from "@/data-access-layer/domain/journal";
+import {
+  JournalEntryDomain,
+  JournalMood,
+  JournalVisibility,
+} from "@/data-access-layer/domain/journal";
 import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
@@ -41,7 +45,7 @@ describe("createJournalEntryAction server action", () => {
     mood: null,
     playSession: null,
     libraryItemId: null,
-    visibility: "PRIVATE",
+    visibility: JournalVisibility.PRIVATE,
     createdAt: new Date("2024-01-01T10:00:00Z"),
     updatedAt: new Date("2024-01-01T10:00:00Z"),
     publishedAt: null,
@@ -86,14 +90,14 @@ describe("createJournalEntryAction server action", () => {
     it("should successfully create journal entry with optional fields", async () => {
       const inputWithOptionalFields = {
         ...validInput,
-        mood: "EXCITED" as const,
+        mood: JournalMood.EXCITED,
         playSession: 5,
         libraryItemId: 123,
       };
 
       const entryWithOptionalFields: JournalEntryDomain = {
         ...mockJournalEntryDomain,
-        mood: "EXCITED",
+        mood: JournalMood.EXCITED,
         playSession: 5,
         libraryItemId: 123,
       };

@@ -25,5 +25,3 @@ export function isContentEmpty(html: string): boolean {
  * Maximum characters allowed for rich text content
  */
 export const MAX_CHARACTERS = 1000;
-
-

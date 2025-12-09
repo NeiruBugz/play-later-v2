@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -117,9 +118,11 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
                 >
                   <div className="gap-md flex items-center">
                     {game.coverImage && (
-                      <img
+                      <Image
                         src={game.coverImage}
-                        alt=""
+                        alt={game.title}
+                        width={32}
+                        height={48}
                         className="h-12 w-8 rounded object-cover"
                       />
                     )}

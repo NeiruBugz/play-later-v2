@@ -1,5 +1,9 @@
 import { getServerUserId } from "@/auth";
-import type { JournalEntryDomain } from "@/data-access-layer/domain/journal";
+import {
+  JournalMood,
+  JournalVisibility,
+  type JournalEntryDomain,
+} from "@/data-access-layer/domain/journal";
 import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
@@ -41,7 +45,7 @@ describe("updateJournalEntryAction server action", () => {
     mood: null,
     playSession: null,
     libraryItemId: null,
-    visibility: "PRIVATE",
+    visibility: JournalVisibility.PRIVATE,
     createdAt: new Date("2024-01-01T10:00:00Z"),
     updatedAt: new Date("2024-01-02T11:00:00Z"),
     publishedAt: null,
@@ -99,7 +103,7 @@ describe("updateJournalEntryAction server action", () => {
         ...mockJournalEntryDomain,
         title: "New Title",
         content: "New content",
-        mood: "RELAXED",
+        mood: JournalMood.RELAXED,
         playSession: 10,
         libraryItemId: 999,
       };
@@ -109,7 +113,14 @@ describe("updateJournalEntryAction server action", () => {
         data: entryWithOptionalFields,
       });
 
-      const result = await updateJournalEntryAction(inputWithOptionalFields);
+      const inputWithOptionalFieldsFixed = {
+        ...inputWithOptionalFields,
+        mood: JournalMood.RELAXED,
+      };
+
+      const result = await updateJournalEntryAction(
+        inputWithOptionalFieldsFixed
+      );
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -520,7 +531,7 @@ describe("updateJournalEntryAction server action", () => {
 
       const partialInput = {
         entryId: "entry-456",
-        mood: "EXCITED" as const,
+        mood: JournalMood.EXCITED,
       };
 
       await updateJournalEntryAction(partialInput);

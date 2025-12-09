@@ -64,5 +64,3 @@ export async function JournalTimelineServer() {
     <JournalTimelineClient initialEntries={entries} initialGames={gameMap} />
   );
 }
-
-

@@ -1,5 +1,5 @@
 import { renderWithTestProviders } from "@/test/utils/test-provider";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import {
@@ -24,13 +24,13 @@ vi.mock("@tiptap/react", () => ({
 
 vi.mock("@tiptap/starter-kit", () => ({
   default: {
-    configure: vi.fn((config: any) => ({})),
+    configure: vi.fn(() => ({})),
   },
 }));
 
 vi.mock("@tiptap/extension-character-count", () => ({
   default: {
-    configure: vi.fn((config: any) => ({})),
+    configure: vi.fn(() => ({})),
   },
 }));
 

@@ -22,8 +22,6 @@ import { cn } from "@/shared/lib/ui/utils";
 import { JournalMood, type JournalEntryDomain } from "@/shared/types";
 
 import {
-  CreateJournalEntrySchema,
-  UpdateJournalEntrySchema,
   type CreateJournalEntryInput,
   type UpdateJournalEntryInput,
 } from "../schemas";
@@ -34,7 +32,7 @@ import { updateJournalEntryAction } from "../server-actions/update-journal-entry
 interface JournalEntryFormProps {
   gameId?: string;
   entry?: JournalEntryDomain;
-  onSuccess: () => void;
+  onSuccess: (entry: JournalEntryDomain) => void;
   onCancel?: () => void;
   className?: string;
 }

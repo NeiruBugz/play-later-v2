@@ -1,11 +1,15 @@
 import { renderWithTestProviders } from "@/test/utils/test-provider";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { toast } from "sonner";
 
+import { ActionResult } from "@/shared/lib";
 import {
+  AcquisitionType,
   JournalMood,
+  JournalVisibility,
+  LibraryItemStatus,
   type JournalEntryDomain,
   type LibraryItemDomain,
 } from "@/shared/types";
@@ -51,7 +55,7 @@ const mockJournalEntry: JournalEntryDomain = {
   content: "Test content",
   mood: null,
   playSession: null,
-  visibility: "PRIVATE",
+  visibility: JournalVisibility.PRIVATE,
   createdAt: new Date("2024-01-01"),
   updatedAt: new Date("2024-01-01"),
   publishedAt: null,
@@ -183,10 +187,12 @@ describe("JournalEntryForm", () => {
       });
 
       it("should show loading state during submission", async () => {
-        let resolveAction: (value: any) => void;
-        const pendingAction = new Promise((resolve) => {
-          resolveAction = resolve;
-        });
+        let resolveAction: (value: ActionResult<JournalEntryDomain>) => void;
+        const pendingAction = new Promise<ActionResult<JournalEntryDomain>>(
+          (resolve) => {
+            resolveAction = resolve;
+          }
+        );
         mockCreateJournalEntryAction.mockReturnValueOnce(pendingAction);
 
         actions.submitForm();
@@ -279,8 +285,8 @@ describe("JournalEntryForm", () => {
           platform: "Steam",
           userId: "user-1",
           gameId: "game-1",
-          status: "CURRENTLY_EXPLORING",
-          acquisitionType: "DIGITAL",
+          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          acquisitionType: AcquisitionType.DIGITAL,
           startedAt: null,
           completedAt: null,
           createdAt: new Date(),
@@ -333,8 +339,8 @@ describe("JournalEntryForm", () => {
             platform: "Steam",
             userId: "user-1",
             gameId: "game-1",
-            status: "CURRENTLY_EXPLORING",
-            acquisitionType: "DIGITAL",
+            status: LibraryItemStatus.CURRENTLY_EXPLORING,
+            acquisitionType: AcquisitionType.DIGITAL,
             startedAt: null,
             completedAt: null,
             createdAt: new Date(),
@@ -345,8 +351,8 @@ describe("JournalEntryForm", () => {
             platform: "Epic Games",
             userId: "user-1",
             gameId: "game-1",
-            status: "EXPERIENCED",
-            acquisitionType: "DIGITAL",
+            status: LibraryItemStatus.EXPERIENCED,
+            acquisitionType: AcquisitionType.DIGITAL,
             startedAt: null,
             completedAt: null,
             createdAt: new Date(),

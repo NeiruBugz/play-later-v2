@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { formatAbsoluteDate, formatRelativeDate } from "@/shared/lib/date";
+import { formatRelativeDate } from "@/shared/lib/date";
 import { JournalMood, type JournalEntryDomain } from "@/shared/types";
 
 import { deleteJournalEntryAction } from "../server-actions/delete-journal-entry";
