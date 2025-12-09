@@ -1,0 +1,4 @@
+description = "Creates the Technical Spec - how the feature will be built"
+prompt = """
+@{.awos/commands/tech.md}
+"""

@@ -26,3 +26,4 @@ export function isContentEmpty(html: string): boolean {
  */
 export const MAX_CHARACTERS = 1000;
 
+
