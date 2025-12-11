@@ -3,7 +3,6 @@ import type { z } from "zod";
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
 import type { BaseService, ServiceResult } from "../types";
-
 import type {
   CollectionGamesByIdSchema,
   EventLogoSchema,
@@ -15,10 +14,10 @@ import type {
   GameDetailsSchema,
   GameExpansionsSchema,
   GameGenresSchema,
-  GetGameCompletionTimesSchema,
   GameScreenshotsSchema,
   GameSearchSchema,
   GetGameBySteamAppIdSchema,
+  GetGameCompletionTimesSchema,
   PlatformSearchSchema,
   SimilarGamesSchema,
   TimesToBeatSchema,
@@ -27,8 +26,12 @@ import type {
 
 export type GameSearchParams = z.infer<typeof GameSearchSchema>;
 export type GameDetailsParams = z.infer<typeof GameDetailsSchema>;
-export type GetGameDetailsBySlugParams = z.infer<typeof GameDetailsBySlugSchema>;
-export type GetGameBySteamAppIdParams = z.infer<typeof GetGameBySteamAppIdSchema>;
+export type GetGameDetailsBySlugParams = z.infer<
+  typeof GameDetailsBySlugSchema
+>;
+export type GetGameBySteamAppIdParams = z.infer<
+  typeof GetGameBySteamAppIdSchema
+>;
 export type SearchPlatformByNameParams = z.infer<typeof PlatformSearchSchema>;
 export type GetGameScreenshotsParams = z.infer<typeof GameScreenshotsSchema>;
 export type GetGameAggregatedRatingParams = z.infer<

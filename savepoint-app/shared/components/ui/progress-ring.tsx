@@ -95,8 +95,9 @@ export function mapLibraryStatusToGameStatus(
   }
 }
 
-export interface ProgressRingProps
-  extends VariantProps<typeof progressRingVariants> {
+export interface ProgressRingProps extends VariantProps<
+  typeof progressRingVariants
+> {
   progress?: number;
   status?: GameStatus;
   animated?: boolean;

@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import { env } from "@/env.mjs";
+import { z } from "zod";
 
 import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
 import {
@@ -456,7 +455,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         game: response[0],
       });
     } catch (error) {
-      logger.error({ error, steamAppId }, "Error fetching game by Steam app ID");
+      logger.error(
+        { error, steamAppId },
+        "Error fetching game by Steam app ID"
+      );
       return this.handleError(error, "Failed to fetch game by Steam app ID");
     }
   }
@@ -979,7 +981,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       );
     }
 
-    const { franchiseId, currentGameId, limit: inputLimit, offset: inputOffset } = validation.data;
+    const {
+      franchiseId,
+      currentGameId,
+      limit: inputLimit,
+      offset: inputOffset,
+    } = validation.data;
     const limit = inputLimit ?? 20;
     const offset = inputOffset ?? 0;
 
@@ -1320,7 +1327,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Event logo validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid event logo ID is required",
+        validation.error.errors[0]?.message ??
+          "Valid event logo ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -1453,7 +1461,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Collection games validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid collection ID is required",
+        validation.error.errors[0]?.message ??
+          "Valid collection ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }

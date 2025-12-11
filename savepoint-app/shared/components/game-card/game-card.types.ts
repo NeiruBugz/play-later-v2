@@ -43,7 +43,8 @@ export type GameData = BaseGameData | SearchGameData | LibraryGameData;
  * Props for GameCard component
  */
 export interface GameCardProps
-  extends Omit<ComponentPropsWithoutRef<"div">, "children">,
+  extends
+    Omit<ComponentPropsWithoutRef<"div">, "children">,
     VariantProps<typeof gameCardVariants> {
   /**
    * Game data in any supported format
