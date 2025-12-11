@@ -1,9 +1,9 @@
-import { config } from "dotenv";
 import { resolve } from "path";
-
-config({ path: resolve(import.meta.dirname, "../.env") });
+import { config } from "dotenv";
 
 import { clearTestData, disconnectDatabase } from "./helpers/db";
+
+config({ path: resolve(import.meta.dirname, "../.env") });
 
 async function globalSetup(): Promise<void> {
   console.log("\n🚀 Running global E2E setup...");

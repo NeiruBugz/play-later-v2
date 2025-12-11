@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 const CoverSchema = z.object({
-  id: z.number().optional(),
+  id: z.number(),
   image_id: z.string(),
   url: z.string().optional(),
 });
 
 const PlatformSchema = z.object({
-  id: z.number().optional(),
-  name: z.string().optional(),
+  id: z.number(),
+  name: z.string(),
   slug: z.string().optional(),
   abbreviation: z.string().optional(),
   alternative_name: z.string().optional(),
@@ -17,47 +17,47 @@ const PlatformSchema = z.object({
   platform_type: z.number().optional(),
 });
 
+const PlatformWithReleaseDateSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  human: z.string(),
+});
+
 const ReleaseDateSchema = z.object({
   id: z.number(),
   human: z.string(),
-  platform: z
-    .object({
-      id: z.number(),
-      name: z.string(),
-      human: z.string().optional(),
-    })
-    .optional(),
+  platform: PlatformWithReleaseDateSchema,
 });
 
 const GenreSchema = z.object({
-  id: z.number().optional(),
-  name: z.string().optional(),
+  id: z.number(),
+  name: z.string(),
 });
 
 const ThemeSchema = z.object({
-  id: z.number().optional(),
-  name: z.string().optional(),
+  id: z.number(),
+  name: z.string(),
 });
 
 const GameModeSchema = z.object({
-  id: z.number().optional(),
-  name: z.string().optional(),
+  id: z.number(),
+  name: z.string(),
 });
 
 const CompanySchema = z.object({
-  id: z.number().optional(),
-  name: z.string().optional(),
+  id: z.number(),
+  name: z.string(),
 });
 
 const InvolvedCompanySchema = z.object({
   id: z.number(),
-  company: CompanySchema.optional(),
-  developer: z.boolean().optional(),
-  publisher: z.boolean().optional(),
+  company: CompanySchema,
+  developer: z.boolean(),
+  publisher: z.boolean(),
 });
 
 const ExternalGameSchema = z.object({
-  id: z.number().optional(),
+  id: z.number(),
   category: z.number().optional(),
   name: z.string().optional(),
   url: z.string().optional(),
@@ -69,8 +69,8 @@ const ScreenshotSchema = z.object({
 });
 
 const WebsiteSchema = z.object({
-  id: z.number().optional(),
-  url: z.string().optional(),
+  id: z.number(),
+  url: z.string(),
   category: z.number().optional(),
   trusted: z.boolean().optional(),
 });
@@ -85,23 +85,33 @@ const CollectionSchema = z.object({
   name: z.string().optional(),
 });
 
-const SimilarGameSchema = z.object({
-  id: z.number().optional(),
+const GameEngineSchema = z.object({
+  id: z.number(),
   name: z.string().optional(),
-  cover: CoverSchema.optional(),
-  release_dates: z.array(ReleaseDateSchema).optional(),
-  first_release_date: z.number().optional(),
+});
+
+const PlayerPerspectiveSchema = z.object({
+  id: z.number(),
+  name: z.string().optional(),
+});
+
+const SimilarGameSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  cover: CoverSchema,
+  release_dates: z.array(ReleaseDateSchema),
+  first_release_date: z.number(),
 });
 
 export const SearchResponseItemSchema = z.object({
   id: z.number(),
   name: z.string(),
   slug: z.string(),
-  cover: CoverSchema.optional(),
-  first_release_date: z.number().optional(),
-  platforms: z.array(PlatformSchema).optional(),
+  cover: CoverSchema,
+  first_release_date: z.number(),
+  platforms: z.array(PlatformSchema),
   release_dates: z.array(ReleaseDateSchema).optional(),
-  game_type: z.number().optional(),
+  game_type: z.number(),
 });
 
 export const FullGameInfoResponseSchema = z.object({
@@ -109,22 +119,24 @@ export const FullGameInfoResponseSchema = z.object({
   name: z.string(),
   slug: z.string(),
   summary: z.string().optional(),
-  aggregated_rating: z.number().optional(),
+  aggregated_rating: z.number(),
   first_release_date: z.number().optional(),
-  cover: CoverSchema.optional(),
-  genres: z.array(GenreSchema).optional(),
+  cover: CoverSchema,
+  genres: z.array(GenreSchema),
   platforms: z.array(PlatformSchema).optional(),
-  release_dates: z.array(ReleaseDateSchema).optional(),
-  screenshots: z.array(ScreenshotSchema).optional(),
-  themes: z.array(ThemeSchema).optional(),
-  game_modes: z.array(GameModeSchema).optional(),
-  involved_companies: z.array(InvolvedCompanySchema).optional(),
-  external_games: z.array(ExternalGameSchema).optional(),
-  websites: z.array(WebsiteSchema).optional(),
-  similar_games: z.array(SimilarGameSchema).optional(),
+  release_dates: z.array(ReleaseDateSchema),
+  screenshots: z.array(ScreenshotSchema),
+  themes: z.array(ThemeSchema),
+  game_modes: z.array(GameModeSchema),
+  game_engines: z.array(GameEngineSchema),
+  player_perspectives: z.array(PlayerPerspectiveSchema),
+  involved_companies: z.array(InvolvedCompanySchema),
+  external_games: z.array(ExternalGameSchema),
+  websites: z.array(WebsiteSchema),
+  similar_games: z.array(SimilarGameSchema),
   franchise: z.union([z.number(), FranchiseSchema]).optional(),
-  franchises: z.array(z.number()).optional(),
-  game_type: z.number().optional(),
+  franchises: z.array(z.number()),
+  game_type: z.number(),
   collections: z.array(CollectionSchema).optional(),
 });
 
@@ -172,8 +184,8 @@ export const GameCompletionTimesItemSchema = z.object({
 export const ExpansionSchema = z.object({
   id: z.number(),
   name: z.string(),
-  cover: CoverSchema.optional(),
-  release_dates: z.array(ReleaseDateSchema).optional(),
+  cover: CoverSchema,
+  release_dates: z.array(ReleaseDateSchema),
 });
 
 export const GameWithExpansionsSchema = z.object({
@@ -210,7 +222,7 @@ export const UpcomingReleaseItemSchema = z.object({
   name: z.string(),
   cover: z.object({ id: z.number(), image_id: z.string() }),
   first_release_date: z.number(),
-  release_dates: z.array(ReleaseDateSchema).optional(),
+  release_dates: z.array(ReleaseDateSchema),
 });
 
 export const EventItemSchema = z.object({
@@ -248,14 +260,14 @@ export const CollectionGameItemSchema = z.object({
   id: z.number(),
   name: z.string(),
   slug: z.string(),
-  cover: z.object({ image_id: z.string() }).optional(),
-  game_type: z.number().optional(),
+  cover: z.object({ image_id: z.string() }),
+  game_type: z.number(),
 });
 
 export const CollectionWithGamesSchema = z.object({
   id: z.number(),
   name: z.string(),
-  games: z.array(CollectionGameItemSchema).optional(),
+  games: z.array(CollectionGameItemSchema),
 });
 
 export const TopRatedGameItemSchema = z.object({

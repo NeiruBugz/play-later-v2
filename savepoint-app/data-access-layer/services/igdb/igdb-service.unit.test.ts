@@ -143,11 +143,18 @@ describe("IgdbService", () => {
             {
               id: 1,
               name: "Test Game",
-              cover: { image_id: "cover1" },
-              platforms: [{ name: "PC" }],
-              release_dates: [{ human: "2024" }],
+              slug: "test-game",
+              cover: { id: 1, image_id: "cover1" },
+              platforms: [{ id: 6, name: "PC" }],
+              release_dates: [
+                {
+                  id: 1,
+                  human: "2024",
+                  platform: { id: 6, name: "PC", human: "PC (Microsoft Windows)" },
+                },
+              ],
               first_release_date: 1704067200,
-              category: 0,
+              game_type: 0,
             },
           ];
 
@@ -179,20 +186,37 @@ describe("IgdbService", () => {
             {
               id: 1,
               name: "Cyberpunk 2077",
-              cover: { image_id: "cover1" },
-              platforms: [{ name: "PC" }],
-              release_dates: [{ human: "2020" }],
+              slug: "cyberpunk-2077",
+              cover: { id: 1, image_id: "cover1" },
+              platforms: [{ id: 6, name: "PC" }],
+              release_dates: [
+                {
+                  id: 1,
+                  human: "2020",
+                  platform: { id: 6, name: "PC", human: "PC (Microsoft Windows)" },
+                },
+              ],
               first_release_date: 1607299200,
-              category: 0,
+              game_type: 0,
             },
             {
               id: 2,
               name: "The Witcher 3",
-              cover: { image_id: "cover2" },
-              platforms: [{ name: "PC" }, { name: "PlayStation 4" }],
-              release_dates: [{ human: "2015" }],
+              slug: "the-witcher-3",
+              cover: { id: 2, image_id: "cover2" },
+              platforms: [
+                { id: 6, name: "PC" },
+                { id: 48, name: "PlayStation 4" },
+              ],
+              release_dates: [
+                {
+                  id: 2,
+                  human: "2015",
+                  platform: { id: 6, name: "PC", human: "PC (Microsoft Windows)" },
+                },
+              ],
               first_release_date: 1431993600,
-              category: 0,
+              game_type: 0,
             },
           ];
 

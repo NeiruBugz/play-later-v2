@@ -46,23 +46,42 @@ import {
   buildUpcomingReleasesQuery,
 } from "./queries";
 import {
+  ArtworkItemSchema,
   CollectionGamesByIdSchema,
+  CollectionWithGamesSchema,
+  EventItemSchema,
+  EventLogoItemSchema,
   EventLogoSchema,
   FranchiseDetailsSchema,
+  FranchiseGameItemSchema,
   FranchiseGamesSchema,
+  FranchiseItemSchema,
+  FullGameInfoResponseSchema,
   GameAggregatedRatingSchema,
   GameArtworksSchema,
+  GameBySteamAppIdItemSchema,
+  GameCompletionTimesItemSchema,
   GameDetailsBySlugSchema,
   GameDetailsSchema,
   GameExpansionsSchema,
   GameGenresSchema,
   GameScreenshotsSchema,
   GameSearchSchema,
+  GameWithExpansionsSchema,
+  GameWithGenresSchema,
+  GameWithRatingSchema,
+  GameWithSimilarSchema,
   GetGameBySteamAppIdSchema,
   GetGameCompletionTimesSchema,
+  PlatformItemSchema,
   PlatformSearchSchema,
+  ScreenshotItemSchema,
+  SearchResponseItemSchema,
   SimilarGamesSchema,
+  TimesToBeatItemSchema,
   TimesToBeatSchema,
+  TopRatedGameItemSchema,
+  UpcomingReleaseItemSchema,
   UpcomingReleasesByIdsSchema,
 } from "./schemas";
 import type {
@@ -274,10 +293,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         offset,
       });
 
-      const games = await this.makeRequest<SearchResponse[]>({
-        body: query,
-        resource: "/games",
-      });
+      const games = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(SearchResponseItemSchema)
+      );
 
       if (!games) {
         logger.warn({ searchQuery: name }, "No games found in search");
@@ -319,10 +338,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ gameId }, "Fetching game details");
       const query = buildGameDetailsByIdQuery(gameId);
 
-      const resultGame = await this.makeRequest<FullGameInfoResponse[]>({
-        body: query,
-        resource: "/games",
-      });
+      const resultGame = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(FullGameInfoResponseSchema)
+      );
 
       if (resultGame && resultGame[0]) {
         logger.info(
@@ -363,10 +382,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ slug }, "Fetching game details by slug");
       const query = buildGameDetailsBySlugQuery(slug);
 
-      const resultGame = await this.makeRequest<FullGameInfoResponse[]>({
-        body: query,
-        resource: "/games",
-      });
+      const resultGame = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(FullGameInfoResponseSchema)
+      );
 
       if (!resultGame || resultGame.length === 0) {
         logger.warn({ slug }, "Game not found by slug");
@@ -389,12 +408,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
   async getPlatforms(): Promise<ServiceResult<PlatformsResult>> {
     try {
       const query = buildPlatformsQuery();
-      const platforms = await this.makeRequest<
-        Array<{ id: number; name: string }>
-      >({
-        body: query,
-        resource: "/platforms",
-      });
+      const platforms = await this.makeValidatedRequest(
+        { body: query, resource: "/platforms" },
+        z.array(PlatformItemSchema)
+      );
 
       if (!platforms) {
         return this.error(
@@ -432,12 +449,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ steamAppId }, "Looking up game by Steam app ID");
       const query = buildGameBySteamAppIdQuery(steamAppId);
 
-      const response = await this.makeRequest<
-        Array<{ id: number; name: string }>
-      >({
-        body: query,
-        resource: "/games",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(GameBySteamAppIdItemSchema)
+      );
 
       if (!response || response.length === 0) {
         logger.warn({ steamAppId }, "No IGDB game found for Steam app ID");
@@ -468,19 +483,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info("Fetching top-rated games");
       const query = buildTopRatedGamesQuery();
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          name: string;
-          aggregated_rating?: number;
-          cover?: {
-            image_id: string;
-          };
-        }>
-      >({
-        body: query,
-        resource: "/games",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(TopRatedGameItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch top-rated games from IGDB API");
@@ -532,16 +538,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ platformName }, "Searching platforms by name");
       const query = buildPlatformSearchQuery(platformName);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          name: string;
-          abbreviation?: string;
-        }>
-      >({
-        body: query,
-        resource: "/platforms",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/platforms" },
+        z.array(PlatformItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to search platforms from IGDB API");
@@ -593,19 +593,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ gameId }, "Fetching game screenshots");
       const query = buildScreenshotsQuery(gameId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          game: number;
-          image_id: string;
-          url?: string;
-          width?: number;
-          height?: number;
-        }>
-      >({
-        body: query,
-        resource: "/screenshots",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/screenshots" },
+        z.array(ScreenshotItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch game screenshots from IGDB API");
@@ -656,16 +647,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ gameId }, "Fetching game aggregated rating");
       const query = buildAggregatedRatingQuery(gameId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          aggregated_rating?: number;
-          aggregated_rating_count?: number;
-        }>
-      >({
-        body: query,
-        resource: "/games",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(GameWithRatingSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch game aggregated rating from IGDB API");
@@ -724,15 +709,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ gameId }, "Fetching similar games");
       const query = buildSimilarGamesQuery(gameId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          similar_games?: number[];
-        }>
-      >({
-        body: query,
-        resource: "/games",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(GameWithSimilarSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch similar games from IGDB API");
@@ -783,15 +763,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ gameId }, "Fetching game genres");
       const query = buildGameGenresQuery(gameId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          genres?: Array<{ id: number; name: string }>;
-        }>
-      >({
-        body: query,
-        resource: "/games",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(GameWithGenresSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch game genres from IGDB API");
@@ -842,20 +817,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ gameId }, "Fetching game completion times");
       const query = buildCompletionTimesQuery(gameId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          game_id?: number;
-          gameplay_main?: number;
-          gameplay_main_extra?: number;
-          gameplay_completionist?: number;
-          completeness?: number;
-          created_at?: number;
-        }>
-      >({
-        body: query,
-        resource: "/game_time_to_beats",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/game_time_to_beats" },
+        z.array(GameCompletionTimesItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch game completion times from IGDB API");
@@ -906,32 +871,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ gameId }, "Fetching game expansions");
       const query = buildExpansionsQuery(gameId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          expansions?: Array<{
-            id: number;
-            name: string;
-            cover: {
-              id: number;
-              image_id: string;
-              url?: string;
-            };
-            release_dates: Array<{
-              id: number;
-              human: string;
-              platform: {
-                id: number;
-                name: string;
-                human: string;
-              };
-            }>;
-          }>;
-        }>
-      >({
-        body: query,
-        resource: "/games",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(GameWithExpansionsSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch game expansions from IGDB API");
@@ -1013,23 +956,14 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       );
 
       const [gamesResponse, countResponse] = await Promise.all([
-        this.makeRequest<
-          Array<{
-            id: number;
-            name: string;
-            slug: string;
-            cover?: {
-              image_id: string;
-            };
-          }>
-        >({
-          body: gamesQuery,
-          resource: "/games",
-        }),
-        this.makeRequest<Array<{ id: number }>>({
-          body: countQuery,
-          resource: "/games",
-        }),
+        this.makeValidatedRequest(
+          { body: gamesQuery, resource: "/games" },
+          z.array(FranchiseGameItemSchema)
+        ),
+        this.makeValidatedRequest(
+          { body: countQuery, resource: "/games" },
+          z.array(z.object({ id: z.number() }))
+        ),
       ]);
 
       if (gamesResponse === undefined || countResponse === undefined) {
@@ -1091,15 +1025,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ franchiseId }, "Fetching franchise details from IGDB");
       const query = buildFranchiseDetailsQuery(franchiseId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          name: string;
-        }>
-      >({
-        body: query,
-        resource: "/franchises",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/franchises" },
+        z.array(FranchiseItemSchema)
+      );
 
       if (response === undefined || response.length === 0) {
         logger.warn({ franchiseId }, "Franchise not found in IGDB");
@@ -1140,22 +1069,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ gameId }, "Fetching game artworks");
       const query = buildArtworksQuery(gameId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          alpha_channel?: boolean;
-          animated?: boolean;
-          checksum: string;
-          game: number;
-          height?: number;
-          image_id: string;
-          url?: string;
-          width?: number;
-        }>
-      >({
-        body: query,
-        resource: "/artworks",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/artworks" },
+        z.array(ArtworkItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch game artworks from IGDB API");
@@ -1207,29 +1124,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ ids, count: ids.length }, "Fetching upcoming releases");
       const query = buildUpcomingReleasesQuery(ids);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          name: string;
-          cover: {
-            id: number;
-            image_id: string;
-          };
-          first_release_date: number;
-          release_dates: Array<{
-            id: number;
-            human: string;
-            platform: {
-              id: number;
-              name: string;
-              human: string;
-            };
-          }>;
-        }>
-      >({
-        body: query,
-        resource: "/games",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/games" },
+        z.array(UpcomingReleaseItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch upcoming releases from IGDB API");
@@ -1266,28 +1164,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info("Fetching upcoming gaming events");
       const query = buildUpcomingEventsQuery();
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          name: string;
-          checksum?: string;
-          created_at?: number;
-          description?: string;
-          end_time?: number;
-          event_logo?: number | { id: number };
-          event_networks?: number[];
-          games?: number[];
-          live_stream_url?: string;
-          slug?: string;
-          start_time: number;
-          time_zone?: string;
-          updated_at?: number;
-          videos?: number[];
-        }>
-      >({
-        body: query,
-        resource: "/events",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/events" },
+        z.array(EventItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch upcoming gaming events from IGDB API");
@@ -1339,17 +1219,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ logoId }, "Fetching event logo");
       const query = buildEventLogoQuery(logoId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          width?: number;
-          height?: number;
-          image_id: string;
-        }>
-      >({
-        body: query,
-        resource: "/event_logos",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/event_logos" },
+        z.array(EventLogoItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch event logo from IGDB API");
@@ -1401,16 +1274,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ igdbId }, "Fetching times to beat");
       const query = buildTimesToBeatQuery(igdbId);
 
-      const response = await this.makeRequest<
-        Array<{
-          id: number;
-          normally?: number;
-          completely?: number;
-        }>
-      >({
-        body: query,
-        resource: "/game_time_to_beats",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/game_time_to_beats" },
+        z.array(TimesToBeatItemSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch times to beat from IGDB API");
@@ -1473,10 +1340,10 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       logger.info({ collectionId }, "Fetching collection games");
       const query = buildCollectionGamesQuery(collectionId);
 
-      const response = await this.makeRequest<CollectionGamesResult[]>({
-        body: query,
-        resource: "/collections",
-      });
+      const response = await this.makeValidatedRequest(
+        { body: query, resource: "/collections" },
+        z.array(CollectionWithGamesSchema)
+      );
 
       if (response === undefined) {
         logger.error("Failed to fetch collection games from IGDB API");
