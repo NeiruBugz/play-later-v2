@@ -67,17 +67,23 @@ vi.mock("next/navigation", () => ({
 // Individual test files can override these mocks if they need specific TipTap behavior
 vi.mock("@tiptap/react", () => ({
   useEditor: vi.fn(() => null),
-  EditorContent: () => null,
+  EditorContent: vi.fn(() => null),
 }));
 
 vi.mock("@tiptap/starter-kit", () => ({
-  default: vi.fn(),
+  default: {
+    configure: vi.fn(() => ({})),
+  },
 }));
 
 vi.mock("@tiptap/extension-character-count", () => ({
-  default: vi.fn(),
+  default: {
+    configure: vi.fn(() => ({})),
+  },
 }));
 
 vi.mock("@tiptap/extension-list-item", () => ({
-  default: vi.fn(),
+  default: {
+    configure: vi.fn(() => ({})),
+  },
 }));

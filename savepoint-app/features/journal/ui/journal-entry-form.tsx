@@ -62,7 +62,14 @@ export function JournalEntryForm({
   const gameId = initialGameId ?? entry?.gameId;
 
   if (!gameId) {
-    throw new Error("gameId is required for JournalEntryForm");
+    return (
+      <div className="text-destructive p-lg border-destructive/20 bg-destructive/5 rounded-lg border">
+        <p className="font-medium">Configuration Error</p>
+        <p className="text-sm">
+          A game ID is required to create a journal entry.
+        </p>
+      </div>
+    );
   }
 
   // Use a common form shape that works for both create and update

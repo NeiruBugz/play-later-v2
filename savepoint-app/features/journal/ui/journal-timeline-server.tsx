@@ -1,7 +1,6 @@
-import { JournalService } from "@/data-access-layer/services";
+import { GameService, JournalService } from "@/data-access-layer/services";
 
 import { requireServerUserId } from "@/shared/lib/app/auth";
-import { prisma } from "@/shared/lib/app/db";
 
 import { JournalTimelineClient } from "./journal-timeline-client";
 
@@ -26,28 +25,17 @@ export async function JournalTimelineServer() {
 
   const entries = entriesResult.data;
 
-  // Fetch all games for the entries in a single query
-  // If no entries, pass empty arrays and let client component handle empty state
+  // Fetch all games for the entries using service layer
   const gameIds =
     entries.length > 0
       ? [...new Set(entries.map((entry) => entry.gameId))]
       : [];
-  const games =
-    gameIds.length > 0
-      ? await prisma.game.findMany({
-          where: {
-            id: { in: gameIds },
-          },
-          select: {
-            id: true,
-            title: true,
-            slug: true,
-            coverImage: true,
-          },
-        })
-      : [];
 
-  // Create a map for quick lookup
+  const gameService = new GameService();
+  const gamesResult = await gameService.getGamesByIds({ ids: gameIds });
+
+  // Create a map for quick lookup (empty map if fetch failed)
+  const games = gamesResult.success ? gamesResult.data : [];
   const gameMap = new Map(
     games.map((game) => [
       game.id,

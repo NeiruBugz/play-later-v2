@@ -85,6 +85,7 @@ export const GAME_DETAILS_BY_SLUG_FIELDS = [
   "franchise.name",
   "franchises",
   "game_type",
+  "collections.id",
   "collections.name",
 ] as const;
 

@@ -1,9 +1,8 @@
-import { JournalService } from "@/data-access-layer/services";
+import { GameService, JournalService } from "@/data-access-layer/services";
 import { notFound } from "next/navigation";
 
 import { JournalEntryDetail } from "@/features/journal/ui/journal-entry-detail";
 import { requireServerUserId } from "@/shared/lib/app/auth";
-import { prisma } from "@/shared/lib/app/db";
 
 export const dynamic = "force-dynamic";
 
@@ -27,20 +26,15 @@ export default async function JournalEntryPage({
 
   const entry = entryResult.data;
 
-  // Fetch game information
-  const game = await prisma.game.findUnique({
-    where: { id: entry.gameId },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      coverImage: true,
-    },
-  });
+  // Fetch game information using service layer
+  const gameService = new GameService();
+  const gameResult = await gameService.getGameById({ id: entry.gameId });
 
-  if (!game) {
+  if (!gameResult.success || !gameResult.data) {
     notFound();
   }
+
+  const game = gameResult.data;
 
   return (
     <main className="py-3xl container mx-auto">

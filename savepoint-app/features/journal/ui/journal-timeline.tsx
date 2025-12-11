@@ -1,9 +1,8 @@
-import { JournalService } from "@/data-access-layer/services";
+import { GameService, JournalService } from "@/data-access-layer/services";
 import Link from "next/link";
 
 import { Button } from "@/shared/components/ui/button";
 import { requireServerUserId } from "@/shared/lib/app/auth";
-import { prisma } from "@/shared/lib/app/db";
 
 import { JournalEntryCard } from "./journal-entry-card";
 
@@ -44,21 +43,13 @@ export async function JournalTimeline() {
     );
   }
 
-  // Fetch all games for the entries in a single query
+  // Fetch all games for the entries using the service layer
   const gameIds = [...new Set(entries.map((entry) => entry.gameId))];
-  const games = await prisma.game.findMany({
-    where: {
-      id: { in: gameIds },
-    },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      coverImage: true,
-    },
-  });
+  const gameService = new GameService();
+  const gamesResult = await gameService.getGamesByIds({ ids: gameIds });
 
-  // Create a map for quick lookup
+  // Create a map for quick lookup (empty map if fetch failed)
+  const games = gamesResult.success ? gamesResult.data : [];
   const gameMap = new Map(games.map((game) => [game.id, game]));
 
   return (

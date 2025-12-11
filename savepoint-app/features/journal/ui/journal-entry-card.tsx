@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatRelativeDate } from "@/shared/lib/date";
+import { stripHtmlTags } from "@/shared/lib/rich-text";
 import { JournalMood, type JournalEntryDomain } from "@/shared/types";
 
 interface GameInfo {
@@ -31,17 +32,6 @@ const MOOD_LABELS: Record<JournalMood, string> = {
   [JournalMood.CURIOUS]: "Curious",
   [JournalMood.NOSTALGIC]: "Nostalgic",
 };
-
-/**
- * Strips HTML tags from content and returns plain text preview
- */
-function stripHtmlTags(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, "") // Remove HTML tags
-    .replace(/&nbsp;/g, " ") // Replace &nbsp; with space
-    .replace(/&[a-z]+;/gi, "") // Remove other HTML entities
-    .trim();
-}
 
 /**
  * Gets first N characters of plain text content

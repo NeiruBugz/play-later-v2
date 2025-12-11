@@ -53,3 +53,4 @@ export {
   type JournalService as IJournalService,
 } from "./journal/types";
 export { JournalService } from "./journal/journal-service";
+export { GameService } from "./game/game-service";

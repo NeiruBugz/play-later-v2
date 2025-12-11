@@ -19,6 +19,30 @@ import { getLibraryItemsByGameIdAction } from "../server-actions/get-library-ite
 import { updateJournalEntryAction } from "../server-actions/update-journal-entry";
 import { JournalEntryForm } from "./journal-entry-form";
 
+// Mock RichTextEditor to render a simple textarea for testing
+vi.mock("@/shared/components/rich-text-editor", () => ({
+  RichTextEditor: ({
+    value,
+    onChange,
+    placeholder,
+    disabled,
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    disabled?: boolean;
+  }) => (
+    <textarea
+      data-testid="rich-text-editor"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      disabled={disabled}
+      aria-label="Content"
+    />
+  ),
+}));
+
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -62,8 +86,8 @@ const mockJournalEntry: JournalEntryDomain = {
 };
 
 const elements = {
-  getTitleInput: () => screen.getByLabelText(/title/i),
-  getContentTextarea: () => screen.getByLabelText(/content/i),
+  getTitleInput: () => screen.getByLabelText(/^title/i),
+  getContentTextarea: () => screen.getByTestId("rich-text-editor"),
   getMoodSelect: () => screen.getByRole("combobox", { name: /mood/i }),
   getHoursPlayedInput: () => screen.getByLabelText(/hours played/i),
   getLibraryItemSelect: () =>
@@ -324,10 +348,13 @@ describe("JournalEntryForm", () => {
         });
       });
 
-      it("should show auto-link message", async () => {
+      it("should not show library item selector when auto-linked", async () => {
+        // When there's exactly one library item, it's auto-linked silently
+        // and the selector is not shown
         await waitFor(() => {
-          expect(elements.getAutoLinkMessage()).toBeVisible();
+          expect(mockGetLibraryItemsByGameIdAction).toHaveBeenCalled();
         });
+        expect(elements.getLibraryItemSelect()).not.toBeInTheDocument();
       });
     });
 
@@ -412,9 +439,11 @@ describe("JournalEntryForm", () => {
       );
     });
 
-    it("should pre-populate form fields with entry data", () => {
-      expect(elements.getTitleInput()).toHaveValue("Test Entry");
-      expect(elements.getContentTextarea()).toHaveValue("Test content");
+    it("should pre-populate form fields with entry data", async () => {
+      await waitFor(() => {
+        expect(elements.getTitleInput()).toHaveValue("Test Entry");
+        expect(elements.getContentTextarea()).toHaveValue("Test content");
+      });
     });
 
     it("should show 'Save Changes' button text", () => {
@@ -434,6 +463,9 @@ describe("JournalEntryForm", () => {
         data: mockJournalEntry,
       });
 
+      // Clear existing values before typing new ones
+      await userEvent.clear(elements.getTitleInput());
+      await userEvent.clear(elements.getContentTextarea());
       await actions.typeTitle("Updated Title");
       await actions.typeContent("Updated content");
       await actions.submitForm();

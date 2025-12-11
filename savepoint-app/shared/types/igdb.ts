@@ -65,7 +65,7 @@ export type FullGameInfoResponse = {
   franchise?: Franchise | number;
   franchises: number[];
   game_type: number;
-  collections: Pick<Collection, "id" | "name">[];
+  collections?: Pick<Collection, "id" | "name">[];
 };
 export type SearchResponse = {
   cover: Cover;

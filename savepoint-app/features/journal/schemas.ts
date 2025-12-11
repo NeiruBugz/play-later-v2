@@ -1,7 +1,11 @@
 import { JournalMood } from "@/data-access-layer/domain/journal";
 import { z } from "zod";
 
-import { isContentEmpty, MAX_CHARACTERS } from "@/shared/lib/rich-text";
+import {
+  isContentEmpty,
+  MAX_CHARACTERS,
+  stripHtmlTags,
+} from "@/shared/lib/rich-text";
 
 export const CreateJournalEntrySchema = z
   .object({
@@ -12,7 +16,7 @@ export const CreateJournalEntrySchema = z
     playSession: z.number().int().positive().optional(),
     libraryItemId: z.number().int().positive().optional(),
   })
-  .refine((data) => data.content.length <= MAX_CHARACTERS, {
+  .refine((data) => stripHtmlTags(data.content).length <= MAX_CHARACTERS, {
     message: `Content must not exceed ${MAX_CHARACTERS} characters`,
     path: ["content"],
   })
@@ -45,7 +49,7 @@ export const UpdateJournalEntrySchema = z
   .refine(
     (data) => {
       if (data.content === undefined) return true;
-      return data.content.length <= MAX_CHARACTERS;
+      return stripHtmlTags(data.content).length <= MAX_CHARACTERS;
     },
     {
       message: `Content must not exceed ${MAX_CHARACTERS} characters`,

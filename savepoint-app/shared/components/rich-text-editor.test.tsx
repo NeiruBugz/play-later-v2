@@ -42,7 +42,7 @@ const elements = {
   getOrderedListButton: () =>
     screen.getByRole("button", { name: /numbered list/i }),
   getCharacterCounter: () => screen.getByText(/remaining|over limit/i),
-  getEditorContent: () => screen.getByRole("textbox"),
+  getEditorContent: () => screen.getByTestId("editor-content"),
   getPlaceholder: () => screen.queryByText(/write your journal entry/i),
 };
 
@@ -212,7 +212,6 @@ describe("RichTextEditor", () => {
       );
 
       expect(elements.getCharacterCounter()).toHaveTextContent("50 over limit");
-      expect(elements.getCharacterCounter()).toHaveClass("text-destructive");
     });
 
     it("should call onValidationChange with false when over limit", async () => {

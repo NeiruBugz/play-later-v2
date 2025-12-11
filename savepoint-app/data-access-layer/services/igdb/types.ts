@@ -272,7 +272,7 @@ export interface CollectionGame {
   id: number;
   name: string;
   slug: string;
-  cover: { image_id: string };
+  cover?: { image_id: string };
   game_type: number;
 }
 

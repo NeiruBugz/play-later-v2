@@ -31,9 +31,17 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: libraryItems, isLoading } = useQuery({
+  const {
+    data: libraryItems,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["library-games-for-journal"],
     queryFn: fetchUserLibraryGames,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   // Get unique games from library items
@@ -59,6 +67,30 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
           <p className="text-muted-foreground text-sm">
             Loading your library games...
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-xl">
+        <div className="space-y-md">
+          <h2 className="heading-md">Select a Game</h2>
+          <p className="text-destructive text-sm">
+            Failed to load your library games
+            {error instanceof Error ? `: ${error.message}` : ""}
+          </p>
+        </div>
+        <div className="gap-md flex items-center justify-end">
+          {onCancel && (
+            <Button type="button" variant="ghost" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+          <Button type="button" onClick={() => refetch()}>
+            Try Again
+          </Button>
         </div>
       </div>
     );
