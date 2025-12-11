@@ -1,4 +1,9 @@
+import { resolve } from "path";
+import { config } from "dotenv";
+
 import { clearTestData, disconnectDatabase } from "./helpers/db";
+
+config({ path: resolve(import.meta.dirname, "../.env") });
 
 async function globalTeardown(): Promise<void> {
   console.log("\n🧹 Running global E2E teardown...");
