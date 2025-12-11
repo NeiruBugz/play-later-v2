@@ -36,7 +36,10 @@ export async function JournalTimelineServer() {
 
   // Create a record for quick lookup (empty record if fetch failed)
   const games = gamesResult.success ? gamesResult.data : [];
-  const gameRecord: Record<string, { id: string; title: string; slug: string; coverImage: string | null }> = {};
+  const gameRecord: Record<
+    string,
+    { id: string; title: string; slug: string; coverImage: string | null }
+  > = {};
 
   games.forEach((game) => {
     gameRecord[game.id] = {

@@ -53,7 +53,7 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
 
   const sanitizedContent = useMemo(
     () => DOMPurify.sanitize(entry.content),
-    [entry.content],
+    [entry.content]
   );
 
   const handleDelete = async () => {
