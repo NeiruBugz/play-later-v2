@@ -221,9 +221,10 @@ export function buildGameDetailsByIdQuery(gameId: number): string {
 }
 
 export function buildGameDetailsBySlugQuery(slug: string): string {
+  const escapedSlug = slug.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   return new QueryBuilder()
     .fields([...GAME_DETAILS_BY_SLUG_FIELDS])
-    .where(`slug = "${slug}"`)
+    .where(`slug = "${escapedSlug}"`)
     .limit(IGDB_SINGLE_RESULT_LIMIT)
     .build();
 }
