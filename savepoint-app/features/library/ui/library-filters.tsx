@@ -107,8 +107,8 @@ export function LibraryFilters() {
   }, [debouncedSearch, searchParams, updateFilter]);
   const hasActiveFilters = Boolean(
     searchParams.get("status") ||
-      searchParams.get("platform") ||
-      searchParams.get("search")
+    searchParams.get("platform") ||
+    searchParams.get("search")
   );
   const currentStatus = searchParams.get("status") ?? "__all__";
 

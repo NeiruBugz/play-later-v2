@@ -179,9 +179,8 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
     });
 
     it("should return error when IGDB fetch fails", async () => {
-      const { IgdbService } = await import(
-        "@/data-access-layer/services/igdb/igdb-service"
-      );
+      const { IgdbService } =
+        await import("@/data-access-layer/services/igdb/igdb-service");
       const mockIgdbService = vi.mocked(IgdbService);
 
       mockIgdbService.mockImplementationOnce(
@@ -207,9 +206,8 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
     });
 
     it("should return error when game not found in IGDB", async () => {
-      const { IgdbService } = await import(
-        "@/data-access-layer/services/igdb/igdb-service"
-      );
+      const { IgdbService } =
+        await import("@/data-access-layer/services/igdb/igdb-service");
       const mockIgdbService = vi.mocked(IgdbService);
 
       mockIgdbService.mockImplementationOnce(

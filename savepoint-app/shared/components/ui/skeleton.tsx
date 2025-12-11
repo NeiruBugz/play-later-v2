@@ -35,7 +35,8 @@ const skeletonVariants = cva("rounded-md relative overflow-hidden", {
 });
 
 export interface SkeletonProps
-  extends ComponentPropsWithoutRef<"div">,
+  extends
+    ComponentPropsWithoutRef<"div">,
     VariantProps<typeof skeletonVariants> {}
 
 export function Skeleton({

@@ -143,11 +143,22 @@ describe("IgdbService", () => {
             {
               id: 1,
               name: "Test Game",
-              cover: { image_id: "cover1" },
-              platforms: [{ name: "PC" }],
-              release_dates: [{ human: "2024" }],
+              slug: "test-game",
+              cover: { id: 1, image_id: "cover1" },
+              platforms: [{ id: 6, name: "PC" }],
+              release_dates: [
+                {
+                  id: 1,
+                  human: "2024",
+                  platform: {
+                    id: 6,
+                    name: "PC",
+                    human: "PC (Microsoft Windows)",
+                  },
+                },
+              ],
               first_release_date: 1704067200,
-              category: 0,
+              game_type: 0,
             },
           ];
 
@@ -179,20 +190,45 @@ describe("IgdbService", () => {
             {
               id: 1,
               name: "Cyberpunk 2077",
-              cover: { image_id: "cover1" },
-              platforms: [{ name: "PC" }],
-              release_dates: [{ human: "2020" }],
+              slug: "cyberpunk-2077",
+              cover: { id: 1, image_id: "cover1" },
+              platforms: [{ id: 6, name: "PC" }],
+              release_dates: [
+                {
+                  id: 1,
+                  human: "2020",
+                  platform: {
+                    id: 6,
+                    name: "PC",
+                    human: "PC (Microsoft Windows)",
+                  },
+                },
+              ],
               first_release_date: 1607299200,
-              category: 0,
+              game_type: 0,
             },
             {
               id: 2,
               name: "The Witcher 3",
-              cover: { image_id: "cover2" },
-              platforms: [{ name: "PC" }, { name: "PlayStation 4" }],
-              release_dates: [{ human: "2015" }],
+              slug: "the-witcher-3",
+              cover: { id: 2, image_id: "cover2" },
+              platforms: [
+                { id: 6, name: "PC" },
+                { id: 48, name: "PlayStation 4" },
+              ],
+              release_dates: [
+                {
+                  id: 2,
+                  human: "2015",
+                  platform: {
+                    id: 6,
+                    name: "PC",
+                    human: "PC (Microsoft Windows)",
+                  },
+                },
+              ],
               first_release_date: 1431993600,
-              category: 0,
+              game_type: 0,
             },
           ];
 
@@ -2811,6 +2847,124 @@ describe("IgdbService", () => {
         if (!result.success) {
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
           expect(result.error).toContain("Failed to fetch event logo");
+        }
+      });
+    });
+  });
+
+  describe("getCollectionGamesById", () => {
+    describe("when service returns", () => {
+      it("should return collection with games successfully", async () => {
+        const params = { collectionId: 123 };
+        const mockResponse = [
+          {
+            id: 123,
+            name: "The Witcher Collection",
+            games: [
+              {
+                id: 1,
+                name: "The Witcher",
+                slug: "the-witcher",
+                cover: { image_id: "abc123" },
+                game_type: 0,
+              },
+              {
+                id: 2,
+                name: "The Witcher 2",
+                slug: "the-witcher-2",
+                cover: { image_id: "def456" },
+                game_type: 0,
+              },
+            ],
+          },
+        ];
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockResponse,
+        });
+
+        const result = await service.getCollectionGamesById(params);
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.id).toBe(123);
+          expect(result.data.name).toBe("The Witcher Collection");
+          expect(result.data.games).toHaveLength(2);
+          expect(result.data.games[0].name).toBe("The Witcher");
+          expect(result.data.games[1].name).toBe("The Witcher 2");
+        }
+      });
+
+      it("should return NOT_FOUND when collection does not exist", async () => {
+        const params = { collectionId: 999999 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
+
+        const result = await service.getCollectionGamesById(params);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+          expect(result.error).toBe("Collection not found");
+        }
+      });
+
+      it("should return VALIDATION_ERROR for invalid collection ID", async () => {
+        const params = { collectionId: -1 };
+
+        const result = await service.getCollectionGamesById(params);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
+        }
+      });
+    });
+
+    describe("when service throws", () => {
+      it("should return INTERNAL_ERROR when IGDB API fails", async () => {
+        const params = { collectionId: 123 };
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        });
+
+        mockFetch.mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+
+        const result = await service.getCollectionGamesById(params);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+          expect(result.error).toContain("Failed to fetch collection games");
         }
       });
     });

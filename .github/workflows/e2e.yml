@@ -71,13 +71,13 @@ jobs:
         working-directory: savepoint-app
         run: |
           cat > .env << 'EOF'
-          # Database
-          POSTGRES_PRISMA_URL=postgresql://postgres:postgres@postgres:5432/savepoint-db
-          POSTGRES_URL_NON_POOLING=postgresql://postgres:postgres@postgres:5432/savepoint-db
-          POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/savepoint-db
-          POSTGRES_URL_NO_SSL=postgresql://postgres:postgres@postgres:5432/savepoint-db
+          # Database (use localhost since service containers are accessed via port mapping)
+          POSTGRES_PRISMA_URL=postgresql://postgres:postgres@localhost:5432/savepoint-db
+          POSTGRES_URL_NON_POOLING=postgresql://postgres:postgres@localhost:5432/savepoint-db
+          POSTGRES_URL=postgresql://postgres:postgres@localhost:5432/savepoint-db
+          POSTGRES_URL_NO_SSL=postgresql://postgres:postgres@localhost:5432/savepoint-db
           POSTGRES_USER=postgres
-          POSTGRES_HOST=postgres
+          POSTGRES_HOST=localhost
           POSTGRES_PASSWORD=postgres
           POSTGRES_DATABASE=savepoint-db
 
@@ -94,9 +94,9 @@ jobs:
           IGDB_CLIENT_SECRET=dummy
           STEAM_API_KEY=dummy
 
-          # S3 via LocalStack
+          # S3 via LocalStack (use localhost for port-mapped service)
           AWS_REGION=us-east-1
-          AWS_ENDPOINT_URL=http://localstack:4566
+          AWS_ENDPOINT_URL=http://localhost:4566
           AWS_ACCESS_KEY_ID=test
           AWS_SECRET_ACCESS_KEY=test
           S3_BUCKET_NAME=savepoint-dev
@@ -106,8 +106,8 @@ jobs:
       - name: Prepare database (Prisma migrate)
         working-directory: savepoint-app
         env:
-          # Ensure Prisma uses the same URL as the app
-          POSTGRES_PRISMA_URL: postgresql://postgres:postgres@postgres:5432/savepoint-db
+          # Ensure Prisma uses the same URL as the app (localhost for port-mapped service)
+          POSTGRES_PRISMA_URL: postgresql://postgres:postgres@localhost:5432/savepoint-db
         run: |
           pnpm prisma migrate deploy
 

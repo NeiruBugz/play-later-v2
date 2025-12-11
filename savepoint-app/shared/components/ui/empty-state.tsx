@@ -42,7 +42,8 @@ const iconVariants = cva("shrink-0", {
 });
 
 export interface EmptyStateProps
-  extends Omit<ComponentPropsWithoutRef<"div">, "title">,
+  extends
+    Omit<ComponentPropsWithoutRef<"div">, "title">,
     VariantProps<typeof emptyStateVariants> {
   icon?: LucideIcon | ReactNode;
   iconProps?: VariantProps<typeof iconVariants>;
