@@ -1,5 +1,3 @@
-import type { Game as IgdbGame } from "igdb-api-types";
-
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
 import type { BaseService, ServiceResult } from "../types";
