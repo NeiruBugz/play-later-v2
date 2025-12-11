@@ -1,9 +1,10 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
 import type { JournalEntryDomain } from "@/shared/types/journal";
 
@@ -33,6 +34,7 @@ export function JournalTimelineClient({
   );
   const [isPending, startTransition] = useTransition();
   const [hasMore, setHasMore] = useState(initialEntries.length === 20);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const handleLoadMore = () => {
     if (isPending || !hasMore) return;
@@ -40,37 +42,47 @@ export function JournalTimelineClient({
     const lastEntry = entries[entries.length - 1];
     if (!lastEntry) return;
 
+    setLoadError(null);
+
     startTransition(async () => {
       const result = await getJournalEntriesAction({
         cursor: lastEntry.id,
         limit: 20,
       });
 
-      if (result.success) {
-        const newEntries = result.data;
-        setEntries((prev) => [...prev, ...newEntries]);
-        setHasMore(newEntries.length === 20);
+      if (!result.success) {
+        setLoadError("Failed to load more entries. Please try again.");
+        return;
+      }
 
-        // Fetch games for new entries
-        const newGameIds = [
-          ...new Set(newEntries.map((entry) => entry.gameId)),
-        ].filter((id) => !games.has(id));
+      const newEntries = result.data;
+      setEntries((prev) => [...prev, ...newEntries]);
+      setHasMore(newEntries.length === 20);
 
-        if (newGameIds.length > 0) {
-          const gamesResult = await getGamesByIdsAction({
-            gameIds: newGameIds,
-          });
+      // Fetch games for new entries
+      const newGameIds = [
+        ...new Set(newEntries.map((entry) => entry.gameId)),
+      ].filter((id) => !games.has(id));
 
-          if (gamesResult.success) {
-            setGames((prev) => {
-              const updated = new Map(prev);
-              gamesResult.data.forEach((game) => {
-                updated.set(game.id, game);
-              });
-              return updated;
-            });
-          }
+      if (newGameIds.length > 0) {
+        const gamesResult = await getGamesByIdsAction({
+          gameIds: newGameIds,
+        });
+
+        if (!gamesResult.success) {
+          setLoadError(
+            "Loaded entries but failed to fetch game details. Some entries may not display correctly."
+          );
+          return;
         }
+
+        setGames((prev) => {
+          const updated = new Map(prev);
+          gamesResult.data.forEach((game) => {
+            updated.set(game.id, game);
+          });
+          return updated;
+        });
       }
     });
   };
@@ -122,7 +134,24 @@ export function JournalTimelineClient({
         })}
       </div>
 
-      {hasMore && (
+      {loadError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>{loadError}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLoadMore}
+              disabled={isPending}
+            >
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {hasMore && !loadError && (
         <div className="pt-lg flex justify-center">
           <Button
             onClick={handleLoadMore}
