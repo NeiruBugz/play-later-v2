@@ -34,21 +34,20 @@ export async function JournalTimelineServer() {
   const gameService = new GameService();
   const gamesResult = await gameService.getGamesByIds({ ids: gameIds });
 
-  // Create a map for quick lookup (empty map if fetch failed)
+  // Create a record for quick lookup (empty record if fetch failed)
   const games = gamesResult.success ? gamesResult.data : [];
-  const gameMap = new Map(
-    games.map((game) => [
-      game.id,
-      {
-        id: game.id,
-        title: game.title,
-        slug: game.slug,
-        coverImage: game.coverImage,
-      },
-    ])
-  );
+  const gameRecord: Record<string, { id: string; title: string; slug: string; coverImage: string | null }> = {};
+
+  games.forEach((game) => {
+    gameRecord[game.id] = {
+      id: game.id,
+      title: game.title,
+      slug: game.slug,
+      coverImage: game.coverImage,
+    };
+  });
 
   return (
-    <JournalTimelineClient initialEntries={entries} initialGames={gameMap} />
+    <JournalTimelineClient initialEntries={entries} initialGames={gameRecord} />
   );
 }

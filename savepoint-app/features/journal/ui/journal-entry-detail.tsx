@@ -1,8 +1,9 @@
 "use client";
 
+import DOMPurify from "dompurify";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { GameCard } from "@/shared/components/game-card";
@@ -49,6 +50,11 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
 
   const displayTitle = entry.title || "Untitled Entry";
   const isUpdated = entry.updatedAt.getTime() !== entry.createdAt.getTime();
+
+  const sanitizedContent = useMemo(
+    () => DOMPurify.sanitize(entry.content),
+    [entry.content],
+  );
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -130,7 +136,7 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
         <CardContent className="space-y-lg">
           <div
             className="prose prose-sm dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: entry.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           />
 
           {/* Entry Metadata */}

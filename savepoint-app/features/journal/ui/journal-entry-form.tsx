@@ -29,6 +29,16 @@ import { createJournalEntryAction } from "../server-actions/create-journal-entry
 import { getLibraryItemsByGameIdAction } from "../server-actions/get-library-items-by-game-id";
 import { updateJournalEntryAction } from "../server-actions/update-journal-entry";
 
+// Use a common form shape that works for both create and update
+// We'll validate and transform in handleSubmit
+type FormData = {
+  title: string;
+  content: string;
+  mood?: JournalMood;
+  playSession?: number;
+  libraryItemId?: number;
+};
+
 interface JournalEntryFormProps {
   gameId?: string;
   entry?: JournalEntryDomain;
@@ -60,27 +70,6 @@ export function JournalEntryForm({
 
   const isEditMode = !!entry;
   const gameId = initialGameId ?? entry?.gameId;
-
-  if (!gameId) {
-    return (
-      <div className="text-destructive p-lg border-destructive/20 bg-destructive/5 rounded-lg border">
-        <p className="font-medium">Configuration Error</p>
-        <p className="text-sm">
-          A game ID is required to create a journal entry.
-        </p>
-      </div>
-    );
-  }
-
-  // Use a common form shape that works for both create and update
-  // We'll validate and transform in handleSubmit
-  type FormData = {
-    title: string;
-    content: string;
-    mood?: JournalMood;
-    playSession?: number;
-    libraryItemId?: number;
-  };
 
   const form = useForm<FormData>({
     resolver: zodResolver(
@@ -147,6 +136,17 @@ export function JournalEntryForm({
     errorMessage: "Failed to update entry",
     onSuccess,
   });
+
+  if (!gameId) {
+    return (
+      <div className="text-destructive p-lg border-destructive/20 bg-destructive/5 rounded-lg border">
+        <p className="font-medium">Configuration Error</p>
+        <p className="text-sm">
+          A game ID is required to create a journal entry.
+        </p>
+      </div>
+    );
+  }
 
   const isSubmitting = isEditMode
     ? updateAction.isSubmitting
@@ -291,7 +291,7 @@ export function JournalEntryForm({
                 id="playSession"
                 type="number"
                 min="0"
-                step="0.5"
+                step="1"
                 placeholder="0"
                 disabled={isSubmitting}
                 aria-invalid={!!form.formState.errors.playSession}

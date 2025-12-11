@@ -20,7 +20,7 @@ interface GameInfo {
 
 interface JournalTimelineClientProps {
   initialEntries: JournalEntryDomain[];
-  initialGames: Map<string, GameInfo>;
+  initialGames: Record<string, GameInfo>;
 }
 
 export function JournalTimelineClient({
@@ -28,7 +28,7 @@ export function JournalTimelineClient({
   initialGames,
 }: JournalTimelineClientProps) {
   const [entries, setEntries] = useState(initialEntries);
-  const [games, setGames] = useState(initialGames);
+  const [games, setGames] = useState(() => new Map(Object.entries(initialGames)));
   const [isPending, startTransition] = useTransition();
   const [hasMore, setHasMore] = useState(initialEntries.length === 20);
 
