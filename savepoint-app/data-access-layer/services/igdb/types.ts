@@ -1,3 +1,5 @@
+import type { Game as IgdbGame } from "igdb-api-types";
+
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
 import type { BaseService, ServiceResult } from "../types";
@@ -255,6 +257,20 @@ export interface TimesToBeatData {
 export interface TimesToBeatResult {
   timesToBeat: TimesToBeatData;
 }
+
+export interface CollectionGame {
+  id: number;
+  name: string;
+  slug: string;
+  cover: { image_id: string };
+  game_type: number;
+}
+
+export interface CollectionGamesResult {
+  name: string;
+  id: number;
+  games: Array<CollectionGame>;
+}
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -307,4 +323,7 @@ export interface IgdbService extends BaseService {
   getTimesToBeat(
     params: GetTimesToBeatParams
   ): Promise<ServiceResult<TimesToBeatResult>>;
+  getCollectionGamesById(params: {
+    collectionId: number;
+  }): Promise<ServiceResult<CollectionGamesResult>>;
 }

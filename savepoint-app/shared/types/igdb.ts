@@ -1,17 +1,15 @@
 import {
+  Collection,
   type Company,
   type Cover,
   type Event,
   type ExternalGame,
   type Franchise,
-  type GameEngine,
   type GameMode,
   type Genre,
   type Platform,
-  type PlayerPerspective,
   type Screenshot,
   type Theme,
-  type Website,
 } from "igdb-api-types";
 
 type PlatformWithReleaseDate = {
@@ -29,13 +27,6 @@ type ReleaseDate = {
   human: string;
   id: number;
   platform: PlatformWithReleaseDate;
-};
-type SimilarGame = {
-  cover: Cover;
-  id: number;
-  name: string;
-  release_dates: ReleaseDate[];
-  first_release_date: number;
 };
 export type RequestOptions = {
   body?: string;
@@ -55,48 +46,26 @@ export type GenresResponse = {
   genres: Genre[];
   id: number;
 };
-type RelatedGameBasic = {
-  id: number;
-  name: string;
-  slug: string;
-  cover?: Cover;
-};
-
 export type FullGameInfoResponse = {
   aggregated_rating: number;
   cover: Cover;
   external_games: ExternalGame[];
   first_release_date?: number;
-  game_engines: GameEngine[];
   game_modes: GameMode[];
   genres: Genre[];
   id: number;
   involved_companies: InvolvedCompany[];
   name: string;
   platforms?: Platform[];
-  player_perspectives: PlayerPerspective[];
   release_dates: ReleaseDate[];
   screenshots: Screenshot[];
-  similar_games: SimilarGame[];
   slug: string;
   summary?: string;
   themes: Theme[];
-  websites: Website[];
   franchise?: Franchise | number;
   franchises: number[];
   game_type: number;
-  // Relationship fields
-  dlcs?: RelatedGameBasic[];
-  remakes?: RelatedGameBasic[];
-  remasters?: RelatedGameBasic[];
-  expansions?: RelatedGameBasic[];
-  standalone_expansions?: RelatedGameBasic[];
-  parent_game?: RelatedGameBasic;
-  bundles?: RelatedGameBasic[];
-  sequels?: RelatedGameBasic[];
-  prequels?: RelatedGameBasic[];
-  spin_offs?: RelatedGameBasic[];
-  side_stories?: RelatedGameBasic[];
+  collections: Pick<Collection, "id" | "name">[];
 };
 export type SearchResponse = {
   cover: Cover;

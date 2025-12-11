@@ -33,6 +33,7 @@ import {
 } from "./constants";
 import { QueryBuilder } from "./query-builder";
 import type {
+  CollectionGamesResult,
   EventLogoResult,
   FranchiseDetailsResult,
   FranchiseGamesResult,
@@ -321,51 +322,6 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           "franchises",
           "game_type",
           "game_type.type",
-          // Relationship fields
-          "dlcs.id",
-          "dlcs.name",
-          "dlcs.slug",
-          "dlcs.cover.image_id",
-          "remakes.id",
-          "remakes.name",
-          "remakes.slug",
-          "remakes.cover.image_id",
-          "remasters.id",
-          "remasters.name",
-          "remasters.slug",
-          "remasters.cover.image_id",
-          "expansions.id",
-          "expansions.name",
-          "expansions.slug",
-          "expansions.cover.image_id",
-          "standalone_expansions.id",
-          "standalone_expansions.name",
-          "standalone_expansions.slug",
-          "standalone_expansions.cover.image_id",
-          "parent_game.id",
-          "parent_game.name",
-          "parent_game.slug",
-          "parent_game.cover.image_id",
-          "bundles.id",
-          "bundles.name",
-          "bundles.slug",
-          "bundles.cover.image_id",
-          "sequels.id",
-          "sequels.name",
-          "sequels.slug",
-          "sequels.cover.image_id",
-          "prequels.id",
-          "prequels.name",
-          "prequels.slug",
-          "prequels.cover.image_id",
-          "spin_offs.id",
-          "spin_offs.name",
-          "spin_offs.slug",
-          "spin_offs.cover.image_id",
-          "side_stories.id",
-          "side_stories.name",
-          "side_stories.slug",
-          "side_stories.cover.image_id",
         ])
         .where(`id = (${gameId})`)
         .limit(IGDB_SINGLE_RESULT_LIMIT)
@@ -427,24 +383,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           "involved_companies.developer",
           "involved_companies.publisher",
           "involved_companies.company.name",
-          "game_modes.name",
-          "game_engines.name",
-          "player_perspectives.name",
           "themes.name",
-          "external_games.category",
-          "external_games.name",
-          "external_games.url",
-          "similar_games.name",
-          "similar_games.cover.image_id",
-          "similar_games.release_dates.human",
-          "similar_games.first_release_date",
-          "websites.url",
-          "websites.category",
-          "websites.trusted",
           "franchise.id",
           "franchise.name",
           "franchises",
           "game_type",
+          "collections.name",
         ])
         .where(`slug = "${slug}"`)
         .limit(IGDB_SINGLE_RESULT_LIMIT)
@@ -1574,6 +1518,66 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         "Error fetching times to beat"
       );
       return this.handleError(error, "Failed to fetch times to beat");
+    }
+  }
+  async getCollectionGamesById(params: {
+    collectionId: number;
+  }): Promise<ServiceResult<CollectionGamesResult>> {
+    try {
+      if (!params.collectionId || params.collectionId <= 0) {
+        this.logger.warn(
+          { collectionId: params.collectionId },
+          "Invalid collection ID provided for collection games fetch"
+        );
+        return this.error(
+          "Valid collection ID is required",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+
+      const { collectionId } = params;
+      this.logger.info({ collectionId }, "Fetching collection games");
+      const query = new QueryBuilder()
+        .fields([
+          "id",
+          "name",
+          "games.id",
+          "games.name",
+          "games.slug",
+          "games.cover.image_id",
+        ])
+        .where(`id = ${collectionId}`)
+        .build();
+      const response = await this.makeRequest<CollectionGamesResult[]>({
+        body: query,
+        resource: "/collections",
+      });
+      if (response === undefined) {
+        this.logger.error("Failed to fetch collection games from IGDB API");
+        return this.error(
+          "Failed to fetch collection games",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+      if (!Array.isArray(response) || response.length === 0) {
+        this.logger.info({ collectionId }, "No games found for collection");
+        return this.success({
+          name: "",
+          id: 0,
+          games: [],
+        });
+      }
+      this.logger.info(
+        { collectionId, gamesCount: response[0].games?.length ?? 0 },
+        "Successfully fetched collection games"
+      );
+      return this.success(response[0]);
+    } catch (error) {
+      this.logger.error(
+        { error, collectionId: params.collectionId },
+        "Error fetching collection games"
+      );
+      return this.handleError(error, "Failed to fetch collection games");
     }
   }
 }
