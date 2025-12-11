@@ -230,7 +230,7 @@ export function buildGameDetailsBySlugQuery(slug: string): string {
 }
 
 export function buildPlatformsQuery(): string {
-  return new QueryBuilder().fields(["name"]).build();
+  return new QueryBuilder().fields(["id", "name", "abbreviation"]).build();
 }
 
 export function buildGameBySteamAppIdQuery(steamAppId: number): string {

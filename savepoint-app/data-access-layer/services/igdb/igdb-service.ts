@@ -13,12 +13,7 @@ import {
   normalizeGameTitle,
   normalizeString,
 } from "@/shared/lib";
-import {
-  FullGameInfoResponse,
-  RequestOptions,
-  TwitchTokenResponse,
-  type SearchResponse,
-} from "@/shared/types";
+import { RequestOptions, TwitchTokenResponse } from "@/shared/types";
 
 import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import {
@@ -1354,12 +1349,8 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
 
       if (!Array.isArray(response) || response.length === 0) {
-        logger.info({ collectionId }, "No games found for collection");
-        return this.success({
-          name: "",
-          id: 0,
-          games: [],
-        });
+        logger.warn({ collectionId }, "Collection not found");
+        return this.error("Collection not found", ServiceErrorCode.NOT_FOUND);
       }
 
       logger.info(

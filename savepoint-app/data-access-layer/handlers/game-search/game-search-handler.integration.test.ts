@@ -26,16 +26,20 @@ const igdbHandlers = [
         {
           id: 1,
           name: "The Legend of Zelda: Breath of the Wild",
-          cover: { image_id: "co3p2d" },
-          platforms: [{ name: "Nintendo Switch" }],
+          slug: "the-legend-of-zelda-breath-of-the-wild",
+          cover: { id: 1, image_id: "co3p2d" },
+          platforms: [{ id: 130, name: "Nintendo Switch" }],
           first_release_date: 1488326400,
+          game_type: 0,
         },
         {
           id: 2,
           name: "The Legend of Zelda: Ocarina of Time",
-          cover: { image_id: "co1234" },
-          platforms: [{ name: "Nintendo 64" }],
+          slug: "the-legend-of-zelda-ocarina-of-time",
+          cover: { id: 2, image_id: "co1234" },
+          platforms: [{ id: 4, name: "Nintendo 64" }],
           first_release_date: 911606400,
+          game_type: 0,
         },
       ]);
     }
@@ -104,9 +108,11 @@ describe("gameSearchHandler Integration Tests", () => {
             {
               id: 100,
               name: "Game from page 2",
-              cover: { image_id: "test" },
-              platforms: [{ name: "PC" }],
+              slug: "game-from-page-2",
+              cover: { id: 100, image_id: "test" },
+              platforms: [{ id: 6, name: "PC" }],
               first_release_date: 1234567890,
+              game_type: 0,
             },
           ]);
         })
