@@ -1,37 +1,74 @@
+import type { z } from "zod";
+
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
 import type { BaseService, ServiceResult } from "../types";
 
-export interface GameSearchParams {
-  name: string;
-  offset?: number;
-  fields?: {
-    platform?: string;
-    platforms?: string;
-  };
-}
+import type {
+  CollectionGamesByIdSchema,
+  EventLogoSchema,
+  FranchiseDetailsSchema,
+  FranchiseGamesSchema,
+  GameAggregatedRatingSchema,
+  GameArtworksSchema,
+  GameDetailsBySlugSchema,
+  GameDetailsSchema,
+  GameExpansionsSchema,
+  GameGenresSchema,
+  GetGameCompletionTimesSchema,
+  GameScreenshotsSchema,
+  GameSearchSchema,
+  GetGameBySteamAppIdSchema,
+  PlatformSearchSchema,
+  SimilarGamesSchema,
+  TimesToBeatSchema,
+  UpcomingReleasesByIdsSchema,
+} from "./schemas";
+
+export type GameSearchParams = z.infer<typeof GameSearchSchema>;
+export type GameDetailsParams = z.infer<typeof GameDetailsSchema>;
+export type GetGameDetailsBySlugParams = z.infer<typeof GameDetailsBySlugSchema>;
+export type GetGameBySteamAppIdParams = z.infer<typeof GetGameBySteamAppIdSchema>;
+export type SearchPlatformByNameParams = z.infer<typeof PlatformSearchSchema>;
+export type GetGameScreenshotsParams = z.infer<typeof GameScreenshotsSchema>;
+export type GetGameAggregatedRatingParams = z.infer<
+  typeof GameAggregatedRatingSchema
+>;
+export type GetSimilarGamesParams = z.infer<typeof SimilarGamesSchema>;
+export type GetGameGenresParams = z.infer<typeof GameGenresSchema>;
+export type GetGameCompletionTimesParams = z.infer<
+  typeof GetGameCompletionTimesSchema
+>;
+export type GetGameExpansionsParams = z.infer<typeof GameExpansionsSchema>;
+export type GetFranchiseGamesParams = z.infer<typeof FranchiseGamesSchema>;
+export type GetFranchiseDetailsParams = z.infer<typeof FranchiseDetailsSchema>;
+export type GetGameArtworksParams = z.infer<typeof GameArtworksSchema>;
+export type GetUpcomingReleasesByIdsParams = z.infer<
+  typeof UpcomingReleasesByIdsSchema
+>;
+export type GetEventLogoParams = z.infer<typeof EventLogoSchema>;
+export type GetTimesToBeatParams = z.infer<typeof TimesToBeatSchema>;
+export type GetCollectionGamesByIdParams = z.infer<
+  typeof CollectionGamesByIdSchema
+>;
+
 export interface GameSearchResult {
   games: SearchResponse[];
   count: number;
 }
-export interface GameDetailsParams {
-  gameId: number;
-}
+
 export interface GameDetailsResult {
   game: FullGameInfoResponse | null;
 }
-export interface GetGameDetailsBySlugParams {
-  slug: string;
-}
+
 export interface GameDetailsBySlugResult {
   game: FullGameInfoResponse;
 }
+
 export interface PlatformsResult {
   platforms: Array<{ id: number; name: string }>;
 }
-export interface GetGameScreenshotsParams {
-  gameId: number;
-}
+
 export interface GameScreenshotsResult {
   screenshots: Array<{
     id: number;
@@ -42,9 +79,7 @@ export interface GameScreenshotsResult {
     height?: number;
   }>;
 }
-export interface SearchGamesByNameParams {
-  name: string;
-}
+
 export interface SearchGamesByNameResult {
   games: Array<{
     id: number;
@@ -57,15 +92,14 @@ export interface SearchGamesByNameResult {
     };
   }>;
 }
-export interface GetGameBySteamAppIdParams {
-  steamAppId: number;
-}
+
 export interface GameBySteamAppIdResult {
   game: {
     id: number;
     name: string;
   };
 }
+
 export interface TopRatedGamesResult {
   games: Array<{
     id: number;
@@ -76,9 +110,7 @@ export interface TopRatedGamesResult {
     };
   }>;
 }
-export interface SearchPlatformByNameParams {
-  platformName: string;
-}
+
 export interface PlatformSearchResult {
   platforms: Array<{
     id: number;
@@ -86,32 +118,25 @@ export interface PlatformSearchResult {
     abbreviation?: string;
   }>;
 }
-export interface GetGameAggregatedRatingParams {
-  gameId: number;
-}
+
 export interface GameAggregatedRatingResult {
   gameId: number;
   rating?: number;
   count?: number;
 }
-export interface GetSimilarGamesParams {
-  gameId: number;
-}
+
 export interface SimilarGamesResult {
   similarGames: number[];
 }
-export interface GetGameGenresParams {
-  gameId: number;
-}
+
 export interface GameGenresResult {
   genres: Array<{ id: number; name: string }>;
 }
-export interface GetGameCompletionTimesParams {
-  gameId: number;
-}
+
 export interface GameCompletionTimesResult {
   completionTimes: GameCompletionTimes | null;
 }
+
 export interface GameCompletionTimes {
   id: number;
   game_id?: number;
@@ -121,9 +146,7 @@ export interface GameCompletionTimes {
   completeness?: number;
   created_at?: number;
 }
-export interface GetGameExpansionsParams {
-  gameId: number;
-}
+
 export interface GameExpansionsResult {
   expansions: Array<{
     id: number;
@@ -144,12 +167,7 @@ export interface GameExpansionsResult {
     }>;
   }>;
 }
-export interface GetFranchiseGamesParams {
-  franchiseId: number;
-  currentGameId: number;
-  limit?: number;
-  offset?: number;
-}
+
 export interface FranchiseGamesResult {
   games: Array<{
     id: number;
@@ -166,18 +184,14 @@ export interface FranchiseGamesResult {
     hasMore: boolean;
   };
 }
-export interface GetFranchiseDetailsParams {
-  franchiseId: number;
-}
+
 export interface FranchiseDetailsResult {
   franchise: {
     id: number;
     name: string;
   };
 }
-export interface GetGameArtworksParams {
-  gameId: number;
-}
+
 export interface GameArtworksResult {
   artworks: Array<{
     id: number;
@@ -191,9 +205,7 @@ export interface GameArtworksResult {
     width?: number;
   }>;
 }
-export interface GetUpcomingReleasesByIdsParams {
-  ids: number[];
-}
+
 export interface UpcomingReleasesResult {
   releases: Array<{
     id: number;
@@ -214,6 +226,7 @@ export interface UpcomingReleasesResult {
     }>;
   }>;
 }
+
 export interface UpcomingGamingEventsResult {
   events: Array<{
     id: number;
@@ -233,9 +246,7 @@ export interface UpcomingGamingEventsResult {
     videos?: number[];
   }>;
 }
-export interface GetEventLogoParams {
-  logoId: number;
-}
+
 export interface EventLogoResult {
   logo: {
     id: number;
@@ -244,17 +255,30 @@ export interface EventLogoResult {
     image_id: string;
   };
 }
-export interface GetTimesToBeatParams {
-  igdbId: number;
-}
 
 export interface TimesToBeatData {
   mainStory?: number;
   completionist?: number;
 }
+
 export interface TimesToBeatResult {
   timesToBeat: TimesToBeatData;
 }
+
+export interface CollectionGame {
+  id: number;
+  name: string;
+  slug: string;
+  cover: { image_id: string };
+  game_type: number;
+}
+
+export interface CollectionGamesResult {
+  name: string;
+  id: number;
+  games: Array<CollectionGame>;
+}
+
 export interface IgdbService extends BaseService {
   searchGamesByName(
     params: GameSearchParams
@@ -307,4 +331,7 @@ export interface IgdbService extends BaseService {
   getTimesToBeat(
     params: GetTimesToBeatParams
   ): Promise<ServiceResult<TimesToBeatResult>>;
+  getCollectionGamesById(params: {
+    collectionId: number;
+  }): Promise<ServiceResult<CollectionGamesResult>>;
 }

@@ -54,6 +54,7 @@ describe("GameDetailService Integration Tests", () => {
       websites: [],
       franchises: [],
       game_type: 0,
+      collections: [],
       genres: [
         { id: 888, name: "Service Genre 1", slug: "service-genre-1" },
         { id: 889, name: "Service Genre 2", slug: "service-genre-2" },
@@ -100,6 +101,7 @@ describe("GameDetailService Integration Tests", () => {
       websites: [],
       franchises: [],
       game_type: 0,
+      collections: [],
     };
 
     await populateGameInDatabase(igdbGame);
@@ -135,6 +137,7 @@ describe("GameDetailService Integration Tests", () => {
       websites: [],
       franchises: [],
       game_type: 0,
+      collections: [],
     };
 
     await populateGameInDatabase(igdbGame);
