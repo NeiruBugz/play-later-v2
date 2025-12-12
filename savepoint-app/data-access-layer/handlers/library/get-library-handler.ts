@@ -34,12 +34,12 @@ export async function getLibraryHandler(
   const validation = GetLibrarySchema.safeParse(input);
   if (!validation.success) {
     logger.warn(
-      { userId, errors: validation.error.errors },
+      { userId, errors: validation.error.issues },
       "Input validation failed"
     );
     return {
       success: false,
-      error: validation.error.errors[0]?.message ?? "Invalid input parameters",
+      error: validation.error.issues[0]?.message ?? "Invalid input parameters",
       status: HTTP_STATUS.BAD_REQUEST,
     };
   }

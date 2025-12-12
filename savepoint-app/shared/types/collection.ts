@@ -10,7 +10,7 @@ export const FilterParamsSchema = z.object({
 export type FilterParams = z.infer<typeof FilterParamsSchema>;
 export const validateFilterParams = (
   params: Record<string, string | number>
-): z.SafeParseReturnType<Record<string, string | number>, FilterParams> => {
+) => {
   return FilterParamsSchema.safeParse({
     platform: params.platform,
     status: params.status,

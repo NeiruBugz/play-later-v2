@@ -103,7 +103,7 @@ describe("updateProfile server action", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toContain("String must contain at least 3");
+        expect(result.error).toContain(">=3 characters");
       }
       expect(mockUpdateProfile).not.toHaveBeenCalled();
     });
@@ -115,7 +115,7 @@ describe("updateProfile server action", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toContain("String must contain at most 25");
+        expect(result.error).toContain("<=25 characters");
       }
       expect(mockUpdateProfile).not.toHaveBeenCalled();
     });
@@ -274,7 +274,7 @@ describe("updateProfile server action", () => {
       const result = await updateProfileFormAction(prevState, formData);
 
       expect(result.status).toBe("error");
-      expect(result.message).toContain("String must contain at least 3");
+      expect(result.message).toContain(">=3 characters");
       expect(result.submittedUsername).toBe("ab");
       expect(mockRevalidatePath).not.toHaveBeenCalled();
     });

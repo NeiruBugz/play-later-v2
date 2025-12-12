@@ -38,7 +38,7 @@ export async function signUpAction(data: SignUpFormData) {
       logger.warn({ err: error }, "Validation error during sign up");
       return {
         success: false as const,
-        error: error.errors[0]?.message ?? "Validation error",
+        error: error.issues[0]?.message ?? "Validation error",
       };
     }
     if (isNextAuthRedirect(error)) {

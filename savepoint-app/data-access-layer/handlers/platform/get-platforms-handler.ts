@@ -28,12 +28,12 @@ export async function getPlatformsHandler(
   const validation = GetPlatformsSchema.safeParse(input);
   if (!validation.success) {
     logger.warn(
-      { igdbId, errors: validation.error.errors },
+      { igdbId, errors: validation.error.issues },
       "Input validation failed"
     );
     return {
       success: false,
-      error: validation.error.errors[0]?.message ?? "Invalid IGDB ID",
+      error: validation.error.issues[0]?.message ?? "Invalid IGDB ID",
       status: HTTP_STATUS.BAD_REQUEST,
     };
   }

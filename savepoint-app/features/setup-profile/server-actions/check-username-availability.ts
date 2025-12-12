@@ -18,7 +18,7 @@ export async function checkUsernameAvailability(data: { username: string }) {
       );
       return {
         success: false as const,
-        error: parsedInput.error.errors[0]?.message ?? "Validation error",
+        error: parsedInput.error.issues[0]?.message ?? "Validation error",
       };
     }
     const username = parsedInput.data.username;

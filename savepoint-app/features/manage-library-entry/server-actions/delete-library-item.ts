@@ -27,7 +27,7 @@ export async function deleteLibraryItemAction(
     );
     const parsed = DeleteLibraryItemSchema.safeParse(input);
     if (!parsed.success) {
-      logger.warn({ errors: parsed.error.errors }, "Invalid input data");
+      logger.warn({ errors: parsed.error.issues }, "Invalid input data");
       return {
         success: false,
         error: "Invalid input data",

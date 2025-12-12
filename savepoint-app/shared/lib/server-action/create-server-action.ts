@@ -28,7 +28,7 @@ export function createServerAction<TInput, TOutput>({
     try {
       const parsed = schema.safeParse(input);
       if (!parsed.success) {
-        logger.warn({ errors: parsed.error.errors }, "Invalid input data");
+        logger.warn({ errors: parsed.error.issues }, "Invalid input data");
         return {
           success: false,
           error: "Invalid input data",

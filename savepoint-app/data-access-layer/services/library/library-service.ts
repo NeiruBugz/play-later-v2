@@ -239,11 +239,11 @@ export class LibraryService extends BaseService {
       const validation = GetLibraryItemsSchema.safeParse(params);
       if (!validation.success) {
         this.logger.warn(
-          { errors: validation.error.errors },
+          { errors: validation.error.issues },
           "Invalid input parameters"
         );
         return this.error(
-          validation.error.errors[0]?.message ?? "Invalid input parameters"
+          validation.error.issues[0]?.message ?? "Invalid input parameters"
         );
       }
       const result = await findLibraryItemsWithFilters(validation.data);
@@ -284,11 +284,11 @@ export class LibraryService extends BaseService {
       const validation = DeleteLibraryItemSchema.safeParse(params);
       if (!validation.success) {
         this.logger.warn(
-          { errors: validation.error.errors },
+          { errors: validation.error.issues },
           "Invalid input parameters"
         );
         return this.error(
-          validation.error.errors[0]?.message ?? "Invalid input parameters"
+          validation.error.issues[0]?.message ?? "Invalid input parameters"
         );
       }
       const deleteResult = await deleteLibraryItem({
