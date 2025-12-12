@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Generator
 from datetime import UTC, datetime
 from unittest.mock import patch
 
@@ -14,21 +15,17 @@ from lambdas.models.steam import SteamOwnedGame
 
 @pytest.fixture
 def s3_bucket() -> str:
-    """Create a mock S3 bucket for testing."""
-    with mock_aws():
-        s3 = boto3.client("s3", region_name="us-east-1")
-        bucket_name = "test-bucket"
-        s3.create_bucket(Bucket=bucket_name)
-        yield bucket_name
+    """Return test bucket name."""
+    return "test-bucket"
 
 
 @pytest.fixture
-def s3_client(s3_bucket: str) -> S3Client:
+def s3_client(s3_bucket: str) -> Generator[S3Client, None, None]:
     """Create S3Client instance with mocked S3."""
     with mock_aws():
         s3 = boto3.client("s3", region_name="us-east-1")
         s3.create_bucket(Bucket=s3_bucket)
-        return S3Client(bucket=s3_bucket, region="us-east-1")
+        yield S3Client(bucket=s3_bucket, region="us-east-1")
 
 
 @pytest.fixture

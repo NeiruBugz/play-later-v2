@@ -10,6 +10,7 @@ Tests real PostgreSQL database operations including:
 
 from __future__ import annotations
 
+import time
 from datetime import datetime
 
 import pytest
@@ -98,7 +99,7 @@ def test_upsert_imported_game_create(
     assert isinstance(imported_game.createdAt, datetime)
     assert isinstance(imported_game.updatedAt, datetime)
 
-    print(f"\n✅ Created ImportedGame:")
+    print("\n✅ Created ImportedGame:")
     print(f"   ID: {imported_game.id}")
     print(f"   Name: {imported_game.name}")
     print(f"   Storefront: {imported_game.storefront.value}")
@@ -140,8 +141,6 @@ def test_upsert_imported_game_update(
     initial_updated_at = imported_game_1.updatedAt
 
     # Update the record (same user + storefront_game_id)
-    import time
-
     time.sleep(0.1)  # Ensure updatedAt timestamp differs
 
     updated_data = ImportedGameData(
@@ -161,7 +160,7 @@ def test_upsert_imported_game_update(
     assert imported_game_2.igdbMatchStatus == IgdbMatchStatus.MATCHED
     assert imported_game_2.updatedAt > initial_updated_at, "updatedAt should be newer"
 
-    print(f"\n✅ Updated ImportedGame:")
+    print("\n✅ Updated ImportedGame:")
     print(f"   ID: {imported_game_2.id}")
     print(f"   Playtime: {imported_game_1.playtime} → {imported_game_2.playtime} minutes")
     print(f"   Status: {imported_game_1.igdbMatchStatus.value} → {imported_game_2.igdbMatchStatus.value}")
@@ -186,21 +185,15 @@ def test_upsert_game_with_genres_platforms(
     """
     db_service = DatabaseService()
 
-    # First, upsert genres
-    genre1 = db_service.upsert_genre(
-        GenreData(igdb_id=5, name="Shooter", slug="shooter")
-    )
-    genre2 = db_service.upsert_genre(
-        GenreData(igdb_id=31, name="Adventure", slug="adventure")
-    )
+    # First, upsert genres (side effects: creates records in DB for game association)
+    db_service.upsert_genre(GenreData(igdb_id=5, name="Shooter", slug="shooter"))
+    db_service.upsert_genre(GenreData(igdb_id=31, name="Adventure", slug="adventure"))
 
-    # Upsert platforms
-    platform1 = db_service.upsert_platform(
+    # Upsert platforms (side effects: creates records in DB for game association)
+    db_service.upsert_platform(
         PlatformData(igdb_id=6, name="PC (Microsoft Windows)", slug="win")
     )
-    platform2 = db_service.upsert_platform(
-        PlatformData(igdb_id=48, name="PlayStation 4", slug="ps4")
-    )
+    db_service.upsert_platform(PlatformData(igdb_id=48, name="PlayStation 4", slug="ps4"))
 
     # Upsert game with genres and platforms
     game_data = GameData(
@@ -227,7 +220,7 @@ def test_upsert_game_with_genres_platforms(
     db_game = db_session.get(Game, game.id)
     assert db_game is not None
 
-    print(f"\n✅ Created Game with relationships:")
+    print("\n✅ Created Game with relationships:")
     print(f"   ID: {game.id}")
     print(f"   Title: {game.title}")
     print(f"   IGDB ID: {game.igdbId}")
@@ -292,7 +285,7 @@ def test_create_library_item_with_status_logic(
     assert library_item.playtime == 500
     assert library_item.status == LibraryItemStatus.EXPERIENCED  # >0 playtime
 
-    print(f"\n✅ Created LibraryItem:")
+    print("\n✅ Created LibraryItem:")
     print(f"   ID: {library_item.id}")
     print(f"   User ID: {library_item.userId}")
     print(f"   Game ID: {library_item.gameId}")
@@ -351,7 +344,7 @@ def test_create_library_item_zero_playtime(
     assert library_item.playtime == 0
     assert library_item.status == LibraryItemStatus.CURIOUS_ABOUT  # 0 playtime
 
-    print(f"\n✅ Created LibraryItem (zero playtime):")
+    print("\n✅ Created LibraryItem (zero playtime):")
     print(f"   Playtime: {library_item.playtime} minutes")
     print(f"   Status: {library_item.status.value}")
 
@@ -388,13 +381,9 @@ def test_full_import_workflow(
     )
     imported_game = db_service.upsert_imported_game(imported_game_data)
 
-    # Step 2: Enrich with IGDB data
-    genre = db_service.upsert_genre(
-        GenreData(igdb_id=32, name="Puzzle", slug="puzzle")
-    )
-    platform = db_service.upsert_platform(
-        PlatformData(igdb_id=6, name="PC", slug="win")
-    )
+    # Step 2: Enrich with IGDB data (side effects: creates records for game association)
+    db_service.upsert_genre(GenreData(igdb_id=32, name="Puzzle", slug="puzzle"))
+    db_service.upsert_platform(PlatformData(igdb_id=6, name="PC", slug="win"))
 
     game_data = GameData(
         igdb_id=789,
@@ -432,7 +421,7 @@ def test_full_import_workflow(
     assert db_game is not None
     assert db_library_item is not None
 
-    print(f"\n✅ Full Import Workflow Completed:")
+    print("\n✅ Full Import Workflow Completed:")
     print(f"   ImportedGame ID: {imported_game.id}")
     print(f"   Game ID: {game.id}")
     print(f"   LibraryItem ID: {library_item.id}")
@@ -474,6 +463,6 @@ def test_database_transaction_rollback(
     rolled_back_game = db_session.get(ImportedGame, game_id)
     assert rolled_back_game is None
 
-    print(f"\n✅ Transaction Rollback:")
+    print("\n✅ Transaction Rollback:")
     print(f"   Game ID before rollback: {game_id}")
-    print(f"   Game exists after rollback: False")
+    print("   Game exists after rollback: False")

@@ -491,7 +491,9 @@ def test_create_library_item_with_zero_playtime_sets_curious_about(
 
     # Mock query to return None (no existing library item)
     mock_result = MagicMock()
-    mock_result.scalar_one_or_none.return_value = None
+    mock_scalars = MagicMock()
+    mock_scalars.first.return_value = None
+    mock_result.scalars.return_value = mock_scalars
     mock_session.execute.return_value = mock_result
 
     create_library_item(mock_session, data)
@@ -515,7 +517,9 @@ def test_create_library_item_with_nonzero_playtime_sets_experienced(
     """Test that create_library_item sets status to EXPERIENCED when playtime > 0."""
     # Mock query to return None (no existing library item)
     mock_result = MagicMock()
-    mock_result.scalar_one_or_none.return_value = None
+    mock_scalars = MagicMock()
+    mock_scalars.first.return_value = None
+    mock_result.scalars.return_value = mock_scalars
     mock_session.execute.return_value = mock_result
 
     create_library_item(mock_session, library_item_data)
@@ -548,7 +552,9 @@ def test_create_library_item_raises_error_if_duplicate_exists(
     )
 
     mock_result = MagicMock()
-    mock_result.scalar_one_or_none.return_value = existing
+    mock_scalars = MagicMock()
+    mock_scalars.first.return_value = existing
+    mock_result.scalars.return_value = mock_scalars
     mock_session.execute.return_value = mock_result
 
     with pytest.raises(ValueError, match="LibraryItem already exists"):

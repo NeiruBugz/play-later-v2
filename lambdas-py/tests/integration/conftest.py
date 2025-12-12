@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import os
 from collections.abc import AsyncGenerator, Generator
+from contextlib import suppress
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import boto3
 import pytest
@@ -392,13 +393,11 @@ def cleanup_s3_test_files(
 
     # Cleanup: Delete all tracked S3 files
     for key in s3_keys:
-        try:
+        with suppress(Exception):
             real_s3_client.delete_object(
                 Bucket=integration_settings.s3_bucket,
                 Key=key,
             )
-        except Exception:
-            pass  # Best effort cleanup
 
 
 @pytest.fixture

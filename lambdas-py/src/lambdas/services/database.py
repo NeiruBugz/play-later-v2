@@ -15,8 +15,8 @@ Architecture:
 from __future__ import annotations
 
 from collections.abc import Generator
-from contextlib import contextmanager
-from datetime import datetime, timezone
+from contextlib import contextmanager, suppress
+from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
@@ -291,12 +291,12 @@ def upsert_imported_game(session: Session, data: ImportedGameData) -> ImportedGa
         existing.img_icon_url = data.img_icon_url
         existing.img_logo_url = data.img_logo_url
         existing.igdbMatchStatus = data.igdb_match_status
-        existing.updatedAt = datetime.now()
+        existing.updatedAt = datetime.now(UTC)
         return existing
     else:
         # Create new record
         logger.debug("Creating new ImportedGame")
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         imported_game = ImportedGame(
             name=data.name,
             storefront=data.storefront,
@@ -340,12 +340,12 @@ def upsert_genre(session: Session, data: GenreData) -> Genre:
         existing.name = data.name
         existing.slug = data.slug
         existing.checksum = data.checksum
-        existing.updatedAt = datetime.now()
+        existing.updatedAt = datetime.now(UTC)
         return existing
     else:
         # Create new record
         logger.debug("Creating new Genre")
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         genre = Genre(
             igdbId=data.igdb_id,
             name=data.name,
@@ -390,12 +390,12 @@ def upsert_platform(session: Session, data: PlatformData) -> Platform:
         existing.platformFamily = data.platform_family
         existing.platformType = data.platform_type
         existing.checksum = data.checksum
-        existing.updatedAt = datetime.now()
+        existing.updatedAt = datetime.now(UTC)
         return existing
     else:
         # Create new record
         logger.debug("Creating new Platform")
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         platform = Platform(
             igdbId=data.igdb_id,
             name=data.name,
@@ -467,12 +467,12 @@ def upsert_game(session: Session, data: GameData) -> Game:
         existing.releaseDate = data.release_date
         existing.steamAppId = data.steam_app_id
         existing.franchiseId = data.franchise_id
-        existing.updatedAt = datetime.now()
+        existing.updatedAt = datetime.now(UTC)
         game = existing
     else:
         # Create new record
         logger.debug("Creating new Game")
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         game = Game(
             igdbId=data.igdb_id,
             title=data.title,
@@ -637,7 +637,7 @@ def create_library_item(session: Session, data: LibraryItemData) -> LibraryItem:
     logger.debug("Determined LibraryItem status", status=status.value, playtime=data.playtime)
 
     # Create new library item
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     library_item = LibraryItem(
         userId=data.user_id,
         gameId=data.game_id,
@@ -659,3 +659,137 @@ def create_library_item(session: Session, data: LibraryItemData) -> LibraryItem:
     )
 
     return library_item
+
+
+# ==================== DatabaseService Class ====================
+
+
+class DatabaseService:
+    """High-level database service for Steam import pipeline.
+
+    Wraps standalone database functions with session management. Each method
+    handles its own transaction using the get_session() context manager.
+
+    Optionally accepts an external session for testing scenarios where
+    transaction isolation is needed.
+
+    Example:
+        >>> db_service = DatabaseService()
+        >>> game = db_service.upsert_imported_game(game_data)
+
+        >>> # With external session (for testing)
+        >>> db_service = DatabaseService(session=test_session)
+        >>> game = db_service.upsert_imported_game(game_data)
+    """
+
+    def __init__(self, session: Session | None = None) -> None:
+        """Initialize DatabaseService.
+
+        Args:
+            session: Optional external session. If provided, this session
+                will be used for all operations (no auto-commit/rollback).
+                If not provided, each method manages its own session.
+        """
+        self._external_session = session
+
+    def _get_session_context(self) -> Generator[Session, None, None]:
+        """Get session context - either external or managed.
+
+        Returns:
+            Generator yielding a Session instance.
+        """
+        if self._external_session is not None:
+            # Use external session without auto-commit
+            yield self._external_session
+        else:
+            # Use managed session with auto-commit
+            with get_session() as session:
+                yield session
+
+    def upsert_imported_game(self, data: ImportedGameData) -> ImportedGame:
+        """Upsert ImportedGame record.
+
+        Args:
+            data: ImportedGame input data
+
+        Returns:
+            The upserted ImportedGame record
+        """
+        session_gen = self._get_session_context()
+        session = next(session_gen)
+        try:
+            return upsert_imported_game(session, data)
+        finally:
+            with suppress(StopIteration):
+                next(session_gen)
+
+    def upsert_genre(self, data: GenreData) -> Genre:
+        """Upsert Genre record.
+
+        Args:
+            data: Genre input data
+
+        Returns:
+            The upserted Genre record
+        """
+        session_gen = self._get_session_context()
+        session = next(session_gen)
+        try:
+            return upsert_genre(session, data)
+        finally:
+            with suppress(StopIteration):
+                next(session_gen)
+
+    def upsert_platform(self, data: PlatformData) -> Platform:
+        """Upsert Platform record.
+
+        Args:
+            data: Platform input data
+
+        Returns:
+            The upserted Platform record
+        """
+        session_gen = self._get_session_context()
+        session = next(session_gen)
+        try:
+            return upsert_platform(session, data)
+        finally:
+            with suppress(StopIteration):
+                next(session_gen)
+
+    def upsert_game(self, data: GameData) -> Game:
+        """Upsert Game record with genres and platforms.
+
+        Args:
+            data: Game input data with genre_ids and platform_ids
+
+        Returns:
+            The upserted Game record
+        """
+        session_gen = self._get_session_context()
+        session = next(session_gen)
+        try:
+            return upsert_game(session, data)
+        finally:
+            with suppress(StopIteration):
+                next(session_gen)
+
+    def create_library_item(self, data: LibraryItemData) -> LibraryItem:
+        """Create LibraryItem record with status based on playtime.
+
+        Args:
+            data: LibraryItem input data
+
+        Returns:
+            The created LibraryItem record
+
+        Raises:
+            ValueError: If LibraryItem already exists for user + game
+        """
+        session_gen = self._get_session_context()
+        session = next(session_gen)
+        try:
+            return create_library_item(session, data)
+        finally:
+            with suppress(StopIteration):
+                next(session_gen)

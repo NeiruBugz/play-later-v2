@@ -14,7 +14,7 @@ variable "secret_names" {
 }
 
 variable "secret_values" {
-  description = "Map of secret names to their values (sensitive)"
+  description = "Map of secret names to their values (sensitive). All keys in secret_names must have corresponding entries."
   type        = map(string)
   sensitive   = true
 }

@@ -1,7 +1,7 @@
 # Tasks: Steam Library Import Pipeline
 
 > **Spec:** `context/spec/005-steam-import-pipeline/`
-> **Generated:** 2025-01-XX
+> **Generated:** 2025-12-11
 > **Status:** Ready for implementation
 
 ---

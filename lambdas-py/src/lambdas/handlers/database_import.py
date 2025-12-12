@@ -416,20 +416,24 @@ def _import_row(
         platform_ids = row.parse_platform_ids()
 
         # Upsert genres (if provided)
+        # Note: Using placeholder names because enriched CSV only contains IDs.
+        # A background job will enrich these with actual names from IGDB.
         for genre_id in genre_ids:
             genre_data = GenreData(
                 igdb_id=genre_id,
-                name=f"Genre {genre_id}",  # Placeholder name
+                name=f"Genre {genre_id}",
                 slug=f"genre-{genre_id}",
                 checksum=None,
             )
             upsert_genre(session, genre_data)
 
         # Upsert platforms (if provided)
+        # Note: Using placeholder names because enriched CSV only contains IDs.
+        # A background job will enrich these with actual names from IGDB.
         for platform_id in platform_ids:
             platform_data = PlatformData(
                 igdb_id=platform_id,
-                name=f"Platform {platform_id}",  # Placeholder name
+                name=f"Platform {platform_id}",
                 slug=f"platform-{platform_id}",
             )
             upsert_platform(session, platform_data)

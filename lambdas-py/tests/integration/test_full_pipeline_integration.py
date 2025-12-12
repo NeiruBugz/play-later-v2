@@ -14,8 +14,6 @@ NOTE: This is a SLOW test (30-60 seconds) that makes REAL API calls to:
 
 from __future__ import annotations
 
-import os
-
 import pytest
 
 from lambdas.handlers.steam_import import handler as steam_import_handler
@@ -95,7 +93,7 @@ def test_full_pipeline_steam_to_database(
     s3_key = steam_result.s3_location.split("/")[-1]
     cleanup_s3_test_files.append(s3_key)
 
-    print(f"✅ Steam import successful:")
+    print("✅ Steam import successful:")
     print(f"   Games found: {steam_result.game_count}")
     print(f"   S3 location: {steam_result.s3_location}")
     print(f"   Duration: {time.time() - pipeline_start:.1f}s")
@@ -109,6 +107,8 @@ def test_full_pipeline_steam_to_database(
 
     from lambdas.handlers.igdb_enrichment import (
         IgdbEnrichmentResponse,
+    )
+    from lambdas.handlers.igdb_enrichment import (
         handler as igdb_enrichment_handler,
     )
 
@@ -136,7 +136,7 @@ def test_full_pipeline_steam_to_database(
         else 0
     )
 
-    print(f"✅ IGDB enrichment successful:")
+    print("✅ IGDB enrichment successful:")
     print(f"   Processed: {enrichment_result.stats.processed}")
     print(f"   Matched: {enrichment_result.stats.matched}")
     print(f"   Unmatched: {enrichment_result.stats.unmatched}")
@@ -152,6 +152,8 @@ def test_full_pipeline_steam_to_database(
 
     from lambdas.handlers.database_import import (
         DatabaseImportResponse,
+    )
+    from lambdas.handlers.database_import import (
         handler as database_import_handler,
     )
 
@@ -169,7 +171,7 @@ def test_full_pipeline_steam_to_database(
     assert db_import_result.stats.games_created >= 0, "Should create Game records"
     assert db_import_result.stats.library_items_created >= 0, "Should create LibraryItem records"
 
-    print(f"✅ Database import successful:")
+    print("✅ Database import successful:")
     print(f"   ImportedGame records: {db_import_result.stats.imported_games_created}")
     print(f"   Game records: {db_import_result.stats.games_created}")
     print(f"   LibraryItem records: {db_import_result.stats.library_items_created}")
@@ -180,11 +182,10 @@ def test_full_pipeline_steam_to_database(
     # =========================================================================
     print("\n✓ Step 4: Verifying database records...")
 
-    from sqlalchemy import select
     from sqlalchemy.orm import sessionmaker
 
     from lambdas.config import get_settings
-    from lambdas.models.db import Game, ImportedGame, LibraryItem
+    from lambdas.models.db import ImportedGame, LibraryItem
 
     settings = get_settings()
     from sqlalchemy import create_engine
@@ -219,7 +220,7 @@ def test_full_pipeline_steam_to_database(
         assert library_items_count >= 0, "Should have LibraryItem records in DB"
         assert sample_imported is not None, "Should have at least one ImportedGame"
 
-        print(f"✅ Database verification successful:")
+        print("✅ Database verification successful:")
         print(f"   ImportedGame records: {imported_games_count}")
         print(f"   LibraryItem records: {library_items_count}")
 
@@ -277,10 +278,14 @@ def test_full_pipeline_limited_50_games(
 
     from lambdas.handlers.database_import import (
         DatabaseImportResponse,
+    )
+    from lambdas.handlers.database_import import (
         handler as database_import_handler,
     )
     from lambdas.handlers.igdb_enrichment import (
         IgdbEnrichmentResponse,
+    )
+    from lambdas.handlers.igdb_enrichment import (
         handler as igdb_enrichment_handler,
     )
     from lambdas.handlers.steam_import import SteamImportResponse
@@ -367,7 +372,7 @@ def test_full_pipeline_limited_50_games(
     assert db_import_result.success, f"Database import failed: {db_import_result.error}"
     assert db_import_result.stats is not None
 
-    print(f"✅ Database import:")
+    print("✅ Database import:")
     print(f"   ImportedGame: {db_import_result.stats.imported_games_created} created")
     print(f"   Game: {db_import_result.stats.games_created} created")
     print(f"   LibraryItem: {db_import_result.stats.library_items_created} created")
@@ -451,10 +456,10 @@ def test_pipeline_handles_network_errors(test_user_id: str) -> None:
         steam_result = SteamImportResponse(**steam_result_dict)
         assert not steam_result.success, "Should fail with invalid Steam ID"
         assert steam_result.error is not None
-        print(f"\n✅ Invalid input handled gracefully:")
+        print("\n✅ Invalid input handled gracefully:")
         print(f"   Error: {steam_result.error}")
     except Exception as e:
         # If it raises an exception, that's also acceptable
         assert "Invalid Steam ID" in str(e) or "validation" in str(e).lower()
-        print(f"\n✅ Invalid input raised exception as expected:")
+        print("\n✅ Invalid input raised exception as expected:")
         print(f"   Exception: {type(e).__name__}: {e}")

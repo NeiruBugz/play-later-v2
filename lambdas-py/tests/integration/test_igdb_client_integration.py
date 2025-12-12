@@ -52,7 +52,7 @@ async def test_oauth_token_acquisition(igdb_client: IgdbClient) -> None:
     time_until_expiry = igdb_client._token_expiry - time.time()
     assert time_until_expiry > 3600, "Token should be valid for at least 1 hour"
 
-    print(f"\n✅ OAuth2 Token acquired successfully")
+    print("\n✅ OAuth2 Token acquired successfully")
     print(f"   Token length: {len(igdb_client._access_token)} characters")
     print(f"   Expires in: {time_until_expiry / 3600:.1f} hours")
 
@@ -142,7 +142,7 @@ async def test_cache_behavior(igdb_client: IgdbClient) -> None:
     # Cache should be significantly faster (at least 10x)
     # First request: ~0.3-0.5s (single API call to games with external_games.url filter)
     # Second request: ~0.001s (cache lookup)
-    print(f"\n📊 Cache Performance:")
+    print("\n📊 Cache Performance:")
     print(f"   First request (API): {first_duration * 1000:.1f}ms")
     print(f"   Second request (cache): {second_duration * 1000:.1f}ms")
     print(f"   Speedup: {first_duration / second_duration:.0f}x faster")
@@ -186,7 +186,7 @@ async def test_negative_caching(igdb_client: IgdbClient) -> None:
 
     assert game_2 is None
 
-    print(f"\n📊 Negative Cache Performance:")
+    print("\n📊 Negative Cache Performance:")
     print(f"   First lookup (API): {first_duration * 1000:.1f}ms")
     print(f"   Second lookup (cache): {second_duration * 1000:.1f}ms")
 
@@ -238,7 +238,7 @@ async def test_rate_limiting_with_multiple_requests(igdb_client: IgdbClient) -> 
     successful_results = [r for r in results if isinstance(r, IgdbGame)]
     errors = [r for r in results if isinstance(r, Exception)]
 
-    print(f"\n⚡ Rate Limiting Test:")
+    print("\n⚡ Rate Limiting Test:")
     print(f"   Total requests: {len(steam_app_ids)}")
     print(f"   Successful: {len(successful_results)}")
     print(f"   Errors: {len(errors)}")
@@ -311,7 +311,7 @@ async def test_game_details_by_igdb_id(igdb_client: IgdbClient) -> None:
     assert len(game.name) > 0
     assert game.slug is not None
 
-    print(f"\n🎮 Game Details for IGDB ID 1942:")
+    print("\n🎮 Game Details for IGDB ID 1942:")
     print(f"   Name: {game.name}")
     print(f"   Slug: {game.slug}")
 

@@ -56,7 +56,7 @@ async def test_fetch_owned_games_success(
 
     # Validate at least some games have played time (for realistic test)
     games_with_playtime = [g for g in games if g.playtime_forever > 0]
-    print(f"\n📊 Library Stats:")
+    print("\n📊 Library Stats:")
     print(f"   Total games: {len(games)}")
     print(f"   Games with playtime: {len(games_with_playtime)}")
     print(f"   Games never played: {len(games) - len(games_with_playtime)}")
@@ -64,7 +64,7 @@ async def test_fetch_owned_games_success(
     if len(games) >= 5:
         # Show top 5 most played games
         top_games = sorted(games, key=lambda g: g.playtime_forever, reverse=True)[:5]
-        print(f"\n🎮 Top 5 Most Played:")
+        print("\n🎮 Top 5 Most Played:")
         for i, game in enumerate(top_games, 1):
             hours = game.playtime_forever / 60
             print(f"   {i}. {game.name} ({hours:.1f} hours)")
@@ -100,7 +100,7 @@ async def test_game_metadata_structure(
     played_games = [g for g in games if g.playtime_forever > 0]
     games_with_last_played = [g for g in played_games if g.rtime_last_played]
 
-    print(f"\n📦 Metadata Completeness:")
+    print("\n📦 Metadata Completeness:")
     print(f"   Games with icons: {len(games_with_icons)}/{len(games)}")
     print(f"   Games with logos: {len(games_with_logos)}/{len(games)}")
     print(f"   Games with stats: {len(games_with_stats)}/{len(games)}")
@@ -160,8 +160,7 @@ async def test_nonexistent_steam_id(steam_client: SteamClient) -> None:
     games = await steam_client.get_owned_games(nonexistent_id)
 
     assert isinstance(games, list)
-    # May be empty if profile is private or doesn't exist
-    assert len(games) == 0 or len(games) > 0  # Either case is valid
+    # May be empty if profile is private or doesn't exist - either case is valid
 
 
 @pytest.mark.integration

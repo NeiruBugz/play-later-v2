@@ -24,4 +24,11 @@ resource "aws_secretsmanager_secret_version" "this" {
 
   secret_id     = aws_secretsmanager_secret.this[each.key].id
   secret_string = var.secret_values[each.key]
+
+  lifecycle {
+    precondition {
+      condition     = contains(keys(var.secret_values), each.key)
+      error_message = "Secret name '${each.key}' must have a corresponding entry in secret_values."
+    }
+  }
 }
