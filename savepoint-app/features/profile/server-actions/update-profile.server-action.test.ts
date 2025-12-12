@@ -29,12 +29,11 @@ describe("updateProfile server action", () => {
     vi.clearAllMocks();
 
     mockUpdateProfile = vi.fn();
-    MockProfileService.mockImplementation(
-      () =>
-        ({
-          updateProfile: mockUpdateProfile,
-        }) as any
-    );
+    MockProfileService.mockImplementation(function () {
+      return {
+        updateProfile: mockUpdateProfile,
+      } as any;
+    });
 
     mockGetServerUserId.mockResolvedValue("user-123");
   });

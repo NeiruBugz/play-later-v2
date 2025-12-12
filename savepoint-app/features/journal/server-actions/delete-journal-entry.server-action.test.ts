@@ -33,12 +33,11 @@ describe("deleteJournalEntryAction server action", () => {
     vi.clearAllMocks();
 
     mockDeleteJournalEntry = vi.fn();
-    MockJournalService.mockImplementation(
-      () =>
-        ({
-          deleteJournalEntry: mockDeleteJournalEntry,
-        }) as any
-    );
+    MockJournalService.mockImplementation(function () {
+      return {
+        deleteJournalEntry: mockDeleteJournalEntry,
+      } as any;
+    });
 
     mockGetServerUserId.mockResolvedValue("user-789");
   });

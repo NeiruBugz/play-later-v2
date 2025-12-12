@@ -14,48 +14,9 @@ export default defineConfig({
     hookTimeout: 10000,
     unstubEnvs: true,
     unstubGlobals: true,
-    coverage: {
-      all: true,
-      exclude: [
-        ".next/",
-        "./idea",
-        "**/*.d.ts",
-        "**/node_modules/**",
-        "**/*.config.*",
-        "test/**",
-        "app/**",
-        "coverage/**",
-        "**/domain/**/*.model.ts",
-        "**/domain/**/*.dto.ts",
-        "**/domain/**/index.ts",
-        "env.mjs",
-        "auth.ts",
-        "**/**/types/**.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
-        "e2e",
-        "**/shared/components/ui/**",
-        "**/shared/providers/**",
-        "**/shared/components/browser-back-button.tsx",
-        "**/shared/components/loading-screen.tsx",
-        "**/shared/config/**",
-        "**/shared/hooks/use-mobile.tsx",
-        "**/shared/lib/app/logger.ts",
-        "**/shared/lib/game/get-game-type-label.ts",
-        "**/shared/lib/game/get-game-url.ts",
-        "**/shared/lib/igdb/image-utils.ts",
-        "**/shared/lib/platform/platform-mapper.ts",
-        "**/shared/lib/platform/platform-to-color.ts",
-        "**/shared/lib/ui/string.ts",
-      ],
-      reporter: ["text", "json", "html"],
-      thresholds: {
-        global: {
-          branches: 80,
-          functions: 80,
-          lines: 80,
-          statements: 80,
-        },
-      },
-    },
+    // Note: Coverage is configured in vitest.coverage.config.ts
+    // Coverage doesn't work with inline projects in Vitest 4.x
+    // Use: pnpm test:coverage (which uses vitest.coverage.config.ts)
     projects: [
       {
         extends: true,
@@ -133,10 +94,10 @@ export default defineConfig({
           hookTimeout: 15000,
           setupFiles: ["./test/setup/integration.ts"],
           pool: "forks",
-          poolOptions: {
-            forks: {
-              singleFork: true,
-            },
+          maxWorkers: 1,
+          isolate: false,
+          sequence: {
+            groupOrder: ["integration"],
           },
           include: ["**/*.integration.test.{js,ts,jsx,tsx}"],
           exclude: [

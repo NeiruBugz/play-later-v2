@@ -99,15 +99,15 @@ describe("addGameToLibrary", () => {
       gameDetailService.populateGameInDatabase
     );
 
-    vi.mocked(ProfileService).mockImplementation(
-      () => mockProfileService as unknown as ProfileService
-    );
-    vi.mocked(LibraryService).mockImplementation(
-      () => mockLibraryService as unknown as LibraryService
-    );
-    vi.mocked(IgdbService).mockImplementation(
-      () => mockIgdbService as unknown as IgdbService
-    );
+    vi.mocked(ProfileService).mockImplementation(function () {
+      return mockProfileService as unknown as ProfileService;
+    });
+    vi.mocked(LibraryService).mockImplementation(function () {
+      return mockLibraryService as unknown as LibraryService;
+    });
+    vi.mocked(IgdbService).mockImplementation(function () {
+      return mockIgdbService as unknown as IgdbService;
+    });
   });
 
   describe("success scenarios", () => {

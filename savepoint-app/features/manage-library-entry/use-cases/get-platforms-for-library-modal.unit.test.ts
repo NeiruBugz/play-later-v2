@@ -71,12 +71,12 @@ describe("getPlatformsForLibraryModal", () => {
 
     mockUpsertPlatforms = vi.mocked(platformRepository.upsertPlatforms);
 
-    vi.mocked(PlatformService).mockImplementation(
-      () => mockPlatformService as unknown as PlatformService
-    );
-    vi.mocked(IgdbService).mockImplementation(
-      () => mockIgdbService as unknown as IgdbService
-    );
+    vi.mocked(PlatformService).mockImplementation(function () {
+      return mockPlatformService as unknown as PlatformService;
+    });
+    vi.mocked(IgdbService).mockImplementation(function () {
+      return mockIgdbService as unknown as IgdbService;
+    });
   });
 
   describe("success scenarios", () => {

@@ -25,9 +25,9 @@ describe("getFranchiseGames", () => {
       getFranchiseGames: vi.fn(),
     };
 
-    vi.mocked(IgdbService).mockImplementation(
-      () => mockIgdbService as unknown as IgdbService
-    );
+    vi.mocked(IgdbService).mockImplementation(function () {
+      return mockIgdbService as unknown as IgdbService;
+    });
   });
 
   describe("success scenarios", () => {
