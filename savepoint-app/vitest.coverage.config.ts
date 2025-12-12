@@ -58,10 +58,7 @@ export default defineConfig({
         "features/**/*.ts",
         "data-access-layer/**/*.ts",
       ],
-      exclude: [
-        "**/*.test.ts",
-        "**/*.spec.ts",
-      ],
+      exclude: ["**/*.test.ts", "**/*.spec.ts"],
       reporter: ["text", "json", "html"],
     },
   },
