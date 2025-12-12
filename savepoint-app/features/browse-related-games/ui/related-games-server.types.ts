@@ -1,4 +1,5 @@
+import type { Collection } from "igdb-api-types";
+
 export interface RelatedGamesServerProps {
-  igdbId: number;
-  franchiseIds: number[];
+  collections: Pick<Collection, "id" | "name">[];
 }

@@ -28,8 +28,11 @@ export default async function GameDetailPage({
   if (!result.success) {
     notFound();
   }
-  const { game, franchiseIds, timesToBeat, userLibraryStatus, journalEntries } =
+  const { game, gameId, timesToBeat, userLibraryStatus, journalEntries } =
     result.data;
+  const collections = (game.collections ?? []).sort((a, b) =>
+    (a.name ?? "").localeCompare(b.name ?? "")
+  );
   const platforms =
     game.platforms
       ?.map((p) => p.name)
@@ -41,7 +44,6 @@ export default async function GameDetailPage({
   return (
     <div className="px-lg py-2xl md:px-2xl lg:px-3xl container mx-auto">
       <div className="gap-2xl lg:gap-3xl flex flex-col lg:grid lg:grid-cols-[minmax(280px,320px)_1fr]">
-        {}
         <aside
           className="space-y-xl lg:top-3xl lg:sticky lg:self-start"
           aria-label="Game details sidebar"
@@ -83,9 +85,14 @@ export default async function GameDetailPage({
           </header>
           <GameDescription summary={game.summary} />
           <TimesToBeatSection timesToBeat={timesToBeat} />
-          {userId && <JournalEntriesSection journalEntries={journalEntries} />}
+          {userId && (
+            <JournalEntriesSection
+              journalEntries={journalEntries}
+              gameId={gameId}
+            />
+          )}
           <Suspense fallback={<RelatedGamesSkeleton />}>
-            <RelatedGamesServer igdbId={game.id} franchiseIds={franchiseIds} />
+            <RelatedGamesServer collections={collections} />
           </Suspense>
         </main>
       </div>

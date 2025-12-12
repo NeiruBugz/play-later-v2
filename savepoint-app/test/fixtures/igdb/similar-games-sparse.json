@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1234,
+    "name": "Test Game with Sparse Similar Games",
+    "similar_games": [
+      {
+        "id": 6000,
+        "name": "Similar Game Without Cover"
+      },
+      {
+        "id": 6001,
+        "name": "Similar Game Without Release Date",
+        "cover": {
+          "image_id": "co_sim_6001"
+        }
+      },
+      {
+        "id": 6002,
+        "name": "Similar Game Minimal",
+        "cover": {
+          "image_id": "co_sim_6002"
+        },
+        "release_dates": []
+      }
+    ]
+  }
+]

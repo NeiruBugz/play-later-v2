@@ -1,0 +1,16 @@
+description = "Runs tasks - delegates coding to sub-agents, tracks progress"
+prompt = """
+@{.awos/commands/implement.md}
+
+## Gemini CLI Extension Delegation
+
+When you need to delegate a task to a domain expert, use the shell execution feature to invoke the appropriate extension:
+
+- For Python/FastAPI/backend tasks: Execute `gemini -e python-expert -y -p "Task: [task description]. Context: [relevant context from specs]"`
+- For React/frontend tasks: Execute `gemini -e react-expert -y -p "Task: [task description]. Context: [relevant context from specs]"`
+- For Kotlin/Spring Boot tasks: Execute `gemini -e kotlin-expert -y -p "Task: [task description]. Context: [relevant context from specs]"`
+
+The `-e` flag loads the specified extension, `-y` enables auto-confirmation, and `-p` passes the prompt.
+
+Note: Shell commands require user confirmation before execution unless running in yolo mode.
+"""

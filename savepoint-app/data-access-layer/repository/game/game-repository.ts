@@ -74,6 +74,60 @@ export async function gameExistsByIgdbId(
     );
   }
 }
+
+export type GameBasicInfo = {
+  id: string;
+  title: string;
+  slug: string;
+  coverImage: string | null;
+};
+
+export async function findGamesByIds(
+  ids: string[]
+): Promise<RepositoryResult<GameBasicInfo[]>> {
+  try {
+    if (ids.length === 0) {
+      return repositorySuccess([]);
+    }
+    const games = await prisma.game.findMany({
+      where: { id: { in: ids } },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        coverImage: true,
+      },
+    });
+    return repositorySuccess(games);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find games by IDs: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+export async function findGameById(
+  id: string
+): Promise<RepositoryResult<GameBasicInfo | null>> {
+  try {
+    const game = await prisma.game.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        coverImage: true,
+      },
+    });
+    return repositorySuccess(game);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find game by ID: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
 export async function createGameWithRelations(params: {
   igdbGame: IgdbGame;
   genreIds: string[];

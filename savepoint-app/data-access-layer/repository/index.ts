@@ -66,8 +66,16 @@ export {
   findGameBySlug,
   findGameByIgdbId,
   gameExistsByIgdbId,
+  findGamesByIds,
+  findGameById,
+  type GameBasicInfo,
 } from "./game/game-repository";
 export {
   findJournalEntriesByGameId,
   countJournalEntriesByGameId,
+  createJournalEntry,
+  findJournalEntryById,
+  findJournalEntriesByUserId,
+  updateJournalEntry,
+  deleteJournalEntry,
 } from "./journal/journal-repository";

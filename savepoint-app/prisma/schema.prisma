@@ -128,8 +128,8 @@ model Review {
   completedOn String?
   userId      String
   gameId      String
-  User        User     @relation(fields: [userId], references: [id])
-  Game        Game     @relation(fields: [gameId], references: [id])
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
 }
 
 model JournalEntry {
@@ -145,9 +145,9 @@ model JournalEntry {
   gameId        String
   libraryItemId Int? // Optional link to library item
 
-  user        User         @relation(fields: [userId], references: [id])
-  game        Game         @relation(fields: [gameId], references: [id])
-  libraryItem LibraryItem? @relation(fields: [libraryItemId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game        Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  libraryItem LibraryItem? @relation(fields: [libraryItemId], references: [id], onDelete: SetNull)
 
   // Metadata
   createdAt   DateTime  @default(now())

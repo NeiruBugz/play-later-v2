@@ -21,6 +21,7 @@ const logger = createLogger({
 });
 type GameDetailsResult = {
   game: FullGameInfoResponse;
+  gameId?: string; // Database game ID (UUID)
   franchiseIds: number[];
   timesToBeat?: {
     mainStory?: number;
@@ -100,10 +101,12 @@ export const getGameDetails = cache(async function getGameDetails(params: {
         }
       | undefined;
     let journalEntries: JournalEntryDomain[] = [];
+    let gameId: string | undefined;
     if (params.userId) {
       const libraryService = new LibraryService();
       const gameResult = await libraryService.findGameByIgdbId(game.id);
       if (gameResult.success && gameResult.data) {
+        gameId = gameResult.data.id;
         const journalService = new JournalService();
         const [libraryItemResult, allLibraryItemsResult, journalEntriesResult] =
           await Promise.all([
@@ -171,6 +174,7 @@ export const getGameDetails = cache(async function getGameDetails(params: {
       success: true,
       data: {
         game,
+        gameId,
         franchiseIds,
         timesToBeat,
         userLibraryStatus,

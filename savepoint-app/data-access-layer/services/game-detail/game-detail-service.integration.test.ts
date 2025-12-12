@@ -21,6 +21,29 @@ vi.mock("@/shared/lib", async () => {
   };
 });
 
+async function waitForGameInDatabase(
+  igdbId: number,
+  { timeout = 2000, interval = 50 } = {}
+) {
+  const deadline = Date.now() + timeout;
+
+  while (Date.now() < deadline) {
+    const result = await findGameByIgdbId(igdbId);
+    if (result.ok && result.data) {
+      return result.data;
+    }
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+
+  const finalResult = await findGameByIgdbId(igdbId);
+  if (!finalResult.ok || !finalResult.data) {
+    throw new Error(
+      `Game with igdbId ${igdbId} not found in database after ${timeout}ms`
+    );
+  }
+  return finalResult.data;
+}
+
 describe("GameDetailService Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
@@ -67,16 +90,12 @@ describe("GameDetailService Integration Tests", () => {
 
     await populateGameInDatabase(igdbGame);
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    const game = await waitForGameInDatabase(54321);
 
-    const result = await findGameByIgdbId(54321);
-
-    expect(result.ok).toBe(true);
-    if (result.ok && result.data) {
-      expect(result.data.title).toBe("Service Test Game");
-      expect(result.data.genres).toHaveLength(2);
-      expect(result.data.platforms).toHaveLength(2);
-    }
+    expect(game).toBeDefined();
+    expect(game.title).toBe("Service Test Game");
+    expect(game.genres).toHaveLength(2);
+    expect(game.platforms).toHaveLength(2);
   });
 
   it("should skip population if game already exists", async () => {
@@ -105,10 +124,10 @@ describe("GameDetailService Integration Tests", () => {
     };
 
     await populateGameInDatabase(igdbGame);
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await waitForGameInDatabase(11111);
 
     await populateGameInDatabase(igdbGame);
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await waitForGameInDatabase(11111);
 
     const prisma = getTestDatabase();
     const count = await prisma.game.count({ where: { igdbId: 11111 } });
@@ -141,15 +160,73 @@ describe("GameDetailService Integration Tests", () => {
     };
 
     await populateGameInDatabase(igdbGame);
-    await new Promise((resolve) => setTimeout(resolve, 200));
 
-    const result = await findGameByIgdbId(11111);
+    const game = await waitForGameInDatabase(11111);
 
-    expect(result.ok).toBe(true);
-    if (result.ok && result.data) {
-      expect(result.data.title).toBe("Game Without Metadata");
-      expect(result.data.genres).toHaveLength(0);
-      expect(result.data.platforms).toHaveLength(0);
-    }
+    expect(game).toBeDefined();
+    expect(game.title).toBe("Game Without Metadata");
+    expect(game.genres).toHaveLength(0);
+    expect(game.platforms).toHaveLength(0);
+  });
+
+  it("should handle game with minimal required fields (optional fields undefined)", async () => {
+    const igdbGame = {
+      id: 99999,
+      name: "Minimal Data Game",
+      slug: "minimal-data-game",
+      cover: { image_id: "co_minimal" },
+      game_type: 0,
+    };
+
+    await populateGameInDatabase(igdbGame);
+
+    const game = await waitForGameInDatabase(99999);
+
+    expect(game).toBeDefined();
+    expect(game.title).toBe("Minimal Data Game");
+    expect(game.slug).toBe("minimal-data-game");
+    expect(game.genres).toHaveLength(0);
+    expect(game.platforms).toHaveLength(0);
+  });
+
+  it("should handle game with sparse data (some optional fields present)", async () => {
+    const igdbGame = {
+      id: 88888,
+      name: "Sparse Data Game",
+      slug: "sparse-data-game",
+      summary: "A game with some missing optional fields",
+      cover: { image_id: "co_sparse" },
+      game_type: 0,
+      genres: [{ id: 12, name: "Action" }],
+      platforms: [{ id: 6, name: "PC (Microsoft Windows)" }],
+    };
+
+    await populateGameInDatabase(igdbGame);
+
+    const game = await waitForGameInDatabase(88888);
+
+    expect(game).toBeDefined();
+    expect(game.title).toBe("Sparse Data Game");
+    expect(game.genres).toHaveLength(1);
+    expect(game.platforms).toHaveLength(1);
+  });
+
+  it("should handle game with missing aggregated_rating", async () => {
+    const igdbGame = {
+      id: 77777,
+      name: "No Rating Game",
+      slug: "no-rating-game",
+      cover: { image_id: "co_norating" },
+      game_type: 0,
+      genres: [{ id: 5, name: "RPG" }],
+    };
+
+    await populateGameInDatabase(igdbGame);
+
+    const game = await waitForGameInDatabase(77777);
+
+    expect(game).toBeDefined();
+    expect(game.title).toBe("No Rating Game");
+    expect(game.genres).toHaveLength(1);
   });
 });

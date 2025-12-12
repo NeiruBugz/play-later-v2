@@ -8,9 +8,8 @@ _This roadmap outlines our strategic direction based on customer needs and busin
 
 _The highest priority features that form the core foundation of SavePoint—enabling users to track their gaming library and begin journaling._
 
-- [ ] **Technical Foundation & Refactoring**
+- [x] **Technical Foundation & Refactoring**
   - [x] **IGDB Integration Consolidation:** Refactor IGDB implementation to eliminate duplication between `shared/lib/igdb.ts` and `data-access-layer/services/igdb/igdb-service.ts`. Extract types to `igdb-api-types` package for unified type definitions. Deprecate legacy utility in favor of service layer pattern. ✅ **Completed:** All 18 methods migrated, legacy implementation removed, comprehensive documentation in place.
-  - [ ] **Vitest Configuration Restructure:** Refactor test setup to three-project architecture (unit/integration/components) with explicit naming conventions (`.unit.test.ts`, `.integration.test.ts`). Create separate setup files for each test type. Update existing tests to follow new structure.
 
 - [x] **User Account Essentials**
   - [x] **Google OAuth Sign-Up & Login:** Allow users to create an account and sign in using Google OAuth as the primary authentication method.
@@ -38,8 +37,9 @@ _The highest priority features that form the core foundation of SavePoint—enab
 _Once the foundational features are complete, we will move on to these high-value additions that enhance discovery and reduce manual work._
 
 - [ ] **Platform Integration**
+  - [ ] **Monorepo Consolidation:** Migrate `play-later-lambdas` repository into the monorepo under `lambdas/`. Consolidate Terraform configurations (Cognito + Lambda infrastructure) into unified `infra/` directory with shared modules.
   - [ ] **Steam Library Import:** Enable users to securely connect their Steam account and automatically import their game library for awareness and organization.
-  - [ ] **Steam Metadata Sync:** Automatically match imported Steam games with IGDB data for enriched metadata.
+  - [ ] **Steam Metadata Sync:** Automatically match imported Steam games with IGDB data for enriched metadata (2-stage Lambda pipeline: fetch → S3 → IGDB enrichment → database).
 
 - [ ] **Discovery & Exploration**
   - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.

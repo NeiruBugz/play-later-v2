@@ -1,11 +1,22 @@
 import "server-only";
 
-import { JournalEntryMapper } from "@/data-access-layer/domain/journal";
-import { findJournalEntriesByGameId } from "@/data-access-layer/repository";
+import {
+  JournalEntryMapper,
+  JournalMood,
+  type JournalEntryDomain,
+} from "@/data-access-layer/domain/journal";
+import {
+  createJournalEntry,
+  deleteJournalEntry,
+  findJournalEntriesByGameId,
+  findJournalEntriesByUserId,
+  findJournalEntryById,
+  updateJournalEntry,
+} from "@/data-access-layer/repository";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { BaseService } from "../types";
+import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 
 export class JournalService extends BaseService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "JournalService" });
@@ -33,6 +44,206 @@ export class JournalService extends BaseService {
       );
       return this.error(
         error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    }
+  }
+
+  async createJournalEntry(params: {
+    userId: string;
+    gameId: string;
+    title: string;
+    content: string;
+    mood?: JournalMood;
+    playSession?: number;
+    libraryItemId?: number;
+  }): Promise<ServiceResult<JournalEntryDomain>> {
+    try {
+      this.logger.info(params, "Creating journal entry");
+      const result = await createJournalEntry(params);
+      if (!result.ok) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to create journal entry"
+        );
+        return this.error(result.error.message);
+      }
+      const domainEntry = JournalEntryMapper.toDomain(result.data);
+      this.logger.info(
+        { entryId: domainEntry.id, ...params },
+        "Journal entry created successfully"
+      );
+      return this.success(domainEntry);
+    } catch (error) {
+      this.logger.error(
+        { error, ...params },
+        "Unexpected error in createJournalEntry"
+      );
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
+  }
+
+  async findJournalEntryById(params: {
+    entryId: string;
+    userId: string;
+  }): Promise<ServiceResult<JournalEntryDomain>> {
+    try {
+      this.logger.info(params, "Finding journal entry by ID");
+      const result = await findJournalEntryById(params);
+      if (!result.ok) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to find journal entry"
+        );
+        return this.error(result.error.message);
+      }
+      const domainEntry = JournalEntryMapper.toDomain(result.data);
+      this.logger.info({ ...params }, "Journal entry found successfully");
+      return this.success(domainEntry);
+    } catch (error) {
+      this.logger.error(
+        { error, ...params },
+        "Unexpected error in findJournalEntryById"
+      );
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
+  }
+
+  async findJournalEntriesByUserId(params: {
+    userId: string;
+    limit?: number;
+    cursor?: string;
+  }): Promise<ServiceResult<JournalEntryDomain[]>> {
+    try {
+      const { userId, limit = 20, cursor } = params;
+
+      this.logger.info(
+        { userId, limit, cursor },
+        "Finding journal entries for user"
+      );
+
+      const result = await findJournalEntriesByUserId({
+        userId,
+        limit,
+        cursor,
+      });
+
+      if (!result.ok) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to find journal entries for user"
+        );
+        return this.error(result.error.message);
+      }
+
+      const domainEntries = JournalEntryMapper.toDomainList(result.data);
+
+      this.logger.info(
+        { userId, count: domainEntries.length },
+        "Journal entries found successfully"
+      );
+
+      return this.success(domainEntries);
+    } catch (error) {
+      this.logger.error(
+        { error, ...params },
+        "Unexpected error in findJournalEntriesByUserId"
+      );
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
+  }
+
+  async updateJournalEntry(params: {
+    userId: string;
+    entryId: string;
+    updates: {
+      title?: string;
+      content?: string;
+      mood?: JournalMood | null;
+      playSession?: number | null;
+      libraryItemId?: number | null;
+    };
+  }): Promise<ServiceResult<JournalEntryDomain>> {
+    try {
+      const { userId, entryId, updates } = params;
+
+      this.logger.info({ userId, entryId }, "Updating journal entry");
+
+      const result = await updateJournalEntry({
+        entryId,
+        userId,
+        updates,
+      });
+
+      if (!result.ok) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to update journal entry"
+        );
+        return this.error(result.error.message);
+      }
+
+      const domainEntry = JournalEntryMapper.toDomain(result.data);
+
+      this.logger.info(
+        { userId, entryId },
+        "Journal entry updated successfully"
+      );
+
+      return this.success(domainEntry);
+    } catch (error) {
+      this.logger.error(
+        { error, ...params },
+        "Unexpected error in updateJournalEntry"
+      );
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
+  }
+
+  async deleteJournalEntry(params: {
+    userId: string;
+    entryId: string;
+  }): Promise<ServiceResult<void>> {
+    try {
+      const { userId, entryId } = params;
+
+      this.logger.info({ userId, entryId }, "Deleting journal entry");
+
+      const result = await deleteJournalEntry({ entryId, userId });
+
+      if (!result.ok) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to delete journal entry"
+        );
+        return this.error(result.error.message);
+      }
+
+      this.logger.info(
+        { userId, entryId },
+        "Journal entry deleted successfully"
+      );
+
+      return this.success(undefined);
+    } catch (error) {
+      this.logger.error(
+        { error, ...params },
+        "Unexpected error in deleteJournalEntry"
+      );
+      return this.error(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+        ServiceErrorCode.INTERNAL_ERROR
       );
     }
   }

@@ -154,18 +154,18 @@ export interface GameExpansionsResult {
   expansions: Array<{
     id: number;
     name: string;
-    cover: {
-      id: number;
+    cover?: {
+      id?: number;
       image_id: string;
       url?: string;
     };
-    release_dates: Array<{
+    release_dates?: Array<{
       id: number;
-      human: string;
-      platform: {
+      human?: string;
+      platform?: {
         id: number;
         name: string;
-        human: string;
+        human?: string;
       };
     }>;
   }>;
@@ -213,18 +213,18 @@ export interface UpcomingReleasesResult {
   releases: Array<{
     id: number;
     name: string;
-    cover: {
-      id: number;
+    cover?: {
+      id?: number;
       image_id: string;
     };
     first_release_date: number;
-    release_dates: Array<{
+    release_dates?: Array<{
       id: number;
-      human: string;
-      platform: {
+      human?: string;
+      platform?: {
         id: number;
         name: string;
-        human: string;
+        human?: string;
       };
     }>;
   }>;
@@ -272,8 +272,8 @@ export interface CollectionGame {
   id: number;
   name: string;
   slug: string;
-  cover: { image_id: string };
-  game_type: number;
+  cover?: { image_id: string };
+  game_type?: number;
 }
 
 export interface CollectionGamesResult {

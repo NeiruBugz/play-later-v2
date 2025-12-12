@@ -1,6 +1,6 @@
 "use client";
 
-import { BookMarked, LayoutGrid, Search, User } from "lucide-react";
+import { BookMarked, BookOpen, LayoutGrid, Search, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -29,6 +29,12 @@ const navItems: NavItem[] = [
     href: "/library",
     label: "Library",
     icon: BookMarked,
+  },
+  {
+    href: "/journal",
+    label: "Journal",
+    icon: BookOpen,
+    matchPaths: ["/journal"],
   },
   {
     href: "/profile",

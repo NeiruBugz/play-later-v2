@@ -1,21 +1,24 @@
 import {
+  Collection,
   type Company,
-  type Cover,
   type Event,
   type ExternalGame,
   type Franchise,
-  type GameEngine,
   type GameMode,
   type Genre,
   type Platform,
-  type PlayerPerspective,
   type Screenshot,
   type Theme,
-  type Website,
 } from "igdb-api-types";
 
+export type Cover = {
+  id?: number;
+  image_id: string;
+  url?: string;
+};
+
 type PlatformWithReleaseDate = {
-  human: string;
+  human?: string;
   id: number;
   name: string;
 };
@@ -26,16 +29,9 @@ type InvolvedCompany = {
   publisher: boolean;
 };
 type ReleaseDate = {
-  human: string;
+  human?: string;
   id: number;
-  platform: PlatformWithReleaseDate;
-};
-type SimilarGame = {
-  cover: Cover;
-  id: number;
-  name: string;
-  release_dates: ReleaseDate[];
-  first_release_date: number;
+  platform?: PlatformWithReleaseDate;
 };
 export type RequestOptions = {
   body?: string;
@@ -56,45 +52,57 @@ export type GenresResponse = {
   id: number;
 };
 export type FullGameInfoResponse = {
-  aggregated_rating: number;
+  aggregated_rating?: number;
   cover: Cover;
-  external_games: ExternalGame[];
+  external_games?: ExternalGame[];
   first_release_date?: number;
-  game_engines: GameEngine[];
-  game_modes: GameMode[];
-  genres: Genre[];
+  game_modes?: GameMode[];
+  genres?: Genre[];
   id: number;
-  involved_companies: InvolvedCompany[];
+  involved_companies?: InvolvedCompany[];
   name: string;
   platforms?: Platform[];
-  player_perspectives: PlayerPerspective[];
-  release_dates: ReleaseDate[];
-  screenshots: Screenshot[];
-  similar_games: SimilarGame[];
+  release_dates?: ReleaseDate[];
+  screenshots?: Screenshot[];
   slug: string;
   summary?: string;
-  themes: Theme[];
-  websites: Website[];
+  themes?: Theme[];
   franchise?: Franchise | number;
-  franchises: number[];
+  franchises?: number[];
   game_type: number;
+  collections?: Pick<Collection, "id" | "name">[];
+  game_engines?: Array<{ id: number; name?: string }>;
+  player_perspectives?: Array<{ id: number; name?: string }>;
+  websites?: Array<{
+    id: number;
+    url: string;
+    category?: number;
+    trusted?: boolean;
+  }>;
+  similar_games?: Array<{
+    id: number;
+    name: string;
+    cover?: Cover;
+    release_dates?: ReleaseDate[];
+    first_release_date?: number;
+  }>;
 };
 export type SearchResponse = {
   cover: Cover;
-  first_release_date: number;
+  first_release_date?: number;
   id: number;
   name: string;
-  platforms: Platform[];
+  platforms?: Platform[];
   release_dates?: ReleaseDate[];
   slug: string;
   game_type: number;
 };
 export type UpcomingReleaseResponse = {
-  cover: Cover;
+  cover?: Cover;
   first_release_date: number;
   id: number;
   name: string;
-  release_dates: ReleaseDate[];
+  release_dates?: ReleaseDate[];
 };
 export type UpcomingEventsResponse = Event[];
 export type IgdbGameResponseItem = {
@@ -113,8 +121,8 @@ export type TimeToBeatsResponse = {
 export type Expansion = {
   id: number;
   name: string;
-  cover: Cover;
-  release_dates: ReleaseDate[];
+  cover?: Cover;
+  release_dates?: ReleaseDate[];
 };
 export type DLCAndExpansionListResponse = {
   id: number;

@@ -1,0 +1,11 @@
+[
+  {
+    "id": 99999,
+    "name": "Minimal Data Game",
+    "slug": "minimal-data-game",
+    "cover": {
+      "image_id": "co_minimal"
+    },
+    "game_type": 0
+  }
+]
