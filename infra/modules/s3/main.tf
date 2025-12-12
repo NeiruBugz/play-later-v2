@@ -44,7 +44,7 @@ resource "aws_s3_bucket_cors_configuration" "this" {
 
 data "aws_iam_policy_document" "s3_rw" {
   statement {
-    sid     = "AllowS3ObjectRW"
+    sid = "AllowS3ObjectRW"
     actions = [
       "s3:GetObject",
       "s3:PutObject",
@@ -56,8 +56,8 @@ data "aws_iam_policy_document" "s3_rw" {
   }
 
   statement {
-    sid     = "AllowListBucket"
-    actions = ["s3:ListBucket"]
+    sid       = "AllowListBucket"
+    actions   = ["s3:ListBucket"]
     resources = [aws_s3_bucket.this.arn]
   }
 }

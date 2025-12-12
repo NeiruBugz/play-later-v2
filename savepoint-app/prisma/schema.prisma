@@ -167,18 +167,19 @@ model IgnoredImportedGames {
 }
 
 model ImportedGame {
-  id               String     @id @default(cuid())
+  id               String           @id @default(cuid())
   name             String
   storefront       Storefront
   storefrontGameId String?
-  playtime         Int?       @default(0)
+  playtime         Int?             @default(0)
   img_icon_url     String?
   img_logo_url     String?
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+  igdbMatchStatus  IgdbMatchStatus  @default(PENDING)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
   deletedAt        DateTime?
   userId           String
-  User             User       @relation(fields: [userId], references: [id])
+  User             User             @relation(fields: [userId], references: [id])
 
   @@index([userId, deletedAt])
   @@index([storefrontGameId])
@@ -218,6 +219,13 @@ enum JournalVisibility {
   PRIVATE // Only user can see
   FRIENDS_ONLY // Future feature
   PUBLIC // Anyone can see
+}
+
+enum IgdbMatchStatus {
+  PENDING   // Initial state, not yet processed
+  MATCHED   // Successfully matched to an IGDB entry
+  UNMATCHED // Could not be matched to IGDB (requires manual review)
+  IGNORED   // User chose to ignore this game
 }
 
 // ----- Game Metadata Models ------//
