@@ -48,14 +48,14 @@ const elements = {
 
 describe("RichTextEditor", () => {
   let mockEditor: any;
-  let mockOnChange: ReturnType<typeof vi.fn>;
-  let mockOnValidationChange: ReturnType<typeof vi.fn>;
+  let mockOnChange: (html: string) => void;
+  let mockOnValidationChange: (isValid: boolean) => void;
   let mockOnUpdate: (args: { editor: any }) => void;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockOnChange = vi.fn();
-    mockOnValidationChange = vi.fn();
+    mockOnChange = vi.fn<(html: string) => void>();
+    mockOnValidationChange = vi.fn<(isValid: boolean) => void>();
 
     // Create a mock editor object
     mockEditor = {

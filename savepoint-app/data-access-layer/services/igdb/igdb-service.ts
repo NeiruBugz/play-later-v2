@@ -232,7 +232,7 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const result = schema.safeParse(response);
     if (!result.success) {
       logger.error(
-        { errors: result.error.errors, resource: options.resource },
+        { errors: result.error.issues, resource: options.resource },
         "IGDB response validation failed"
       );
       return undefined;
@@ -258,11 +258,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GameSearchSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors },
+        { errors: validation.error.issues },
         "Game search validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Invalid search parameters",
+        validation.error.issues[0]?.message ?? "Invalid search parameters",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -318,11 +318,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GameDetailsSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, gameId: params.gameId },
+        { errors: validation.error.issues, gameId: params.gameId },
         "Game details validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -362,11 +362,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GameDetailsBySlugSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, slug: params.slug },
+        { errors: validation.error.issues, slug: params.slug },
         "Game details by slug validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game slug is required",
+        validation.error.issues[0]?.message ?? "Valid game slug is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -429,11 +429,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GetGameBySteamAppIdSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, steamAppId: params.steamAppId },
+        { errors: validation.error.issues, steamAppId: params.steamAppId },
         "Steam app ID validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid Steam app ID is required",
+        validation.error.issues[0]?.message ?? "Valid Steam app ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -517,11 +517,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = PlatformSearchSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, platformName: params.platformName },
+        { errors: validation.error.issues, platformName: params.platformName },
         "Platform search validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ??
+        validation.error.issues[0]?.message ??
           "Platform name is required for search",
         ServiceErrorCode.VALIDATION_ERROR
       );
@@ -573,11 +573,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GameScreenshotsSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, gameId: params.gameId },
+        { errors: validation.error.issues, gameId: params.gameId },
         "Game screenshots validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -627,11 +627,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GameAggregatedRatingSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, gameId: params.gameId },
+        { errors: validation.error.issues, gameId: params.gameId },
         "Game aggregated rating validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -689,11 +689,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = SimilarGamesSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, gameId: params.gameId },
+        { errors: validation.error.issues, gameId: params.gameId },
         "Similar games validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -745,11 +745,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GameGenresSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, gameId: params.gameId },
+        { errors: validation.error.issues, gameId: params.gameId },
         "Game genres validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -801,11 +801,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GetGameCompletionTimesSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, gameId: params.gameId },
+        { errors: validation.error.issues, gameId: params.gameId },
         "Game completion times validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -855,11 +855,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GameExpansionsSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, gameId: params.gameId },
+        { errors: validation.error.issues, gameId: params.gameId },
         "Game expansions validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -916,11 +916,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = FranchiseGamesSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors },
+        { errors: validation.error.issues },
         "Franchise games validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Invalid franchise parameters",
+        validation.error.issues[0]?.message ?? "Invalid franchise parameters",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -1011,11 +1011,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = FranchiseDetailsSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, franchiseId: params.franchiseId },
+        { errors: validation.error.issues, franchiseId: params.franchiseId },
         "Franchise details validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid franchise ID is required",
+        validation.error.issues[0]?.message ?? "Valid franchise ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -1055,11 +1055,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = GameArtworksSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, gameId: params.gameId },
+        { errors: validation.error.issues, gameId: params.gameId },
         "Game artworks validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -1109,11 +1109,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = UpcomingReleasesByIdsSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors },
+        { errors: validation.error.issues },
         "Upcoming releases validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ??
+        validation.error.issues[0]?.message ??
           "At least one valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
@@ -1204,11 +1204,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = EventLogoSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, logoId: params.logoId },
+        { errors: validation.error.issues, logoId: params.logoId },
         "Event logo validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ??
+        validation.error.issues[0]?.message ??
           "Valid event logo ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
@@ -1260,11 +1260,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = TimesToBeatSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, igdbId: params.igdbId },
+        { errors: validation.error.issues, igdbId: params.igdbId },
         "Times to beat validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ?? "Valid game ID is required",
+        validation.error.issues[0]?.message ?? "Valid game ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );
     }
@@ -1325,11 +1325,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
     const validation = CollectionGamesByIdSchema.safeParse(params);
     if (!validation.success) {
       logger.warn(
-        { errors: validation.error.errors, collectionId: params.collectionId },
+        { errors: validation.error.issues, collectionId: params.collectionId },
         "Collection games validation failed"
       );
       return this.error(
-        validation.error.errors[0]?.message ??
+        validation.error.issues[0]?.message ??
           "Valid collection ID is required",
         ServiceErrorCode.VALIDATION_ERROR
       );

@@ -50,7 +50,7 @@ async function performUpdateProfile(
       );
       return {
         success: false as const,
-        error: validationResult.error.errors[0]?.message ?? "Validation error",
+        error: validationResult.error.issues[0]?.message ?? "Validation error",
       };
     }
     const validatedData = validationResult.data;

@@ -3,27 +3,24 @@ import { z } from "zod";
 const positiveInt = (fieldName: string) =>
   z
     .number({
-      required_error: `Valid ${fieldName} is required`,
-      invalid_type_error: `Valid ${fieldName} is required`,
+      error: `Valid ${fieldName} is required`,
     })
-    .int({ message: `Valid ${fieldName} is required` })
-    .positive({ message: `Valid ${fieldName} is required` });
+    .int({ error: `Valid ${fieldName} is required` })
+    .positive({ error: `Valid ${fieldName} is required` });
 
 const nonNegativeInt = z.number().int().nonnegative();
 
 const nonEmptyString = (fieldName: string) =>
   z
     .string({
-      required_error: `${fieldName} is required`,
-      invalid_type_error: `${fieldName} is required`,
+      error: `${fieldName} is required`,
     })
-    .min(1, { message: `${fieldName} is required` });
+    .min(1, { error: `${fieldName} is required` });
 
 export const GameSearchSchema = z.object({
   name: z
     .string({
-      required_error: "Game name is required for search",
-      invalid_type_error: "Game name is required for search",
+      error: "Game name is required for search",
     })
     .transform((val) => val.trim())
     .refine((val) => val.length > 0, {
@@ -53,8 +50,7 @@ export const GetGameBySteamAppIdSchema = z.object({
 export const PlatformSearchSchema = z.object({
   platformName: z
     .string({
-      required_error: "Platform name is required for search",
-      invalid_type_error: "Platform name is required for search",
+      error: "Platform name is required for search",
     })
     .transform((val) => val.trim())
     .refine((val) => val.length > 0, {
@@ -106,17 +102,15 @@ export const UpcomingReleasesByIdsSchema = z.object({
     .array(
       z
         .number({
-          required_error: "All game IDs must be valid positive integers",
-          invalid_type_error: "All game IDs must be valid positive integers",
+          error: "All game IDs must be valid positive integers",
         })
-        .int({ message: "All game IDs must be valid positive integers" })
-        .positive({ message: "All game IDs must be valid positive integers" }),
+        .int({ error: "All game IDs must be valid positive integers" })
+        .positive({ error: "All game IDs must be valid positive integers" }),
       {
-        required_error: "At least one game ID is required",
-        invalid_type_error: "At least one game ID is required",
+        error: "At least one game ID is required",
       }
     )
-    .min(1, { message: "At least one game ID is required" }),
+    .min(1, { error: "At least one game ID is required" }),
 });
 
 export const EventLogoSchema = z.object({

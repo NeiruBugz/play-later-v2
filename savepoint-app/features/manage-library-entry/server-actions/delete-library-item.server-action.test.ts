@@ -27,12 +27,11 @@ describe("deleteLibraryItemAction server action", () => {
     vi.clearAllMocks();
 
     mockDeleteLibraryItem = vi.fn();
-    MockLibraryService.mockImplementation(
-      () =>
-        ({
-          deleteLibraryItem: mockDeleteLibraryItem,
-        }) as any
-    );
+    MockLibraryService.mockImplementation(function () {
+      return {
+        deleteLibraryItem: mockDeleteLibraryItem,
+      } as any;
+    });
 
     mockGetServerUserId.mockResolvedValue("user-123");
   });

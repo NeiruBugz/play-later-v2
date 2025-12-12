@@ -39,12 +39,11 @@ describe("GET /api/games/search", () => {
 
     // Mock IgdbService instance
     mockSearchGamesByName = vi.fn();
-    vi.mocked(IgdbService).mockImplementation(
-      () =>
-        ({
-          searchGamesByName: mockSearchGamesByName,
-        }) as unknown as IgdbService
-    );
+    vi.mocked(IgdbService).mockImplementation(function () {
+      return {
+        searchGamesByName: mockSearchGamesByName,
+      } as unknown as IgdbService;
+    });
 
     // Default: allow rate limit
     mockCheckRateLimit.mockResolvedValue({

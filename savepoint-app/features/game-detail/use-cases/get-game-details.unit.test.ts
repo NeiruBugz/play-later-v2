@@ -63,15 +63,15 @@ describe("getGameDetails", () => {
       gameDetailService.populateGameInDatabase
     );
 
-    vi.mocked(IgdbService).mockImplementation(
-      () => mockIgdbService as unknown as IgdbService
-    );
-    vi.mocked(LibraryService).mockImplementation(
-      () => mockLibraryService as unknown as LibraryService
-    );
-    vi.mocked(JournalService).mockImplementation(
-      () => mockJournalService as unknown as JournalService
-    );
+    vi.mocked(IgdbService).mockImplementation(function () {
+      return mockIgdbService as unknown as IgdbService;
+    });
+    vi.mocked(LibraryService).mockImplementation(function () {
+      return mockLibraryService as unknown as LibraryService;
+    });
+    vi.mocked(JournalService).mockImplementation(function () {
+      return mockJournalService as unknown as JournalService;
+    });
   });
 
   describe("success scenarios", () => {

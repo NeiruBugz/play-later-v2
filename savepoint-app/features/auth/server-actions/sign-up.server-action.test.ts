@@ -24,9 +24,9 @@ describe("signUpAction", () => {
       signUp: vi.fn(),
     };
 
-    vi.mocked(AuthService).mockImplementation(
-      () => mockAuthService as unknown as AuthService
-    );
+    vi.mocked(AuthService).mockImplementation(function () {
+      return mockAuthService as unknown as AuthService;
+    });
 
     mockSignIn = vi.mocked(authModule.signIn);
   });

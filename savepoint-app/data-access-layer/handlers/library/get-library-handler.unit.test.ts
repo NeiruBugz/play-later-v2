@@ -25,12 +25,11 @@ describe("getLibraryHandler", () => {
 
     mockGetLibraryItems = vi.fn();
 
-    mockLibraryService.mockImplementation(
-      () =>
-        ({
-          getLibraryItems: mockGetLibraryItems,
-        }) as any
-    );
+    mockLibraryService.mockImplementation(function () {
+      return {
+        getLibraryItems: mockGetLibraryItems,
+      } as any;
+    });
   });
 
   describe("Input Validation", () => {

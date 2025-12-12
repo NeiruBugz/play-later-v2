@@ -65,7 +65,7 @@ export async function loadMoreFranchiseGames(
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      logger.error({ error: error.errors }, "Validation error");
+      logger.error({ error: error.issues }, "Validation error");
       return { success: false, error: "Invalid input parameters" };
     }
     logger.error({ error }, "Server action failed");

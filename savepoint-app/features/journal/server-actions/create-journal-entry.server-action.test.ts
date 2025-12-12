@@ -55,12 +55,11 @@ describe("createJournalEntryAction server action", () => {
     vi.clearAllMocks();
 
     mockCreateJournalEntry = vi.fn();
-    MockJournalService.mockImplementation(
-      () =>
-        ({
-          createJournalEntry: mockCreateJournalEntry,
-        }) as any
-    );
+    MockJournalService.mockImplementation(function () {
+      return {
+        createJournalEntry: mockCreateJournalEntry,
+      } as any;
+    });
 
     mockGetServerUserId.mockResolvedValue("user-789");
   });
