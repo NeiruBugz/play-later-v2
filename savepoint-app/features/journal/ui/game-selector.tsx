@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -149,15 +149,14 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
                   onClick={() => handleGameSelect(game.id)}
                 >
                   <div className="gap-md flex items-center">
-                    {game.coverImage && (
-                      <Image
-                        src={game.coverImage}
-                        alt={game.title}
-                        width={32}
-                        height={48}
-                        className="h-12 w-8 rounded object-cover"
-                      />
-                    )}
+                    <GameCoverImage
+                      imageId={game.coverImage}
+                      gameTitle={game.title}
+                      size="cover_small"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 384px"
+                      className="h-12 w-8"
+                      imageClassName="rounded object-cover"
+                    />
                     <span className="text-left">{game.title}</span>
                   </div>
                 </Button>

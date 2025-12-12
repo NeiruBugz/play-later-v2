@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const CoverSchema = z.object({
-  id: z.number(),
+  id: z.number().optional(),
   image_id: z.string(),
   url: z.string().optional(),
 });
@@ -20,13 +20,13 @@ const PlatformSchema = z.object({
 const PlatformWithReleaseDateSchema = z.object({
   id: z.number(),
   name: z.string(),
-  human: z.string(),
+  human: z.string().optional(),
 });
 
 const ReleaseDateSchema = z.object({
   id: z.number(),
-  human: z.string(),
-  platform: PlatformWithReleaseDateSchema,
+  human: z.string().optional(),
+  platform: PlatformWithReleaseDateSchema.optional(),
 });
 
 const GenreSchema = z.object({
@@ -98,9 +98,9 @@ const PlayerPerspectiveSchema = z.object({
 const SimilarGameSchema = z.object({
   id: z.number(),
   name: z.string(),
-  cover: CoverSchema,
-  release_dates: z.array(ReleaseDateSchema),
-  first_release_date: z.number(),
+  cover: CoverSchema.optional(),
+  release_dates: z.array(ReleaseDateSchema).optional(),
+  first_release_date: z.number().optional(),
 });
 
 export const SearchResponseItemSchema = z.object({
@@ -108,8 +108,8 @@ export const SearchResponseItemSchema = z.object({
   name: z.string(),
   slug: z.string(),
   cover: CoverSchema,
-  first_release_date: z.number(),
-  platforms: z.array(PlatformSchema),
+  first_release_date: z.number().optional(),
+  platforms: z.array(PlatformSchema).optional(),
   release_dates: z.array(ReleaseDateSchema).optional(),
   game_type: z.number(),
 });
@@ -119,23 +119,23 @@ export const FullGameInfoResponseSchema = z.object({
   name: z.string(),
   slug: z.string(),
   summary: z.string().optional(),
-  aggregated_rating: z.number(),
+  aggregated_rating: z.number().optional(),
   first_release_date: z.number().optional(),
   cover: CoverSchema,
-  genres: z.array(GenreSchema),
+  genres: z.array(GenreSchema).optional(),
   platforms: z.array(PlatformSchema).optional(),
-  release_dates: z.array(ReleaseDateSchema),
-  screenshots: z.array(ScreenshotSchema),
-  themes: z.array(ThemeSchema),
-  game_modes: z.array(GameModeSchema),
-  game_engines: z.array(GameEngineSchema),
-  player_perspectives: z.array(PlayerPerspectiveSchema),
-  involved_companies: z.array(InvolvedCompanySchema),
-  external_games: z.array(ExternalGameSchema),
-  websites: z.array(WebsiteSchema),
-  similar_games: z.array(SimilarGameSchema),
+  release_dates: z.array(ReleaseDateSchema).optional(),
+  screenshots: z.array(ScreenshotSchema).optional(),
+  themes: z.array(ThemeSchema).optional(),
+  game_modes: z.array(GameModeSchema).optional(),
+  game_engines: z.array(GameEngineSchema).optional(),
+  player_perspectives: z.array(PlayerPerspectiveSchema).optional(),
+  involved_companies: z.array(InvolvedCompanySchema).optional(),
+  external_games: z.array(ExternalGameSchema).optional(),
+  websites: z.array(WebsiteSchema).optional(),
+  similar_games: z.array(SimilarGameSchema).optional(),
   franchise: z.union([z.number(), FranchiseSchema]).optional(),
-  franchises: z.array(z.number()),
+  franchises: z.array(z.number()).optional(),
   game_type: z.number(),
   collections: z.array(CollectionSchema).optional(),
 });
@@ -184,8 +184,8 @@ export const GameCompletionTimesItemSchema = z.object({
 export const ExpansionSchema = z.object({
   id: z.number(),
   name: z.string(),
-  cover: CoverSchema,
-  release_dates: z.array(ReleaseDateSchema),
+  cover: CoverSchema.optional(),
+  release_dates: z.array(ReleaseDateSchema).optional(),
 });
 
 export const GameWithExpansionsSchema = z.object({
@@ -220,9 +220,11 @@ export const ArtworkItemSchema = z.object({
 export const UpcomingReleaseItemSchema = z.object({
   id: z.number(),
   name: z.string(),
-  cover: z.object({ id: z.number(), image_id: z.string() }),
+  cover: z
+    .object({ id: z.number().optional(), image_id: z.string() })
+    .optional(),
   first_release_date: z.number(),
-  release_dates: z.array(ReleaseDateSchema),
+  release_dates: z.array(ReleaseDateSchema).optional(),
 });
 
 export const EventItemSchema = z.object({
@@ -260,8 +262,8 @@ export const CollectionGameItemSchema = z.object({
   id: z.number(),
   name: z.string(),
   slug: z.string(),
-  cover: z.object({ image_id: z.string() }),
-  game_type: z.number(),
+  cover: z.object({ image_id: z.string() }).optional(),
+  game_type: z.number().optional(),
 });
 
 export const CollectionWithGamesSchema = z.object({

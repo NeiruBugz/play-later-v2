@@ -717,7 +717,9 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      if (response.length === 0 || !response[0] || !response[0].similar_games) {
+      const similarGames = response[0]?.similar_games ?? [];
+
+      if (response.length === 0 || !response[0] || similarGames.length === 0) {
         logger.info({ gameId }, "No similar games found for game");
         return this.success({
           similarGames: [],
@@ -725,11 +727,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
 
       logger.info(
-        { gameId, count: response[0].similar_games.length },
+        { gameId, count: similarGames.length },
         "Successfully fetched similar games"
       );
       return this.success({
-        similarGames: response[0].similar_games,
+        similarGames,
       });
     } catch (error) {
       logger.error({ error, gameId }, "Error fetching similar games");
@@ -771,7 +773,9 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
-      if (response.length === 0 || !response[0] || !response[0].genres) {
+      const genres = response[0]?.genres ?? [];
+
+      if (response.length === 0 || !response[0] || genres.length === 0) {
         logger.info({ gameId }, "No genres found for game");
         return this.success({
           genres: [],
@@ -779,11 +783,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
 
       logger.info(
-        { gameId, count: response[0].genres.length },
+        { gameId, count: genres.length },
         "Successfully fetched game genres"
       );
       return this.success({
-        genres: response[0].genres,
+        genres,
       });
     } catch (error) {
       logger.error({ error, gameId }, "Error fetching game genres");
@@ -879,11 +883,13 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
         );
       }
 
+      const expansions = response[0]?.expansions ?? [];
+
       if (
         !response ||
         response.length === 0 ||
         !response[0] ||
-        !response[0].expansions
+        expansions.length === 0
       ) {
         logger.info({ gameId }, "No expansions found for game");
         return this.success({
@@ -892,11 +898,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
 
       logger.info(
-        { gameId, count: response[0].expansions.length },
+        { gameId, count: expansions.length },
         "Successfully fetched game expansions"
       );
       return this.success({
-        expansions: response[0].expansions,
+        expansions,
       });
     } catch (error) {
       logger.error({ error, gameId }, "Error fetching game expansions");

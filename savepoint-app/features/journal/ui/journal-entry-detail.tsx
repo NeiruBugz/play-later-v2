@@ -179,7 +179,7 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDelete}
-        entryTitle={entry.title}
+        entryTitle={displayTitle}
       />
     </div>
   );

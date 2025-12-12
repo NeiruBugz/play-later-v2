@@ -1,0 +1,24 @@
+[
+  {
+    "id": 88888,
+    "name": "Sparse Data Game",
+    "slug": "sparse-data-game",
+    "summary": "A game with some missing optional fields",
+    "cover": {
+      "image_id": "co_sparse"
+    },
+    "game_type": 0,
+    "genres": [
+      { "id": 12, "name": "Action" }
+    ],
+    "platforms": [
+      { "id": 6, "name": "PC (Microsoft Windows)" }
+    ],
+    "release_dates": [
+      {
+        "id": 1001,
+        "human": "2023"
+      }
+    ]
+  }
+]
