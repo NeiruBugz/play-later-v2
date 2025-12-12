@@ -341,8 +341,7 @@ describe("AvatarStorageService", () => {
       expect(mockS3Send).toHaveBeenCalledTimes(1);
       expect(mockS3Send).toHaveBeenCalledWith(expect.any(PutObjectCommand));
 
-      const putCommand = mockS3Send.mock
-        .calls[0][0] as PutObjectCommand;
+      const putCommand = mockS3Send.mock.calls[0][0] as PutObjectCommand;
       expect(putCommand.input).toMatchObject({
         Bucket: "test-bucket",
         Key: `user-avatars/${TEST_USER_ID}/${MOCK_TIMESTAMP}-avatar.jpg`,
@@ -354,9 +353,7 @@ describe("AvatarStorageService", () => {
 
   describe("Upload Failure", () => {
     it("should return error result when S3 upload throws error", async () => {
-      mockS3Send.mockRejectedValue(
-        new Error("S3 connection failed")
-      );
+      mockS3Send.mockRejectedValue(new Error("S3 connection failed"));
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       const result = await AvatarStorageService.uploadAvatar(
@@ -386,7 +383,6 @@ describe("AvatarStorageService", () => {
     });
 
     it("should log error when upload fails", async () => {
-
       const mockError = new Error("S3 service unavailable");
       mockS3Send.mockRejectedValue(mockError);
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
@@ -413,7 +409,6 @@ describe("AvatarStorageService", () => {
     });
 
     it("should log error with error object and userId on failed upload", async () => {
-
       const mockError = new Error("Upload error");
       mockS3Send.mockRejectedValue(mockError);
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
