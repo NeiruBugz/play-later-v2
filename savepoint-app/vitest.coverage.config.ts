@@ -12,9 +12,14 @@
  * environment conflicts. Use the main vitest.config.ts for running
  * all tests including component tests.
  */
-import path from "path";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
+
+const __filename = fileURLToPath(import.meta.url);
+const rootDir = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
@@ -64,7 +69,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./"),
+      "@": path.resolve(rootDir, "./"),
     },
   },
 });

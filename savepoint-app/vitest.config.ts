@@ -1,7 +1,11 @@
-import path from "path";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
+
+const __filename = fileURLToPath(import.meta.url);
+const rootDir = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
@@ -23,6 +27,7 @@ export default defineConfig({
         test: {
           name: "utilities",
           environment: "node",
+          sequence: { groupOrder: 1 },
           include: [
             "**/shared/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
           ],
@@ -44,6 +49,7 @@ export default defineConfig({
           name: "components",
           environment: "jsdom",
           setupFiles: ["./test/setup/client-setup.ts"],
+          sequence: { groupOrder: 2 },
           include: [
             "**/features/**/ui/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/features/**/hooks/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
@@ -65,6 +71,7 @@ export default defineConfig({
         test: {
           name: "backend",
           environment: "node",
+          sequence: { groupOrder: 3 },
           include: [
             "**/features/**/server-actions/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/features/**/lib/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
@@ -95,6 +102,9 @@ export default defineConfig({
           setupFiles: ["./test/setup/integration.ts"],
           pool: "forks",
           maxWorkers: 1,
+          sequence: {
+            groupOrder: 0,
+          },
           isolate: false,
           include: ["**/*.integration.test.{js,ts,jsx,tsx}"],
           exclude: [
@@ -109,7 +119,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./"),
+      "@": path.resolve(rootDir, "./"),
     },
   },
 });

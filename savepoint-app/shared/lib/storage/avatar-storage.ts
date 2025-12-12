@@ -4,7 +4,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { MAX_AVATAR_FILE_SIZE_BYTES } from "@/shared/constants";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { s3Client } from "./s3-client";
+import { getS3Client } from "./s3-client";
 
 const logger = createLogger({ [LOGGER_CONTEXT.STORAGE]: "AvatarStorage" });
 export class AvatarStorageService {
@@ -31,7 +31,7 @@ export class AvatarStorageService {
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
       const key = `${env.S3_AVATAR_PATH_PREFIX}${userId}/${timestamp}-${sanitizedName}`;
       const buffer = Buffer.from(await file.arrayBuffer());
-      await s3Client.send(
+      await getS3Client().send(
         new PutObjectCommand({
           Bucket: env.S3_BUCKET_NAME,
           Key: key,

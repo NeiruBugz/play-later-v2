@@ -2,10 +2,12 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 import { AvatarStorageService } from "./avatar-storage";
 
+const mockS3Send = vi.fn();
 vi.mock("./s3-client", () => ({
-  s3Client: {
-    send: vi.fn(),
-  },
+  getS3Client: vi.fn(() => ({
+    send: mockS3Send,
+  })),
+  resetS3Client: vi.fn(),
 }));
 
 vi.mock("@/env.mjs", () => ({
@@ -34,11 +36,10 @@ describe("AvatarStorageService", () => {
   const TEST_USER_ID = "user-123";
   const MOCK_TIMESTAMP = 1705847392000;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(Date, "now").mockReturnValue(MOCK_TIMESTAMP);
-    const { s3Client } = await import("./s3-client");
-    vi.mocked(s3Client.send).mockResolvedValue({} as any);
+    mockS3Send.mockResolvedValue({});
   });
 
   describe("File Validation - Valid Files", () => {
@@ -160,12 +161,11 @@ describe("AvatarStorageService", () => {
 
   describe("S3 Key Generation", () => {
     it("should generate key with S3_AVATAR_PATH_PREFIX", async () => {
-      const { s3Client } = await import("./s3-client");
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       await AvatarStorageService.uploadAvatar(TEST_USER_ID, file);
 
-      expect(s3Client.send).toHaveBeenCalledWith(
+      expect(mockS3Send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: expect.objectContaining({
             Key: expect.stringContaining("user-avatars/"),
@@ -175,12 +175,11 @@ describe("AvatarStorageService", () => {
     });
 
     it("should generate key with userId", async () => {
-      const { s3Client } = await import("./s3-client");
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       await AvatarStorageService.uploadAvatar(TEST_USER_ID, file);
 
-      expect(s3Client.send).toHaveBeenCalledWith(
+      expect(mockS3Send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: expect.objectContaining({
             Key: expect.stringContaining(TEST_USER_ID),
@@ -190,12 +189,11 @@ describe("AvatarStorageService", () => {
     });
 
     it("should generate key with timestamp", async () => {
-      const { s3Client } = await import("./s3-client");
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       await AvatarStorageService.uploadAvatar(TEST_USER_ID, file);
 
-      expect(s3Client.send).toHaveBeenCalledWith(
+      expect(mockS3Send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: expect.objectContaining({
             Key: expect.stringContaining(MOCK_TIMESTAMP.toString()),
@@ -205,13 +203,12 @@ describe("AvatarStorageService", () => {
     });
 
     it("should generate key with sanitized filename", async () => {
-      const { s3Client } = await import("./s3-client");
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       await AvatarStorageService.uploadAvatar(TEST_USER_ID, file);
 
       const expectedKey = `user-avatars/${TEST_USER_ID}/${MOCK_TIMESTAMP}-avatar.jpg`;
-      expect(s3Client.send).toHaveBeenCalledWith(
+      expect(mockS3Send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: expect.objectContaining({
             Key: expectedKey,
@@ -221,13 +218,12 @@ describe("AvatarStorageService", () => {
     });
 
     it("should sanitize filename with spaces to underscores", async () => {
-      const { s3Client } = await import("./s3-client");
       const file = createMockFile("my avatar pic.jpg", 1024, "image/jpeg");
 
       await AvatarStorageService.uploadAvatar(TEST_USER_ID, file);
 
       const expectedKey = `user-avatars/${TEST_USER_ID}/${MOCK_TIMESTAMP}-my_avatar_pic.jpg`;
-      expect(s3Client.send).toHaveBeenCalledWith(
+      expect(mockS3Send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: expect.objectContaining({
             Key: expectedKey,
@@ -237,13 +233,12 @@ describe("AvatarStorageService", () => {
     });
 
     it("should sanitize filename with special characters (@#$%) to underscores", async () => {
-      const { s3Client } = await import("./s3-client");
       const file = createMockFile("user@#avatar$%.jpg", 1024, "image/jpeg");
 
       await AvatarStorageService.uploadAvatar(TEST_USER_ID, file);
 
       const expectedKey = `user-avatars/${TEST_USER_ID}/${MOCK_TIMESTAMP}-user__avatar__.jpg`;
-      expect(s3Client.send).toHaveBeenCalledWith(
+      expect(mockS3Send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: expect.objectContaining({
             Key: expectedKey,
@@ -253,13 +248,12 @@ describe("AvatarStorageService", () => {
     });
 
     it("should preserve valid characters (alphanumeric, ., -) in filename", async () => {
-      const { s3Client } = await import("./s3-client");
       const file = createMockFile("avatar-pic.v2.jpg", 1024, "image/jpeg");
 
       await AvatarStorageService.uploadAvatar(TEST_USER_ID, file);
 
       const expectedKey = `user-avatars/${TEST_USER_ID}/${MOCK_TIMESTAMP}-avatar-pic.v2.jpg`;
-      expect(s3Client.send).toHaveBeenCalledWith(
+      expect(mockS3Send).toHaveBeenCalledWith(
         expect.objectContaining({
           input: expect.objectContaining({
             Key: expectedKey,
@@ -340,15 +334,14 @@ describe("AvatarStorageService", () => {
     });
 
     it("should call S3 client with correct parameters", async () => {
-      const { s3Client } = await import("./s3-client");
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       await AvatarStorageService.uploadAvatar(TEST_USER_ID, file);
 
-      expect(s3Client.send).toHaveBeenCalledTimes(1);
-      expect(s3Client.send).toHaveBeenCalledWith(expect.any(PutObjectCommand));
+      expect(mockS3Send).toHaveBeenCalledTimes(1);
+      expect(mockS3Send).toHaveBeenCalledWith(expect.any(PutObjectCommand));
 
-      const putCommand = vi.mocked(s3Client.send).mock
+      const putCommand = mockS3Send.mock
         .calls[0][0] as PutObjectCommand;
       expect(putCommand.input).toMatchObject({
         Bucket: "test-bucket",
@@ -361,8 +354,7 @@ describe("AvatarStorageService", () => {
 
   describe("Upload Failure", () => {
     it("should return error result when S3 upload throws error", async () => {
-      const { s3Client } = await import("./s3-client");
-      vi.mocked(s3Client.send).mockRejectedValue(
+      mockS3Send.mockRejectedValue(
         new Error("S3 connection failed")
       );
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
@@ -379,8 +371,7 @@ describe("AvatarStorageService", () => {
     });
 
     it("should return error result on network error", async () => {
-      const { s3Client } = await import("./s3-client");
-      vi.mocked(s3Client.send).mockRejectedValue(new Error("Network timeout"));
+      mockS3Send.mockRejectedValue(new Error("Network timeout"));
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       const result = await AvatarStorageService.uploadAvatar(
@@ -395,10 +386,9 @@ describe("AvatarStorageService", () => {
     });
 
     it("should log error when upload fails", async () => {
-      const { s3Client } = await import("./s3-client");
 
       const mockError = new Error("S3 service unavailable");
-      vi.mocked(s3Client.send).mockRejectedValue(mockError);
+      mockS3Send.mockRejectedValue(mockError);
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       await expect(
@@ -423,10 +413,9 @@ describe("AvatarStorageService", () => {
     });
 
     it("should log error with error object and userId on failed upload", async () => {
-      const { s3Client } = await import("./s3-client");
 
       const mockError = new Error("Upload error");
-      vi.mocked(s3Client.send).mockRejectedValue(mockError);
+      mockS3Send.mockRejectedValue(mockError);
       const file = createMockFile("avatar.jpg", 1024, "image/jpeg");
 
       const result = await AvatarStorageService.uploadAvatar(

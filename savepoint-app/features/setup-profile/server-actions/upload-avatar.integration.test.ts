@@ -14,7 +14,7 @@ import {
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 
-import { s3Client } from "@/shared/lib/storage/s3-client";
+import { getS3Client } from "@/shared/lib/storage/s3-client";
 
 import { uploadAvatar } from "./upload-avatar";
 
@@ -47,7 +47,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
 
   const fileExistsInS3 = async (key: string): Promise<boolean> => {
     try {
-      await s3Client.send(
+      await getS3Client().send(
         new GetObjectCommand({
           Bucket: env.S3_BUCKET_NAME,
           Key: key,
@@ -66,7 +66,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
   };
 
   const cleanupUserS3Files = async (userId: string): Promise<void> => {
-    const listResponse = await s3Client.send(
+    const listResponse = await getS3Client().send(
       new ListObjectsV2Command({
         Bucket: env.S3_BUCKET_NAME,
         Prefix: `${env.S3_AVATAR_PATH_PREFIX}${userId}/`,
@@ -76,7 +76,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     if (listResponse.Contents) {
       for (const object of listResponse.Contents) {
         if (object.Key) {
-          await s3Client.send(
+          await getS3Client().send(
             new DeleteObjectCommand({
               Bucket: env.S3_BUCKET_NAME,
               Key: object.Key,
@@ -91,7 +91,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     await setupDatabase();
 
     try {
-      await s3Client.send(
+      await getS3Client().send(
         new HeadBucketCommand({
           Bucket: env.S3_BUCKET_NAME,
         })
@@ -100,7 +100,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
       const err = error as { name?: string };
       if (err.name === "NotFound" || err.name === "NoSuchBucket") {
         try {
-          await s3Client.send(
+          await getS3Client().send(
             new CreateBucketCommand({
               Bucket: env.S3_BUCKET_NAME,
             })
@@ -263,7 +263,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
         expect(result.error).toBe("Invalid input data");
       }
 
-      const listResponse = await s3Client.send(
+      const listResponse = await getS3Client().send(
         new ListObjectsV2Command({
           Bucket: env.S3_BUCKET_NAME,
           Prefix: `${env.S3_AVATAR_PATH_PREFIX}${testUserId}/`,
@@ -301,7 +301,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
         expect(result.error).toBe("Invalid input data");
       }
 
-      const listResponse = await s3Client.send(
+      const listResponse = await getS3Client().send(
         new ListObjectsV2Command({
           Bucket: env.S3_BUCKET_NAME,
           Prefix: `${env.S3_AVATAR_PATH_PREFIX}${testUserId}/`,
@@ -337,7 +337,7 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
         );
       }
 
-      const listResponse = await s3Client.send(
+      const listResponse = await getS3Client().send(
         new ListObjectsV2Command({
           Bucket: env.S3_BUCKET_NAME,
           Prefix: `${env.S3_AVATAR_PATH_PREFIX}${testUserId}/`,

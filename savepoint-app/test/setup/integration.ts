@@ -44,7 +44,11 @@ vi.mock("@/shared/lib/app/db", async () => {
 });
 vi.unmock("@/data-access-layer/repository");
 async function ensureS3BucketExists(): Promise<void> {
-  const { s3Client } = await import("@/shared/lib/storage/s3-client");
+  const { getS3Client, resetS3Client } = await import(
+    "@/shared/lib/storage/s3-client"
+  );
+  resetS3Client();
+  const s3Client = getS3Client();
   const bucketName = process.env.S3_BUCKET_NAME!;
   try {
     await s3Client.send(
