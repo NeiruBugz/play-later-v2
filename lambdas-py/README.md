@@ -166,14 +166,52 @@ logger.info("Processing started", steam_id="76561198...")
 
 ## Deployment
 
-(To be implemented with Terraform/SAM)
+### Infrastructure Setup
+
+Deploy infrastructure with Terraform:
 
 ```bash
-# Package Lambda
-uv build
-
-# Deploy with Terraform
+cd infra/envs/dev  # or infra/envs/prod
+terraform init
 terraform apply
+```
+
+### Populate Secrets
+
+After `terraform apply`, populate the AWS Secrets Manager secrets via AWS CLI.
+This keeps sensitive values out of Terraform state.
+
+```bash
+# Set environment (dev or prod)
+ENV=dev  # or prod
+PROJECT=savepoint
+
+# Steam API Key
+aws secretsmanager put-secret-value \
+  --secret-id "${PROJECT}/${ENV}/steam-api-key" \
+  --secret-string "$STEAM_API_KEY"
+
+# IGDB Credentials (JSON format)
+aws secretsmanager put-secret-value \
+  --secret-id "${PROJECT}/${ENV}/igdb-credentials" \
+  --secret-string "{\"client_id\":\"$IGDB_CLIENT_ID\",\"client_secret\":\"$IGDB_CLIENT_SECRET\"}"
+
+# Database URL
+aws secretsmanager put-secret-value \
+  --secret-id "${PROJECT}/${ENV}/database-url" \
+  --secret-string "$DATABASE_URL"
+```
+
+### Build and Push Container Images
+
+```bash
+# Authenticate with ECR
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_URL>
+
+# Build and push images (example for steam-import)
+docker build -t savepoint-lambdas:steam-import -f Dockerfile.steam-import .
+docker tag savepoint-lambdas:steam-import <ECR_URL>:steam-import-latest
+docker push <ECR_URL>:steam-import-latest
 ```
 
 ## License

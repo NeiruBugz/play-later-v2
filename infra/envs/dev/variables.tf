@@ -70,33 +70,9 @@ variable "additional_callback_urls" {
 # Lambda Configuration
 # =============================================================================
 
-variable "steam_api_key" {
-  type        = string
-  description = "Steam Web API key"
-  sensitive   = true
-  default     = ""
-}
-
-variable "igdb_client_id" {
-  type        = string
-  description = "IGDB/Twitch client ID"
-  sensitive   = true
-  default     = ""
-}
-
-variable "igdb_client_secret" {
-  type        = string
-  description = "IGDB/Twitch client secret"
-  sensitive   = true
-  default     = ""
-}
-
-variable "database_url" {
-  type        = string
-  description = "PostgreSQL database connection URL"
-  sensitive   = true
-  default     = ""
-}
+# NOTE: Secret values (steam_api_key, igdb_client_id, igdb_client_secret, database_url)
+# are populated out-of-band via AWS CLI after terraform apply.
+# See lambdas-py/README.md for deployment instructions.
 
 variable "lambda_log_level" {
   type        = string

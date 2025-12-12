@@ -13,11 +13,8 @@ variable "secret_names" {
   type        = list(string)
 }
 
-variable "secret_values" {
-  description = "Map of secret names to their values (sensitive). All keys in secret_names must have corresponding entries."
-  type        = map(string)
-  sensitive   = true
-}
+# NOTE: secret_values removed - secrets are populated out-of-band via AWS CLI
+# to avoid storing sensitive data in Terraform state.
 
 variable "recovery_window_in_days" {
   description = "Number of days AWS Secrets Manager waits before deleting a secret (0 for immediate deletion in dev)"

@@ -128,7 +128,7 @@ class IgdbClient:
 
             response = await client.post(
                 self._twitch_url,
-                params={
+                data={
                     "client_id": self._client_id,
                     "client_secret": self._client_secret,
                     "grant_type": "client_credentials",

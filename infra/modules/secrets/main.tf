@@ -19,16 +19,6 @@ resource "aws_secretsmanager_secret" "this" {
   tags = local.tags
 }
 
-resource "aws_secretsmanager_secret_version" "this" {
-  for_each = local.secret_names_set
-
-  secret_id     = aws_secretsmanager_secret.this[each.key].id
-  secret_string = var.secret_values[each.key]
-
-  lifecycle {
-    precondition {
-      condition     = contains(keys(var.secret_values), each.key)
-      error_message = "Secret name '${each.key}' must have a corresponding entry in secret_values."
-    }
-  }
-}
+# NOTE: Secret values are populated out-of-band via AWS CLI after terraform apply.
+# This avoids storing sensitive values in Terraform state.
+# See lambdas-py/README.md for deployment instructions.

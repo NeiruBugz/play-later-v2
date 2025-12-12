@@ -53,14 +53,8 @@ module "lambda_secrets" {
   environment = var.environment
 
   secret_names = ["steam-api-key", "igdb-credentials", "database-url"]
-  secret_values = {
-    steam-api-key = var.steam_api_key
-    igdb-credentials = jsonencode({
-      client_id     = var.igdb_client_id
-      client_secret = var.igdb_client_secret
-    })
-    database-url = var.database_url
-  }
+  # NOTE: secret_values populated out-of-band via AWS CLI after terraform apply
+  # See lambdas-py/README.md for deployment instructions
 
   recovery_window_in_days = 0 # Immediate deletion in dev
 }
