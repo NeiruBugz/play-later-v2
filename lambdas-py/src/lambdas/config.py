@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     )
 
     # Steam API Configuration
-    steam_api_key: str = Field(
+    steam_api_key: SecretStr = Field(
         ...,
         description="Steam Web API key for accessing user libraries",
     )
@@ -31,13 +31,13 @@ class Settings(BaseSettings):
         ...,
         description="Twitch client ID for IGDB API access",
     )
-    igdb_client_secret: str = Field(
+    igdb_client_secret: SecretStr = Field(
         ...,
         description="Twitch client secret for IGDB API access",
     )
 
     # Database Configuration
-    database_url: str = Field(
+    database_url: SecretStr = Field(
         ...,
         description="PostgreSQL connection string",
     )
@@ -70,7 +70,7 @@ class Settings(BaseSettings):
             )
         return upper_v
 
-    @field_validator("database_url")
+    @field_validator("database_url", mode="before")
     @classmethod
     def validate_database_url(cls, v: str) -> str:
         """Validate that database URL is a PostgreSQL connection string."""

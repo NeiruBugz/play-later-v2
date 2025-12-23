@@ -3,7 +3,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from lambdas.errors import S3Error, SteamApiError
 from lambdas.handlers.steam_import import (
@@ -110,7 +110,7 @@ class TestSteamImportHandler:
             patch("lambdas.handlers.steam_import.get_settings") as mock_settings,
         ):
             # Setup mocks
-            mock_settings.return_value.steam_api_key = "test-key"
+            mock_settings.return_value.steam_api_key = SecretStr("test-key")
             mock_settings.return_value.s3_bucket = "test-bucket"
             mock_settings.return_value.aws_region = "us-east-1"
 
@@ -150,7 +150,7 @@ class TestSteamImportHandler:
             patch("lambdas.handlers.steam_import.get_settings") as mock_settings,
         ):
             # Setup mocks
-            mock_settings.return_value.steam_api_key = "test-key"
+            mock_settings.return_value.steam_api_key = SecretStr("test-key")
 
             mock_steam_instance = AsyncMock()
             mock_steam_instance.get_owned_games.return_value = []
@@ -180,7 +180,7 @@ class TestSteamImportHandler:
             patch("lambdas.handlers.steam_import.get_settings") as mock_settings,
         ):
             # Setup mocks
-            mock_settings.return_value.steam_api_key = "test-key"
+            mock_settings.return_value.steam_api_key = SecretStr("test-key")
             mock_settings.return_value.s3_bucket = "test-bucket"
             mock_settings.return_value.aws_region = "us-east-1"
 
@@ -257,7 +257,7 @@ class TestSteamImportHandler:
             patch("lambdas.handlers.steam_import.get_settings") as mock_settings,
         ):
             # Setup mocks
-            mock_settings.return_value.steam_api_key = "test-key"
+            mock_settings.return_value.steam_api_key = SecretStr("test-key")
 
             mock_steam_instance = AsyncMock()
             mock_steam_instance.get_owned_games.side_effect = SteamApiError(
@@ -284,7 +284,7 @@ class TestSteamImportHandler:
             patch("lambdas.handlers.steam_import.get_settings") as mock_settings,
         ):
             # Setup mocks
-            mock_settings.return_value.steam_api_key = "test-key"
+            mock_settings.return_value.steam_api_key = SecretStr("test-key")
             mock_settings.return_value.s3_bucket = "test-bucket"
             mock_settings.return_value.aws_region = "us-east-1"
 
@@ -314,7 +314,7 @@ class TestSteamImportHandler:
             patch("lambdas.handlers.steam_import.get_settings") as mock_settings,
         ):
             # Setup mocks
-            mock_settings.return_value.steam_api_key = "test-key"
+            mock_settings.return_value.steam_api_key = SecretStr("test-key")
 
             mock_steam_instance = AsyncMock()
             mock_steam_instance.get_owned_games.side_effect = RuntimeError(
@@ -340,7 +340,7 @@ class TestSteamImportHandler:
             patch("lambdas.handlers.steam_import.get_settings") as mock_settings,
         ):
             # Setup mocks
-            mock_settings.return_value.steam_api_key = "test-api-key"
+            mock_settings.return_value.steam_api_key = SecretStr("test-api-key")
             mock_settings.return_value.s3_bucket = "test-bucket"
             mock_settings.return_value.aws_region = "us-east-1"
 
@@ -375,7 +375,7 @@ class TestSteamImportHandler:
             patch("lambdas.handlers.steam_import.get_settings") as mock_settings,
         ):
             # Setup mocks
-            mock_settings.return_value.steam_api_key = "test-key"
+            mock_settings.return_value.steam_api_key = SecretStr("test-key")
             mock_settings.return_value.s3_bucket = "my-test-bucket"
             mock_settings.return_value.aws_region = "us-west-2"
 

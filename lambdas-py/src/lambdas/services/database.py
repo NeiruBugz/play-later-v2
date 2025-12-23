@@ -15,7 +15,7 @@ Architecture:
 from __future__ import annotations
 
 from collections.abc import Generator
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from typing import Any
 
@@ -190,7 +190,7 @@ def _get_engine() -> Engine:
         logger.debug("Creating SQLAlchemy engine")
 
         _engine = create_engine(
-            settings.database_url,
+            settings.database_url.get_secret_value(),
             pool_size=2,
             max_overflow=3,
             pool_pre_ping=True,
@@ -692,17 +692,16 @@ class DatabaseService:
         """
         self._external_session = session
 
-    def _get_session_context(self) -> Generator[Session, None, None]:
+    @contextmanager
+    def _get_session(self) -> Generator[Session, None, None]:
         """Get session context - either external or managed.
 
-        Returns:
-            Generator yielding a Session instance.
+        Yields:
+            Session instance (external or managed with auto-commit).
         """
         if self._external_session is not None:
-            # Use external session without auto-commit
             yield self._external_session
         else:
-            # Use managed session with auto-commit
             with get_session() as session:
                 yield session
 
@@ -715,13 +714,8 @@ class DatabaseService:
         Returns:
             The upserted ImportedGame record
         """
-        session_gen = self._get_session_context()
-        session = next(session_gen)
-        try:
+        with self._get_session() as session:
             return upsert_imported_game(session, data)
-        finally:
-            with suppress(StopIteration):
-                next(session_gen)
 
     def upsert_genre(self, data: GenreData) -> Genre:
         """Upsert Genre record.
@@ -732,13 +726,8 @@ class DatabaseService:
         Returns:
             The upserted Genre record
         """
-        session_gen = self._get_session_context()
-        session = next(session_gen)
-        try:
+        with self._get_session() as session:
             return upsert_genre(session, data)
-        finally:
-            with suppress(StopIteration):
-                next(session_gen)
 
     def upsert_platform(self, data: PlatformData) -> Platform:
         """Upsert Platform record.
@@ -749,13 +738,8 @@ class DatabaseService:
         Returns:
             The upserted Platform record
         """
-        session_gen = self._get_session_context()
-        session = next(session_gen)
-        try:
+        with self._get_session() as session:
             return upsert_platform(session, data)
-        finally:
-            with suppress(StopIteration):
-                next(session_gen)
 
     def upsert_game(self, data: GameData) -> Game:
         """Upsert Game record with genres and platforms.
@@ -766,13 +750,8 @@ class DatabaseService:
         Returns:
             The upserted Game record
         """
-        session_gen = self._get_session_context()
-        session = next(session_gen)
-        try:
+        with self._get_session() as session:
             return upsert_game(session, data)
-        finally:
-            with suppress(StopIteration):
-                next(session_gen)
 
     def create_library_item(self, data: LibraryItemData) -> LibraryItem:
         """Create LibraryItem record with status based on playtime.
@@ -786,10 +765,5 @@ class DatabaseService:
         Raises:
             ValueError: If LibraryItem already exists for user + game
         """
-        session_gen = self._get_session_context()
-        session = next(session_gen)
-        try:
+        with self._get_session() as session:
             return create_library_item(session, data)
-        finally:
-            with suppress(StopIteration):
-                next(session_gen)

@@ -190,7 +190,7 @@ def test_full_pipeline_steam_to_database(
     settings = get_settings()
     from sqlalchemy import create_engine
 
-    engine = create_engine(settings.database_url)
+    engine = create_engine(settings.database_url.get_secret_value())
     Session = sessionmaker(bind=engine)
     session = Session()
 

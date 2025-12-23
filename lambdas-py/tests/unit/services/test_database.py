@@ -10,6 +10,7 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pydantic import SecretStr
 from sqlalchemy.orm import Session
 
 from lambdas.models.db import (
@@ -673,7 +674,7 @@ def test_get_engine_creates_engine_with_correct_settings(
 
     # Mock settings
     mock_settings = MagicMock()
-    mock_settings.database_url = "postgresql://user:pass@localhost:5432/db"
+    mock_settings.database_url = SecretStr("postgresql://user:pass@localhost:5432/db")
     mock_get_settings.return_value = mock_settings
 
     # Mock engine

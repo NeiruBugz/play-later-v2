@@ -63,7 +63,7 @@ async def _import_steam_library(event: SteamImportEvent) -> SteamImportResponse:
 
     try:
         # Fetch games from Steam
-        async with SteamClient(api_key=settings.steam_api_key) as steam_client:
+        async with SteamClient(api_key=settings.steam_api_key.get_secret_value()) as steam_client:
             games = await steam_client.get_owned_games(event.steam_id64)
 
         logger.info("Fetched games from Steam", game_count=len(games))

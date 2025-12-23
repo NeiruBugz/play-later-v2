@@ -3,7 +3,7 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from lambdas.errors import IgdbApiError, S3Error
 from lambdas.handlers.igdb_enrichment import (
@@ -101,7 +101,7 @@ def mock_settings() -> MagicMock:
     """Fixture for mocked settings."""
     settings = MagicMock()
     settings.igdb_client_id = "test_client_id"
-    settings.igdb_client_secret = "test_client_secret"
+    settings.igdb_client_secret = SecretStr("test_client_secret")
     settings.aws_region = "us-east-1"
     return settings
 

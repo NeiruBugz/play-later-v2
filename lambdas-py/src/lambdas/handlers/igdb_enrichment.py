@@ -140,7 +140,7 @@ async def _enrich_steam_library(
 
         async with IgdbClient(
             client_id=settings.igdb_client_id,
-            client_secret=settings.igdb_client_secret,
+            client_secret=settings.igdb_client_secret.get_secret_value(),
         ) as igdb_client:
             for game_data in raw_games:
                 stats.processed += 1

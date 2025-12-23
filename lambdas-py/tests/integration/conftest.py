@@ -177,7 +177,7 @@ async def steam_client(
     Yields:
         Initialized SteamClient connected to real Steam API
     """
-    async with SteamClient(api_key=integration_settings.steam_api_key) as client:
+    async with SteamClient(api_key=integration_settings.steam_api_key.get_secret_value()) as client:
         yield client
 
 
@@ -221,7 +221,7 @@ async def igdb_client(
     """
     async with IgdbClient(
         client_id=integration_settings.igdb_client_id,
-        client_secret=integration_settings.igdb_client_secret,
+        client_secret=integration_settings.igdb_client_secret.get_secret_value(),
     ) as client:
         yield client
 
@@ -246,7 +246,7 @@ def db_engine(
         SQLAlchemy Engine instance
     """
     engine = create_engine(
-        integration_settings.database_url,
+        integration_settings.database_url.get_secret_value(),
         echo=False,
         pool_pre_ping=True,
     )
