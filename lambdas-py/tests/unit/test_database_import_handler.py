@@ -234,6 +234,64 @@ def test_enriched_csv_row_parse_empty_genres() -> None:
     assert genre_ids == []
 
 
+def test_enriched_csv_row_parse_genre_ids_with_textual_names() -> None:
+    """Test parsing genre IDs tolerates both numeric IDs and textual names."""
+    row = EnrichedCsvRow(
+        steam_app_id="570",
+        name="Dota 2",
+        playtime=15000,
+        igdb_genres="5,Action,12,RPG",
+        match_status=IgdbMatchStatus.MATCHED,
+    )
+
+    genre_values = row.parse_genre_ids()
+    # Should return mixed list: ints for numeric values, strings for names
+    assert genre_values == [5, "Action", 12, "RPG"]
+
+
+def test_enriched_csv_row_parse_platform_ids_with_textual_names() -> None:
+    """Test parsing platform IDs tolerates both numeric IDs and textual names."""
+    row = EnrichedCsvRow(
+        steam_app_id="570",
+        name="Dota 2",
+        playtime=15000,
+        igdb_platforms="6,PC,14,PlayStation 5",
+        match_status=IgdbMatchStatus.MATCHED,
+    )
+
+    platform_values = row.parse_platform_ids()
+    # Should return mixed list: ints for numeric values, strings for names
+    assert platform_values == [6, "PC", 14, "PlayStation 5"]
+
+
+def test_enriched_csv_row_parse_genre_ids_only_textual_names() -> None:
+    """Test parsing genre IDs with only textual names."""
+    row = EnrichedCsvRow(
+        steam_app_id="570",
+        name="Dota 2",
+        playtime=15000,
+        igdb_genres="Action,RPG,Strategy",
+        match_status=IgdbMatchStatus.MATCHED,
+    )
+
+    genre_values = row.parse_genre_ids()
+    assert genre_values == ["Action", "RPG", "Strategy"]
+
+
+def test_enriched_csv_row_parse_platform_ids_only_textual_names() -> None:
+    """Test parsing platform IDs with only textual names."""
+    row = EnrichedCsvRow(
+        steam_app_id="570",
+        name="Dota 2",
+        playtime=15000,
+        igdb_platforms="PC,PlayStation 5,Xbox Series X",
+        match_status=IgdbMatchStatus.MATCHED,
+    )
+
+    platform_values = row.parse_platform_ids()
+    assert platform_values == ["PC", "PlayStation 5", "Xbox Series X"]
+
+
 def test_enriched_csv_row_parse_release_date() -> None:
     """Test parsing release date string to datetime."""
     row = EnrichedCsvRow(
@@ -298,6 +356,68 @@ def test_parse_enriched_csv_invalid_row_skipped() -> None:
     assert len(rows) == 2
     assert rows[0].steam_app_id == "570"
     assert rows[1].steam_app_id == "730"
+
+
+def test_enriched_csv_row_filtered_status_mapped_to_ignored() -> None:
+    """Test FILTERED status is mapped to IGNORED enum."""
+    row = EnrichedCsvRow(
+        steam_app_id="440",
+        name="Team Fortress 2",
+        playtime=0,
+        match_status="filtered",  # Lowercase FILTERED
+    )
+
+    assert row.match_status == IgdbMatchStatus.IGNORED
+
+
+def test_enriched_csv_row_error_status_mapped_to_unmatched() -> None:
+    """Test ERROR status is mapped to UNMATCHED enum."""
+    row = EnrichedCsvRow(
+        steam_app_id="570",
+        name="Dota 2",
+        playtime=15000,
+        match_status="error",  # Lowercase ERROR
+    )
+
+    assert row.match_status == IgdbMatchStatus.UNMATCHED
+
+
+def test_enriched_csv_row_invalid_status_defaults_to_unmatched() -> None:
+    """Test invalid status defaults to UNMATCHED enum."""
+    row = EnrichedCsvRow(
+        steam_app_id="730",
+        name="Counter-Strike 2",
+        playtime=5000,
+        match_status="INVALID_STATUS",  # Unknown status
+    )
+
+    assert row.match_status == IgdbMatchStatus.UNMATCHED
+
+
+def test_parse_enriched_csv_with_filtered_status() -> None:
+    """Test parsing CSV with FILTERED status maps to IGNORED."""
+    csv_content = """appid,name,playtime_forever,match_status
+440,Team Fortress 2,0,filtered
+570,Dota 2,15000,matched"""
+
+    rows = _parse_enriched_csv(csv_content)
+
+    assert len(rows) == 2
+    assert rows[0].match_status == IgdbMatchStatus.IGNORED
+    assert rows[1].match_status == IgdbMatchStatus.MATCHED
+
+
+def test_parse_enriched_csv_with_error_status() -> None:
+    """Test parsing CSV with ERROR status maps to UNMATCHED."""
+    csv_content = """appid,name,playtime_forever,match_status
+570,Dota 2,15000,error
+440,Team Fortress 2,0,unmatched"""
+
+    rows = _parse_enriched_csv(csv_content)
+
+    assert len(rows) == 2
+    assert rows[0].match_status == IgdbMatchStatus.UNMATCHED
+    assert rows[1].match_status == IgdbMatchStatus.UNMATCHED
 
 
 # ==================== Import Logic Tests ====================
@@ -414,6 +534,94 @@ def test_import_row_matched_game_creates_library_item(
     assert stats.imported_games_updated == 1
     assert stats.games_created == 1
     assert stats.library_items_created == 1
+
+
+@patch("lambdas.handlers.database_import.get_logger")
+@patch("lambdas.handlers.database_import.create_library_item")
+@patch("lambdas.handlers.database_import.upsert_game")
+@patch("lambdas.handlers.database_import.upsert_genre")
+@patch("lambdas.handlers.database_import.upsert_platform")
+@patch("lambdas.handlers.database_import.upsert_imported_game")
+@patch("lambdas.handlers.database_import._check_record_exists")
+def test_import_row_filters_textual_names_and_logs_warning(
+    mock_check_exists: Mock,
+    mock_upsert_imported_game: Mock,
+    mock_upsert_platform: Mock,
+    mock_upsert_genre: Mock,
+    mock_upsert_game: Mock,
+    mock_create_library_item: Mock,
+    mock_get_logger: Mock,
+    mock_session: Mock,
+) -> None:
+    """Test importing MATCHED game filters out textual names and logs warnings."""
+    mock_check_exists.side_effect = [False, False]
+
+    mock_imported_game = Mock()
+    mock_imported_game.id = "imported123"
+    mock_upsert_imported_game.return_value = mock_imported_game
+
+    mock_game = Mock()
+    mock_game.id = "game123"
+    mock_upsert_game.return_value = mock_game
+
+    mock_library_item = Mock()
+    mock_library_item.id = "library123"
+    mock_create_library_item.return_value = mock_library_item
+
+    mock_logger = Mock()
+    mock_get_logger.return_value = mock_logger
+
+    # Row with mixed numeric IDs and textual names
+    row = EnrichedCsvRow(
+        steam_app_id="570",
+        name="Dota 2",
+        playtime=15000,
+        igdb_id=119,
+        igdb_title="Dota 2",
+        igdb_slug="dota-2",
+        igdb_genres="5,Action,12,RPG",  # Mixed: 5,12 are ints; Action,RPG are strings
+        igdb_platforms="6,PC,14",  # Mixed: 6,14 are ints; PC is string
+        match_status=IgdbMatchStatus.MATCHED,
+    )
+
+    stats = ImportStats()
+
+    _import_row(mock_session, row, "user123", stats)
+
+    # Should log warnings for textual names
+    assert mock_logger.warning.call_count == 2
+
+    # Check genre warning
+    genre_warning_call = mock_logger.warning.call_args_list[0]
+    assert "genre names" in genre_warning_call[0][0].lower()
+    assert genre_warning_call[1]["genre_names"] == ["Action", "RPG"]
+    assert genre_warning_call[1]["genre_ids"] == [5, 12]
+
+    # Check platform warning
+    platform_warning_call = mock_logger.warning.call_args_list[1]
+    assert "platform names" in platform_warning_call[0][0].lower()
+    assert platform_warning_call[1]["platform_names"] == ["PC"]
+    assert platform_warning_call[1]["platform_ids"] == [6, 14]
+
+    # Should only upsert genres with integer IDs (2 calls for IDs 5 and 12)
+    assert mock_upsert_genre.call_count == 2
+    # Verify only int IDs are passed
+    for call in mock_upsert_genre.call_args_list:
+        genre_data = call[0][1]
+        assert isinstance(genre_data.igdb_id, int)
+
+    # Should only upsert platforms with integer IDs (2 calls for IDs 6 and 14)
+    assert mock_upsert_platform.call_count == 2
+    # Verify only int IDs are passed
+    for call in mock_upsert_platform.call_args_list:
+        platform_data = call[0][1]
+        assert isinstance(platform_data.igdb_id, int)
+
+    # Should upsert Game with only integer IDs
+    mock_upsert_game.assert_called_once()
+    game_data = mock_upsert_game.call_args[0][1]
+    assert game_data.genre_ids == [5, 12]  # Only ints
+    assert game_data.platform_ids == [6, 14]  # Only ints
 
 
 @patch("lambdas.handlers.database_import.create_library_item")

@@ -41,23 +41,26 @@ cp .env.integration.example .env.integration
 **Required Environment Variables:**
 
 ```bash
-# Test User (create in your dev database first)
-TEST_USER_ID=test-user-integration
+IGDB_CLIENT_ID=your-igdb-client-id
+IGDB_CLIENT_SECRET=your-igdb-client-secret
 
-# Steam API (get from https://steamcommunity.com/dev/apikey)
-STEAM_API_KEY=your_steam_api_key_here
-TEST_STEAM_ID=76561198000000000  # Use small test account!
+# Steam API (optional for Steam integration features)
+STEAM_API_KEY=your-steam-api-key
 
-# IGDB/Twitch API (get from https://dev.twitch.tv/console/apps)
-IGDB_CLIENT_ID=your_twitch_client_id_here
-IGDB_CLIENT_SECRET=your_twitch_client_secret_here
+# Database Configuration
+DATABASE_URL=your-postgres-url
 
-# Database (dev/test database only - NOT production!)
-DATABASE_URL=postgresql://user:password@localhost:5432/savepoint_test
-
-# S3 (test bucket or LocalStack)
-S3_BUCKET=savepoint-steam-imports-test
 AWS_REGION=us-east-1
+AWS_ENDPOINT_URL=http://localhost:4568
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
+S3_BUCKET=savepoint-dev
+
+# Logging Configuration
+LOG_LEVEL=INFO
+
+TEST_USER_ID=your-test-user-db-id
+TEST_STEAM_ID=your-test-steam-user-id
 ```
 
 ### 3. Set Up Test Database

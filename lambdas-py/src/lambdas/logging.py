@@ -65,11 +65,18 @@ def configure_logging(log_level: str | None = None) -> None:
             structlog.dev.ConsoleRenderer(colors=True),
         ]
 
+    # Resolve log level to numeric value
+    # logging.getLevelName() returns a string when given an int, but we need an int
+    if isinstance(level, str):
+        # Convert string level name to numeric level
+        numeric_level = logging._nameToLevel.get(level.upper(), logging.INFO)
+    else:
+        # Already numeric, use as-is
+        numeric_level = int(level) if level is not None else logging.INFO
+
     structlog.configure(
         processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(
-            logging.getLevelName(level)
-        ),
+        wrapper_class=structlog.make_filtering_bound_logger(numeric_level),
         context_class=dict,
         logger_factory=structlog.PrintLoggerFactory(),
         cache_logger_on_first_use=True,

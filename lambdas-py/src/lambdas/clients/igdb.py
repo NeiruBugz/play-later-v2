@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-import asyncio
 import time
 from typing import Any
 
 import httpx
+from aiolimiter import AsyncLimiter
+from pydantic import ValidationError
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -19,13 +20,17 @@ from lambdas.models.igdb import IgdbGame, IgdbToken
 # Steam store URL pattern for IGDB external_games matching
 STEAM_STORE_URL = "https://store.steampowered.com/app"
 
+# Shared rate limiter: 4 requests per second (application-wide)
+# Uses leaky bucket algorithm to ensure requests are spaced ~0.25s apart globally
+_IGDB_RATE_LIMITER = AsyncLimiter(max_rate=4, time_period=1.0)
+
 
 class IgdbClient:
     """Async client for IGDB API with OAuth2, rate limiting, and caching.
 
     Features:
     - Automatic OAuth2 token management via Twitch API
-    - Rate limiting (4 requests/second via semaphore)
+    - Rate limiting (4 requests/second via shared AsyncLimiter)
     - In-memory cache with 1-hour TTL
     - Negative caching (remembers failed lookups)
     - Retry with exponential backoff
@@ -70,8 +75,8 @@ class IgdbClient:
         self._access_token: str | None = None
         self._token_expiry: float | None = None
 
-        # Rate limiting: 4 requests/second
-        self._semaphore = asyncio.Semaphore(rate_limit)
+        # Note: rate_limit parameter is kept for API compatibility but not used
+        # Rate limiting is handled by the shared module-level _IGDB_RATE_LIMITER
 
         # Cache: {steam_app_id: (IgdbGame | None, expiry_timestamp)}
         # Stores both positive (IgdbGame) and negative (None) results
@@ -153,7 +158,7 @@ class IgdbClient:
 
             try:
                 token_data = IgdbToken.model_validate(response.json())
-            except ValueError as e:
+            except ValidationError as e:
                 raise IgdbApiError(
                     message="Failed to parse token response",
                     details={"validation_error": str(e)},
@@ -197,11 +202,9 @@ class IgdbClient:
         client = await self._ensure_client()
         token = await self._get_token()
 
-        # Rate limiting: acquire semaphore and spread requests
-        async with self._semaphore:
-            # Spread requests to avoid bursts (250ms between requests for 4 req/sec)
-            await asyncio.sleep(0.25)
-
+        # Rate limiting: acquire token from shared limiter (4 req/sec globally)
+        # The limiter ensures requests are spaced ~0.25s apart across all instances
+        async with _IGDB_RATE_LIMITER:
             url = f"{self._base_url}/{endpoint}"
 
             try:
@@ -367,7 +370,7 @@ class IgdbClient:
 
             try:
                 game_result = IgdbGame.model_validate(games_data[0])
-            except (ValueError, IndexError) as e:
+            except (ValidationError, IndexError) as e:
                 raise IgdbApiError(
                     message="Failed to parse games response",
                     details={
@@ -425,7 +428,7 @@ class IgdbClient:
                     name=game.name,
                 )
                 return game
-            except (ValueError, IndexError) as e:
+            except (ValidationError, IndexError) as e:
                 raise IgdbApiError(
                     message="Failed to parse games response",
                     details={"igdb_id": igdb_id, "validation_error": str(e)},

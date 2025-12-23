@@ -187,7 +187,7 @@ def _get_engine() -> Engine:
 
     if _engine is None:
         settings = get_settings()
-        logger.debug("Creating SQLAlchemy engine", database_url=settings.database_url)
+        logger.debug("Creating SQLAlchemy engine")
 
         _engine = create_engine(
             settings.database_url,
@@ -618,7 +618,7 @@ def create_library_item(session: Session, data: LibraryItemData) -> LibraryItem:
         LibraryItem.userId == data.user_id,
         LibraryItem.gameId == data.game_id,
     )
-    existing = session.execute(stmt).scalars().first()
+    existing = session.execute(stmt).scalar_one_or_none()
 
     if existing:
         logger.warning(

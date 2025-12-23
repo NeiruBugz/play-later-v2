@@ -114,7 +114,7 @@ class S3Client:
                 "name": game.name or "",
                 "playtime_forever": game.playtime_forever,
                 "img_icon_url": game.img_icon_url or "",
-                "rtime_last_played": game.rtime_last_played or "",
+                "rtime_last_played": str(game.rtime_last_played) if game.rtime_last_played is not None else "",
             })
 
         csv_content = output.getvalue()
@@ -286,7 +286,7 @@ class S3Client:
             games: List of Steam games
 
         Returns:
-            S3 key where the CSV was uploaded
+            Full S3 URI (s3://bucket/key) where the CSV was uploaded
 
         Raises:
             S3Error: If upload fails

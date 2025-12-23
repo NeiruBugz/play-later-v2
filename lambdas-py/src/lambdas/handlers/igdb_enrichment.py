@@ -183,7 +183,7 @@ async def _enrich_steam_library(
                 # Only enrich games, skip DLC/demos/etc.
                 if not classification_result.should_enrich:
                     stats.filtered += 1
-                    row.match_status = "filtered"
+                    row.match_status = "IGNORED"
                     enriched_rows.append(row)
 
                     logger.debug(
@@ -201,7 +201,7 @@ async def _enrich_steam_library(
                     if igdb_game:
                         stats.matched += 1
                         row = _populate_igdb_data(row, igdb_game)
-                        row.match_status = "matched"
+                        row.match_status = "MATCHED"
 
                         logger.debug(
                             "Matched game with IGDB",
@@ -211,7 +211,7 @@ async def _enrich_steam_library(
                         )
                     else:
                         stats.unmatched += 1
-                        row.match_status = "unmatched"
+                        row.match_status = "UNMATCHED"
 
                         logger.debug(
                             "No IGDB match found",
@@ -222,7 +222,7 @@ async def _enrich_steam_library(
                 except IgdbApiError as e:
                     # Log error but continue processing other games
                     stats.unmatched += 1
-                    row.match_status = "error"
+                    row.match_status = "PENDING"
 
                     logger.error(
                         "IGDB API error during enrichment",

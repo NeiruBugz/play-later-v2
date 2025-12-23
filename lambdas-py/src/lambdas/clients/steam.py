@@ -4,6 +4,7 @@ import re
 from typing import Any
 
 import httpx
+from pydantic import ValidationError
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -201,7 +202,7 @@ class SteamClient:
         # Parse and validate response
         try:
             api_response = SteamApiResponse.model_validate(data)
-        except ValueError as e:
+        except (ValueError, ValidationError) as e:
             raise SteamApiError(
                 message="Invalid response structure from Steam API",
                 details={"validation_error": str(e)},

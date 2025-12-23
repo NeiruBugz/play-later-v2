@@ -33,11 +33,35 @@ lambdas-py/
 ### Installation
 
 ```bash
-# Install dependencies
+# Install dependencies (uses uv.lock for reproducible builds)
 uv sync
 
 # Install with dev dependencies
 uv sync --all-extras
+```
+
+### Dependency Management
+
+This project uses **reproducible dependency management** with explicit version constraints:
+
+- **Upper bounds** on all dependencies to prevent breaking changes
+- **Lock file** (`uv.lock`) committed to version control for reproducible builds
+- **CI/CD builds** must use `uv sync --frozen` to ensure exact versions from lock file
+
+**Key version constraints:**
+- `httpx<0.28` - Avoids breaking changes in 0.28.1 (removed deprecated shortcuts, SSL API changes)
+- `boto3<2.0` - Prevents S3 integrity protection regressions and botocore mismatches
+- `pydantic-settings<3.0` - Avoids source resolution order changes (2.12.0) and env_prefix behavior changes
+- `sqlalchemy<3.0` - Prevents breaking changes in transaction/ORM execution model
+- `psycopg2-binary<3.0` - Avoids binary wheel compatibility issues with newer libpq/OpenSSL
+
+**For Lambda container builds:**
+```bash
+# Always use frozen lock file for reproducible builds
+uv sync --frozen
+
+# Or explicitly use lock file
+uv sync --locked
 ```
 
 ## Development
@@ -204,15 +228,27 @@ aws secretsmanager put-secret-value \
 
 ### Build and Push Container Images
 
+**Important:** Docker builds must use the lock file (`uv.lock`) for reproducible Lambda deployments.
+
 ```bash
 # Authenticate with ECR
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_URL>
 
 # Build and push images (example for steam-import)
+# Ensure Dockerfile uses: uv sync --frozen or uv sync --locked
 docker build -t savepoint-lambdas:steam-import -f Dockerfile.steam-import .
 docker tag savepoint-lambdas:steam-import <ECR_URL>:steam-import-latest
 docker push <ECR_URL>:steam-import-latest
 ```
+
+**Dockerfile requirements:**
+- Must copy `uv.lock` before running `uv sync`
+- Use `uv sync --frozen` or `uv sync --locked` to enforce exact versions
+- Example:
+  ```dockerfile
+  COPY pyproject.toml uv.lock ./
+  RUN uv sync --frozen --no-dev
+  ```
 
 ## License
 

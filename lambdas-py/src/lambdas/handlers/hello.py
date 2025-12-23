@@ -19,7 +19,7 @@ def handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     # Configure logging on first invocation
     configure_logging()
 
-    logger = get_logger(lambda_name="hello", request_id=context.request_id if context else "local")
+    logger = get_logger(lambda_name="hello", request_id=context.aws_request_id if context else "local")
 
     logger.info("Hello handler invoked", event_keys=list(event.keys()))
 

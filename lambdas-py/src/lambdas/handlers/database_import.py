@@ -139,8 +139,8 @@ class EnrichedCsvRow(BaseModel):
         igdb_description: Game description/summary
         igdb_cover_image: Cover image URL
         igdb_release_date: Release date (ISO 8601 date string)
-        igdb_genres: Comma-separated genre IDs (e.g., "5,12,31")
-        igdb_platforms: Comma-separated platform IDs
+        igdb_genres: Comma-separated genre IDs (e.g., "5,12,31") or names (e.g., "Action,RPG")
+        igdb_platforms: Comma-separated platform IDs (e.g., "6,14") or names (e.g., "PC,PlayStation 5")
         match_status: MATCHED, UNMATCHED, or IGNORED
     """
 
@@ -193,50 +193,102 @@ class EnrichedCsvRow(BaseModel):
     @field_validator("match_status", mode="before")
     @classmethod
     def normalize_match_status(cls, v: str | IgdbMatchStatus) -> str:
-        """Normalize match_status to uppercase for enum parsing."""
-        if isinstance(v, IgdbMatchStatus):
-            return v.value
-        if isinstance(v, str):
-            return v.upper()
-        return v
+        """Normalize match_status to uppercase and map invalid values to valid enum.
 
-    def parse_genre_ids(self) -> list[int]:
-        """Parse comma-separated genre IDs into list of integers.
+        Maps invalid statuses to valid ones:
+        - FILTERED → IGNORED (filtered apps should be ignored)
+        - ERROR → UNMATCHED (API errors treated as unmatched)
+        - Any other invalid value → UNMATCHED (default fallback)
+
+        Args:
+            v: Raw match_status value (string or enum)
 
         Returns:
-            List of IGDB genre IDs (empty if no genres)
+            Valid IgdbMatchStatus enum value as string
+        """
+        if isinstance(v, IgdbMatchStatus):
+            return v.value
+
+        if isinstance(v, str):
+            normalized = v.upper().strip()
+
+            # Map known invalid statuses to valid enum values
+            status_mapping = {
+                "FILTERED": IgdbMatchStatus.IGNORED.value,
+                "ERROR": IgdbMatchStatus.UNMATCHED.value,
+            }
+
+            if normalized in status_mapping:
+                return status_mapping[normalized]
+
+            # Check if it's already a valid enum value
+            valid_values = {status.value for status in IgdbMatchStatus}
+            if normalized in valid_values:
+                return normalized
+
+            # Fallback: log warning and default to UNMATCHED
+            logger = get_logger()
+            logger.warning(
+                "Invalid match_status value, defaulting to UNMATCHED",
+                original_value=v,
+                normalized_value=normalized,
+            )
+            return IgdbMatchStatus.UNMATCHED.value
+
+        # Fallback for non-string, non-enum values
+        logger = get_logger()
+        logger.warning(
+            "Unexpected match_status type, defaulting to UNMATCHED",
+            value_type=type(v).__name__,
+            value=str(v),
+        )
+        return IgdbMatchStatus.UNMATCHED.value
+
+    def parse_genre_ids(self) -> list[int | str]:
+        """Parse comma-separated genre IDs or names into list of integers or strings.
+
+        Tolerates both numeric IDs (e.g., "5,12,31") and textual names (e.g., "Action,RPG").
+        Attempts to parse each token as an integer; if successful, appends the int,
+        otherwise appends the trimmed string.
+
+        Returns:
+            List of IGDB genre IDs (int) or genre names (str), empty if no genres
         """
         if not self.igdb_genres:
             return []
 
-        ids = []
+        ids: list[int | str] = []
         for genre_str in self.igdb_genres.split(","):
             genre_str = genre_str.strip()
             if genre_str:
                 try:
                     ids.append(int(genre_str))
                 except ValueError:
-                    continue
+                    ids.append(genre_str)
 
         return ids
 
-    def parse_platform_ids(self) -> list[int]:
-        """Parse comma-separated platform IDs into list of integers.
+    def parse_platform_ids(self) -> list[int | str]:
+        """Parse comma-separated platform IDs or names into list of integers or strings.
+
+        Tolerates both numeric IDs (e.g., "6,14") and textual names (e.g., "PC,PlayStation 5").
+        Attempts to parse each token as an integer; if successful, appends the int,
+        otherwise appends the trimmed string.
 
         Returns:
-            List of IGDB platform IDs (empty if no platforms)
+            List of IGDB platform IDs (int) or platform names (str), empty if no platforms
         """
         if not self.igdb_platforms:
             return []
 
-        ids = []
+        ids: list[int | str] = []
         for platform_str in self.igdb_platforms.split(","):
             platform_str = platform_str.strip()
             if platform_str:
                 try:
                     ids.append(int(platform_str))
                 except ValueError:
-                    continue
+                    ids.append(platform_str)
 
         return ids
 
@@ -301,10 +353,19 @@ def _parse_enriched_csv(csv_content: str) -> list[EnrichedCsvRow]:
             row = EnrichedCsvRow(**row_dict)
             rows.append(row)
         except Exception as e:
+            # Extract context for better error logging
+            appid = row_dict.get("appid", "unknown")
+            name = row_dict.get("name", "unknown")
+            match_status = row_dict.get("match_status", "unknown")
+
             logger.warning(
                 "Failed to parse CSV row, skipping",
                 row_number=i,
+                steam_app_id=appid,
+                name=name,
+                match_status=match_status,
                 error=str(e),
+                error_type=type(e).__name__,
             )
             continue
 
@@ -411,9 +472,43 @@ def _import_row(
             {"igdbId": row.igdb_id},
         )
 
-        # Parse genre and platform IDs
-        genre_ids = row.parse_genre_ids()
-        platform_ids = row.parse_platform_ids()
+        # Parse genre and platform IDs/names (tolerates both numeric IDs and textual names)
+        genre_values = row.parse_genre_ids()
+        platform_values = row.parse_platform_ids()
+
+        # Filter to only integer IDs for database operations (strings are skipped with warning)
+        genre_ids: list[int] = []
+        genre_names: list[str] = []
+        for value in genre_values:
+            if isinstance(value, int):
+                genre_ids.append(value)
+            else:
+                genre_names.append(value)
+
+        platform_ids: list[int] = []
+        platform_names: list[str] = []
+        for value in platform_values:
+            if isinstance(value, int):
+                platform_ids.append(value)
+            else:
+                platform_names.append(value)
+
+        # Log warnings if textual names were encountered
+        if genre_names:
+            logger.warning(
+                "Encountered textual genre names (skipping, only numeric IDs are used)",
+                steam_app_id=row.steam_app_id,
+                genre_names=genre_names,
+                genre_ids=genre_ids,
+            )
+
+        if platform_names:
+            logger.warning(
+                "Encountered textual platform names (skipping, only numeric IDs are used)",
+                steam_app_id=row.steam_app_id,
+                platform_names=platform_names,
+                platform_ids=platform_ids,
+            )
 
         # Upsert genres (if provided)
         # Note: Using placeholder names because enriched CSV only contains IDs.

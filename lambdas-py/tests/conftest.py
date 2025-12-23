@@ -127,7 +127,7 @@ def lambda_context() -> MagicMock:
         "arn:aws:lambda:us-east-1:123456789012:function:test-function"
     )
     context.memory_limit_in_mb = 128
-    context.request_id = "test-request-id-12345"
+    context.aws_request_id = "test-request-id-12345"
     context.log_group_name = "/aws/lambda/test-function"
     context.log_stream_name = "2024/01/01/[$LATEST]test-stream"
     return context

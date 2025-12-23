@@ -53,8 +53,15 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
       days = var.lifecycle_expiration_days
     }
 
-    noncurrent_version_expiration {
-      noncurrent_days = 7
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
+    dynamic "noncurrent_version_expiration" {
+      for_each = var.enable_versioning ? [1] : []
+      content {
+        noncurrent_days = 7
+      }
     }
   }
 }

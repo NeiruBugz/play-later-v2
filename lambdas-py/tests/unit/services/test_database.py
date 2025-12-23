@@ -342,11 +342,25 @@ def test_upsert_game_creates_new_record_with_igdb_match(
     def side_effect(*args: tuple[object, ...]) -> MagicMock:
         # Check if this is a Genre or Platform query
         if args and hasattr(args[0], "column_descriptions"):
-            # This is a genre or platform query
-            if any("Genre" in str(col) for col in str(args[0])):
-                return mock_genres_result
-            elif any("Platform" in str(col) for col in str(args[0])):
-                return mock_platforms_result
+            # Iterate over actual column descriptions, not string characters
+            for col in args[0].column_descriptions:
+                # Check column name or string representation for Genre/Platform
+                col_str = str(col)
+                # Try to get column name from dict or tuple/list
+                col_name = None
+                if isinstance(col, dict):
+                    col_name = col.get("name") or col.get("entity")
+                elif isinstance(col, (tuple, list)) and len(col) > 0:
+                    col_name = col[0]
+                
+                # Check column name or string representation for Genre
+                check_str = str(col_name) if col_name else col_str
+                if "Genre" in check_str:
+                    return mock_genres_result
+                
+                # Check column name or string representation for Platform
+                if "Platform" in check_str:
+                    return mock_platforms_result
         return mock_result
 
     mock_session.execute.side_effect = side_effect
@@ -491,9 +505,7 @@ def test_create_library_item_with_zero_playtime_sets_curious_about(
 
     # Mock query to return None (no existing library item)
     mock_result = MagicMock()
-    mock_scalars = MagicMock()
-    mock_scalars.first.return_value = None
-    mock_result.scalars.return_value = mock_scalars
+    mock_result.scalar_one_or_none.return_value = None
     mock_session.execute.return_value = mock_result
 
     create_library_item(mock_session, data)
@@ -517,9 +529,7 @@ def test_create_library_item_with_nonzero_playtime_sets_experienced(
     """Test that create_library_item sets status to EXPERIENCED when playtime > 0."""
     # Mock query to return None (no existing library item)
     mock_result = MagicMock()
-    mock_scalars = MagicMock()
-    mock_scalars.first.return_value = None
-    mock_result.scalars.return_value = mock_scalars
+    mock_result.scalar_one_or_none.return_value = None
     mock_session.execute.return_value = mock_result
 
     create_library_item(mock_session, library_item_data)
@@ -552,9 +562,7 @@ def test_create_library_item_raises_error_if_duplicate_exists(
     )
 
     mock_result = MagicMock()
-    mock_scalars = MagicMock()
-    mock_scalars.first.return_value = existing
-    mock_result.scalars.return_value = mock_scalars
+    mock_result.scalar_one_or_none.return_value = existing
     mock_session.execute.return_value = mock_result
 
     with pytest.raises(ValueError, match="LibraryItem already exists"):

@@ -334,21 +334,22 @@ def real_s3_client(
         client.head_bucket(Bucket=integration_settings.s3_bucket)
     except client.exceptions.NoSuchBucket:
         # Create bucket if it doesn't exist (useful for LocalStack)
-        client.create_bucket(
-            Bucket=integration_settings.s3_bucket,
-            CreateBucketConfiguration={"LocationConstraint": integration_settings.aws_region}
-            if integration_settings.aws_region != "us-east-1"
-            else {},
-        )
+        # us-east-1 doesn't require CreateBucketConfiguration
+        kwargs = {"Bucket": integration_settings.s3_bucket}
+        if integration_settings.aws_region != "us-east-1":
+            kwargs["CreateBucketConfiguration"] = {
+                "LocationConstraint": integration_settings.aws_region
+            }
+        client.create_bucket(**kwargs)
 
     yield client
 
 
 @pytest.fixture
-async def s3_client_wrapper(
+def s3_client_wrapper(
     integration_settings: Settings,
     skip_if_no_s3: None,
-) -> AsyncGenerator[S3Client, None]:
+) -> Generator[S3Client, None, None]:
     """Provide S3Client wrapper for integration tests.
 
     Args:
@@ -360,12 +361,12 @@ async def s3_client_wrapper(
     """
     endpoint_url = os.getenv("AWS_ENDPOINT_URL")
 
-    async with S3Client(
-        bucket_name=integration_settings.s3_bucket,
-        region_name=integration_settings.aws_region,
+    client = S3Client(
+        bucket=integration_settings.s3_bucket,
+        region=integration_settings.aws_region,
         endpoint_url=endpoint_url,
-    ) as client:
-        yield client
+    )
+    yield client
 
 
 # =============================================================================

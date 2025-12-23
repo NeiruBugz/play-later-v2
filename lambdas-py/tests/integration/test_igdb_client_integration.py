@@ -206,7 +206,7 @@ async def test_rate_limiting_with_multiple_requests(igdb_client: IgdbClient) -> 
     Validates:
         - Multiple rapid requests don't cause rate limit errors
         - Requests are properly spread out (4 req/sec max)
-        - Semaphore prevents request bursts
+        - Shared AsyncLimiter prevents request bursts and ensures global rate limiting
     """
     # Clear cache to force API requests
     igdb_client.clear_cache()
