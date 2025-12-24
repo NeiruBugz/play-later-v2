@@ -19,6 +19,27 @@ import pytest
 from lambdas.handlers.steam_import import handler as steam_import_handler
 
 
+def _extract_s3_key(s3_uri: str) -> str:
+    """Extract full S3 object key from S3 URI.
+
+    Converts s3://bucket-name/path/to/file.csv to path/to/file.csv
+    (everything after the bucket name).
+
+    Args:
+        s3_uri: S3 URI in format s3://bucket/key
+
+    Returns:
+        Full S3 object key (path/to/file.csv)
+    """
+    if not s3_uri.startswith("s3://"):
+        raise ValueError(f"Invalid S3 URI format: {s3_uri}")
+    # Remove s3:// prefix and split bucket from key
+    parts = s3_uri[5:].split("/", 1)
+    if len(parts) != 2:
+        raise ValueError(f"Invalid S3 URI format: {s3_uri}")
+    return parts[1]  # Return everything after bucket name
+
+
 @pytest.mark.integration
 @pytest.mark.slow
 def test_full_pipeline_steam_to_database(
@@ -90,7 +111,7 @@ def test_full_pipeline_steam_to_database(
     assert steam_result.s3_location is not None, "Should have S3 location"
 
     # Track S3 file for cleanup
-    s3_key = steam_result.s3_location.split("/")[-1]
+    s3_key = _extract_s3_key(steam_result.s3_location)
     cleanup_s3_test_files.append(s3_key)
 
     print("✅ Steam import successful:")
@@ -127,7 +148,7 @@ def test_full_pipeline_steam_to_database(
     assert enrichment_result.s3_enriched_location is not None, "Should have enriched S3 location"
 
     # Track enriched S3 file for cleanup
-    enriched_s3_key = enrichment_result.s3_enriched_location.split("/")[-1]
+    enriched_s3_key = _extract_s3_key(enrichment_result.s3_enriched_location)
     cleanup_s3_test_files.append(enriched_s3_key)
 
     match_rate = (
@@ -315,7 +336,7 @@ def test_full_pipeline_limited_50_games(
     assert steam_result.game_count is not None and steam_result.game_count > 0
     assert steam_result.s3_location is not None
 
-    s3_key = steam_result.s3_location.split("/")[-1]
+    s3_key = _extract_s3_key(steam_result.s3_location)
     cleanup_s3_test_files.append(s3_key)
 
     print(f"✅ Steam import: {steam_result.game_count} games")
@@ -341,7 +362,7 @@ def test_full_pipeline_limited_50_games(
     assert enrichment_result.stats is not None
     assert enrichment_result.s3_enriched_location is not None
 
-    enriched_s3_key = enrichment_result.s3_enriched_location.split("/")[-1]
+    enriched_s3_key = _extract_s3_key(enrichment_result.s3_enriched_location)
     cleanup_s3_test_files.append(enriched_s3_key)
 
     match_rate = (

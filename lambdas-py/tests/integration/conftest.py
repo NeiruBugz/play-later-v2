@@ -406,17 +406,15 @@ def cleanup_db_test_data(
     db_session: Session,
     test_user_id: str,
 ) -> Generator[None, None, None]:
-    """Cleanup database test data after test completes.
+    """Cleanup database test data before test runs.
 
     Args:
         db_session: Database session fixture
         test_user_id: Test user ID
 
     Yields:
-        None (cleanup happens after test)
+        None (cleanup happens before test)
     """
-    yield
-
     # Cleanup: Delete test data in correct order (respecting foreign keys)
     try:
         # Delete LibraryItems first (has foreign keys to ImportedGame and User)
@@ -435,3 +433,5 @@ def cleanup_db_test_data(
     except Exception:
         db_session.rollback()
         # Best effort cleanup - don't fail test if cleanup fails
+
+    yield
