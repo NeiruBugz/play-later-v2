@@ -1,5 +1,13 @@
 import { afterEach, beforeAll, vi } from "vitest";
 
+// Mock server-only FIRST before any other imports to prevent "Client Component" errors
+vi.mock("server-only", () => ({}));
+
+// Mock @/auth to provide a mockable getServerUserId for integration tests
+vi.mock("@/auth", () => ({
+  getServerUserId: vi.fn(),
+}));
+
 import "./common-mocks";
 
 import { CreateBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
@@ -43,6 +51,9 @@ vi.mock("@/shared/lib/app/db", async () => {
   };
 });
 vi.unmock("@/data-access-layer/repository");
+
+// Unmock @/shared/lib to use real implementations (global.ts mocks it for unit tests)
+vi.unmock("@/shared/lib");
 async function ensureS3BucketExists(): Promise<void> {
   const { getS3Client, resetS3Client } =
     await import("@/shared/lib/storage/s3-client");
@@ -84,8 +95,14 @@ async function ensureS3BucketExists(): Promise<void> {
 beforeAll(async () => {
   await ensureS3BucketExists();
 });
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.resetAllMocks();
+});
+
 afterEach(async () => {
   vi.clearAllMocks();
-
+  vi.resetAllMocks();
   await resetTestDatabase();
 });

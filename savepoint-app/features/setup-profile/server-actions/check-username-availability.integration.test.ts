@@ -1,36 +1,11 @@
-import {
-  cleanupDatabase,
-  resetTestDatabase,
-  setupDatabase,
-} from "@/test/setup/database";
+import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 
 import { checkUsernameAvailability } from "./check-username-availability";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
 describe("checkUsernameAvailability server action", () => {
   beforeAll(async () => {
     await setupDatabase();
-  });
-
-  afterAll(async () => {
-    try {
-      await cleanupDatabase();
-    } catch (error) {
-      console.error("Error in global teardown:", error);
-    }
   });
 
   beforeEach(async () => {

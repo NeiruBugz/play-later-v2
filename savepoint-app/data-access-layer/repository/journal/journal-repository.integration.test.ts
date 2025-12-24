@@ -1,8 +1,4 @@
-import {
-  cleanupDatabase,
-  resetTestDatabase,
-  setupDatabase,
-} from "@/test/setup/database";
+import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createLibraryItem } from "@/test/setup/db-factories";
 
 import { createGameWithRelations } from "../game/game-repository";
@@ -18,15 +14,6 @@ import {
   updateJournalEntry,
 } from "./journal-repository";
 
-vi.mock("@/shared/lib/app/db", async () => {
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
 
 describe("Journal Repository Integration Tests", () => {
   let testGameId: string;
@@ -36,9 +23,6 @@ describe("Journal Repository Integration Tests", () => {
     await setupDatabase();
   });
 
-  afterAll(async () => {
-    await cleanupDatabase();
-  });
 
   beforeEach(async () => {
     await resetTestDatabase();

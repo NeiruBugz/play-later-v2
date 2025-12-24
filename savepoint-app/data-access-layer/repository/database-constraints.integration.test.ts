@@ -1,5 +1,4 @@
 import {
-  cleanupDatabase,
   getTestDatabase,
   resetTestDatabase,
   setupDatabase,
@@ -11,26 +10,9 @@ import {
   LibraryItemStatus,
 } from "@prisma/client";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
 describe("Database Check Constraints - Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
-  });
-
-  afterAll(async () => {
-    await cleanupDatabase();
   });
 
   beforeEach(async () => {

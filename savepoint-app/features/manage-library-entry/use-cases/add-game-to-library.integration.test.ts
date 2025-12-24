@@ -9,9 +9,45 @@ import { prisma } from "@/shared/lib/app/db";
 
 import { addGameToLibrary } from "./add-game-to-library";
 
+const { mockGetGameDetails, MockIgdbService, mockPopulateGameInDatabase } =
+  vi.hoisted(() => {
+    const mockFn = vi.fn();
+    const mockPopulate = vi.fn();
+
+    return {
+      mockGetGameDetails: mockFn,
+      MockIgdbService: class {
+        async getGameDetails(...args: unknown[]) {
+          return mockFn(...args);
+        }
+      },
+      mockPopulateGameInDatabase: mockPopulate,
+    };
+  });
+
 vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
-  IgdbService: vi.fn().mockImplementation(() => ({
-    getGameDetails: vi.fn().mockResolvedValue({
+  IgdbService: MockIgdbService,
+}));
+
+vi.mock(
+  "@/data-access-layer/services/game-detail/game-detail-service",
+  () => ({
+    populateGameInDatabase: mockPopulateGameInDatabase,
+  })
+);
+
+describe("addGameToLibrary - Use Case Integration Tests", () => {
+  let testUser: Awaited<ReturnType<typeof createUser>>;
+  let testGame: Awaited<ReturnType<typeof createGame>>;
+
+  beforeAll(async () => {
+    await setupDatabase();
+  });
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    mockGetGameDetails.mockResolvedValue({
       success: true,
       data: {
         game: {
@@ -23,47 +59,29 @@ vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
           first_release_date: 1609459200,
           genres: [{ id: 1, name: "Action", slug: "action" }],
           platforms: [
-            {
-              id: 1,
-              name: "PC",
-              slug: "pc",
-              abbreviation: "PC",
-            },
+            { id: 1, name: "PC", slug: "pc", abbreviation: "PC" },
           ],
         },
       },
-    }),
-  })),
-}));
-
-vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
-  populateGameInDatabase: vi.fn().mockImplementation(async (game) => {
-    await prisma.game.create({
-      data: {
-        title: game.name,
-        igdbId: game.id,
-        slug: game.slug,
-        description: game.summary,
-        coverImage: game.cover?.image_id
-          ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
-          : null,
-        releaseDate: game.first_release_date
-          ? new Date(game.first_release_date * 1000)
-          : null,
-      },
     });
-  }),
-}));
 
-describe("addGameToLibrary - Use Case Integration Tests", () => {
-  let testUser: Awaited<ReturnType<typeof createUser>>;
-  let testGame: Awaited<ReturnType<typeof createGame>>;
+    mockPopulateGameInDatabase.mockImplementation(async (game) => {
+      await prisma.game.create({
+        data: {
+          title: game.name,
+          igdbId: game.id,
+          slug: game.slug,
+          description: game.summary,
+          coverImage: game.cover?.image_id
+            ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+            : null,
+          releaseDate: game.first_release_date
+            ? new Date(game.first_release_date * 1000)
+            : null,
+        },
+      });
+    });
 
-  beforeAll(async () => {
-    await setupDatabase();
-  });
-
-  beforeEach(async () => {
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
@@ -179,19 +197,10 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
     });
 
     it("should return error when IGDB fetch fails", async () => {
-      const { IgdbService } =
-        await import("@/data-access-layer/services/igdb/igdb-service");
-      const mockIgdbService = vi.mocked(IgdbService);
-
-      mockIgdbService.mockImplementationOnce(
-        () =>
-          ({
-            getGameDetails: vi.fn().mockResolvedValue({
-              success: false,
-              error: "IGDB API error",
-            }),
-          }) as never
-      );
+      mockGetGameDetails.mockResolvedValueOnce({
+        success: false,
+        error: "IGDB API error",
+      });
 
       const result = await addGameToLibrary({
         userId: testUser.id,
@@ -206,19 +215,10 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
     });
 
     it("should return error when game not found in IGDB", async () => {
-      const { IgdbService } =
-        await import("@/data-access-layer/services/igdb/igdb-service");
-      const mockIgdbService = vi.mocked(IgdbService);
-
-      mockIgdbService.mockImplementationOnce(
-        () =>
-          ({
-            getGameDetails: vi.fn().mockResolvedValue({
-              success: true,
-              data: { game: null },
-            }),
-          }) as never
-      );
+      mockGetGameDetails.mockResolvedValueOnce({
+        success: true,
+        data: { game: null },
+      });
 
       const result = await addGameToLibrary({
         userId: testUser.id,

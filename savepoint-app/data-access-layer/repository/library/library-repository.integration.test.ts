@@ -1,5 +1,4 @@
 import {
-  cleanupDatabase,
   getTestDatabase,
   resetTestDatabase,
   setupDatabase,
@@ -14,23 +13,9 @@ import { LibraryItemStatus } from "@prisma/client";
 import { isRepositorySuccess } from "../types";
 import { findLibraryItemsWithFilters } from "./library-repository";
 
-vi.mock("@/shared/lib/app/db", async () => {
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
 describe("LibraryRepository - Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
-  });
-
-  afterAll(async () => {
-    await cleanupDatabase();
   });
 
   beforeEach(async () => {

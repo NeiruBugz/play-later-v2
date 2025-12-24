@@ -1,6 +1,9 @@
-import { afterEach, beforeAll, vi } from "vitest";
+import { allCustomMatcher } from "aws-sdk-client-mock-vitest";
+import { afterEach, beforeAll, expect, vi } from "vitest";
 
 import "./common-mocks";
+
+expect.extend(allCustomMatcher);
 
 process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";

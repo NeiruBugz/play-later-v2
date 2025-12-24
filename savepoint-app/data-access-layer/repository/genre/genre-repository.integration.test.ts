@@ -1,8 +1,4 @@
-import {
-  cleanupDatabase,
-  resetTestDatabase,
-  setupDatabase,
-} from "@/test/setup/database";
+import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 
 import { isRepositorySuccess } from "../types";
 import {
@@ -11,26 +7,9 @@ import {
   upsertGenres,
 } from "./genre-repository";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
 describe("GenreRepository - Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
-  });
-
-  afterAll(async () => {
-    await cleanupDatabase();
   });
 
   beforeEach(async () => {

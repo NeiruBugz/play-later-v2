@@ -1,3 +1,4 @@
+import { getServerUserId } from "@/auth";
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { setupDatabase } from "@/test/setup/database";
 import {
@@ -12,53 +13,32 @@ import { addToLibraryAction } from "./add-to-library-action";
 import { updateLibraryEntryAction } from "./update-library-entry-action";
 import { updateLibraryStatusAction } from "./update-library-status-action";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
+const { mockGetGameDetails, MockIgdbService, mockPopulateGameInDatabase } =
+  vi.hoisted(() => {
+    const mockFn = vi.fn();
+    const mockPopulate = vi.fn();
 
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
-}));
-
-vi.mock("@/auth", () => ({
-  getServerUserId: vi.fn(),
-}));
+    return {
+      mockGetGameDetails: mockFn,
+      MockIgdbService: class {
+        async getGameDetails(...args: unknown[]) {
+          return mockFn(...args);
+        }
+      },
+      mockPopulateGameInDatabase: mockPopulate,
+    };
+  });
 
 vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
-  IgdbService: vi.fn().mockImplementation(() => ({
-    getGameDetails: vi.fn().mockResolvedValue({
-      success: true,
-      data: {
-        game: {
-          id: 999,
-          name: "Test Game",
-          slug: "test-game",
-          summary: "A test game",
-          cover: { image_id: "test123" },
-          first_release_date: 1609459200,
-          genres: [{ id: 1, name: "Action", slug: "action" }],
-          platforms: [
-            {
-              id: 1,
-              name: "PC",
-              slug: "pc",
-              abbreviation: "PC",
-            },
-          ],
-        },
-      },
-    }),
-  })),
+  IgdbService: MockIgdbService,
 }));
+
+vi.mock(
+  "@/data-access-layer/services/game-detail/game-detail-service",
+  () => ({
+    populateGameInDatabase: mockPopulateGameInDatabase,
+  })
+);
 
 describe("addToLibraryAction - Integration Tests", () => {
   let testUser: Awaited<ReturnType<typeof createUser>>;
@@ -69,6 +49,41 @@ describe("addToLibraryAction - Integration Tests", () => {
   });
 
   beforeEach(async () => {
+    vi.clearAllMocks();
+
+    mockGetGameDetails.mockResolvedValue({
+      success: true,
+      data: {
+        game: {
+          id: 999,
+          name: "Test Game",
+          slug: "test-game",
+          summary: "A test game",
+          cover: { image_id: "test123" },
+          first_release_date: 1609459200,
+          genres: [{ id: 1, name: "Action", slug: "action" }],
+          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
+        },
+      },
+    });
+
+    mockPopulateGameInDatabase.mockImplementation(async (game) => {
+      await prisma.game.create({
+        data: {
+          title: game.name,
+          igdbId: game.id,
+          slug: game.slug,
+          description: game.summary,
+          coverImage: game.cover?.image_id
+            ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+            : null,
+          releaseDate: game.first_release_date
+            ? new Date(game.first_release_date * 1000)
+            : null,
+        },
+      });
+    });
+
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
@@ -79,7 +94,6 @@ describe("addToLibraryAction - Integration Tests", () => {
       igdbId: 12345,
     });
 
-    const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
 
@@ -236,6 +250,39 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   });
 
   beforeEach(async () => {
+    mockGetGameDetails.mockResolvedValue({
+      success: true,
+      data: {
+        game: {
+          id: 999,
+          name: "Test Game",
+          slug: "test-game",
+          summary: "A test game",
+          cover: { image_id: "test123" },
+          first_release_date: 1609459200,
+          genres: [{ id: 1, name: "Action", slug: "action" }],
+          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
+        },
+      },
+    });
+
+    mockPopulateGameInDatabase.mockImplementation(async (game) => {
+      await prisma.game.create({
+        data: {
+          title: game.name,
+          igdbId: game.id,
+          slug: game.slug,
+          description: game.summary,
+          coverImage: game.cover?.image_id
+            ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+            : null,
+          releaseDate: game.first_release_date
+            ? new Date(game.first_release_date * 1000)
+            : null,
+        },
+      });
+    });
+
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
@@ -246,7 +293,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       igdbId: 12345,
     });
 
-    const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
 
@@ -434,7 +480,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       igdbId: 12345,
     });
 
-    const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
 

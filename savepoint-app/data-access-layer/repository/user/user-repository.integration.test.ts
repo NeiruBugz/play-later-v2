@@ -1,30 +1,12 @@
-import {
-  cleanupDatabase,
-  resetTestDatabase,
-  setupDatabase,
-} from "@/test/setup/database";
+import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 
 import { isRepositorySuccess } from "../types";
 import { findUserById, updateUserProfile } from "./user-repository";
 
-vi.mock("@/shared/lib/app/db", async () => {
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
 describe("UserRepository - Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
-  });
-
-  afterAll(async () => {
-    await cleanupDatabase();
   });
 
   beforeEach(async () => {

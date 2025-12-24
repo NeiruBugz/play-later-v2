@@ -1,8 +1,4 @@
-import {
-  cleanupDatabase,
-  resetTestDatabase,
-  setupDatabase,
-} from "@/test/setup/database";
+import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 
 import { upsertGenre } from "../genre/genre-repository";
 import { upsertPlatform } from "../platform/platform-repository";
@@ -13,26 +9,9 @@ import {
   gameExistsByIgdbId,
 } from "./game-repository";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
 describe("Game Repository Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
-  });
-
-  afterAll(async () => {
-    await cleanupDatabase();
   });
 
   beforeEach(async () => {
