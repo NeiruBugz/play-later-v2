@@ -230,8 +230,9 @@ class TestSteamClientErrorHandling:
     async def test_network_timeout(
         self, steam_api_key: str, valid_steam_id: str
     ) -> None:
-        """Test handling of network timeout."""
-        respx.get(
+        """Test handling of network timeout after retries exhausted."""
+        # Mock will be called 3 times due to tenacity retry (stop_after_attempt(3))
+        route = respx.get(
             "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
         ).mock(side_effect=httpx.TimeoutException("Connection timeout"))
 
@@ -239,7 +240,13 @@ class TestSteamClientErrorHandling:
             with pytest.raises(SteamApiError) as exc_info:
                 await client.get_owned_games(valid_steam_id)
 
+        # Verify retries were attempted (3 attempts total)
+        assert route.call_count == 3
+        # Verify error message indicates retries were exhausted
         assert "timed out" in exc_info.value.message.lower()
+        assert "retries" in exc_info.value.message.lower()
+        # Verify __cause__ preserves the original exception
+        assert isinstance(exc_info.value.__cause__, httpx.TimeoutException)
 
     @respx.mock
     async def test_malformed_json_response(

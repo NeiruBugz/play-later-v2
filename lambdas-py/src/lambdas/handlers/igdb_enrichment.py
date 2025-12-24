@@ -15,6 +15,11 @@ from lambdas.errors import IgdbApiError, S3Error
 from lambdas.logging import bind_context, get_logger
 from lambdas.services.classifier import classify_steam_app
 
+# Create a single event loop at module scope to be reused across invocations.
+# This avoids "Event loop closed" errors with long-lived async clients.
+_loop = asyncio.new_event_loop()
+asyncio.set_event_loop(_loop)
+
 if TYPE_CHECKING:
     from lambdas.models.igdb import IgdbGame
 
@@ -375,8 +380,8 @@ def handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
                 success=False, error=f"Invalid input: {e}"
             ).model_dump()
 
-        # Run async enrichment
-        response = asyncio.run(_enrich_steam_library(validated_event))
+        # Run async enrichment on the module-level event loop
+        response = _loop.run_until_complete(_enrich_steam_library(validated_event))
         return response.model_dump()
 
     except Exception as e:

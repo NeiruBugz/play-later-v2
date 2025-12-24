@@ -145,12 +145,10 @@ class SteamClient:
                     details={"path": path, "error": str(e)},
                 ) from e
 
-        except httpx.TimeoutException as e:
-            self._logger.warning("Steam API request timeout", path=path)
-            raise SteamApiError(
-                message="Steam API request timed out",
-                details={"path": path, "timeout_seconds": 30},
-            ) from e
+        except httpx.TimeoutException:
+            # Let TimeoutException propagate so tenacity can retry
+            self._logger.warning("Steam API request timeout (will retry)", path=path)
+            raise
 
         except httpx.NetworkError as e:
             self._logger.error("Steam API network error", path=path, error=str(e))
@@ -196,8 +194,24 @@ class SteamClient:
             "format": "json",
         }
 
-        # Make API request
-        data = await self._make_request(GET_OWNED_GAMES_PATH, params)
+        # Make API request (retries handled by tenacity decorator on _make_request)
+        try:
+            data = await self._make_request(GET_OWNED_GAMES_PATH, params)
+        except httpx.TimeoutException as e:
+            # All retries exhausted, wrap with context
+            self._logger.error(
+                "Steam API request timed out after all retries",
+                steam_id=steam_id64,
+                path=GET_OWNED_GAMES_PATH,
+            )
+            raise SteamApiError(
+                message="Steam API request timed out after multiple retries",
+                details={
+                    "steam_id": steam_id64,
+                    "path": GET_OWNED_GAMES_PATH,
+                    "timeout_seconds": 30,
+                },
+            ) from e
 
         # Parse and validate response
         try:
