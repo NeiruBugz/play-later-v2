@@ -65,3 +65,17 @@ variable "additional_callback_urls" {
   description = "Additional callback URLs for OAuth (e.g., Vercel preview deployments)"
   default     = []
 }
+
+# =============================================================================
+# Lambda Configuration
+# =============================================================================
+
+# NOTE: Secret values (steam_api_key, igdb_client_id, igdb_client_secret, database_url)
+# are populated out-of-band via AWS CLI after terraform apply.
+# See lambdas-py/README.md for deployment instructions.
+
+variable "lambda_log_level" {
+  type        = string
+  description = "Log level for Lambda functions (DEBUG, INFO, WARNING, ERROR)"
+  default     = "INFO"
+}
