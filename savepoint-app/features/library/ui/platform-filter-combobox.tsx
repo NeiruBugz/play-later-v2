@@ -59,13 +59,13 @@ export function PlatformFilterCombobox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "body-sm h-9 w-full justify-between",
+            "h-9 w-full justify-between rounded-md border-input text-sm shadow-sm",
             (value === "__all__" || !value) && "text-muted-foreground"
           )}
           disabled={isLoading || disabled}
           aria-label="Filter by platform"
         >
-          {isLoading ? "Loading platforms..." : displayValue}
+          {isLoading ? "Loading..." : displayValue}
           <ChevronsUpDown className="ml-md h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
