@@ -1,12 +1,12 @@
 import {
-  libraryItemsFixture,
   uniquePlatformsFixture,
 } from "@/test/fixtures/library";
+import { createLibraryHandlers } from "@/test/mocks/handlers";
+import { server } from "@/test/setup/client-setup";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { setupServer } from "msw/node";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import {
@@ -44,53 +44,6 @@ const createNavigationMock = () => {
 
   return { mockPush, getParams: () => currentParams };
 };
-
-const createLibraryHandlers = (items = libraryItemsFixture) => [
-  http.get("/api/library", ({ request }) => {
-    const url = new URL(request.url);
-    const status = url.searchParams.get("status");
-    const platform = url.searchParams.get("platform");
-    const search = url.searchParams.get("search");
-    const sortBy = url.searchParams.get("sortBy") ?? "createdAt";
-    const sortOrder = url.searchParams.get("sortOrder") ?? "desc";
-
-    let filtered = [...items];
-
-    if (status) {
-      filtered = filtered.filter((item) => item.status === status);
-    }
-    if (platform) {
-      filtered = filtered.filter((item) => item.platform === platform);
-    }
-    if (search) {
-      filtered = filtered.filter((item) =>
-        item.game.title.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    filtered.sort((a, b) => {
-      const aVal = a[sortBy as keyof typeof a];
-      const bVal = b[sortBy as keyof typeof b];
-
-      if (aVal === null || aVal === undefined) return 1;
-      if (bVal === null || bVal === undefined) return -1;
-
-      const comparison = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-      return sortOrder === "asc" ? comparison : -comparison;
-    });
-
-    return HttpResponse.json({ success: true, data: filtered });
-  }),
-
-  http.get("/api/library/unique-platforms", () => {
-    return HttpResponse.json({
-      success: true,
-      data: { platforms: uniquePlatformsFixture },
-    });
-  }),
-];
-
-const server = setupServer(...createLibraryHandlers());
 
 const elements = {
   getLibraryHeading: () => screen.getByRole("heading", { name: "My Library" }),
@@ -135,6 +88,8 @@ const renderComponent = () => {
     defaultOptions: {
       queries: {
         retry: false,
+        gcTime: 0, // Disable garbage collection (immediate cleanup)
+        staleTime: 0, // Data is always stale
       },
       mutations: {
         retry: false,
@@ -156,18 +111,6 @@ const renderComponent = () => {
 };
 
 describe("LibraryPageView", () => {
-  beforeAll(() => {
-    server.listen({ onUnhandledRequest: "bypass" });
-  });
-
-  afterEach(() => {
-    server.resetHandlers();
-  });
-
-  afterAll(() => {
-    server.close();
-  });
-
   beforeEach(() => {
     createNavigationMock();
   });
@@ -460,18 +403,8 @@ describe("LibraryPageView", () => {
 
   describe("given empty library", () => {
     beforeEach(() => {
-      // Override MSW handler to return empty library
-      server.use(
-        http.get("/api/library", () => {
-          return HttpResponse.json({ success: true, data: [] });
-        }),
-        http.get("/api/library/unique-platforms", () => {
-          return HttpResponse.json({
-            success: true,
-            data: { platforms: [] },
-          });
-        })
-      );
+      // Override MSW handler to return empty library - call before render
+      server.resetHandlers(...createLibraryHandlers([]));
     });
 
     it("displays empty state component", async () => {
@@ -492,12 +425,18 @@ describe("LibraryPageView", () => {
   describe("given API error", () => {
     beforeEach(() => {
       // Override MSW handler to return error response
-      server.use(
+      server.resetHandlers(
         http.get("/api/library", () => {
           return HttpResponse.json(
             { success: false, error: "Failed to load library" },
             { status: 500 }
           );
+        }),
+        http.get("/api/library/unique-platforms", () => {
+          return HttpResponse.json({
+            success: true,
+            data: { platforms: uniquePlatformsFixture },
+          });
         })
       );
     });

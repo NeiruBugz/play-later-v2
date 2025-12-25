@@ -1,7 +1,6 @@
 import "@testing-library/jest-dom";
 
-import { searchResponseFixture } from "@fixtures/search";
-import { http, HttpResponse } from "msw";
+import { allHandlers } from "@/test/mocks/handlers";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
@@ -57,19 +56,7 @@ if (!Element.prototype.hasPointerCapture) {
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = vi.fn();
 }
-export const server = setupServer(
-  http.get("/api/igdb-search", async ({ request }: { request: Request }) => {
-    const url = new URL(request.url);
-    const query = url.searchParams.get("q") ?? "";
-    await new Promise((resolve) => {
-      setTimeout(resolve, 100);
-    });
-    if (query.includes("sdasdass") || query.length === 0) {
-      return HttpResponse.json({ response: [] });
-    }
-    return HttpResponse.json(searchResponseFixture);
-  })
-);
+export const server = setupServer(...allHandlers);
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: "bypass" });
