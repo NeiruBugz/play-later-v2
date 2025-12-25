@@ -15,6 +15,8 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground border-border",
+        subtle:
+          "border-border/50 bg-muted/50 text-muted-foreground hover:bg-muted dark:border-border/30 dark:bg-muted/30",
         playstation:
           "border-transparent bg-[#0070d1]/10 text-[#0070d1] hover:bg-[#0070d1]/20 dark:bg-[#0070d1]/20 dark:text-[#5ca7e8]",
         xbox: "border-transparent bg-[#107c10]/10 text-[#107c10] hover:bg-[#107c10]/20 dark:bg-[#107c10]/20 dark:text-[#6ebd6a]",

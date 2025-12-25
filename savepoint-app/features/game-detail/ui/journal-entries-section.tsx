@@ -1,3 +1,4 @@
+import { PenLine } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/shared/components/ui/button";
@@ -21,6 +22,7 @@ function formatEntryDate(date: Date): string {
     year: "numeric",
   });
 }
+
 function truncateToLines(text: string, maxLines: number): string {
   const lines = text.split("\n").slice(0, maxLines);
   const truncated = lines.join("\n");
@@ -29,40 +31,62 @@ function truncateToLines(text: string, maxLines: number): string {
     text.split("\n").length > maxLines || truncated.length < text.length;
   return hasMore ? `${truncated}...` : truncated;
 }
-function JournalEntryCard({ entry }: JournalEntryCardProps) {
+
+function JournalEntryCard({
+  entry,
+  isLast,
+}: JournalEntryCardProps & { isLast: boolean }) {
   const contentPreview = truncateToLines(entry.content, 2);
   const displayTitle = entry.title || "Untitled Entry";
   return (
-    <Link href={`/journal/${entry.id}`} className="block">
-      <Card className="cursor-pointer">
-        <CardHeader className="pb-lg">
-          <CardTitle className="line-clamp-1">{displayTitle}</CardTitle>
-          <CardDescription className="caption">
-            {formatEntryDate(entry.createdAt)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="body-sm text-muted-foreground line-clamp-2">
-            {contentPreview}
-          </p>
-        </CardContent>
-      </Card>
-    </Link>
+    <div className="gap-lg relative flex">
+      <div className="flex flex-col items-center">
+        <div className="bg-primary z-10 h-3 w-3 rounded-full" />
+        {!isLast && <div className="bg-border w-px flex-1" />}
+      </div>
+      <Link href={`/journal/${entry.id}`} className="mb-lg -mt-1 block flex-1">
+        <Card className="cursor-pointer transition-shadow hover:shadow-md">
+          <CardHeader className="pb-sm">
+            <CardTitle className="heading-xs line-clamp-1">
+              {displayTitle}
+            </CardTitle>
+            <CardDescription className="caption">
+              {formatEntryDate(entry.createdAt)}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="body-sm text-muted-foreground line-clamp-2">
+              {contentPreview}
+            </p>
+          </CardContent>
+        </Card>
+      </Link>
+    </div>
   );
 }
+
 function EmptyState({ gameId }: { gameId?: string }) {
   const writeEntryHref = gameId
     ? `/journal/new?gameId=${gameId}`
     : "/journal/new";
   return (
-    <div className="gap-xl p-3xl flex flex-col items-center rounded-lg border border-dashed text-center">
-      <p className="body-sm text-muted-foreground">No journal entries yet</p>
-      <Button variant="secondary" size="sm" asChild>
+    <div className="bg-muted/30 gap-lg p-2xl flex flex-col items-center rounded-lg border border-dashed text-center">
+      <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
+        <PenLine className="text-primary h-6 w-6" />
+      </div>
+      <div className="space-y-xs">
+        <p className="body-md font-medium">Document your journey</p>
+        <p className="body-sm text-muted-foreground">
+          Capture thoughts, progress, and memories as you play
+        </p>
+      </div>
+      <Button asChild>
         <Link href={writeEntryHref}>Write Your First Entry</Link>
       </Button>
     </div>
   );
 }
+
 export function JournalEntriesSection({
   journalEntries,
   gameId,
@@ -78,23 +102,29 @@ export function JournalEntriesSection({
     >
       <div className="flex items-center justify-between">
         <h2 id="journal-heading" className="heading-md font-serif">
-          Journal Entries
+          Your Journal
         </h2>
         {hasEntries && (
           <Button variant="secondary" size="sm" asChild>
-            <Link href={writeEntryHref}>Write New Entry</Link>
+            <Link href={writeEntryHref}>
+              <PenLine className="mr-2 h-4 w-4" />
+              Write Entry
+            </Link>
           </Button>
         )}
       </div>
       {hasEntries ? (
-        <div className="space-y-lg">
+        <div className="pl-xs">
           {journalEntries.map((entry, index) => (
             <div
               key={entry.id}
               className="animate-stagger-in"
               style={{ animationDelay: `${(index + 1) * 50}ms` }}
             >
-              <JournalEntryCard entry={entry} />
+              <JournalEntryCard
+                entry={entry}
+                isLast={index === journalEntries.length - 1}
+              />
             </div>
           ))}
         </div>

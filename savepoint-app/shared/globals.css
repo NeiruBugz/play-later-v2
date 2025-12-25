@@ -156,74 +156,77 @@
 }
 
 .dark {
-  /* Base colors - warm dark like aged wood */
-  --background: oklch(0.2 0.015 40);
-  --foreground: oklch(0.92 0.01 50);
-  /* Surface colors */
-  --card: oklch(0.24 0.015 40);
-  --card-foreground: oklch(0.92 0.01 50);
-  --popover: oklch(0.24 0.015 40);
-  --popover-foreground: oklch(0.92 0.01 50);
-  /* Primary accent - Lighter burgundy for dark mode */
-  --primary: oklch(0.55 0.12 20);
+  /* Base colors - rich charcoal with warm undertone (inspired by Letterboxd) */
+  --background: oklch(0.15 0.012 45);
+  --foreground: oklch(0.93 0.008 55);
+  /* Surface colors - clear elevation hierarchy */
+  --card: oklch(0.19 0.014 45);
+  --card-foreground: oklch(0.93 0.008 55);
+  --popover: oklch(0.21 0.014 45);
+  --popover-foreground: oklch(0.93 0.008 55);
+  /* Primary accent - Warmer burgundy for dark mode */
+  --primary: oklch(0.58 0.14 18);
   --primary-foreground: oklch(0.98 0.005 50);
-  /* Secondary accent - Lighter forest green */
-  --secondary: oklch(0.58 0.08 150);
+  /* Secondary accent - Brighter forest green */
+  --secondary: oklch(0.6 0.1 150);
   --secondary-foreground: oklch(0.98 0.005 50);
-  /* Muted - Darker warm gray */
-  --muted: oklch(0.3 0.015 40);
-  --muted-foreground: oklch(0.68 0.01 50);
+  /* Muted - Subtle elevated surface */
+  --muted: oklch(0.25 0.012 45);
+  --muted-foreground: oklch(0.65 0.008 55);
   /* Accent - Warm amber glow (lamplight effect) */
-  --accent: oklch(0.35 0.025 70);
-  --accent-foreground: oklch(0.92 0.01 50);
+  --accent: oklch(0.28 0.02 55);
+  --accent-foreground: oklch(0.93 0.008 55);
   /* Destructive - Softer red for dark mode */
-  --destructive: oklch(0.6 0.18 25);
+  --destructive: oklch(0.62 0.18 22);
   --destructive-foreground: oklch(0.98 0.005 50);
-  /* Success - Lighter green for dark mode */
-  --success: oklch(0.62 0.12 145);
+  /* Success - Brighter green for dark mode */
+  --success: oklch(0.65 0.14 145);
   --success-foreground: oklch(0.98 0.005 50);
   /* Warning - Brighter amber for dark mode */
-  --warning: oklch(0.7 0.15 70);
-  --warning-foreground: oklch(0.2 0.015 40);
+  --warning: oklch(0.72 0.16 65);
+  --warning-foreground: oklch(0.15 0.012 45);
   /* Info - Lighter blue for dark mode */
-  --info: oklch(0.65 0.1 240);
+  --info: oklch(0.68 0.12 240);
   --info-foreground: oklch(0.98 0.005 50);
-  /* Borders and inputs */
-  --border: oklch(0.35 0.018 40);
-  --input: oklch(0.35 0.018 40);
-  --ring: oklch(0.55 0.12 20);
+  /* Borders and inputs - subtle but visible */
+  --border: oklch(0.3 0.015 45);
+  --input: oklch(0.25 0.012 45);
+  --ring: oklch(0.58 0.14 18);
   /* Chart colors - adjusted for dark mode visibility */
-  --chart-1: oklch(0.58 0.12 20);
-  --chart-2: oklch(0.62 0.08 150);
-  --chart-3: oklch(0.68 0.12 70);
-  --chart-4: oklch(0.62 0.1 250);
-  --chart-5: oklch(0.65 0.1 30);
+  --chart-1: oklch(0.6 0.14 18);
+  --chart-2: oklch(0.65 0.1 150);
+  --chart-3: oklch(0.7 0.14 65);
+  --chart-4: oklch(0.65 0.12 250);
+  --chart-5: oklch(0.68 0.12 28);
   /* Sidebar */
-  --sidebar: oklch(0.24 0.015 40);
-  --sidebar-foreground: oklch(0.92 0.01 50);
-  --sidebar-primary: oklch(0.55 0.12 20);
+  --sidebar: oklch(0.17 0.012 45);
+  --sidebar-foreground: oklch(0.93 0.008 55);
+  --sidebar-primary: oklch(0.58 0.14 18);
   --sidebar-primary-foreground: oklch(0.98 0.005 50);
-  --sidebar-accent: oklch(0.3 0.015 40);
-  --sidebar-accent-foreground: oklch(0.92 0.01 50);
-  --sidebar-border: oklch(0.35 0.018 40);
-  --sidebar-ring: oklch(0.55 0.12 20);
-  /* Custom shadows - darker for dark mode */
-  --shadow-paper-sm: 0 1px 3px 0 oklch(0 0 0 / 0.15);
+  --sidebar-accent: oklch(0.25 0.012 45);
+  --sidebar-accent-foreground: oklch(0.93 0.008 55);
+  --sidebar-border: oklch(0.3 0.015 45);
+  --sidebar-ring: oklch(0.58 0.14 18);
+  /* Custom shadows - deeper, more dramatic for dark mode */
+  --shadow-paper-sm: 0 1px 3px 0 oklch(0 0 0 / 0.25);
   --shadow-paper:
-    0 2px 10px 0 oklch(0 0 0 / 0.2), 0 1px 4px 0 oklch(0 0 0 / 0.12);
+    0 2px 12px 0 oklch(0 0 0 / 0.35),
+    0 1px 4px 0 oklch(0 0 0 / 0.2);
   --shadow-paper-md:
-    0 4px 16px 0 oklch(0 0 0 / 0.25), 0 2px 6px 0 oklch(0 0 0 / 0.15);
+    0 4px 20px 0 oklch(0 0 0 / 0.4),
+    0 2px 8px 0 oklch(0 0 0 / 0.25);
   --shadow-paper-lg:
-    0 8px 32px 0 oklch(0 0 0 / 0.3), 0 4px 12px 0 oklch(0 0 0 / 0.18);
+    0 8px 40px 0 oklch(0 0 0 / 0.5),
+    0 4px 16px 0 oklch(0 0 0 / 0.3);
 
-  /* Status colors - adjusted for dark mode visibility */
-  --status-wantToPlay: oklch(0.65 0.1 240);
+  /* Status colors - vibrant for dark mode visibility */
+  --status-wantToPlay: oklch(0.68 0.14 240);
   --status-wantToPlay-foreground: oklch(0.98 0.005 50);
-  --status-owned: oklch(0.68 0.16 55);
-  --status-owned-foreground: oklch(0.98 0.005 50);
-  --status-playing: oklch(0.6 0.15 20);
+  --status-owned: oklch(0.72 0.18 55);
+  --status-owned-foreground: oklch(0.15 0.012 45);
+  --status-playing: oklch(0.62 0.16 18);
   --status-playing-foreground: oklch(0.98 0.005 50);
-  --status-played: oklch(0.62 0.12 145);
+  --status-played: oklch(0.65 0.14 145);
   --status-played-foreground: oklch(0.98 0.005 50);
 }
 
