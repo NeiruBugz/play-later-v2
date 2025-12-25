@@ -1,9 +1,12 @@
+import { getTestDatabase } from "@/test/setup/database";
+import { faker, seedFaker } from "@/test/setup/faker";
 import { type User } from "@prisma/client";
 
-import { getTestDatabase } from "../database";
-import { faker, seedFaker } from "../faker";
-
 let userCounter = 0;
+
+export const resetUserCounter = () => {
+  userCounter = 0;
+};
 
 export type UserFactoryOptions = {
   email?: string;
@@ -36,7 +39,7 @@ export const createUserData = (
 export const createSeededUserData = (
   seed: number = 12345,
   overrides?: Partial<UserFactoryOptions>
-) => {
+): ReturnType<typeof createUserData> => {
   seedFaker(seed);
   return createUserData(overrides);
 };
@@ -58,20 +61,20 @@ export const createUsers = async (
   for (let i = 0; i < count; i++) {
     // Clone options to avoid mutating the original object
     const clonedOptions = { ...options };
-    
+
     // Make unique fields unique per user if they're provided in options
     if (clonedOptions.email) {
       clonedOptions.email = `${i}_${clonedOptions.email}`;
     }
     if (clonedOptions.username) {
       clonedOptions.username = `${clonedOptions.username}_${i}`;
-      // Update usernameNormalized if username is set, unless explicitly overridden
       if (!clonedOptions.usernameNormalized) {
         clonedOptions.usernameNormalized = clonedOptions.username.toLowerCase();
       }
     }
     if (clonedOptions.usernameNormalized && !clonedOptions.username) {
-      clonedOptions.usernameNormalized = `${clonedOptions.usernameNormalized}_${i}`;
+      clonedOptions.username = `${clonedOptions.usernameNormalized}_${i}`;
+      delete clonedOptions.usernameNormalized;
     }
     if (clonedOptions.steamId64) {
       clonedOptions.steamId64 = `${clonedOptions.steamId64}${i}`;
@@ -79,7 +82,7 @@ export const createUsers = async (
     if (clonedOptions.steamUsername) {
       clonedOptions.steamUsername = `${clonedOptions.steamUsername}_${i}`;
     }
-    
+
     users.push(await createUser(clonedOptions));
   }
   return users;

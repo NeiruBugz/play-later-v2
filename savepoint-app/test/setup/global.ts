@@ -1,7 +1,9 @@
 import { allCustomMatcher } from "aws-sdk-client-mock-vitest";
-import { afterEach, beforeAll, expect, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, expect, vi } from "vitest";
 
 import "./common-mocks";
+
+import { resetUserCounter } from "./db-factories/user";
 
 expect.extend(allCustomMatcher);
 
@@ -278,6 +280,10 @@ global.testUtils = {
     return formData;
   },
 };
+beforeEach(() => {
+  resetUserCounter();
+});
+
 afterEach(() => {
   vi.clearAllMocks();
 });
