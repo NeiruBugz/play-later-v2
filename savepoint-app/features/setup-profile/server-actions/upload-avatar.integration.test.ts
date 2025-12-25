@@ -118,7 +118,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     vi.clearAllMocks();
   });
 
-
   describe("Successful Upload Tests", () => {
     it("should upload valid JPEG and return S3 URL", async () => {
       const file = createTestFile("avatar.jpg", 1024 * 100, "image/jpeg");

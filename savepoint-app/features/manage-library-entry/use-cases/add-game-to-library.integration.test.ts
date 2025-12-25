@@ -29,12 +29,9 @@ vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
   IgdbService: MockIgdbService,
 }));
 
-vi.mock(
-  "@/data-access-layer/services/game-detail/game-detail-service",
-  () => ({
-    populateGameInDatabase: mockPopulateGameInDatabase,
-  })
-);
+vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
+  populateGameInDatabase: mockPopulateGameInDatabase,
+}));
 
 describe("addGameToLibrary - Use Case Integration Tests", () => {
   let testUser: Awaited<ReturnType<typeof createUser>>;
@@ -58,9 +55,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
           cover: { image_id: "test123" },
           first_release_date: 1609459200,
           genres: [{ id: 1, name: "Action", slug: "action" }],
-          platforms: [
-            { id: 1, name: "PC", slug: "pc", abbreviation: "PC" },
-          ],
+          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
         },
       },
     });

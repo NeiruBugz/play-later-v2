@@ -33,12 +33,9 @@ vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
   IgdbService: MockIgdbService,
 }));
 
-vi.mock(
-  "@/data-access-layer/services/game-detail/game-detail-service",
-  () => ({
-    populateGameInDatabase: mockPopulateGameInDatabase,
-  })
-);
+vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
+  populateGameInDatabase: mockPopulateGameInDatabase,
+}));
 
 describe("addToLibraryAction - Integration Tests", () => {
   let testUser: Awaited<ReturnType<typeof createUser>>;

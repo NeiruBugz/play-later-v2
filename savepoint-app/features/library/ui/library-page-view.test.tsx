@@ -1,6 +1,4 @@
-import {
-  uniquePlatformsFixture,
-} from "@/test/fixtures/library";
+import { uniquePlatformsFixture } from "@/test/fixtures/library";
 import { createLibraryHandlers } from "@/test/mocks/handlers";
 import { server } from "@/test/setup/client-setup";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

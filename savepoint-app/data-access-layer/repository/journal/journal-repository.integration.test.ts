@@ -14,7 +14,6 @@ import {
   updateJournalEntry,
 } from "./journal-repository";
 
-
 describe("Journal Repository Integration Tests", () => {
   let testGameId: string;
   let testUserId: string;
@@ -22,7 +21,6 @@ describe("Journal Repository Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
   });
-
 
   beforeEach(async () => {
     await resetTestDatabase();

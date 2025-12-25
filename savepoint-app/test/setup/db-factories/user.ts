@@ -19,7 +19,8 @@ export const createUserData = (
   overrides: Partial<UserFactoryOptions> = {}
 ): UserFactoryOptions => {
   const uniqueId = ++userCounter;
-  const username = overrides.username || `${faker.internet.username()}_${uniqueId}`;
+  const username =
+    overrides.username || `${faker.internet.username()}_${uniqueId}`;
 
   return {
     email: overrides.email || faker.internet.email(),

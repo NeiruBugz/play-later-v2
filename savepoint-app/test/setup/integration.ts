@@ -1,5 +1,11 @@
 import { afterEach, beforeAll, vi } from "vitest";
 
+import "./common-mocks";
+
+import { CreateBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
+
+import { resetTestDatabase } from "./database";
+
 // Mock server-only FIRST before any other imports to prevent "Client Component" errors
 vi.mock("server-only", () => ({}));
 
@@ -7,12 +13,6 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/auth", () => ({
   getServerUserId: vi.fn(),
 }));
-
-import "./common-mocks";
-
-import { CreateBucketCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
-
-import { resetTestDatabase } from "./database";
 
 process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";

@@ -7,7 +7,6 @@ import {
 import { findGameByIgdbId } from "../../repository/game/game-repository";
 import { populateGameInDatabase } from "./game-detail-service";
 
-
 async function waitForGameInDatabase(
   igdbId: number,
   { timeout = 2000, interval = 50 } = {}

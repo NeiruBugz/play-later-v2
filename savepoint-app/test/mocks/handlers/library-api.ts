@@ -2,7 +2,6 @@ import {
   libraryItemsFixture,
   uniquePlatformsFixture,
 } from "@/test/fixtures/library";
-import type { LibraryItemWithGameDomain } from "@/shared/types";
 import { http, HttpResponse } from "msw";
 
 export const createLibraryHandlers = (items = libraryItemsFixture) => [

@@ -16,18 +16,26 @@ export type GameFactoryOptions = {
 
 export const createGameData = (
   overrides: Partial<GameFactoryOptions> = {}
-): Omit<Required<GameFactoryOptions>, 'releaseDate'> & { releaseDate: Date | null } => {
+): Omit<Required<GameFactoryOptions>, "releaseDate"> & {
+  releaseDate: Date | null;
+} => {
   const uniqueId = ++gameCounter;
   const gameName = overrides.title ?? faker.commerce.productName();
 
   return {
     title: gameName,
-    slug: overrides.slug ?? faker.helpers.slugify(gameName).toLowerCase() + `-${uniqueId}`,
+    slug:
+      overrides.slug ??
+      faker.helpers.slugify(gameName).toLowerCase() + `-${uniqueId}`,
     igdbId: overrides.igdbId ?? faker.number.int({ min: 1, max: 999999 }),
     description: overrides.description ?? faker.lorem.paragraph(),
     coverImage: overrides.coverImage ?? faker.image.url(),
-    steamAppId: overrides.steamAppId ?? faker.number.int({ min: 1, max: 999999 }),
-    releaseDate: 'releaseDate' in overrides ? (overrides.releaseDate ?? null) : faker.date.past({ years: 10 }),
+    steamAppId:
+      overrides.steamAppId ?? faker.number.int({ min: 1, max: 999999 }),
+    releaseDate:
+      "releaseDate" in overrides
+        ? (overrides.releaseDate ?? null)
+        : faker.date.past({ years: 10 }),
   };
 };
 
@@ -91,7 +99,11 @@ export const createLibraryItem = async (
   const { userId, gameId, ...overrides } = options;
   const itemData = createLibraryItemData(overrides);
 
-  if (itemData.startedAt && itemData.completedAt && itemData.completedAt < itemData.startedAt) {
+  if (
+    itemData.startedAt &&
+    itemData.completedAt &&
+    itemData.completedAt < itemData.startedAt
+  ) {
     throw new Error(
       `Invalid test data: completedAt (${itemData.completedAt.toISOString()}) must be >= startedAt (${itemData.startedAt.toISOString()}). ` +
         `This violates the database constraint "completedAt_after_startedAt".`
@@ -132,7 +144,9 @@ export const createSeededReviewData = (
   return createReviewData(overrides);
 };
 
-export const createReview = async (options: ReviewFactoryOptions): Promise<Review> => {
+export const createReview = async (
+  options: ReviewFactoryOptions
+): Promise<Review> => {
   const { userId, gameId, ...overrides } = options;
   const reviewData = createReviewData(overrides);
 
