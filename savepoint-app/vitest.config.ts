@@ -105,7 +105,7 @@ export default defineConfig({
           sequence: {
             groupOrder: 0,
           },
-          isolate: false,
+          isolate: true,
           include: ["**/*.integration.test.{js,ts,jsx,tsx}"],
           exclude: [
             "**/node_modules/**",

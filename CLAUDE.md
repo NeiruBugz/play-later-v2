@@ -735,6 +735,13 @@ This project uses **pnpm** (version 10), not npm or yarn. The `pnpm` commands ar
 
 **Monorepo Setup**: Uses pnpm workspaces. The main app is `savepoint` in the `savepoint-app/` directory.
 
+**Exact Versions**: Always install dependencies with the `-E` flag to pin exact versions (no caret `^` or tilde `~`):
+
+```bash
+pnpm add -E package-name        # Production dependency
+pnpm add -DE package-name       # Dev dependency
+```
+
 ### Port Configuration
 
 - Development server: **6060** (not standard 3000)

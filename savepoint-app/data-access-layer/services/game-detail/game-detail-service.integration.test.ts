@@ -1,5 +1,4 @@
 import {
-  cleanupDatabase,
   getTestDatabase,
   resetTestDatabase,
   setupDatabase,
@@ -7,19 +6,6 @@ import {
 
 import { findGameByIgdbId } from "../../repository/game/game-repository";
 import { populateGameInDatabase } from "./game-detail-service";
-
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
 
 async function waitForGameInDatabase(
   igdbId: number,
@@ -47,10 +33,6 @@ async function waitForGameInDatabase(
 describe("GameDetailService Integration Tests", () => {
   beforeAll(async () => {
     await setupDatabase();
-  });
-
-  afterAll(async () => {
-    await cleanupDatabase();
   });
 
   beforeEach(async () => {

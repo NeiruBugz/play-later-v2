@@ -1,6 +1,11 @@
-import { afterEach, beforeAll, vi } from "vitest";
+import { allCustomMatcher } from "aws-sdk-client-mock-vitest";
+import { afterEach, beforeAll, beforeEach, expect, vi } from "vitest";
 
 import "./common-mocks";
+
+import { resetUserCounter } from "./db-factories/user";
+
+expect.extend(allCustomMatcher);
 
 process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";
@@ -275,6 +280,10 @@ global.testUtils = {
     return formData;
   },
 };
+beforeEach(() => {
+  resetUserCounter();
+});
+
 afterEach(() => {
   vi.clearAllMocks();
 });

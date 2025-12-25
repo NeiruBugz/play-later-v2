@@ -1,41 +1,62 @@
+import { getServerUserId } from "@/auth";
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
-import { setupDatabase } from "@/test/setup/database";
+import {
+  cleanupDatabase,
+  getTestDatabase,
+  resetTestDatabase,
+  setupDatabase,
+} from "@/test/setup/database";
 import {
   createGame,
   createLibraryItem,
   createUser,
 } from "@/test/setup/db-factories";
 
-import { prisma } from "@/shared/lib/app/db";
-
 import { addToLibraryAction } from "./add-to-library-action";
 import { updateLibraryEntryAction } from "./update-library-entry-action";
 import { updateLibraryStatusAction } from "./update-library-status-action";
 
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
+const { mockGetGameDetails, MockIgdbService, mockPopulateGameInDatabase } =
+  vi.hoisted(() => {
+    const mockFn = vi.fn();
+    const mockPopulate = vi.fn();
 
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
-}));
-
-vi.mock("@/auth", () => ({
-  getServerUserId: vi.fn(),
-}));
+    return {
+      mockGetGameDetails: mockFn,
+      MockIgdbService: class {
+        async getGameDetails(...args: unknown[]) {
+          return mockFn(...args);
+        }
+      },
+      mockPopulateGameInDatabase: mockPopulate,
+    };
+  });
 
 vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
-  IgdbService: vi.fn().mockImplementation(() => ({
-    getGameDetails: vi.fn().mockResolvedValue({
+  IgdbService: MockIgdbService,
+}));
+
+vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
+  populateGameInDatabase: mockPopulateGameInDatabase,
+}));
+
+beforeAll(async () => {
+  await setupDatabase();
+});
+
+afterAll(async () => {
+  await cleanupDatabase();
+});
+
+describe("addToLibraryAction - Integration Tests", () => {
+  let testUser: Awaited<ReturnType<typeof createUser>>;
+  let testGame: Awaited<ReturnType<typeof createGame>>;
+
+  beforeEach(async () => {
+    await resetTestDatabase();
+    vi.clearAllMocks();
+
+    mockGetGameDetails.mockResolvedValue({
       success: true,
       data: {
         game: {
@@ -46,29 +67,28 @@ vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
           cover: { image_id: "test123" },
           first_release_date: 1609459200,
           genres: [{ id: 1, name: "Action", slug: "action" }],
-          platforms: [
-            {
-              id: 1,
-              name: "PC",
-              slug: "pc",
-              abbreviation: "PC",
-            },
-          ],
+          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
         },
       },
-    }),
-  })),
-}));
+    });
 
-describe("addToLibraryAction - Integration Tests", () => {
-  let testUser: Awaited<ReturnType<typeof createUser>>;
-  let testGame: Awaited<ReturnType<typeof createGame>>;
+    mockPopulateGameInDatabase.mockImplementation(async (game) => {
+      await getTestDatabase().game.create({
+        data: {
+          title: game.name,
+          igdbId: game.id,
+          slug: game.slug,
+          description: game.summary,
+          coverImage: game.cover?.image_id
+            ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+            : null,
+          releaseDate: game.first_release_date
+            ? new Date(game.first_release_date * 1000)
+            : null,
+        },
+      });
+    });
 
-  beforeAll(async () => {
-    await setupDatabase();
-  });
-
-  beforeEach(async () => {
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
@@ -79,7 +99,6 @@ describe("addToLibraryAction - Integration Tests", () => {
       igdbId: 12345,
     });
 
-    const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
 
@@ -98,7 +117,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       expect(result.data.gameId).toBe(testGame.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      const libraryItem = await prisma.libraryItem.findUnique({
+      const libraryItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: result.data.id },
       });
       expect(libraryItem).toBeTruthy();
@@ -219,7 +238,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       expect(result.data.userId).toBe(testUser.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      const game = await prisma.game.findUnique({
+      const game = await getTestDatabase().game.findUnique({
         where: { igdbId: newIgdbId },
       });
       expect(game).toBeTruthy();
@@ -231,11 +250,41 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   let testUser: Awaited<ReturnType<typeof createUser>>;
   let testGame: Awaited<ReturnType<typeof createGame>>;
 
-  beforeAll(async () => {
-    await setupDatabase();
-  });
-
   beforeEach(async () => {
+    await resetTestDatabase();
+    mockGetGameDetails.mockResolvedValue({
+      success: true,
+      data: {
+        game: {
+          id: 999,
+          name: "Test Game",
+          slug: "test-game",
+          summary: "A test game",
+          cover: { image_id: "test123" },
+          first_release_date: 1609459200,
+          genres: [{ id: 1, name: "Action", slug: "action" }],
+          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
+        },
+      },
+    });
+
+    mockPopulateGameInDatabase.mockImplementation(async (game) => {
+      await getTestDatabase().game.create({
+        data: {
+          title: game.name,
+          igdbId: game.id,
+          slug: game.slug,
+          description: game.summary,
+          coverImage: game.cover?.image_id
+            ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+            : null,
+          releaseDate: game.first_release_date
+            ? new Date(game.first_release_date * 1000)
+            : null,
+        },
+      });
+    });
+
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
@@ -246,7 +295,6 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       igdbId: 12345,
     });
 
-    const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
 
@@ -269,7 +317,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.id).toBe(initialLibraryItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: initialLibraryItem.id },
       });
       expect(dbItem?.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
@@ -301,7 +349,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.id).toBe(recentItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      const dbOldItem = await prisma.libraryItem.findUnique({
+      const dbOldItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: oldItem.id },
       });
       expect(dbOldItem?.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
@@ -349,7 +397,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.gameId).toBe(testGame.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      const libraryItem = await prisma.libraryItem.findUnique({
+      const libraryItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: result.data.id },
       });
       expect(libraryItem).toBeTruthy();
@@ -369,7 +417,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.userId).toBe(testUser.id);
       expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
 
-      const game = await prisma.game.findUnique({
+      const game = await getTestDatabase().game.findUnique({
         where: { igdbId: newIgdbId },
       });
       expect(game).toBeTruthy();
@@ -419,11 +467,8 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
   let testUser: Awaited<ReturnType<typeof createUser>>;
   let testGame: Awaited<ReturnType<typeof createGame>>;
 
-  beforeAll(async () => {
-    await setupDatabase();
-  });
-
   beforeEach(async () => {
+    await resetTestDatabase();
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",
@@ -434,7 +479,6 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       igdbId: 12345,
     });
 
-    const { getServerUserId } = await import("@/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
 
@@ -457,7 +501,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(libraryItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
       expect(dbItem?.status).toBe(LibraryItemStatus.EXPERIENCED);
@@ -484,7 +528,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(libraryItem.id);
       expect(result.data.startedAt?.getTime()).toBe(startedDate.getTime());
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
       expect(dbItem?.startedAt?.getTime()).toBe(startedDate.getTime());
@@ -512,7 +556,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
       expect(result.data.completedAt?.getTime()).toBe(completedDate.getTime());
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
       expect(dbItem?.status).toBe(LibraryItemStatus.EXPERIENCED);
@@ -543,7 +587,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(item1.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      const dbItem2 = await prisma.libraryItem.findUnique({
+      const dbItem2 = await getTestDatabase().libraryItem.findUnique({
         where: { id: item2.id },
       });
       expect(dbItem2?.status).toBe(LibraryItemStatus.WISHLIST);
@@ -627,7 +671,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       if (result.success) return;
       expect(result.error).toContain("Failed to update library entry");
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
       expect(dbItem?.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);

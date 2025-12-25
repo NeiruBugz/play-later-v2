@@ -11,6 +11,11 @@ cd savepoint-app
 pnpm install
 pnpm dev
 
+Adding dependencies (always use `-E` for exact versions):
+
+pnpm add -E package-name        # Production dependency
+pnpm add -DE package-name       # Dev dependency
+
 Infra quickstart is documented at infra/README.md.
 
 Pre-commit Hooks

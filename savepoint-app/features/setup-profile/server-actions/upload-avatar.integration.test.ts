@@ -1,10 +1,6 @@
 import { getServerUserId } from "@/auth";
 import { env } from "@/env.mjs";
-import {
-  cleanupDatabase,
-  getTestDatabase,
-  setupDatabase,
-} from "@/test/setup/database";
+import { getTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 import {
   CreateBucketCommand,
@@ -17,23 +13,6 @@ import {
 import { getS3Client } from "@/shared/lib/storage/s3-client";
 
 import { uploadAvatar } from "./upload-avatar";
-
-vi.mock("@/shared/lib", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/shared/lib")>("@/shared/lib");
-  const { getTestDatabase } = await import("@/test/setup/database");
-
-  return {
-    ...actual,
-    get prisma() {
-      return getTestDatabase();
-    },
-  };
-});
-
-vi.mock("@/auth", () => ({
-  getServerUserId: vi.fn(),
-}));
 
 describe("uploadAvatar Server Action - Integration Tests", () => {
   let testUserId: string;
@@ -137,10 +116,6 @@ describe("uploadAvatar Server Action - Integration Tests", () => {
     await db.user.delete({ where: { id: testUserId } }).catch(() => {});
 
     vi.clearAllMocks();
-  });
-
-  afterAll(async () => {
-    await cleanupDatabase();
   });
 
   describe("Successful Upload Tests", () => {

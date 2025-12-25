@@ -32,7 +32,7 @@ vi.mock("@/env.mjs", () => ({
     AWS_ENDPOINT_URL: "http://localhost:4568",
     AWS_ACCESS_KEY_ID: "test-access-key",
     AWS_SECRET_ACCESS_KEY: "test-secret-key",
-    S3_BUCKET_NAME: "savepoint-test",
+    S3_BUCKET_NAME: "savepoint-dev",
     S3_AVATAR_PATH_PREFIX: "user-avatars/",
   },
 }));
