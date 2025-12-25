@@ -107,8 +107,8 @@ export function LibraryFilters() {
 
   const hasActiveFilters = Boolean(
     searchParams.get("status") ||
-      searchParams.get("platform") ||
-      searchParams.get("search")
+    searchParams.get("platform") ||
+    searchParams.get("search")
   );
   const currentStatus = searchParams.get("status") ?? "__all__";
 
@@ -204,7 +204,10 @@ export function LibraryFilters() {
 
         {/* Sort Control */}
         <div className="w-full md:w-[180px]">
-          <Select value={getCurrentSortValue()} onValueChange={handleSortChange}>
+          <Select
+            value={getCurrentSortValue()}
+            onValueChange={handleSortChange}
+          >
             <SelectTrigger aria-label="Sort by">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>

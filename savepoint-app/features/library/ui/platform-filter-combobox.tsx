@@ -59,7 +59,7 @@ export function PlatformFilterCombobox({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "h-9 w-full justify-between rounded-md border-input text-sm shadow-sm",
+            "border-input h-9 w-full justify-between rounded-md text-sm shadow-sm",
             (value === "__all__" || !value) && "text-muted-foreground"
           )}
           disabled={isLoading || disabled}

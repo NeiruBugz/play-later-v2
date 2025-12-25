@@ -374,7 +374,7 @@ describe("LibraryPageView", () => {
       mockPush.mockClear();
 
       // Select a different sort option
-      await actions.selectSort("Release Date (Newest)");
+      await actions.selectSort("Release (Newest)");
 
       // Verify router.push was called with correct params
       expect(mockPush).toHaveBeenCalledWith(
@@ -390,9 +390,7 @@ describe("LibraryPageView", () => {
       rerender(<LibraryPageView />);
 
       await waitFor(() => {
-        expect(elements.getSortSelect()).toHaveTextContent(
-          "Release Date (Newest)"
-        );
+        expect(elements.getSortSelect()).toHaveTextContent("Release (Newest)");
       });
     });
   });
