@@ -1,6 +1,6 @@
-import type { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
 import { execSync } from "child_process";
+import { PrismaPg } from "@prisma/adapter-pg";
+import type { PrismaClient } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { Pool } from "pg";
 
@@ -23,9 +23,7 @@ describe("Status Simplification Migration", () => {
 
       pool = new Pool({ connectionString: databaseUrl });
       const adapter = new PrismaPg(pool);
-      const { PrismaClient: TestPrismaClient } = await import(
-        "@prisma/client"
-      );
+      const { PrismaClient: TestPrismaClient } = await import("@prisma/client");
       testDatabase = new TestPrismaClient({ adapter }) as PrismaClient;
       await testDatabase.$connect();
 
@@ -139,7 +137,9 @@ describe("Status Simplification Migration", () => {
   });
 
   beforeEach(async () => {
-    await testDatabase.$executeRawUnsafe(`TRUNCATE TABLE "LibraryItem" CASCADE;`);
+    await testDatabase.$executeRawUnsafe(
+      `TRUNCATE TABLE "LibraryItem" CASCADE;`
+    );
   });
 
   const insertLibraryItemWithRawStatus = async (

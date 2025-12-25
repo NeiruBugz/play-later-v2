@@ -104,19 +104,9 @@ export class LibraryService extends BaseService {
     }
   }
   private validateStatusTransition(
-    currentStatus: LibraryItemStatus,
-    newStatus: LibraryItemStatus
-  ): { valid: boolean; error?: string } {
-    if (
-      newStatus === LibraryItemStatus.WISHLIST &&
-      currentStatus !== LibraryItemStatus.WISHLIST
-    ) {
-      return {
-        valid: false,
-        error:
-          "Cannot move a game back to Wishlist. Create a new library item instead.",
-      };
-    }
+    _currentStatus: LibraryItemStatus,
+    _newStatus: LibraryItemStatus
+  ): { valid: boolean } {
     return { valid: true };
   }
   async updateLibraryItem(params: {
@@ -147,23 +137,7 @@ export class LibraryService extends BaseService {
       const currentStatus = currentDomainItem.status;
       const newStatus = params.libraryItem.status;
       if (newStatus !== currentStatus) {
-        const transitionValidation = this.validateStatusTransition(
-          currentStatus,
-          newStatus
-        );
-        if (!transitionValidation.valid) {
-          this.logger.warn(
-            {
-              libraryItemId: params.libraryItem.id,
-              currentStatus,
-              requestedStatus: newStatus,
-            },
-            "Invalid status transition attempted"
-          );
-          return this.error(
-            transitionValidation.error ?? "Invalid status transition"
-          );
-        }
+        this.validateStatusTransition(currentStatus, newStatus);
       }
       const result = await updateLibraryItem({
         userId: params.userId,

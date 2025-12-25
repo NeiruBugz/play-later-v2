@@ -1,12 +1,13 @@
 import "server-only";
 
+import { LibraryItemStatus } from "@/data-access-layer/domain/library/enums";
 import {
   repositoryError,
   RepositoryErrorCode,
   repositorySuccess,
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
-import { LibraryItemStatus, Prisma, type LibraryItem } from "@prisma/client";
+import { Prisma, type LibraryItem } from "@prisma/client";
 
 import {
   DEFAULT_ITEMS_PER_PAGE,
@@ -283,7 +284,7 @@ export async function getRecentlyCompletedLibraryItems({
 > {
   try {
     const items = await prisma.libraryItem.findMany({
-      where: { userId, status: LibraryItemStatus.EXPERIENCED },
+      where: { userId, status: LibraryItemStatus.PLAYED },
       include: { game: { select: { title: true } } },
       orderBy: { completedAt: "desc" },
       take: RECENT_COMPLETED_ITEMS_LIMIT,
@@ -444,7 +445,7 @@ export async function getLibraryByUsername({
     );
   }
 }
-export async function getWishlistedItemsByUsername({
+export async function getWantToPlayItemsByUsername({
   username,
 }: {
   username: string;
@@ -455,7 +456,7 @@ export async function getWishlistedItemsByUsername({
 > {
   try {
     const items = await prisma.libraryItem.findMany({
-      where: { User: { username }, status: LibraryItemStatus.WISHLIST },
+      where: { User: { username }, status: LibraryItemStatus.WANT_TO_PLAY },
       include: { game: true },
       orderBy: { createdAt: "asc" },
     });
@@ -463,11 +464,11 @@ export async function getWishlistedItemsByUsername({
   } catch (error) {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get wishlisted items: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Failed to get want-to-play items: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
-export async function findWishlistItemsForUser({
+export async function findWantToPlayItemsForUser({
   userId,
 }: {
   userId: string;
@@ -478,7 +479,7 @@ export async function findWishlistItemsForUser({
 > {
   try {
     const items = await prisma.libraryItem.findMany({
-      where: { userId, status: LibraryItemStatus.WISHLIST },
+      where: { userId, status: LibraryItemStatus.WANT_TO_PLAY },
       include: { game: true },
       orderBy: { createdAt: "asc" },
     });
@@ -486,11 +487,11 @@ export async function findWishlistItemsForUser({
   } catch (error) {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to find wishlist items: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Failed to find want-to-play items: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
-export async function findUpcomingWishlistItems({
+export async function findUpcomingWantToPlayItems({
   userId,
 }: {
   userId: string;
@@ -512,7 +513,7 @@ export async function findUpcomingWishlistItems({
     const items = await prisma.libraryItem.findMany({
       where: {
         userId,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
         game: { releaseDate: { gte: new Date() } },
       },
       include: {
@@ -530,7 +531,7 @@ export async function findUpcomingWishlistItems({
   } catch (error) {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to find upcoming wishlist items: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Failed to find upcoming want-to-play items: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
@@ -554,7 +555,7 @@ export async function findCurrentlyPlayingGames({
 > {
   try {
     const items = await prisma.libraryItem.findMany({
-      where: { userId, status: LibraryItemStatus.CURRENTLY_EXPLORING },
+      where: { userId, status: LibraryItemStatus.PLAYING },
       include: {
         game: {
           select: { id: true, title: true, igdbId: true, coverImage: true },
@@ -616,7 +617,7 @@ export async function getLibraryStatsByUserId(userId: string): Promise<
       prisma.libraryItem.findMany({
         where: {
           userId,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         },
         include: {
           game: {

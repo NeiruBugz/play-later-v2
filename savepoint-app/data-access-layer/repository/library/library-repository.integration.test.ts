@@ -1,3 +1,4 @@
+import { LibraryItemStatus } from "@/data-access-layer/domain/library/enums";
 import {
   getTestDatabase,
   resetTestDatabase,
@@ -8,7 +9,6 @@ import {
   createLibraryItem,
   createUser,
 } from "@/test/setup/db-factories";
-import { LibraryItemStatus } from "@prisma/client";
 
 import { isRepositorySuccess } from "../types";
 import { findLibraryItemsWithFilters } from "./library-repository";
@@ -33,17 +33,17 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game1.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game2.id,
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game3.id,
-          status: LibraryItemStatus.WISHLIST,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
 
         const result = await findLibraryItemsWithFilters({ userId: user.id });
@@ -66,22 +66,22 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game1.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game2.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game3.id,
-          status: LibraryItemStatus.WISHLIST,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
 
         const result = await findLibraryItemsWithFilters({
           userId: user.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
 
         expect(isRepositorySuccess(result)).toBe(true);
@@ -89,7 +89,7 @@ describe("LibraryRepository - Integration Tests", () => {
           expect(result.data).toHaveLength(2);
           expect(
             result.data.every(
-              (item) => item.status === LibraryItemStatus.CURRENTLY_EXPLORING
+              (item) => item.status === LibraryItemStatus.PLAYING
             )
           ).toBe(true);
         }
@@ -170,25 +170,25 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game1.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game2.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game3.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PlayStation 5",
         });
 
         const result = await findLibraryItemsWithFilters({
           userId: user.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
           search: "dark souls",
         });
@@ -201,7 +201,7 @@ describe("LibraryRepository - Integration Tests", () => {
           );
           expect(
             result.data.every(
-              (item) => item.status === LibraryItemStatus.CURRENTLY_EXPLORING
+              (item) => item.status === LibraryItemStatus.PLAYING
             )
           ).toBe(true);
           expect(
@@ -346,7 +346,7 @@ describe("LibraryRepository - Integration Tests", () => {
         const item1 = await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
         await prisma.libraryItem.update({
           where: { id: item1.id },
@@ -356,7 +356,7 @@ describe("LibraryRepository - Integration Tests", () => {
         const item2 = await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await prisma.libraryItem.update({
           where: { id: item2.id },
@@ -366,7 +366,7 @@ describe("LibraryRepository - Integration Tests", () => {
         const item3 = await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
         });
         await prisma.libraryItem.update({
           where: { id: item3.id },
@@ -382,7 +382,7 @@ describe("LibraryRepository - Integration Tests", () => {
         if (isRepositorySuccess(result)) {
           expect(result.data).toHaveLength(1);
           expect(result.data[0].id).toBe(item3.id);
-          expect(result.data[0].status).toBe(LibraryItemStatus.EXPERIENCED);
+          expect(result.data[0].status).toBe(LibraryItemStatus.PLAYED);
         }
       });
 
@@ -393,17 +393,17 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
         });
 
         const result = await findLibraryItemsWithFilters({

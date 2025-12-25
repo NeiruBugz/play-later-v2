@@ -50,7 +50,7 @@ describe("LibraryService", () => {
         id: 1,
         userId: validUserId,
         gameId: "clx456def789ghi",
-        status: LibraryItemStatus.CURIOUS_ABOUT,
+        status: LibraryItemStatus.WANT_TO_PLAY,
         platform: "PlayStation 5",
         acquisitionType: "DIGITAL",
         startedAt: null,
@@ -72,7 +72,7 @@ describe("LibraryService", () => {
         id: 2,
         userId: validUserId,
         gameId: "clx789ghi012jkl",
-        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        status: LibraryItemStatus.PLAYING,
         platform: "PC",
         acquisitionType: "DIGITAL",
         startedAt: new Date("2025-01-05"),
@@ -123,7 +123,7 @@ describe("LibraryService", () => {
 
         const params = {
           userId: validUserId,
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
           platform: "PlayStation 5",
           search: "Test",
           sortBy: "createdAt" as const,
@@ -328,184 +328,48 @@ describe("LibraryService", () => {
       updatedAt: new Date("2025-01-01"),
     });
 
-    describe("valid status transitions", () => {
-      it("should allow forward progression (CURIOUS_ABOUT → CURRENTLY_EXPLORING)", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.CURIOUS_ABOUT)
-          )
-        );
+    describe("all status transitions are allowed", () => {
+      const allStatuses = [
+        LibraryItemStatus.WANT_TO_PLAY,
+        LibraryItemStatus.OWNED,
+        LibraryItemStatus.PLAYING,
+        LibraryItemStatus.PLAYED,
+      ];
 
-        mockUpdateLibraryItem.mockResolvedValue(
-          repositorySuccess({
-            ...createMockLibraryItem(LibraryItemStatus.CURRENTLY_EXPLORING),
-            updatedAt: new Date("2025-01-02"),
-          })
-        );
+      const transitions = allStatuses.flatMap((from) =>
+        allStatuses.filter((to) => to !== from).map((to) => ({ from, to }))
+      );
 
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
-          },
-        });
-
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.status).toBe(
-            LibraryItemStatus.CURRENTLY_EXPLORING
+      it.each(transitions)(
+        "should allow transition from $from to $to",
+        async ({ from, to }) => {
+          mockFindLibraryItemById.mockResolvedValue(
+            repositorySuccess(createMockLibraryItem(from))
           );
+
+          mockUpdateLibraryItem.mockResolvedValue(
+            repositorySuccess({
+              ...createMockLibraryItem(to),
+              updatedAt: new Date("2025-01-02"),
+            })
+          );
+
+          const result = await service.updateLibraryItem({
+            userId: validUserId,
+            libraryItem: {
+              id: libraryItemId,
+              status: to,
+            },
+          });
+
+          expect(result.success).toBe(true);
+          if (result.success) {
+            expect(result.data.status).toBe(to);
+          }
+
+          expect(mockUpdateLibraryItem).toHaveBeenCalled();
         }
-
-        expect(mockUpdateLibraryItem).toHaveBeenCalled();
-      });
-
-      it("should allow forward progression (CURRENTLY_EXPLORING → EXPERIENCED)", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.CURRENTLY_EXPLORING)
-          )
-        );
-
-        mockUpdateLibraryItem.mockResolvedValue(
-          repositorySuccess({
-            ...createMockLibraryItem(LibraryItemStatus.EXPERIENCED),
-            updatedAt: new Date("2025-01-03"),
-          })
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.EXPERIENCED,
-          },
-        });
-
-        expect(result.success).toBe(true);
-        expect(mockUpdateLibraryItem).toHaveBeenCalled();
-      });
-
-      it("should allow skipping steps (WISHLIST → EXPERIENCED)", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(createMockLibraryItem(LibraryItemStatus.WISHLIST))
-        );
-
-        mockUpdateLibraryItem.mockResolvedValue(
-          repositorySuccess({
-            ...createMockLibraryItem(LibraryItemStatus.EXPERIENCED),
-            updatedAt: new Date("2025-01-04"),
-          })
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.EXPERIENCED,
-          },
-        });
-
-        expect(result.success).toBe(true);
-        expect(mockUpdateLibraryItem).toHaveBeenCalled();
-      });
-
-      it("should allow transition FROM Wishlist to any other status", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(createMockLibraryItem(LibraryItemStatus.WISHLIST))
-        );
-
-        mockUpdateLibraryItem.mockResolvedValue(
-          repositorySuccess({
-            ...createMockLibraryItem(LibraryItemStatus.CURIOUS_ABOUT),
-            updatedAt: new Date("2025-01-06"),
-          })
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.CURIOUS_ABOUT,
-          },
-        });
-
-        expect(result.success).toBe(true);
-        expect(mockUpdateLibraryItem).toHaveBeenCalled();
-      });
-    });
-
-    describe("invalid status transitions", () => {
-      it("should block transition TO Wishlist from CURIOUS_ABOUT", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.CURIOUS_ABOUT)
-          )
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.WISHLIST,
-          },
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toContain("Wishlist");
-          expect(result.error).toContain("new library item");
-        }
-
-        expect(mockUpdateLibraryItem).not.toHaveBeenCalled();
-      });
-
-      it("should block transition TO Wishlist from CURRENTLY_EXPLORING", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.CURRENTLY_EXPLORING)
-          )
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.WISHLIST,
-          },
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toContain("Wishlist");
-        }
-
-        expect(mockUpdateLibraryItem).not.toHaveBeenCalled();
-      });
-
-      it("should block transition TO Wishlist from EXPERIENCED", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.EXPERIENCED)
-          )
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.WISHLIST,
-          },
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toContain("Wishlist");
-        }
-
-        expect(mockUpdateLibraryItem).not.toHaveBeenCalled();
-      });
+      );
     });
 
     describe("error scenarios", () => {
@@ -521,7 +385,7 @@ describe("LibraryService", () => {
           userId: validUserId,
           libraryItem: {
             id: libraryItemId,
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
+            status: LibraryItemStatus.PLAYING,
           },
         });
 
@@ -536,7 +400,7 @@ describe("LibraryService", () => {
       it("should return error when repository update fails", async () => {
         mockFindLibraryItemById.mockResolvedValue(
           repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.CURIOUS_ABOUT)
+            createMockLibraryItem(LibraryItemStatus.WANT_TO_PLAY)
           )
         );
 
@@ -551,7 +415,7 @@ describe("LibraryService", () => {
           userId: validUserId,
           libraryItem: {
             id: libraryItemId,
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
+            status: LibraryItemStatus.PLAYING,
           },
         });
 
@@ -570,7 +434,7 @@ describe("LibraryService", () => {
           userId: validUserId,
           libraryItem: {
             id: libraryItemId,
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
+            status: LibraryItemStatus.PLAYING,
           },
         });
 
@@ -583,7 +447,7 @@ describe("LibraryService", () => {
       it("should handle unexpected errors during update", async () => {
         mockFindLibraryItemById.mockResolvedValue(
           repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.CURIOUS_ABOUT)
+            createMockLibraryItem(LibraryItemStatus.WANT_TO_PLAY)
           )
         );
 
@@ -595,7 +459,7 @@ describe("LibraryService", () => {
           userId: validUserId,
           libraryItem: {
             id: libraryItemId,
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
+            status: LibraryItemStatus.PLAYING,
           },
         });
 

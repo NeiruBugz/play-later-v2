@@ -93,7 +93,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.CURIOUS_ABOUT,
+        status: LibraryItemStatus.WANT_TO_PLAY,
         platform: "PlayStation 5",
       });
 
@@ -103,7 +103,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       expect(result.data.libraryItem.userId).toBe(testUser.id);
       expect(result.data.libraryItem.gameId).toBe(testGame.id);
       expect(result.data.libraryItem.status).toBe(
-        LibraryItemStatus.CURIOUS_ABOUT
+        LibraryItemStatus.WANT_TO_PLAY
       );
       expect(result.data.libraryItem.platform).toBe("PlayStation 5");
       expect(result.data.libraryItem.acquisitionType).toBe(
@@ -115,7 +115,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
         where: { id: result.data.libraryItem.id },
       });
       expect(libraryItem).toBeTruthy();
-      expect(libraryItem?.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
+      expect(libraryItem?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
     });
 
     it("should add game with dates when provided", async () => {
@@ -125,7 +125,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.EXPERIENCED,
+        status: LibraryItemStatus.PLAYED,
         platform: "PC",
         startedAt,
         completedAt,
@@ -146,13 +146,13 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
       expect(result.success).toBe(false);
@@ -174,7 +174,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: newIgdbId,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
       expect(result.success).toBe(true);
@@ -200,7 +200,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: 888,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
       expect(result.success).toBe(false);
@@ -218,7 +218,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: 777,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
       expect(result.success).toBe(false);
@@ -233,7 +233,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: "non-existent-user-id",
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
       expect(result.success).toBe(false);
@@ -248,7 +248,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
       expect(result.success).toBe(true);
@@ -261,7 +261,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
       expect(result.success).toBe(true);
@@ -273,12 +273,10 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
 
     it("should work with all library statuses", async () => {
       const statuses = [
-        LibraryItemStatus.WISHLIST,
-        LibraryItemStatus.CURIOUS_ABOUT,
-        LibraryItemStatus.CURRENTLY_EXPLORING,
-        LibraryItemStatus.EXPERIENCED,
-        LibraryItemStatus.TOOK_A_BREAK,
-        LibraryItemStatus.REVISITING,
+        LibraryItemStatus.WANT_TO_PLAY,
+        LibraryItemStatus.OWNED,
+        LibraryItemStatus.PLAYING,
+        LibraryItemStatus.PLAYED,
       ];
 
       for (const status of statuses) {

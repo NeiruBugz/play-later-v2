@@ -4,12 +4,10 @@ import type {
 } from "@/data-access-layer/domain/library";
 
 export const LibraryStatusMapper: Record<LibraryItemStatus, string> = {
-  CURIOUS_ABOUT: "Curious About",
-  CURRENTLY_EXPLORING: "Currently Exploring",
-  TOOK_A_BREAK: "Took a Break",
-  EXPERIENCED: "Experienced",
-  WISHLIST: "Wishlist",
-  REVISITING: "Revisiting",
+  WANT_TO_PLAY: "Want to Play",
+  OWNED: "Owned",
+  PLAYING: "Playing",
+  PLAYED: "Played",
 };
 export const AcquisitionStatusMapper: Record<AcquisitionType, string> = {
   DIGITAL: "Digital",

@@ -48,7 +48,7 @@ describe("addGameToLibrary", () => {
 
   const validUserId = "clx123abc456def";
   const validIgdbId = 12345;
-  const validStatus: LibraryItemStatusType = LibraryItemStatus.CURIOUS_ABOUT;
+  const validStatus: LibraryItemStatusType = LibraryItemStatus.WANT_TO_PLAY;
 
   const mockGame = createDatabaseGameFixture({
     id: "game-456",
@@ -197,7 +197,7 @@ describe("addGameToLibrary", () => {
       const result = await addGameToLibrary({
         userId: validUserId,
         igdbId: validIgdbId,
-        status: LibraryItemStatus.EXPERIENCED,
+        status: LibraryItemStatus.PLAYED,
         platform: "PlayStation 5",
         startedAt,
         completedAt,
@@ -209,7 +209,7 @@ describe("addGameToLibrary", () => {
         userId: validUserId,
         gameId: mockGame.id,
         libraryItem: {
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
           acquisitionType: AcquisitionType.DIGITAL,
           platform: "PlayStation 5",
           startedAt,
@@ -310,7 +310,7 @@ describe("addGameToLibrary", () => {
     it("should allow adding same game with different status", async () => {
       const existingItem = {
         ...mockLibraryItem,
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       };
 
       mockProfileService.verifyUserExists.mockResolvedValue({
@@ -330,7 +330,7 @@ describe("addGameToLibrary", () => {
 
       const newItem = {
         ...mockLibraryItem,
-        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        status: LibraryItemStatus.PLAYING,
       };
 
       mockLibraryService.createLibraryItem.mockResolvedValue({
@@ -341,12 +341,12 @@ describe("addGameToLibrary", () => {
       const result = await addGameToLibrary({
         userId: validUserId,
         igdbId: validIgdbId,
-        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        status: LibraryItemStatus.PLAYING,
       });
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.libraryItem.status).toBe("CURRENTLY_EXPLORING");
+        expect(result.data.libraryItem.status).toBe("PLAYING");
       }
     });
 
