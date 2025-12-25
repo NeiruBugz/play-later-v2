@@ -4,7 +4,7 @@ export {
   isoToReadable,
   getTimeStamp,
 } from "./date-functions";
-export { LibraryStatusMapper, AcquisitionStatusMapper } from "./enum-mappers";
+export { AcquisitionStatusMapper } from "./enum-mappers";
 export {
   capitalizeString,
   normalizeGameTitle,

@@ -1,6 +1,5 @@
 "use client";
 
-import type { LibraryItemStatus } from "@/data-access-layer/domain/library/enums";
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -16,53 +15,25 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
-import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
+import {
+  LIBRARY_STATUS_CONFIG,
+  type StatusBadgeVariant,
+} from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui";
 
 import { useUniquePlatforms } from "../hooks/use-unique-platforms";
 import { PlatformFilterCombobox } from "./platform-filter-combobox";
 
-const STATUS_FILTER_STYLES: Record<
-  LibraryItemStatus,
-  { active: string; inactive: string }
-> = {
-  WISHLIST: {
-    active:
-      "bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)] hover:bg-[var(--status-wishlist)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-wishlist)]/30 text-[var(--status-wishlist)] hover:bg-[var(--status-wishlist)]/10",
-  },
-  CURIOUS_ABOUT: {
-    active:
-      "bg-[var(--status-curious)] text-[var(--status-curious-foreground)] hover:bg-[var(--status-curious)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-curious)]/30 text-[var(--status-curious)] hover:bg-[var(--status-curious)]/10",
-  },
-  CURRENTLY_EXPLORING: {
-    active:
-      "bg-[var(--status-playing)] text-[var(--status-playing-foreground)] hover:bg-[var(--status-playing)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-playing)]/30 text-[var(--status-playing)] hover:bg-[var(--status-playing)]/10",
-  },
-  TOOK_A_BREAK: {
-    active:
-      "bg-[var(--status-break)] text-[var(--status-break-foreground)] hover:bg-[var(--status-break)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-break)]/30 text-[var(--status-break)] hover:bg-[var(--status-break)]/10",
-  },
-  EXPERIENCED: {
-    active:
-      "bg-[var(--status-experienced)] text-[var(--status-experienced-foreground)] hover:bg-[var(--status-experienced)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-experienced)]/30 text-[var(--status-experienced)] hover:bg-[var(--status-experienced)]/10",
-  },
-  REVISITING: {
-    active:
-      "bg-[var(--status-revisiting)] text-[var(--status-revisiting-foreground)] hover:bg-[var(--status-revisiting)]/90 border-transparent",
-    inactive:
-      "border-[var(--status-revisiting)]/30 text-[var(--status-revisiting)] hover:bg-[var(--status-revisiting)]/10",
-  },
-};
+function getStatusFilterStyles(badgeVariant: StatusBadgeVariant): {
+  active: string;
+  inactive: string;
+} {
+  const cssVarName = `--status-${badgeVariant}`;
+  return {
+    active: `bg-[var(${cssVarName})] text-[var(${cssVarName}-foreground)] hover:bg-[var(${cssVarName})]/90 border-transparent`,
+    inactive: `border-[var(${cssVarName})]/30 text-[var(${cssVarName})] hover:bg-[var(${cssVarName})]/10`,
+  };
+}
 
 export function LibraryFilters() {
   const router = useRouter();
@@ -149,24 +120,23 @@ export function LibraryFilters() {
           >
             All Statuses
           </Button>
-          {LIBRARY_STATUS_CONFIG.map((option) => {
-            const isActive = currentStatus === option.value;
-            const statusStyles =
-              STATUS_FILTER_STYLES[option.value as LibraryItemStatus];
+          {LIBRARY_STATUS_CONFIG.map((config) => {
+            const isActive = currentStatus === config.value;
+            const statusStyles = getStatusFilterStyles(config.badgeVariant);
             return (
               <Button
-                key={option.value}
+                key={config.value}
                 variant="outline"
                 size="sm"
-                onClick={() => updateFilter("status", option.value)}
-                aria-label={`Filter by ${option.label}`}
+                onClick={() => updateFilter("status", config.value)}
+                aria-label={`Filter by ${config.label}`}
                 aria-pressed={isActive}
                 className={cn(
                   "transition-all",
                   isActive ? statusStyles.active : statusStyles.inactive
                 )}
               >
-                {option.label}
+                {config.label}
               </Button>
             );
           })}

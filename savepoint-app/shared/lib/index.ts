@@ -33,7 +33,6 @@ export {
   convertUnixToHumanReadable,
   isoToReadable,
   getTimeStamp,
-  LibraryStatusMapper,
   AcquisitionStatusMapper,
   capitalizeString,
   normalizeGameTitle,

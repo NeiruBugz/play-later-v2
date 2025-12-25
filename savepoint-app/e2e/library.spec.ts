@@ -10,12 +10,10 @@ test.describe("[library] Library page", () => {
     await expect(library.heading()).toBeVisible();
 
     await expect(library.allStatusesButton()).toBeVisible();
-    await expect(library.curiousAboutButton()).toBeVisible();
-    await expect(library.currentlyExploringButton()).toBeVisible();
-    await expect(library.takingABreakButton()).toBeVisible();
-    await expect(library.experiencedButton()).toBeVisible();
-    await expect(library.wishlistButton()).toBeVisible();
-    await expect(library.revisitingButton()).toBeVisible();
+    await expect(library.wantToPlayButton()).toBeVisible();
+    await expect(library.ownedButton()).toBeVisible();
+    await expect(library.playingButton()).toBeVisible();
+    await expect(library.playedButton()).toBeVisible();
   });
 
   test("has 'All Statuses' button selected by default", async ({ page }) => {
@@ -60,14 +58,14 @@ test.describe("[library] Library page", () => {
       "aria-pressed",
       "true"
     );
-    await expect(library.curiousAboutButton()).toHaveAttribute(
+    await expect(library.wantToPlayButton()).toHaveAttribute(
       "aria-pressed",
       "false"
     );
 
-    await library.curiousAboutButton().click();
+    await library.wantToPlayButton().click();
 
-    await expect(library.curiousAboutButton()).toHaveAttribute(
+    await expect(library.wantToPlayButton()).toHaveAttribute(
       "aria-pressed",
       "true"
     );
@@ -76,6 +74,6 @@ test.describe("[library] Library page", () => {
       "false"
     );
 
-    expect(page.url()).toContain("status=CURIOUS_ABOUT");
+    expect(page.url()).toContain("status=WANT_TO_PLAY");
   });
 });

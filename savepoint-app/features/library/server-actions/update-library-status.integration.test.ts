@@ -107,7 +107,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   });
 
   describe("Status transition validation", () => {
-    it("should prevent moving TO Wishlist from other statuses", async () => {
+    it("should allow moving TO Want to Play from other statuses", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
@@ -119,17 +119,17 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
         status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
-      expect(result.success).toBe(false);
-      if (result.success) return;
-      expect(result.error).toContain("Cannot move a game back to Wishlist");
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
 
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
-      expect(dbItem?.status).toBe(LibraryItemStatus.PLAYING);
+      expect(dbItem?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
     });
 
-    it("should allow updating Wishlist TO other statuses", async () => {
+    it("should allow updating Want to Play TO other statuses", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
@@ -138,15 +138,15 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.PLAYING,
       });
 
       expect(result.success).toBe(true);
       if (!result.success) return;
-      expect(result.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(result.data.status).toBe(LibraryItemStatus.PLAYING);
     });
 
-    it("should allow staying in Wishlist status (same status update)", async () => {
+    it("should allow staying in Want to Play status (same status update)", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,

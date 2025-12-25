@@ -36,7 +36,7 @@ function renderStatusSelectInForm(props = {}) {
   const TestForm = () => {
     const methods = useForm<TestFormData>({
       defaultValues: {
-        status: LibraryItemStatus.CURIOUS_ABOUT,
+        status: LibraryItemStatus.WANT_TO_PLAY,
       },
     });
 
@@ -75,13 +75,13 @@ describe("StatusSelect", () => {
   });
 
   describe("given user opens the select dropdown", () => {
-    it("should display all 6 status options", async () => {
+    it("should display all 4 status options", async () => {
       renderStatusSelectInForm();
 
       await actions.clickTrigger();
 
       const options = elements.getOptions();
-      expect(options).toHaveLength(6);
+      expect(options).toHaveLength(4);
     });
 
     it.each(STATUS_SELECT_OPTIONS)(

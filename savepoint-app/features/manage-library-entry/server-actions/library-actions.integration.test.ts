@@ -140,17 +140,16 @@ describe("addToLibraryAction - Integration Tests", () => {
     it("should handle all journey statuses", async () => {
       const statuses = [
         LibraryItemStatus.WANT_TO_PLAY,
+        LibraryItemStatus.OWNED,
         LibraryItemStatus.PLAYING,
         LibraryItemStatus.PLAYED,
-        LibraryItemStatus.PLAYED,
-        LibraryItemStatus.WANT_TO_PLAY,
-        LibraryItemStatus.PLAYING,
       ];
 
-      for (const status of statuses) {
+      for (let i = 0; i < statuses.length; i++) {
+        const status = statuses[i];
         const user = await createUser({
-          email: `user-${status}@example.com`,
-          username: `user-${status}`,
+          email: `user-status-${i}@example.com`,
+          username: `user-status-${i}`,
         });
 
         const { getServerUserId } = await import("@/auth");

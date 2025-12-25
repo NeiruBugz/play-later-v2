@@ -9,10 +9,7 @@ import {
   mapLibraryStatusToGameStatus,
   ProgressRing,
 } from "@/shared/components/ui/progress-ring";
-import {
-  LIBRARY_STATUS_LABELS,
-  LIBRARY_STATUS_VARIANTS,
-} from "@/shared/lib/library-status";
+import { getStatusConfig } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui";
 import type { LibraryItemStatus } from "@/shared/types";
 
@@ -49,6 +46,8 @@ export const LibraryCard = memo(function LibraryCard({
 
   const staggerIndex = Math.min(index + 1, 12);
 
+  const statusConfig = getStatusConfig(status);
+
   return (
     <Link
       href={`/games/${game.slug}`}
@@ -61,7 +60,7 @@ export const LibraryCard = memo(function LibraryCard({
       )}
       onClick={handleLinkInteraction}
       onMouseDown={handleLinkInteraction}
-      aria-label={`${game.title} - ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}${hasMultipleEntries ? ` - ${game.entryCount} entries` : ""}`}
+      aria-label={`${game.title} - ${statusConfig.label}${hasMultipleEntries ? ` - ${game.entryCount} entries` : ""}`}
       style={{ animationDelay: `${staggerIndex * 50}ms` }}
     >
       <div className="relative overflow-hidden rounded-lg">
@@ -94,12 +93,12 @@ export const LibraryCard = memo(function LibraryCard({
 
         <div className="absolute top-3 left-3 z-10">
           <Badge
-            variant={LIBRARY_STATUS_VARIANTS[status as LibraryItemStatus]}
+            variant={statusConfig.badgeVariant}
             role="status"
-            aria-label={`Status: ${LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}`}
+            aria-label={`Status: ${statusConfig.label}`}
             className="shadow-paper-sm backdrop-blur-sm"
           >
-            {LIBRARY_STATUS_LABELS[status as LibraryItemStatus]}
+            {statusConfig.label}
           </Badge>
         </div>
 

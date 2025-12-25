@@ -1,12 +1,5 @@
-import {
-  Bookmark,
-  Clock,
-  Eye,
-  Gamepad2,
-  Library,
-  RotateCcw,
-  Trophy,
-} from "lucide-react";
+import { LibraryItemStatus } from "@/data-access-layer/domain/library";
+import { Library } from "lucide-react";
 import Link from "next/link";
 
 import { Card } from "@/shared/components/ui/card";
@@ -14,6 +7,11 @@ import {
   ProgressRing,
   type GameStatus,
 } from "@/shared/components/ui/progress-ring";
+import {
+  getStatusIcon,
+  getStatusLabel,
+  LIBRARY_STATUS_CONFIG,
+} from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui";
 
 import type { DashboardStatsData } from "./dashboard-stats-server";
@@ -101,6 +99,22 @@ interface DashboardStatsCardsProps {
 }
 
 export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
+  const statusMap: Record<
+    LibraryItemStatus,
+    { count: number; gameStatus: GameStatus }
+  > = {
+    [LibraryItemStatus.WANT_TO_PLAY]: {
+      count: stats.wantToPlay,
+      gameStatus: "WANT_TO_PLAY",
+    },
+    [LibraryItemStatus.OWNED]: { count: stats.owned, gameStatus: "OWNED" },
+    [LibraryItemStatus.PLAYING]: {
+      count: stats.playing,
+      gameStatus: "PLAYING",
+    },
+    [LibraryItemStatus.PLAYED]: { count: stats.played, gameStatus: "PLAYED" },
+  };
+
   const statItems: Omit<StatCardProps, "index" | "total">[] = [
     {
       label: "Total Games",
@@ -109,52 +123,21 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
       status: "PLAYING",
       href: "/library",
     },
-    {
-      label: "Currently Exploring",
-      count: stats.currentlyExploring,
-      icon: <Gamepad2 className="h-4 w-4" />,
-      status: "PLAYING",
-      href: "/library?status=CURRENTLY_EXPLORING",
-    },
-    {
-      label: "Experienced",
-      count: stats.experienced,
-      icon: <Trophy className="h-4 w-4" />,
-      status: "EXPERIENCED",
-      href: "/library?status=EXPERIENCED",
-    },
-    {
-      label: "Curious About",
-      count: stats.curiousAbout,
-      icon: <Eye className="h-4 w-4" />,
-      status: "CURIOUS",
-      href: "/library?status=CURIOUS_ABOUT",
-    },
-    {
-      label: "Taking a Break",
-      count: stats.tookABreak,
-      icon: <Clock className="h-4 w-4" />,
-      status: "BREAK",
-      href: "/library?status=TOOK_A_BREAK",
-    },
-    {
-      label: "Wishlist",
-      count: stats.wishlist,
-      icon: <Bookmark className="h-4 w-4" />,
-      status: "WISHLIST",
-      href: "/library?status=WISHLIST",
-    },
-    {
-      label: "Revisiting",
-      count: stats.revisiting,
-      icon: <RotateCcw className="h-4 w-4" />,
-      status: "REVISITING",
-      href: "/library?status=REVISITING",
-    },
+    ...LIBRARY_STATUS_CONFIG.map((statusConfig) => {
+      const Icon = getStatusIcon(statusConfig.value);
+      const { count, gameStatus } = statusMap[statusConfig.value];
+      return {
+        label: getStatusLabel(statusConfig.value),
+        count,
+        icon: <Icon className="h-4 w-4" />,
+        status: gameStatus,
+        href: `/library?status=${statusConfig.value}`,
+      };
+    }),
   ];
 
   return (
-    <div className="gap-lg grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+    <div className="gap-lg grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {statItems.map((item, index) => (
         <StatCard
           key={item.label}

@@ -133,12 +133,10 @@ describe("LibraryPageView", () => {
         expect(elements.getAllStatusesButton()).toBeVisible();
       });
 
-      expect(elements.getStatusButton("Curious About")).toBeVisible();
-      expect(elements.getStatusButton("Currently Exploring")).toBeVisible();
-      expect(elements.getStatusButton("Taking a Break")).toBeVisible();
-      expect(elements.getStatusButton("Experienced")).toBeVisible();
-      expect(elements.getStatusButton("Wishlist")).toBeVisible();
-      expect(elements.getStatusButton("Revisiting")).toBeVisible();
+      expect(elements.getStatusButton("Want to Play")).toBeVisible();
+      expect(elements.getStatusButton("Owned")).toBeVisible();
+      expect(elements.getStatusButton("Playing")).toBeVisible();
+      expect(elements.getStatusButton("Played")).toBeVisible();
     });
 
     it("displays sort select with default value", async () => {
@@ -179,17 +177,17 @@ describe("LibraryPageView", () => {
         const { mockPush } = createNavigationMock();
         const { rerender } = renderComponent();
 
-        await actions.clickStatusButton("Curious About");
+        await actions.clickStatusButton("Want to Play");
 
         expect(mockPush).toHaveBeenCalledWith(
-          expect.stringContaining("status=CURIOUS_ABOUT"),
+          expect.stringContaining("status=WANT_TO_PLAY"),
           expect.anything()
         );
 
         rerender(<LibraryPageView />);
 
         await waitFor(() => {
-          expect(elements.getStatusButton("Curious About")).toHaveAttribute(
+          expect(elements.getStatusButton("Want to Play")).toHaveAttribute(
             "aria-pressed",
             "true"
           );
@@ -284,17 +282,17 @@ describe("LibraryPageView", () => {
       const { rerender } = renderComponent();
 
       await waitFor(() => {
-        expect(elements.getStatusButton("Curious About")).toBeVisible();
+        expect(elements.getStatusButton("Want to Play")).toBeVisible();
       });
 
       // Apply status filter
-      await actions.clickStatusButton("Curious About");
+      await actions.clickStatusButton("Want to Play");
 
       // Re-render to reflect status change
       rerender(<LibraryPageView />);
 
       await waitFor(() => {
-        expect(elements.getStatusButton("Curious About")).toHaveAttribute(
+        expect(elements.getStatusButton("Want to Play")).toHaveAttribute(
           "aria-pressed",
           "true"
         );

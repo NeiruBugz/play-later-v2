@@ -9,28 +9,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/shared/components/ui/popover";
-import { LibraryStatusMapper } from "@/shared/lib/ui/enum-mappers";
+import {
+  getStatusConfig,
+  LIBRARY_STATUS_CONFIG,
+} from "@/shared/lib/library-status";
 import { LibraryItemStatus } from "@/shared/types";
 
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
 import type { LibraryCardInteractiveBadgeProps } from "./library-card-interactive-badge.types";
 
-const STATUS_OPTIONS: LibraryItemStatus[] = [
-  LibraryItemStatus.WISHLIST,
-  LibraryItemStatus.CURIOUS_ABOUT,
-  LibraryItemStatus.CURRENTLY_EXPLORING,
-  LibraryItemStatus.TOOK_A_BREAK,
-  LibraryItemStatus.EXPERIENCED,
-  LibraryItemStatus.REVISITING,
-];
-
 export function LibraryCardInteractiveBadge({
   libraryItemId,
   currentStatus,
-  statusVariant,
 }: LibraryCardInteractiveBadgeProps) {
   const [open, setOpen] = useState(false);
   const updateStatus = useUpdateLibraryStatus();
+
+  const currentConfig = getStatusConfig(currentStatus);
+
   const handleStatusChange = (newStatus: LibraryItemStatus) => {
     updateStatus.mutate({
       libraryItemId,
@@ -39,9 +35,10 @@ export function LibraryCardInteractiveBadge({
     setOpen(false);
   };
 
-  const availableStatuses = STATUS_OPTIONS.filter(
-    (status) => status !== currentStatus
+  const availableStatuses = LIBRARY_STATUS_CONFIG.filter(
+    (config) => config.value !== currentStatus
   );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -49,7 +46,7 @@ export function LibraryCardInteractiveBadge({
           type="button"
           className="focus-visible:ring-ring transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
           disabled={updateStatus.isPending}
-          aria-label="Change status"
+          aria-label={currentConfig.ariaLabel}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -60,11 +57,11 @@ export function LibraryCardInteractiveBadge({
           }}
         >
           <Badge
-            variant={statusVariant}
+            variant={currentConfig.badgeVariant}
             className="cursor-pointer"
             data-library-interactive
           >
-            {LibraryStatusMapper[currentStatus]}
+            {currentConfig.label}
           </Badge>
         </button>
       </PopoverTrigger>
@@ -80,31 +77,22 @@ export function LibraryCardInteractiveBadge({
           <p className="caption text-muted-foreground mb-md font-medium">
             Change status
           </p>
-          {availableStatuses.map((status) => {
-            const isDisabled =
-              status === LibraryItemStatus.WISHLIST &&
-              currentStatus !== LibraryItemStatus.WISHLIST;
-            return (
-              <Button
-                key={status}
-                variant="ghost"
-                className="body-sm w-full justify-start"
-                disabled={isDisabled || updateStatus.isPending}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleStatusChange(status);
-                }}
-              >
-                {LibraryStatusMapper[status]}
-                {isDisabled && (
-                  <span className="caption text-muted-foreground ml-auto">
-                    (cannot move back)
-                  </span>
-                )}
-              </Button>
-            );
-          })}
+          {availableStatuses.map((statusConfig) => (
+            <Button
+              key={statusConfig.value}
+              variant="ghost"
+              className="body-sm w-full justify-start"
+              disabled={updateStatus.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleStatusChange(statusConfig.value);
+              }}
+              aria-label={statusConfig.ariaLabel}
+            >
+              {statusConfig.label}
+            </Button>
+          ))}
         </div>
       </PopoverContent>
     </Popover>

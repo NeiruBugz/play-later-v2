@@ -12,7 +12,7 @@ const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GetLibraryHandler" });
 
 const GetLibrarySchema = z.object({
   userId: z.string().cuid(),
-  status: z.nativeEnum(LibraryItemStatus).optional(),
+  status: z.enum(LibraryItemStatus).optional(),
   platform: z.string().optional(),
   search: z.string().optional(),
   sortBy: z

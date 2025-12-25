@@ -76,7 +76,7 @@ export function JournalEntryForm({
       z.object({
         title: z.string().min(1, "Title is required"),
         content: z.string().min(1, "Content is required"),
-        mood: z.nativeEnum(JournalMood).optional(),
+        mood: z.enum(JournalMood).optional(),
         playSession: z.number().int().positive().optional(),
         libraryItemId: z.number().int().positive().optional(),
       })

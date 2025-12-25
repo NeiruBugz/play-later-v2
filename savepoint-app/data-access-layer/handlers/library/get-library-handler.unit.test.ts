@@ -102,7 +102,7 @@ describe("getLibraryHandler", () => {
 
       const params = {
         userId: "clx123abc456def789ghi",
-        status: LibraryItemStatus.CURIOUS_ABOUT,
+        status: LibraryItemStatus.WANT_TO_PLAY,
         platform: "PlayStation 5",
         search: "zelda",
         sortBy: "createdAt" as const,
@@ -146,7 +146,7 @@ describe("getLibraryHandler", () => {
 
       const params = {
         userId: "clx123abc456def789ghi",
-        status: LibraryItemStatus.CURIOUS_ABOUT,
+        status: LibraryItemStatus.WANT_TO_PLAY,
         platform: "PlayStation 5",
         search: "zelda",
         sortBy: "createdAt" as const,
@@ -157,7 +157,7 @@ describe("getLibraryHandler", () => {
 
       expect(mockGetLibraryItems).toHaveBeenCalledWith({
         userId: "clx123abc456def789ghi",
-        status: LibraryItemStatus.CURIOUS_ABOUT,
+        status: LibraryItemStatus.WANT_TO_PLAY,
         platform: "PlayStation 5",
         search: "zelda",
         sortBy: "createdAt",
@@ -193,7 +193,7 @@ describe("getLibraryHandler", () => {
           id: 1,
           userId: "clx123abc456def789ghi",
           gameId: "clx456def789ghi123jkl",
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
           platform: "PlayStation 5",
           acquisitionType: null,
           startedAt: null,
@@ -241,7 +241,7 @@ describe("getLibraryHandler", () => {
 
       const params = {
         userId: "clx123abc456def789ghi",
-        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        status: LibraryItemStatus.PLAYING,
       };
 
       const result = await getLibraryHandler(params, mockContext);
@@ -260,7 +260,7 @@ describe("getLibraryHandler", () => {
           id: 2,
           userId: "clx123abc456def789ghi",
           gameId: "clx789ghi123jkl456mno",
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
           acquisitionType: null,
           startedAt: new Date("2025-01-15"),
@@ -285,7 +285,7 @@ describe("getLibraryHandler", () => {
 
       const params = {
         userId: "clx123abc456def789ghi",
-        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        status: LibraryItemStatus.PLAYING,
       };
 
       const result = await getLibraryHandler(params, mockContext);
@@ -293,9 +293,7 @@ describe("getLibraryHandler", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toHaveLength(1);
-        expect(result.data[0]?.status).toBe(
-          LibraryItemStatus.CURRENTLY_EXPLORING
-        );
+        expect(result.data[0]?.status).toBe(LibraryItemStatus.PLAYING);
       }
     });
 
@@ -429,7 +427,7 @@ describe("getLibraryHandler", () => {
           id: 1,
           userId: "clx123abc456def789ghi",
           gameId: "clx456def789ghi123jkl",
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
           platform: "PlayStation 5",
           acquisitionType: null,
           startedAt: null,
@@ -449,7 +447,7 @@ describe("getLibraryHandler", () => {
           id: 2,
           userId: "clx123abc456def789ghi",
           gameId: "clx789ghi123jkl456mno",
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
           acquisitionType: null,
           startedAt: new Date("2025-01-15"),

@@ -32,7 +32,7 @@ export async function ContinuePlayingServer({
 
     const result = await service.getLibraryItems({
       userId,
-      status: LibraryItemStatus.CURRENTLY_EXPLORING,
+      status: LibraryItemStatus.PLAYING,
       sortBy: "startedAt",
       sortOrder: "desc",
       distinctByGame: true,
@@ -59,7 +59,7 @@ export async function ContinuePlayingServer({
       <DashboardGameSection
         title="Continue Playing"
         items={limitedItems}
-        viewAllHref="/library?status=CURRENTLY_EXPLORING"
+        viewAllHref="/library?status=PLAYING"
         viewAllLabel="View All Playing"
         emptyMessage="No games in progress. Start exploring something new!"
       />

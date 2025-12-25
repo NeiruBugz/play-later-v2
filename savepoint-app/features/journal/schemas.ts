@@ -12,7 +12,7 @@ export const CreateJournalEntrySchema = z
     gameId: z.string().min(1, "Game ID is required"),
     title: z.string().min(1, "Title is required"),
     content: z.string().min(1, "Content is required"),
-    mood: z.nativeEnum(JournalMood).optional(),
+    mood: z.enum(JournalMood).optional(),
     playSession: z.number().int().positive().optional(),
     libraryItemId: z.number().int().positive().optional(),
   })
@@ -32,7 +32,7 @@ export const UpdateJournalEntrySchema = z
     entryId: z.string().min(1, "Entry ID is required"),
     title: z.string().min(1, "Title cannot be empty").optional(),
     content: z.string().min(1, "Content cannot be empty").optional(),
-    mood: z.nativeEnum(JournalMood).nullable().optional(),
+    mood: z.enum(JournalMood).nullable().optional(),
     playSession: z
       .number()
       .int()

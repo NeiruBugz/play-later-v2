@@ -32,39 +32,29 @@ export class LibraryPage {
     return this.page.getByRole("button", { name: `Filter by ${status}` });
   }
 
-  curiousAboutButton(): Locator {
-    return this.statusFilterButton("Curious About");
+  wantToPlayButton(): Locator {
+    return this.statusFilterButton("Want to Play");
   }
 
-  currentlyExploringButton(): Locator {
-    return this.statusFilterButton("Currently Exploring");
+  ownedButton(): Locator {
+    return this.statusFilterButton("Owned");
   }
 
-  takingABreakButton(): Locator {
-    return this.statusFilterButton("Taking a Break");
+  playingButton(): Locator {
+    return this.statusFilterButton("Playing");
   }
 
-  experiencedButton(): Locator {
-    return this.statusFilterButton("Experienced");
-  }
-
-  wishlistButton(): Locator {
-    return this.statusFilterButton("Wishlist");
-  }
-
-  revisitingButton(): Locator {
-    return this.statusFilterButton("Revisiting");
+  playedButton(): Locator {
+    return this.statusFilterButton("Played");
   }
 
   allStatusButtons(): Locator[] {
     return [
       this.allStatusesButton(),
-      this.curiousAboutButton(),
-      this.currentlyExploringButton(),
-      this.takingABreakButton(),
-      this.experiencedButton(),
-      this.wishlistButton(),
-      this.revisitingButton(),
+      this.wantToPlayButton(),
+      this.ownedButton(),
+      this.playingButton(),
+      this.playedButton(),
     ];
   }
 

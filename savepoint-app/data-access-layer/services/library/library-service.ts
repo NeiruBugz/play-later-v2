@@ -27,7 +27,7 @@ import { BaseService, type ServiceResult } from "../types";
 
 const GetLibraryItemsSchema = z.object({
   userId: z.string().cuid(),
-  status: z.nativeEnum(LibraryItemStatus).optional(),
+  status: z.enum(LibraryItemStatus).optional(),
   platform: z.string().optional(),
   search: z.string().optional(),
   sortBy: z
@@ -104,7 +104,9 @@ export class LibraryService extends BaseService {
     }
   }
   private validateStatusTransition(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _currentStatus: LibraryItemStatus,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _newStatus: LibraryItemStatus
   ): { valid: boolean } {
     return { valid: true };

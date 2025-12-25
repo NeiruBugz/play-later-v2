@@ -1,7 +1,6 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import { Pause, RotateCcw } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
 import { cn } from "@/shared/lib/ui";
@@ -32,66 +31,42 @@ const strokeWidths = {
   cover: 4,
 };
 
-const iconSizes = {
-  sm: 12,
-  md: 16,
-  lg: 20,
-  xl: 24,
-  cover: 16,
-};
-
-export type GameStatus =
-  | "CURIOUS"
-  | "PLAYING"
-  | "BREAK"
-  | "EXPERIENCED"
-  | "WISHLIST"
-  | "REVISITING";
+export type GameStatus = "WANT_TO_PLAY" | "OWNED" | "PLAYING" | "PLAYED";
 
 export type LibraryItemStatusType =
-  | "WISHLIST"
-  | "CURIOUS_ABOUT"
-  | "CURRENTLY_EXPLORING"
-  | "TOOK_A_BREAK"
-  | "EXPERIENCED"
-  | "REVISITING";
+  | "WANT_TO_PLAY"
+  | "OWNED"
+  | "PLAYING"
+  | "PLAYED";
 
 const statusColors: Record<GameStatus, string> = {
-  CURIOUS: "var(--status-curious)",
+  WANT_TO_PLAY: "var(--status-want-to-play)",
+  OWNED: "var(--status-owned)",
   PLAYING: "var(--status-playing)",
-  BREAK: "var(--status-break)",
-  EXPERIENCED: "var(--status-experienced)",
-  WISHLIST: "var(--status-wishlist)",
-  REVISITING: "var(--status-revisiting)",
+  PLAYED: "var(--status-played)",
 };
 
 const statusDefaults: Record<GameStatus, number> = {
-  CURIOUS: 10,
+  WANT_TO_PLAY: 0,
+  OWNED: 10,
   PLAYING: 50,
-  BREAK: 50,
-  EXPERIENCED: 100,
-  WISHLIST: 0,
-  REVISITING: 100,
+  PLAYED: 100,
 };
 
 export function mapLibraryStatusToGameStatus(
   libraryStatus: LibraryItemStatusType | string
 ): GameStatus {
   switch (libraryStatus) {
-    case "WISHLIST":
-      return "WISHLIST";
-    case "CURIOUS_ABOUT":
-      return "CURIOUS";
-    case "CURRENTLY_EXPLORING":
+    case "WANT_TO_PLAY":
+      return "WANT_TO_PLAY";
+    case "OWNED":
+      return "OWNED";
+    case "PLAYING":
       return "PLAYING";
-    case "TOOK_A_BREAK":
-      return "BREAK";
-    case "EXPERIENCED":
-      return "EXPERIENCED";
-    case "REVISITING":
-      return "REVISITING";
+    case "PLAYED":
+      return "PLAYED";
     default:
-      return "CURIOUS";
+      return "WANT_TO_PLAY";
   }
 }
 
@@ -111,7 +86,7 @@ export interface ProgressRingProps extends VariantProps<
 
 export function ProgressRing({
   progress,
-  status = "CURIOUS",
+  status = "WANT_TO_PLAY",
   size = "md",
   animated = true,
   showPercentage = false,
@@ -142,29 +117,6 @@ export function ProgressRing({
 
   const renderStatusIcon = () => {
     if (!showIcon) return null;
-
-    const iconSize = iconSizes[sizeKey];
-
-    if (status === "BREAK") {
-      return (
-        <Pause
-          size={iconSize}
-          className="text-muted-foreground absolute"
-          aria-hidden="true"
-        />
-      );
-    }
-
-    if (status === "REVISITING") {
-      return (
-        <RotateCcw
-          size={iconSize}
-          className="text-muted-foreground absolute"
-          aria-hidden="true"
-        />
-      );
-    }
-
     return null;
   };
 

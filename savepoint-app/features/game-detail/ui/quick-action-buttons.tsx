@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  BookmarkIcon,
-  ClockIcon,
-  GamepadIcon,
-  HeartIcon,
-  PauseIcon,
-  SparklesIcon,
-} from "lucide-react";
 import { useOptimistic, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -19,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui";
 import { LibraryItemStatus } from "@/shared/types";
 
@@ -28,67 +21,6 @@ interface OptimisticStatusState {
   status: LibraryItemStatus | undefined;
   isOptimistic: boolean;
 }
-
-const STATUS_CONFIG: Record<
-  LibraryItemStatus,
-  {
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    ariaLabel: string;
-    activeClass: string;
-  }
-> = {
-  [LibraryItemStatus.CURIOUS_ABOUT]: {
-    label: "Curious",
-    icon: SparklesIcon,
-    ariaLabel: "Mark as Curious About",
-    activeClass:
-      "bg-[var(--status-curious)] text-[var(--status-curious-foreground)] hover:bg-[var(--status-curious)]/90",
-  },
-  [LibraryItemStatus.CURRENTLY_EXPLORING]: {
-    label: "Playing",
-    icon: GamepadIcon,
-    ariaLabel: "Mark as Currently Exploring",
-    activeClass:
-      "bg-[var(--status-playing)] text-[var(--status-playing-foreground)] hover:bg-[var(--status-playing)]/90",
-  },
-  [LibraryItemStatus.TOOK_A_BREAK]: {
-    label: "Break",
-    icon: PauseIcon,
-    ariaLabel: "Mark as Taking a Break",
-    activeClass:
-      "bg-[var(--status-break)] text-[var(--status-break-foreground)] hover:bg-[var(--status-break)]/90",
-  },
-  [LibraryItemStatus.EXPERIENCED]: {
-    label: "Finished",
-    icon: HeartIcon,
-    ariaLabel: "Mark as Experienced",
-    activeClass:
-      "bg-[var(--status-experienced)] text-[var(--status-experienced-foreground)] hover:bg-[var(--status-experienced)]/90",
-  },
-  [LibraryItemStatus.WISHLIST]: {
-    label: "Wishlist",
-    icon: BookmarkIcon,
-    ariaLabel: "Add to Wishlist",
-    activeClass:
-      "bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)] hover:bg-[var(--status-wishlist)]/90",
-  },
-  [LibraryItemStatus.REVISITING]: {
-    label: "Replay",
-    icon: ClockIcon,
-    ariaLabel: "Mark as Revisiting",
-    activeClass:
-      "bg-[var(--status-revisiting)] text-[var(--status-revisiting-foreground)] hover:bg-[var(--status-revisiting)]/90",
-  },
-};
-const STATUS_ORDER: LibraryItemStatus[] = [
-  LibraryItemStatus.CURIOUS_ABOUT,
-  LibraryItemStatus.CURRENTLY_EXPLORING,
-  LibraryItemStatus.TOOK_A_BREAK,
-  LibraryItemStatus.EXPERIENCED,
-  LibraryItemStatus.WISHLIST,
-  LibraryItemStatus.REVISITING,
-];
 export const QuickActionButtons = ({
   igdbId,
   gameTitle,
@@ -115,7 +47,8 @@ export const QuickActionButtons = ({
     startTransition(async () => {
       const result = await updateLibraryStatusAction({ igdbId, status });
       if (result.success) {
-        const statusLabel = STATUS_CONFIG[status].label;
+        const config = LIBRARY_STATUS_CONFIG.find((c) => c.value === status);
+        const statusLabel = config?.label ?? "Unknown";
         const message = `Status updated to ${statusLabel}`;
         setAnnouncement(message);
         toast.success(message, {
@@ -154,24 +87,26 @@ export const QuickActionButtons = ({
           role="group"
           aria-label="Journey status quick actions"
         >
-          {STATUS_ORDER.map((status) => {
-            const config = STATUS_CONFIG[status];
+          {LIBRARY_STATUS_CONFIG.map((config) => {
             const Icon = config.icon;
-            const isActive = optimisticStatus.status === status;
+            const isActive = optimisticStatus.status === config.value;
             const isOptimisticActive =
               isActive && optimisticStatus.isOptimistic;
+
+            const activeClass = `bg-[var(--status-${config.value.toLowerCase().replace(/_/g, "-")})] text-[var(--status-${config.value.toLowerCase().replace(/_/g, "-")}-foreground)] hover:bg-[var(--status-${config.value.toLowerCase().replace(/_/g, "-")})]/90`;
+
             return (
               <Button
-                key={status}
+                key={config.value}
                 variant="outline"
                 size="sm"
                 className={cn(
                   "focus-visible:ring-ring gap-xs py-lg flex h-auto flex-col border focus-visible:ring-2 focus-visible:ring-offset-2",
                   "duration-normal ease-out-expo transition-all",
-                  isActive && config.activeClass,
+                  isActive && activeClass,
                   isOptimisticActive && "opacity-80"
                 )}
-                onClick={() => handleStatusChange(status)}
+                onClick={() => handleStatusChange(config.value)}
                 disabled={isPending}
                 aria-label={config.ariaLabel}
                 aria-pressed={isActive}
