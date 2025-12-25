@@ -1,6 +1,9 @@
 import { type User } from "@prisma/client";
 
 import { getTestDatabase } from "../database";
+import { faker, seedFaker } from "../faker";
+
+let userCounter = 0;
 
 export type UserFactoryOptions = {
   email?: string;
@@ -11,39 +14,48 @@ export type UserFactoryOptions = {
   steamUsername?: string;
   password?: string;
 };
+
+export const createUserData = (
+  overrides: Partial<UserFactoryOptions> = {}
+): UserFactoryOptions => {
+  const uniqueId = ++userCounter;
+  const username = overrides.username || `${faker.internet.username()}_${uniqueId}`;
+
+  return {
+    email: overrides.email || faker.internet.email(),
+    name: overrides.name || faker.person.fullName(),
+    username,
+    usernameNormalized: overrides.usernameNormalized || username.toLowerCase(),
+    steamId64: overrides.steamId64 || faker.string.numeric(17),
+    steamUsername: overrides.steamUsername || faker.internet.username(),
+    password: overrides.password,
+  };
+};
+
+export const createSeededUserData = (
+  seed: number = 12345,
+  overrides?: Partial<UserFactoryOptions>
+) => {
+  seedFaker(seed);
+  return createUserData(overrides);
+};
+
 export const createUser = async (
   options: UserFactoryOptions = {}
 ): Promise<User> => {
-  const timestamp = Date.now();
-  const randomSuffix = Math.random().toString(36).substring(2, 8);
-  const username = options.username ?? `testuser${timestamp}${randomSuffix}`;
-  const defaultData = {
-    email: `user-${timestamp}-${randomSuffix}@example.com`,
-    name: `Test User ${timestamp}`,
-    username,
-    usernameNormalized: options.usernameNormalized ?? username.toLowerCase(),
-    password: options.password,
-    ...options,
-  };
+  const defaultData = createUserData(options);
   return getTestDatabase().user.create({
     data: defaultData,
   });
 };
+
 export const createUsers = async (
   count: number,
   options: UserFactoryOptions = {}
 ): Promise<User[]> => {
   const users = [];
   for (let i = 0; i < count; i++) {
-    const timestamp = Date.now();
-    const randomSuffix = Math.random().toString(36).substring(2, 8);
-    users.push(
-      await createUser({
-        ...options,
-        email: `user-${timestamp}-${i}-${randomSuffix}@example.com`,
-        username: `testuser${timestamp}${i}${randomSuffix}`,
-      })
-    );
+    users.push(await createUser(options));
   }
   return users;
 };
