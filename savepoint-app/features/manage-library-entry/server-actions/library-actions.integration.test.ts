@@ -2,6 +2,7 @@ import { getServerUserId } from "@/auth";
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import {
   cleanupDatabase,
+  getTestDatabase,
   resetTestDatabase,
   setupDatabase,
 } from "@/test/setup/database";
@@ -10,8 +11,6 @@ import {
   createLibraryItem,
   createUser,
 } from "@/test/setup/db-factories";
-
-import { prisma } from "@/shared/lib/app/db";
 
 import { addToLibraryAction } from "./add-to-library-action";
 import { updateLibraryEntryAction } from "./update-library-entry-action";
@@ -74,7 +73,7 @@ describe("addToLibraryAction - Integration Tests", () => {
     });
 
     mockPopulateGameInDatabase.mockImplementation(async (game) => {
-      await prisma.game.create({
+      await getTestDatabase().game.create({
         data: {
           title: game.name,
           igdbId: game.id,
@@ -118,7 +117,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       expect(result.data.gameId).toBe(testGame.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      const libraryItem = await prisma.libraryItem.findUnique({
+      const libraryItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: result.data.id },
       });
       expect(libraryItem).toBeTruthy();
@@ -239,7 +238,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       expect(result.data.userId).toBe(testUser.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      const game = await prisma.game.findUnique({
+      const game = await getTestDatabase().game.findUnique({
         where: { igdbId: newIgdbId },
       });
       expect(game).toBeTruthy();
@@ -270,7 +269,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     });
 
     mockPopulateGameInDatabase.mockImplementation(async (game) => {
-      await prisma.game.create({
+      await getTestDatabase().game.create({
         data: {
           title: game.name,
           igdbId: game.id,
@@ -318,7 +317,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.id).toBe(initialLibraryItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: initialLibraryItem.id },
       });
       expect(dbItem?.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
@@ -350,7 +349,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.id).toBe(recentItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      const dbOldItem = await prisma.libraryItem.findUnique({
+      const dbOldItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: oldItem.id },
       });
       expect(dbOldItem?.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
@@ -398,7 +397,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.gameId).toBe(testGame.id);
       expect(result.data.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
 
-      const libraryItem = await prisma.libraryItem.findUnique({
+      const libraryItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: result.data.id },
       });
       expect(libraryItem).toBeTruthy();
@@ -418,7 +417,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.userId).toBe(testUser.id);
       expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
 
-      const game = await prisma.game.findUnique({
+      const game = await getTestDatabase().game.findUnique({
         where: { igdbId: newIgdbId },
       });
       expect(game).toBeTruthy();
@@ -502,7 +501,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(libraryItem.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
       expect(dbItem?.status).toBe(LibraryItemStatus.EXPERIENCED);
@@ -529,7 +528,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(libraryItem.id);
       expect(result.data.startedAt?.getTime()).toBe(startedDate.getTime());
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
       expect(dbItem?.startedAt?.getTime()).toBe(startedDate.getTime());
@@ -557,7 +556,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
       expect(result.data.completedAt?.getTime()).toBe(completedDate.getTime());
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
       expect(dbItem?.status).toBe(LibraryItemStatus.EXPERIENCED);
@@ -588,7 +587,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       expect(result.data.id).toBe(item1.id);
       expect(result.data.status).toBe(LibraryItemStatus.EXPERIENCED);
 
-      const dbItem2 = await prisma.libraryItem.findUnique({
+      const dbItem2 = await getTestDatabase().libraryItem.findUnique({
         where: { id: item2.id },
       });
       expect(dbItem2?.status).toBe(LibraryItemStatus.WISHLIST);
@@ -672,7 +671,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       if (result.success) return;
       expect(result.error).toContain("Failed to update library entry");
 
-      const dbItem = await prisma.libraryItem.findUnique({
+      const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
       expect(dbItem?.status).toBe(LibraryItemStatus.CURIOUS_ABOUT);
