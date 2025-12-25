@@ -99,7 +99,7 @@ model Game {
 
 model LibraryItem {
   id              Int               @id @default(autoincrement())
-  status          LibraryItemStatus @default(CURIOUS_ABOUT)
+  status          LibraryItemStatus @default(PLAYED)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   platform        String?
@@ -192,12 +192,10 @@ enum Storefront {
 }
 
 enum LibraryItemStatus {
-  CURIOUS_ABOUT
-  CURRENTLY_EXPLORING
-  TOOK_A_BREAK
-  EXPERIENCED
-  WISHLIST
-  REVISITING
+  WANT_TO_PLAY
+  OWNED
+  PLAYING
+  PLAYED
 }
 
 enum AcquisitionType {
