@@ -1,6 +1,10 @@
 import { getServerUserId } from "@/auth";
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
-import { setupDatabase } from "@/test/setup/database";
+import {
+  cleanupDatabase,
+  resetTestDatabase,
+  setupDatabase,
+} from "@/test/setup/database";
 import {
   createGame,
   createLibraryItem,
@@ -37,15 +41,20 @@ vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
   populateGameInDatabase: mockPopulateGameInDatabase,
 }));
 
+beforeAll(async () => {
+  await setupDatabase();
+});
+
+afterAll(async () => {
+  await cleanupDatabase();
+});
+
 describe("addToLibraryAction - Integration Tests", () => {
   let testUser: Awaited<ReturnType<typeof createUser>>;
   let testGame: Awaited<ReturnType<typeof createGame>>;
 
-  beforeAll(async () => {
-    await setupDatabase();
-  });
-
   beforeEach(async () => {
+    await resetTestDatabase();
     vi.clearAllMocks();
 
     mockGetGameDetails.mockResolvedValue({
@@ -242,11 +251,8 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   let testUser: Awaited<ReturnType<typeof createUser>>;
   let testGame: Awaited<ReturnType<typeof createGame>>;
 
-  beforeAll(async () => {
-    await setupDatabase();
-  });
-
   beforeEach(async () => {
+    await resetTestDatabase();
     mockGetGameDetails.mockResolvedValue({
       success: true,
       data: {
@@ -462,11 +468,8 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
   let testUser: Awaited<ReturnType<typeof createUser>>;
   let testGame: Awaited<ReturnType<typeof createGame>>;
 
-  beforeAll(async () => {
-    await setupDatabase();
-  });
-
   beforeEach(async () => {
+    await resetTestDatabase();
     testUser = await createUser({
       email: "test@example.com",
       username: "testuser",

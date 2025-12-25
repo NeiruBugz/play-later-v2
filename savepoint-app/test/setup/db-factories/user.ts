@@ -56,7 +56,31 @@ export const createUsers = async (
 ): Promise<User[]> => {
   const users = [];
   for (let i = 0; i < count; i++) {
-    users.push(await createUser(options));
+    // Clone options to avoid mutating the original object
+    const clonedOptions = { ...options };
+    
+    // Make unique fields unique per user if they're provided in options
+    if (clonedOptions.email) {
+      clonedOptions.email = `${i}_${clonedOptions.email}`;
+    }
+    if (clonedOptions.username) {
+      clonedOptions.username = `${clonedOptions.username}_${i}`;
+      // Update usernameNormalized if username is set, unless explicitly overridden
+      if (!clonedOptions.usernameNormalized) {
+        clonedOptions.usernameNormalized = clonedOptions.username.toLowerCase();
+      }
+    }
+    if (clonedOptions.usernameNormalized && !clonedOptions.username) {
+      clonedOptions.usernameNormalized = `${clonedOptions.usernameNormalized}_${i}`;
+    }
+    if (clonedOptions.steamId64) {
+      clonedOptions.steamId64 = `${clonedOptions.steamId64}${i}`;
+    }
+    if (clonedOptions.steamUsername) {
+      clonedOptions.steamUsername = `${clonedOptions.steamUsername}_${i}`;
+    }
+    
+    users.push(await createUser(clonedOptions));
   }
   return users;
 };
