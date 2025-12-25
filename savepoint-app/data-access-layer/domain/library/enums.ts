@@ -8,29 +8,21 @@
  */
 export enum LibraryItemStatus {
   /**
-   * Game is on the wishlist, not yet acquired
+   * On your radar, haven't started
    */
-  WISHLIST = "WISHLIST",
+  WANT_TO_PLAY = "WANT_TO_PLAY",
   /**
-   * User is interested in the game but hasn't started playing
+   * In your library, haven't started
    */
-  CURIOUS_ABOUT = "CURIOUS_ABOUT",
+  OWNED = "OWNED",
   /**
-   * User is actively playing the game
+   * Currently engaged
    */
-  CURRENTLY_EXPLORING = "CURRENTLY_EXPLORING",
+  PLAYING = "PLAYING",
   /**
-   * User has paused playing the game
+   * Have experienced it
    */
-  TOOK_A_BREAK = "TOOK_A_BREAK",
-  /**
-   * User has completed/experienced the game
-   */
-  EXPERIENCED = "EXPERIENCED",
-  /**
-   * User is playing the game again
-   */
-  REVISITING = "REVISITING",
+  PLAYED = "PLAYED",
 }
 
 /**
