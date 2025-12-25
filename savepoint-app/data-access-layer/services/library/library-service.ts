@@ -35,6 +35,8 @@ const GetLibraryItemsSchema = z.object({
     .optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
   distinctByGame: z.boolean().optional(),
+  offset: z.number().int().min(0).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
 });
 const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
@@ -50,6 +52,14 @@ type GetLibraryItemsParams = {
   sortBy?: SortField;
   sortOrder?: "asc" | "desc";
   distinctByGame?: boolean;
+  offset?: number;
+  limit?: number;
+};
+
+export type GetLibraryItemsResult = {
+  items: LibraryItemWithGameDomain[];
+  total: number;
+  hasMore: boolean;
 };
 export class LibraryService extends BaseService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "LibraryService" });
@@ -207,7 +217,7 @@ export class LibraryService extends BaseService {
   async getLibraryItems(
     params: GetLibraryItemsParams
   ): Promise<
-    | { success: true; data: LibraryItemWithGameDomain[] }
+    | { success: true; data: GetLibraryItemsResult }
     | { success: false; error: string }
   > {
     try {
@@ -222,7 +232,13 @@ export class LibraryService extends BaseService {
           validation.error.issues[0]?.message ?? "Invalid input parameters"
         );
       }
-      const result = await findLibraryItemsWithFilters(validation.data);
+
+      const { offset, limit, ...restParams } = validation.data;
+      const result = await findLibraryItemsWithFilters({
+        ...restParams,
+        skip: offset,
+        take: limit,
+      });
       if (!result.ok) {
         this.logger.error(
           { error: result.error, userId: params.userId },
@@ -231,13 +247,26 @@ export class LibraryService extends BaseService {
         return this.error("Failed to fetch library items");
       }
 
-      const domainItems = LibraryItemMapper.toWithGameDomainList(result.data);
+      const domainItems = LibraryItemMapper.toWithGameDomainList(
+        result.data.items
+      );
+      const currentOffset = offset ?? 0;
+      const hasMore = currentOffset + domainItems.length < result.data.total;
 
       this.logger.info(
-        { count: domainItems.length, userId: params.userId },
+        {
+          count: domainItems.length,
+          total: result.data.total,
+          hasMore,
+          userId: params.userId,
+        },
         "Library items fetched successfully"
       );
-      return this.success(domainItems);
+      return this.success({
+        items: domainItems,
+        total: result.data.total,
+        hasMore,
+      });
     } catch (error) {
       this.logger.error(
         { error, ...params },

@@ -12,6 +12,8 @@ export const createLibraryHandlers = (items = libraryItemsFixture) => [
     const search = url.searchParams.get("search");
     const sortBy = url.searchParams.get("sortBy") ?? "createdAt";
     const sortOrder = url.searchParams.get("sortOrder") ?? "desc";
+    const offset = parseInt(url.searchParams.get("offset") ?? "0", 10);
+    const limit = parseInt(url.searchParams.get("limit") ?? "24", 10);
 
     let filtered = [...items];
 
@@ -38,7 +40,14 @@ export const createLibraryHandlers = (items = libraryItemsFixture) => [
       return sortOrder === "asc" ? comparison : -comparison;
     });
 
-    return HttpResponse.json({ success: true, data: filtered });
+    const total = filtered.length;
+    const paginatedItems = filtered.slice(offset, offset + limit);
+    const hasMore = offset + paginatedItems.length < total;
+
+    return HttpResponse.json({
+      success: true,
+      data: { items: paginatedItems, total, hasMore },
+    });
   }),
 
   http.get("/api/library/unique-platforms", () => {

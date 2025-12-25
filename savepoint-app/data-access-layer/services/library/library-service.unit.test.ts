@@ -95,7 +95,7 @@ describe("LibraryService", () => {
     describe("success scenarios", () => {
       it("should return success result when repository succeeds", async () => {
         mockFindLibraryItemsWithFilters.mockResolvedValue(
-          repositorySuccess(mockLibraryItems)
+          repositorySuccess({ items: mockLibraryItems, total: 2 })
         );
 
         const result = await service.getLibraryItems({
@@ -104,11 +104,13 @@ describe("LibraryService", () => {
 
         expect(result.success).toBe(true);
         if (result.success) {
-          expect(result.data).toHaveLength(2);
-          expect(result.data[0]?.game.entryCount).toBe(1);
-          expect(result.data[0]?.game).not.toHaveProperty("_count");
-          expect(result.data[1]?.game.entryCount).toBe(1);
-          expect(result.data[1]?.game).not.toHaveProperty("_count");
+          expect(result.data.items).toHaveLength(2);
+          expect(result.data.total).toBe(2);
+          expect(result.data.hasMore).toBe(false);
+          expect(result.data.items[0]?.game.entryCount).toBe(1);
+          expect(result.data.items[0]?.game).not.toHaveProperty("_count");
+          expect(result.data.items[1]?.game.entryCount).toBe(1);
+          expect(result.data.items[1]?.game).not.toHaveProperty("_count");
         }
 
         expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith({
@@ -118,7 +120,7 @@ describe("LibraryService", () => {
 
       it("should call repository with correct parameters including filters", async () => {
         mockFindLibraryItemsWithFilters.mockResolvedValue(
-          repositorySuccess([mockLibraryItems[0]])
+          repositorySuccess({ items: [mockLibraryItems[0]], total: 1 })
         );
 
         const params = {
@@ -137,7 +139,7 @@ describe("LibraryService", () => {
 
       it("should return empty array when no library items found", async () => {
         mockFindLibraryItemsWithFilters.mockResolvedValue(
-          repositorySuccess([])
+          repositorySuccess({ items: [], total: 0 })
         );
 
         const result = await service.getLibraryItems({
@@ -146,8 +148,10 @@ describe("LibraryService", () => {
 
         expect(result.success).toBe(true);
         if (result.success) {
-          expect(result.data).toEqual([]);
-          expect(result.data).toHaveLength(0);
+          expect(result.data.items).toEqual([]);
+          expect(result.data.items).toHaveLength(0);
+          expect(result.data.total).toBe(0);
+          expect(result.data.hasMore).toBe(false);
         }
       });
     });

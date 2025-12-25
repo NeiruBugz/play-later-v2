@@ -97,7 +97,7 @@ describe("getLibraryHandler", () => {
     it("should accept all valid input combinations", async () => {
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: [],
+        data: { items: [], total: 0, hasMore: false },
       });
 
       const params = {
@@ -118,7 +118,7 @@ describe("getLibraryHandler", () => {
     it("should handle optional parameters correctly (only userId provided)", async () => {
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: [],
+        data: { items: [], total: 0, hasMore: false },
       });
 
       const params = {
@@ -141,7 +141,7 @@ describe("getLibraryHandler", () => {
     it("should call LibraryService.getLibraryItems with correct parameters", async () => {
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: [],
+        data: { items: [], total: 0, hasMore: false },
       });
 
       const params = {
@@ -169,7 +169,7 @@ describe("getLibraryHandler", () => {
     it("should pass distinctByGame: true to service (library view requirement)", async () => {
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: [],
+        data: { items: [], total: 0, hasMore: false },
       });
 
       const params = {
@@ -213,7 +213,7 @@ describe("getLibraryHandler", () => {
 
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: mockData,
+        data: { items: mockData, total: 1, hasMore: false },
       });
 
       const params = {
@@ -225,9 +225,9 @@ describe("getLibraryHandler", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.status).toBe(200);
-        expect(result.data).toEqual(mockData);
-        expect(result.data).toHaveLength(1);
-        expect(result.data[0]?.game.title).toBe(
+        expect(result.data.items).toEqual(mockData);
+        expect(result.data.items).toHaveLength(1);
+        expect(result.data.items[0]?.game.title).toBe(
           "The Legend of Zelda: Breath of the Wild"
         );
       }
@@ -236,7 +236,7 @@ describe("getLibraryHandler", () => {
     it("should return empty array when no library items found", async () => {
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: [],
+        data: { items: [], total: 0, hasMore: false },
       });
 
       const params = {
@@ -249,8 +249,8 @@ describe("getLibraryHandler", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.status).toBe(200);
-        expect(result.data).toEqual([]);
-        expect(result.data).toHaveLength(0);
+        expect(result.data.items).toEqual([]);
+        expect(result.data.items).toHaveLength(0);
       }
     });
 
@@ -280,7 +280,7 @@ describe("getLibraryHandler", () => {
 
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: mockData,
+        data: { items: mockData, total: 1, hasMore: false },
       });
 
       const params = {
@@ -292,15 +292,15 @@ describe("getLibraryHandler", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toHaveLength(1);
-        expect(result.data[0]?.status).toBe(LibraryItemStatus.PLAYING);
+        expect(result.data.items).toHaveLength(1);
+        expect(result.data.items[0]?.status).toBe(LibraryItemStatus.PLAYING);
       }
     });
 
     it("should support filtering by platform", async () => {
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: [],
+        data: { items: [], total: 0, hasMore: false },
       });
 
       const params = {
@@ -320,7 +320,7 @@ describe("getLibraryHandler", () => {
     it("should support search filtering", async () => {
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: [],
+        data: { items: [], total: 0, hasMore: false },
       });
 
       const params = {
@@ -340,7 +340,7 @@ describe("getLibraryHandler", () => {
     it("should support sorting by different fields", async () => {
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: [],
+        data: { items: [], total: 0, hasMore: false },
       });
 
       const params = {
@@ -467,7 +467,7 @@ describe("getLibraryHandler", () => {
 
       mockGetLibraryItems.mockResolvedValue({
         success: true,
-        data: mockData,
+        data: { items: mockData, total: 2, hasMore: false },
       });
 
       const params = {
@@ -478,9 +478,9 @@ describe("getLibraryHandler", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toHaveLength(2);
-        expect(result.data[0]?.game.entryCount).toBe(2);
-        expect(result.data[1]?.game.entryCount).toBe(1);
+        expect(result.data.items).toHaveLength(2);
+        expect(result.data.items[0]?.game.entryCount).toBe(2);
+        expect(result.data.items[1]?.game.entryCount).toBe(1);
       }
     });
   });

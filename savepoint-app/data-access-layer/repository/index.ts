@@ -33,6 +33,7 @@ export {
   findMostRecentLibraryItemByGameId,
   findAllLibraryItemsByGameId,
   findLibraryItemsWithFilters,
+  type FindLibraryItemsResult,
 } from "./library/library-repository";
 export {
   getUserBySteamId,

@@ -83,10 +83,10 @@ export async function DashboardStatsServer({
     }
 
     const stats: DashboardStatsData = {
-      wantToPlay: wantToPlayResult.data.length,
-      owned: ownedResult.data.length,
-      playing: playingResult.data.length,
-      played: playedResult.data.length,
+      wantToPlay: wantToPlayResult.data.total,
+      owned: ownedResult.data.total,
+      playing: playingResult.data.total,
+      played: playedResult.data.total,
       total: 0,
     };
 

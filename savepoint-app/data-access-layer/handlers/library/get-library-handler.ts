@@ -19,15 +19,28 @@ const GetLibrarySchema = z.object({
     .enum(["createdAt", "releaseDate", "startedAt", "completedAt"])
     .optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
+  offset: z.number().int().min(0).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
 });
 
 export async function getLibraryHandler(
   input: GetLibraryHandlerInput,
   context: RequestContext
 ): Promise<HandlerResult<GetLibraryHandlerOutput>> {
-  const { userId, status, platform, search, sortBy, sortOrder } = input;
+  const { userId, status, platform, search, sortBy, sortOrder, offset, limit } =
+    input;
   logger.info(
-    { userId, status, platform, search, sortBy, sortOrder, ip: context.ip },
+    {
+      userId,
+      status,
+      platform,
+      search,
+      sortBy,
+      sortOrder,
+      offset,
+      limit,
+      ip: context.ip,
+    },
     "Processing library fetch request"
   );
 
@@ -45,9 +58,11 @@ export async function getLibraryHandler(
   }
 
   const libraryService = new LibraryService();
+  const isPaginated =
+    validation.data.offset !== undefined || validation.data.limit !== undefined;
   const result = await libraryService.getLibraryItems({
     ...validation.data,
-    distinctByGame: true,
+    distinctByGame: !isPaginated,
   });
 
   if (!result.success) {
@@ -63,7 +78,7 @@ export async function getLibraryHandler(
   }
 
   logger.info(
-    { userId, count: result.data.length },
+    { userId, count: result.data.items.length, total: result.data.total },
     "Library items fetched successfully"
   );
   return {

@@ -40,7 +40,7 @@ export async function RecentlyAddedServer({
       throw new Error(result.error);
     }
 
-    const limitedItems = result.data.slice(0, RECENTLY_ADDED_LIMIT);
+    const limitedItems = result.data.items.slice(0, RECENTLY_ADDED_LIMIT);
 
     logger.info(
       { userId, count: limitedItems.length },

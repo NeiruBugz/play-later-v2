@@ -705,6 +705,11 @@ type LibraryItemWithGameAndCount = LibraryItem & {
   };
 };
 
+export type FindLibraryItemsResult = {
+  items: LibraryItemWithGameAndCount[];
+  total: number;
+};
+
 export async function findLibraryItemsWithFilters(params: {
   userId: string;
   status?: LibraryItemStatus;
@@ -713,7 +718,9 @@ export async function findLibraryItemsWithFilters(params: {
   sortBy?: "createdAt" | "releaseDate" | "startedAt" | "completedAt";
   sortOrder?: "asc" | "desc";
   distinctByGame?: boolean;
-}): Promise<RepositoryResult<LibraryItemWithGameAndCount[]>> {
+  skip?: number;
+  take?: number;
+}): Promise<RepositoryResult<FindLibraryItemsResult>> {
   try {
     const {
       userId,
@@ -723,6 +730,8 @@ export async function findLibraryItemsWithFilters(params: {
       sortBy = "createdAt",
       sortOrder = "desc",
       distinctByGame = false,
+      skip,
+      take,
     } = params;
     const whereClause: Prisma.LibraryItemWhereInput = {
       userId,
@@ -748,28 +757,36 @@ export async function findLibraryItemsWithFilters(params: {
         orderByClause = { createdAt: sortOrder };
         break;
     }
-    const items = await prisma.libraryItem.findMany({
-      where: whereClause,
-      orderBy: orderByClause,
-      include: {
-        game: {
-          select: {
-            id: true,
-            title: true,
-            coverImage: true,
-            slug: true,
-            releaseDate: true,
-            _count: {
-              select: {
-                libraryItems: { where: { userId } },
+    const isPaginated = skip !== undefined || take !== undefined;
+
+    const [items, total] = await Promise.all([
+      prisma.libraryItem.findMany({
+        where: whereClause,
+        orderBy: orderByClause,
+        ...(skip !== undefined && { skip }),
+        ...(take !== undefined && { take }),
+        include: {
+          game: {
+            select: {
+              id: true,
+              title: true,
+              coverImage: true,
+              slug: true,
+              releaseDate: true,
+              _count: {
+                select: {
+                  libraryItems: { where: { userId } },
+                },
               },
             },
           },
         },
-      },
-    });
-    if (!distinctByGame) {
-      return repositorySuccess(items);
+      }),
+      prisma.libraryItem.count({ where: whereClause }),
+    ]);
+
+    if (!distinctByGame || isPaginated) {
+      return repositorySuccess({ items, total });
     }
     const deduplicatedItems = Array.from(
       items
@@ -815,7 +832,7 @@ export async function findLibraryItemsWithFilters(params: {
       const comparison = aValue.getTime() - bValue.getTime();
       return sortOrder === "asc" ? comparison : -comparison;
     });
-    return repositorySuccess(sortedItems);
+    return repositorySuccess({ items: sortedItems, total: sortedItems.length });
   } catch (error) {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
