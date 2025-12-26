@@ -223,3 +223,52 @@ export async function createTestLibraryItem(data: {
     status: libraryItem.status,
   };
 }
+export interface TestJournalEntry {
+  id: string;
+  userId: string;
+  gameId: string;
+  title: string | null;
+  content: string;
+}
+export async function createTestJournalEntry(data: {
+  userId: string;
+  gameId: string;
+  libraryItemId?: number;
+  title?: string;
+  content: string;
+  playSession?: number;
+}): Promise<TestJournalEntry> {
+  const entry = await getPrisma().journalEntry.create({
+    data: {
+      userId: data.userId,
+      gameId: data.gameId,
+      libraryItemId: data.libraryItemId ?? null,
+      title: data.title ?? null,
+      content: data.content,
+      playSession: data.playSession ?? null,
+    },
+  });
+  return {
+    id: entry.id,
+    userId: entry.userId,
+    gameId: entry.gameId,
+    title: entry.title,
+    content: entry.content,
+  };
+}
+export async function deleteTestJournalEntries(userId: string): Promise<void> {
+  await getPrisma().journalEntry.deleteMany({
+    where: { userId },
+  });
+}
+export async function cleanupUserTestData(userId: string): Promise<void> {
+  const client = getPrisma();
+  await client.journalEntry.deleteMany({ where: { userId } });
+  await client.libraryItem.deleteMany({ where: { userId } });
+  await client.game.deleteMany({
+    where: {
+      title: { contains: "Test Game" },
+      libraryItems: { none: {} },
+    },
+  });
+}

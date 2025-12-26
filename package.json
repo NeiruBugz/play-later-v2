@@ -3,7 +3,6 @@
   "private": true,
   "packageManager": "pnpm@10.11.0",
   "devDependencies": {
-    "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.2.0"
   },
   "pnpm": {
