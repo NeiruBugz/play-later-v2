@@ -1,6 +1,10 @@
+"use client";
+
 import { PenLine } from "lucide-react";
 import Link from "next/link";
 
+import { useJournalEntryDialog } from "@/features/journal/hooks";
+import { JournalEntryDialog } from "@/features/journal/ui/journal-entry-dialog";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -65,10 +69,7 @@ function JournalEntryCard({
   );
 }
 
-function EmptyState({ gameId }: { gameId?: string }) {
-  const writeEntryHref = gameId
-    ? `/journal/new?gameId=${gameId}`
-    : "/journal/new";
+function EmptyState({ onWriteEntry }: { onWriteEntry: () => void }) {
   return (
     <div className="bg-muted/30 gap-lg p-2xl flex flex-col items-center rounded-lg border border-dashed text-center">
       <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
@@ -80,9 +81,7 @@ function EmptyState({ gameId }: { gameId?: string }) {
           Capture thoughts, progress, and memories as you play
         </p>
       </div>
-      <Button asChild>
-        <Link href={writeEntryHref}>Write Your First Entry</Link>
-      </Button>
+      <Button onClick={onWriteEntry}>Write Your First Entry</Button>
     </div>
   );
 }
@@ -90,47 +89,55 @@ function EmptyState({ gameId }: { gameId?: string }) {
 export function JournalEntriesSection({
   journalEntries,
   gameId,
+  gameTitle,
 }: JournalEntriesSectionProps) {
   const hasEntries = journalEntries.length > 0;
-  const writeEntryHref = gameId
-    ? `/journal/new?gameId=${gameId}`
-    : "/journal/new";
+  const dialog = useJournalEntryDialog();
+
   return (
-    <section
-      className="animate-fade-in space-y-xl"
-      aria-labelledby="journal-heading"
-    >
-      <div className="flex items-center justify-between">
-        <h2 id="journal-heading" className="heading-md font-serif">
-          Your Journal
-        </h2>
-        {hasEntries && (
-          <Button variant="secondary" size="sm" asChild>
-            <Link href={writeEntryHref}>
+    <>
+      <section
+        className="animate-fade-in space-y-xl"
+        aria-labelledby="journal-heading"
+      >
+        <div className="flex items-center justify-between">
+          <h2 id="journal-heading" className="heading-md font-serif">
+            Your Journal
+          </h2>
+          {hasEntries && (
+            <Button variant="secondary" size="sm" onClick={dialog.open}>
               <PenLine className="mr-2 h-4 w-4" />
               Write Entry
-            </Link>
-          </Button>
-        )}
-      </div>
-      {hasEntries ? (
-        <div className="pl-xs">
-          {journalEntries.map((entry, index) => (
-            <div
-              key={entry.id}
-              className="animate-stagger-in"
-              style={{ animationDelay: `${(index + 1) * 50}ms` }}
-            >
-              <JournalEntryCard
-                entry={entry}
-                isLast={index === journalEntries.length - 1}
-              />
-            </div>
-          ))}
+            </Button>
+          )}
         </div>
-      ) : (
-        <EmptyState gameId={gameId} />
-      )}
-    </section>
+        {hasEntries ? (
+          <div className="pl-xs">
+            {journalEntries.map((entry, index) => (
+              <div
+                key={entry.id}
+                className="animate-stagger-in"
+                style={{ animationDelay: `${(index + 1) * 50}ms` }}
+              >
+                <JournalEntryCard
+                  entry={entry}
+                  isLast={index === journalEntries.length - 1}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <EmptyState onWriteEntry={dialog.open} />
+        )}
+      </section>
+
+      <JournalEntryDialog
+        isOpen={dialog.isOpen}
+        onClose={dialog.close}
+        gameId={gameId}
+        gameTitle={gameTitle}
+        onSuccess={dialog.onSuccess}
+      />
+    </>
   );
 }

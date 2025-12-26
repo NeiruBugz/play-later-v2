@@ -13,15 +13,13 @@ export interface DashboardStatsData {
   total: number;
 }
 
-interface DashboardStatsServerProps {
+interface DashboardStatsProps {
   userId: string;
 }
 
-export async function DashboardStatsServer({
-  userId,
-}: DashboardStatsServerProps) {
+export async function DashboardStats({ userId }: DashboardStatsProps) {
   const logger = createLogger({
-    [LOGGER_CONTEXT.PAGE]: "DashboardStatsServer",
+    [LOGGER_CONTEXT.PAGE]: "DashboardStats",
   });
 
   try {
@@ -101,7 +99,7 @@ export async function DashboardStatsServer({
 
     return <DashboardStatsCards stats={stats} />;
   } catch (error) {
-    logger.error({ error }, "Error in DashboardStatsServer");
+    logger.error({ error }, "Error in DashboardStats");
     throw error;
   }
 }

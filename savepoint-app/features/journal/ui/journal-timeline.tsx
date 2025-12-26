@@ -19,15 +19,15 @@ interface GameInfo {
   coverImage: string | null;
 }
 
-interface JournalTimelineClientProps {
+interface JournalTimelineProps {
   initialEntries: JournalEntryDomain[];
   initialGames: Record<string, GameInfo>;
 }
 
-export function JournalTimelineClient({
+export function JournalTimeline({
   initialEntries,
   initialGames,
-}: JournalTimelineClientProps) {
+}: JournalTimelineProps) {
   const [entries, setEntries] = useState(initialEntries);
   const [games, setGames] = useState(
     () => new Map(Object.entries(initialGames))

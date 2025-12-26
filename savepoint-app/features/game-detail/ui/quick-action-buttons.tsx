@@ -40,11 +40,8 @@ export const QuickActionButtons = ({
   const handleStatusChange = (status: LibraryItemStatus) => {
     if (isPending) return;
 
-    // 1. Immediate optimistic update (before server call)
-    setOptimisticStatus(status);
-
-    // 2. Server action in transition
     startTransition(async () => {
+      setOptimisticStatus(status);
       const result = await updateLibraryStatusAction({ igdbId, status });
       if (result.success) {
         const config = LIBRARY_STATUS_CONFIG.find((c) => c.value === status);

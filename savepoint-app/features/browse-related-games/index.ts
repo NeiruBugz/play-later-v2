@@ -1,6 +1,6 @@
 // Feature: browse-related-games
 // Public exports for the browse-related-games feature
 
-export { RelatedGamesServer, RelatedGamesSkeleton } from "./ui";
+export { RelatedGames, RelatedGamesSkeleton } from "./ui";
 
-export type { RelatedGamesServerProps } from "./ui";
+export type { RelatedGamesProps } from "./ui";

@@ -1,5 +1,5 @@
 import type { Collection } from "igdb-api-types";
 
-export interface RelatedGamesServerProps {
+export interface RelatedGamesProps {
   collections: Pick<Collection, "id" | "name">[];
 }

@@ -11,14 +11,12 @@ export interface RecentlyAddedData {
   items: LibraryItemWithGameDomain[];
 }
 
-interface RecentlyAddedServerProps {
+interface RecentlyAddedProps {
   userId: string;
 }
 
-export async function RecentlyAddedServer({
-  userId,
-}: RecentlyAddedServerProps) {
-  const logger = createLogger({ [LOGGER_CONTEXT.PAGE]: "RecentlyAddedServer" });
+export async function RecentlyAdded({ userId }: RecentlyAddedProps) {
+  const logger = createLogger({ [LOGGER_CONTEXT.PAGE]: "RecentlyAdded" });
 
   try {
     const service = new LibraryService();
@@ -59,7 +57,7 @@ export async function RecentlyAddedServer({
       />
     );
   } catch (error) {
-    logger.error({ error }, "Error in RecentlyAddedServer");
+    logger.error({ error }, "Error in RecentlyAdded");
     throw error;
   }
 }

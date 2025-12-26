@@ -14,15 +14,13 @@ export interface ContinuePlayingData {
   items: LibraryItemWithGameDomain[];
 }
 
-interface ContinuePlayingServerProps {
+interface ContinuePlayingProps {
   userId: string;
 }
 
-export async function ContinuePlayingServer({
-  userId,
-}: ContinuePlayingServerProps) {
+export async function ContinuePlaying({ userId }: ContinuePlayingProps) {
   const logger = createLogger({
-    [LOGGER_CONTEXT.PAGE]: "ContinuePlayingServer",
+    [LOGGER_CONTEXT.PAGE]: "ContinuePlaying",
   });
 
   try {
@@ -65,7 +63,7 @@ export async function ContinuePlayingServer({
       />
     );
   } catch (error) {
-    logger.error({ error }, "Error in ContinuePlayingServer");
+    logger.error({ error }, "Error in ContinuePlaying");
     throw error;
   }
 }

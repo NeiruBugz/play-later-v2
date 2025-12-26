@@ -16,11 +16,11 @@ import { cn } from "@/shared/lib/ui";
 import { dismissOnboarding } from "../server-actions";
 import { OnboardingStep } from "./onboarding-step";
 
-interface GettingStartedClientProps {
+interface GettingStartedProps {
   progress: OnboardingProgress;
 }
 
-export function GettingStartedClient({ progress }: GettingStartedClientProps) {
+export function GettingStarted({ progress }: GettingStartedProps) {
   const [isPending, startTransition] = useTransition();
   const progressPercentage = Math.round(
     (progress.completedCount / progress.totalCount) * 100

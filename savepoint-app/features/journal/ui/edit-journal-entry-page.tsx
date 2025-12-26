@@ -6,13 +6,11 @@ import type { JournalEntryDomain } from "@/shared/types";
 
 import { JournalEntryForm } from "./journal-entry-form";
 
-interface EditJournalEntryPageClientProps {
+interface EditJournalEntryPageProps {
   entry: JournalEntryDomain;
 }
 
-export function EditJournalEntryPageClient({
-  entry,
-}: EditJournalEntryPageClientProps) {
+export function EditJournalEntryPage({ entry }: EditJournalEntryPageProps) {
   const router = useRouter();
 
   const handleSuccess = () => {

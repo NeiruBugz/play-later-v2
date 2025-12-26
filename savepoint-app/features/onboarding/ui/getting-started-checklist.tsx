@@ -4,7 +4,7 @@ import { OnboardingService } from "@/data-access-layer/services";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { GettingStartedClient } from "./getting-started-client";
+import { GettingStarted } from "./getting-started";
 
 interface GettingStartedChecklistProps {
   userId: string;
@@ -34,5 +34,5 @@ export async function GettingStartedChecklist({
     return null;
   }
 
-  return <GettingStartedClient progress={result.data} />;
+  return <GettingStarted progress={result.data} />;
 }

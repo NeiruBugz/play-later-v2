@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import {
-  RelatedGamesServer,
+  RelatedGames,
   RelatedGamesSkeleton,
 } from "@/features/browse-related-games";
 import { GameCoverImage } from "@/features/game-detail/ui/game-cover-image";
@@ -85,14 +85,15 @@ export default async function GameDetailPage({
           </header>
           <GameDescription summary={game.summary} />
           <TimesToBeatSection timesToBeat={timesToBeat} />
-          {userId && (
+          {userId && gameId && (
             <JournalEntriesSection
               journalEntries={journalEntries}
               gameId={gameId}
+              gameTitle={game.name}
             />
           )}
           <Suspense fallback={<RelatedGamesSkeleton />}>
-            <RelatedGamesServer collections={collections} />
+            <RelatedGames collections={collections} />
           </Suspense>
         </main>
       </div>

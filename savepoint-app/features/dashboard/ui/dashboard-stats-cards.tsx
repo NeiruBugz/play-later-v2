@@ -14,7 +14,7 @@ import {
 } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui";
 
-import type { DashboardStatsData } from "./dashboard-stats-server";
+import type { DashboardStatsData } from "./dashboard-stats";
 
 interface StatCardProps {
   label: string;

@@ -9,11 +9,9 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 
-import type { RelatedGamesServerProps } from "./related-games-server.types";
+import type { RelatedGamesProps } from "./related-games.types";
 
-export async function RelatedGamesServer({
-  collections,
-}: RelatedGamesServerProps) {
+export async function RelatedGames({ collections }: RelatedGamesProps) {
   const igdbService = new IgdbService();
 
   const collectionsWithGamesPromises = collections.map((collection) =>
