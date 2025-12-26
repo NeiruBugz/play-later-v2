@@ -74,7 +74,7 @@ export async function countJournalEntriesByUserId(
 export async function createJournalEntry(params: {
   userId: string;
   gameId: string;
-  title: string;
+  title?: string;
   content: string;
   mood?: JournalMood;
   playSession?: number;

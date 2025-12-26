@@ -137,29 +137,3 @@ vi.mock("next/navigation", () => ({
   })),
   useSearchParams: vi.fn(() => new URLSearchParams()),
 }));
-
-// Mock TipTap modules globally to prevent Node.js v22 stream API compatibility issues
-// This fixes the "controller[kState].transformAlgorithm is not a function" error
-// Individual test files can override these mocks if they need specific TipTap behavior
-vi.mock("@tiptap/react", () => ({
-  useEditor: vi.fn(() => null),
-  EditorContent: vi.fn(() => null),
-}));
-
-vi.mock("@tiptap/starter-kit", () => ({
-  default: {
-    configure: vi.fn(() => ({})),
-  },
-}));
-
-vi.mock("@tiptap/extension-character-count", () => ({
-  default: {
-    configure: vi.fn(() => ({})),
-  },
-}));
-
-vi.mock("@tiptap/extension-list-item", () => ({
-  default: {
-    configure: vi.fn(() => ({})),
-  },
-}));

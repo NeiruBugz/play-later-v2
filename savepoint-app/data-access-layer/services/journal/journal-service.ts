@@ -48,18 +48,36 @@ export class JournalService extends BaseService {
     }
   }
 
+  private generateAutoTitle(timezone?: string): string {
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: timezone ?? "UTC",
+    };
+    return new Date().toLocaleDateString("en-US", options);
+  }
+
   async createJournalEntry(params: {
     userId: string;
     gameId: string;
-    title: string;
+    title?: string;
     content: string;
     mood?: JournalMood;
     playSession?: number;
     libraryItemId?: number;
+    timezone?: string;
   }): Promise<ServiceResult<JournalEntryDomain>> {
     try {
       this.logger.info(params, "Creating journal entry");
-      const result = await createJournalEntry(params);
+
+      const finalTitle =
+        params.title?.trim() || this.generateAutoTitle(params.timezone);
+
+      const result = await createJournalEntry({
+        ...params,
+        title: finalTitle,
+      });
       if (!result.ok) {
         this.logger.error(
           { error: result.error, ...params },

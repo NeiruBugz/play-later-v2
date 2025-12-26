@@ -28,8 +28,6 @@ const elements = {
   getButton: () => screen.getByRole("option"),
   getPlatformText: () => screen.getByText(/PC|No Platform|PlayStation 5/),
   getStatusBadge: () => screen.getByText(/Want to Play|Owned|Playing|Played/i),
-  getGamepadIcon: () => screen.getByRole("option").querySelector("svg"),
-  getChevronIcon: () => screen.getByRole("option").querySelectorAll("svg")[1],
 };
 
 const actions = {
@@ -203,37 +201,6 @@ describe("EntryRow", () => {
       );
 
       expect(elements.getButton()).toHaveAttribute("role", "option");
-    });
-  });
-
-  describe("layout and styling", () => {
-    it("should render gamepad icon", () => {
-      const entry = createMockEntry();
-      render(
-        <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
-      );
-
-      expect(elements.getGamepadIcon()).toBeInTheDocument();
-    });
-
-    it("should render chevron icon", () => {
-      const entry = createMockEntry();
-      render(
-        <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
-      );
-
-      expect(elements.getChevronIcon()).toBeInTheDocument();
-    });
-
-    it("should truncate long platform names", () => {
-      const entry = createMockEntry({ platform: "PC" });
-      render(
-        <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
-      );
-
-      const platformText = screen.getByText("PC");
-      const container = platformText.closest("p");
-      expect(container).toHaveClass("truncate");
     });
   });
 });

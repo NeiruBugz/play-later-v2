@@ -48,6 +48,7 @@ export function UsernameInput({
           aria-describedby="username-error"
           placeholder="Enter username"
           autoComplete="username"
+          required
         />
         <div className="pr-lg pointer-events-none absolute inset-y-0 right-0 flex items-center">
           {validationStatus === "validating" && (

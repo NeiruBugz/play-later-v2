@@ -42,7 +42,7 @@ const elements = {
   getSubmitButton: () => {
     const buttons = screen.getAllByRole("button");
     return (
-      buttons.find((btn) => btn.type === "submit") ||
+      buttons.find((btn) => (btn as HTMLButtonElement).type === "submit") ||
       buttons[buttons.length - 1]
     );
   },
@@ -124,13 +124,16 @@ describe("EntryForm - AddForm variant", () => {
     it("should successfully submit the form", async () => {
       const mockOnSuccess = vi.fn();
       const mockActionResult = {
-        success: true,
+        success: true as const,
         data: {
           id: 1,
           userId: "user-123",
           gameId: "game-123",
           status: LibraryItemStatus.WANT_TO_PLAY,
           platform: null,
+          acquisitionType: null,
+          startedAt: null,
+          completedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -157,13 +160,16 @@ describe("EntryForm - AddForm variant", () => {
     it("should call onSuccess callback after successful submission", async () => {
       const mockOnSuccess = vi.fn();
       const mockActionResult = {
-        success: true,
+        success: true as const,
         data: {
           id: 1,
           userId: "user-123",
           gameId: "game-123",
           status: LibraryItemStatus.WANT_TO_PLAY,
           platform: null,
+          acquisitionType: null,
+          startedAt: null,
+          completedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -184,13 +190,16 @@ describe("EntryForm - AddForm variant", () => {
   describe("given user submits form with platform selected", () => {
     it("should submit form with selected platform", async () => {
       const mockActionResult = {
-        success: true,
+        success: true as const,
         data: {
           id: 1,
           userId: "user-123",
           gameId: "game-123",
           status: LibraryItemStatus.WANT_TO_PLAY,
           platform: "PlayStation 5",
+          acquisitionType: null,
+          startedAt: null,
+          completedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -219,13 +228,16 @@ describe("EntryForm - AddForm variant", () => {
   describe("given user interacts with form controls", () => {
     it("should allow changing status and submitting without platform", async () => {
       const mockActionResult = {
-        success: true,
+        success: true as const,
         data: {
           id: 1,
           userId: "user-123",
           gameId: "game-123",
           status: LibraryItemStatus.PLAYING,
           platform: null,
+          acquisitionType: null,
+          startedAt: null,
+          completedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

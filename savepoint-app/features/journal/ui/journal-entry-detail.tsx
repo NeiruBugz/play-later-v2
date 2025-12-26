@@ -1,9 +1,8 @@
 "use client";
 
-import DOMPurify from "dompurify";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { GameCard } from "@/shared/components/game-card";
@@ -16,7 +15,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatRelativeDate } from "@/shared/lib/date";
-import { JournalMood, type JournalEntryDomain } from "@/shared/types";
+import type { JournalEntryDomain } from "@/shared/types";
 
 import { deleteJournalEntryAction } from "../server-actions/delete-journal-entry";
 import { DeleteEntryDialog } from "./delete-entry-dialog";
@@ -33,15 +32,6 @@ interface JournalEntryDetailProps {
   game: GameInfo;
 }
 
-const MOOD_LABELS: Record<JournalMood, string> = {
-  [JournalMood.EXCITED]: "Excited",
-  [JournalMood.RELAXED]: "Relaxed",
-  [JournalMood.FRUSTRATED]: "Frustrated",
-  [JournalMood.ACCOMPLISHED]: "Accomplished",
-  [JournalMood.CURIOUS]: "Curious",
-  [JournalMood.NOSTALGIC]: "Nostalgic",
-};
-
 export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
   const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -50,11 +40,6 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
 
   const displayTitle = entry.title || "Untitled Entry";
   const isUpdated = entry.updatedAt.getTime() !== entry.createdAt.getTime();
-
-  const sanitizedContent = useMemo(
-    () => DOMPurify.sanitize(entry.content),
-    [entry.content]
-  );
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -134,28 +119,17 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
           <CardTitle className="text-base">Entry</CardTitle>
         </CardHeader>
         <CardContent className="space-y-lg">
-          <div
-            className="prose prose-sm dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-          />
+          <p className="text-sm whitespace-pre-wrap">{entry.content}</p>
 
           {/* Entry Metadata */}
-          {(entry.mood || entry.playSession !== null) && (
+          {entry.playSession !== null && (
             <div className="gap-md pt-lg flex flex-wrap items-center border-t">
-              {entry.mood && (
-                <div className="space-y-xs">
-                  <span className="text-muted-foreground text-xs">Mood</span>
-                  <Badge variant="secondary">{MOOD_LABELS[entry.mood]}</Badge>
-                </div>
-              )}
-              {entry.playSession !== null && (
-                <div className="space-y-xs">
-                  <span className="text-muted-foreground text-xs">
-                    Hours Played
-                  </span>
-                  <Badge variant="outline">{entry.playSession} hours</Badge>
-                </div>
-              )}
+              <div className="space-y-xs">
+                <span className="text-muted-foreground text-xs">
+                  Hours Played
+                </span>
+                <Badge variant="outline">{entry.playSession} hours</Badge>
+              </div>
             </div>
           )}
         </CardContent>

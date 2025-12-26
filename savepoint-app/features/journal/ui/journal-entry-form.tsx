@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { RichTextEditor } from "@/shared/components/rich-text-editor";
 import { Button } from "@/shared/components/ui/button";
 import { Form, FormField } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
@@ -17,9 +16,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
+import { MAX_CHARACTERS } from "@/shared/lib/rich-text";
 import { cn } from "@/shared/lib/ui/utils";
-import { JournalMood, type JournalEntryDomain } from "@/shared/types";
+import { type JournalEntryDomain } from "@/shared/types";
 
 import {
   type CreateJournalEntryInput,
@@ -32,9 +33,8 @@ import { updateJournalEntryAction } from "../server-actions/update-journal-entry
 // Use a common form shape that works for both create and update
 // We'll validate and transform in handleSubmit
 type FormData = {
-  title: string;
+  title?: string;
   content: string;
-  mood?: JournalMood;
   playSession?: number;
   libraryItemId?: number;
 };
@@ -46,15 +46,6 @@ interface JournalEntryFormProps {
   onCancel?: () => void;
   className?: string;
 }
-
-const MOOD_OPTIONS = [
-  { value: JournalMood.EXCITED, label: "Excited" },
-  { value: JournalMood.RELAXED, label: "Relaxed" },
-  { value: JournalMood.FRUSTRATED, label: "Frustrated" },
-  { value: JournalMood.ACCOMPLISHED, label: "Accomplished" },
-  { value: JournalMood.CURIOUS, label: "Curious" },
-  { value: JournalMood.NOSTALGIC, label: "Nostalgic" },
-];
 
 export function JournalEntryForm({
   gameId: initialGameId,
@@ -74,9 +65,14 @@ export function JournalEntryForm({
   const form = useForm<FormData>({
     resolver: zodResolver(
       z.object({
-        title: z.string().min(1, "Title is required"),
-        content: z.string().min(1, "Content is required"),
-        mood: z.enum(JournalMood).optional(),
+        title: z.string().optional(),
+        content: z
+          .string()
+          .min(1, "Content is required")
+          .max(
+            MAX_CHARACTERS,
+            `Content must not exceed ${MAX_CHARACTERS} characters`
+          ),
         playSession: z.number().int().positive().optional(),
         libraryItemId: z.number().int().positive().optional(),
       })
@@ -84,7 +80,6 @@ export function JournalEntryForm({
     defaultValues: {
       title: entry?.title ?? "",
       content: entry?.content ?? "",
-      mood: entry?.mood ?? undefined,
       playSession: entry?.playSession ?? undefined,
       libraryItemId: entry?.libraryItemId ?? undefined,
     },
@@ -157,9 +152,8 @@ export function JournalEntryForm({
       // Transform to UpdateJournalEntryInput
       const updateData: UpdateJournalEntryInput = {
         entryId: entry!.id,
-        title: data.title,
+        title: data.title || undefined,
         content: data.content,
-        mood: data.mood ?? undefined,
         playSession: data.playSession ?? undefined,
         libraryItemId: data.libraryItemId ?? undefined,
       };
@@ -168,11 +162,11 @@ export function JournalEntryForm({
       // Transform to CreateJournalEntryInput
       const createData: CreateJournalEntryInput = {
         gameId,
-        title: data.title,
+        title: data.title || undefined,
         content: data.content,
-        mood: data.mood,
         playSession: data.playSession,
         libraryItemId: data.libraryItemId,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
       await createAction.handleSubmit(createData);
     }
@@ -191,12 +185,10 @@ export function JournalEntryForm({
           name="title"
           render={({ field }) => (
             <div className="space-y-md">
-              <Label htmlFor="title">
-                Title <span className="text-destructive">*</span>
-              </Label>
+              <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
-                placeholder="Enter entry title"
+                placeholder="Add a title (optional)"
                 disabled={isSubmitting}
                 aria-invalid={!!form.formState.errors.title}
                 aria-describedby={
@@ -222,15 +214,21 @@ export function JournalEntryForm({
           name="content"
           render={({ field }) => (
             <div className="space-y-md">
-              <Label htmlFor="content">
-                Content <span className="text-destructive">*</span>
-              </Label>
-              <RichTextEditor
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Write your journal entry..."
+              <Label htmlFor="content">What's on your mind?</Label>
+              <Textarea
+                id="content"
+                {...field}
+                placeholder="Share your thoughts about this game..."
+                className="min-h-[120px] resize-y"
                 disabled={isSubmitting}
+                aria-invalid={!!form.formState.errors.content}
+                aria-describedby={
+                  form.formState.errors.content ? "content-error" : undefined
+                }
               />
+              <p className="text-muted-foreground text-xs">
+                {field.value.length}/{MAX_CHARACTERS} characters
+              </p>
               {form.formState.errors.content && (
                 <p
                   id="content-error"
@@ -238,43 +236,6 @@ export function JournalEntryForm({
                   role="alert"
                 >
                   {form.formState.errors.content.message}
-                </p>
-              )}
-            </div>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="mood"
-          render={({ field }) => (
-            <div className="space-y-md">
-              <Label htmlFor="mood">Mood (Optional)</Label>
-              <Select
-                onValueChange={(value) =>
-                  field.onChange(value === "none" ? undefined : value)
-                }
-                value={field.value ?? "none"}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger
-                  id="mood"
-                  aria-invalid={!!form.formState.errors.mood}
-                >
-                  <SelectValue placeholder="Select a mood" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {MOOD_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.mood && (
-                <p className="text-destructive text-sm" role="alert">
-                  {form.formState.errors.mood.message}
                 </p>
               )}
             </div>
@@ -387,12 +348,10 @@ export function JournalEntryForm({
           )}
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting
-              ? isEditMode
-                ? "Saving..."
-                : "Creating..."
+              ? "Saving..."
               : isEditMode
                 ? "Save Changes"
-                : "Create Entry"}
+                : "Save thought"}
           </Button>
         </div>
       </form>

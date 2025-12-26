@@ -42,6 +42,25 @@ describe("JournalService", () => {
     mockDeleteJournalEntry = vi.mocked(deleteJournalEntry);
   });
 
+  describe("generateAutoTitle", () => {
+    it("should generate date in 'MMM DD, YYYY' format", () => {
+      // Access private method via any
+      const serviceAny = service as any;
+      const title = serviceAny.generateAutoTitle("America/New_York");
+
+      // Verify format: "Dec 25, 2024"
+      expect(title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
+    });
+
+    it("should use UTC when timezone is not provided", () => {
+      const serviceAny = service as any;
+      const title = serviceAny.generateAutoTitle();
+
+      // Verify format is consistent
+      expect(title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
+    });
+  });
+
   describe("createJournalEntry", () => {
     const validParams = {
       userId: "user-123",
@@ -234,6 +253,103 @@ describe("JournalService", () => {
       if (!result.success) {
         expect(result.error).toContain("Game not found");
       }
+    });
+
+    it("should auto-generate title when title is empty string", async () => {
+      const paramsWithEmptyTitle = {
+        ...validParams,
+        title: "",
+      };
+
+      mockCreateJournalEntry.mockImplementation((params) => {
+        // Repository should receive the auto-generated title
+        expect(params.title).not.toBe("");
+        expect(params.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
+        return Promise.resolve(
+          repositorySuccess({
+            ...mockPrismaJournalEntry,
+            title: params.title!,
+          })
+        );
+      });
+
+      const result = await service.createJournalEntry(paramsWithEmptyTitle);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
+      }
+    });
+
+    it("should auto-generate title when title is undefined", async () => {
+      const paramsWithoutTitle = {
+        userId: "user-123",
+        gameId: "game-456",
+        content: "Content without title",
+      };
+
+      mockCreateJournalEntry.mockImplementation((params) => {
+        expect(params.title).toBeDefined();
+        expect(params.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
+        return Promise.resolve(
+          repositorySuccess({
+            ...mockPrismaJournalEntry,
+            title: params.title!,
+          })
+        );
+      });
+
+      const result = await service.createJournalEntry(paramsWithoutTitle);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
+      }
+    });
+
+    it("should preserve user-provided title when not empty", async () => {
+      mockCreateJournalEntry.mockResolvedValue(
+        repositorySuccess(mockPrismaJournalEntry)
+      );
+
+      const result = await service.createJournalEntry(validParams);
+
+      expect(mockCreateJournalEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "My First Entry",
+        })
+      );
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.title).toBe("My First Entry");
+      }
+    });
+
+    it("should use provided timezone for auto-generated title", async () => {
+      const paramsWithTimezone = {
+        userId: "user-123",
+        gameId: "game-456",
+        content: "Content",
+        timezone: "America/New_York",
+      };
+
+      mockCreateJournalEntry.mockImplementation((params) => {
+        // We can't test the exact output without mocking Date,
+        // but we can verify the title is generated
+        expect(params.title).toBeDefined();
+        expect(params.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
+        return Promise.resolve(
+          repositorySuccess({
+            ...mockPrismaJournalEntry,
+            title: params.title!,
+          })
+        );
+      });
+
+      const result = await service.createJournalEntry(paramsWithTimezone);
+
+      expect(result.success).toBe(true);
     });
   });
 
