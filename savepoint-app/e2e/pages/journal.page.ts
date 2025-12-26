@@ -175,7 +175,7 @@ export class JournalPage {
   }
 
   successToast(): Locator {
-    return this.page.locator('[data-sonner-toast]', {
+    return this.page.locator("[data-sonner-toast]", {
       hasText: /created|updated|deleted/i,
     });
   }

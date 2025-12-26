@@ -19,7 +19,7 @@ const GetLibrarySchema = z.object({
     .enum(["createdAt", "releaseDate", "startedAt", "completedAt"])
     .optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
-  offset: z.number().int().min(0).optional(),
+  offset: z.number().int().min(0).max(10000).optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
 
@@ -77,9 +77,9 @@ export async function getLibraryHandler(
     };
   }
 
-  logger.info(
+  logger.debug(
     { userId, count: result.data.items.length, total: result.data.total },
-    "Library items fetched successfully"
+    "Library items fetched"
   );
   return {
     success: true,

@@ -113,14 +113,6 @@ export class LibraryService extends BaseService {
       );
     }
   }
-  private validateStatusTransition(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _currentStatus: LibraryItemStatus,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _newStatus: LibraryItemStatus
-  ): { valid: boolean } {
-    return { valid: true };
-  }
   async updateLibraryItem(params: {
     userId: string;
     libraryItem: {
@@ -143,14 +135,6 @@ export class LibraryService extends BaseService {
         );
         return this.error("Library item not found");
       }
-      const currentDomainItem = LibraryItemMapper.toDomain(
-        currentItemResult.data
-      );
-      const currentStatus = currentDomainItem.status;
-      const newStatus = params.libraryItem.status;
-      if (newStatus !== currentStatus) {
-        this.validateStatusTransition(currentStatus, newStatus);
-      }
       const result = await updateLibraryItem({
         userId: params.userId,
         libraryItem: {
@@ -170,8 +154,7 @@ export class LibraryService extends BaseService {
       this.logger.info(
         {
           libraryItemId: params.libraryItem.id,
-          oldStatus: currentStatus,
-          newStatus,
+          newStatus: params.libraryItem.status,
         },
         "Library item updated successfully"
       );
