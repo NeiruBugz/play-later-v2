@@ -52,7 +52,7 @@ export async function updateLibraryStatusAction(
         { igdbId, userId },
         "Game not in library, adding with new status"
       );
-      return addToLibraryAction({ igdbId, status, platform: "PC" });
+      return addToLibraryAction({ igdbId, status, platform: undefined });
     }
     const game = gameResult.data;
     const libraryItemsResult =
@@ -75,7 +75,7 @@ export async function updateLibraryStatusAction(
         { igdbId, userId },
         "No library item found, adding game to library"
       );
-      return addToLibraryAction({ igdbId, status, platform: "PC" });
+      return addToLibraryAction({ igdbId, status, platform: undefined });
     }
     const mostRecentItem = libraryItemsResult.data;
     const updateResult = await libraryService.updateLibraryItem({

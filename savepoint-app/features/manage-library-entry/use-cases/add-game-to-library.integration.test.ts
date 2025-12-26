@@ -298,4 +298,141 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       }
     });
   });
+
+  describe("duplicate detection with null platform", () => {
+    it("should detect duplicate when adding same game twice without platform", async () => {
+      const firstResult = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+      });
+
+      expect(firstResult.success).toBe(true);
+      if (!firstResult.success) return;
+
+      expect(firstResult.data.libraryItem.platform).toBeNull();
+
+      const secondResult = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+      });
+
+      expect(secondResult.success).toBe(false);
+      if (secondResult.success) return;
+
+      expect(secondResult.error).toContain("already in your library");
+    });
+
+    it("should allow adding game without platform when entry with platform exists", async () => {
+      const firstResult = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+        platform: "Steam",
+      });
+
+      expect(firstResult.success).toBe(true);
+      if (!firstResult.success) return;
+
+      expect(firstResult.data.libraryItem.platform).toBe("Steam");
+
+      const secondResult = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+      });
+
+      expect(secondResult.success).toBe(true);
+      if (!secondResult.success) return;
+
+      expect(secondResult.data.libraryItem.platform).toBeNull();
+
+      const allItems = await prisma.libraryItem.findMany({
+        where: {
+          userId: testUser.id,
+          gameId: testGame.id,
+        },
+      });
+      expect(allItems).toHaveLength(2);
+      expect(allItems.some((item) => item.platform === "Steam")).toBe(true);
+      expect(allItems.some((item) => item.platform === null)).toBe(true);
+    });
+
+    it("should allow adding game with platform when entry without platform exists", async () => {
+      const firstResult = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+      });
+
+      expect(firstResult.success).toBe(true);
+      if (!firstResult.success) return;
+
+      expect(firstResult.data.libraryItem.platform).toBeNull();
+
+      const secondResult = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+        platform: "PlayStation 5",
+      });
+
+      expect(secondResult.success).toBe(true);
+      if (!secondResult.success) return;
+
+      expect(secondResult.data.libraryItem.platform).toBe("PlayStation 5");
+
+      const allItems = await prisma.libraryItem.findMany({
+        where: {
+          userId: testUser.id,
+          gameId: testGame.id,
+        },
+      });
+      expect(allItems).toHaveLength(2);
+      expect(allItems.some((item) => item.platform === null)).toBe(true);
+      expect(allItems.some((item) => item.platform === "PlayStation 5")).toBe(
+        true
+      );
+    });
+
+    it("should allow multiple entries with different platforms and one without platform", async () => {
+      const steamResult = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+        platform: "Steam",
+      });
+
+      const ps5Result = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+        platform: "PlayStation 5",
+      });
+
+      const noPlatformResult = await addGameToLibrary({
+        userId: testUser.id,
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+      });
+
+      expect(steamResult.success).toBe(true);
+      expect(ps5Result.success).toBe(true);
+      expect(noPlatformResult.success).toBe(true);
+
+      const allItems = await prisma.libraryItem.findMany({
+        where: {
+          userId: testUser.id,
+          gameId: testGame.id,
+        },
+      });
+      expect(allItems).toHaveLength(3);
+      expect(allItems.some((item) => item.platform === "Steam")).toBe(true);
+      expect(allItems.some((item) => item.platform === "PlayStation 5")).toBe(
+        true
+      );
+      expect(allItems.some((item) => item.platform === null)).toBe(true);
+    });
+  });
 });

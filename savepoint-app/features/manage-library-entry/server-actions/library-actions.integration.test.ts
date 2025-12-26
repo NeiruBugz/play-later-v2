@@ -135,6 +135,30 @@ describe("addToLibraryAction - Integration Tests", () => {
       if (!result.success) return;
 
       expect(result.data.platform).toBe("PlayStation 5");
+
+      const libraryItem = await getTestDatabase().libraryItem.findUnique({
+        where: { id: result.data.id },
+      });
+      expect(libraryItem).toBeTruthy();
+      expect(libraryItem?.platform).toBe("PlayStation 5");
+    });
+
+    it("should add game without platform information", async () => {
+      const result = await addToLibraryAction({
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+      });
+
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+
+      expect(result.data.platform).toBeNull();
+
+      const libraryItem = await getTestDatabase().libraryItem.findUnique({
+        where: { id: result.data.id },
+      });
+      expect(libraryItem).toBeTruthy();
+      expect(libraryItem?.platform).toBeNull();
     });
 
     it("should handle all journey statuses", async () => {
@@ -400,6 +424,24 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
         where: { id: result.data.id },
       });
       expect(libraryItem).toBeTruthy();
+    });
+
+    it("should create library item with null platform when using quick action", async () => {
+      const result = await updateLibraryStatusAction({
+        igdbId: testGame.igdbId,
+        status: LibraryItemStatus.WANT_TO_PLAY,
+      });
+
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+
+      expect(result.data.platform).toBeNull();
+
+      const libraryItem = await getTestDatabase().libraryItem.findUnique({
+        where: { id: result.data.id },
+      });
+      expect(libraryItem).toBeTruthy();
+      expect(libraryItem?.platform).toBeNull();
     });
 
     it("should fetch game from IGDB and create library item if game doesn't exist", async () => {

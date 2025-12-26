@@ -710,6 +710,40 @@ export type FindLibraryItemsResult = {
   total: number;
 };
 
+export async function countLibraryItemsByUserId(
+  userId: string
+): Promise<RepositoryResult<number>> {
+  try {
+    const count = await prisma.libraryItem.count({
+      where: { userId },
+    });
+    return repositorySuccess(count);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to count library items: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+export async function hasLibraryItemWithStatus(
+  userId: string,
+  status: LibraryItemStatus
+): Promise<RepositoryResult<boolean>> {
+  try {
+    const item = await prisma.libraryItem.findFirst({
+      where: { userId, status },
+      select: { id: true },
+    });
+    return repositorySuccess(item !== null);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to check library item status: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
 export async function findLibraryItemsWithFilters(params: {
   userId: string;
   status?: LibraryItemStatus;

@@ -3,7 +3,7 @@ import * as React from "react";
 
 import { cn } from "@/shared/lib/ui/utils";
 
-const cardVariants = cva("rounded-lg border transition-all duration-normal", {
+const cardVariants = cva("rounded-sm border transition-all duration-normal", {
   variants: {
     variant: {
       default:

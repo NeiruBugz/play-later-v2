@@ -54,6 +54,7 @@ model User {
   username                String?                @unique
   usernameNormalized      String?                @unique
   profileSetupCompletedAt DateTime?
+  onboardingDismissedAt   DateTime?
   createdAt               DateTime               @default(now())
   updatedAt               DateTime               @updatedAt
   steamProfileURL         String?

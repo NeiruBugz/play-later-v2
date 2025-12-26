@@ -33,6 +33,8 @@ export {
   findMostRecentLibraryItemByGameId,
   findAllLibraryItemsByGameId,
   findLibraryItemsWithFilters,
+  countLibraryItemsByUserId,
+  hasLibraryItemWithStatus,
   type FindLibraryItemsResult,
 } from "./library/library-repository";
 export {
@@ -49,6 +51,8 @@ export {
   updateUserProfile,
   findUserByEmail,
   createUserWithCredentials,
+  updateOnboardingDismissed,
+  getOnboardingStatus,
 } from "./user/user-repository";
 export {
   upsertGenre,
@@ -74,6 +78,7 @@ export {
 export {
   findJournalEntriesByGameId,
   countJournalEntriesByGameId,
+  countJournalEntriesByUserId,
   createJournalEntry,
   findJournalEntryById,
   findJournalEntriesByUserId,

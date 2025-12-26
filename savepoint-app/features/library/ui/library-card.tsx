@@ -101,19 +101,6 @@ export const LibraryCard = memo(function LibraryCard({
             {statusConfig.label}
           </Badge>
         </div>
-
-        {hasMultipleEntries && (
-          <div className="absolute top-3 right-3 z-10">
-            <Badge
-              variant="secondary"
-              role="status"
-              aria-label={`${game.entryCount} library entries for this game`}
-              className="shadow-paper-sm backdrop-blur-sm"
-            >
-              {game.entryCount} entries
-            </Badge>
-          </div>
-        )}
       </div>
 
       <LibraryCardActionBar

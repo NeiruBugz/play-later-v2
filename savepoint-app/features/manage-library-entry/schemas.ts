@@ -5,7 +5,7 @@ import { LibraryItemStatus } from "@/shared/types";
 export const AddToLibrarySchema = z.object({
   igdbId: z.number().int().positive(),
   status: z.enum(LibraryItemStatus),
-  platform: z.string().min(1, "Platform is required"),
+  platform: z.string().optional(),
   startedAt: z.date().optional(),
   completedAt: z.date().optional(),
 });

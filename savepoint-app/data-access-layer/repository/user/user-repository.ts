@@ -307,6 +307,52 @@ export async function findUserByNormalizedUsername(
     );
   }
 }
+export async function updateOnboardingDismissed(
+  userId: string
+): Promise<RepositoryResult<void>> {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { onboardingDismissedAt: new Date() },
+    });
+    return repositorySuccess(undefined);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
+    }
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to update onboarding dismissed: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+export async function getOnboardingStatus(userId: string): Promise<
+  RepositoryResult<{
+    profileSetupCompletedAt: Date | null;
+    onboardingDismissedAt: Date | null;
+  } | null>
+> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        profileSetupCompletedAt: true,
+        onboardingDismissedAt: true,
+      },
+    });
+    return repositorySuccess(user);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to get onboarding status: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
 export async function updateUserProfile(
   userId: string,
   data: {

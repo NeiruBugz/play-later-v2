@@ -82,13 +82,13 @@ function StatCard({
           )}
         </div>
 
-        <div
+        {/* <div
           className="duration-slow ease-out-expo absolute bottom-0 left-0 h-1 transition-all"
           style={{
             width: `${percentage}%`,
             backgroundColor: `var(--status-${status.toLowerCase()})`,
           }}
-        />
+        /> */}
       </Card>
     </Link>
   );

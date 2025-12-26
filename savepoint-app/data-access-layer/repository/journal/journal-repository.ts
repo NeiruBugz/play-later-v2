@@ -55,6 +55,22 @@ export async function countJournalEntriesByGameId(params: {
   }
 }
 
+export async function countJournalEntriesByUserId(
+  userId: string
+): Promise<RepositoryResult<number>> {
+  try {
+    const count = await prisma.journalEntry.count({
+      where: { userId },
+    });
+    return repositorySuccess(count);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to count journal entries: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
 export async function createJournalEntry(params: {
   userId: string;
   gameId: string;

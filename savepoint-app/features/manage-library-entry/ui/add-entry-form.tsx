@@ -29,7 +29,7 @@ export const AddEntryForm = ({
     defaultValues: {
       igdbId,
       status: LibraryItemStatus.PLAYED,
-      platform: "",
+      platform: undefined,
     },
   });
   const {
@@ -60,7 +60,7 @@ export const AddEntryForm = ({
       form.reset({
         igdbId,
         status: LibraryItemStatus.PLAYED,
-        platform: "",
+        platform: undefined,
       });
       onSuccess();
     },
