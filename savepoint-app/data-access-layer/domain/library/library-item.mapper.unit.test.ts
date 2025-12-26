@@ -15,7 +15,7 @@ describe("LibraryItemMapper", () => {
         id: 1,
         userId: "user123",
         gameId: "game456",
-        status: PrismaLibraryItemStatus.CURRENTLY_EXPLORING,
+        status: PrismaLibraryItemStatus.PLAYING,
         platform: "PS5",
         acquisitionType: PrismaAcquisitionType.DIGITAL,
         startedAt: new Date("2024-01-01"),
@@ -29,7 +29,7 @@ describe("LibraryItemMapper", () => {
       expect(domain.id).toBe(1);
       expect(domain.userId).toBe("user123");
       expect(domain.gameId).toBe("game456");
-      expect(domain.status).toBe(LibraryItemStatus.CURRENTLY_EXPLORING);
+      expect(domain.status).toBe(LibraryItemStatus.PLAYING);
       expect(domain.platform).toBe("PS5");
       expect(domain.acquisitionType).toBe(AcquisitionType.DIGITAL);
       expect(domain.startedAt).toEqual(new Date("2024-01-01"));
@@ -43,7 +43,7 @@ describe("LibraryItemMapper", () => {
         id: 2,
         userId: "user456",
         gameId: "game789",
-        status: PrismaLibraryItemStatus.WISHLIST,
+        status: PrismaLibraryItemStatus.WANT_TO_PLAY,
         platform: null,
         acquisitionType: null,
         startedAt: null,
@@ -67,7 +67,7 @@ describe("LibraryItemMapper", () => {
         id: 1,
         userId: "user123",
         gameId: "game456",
-        status: PrismaLibraryItemStatus.EXPERIENCED,
+        status: PrismaLibraryItemStatus.PLAYED,
         platform: "Nintendo Switch",
         acquisitionType: PrismaAcquisitionType.PHYSICAL,
         startedAt: new Date("2024-01-01"),
@@ -105,7 +105,7 @@ describe("LibraryItemMapper", () => {
         id: 1,
         userId: "user123",
         gameId: "game456",
-        status: PrismaLibraryItemStatus.CURRENTLY_EXPLORING,
+        status: PrismaLibraryItemStatus.PLAYING,
         platform: "PC",
         acquisitionType: PrismaAcquisitionType.DIGITAL,
         startedAt: new Date("2024-01-01"),
@@ -135,7 +135,7 @@ describe("LibraryItemMapper", () => {
         id: 1,
         userId: "user123",
         gameId: "game456",
-        status: PrismaLibraryItemStatus.WISHLIST,
+        status: PrismaLibraryItemStatus.WANT_TO_PLAY,
         platform: null,
         acquisitionType: null,
         startedAt: null,
@@ -168,7 +168,7 @@ describe("LibraryItemMapper", () => {
           id: 1,
           userId: "user123",
           gameId: "game1",
-          status: PrismaLibraryItemStatus.EXPERIENCED,
+          status: PrismaLibraryItemStatus.PLAYED,
           platform: "PS5",
           acquisitionType: PrismaAcquisitionType.DIGITAL,
           startedAt: new Date("2024-01-01"),
@@ -188,7 +188,7 @@ describe("LibraryItemMapper", () => {
           id: 2,
           userId: "user123",
           gameId: "game2",
-          status: PrismaLibraryItemStatus.CURRENTLY_EXPLORING,
+          status: PrismaLibraryItemStatus.PLAYING,
           platform: "PC",
           acquisitionType: PrismaAcquisitionType.PHYSICAL,
           startedAt: new Date("2024-02-01"),
@@ -229,7 +229,7 @@ describe("LibraryItemMapper", () => {
         id: 1,
         userId: "user123",
         gameId: "game456",
-        status: LibraryItemStatus.EXPERIENCED,
+        status: LibraryItemStatus.PLAYED,
         platform: "PS5",
         acquisitionType: AcquisitionType.DIGITAL,
         startedAt: new Date("2024-01-01T10:00:00.000Z"),
@@ -241,7 +241,7 @@ describe("LibraryItemMapper", () => {
       const dto = LibraryItemMapper.toDTO(domain);
 
       expect(dto.id).toBe(1);
-      expect(dto.status).toBe("EXPERIENCED");
+      expect(dto.status).toBe("PLAYED");
       expect(dto.acquisitionType).toBe("DIGITAL");
       expect(dto.startedAt).toBe("2024-01-01T10:00:00.000Z");
       expect(dto.completedAt).toBe("2024-02-15T15:30:00.000Z");
@@ -254,7 +254,7 @@ describe("LibraryItemMapper", () => {
         id: 2,
         userId: "user456",
         gameId: "game789",
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
         platform: null,
         acquisitionType: null,
         startedAt: null,
@@ -278,7 +278,7 @@ describe("LibraryItemMapper", () => {
         id: 1,
         userId: "user123",
         gameId: "game456",
-        status: LibraryItemStatus.CURRENTLY_EXPLORING,
+        status: LibraryItemStatus.PLAYING,
         platform: "Nintendo Switch",
         acquisitionType: AcquisitionType.PHYSICAL,
         startedAt: new Date("2024-01-01T10:00:00.000Z"),
@@ -309,7 +309,7 @@ describe("LibraryItemMapper", () => {
         id: 1,
         userId: "user123",
         gameId: "game456",
-        status: LibraryItemStatus.WISHLIST,
+        status: LibraryItemStatus.WANT_TO_PLAY,
         platform: null,
         acquisitionType: null,
         startedAt: null,
@@ -340,7 +340,7 @@ describe("LibraryItemMapper", () => {
           id: 1,
           userId: "user123",
           gameId: "game1",
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
           platform: "PS5",
           acquisitionType: AcquisitionType.DIGITAL,
           startedAt: new Date("2024-01-01T00:00:00.000Z"),
@@ -360,7 +360,7 @@ describe("LibraryItemMapper", () => {
           id: 2,
           userId: "user123",
           gameId: "game2",
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
           acquisitionType: AcquisitionType.PHYSICAL,
           startedAt: new Date("2024-02-01T00:00:00.000Z"),
@@ -399,7 +399,7 @@ describe("LibraryItemMapper", () => {
         id: 1,
         userId: "user123",
         gameId: "game456",
-        status: PrismaLibraryItemStatus.EXPERIENCED,
+        status: PrismaLibraryItemStatus.PLAYED,
         platform: "PS5",
         acquisitionType: PrismaAcquisitionType.DIGITAL,
         startedAt: new Date("2024-01-01T10:00:00.000Z"),

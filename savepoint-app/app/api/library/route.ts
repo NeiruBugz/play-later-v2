@@ -22,6 +22,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const rawSearch = searchParams.get("search");
     const rawSortBy = searchParams.get("sortBy");
     const rawSortOrder = searchParams.get("sortOrder");
+    const rawOffset = searchParams.get("offset");
+    const rawLimit = searchParams.get("limit");
     const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
     const url = new URL(request.url);
     logger.info(
@@ -32,6 +34,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         search: rawSearch,
         sortBy: rawSortBy,
         sortOrder: rawSortOrder,
+        offset: rawOffset,
+        limit: rawLimit,
         ip,
       },
       "Library API request received"
@@ -50,6 +54,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             | "completedAt"
             | undefined) ?? undefined,
         sortOrder: (rawSortOrder as "asc" | "desc" | undefined) ?? undefined,
+        offset: rawOffset ? parseInt(rawOffset, 10) : undefined,
+        limit: rawLimit ? parseInt(rawLimit, 10) : undefined,
       },
       {
         ip,
@@ -74,7 +80,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return response;
     }
     logger.info(
-      { userId, count: result.data.length },
+      { userId, count: result.data.items.length, total: result.data.total },
       "Library items fetched successfully"
     );
     const response = NextResponse.json(

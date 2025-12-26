@@ -104,9 +104,6 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
             />
           </div>
           <div className="space-y-md">
-            <label className="body-sm text-foreground font-medium">
-              Username <span className="text-destructive">*</span>
-            </label>
             <UsernameInput
               value={username}
               onChange={setUsername}

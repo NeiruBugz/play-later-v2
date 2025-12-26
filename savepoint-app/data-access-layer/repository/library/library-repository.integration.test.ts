@@ -1,3 +1,4 @@
+import { LibraryItemStatus } from "@/data-access-layer/domain/library/enums";
 import {
   getTestDatabase,
   resetTestDatabase,
@@ -8,7 +9,6 @@ import {
   createLibraryItem,
   createUser,
 } from "@/test/setup/db-factories";
-import { LibraryItemStatus } from "@prisma/client";
 
 import { isRepositorySuccess } from "../types";
 import { findLibraryItemsWithFilters } from "./library-repository";
@@ -33,27 +33,28 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game1.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game2.id,
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game3.id,
-          status: LibraryItemStatus.WISHLIST,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
 
         const result = await findLibraryItemsWithFilters({ userId: user.id });
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(3);
-          expect(result.data.every((item) => item.userId === user.id)).toBe(
-            true
-          );
+          expect(result.data.items).toHaveLength(3);
+          expect(result.data.total).toBe(3);
+          expect(
+            result.data.items.every((item) => item.userId === user.id)
+          ).toBe(true);
         }
       });
 
@@ -66,30 +67,30 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game1.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game2.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game3.id,
-          status: LibraryItemStatus.WISHLIST,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
 
         const result = await findLibraryItemsWithFilters({
           userId: user.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(2);
+          expect(result.data.items).toHaveLength(2);
           expect(
-            result.data.every(
-              (item) => item.status === LibraryItemStatus.CURRENTLY_EXPLORING
+            result.data.items.every(
+              (item) => item.status === LibraryItemStatus.PLAYING
             )
           ).toBe(true);
         }
@@ -124,10 +125,10 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(2);
-          expect(result.data.every((item) => item.platform === "PC")).toBe(
-            true
-          );
+          expect(result.data.items).toHaveLength(2);
+          expect(
+            result.data.items.every((item) => item.platform === "PC")
+          ).toBe(true);
         }
       });
 
@@ -152,9 +153,9 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(2);
+          expect(result.data.items).toHaveLength(2);
           expect(
-            result.data.every((item) =>
+            result.data.items.every((item) =>
               item.game.title.toLowerCase().includes("zelda")
             )
           ).toBe(true);
@@ -170,42 +171,42 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game1.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game2.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game3.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PlayStation 5",
         });
 
         const result = await findLibraryItemsWithFilters({
           userId: user.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           platform: "PC",
           search: "dark souls",
         });
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(2);
-          expect(result.data.every((item) => item.platform === "PC")).toBe(
-            true
-          );
+          expect(result.data.items).toHaveLength(2);
           expect(
-            result.data.every(
-              (item) => item.status === LibraryItemStatus.CURRENTLY_EXPLORING
+            result.data.items.every((item) => item.platform === "PC")
+          ).toBe(true);
+          expect(
+            result.data.items.every(
+              (item) => item.status === LibraryItemStatus.PLAYING
             )
           ).toBe(true);
           expect(
-            result.data.every((item) =>
+            result.data.items.every((item) =>
               item.game.title.toLowerCase().includes("dark souls")
             )
           ).toBe(true);
@@ -241,10 +242,10 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(3);
-          expect(result.data[0].game.title).toBe("Oldest Game");
-          expect(result.data[1].game.title).toBe("Middle Game");
-          expect(result.data[2].game.title).toBe("Newest Game");
+          expect(result.data.items).toHaveLength(3);
+          expect(result.data.items[0].game.title).toBe("Oldest Game");
+          expect(result.data.items[1].game.title).toBe("Middle Game");
+          expect(result.data.items[2].game.title).toBe("Newest Game");
         }
       });
 
@@ -275,10 +276,10 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(3);
-          expect(result.data[0].game.title).toBe("Newest Game");
-          expect(result.data[1].game.title).toBe("Middle Game");
-          expect(result.data[2].game.title).toBe("Oldest Game");
+          expect(result.data.items).toHaveLength(3);
+          expect(result.data.items[0].game.title).toBe("Newest Game");
+          expect(result.data.items[1].game.title).toBe("Middle Game");
+          expect(result.data.items[2].game.title).toBe("Oldest Game");
         }
       });
 
@@ -327,11 +328,11 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(3);
-          expect(result.data[0].game.title).toBe("Started First");
-          expect(result.data[1].game.title).toBe("Started Second");
-          expect(result.data[2].game.title).toBe("Not Started");
-          expect(result.data[2].startedAt).toBeNull();
+          expect(result.data.items).toHaveLength(3);
+          expect(result.data.items[0].game.title).toBe("Started First");
+          expect(result.data.items[1].game.title).toBe("Started Second");
+          expect(result.data.items[2].game.title).toBe("Not Started");
+          expect(result.data.items[2].startedAt).toBeNull();
         }
       });
     });
@@ -346,7 +347,7 @@ describe("LibraryRepository - Integration Tests", () => {
         const item1 = await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
         await prisma.libraryItem.update({
           where: { id: item1.id },
@@ -356,7 +357,7 @@ describe("LibraryRepository - Integration Tests", () => {
         const item2 = await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await prisma.libraryItem.update({
           where: { id: item2.id },
@@ -366,7 +367,7 @@ describe("LibraryRepository - Integration Tests", () => {
         const item3 = await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
         });
         await prisma.libraryItem.update({
           where: { id: item3.id },
@@ -380,9 +381,9 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(1);
-          expect(result.data[0].id).toBe(item3.id);
-          expect(result.data[0].status).toBe(LibraryItemStatus.EXPERIENCED);
+          expect(result.data.items).toHaveLength(1);
+          expect(result.data.items[0].id).toBe(item3.id);
+          expect(result.data.items[0].status).toBe(LibraryItemStatus.PLAYED);
         }
       });
 
@@ -393,17 +394,17 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
         });
         await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
         });
 
         const result = await findLibraryItemsWithFilters({
@@ -413,7 +414,7 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(3);
+          expect(result.data.items).toHaveLength(3);
         }
       });
 
@@ -467,15 +468,15 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(2);
-          const gameIds = result.data.map((item) => item.gameId).sort();
+          expect(result.data.items).toHaveLength(2);
+          const gameIds = result.data.items.map((item) => item.gameId).sort();
           expect(gameIds).toEqual([game1.id, game2.id].sort());
-          expect(result.data.find((item) => item.gameId === game1.id)?.id).toBe(
-            item2.id
-          );
-          expect(result.data.find((item) => item.gameId === game2.id)?.id).toBe(
-            item4.id
-          );
+          expect(
+            result.data.items.find((item) => item.gameId === game1.id)?.id
+          ).toBe(item2.id);
+          expect(
+            result.data.items.find((item) => item.gameId === game2.id)?.id
+          ).toBe(item4.id);
         }
       });
     });
@@ -496,8 +497,8 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(1);
-          expect(result.data[0].game._count.libraryItems).toBe(3);
+          expect(result.data.items).toHaveLength(1);
+          expect(result.data.items[0].game._count.libraryItems).toBe(3);
         }
       });
 
@@ -519,8 +520,8 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(1);
-          expect(result.data[0].game._count.libraryItems).toBe(2);
+          expect(result.data.items).toHaveLength(1);
+          expect(result.data.items[0].game._count.libraryItems).toBe(2);
         }
       });
     });
@@ -533,7 +534,7 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(0);
+          expect(result.data.items).toHaveLength(0);
         }
       });
 
@@ -552,10 +553,10 @@ describe("LibraryRepository - Integration Tests", () => {
         expect(isRepositorySuccess(result1)).toBe(true);
         expect(isRepositorySuccess(result2)).toBe(true);
         if (isRepositorySuccess(result1) && isRepositorySuccess(result2)) {
-          expect(result1.data).toHaveLength(1);
-          expect(result2.data).toHaveLength(1);
-          expect(result1.data[0].game.title).toBe("User 1 Game");
-          expect(result2.data[0].game.title).toBe("User 2 Game");
+          expect(result1.data.items).toHaveLength(1);
+          expect(result2.data.items).toHaveLength(1);
+          expect(result1.data.items[0].game.title).toBe("User 1 Game");
+          expect(result2.data.items[0].game.title).toBe("User 2 Game");
         }
       });
 
@@ -576,8 +577,8 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(1);
-          expect(result.data[0].game.title).toBe(
+          expect(result.data.items).toHaveLength(1);
+          expect(result.data.items[0].game.title).toBe(
             "The Legend of Zelda: Breath of the Wild"
           );
         }
@@ -596,7 +597,7 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(1);
+          expect(result.data.items).toHaveLength(1);
         }
       });
 
@@ -613,7 +614,7 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(result)).toBe(true);
         if (isRepositorySuccess(result)) {
-          expect(result.data).toHaveLength(0);
+          expect(result.data.items).toHaveLength(0);
         }
       });
 
@@ -644,15 +645,17 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(resultAsc)).toBe(true);
         if (isRepositorySuccess(resultAsc)) {
-          expect(resultAsc.data).toHaveLength(3);
-          expect(resultAsc.data[0].game.title).toBe(
+          expect(resultAsc.data.items).toHaveLength(3);
+          expect(resultAsc.data.items[0].game.title).toBe(
             "Another Game With Release Date"
           );
-          expect(resultAsc.data[1].game.title).toBe("Game With Release Date");
-          expect(resultAsc.data[2].game.title).toBe(
+          expect(resultAsc.data.items[1].game.title).toBe(
+            "Game With Release Date"
+          );
+          expect(resultAsc.data.items[2].game.title).toBe(
             "Game Without Release Date"
           );
-          expect(resultAsc.data[2].game.releaseDate).toBeNull();
+          expect(resultAsc.data.items[2].game.releaseDate).toBeNull();
         }
 
         const resultDesc = await findLibraryItemsWithFilters({
@@ -663,13 +666,15 @@ describe("LibraryRepository - Integration Tests", () => {
 
         expect(isRepositorySuccess(resultDesc)).toBe(true);
         if (isRepositorySuccess(resultDesc)) {
-          expect(resultDesc.data).toHaveLength(3);
-          expect(resultDesc.data[0].game.title).toBe(
+          expect(resultDesc.data.items).toHaveLength(3);
+          expect(resultDesc.data.items[0].game.title).toBe(
             "Game Without Release Date"
           );
-          expect(resultDesc.data[0].game.releaseDate).toBeNull();
-          expect(resultDesc.data[1].game.title).toBe("Game With Release Date");
-          expect(resultDesc.data[2].game.title).toBe(
+          expect(resultDesc.data.items[0].game.releaseDate).toBeNull();
+          expect(resultDesc.data.items[1].game.title).toBe(
+            "Game With Release Date"
+          );
+          expect(resultDesc.data.items[2].game.title).toBe(
             "Another Game With Release Date"
           );
         }

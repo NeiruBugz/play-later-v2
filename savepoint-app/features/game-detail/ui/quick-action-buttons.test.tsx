@@ -41,35 +41,28 @@ const createMockLibraryItem = (
 });
 
 const elements = {
-  getCuriousButton: () => screen.getByLabelText("Mark as Curious About"),
-  getPlayingButton: () => screen.getByLabelText("Mark as Currently Exploring"),
-  getBreakButton: () => screen.getByLabelText("Mark as Taking a Break"),
-  getExperiencedButton: () => screen.getByLabelText("Mark as Experienced"),
-  getWishlistButton: () => screen.getByLabelText("Add to Wishlist"),
-  getRevisitingButton: () => screen.getByLabelText("Mark as Revisiting"),
+  getWantToPlayButton: () => screen.getByLabelText("Mark as Want to Play"),
+  getOwnedButton: () => screen.getByLabelText("Mark as Owned"),
+  getPlayingButton: () => screen.getByLabelText("Mark as Playing"),
+  getPlayedButton: () => screen.getByLabelText("Mark as Played"),
+  getAllStatusButtons: () => screen.getAllByRole("button"),
   getQuickActionsGroup: () =>
     screen.getByRole("group", { name: /journey status quick actions/i }),
   getAnnouncementRegion: () => screen.getByRole("status"),
 };
 
 const actions = {
-  clickCuriousButton: async () => {
-    await userEvent.click(elements.getCuriousButton());
+  clickWantToPlayButton: async () => {
+    await userEvent.click(elements.getWantToPlayButton());
+  },
+  clickOwnedButton: async () => {
+    await userEvent.click(elements.getOwnedButton());
   },
   clickPlayingButton: async () => {
     await userEvent.click(elements.getPlayingButton());
   },
-  clickBreakButton: async () => {
-    await userEvent.click(elements.getBreakButton());
-  },
-  clickExperiencedButton: async () => {
-    await userEvent.click(elements.getExperiencedButton());
-  },
-  clickWishlistButton: async () => {
-    await userEvent.click(elements.getWishlistButton());
-  },
-  clickRevisitingButton: async () => {
-    await userEvent.click(elements.getRevisitingButton());
+  clickPlayedButton: async () => {
+    await userEvent.click(elements.getPlayedButton());
   },
 };
 
@@ -86,20 +79,21 @@ describe("QuickActionButtons", () => {
     // Default: action succeeds
     mockUpdateLibraryStatusAction.mockResolvedValue({
       success: true,
-      data: createMockLibraryItem(LibraryItemStatus.CURIOUS_ABOUT),
+      data: createMockLibraryItem(LibraryItemStatus.WANT_TO_PLAY),
     });
   });
 
   describe("given component just rendered", () => {
-    it("should render all status buttons", () => {
+    it("should render all 4 status buttons", () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      expect(elements.getCuriousButton()).toBeVisible();
+      expect(elements.getWantToPlayButton()).toBeVisible();
+      expect(elements.getOwnedButton()).toBeVisible();
       expect(elements.getPlayingButton()).toBeVisible();
-      expect(elements.getBreakButton()).toBeVisible();
-      expect(elements.getExperiencedButton()).toBeVisible();
-      expect(elements.getWishlistButton()).toBeVisible();
-      expect(elements.getRevisitingButton()).toBeVisible();
+      expect(elements.getPlayedButton()).toBeVisible();
+
+      const allButtons = elements.getAllStatusButtons();
+      expect(allButtons).toHaveLength(4);
     });
 
     it("should render buttons within a labeled group", () => {
@@ -119,29 +113,52 @@ describe("QuickActionButtons", () => {
   });
 
   describe("given current status is set", () => {
-    it("should mark the Curious button as pressed when status is CURIOUS_ABOUT", () => {
+    it("should mark the Want to Play button as pressed when status is WANT_TO_PLAY", () => {
       render(
         <QuickActionButtons
           {...defaultProps}
-          currentStatus={LibraryItemStatus.CURIOUS_ABOUT}
+          currentStatus={LibraryItemStatus.WANT_TO_PLAY}
         />
       );
 
-      expect(elements.getCuriousButton()).toHaveAttribute(
+      expect(elements.getWantToPlayButton()).toHaveAttribute(
         "aria-pressed",
         "true"
+      );
+      expect(elements.getOwnedButton()).toHaveAttribute(
+        "aria-pressed",
+        "false"
       );
       expect(elements.getPlayingButton()).toHaveAttribute(
         "aria-pressed",
         "false"
       );
+      expect(elements.getPlayedButton()).toHaveAttribute(
+        "aria-pressed",
+        "false"
+      );
     });
 
-    it("should mark the Playing button as pressed when status is CURRENTLY_EXPLORING", () => {
+    it("should mark the Owned button as pressed when status is OWNED", () => {
       render(
         <QuickActionButtons
           {...defaultProps}
-          currentStatus={LibraryItemStatus.CURRENTLY_EXPLORING}
+          currentStatus={LibraryItemStatus.OWNED}
+        />
+      );
+
+      expect(elements.getOwnedButton()).toHaveAttribute("aria-pressed", "true");
+      expect(elements.getWantToPlayButton()).toHaveAttribute(
+        "aria-pressed",
+        "false"
+      );
+    });
+
+    it("should mark the Playing button as pressed when status is PLAYING", () => {
+      render(
+        <QuickActionButtons
+          {...defaultProps}
+          currentStatus={LibraryItemStatus.PLAYING}
         />
       );
 
@@ -149,42 +166,59 @@ describe("QuickActionButtons", () => {
         "aria-pressed",
         "true"
       );
-      expect(elements.getCuriousButton()).toHaveAttribute(
+      expect(elements.getWantToPlayButton()).toHaveAttribute(
         "aria-pressed",
         "false"
       );
     });
 
-    it("should mark the Experienced button as pressed when status is EXPERIENCED", () => {
+    it("should mark the Played button as pressed when status is PLAYED", () => {
       render(
         <QuickActionButtons
           {...defaultProps}
-          currentStatus={LibraryItemStatus.EXPERIENCED}
+          currentStatus={LibraryItemStatus.PLAYED}
         />
       );
 
-      expect(elements.getExperiencedButton()).toHaveAttribute(
+      expect(elements.getPlayedButton()).toHaveAttribute(
         "aria-pressed",
         "true"
+      );
+      expect(elements.getWantToPlayButton()).toHaveAttribute(
+        "aria-pressed",
+        "false"
       );
     });
   });
 
   describe("given user clicks a status button", () => {
-    it("should call updateLibraryStatusAction with correct parameters", async () => {
+    it("should call updateLibraryStatusAction with correct parameters for Want to Play", async () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      await actions.clickCuriousButton();
+      await actions.clickWantToPlayButton();
 
       await waitFor(() => {
         expect(mockUpdateLibraryStatusAction).toHaveBeenCalledWith({
           igdbId: 12345,
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
         });
       });
     });
 
-    it("should display success toast with correct message", async () => {
+    it("should call updateLibraryStatusAction with correct parameters for Owned", async () => {
+      render(<QuickActionButtons {...defaultProps} />);
+
+      await actions.clickOwnedButton();
+
+      await waitFor(() => {
+        expect(mockUpdateLibraryStatusAction).toHaveBeenCalledWith({
+          igdbId: 12345,
+          status: LibraryItemStatus.OWNED,
+        });
+      });
+    });
+
+    it("should display success toast with correct message for Playing", async () => {
       render(<QuickActionButtons {...defaultProps} />);
 
       await actions.clickPlayingButton();
@@ -199,14 +233,14 @@ describe("QuickActionButtons", () => {
       });
     });
 
-    it("should update announcement region for screen readers", async () => {
+    it("should update announcement region for screen readers when marking as Played", async () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      await actions.clickExperiencedButton();
+      await actions.clickPlayedButton();
 
       await waitFor(() => {
         expect(elements.getAnnouncementRegion()).toHaveTextContent(
-          "Status updated to Finished"
+          "Status updated to Played"
         );
       });
     });
@@ -223,7 +257,7 @@ describe("QuickActionButtons", () => {
     it("should display error toast with server error message", async () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      await actions.clickWishlistButton();
+      await actions.clickOwnedButton();
 
       await waitFor(() => {
         expect(mockToastError).toHaveBeenCalledWith("Failed to update status", {
@@ -235,7 +269,7 @@ describe("QuickActionButtons", () => {
     it("should update announcement region with error message", async () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      await actions.clickRevisitingButton();
+      await actions.clickPlayedButton();
 
       await waitFor(() => {
         expect(elements.getAnnouncementRegion()).toHaveTextContent(
@@ -248,7 +282,7 @@ describe("QuickActionButtons", () => {
       render(
         <QuickActionButtons
           {...defaultProps}
-          currentStatus={LibraryItemStatus.CURIOUS_ABOUT}
+          currentStatus={LibraryItemStatus.WANT_TO_PLAY}
         />
       );
 
@@ -256,7 +290,7 @@ describe("QuickActionButtons", () => {
 
       // After error, should revert to original status
       await waitFor(() => {
-        expect(elements.getCuriousButton()).toHaveAttribute(
+        expect(elements.getWantToPlayButton()).toHaveAttribute(
           "aria-pressed",
           "true"
         );
@@ -279,7 +313,7 @@ describe("QuickActionButtons", () => {
     it("should display generic error description", async () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      await actions.clickCuriousButton();
+      await actions.clickWantToPlayButton();
 
       await waitFor(() => {
         expect(mockToastError).toHaveBeenCalledWith("Failed to update status", {
@@ -298,7 +332,7 @@ describe("QuickActionButtons", () => {
               () =>
                 resolve({
                   success: true,
-                  data: createMockLibraryItem(LibraryItemStatus.CURIOUS_ABOUT),
+                  data: createMockLibraryItem(LibraryItemStatus.WANT_TO_PLAY),
                 }),
               100
             );
@@ -306,32 +340,27 @@ describe("QuickActionButtons", () => {
       );
     });
 
-    it("should disable all buttons during transition", async () => {
+    it("should disable all 4 buttons during transition", async () => {
       render(<QuickActionButtons {...defaultProps} />);
 
-      await actions.clickCuriousButton();
+      await actions.clickWantToPlayButton();
 
-      expect(elements.getCuriousButton()).toBeDisabled();
+      expect(elements.getWantToPlayButton()).toBeDisabled();
+      expect(elements.getOwnedButton()).toBeDisabled();
       expect(elements.getPlayingButton()).toBeDisabled();
-      expect(elements.getBreakButton()).toBeDisabled();
-      expect(elements.getExperiencedButton()).toBeDisabled();
-      expect(elements.getWishlistButton()).toBeDisabled();
-      expect(elements.getRevisitingButton()).toBeDisabled();
+      expect(elements.getPlayedButton()).toBeDisabled();
     });
 
     it("should show optimistic update immediately before server responds", async () => {
       render(
         <QuickActionButtons
           {...defaultProps}
-          currentStatus={LibraryItemStatus.WISHLIST}
+          currentStatus={LibraryItemStatus.OWNED}
         />
       );
 
       // Verify initial state
-      expect(elements.getWishlistButton()).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      );
+      expect(elements.getOwnedButton()).toHaveAttribute("aria-pressed", "true");
       expect(elements.getPlayingButton()).toHaveAttribute(
         "aria-pressed",
         "false"
@@ -342,12 +371,12 @@ describe("QuickActionButtons", () => {
 
       // Immediately after click, before server responds (100ms delay):
       // - Playing button should be pressed (optimistic state)
-      // - Wishlist button should no longer be pressed
+      // - Owned button should no longer be pressed
       expect(elements.getPlayingButton()).toHaveAttribute(
         "aria-pressed",
         "true"
       );
-      expect(elements.getWishlistButton()).toHaveAttribute(
+      expect(elements.getOwnedButton()).toHaveAttribute(
         "aria-pressed",
         "false"
       );

@@ -14,6 +14,14 @@ export interface GetLibraryHandlerInput {
   sortBy?: "createdAt" | "releaseDate" | "startedAt" | "completedAt";
 
   sortOrder?: "asc" | "desc";
+
+  offset?: number;
+
+  limit?: number;
 }
 
-export type GetLibraryHandlerOutput = LibraryItemWithGameDomain[];
+export interface GetLibraryHandlerOutput {
+  items: LibraryItemWithGameDomain[];
+  total: number;
+  hasMore: boolean;
+}

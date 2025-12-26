@@ -3,9 +3,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { ContinuePlayingServer } from "@/features/dashboard/ui/continue-playing-server";
-import { DashboardStatsServer } from "@/features/dashboard/ui/dashboard-stats-server";
-import { RecentlyAddedServer } from "@/features/dashboard/ui/recently-added-server";
+import { ContinuePlaying } from "@/features/dashboard/ui/continue-playing";
+import { DashboardStats } from "@/features/dashboard/ui/dashboard-stats";
+import { RecentlyAdded } from "@/features/dashboard/ui/recently-added";
+import { GettingStartedChecklist } from "@/features/onboarding";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
@@ -37,6 +38,10 @@ function SectionSkeleton() {
   );
 }
 
+function OnboardingSkeleton() {
+  return <Skeleton className="h-64" variant="card" />;
+}
+
 export default async function DashboardPage() {
   const userId = await requireServerUserId();
 
@@ -61,16 +66,20 @@ export default async function DashboardPage() {
           </p>
         </header>
 
+        <Suspense fallback={<OnboardingSkeleton />}>
+          <GettingStartedChecklist userId={userId} />
+        </Suspense>
+
         <Suspense fallback={<StatsSkeleton />}>
-          <DashboardStatsServer userId={userId} />
+          <DashboardStats userId={userId} />
         </Suspense>
 
         <Suspense fallback={<SectionSkeleton />}>
-          <ContinuePlayingServer userId={userId} />
+          <ContinuePlaying userId={userId} />
         </Suspense>
 
         <Suspense fallback={<SectionSkeleton />}>
-          <RecentlyAddedServer userId={userId} />
+          <RecentlyAdded userId={userId} />
         </Suspense>
       </div>
     </main>

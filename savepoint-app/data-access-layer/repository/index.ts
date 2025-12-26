@@ -24,15 +24,18 @@ export {
   getOtherUsersLibraries,
   getOtherUsersLibrariesPaginated,
   getLibraryByUsername,
-  getWishlistedItemsByUsername,
-  findWishlistItemsForUser,
-  findUpcomingWishlistItems,
+  getWantToPlayItemsByUsername,
+  findWantToPlayItemsForUser,
+  findUpcomingWantToPlayItems,
   findCurrentlyPlayingGames,
   buildCollectionFilter,
   getLibraryStatsByUserId,
   findMostRecentLibraryItemByGameId,
   findAllLibraryItemsByGameId,
   findLibraryItemsWithFilters,
+  countLibraryItemsByUserId,
+  hasLibraryItemWithStatus,
+  type FindLibraryItemsResult,
 } from "./library/library-repository";
 export {
   getUserBySteamId,
@@ -48,6 +51,8 @@ export {
   updateUserProfile,
   findUserByEmail,
   createUserWithCredentials,
+  updateOnboardingDismissed,
+  getOnboardingStatus,
 } from "./user/user-repository";
 export {
   upsertGenre,
@@ -73,6 +78,7 @@ export {
 export {
   findJournalEntriesByGameId,
   countJournalEntriesByGameId,
+  countJournalEntriesByUserId,
   createJournalEntry,
   findJournalEntryById,
   findJournalEntriesByUserId,

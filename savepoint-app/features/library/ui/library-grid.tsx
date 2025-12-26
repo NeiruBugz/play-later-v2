@@ -2,6 +2,7 @@
 
 import { useLibraryData } from "@/features/library/hooks/use-library-data";
 import { useLibraryFilters } from "@/features/library/hooks/use-library-filters";
+import { Button } from "@/shared/components/ui/button";
 
 import { LibraryCard } from "./library-card";
 import { LibraryEmptyState } from "./library-empty-state";
@@ -29,25 +30,51 @@ function LibraryErrorState({ error }: LibraryErrorStateProps) {
 
 export function LibraryGrid() {
   const filters = useLibraryFilters();
-  const { data, isLoading, error } = useLibraryData(filters);
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useLibraryData(filters);
+
   if (isLoading) {
     return <LibraryGridSkeleton />;
   }
   if (error) {
     return <LibraryErrorState error={error} />;
   }
-  if (!data || data.length === 0) {
+
+  const items = data?.pages.flatMap((page) => page.items) ?? [];
+
+  if (items.length === 0) {
     return <LibraryEmptyState />;
   }
+
   return (
-    <div
-      className="gap-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
-      role="feed"
-      aria-label="Your game library"
-    >
-      {data.map((item, index) => (
-        <LibraryCard key={item.id} item={item} index={index} />
-      ))}
+    <div className="space-y-xl">
+      <div
+        className="gap-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+        role="feed"
+        aria-label="Your game library"
+      >
+        {items.map((item, index) => (
+          <LibraryCard key={item.id} item={item} index={index} />
+        ))}
+      </div>
+
+      {hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="secondary"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? "Loading..." : "Load More"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

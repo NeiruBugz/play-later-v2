@@ -135,13 +135,7 @@ export function buildMockLibraryItem(
     id?: number;
     userId?: string;
     gameId?: string;
-    status?:
-      | "CURIOUS_ABOUT"
-      | "CURRENTLY_EXPLORING"
-      | "TOOK_A_BREAK"
-      | "EXPERIENCED"
-      | "WISHLIST"
-      | "REVISITING";
+    status?: "WANT_TO_PLAY" | "OWNED" | "PLAYING" | "PLAYED";
     platform?: string;
     acquisitionType?: "DIGITAL" | "PHYSICAL" | "SUBSCRIPTION" | "FREE_TO_PLAY";
     startedAt?: Date | null;
@@ -154,7 +148,7 @@ export function buildMockLibraryItem(
     id: 1,
     userId: "test-user-id",
     gameId: "test-game-id",
-    status: "CURRENTLY_EXPLORING" as const,
+    status: "PLAYING" as const,
     platform: "PC",
     acquisitionType: "DIGITAL" as const,
     startedAt: null,

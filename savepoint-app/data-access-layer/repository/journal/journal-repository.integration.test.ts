@@ -436,7 +436,7 @@ describe("Journal Repository Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUserId,
         gameId: testGameId,
-        status: "CURRENTLY_EXPLORING",
+        status: "PLAYING",
       });
 
       const result = await createJournalEntry({
@@ -591,7 +591,7 @@ describe("Journal Repository Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUserId,
         gameId: testGameId,
-        status: "CURRENTLY_EXPLORING",
+        status: "PLAYING",
       });
 
       const { prisma } = await import("@/shared/lib/app/db");
@@ -1122,7 +1122,7 @@ describe("Journal Repository Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUserId,
         gameId: testGameId,
-        status: "CURRENTLY_EXPLORING",
+        status: "PLAYING",
       });
 
       const entry = await prisma.journalEntry.create({
@@ -1315,7 +1315,7 @@ describe("Journal Repository Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUserId,
         gameId: testGameId,
-        status: "CURRENTLY_EXPLORING",
+        status: "PLAYING",
       });
 
       const entry = await prisma.journalEntry.create({

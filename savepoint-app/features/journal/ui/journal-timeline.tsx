@@ -1,31 +1,91 @@
-import { GameService, JournalService } from "@/data-access-layer/services";
+"use client";
+
+import { AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useState, useTransition } from "react";
 
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
-import { requireServerUserId } from "@/shared/lib/app/auth";
+import type { JournalEntryDomain } from "@/shared/types/journal";
 
+import { getGamesByIdsAction } from "../server-actions/get-games-by-ids";
+import { getJournalEntriesAction } from "../server-actions/get-journal-entries";
 import { JournalEntryCard } from "./journal-entry-card";
 
-export async function JournalTimeline() {
-  const userId = await requireServerUserId();
+interface GameInfo {
+  id: string;
+  title: string;
+  slug: string;
+  coverImage: string | null;
+}
 
-  const journalService = new JournalService();
-  const entriesResult = await journalService.findJournalEntriesByUserId({
-    userId,
-    limit: 20,
-  });
+interface JournalTimelineProps {
+  initialEntries: JournalEntryDomain[];
+  initialGames: Record<string, GameInfo>;
+}
 
-  if (!entriesResult.success) {
-    return (
-      <div className="space-y-lg border-border/50 bg-muted/10 p-3xl flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed text-center">
-        <p className="body-sm text-muted-foreground">
-          Failed to load journal entries. Please try again later.
-        </p>
-      </div>
-    );
-  }
+export function JournalTimeline({
+  initialEntries,
+  initialGames,
+}: JournalTimelineProps) {
+  const [entries, setEntries] = useState(initialEntries);
+  const [games, setGames] = useState(
+    () => new Map(Object.entries(initialGames))
+  );
+  const [isPending, startTransition] = useTransition();
+  const [hasMore, setHasMore] = useState(initialEntries.length === 20);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const entries = entriesResult.data;
+  const handleLoadMore = () => {
+    if (isPending || !hasMore) return;
+
+    const lastEntry = entries[entries.length - 1];
+    if (!lastEntry) return;
+
+    setLoadError(null);
+
+    startTransition(async () => {
+      const result = await getJournalEntriesAction({
+        cursor: lastEntry.id,
+        limit: 20,
+      });
+
+      if (!result.success) {
+        setLoadError("Failed to load more entries. Please try again.");
+        return;
+      }
+
+      const newEntries = result.data;
+      setEntries((prev) => [...prev, ...newEntries]);
+      setHasMore(newEntries.length === 20);
+
+      // Fetch games for new entries
+      const newGameIds = [
+        ...new Set(newEntries.map((entry) => entry.gameId)),
+      ].filter((id) => !games.has(id));
+
+      if (newGameIds.length > 0) {
+        const gamesResult = await getGamesByIdsAction({
+          gameIds: newGameIds,
+        });
+
+        if (!gamesResult.success) {
+          setLoadError(
+            "Loaded entries but failed to fetch game details. Some entries may not display correctly."
+          );
+          return;
+        }
+
+        setGames((prev) => {
+          const updated = new Map(prev);
+          gamesResult.data.forEach((game) => {
+            updated.set(game.id, game);
+          });
+          return updated;
+        });
+      }
+    });
+  };
 
   if (entries.length === 0) {
     return (
@@ -43,15 +103,6 @@ export async function JournalTimeline() {
     );
   }
 
-  // Fetch all games for the entries using the service layer
-  const gameIds = [...new Set(entries.map((entry) => entry.gameId))];
-  const gameService = new GameService();
-  const gamesResult = await gameService.getGamesByIds({ ids: gameIds });
-
-  // Create a map for quick lookup (empty map if fetch failed)
-  const games = gamesResult.success ? gamesResult.data : [];
-  const gameMap = new Map(games.map((game) => [game.id, game]));
-
   return (
     <div className="space-y-xl">
       <div className="flex items-center justify-between">
@@ -63,7 +114,7 @@ export async function JournalTimeline() {
 
       <div className="space-y-lg">
         {entries.map((entry) => {
-          const game = gameMap.get(entry.gameId);
+          const game = games.get(entry.gameId);
           if (!game) {
             // Skip entries with missing games (shouldn't happen, but handle gracefully)
             return null;
@@ -82,6 +133,43 @@ export async function JournalTimeline() {
           );
         })}
       </div>
+
+      {loadError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>{loadError}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLoadMore}
+              disabled={isPending}
+            >
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {hasMore && !loadError && (
+        <div className="pt-lg flex justify-center">
+          <Button
+            onClick={handleLoadMore}
+            disabled={isPending}
+            variant="outline"
+            size="lg"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              "Load More"
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

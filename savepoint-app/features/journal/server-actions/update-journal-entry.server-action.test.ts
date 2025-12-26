@@ -318,20 +318,6 @@ describe("updateJournalEntryAction server action", () => {
       expect(mockUpdateJournalEntry).not.toHaveBeenCalled();
     });
 
-    it("should return error for empty title when provided", async () => {
-      const result = await updateJournalEntryAction({
-        entryId: "entry-456",
-        title: "",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Invalid input data");
-      }
-
-      expect(mockUpdateJournalEntry).not.toHaveBeenCalled();
-    });
-
     it("should return error for empty content when provided", async () => {
       const result = await updateJournalEntryAction({
         entryId: "entry-456",

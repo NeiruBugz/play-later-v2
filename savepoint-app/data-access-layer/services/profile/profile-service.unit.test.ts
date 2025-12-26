@@ -137,9 +137,10 @@ describe("ProfileService", () => {
         expect(result.data.profile.username).toBe("testuser");
         expect(result.data.profile.email).toBe("test@example.com");
         expect(result.data.profile.stats.statusCounts).toEqual({
-          CURIOUS_ABOUT: 5,
-          CURRENTLY_EXPLORING: 2,
-          EXPERIENCED: 10,
+          WANT_TO_PLAY: 5,
+          OWNED: 3,
+          PLAYING: 2,
+          PLAYED: 10,
         });
         expect(result.data.profile.stats.recentGames).toHaveLength(2);
         expect(result.data.profile.stats.recentGames[0].title).toBe(

@@ -47,10 +47,18 @@ export {
   type RecentGame,
 } from "./profile/types";
 export { ProfileService } from "./profile/profile-service";
-export { LibraryService } from "./library/library-service";
+export {
+  LibraryService,
+  type GetLibraryItemsResult,
+} from "./library/library-service";
 export {
   type FindJournalEntriesResult,
   type JournalService as IJournalService,
 } from "./journal/types";
 export { JournalService } from "./journal/journal-service";
 export { GameService } from "./game/game-service";
+export {
+  OnboardingService,
+  type OnboardingStep,
+  type OnboardingProgress,
+} from "./onboarding";

@@ -12,22 +12,35 @@ const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GetLibraryHandler" });
 
 const GetLibrarySchema = z.object({
   userId: z.string().cuid(),
-  status: z.nativeEnum(LibraryItemStatus).optional(),
+  status: z.enum(LibraryItemStatus).optional(),
   platform: z.string().optional(),
   search: z.string().optional(),
   sortBy: z
     .enum(["createdAt", "releaseDate", "startedAt", "completedAt"])
     .optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
+  offset: z.number().int().min(0).max(10000).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
 });
 
 export async function getLibraryHandler(
   input: GetLibraryHandlerInput,
   context: RequestContext
 ): Promise<HandlerResult<GetLibraryHandlerOutput>> {
-  const { userId, status, platform, search, sortBy, sortOrder } = input;
+  const { userId, status, platform, search, sortBy, sortOrder, offset, limit } =
+    input;
   logger.info(
-    { userId, status, platform, search, sortBy, sortOrder, ip: context.ip },
+    {
+      userId,
+      status,
+      platform,
+      search,
+      sortBy,
+      sortOrder,
+      offset,
+      limit,
+      ip: context.ip,
+    },
     "Processing library fetch request"
   );
 
@@ -45,9 +58,11 @@ export async function getLibraryHandler(
   }
 
   const libraryService = new LibraryService();
+  const isPaginated =
+    validation.data.offset !== undefined || validation.data.limit !== undefined;
   const result = await libraryService.getLibraryItems({
     ...validation.data,
-    distinctByGame: true,
+    distinctByGame: !isPaginated,
   });
 
   if (!result.success) {
@@ -62,9 +77,9 @@ export async function getLibraryHandler(
     };
   }
 
-  logger.info(
-    { userId, count: result.data.length },
-    "Library items fetched successfully"
+  logger.debug(
+    { userId, count: result.data.items.length, total: result.data.total },
+    "Library items fetched"
   );
   return {
     success: true,

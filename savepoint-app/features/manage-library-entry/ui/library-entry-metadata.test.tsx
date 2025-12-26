@@ -32,7 +32,7 @@ const createMockLibraryItem = (
   id: 1,
   userId: "user1",
   gameId: "game1",
-  status: LibraryItemStatus.CURIOUS_ABOUT,
+  status: LibraryItemStatus.WANT_TO_PLAY,
   platform: "PC",
   acquisitionType: AcquisitionType.DIGITAL,
   createdAt: new Date("2025-01-27T12:00:00Z"),

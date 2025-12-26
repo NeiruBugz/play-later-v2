@@ -1,3 +1,3 @@
-export { RelatedGamesServer } from "./related-games-server";
+export { RelatedGames } from "./related-games";
 export { RelatedGamesSkeleton } from "./related-games-skeleton";
-export type { RelatedGamesServerProps } from "./related-games-server.types";
+export type { RelatedGamesProps } from "./related-games.types";

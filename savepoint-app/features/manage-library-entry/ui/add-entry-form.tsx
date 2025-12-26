@@ -28,8 +28,8 @@ export const AddEntryForm = ({
     resolver: zodResolver(AddToLibrarySchema),
     defaultValues: {
       igdbId,
-      status: LibraryItemStatus.CURIOUS_ABOUT,
-      platform: "",
+      status: LibraryItemStatus.PLAYED,
+      platform: undefined,
     },
   });
   const {
@@ -59,8 +59,8 @@ export const AddEntryForm = ({
     onSuccess: () => {
       form.reset({
         igdbId,
-        status: LibraryItemStatus.CURIOUS_ABOUT,
-        platform: "",
+        status: LibraryItemStatus.PLAYED,
+        platform: undefined,
       });
       onSuccess();
     },

@@ -23,9 +23,10 @@ export const libraryStatsSuccessFixture = {
   ok: true as const,
   data: {
     statusCounts: {
-      CURIOUS_ABOUT: 5,
-      CURRENTLY_EXPLORING: 2,
-      EXPERIENCED: 10,
+      WANT_TO_PLAY: 5,
+      OWNED: 3,
+      PLAYING: 2,
+      PLAYED: 10,
     },
     recentGames: [
       {

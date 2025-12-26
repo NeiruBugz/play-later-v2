@@ -9,7 +9,7 @@ import { LibraryItemStatus, type LibraryItemDomain } from "@/shared/types";
 
 const UpdateLibraryStatusSchema = z.object({
   libraryItemId: z.number().int().positive(),
-  status: z.nativeEnum(LibraryItemStatus),
+  status: z.enum(LibraryItemStatus),
 });
 export type UpdateLibraryStatusInput = z.infer<
   typeof UpdateLibraryStatusSchema

@@ -182,20 +182,6 @@ describe("createJournalEntryAction server action", () => {
   });
 
   describe("Validation Errors", () => {
-    it("should return error for empty title", async () => {
-      const result = await createJournalEntryAction({
-        ...validInput,
-        title: "",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Invalid input data");
-      }
-
-      expect(mockCreateJournalEntry).not.toHaveBeenCalled();
-    });
-
     it("should return error for empty content", async () => {
       const result = await createJournalEntryAction({
         ...validInput,

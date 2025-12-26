@@ -35,14 +35,14 @@ export const PlatformCombobox = <T extends FieldValues = FieldValues>({
   supportedPlatforms,
   otherPlatforms,
   isLoading = false,
-  description = "Select the platform you own this game on",
+  description = "Select the platform you'll play on (optional)",
 }: PlatformComboboxProps<T>) => {
   const [open, setOpen] = useState(false);
   const allPlatforms = [...supportedPlatforms, ...otherPlatforms];
   const selectedPlatform = allPlatforms.find((p) => p.name === field.value);
   return (
     <FormItem className="flex flex-col">
-      <FormLabel>Platform *</FormLabel>
+      <FormLabel>Platform (Optional)</FormLabel>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <FormControl>

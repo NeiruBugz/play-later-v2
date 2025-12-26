@@ -45,7 +45,7 @@ export function EntryRow({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">
-          {entry.platform ?? "Unknown Platform"}
+          {entry.platform ?? "No Platform"}
         </p>
       </div>
 

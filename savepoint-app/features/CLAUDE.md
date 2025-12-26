@@ -21,7 +21,8 @@ features/
 ├── library/                  # User library views
 ├── profile/                  # User profile management
 ├── dashboard/                # Dashboard components
-└── journal/                  # Journal entry management
+├── journal/                  # Journal entry management
+└── onboarding/               # Onboarding and getting started
 ```
 
 ## Feature Module Structure
@@ -86,6 +87,25 @@ import { useLibraryModal } from "@/features/manage-library-entry/hooks";
 1. Only import from `manage-library-entry`'s public API (barrel exports)
 2. Do not create new cross-feature dependencies without documenting here
 3. If more features need cross-feature imports, consider moving to `shared/`
+
+### Cross-Feature Import Exception: `onboarding`
+
+**Exception**: The `onboarding` feature provides getting-started components for new users. It MAY be imported by app-level pages.
+
+**Rationale**: Onboarding UI (checklist, progress indicators) is displayed on the dashboard and potentially other pages during the new user experience. The components are self-contained and don't create circular dependencies.
+
+```typescript
+// ✅ Allowed - documented architectural exception
+import { GettingStartedChecklist } from "@/features/onboarding";
+```
+
+**Authorized consumers:**
+- `app/(protected)/dashboard/page.tsx`
+
+**Rules for this exception:**
+1. Only import from `onboarding`'s public API (barrel exports)
+2. Onboarding components should remain stateless/presentational where possible
+3. Business logic lives in `OnboardingService` in the data access layer
 
 ### Use-Cases for Multi-Service Orchestration
 When a feature needs multiple services, create a use-case:

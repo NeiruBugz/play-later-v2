@@ -39,9 +39,9 @@ Patient gamers who view their game collections as opportunities rather than obli
 
 ### 2.1. Core Features
 
-- **Personal Gaming Library:** Curate your collection across multiple platforms—organize games that are waiting for the right moment, currently being explored, or have been experienced
-- **Gaming Journal:** Write reflections and memories about your gaming experiences, capturing what resonated and why
-- **Journey Tracking:** Mark where you are in each world (Curious About, Currently Exploring, Taking a Break, Experienced)
+- **Personal Gaming Library:** Curate your collection across platforms—organize games by intent. Platform tracking is optional; focus is on what you want to play, not cataloging everything you own.
+- **Gaming Journal:** Capture thoughts and memories about your gaming experiences. Quick, frictionless entries during or after play—no formal structure required.
+- **Journey Tracking:** Mark your relationship with each game using four intuitive statuses: Want to Play, Owned, Playing, Played.
 - **Curated Collections:** Create themed collections that reflect your gaming taste ("Cozy Winter Games," "Games That Made Me Think," "Worlds to Revisit")
 - **Platform Integration:** Import libraries from Steam and other services to bring awareness to your collection
 - **Discovery & Exploration:** Find similar games and new worlds to explore through IGDB integration and community collections
@@ -50,7 +50,18 @@ Patient gamers who view their game collections as opportunities rather than obli
 
 ### 2.2. User Journey
 
-A patient gamer signs up for SavePoint and imports their Steam library for awareness, browses their collection and marks a few games they're curious about exploring soon, starts playing a game and marks it as "Currently Exploring," journals thoughts and feelings during or after play sessions, after finishing or taking a break writes a reflection capturing what the experience meant to them, discovers their next game through similar game suggestions or community collections, reads others' gaming reflections for games they're curious about, creates themed collections to share with the community, and returns periodically to revisit past journal entries and relive cherished gaming memories.
+A patient gamer signs up for SavePoint and imports their Steam library, curating which games to track. They mark a few games as "Want to Play," start one and mark it as "Playing," and jot down quick thoughts during or after sessions. When they finish or move on, they mark it "Played." They discover their next game through similar game suggestions or community collections, read others' reflections, create themed collections, and return to revisit past journal entries and relive cherished gaming memories.
+
+### 2.3. UX Principles
+
+SavePoint follows a "Letterboxd for games" philosophy: the core action should be instant, with progressive enhancement for those who want more detail.
+
+**Simplification decisions:**
+
+- **4 statuses, not 6:** Want to Play, Owned, Playing, Played. Simple, obvious, no decision paralysis. See [spec](../spec/002-status-simplification/functional-spec.md).
+- **Platform is optional:** Just say "I'm playing Zelda"—platform is metadata, not identity. See [spec](../spec/003-optional-platform/functional-spec.md).
+- **Frictionless journaling:** Plain text, optional titles, "save thought" framing. Capture memories in under 10 seconds. See [spec](../spec/004-journal-friction-reduction/functional-spec.md).
+- **Intentional library:** Your library reflects games you intend to experience, not everything you own. Steam import is curation, not bulk transfer.
 
 ---
 
@@ -59,7 +70,7 @@ A patient gamer signs up for SavePoint and imports their Steam library for aware
 ### 3.1. What's In-Scope for this Version
 
 - Personal gaming library management across platforms (curate what matters)
-- Journey status tracking (Curious About, Currently Exploring, Taking a Break, Experienced, etc.)
+- Journey status tracking (Want to Play, Owned, Playing, Played)
 - Gaming journal system for writing reflections and memories
 - Curated collections creation (themed, personal, shareable)
 - Steam integration for library import

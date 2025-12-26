@@ -1,5 +1,9 @@
 # SavePoint Monorepo
 
+[![Integration Tests (Vitest)](https://github.com/NeiruBugz/play-later-v2/actions/workflows/integration.yml/badge.svg)](https://github.com/NeiruBugz/play-later-v2/actions/workflows/integration.yml)
+
+[![E2E Tests (Playwright)](https://github.com/NeiruBugz/play-later-v2/actions/workflows/e2e.yml/badge.svg)](https://github.com/NeiruBugz/play-later-v2/actions/workflows/e2e.yml)
+
 This repository contains two top-level modules:
 
 - infra: Terraform infrastructure (Cognito, environments, modules)

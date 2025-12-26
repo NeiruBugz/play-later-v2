@@ -11,9 +11,9 @@ export function createProfileFixture(
     createdAt: new Date("2024-01-15T00:00:00.000Z"),
     stats: {
       statusCounts: {
-        CURIOUS_ABOUT: 5,
-        CURRENTLY_EXPLORING: 3,
-        EXPERIENCED: 10,
+        WANT_TO_PLAY: 5,
+        PLAYING: 3,
+        PLAYED: 10,
       },
       recentGames: [
         {

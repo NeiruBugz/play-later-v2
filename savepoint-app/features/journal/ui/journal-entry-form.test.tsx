@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { ActionResult } from "@/shared/lib";
 import {
   AcquisitionType,
-  JournalMood,
   JournalVisibility,
   LibraryItemStatus,
   type JournalEntryDomain,
@@ -18,30 +17,6 @@ import { createJournalEntryAction } from "../server-actions/create-journal-entry
 import { getLibraryItemsByGameIdAction } from "../server-actions/get-library-items-by-game-id";
 import { updateJournalEntryAction } from "../server-actions/update-journal-entry";
 import { JournalEntryForm } from "./journal-entry-form";
-
-// Mock RichTextEditor to render a simple textarea for testing
-vi.mock("@/shared/components/rich-text-editor", () => ({
-  RichTextEditor: ({
-    value,
-    onChange,
-    placeholder,
-    disabled,
-  }: {
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    disabled?: boolean;
-  }) => (
-    <textarea
-      data-testid="rich-text-editor"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      disabled={disabled}
-      aria-label="Content"
-    />
-  ),
-}));
 
 vi.mock("sonner", () => ({
   toast: {
@@ -87,19 +62,16 @@ const mockJournalEntry: JournalEntryDomain = {
 
 const elements = {
   getTitleInput: () => screen.getByLabelText(/^title/i),
-  getContentTextarea: () => screen.getByTestId("rich-text-editor"),
-  getMoodSelect: () => screen.getByRole("combobox", { name: /mood/i }),
+  getContentTextarea: () => screen.getByLabelText(/what's on your mind/i),
   getHoursPlayedInput: () => screen.getByLabelText(/hours played/i),
   getLibraryItemSelect: () =>
     screen.queryByRole("combobox", { name: /link to library item/i }),
   getSubmitButton: () =>
-    screen.queryByRole("button", { name: /create entry/i }) ||
+    screen.queryByRole("button", { name: /save thought/i }) ||
     screen.getByRole("button", { name: /save changes/i }),
   getSaveButton: () => screen.getByRole("button", { name: /save changes/i }),
   getCancelButton: () => screen.queryByRole("button", { name: /cancel/i }),
-  getCreatingButton: () => screen.queryByRole("button", { name: /creating/i }),
   getSavingButton: () => screen.queryByRole("button", { name: /saving/i }),
-  getTitleError: () => screen.queryByText(/title is required/i),
   getContentError: () => screen.queryByText(/content is required/i),
   getAutoLinkMessage: () =>
     screen.queryByText(/automatically linked to your library item/i),
@@ -112,16 +84,12 @@ const actions = {
   typeContent: async (value: string) => {
     await userEvent.type(elements.getContentTextarea(), value);
   },
-  selectMood: async (mood: string) => {
-    await userEvent.click(elements.getMoodSelect());
-    await userEvent.click(screen.getByRole("option", { name: mood }));
-  },
   typeHoursPlayed: async (value: string) => {
     await userEvent.type(elements.getHoursPlayedInput(), value);
   },
   submitForm: async () => {
     const submitButton =
-      screen.queryByRole("button", { name: /create entry/i }) ||
+      screen.queryByRole("button", { name: /save thought/i }) ||
       screen.getByRole("button", { name: /save changes/i });
     await userEvent.click(submitButton);
   },
@@ -159,21 +127,19 @@ describe("JournalEntryForm", () => {
     it("should display all form fields", () => {
       expect(elements.getTitleInput()).toBeVisible();
       expect(elements.getContentTextarea()).toBeVisible();
-      expect(elements.getMoodSelect()).toBeVisible();
       expect(elements.getHoursPlayedInput()).toBeVisible();
       expect(elements.getSubmitButton()).toBeVisible();
     });
 
-    it("should show 'Create Entry' button text", () => {
-      expect(elements.getSubmitButton()).toHaveTextContent("Create Entry");
+    it("should show 'Save thought' button text", () => {
+      expect(elements.getSubmitButton()).toHaveTextContent("Save thought");
     });
 
     describe("when form is submitted with empty required fields", () => {
-      it("should display validation errors for title and content", async () => {
+      it("should display validation error for content", async () => {
         await actions.submitForm();
 
         await waitFor(() => {
-          expect(elements.getTitleError()).toBeVisible();
           expect(elements.getContentError()).toBeVisible();
         });
       });
@@ -182,10 +148,32 @@ describe("JournalEntryForm", () => {
         await actions.submitForm();
 
         await waitFor(() => {
-          expect(elements.getTitleError()).toBeVisible();
+          expect(elements.getContentError()).toBeVisible();
         });
 
         expect(mockCreateJournalEntryAction).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("when form is submitted with only content (no title)", () => {
+      beforeEach(async () => {
+        await actions.typeContent("This is my journal entry content.");
+      });
+
+      it("should call createJournalEntryAction with empty title and timezone", async () => {
+        await actions.submitForm();
+
+        await waitFor(() => {
+          expect(mockCreateJournalEntryAction).toHaveBeenCalledWith({
+            gameId: "game-1",
+            title: undefined,
+            content: "This is my journal entry content.",
+            mood: undefined,
+            playSession: undefined,
+            libraryItemId: undefined,
+            timezone: expect.any(String),
+          });
+        });
       });
     });
 
@@ -206,6 +194,7 @@ describe("JournalEntryForm", () => {
             mood: undefined,
             playSession: undefined,
             libraryItemId: undefined,
+            timezone: expect.any(String),
           });
         });
       });
@@ -222,7 +211,7 @@ describe("JournalEntryForm", () => {
         actions.submitForm();
 
         await waitFor(() => {
-          expect(elements.getCreatingButton()).toBeVisible();
+          expect(elements.getSavingButton()).toBeVisible();
         });
 
         resolveAction!({ success: true, data: mockJournalEntry });
@@ -271,20 +260,6 @@ describe("JournalEntryForm", () => {
         await actions.typeContent("Content here");
       });
 
-      it("should submit with mood selected", async () => {
-        await actions.selectMood("Excited");
-
-        await actions.submitForm();
-
-        await waitFor(() => {
-          expect(mockCreateJournalEntryAction).toHaveBeenCalledWith(
-            expect.objectContaining({
-              mood: JournalMood.EXCITED,
-            })
-          );
-        });
-      });
-
       it("should submit with hours played", async () => {
         await actions.typeHoursPlayed("5");
 
@@ -294,6 +269,7 @@ describe("JournalEntryForm", () => {
           expect(mockCreateJournalEntryAction).toHaveBeenCalledWith(
             expect.objectContaining({
               playSession: 5,
+              timezone: expect.any(String),
             })
           );
         });
@@ -309,7 +285,7 @@ describe("JournalEntryForm", () => {
           platform: "Steam",
           userId: "user-1",
           gameId: "game-1",
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           acquisitionType: AcquisitionType.DIGITAL,
           startedAt: null,
           completedAt: null,
@@ -343,6 +319,7 @@ describe("JournalEntryForm", () => {
           expect(mockCreateJournalEntryAction).toHaveBeenCalledWith(
             expect.objectContaining({
               libraryItemId: 1,
+              timezone: expect.any(String),
             })
           );
         });
@@ -366,7 +343,7 @@ describe("JournalEntryForm", () => {
             platform: "Steam",
             userId: "user-1",
             gameId: "game-1",
-            status: LibraryItemStatus.CURRENTLY_EXPLORING,
+            status: LibraryItemStatus.PLAYING,
             acquisitionType: AcquisitionType.DIGITAL,
             startedAt: null,
             completedAt: null,
@@ -378,7 +355,7 @@ describe("JournalEntryForm", () => {
             platform: "Epic Games",
             userId: "user-1",
             gameId: "game-1",
-            status: LibraryItemStatus.EXPERIENCED,
+            status: LibraryItemStatus.PLAYED,
             acquisitionType: AcquisitionType.DIGITAL,
             startedAt: null,
             completedAt: null,
@@ -420,6 +397,7 @@ describe("JournalEntryForm", () => {
           expect(mockCreateJournalEntryAction).toHaveBeenCalledWith(
             expect.objectContaining({
               libraryItemId: 1,
+              timezone: expect.any(String),
             })
           );
         });
@@ -522,24 +500,6 @@ describe("JournalEntryForm", () => {
         expect(mockToastError).toHaveBeenCalledWith("Failed to update entry", {
           description: "Update failed",
         });
-      });
-    });
-
-    it("should include mood in update payload when mood is selected", async () => {
-      mockUpdateJournalEntryAction.mockResolvedValue({
-        success: true,
-        data: mockJournalEntry,
-      });
-
-      await actions.selectMood("Excited");
-      await actions.submitForm();
-
-      await waitFor(() => {
-        expect(mockUpdateJournalEntryAction).toHaveBeenCalledWith(
-          expect.objectContaining({
-            mood: JournalMood.EXCITED,
-          })
-        );
       });
     });
 

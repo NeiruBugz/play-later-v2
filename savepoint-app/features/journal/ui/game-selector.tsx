@@ -1,21 +1,24 @@
 "use client";
 
+import type { GetLibraryItemsResult } from "@/data-access-layer/services";
 import { useQuery } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { Gamepad2, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import type { LibraryItemWithGameDomain } from "@/shared/types";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { cn } from "@/shared/lib/ui/utils";
 
 interface GameSelectorProps {
   onGameSelect: (gameId: string) => void;
   onCancel?: () => void;
 }
 
-async function fetchUserLibraryGames(): Promise<LibraryItemWithGameDomain[]> {
+async function fetchUserLibraryGames(): Promise<GetLibraryItemsResult> {
   const response = await fetch("/api/library?distinctByGame=true");
   if (!response.ok) {
     throw new Error("Failed to fetch library games");
@@ -27,9 +30,37 @@ async function fetchUserLibraryGames(): Promise<LibraryItemWithGameDomain[]> {
   return json.data;
 }
 
+function GameItemSkeleton() {
+  return (
+    <div className="gap-lg px-md py-sm flex items-center rounded-lg border border-transparent">
+      <Skeleton className="h-16 w-12 shrink-0 rounded-md" />
+      <div className="space-y-sm min-w-0 flex-1">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-3 w-1/2" />
+      </div>
+    </div>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="space-y-lg">
+      <div className="space-y-md">
+        <Skeleton className="h-10 w-full rounded-lg" />
+      </div>
+      <div className="space-y-sm">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <GameItemSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const {
     data: libraryItems,
@@ -40,14 +71,15 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
   } = useQuery({
     queryKey: ["library-games-for-journal"],
     queryFn: fetchUserLibraryGames,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Get unique games from library items
   const uniqueGames = libraryItems
     ? Array.from(
-        new Map(libraryItems.map((item) => [item.game.id, item.game])).values()
+        new Map(
+          libraryItems.items.map((item) => [item.game.id, item.game])
+        ).values()
       )
     : [];
 
@@ -55,19 +87,30 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
     game.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleGameSelect = (gameId: string) => {
-    onGameSelect(gameId);
-  };
+  const virtualizer = useVirtualizer({
+    count: filteredGames.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 72,
+    overscan: 5,
+  });
 
   if (isLoading) {
     return (
       <div className="space-y-xl">
-        <div className="space-y-md">
-          <Label>Select a Game</Label>
+        <div className="space-y-sm">
+          <h2 className="font-serif text-lg font-medium">Select a Game</h2>
           <p className="text-muted-foreground text-sm">
-            Loading your library games...
+            Choose from your library
           </p>
         </div>
+        <LoadingState />
+        {onCancel && (
+          <div className="flex items-center justify-end">
+            <Button type="button" variant="ghost" onClick={onCancel}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -75,10 +118,10 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
   if (isError) {
     return (
       <div className="space-y-xl">
-        <div className="space-y-md">
-          <h2 className="heading-md">Select a Game</h2>
+        <div className="space-y-sm">
+          <h2 className="font-serif text-lg font-medium">Select a Game</h2>
           <p className="text-destructive text-sm">
-            Failed to load your library games
+            Failed to load your library
             {error instanceof Error ? `: ${error.message}` : ""}
           </p>
         </div>
@@ -99,75 +142,142 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
   if (!uniqueGames || uniqueGames.length === 0) {
     return (
       <div className="space-y-xl">
-        <div className="space-y-md">
-          <h2 className="heading-md">Select a Game</h2>
-          <p className="text-muted-foreground text-sm">
-            You don't have any games in your library yet. Add games to your
-            library first.
-          </p>
+        <div className="space-y-sm">
+          <h2 className="font-serif text-lg font-medium">Select a Game</h2>
         </div>
-        <div className="gap-md flex items-center justify-end">
-          {onCancel && (
+        <div className="gap-lg bg-muted/20 px-xl py-3xl flex flex-col items-center rounded-lg border border-dashed text-center">
+          <div className="bg-muted/50 flex h-16 w-16 items-center justify-center rounded-full">
+            <Gamepad2 className="text-muted-foreground/60 h-8 w-8" />
+          </div>
+          <div className="space-y-xs">
+            <p className="font-medium">No games in your library</p>
+            <p className="text-muted-foreground text-sm">
+              Add games to your library first to write about them
+            </p>
+          </div>
+          <Button type="button" onClick={() => router.push("/games/search")}>
+            Browse Games
+          </Button>
+        </div>
+        {onCancel && (
+          <div className="flex items-center justify-end">
             <Button type="button" variant="ghost" onClick={onCancel}>
               Cancel
             </Button>
-          )}
-          <Button type="button" onClick={() => router.push("/library")}>
-            Go to Library
-          </Button>
-        </div>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className="space-y-xl">
-      <div className="space-y-md">
-        <Label htmlFor="game-search">Select a Game</Label>
-        <Input
-          id="game-search"
-          type="search"
-          placeholder="Search your library games..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+    <div className="space-y-lg">
+      <div className="space-y-sm">
+        <h2 className="font-serif text-lg font-medium">Select a Game</h2>
+        <p className="text-muted-foreground text-sm">
+          {uniqueGames.length} game{uniqueGames.length !== 1 ? "s" : ""} in your
+          library
+        </p>
       </div>
 
-      {filteredGames.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          No games found matching "{searchQuery}"
+      <div className="relative">
+        <Search className="left-md text-muted-foreground pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2" />
+        <Input
+          type="search"
+          placeholder="Search your games..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-xl pr-xl"
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery("")}
+            className="right-md p-xs text-muted-foreground hover:text-foreground absolute top-1/2 -translate-y-1/2 rounded-sm transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {searchQuery && (
+        <p className="text-muted-foreground text-xs">
+          {filteredGames.length} result{filteredGames.length !== 1 ? "s" : ""}{" "}
+          for "{searchQuery}"
         </p>
+      )}
+
+      {filteredGames.length === 0 ? (
+        <div className="gap-md bg-muted/20 px-xl py-2xl flex flex-col items-center rounded-lg border border-dashed text-center">
+          <Search className="text-muted-foreground/40 h-8 w-8" />
+          <div className="space-y-xs">
+            <p className="text-muted-foreground text-sm">
+              No games found matching "{searchQuery}"
+            </p>
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="text-primary text-sm underline-offset-2 hover:underline"
+            >
+              Clear search
+            </button>
+          </div>
+        </div>
       ) : (
-        <div className="space-y-md">
-          <ul className="space-y-sm">
-            {filteredGames.map((game) => (
-              <li key={game.id}>
-                <Button
+        <div
+          ref={scrollContainerRef}
+          className="bg-card/50 relative max-h-[360px] overflow-y-auto rounded-lg border"
+        >
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const game = filteredGames[virtualItem.index];
+              if (!game) return null;
+
+              return (
+                <button
+                  key={game.id}
                   type="button"
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => handleGameSelect(game.id)}
+                  onClick={() => onGameSelect(game.id)}
+                  className={cn(
+                    "gap-lg px-md py-sm absolute top-0 left-0 flex w-full items-center",
+                    "border-border/30 border-b last:border-b-0",
+                    "transition-colors duration-150",
+                    "hover:bg-accent/50 focus-visible:bg-accent/50 focus-visible:outline-none"
+                  )}
+                  style={{
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
                 >
-                  <div className="gap-md flex items-center">
+                  <div className="relative shrink-0 overflow-hidden rounded-md shadow-sm">
                     <GameCoverImage
                       imageId={game.coverImage}
                       gameTitle={game.title}
                       size="cover_small"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 384px"
-                      className="h-12 w-8"
-                      imageClassName="rounded object-cover"
+                      sizes="48px"
+                      className="h-14 w-10"
+                      imageClassName="rounded-md object-cover"
                     />
-                    <span className="text-left">{game.title}</span>
                   </div>
-                </Button>
-              </li>
-            ))}
-          </ul>
+                  <span className="min-w-0 flex-1 truncate text-left text-sm font-medium">
+                    {game.title}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {onCancel && (
-        <div className="flex items-center justify-end">
+        <div className="border-border/50 pt-lg flex items-center justify-end border-t">
           <Button type="button" variant="ghost" onClick={onCancel}>
             Cancel
           </Button>

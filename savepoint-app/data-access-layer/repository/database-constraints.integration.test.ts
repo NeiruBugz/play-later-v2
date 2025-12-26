@@ -1,14 +1,11 @@
+import { LibraryItemStatus } from "@/data-access-layer/domain/library/enums";
 import {
   getTestDatabase,
   resetTestDatabase,
   setupDatabase,
 } from "@/test/setup/database";
 import { createGame, createUser } from "@/test/setup/db-factories";
-import {
-  AcquisitionType,
-  JournalVisibility,
-  LibraryItemStatus,
-} from "@prisma/client";
+import { AcquisitionType, JournalVisibility } from "@prisma/client";
 
 describe("Database Check Constraints - Integration Tests", () => {
   beforeAll(async () => {
@@ -32,7 +29,7 @@ describe("Database Check Constraints - Integration Tests", () => {
         data: {
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           acquisitionType: AcquisitionType.DIGITAL,
           createdAt,
           startedAt,
@@ -55,7 +52,7 @@ describe("Database Check Constraints - Integration Tests", () => {
         data: {
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURRENTLY_EXPLORING,
+          status: LibraryItemStatus.PLAYING,
           acquisitionType: AcquisitionType.DIGITAL,
           createdAt,
           startedAt,
@@ -77,7 +74,7 @@ describe("Database Check Constraints - Integration Tests", () => {
         data: {
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
           acquisitionType: AcquisitionType.DIGITAL,
           createdAt,
           completedAt,
@@ -102,7 +99,7 @@ describe("Database Check Constraints - Integration Tests", () => {
           data: {
             userId: user.id,
             gameId: game.id,
-            status: LibraryItemStatus.EXPERIENCED,
+            status: LibraryItemStatus.PLAYED,
             acquisitionType: AcquisitionType.DIGITAL,
             createdAt,
             startedAt,
@@ -125,7 +122,7 @@ describe("Database Check Constraints - Integration Tests", () => {
         data: {
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.EXPERIENCED,
+          status: LibraryItemStatus.PLAYED,
           acquisitionType: AcquisitionType.DIGITAL,
           createdAt,
           startedAt,
@@ -147,7 +144,7 @@ describe("Database Check Constraints - Integration Tests", () => {
         data: {
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.CURIOUS_ABOUT,
+          status: LibraryItemStatus.WANT_TO_PLAY,
           acquisitionType: AcquisitionType.DIGITAL,
           startedAt: null,
           completedAt: null,

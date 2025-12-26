@@ -104,81 +104,107 @@ vi.mock("@/shared/lib", () => {
       ERROR_BOUNDARY: "errorBoundary",
       STORAGE: "storage",
     },
-    LIBRARY_STATUS_CONFIG: [
-      {
-        value: "CURIOUS_ABOUT",
-        label: "Curious About",
-        description: "Interested in trying this game",
-        badgeVariant: "outline",
-      },
-      {
-        value: "CURRENTLY_EXPLORING",
-        label: "Currently Exploring",
-        description: "Actively playing this game",
-        badgeVariant: "default",
-      },
-      {
-        value: "TOOK_A_BREAK",
-        label: "Took a Break",
-        description: "Paused but plan to return",
-        badgeVariant: "secondary",
-      },
-      {
-        value: "EXPERIENCED",
-        label: "Experienced",
-        description: "Finished or thoroughly explored",
-        badgeVariant: "secondary",
-      },
-      {
-        value: "WISHLIST",
-        label: "Wishlist",
-        description: "Want to play in the future",
-        badgeVariant: "outline",
-      },
-      {
-        value: "REVISITING",
-        label: "Revisiting",
-        description: "Playing again after completing",
-        badgeVariant: "default",
-      },
-    ],
+    LIBRARY_STATUS_CONFIG: (() => {
+      const MockIcon = () => null;
+      return [
+        {
+          value: "WANT_TO_PLAY",
+          label: "Want to Play",
+          description: "On your radar, haven't started",
+          badgeVariant: "wantToPlay",
+          icon: MockIcon,
+          ariaLabel: "Mark as Want to Play",
+        },
+        {
+          value: "OWNED",
+          label: "Owned",
+          description: "In your library, haven't started",
+          badgeVariant: "owned",
+          icon: MockIcon,
+          ariaLabel: "Mark as Owned",
+        },
+        {
+          value: "PLAYING",
+          label: "Playing",
+          description: "Currently engaged",
+          badgeVariant: "playing",
+          icon: MockIcon,
+          ariaLabel: "Mark as Playing",
+        },
+        {
+          value: "PLAYED",
+          label: "Played",
+          description: "Have experienced it",
+          badgeVariant: "played",
+          icon: MockIcon,
+          ariaLabel: "Mark as Played",
+        },
+      ];
+    })(),
     LIBRARY_STATUS_LABELS: {
-      CURIOUS_ABOUT: "Curious About",
-      CURRENTLY_EXPLORING: "Currently Exploring",
-      TOOK_A_BREAK: "Took a Break",
-      EXPERIENCED: "Experienced",
-      WISHLIST: "Wishlist",
-      REVISITING: "Revisiting",
+      WANT_TO_PLAY: "Want to Play",
+      OWNED: "Owned",
+      PLAYING: "Playing",
+      PLAYED: "Played",
     },
     LIBRARY_STATUS_VARIANTS: {
-      CURIOUS_ABOUT: "outline",
-      CURRENTLY_EXPLORING: "default",
-      TOOK_A_BREAK: "secondary",
-      EXPERIENCED: "secondary",
-      WISHLIST: "outline",
-      REVISITING: "default",
+      WANT_TO_PLAY: "wantToPlay",
+      OWNED: "owned",
+      PLAYING: "playing",
+      PLAYED: "played",
     },
     getStatusLabel: vi.fn((status: string) => {
       const labels: Record<string, string> = {
-        CURIOUS_ABOUT: "Curious About",
-        CURRENTLY_EXPLORING: "Currently Exploring",
-        TOOK_A_BREAK: "Took a Break",
-        EXPERIENCED: "Experienced",
-        WISHLIST: "Wishlist",
-        REVISITING: "Revisiting",
+        WANT_TO_PLAY: "Want to Play",
+        OWNED: "Owned",
+        PLAYING: "Playing",
+        PLAYED: "Played",
       };
       return labels[status] || status;
     }),
     getStatusVariant: vi.fn((status: string) => {
       const variants: Record<string, string> = {
-        CURIOUS_ABOUT: "outline",
-        CURRENTLY_EXPLORING: "default",
-        TOOK_A_BREAK: "secondary",
-        EXPERIENCED: "secondary",
-        WISHLIST: "outline",
-        REVISITING: "default",
+        WANT_TO_PLAY: "wantToPlay",
+        OWNED: "owned",
+        PLAYING: "playing",
+        PLAYED: "played",
       };
       return variants[status] || "secondary";
+    }),
+    getStatusIcon: vi.fn(() => () => null),
+    getStatusConfig: vi.fn((status: string) => {
+      const MockIcon = () => null;
+      const configs = [
+        {
+          value: "WANT_TO_PLAY",
+          label: "Want to Play",
+          icon: MockIcon,
+          badgeVariant: "wantToPlay",
+          ariaLabel: "Mark as Want to Play",
+        },
+        {
+          value: "OWNED",
+          label: "Owned",
+          icon: MockIcon,
+          badgeVariant: "owned",
+          ariaLabel: "Mark as Owned",
+        },
+        {
+          value: "PLAYING",
+          label: "Playing",
+          icon: MockIcon,
+          badgeVariant: "playing",
+          ariaLabel: "Mark as Playing",
+        },
+        {
+          value: "PLAYED",
+          label: "Played",
+          icon: MockIcon,
+          badgeVariant: "played",
+          ariaLabel: "Mark as Played",
+        },
+      ];
+      return configs.find((c) => c.value === status);
     }),
     createServerAction: vi.fn(() => vi.fn()),
   };

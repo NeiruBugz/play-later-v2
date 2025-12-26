@@ -27,7 +27,7 @@ import { BaseService, type ServiceResult } from "../types";
 
 const GetLibraryItemsSchema = z.object({
   userId: z.string().cuid(),
-  status: z.nativeEnum(LibraryItemStatus).optional(),
+  status: z.enum(LibraryItemStatus).optional(),
   platform: z.string().optional(),
   search: z.string().optional(),
   sortBy: z
@@ -35,6 +35,8 @@ const GetLibraryItemsSchema = z.object({
     .optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
   distinctByGame: z.boolean().optional(),
+  offset: z.number().int().min(0).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
 });
 const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
@@ -50,6 +52,14 @@ type GetLibraryItemsParams = {
   sortBy?: SortField;
   sortOrder?: "asc" | "desc";
   distinctByGame?: boolean;
+  offset?: number;
+  limit?: number;
+};
+
+export type GetLibraryItemsResult = {
+  items: LibraryItemWithGameDomain[];
+  total: number;
+  hasMore: boolean;
 };
 export class LibraryService extends BaseService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "LibraryService" });
@@ -103,22 +113,6 @@ export class LibraryService extends BaseService {
       );
     }
   }
-  private validateStatusTransition(
-    currentStatus: LibraryItemStatus,
-    newStatus: LibraryItemStatus
-  ): { valid: boolean; error?: string } {
-    if (
-      newStatus === LibraryItemStatus.WISHLIST &&
-      currentStatus !== LibraryItemStatus.WISHLIST
-    ) {
-      return {
-        valid: false,
-        error:
-          "Cannot move a game back to Wishlist. Create a new library item instead.",
-      };
-    }
-    return { valid: true };
-  }
   async updateLibraryItem(params: {
     userId: string;
     libraryItem: {
@@ -141,30 +135,6 @@ export class LibraryService extends BaseService {
         );
         return this.error("Library item not found");
       }
-      const currentDomainItem = LibraryItemMapper.toDomain(
-        currentItemResult.data
-      );
-      const currentStatus = currentDomainItem.status;
-      const newStatus = params.libraryItem.status;
-      if (newStatus !== currentStatus) {
-        const transitionValidation = this.validateStatusTransition(
-          currentStatus,
-          newStatus
-        );
-        if (!transitionValidation.valid) {
-          this.logger.warn(
-            {
-              libraryItemId: params.libraryItem.id,
-              currentStatus,
-              requestedStatus: newStatus,
-            },
-            "Invalid status transition attempted"
-          );
-          return this.error(
-            transitionValidation.error ?? "Invalid status transition"
-          );
-        }
-      }
       const result = await updateLibraryItem({
         userId: params.userId,
         libraryItem: {
@@ -184,8 +154,7 @@ export class LibraryService extends BaseService {
       this.logger.info(
         {
           libraryItemId: params.libraryItem.id,
-          oldStatus: currentStatus,
-          newStatus,
+          newStatus: params.libraryItem.status,
         },
         "Library item updated successfully"
       );
@@ -231,7 +200,7 @@ export class LibraryService extends BaseService {
   async getLibraryItems(
     params: GetLibraryItemsParams
   ): Promise<
-    | { success: true; data: LibraryItemWithGameDomain[] }
+    | { success: true; data: GetLibraryItemsResult }
     | { success: false; error: string }
   > {
     try {
@@ -246,7 +215,13 @@ export class LibraryService extends BaseService {
           validation.error.issues[0]?.message ?? "Invalid input parameters"
         );
       }
-      const result = await findLibraryItemsWithFilters(validation.data);
+
+      const { offset, limit, ...restParams } = validation.data;
+      const result = await findLibraryItemsWithFilters({
+        ...restParams,
+        skip: offset,
+        take: limit,
+      });
       if (!result.ok) {
         this.logger.error(
           { error: result.error, userId: params.userId },
@@ -255,13 +230,26 @@ export class LibraryService extends BaseService {
         return this.error("Failed to fetch library items");
       }
 
-      const domainItems = LibraryItemMapper.toWithGameDomainList(result.data);
+      const domainItems = LibraryItemMapper.toWithGameDomainList(
+        result.data.items
+      );
+      const currentOffset = offset ?? 0;
+      const hasMore = currentOffset + domainItems.length < result.data.total;
 
       this.logger.info(
-        { count: domainItems.length, userId: params.userId },
+        {
+          count: domainItems.length,
+          total: result.data.total,
+          hasMore,
+          userId: params.userId,
+        },
         "Library items fetched successfully"
       );
-      return this.success(domainItems);
+      return this.success({
+        items: domainItems,
+        total: result.data.total,
+        hasMore,
+      });
     } catch (error) {
       this.logger.error(
         { error, ...params },

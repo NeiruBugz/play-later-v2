@@ -1,10 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import {
   LIBRARY_DATA_GC_TIME_MS,
   LIBRARY_DATA_STALE_TIME_MS,
+  LIBRARY_PAGE_SIZE,
 } from "@/shared/constants";
 import type {
   LibraryItemStatus,
@@ -19,10 +20,16 @@ export type LibraryFilters = {
   sortOrder?: "asc" | "desc";
 };
 
+type LibraryPageData = {
+  items: LibraryItemWithGameDomain[];
+  total: number;
+  hasMore: boolean;
+};
+
 type LibraryApiResponse =
   | {
       success: true;
-      data: LibraryItemWithGameDomain[];
+      data: LibraryPageData;
     }
   | {
       success: false;
@@ -30,14 +37,16 @@ type LibraryApiResponse =
     };
 
 export function useLibraryData(filters: LibraryFilters = {}) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["library", filters],
-    queryFn: async (): Promise<LibraryItemWithGameDomain[]> => {
+    queryFn: async ({ pageParam }): Promise<LibraryPageData> => {
       const params = new URLSearchParams(
         Object.entries(filters)
           .filter(([, value]) => value !== undefined)
           .map(([key, value]) => [key, String(value)])
       );
+      params.set("offset", String(pageParam));
+      params.set("limit", String(LIBRARY_PAGE_SIZE));
 
       const response = await fetch(`/api/library?${params.toString()}`);
       if (!response.ok) {
@@ -50,6 +59,15 @@ export function useLibraryData(filters: LibraryFilters = {}) {
         throw new Error(json.error);
       }
       return json.data;
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.hasMore) return undefined;
+      const totalFetched = allPages.reduce(
+        (sum, page) => sum + page.items.length,
+        0
+      );
+      return totalFetched;
     },
     staleTime: LIBRARY_DATA_STALE_TIME_MS,
     gcTime: LIBRARY_DATA_GC_TIME_MS,

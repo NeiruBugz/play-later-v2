@@ -116,27 +116,27 @@ test.describe("Profile Page - With Library Items", () => {
       createTestLibraryItem({
         userId: user.id,
         gameId: game1.id,
-        status: "CURIOUS_ABOUT",
+        status: "WANT_TO_PLAY",
       }),
       createTestLibraryItem({
         userId: user.id,
         gameId: game2.id,
-        status: "CURIOUS_ABOUT",
+        status: "WANT_TO_PLAY",
       }),
       createTestLibraryItem({
         userId: user.id,
         gameId: game3.id,
-        status: "CURIOUS_ABOUT",
+        status: "WANT_TO_PLAY",
       }),
       createTestLibraryItem({
         userId: user.id,
         gameId: game4.id,
-        status: "CURRENTLY_EXPLORING",
+        status: "PLAYING",
       }),
       createTestLibraryItem({
         userId: user.id,
         gameId: game5.id,
-        status: "CURRENTLY_EXPLORING",
+        status: "PLAYING",
       }),
     ]);
   });
@@ -150,14 +150,12 @@ test.describe("Profile Page - With Library Items", () => {
     await profile.goto();
 
     await expect(profile.statsHeading()).toBeVisible();
-    await expect(profile.statusCard("Curious About")).toBeVisible();
+    await expect(profile.statusCard("Want to Play")).toBeVisible();
     await expect(
-      profile.statusCard("Curious About").getByText("3")
+      profile.statusCard("Want to Play").getByText("3")
     ).toBeVisible();
-    await expect(profile.statusCard("Currently Exploring")).toBeVisible();
-    await expect(
-      profile.statusCard("Currently Exploring").getByText("2")
-    ).toBeVisible();
+    await expect(profile.statusCard("Playing")).toBeVisible();
+    await expect(profile.statusCard("Playing").getByText("2")).toBeVisible();
   });
 
   test("should display status cards with proper styling", async ({ page }) => {
@@ -191,10 +189,10 @@ test.describe("Profile Page - With Library Items", () => {
   test("should display human-readable status labels", async ({ page }) => {
     const profile = new ProfilePage(page);
     await profile.goto();
-    await expect(profile.statusCard("Curious About")).toBeVisible();
-    await expect(profile.statusCard("Currently Exploring")).toBeVisible();
-    await expect(page.getByText("CURIOUS_ABOUT")).not.toBeVisible();
-    await expect(page.getByText("CURRENTLY_EXPLORING")).not.toBeVisible();
+    await expect(profile.statusCard("Want to Play")).toBeVisible();
+    await expect(profile.statusCard("Playing")).toBeVisible();
+    await expect(page.getByText("WANT_TO_PLAY")).not.toBeVisible();
+    await expect(page.getByText("PLAYING")).not.toBeVisible();
   });
 
   test("should display Recently Played section with correct games", async ({

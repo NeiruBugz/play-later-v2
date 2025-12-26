@@ -207,19 +207,13 @@ export interface TestLibraryItem {
 export async function createTestLibraryItem(data: {
   userId: string;
   gameId: string;
-  status?:
-    | "CURIOUS_ABOUT"
-    | "CURRENTLY_EXPLORING"
-    | "TOOK_A_BREAK"
-    | "EXPERIENCED"
-    | "WISHLIST"
-    | "REVISITING";
+  status?: "WANT_TO_PLAY" | "OWNED" | "PLAYING" | "PLAYED";
 }): Promise<TestLibraryItem> {
   const libraryItem = await getPrisma().libraryItem.create({
     data: {
       userId: data.userId,
       gameId: data.gameId,
-      status: data.status ?? "CURIOUS_ABOUT",
+      status: data.status ?? "WANT_TO_PLAY",
     },
   });
   return {
@@ -228,4 +222,53 @@ export async function createTestLibraryItem(data: {
     gameId: libraryItem.gameId,
     status: libraryItem.status,
   };
+}
+export interface TestJournalEntry {
+  id: string;
+  userId: string;
+  gameId: string;
+  title: string | null;
+  content: string;
+}
+export async function createTestJournalEntry(data: {
+  userId: string;
+  gameId: string;
+  libraryItemId?: number;
+  title?: string;
+  content: string;
+  playSession?: number;
+}): Promise<TestJournalEntry> {
+  const entry = await getPrisma().journalEntry.create({
+    data: {
+      userId: data.userId,
+      gameId: data.gameId,
+      libraryItemId: data.libraryItemId ?? null,
+      title: data.title ?? null,
+      content: data.content,
+      playSession: data.playSession ?? null,
+    },
+  });
+  return {
+    id: entry.id,
+    userId: entry.userId,
+    gameId: entry.gameId,
+    title: entry.title,
+    content: entry.content,
+  };
+}
+export async function deleteTestJournalEntries(userId: string): Promise<void> {
+  await getPrisma().journalEntry.deleteMany({
+    where: { userId },
+  });
+}
+export async function cleanupUserTestData(userId: string): Promise<void> {
+  const client = getPrisma();
+  await client.journalEntry.deleteMany({ where: { userId } });
+  await client.libraryItem.deleteMany({ where: { userId } });
+  await client.game.deleteMany({
+    where: {
+      title: { contains: "Test Game" },
+      libraryItems: { none: {} },
+    },
+  });
 }

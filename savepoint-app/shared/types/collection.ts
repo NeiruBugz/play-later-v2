@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const FilterParamsSchema = z.object({
   platform: z.string().optional().default(""),
-  status: z.union([z.nativeEnum(LibraryItemStatus), z.string()]).optional(),
+  status: z.union([z.enum(LibraryItemStatus), z.string()]).optional(),
   search: z.string().optional().default(""),
   page: z.coerce.number().optional().default(1),
 });

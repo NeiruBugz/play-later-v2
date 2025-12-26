@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  BookmarkIcon,
-  ClockIcon,
-  GamepadIcon,
-  HeartIcon,
-  PauseIcon,
-  SparklesIcon,
-} from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -24,10 +16,10 @@ import {
 } from "@/shared/components/ui/card";
 import { formatAbsoluteDate } from "@/shared/lib/date";
 import {
-  LIBRARY_STATUS_LABELS,
-  LIBRARY_STATUS_VARIANTS,
+  getStatusIcon,
+  getStatusLabel,
+  getStatusVariant,
 } from "@/shared/lib/library-status";
-import type { LibraryItemStatus } from "@/shared/types";
 
 import { AddToLibraryButton } from "./add-to-library-button";
 import type { LibraryStatusDisplayProps } from "./library-status-display.types";
@@ -39,18 +31,6 @@ const LibraryModal = dynamic(
     ),
   { ssr: false }
 );
-
-const STATUS_ICONS: Record<
-  LibraryItemStatus,
-  React.ComponentType<{ className?: string }>
-> = {
-  CURIOUS_ABOUT: SparklesIcon,
-  CURRENTLY_EXPLORING: GamepadIcon,
-  TOOK_A_BREAK: PauseIcon,
-  EXPERIENCED: HeartIcon,
-  WISHLIST: BookmarkIcon,
-  REVISITING: ClockIcon,
-};
 
 export const LibraryStatusDisplay = ({
   gameId,
@@ -79,9 +59,9 @@ export const LibraryStatusDisplay = ({
   }
 
   const status = userLibraryStatus.mostRecent.status;
-  const Icon = STATUS_ICONS[status];
-  const statusLabel = LIBRARY_STATUS_LABELS[status];
-  const badgeVariant = LIBRARY_STATUS_VARIANTS[status];
+  const Icon = getStatusIcon(status);
+  const statusLabel = getStatusLabel(status);
+  const badgeVariant = getStatusVariant(status);
   const updatedDate = formatAbsoluteDate(userLibraryStatus.updatedAt);
 
   const handleDeleteItem = async (itemId: number) => {

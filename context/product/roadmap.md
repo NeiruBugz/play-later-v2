@@ -23,7 +23,7 @@ _The highest priority features that form the core foundation of SavePoint—enab
 
 - [x] **Personal Gaming Library**
   - [x] **Add Games to Library:** Enable users to add games from IGDB search results to their personal library.
-  - [x] **Journey Status Tracking:** Allow users to mark games with status indicators (Curious About, Currently Exploring, Taking a Break, Experienced, Wishlist, Revisiting) to organize their collection by intent.
+  - [x] **Journey Status Tracking:** Allow users to mark games with status indicators (Want to Play, Owned, Playing, Played) to organize their collection by intent.
   - [x] **Library View & Organization:** Display the user's gaming library in a clear, browsable format with filtering by status and platform.
 
 - [ ] **Gaming Journal**
@@ -36,10 +36,29 @@ _The highest priority features that form the core foundation of SavePoint—enab
 
 _Once the foundational features are complete, we will move on to these high-value additions that enhance discovery and reduce manual work._
 
-- [ ] **Platform Integration**
-  - [ ] **Monorepo Consolidation:** Migrate `play-later-lambdas` repository into the monorepo under `lambdas/`. Consolidate Terraform configurations (Cognito + Lambda infrastructure) into unified `infra/` directory with shared modules.
-  - [ ] **Steam Library Import:** Enable users to securely connect their Steam account and automatically import their game library for awareness and organization.
-  - [ ] **Steam Metadata Sync:** Automatically match imported Steam games with IGDB data for enriched metadata (2-stage Lambda pipeline: fetch → S3 → IGDB enrichment → database).
+- [ ] **Steam Library Integration**
+
+  _Philosophy: SavePoint is for games you intend to experience, not a catalog. Steam import is curation, not bulk transfer. See [Product Definition](product-definition.md#23-ux-principles)._
+
+  - [ ] **Stage 1: Technical Foundation**
+    - [ ] Steam OAuth connection (secure account linking)
+    - [ ] Lambda pipeline integration (fetch Steam library → IGDB enrichment → database)
+    - [ ] Imported games stored separately from library (staging area)
+
+  - [ ] **Stage 2: Curation UX Research**
+    - [ ] Research: How to present 100+ games without overwhelming users
+    - [ ] Evaluate approaches: playtime filtering, configurable criteria, smart grouping
+    - [ ] Define the curation flow and create functional spec
+
+  - [ ] **Stage 3: Curation Interface**
+    - [ ] Present imported games for user selection ("Choose games to track")
+    - [ ] Smart defaults: games with playtime pre-selected, never-launched unchecked
+    - [ ] Bulk actions: Select All / Deselect All
+    - [ ] Selected games added to library with chosen status
+
+  - [ ] **Stage 4: Ongoing Sync**
+    - [ ] Re-import detects new games only (no duplicates)
+    - [ ] Optional: periodic sync for new purchases
 
 - [ ] **Discovery & Exploration**
   - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.

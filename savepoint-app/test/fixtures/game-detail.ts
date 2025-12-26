@@ -27,7 +27,7 @@ export function createSimpleLibraryItemFixture(
     id: 1,
     userId: "user-123",
     gameId: "game-456",
-    status: "CURRENTLY_EXPLORING",
+    status: "PLAYING",
     platform: "Nintendo Switch",
     acquisitionType: "DIGITAL",
     startedAt: new Date("2025-01-01"),
