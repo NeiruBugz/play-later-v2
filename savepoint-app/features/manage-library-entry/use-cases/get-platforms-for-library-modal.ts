@@ -2,14 +2,14 @@
 
 import type { PlatformDomain } from "@/data-access-layer/domain/platform";
 import { upsertPlatforms } from "@/data-access-layer/repository";
-import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
+import { GameDetailService } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { PlatformService } from "@/data-access-layer/services/platform/platform-service";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 const logger = createLogger({
-  [LOGGER_CONTEXT.SERVICE]: "getPlatformsForLibraryModalUseCase",
+  [LOGGER_CONTEXT.USE_CASE]: "getPlatformsForLibraryModalUseCase",
 });
 
 export type GetPlatformsForLibraryModalInput = {
@@ -90,7 +90,7 @@ export async function getPlatformsForLibraryModal(
         }));
 
         const upsertResult = await upsertPlatforms(mappedPlatforms);
-        if (!upsertResult.ok) {
+        if (!upsertResult.success) {
           logger.error(
             { error: upsertResult.error, igdbId },
             "Failed to upsert platforms from IGDB"
@@ -98,7 +98,8 @@ export async function getPlatformsForLibraryModal(
         }
 
         // Populate game in database (also handles platforms)
-        await populateGameInDatabase(igdbGame);
+        const gameDetailService = new GameDetailService();
+        await gameDetailService.populateGameInDatabase(igdbGame);
 
         // Re-fetch platforms from database
         const refreshedResult =
@@ -138,7 +139,7 @@ export async function getPlatformsForLibraryModal(
       }));
 
       const upsertResult = await upsertPlatforms(mappedPlatforms);
-      if (!upsertResult.ok) {
+      if (!upsertResult.success) {
         logger.error(
           { error: upsertResult.error },
           "Failed to upsert all platforms from IGDB"

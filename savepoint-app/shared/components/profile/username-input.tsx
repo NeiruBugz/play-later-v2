@@ -3,11 +3,11 @@
 import { Check, Loader2, X } from "lucide-react";
 import { useEffect } from "react";
 
+import { useUsernameValidation } from "@/features/setup-profile/hooks/use-username-validation";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { cn } from "@/shared/lib/ui/utils";
 
-import { useUsernameValidation } from "../hooks/use-username-validation";
 import type { UsernameInputProps } from "./username-input.types";
 
 export function UsernameInput({

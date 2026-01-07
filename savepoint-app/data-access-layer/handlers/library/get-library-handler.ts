@@ -1,9 +1,15 @@
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
+import {
+  DEFAULT_RATE_LIMIT_REQUESTS,
+  RATE_LIMIT_RETRY_AFTER_SECONDS,
+} from "@/shared/constants";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { checkRateLimit } from "@/shared/lib/rate-limit";
 
 import type { HandlerResult, RequestContext } from "../types";
 import type { GetLibraryHandlerInput, GetLibraryHandlerOutput } from "./types";
@@ -54,6 +60,24 @@ export async function getLibraryHandler(
       success: false,
       error: validation.error.issues[0]?.message ?? "Invalid input parameters",
       status: HTTP_STATUS.BAD_REQUEST,
+    };
+  }
+
+  const rateLimitRequest = {
+    headers: context.headers,
+  } as unknown as NextRequest;
+  const rateLimitResult = await checkRateLimit(rateLimitRequest);
+  if (!rateLimitResult.allowed) {
+    logger.warn({ userId, ip: context.ip }, "Rate limit exceeded");
+    return {
+      success: false,
+      error: "Rate limit exceeded. Try again later.",
+      status: HTTP_STATUS.TOO_MANY_REQUESTS,
+      headers: {
+        "X-RateLimit-Limit": String(DEFAULT_RATE_LIMIT_REQUESTS),
+        "X-RateLimit-Remaining": "0",
+        "Retry-After": String(RATE_LIMIT_RETRY_AFTER_SECONDS),
+      },
     };
   }
 

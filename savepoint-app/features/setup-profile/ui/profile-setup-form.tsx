@@ -10,6 +10,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { AvatarUpload, UsernameInput } from "@/shared/components";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -25,9 +26,7 @@ import {
   completeProfileSetupFormAction,
   skipProfileSetup,
 } from "../server-actions";
-import { AvatarUpload } from "./avatar-upload";
 import type { ProfileSetupFormProps } from "./profile-setup-form.types";
-import { UsernameInput } from "./username-input";
 
 export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
   const router = useRouter();

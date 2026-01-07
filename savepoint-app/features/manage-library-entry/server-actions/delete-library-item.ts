@@ -5,7 +5,7 @@ import { LibraryService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT, type ActionResult } from "@/shared/lib";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "deleteLibraryItemAction",
@@ -15,11 +15,10 @@ const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
 });
 export type DeleteLibraryItemInput = z.infer<typeof DeleteLibraryItemSchema>;
-type ActionResult = { success: true } | { success: false; error: string };
 
 export async function deleteLibraryItemAction(
   input: DeleteLibraryItemInput
-): Promise<ActionResult> {
+): Promise<ActionResult<void>> {
   try {
     logger.info(
       { libraryItemId: input.libraryItemId },
@@ -68,6 +67,7 @@ export async function deleteLibraryItemAction(
     );
     return {
       success: true,
+      data: undefined,
     };
   } catch (error) {
     logger.error(

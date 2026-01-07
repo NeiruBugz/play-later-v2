@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
-import { AvatarUpload, UsernameInput } from "@/features/setup-profile";
+import { AvatarUpload, UsernameInput } from "@/shared/components";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,

@@ -74,8 +74,8 @@ describe("PlatformRepository - Integration Tests", () => {
       }
 
       const findResult = await findPlatformByIgdbId(48);
-      expect(findResult.ok).toBe(true);
-      if (findResult.ok) {
+      expect(findResult.success).toBe(true);
+      if (findResult.success) {
         expect(findResult.data?.name).toBe("PlayStation 5 Pro");
       }
     });

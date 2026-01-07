@@ -2,10 +2,11 @@ import { VALID_IMAGE_TYPES } from "@fixtures/enum-test-cases";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { uploadAvatar } from "../server-actions";
+import { uploadAvatar } from "@/features/setup-profile/server-actions";
+
 import { AvatarUpload } from "./avatar-upload";
 
-vi.mock("../server-actions", () => ({
+vi.mock("@/features/setup-profile/server-actions", () => ({
   uploadAvatar: vi.fn(),
 }));
 

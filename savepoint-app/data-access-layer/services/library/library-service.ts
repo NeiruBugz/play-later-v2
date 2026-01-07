@@ -67,7 +67,7 @@ export class LibraryService extends BaseService {
     try {
       this.logger.info({ igdbId }, "Finding game by IGDB ID");
       const result = await findGameByIgdbId(igdbId);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, igdbId },
           "Failed to find game"
@@ -92,7 +92,7 @@ export class LibraryService extends BaseService {
     try {
       this.logger.info(params, "Finding most recent library item");
       const result = await findMostRecentLibraryItemByGameId(params);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find library item"
@@ -128,7 +128,7 @@ export class LibraryService extends BaseService {
         libraryItemId: params.libraryItem.id,
         userId: params.userId,
       });
-      if (!currentItemResult.ok) {
+      if (!currentItemResult.success) {
         this.logger.error(
           { error: currentItemResult.error, ...params },
           "Failed to fetch library item for update"
@@ -144,7 +144,7 @@ export class LibraryService extends BaseService {
           completedAt: params.libraryItem.completedAt,
         },
       });
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to update library item"
@@ -176,7 +176,7 @@ export class LibraryService extends BaseService {
     try {
       this.logger.info(params, "Finding all library items for game");
       const result = await findAllLibraryItemsByGameId(params);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find library items"
@@ -222,7 +222,7 @@ export class LibraryService extends BaseService {
         skip: offset,
         take: limit,
       });
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, userId: params.userId },
           "Failed to fetch library items"
@@ -283,7 +283,7 @@ export class LibraryService extends BaseService {
         libraryItemId: params.libraryItemId,
         userId: params.userId,
       });
-      if (!deleteResult.ok) {
+      if (!deleteResult.success) {
         if (deleteResult.error.code === "NOT_FOUND") {
           this.logger.warn(
             { libraryItemId: params.libraryItemId, userId: params.userId },
@@ -347,7 +347,7 @@ export class LibraryService extends BaseService {
           completedAt: params.libraryItem.completedAt,
         },
       });
-      if (!result.ok) {
+      if (!result.success) {
         if (result.error.code === "DUPLICATE") {
           this.logger.warn(
             { userId: params.userId, gameId: params.gameId },

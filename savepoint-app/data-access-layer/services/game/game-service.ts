@@ -26,7 +26,7 @@ export class GameService extends BaseService {
 
     const result = await findGamesByIds(ids);
 
-    if (!result.ok) {
+    if (!result.success) {
       logger.error({ error: result.error }, "Failed to fetch games by IDs");
       return this.error(result.error.message, ServiceErrorCode.INTERNAL_ERROR);
     }
@@ -47,7 +47,7 @@ export class GameService extends BaseService {
 
     const result = await findGameById(id);
 
-    if (!result.ok) {
+    if (!result.success) {
       logger.error({ error: result.error }, "Failed to fetch game by ID");
       return this.error(result.error.message, ServiceErrorCode.INTERNAL_ERROR);
     }

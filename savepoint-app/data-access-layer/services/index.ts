@@ -57,6 +57,7 @@ export {
 } from "./journal/types";
 export { JournalService } from "./journal/journal-service";
 export { GameService } from "./game/game-service";
+export { GameDetailService } from "./game-detail/game-detail-service";
 export {
   OnboardingService,
   type OnboardingStep,

@@ -4,10 +4,10 @@ import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 
+import { uploadAvatar } from "@/features/setup-profile/server-actions";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
 
-import { uploadAvatar } from "../server-actions";
 import type { AvatarUploadProps } from "./avatar-upload.types";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
