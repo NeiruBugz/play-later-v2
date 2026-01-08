@@ -1,6 +1,4 @@
-import type { RateLimitInput } from "./rate-limit";
-
-import { checkRateLimit } from "./rate-limit";
+import { checkRateLimit, type RateLimitInput } from "./rate-limit";
 
 function createMockRequest(ip: string): RateLimitInput {
   return {

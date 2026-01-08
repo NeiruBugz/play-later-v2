@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { getSession } from "./helpers/auth";
 import {
+  cleanupUserTestData,
   createTestGame,
   createTestLibraryItem,
   disconnectDatabase,
@@ -10,6 +11,14 @@ import {
 import { ProfilePage } from "./pages/profile.page";
 
 test.describe("Profile Page", () => {
+  test.beforeEach(async () => {
+    const email = process.env.E2E_AUTH_EMAIL ?? "e2e-auth-user@example.com";
+    const user = await getUserByEmail(email);
+    if (user) {
+      await cleanupUserTestData(user.id);
+    }
+  });
+
   test.afterAll(async () => {
     await disconnectDatabase();
   });
@@ -83,10 +92,13 @@ test.describe("Profile Page", () => {
 });
 
 test.describe("Profile Page - With Library Items", () => {
-  test.beforeAll(async () => {
+  test.beforeEach(async () => {
     const email = process.env.E2E_AUTH_EMAIL ?? "e2e-auth-user@example.com";
     const user = await getUserByEmail(email);
     if (!user) throw new Error("Authenticated user not found in DB");
+
+    // Clean up any existing test data first
+    await cleanupUserTestData(user.id);
 
     const [game1, game2, game3, game4, game5] = await Promise.all([
       createTestGame({
@@ -191,8 +203,10 @@ test.describe("Profile Page - With Library Items", () => {
     await profile.goto();
     await expect(profile.statusCard("Want to Play")).toBeVisible();
     await expect(profile.statusCard("Playing")).toBeVisible();
-    await expect(page.getByText("WANT_TO_PLAY")).not.toBeVisible();
-    await expect(page.getByText("PLAYING")).not.toBeVisible();
+    await expect(
+      page.getByText("WANT_TO_PLAY", { exact: true })
+    ).not.toBeVisible();
+    await expect(page.getByText("PLAYING", { exact: true })).not.toBeVisible();
   });
 
   test("should display Recently Played section with correct games", async ({

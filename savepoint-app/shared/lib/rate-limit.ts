@@ -58,8 +58,7 @@ export async function checkRateLimit(
   limit: number = DEFAULT_RATE_LIMIT_REQUESTS,
   windowMs: number = DEFAULT_RATE_LIMIT_WINDOW_MS
 ): Promise<{ allowed: boolean; remaining: number }> {
-  const ip =
-    input.ip ?? input.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = input.ip ?? input.headers.get("x-forwarded-for") ?? "unknown";
   const limiter = initializeRateLimiter();
   if (limiter) {
     const { success, remaining } = await limiter.limit(ip);

@@ -1,8 +1,25 @@
 import { expect, test } from "@playwright/test";
 
+import {
+  cleanupUserTestData,
+  disconnectDatabase,
+  getUserByEmail,
+} from "./helpers/db";
 import { LibraryPage } from "./pages/library.page";
 
 test.describe("[library] Library page", () => {
+  test.beforeAll(async () => {
+    const email = process.env.E2E_AUTH_EMAIL ?? "e2e-auth-user@example.com";
+    const user = await getUserByEmail(email);
+    if (user) {
+      await cleanupUserTestData(user.id);
+    }
+  });
+
+  test.afterAll(async () => {
+    await disconnectDatabase();
+  });
+
   test("displays all status filter buttons", async ({ page }) => {
     const library = new LibraryPage(page);
     await library.goto();

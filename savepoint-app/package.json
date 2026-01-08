@@ -27,8 +27,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "db:cleanup-test": "docker exec savepoint-postgres psql -U postgres -t -c \"SELECT datname FROM pg_database WHERE datname LIKE 'test_%';\" | xargs -I {} docker exec savepoint-postgres dropdb -U postgres --if-exists \"{}\"",
-    "code-fix": "pnpm format:write && pnpm lint:fix",
-    "commitlint": "commitlint --edit",
+    "ci:fix": "pnpm format:write && pnpm lint:fix",
     "ci:check": "pnpm lint && pnpm format:check && pnpm typecheck"
   },
   "dependencies": {

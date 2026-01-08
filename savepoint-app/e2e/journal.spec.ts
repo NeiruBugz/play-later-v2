@@ -61,20 +61,29 @@ test.describe("[journal] Journal With Entries", () => {
   let testLibraryItem: TestLibraryItem;
   let testEntry: TestJournalEntry;
   let userId: string;
+  let testRunId: number;
 
-  test.beforeEach(async () => {
+  test.beforeAll(async () => {
     const user = await getUserByEmail(AUTH_USER_EMAIL);
     if (!user) {
       throw new Error("Auth user not found");
     }
     userId = user.id;
+    // Use a unique ID for this test run to avoid collisions with parallel tests
+    // Keep it small enough to fit in PostgreSQL integer type
+    testRunId = Math.floor(Date.now() / 1000) % 100000;
+  });
 
-    await cleanupUserTestData(userId);
+  test.beforeEach(async () => {
+    // Don't delete entries - each test creates fresh data with unique IDs
+    // Global teardown will clean up all test data
 
+    // Use unique igdbId per test to avoid conflicts
+    const uniqueId = testRunId * 100 + Math.floor(Math.random() * 100);
     testGame = await createTestGame({
-      title: "Test Game for Journal",
-      igdbId: 999001,
-      slug: "test-game-journal",
+      title: `JournalWithEntries Game ${uniqueId}`,
+      igdbId: 900000 + uniqueId,
+      slug: `journal-with-entries-game-${uniqueId}`,
     });
 
     testLibraryItem = await createTestLibraryItem({
@@ -202,20 +211,28 @@ test.describe("[journal] Journal With Entries", () => {
 test.describe("[journal] Create Entry Flow", () => {
   let testGame: TestGame;
   let userId: string;
+  let testRunId: number;
 
-  test.beforeEach(async () => {
+  test.beforeAll(async () => {
     const user = await getUserByEmail(AUTH_USER_EMAIL);
     if (!user) {
       throw new Error("Auth user not found");
     }
     userId = user.id;
+    // Use a unique ID for this test run, keep small for PostgreSQL integer
+    testRunId = Math.floor(Date.now() / 1000) % 100000;
+  });
 
-    await cleanupUserTestData(userId);
+  test.beforeEach(async () => {
+    // Don't delete entries - each test creates fresh data with unique IDs
+    // Global teardown will clean up all test data
 
+    // Use unique igdbId per test to avoid conflicts
+    const uniqueId = testRunId * 100 + Math.floor(Math.random() * 100);
     testGame = await createTestGame({
-      title: "Test Game for Create",
-      igdbId: 999002,
-      slug: "test-game-create",
+      title: `CreateFlow Game ${uniqueId}`,
+      igdbId: 800000 + uniqueId,
+      slug: `createflow-game-${uniqueId}`,
     });
 
     await createTestLibraryItem({
@@ -245,7 +262,7 @@ test.describe("[journal] Create Entry Flow", () => {
     const journal = new JournalPage(page);
     await journal.gotoNewEntry();
 
-    await journal.gameButton("Test Game for Create").click();
+    await journal.gameButton(testGame.title).click();
 
     await journal.fillEntryForm({
       title: "New Journal Entry",
@@ -266,7 +283,7 @@ test.describe("[journal] Create Entry Flow", () => {
     const journal = new JournalPage(page);
     await journal.gotoNewEntry();
 
-    await journal.gameButton("Test Game for Create").click();
+    await journal.gameButton(testGame.title).click();
 
     await journal.fillEntryForm({
       content: "Content without a title.",
