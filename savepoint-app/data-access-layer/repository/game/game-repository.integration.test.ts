@@ -32,7 +32,7 @@ describe("Game Repository Integration Tests", () => {
       slug: "test-platform",
     });
 
-    if (!genreResult.ok || !platformResult.ok) {
+    if (!genreResult.success || !platformResult.success) {
       throw new Error("Failed to set up test data");
     }
 
@@ -56,8 +56,8 @@ describe("Game Repository Integration Tests", () => {
       platformIds: [testPlatformId],
     });
 
-    expect(result.ok).toBe(true);
-    if (result.ok) {
+    expect(result.success).toBe(true);
+    if (result.success) {
       expect(result.data.title).toBe("Test Game");
       expect(result.data.slug).toBe("test-game");
       expect(result.data.igdbId).toBe(12345);
@@ -79,8 +79,8 @@ describe("Game Repository Integration Tests", () => {
 
     const result = await findGameBySlug("test-game");
 
-    expect(result.ok).toBe(true);
-    if (result.ok && result.data) {
+    expect(result.success).toBe(true);
+    if (result.success && result.data) {
       expect(result.data.title).toBe("Test Game");
       expect(result.data.genres).toHaveLength(1);
       expect(result.data.platforms).toHaveLength(1);
@@ -102,8 +102,8 @@ describe("Game Repository Integration Tests", () => {
 
     const result = await findGameByIgdbId(12345);
 
-    expect(result.ok).toBe(true);
-    if (result.ok && result.data) {
+    expect(result.success).toBe(true);
+    if (result.success && result.data) {
       expect(result.data.igdbId).toBe(12345);
     }
   });
@@ -124,13 +124,13 @@ describe("Game Repository Integration Tests", () => {
     const existsResult = await gameExistsByIgdbId(12345);
     const notExistsResult = await gameExistsByIgdbId(99999);
 
-    expect(existsResult.ok).toBe(true);
-    if (existsResult.ok) {
+    expect(existsResult.success).toBe(true);
+    if (existsResult.success) {
       expect(existsResult.data).toBe(true);
     }
 
-    expect(notExistsResult.ok).toBe(true);
-    if (notExistsResult.ok) {
+    expect(notExistsResult.success).toBe(true);
+    if (notExistsResult.success) {
       expect(notExistsResult.data).toBe(false);
     }
   });
@@ -154,9 +154,9 @@ describe("Game Repository Integration Tests", () => {
       platformIds: [testPlatformId],
     });
 
-    expect(result1.ok).toBe(true);
-    expect(result2.ok).toBe(false);
-    if (!result2.ok) {
+    expect(result1.success).toBe(true);
+    expect(result2.success).toBe(false);
+    if (!result2.success) {
       expect(result2.error.code).toBe("DUPLICATE");
     }
   });
@@ -164,8 +164,8 @@ describe("Game Repository Integration Tests", () => {
   it("should return null when game slug is not found", async () => {
     const result = await findGameBySlug("non-existent-slug");
 
-    expect(result.ok).toBe(true);
-    if (result.ok) {
+    expect(result.success).toBe(true);
+    if (result.success) {
       expect(result.data).toBeNull();
     }
   });
@@ -173,8 +173,8 @@ describe("Game Repository Integration Tests", () => {
   it("should return null when game IGDB ID is not found", async () => {
     const result = await findGameByIgdbId(99999);
 
-    expect(result.ok).toBe(true);
-    if (result.ok) {
+    expect(result.success).toBe(true);
+    if (result.success) {
       expect(result.data).toBeNull();
     }
   });
@@ -192,12 +192,12 @@ describe("Game Repository Integration Tests", () => {
       platformIds: [],
     });
 
-    expect(result.ok).toBe(true);
-    if (result.ok) {
+    expect(result.success).toBe(true);
+    if (result.success) {
       expect(result.data.title).toBe("Game Without Relations");
 
       const gameWithRelations = await findGameByIgdbId(11111);
-      if (gameWithRelations.ok && gameWithRelations.data) {
+      if (gameWithRelations.success && gameWithRelations.data) {
         expect(gameWithRelations.data.genres).toHaveLength(0);
         expect(gameWithRelations.data.platforms).toHaveLength(0);
       }

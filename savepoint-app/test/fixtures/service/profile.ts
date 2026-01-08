@@ -20,7 +20,7 @@ export const newUserProfileFixture = {
   createdAt: new Date("2024-03-01"),
 };
 export const libraryStatsSuccessFixture = {
-  ok: true as const,
+  success: true as const,
   data: {
     statusCounts: {
       WANT_TO_PLAY: 5,
@@ -45,14 +45,14 @@ export const libraryStatsSuccessFixture = {
   },
 };
 export const libraryStatsEmptyFixture = {
-  ok: true as const,
+  success: true as const,
   data: {
     statusCounts: {},
     recentGames: [],
   },
 };
 export const libraryStatsErrorFixture = {
-  ok: false as const,
+  success: false as const,
   error: {
     code: "STATS_FETCH_FAILED",
     message: "Failed to fetch library stats",

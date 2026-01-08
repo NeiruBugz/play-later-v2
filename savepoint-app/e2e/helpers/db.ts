@@ -128,12 +128,22 @@ export async function clearTestData(): Promise<void> {
   });
   await client.game.deleteMany({
     where: {
-      title: {
-        contains: "Test Game",
-      },
-      libraryItems: {
-        none: {},
-      },
+      OR: [
+        { title: { contains: "Test Game" } },
+        { title: { startsWith: "E2E " } },
+        {
+          title: {
+            in: [
+              "The Legend of Zelda",
+              "Super Mario Bros",
+              "Hades",
+              "Celeste",
+              "Hollow Knight",
+            ],
+          },
+        },
+      ],
+      libraryItems: { none: {} },
     },
   });
   await deleteTestUsersByPattern("test-");
@@ -265,9 +275,24 @@ export async function cleanupUserTestData(userId: string): Promise<void> {
   const client = getPrisma();
   await client.journalEntry.deleteMany({ where: { userId } });
   await client.libraryItem.deleteMany({ where: { userId } });
+  // Only delete games that are NOT part of active tests (E2E prefix games are protected)
+  // E2E games will be cleaned up in afterAll/global teardown
   await client.game.deleteMany({
     where: {
-      title: { contains: "Test Game" },
+      OR: [
+        { title: { contains: "Test Game" } },
+        {
+          title: {
+            in: [
+              "The Legend of Zelda",
+              "Super Mario Bros",
+              "Hades",
+              "Celeste",
+              "Hollow Knight",
+            ],
+          },
+        },
+      ],
       libraryItems: { none: {} },
     },
   });

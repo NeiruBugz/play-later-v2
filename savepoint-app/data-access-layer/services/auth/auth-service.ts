@@ -18,7 +18,7 @@ export class AuthService extends BaseService {
       this.logger.info({ userId: "unknown" }, "User sign up attempt");
       const normalizedEmail = input.email.trim().toLowerCase();
       const existingUserResult = await findUserByEmail(normalizedEmail);
-      if (!existingUserResult.ok) {
+      if (!existingUserResult.success) {
         this.logger.error(
           { userId: "unknown", error: existingUserResult.error },
           "Error checking for existing user"
@@ -44,7 +44,7 @@ export class AuthService extends BaseService {
         password: hashedPassword,
         name: input.name ?? null,
       });
-      if (!createUserResult.ok) {
+      if (!createUserResult.success) {
         this.logger.error(
           { userId: "unknown", error: createUserResult.error },
           "Error creating user account"

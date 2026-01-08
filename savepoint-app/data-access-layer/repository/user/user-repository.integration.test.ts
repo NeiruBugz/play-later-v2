@@ -37,8 +37,8 @@ describe("UserRepository - Integration Tests", () => {
       const dbUserResult = await findUserById(user.id, {
         select: { id: true, username: true, usernameNormalized: true },
       });
-      expect(dbUserResult.ok).toBe(true);
-      if (dbUserResult.ok) {
+      expect(dbUserResult.success).toBe(true);
+      if (dbUserResult.success) {
         expect(dbUserResult.data?.username).toBe("NewUsername");
         expect(dbUserResult.data?.usernameNormalized).toBe("newusername");
       }
@@ -84,8 +84,8 @@ describe("UserRepository - Integration Tests", () => {
       const dbUserResult = await findUserById(user.id, {
         select: { id: true, image: true },
       });
-      expect(dbUserResult.ok).toBe(true);
-      if (dbUserResult.ok) {
+      expect(dbUserResult.success).toBe(true);
+      if (dbUserResult.success) {
         expect(dbUserResult.data?.image).toBe("https://example.com/avatar.jpg");
       }
     });
@@ -120,8 +120,8 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUserResult.ok).toBe(true);
-      if (dbUserResult.ok) {
+      expect(dbUserResult.success).toBe(true);
+      if (dbUserResult.success) {
         expect(dbUserResult.data).toMatchObject({
           id: user.id,
           username: "NewUsername",
@@ -170,8 +170,8 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUserResult.ok).toBe(true);
-      if (dbUserResult.ok) {
+      expect(dbUserResult.success).toBe(true);
+      if (dbUserResult.success) {
         expect(dbUserResult.data).toMatchObject({
           id: user.id,
           username: "testuser",
@@ -203,8 +203,8 @@ describe("UserRepository - Integration Tests", () => {
       const dbUserResult = await findUserById(user.id, {
         select: { id: true, username: true, usernameNormalized: true },
       });
-      expect(dbUserResult.ok).toBe(true);
-      if (dbUserResult.ok) {
+      expect(dbUserResult.success).toBe(true);
+      if (dbUserResult.success) {
         expect(dbUserResult.data?.username).toBeNull();
         expect(dbUserResult.data?.usernameNormalized).toBeNull();
       }
@@ -228,8 +228,8 @@ describe("UserRepository - Integration Tests", () => {
       const dbUserResult = await findUserById(user.id, {
         select: { id: true, image: true },
       });
-      expect(dbUserResult.ok).toBe(true);
-      if (dbUserResult.ok) {
+      expect(dbUserResult.success).toBe(true);
+      if (dbUserResult.success) {
         expect(dbUserResult.data?.image).toBeNull();
       }
     });
@@ -311,16 +311,16 @@ describe("UserRepository - Integration Tests", () => {
         username: "user2",
         usernameNormalized: "user2",
       });
-      expect(result1.ok).toBe(true);
-      if (result1.ok) {
+      expect(result1.success).toBe(true);
+      if (result1.success) {
         expect(result1.data.username).toBe("user2");
       }
 
       const result2 = await updateUserProfile(user.id, {
         image: "https://example.com/avatar1.jpg",
       });
-      expect(result2.ok).toBe(true);
-      if (result2.ok) {
+      expect(result2.success).toBe(true);
+      if (result2.success) {
         expect(result2.data.image).toBe("https://example.com/avatar1.jpg");
         expect(result2.data.username).toBe("user2");
       }
@@ -331,8 +331,8 @@ describe("UserRepository - Integration Tests", () => {
         image: "https://example.com/avatar2.jpg",
       });
 
-      expect(result3.ok).toBe(true);
-      if (result3.ok) {
+      expect(result3.success).toBe(true);
+      if (result3.success) {
         expect(result3.data).toMatchObject({
           id: user.id,
           username: "user3",
@@ -349,8 +349,8 @@ describe("UserRepository - Integration Tests", () => {
           image: true,
         },
       });
-      expect(dbUserResult.ok).toBe(true);
-      if (dbUserResult.ok) {
+      expect(dbUserResult.success).toBe(true);
+      if (dbUserResult.success) {
         expect(dbUserResult.data).toMatchObject({
           username: "user3",
           usernameNormalized: "user3",

@@ -9,28 +9,37 @@ import { prisma } from "@/shared/lib/app/db";
 
 import { addGameToLibrary } from "./add-game-to-library";
 
-const { mockGetGameDetails, MockIgdbService, mockPopulateGameInDatabase } =
-  vi.hoisted(() => {
-    const mockFn = vi.fn();
-    const mockPopulate = vi.fn();
+const {
+  mockGetGameDetails,
+  MockIgdbService,
+  mockPopulateGameInDatabase,
+  MockGameDetailService,
+} = vi.hoisted(() => {
+  const mockFn = vi.fn();
+  const mockPopulate = vi.fn();
 
-    return {
-      mockGetGameDetails: mockFn,
-      MockIgdbService: class {
-        async getGameDetails(...args: unknown[]) {
-          return mockFn(...args);
-        }
-      },
-      mockPopulateGameInDatabase: mockPopulate,
-    };
-  });
+  return {
+    mockGetGameDetails: mockFn,
+    MockIgdbService: class {
+      async getGameDetails(...args: unknown[]) {
+        return mockFn(...args);
+      }
+    },
+    mockPopulateGameInDatabase: mockPopulate,
+    MockGameDetailService: class {
+      async populateGameInDatabase(...args: unknown[]) {
+        return mockPopulate(...args);
+      }
+    },
+  };
+});
 
 vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
   IgdbService: MockIgdbService,
 }));
 
 vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
-  populateGameInDatabase: mockPopulateGameInDatabase,
+  GameDetailService: MockGameDetailService,
 }));
 
 describe("addGameToLibrary - Use Case Integration Tests", () => {
@@ -61,7 +70,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
     });
 
     mockPopulateGameInDatabase.mockImplementation(async (game) => {
-      await prisma.game.create({
+      const createdGame = await prisma.game.create({
         data: {
           title: game.name,
           igdbId: game.id,
@@ -75,6 +84,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
             : null,
         },
       });
+      return { success: true, data: createdGame };
     });
 
     testUser = await createUser({

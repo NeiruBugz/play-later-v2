@@ -6,8 +6,8 @@ import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
+import { uploadAvatar } from "@/shared/server-actions/profile";
 
-import { uploadAvatar } from "../server-actions";
 import type { AvatarUploadProps } from "./avatar-upload.types";
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024;

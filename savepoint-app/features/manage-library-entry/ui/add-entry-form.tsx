@@ -3,10 +3,10 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { useGetPlatforms } from "@/features/game-detail/hooks/use-get-platforms";
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
+import { useGetPlatforms } from "@/shared/hooks/game";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 import { LibraryItemStatus } from "@/shared/types";
 

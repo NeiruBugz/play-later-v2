@@ -1,9 +1,8 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-type ActionResult<T = unknown> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+import type { ActionResult } from "@/shared/lib/server-action";
+
 type UseFormSubmissionOptions<TInput, TOutput> = {
   action: (input: TInput) => Promise<ActionResult<TOutput>>;
   onSuccess?: (data: TOutput) => void;

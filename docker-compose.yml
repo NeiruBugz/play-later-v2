@@ -53,7 +53,7 @@ services:
       DEBUG: ${LOCALSTACK_DEBUG:-0}
       DATA_DIR: /var/lib/localstack/data
       PERSISTENCE: 1
-      S3_BUCKET: ${S3_BUCKET:-savepoint-dev-imports}
+      S3_BUCKET: ${S3_BUCKET:-savepoint-dev}
     ports:
       - "${LOCALSTACK_PORT:-4568}:4566" # LocalStack Gateway
       - "4610-4659:4510-4559" # External services port range

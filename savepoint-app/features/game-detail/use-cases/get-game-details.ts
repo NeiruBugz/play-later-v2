@@ -1,11 +1,11 @@
 "use server";
 
 import {
+  GameDetailService,
   IgdbService,
   JournalService,
   LibraryService,
 } from "@/data-access-layer/services";
-import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { cache } from "react";
 
 import { createLogger } from "@/shared/lib/app/logger";
@@ -17,7 +17,7 @@ import type {
 } from "@/shared/types";
 
 const logger = createLogger({
-  [LOGGER_CONTEXT.SERVICE]: "getGameDetailsUseCase",
+  [LOGGER_CONTEXT.USE_CASE]: "getGameDetailsUseCase",
 });
 type GameDetailsResult = {
   game: FullGameInfoResponse;
@@ -58,12 +58,15 @@ export const getGameDetails = cache(async function getGameDetails(params: {
       };
     }
     const game = igdbResult.data.game;
-    populateGameInDatabase(game).catch((err) =>
-      logger.error(
-        { err, slug: params.slug },
-        "Background game population failed"
-      )
-    );
+    const gameDetailService = new GameDetailService();
+    gameDetailService
+      .populateGameInDatabase(game)
+      .catch((err) =>
+        logger.error(
+          { err, slug: params.slug },
+          "Background game population failed"
+        )
+      );
     const franchiseIds: number[] = [];
     if (typeof game.franchise === "number" && game.franchise > 0) {
       franchiseIds.push(game.franchise);

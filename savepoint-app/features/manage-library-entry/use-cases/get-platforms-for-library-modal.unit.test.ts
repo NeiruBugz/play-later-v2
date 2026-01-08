@@ -1,5 +1,5 @@
 import * as platformRepository from "@/data-access-layer/repository/platform/platform-repository";
-import * as gameDetailService from "@/data-access-layer/services/game-detail/game-detail-service";
+import { GameDetailService } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { PlatformService } from "@/data-access-layer/services/platform/platform-service";
 import {
@@ -9,6 +9,10 @@ import {
 
 import { getPlatformsForLibraryModal } from "./get-platforms-for-library-modal";
 
+vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
+  GameDetailService: vi.fn(),
+}));
+
 vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
   IgdbService: vi.fn(),
 }));
@@ -17,15 +21,14 @@ vi.mock("@/data-access-layer/services/platform/platform-service", () => ({
   PlatformService: vi.fn(),
 }));
 
-vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
-  populateGameInDatabase: vi.fn(),
-}));
-
 vi.mock("@/data-access-layer/repository/platform/platform-repository", () => ({
   upsertPlatforms: vi.fn(),
 }));
 
 describe("getPlatformsForLibraryModal", () => {
+  let mockGameDetailService: {
+    populateGameInDatabase: ReturnType<typeof vi.fn>;
+  };
   let mockPlatformService: {
     getPlatformsForGame: ReturnType<typeof vi.fn>;
   };
@@ -33,7 +36,6 @@ describe("getPlatformsForLibraryModal", () => {
     getGameDetails: ReturnType<typeof vi.fn>;
     getPlatforms: ReturnType<typeof vi.fn>;
   };
-  let mockPopulateGameInDatabase: ReturnType<typeof vi.fn>;
   let mockUpsertPlatforms: ReturnType<typeof vi.fn>;
 
   const validIgdbId = 12345;
@@ -56,6 +58,10 @@ describe("getPlatformsForLibraryModal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    mockGameDetailService = {
+      populateGameInDatabase: vi.fn(),
+    };
+
     mockPlatformService = {
       getPlatformsForGame: vi.fn(),
     };
@@ -65,12 +71,11 @@ describe("getPlatformsForLibraryModal", () => {
       getPlatforms: vi.fn(),
     };
 
-    mockPopulateGameInDatabase = vi.mocked(
-      gameDetailService.populateGameInDatabase
-    );
-
     mockUpsertPlatforms = vi.mocked(platformRepository.upsertPlatforms);
 
+    vi.mocked(GameDetailService).mockImplementation(function () {
+      return mockGameDetailService as unknown as GameDetailService;
+    });
     vi.mocked(PlatformService).mockImplementation(function () {
       return mockPlatformService as unknown as PlatformService;
     });
@@ -121,7 +126,10 @@ describe("getPlatformsForLibraryModal", () => {
       });
 
       mockUpsertPlatforms.mockResolvedValue({ ok: true, data: [] });
-      mockPopulateGameInDatabase.mockResolvedValue({ ok: true });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
@@ -136,7 +144,9 @@ describe("getPlatformsForLibraryModal", () => {
         gameId: validIgdbId,
       });
       expect(mockUpsertPlatforms).toHaveBeenCalled();
-      expect(mockPopulateGameInDatabase).toHaveBeenCalledWith(mockIgdbGame);
+      expect(mockGameDetailService.populateGameInDatabase).toHaveBeenCalledWith(
+        mockIgdbGame
+      );
       expect(mockPlatformService.getPlatformsForGame).toHaveBeenCalledTimes(2);
     });
 
@@ -222,7 +232,10 @@ describe("getPlatformsForLibraryModal", () => {
       });
 
       mockUpsertPlatforms.mockResolvedValue({ ok: true, data: [] });
-      mockPopulateGameInDatabase.mockResolvedValue({ ok: true });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockPlatformService.getPlatformsForGame
         .mockResolvedValueOnce({
@@ -285,7 +298,10 @@ describe("getPlatformsForLibraryModal", () => {
         ok: false,
         error: { message: "Upsert failed" },
       });
-      mockPopulateGameInDatabase.mockResolvedValue({ ok: true });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 

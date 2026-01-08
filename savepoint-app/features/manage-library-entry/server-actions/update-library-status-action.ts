@@ -4,7 +4,7 @@ import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT, type ActionResult } from "@/shared/lib";
 import type { LibraryItemDomain } from "@/shared/types";
 
 import {
@@ -16,9 +16,6 @@ import { addToLibraryAction } from "./add-to-library-action";
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "updateLibraryStatusAction",
 });
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
 
 export async function updateLibraryStatusAction(
   input: UpdateLibraryStatusByIgdbInput

@@ -1,6 +1,5 @@
 import { isSuccessResult } from "@/data-access-layer/services";
 import { IgdbService } from "@/data-access-layer/services/igdb";
-import type { NextRequest } from "next/server";
 
 import { SearchGamesSchema } from "@/features/game-search/schemas";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
@@ -36,10 +35,10 @@ export async function gameSearchHandler(
     };
   }
 
-  const rateLimitRequest = {
+  const rateLimitResult = await checkRateLimit({
     headers: context.headers,
-  } as unknown as NextRequest;
-  const rateLimitResult = await checkRateLimit(rateLimitRequest);
+    ip: context.ip,
+  });
   if (!rateLimitResult.allowed) {
     logger.warn({ query, ip: context.ip }, "Rate limit exceeded");
     return {

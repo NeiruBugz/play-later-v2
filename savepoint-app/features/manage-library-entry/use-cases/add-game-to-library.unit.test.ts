@@ -1,4 +1,4 @@
-import * as gameDetailService from "@/data-access-layer/services/game-detail/game-detail-service";
+import { GameDetailService } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
@@ -16,6 +16,10 @@ import {
 
 import { addGameToLibrary } from "./add-game-to-library";
 
+vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
+  GameDetailService: vi.fn(),
+}));
+
 vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
   IgdbService: vi.fn(),
 }));
@@ -28,11 +32,10 @@ vi.mock("@/data-access-layer/services/profile/profile-service", () => ({
   ProfileService: vi.fn(),
 }));
 
-vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
-  populateGameInDatabase: vi.fn(),
-}));
-
 describe("addGameToLibrary", () => {
+  let mockGameDetailService: {
+    populateGameInDatabase: ReturnType<typeof vi.fn>;
+  };
   let mockProfileService: {
     verifyUserExists: ReturnType<typeof vi.fn>;
   };
@@ -44,7 +47,6 @@ describe("addGameToLibrary", () => {
   let mockIgdbService: {
     getGameDetails: ReturnType<typeof vi.fn>;
   };
-  let mockPopulateGameInDatabase: ReturnType<typeof vi.fn>;
 
   const validUserId = "clx123abc456def";
   const validIgdbId = 12345;
@@ -81,6 +83,10 @@ describe("addGameToLibrary", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    mockGameDetailService = {
+      populateGameInDatabase: vi.fn(),
+    };
+
     mockProfileService = {
       verifyUserExists: vi.fn(),
     };
@@ -95,10 +101,9 @@ describe("addGameToLibrary", () => {
       getGameDetails: vi.fn(),
     };
 
-    mockPopulateGameInDatabase = vi.mocked(
-      gameDetailService.populateGameInDatabase
-    );
-
+    vi.mocked(GameDetailService).mockImplementation(function () {
+      return mockGameDetailService as unknown as GameDetailService;
+    });
     vi.mocked(ProfileService).mockImplementation(function () {
       return mockProfileService as unknown as ProfileService;
     });
@@ -239,7 +244,10 @@ describe("addGameToLibrary", () => {
         data: { game: mockIgdbGame },
       });
 
-      mockPopulateGameInDatabase.mockResolvedValue({ ok: true });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -262,7 +270,9 @@ describe("addGameToLibrary", () => {
       expect(mockIgdbService.getGameDetails).toHaveBeenCalledWith({
         gameId: validIgdbId,
       });
-      expect(mockPopulateGameInDatabase).toHaveBeenCalledWith(mockIgdbGame);
+      expect(mockGameDetailService.populateGameInDatabase).toHaveBeenCalledWith(
+        mockIgdbGame
+      );
       expect(mockLibraryService.findGameByIgdbId).toHaveBeenCalledTimes(2);
     });
 
@@ -477,7 +487,10 @@ describe("addGameToLibrary", () => {
         data: { game: mockIgdbGame },
       });
 
-      mockPopulateGameInDatabase.mockResolvedValue({ ok: true });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       const result = await addGameToLibrary({
         userId: validUserId,

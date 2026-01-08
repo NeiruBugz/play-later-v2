@@ -28,7 +28,7 @@ export class JournalService extends BaseService {
     try {
       this.logger.info(params, "Finding journal entries for game");
       const result = await findJournalEntriesByGameId(params);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find journal entries"
@@ -78,7 +78,7 @@ export class JournalService extends BaseService {
         ...params,
         title: finalTitle,
       });
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to create journal entry"
@@ -110,7 +110,7 @@ export class JournalService extends BaseService {
     try {
       this.logger.info(params, "Finding journal entry by ID");
       const result = await findJournalEntryById(params);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find journal entry"
@@ -151,7 +151,7 @@ export class JournalService extends BaseService {
         cursor,
       });
 
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find journal entries for user"
@@ -201,7 +201,7 @@ export class JournalService extends BaseService {
         updates,
       });
 
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to update journal entry"
@@ -240,7 +240,7 @@ export class JournalService extends BaseService {
 
       const result = await deleteJournalEntry({ entryId, userId });
 
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to delete journal entry"

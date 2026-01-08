@@ -47,7 +47,7 @@ describe("Journal Repository Integration Tests", () => {
       slug: "test-platform",
     });
 
-    if (!genreResult.ok || !platformResult.ok) {
+    if (!genreResult.success || !platformResult.success) {
       throw new Error("Failed to set up test data");
     }
 
@@ -61,7 +61,7 @@ describe("Journal Repository Integration Tests", () => {
       platformIds: [platformResult.data.id],
     });
 
-    if (!gameResult.ok) {
+    if (!gameResult.success) {
       throw new Error("Failed to create test game");
     }
 
@@ -76,8 +76,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toEqual([]);
       }
     });
@@ -121,8 +121,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(3);
 
         expect(result.data[0].id).toBe(entry3.id);
@@ -152,8 +152,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(3);
 
         expect(result.data[0].title).toBe("Entry 5");
@@ -197,8 +197,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(1);
         expect(result.data[0].title).toBe("User 1 Entry");
         expect(result.data[0].userId).toBe(testUserId);
@@ -218,7 +218,7 @@ describe("Journal Repository Integration Tests", () => {
         platformIds: [],
       });
 
-      if (!otherGameResult.ok) {
+      if (!otherGameResult.success) {
         throw new Error("Failed to create other game");
       }
 
@@ -246,8 +246,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(1);
         expect(result.data[0].title).toBe("Game 1 Entry");
         expect(result.data[0].gameId).toBe(testGameId);
@@ -274,8 +274,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(3);
       }
     });
@@ -288,8 +288,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toBe(0);
       }
     });
@@ -313,8 +313,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toBe(5);
       }
     });
@@ -353,8 +353,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toBe(1);
       }
     });
@@ -372,7 +372,7 @@ describe("Journal Repository Integration Tests", () => {
         platformIds: [],
       });
 
-      if (!otherGameResult.ok) {
+      if (!otherGameResult.success) {
         throw new Error("Failed to create other game");
       }
 
@@ -399,8 +399,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toBe(1);
       }
     });
@@ -415,8 +415,8 @@ describe("Journal Repository Integration Tests", () => {
         content: "This is my first journal entry about this game.",
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toMatchObject({
           userId: testUserId,
           gameId: testGameId,
@@ -449,8 +449,8 @@ describe("Journal Repository Integration Tests", () => {
         libraryItemId: libraryItem.id,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toMatchObject({
           userId: testUserId,
           gameId: testGameId,
@@ -477,8 +477,8 @@ describe("Journal Repository Integration Tests", () => {
 
       const afterCreate = new Date();
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data.createdAt.getTime()).toBeGreaterThanOrEqual(
           beforeCreate.getTime()
         );
@@ -506,8 +506,8 @@ describe("Journal Repository Integration Tests", () => {
         content: "This should fail due to invalid userId.",
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("DATABASE_ERROR");
         expect(result.error.message).toContain(
           "Failed to create journal entry"
@@ -523,8 +523,8 @@ describe("Journal Repository Integration Tests", () => {
         content: "This should fail due to invalid gameId.",
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("DATABASE_ERROR");
         expect(result.error.message).toContain(
           "Failed to create journal entry"
@@ -541,8 +541,8 @@ describe("Journal Repository Integration Tests", () => {
         libraryItemId: 99999, // Non-existent library item ID
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("DATABASE_ERROR");
         expect(result.error.message).toContain(
           "Failed to create journal entry"
@@ -571,8 +571,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toMatchObject({
           id: entry.id,
           userId: testUserId,
@@ -613,8 +613,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data.id).toBe(entry.id);
         expect(result.data.userId).toBe(testUserId);
         expect(result.data.gameId).toBe(testGameId);
@@ -638,8 +638,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("NOT_FOUND");
         expect(result.error.message).toContain("Journal entry not found");
       }
@@ -670,8 +670,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("NOT_FOUND");
         expect(result.error.message).toContain("Journal entry not found");
       }
@@ -685,8 +685,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toEqual([]);
       }
     });
@@ -733,8 +733,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(3);
         expect(result.data[0].id).toBe(entry2.id);
         expect(result.data[1].id).toBe(entry3.id);
@@ -765,8 +765,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 2,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(2);
         expect(result.data[0].id).toBe(entries[0].id);
         expect(result.data[1].id).toBe(entries[1].id);
@@ -796,8 +796,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 2,
       });
 
-      expect(firstPageResult.ok).toBe(true);
-      if (!firstPageResult.ok) return;
+      expect(firstPageResult.success).toBe(true);
+      if (!firstPageResult.success) return;
 
       const cursor = firstPageResult.data[firstPageResult.data.length - 1].id;
 
@@ -807,8 +807,8 @@ describe("Journal Repository Integration Tests", () => {
         cursor,
       });
 
-      expect(secondPageResult.ok).toBe(true);
-      if (secondPageResult.ok) {
+      expect(secondPageResult.success).toBe(true);
+      if (secondPageResult.success) {
         expect(secondPageResult.data).toHaveLength(2);
         expect(secondPageResult.data[0].id).toBe(entries[2].id);
         expect(secondPageResult.data[1].id).toBe(entries[3].id);
@@ -858,8 +858,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(2);
         expect(
           result.data.every(
@@ -878,8 +878,8 @@ describe("Journal Repository Integration Tests", () => {
         cursor: nonExistentCursor,
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("NOT_FOUND");
         expect(result.error.message).toContain("Cursor entry not found");
       }
@@ -902,8 +902,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 0,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toEqual([]);
       }
     });
@@ -937,8 +937,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 1,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(1);
         expect(result.data[0].title).toBe("Entry 2");
       }
@@ -963,8 +963,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 1000,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toHaveLength(5);
       }
     });
@@ -999,8 +999,8 @@ describe("Journal Repository Integration Tests", () => {
         cursor: lastEntry.id,
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toEqual([]);
       }
     });
@@ -1024,7 +1024,7 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(true);
+      expect(result.success).toBe(true);
     });
 
     it("should return error when entry doesn't exist", async () => {
@@ -1035,8 +1035,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("NOT_FOUND");
         expect(result.error.message).toContain("Journal entry not found");
       }
@@ -1067,8 +1067,8 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("NOT_FOUND");
         expect(result.error.message).toContain("Journal entry not found");
       }
@@ -1097,7 +1097,7 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(deleteResult.ok).toBe(true);
+      expect(deleteResult.success).toBe(true);
 
       const dbEntry = await prisma.journalEntry.findUnique({
         where: { id: entry.id },
@@ -1108,8 +1108,8 @@ describe("Journal Repository Integration Tests", () => {
         entryId: entry.id,
         userId: testUserId,
       });
-      expect(findResult.ok).toBe(false);
-      if (!findResult.ok) {
+      expect(findResult.success).toBe(false);
+      if (!findResult.success) {
         expect(findResult.error.code).toBe("NOT_FOUND");
       }
     });
@@ -1149,8 +1149,8 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data).toMatchObject({
           id: entry.id,
           userId: testUserId,
@@ -1186,8 +1186,8 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data.title).toBe("New Title Only");
         expect(result.data.content).toBe("Original content");
         expect(result.data.mood).toBe("EXCITED");
@@ -1216,8 +1216,8 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data.title).toBe("Original Title");
         expect(result.data.content).toBe("Only the content changed");
         expect(result.data.mood).toBe("FRUSTRATED");
@@ -1249,8 +1249,8 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data.updatedAt.getTime()).toBeGreaterThan(now.getTime());
         expect(result.data.createdAt.getTime()).toBe(now.getTime());
       }
@@ -1284,8 +1284,8 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("NOT_FOUND");
         expect(result.error.message).toContain("Journal entry not found");
       }
@@ -1302,8 +1302,8 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
+      expect(result.success).toBe(false);
+      if (!result.success) {
         expect(result.error.code).toBe("NOT_FOUND");
         expect(result.error.message).toContain("Journal entry not found");
       }
@@ -1340,8 +1340,8 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.ok).toBe(true);
-      if (result.ok) {
+      expect(result.success).toBe(true);
+      if (result.success) {
         expect(result.data.mood).toBeNull();
         expect(result.data.playSession).toBeNull();
         expect(result.data.libraryItemId).toBeNull();
@@ -1372,7 +1372,7 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(updateResult.ok).toBe(true);
+      expect(updateResult.success).toBe(true);
 
       const dbEntry = await prisma.journalEntry.findUnique({
         where: { id: entry.id },

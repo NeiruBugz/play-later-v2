@@ -5,7 +5,7 @@ import {
 } from "@/test/setup/database";
 
 import { findGameByIgdbId } from "../../repository/game/game-repository";
-import { populateGameInDatabase } from "./game-detail-service";
+import { GameDetailService } from "./game-detail-service";
 
 async function waitForGameInDatabase(
   igdbId: number,
@@ -15,14 +15,14 @@ async function waitForGameInDatabase(
 
   while (Date.now() < deadline) {
     const result = await findGameByIgdbId(igdbId);
-    if (result.ok && result.data) {
+    if (result.success && result.data) {
       return result.data;
     }
     await new Promise((resolve) => setTimeout(resolve, interval));
   }
 
   const finalResult = await findGameByIgdbId(igdbId);
-  if (!finalResult.ok || !finalResult.data) {
+  if (!finalResult.success || !finalResult.data) {
     throw new Error(
       `Game with igdbId ${igdbId} not found in database after ${timeout}ms`
     );
@@ -31,12 +31,15 @@ async function waitForGameInDatabase(
 }
 
 describe("GameDetailService Integration Tests", () => {
+  let gameDetailService: GameDetailService;
+
   beforeAll(async () => {
     await setupDatabase();
   });
 
   beforeEach(async () => {
     await resetTestDatabase();
+    gameDetailService = new GameDetailService();
   });
 
   it("should populate game with genres and platforms in database", async () => {
@@ -70,7 +73,13 @@ describe("GameDetailService Integration Tests", () => {
       ],
     };
 
-    await populateGameInDatabase(igdbGame);
+    const result = await gameDetailService.populateGameInDatabase(igdbGame);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBeDefined();
+      expect(result.data?.title).toBe("Service Test Game");
+    }
 
     const game = await waitForGameInDatabase(54321);
 
@@ -105,11 +114,18 @@ describe("GameDetailService Integration Tests", () => {
       collections: [],
     };
 
-    await populateGameInDatabase(igdbGame);
+    const firstResult =
+      await gameDetailService.populateGameInDatabase(igdbGame);
+    expect(firstResult.success).toBe(true);
+
     await waitForGameInDatabase(11111);
 
-    await populateGameInDatabase(igdbGame);
-    await waitForGameInDatabase(11111);
+    const secondResult =
+      await gameDetailService.populateGameInDatabase(igdbGame);
+    expect(secondResult.success).toBe(true);
+    if (secondResult.success) {
+      expect(secondResult.data).toBeNull();
+    }
 
     const prisma = getTestDatabase();
     const count = await prisma.game.count({ where: { igdbId: 11111 } });
@@ -141,7 +157,13 @@ describe("GameDetailService Integration Tests", () => {
       collections: [],
     };
 
-    await populateGameInDatabase(igdbGame);
+    const result = await gameDetailService.populateGameInDatabase(igdbGame);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBeDefined();
+      expect(result.data?.title).toBe("Game Without Metadata");
+    }
 
     const game = await waitForGameInDatabase(11111);
 
@@ -160,7 +182,14 @@ describe("GameDetailService Integration Tests", () => {
       game_type: 0,
     };
 
-    await populateGameInDatabase(igdbGame);
+    const result = await gameDetailService.populateGameInDatabase(igdbGame);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBeDefined();
+      expect(result.data?.title).toBe("Minimal Data Game");
+      expect(result.data?.slug).toBe("minimal-data-game");
+    }
 
     const game = await waitForGameInDatabase(99999);
 
@@ -183,7 +212,13 @@ describe("GameDetailService Integration Tests", () => {
       platforms: [{ id: 6, name: "PC (Microsoft Windows)" }],
     };
 
-    await populateGameInDatabase(igdbGame);
+    const result = await gameDetailService.populateGameInDatabase(igdbGame);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBeDefined();
+      expect(result.data?.title).toBe("Sparse Data Game");
+    }
 
     const game = await waitForGameInDatabase(88888);
 
@@ -203,7 +238,13 @@ describe("GameDetailService Integration Tests", () => {
       genres: [{ id: 5, name: "RPG" }],
     };
 
-    await populateGameInDatabase(igdbGame);
+    const result = await gameDetailService.populateGameInDatabase(igdbGame);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBeDefined();
+      expect(result.data?.title).toBe("No Rating Game");
+    }
 
     const game = await waitForGameInDatabase(77777);
 
