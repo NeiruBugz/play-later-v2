@@ -10,7 +10,8 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import { AvatarUpload, UsernameInput } from "@/shared/components";
+import { AvatarUpload } from "./avatar-upload";
+import { UsernameInput } from "./username-input";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,

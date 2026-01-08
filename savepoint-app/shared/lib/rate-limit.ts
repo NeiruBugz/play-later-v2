@@ -1,13 +1,17 @@
 import { env } from "@/env.mjs";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import type { NextRequest } from "next/server";
 
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,
   DEFAULT_RATE_LIMIT_WINDOW_MS,
   RATE_LIMIT_CLEANUP_INTERVAL_MS,
 } from "@/shared/constants";
+
+export type RateLimitInput = {
+  headers: Headers;
+  ip?: string;
+};
 
 let ratelimit: Ratelimit | null = null;
 let inMemoryFallback: Map<string, { count: number; resetAt: number }> | null =
@@ -50,11 +54,12 @@ function initializeRateLimiter(): Ratelimit | null {
   return null;
 }
 export async function checkRateLimit(
-  request: NextRequest,
+  input: RateLimitInput,
   limit: number = DEFAULT_RATE_LIMIT_REQUESTS,
   windowMs: number = DEFAULT_RATE_LIMIT_WINDOW_MS
 ): Promise<{ allowed: boolean; remaining: number }> {
-  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  const ip =
+    input.ip ?? input.headers.get("x-forwarded-for") ?? "unknown";
   const limiter = initializeRateLimiter();
   if (limiter) {
     const { success, remaining } = await limiter.limit(ip);

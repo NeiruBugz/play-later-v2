@@ -1,6 +1,5 @@
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
-import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
@@ -63,10 +62,10 @@ export async function getLibraryHandler(
     };
   }
 
-  const rateLimitRequest = {
+  const rateLimitResult = await checkRateLimit({
     headers: context.headers,
-  } as unknown as NextRequest;
-  const rateLimitResult = await checkRateLimit(rateLimitRequest);
+    ip: context.ip,
+  });
   if (!rateLimitResult.allowed) {
     logger.warn({ userId, ip: context.ip }, "Rate limit exceeded");
     return {

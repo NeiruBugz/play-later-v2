@@ -5,10 +5,6 @@ import { memo } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
-import {
-  mapLibraryStatusToGameStatus,
-  ProgressRing,
-} from "@/shared/components/ui/progress-ring";
 import { getStatusConfig } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui";
 import type { LibraryItemStatus } from "@/shared/types";
@@ -24,7 +20,6 @@ export const LibraryCard = memo(function LibraryCard({
   const hasMultipleEntries = game.entryCount > 1;
   const coverImageId =
     game.coverImage?.split("/").pop()?.replace(".jpg", "") ?? null;
-  const gameStatus = mapLibraryStatusToGameStatus(status);
 
   const handleLinkInteraction = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.defaultPrevented) {
@@ -73,15 +68,6 @@ export const LibraryCard = memo(function LibraryCard({
           priority={index < 6}
           fetchPriority={index < 6 ? "high" : "low"}
         />
-
-        <div className="duration-normal pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-          <ProgressRing
-            status={gameStatus}
-            size="lg"
-            animated={false}
-            className="drop-shadow-lg"
-          />
-        </div>
 
         <div className="duration-normal pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
           <div className="p-lg flex h-full items-end">

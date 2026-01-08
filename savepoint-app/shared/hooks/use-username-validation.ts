@@ -6,7 +6,7 @@ import {
   USERNAME_VALIDATION_DEBOUNCE_MS,
 } from "@/shared/constants";
 
-import { checkUsernameAvailability } from "../server-actions";
+import { checkUsernameAvailability } from "@/features/setup-profile/server-actions";
 
 type ValidationStatus = "idle" | "validating" | "available" | "error";
 interface UseUsernameValidationResult {
