@@ -297,3 +297,28 @@ export async function cleanupUserTestData(userId: string): Promise<void> {
     },
   });
 }
+
+export async function cleanupUserLibraryData(userId: string): Promise<void> {
+  const client = getPrisma();
+  await client.libraryItem.deleteMany({ where: { userId } });
+  // Only delete games that are NOT part of active tests and have no library items
+  await client.game.deleteMany({
+    where: {
+      OR: [
+        { title: { contains: "Test Game" } },
+        {
+          title: {
+            in: [
+              "The Legend of Zelda",
+              "Super Mario Bros",
+              "Hades",
+              "Celeste",
+              "Hollow Knight",
+            ],
+          },
+        },
+      ],
+      libraryItems: { none: {} },
+    },
+  });
+}

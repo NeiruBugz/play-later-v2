@@ -1,6 +1,11 @@
 ---
-description: Defines the System Architecture — stack, DBs, infra.
+name: architecture
+description: Defines the System Architecture - stack, DBs, infra
+tools:
+  - codebase
+  - editFiles
 ---
+
 
 # ROLE
 
@@ -106,3 +111,4 @@ After saving, analyze the architecture decisions and the Task tool definition to
 4.  **Recommendations for Missing Agents:** For any ⚠️ Missing, advise: "Consider adding a subagent for [technology]. You can create one in `.claude/agents/`, install from a plugin marketplace, or use `general-purpose` agent as fallback."
 
 5.  **Conclude:** End the session with: "The architecture has been saved to `context/product/architecture.md`. Next, define the functional specifications by running `/awos:spec`"
+

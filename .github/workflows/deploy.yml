@@ -1,0 +1,161 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  infra:
+    name: Provision AWS Infra (Terraform)
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (assume role)
+        if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Configure AWS credentials (access keys)
+        if: ${{ secrets.AWS_ROLE_TO_ASSUME == '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform Init
+        working-directory: infra/envs/prod
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        working-directory: infra/envs/prod
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: tf-plan
+        working-directory: infra/envs/prod
+        run: >
+          terraform plan -input=false -out=tfplan
+          -var="region=${{ secrets.AWS_REGION }}"
+          -var="project_name=${{ secrets.PROJECT_NAME }}"
+          -var="app_url=${{ secrets.APP_URL }}"
+          -var="domain_prefix=${{ secrets.COGNITO_DOMAIN_PREFIX }}"
+          -var="enable_cognito_native=${{ secrets.ENABLE_COGNITO_NATIVE }}"
+          -var="google_client_id=${{ secrets.GOOGLE_CLIENT_ID }}"
+          -var="google_client_secret=${{ secrets.GOOGLE_CLIENT_SECRET }}"
+
+      - name: Terraform Apply
+        working-directory: infra/envs/prod
+        run: terraform apply -auto-approve tfplan
+
+      - name: Capture important outputs
+        id: tf-outputs
+        working-directory: infra/envs/prod
+        run: |
+          echo "cognito_user_pool_id=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_OUTPUT
+          echo "cognito_user_pool_client_id=$(terraform output -raw cognito_user_pool_client_id)" >> $GITHUB_OUTPUT
+          # client secret is sensitive; do not print or expose
+          echo "cognito_issuer=$(terraform output -raw cognito_issuer)" >> $GITHUB_OUTPUT
+
+  migrate:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [infra]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      
+      - name: Check for new migrations
+        id: check-migrations
+        run: |
+          # Check if there are any new migration files in this push
+          NEW_MIGRATIONS=$(git diff --name-only HEAD~1 HEAD -- savepoint-app/prisma/migrations/ | grep -E "\.sql$" || true)
+          
+          if [ -z "$NEW_MIGRATIONS" ]; then
+            echo "No new migration files detected"
+            echo "has-migrations=false" >> $GITHUB_OUTPUT
+          else
+            echo "New migration files detected:"
+            echo "$NEW_MIGRATIONS"
+            echo "has-migrations=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Setup pnpm
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        working-directory: savepoint-app
+        run: pnpm install --frozen-lockfile
+
+      - name: Check migration status
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        run: |
+          echo "Checking current migration status..."
+          pnpm -C savepoint-app prisma migrate status || echo "Found pending migrations - will apply them next"
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+
+      - name: Run database migrations
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        working-directory: savepoint-app
+        run: pnpm prisma migrate deploy
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+
+      - name: Generate Prisma client
+        if: steps.check-migrations.outputs.has-migrations == 'true'
+        working-directory: savepoint-app
+        run: pnpm prisma generate
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+
+  deploy-vercel:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [migrate]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: vercel/action@v1
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: savepoint-app
+          prod: true

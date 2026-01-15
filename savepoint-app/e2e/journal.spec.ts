@@ -5,12 +5,10 @@ import {
   createTestGame,
   createTestJournalEntry,
   createTestLibraryItem,
-  deleteTestJournalEntries,
   disconnectDatabase,
   getUserByEmail,
   type TestGame,
   type TestJournalEntry,
-  type TestLibraryItem,
 } from "./helpers/db";
 import { JournalPage } from "./pages/journal.page";
 
@@ -58,7 +56,6 @@ test.describe("[journal] Journal Empty State", () => {
 
 test.describe("[journal] Journal With Entries", () => {
   let testGame: TestGame;
-  let testLibraryItem: TestLibraryItem;
   let testEntry: TestJournalEntry;
   let userId: string;
   let testRunId: number;
@@ -86,16 +83,13 @@ test.describe("[journal] Journal With Entries", () => {
       slug: `journal-with-entries-game-${uniqueId}`,
     });
 
-    testLibraryItem = await createTestLibraryItem({
-      userId,
-      gameId: testGame.id,
-      status: "PLAYING",
-    });
+    // Note: We don't create a library item to avoid race conditions with
+    // parallel tests that might delete library items. Journal entries can
+    // exist without being linked to a library item.
 
     testEntry = await createTestJournalEntry({
       userId,
       gameId: testGame.id,
-      libraryItemId: testLibraryItem.id,
       title: "My First Entry",
       content: "This is my test journal entry content.",
       playSession: 5,
@@ -122,7 +116,10 @@ test.describe("[journal] Journal With Entries", () => {
   test("navigates to entry detail page", async ({ page }) => {
     const journal = new JournalPage(page);
 
-    await journal.gotoEntry(testEntry.id);
+    // Navigate through UI to avoid race conditions with direct URL
+    await journal.goto();
+    await journal.entryCard("My First Entry").first().click();
+    await page.waitForURL(/\/journal\/[a-z0-9-]+$/);
 
     await expect(journal.entryTitle()).toHaveText("My First Entry");
     await expect(journal.entryContent()).toContainText(
@@ -133,7 +130,11 @@ test.describe("[journal] Journal With Entries", () => {
 
   test("navigates to edit page and updates entry", async ({ page }) => {
     const journal = new JournalPage(page);
-    await journal.gotoEntry(testEntry.id);
+
+    // Navigate through UI to avoid race conditions with direct URL
+    await journal.goto();
+    await journal.entryCard("My First Entry").first().click();
+    await page.waitForURL(/\/journal\/[a-z0-9-]+$/);
 
     await expect(journal.entryTitle()).toHaveText("My First Entry");
 

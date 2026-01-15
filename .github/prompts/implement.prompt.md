@@ -1,6 +1,12 @@
 ---
-description: Runs tasks — delegates coding to sub-agents, tracks progress.
+name: implement
+description: Runs tasks - delegates coding to sub-agents, tracks progress
+tools:
+  - codebase
+  - editFiles
+  - runInTerminal
 ---
+
 
 # ROLE
 
@@ -90,3 +96,4 @@ Count completed `[x]` and total tasks, calculate percentage.
 
 - If tasks remain: "Implementation step complete. [N]/[Total] tasks done ([X]%)."
 - If all tasks are `[x]`: "All tasks complete (100%). Run `/awos:verify` to verify acceptance criteria and mark spec as Completed."
+

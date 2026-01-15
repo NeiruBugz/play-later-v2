@@ -8,6 +8,10 @@ import {
 import { LibraryPage } from "./pages/library.page";
 
 test.describe("[library] Library page", () => {
+  // Run tests in serial mode to avoid race conditions with parallel tests
+  // that might create/delete library items for the shared auth user
+  test.describe.configure({ mode: "serial" });
+
   test.beforeAll(async () => {
     const email = process.env.E2E_AUTH_EMAIL ?? "e2e-auth-user@example.com";
     const user = await getUserByEmail(email);

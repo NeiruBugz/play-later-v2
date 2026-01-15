@@ -12,11 +12,22 @@ export async function signInWithCredentials(
       sessionStorage.clear();
     } catch {}
   });
-  await page.goto("/login", { waitUntil: "domcontentloaded" });
-  await page.getByRole("textbox", { name: /email/i }).waitFor();
-  await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(password);
-  await page.getByRole("button", { name: "Sign In", exact: true }).click();
+  await page.goto("/login", { waitUntil: "networkidle" });
+
+  const emailInput = page.getByRole("textbox", { name: /email/i });
+  await emailInput.waitFor({ state: "visible" });
+  await emailInput.click();
+  await emailInput.fill(email);
+
+  const passwordInput = page.getByLabel(/password/i);
+  await passwordInput.click();
+  await passwordInput.fill(password);
+
+  // Blur the password field to trigger validation before clicking sign in
+  await passwordInput.blur();
+
+  const signInButton = page.getByRole("button", { name: "Sign In", exact: true });
+  await signInButton.click();
   await page.waitForURL((url) => url.pathname !== "/login", { timeout: 10000 });
 }
 export async function signOut(page: Page): Promise<void> {

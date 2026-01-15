@@ -1,0 +1,259 @@
+name: PR Code Quality Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  format-check:
+    name: Check Code Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Check code formatting
+        run: pnpm --filter savepoint format:check
+
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: pnpm --filter savepoint lint
+
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Route typings
+        run: pnpm --filter savepoint next typegen
+
+      - name: Run TypeScript type checking
+        run: pnpm --filter savepoint typecheck
+
+  components-test:
+    name: Components Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm --filter savepoint test:components
+
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm --filter savepoint test:backend
+
+  utilities-test:
+    name: Utilities Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        run: pnpm --filter savepoint test:utilities
+
+  migration-validation:
+    name: Validate Database Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for migration changes
+        id: check-migrations
+        run: |
+          # Check if there are any migration-related changes in this PR
+          MIGRATION_CHANGES=$(git diff --name-only origin/main...HEAD -- savepoint-app/prisma/ | grep -E "(schema\.prisma|migrations/.*\.sql)$" || true)
+
+          if [ -z "$MIGRATION_CHANGES" ]; then
+            echo "No migration or schema changes detected"
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Migration or schema changes detected:"
+            echo "$MIGRATION_CHANGES"
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup pnpm
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Prisma schema
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: pnpm --filter savepoint prisma validate
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+
+      - name: Check for schema drift
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: |
+          # Check if there are new migration files in this PR
+          NEW_MIGRATIONS=$(git diff --name-only origin/main...HEAD -- savepoint-app/prisma/migrations/ | grep -E "\.sql$" || true)
+          SCHEMA_CHANGES=$(git diff --name-only origin/main...HEAD -- savepoint-app/prisma/schema.prisma || true)
+
+          if [ -n "$SCHEMA_CHANGES" ] && [ -z "$NEW_MIGRATIONS" ]; then
+            echo "⚠️ Schema changes detected but no new migration files found"
+            echo "Schema was modified but migrations weren't generated"
+            echo "Please run 'pnpm prisma migrate dev --name descriptive_name' to generate migrations"
+            exit 1
+          elif [ -n "$SCHEMA_CHANGES" ] && [ -n "$NEW_MIGRATIONS" ]; then
+            echo "✅ Schema changes detected with corresponding migration files"
+            echo "Schema changes: $SCHEMA_CHANGES"
+            echo "New migrations: $NEW_MIGRATIONS"
+          elif [ -n "$NEW_MIGRATIONS" ] && [ -z "$SCHEMA_CHANGES" ]; then
+            echo "ℹ️ Migration files added without schema changes (manual migrations)"
+            echo "New migrations: $NEW_MIGRATIONS"
+          else
+            echo "✅ No schema drift detected"
+          fi
+
+      - name: Check for destructive migrations
+        if: steps.check-migrations.outputs.has-changes == 'true'
+        run: |
+          # Check for potentially destructive SQL operations in new migrations
+          NEW_MIGRATIONS=$(git diff --name-only origin/main...HEAD -- savepoint-app/prisma/migrations/ | grep -E "\.sql$" || true)
+
+          if [ -n "$NEW_MIGRATIONS" ]; then
+            echo "Checking new migrations for destructive operations..."
+            DESTRUCTIVE_FOUND=false
+
+            for migration in $NEW_MIGRATIONS; do
+              if [ -f "$migration" ]; then
+                echo "Checking $migration:"
+
+                # Check for DROP statements
+                if grep -i "DROP[[:space:]]\+\(TABLE\|COLUMN\|INDEX\|CONSTRAINT\)" "$migration"; then
+                  echo "⚠️ Found potentially destructive DROP operation in $migration"
+                  DESTRUCTIVE_FOUND=true
+                fi
+
+                # Check for data type changes that might cause data loss
+                if grep -i "ALTER[[:space:]]\+COLUMN.*TYPE" "$migration"; then
+                  echo "⚠️ Found column type change in $migration - review for potential data loss"
+                  DESTRUCTIVE_FOUND=true
+                fi
+              fi
+            done
+
+            if [ "$DESTRUCTIVE_FOUND" = true ]; then
+              echo ""
+              echo "🚨 Destructive operations detected in migrations!"
+              echo "Please review carefully and ensure:"
+              echo "1. Data backup is available"
+              echo "2. Migration is reversible or acceptable"
+              echo "3. Stakeholders are aware of potential data loss"
+              echo ""
+              echo "If this is intentional, add a comment in the PR explaining the necessity."
+            else
+              echo "✅ No destructive operations found in new migrations"
+            fi
+          fi
