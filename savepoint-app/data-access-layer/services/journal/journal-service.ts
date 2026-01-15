@@ -38,7 +38,10 @@ export class JournalService extends BaseService {
       const domainEntries = JournalEntryMapper.toDomainList(result.data);
       return this.success(domainEntries);
     } catch (error) {
-      return this.handleError(error, "Failed to find journal entries by game ID");
+      return this.handleError(
+        error,
+        "Failed to find journal entries by game ID"
+      );
     }
   }
 
@@ -148,7 +151,10 @@ export class JournalService extends BaseService {
 
       return this.success(domainEntries);
     } catch (error) {
-      return this.handleError(error, "Failed to find journal entries by user ID");
+      return this.handleError(
+        error,
+        "Failed to find journal entries by user ID"
+      );
     }
   }
 

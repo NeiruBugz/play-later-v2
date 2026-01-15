@@ -26,7 +26,10 @@ export async function signInWithCredentials(
   // Blur the password field to trigger validation before clicking sign in
   await passwordInput.blur();
 
-  const signInButton = page.getByRole("button", { name: "Sign In", exact: true });
+  const signInButton = page.getByRole("button", {
+    name: "Sign In",
+    exact: true,
+  });
   await signInButton.click();
   await page.waitForURL((url) => url.pathname !== "/login", { timeout: 10000 });
 }
