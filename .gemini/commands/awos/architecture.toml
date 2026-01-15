@@ -1,4 +1,0 @@
-description = "Defines the System Architecture - stack, DBs, infra"
-prompt = """
-@{.awos/commands/architecture.md}
-"""

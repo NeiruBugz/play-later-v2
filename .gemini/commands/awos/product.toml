@@ -1,4 +1,0 @@
-description = "Defines the Product - what, why, and for who"
-prompt = """
-@{.awos/commands/product.md}
-"""
