@@ -15,8 +15,9 @@ vi.mock("../server-actions/update-profile", () => ({
   updateProfileFormAction: vi.fn(),
 }));
 
-vi.mock("../../setup-profile/server-actions/upload-avatar", () => ({
+vi.mock("@/shared/server-actions/profile", () => ({
   uploadAvatar: vi.fn(),
+  checkUsernameAvailability: vi.fn(),
 }));
 
 const mockUpdateProfileFormAction = vi.mocked(updateProfileFormAction);

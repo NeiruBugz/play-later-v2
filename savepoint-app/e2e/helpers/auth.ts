@@ -33,6 +33,7 @@ export async function signInWithCredentials(
   await signInButton.click();
   await page.waitForURL((url) => url.pathname !== "/login", { timeout: 10000 });
 }
+
 export async function signOut(page: Page): Promise<void> {
   await page.click('button:has-text("Sign Out")');
   await page.waitForLoadState("networkidle");

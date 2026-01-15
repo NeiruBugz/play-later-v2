@@ -390,9 +390,10 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockRejectedValue(
-        new Error("Database error")
-      );
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
+        success: false,
+        error: { code: "DATABASE_ERROR", message: "Database error" },
+      });
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",

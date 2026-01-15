@@ -6,4 +6,3 @@ export {
   type CompleteProfileSetupFormState,
 } from "./complete-profile-setup";
 export { skipProfileSetup } from "./skip-profile-setup";
-export { checkUsernameAvailability } from "./check-username-availability";

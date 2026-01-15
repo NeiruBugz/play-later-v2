@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
-import { checkUsernameAvailability } from "@/features/setup-profile/server-actions";
 import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   USERNAME_VALIDATION_DEBOUNCE_MS,
 } from "@/shared/constants";
+import { checkUsernameAvailability } from "@/shared/server-actions/profile";
 
 type ValidationStatus = "idle" | "validating" | "available" | "error";
 interface UseUsernameValidationResult {

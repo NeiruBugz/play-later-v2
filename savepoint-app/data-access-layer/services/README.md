@@ -296,6 +296,30 @@ type Error = {
 };
 ```
 
+### Error Code Usage
+
+The `code` field is populated for all programmatic errors that can be handled by callers:
+
+- `VALIDATION_ERROR` - Invalid input data (malformed request, schema violation)
+- `NOT_FOUND` - Requested resource doesn't exist (game, user, etc.)
+- `UNAUTHORIZED` - Authentication required or insufficient permissions
+- `RATE_LIMITED` - Too many requests to external API
+
+For unexpected internal errors (database failures, unhandled exceptions), the code may be omitted and only the `error` message is provided. This distinction helps callers determine whether to show user-friendly messages (known error codes) or generic error messages (unknown errors).
+
+```typescript
+if (!result.success) {
+  if (result.code) {
+    // Known, handleable error - can show specific message
+    handleKnownError(result.code, result.error);
+  } else {
+    // Unexpected error - show generic message, log details
+    logger.error({ error: result.error }, "Unexpected service error");
+    showGenericError();
+  }
+}
+```
+
 **Error Codes**:
 
 - `VALIDATION_ERROR`: Invalid input parameters

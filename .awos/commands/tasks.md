@@ -54,17 +54,17 @@ Follow this process precisely.
   1.  First, identify the absolute smallest piece of user-visible value from the spec. This is your **Slice 1**.
   2.  Create a high-level checklist item for that slice (e.g., `- [ ] **Slice 1: View existing avatar (or placeholder)**`).
   3.  Under that slice, create the nested sub-tasks (database, backend, frontend) needed to implement **only that slice**.
-  4.  **For each sub-task, assign the appropriate subagent:**
+  4.  **For each sub-task, assign the appropriate agent:**
       - Analyze the sub-task description to understand what technology/domain it involves
-      - Analyze the Task tool definition to extract all available subagent_type values with their descriptions to understand what subagents are available for assignment.
-      - Match the sub-task to a subagent based on:
+      - Check the `.awos/subagents/` directory to see what agents are available for assignment and their descriptions.
+      - Match the sub-task to an agent based on:
         - Technology keywords
         - Task intent
         - Tech stack identified in technical-considerations.md
-      - Append the subagent assignment using format: `**[Agent: agent-name]**` at the end of the sub-task description
+      - Append the agent assignment using format: `**[Agent: agent-name]**` at the end of the sub-task description
       - Use `general-purpose` agent when no specialist clearly matches the task
   5.  Next, identify the second-smallest piece of value that builds on the first. This is **Slice 2**.
-  6.  Create a high-level checklist item and its sub-tasks with subagent assignments.
+  6.  Create a high-level checklist item and its sub-tasks with agent assignments.
   7.  Repeat this process until all requirements from the specification are covered.
 
 - **Example of applying the rule for "User Profile Picture Upload":**

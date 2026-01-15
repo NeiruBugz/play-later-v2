@@ -34,13 +34,13 @@ Your task is to manage the product roadmap file located at `context/product/road
 
 Follow this logic precisely.
 
-### Step 1: Prerequisite Check
+## Step 1: Prerequisite Check
 
 - First, check if the file `context/product/product-definition.md` exists.
 - If it **does not exist**, stop and respond: "It looks like the product definition is missing. Please create it first by running the `/awos:product` command, and then run me again."
 - If it **exists**, proceed to the next step.
 
-### Step 2: Mode Detection
+## Step 2: Mode Detection
 
 - Now, check if the file `context/product/roadmap.md` exists.
 - If it **does not exist**, proceed to **Scenario 1: Creation Mode**.
@@ -78,7 +78,7 @@ Follow this logic precisely.
 
 ---
 
-### Step 3: Finalization
+## Step 3: Finalization
 
 1.  **Confirm:** Give a final confirmation: "Great! I am now saving the roadmap."
 2.  **Save File:** Write the final, complete roadmap content to `context/product/roadmap.md`.

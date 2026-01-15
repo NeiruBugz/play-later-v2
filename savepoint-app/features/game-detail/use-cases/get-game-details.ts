@@ -59,14 +59,14 @@ export const getGameDetails = cache(async function getGameDetails(params: {
     }
     const game = igdbResult.data.game;
     const gameDetailService = new GameDetailService();
-    gameDetailService
-      .populateGameInDatabase(game)
-      .catch((err) =>
+    gameDetailService.populateGameInDatabase(game).then((populateResult) => {
+      if (!populateResult.success) {
         logger.error(
-          { err, slug: params.slug },
+          { error: populateResult.error, slug: params.slug },
           "Background game population failed"
-        )
-      );
+        );
+      }
+    });
     const franchiseIds: number[] = [];
     if (typeof game.franchise === "number" && game.franchise > 0) {
       franchiseIds.push(game.franchise);

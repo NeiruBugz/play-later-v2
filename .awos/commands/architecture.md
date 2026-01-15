@@ -87,15 +87,15 @@ Follow this logic precisely.
 
 ### Step 4: Review Subagent Coverage
 
-After saving, analyze the architecture decisions and the Task tool definition to extract all available subagent_type values with their descriptions to check if appropriate subagents exist:
+After saving, analyze the architecture decisions and check the `.awos/subagents/` directory to see if appropriate agents exist:
 
 1.  **Identify Technologies:** Extract all technologies from the architecture (languages, frameworks, cloud providers, databases, infrastructure tools).
 
-2.  **Check Subagent Coverage:** For each technology, check your available subagents to see if a relevant domain expert exists.
+2.  **Check Agent Coverage:** For each technology, check your available agents in `.awos/subagents/` to see if a relevant domain expert exists.
 
 3.  **Present Coverage Table:**
 
-| Technology             | Recommended Subagent Role | Status                 |
+| Technology             | Recommended Agent Role    | Status                 |
 | ---------------------- | ------------------------- | ---------------------- |
 | [e.g., Python/FastAPI] | Python backend expert     | ✅ Exists / ⚠️ Missing |
 | [e.g., React]          | React/frontend expert     | ✅ Exists / ⚠️ Missing |
@@ -103,6 +103,6 @@ After saving, analyze the architecture decisions and the Task tool definition to
 | [e.g., Terraform]      | Terraform/IaC expert      | ✅ Exists / ⚠️ Missing |
 | [e.g., PostgreSQL]     | Database expert           | ✅ Exists / ⚠️ Missing |
 
-4.  **Recommendations for Missing Agents:** For any ⚠️ Missing, advise: "Consider adding a subagent for [technology]. You can create one in `.claude/agents/`, install from a plugin marketplace, or use `general-purpose` agent as fallback."
+4.  **Recommendations for Missing Agents:** For any ⚠️ Missing, advise: "Consider adding an agent for [technology]. You can create one in `.awos/subagents/`, or use `general-purpose` agent as fallback."
 
 5.  **Conclude:** End the session with: "The architecture has been saved to `context/product/architecture.md`. Next, define the functional specifications by running `/awos:spec`"

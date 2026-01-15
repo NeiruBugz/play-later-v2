@@ -12,7 +12,7 @@ export const LibrarySortOrderSchema = z.enum(["asc", "desc"]);
 
 export const GetLibraryItemsBaseSchema = z.object({
   userId: z.string().cuid(),
-  status: z.enum(LibraryItemStatus).optional(),
+  status: z.nativeEnum(LibraryItemStatus).optional(),
   platform: z.string().optional(),
   search: z.string().optional(),
   sortBy: LibrarySortBySchema.optional(),
