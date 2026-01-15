@@ -274,7 +274,7 @@ describe("PlatformService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("An unexpected error occurred");
+          expect(result.error).toBe("Failed to get platforms for game");
         }
       });
     });

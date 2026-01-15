@@ -46,10 +46,7 @@ export class PlatformService extends BaseService {
       );
       return this.success({ platforms: platforms.data });
     } catch (error) {
-      this.logger.error({ error }, "Unexpected error in getSystemPlatforms");
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to get system platforms");
     }
   }
 
@@ -101,13 +98,7 @@ export class PlatformService extends BaseService {
       );
       return this.success({ supportedPlatforms, otherPlatforms });
     } catch (error) {
-      this.logger.error(
-        { error, igdbId },
-        "Unexpected error in getPlatformsForGame"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to get platforms for game");
     }
   }
 }

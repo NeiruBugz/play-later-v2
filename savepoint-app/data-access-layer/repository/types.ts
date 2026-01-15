@@ -53,3 +53,18 @@ export function isRepositoryError<TData>(
 ): result is RepositoryFailure {
   return result.success === false;
 }
+
+export async function withRepositoryError<T>(
+  operation: () => Promise<T>,
+  errorMessage: string
+): Promise<RepositoryResult<T>> {
+  try {
+    const result = await operation();
+    return repositorySuccess(result);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `${errorMessage}: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}

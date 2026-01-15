@@ -19,29 +19,15 @@ import {
   findMostRecentLibraryItemByGameId,
   updateLibraryItem,
 } from "@/data-access-layer/repository";
-import { z } from "zod";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService, type ServiceResult } from "../types";
 
-const GetLibraryItemsSchema = z.object({
-  userId: z.string().cuid(),
-  status: z.enum(LibraryItemStatus).optional(),
-  platform: z.string().optional(),
-  search: z.string().optional(),
-  sortBy: z
-    .enum(["createdAt", "releaseDate", "startedAt", "completedAt"])
-    .optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional(),
-  distinctByGame: z.boolean().optional(),
-  offset: z.number().int().min(0).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-const DeleteLibraryItemSchema = z.object({
-  libraryItemId: z.number().int().positive(),
-  userId: z.string().cuid(),
-});
+import {
+  DeleteLibraryItemSchema,
+  GetLibraryItemsServiceSchema,
+} from "./schemas";
 
 type SortField = "createdAt" | "releaseDate" | "startedAt" | "completedAt";
 type GetLibraryItemsParams = {
@@ -76,13 +62,7 @@ export class LibraryService extends BaseService {
       }
       return this.success(result.data);
     } catch (error) {
-      this.logger.error(
-        { error, igdbId },
-        "Unexpected error in findGameByIgdbId"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to find game by IGDB ID");
     }
   }
   async findMostRecentLibraryItemByGameId(params: {
@@ -104,13 +84,7 @@ export class LibraryService extends BaseService {
         : null;
       return this.success(domainItem);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in findMostRecentLibraryItemByGameId"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to find most recent library item");
     }
   }
   async updateLibraryItem(params: {
@@ -160,13 +134,7 @@ export class LibraryService extends BaseService {
       );
       return this.success(LibraryItemMapper.toDomain(result.data));
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in updateLibraryItem"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to update library item");
     }
   }
   async findAllLibraryItemsByGameId(params: {
@@ -188,13 +156,7 @@ export class LibraryService extends BaseService {
       );
       return this.success(domainItems);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in findAllLibraryItemsByGameId"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to find all library items");
     }
   }
   async getLibraryItems(
@@ -205,7 +167,7 @@ export class LibraryService extends BaseService {
   > {
     try {
       this.logger.info({ userId: params.userId }, "Fetching library items");
-      const validation = GetLibraryItemsSchema.safeParse(params);
+      const validation = GetLibraryItemsServiceSchema.safeParse(params);
       if (!validation.success) {
         this.logger.warn(
           { errors: validation.error.issues },
@@ -251,13 +213,7 @@ export class LibraryService extends BaseService {
         hasMore,
       });
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in getLibraryItems"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to get library items");
     }
   }
   async deleteLibraryItem(params: {
@@ -305,13 +261,7 @@ export class LibraryService extends BaseService {
       );
       return this.success(undefined);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in deleteLibraryItem"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to delete library item");
     }
   }
   async createLibraryItem(params: {
@@ -367,13 +317,7 @@ export class LibraryService extends BaseService {
       );
       return this.success(LibraryItemMapper.toDomain(result.data));
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in createLibraryItem"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to create library item");
     }
   }
 }

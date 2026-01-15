@@ -114,6 +114,50 @@ export async function findGamesByIds(
 | Count | `count` | `countLibraryItems`, `countUserGames` |
 | Upsert | `upsert` | `upsertGame`, `upsertPlatform` |
 
+### Not-Found Handling
+
+Repository functions follow two patterns for handling missing data:
+
+**Pattern 1: Null in Success** - For pure lookups where "not found" is a valid result
+
+```typescript
+// Use when: Caller needs flexibility to handle "not found"
+export async function findGameBySlug(slug: string): Promise<RepositoryResult<Game | null>> {
+  const game = await prisma.game.findUnique({ where: { slug } });
+  return repositorySuccess(game);  // Returns null if not found
+}
+```
+
+**Pattern 2: NOT_FOUND Error** - For operations requiring existence or authorization
+
+```typescript
+// Use when: Operation cannot proceed without the item, or checking ownership
+export async function findLibraryItemById(params: {
+  libraryItemId: number;
+  userId: string;  // Ownership check
+}): Promise<RepositoryResult<LibraryItem>> {
+  const item = await prisma.libraryItem.findFirst({
+    where: { id: params.libraryItemId, userId: params.userId },
+  });
+  if (!item) {
+    return repositoryError(RepositoryErrorCode.NOT_FOUND, "Library item not found");
+  }
+  return repositorySuccess(item);
+}
+```
+
+**When to use each pattern:**
+
+| Scenario | Pattern | Example |
+|----------|---------|---------|
+| Cache lookup (may miss) | Null in Success | `findGameByIgdbId` |
+| Check before create | Null in Success | `findUserByEmail` |
+| Get for display | Null in Success | `findGameBySlug` |
+| Get for modification | NOT_FOUND Error | `findLibraryItemById` |
+| Authorized access | NOT_FOUND Error | `findLibraryItemById` (with userId) |
+| Delete operation | NOT_FOUND Error | `deleteLibraryItem` |
+| Update operation | NOT_FOUND Error | `updateLibraryItem` |
+
 ## Security Patterns
 
 ### Restrictive Default Selects

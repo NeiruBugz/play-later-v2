@@ -8,6 +8,7 @@ export {
   repositoryError,
   isRepositorySuccess,
   isRepositoryError,
+  withRepositoryError,
 } from "./types";
 export {
   createLibraryItem,

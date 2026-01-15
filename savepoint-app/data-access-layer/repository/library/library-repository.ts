@@ -5,6 +5,7 @@ import {
   repositoryError,
   RepositoryErrorCode,
   repositorySuccess,
+  withRepositoryError,
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import { Prisma, type LibraryItem } from "@prisma/client";
@@ -209,17 +210,10 @@ export async function getLibraryCount({
   status,
   gteClause,
 }: GetLibraryCountInput): Promise<RepositoryResult<number>> {
-  try {
-    const count = await prisma.libraryItem.count({
-      where: { userId, status, ...gteClause },
-    });
-    return repositorySuccess(count);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get library count: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+  return withRepositoryError(
+    () => prisma.libraryItem.count({ where: { userId, status, ...gteClause } }),
+    "Failed to get library count"
+  );
 }
 export async function getPlatformBreakdown({
   userId,
@@ -282,39 +276,31 @@ export async function getRecentlyCompletedLibraryItems({
 }): Promise<
   RepositoryResult<Array<LibraryItem & { game: { title: string } }>>
 > {
-  try {
-    const items = await prisma.libraryItem.findMany({
-      where: { userId, status: LibraryItemStatus.PLAYED },
-      include: { game: { select: { title: true } } },
-      orderBy: { completedAt: "desc" },
-      take: RECENT_COMPLETED_ITEMS_LIMIT,
-    });
-    return repositorySuccess(items);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get recently completed items: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+  return withRepositoryError(
+    () =>
+      prisma.libraryItem.findMany({
+        where: { userId, status: LibraryItemStatus.PLAYED },
+        include: { game: { select: { title: true } } },
+        orderBy: { completedAt: "desc" },
+        take: RECENT_COMPLETED_ITEMS_LIMIT,
+      }),
+    "Failed to get recently completed items"
+  );
 }
 export async function getUniquePlatforms({
   userId,
 }: {
   userId: string;
 }): Promise<RepositoryResult<Array<{ platform: string | null }>>> {
-  try {
-    const platforms = await prisma.libraryItem.findMany({
-      where: { userId },
-      select: { platform: true },
-      distinct: ["platform"],
-    });
-    return repositorySuccess(platforms);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get unique platforms: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+  return withRepositoryError(
+    () =>
+      prisma.libraryItem.findMany({
+        where: { userId },
+        select: { platform: true },
+        distinct: ["platform"],
+      }),
+    "Failed to get unique platforms"
+  );
 }
 
 export async function getOtherUsersLibraries({
@@ -713,17 +699,10 @@ export type FindLibraryItemsResult = {
 export async function countLibraryItemsByUserId(
   userId: string
 ): Promise<RepositoryResult<number>> {
-  try {
-    const count = await prisma.libraryItem.count({
-      where: { userId },
-    });
-    return repositorySuccess(count);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to count library items: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+  return withRepositoryError(
+    () => prisma.libraryItem.count({ where: { userId } }),
+    "Failed to count library items"
+  );
 }
 
 export async function hasLibraryItemWithStatus(

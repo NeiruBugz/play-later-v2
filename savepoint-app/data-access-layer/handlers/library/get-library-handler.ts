@@ -1,4 +1,4 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
+import { GetLibraryItemsBaseSchema } from "@/data-access-layer/services/library/schemas";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { z } from "zod";
 
@@ -15,17 +15,8 @@ import type { GetLibraryHandlerInput, GetLibraryHandlerOutput } from "./types";
 
 const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GetLibraryHandler" });
 
-const GetLibrarySchema = z.object({
-  userId: z.string().cuid(),
-  status: z.enum(LibraryItemStatus).optional(),
-  platform: z.string().optional(),
-  search: z.string().optional(),
-  sortBy: z
-    .enum(["createdAt", "releaseDate", "startedAt", "completedAt"])
-    .optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional(),
+const GetLibrarySchema = GetLibraryItemsBaseSchema.extend({
   offset: z.number().int().min(0).max(10000).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
 });
 
 export async function getLibraryHandler(
