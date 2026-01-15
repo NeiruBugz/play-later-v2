@@ -18,7 +18,7 @@ import {
   LIBRARY_STATUS_CONFIG,
   type StatusBadgeVariant,
 } from "@/shared/lib/library-status";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 import { useUniquePlatforms } from "../hooks/use-unique-platforms";
 import { PlatformFilterCombobox } from "./platform-filter-combobox";

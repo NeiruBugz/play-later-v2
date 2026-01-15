@@ -12,7 +12,7 @@ import {
   getStatusLabel,
   LIBRARY_STATUS_CONFIG,
 } from "@/shared/lib/library-status";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 import type { DashboardStatsData } from "./dashboard-stats";
 

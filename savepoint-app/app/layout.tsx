@@ -2,7 +2,7 @@ import { type Metadata, type Viewport } from "next";
 
 import { LoadingScreen } from "@/shared/components/loading-screen";
 import { SpeedInsightsClient } from "@/shared/components/speed-insights";
-import { cn } from "@/shared/lib";
+import { cn } from "@/shared/lib/ui/utils";
 import { Providers } from "@/shared/providers";
 
 import "@/shared/globals.css";

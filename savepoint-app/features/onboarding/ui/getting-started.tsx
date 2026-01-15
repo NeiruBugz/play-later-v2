@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 import { dismissOnboarding } from "../server-actions";
 import { OnboardingStep } from "./onboarding-step";
@@ -28,7 +28,7 @@ export function GettingStarted({ progress }: GettingStartedProps) {
 
   const handleDismiss = () => {
     startTransition(async () => {
-      await dismissOnboarding();
+      await dismissOnboarding({});
     });
   };
 

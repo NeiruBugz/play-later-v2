@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { LibraryCard } from "@/features/library/ui/library-card";
 import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 interface DashboardGameSectionProps {
   title: string;

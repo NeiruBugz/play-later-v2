@@ -3,7 +3,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { useEffect, useId, useState } from "react";
 
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 const progressRingVariants = cva(
   "relative inline-flex items-center justify-center",

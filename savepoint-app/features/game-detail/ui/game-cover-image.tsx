@@ -3,7 +3,7 @@
 import { Gamepad2 } from "lucide-react";
 import Image from "next/image";
 
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 import type { GameCoverImageProps } from "./game-cover-image.types";
 

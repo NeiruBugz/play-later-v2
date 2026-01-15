@@ -33,9 +33,6 @@ const MOOD_LABELS: Record<JournalMood, string> = {
   [JournalMood.NOSTALGIC]: "Nostalgic",
 };
 
-/**
- * Gets first N characters of plain text content
- */
 function getContentPreview(content: string, maxLength: number = 100): string {
   const plainText = stripHtmlTags(content);
   if (plainText.length <= maxLength) {

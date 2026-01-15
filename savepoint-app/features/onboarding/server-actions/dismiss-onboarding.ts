@@ -1,30 +1,26 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { OnboardingService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { createServerAction, type ActionResult } from "@/shared/lib";
 
-export async function dismissOnboarding(): Promise<{
-  success: boolean;
-  error?: string;
-}> {
-  const logger = createLogger({
-    [LOGGER_CONTEXT.SERVER_ACTION]: "dismissOnboarding",
-  });
+const EmptySchema = z.object({});
 
-  try {
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn({ reason: "unauthorized" }, "Dismiss onboarding denied");
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const service = new OnboardingService();
+export const dismissOnboarding = createServerAction<
+  Record<string, never>,
+  void
+>({
+  actionName: "dismissOnboarding",
+  schema: EmptySchema,
+  requireAuth: true,
+  handler: async ({ userId, logger }): Promise<ActionResult<void>> => {
     logger.info({ userId }, "Dismissing onboarding");
 
-    const result = await service.dismiss({ userId });
+    const service = new OnboardingService();
+    const result = await service.dismiss({ userId: userId! });
+
     if (!result.success) {
       logger.error(
         { userId, reason: result.error },
@@ -35,9 +31,6 @@ export async function dismissOnboarding(): Promise<{
 
     revalidatePath("/dashboard");
     logger.info({ userId }, "Onboarding dismissed successfully");
-    return { success: true };
-  } catch (err) {
-    logger.error({ err }, "Unexpected error in dismissOnboarding");
-    return { success: false, error: "Failed to dismiss onboarding" };
-  }
-}
+    return { success: true, data: undefined };
+  },
+});

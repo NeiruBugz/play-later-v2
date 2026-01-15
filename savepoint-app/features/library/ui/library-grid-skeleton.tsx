@@ -1,5 +1,5 @@
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 export function LibraryGridSkeleton() {
   return (

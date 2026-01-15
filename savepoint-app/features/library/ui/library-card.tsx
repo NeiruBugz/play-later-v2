@@ -6,7 +6,7 @@ import { memo } from "react";
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
 import { getStatusConfig } from "@/shared/lib/library-status";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 import type { LibraryItemStatus } from "@/shared/types";
 
 import { LibraryCardActionBar } from "./library-card-action-bar";

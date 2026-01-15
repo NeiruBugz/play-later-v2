@@ -22,6 +22,14 @@ import {
 import { signInAction } from "../server-actions/sign-in";
 import { signUpAction } from "../server-actions/sign-up";
 
+function getSubmitButtonLabel(
+  isLoading: boolean,
+  mode: "signin" | "signup"
+): string {
+  if (isLoading) return "Loading...";
+  return mode === "signin" ? "Sign In" : "Sign Up";
+}
+
 export function CredentialsForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [isPending, startTransition] = useTransition();
@@ -177,11 +185,7 @@ export function CredentialsForm() {
           className="w-full cursor-pointer"
           disabled={isSubmitting || isPending}
         >
-          {isSubmitting || isPending
-            ? "Loading..."
-            : mode === "signin"
-              ? "Sign In"
-              : "Sign Up"}
+          {getSubmitButtonLabel(isSubmitting || isPending, mode)}
         </Button>
       </form>
       <div className="body-sm mt-2xl text-center">

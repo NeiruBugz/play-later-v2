@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 import { LibraryItemStatus } from "@/shared/types";
 
 import type { QuickActionButtonsProps } from "./quick-action-buttons.types";

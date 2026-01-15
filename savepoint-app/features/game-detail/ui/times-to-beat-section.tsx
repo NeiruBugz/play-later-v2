@@ -1,7 +1,7 @@
 import { Clock, Trophy } from "lucide-react";
 
 import { Card } from "@/shared/components/ui/card";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 import type { TimesToBeatSectionProps } from "./times-to-beat-section.types";
 

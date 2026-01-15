@@ -65,7 +65,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
   };
   const handleSkip = () => {
     startTransition(async () => {
-      const res = await skipProfileSetup();
+      const res = await skipProfileSetup({});
       if (!res.success) {
         toast.error(res.error ?? "Failed to complete setup");
         return;
