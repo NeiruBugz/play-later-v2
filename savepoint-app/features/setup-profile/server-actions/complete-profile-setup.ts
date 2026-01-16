@@ -49,6 +49,7 @@ const performCompleteSetup = createServerAction<
     }
 
     logger.info({ userId }, "Profile setup completed");
+    revalidatePath("/dashboard");
     return {
       success: true,
       data: result.data,
