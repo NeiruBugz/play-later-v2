@@ -1,8 +1,7 @@
 "use server";
 
-import { z } from "zod";
-
 import { GameService } from "@/data-access-layer/services";
+import { z } from "zod";
 
 import { createServerAction } from "@/shared/lib";
 
@@ -39,7 +38,10 @@ export const getGamesByIdsAction = createServerAction<
       };
     }
 
-    logger.info({ gamesCount: result.data.length }, "Games fetched successfully");
+    logger.info(
+      { gamesCount: result.data.length },
+      "Games fetched successfully"
+    );
     return {
       success: true,
       data: result.data,
