@@ -6,6 +6,8 @@ export class GameDetailPage {
   async goto(slug: string): Promise<void> {
     await this.page.goto(`/games/${slug}`);
     await this.page.waitForLoadState("networkidle");
+    // Wait for the game title to appear (confirms IGDB data loaded)
+    await this.heading().waitFor({ state: "visible", timeout: 30000 });
   }
 
   heading(): Locator {

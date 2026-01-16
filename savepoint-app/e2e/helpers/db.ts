@@ -193,8 +193,16 @@ export async function createTestGame(data?: {
   const igdbId = data?.igdbId ?? Math.floor(Math.random() * 1000000);
   const title = data?.title ?? `Test Game ${igdbId}`;
   const slug = data?.slug ?? `test-game-${igdbId}`;
-  const game = await getPrisma().game.create({
-    data: {
+
+  // Use upsert to handle potential collisions from test retries
+  const game = await getPrisma().game.upsert({
+    where: { igdbId },
+    update: {
+      title,
+      slug,
+      coverImage: data?.coverImage ?? null,
+    },
+    create: {
       igdbId,
       title,
       slug,
