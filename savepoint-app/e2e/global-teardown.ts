@@ -1,12 +1,9 @@
-import { resolve } from "path";
-import { config } from "dotenv";
-
+// NOTE: Environment is loaded in playwright.config.ts before this runs
 import { clearTestData, disconnectDatabase } from "./helpers/db";
 
-config({ path: resolve(import.meta.dirname, "../.env") });
-
 async function globalTeardown(): Promise<void> {
-  console.log("\n🧹 Running global E2E teardown...");
+  const dbName = process.env.POSTGRES_DATABASE ?? "savepoint-db-test";
+  console.log(`\n🧹 Running global E2E teardown (database: ${dbName})...`);
   try {
     await clearTestData();
     console.log("✅ Test data cleared successfully");
