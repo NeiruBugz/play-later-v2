@@ -24,22 +24,22 @@ export function ProfileView({ profile }: ProfileViewProps) {
   const totalGames = statusEntries.reduce((sum, [, count]) => sum + count, 0);
 
   return (
-    <div className="space-y-3xl">
-      <div className="gap-2xl flex flex-col sm:flex-row sm:items-start sm:justify-between">
-        <div className="gap-2xl flex items-start">
+    <div className="space-y-2xl">
+      <div className="gap-xl flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="gap-lg flex items-center">
           <div className="shrink-0">
             {profile.image ? (
               <Image
-                width={96}
-                height={96}
+                width={80}
+                height={80}
                 priority
                 src={profile.image}
                 alt={`${displayName}'s avatar`}
-                className="h-24 w-24 rounded-full object-cover ring-2 ring-[oklch(var(--border))]"
+                className="ring-border/50 h-20 w-20 rounded-lg object-cover ring-1"
               />
             ) : (
               <div
-                className="bg-muted text-muted-foreground flex h-24 w-24 items-center justify-center rounded-full text-2xl font-bold"
+                className="bg-primary/10 text-primary flex h-20 w-20 items-center justify-center rounded-lg text-2xl font-semibold"
                 data-testid="profile-avatar-placeholder"
               >
                 {displayName.charAt(0).toUpperCase()}
@@ -47,29 +47,31 @@ export function ProfileView({ profile }: ProfileViewProps) {
             )}
           </div>
           <div className="flex-1">
-            <h2 className="heading-xl font-serif">{displayName}</h2>
-            {profile.email && (
-              <p className="text-muted-foreground mt-xs text-sm">
-                {profile.email}
-              </p>
-            )}
-            <p className="text-muted-foreground mt-md text-sm">
-              Joined {joinDateFormatted}
-            </p>
+            <h1 className="heading-xl tracking-tight">{displayName}</h1>
+            <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-sm">
+              {profile.email && (
+                <>
+                  <span>{profile.email}</span>
+                  <span className="text-border">•</span>
+                </>
+              )}
+              <span>Joined {joinDateFormatted}</span>
+            </div>
           </div>
         </div>
-        <div className="gap-md flex flex-col">
-          <Button variant="outline" className="shrink-0" asChild>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
             <Link href="/profile/settings">Edit Profile</Link>
           </Button>
           <LogoutButton />
         </div>
       </div>
+
       {statusEntries.length > 0 && (
         <div>
-          <h2 className="heading-lg mb-xl font-serif">Library Stats</h2>
+          <h2 className="heading-md mb-lg tracking-tight">Library Stats</h2>
           <div
-            className="gap-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+            className="grid grid-cols-2 gap-3 sm:grid-cols-4"
             data-testid="profile-stats-grid"
           >
             {statusEntries.map(([status, count], index) => {
@@ -81,29 +83,29 @@ export function ProfileView({ profile }: ProfileViewProps) {
                 <Card
                   key={status}
                   variant="interactive"
-                  className="animate-fade-in p-xl hover:shadow-paper-md hover:scale-[1.02]"
+                  className="animate-fade-in p-lg transition-all hover:scale-[1.02]"
                   style={{ animationDelay: `${(index + 1) * 50}ms` }}
                   data-testid="profile-status-card"
                 >
-                  <div className="gap-md flex flex-col items-center">
+                  <div className="flex items-center gap-3">
                     <ProgressRing
                       status={gameStatus}
                       progress={percentage}
-                      size="md"
+                      size="sm"
                       showPercentage
                     />
-                    <div className="text-center">
+                    <div>
                       <p
-                        className="body-sm text-muted-foreground font-medium"
-                        data-testid="profile-status-label"
-                      >
-                        {statusLabels[status] || status}
-                      </p>
-                      <p
-                        className="heading-lg mt-xs"
+                        className="text-2xl font-semibold tabular-nums"
                         data-testid="profile-status-count"
                       >
                         {count}
+                      </p>
+                      <p
+                        className="text-muted-foreground text-xs font-medium"
+                        data-testid="profile-status-label"
+                      >
+                        {statusLabels[status] || status}
                       </p>
                     </div>
                   </div>
@@ -113,11 +115,12 @@ export function ProfileView({ profile }: ProfileViewProps) {
           </div>
         </div>
       )}
+
       {profile.stats.recentGames.length > 0 && (
         <div>
-          <h2 className="heading-lg mb-xl font-serif">Recently Played</h2>
+          <h2 className="heading-md mb-lg tracking-tight">Recently Played</h2>
           <div
-            className="gap-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7"
             data-testid="profile-recent-games-grid"
           >
             {profile.stats.recentGames.map((game, index) => {
@@ -125,10 +128,9 @@ export function ProfileView({ profile }: ProfileViewProps) {
                 ? `${IMAGE_API}/${IMAGE_SIZES["hd"]}/${game.coverImage}.webp`
                 : "";
               return (
-                <Card
+                <div
                   key={game.gameId}
-                  variant="interactive"
-                  className="animate-fade-in group duration-normal ease-out-expo hover:shadow-paper-md overflow-hidden p-0 transition-all hover:scale-[1.01]"
+                  className="animate-fade-in group relative overflow-hidden rounded-lg"
                   style={{ animationDelay: `${(index + 1) * 50}ms` }}
                   data-testid="profile-recent-game-card"
                 >
@@ -138,23 +140,23 @@ export function ProfileView({ profile }: ProfileViewProps) {
                       height={267}
                       src={src}
                       alt={game.title}
-                      className="aspect-3/4 w-full object-cover"
+                      className="aspect-[3/4] w-full object-cover"
                     />
                   ) : (
                     <div
-                      className="bg-muted aspect-3/4 w-full"
+                      className="bg-muted aspect-[3/4] w-full"
                       data-testid="profile-game-cover-fallback"
-                    ></div>
+                    />
                   )}
-                  <div className="p-lg">
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-8">
                     <h3
-                      className="text-foreground line-clamp-2 text-sm font-medium"
+                      className="line-clamp-2 text-sm font-semibold text-white drop-shadow-md"
                       data-testid="profile-recent-game-title"
                     >
                       {game.title}
                     </h3>
                     <p
-                      className="text-muted-foreground mt-xs text-xs"
+                      className="mt-1 text-xs text-white/60"
                       data-testid="profile-recent-game-timestamp"
                     >
                       {formatDistanceToNow(new Date(game.lastPlayed), {
@@ -162,15 +164,16 @@ export function ProfileView({ profile }: ProfileViewProps) {
                       })}
                     </p>
                   </div>
-                </Card>
+                </div>
               );
             })}
           </div>
         </div>
       )}
+
       {statusEntries.length === 0 && profile.stats.recentGames.length === 0 && (
-        <div className="border-border bg-muted p-4xl rounded-lg border text-center">
-          <p className="body-lg text-muted-foreground">
+        <div className="border-border/50 bg-card p-3xl rounded-lg border text-center">
+          <p className="body-md text-muted-foreground">
             Your library is empty. Start adding games to your collection!
           </p>
         </div>

@@ -5,11 +5,14 @@ import { memo } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
+import { useMediaQuery } from "@/shared/hooks/use-media-query";
 import { getStatusConfig } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
 import type { LibraryItemStatus } from "@/shared/types";
 
 import { LibraryCardActionBar } from "./library-card-action-bar";
+import { LibraryCardMobileActions } from "./library-card-mobile-actions";
+import { LibraryCardSwipe } from "./library-card-swipe";
 import type { LibraryCardProps } from "./library-card.types";
 
 export const LibraryCard = memo(function LibraryCard({
@@ -20,6 +23,7 @@ export const LibraryCard = memo(function LibraryCard({
   const hasMultipleEntries = game.entryCount > 1;
   const coverImageId =
     game.coverImage?.split("/").pop()?.replace(".jpg", "") ?? null;
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
   const handleLinkInteraction = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.defaultPrevented) {
@@ -43,28 +47,15 @@ export const LibraryCard = memo(function LibraryCard({
 
   const statusConfig = getStatusConfig(status);
 
-  return (
-    <Link
-      href={`/games/${game.slug}`}
-      className={cn(
-        "group relative block [&>[data-library-interactive]]:pointer-events-auto",
-        "animate-stagger-in",
-        `stagger-${staggerIndex}`,
-        "duration-normal ease-out-expo rounded-lg transition-all",
-        "hover:shadow-paper-md hover:scale-[1.02]"
-      )}
-      onClick={handleLinkInteraction}
-      onMouseDown={handleLinkInteraction}
-      aria-label={`${game.title} - ${statusConfig.label}${hasMultipleEntries ? ` - ${game.entryCount} entries` : ""}`}
-      style={{ animationDelay: `${staggerIndex * 50}ms` }}
-    >
+  const cardContent = (
+    <>
       <div className="relative overflow-hidden rounded-lg">
         <GameCoverImage
           imageId={coverImageId}
           gameTitle={game.title}
           size="hd"
           className="aspect-[3/4] w-full"
-          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, (max-width: 1280px) 14vw, 12vw"
           priority={index < 6}
           fetchPriority={index < 6 ? "high" : "low"}
         />
@@ -89,10 +80,44 @@ export const LibraryCard = memo(function LibraryCard({
         </div>
       </div>
 
-      <LibraryCardActionBar
-        libraryItemId={item.id}
-        currentStatus={status as LibraryItemStatus}
-      />
+      {!isMobile && (
+        <LibraryCardActionBar
+          libraryItemId={item.id}
+          currentStatus={status as LibraryItemStatus}
+        />
+      )}
+    </>
+  );
+
+  return (
+    <Link
+      href={`/games/${game.slug}`}
+      className={cn(
+        "group relative block [&>[data-library-interactive]]:pointer-events-auto",
+        "animate-stagger-in",
+        `stagger-${staggerIndex}`,
+        "duration-normal ease-out-expo rounded-lg transition-all",
+        !isMobile && "hover:shadow-paper-md hover:scale-[1.02]"
+      )}
+      onClick={handleLinkInteraction}
+      onMouseDown={handleLinkInteraction}
+      aria-label={`${game.title} - ${statusConfig.label}${hasMultipleEntries ? ` - ${game.entryCount} entries` : ""}`}
+      style={{ animationDelay: `${staggerIndex * 50}ms` }}
+    >
+      {isMobile ? (
+        <LibraryCardSwipe
+          actionBar={
+            <LibraryCardMobileActions
+              libraryItemId={item.id}
+              currentStatus={status as LibraryItemStatus}
+            />
+          }
+        >
+          {cardContent}
+        </LibraryCardSwipe>
+      ) : (
+        cardContent
+      )}
     </Link>
   );
 });

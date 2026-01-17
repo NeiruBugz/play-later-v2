@@ -67,7 +67,7 @@ export const QuickActionButtons = ({
       style={{ animationDelay: "100ms" }}
     >
       <CardHeader className="pb-lg">
-        <CardTitle className="font-serif">Quick Actions</CardTitle>
+        <CardTitle className="font-semibold">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
         {}

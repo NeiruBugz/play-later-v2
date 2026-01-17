@@ -48,10 +48,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         search: rawSearch ?? undefined,
         sortBy:
           (rawSortBy as
+            | "updatedAt"
             | "createdAt"
             | "releaseDate"
             | "startedAt"
             | "completedAt"
+            | "title"
             | undefined) ?? undefined,
         sortOrder: (rawSortOrder as "asc" | "desc" | undefined) ?? undefined,
         offset: rawOffset ? parseInt(rawOffset, 10) : undefined,

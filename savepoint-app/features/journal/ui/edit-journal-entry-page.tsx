@@ -24,7 +24,7 @@ export function EditJournalEntryPage({ entry }: EditJournalEntryPageProps) {
   return (
     <main className="py-3xl container mx-auto">
       <div className="mx-auto max-w-3xl">
-        <h1 className="heading-xl mb-xl font-serif">Edit Journal Entry</h1>
+        <h1 className="heading-xl mb-xl font-semibold">Edit Journal Entry</h1>
         <JournalEntryForm
           entry={entry}
           gameId={entry.gameId}

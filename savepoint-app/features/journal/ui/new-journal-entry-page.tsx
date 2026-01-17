@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { JournalEntryDomain } from "@/shared/types";
 
-import { GameSelector } from "./game-selector";
+import { getPlayingGameAction } from "../server-actions/get-playing-game";
+import { InlineGameSelector } from "./inline-game-selector";
 import { JournalEntryForm } from "./journal-entry-form";
 
 export function NewJournalEntryPage() {
@@ -15,6 +16,23 @@ export function NewJournalEntryPage() {
   const [selectedGameId, setSelectedGameId] = useState<string | null>(
     gameIdFromQuery
   );
+  const [defaultPlayingGameId, setDefaultPlayingGameId] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    if (!gameIdFromQuery) {
+      getPlayingGameAction()
+        .then((result) => {
+          if (result.success && result.data) {
+            setDefaultPlayingGameId(result.data.id);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to fetch playing game:", error);
+        });
+    }
+  }, [gameIdFromQuery]);
 
   const handleSuccess = (entry: JournalEntryDomain) => {
     router.push(`/journal/${entry.id}`);
@@ -25,36 +43,31 @@ export function NewJournalEntryPage() {
   };
 
   const handleGameSelect = (gameId: string) => {
-    setSelectedGameId(gameId);
+    setSelectedGameId(gameId || null);
   };
-
-  if (!selectedGameId) {
-    return (
-      <div className="space-y-xl">
-        <header>
-          <h1 className="heading-xl font-serif">Write New Entry</h1>
-          <p className="body-md text-muted-foreground">
-            Select a game to write about
-          </p>
-        </header>
-        <GameSelector onGameSelect={handleGameSelect} onCancel={handleCancel} />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-xl">
-      <header>
-        <h1 className="heading-xl font-serif">Write New Entry</h1>
-        <p className="body-md text-muted-foreground">
-          Share your thoughts and experiences
-        </p>
+      <header className="space-y-md">
+        <div>
+          <h1 className="heading-xl font-semibold">Write New Entry</h1>
+          <p className="body-md text-muted-foreground">
+            Share your thoughts and experiences
+          </p>
+        </div>
+        <InlineGameSelector
+          selectedGameId={selectedGameId}
+          onGameSelect={handleGameSelect}
+          defaultGameId={defaultPlayingGameId ?? undefined}
+        />
       </header>
-      <JournalEntryForm
-        gameId={selectedGameId}
-        onSuccess={handleSuccess}
-        onCancel={handleCancel}
-      />
+      {selectedGameId && (
+        <JournalEntryForm
+          gameId={selectedGameId}
+          onSuccess={handleSuccess}
+          onCancel={handleCancel}
+        />
+      )}
     </div>
   );
 }

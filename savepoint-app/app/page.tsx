@@ -21,7 +21,7 @@ export default async function Page() {
               <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
                 <BookOpen className="text-primary-foreground h-5 w-5" />
               </div>
-              <span className="heading-sm text-foreground font-serif">
+              <span className="heading-sm text-foreground font-semibold">
                 SavePoint
               </span>
             </div>
@@ -57,7 +57,7 @@ export default async function Page() {
                   For Patient Gamers
                 </span>
               </div>
-              <h1 className="display-2xl font-serif text-balance">
+              <h1 className="display-2xl font-semibold text-balance">
                 Your Personal Gaming Library & Journal
               </h1>
               <p className="body-lg text-muted-foreground mx-auto max-w-2xl text-pretty">
@@ -90,7 +90,7 @@ export default async function Page() {
       <section id="philosophy" className="bg-muted/30 py-5xl">
         <div className="px-lg container mx-auto">
           <div className="space-y-2xl mx-auto max-w-3xl text-center">
-            <h2 className="display-lg font-serif text-balance">
+            <h2 className="display-lg font-semibold text-balance">
               A Different Approach to Gaming
             </h2>
             <p className="body-lg text-muted-foreground text-pretty">
@@ -104,7 +104,7 @@ export default async function Page() {
       <section id="features" className="py-5xl">
         <div className="px-lg container mx-auto">
           <div className="mb-4xl space-y-xl text-center">
-            <h2 className="display-lg font-serif">Everything You Need</h2>
+            <h2 className="display-lg font-semibold">Everything You Need</h2>
             <p className="body-lg text-muted-foreground mx-auto max-w-2xl">
               Thoughtfully designed features for patient gamers
             </p>
@@ -114,7 +114,7 @@ export default async function Page() {
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Library className="text-primary h-6 w-6" />
               </div>
-              <h3 className="heading-lg font-serif">Personal Library</h3>
+              <h3 className="heading-lg font-semibold">Personal Library</h3>
               <p className="body-md text-muted-foreground">
                 Curate your collection across all platforms. Import from Steam
                 and other services, or add games manually.
@@ -124,7 +124,7 @@ export default async function Page() {
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <BookOpen className="text-secondary h-6 w-6" />
               </div>
-              <h3 className="heading-lg font-serif">Gaming Journal</h3>
+              <h3 className="heading-lg font-semibold">Gaming Journal</h3>
               <p className="body-md text-muted-foreground">
                 Write reflections and preserve memories. Capture what made each
                 game special to you.
@@ -134,7 +134,7 @@ export default async function Page() {
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Clock className="text-primary h-6 w-6" />
               </div>
-              <h3 className="heading-lg font-serif">Journey Tracking</h3>
+              <h3 className="heading-lg font-semibold">Journey Tracking</h3>
               <p className="body-md text-muted-foreground">
                 Mark where you are: Curious About, Currently Exploring,
                 Experienced. No pressure, just progress.
@@ -144,7 +144,7 @@ export default async function Page() {
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Heart className="text-secondary h-6 w-6" />
               </div>
-              <h3 className="heading-lg font-serif">Curated Collections</h3>
+              <h3 className="heading-lg font-semibold">Curated Collections</h3>
               <p className="body-md text-muted-foreground">
                 Create themed collections like "Cozy Winter Games" or "Games
                 That Made Me Think."
@@ -154,7 +154,7 @@ export default async function Page() {
               <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Sparkles className="text-primary h-6 w-6" />
               </div>
-              <h3 className="heading-lg font-serif">Discovery</h3>
+              <h3 className="heading-lg font-semibold">Discovery</h3>
               <p className="body-md text-muted-foreground">
                 Find similar games through IGDB integration. Discover your next
                 adventure thoughtfully.
@@ -164,7 +164,9 @@ export default async function Page() {
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Users className="text-secondary h-6 w-6" />
               </div>
-              <h3 className="heading-lg font-serif">Community Reflections</h3>
+              <h3 className="heading-lg font-semibold">
+                Community Reflections
+              </h3>
               <p className="body-md text-muted-foreground">
                 Read and share perspectives on games. Connect with fellow
                 patient gamers.
@@ -178,7 +180,7 @@ export default async function Page() {
           <div className="mx-auto max-w-6xl">
             <div className="gap-4xl grid items-center md:grid-cols-2">
               <div className="space-y-2xl">
-                <h2 className="display-lg font-serif text-balance">
+                <h2 className="display-lg font-semibold text-balance">
                   Your Gaming Memories Timeline
                 </h2>
                 <p className="body-lg text-muted-foreground">
@@ -207,7 +209,7 @@ export default async function Page() {
       <section className="py-5xl">
         <div className="px-lg container mx-auto">
           <div className="space-y-3xl mx-auto max-w-3xl text-center">
-            <h2 className="display-lg font-serif text-balance">
+            <h2 className="display-lg font-semibold text-balance">
               Ready to Start Your Journey?
             </h2>
             <p className="body-lg text-muted-foreground text-pretty">
@@ -240,7 +242,7 @@ export default async function Page() {
                 <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
                   <BookOpen className="text-primary-foreground h-5 w-5" />
                 </div>
-                <span className="heading-sm font-serif">SavePoint</span>
+                <span className="heading-sm font-semibold">SavePoint</span>
               </div>
               <p className="body-sm text-muted-foreground">
                 Your personal gaming library and journal for patient gamers.

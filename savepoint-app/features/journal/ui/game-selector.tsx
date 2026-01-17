@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Gamepad2, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Button } from "@/shared/components/ui/button";
@@ -14,8 +14,13 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { cn } from "@/shared/lib/ui/utils";
 
 interface GameSelectorProps {
-  onGameSelect: (gameId: string) => void;
+  onGameSelect: (
+    gameId: string,
+    gameTitle: string,
+    coverImage: string | null
+  ) => void;
   onCancel?: () => void;
+  defaultGameId?: string;
 }
 
 async function fetchUserLibraryGames(): Promise<GetLibraryItemsResult> {
@@ -57,10 +62,15 @@ function LoadingState() {
   );
 }
 
-export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
+export function GameSelector({
+  onGameSelect,
+  onCancel,
+  defaultGameId,
+}: GameSelectorProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [hasAutoSelected, setHasAutoSelected] = useState(false);
 
   const {
     data: libraryItems,
@@ -94,11 +104,24 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
     overscan: 5,
   });
 
+  useEffect(() => {
+    if (defaultGameId && uniqueGames.length > 0 && !hasAutoSelected) {
+      const defaultGame = uniqueGames.find((game) => game.id === defaultGameId);
+      if (defaultGame) {
+        setHasAutoSelected(true);
+      }
+    }
+  }, [defaultGameId, uniqueGames, hasAutoSelected]);
+
+  const defaultGame = defaultGameId
+    ? uniqueGames.find((game) => game.id === defaultGameId)
+    : null;
+
   if (isLoading) {
     return (
       <div className="space-y-xl">
         <div className="space-y-sm">
-          <h2 className="font-serif text-lg font-medium">Select a Game</h2>
+          <h2 className="text-lg font-medium font-semibold">Select a Game</h2>
           <p className="text-muted-foreground text-sm">
             Choose from your library
           </p>
@@ -119,7 +142,7 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
     return (
       <div className="space-y-xl">
         <div className="space-y-sm">
-          <h2 className="font-serif text-lg font-medium">Select a Game</h2>
+          <h2 className="text-lg font-medium font-semibold">Select a Game</h2>
           <p className="text-destructive text-sm">
             Failed to load your library
             {error instanceof Error ? `: ${error.message}` : ""}
@@ -143,7 +166,7 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
     return (
       <div className="space-y-xl">
         <div className="space-y-sm">
-          <h2 className="font-serif text-lg font-medium">Select a Game</h2>
+          <h2 className="text-lg font-medium font-semibold">Select a Game</h2>
         </div>
         <div className="gap-lg bg-muted/20 px-xl py-3xl flex flex-col items-center rounded-lg border border-dashed text-center">
           <div className="bg-muted/50 flex h-16 w-16 items-center justify-center rounded-full">
@@ -173,12 +196,48 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
   return (
     <div className="space-y-lg">
       <div className="space-y-sm">
-        <h2 className="font-serif text-lg font-medium">Select a Game</h2>
+        <h2 className="text-lg font-medium font-semibold">Select a Game</h2>
         <p className="text-muted-foreground text-sm">
           {uniqueGames.length} game{uniqueGames.length !== 1 ? "s" : ""} in your
           library
         </p>
       </div>
+
+      {defaultGame && hasAutoSelected && (
+        <div className="bg-accent/50 border-accent px-lg py-md flex items-center gap-3 rounded-lg border">
+          <div className="relative shrink-0 overflow-hidden rounded-md shadow-sm">
+            <GameCoverImage
+              imageId={defaultGame.coverImage}
+              gameTitle={defaultGame.title}
+              size="cover_small"
+              sizes="48px"
+              className="h-14 w-10"
+              imageClassName="rounded-md object-cover"
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-accent-foreground text-sm font-medium">
+              Auto-selected your current game
+            </p>
+            <p className="text-muted-foreground truncate text-xs">
+              {defaultGame.title}
+            </p>
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            onClick={() =>
+              onGameSelect(
+                defaultGame.id,
+                defaultGame.title,
+                defaultGame.coverImage
+              )
+            }
+          >
+            Continue
+          </Button>
+        </div>
+      )}
 
       <div className="relative">
         <Search className="left-md text-muted-foreground pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2" />
@@ -244,7 +303,9 @@ export function GameSelector({ onGameSelect, onCancel }: GameSelectorProps) {
                 <button
                   key={game.id}
                   type="button"
-                  onClick={() => onGameSelect(game.id)}
+                  onClick={() =>
+                    onGameSelect(game.id, game.title, game.coverImage)
+                  }
                   className={cn(
                     "gap-lg px-md py-sm absolute top-0 left-0 flex w-full items-center",
                     "border-border/30 border-b last:border-b-0",

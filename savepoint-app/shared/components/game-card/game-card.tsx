@@ -71,6 +71,8 @@ export function GameCard({
   enableHoverEffects = true,
   priority = false,
   sizes,
+  badges,
+  overlay,
   className,
   ...props
 }: GameCardProps) {
@@ -122,6 +124,8 @@ export function GameCard({
             : "(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw")
         }
         enableHoverEffect={enableHoverEffects}
+        badges={badges}
+        overlay={overlay}
         className={
           layout === "horizontal"
             ? "h-32 w-24 flex-shrink-0"

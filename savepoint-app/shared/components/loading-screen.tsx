@@ -28,7 +28,7 @@ export function LoadingScreen() {
           </div>
         </div>
         <div className="space-y-sm">
-          <p className="heading-md font-serif tracking-wide">SavePoint</p>
+          <p className="heading-md font-semibold tracking-tight">SavePoint</p>
           <p className="body-sm text-muted-foreground">
             Loading your gaming library...
           </p>

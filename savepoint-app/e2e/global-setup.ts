@@ -1,5 +1,5 @@
-import { resolve } from "path";
 import { execSync } from "child_process";
+import { resolve } from "path";
 import { Pool } from "pg";
 
 // NOTE: Environment is loaded in playwright.config.ts before this runs

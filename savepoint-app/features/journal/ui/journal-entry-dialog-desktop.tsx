@@ -35,7 +35,7 @@ export function JournalEntryDialogDesktop({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[500px]">
         <DialogHeader className="border-border/50 px-2xl pb-lg pt-2xl border-b">
-          <DialogTitle className="font-serif text-xl">
+          <DialogTitle className="text-xl font-semibold">
             Capture a thought
           </DialogTitle>
           <DialogDescription className="text-muted-foreground/80">

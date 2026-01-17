@@ -1,3 +1,5 @@
+import type { LibraryItemStatus } from "@/shared/types";
+
 export interface SearchGameResult {
   id: number;
   name: string;
@@ -11,6 +13,11 @@ export interface SearchGameResult {
   }>;
   first_release_date?: number;
 }
+
+export interface SearchGameResultWithStatus extends SearchGameResult {
+  libraryStatus?: LibraryItemStatus | null;
+}
+
 export interface GameSearchResponse {
   games: SearchGameResult[];
   count: number;

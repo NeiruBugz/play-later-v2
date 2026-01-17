@@ -29,6 +29,7 @@ export {
   findWantToPlayItemsForUser,
   findUpcomingWantToPlayItems,
   findCurrentlyPlayingGames,
+  findMostRecentPlayingGame,
   buildCollectionFilter,
   getLibraryStatsByUserId,
   findMostRecentLibraryItemByGameId,

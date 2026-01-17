@@ -4,59 +4,59 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Base colors - warm neutrals inspired by aged paper */
-  --background: oklch(0.97 0.008 50);
-  --foreground: oklch(0.25 0.015 40);
+  /* Base colors - clean light theme */
+  --background: oklch(0.985 0.002 260);
+  --foreground: oklch(0.15 0.01 260);
   /* Surface colors */
-  --card: oklch(0.985 0.006 50);
-  --card-foreground: oklch(0.25 0.015 40);
-  --popover: oklch(0.99 0.005 50);
-  --popover-foreground: oklch(0.25 0.015 40);
-  /* Primary accent - Deep burgundy (leather-bound books) */
-  --primary: oklch(0.42 0.12 20);
-  --primary-foreground: oklch(0.98 0.005 50);
-  /* Secondary accent - Forest green (reading lamp shades) */
-  --secondary: oklch(0.45 0.08 150);
-  --secondary-foreground: oklch(0.98 0.005 50);
-  /* Muted - Warm gray backgrounds */
-  --muted: oklch(0.92 0.01 50);
-  --muted-foreground: oklch(0.5 0.015 40);
-  /* Accent - Amber highlights */
-  --accent: oklch(0.9 0.015 70);
-  --accent-foreground: oklch(0.3 0.02 40);
-  /* Destructive - Muted red (not alarm red) */
-  --destructive: oklch(0.55 0.18 25);
-  --destructive-foreground: oklch(0.98 0.005 50);
-  /* Success - Muted green (forest tones) */
-  --success: oklch(0.55 0.12 145);
-  --success-foreground: oklch(0.98 0.005 50);
-  /* Warning - Amber/Gold (warm cautionary) */
-  --warning: oklch(0.65 0.15 70);
-  --warning-foreground: oklch(0.25 0.015 40);
-  /* Info - Muted blue (book cover blue) */
-  --info: oklch(0.58 0.1 240);
-  --info-foreground: oklch(0.98 0.005 50);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0.01 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0.01 260);
+  /* Primary accent - teal/cyan (#14b8a6) */
+  --primary: oklch(0.65 0.14 175);
+  --primary-foreground: oklch(0.99 0.002 175);
+  /* Secondary - muted gray */
+  --secondary: oklch(0.94 0.005 260);
+  --secondary-foreground: oklch(0.2 0.01 260);
+  /* Muted */
+  --muted: oklch(0.94 0.005 260);
+  --muted-foreground: oklch(0.45 0.01 260);
+  /* Accent - light teal tint */
+  --accent: oklch(0.94 0.03 175);
+  --accent-foreground: oklch(0.2 0.01 260);
+  /* Destructive */
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.99 0.002 25);
+  /* Success */
+  --success: oklch(0.6 0.16 145);
+  --success-foreground: oklch(0.99 0.002 145);
+  /* Warning */
+  --warning: oklch(0.75 0.15 75);
+  --warning-foreground: oklch(0.2 0.02 75);
+  /* Info */
+  --info: oklch(0.6 0.14 240);
+  --info-foreground: oklch(0.99 0.002 240);
   /* Borders and inputs */
-  --border: oklch(0.88 0.012 50);
-  --input: oklch(0.88 0.012 50);
-  --ring: oklch(0.42 0.12 20);
-  /* Chart colors - warm, sophisticated palette */
-  --chart-1: oklch(0.42 0.12 20);
-  --chart-2: oklch(0.45 0.08 150);
-  --chart-3: oklch(0.58 0.12 70);
-  --chart-4: oklch(0.5 0.1 250);
-  --chart-5: oklch(0.52 0.1 30);
-  /* Border radius - slightly softer */
-  --radius: 0.75rem;
+  --border: oklch(0.9 0.005 260);
+  --input: oklch(0.9 0.005 260);
+  --ring: oklch(0.65 0.14 175);
+  /* Chart colors */
+  --chart-1: oklch(0.65 0.14 175);
+  --chart-2: oklch(0.6 0.16 145);
+  --chart-3: oklch(0.7 0.14 55);
+  --chart-4: oklch(0.55 0.15 280);
+  --chart-5: oklch(0.6 0.18 25);
+  /* Border radius - tight, cinematic (Letterboxd-style) */
+  --radius: 0.25rem;
   /* Sidebar */
-  --sidebar: oklch(0.95 0.01 50);
-  --sidebar-foreground: oklch(0.3 0.015 40);
-  --sidebar-primary: oklch(0.42 0.12 20);
-  --sidebar-primary-foreground: oklch(0.98 0.005 50);
-  --sidebar-accent: oklch(0.92 0.01 50);
-  --sidebar-accent-foreground: oklch(0.3 0.015 40);
-  --sidebar-border: oklch(0.88 0.012 50);
-  --sidebar-ring: oklch(0.42 0.12 20);
+  --sidebar: oklch(0.97 0.003 260);
+  --sidebar-foreground: oklch(0.2 0.01 260);
+  --sidebar-primary: oklch(0.65 0.14 175);
+  --sidebar-primary-foreground: oklch(0.99 0.002 175);
+  --sidebar-accent: oklch(0.94 0.02 175);
+  --sidebar-accent-foreground: oklch(0.2 0.01 260);
+  --sidebar-border: oklch(0.9 0.005 260);
+  --sidebar-ring: oklch(0.65 0.14 175);
   /* Platform brand colors */
   --color-nintendo: #e60012;
   --color-playstation: #0070d1;
@@ -107,17 +107,17 @@
   --font-weight-subheading: 600;
   --font-weight-body: 400;
   --font-weight-caption: 500;
-  /* Custom shadows - paper-like, soft */
-  --shadow-paper-sm: 0 1px 2px 0 oklch(0.25 0.015 40 / 0.05);
+  /* Custom shadows - subtle, cinematic */
+  --shadow-paper-sm: 0 1px 2px 0 oklch(0 0 0 / 0.04);
   --shadow-paper:
-    0 2px 8px 0 oklch(0.25 0.015 40 / 0.06),
-    0 1px 3px 0 oklch(0.25 0.015 40 / 0.04);
+    0 2px 8px 0 oklch(0 0 0 / 0.06),
+    0 1px 3px 0 oklch(0 0 0 / 0.04);
   --shadow-paper-md:
-    0 4px 12px 0 oklch(0.25 0.015 40 / 0.08),
-    0 2px 4px 0 oklch(0.25 0.015 40 / 0.05);
+    0 4px 12px 0 oklch(0 0 0 / 0.08),
+    0 2px 4px 0 oklch(0 0 0 / 0.05);
   --shadow-paper-lg:
-    0 8px 24px 0 oklch(0.25 0.015 40 / 0.1),
-    0 4px 8px 0 oklch(0.25 0.015 40 / 0.06);
+    0 8px 24px 0 oklch(0 0 0 / 0.1),
+    0 4px 8px 0 oklch(0 0 0 / 0.06);
   /* Semantic spacing scale - Tailwind-aligned */
   --space-xs: 0.25rem; /* 4px - very tight (Tailwind 1) */
   --space-sm: 0.375rem; /* 6px - tight (Tailwind 1.5) */
@@ -144,69 +144,69 @@
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Status colors - semantic game journey states */
-  --status-wantToPlay: oklch(0.58 0.1 240);
-  --status-wantToPlay-foreground: oklch(0.98 0.005 50);
-  --status-owned: oklch(0.62 0.16 55);
-  --status-owned-foreground: oklch(0.98 0.005 50);
-  --status-playing: oklch(0.5 0.15 20);
-  --status-playing-foreground: oklch(0.98 0.005 50);
-  --status-played: oklch(0.55 0.12 145);
-  --status-played-foreground: oklch(0.98 0.005 50);
+  /* Status colors - game journey states */
+  --status-wantToPlay: oklch(0.55 0.14 260);
+  --status-wantToPlay-foreground: oklch(0.99 0 0);
+  --status-owned: oklch(0.65 0.15 55);
+  --status-owned-foreground: oklch(0.15 0.01 55);
+  --status-playing: oklch(0.65 0.14 175);
+  --status-playing-foreground: oklch(0.99 0 0);
+  --status-played: oklch(0.6 0.16 145);
+  --status-played-foreground: oklch(0.99 0 0);
 }
 
 .dark {
-  /* Base colors - rich charcoal with warm undertone (inspired by Letterboxd) */
-  --background: oklch(0.15 0.012 45);
-  --foreground: oklch(0.93 0.008 55);
-  /* Surface colors - clear elevation hierarchy */
-  --card: oklch(0.19 0.014 45);
-  --card-foreground: oklch(0.93 0.008 55);
-  --popover: oklch(0.21 0.014 45);
-  --popover-foreground: oklch(0.93 0.008 55);
-  /* Primary accent - Warmer burgundy for dark mode */
-  --primary: oklch(0.58 0.14 18);
-  --primary-foreground: oklch(0.98 0.005 50);
-  /* Secondary accent - Brighter forest green */
-  --secondary: oklch(0.6 0.1 150);
-  --secondary-foreground: oklch(0.98 0.005 50);
-  /* Muted - Subtle elevated surface */
-  --muted: oklch(0.25 0.012 45);
-  --muted-foreground: oklch(0.65 0.008 55);
-  /* Accent - Warm amber glow (lamplight effect) */
-  --accent: oklch(0.28 0.02 55);
-  --accent-foreground: oklch(0.93 0.008 55);
-  /* Destructive - Softer red for dark mode */
-  --destructive: oklch(0.62 0.18 22);
-  --destructive-foreground: oklch(0.98 0.005 50);
-  /* Success - Brighter green for dark mode */
-  --success: oklch(0.65 0.14 145);
-  --success-foreground: oklch(0.98 0.005 50);
-  /* Warning - Brighter amber for dark mode */
-  --warning: oklch(0.72 0.16 65);
-  --warning-foreground: oklch(0.15 0.012 45);
-  /* Info - Lighter blue for dark mode */
-  --info: oklch(0.68 0.12 240);
-  --info-foreground: oklch(0.98 0.005 50);
-  /* Borders and inputs - subtle but visible */
-  --border: oklch(0.3 0.015 45);
-  --input: oklch(0.25 0.012 45);
-  --ring: oklch(0.58 0.14 18);
-  /* Chart colors - adjusted for dark mode visibility */
-  --chart-1: oklch(0.6 0.14 18);
-  --chart-2: oklch(0.65 0.1 150);
-  --chart-3: oklch(0.7 0.14 65);
-  --chart-4: oklch(0.65 0.12 250);
-  --chart-5: oklch(0.68 0.12 28);
-  /* Sidebar */
-  --sidebar: oklch(0.17 0.012 45);
-  --sidebar-foreground: oklch(0.93 0.008 55);
-  --sidebar-primary: oklch(0.58 0.14 18);
-  --sidebar-primary-foreground: oklch(0.98 0.005 50);
-  --sidebar-accent: oklch(0.25 0.012 45);
-  --sidebar-accent-foreground: oklch(0.93 0.008 55);
-  --sidebar-border: oklch(0.3 0.015 45);
-  --sidebar-ring: oklch(0.58 0.14 18);
+  /* Base colors - Letterboxd-style deep dark */
+  --background: oklch(0.12 0.005 260);
+  --foreground: oklch(0.93 0.005 260);
+  /* Surface colors - subtle elevation */
+  --card: oklch(0.16 0.005 260);
+  --card-foreground: oklch(0.93 0.005 260);
+  --popover: oklch(0.18 0.005 260);
+  --popover-foreground: oklch(0.93 0.005 260);
+  /* Primary accent - teal/cyan */
+  --primary: oklch(0.72 0.15 175);
+  --primary-foreground: oklch(0.12 0.01 175);
+  /* Secondary - elevated surface */
+  --secondary: oklch(0.2 0.005 260);
+  --secondary-foreground: oklch(0.9 0.005 260);
+  /* Muted */
+  --muted: oklch(0.2 0.005 260);
+  --muted-foreground: oklch(0.6 0.005 260);
+  /* Accent - subtle teal tint */
+  --accent: oklch(0.22 0.02 175);
+  --accent-foreground: oklch(0.93 0.005 260);
+  /* Destructive */
+  --destructive: oklch(0.6 0.2 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  /* Success */
+  --success: oklch(0.7 0.17 145);
+  --success-foreground: oklch(0.12 0.01 145);
+  /* Warning */
+  --warning: oklch(0.8 0.15 75);
+  --warning-foreground: oklch(0.15 0.02 75);
+  /* Info */
+  --info: oklch(0.7 0.14 240);
+  --info-foreground: oklch(0.99 0 0);
+  /* Borders and inputs - very subtle */
+  --border: oklch(0.25 0.005 260);
+  --input: oklch(0.2 0.005 260);
+  --ring: oklch(0.72 0.15 175);
+  /* Chart colors */
+  --chart-1: oklch(0.72 0.15 175);
+  --chart-2: oklch(0.7 0.17 145);
+  --chart-3: oklch(0.75 0.14 55);
+  --chart-4: oklch(0.65 0.15 280);
+  --chart-5: oklch(0.65 0.18 25);
+  /* Sidebar - slightly darker than background */
+  --sidebar: oklch(0.1 0.005 260);
+  --sidebar-foreground: oklch(0.9 0.005 260);
+  --sidebar-primary: oklch(0.72 0.15 175);
+  --sidebar-primary-foreground: oklch(0.12 0.01 175);
+  --sidebar-accent: oklch(0.18 0.02 175);
+  --sidebar-accent-foreground: oklch(0.9 0.005 260);
+  --sidebar-border: oklch(0.22 0.005 260);
+  --sidebar-ring: oklch(0.72 0.15 175);
   /* Custom shadows - deeper, more dramatic for dark mode */
   --shadow-paper-sm: 0 1px 3px 0 oklch(0 0 0 / 0.25);
   --shadow-paper:
@@ -219,22 +219,22 @@
     0 8px 40px 0 oklch(0 0 0 / 0.5),
     0 4px 16px 0 oklch(0 0 0 / 0.3);
 
-  /* Status colors - vibrant for dark mode visibility */
-  --status-wantToPlay: oklch(0.68 0.14 240);
-  --status-wantToPlay-foreground: oklch(0.98 0.005 50);
-  --status-owned: oklch(0.72 0.18 55);
-  --status-owned-foreground: oklch(0.15 0.012 45);
-  --status-playing: oklch(0.62 0.16 18);
-  --status-playing-foreground: oklch(0.98 0.005 50);
-  --status-played: oklch(0.65 0.14 145);
-  --status-played-foreground: oklch(0.98 0.005 50);
+  /* Status colors - vibrant for dark mode */
+  --status-wantToPlay: oklch(0.65 0.15 260);
+  --status-wantToPlay-foreground: oklch(0.99 0 0);
+  --status-owned: oklch(0.75 0.15 55);
+  --status-owned-foreground: oklch(0.15 0.01 55);
+  --status-playing: oklch(0.72 0.15 175);
+  --status-playing-foreground: oklch(0.12 0.01 175);
+  --status-played: oklch(0.7 0.17 145);
+  --status-played-foreground: oklch(0.12 0.01 145);
 }
 
 @theme inline {
   /* Font families */
-  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
-  --font-serif: "Playfair Display", "Merriweather", serif;
-  --font-mono: "DM Mono", monospace;
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: "Geist Mono", "DM Mono", monospace;
   /* Tailwind color mappings */
   --color-background: var(--background);
   --color-foreground: var(--foreground);

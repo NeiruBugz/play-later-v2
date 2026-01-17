@@ -101,7 +101,7 @@ export function JournalEntriesSection({
         aria-labelledby="journal-heading"
       >
         <div className="flex items-center justify-between">
-          <h2 id="journal-heading" className="heading-md font-serif">
+          <h2 id="journal-heading" className="heading-md font-semibold">
             Your Journal
           </h2>
           {hasEntries && (

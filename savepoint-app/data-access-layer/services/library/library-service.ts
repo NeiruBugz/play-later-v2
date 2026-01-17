@@ -17,6 +17,8 @@ import {
   findLibraryItemById,
   findLibraryItemsWithFilters,
   findMostRecentLibraryItemByGameId,
+  findMostRecentPlayingGame,
+  findWantToPlayItemsForUser,
   updateLibraryItem,
 } from "@/data-access-layer/repository";
 
@@ -28,7 +30,13 @@ import {
   GetLibraryItemsServiceSchema,
 } from "./schemas";
 
-type SortField = "createdAt" | "releaseDate" | "startedAt" | "completedAt";
+type SortField =
+  | "updatedAt"
+  | "createdAt"
+  | "releaseDate"
+  | "startedAt"
+  | "completedAt"
+  | "title";
 type GetLibraryItemsParams = {
   userId: string;
   status?: LibraryItemStatus;
@@ -62,6 +70,47 @@ export class LibraryService extends BaseService {
       return this.success(result.data);
     } catch (error) {
       return this.handleError(error, "Failed to find game by IGDB ID");
+    }
+  }
+
+  async getMostRecentPlayingGame(params: { userId: string }): Promise<
+    ServiceResult<{
+      gameId: string;
+      igdbId: number;
+      name: string;
+      coverImageId: string | null;
+    } | null>
+  > {
+    try {
+      this.logger.info(params, "Finding most recent playing game");
+      const result = await findMostRecentPlayingGame(params);
+      if (!result.success) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to find most recent playing game"
+        );
+        return this.error("Failed to find most recent playing game");
+      }
+
+      if (!result.data) {
+        this.logger.info(params, "No playing games found");
+        return this.success(null);
+      }
+
+      const game = {
+        gameId: result.data.game.id,
+        igdbId: result.data.game.igdbId,
+        name: result.data.game.title,
+        coverImageId: result.data.game.coverImage,
+      };
+
+      this.logger.info(
+        { ...params, gameId: game.gameId },
+        "Most recent playing game found"
+      );
+      return this.success(game);
+    } catch (error) {
+      return this.handleError(error, "Failed to get most recent playing game");
     }
   }
   async findMostRecentLibraryItemByGameId(params: {
@@ -317,6 +366,61 @@ export class LibraryService extends BaseService {
       return this.success(LibraryItemMapper.toDomain(result.data));
     } catch (error) {
       return this.handleError(error, "Failed to create library item");
+    }
+  }
+
+  async getRandomWantToPlayGame(params: { userId: string }): Promise<
+    ServiceResult<{
+      id: string;
+      igdbId: number;
+      title: string;
+      slug: string;
+      coverImage: string | null;
+    } | null>
+  > {
+    try {
+      this.logger.info(params, "Fetching random want-to-play game");
+
+      const result = await findWantToPlayItemsForUser({
+        userId: params.userId,
+      });
+
+      if (!result.success) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to fetch want-to-play items"
+        );
+        return this.error("Failed to fetch want-to-play games");
+      }
+
+      const items = result.data;
+
+      if (items.length === 0) {
+        this.logger.info(params, "No want-to-play games found");
+        return this.success(null);
+      }
+
+      const randomIndex = Math.floor(Math.random() * items.length);
+      const randomItem = items[randomIndex];
+
+      this.logger.info(
+        {
+          userId: params.userId,
+          gameId: randomItem.game.id,
+          gameTitle: randomItem.game.title,
+        },
+        "Random want-to-play game selected"
+      );
+
+      return this.success({
+        id: randomItem.game.id,
+        igdbId: randomItem.game.igdbId,
+        title: randomItem.game.title,
+        slug: randomItem.game.slug,
+        coverImage: randomItem.game.coverImage,
+      });
+    } catch (error) {
+      return this.handleError(error, "Failed to get random want-to-play game");
     }
   }
 }

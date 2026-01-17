@@ -71,7 +71,7 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
     <div className="space-y-xl">
       {/* Entry Header */}
       <header className="space-y-md">
-        <h1 className="heading-xl font-serif">{displayTitle}</h1>
+        <h1 className="heading-xl font-semibold">{displayTitle}</h1>
         <div className="gap-md flex flex-wrap items-center">
           <time
             dateTime={entry.createdAt.toISOString()}

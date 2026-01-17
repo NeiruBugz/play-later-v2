@@ -16,7 +16,13 @@ export type LibraryFilters = {
   status?: LibraryItemStatus;
   platform?: string;
   search?: string;
-  sortBy?: "createdAt" | "releaseDate" | "startedAt" | "completedAt";
+  sortBy?:
+    | "updatedAt"
+    | "createdAt"
+    | "releaseDate"
+    | "startedAt"
+    | "completedAt"
+    | "title";
   sortOrder?: "asc" | "desc";
 };
 

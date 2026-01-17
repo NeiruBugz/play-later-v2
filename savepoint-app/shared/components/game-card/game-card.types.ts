@@ -83,6 +83,16 @@ export interface GameCardProps
    * Responsive sizes for Next.js Image
    */
   sizes?: string;
+
+  /**
+   * Optional badges to display on the cover image
+   */
+  badges?: ReactNode;
+
+  /**
+   * Optional overlay content (e.g., hover effects, interactive elements)
+   */
+  overlay?: ReactNode;
 }
 
 /**

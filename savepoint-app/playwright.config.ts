@@ -1,6 +1,6 @@
 import { resolve } from "path";
-import { config } from "dotenv";
 import { defineConfig, devices } from "@playwright/test";
+import { config } from "dotenv";
 
 // Load environment for E2E tests:
 // - In CI: just load .env (CI configures the test database via env vars)

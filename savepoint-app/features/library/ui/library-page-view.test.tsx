@@ -146,7 +146,7 @@ describe("LibraryPageView", () => {
         expect(elements.getSortSelect()).toBeVisible();
       });
 
-      expect(elements.getSortSelect()).toHaveTextContent("Recently Added");
+      expect(elements.getSortSelect()).toHaveTextContent("Recently Updated");
     });
 
     it("does not display clear filters button when no filters are active", async () => {
@@ -367,22 +367,22 @@ describe("LibraryPageView", () => {
         expect(elements.getSortSelect()).toBeVisible();
       });
 
-      // Initially shows "Recently Added"
-      expect(elements.getSortSelect()).toHaveTextContent("Recently Added");
+      // Initially shows "Recently Updated"
+      expect(elements.getSortSelect()).toHaveTextContent("Recently Updated");
 
       // Clear any calls from initial render
       mockPush.mockClear();
 
-      // Select a different sort option
-      await actions.selectSort("Release (Newest)");
+      // Select a different sort option (using a primary option that's always visible)
+      await actions.selectSort("Title A-Z");
 
       // Verify router.push was called with correct params
       expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining("sortBy=releaseDate"),
+        expect.stringContaining("sortBy=title"),
         expect.anything()
       );
       expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining("sortOrder=desc"),
+        expect.stringContaining("sortOrder=asc"),
         expect.anything()
       );
 
@@ -390,7 +390,7 @@ describe("LibraryPageView", () => {
       rerender(<LibraryPageView />);
 
       await waitFor(() => {
-        expect(elements.getSortSelect()).toHaveTextContent("Release (Newest)");
+        expect(elements.getSortSelect()).toHaveTextContent("Title A-Z");
       });
     });
   });

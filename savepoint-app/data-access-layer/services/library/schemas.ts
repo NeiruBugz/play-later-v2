@@ -2,10 +2,12 @@ import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { z } from "zod";
 
 export const LibrarySortBySchema = z.enum([
+  "updatedAt",
   "createdAt",
   "releaseDate",
   "startedAt",
   "completedAt",
+  "title",
 ]);
 
 export const LibrarySortOrderSchema = z.enum(["asc", "desc"]);

@@ -20,6 +20,7 @@ const GameSearchResults = dynamic(
 
 export const GameSearchInput = ({
   initialQuery = "",
+  userId,
 }: GameSearchInputProps) => {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
@@ -40,7 +41,7 @@ export const GameSearchInput = ({
         className="body-md h-12"
       />
       {debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH && (
-        <GameSearchResults query={debouncedQuery} />
+        <GameSearchResults query={debouncedQuery} userId={userId} />
       )}
     </div>
   );

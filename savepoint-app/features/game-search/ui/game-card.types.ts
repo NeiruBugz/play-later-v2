@@ -1,5 +1,5 @@
-import type { SearchGameResult } from "../types";
+import type { SearchGameResultWithStatus } from "../types";
 
 export interface GameCardProps {
-  game: SearchGameResult;
+  game: SearchGameResultWithStatus;
 }

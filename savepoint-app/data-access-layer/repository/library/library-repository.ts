@@ -557,6 +557,43 @@ export async function findCurrentlyPlayingGames({
     );
   }
 }
+
+export async function findMostRecentPlayingGame({
+  userId,
+}: {
+  userId: string;
+}): Promise<
+  RepositoryResult<
+    | (LibraryItem & {
+        game: {
+          id: string;
+          title: string;
+          igdbId: number;
+          coverImage: string | null;
+        };
+      })
+    | null
+  >
+> {
+  try {
+    const item = await prisma.libraryItem.findFirst({
+      where: { userId, status: LibraryItemStatus.PLAYING },
+      include: {
+        game: {
+          select: { id: true, title: true, igdbId: true, coverImage: true },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+    return repositorySuccess(item);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find most recent playing game: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
 export function buildCollectionFilter({
   userId,
   platform,
@@ -728,7 +765,13 @@ export async function findLibraryItemsWithFilters(params: {
   status?: LibraryItemStatus;
   platform?: string;
   search?: string;
-  sortBy?: "createdAt" | "releaseDate" | "startedAt" | "completedAt";
+  sortBy?:
+    | "updatedAt"
+    | "createdAt"
+    | "releaseDate"
+    | "startedAt"
+    | "completedAt"
+    | "title";
   sortOrder?: "asc" | "desc";
   distinctByGame?: boolean;
   skip?: number;
@@ -740,7 +783,7 @@ export async function findLibraryItemsWithFilters(params: {
       status,
       platform,
       search,
-      sortBy = "createdAt",
+      sortBy = "updatedAt",
       sortOrder = "desc",
       distinctByGame = false,
       skip,
@@ -764,6 +807,12 @@ export async function findLibraryItemsWithFilters(params: {
         break;
       case "completedAt":
         orderByClause = { completedAt: sortOrder };
+        break;
+      case "title":
+        orderByClause = { game: { title: sortOrder } };
+        break;
+      case "updatedAt":
+        orderByClause = { updatedAt: sortOrder };
         break;
       case "createdAt":
       default:
@@ -817,33 +866,50 @@ export async function findLibraryItemsWithFilters(params: {
     );
 
     const sortedItems = deduplicatedItems.sort((a, b) => {
-      let aValue: Date | null | undefined;
-      let bValue: Date | null | undefined;
       switch (sortBy) {
-        case "releaseDate":
-          aValue = a.game.releaseDate;
-          bValue = b.game.releaseDate;
-          break;
-        case "startedAt":
-          aValue = a.startedAt;
-          bValue = b.startedAt;
-          break;
-        case "completedAt":
-          aValue = a.completedAt;
-          bValue = b.completedAt;
-          break;
+        case "releaseDate": {
+          const aValue = a.game.releaseDate;
+          const bValue = b.game.releaseDate;
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          const comparison = aValue.getTime() - bValue.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+        case "startedAt": {
+          const aValue = a.startedAt;
+          const bValue = b.startedAt;
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          const comparison = aValue.getTime() - bValue.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+        case "completedAt": {
+          const aValue = a.completedAt;
+          const bValue = b.completedAt;
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          const comparison = aValue.getTime() - bValue.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+        case "title": {
+          const aTitle = a.game.title.toLowerCase();
+          const bTitle = b.game.title.toLowerCase();
+          const comparison = aTitle.localeCompare(bTitle);
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+        case "updatedAt": {
+          const comparison = a.updatedAt.getTime() - b.updatedAt.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
         case "createdAt":
-        default:
-          aValue = a.createdAt;
-          bValue = b.createdAt;
-          break;
+        default: {
+          const comparison = a.createdAt.getTime() - b.createdAt.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
       }
-
-      if (!aValue && !bValue) return 0;
-      if (!aValue) return 1;
-      if (!bValue) return -1;
-      const comparison = aValue.getTime() - bValue.getTime();
-      return sortOrder === "asc" ? comparison : -comparison;
     });
     return repositorySuccess({ items: sortedItems, total: sortedItems.length });
   } catch (error) {

@@ -71,7 +71,7 @@ function StatCard({
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="heading-lg font-serif tabular-nums">{count}</p>
+            <p className="text-2xl font-semibold tabular-nums">{count}</p>
             <p className="body-sm text-muted-foreground truncate">{label}</p>
           </div>
 

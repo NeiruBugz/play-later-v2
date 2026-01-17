@@ -12,7 +12,7 @@ export function AuthPageView() {
     <div className="from-muted/40 via-background to-background dark:from-muted/20 dark:via-background dark:to-background p-lg flex min-h-screen items-center justify-center bg-linear-to-br">
       <Card className="p-3xl group w-full max-w-md">
         <div className="mb-2xl text-center">
-          <h1 className="font-serif text-3xl font-bold">SavePoint</h1>
+          <h1 className="text-3xl font-bold font-semibold">SavePoint</h1>
           <p className="body-sm text-muted-foreground mt-md">
             Manage your gaming experiences
           </p>

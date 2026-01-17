@@ -26,7 +26,7 @@ export function DashboardGameSection({
   return (
     <section className={cn("space-y-xl", className)}>
       <div className="flex items-center justify-between">
-        <h2 className="heading-lg font-serif">{title}</h2>
+        <h2 className="heading-md tracking-tight">{title}</h2>
         {items.length > 0 && (
           <Button variant="ghost" size="sm" asChild>
             <Link href={viewAllHref} className="group">

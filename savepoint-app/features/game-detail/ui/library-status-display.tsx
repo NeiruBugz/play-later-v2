@@ -76,7 +76,9 @@ export const LibraryStatusDisplay = ({
     <>
       <Card className="animate-fade-in w-full">
         <CardHeader className="pb-lg">
-          <CardTitle className="font-serif text-base">Library Status</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            Library Status
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-lg">
           <div className="gap-md flex items-center" role="status">
