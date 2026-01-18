@@ -79,10 +79,11 @@ export function JournalQuickEntrySheet({
 
   useEffect(() => {
     if (isOpen && !selectedGame) {
+      let isCancelled = false;
       setIsLoadingGame(true);
       getPlayingGameAction()
         .then((result) => {
-          if (result.success && result.data) {
+          if (!isCancelled && result.success && result.data) {
             setSelectedGame({
               id: result.data.id,
               title: result.data.title,
@@ -91,11 +92,19 @@ export function JournalQuickEntrySheet({
           }
         })
         .catch((error) => {
-          console.error("Failed to fetch playing game:", error);
+          if (!isCancelled) {
+            console.error("Failed to fetch playing game:", error);
+          }
         })
         .finally(() => {
-          setIsLoadingGame(false);
+          if (!isCancelled) {
+            setIsLoadingGame(false);
+          }
         });
+
+      return () => {
+        isCancelled = true;
+      };
     }
   }, [isOpen, selectedGame]);
 

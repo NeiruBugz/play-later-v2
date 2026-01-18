@@ -45,6 +45,9 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
             setRecentGames(result.data);
           }
         })
+        .catch((error) => {
+          console.error("Failed to fetch recent games:", error);
+        })
         .finally(() => {
           setIsLoadingRecent(false);
         });

@@ -202,7 +202,7 @@ describe("LibraryCardSwipe", () => {
 
 ## File Structure
 
-```
+```text
 features/library/
 ├── ui/
 │   ├── library-card.tsx                    # Modified: conditional swipe wrapper

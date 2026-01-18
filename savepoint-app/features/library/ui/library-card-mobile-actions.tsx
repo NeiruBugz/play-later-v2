@@ -27,6 +27,7 @@ export function LibraryCardMobileActions({
 }: LibraryCardMobileActionsProps) {
   const updateStatus = useUpdateLibraryStatus();
   const handleStatusChange = (status: LibraryItemStatus) => {
+    if (updateStatus.isPending) return;
     updateStatus.mutate({
       libraryItemId,
       status,

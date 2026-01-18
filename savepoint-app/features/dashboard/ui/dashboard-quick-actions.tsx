@@ -118,8 +118,14 @@ export function DashboardQuickActions() {
     setIsLoadingGame(true);
     try {
       const result = await getRandomWantToPlayAction({});
-      if (result.success && result.data) {
-        setRandomGame(result.data);
+      if (result.success) {
+        if (result.data) {
+          setRandomGame(result.data);
+          setHasWantToPlayGames(true);
+        } else {
+          setRandomGame(null);
+          setHasWantToPlayGames(false);
+        }
       }
     } catch (error) {
       console.error("Failed to refresh random game:", error);

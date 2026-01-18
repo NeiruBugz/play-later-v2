@@ -15,21 +15,29 @@ export function useLibraryStatus(igdbIds: number[], isAuthenticated: boolean) {
       return;
     }
 
+    let isCurrent = true;
+
     const fetchStatuses = async () => {
       setIsLoading(true);
       try {
         const result = await getLibraryStatusForGames({ igdbIds });
-        if (result.success && result.data) {
+        if (isCurrent && result.success && result.data) {
           setStatusMap(result.data);
         }
       } catch (error) {
         console.error("Failed to fetch library status:", error);
       } finally {
-        setIsLoading(false);
+        if (isCurrent) {
+          setIsLoading(false);
+        }
       }
     };
 
     void fetchStatuses();
+
+    return () => {
+      isCurrent = false;
+    };
   }, [igdbIds, isAuthenticated]);
 
   return {

@@ -102,11 +102,12 @@ export function LibraryFilters() {
     return `${sortBy}-${sortOrder}`;
   }, [searchParams]);
 
-  const [showAdvancedSort, setShowAdvancedSort] = useState(false);
   const currentSortValue = getCurrentSortValue();
   const isAdvancedSort = ADVANCED_SORT_OPTIONS.some(
     (opt) => opt.value === currentSortValue
   );
+  const [showAdvancedSort, setShowAdvancedSort] = useState(isAdvancedSort);
+  const advancedOpen = showAdvancedSort || isAdvancedSort;
 
   const handleSortChange = useCallback(
     (value: string) => {
@@ -235,7 +236,7 @@ export function LibraryFilters() {
                 </SelectItem>
               ))}
 
-              <Collapsible open={showAdvancedSort || isAdvancedSort}>
+              <Collapsible open={advancedOpen}>
                 <CollapsibleTrigger asChild>
                   <Button
                     variant="ghost"
@@ -245,17 +246,18 @@ export function LibraryFilters() {
                       e.preventDefault();
                       setShowAdvancedSort(!showAdvancedSort);
                     }}
+                    aria-expanded={advancedOpen}
                     aria-label={
-                      showAdvancedSort
+                      advancedOpen
                         ? "Hide advanced sort options"
                         : "Show advanced sort options"
                     }
                   >
-                    More
+                    {advancedOpen ? "Hide" : "More"}
                     <ChevronDown
                       className={cn(
                         "h-4 w-4 transition-transform",
-                        (showAdvancedSort || isAdvancedSort) && "rotate-180"
+                        advancedOpen && "rotate-180"
                       )}
                       aria-hidden="true"
                     />

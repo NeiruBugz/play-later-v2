@@ -23,6 +23,7 @@ export function QuickAddButton({
       gameTitle={gameTitle}
       trigger={
         <Button
+          type="button"
           variant="secondary"
           size="icon"
           className={cn(
@@ -33,7 +34,6 @@ export function QuickAddButton({
           )}
           aria-label={`Quick add ${gameTitle} to library`}
           onClick={(e) => {
-            e.preventDefault();
             e.stopPropagation();
           }}
         >

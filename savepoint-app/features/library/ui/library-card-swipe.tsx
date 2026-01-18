@@ -91,11 +91,13 @@ export function LibraryCardSwipe({
     isDragging.current = false;
     const diff = currentX.current - startX.current;
     const duration = Date.now() - startTime.current;
-    const velocity = Math.abs(diff) / duration;
+    const safeDuration = Math.max(duration, 1);
+    const velocity = Math.abs(diff) / safeDuration;
 
     const shouldReveal =
       (!isRevealed &&
-        (diff < -SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD)) ||
+        (diff < -SWIPE_THRESHOLD ||
+          (diff < 0 && velocity > SWIPE_VELOCITY_THRESHOLD))) ||
       (isRevealed && diff > -SWIPE_THRESHOLD);
 
     if (shouldReveal && !isRevealed) {

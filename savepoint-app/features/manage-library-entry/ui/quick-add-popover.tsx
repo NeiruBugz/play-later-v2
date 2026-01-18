@@ -29,21 +29,28 @@ export function QuickAddPopover({
     if (isPending) return;
 
     startTransition(async () => {
-      const result = await quickAddToLibraryAction({ igdbId, status });
+      try {
+        const result = await quickAddToLibraryAction({ igdbId, status });
 
-      if (result.success) {
-        const config = LIBRARY_STATUS_CONFIG.find((c) => c.value === status);
-        const statusLabel = config?.label ?? "Unknown";
+        if (result.success) {
+          const config = LIBRARY_STATUS_CONFIG.find((c) => c.value === status);
+          const statusLabel = config?.label ?? "Unknown";
 
-        toast.success(`Added to ${statusLabel}`, {
-          description: gameTitle,
-        });
+          toast.success(`Added to ${statusLabel}`, {
+            description: gameTitle,
+          });
 
-        setOpen(false);
-        onSuccess?.();
-      } else {
+          setOpen(false);
+          onSuccess?.();
+        } else {
+          toast.error("Failed to add game", {
+            description: result.error || "Please try again",
+          });
+        }
+      } catch (error) {
         toast.error("Failed to add game", {
-          description: result.error || "Please try again",
+          description:
+            error instanceof Error ? error.message : "Please try again",
         });
       }
     });
