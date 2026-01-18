@@ -8,6 +8,7 @@ export {
   repositoryError,
   isRepositorySuccess,
   isRepositoryError,
+  withRepositoryError,
 } from "./types";
 export {
   createLibraryItem,
@@ -28,6 +29,7 @@ export {
   findWantToPlayItemsForUser,
   findUpcomingWantToPlayItems,
   findCurrentlyPlayingGames,
+  findMostRecentPlayingGame,
   buildCollectionFilter,
   getLibraryStatsByUserId,
   findMostRecentLibraryItemByGameId,

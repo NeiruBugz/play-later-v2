@@ -144,4 +144,3 @@ jobs:
           name: e2e-test-results
           path: savepoint-app/test-results
           if-no-files-found: ignore
-

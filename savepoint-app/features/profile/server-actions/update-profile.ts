@@ -1,89 +1,65 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { createServerAction, type ActionResult } from "@/shared/lib";
 import {
   UpdateProfileSchema,
   type UpdateProfileInput,
 } from "@/shared/lib/profile";
 import type { UpdateProfileFormState } from "@/shared/types/profile";
 
-type PerformUpdateProfileResult =
-  | {
-      success: true;
-      data: {
-        username: string | null;
-        image: string | null;
-      };
-    }
-  | {
-      success: false;
-      error: string;
-    };
-async function performUpdateProfile(
-  data: UpdateProfileInput
-): Promise<PerformUpdateProfileResult> {
-  const logger = createLogger({
-    [LOGGER_CONTEXT.SERVER_ACTION]: "updateProfile",
-  });
-  try {
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn({ reason: "unauthorized" }, "Update profile denied");
-      return {
-        success: false as const,
-        error: "Unauthorized",
-      };
-    }
+type UpdateProfileData = {
+  username: string | null;
+  image: string | null;
+};
+
+const performUpdateProfile = createServerAction<
+  UpdateProfileInput,
+  UpdateProfileData
+>({
+  actionName: "updateProfile",
+  schema: UpdateProfileSchema,
+  requireAuth: true,
+  handler: async ({
+    input,
+    userId,
+    logger,
+  }): Promise<ActionResult<UpdateProfileData>> => {
     const sanitizedData: UpdateProfileInput = {
-      username: data.username.trim(),
-      avatarUrl: data.avatarUrl,
+      username: input.username.trim(),
+      avatarUrl: input.avatarUrl,
     };
-    const validationResult = UpdateProfileSchema.safeParse(sanitizedData);
-    if (!validationResult.success) {
-      logger.warn(
-        { userId, reason: "validation_error" },
-        "Invalid update profile input"
-      );
-      return {
-        success: false as const,
-        error: validationResult.error.issues[0]?.message ?? "Validation error",
-      };
-    }
-    const validatedData = validationResult.data;
+
     const profileService = new ProfileService();
     logger.info({ userId }, "Updating user profile");
+
     const result = await profileService.updateProfile({
-      userId,
-      username: validatedData.username,
-      avatarUrl: validatedData.avatarUrl,
+      userId: userId!,
+      username: sanitizedData.username,
+      avatarUrl: sanitizedData.avatarUrl,
     });
+
     if (!result.success) {
       logger.error({ userId, reason: result.error }, "Profile update failed");
       return {
-        success: false as const,
+        success: false,
         error: result.error,
       };
     }
+
     logger.info({ userId }, "Profile updated successfully");
     return {
-      success: true as const,
+      success: true,
       data: result.data,
     };
-  } catch (err) {
-    logger.error({ err }, "Unexpected error in updateProfile");
-    return {
-      success: false as const,
-      error: "An unexpected error occurred",
-    };
-  }
-}
+  },
+});
+
 export async function updateProfile(
   data: UpdateProfileInput
-): Promise<PerformUpdateProfileResult> {
+): Promise<ActionResult<UpdateProfileData>> {
   return performUpdateProfile(data);
 }
 
@@ -93,6 +69,7 @@ export async function updateProfileFormAction(
 ): Promise<UpdateProfileFormState> {
   const rawUsername = formData.get("username");
   const rawAvatar = formData.get("avatarUrl");
+
   if (typeof rawUsername !== "string") {
     return {
       status: "error",
@@ -100,6 +77,7 @@ export async function updateProfileFormAction(
       submittedUsername: undefined,
     };
   }
+
   const trimmedUsername = rawUsername.trim();
   if (!trimmedUsername) {
     return {
@@ -108,6 +86,7 @@ export async function updateProfileFormAction(
       submittedUsername: undefined,
     };
   }
+
   const result = await performUpdateProfile({
     username: trimmedUsername,
     avatarUrl:
@@ -115,6 +94,7 @@ export async function updateProfileFormAction(
         ? rawAvatar.trim()
         : undefined,
   });
+
   if (result.success) {
     revalidatePath("/profile");
     return {
@@ -123,6 +103,7 @@ export async function updateProfileFormAction(
       submittedUsername: trimmedUsername,
     };
   }
+
   return {
     status: "error",
     message: result.error,

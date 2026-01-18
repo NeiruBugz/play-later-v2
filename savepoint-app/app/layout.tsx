@@ -2,37 +2,26 @@ import { type Metadata, type Viewport } from "next";
 
 import { LoadingScreen } from "@/shared/components/loading-screen";
 import { SpeedInsightsClient } from "@/shared/components/speed-insights";
-import { cn } from "@/shared/lib";
+import { cn } from "@/shared/lib/ui/utils";
 import { Providers } from "@/shared/providers";
 
 import "@/shared/globals.css";
 
-import {
-  DM_Mono as FontMono,
-  Plus_Jakarta_Sans as FontSans,
-  Playfair_Display as FontSerif,
-} from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
-const fontSans = FontSans({
+const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
   preload: true,
-  weight: ["300", "400", "500", "600", "700", "800"],
 });
-const fontSerif = FontSerif({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-  preload: true,
-});
-const fontMono = FontMono({
+
+const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
   preload: true,
-  weight: ["300", "400", "500"],
 });
 export const viewport: Viewport = {
   width: "device-width",
@@ -109,7 +98,7 @@ export default function RootLayout({
         className={cn(
           "bg-background relative min-h-screen antialiased",
           "selection:bg-primary/20 selection:text-primary-foreground",
-          `font-sans ${fontSans.variable} ${fontMono.variable} ${fontSerif.variable} antialiased`
+          `font-sans ${fontSans.variable} ${fontMono.variable} antialiased`
         )}
       >
         <Providers

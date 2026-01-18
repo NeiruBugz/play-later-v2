@@ -8,7 +8,13 @@ export type LibraryFilterValues = {
   status?: LibraryItemStatus;
   platform?: string;
   search?: string;
-  sortBy: "createdAt" | "releaseDate" | "startedAt" | "completedAt";
+  sortBy:
+    | "updatedAt"
+    | "createdAt"
+    | "releaseDate"
+    | "startedAt"
+    | "completedAt"
+    | "title";
   sortOrder: "asc" | "desc";
 };
 
@@ -21,13 +27,18 @@ export function useLibraryFilters(): LibraryFilterValues {
   const platform = searchParams.get("platform") ?? undefined;
   const search = searchParams.get("search") ?? undefined;
 
+  const VALID_SORT_BY = new Set([
+    "updatedAt",
+    "createdAt",
+    "releaseDate",
+    "startedAt",
+    "completedAt",
+    "title",
+  ]);
   const sortByParam = searchParams.get("sortBy");
-  const sortBy =
-    sortByParam === "releaseDate" ||
-    sortByParam === "startedAt" ||
-    sortByParam === "completedAt"
-      ? sortByParam
-      : "createdAt";
+  const sortBy = VALID_SORT_BY.has(sortByParam ?? "")
+    ? (sortByParam as LibraryFilterValues["sortBy"])
+    : "updatedAt";
   const sortOrderParam = searchParams.get("sortOrder");
   const sortOrder = sortOrderParam === "asc" ? "asc" : "desc";
   return {

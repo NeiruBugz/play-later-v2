@@ -5,6 +5,7 @@ import {
   repositoryError,
   RepositoryErrorCode,
   repositorySuccess,
+  withRepositoryError,
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
 import { Prisma, type LibraryItem } from "@prisma/client";
@@ -209,17 +210,10 @@ export async function getLibraryCount({
   status,
   gteClause,
 }: GetLibraryCountInput): Promise<RepositoryResult<number>> {
-  try {
-    const count = await prisma.libraryItem.count({
-      where: { userId, status, ...gteClause },
-    });
-    return repositorySuccess(count);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get library count: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+  return withRepositoryError(
+    () => prisma.libraryItem.count({ where: { userId, status, ...gteClause } }),
+    "Failed to get library count"
+  );
 }
 export async function getPlatformBreakdown({
   userId,
@@ -282,39 +276,31 @@ export async function getRecentlyCompletedLibraryItems({
 }): Promise<
   RepositoryResult<Array<LibraryItem & { game: { title: string } }>>
 > {
-  try {
-    const items = await prisma.libraryItem.findMany({
-      where: { userId, status: LibraryItemStatus.PLAYED },
-      include: { game: { select: { title: true } } },
-      orderBy: { completedAt: "desc" },
-      take: RECENT_COMPLETED_ITEMS_LIMIT,
-    });
-    return repositorySuccess(items);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get recently completed items: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+  return withRepositoryError(
+    () =>
+      prisma.libraryItem.findMany({
+        where: { userId, status: LibraryItemStatus.PLAYED },
+        include: { game: { select: { title: true } } },
+        orderBy: { completedAt: "desc" },
+        take: RECENT_COMPLETED_ITEMS_LIMIT,
+      }),
+    "Failed to get recently completed items"
+  );
 }
 export async function getUniquePlatforms({
   userId,
 }: {
   userId: string;
 }): Promise<RepositoryResult<Array<{ platform: string | null }>>> {
-  try {
-    const platforms = await prisma.libraryItem.findMany({
-      where: { userId },
-      select: { platform: true },
-      distinct: ["platform"],
-    });
-    return repositorySuccess(platforms);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get unique platforms: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+  return withRepositoryError(
+    () =>
+      prisma.libraryItem.findMany({
+        where: { userId },
+        select: { platform: true },
+        distinct: ["platform"],
+      }),
+    "Failed to get unique platforms"
+  );
 }
 
 export async function getOtherUsersLibraries({
@@ -571,6 +557,43 @@ export async function findCurrentlyPlayingGames({
     );
   }
 }
+
+export async function findMostRecentPlayingGame({
+  userId,
+}: {
+  userId: string;
+}): Promise<
+  RepositoryResult<
+    | (LibraryItem & {
+        game: {
+          id: string;
+          title: string;
+          igdbId: number;
+          coverImage: string | null;
+        };
+      })
+    | null
+  >
+> {
+  try {
+    const item = await prisma.libraryItem.findFirst({
+      where: { userId, status: LibraryItemStatus.PLAYING },
+      include: {
+        game: {
+          select: { id: true, title: true, igdbId: true, coverImage: true },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+    return repositorySuccess(item);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find most recent playing game: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
 export function buildCollectionFilter({
   userId,
   platform,
@@ -713,17 +736,10 @@ export type FindLibraryItemsResult = {
 export async function countLibraryItemsByUserId(
   userId: string
 ): Promise<RepositoryResult<number>> {
-  try {
-    const count = await prisma.libraryItem.count({
-      where: { userId },
-    });
-    return repositorySuccess(count);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to count library items: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+  return withRepositoryError(
+    () => prisma.libraryItem.count({ where: { userId } }),
+    "Failed to count library items"
+  );
 }
 
 export async function hasLibraryItemWithStatus(
@@ -749,7 +765,13 @@ export async function findLibraryItemsWithFilters(params: {
   status?: LibraryItemStatus;
   platform?: string;
   search?: string;
-  sortBy?: "createdAt" | "releaseDate" | "startedAt" | "completedAt";
+  sortBy?:
+    | "updatedAt"
+    | "createdAt"
+    | "releaseDate"
+    | "startedAt"
+    | "completedAt"
+    | "title";
   sortOrder?: "asc" | "desc";
   distinctByGame?: boolean;
   skip?: number;
@@ -761,7 +783,7 @@ export async function findLibraryItemsWithFilters(params: {
       status,
       platform,
       search,
-      sortBy = "createdAt",
+      sortBy = "updatedAt",
       sortOrder = "desc",
       distinctByGame = false,
       skip,
@@ -785,6 +807,12 @@ export async function findLibraryItemsWithFilters(params: {
         break;
       case "completedAt":
         orderByClause = { completedAt: sortOrder };
+        break;
+      case "title":
+        orderByClause = { game: { title: sortOrder } };
+        break;
+      case "updatedAt":
+        orderByClause = { updatedAt: sortOrder };
         break;
       case "createdAt":
       default:
@@ -838,33 +866,50 @@ export async function findLibraryItemsWithFilters(params: {
     );
 
     const sortedItems = deduplicatedItems.sort((a, b) => {
-      let aValue: Date | null | undefined;
-      let bValue: Date | null | undefined;
       switch (sortBy) {
-        case "releaseDate":
-          aValue = a.game.releaseDate;
-          bValue = b.game.releaseDate;
-          break;
-        case "startedAt":
-          aValue = a.startedAt;
-          bValue = b.startedAt;
-          break;
-        case "completedAt":
-          aValue = a.completedAt;
-          bValue = b.completedAt;
-          break;
+        case "releaseDate": {
+          const aValue = a.game.releaseDate;
+          const bValue = b.game.releaseDate;
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          const comparison = aValue.getTime() - bValue.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+        case "startedAt": {
+          const aValue = a.startedAt;
+          const bValue = b.startedAt;
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          const comparison = aValue.getTime() - bValue.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+        case "completedAt": {
+          const aValue = a.completedAt;
+          const bValue = b.completedAt;
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          const comparison = aValue.getTime() - bValue.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+        case "title": {
+          const aTitle = a.game.title.toLowerCase();
+          const bTitle = b.game.title.toLowerCase();
+          const comparison = aTitle.localeCompare(bTitle);
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
+        case "updatedAt": {
+          const comparison = a.updatedAt.getTime() - b.updatedAt.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
         case "createdAt":
-        default:
-          aValue = a.createdAt;
-          bValue = b.createdAt;
-          break;
+        default: {
+          const comparison = a.createdAt.getTime() - b.createdAt.getTime();
+          return sortOrder === "asc" ? comparison : -comparison;
+        }
       }
-
-      if (!aValue && !bValue) return 0;
-      if (!aValue) return 1;
-      if (!bValue) return -1;
-      const comparison = aValue.getTime() - bValue.getTime();
-      return sortOrder === "asc" ? comparison : -comparison;
     });
     return repositorySuccess({ items: sortedItems, total: sortedItems.length });
   } catch (error) {

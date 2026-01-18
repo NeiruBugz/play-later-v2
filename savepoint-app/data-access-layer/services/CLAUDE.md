@@ -105,8 +105,8 @@ describe("ProfileService", () => {
 
     const result = await service.getProfile({ userId: "xxx" });
 
-    expect(result.ok).toBe(false);
-    expect(result.error.code).toBe(ServiceErrorCode.NOT_FOUND);
+    expect(result.success).toBe(false);
+    expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
   });
 });
 ```

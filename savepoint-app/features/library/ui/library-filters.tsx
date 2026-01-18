@@ -1,10 +1,15 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/shared/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/shared/components/ui/collapsible";
 import { Input } from "@/shared/components/ui/input";
 import {
   Select,
@@ -18,20 +23,23 @@ import {
   LIBRARY_STATUS_CONFIG,
   type StatusBadgeVariant,
 } from "@/shared/lib/library-status";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 import { useUniquePlatforms } from "../hooks/use-unique-platforms";
 import { PlatformFilterCombobox } from "./platform-filter-combobox";
 
-const SORT_OPTIONS = [
+const PRIMARY_SORT_OPTIONS = [
+  { value: "updatedAt-desc", label: "Recently Updated" },
   { value: "createdAt-desc", label: "Recently Added" },
-  { value: "createdAt-asc", label: "Oldest First" },
-  { value: "releaseDate-desc", label: "Release (Newest)" },
-  { value: "releaseDate-asc", label: "Release (Oldest)" },
-  { value: "startedAt-desc", label: "Started (Recent)" },
-  { value: "startedAt-asc", label: "Started (Oldest)" },
-  { value: "completedAt-desc", label: "Completed (Recent)" },
-  { value: "completedAt-asc", label: "Completed (Oldest)" },
+  { value: "title-asc", label: "Title A-Z" },
+  { value: "title-desc", label: "Title Z-A" },
+] as const;
+
+const ADVANCED_SORT_OPTIONS = [
+  { value: "releaseDate-desc", label: "Release Date (Newest)" },
+  { value: "releaseDate-asc", label: "Release Date (Oldest)" },
+  { value: "startedAt-desc", label: "Started Date" },
+  { value: "completedAt-desc", label: "Completed Date" },
 ] as const;
 
 function getStatusFilterStyles(badgeVariant: StatusBadgeVariant): {
@@ -89,10 +97,17 @@ export function LibraryFilters() {
   }, [debouncedSearch, searchParams, updateFilter]);
 
   const getCurrentSortValue = useCallback((): string => {
-    const sortBy = searchParams.get("sortBy") ?? "createdAt";
+    const sortBy = searchParams.get("sortBy") ?? "updatedAt";
     const sortOrder = searchParams.get("sortOrder") ?? "desc";
     return `${sortBy}-${sortOrder}`;
   }, [searchParams]);
+
+  const currentSortValue = getCurrentSortValue();
+  const isAdvancedSort = ADVANCED_SORT_OPTIONS.some(
+    (opt) => opt.value === currentSortValue
+  );
+  const [showAdvancedSort, setShowAdvancedSort] = useState(isAdvancedSort);
+  const advancedOpen = showAdvancedSort || isAdvancedSort;
 
   const handleSortChange = useCallback(
     (value: string) => {
@@ -203,20 +218,59 @@ export function LibraryFilters() {
         </div>
 
         {/* Sort Control */}
-        <div className="w-full md:w-[180px]">
+        <div className="w-full md:w-[200px]">
           <Select
-            value={getCurrentSortValue()}
+            value={currentSortValue}
             onValueChange={handleSortChange}
+            onOpenChange={(open) => {
+              if (!open) setShowAdvancedSort(false);
+            }}
           >
             <SelectTrigger aria-label="Sort by">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
-              {SORT_OPTIONS.map((option) => (
+              {PRIMARY_SORT_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
               ))}
+
+              <Collapsible open={advancedOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-sm hover:bg-accent w-full justify-start px-2 py-1.5 text-sm font-normal"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowAdvancedSort(!showAdvancedSort);
+                    }}
+                    aria-expanded={advancedOpen}
+                    aria-label={
+                      advancedOpen
+                        ? "Hide advanced sort options"
+                        : "Show advanced sort options"
+                    }
+                  >
+                    {advancedOpen ? "Hide" : "More"}
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 transition-transform",
+                        advancedOpen && "rotate-180"
+                      )}
+                      aria-hidden="true"
+                    />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  {ADVANCED_SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
             </SelectContent>
           </Select>
         </div>

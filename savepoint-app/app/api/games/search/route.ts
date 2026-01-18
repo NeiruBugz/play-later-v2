@@ -50,7 +50,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Rate limit check (before cache to prevent abuse)
-    const rateLimitResult = await checkRateLimit(request);
+    const rateLimitResult = await checkRateLimit({
+      headers: request.headers,
+      ip: request.headers.get("x-forwarded-for") ?? undefined,
+    });
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Try again later." },

@@ -106,7 +106,7 @@ export function JournalTimeline({
   return (
     <div className="space-y-xl">
       <div className="flex items-center justify-between">
-        <h2 className="heading-md font-serif">Journal Entries</h2>
+        <h2 className="heading-md font-semibold">Journal Entries</h2>
         <Button asChild variant="secondary" size="sm">
           <Link href="/journal/new">Write New Entry</Link>
         </Button>

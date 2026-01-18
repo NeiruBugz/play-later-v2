@@ -22,8 +22,8 @@ vi.mock("@/data-access-layer/repository", () => ({
   getOnboardingStatus: vi.fn(),
   updateOnboardingDismissed: vi.fn(),
   isRepositorySuccess: <TData>(result: {
-    ok: boolean;
-  }): result is { ok: true; data: TData } => result.ok === true,
+    success: boolean;
+  }): result is { success: true; data: TData } => result.success === true,
 }));
 
 describe("OnboardingService", () => {

@@ -1,52 +1,34 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
-const logger = createLogger({
-  [LOGGER_CONTEXT.SERVER_ACTION]: "deleteLibraryItemAction",
-});
+import { createServerAction, type ActionResult } from "@/shared/lib";
 
 const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
 });
 export type DeleteLibraryItemInput = z.infer<typeof DeleteLibraryItemSchema>;
-type ActionResult = { success: true } | { success: false; error: string };
 
-export async function deleteLibraryItemAction(
-  input: DeleteLibraryItemInput
-): Promise<ActionResult> {
-  try {
-    logger.info(
-      { libraryItemId: input.libraryItemId },
-      "Attempting to delete library item"
-    );
-    const parsed = DeleteLibraryItemSchema.safeParse(input);
-    if (!parsed.success) {
-      logger.warn({ errors: parsed.error.issues }, "Invalid input data");
-      return {
-        success: false,
-        error: "Invalid input data",
-      };
-    }
-    const { libraryItemId } = parsed.data;
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn("Unauthenticated user attempted to delete library item");
-      return {
-        success: false,
-        error: "You must be logged in to delete library items",
-      };
-    }
+export const deleteLibraryItemAction = createServerAction<
+  DeleteLibraryItemInput,
+  void
+>({
+  actionName: "deleteLibraryItemAction",
+  schema: DeleteLibraryItemSchema,
+  requireAuth: true,
+  handler: async ({ input, userId, logger }): Promise<ActionResult<void>> => {
+    const { libraryItemId } = input;
+
+    logger.info({ libraryItemId }, "Attempting to delete library item");
+
     const libraryService = new LibraryService();
     const result = await libraryService.deleteLibraryItem({
       libraryItemId,
-      userId,
+      userId: userId!,
     });
+
     if (!result.success) {
       logger.error(
         { error: result.error, userId, libraryItemId },
@@ -57,27 +39,15 @@ export async function deleteLibraryItemAction(
         error: result.error,
       };
     }
+
     revalidatePath("/library");
     revalidatePath("/games/[slug]", "page");
-    logger.info(
-      {
-        userId,
-        libraryItemId,
-      },
-      "Library item deleted successfully"
-    );
+
+    logger.info({ userId, libraryItemId }, "Library item deleted successfully");
+
     return {
       success: true,
+      data: undefined,
     };
-  } catch (error) {
-    logger.error(
-      { error, libraryItemId: input.libraryItemId },
-      "Unexpected error in deleteLibraryItemAction"
-    );
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "An unexpected error occurred",
-    };
-  }
-}
+  },
+});

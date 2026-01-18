@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { ContinuePlaying } from "@/features/dashboard/ui/continue-playing";
+import { DashboardQuickActions } from "@/features/dashboard/ui/dashboard-quick-actions";
 import { DashboardStats } from "@/features/dashboard/ui/dashboard-stats";
 import { RecentlyAdded } from "@/features/dashboard/ui/recently-added";
 import { GettingStartedChecklist } from "@/features/onboarding";
@@ -60,7 +61,9 @@ export default async function DashboardPage() {
     <main className="py-3xl container mx-auto">
       <div className="space-y-3xl">
         <header>
-          <h1 className="heading-xl font-serif">Welcome back, {username}!</h1>
+          <h1 className="heading-xl tracking-tight">
+            Welcome back, {username}!
+          </h1>
           <p className="body-md text-muted-foreground">
             Track your gaming journey and discover what to play next
           </p>
@@ -69,6 +72,8 @@ export default async function DashboardPage() {
         <Suspense fallback={<OnboardingSkeleton />}>
           <GettingStartedChecklist userId={userId} />
         </Suspense>
+
+        <DashboardQuickActions />
 
         <Suspense fallback={<StatsSkeleton />}>
           <DashboardStats userId={userId} />

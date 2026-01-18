@@ -16,7 +16,7 @@ import {
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
+import { BaseService, type ServiceResult } from "../types";
 
 export class JournalService extends BaseService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "JournalService" });
@@ -28,7 +28,7 @@ export class JournalService extends BaseService {
     try {
       this.logger.info(params, "Finding journal entries for game");
       const result = await findJournalEntriesByGameId(params);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find journal entries"
@@ -38,12 +38,9 @@ export class JournalService extends BaseService {
       const domainEntries = JournalEntryMapper.toDomainList(result.data);
       return this.success(domainEntries);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in findJournalEntriesByGameId"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
+      return this.handleError(
+        error,
+        "Failed to find journal entries by game ID"
       );
     }
   }
@@ -78,7 +75,7 @@ export class JournalService extends BaseService {
         ...params,
         title: finalTitle,
       });
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to create journal entry"
@@ -92,14 +89,7 @@ export class JournalService extends BaseService {
       );
       return this.success(domainEntry);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in createJournalEntry"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
+      return this.handleError(error, "Failed to create journal entry");
     }
   }
 
@@ -110,7 +100,7 @@ export class JournalService extends BaseService {
     try {
       this.logger.info(params, "Finding journal entry by ID");
       const result = await findJournalEntryById(params);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find journal entry"
@@ -121,14 +111,7 @@ export class JournalService extends BaseService {
       this.logger.info({ ...params }, "Journal entry found successfully");
       return this.success(domainEntry);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in findJournalEntryById"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
+      return this.handleError(error, "Failed to find journal entry by ID");
     }
   }
 
@@ -151,7 +134,7 @@ export class JournalService extends BaseService {
         cursor,
       });
 
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find journal entries for user"
@@ -168,13 +151,9 @@ export class JournalService extends BaseService {
 
       return this.success(domainEntries);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in findJournalEntriesByUserId"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred",
-        ServiceErrorCode.INTERNAL_ERROR
+      return this.handleError(
+        error,
+        "Failed to find journal entries by user ID"
       );
     }
   }
@@ -201,7 +180,7 @@ export class JournalService extends BaseService {
         updates,
       });
 
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to update journal entry"
@@ -218,14 +197,7 @@ export class JournalService extends BaseService {
 
       return this.success(domainEntry);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in updateJournalEntry"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
+      return this.handleError(error, "Failed to update journal entry");
     }
   }
 
@@ -240,7 +212,7 @@ export class JournalService extends BaseService {
 
       const result = await deleteJournalEntry({ entryId, userId });
 
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to delete journal entry"
@@ -255,14 +227,7 @@ export class JournalService extends BaseService {
 
       return this.success(undefined);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in deleteJournalEntry"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
+      return this.handleError(error, "Failed to delete journal entry");
     }
   }
 }

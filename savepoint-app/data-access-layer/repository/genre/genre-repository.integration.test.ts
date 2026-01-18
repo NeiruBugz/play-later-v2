@@ -56,8 +56,8 @@ describe("GenreRepository - Integration Tests", () => {
       }
 
       const findResult = await findGenreByIgdbId(1);
-      expect(findResult.ok).toBe(true);
-      if (findResult.ok) {
+      expect(isRepositorySuccess(findResult)).toBe(true);
+      if (isRepositorySuccess(findResult)) {
         expect(findResult.data?.name).toBe("Action-Adventure");
       }
     });

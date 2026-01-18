@@ -52,11 +52,19 @@ export {
   type GetLibraryItemsResult,
 } from "./library/library-service";
 export {
+  GetLibraryItemsBaseSchema,
+  GetLibraryItemsServiceSchema,
+  DeleteLibraryItemSchema,
+  LibrarySortBySchema,
+  LibrarySortOrderSchema,
+} from "./library/schemas";
+export {
   type FindJournalEntriesResult,
   type JournalService as IJournalService,
 } from "./journal/types";
 export { JournalService } from "./journal/journal-service";
 export { GameService } from "./game/game-service";
+export { GameDetailService } from "./game-detail/game-detail-service";
 export {
   OnboardingService,
   type OnboardingStep,

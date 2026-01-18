@@ -40,7 +40,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
           />
           Something went wrong
         </span>
-        <h1 className="font-serif text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+        <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
           We hit an unexpected error.
         </h1>
         <p className="text-muted-foreground text-lg leading-relaxed">

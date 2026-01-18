@@ -3,7 +3,7 @@ import { Check, Circle } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 interface OnboardingStepProps {
   step: OnboardingStepType;

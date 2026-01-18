@@ -1,6 +1,6 @@
 "use server";
 
-import { populateGameInDatabase } from "@/data-access-layer/services/game-detail/game-detail-service";
+import { GameDetailService } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
@@ -13,7 +13,7 @@ import {
 } from "@/shared/types";
 
 const logger = createLogger({
-  [LOGGER_CONTEXT.SERVICE]: "addGameToLibraryUseCase",
+  [LOGGER_CONTEXT.USE_CASE]: "addGameToLibraryUseCase",
 });
 export type AddGameToLibraryInput = {
   userId: string;
@@ -82,7 +82,20 @@ export async function addGameToLibrary(
           error: "Game not found in IGDB",
         };
       }
-      await populateGameInDatabase(igdbGameResult.data.game);
+      const gameDetailService = new GameDetailService();
+      const populateResult = await gameDetailService.populateGameInDatabase(
+        igdbGameResult.data.game
+      );
+      if (!populateResult.success) {
+        logger.error(
+          { igdbId, error: populateResult.error },
+          "Failed to populate game in database"
+        );
+        return {
+          success: false,
+          error: "Failed to save game to database",
+        };
+      }
       gameResult = await libraryService.findGameByIgdbId(igdbId);
       if (!gameResult.success || !gameResult.data) {
         logger.error({ igdbId }, "Game still not found after population");

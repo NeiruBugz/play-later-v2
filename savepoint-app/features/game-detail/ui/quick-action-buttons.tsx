@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 import { LibraryItemStatus } from "@/shared/types";
 
 import type { QuickActionButtonsProps } from "./quick-action-buttons.types";
@@ -67,7 +67,7 @@ export const QuickActionButtons = ({
       style={{ animationDelay: "100ms" }}
     >
       <CardHeader className="pb-lg">
-        <CardTitle className="font-serif">Quick Actions</CardTitle>
+        <CardTitle className="font-semibold">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
         {}

@@ -16,6 +16,19 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
+vi.mock("@/shared/lib", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/shared/lib")>();
+  return {
+    ...original,
+    createLogger: vi.fn(() => ({
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    })),
+  };
+});
+
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
 const MockLibraryService = vi.mocked(LibraryService);
@@ -103,7 +116,7 @@ describe("deleteLibraryItemAction server action", () => {
 
       expect(result).toEqual({
         success: false,
-        error: "You must be logged in to delete library items",
+        error: "You must be logged in to perform this action",
       });
 
       expect(mockDeleteLibraryItem).not.toHaveBeenCalled();

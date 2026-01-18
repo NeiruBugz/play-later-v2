@@ -39,6 +39,10 @@ export type { AddEntryFormProps } from "./add-entry-form.types";
 export { EditEntryForm } from "./edit-entry-form";
 export type { EditEntryFormProps } from "./edit-entry-form.types";
 
+// Quick actions
+export { QuickAddPopover } from "./quick-add-popover";
+export type { QuickAddPopoverProps } from "./quick-add-popover.types";
+
 // Constants
 export * from "./constants";
 

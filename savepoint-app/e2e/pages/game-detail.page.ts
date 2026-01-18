@@ -5,7 +5,15 @@ export class GameDetailPage {
 
   async goto(slug: string): Promise<void> {
     await this.page.goto(`/games/${slug}`);
-    await this.page.waitForLoadState("networkidle");
+    // First wait for the page to start loading (skeleton or real content)
+    // This confirms navigation succeeded even if IGDB is slow
+    await this.page
+      .locator('[data-testid="skeleton-layout"], h1.display-lg')
+      .first()
+      .waitFor({ state: "visible", timeout: 15000 });
+    // Then wait for the actual game title (IGDB data loaded)
+    // Extended timeout for CI where IGDB API can be slow
+    await this.heading().waitFor({ state: "visible", timeout: 50000 });
   }
 
   heading(): Locator {

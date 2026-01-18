@@ -6,6 +6,7 @@ import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from "next-themes";
+import NextTopLoader from "nextjs-toploader";
 import { useState, type PropsWithChildren } from "react";
 
 function makeQueryClient() {
@@ -40,6 +41,7 @@ export function Providers({
     <NextThemesProvider {...props}>
       <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={false}>
         <QueryClientProvider client={queryClient}>
+          <NextTopLoader />
           {children}
         </QueryClientProvider>
       </SessionProvider>

@@ -27,6 +27,15 @@ export const UpdateLibraryStatusByIgdbSchema = z.object({
   status: z.enum(LibraryItemStatus),
 });
 
+export const GetLibraryStatusForGamesSchema = z.object({
+  igdbIds: z.array(z.number().int().positive()).min(1).max(100),
+});
+
+export const QuickAddToLibrarySchema = z.object({
+  igdbId: z.number().int().positive(),
+  status: z.enum(LibraryItemStatus),
+});
+
 export type AddToLibraryInput = z.infer<typeof AddToLibrarySchema>;
 export type UpdateLibraryStatusInput = z.infer<
   typeof UpdateLibraryStatusSchema
@@ -35,3 +44,7 @@ export type UpdateLibraryEntryInput = z.infer<typeof UpdateLibraryEntrySchema>;
 export type UpdateLibraryStatusByIgdbInput = z.infer<
   typeof UpdateLibraryStatusByIgdbSchema
 >;
+export type GetLibraryStatusForGamesInput = z.infer<
+  typeof GetLibraryStatusForGamesSchema
+>;
+export type QuickAddToLibraryInput = z.infer<typeof QuickAddToLibrarySchema>;

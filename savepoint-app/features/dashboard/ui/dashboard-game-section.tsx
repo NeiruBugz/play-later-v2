@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { LibraryCard } from "@/features/library/ui/library-card";
 import { Button } from "@/shared/components/ui/button";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 interface DashboardGameSectionProps {
   title: string;
@@ -26,7 +26,7 @@ export function DashboardGameSection({
   return (
     <section className={cn("space-y-xl", className)}>
       <div className="flex items-center justify-between">
-        <h2 className="heading-lg font-serif">{title}</h2>
+        <h2 className="heading-md tracking-tight">{title}</h2>
         {items.length > 0 && (
           <Button variant="ghost" size="sm" asChild>
             <Link href={viewAllHref} className="group">

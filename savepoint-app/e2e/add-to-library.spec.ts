@@ -26,8 +26,9 @@ test.describe("[add-to-library] Add game to library", () => {
     const gameDetail = new GameDetailPage(page);
 
     await gameDetail.goto(KNOWN_GAME_SLUG);
-    await expect(gameDetail.heading()).toBeVisible();
 
+    // Wait for the add button to appear (confirms user is authenticated and UI loaded)
+    await gameDetail.addToLibraryButton().waitFor({ state: "visible" });
     await gameDetail.addToLibraryButton().click();
     await expect(gameDetail.libraryModal()).toBeVisible();
 
@@ -42,6 +43,9 @@ test.describe("[add-to-library] Add game to library", () => {
     const gameDetail = new GameDetailPage(page);
 
     await gameDetail.goto(KNOWN_GAME_SLUG);
+
+    // Wait for the add button to appear (confirms user is authenticated and UI loaded)
+    await gameDetail.addToLibraryButton().waitFor({ state: "visible" });
     await gameDetail.addToLibraryButton().click();
 
     await expect(gameDetail.libraryModal()).toBeVisible();

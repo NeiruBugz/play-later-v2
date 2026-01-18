@@ -1,7 +1,7 @@
 import { Clock, Trophy } from "lucide-react";
 
 import { Card } from "@/shared/components/ui/card";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 import type { TimesToBeatSectionProps } from "./times-to-beat-section.types";
 
@@ -28,7 +28,7 @@ function TimeCard({ icon, label, hours, accentColor }: TimeCardProps) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="body-sm text-muted-foreground">{label}</p>
-          <p className="heading-md font-serif tabular-nums">
+          <p className="heading-md font-semibold tabular-nums">
             {hasTime ? (
               <>
                 {hours}
@@ -59,7 +59,7 @@ export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
       className="animate-fade-in space-y-lg"
       aria-labelledby="times-to-beat-heading"
     >
-      <h2 id="times-to-beat-heading" className="heading-md font-serif">
+      <h2 id="times-to-beat-heading" className="heading-md font-semibold">
         Times to Beat
       </h2>
       <div className="gap-lg grid sm:grid-cols-2">

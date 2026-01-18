@@ -11,8 +11,7 @@ import {
 } from "@aws-sdk/client-s3";
 
 import { getS3Client } from "@/shared/lib/storage/s3-client";
-
-import { uploadAvatar } from "./upload-avatar";
+import { uploadAvatar } from "@/shared/server-actions/profile";
 
 describe("uploadAvatar Server Action - Integration Tests", () => {
   let testUserId: string;

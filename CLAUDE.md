@@ -189,12 +189,12 @@ Services return structured results instead of throwing errors:
 
 ```typescript
 type ServiceResult<TData, TError = ServiceError> =
-  | { ok: true; data: TData }
-  | { ok: false; error: TError };
+  | { success: true; data: TData }
+  | { success: false; error: TError };
 
 // Usage example
 const result = await GameService.searchGames(params);
-if (result.ok) {
+if (result.success) {
   console.log(result.data);
 } else {
   console.error(result.error.code, result.error.message);
@@ -392,8 +392,8 @@ Prefer Result types over throwing errors in business logic:
 ```typescript
 // ✅ Preferred for services
 type Result<T, E extends Error> =
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+  | { success: true; value: T }
+  | { success: false; error: E };
 
 // ❌ Avoid manual try/catch in business logic
 // Only throw errors if your framework handles them (e.g., Next.js error boundaries)

@@ -1,4 +1,0 @@
-description = "Breaks the Tech Spec into a task list for engineers"
-prompt = """
-@{.awos/commands/tasks.md}
-"""

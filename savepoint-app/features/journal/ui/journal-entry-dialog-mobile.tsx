@@ -42,7 +42,7 @@ export function JournalEntryDialogMobile({
 
           <div className="border-border/50 px-lg pb-md pt-sm flex items-center justify-between border-b">
             <div className="min-w-0 flex-1">
-              <Drawer.Title className="font-serif text-lg font-semibold">
+              <Drawer.Title className="text-lg font-semibold">
                 Capture a thought
               </Drawer.Title>
               <Drawer.Description className="text-muted-foreground/80 truncate text-sm">

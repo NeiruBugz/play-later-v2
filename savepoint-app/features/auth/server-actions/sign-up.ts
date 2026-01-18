@@ -2,7 +2,6 @@
 
 import { signIn } from "@/auth";
 import { AuthService } from "@/data-access-layer/services";
-import z from "zod";
 
 import { SignUpFormData, signUpSchema } from "@/features/auth/lib/types";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -12,10 +11,18 @@ const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "signUpAction",
 });
 export async function signUpAction(data: SignUpFormData) {
+  const validated = signUpSchema.safeParse(data);
+  if (!validated.success) {
+    logger.warn({ err: validated.error }, "Validation error during sign up");
+    return {
+      success: false as const,
+      error: validated.error.issues[0]?.message ?? "Validation error",
+    };
+  }
+
   try {
-    const validatedData = signUpSchema.parse(data);
     const authService = new AuthService();
-    const result = await authService.signUp(validatedData);
+    const result = await authService.signUp(validated.data);
     if (!result.success) {
       logger.error({ err: result.error }, "Failed to sign up user");
       return {
@@ -24,8 +31,8 @@ export async function signUpAction(data: SignUpFormData) {
       };
     }
     await signIn("credentials", {
-      email: validatedData.email,
-      password: validatedData.password,
+      email: validated.data.email,
+      password: validated.data.password,
       redirectTo: "/dashboard",
     });
     logger.info({}, "User signed up successfully");
@@ -34,13 +41,6 @@ export async function signUpAction(data: SignUpFormData) {
       message: result.data.message,
     };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      logger.warn({ err: error }, "Validation error during sign up");
-      return {
-        success: false as const,
-        error: error.issues[0]?.message ?? "Validation error",
-      };
-    }
     if (isNextAuthRedirect(error)) {
       logger.debug("Redirecting user to dashboard after successful sign up");
       throw error;

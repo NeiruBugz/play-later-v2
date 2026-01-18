@@ -5,6 +5,7 @@ export enum RepositoryErrorCode {
   DATABASE_ERROR = "DATABASE_ERROR",
   INTERNAL_ERROR = "INTERNAL_ERROR",
   ALREADY_EXISTS = "ALREADY_EXISTS",
+  EXTERNAL_SERVICE_ERROR = "EXTERNAL_SERVICE_ERROR",
 }
 export type RepositoryError = {
   code: RepositoryErrorCode;
@@ -12,11 +13,11 @@ export type RepositoryError = {
   details?: unknown;
 };
 export type RepositorySuccess<TData> = {
-  ok: true;
+  success: true;
   data: TData;
 };
 export type RepositoryFailure = {
-  ok: false;
+  success: false;
   error: RepositoryError;
 };
 export type RepositoryResult<TData> =
@@ -24,7 +25,7 @@ export type RepositoryResult<TData> =
   | RepositoryFailure;
 export function repositorySuccess<TData>(data: TData): RepositoryResult<TData> {
   return {
-    ok: true,
+    success: true,
     data,
   };
 }
@@ -34,7 +35,7 @@ export function repositoryError<TData = never>(
   details?: unknown
 ): RepositoryResult<TData> {
   return {
-    ok: false,
+    success: false,
     error: {
       code,
       message,
@@ -45,10 +46,25 @@ export function repositoryError<TData = never>(
 export function isRepositorySuccess<TData>(
   result: RepositoryResult<TData>
 ): result is RepositorySuccess<TData> {
-  return result.ok === true;
+  return result.success === true;
 }
 export function isRepositoryError<TData>(
   result: RepositoryResult<TData>
 ): result is RepositoryFailure {
-  return result.ok === false;
+  return result.success === false;
+}
+
+export async function withRepositoryError<T>(
+  operation: () => Promise<T>,
+  errorMessage: string
+): Promise<RepositoryResult<T>> {
+  try {
+    const result = await operation();
+    return repositorySuccess(result);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `${errorMessage}: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
 }

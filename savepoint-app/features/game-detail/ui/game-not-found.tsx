@@ -29,7 +29,7 @@ export function GameNotFound({ initialQuery = "" }: GameNotFoundProps) {
           <Search className="h-4 w-4" aria-hidden="true" />
           Game not found
         </span>
-        <h1 className="display-xl font-serif text-balance">
+        <h1 className="display-xl font-semibold text-balance">
           This game doesn&apos;t exist in our database.
         </h1>
         <p className="body-lg text-muted-foreground">

@@ -16,28 +16,37 @@ import { addToLibraryAction } from "./add-to-library-action";
 import { updateLibraryEntryAction } from "./update-library-entry-action";
 import { updateLibraryStatusAction } from "./update-library-status-action";
 
-const { mockGetGameDetails, MockIgdbService, mockPopulateGameInDatabase } =
-  vi.hoisted(() => {
-    const mockFn = vi.fn();
-    const mockPopulate = vi.fn();
+const {
+  mockGetGameDetails,
+  MockIgdbService,
+  mockPopulateGameInDatabase,
+  MockGameDetailService,
+} = vi.hoisted(() => {
+  const mockFn = vi.fn();
+  const mockPopulate = vi.fn();
 
-    return {
-      mockGetGameDetails: mockFn,
-      MockIgdbService: class {
-        async getGameDetails(...args: unknown[]) {
-          return mockFn(...args);
-        }
-      },
-      mockPopulateGameInDatabase: mockPopulate,
-    };
-  });
+  return {
+    mockGetGameDetails: mockFn,
+    MockIgdbService: class {
+      async getGameDetails(...args: unknown[]) {
+        return mockFn(...args);
+      }
+    },
+    mockPopulateGameInDatabase: mockPopulate,
+    MockGameDetailService: class {
+      async populateGameInDatabase(...args: unknown[]) {
+        return mockPopulate(...args);
+      }
+    },
+  };
+});
 
 vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
   IgdbService: MockIgdbService,
 }));
 
 vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
-  populateGameInDatabase: mockPopulateGameInDatabase,
+  GameDetailService: MockGameDetailService,
 }));
 
 beforeAll(async () => {
@@ -73,7 +82,7 @@ describe("addToLibraryAction - Integration Tests", () => {
     });
 
     mockPopulateGameInDatabase.mockImplementation(async (game) => {
-      await getTestDatabase().game.create({
+      const createdGame = await getTestDatabase().game.create({
         data: {
           title: game.name,
           igdbId: game.id,
@@ -87,6 +96,7 @@ describe("addToLibraryAction - Integration Tests", () => {
             : null,
         },
       });
+      return { success: true, data: createdGame };
     });
 
     testUser = await createUser({
@@ -292,7 +302,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     });
 
     mockPopulateGameInDatabase.mockImplementation(async (game) => {
-      await getTestDatabase().game.create({
+      const createdGame = await getTestDatabase().game.create({
         data: {
           title: game.name,
           igdbId: game.id,
@@ -306,6 +316,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
             : null,
         },
       });
+      return { success: true, data: createdGame };
     });
 
     testUser = await createUser({

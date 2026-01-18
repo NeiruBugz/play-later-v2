@@ -31,7 +31,7 @@ The service layer follows a **Result pattern** with consistent error handling an
 const service = new ProfileService();
 const result = await service.getProfileWithStats({ userId });
 
-if (result.ok) {
+if (result.success) {
   console.log(result.data.profile.username);
   console.log(result.data.profile.stats.statusCounts);
 }
@@ -68,7 +68,7 @@ const result = await profileService.getProfileWithStats({ userId });
 // IGDB service — reuse within a single request to benefit from token caching
 const igdbService = new IgdbService();
 const search = await igdbService.searchGamesByName({ name: "Zelda" });
-if (search.ok && search.data.games.length > 0) {
+if (search.success && search.data.games.length > 0) {
   await igdbService.getGameDetails({ gameId: search.data.games[0].id });
 }
 ```
@@ -88,7 +88,7 @@ export const getProfileWithStats = authorizedActionClient
   .action(async ({ parsedInput }) => {
     const service = new ProfileService();
     const result = await service.getProfileWithStats(parsedInput);
-    if (!result.ok) throw new Error(result.error.message);
+    if (!result.success) throw new Error(result.error);
     return result.data;
   });
 ```
@@ -100,13 +100,13 @@ All services return `ServiceResult<TData, TError>`:
 ```typescript
 const result = await service.getProfile({ userId });
 
-if (result.ok) {
+if (result.success) {
   // TypeScript knows result.data exists
   const profile = result.data.profile;
   console.log(profile.username);
 } else {
   // TypeScript knows result.error exists
-  switch (result.error.code) {
+  switch (result.code) {
     case ServiceErrorCode.NOT_FOUND:
       console.log("User not found");
       break;
@@ -114,7 +114,7 @@ if (result.ok) {
       console.log("Unauthorized access");
       break;
     default:
-      console.error(result.error.message);
+      console.error(result.error);
   }
 }
 ```
@@ -131,7 +131,7 @@ if (isSuccessResult(result)) {
 }
 
 if (isErrorResult(result)) {
-  console.error(result.error.code);
+  console.error(result.code);
 }
 ```
 
@@ -152,7 +152,7 @@ export default async function ProfilePage() {
   const service = new ProfileService();
   const result = await service.getProfileWithStats({ userId });
 
-  if (!result.ok) {
+  if (!result.success) {
     console.error("Failed to load profile:", result.error);
     redirect("/login");
   }
@@ -197,13 +197,13 @@ const result = await igdbService.searchGamesByName({
   },
 });
 
-if (result.ok) {
+if (result.success) {
   console.log(`Found ${result.data.count} games`);
   result.data.games.forEach((game) => {
     console.log(`- ${game.name} (ID: ${game.id})`);
   });
 } else {
-  console.error(`Error: ${result.error.message}`);
+  console.error(`Error: ${result.error}`);
 }
 ```
 
@@ -214,13 +214,13 @@ const result = await igdbService.getGameDetails({
   gameId: 1905,
 });
 
-if (result.ok) {
+if (result.success) {
   const { game } = result.data;
   console.log(`Title: ${game.name}`);
   console.log(`Summary: ${game.summary}`);
   console.log(`Rating: ${game.aggregated_rating}/100`);
 } else {
-  console.error(`Failed to fetch game: ${result.error.message}`);
+  console.error(`Failed to fetch game: ${result.error}`);
 }
 ```
 
@@ -231,14 +231,14 @@ const result = await igdbService.getGameBySteamAppId({
   steamAppId: 570940,
 });
 
-if (result.ok) {
+if (result.success) {
   const { game } = result.data;
   console.log(`Steam game maps to IGDB ID: ${game.id}`);
   console.log(`Game name: ${game.name}`);
-} else if (result.error.code === "NOT_FOUND") {
+} else if (result.code === "NOT_FOUND") {
   console.log("No IGDB mapping found for this Steam app ID");
 } else {
-  console.error(`Error: ${result.error.message}`);
+  console.error(`Error: ${result.error}`);
 }
 ```
 
@@ -249,7 +249,7 @@ const result = await igdbService.getSimilarGames({
   gameId: 1905,
 });
 
-if (result.ok) {
+if (result.success) {
   const { similarGames } = result.data;
   if (similarGames.length > 0) {
     console.log(`Found ${similarGames.length} similar games`);
@@ -257,7 +257,7 @@ if (result.ok) {
     console.log("No similar games available");
   }
 } else {
-  console.error(`Error: ${result.error.message}`);
+  console.error(`Error: ${result.error}`);
 }
 ```
 
@@ -266,14 +266,14 @@ if (result.ok) {
 ```typescript
 const result = await igdbService.getTopRatedGames();
 
-if (result.ok) {
+if (result.success) {
   result.data.games.forEach((game, index) => {
     console.log(
       `${index + 1}. ${game.name} - ${game.aggregated_rating?.toFixed(1)}/100`
     );
   });
 } else {
-  console.error(`Error: ${result.error.message}`);
+  console.error(`Error: ${result.error}`);
 }
 ```
 
@@ -284,19 +284,40 @@ All methods return `ServiceResult<TData, TError>` with the following structure:
 ```typescript
 // Success response
 type Success = {
-  ok: true;
+  success: true;
   data: TData;
 };
 
 // Error response
 type Error = {
-  ok: false;
-  error: {
-    code: ServiceErrorCode;
-    message: string;
-    details?: unknown;
-  };
+  success: false;
+  error: string;
+  code?: ServiceErrorCode;
 };
+```
+
+### Error Code Usage
+
+The `code` field is populated for all programmatic errors that can be handled by callers:
+
+- `VALIDATION_ERROR` - Invalid input data (malformed request, schema violation)
+- `NOT_FOUND` - Requested resource doesn't exist (game, user, etc.)
+- `UNAUTHORIZED` - Authentication required or insufficient permissions
+- `RATE_LIMITED` - Too many requests to external API
+
+For unexpected internal errors (database failures, unhandled exceptions), the code may be omitted and only the `error` message is provided. This distinction helps callers determine whether to show user-friendly messages (known error codes) or generic error messages (unknown errors).
+
+```typescript
+if (!result.success) {
+  if (result.code) {
+    // Known, handleable error - can show specific message
+    handleKnownError(result.code, result.error);
+  } else {
+    // Unexpected error - show generic message, log details
+    logger.error({ error: result.error }, "Unexpected service error");
+    showGenericError();
+  }
+}
 ```
 
 **Error Codes**:
@@ -314,23 +335,23 @@ type Error = {
 ```typescript
 const result = await igdbService.searchGamesByName({ name: "Zelda" });
 
-if (result.ok) {
+if (result.success) {
   // Handle success - TypeScript knows result.data exists
   const games = result.data.games;
 } else {
   // Handle error - TypeScript knows result.error exists
-  switch (result.error.code) {
+  switch (result.code) {
     case "VALIDATION_ERROR":
-      console.error("Invalid input:", result.error.message);
+      console.error("Invalid input:", result.error);
       break;
     case "NOT_FOUND":
       console.log("No games found");
       break;
     case "INTERNAL_ERROR":
-      console.error("API error:", result.error.message);
+      console.error("API error:", result.error);
       break;
     default:
-      console.error("Unexpected error:", result.error.message);
+      console.error("Unexpected error:", result.error);
   }
 }
 ```
@@ -352,12 +373,12 @@ if (result.ok) {
    const details = await new IgdbService().getGameDetails({ gameId: 1 });
    ```
 
-2. **Always Check `result.ok`**: The Result pattern ensures type-safe error handling
+2. **Always Check `result.success`**: The Result pattern ensures type-safe error handling
 
    ```typescript
    // ✅ Good: Type-safe access
    const result = await service.getGameDetails({ gameId: 1905 });
-   if (result.ok) {
+   if (result.success) {
      console.log(result.data.game.name);
    }
 
@@ -369,10 +390,10 @@ if (result.ok) {
 3. **Use Typed Error Codes**: Switch on error codes for programmatic handling
 
    ```typescript
-   if (!result.ok) {
-     if (result.error.code === "NOT_FOUND") {
+   if (!result.success) {
+     if (result.code === "NOT_FOUND") {
        // Handle missing resource gracefully
-     } else if (result.error.code === "RATE_LIMIT") {
+     } else if (result.code === "RATE_LIMIT") {
        // Implement retry logic
      }
    }
@@ -391,7 +412,7 @@ if (result.ok) {
 5. **Handle Empty Results**: Many methods return empty arrays for valid "no results" scenarios
    ```typescript
    const result = await service.getGameScreenshots({ gameId: 1905 });
-   if (result.ok) {
+   if (result.success) {
      if (result.data.screenshots.length === 0) {
        console.log("No screenshots available for this game");
      }
@@ -465,8 +486,8 @@ export const searchGamesAction = authorizedActionClient
       name: parsedInput.query,
     });
 
-    if (!result.ok) {
-      throw new Error(result.error.message);
+    if (!result.success) {
+      throw new Error(result.error);
     }
 
     return result.data;

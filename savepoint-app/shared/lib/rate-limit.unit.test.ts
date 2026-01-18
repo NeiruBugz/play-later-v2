@@ -1,13 +1,12 @@
-import type { NextRequest } from "next/server";
+import { checkRateLimit, type RateLimitInput } from "./rate-limit";
 
-import { checkRateLimit } from "./rate-limit";
-
-function createMockRequest(ip: string): NextRequest {
+function createMockRequest(ip: string): RateLimitInput {
   return {
-    headers: {
-      get: vi.fn().mockReturnValue(ip),
-    },
-  } as unknown as NextRequest;
+    headers: new Headers({
+      "x-forwarded-for": ip,
+    }),
+    ip: undefined,
+  };
 }
 
 describe("checkRateLimit", () => {
@@ -113,13 +112,16 @@ describe("checkRateLimit", () => {
       expect(sixthRequest.remaining).toBe(0);
     });
 
-    it("should extract IP from x-forwarded-for header when request.ip is unavailable", async () => {
+    it("should extract IP from x-forwarded-for header when ip is not provided", async () => {
       const forwardedIP = "203.0.113.1";
-      const mockRequest = createMockRequest(forwardedIP);
+      const mockRequest: RateLimitInput = {
+        headers: new Headers({
+          "x-forwarded-for": forwardedIP,
+        }),
+      };
 
       const result = await checkRateLimit(mockRequest);
 
-      expect(mockRequest.headers.get).toHaveBeenCalledWith("x-forwarded-for");
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(19);
     });
@@ -127,11 +129,9 @@ describe("checkRateLimit", () => {
 
   describe("when handling edge cases", () => {
     it("should handle requests with no IP information", async () => {
-      const mockRequest = {
-        headers: {
-          get: vi.fn().mockReturnValue(null),
-        },
-      } as unknown as NextRequest;
+      const mockRequest: RateLimitInput = {
+        headers: new Headers(),
+      };
 
       const result = await checkRateLimit(mockRequest);
 

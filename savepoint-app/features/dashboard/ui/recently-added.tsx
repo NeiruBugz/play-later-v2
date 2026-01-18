@@ -5,7 +5,7 @@ import { LibraryService } from "@/data-access-layer/services";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-const RECENTLY_ADDED_LIMIT = 8;
+const RECENTLY_ADDED_LIMIT = 6;
 
 export interface RecentlyAddedData {
   items: LibraryItemWithGameDomain[];
@@ -28,6 +28,7 @@ export async function RecentlyAdded({ userId }: RecentlyAddedProps) {
       sortBy: "createdAt",
       sortOrder: "desc",
       distinctByGame: true,
+      limit: RECENTLY_ADDED_LIMIT,
     });
 
     if (!result.success) {
@@ -38,10 +39,8 @@ export async function RecentlyAdded({ userId }: RecentlyAddedProps) {
       throw new Error(result.error);
     }
 
-    const limitedItems = result.data.items.slice(0, RECENTLY_ADDED_LIMIT);
-
     logger.info(
-      { userId, count: limitedItems.length },
+      { userId, count: result.data.items.length },
       "Recently added games fetched successfully"
     );
 
@@ -50,7 +49,7 @@ export async function RecentlyAdded({ userId }: RecentlyAddedProps) {
     return (
       <DashboardGameSection
         title="Recently Added"
-        items={limitedItems}
+        items={result.data.items}
         viewAllHref="/library?sortBy=createdAt&sortOrder=desc"
         viewAllLabel="View Library"
         emptyMessage="Your library is empty. Add some games to get started!"

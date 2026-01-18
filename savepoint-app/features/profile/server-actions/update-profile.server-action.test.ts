@@ -18,6 +18,19 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
+vi.mock("@/shared/lib", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/shared/lib")>();
+  return {
+    ...original,
+    createLogger: vi.fn(() => ({
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    })),
+  };
+});
+
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
 const MockProfileService = vi.mocked(ProfileService);
@@ -48,7 +61,7 @@ describe("updateProfile server action", () => {
 
       expect(result).toEqual({
         success: false,
-        error: "Unauthorized",
+        error: "You must be logged in to perform this action",
       });
       expect(mockUpdateProfile).not.toHaveBeenCalled();
     });
@@ -102,7 +115,7 @@ describe("updateProfile server action", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toContain(">=3 characters");
+        expect(result.error).toBe("Invalid input data");
       }
       expect(mockUpdateProfile).not.toHaveBeenCalled();
     });
@@ -114,7 +127,7 @@ describe("updateProfile server action", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toContain("<=25 characters");
+        expect(result.error).toBe("Invalid input data");
       }
       expect(mockUpdateProfile).not.toHaveBeenCalled();
     });
@@ -148,7 +161,7 @@ describe("updateProfile server action", () => {
 
       expect(result).toEqual({
         success: false,
-        error: "An unexpected error occurred",
+        error: "Database connection lost",
       });
     });
   });
@@ -273,7 +286,7 @@ describe("updateProfile server action", () => {
       const result = await updateProfileFormAction(prevState, formData);
 
       expect(result.status).toBe("error");
-      expect(result.message).toContain(">=3 characters");
+      expect(result.message).toBe("Invalid input data");
       expect(result.submittedUsername).toBe("ab");
       expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
@@ -288,7 +301,7 @@ describe("updateProfile server action", () => {
 
       expect(result).toEqual({
         status: "error",
-        message: "Unauthorized",
+        message: "You must be logged in to perform this action",
         submittedUsername: "newusername",
       });
       expect(mockRevalidatePath).not.toHaveBeenCalled();
@@ -304,7 +317,7 @@ describe("updateProfile server action", () => {
 
       expect(result).toEqual({
         status: "error",
-        message: "An unexpected error occurred",
+        message: "Network error",
         submittedUsername: "testuser",
       });
       expect(mockRevalidatePath).not.toHaveBeenCalled();

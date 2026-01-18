@@ -4,7 +4,7 @@ import type { LibraryItemStatus } from "@/data-access-layer/domain/library";
 
 import { Button } from "@/shared/components/ui/button";
 import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
-import { cn } from "@/shared/lib/ui";
+import { cn } from "@/shared/lib/ui/utils";
 
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
 import type { LibraryCardActionBarProps } from "./library-card-action-bar.types";

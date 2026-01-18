@@ -17,33 +17,26 @@ import {
   findLibraryItemById,
   findLibraryItemsWithFilters,
   findMostRecentLibraryItemByGameId,
+  findMostRecentPlayingGame,
+  findWantToPlayItemsForUser,
   updateLibraryItem,
 } from "@/data-access-layer/repository";
-import { z } from "zod";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService, type ServiceResult } from "../types";
+import {
+  DeleteLibraryItemSchema,
+  GetLibraryItemsServiceSchema,
+} from "./schemas";
 
-const GetLibraryItemsSchema = z.object({
-  userId: z.string().cuid(),
-  status: z.enum(LibraryItemStatus).optional(),
-  platform: z.string().optional(),
-  search: z.string().optional(),
-  sortBy: z
-    .enum(["createdAt", "releaseDate", "startedAt", "completedAt"])
-    .optional(),
-  sortOrder: z.enum(["asc", "desc"]).optional(),
-  distinctByGame: z.boolean().optional(),
-  offset: z.number().int().min(0).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-});
-const DeleteLibraryItemSchema = z.object({
-  libraryItemId: z.number().int().positive(),
-  userId: z.string().cuid(),
-});
-
-type SortField = "createdAt" | "releaseDate" | "startedAt" | "completedAt";
+type SortField =
+  | "updatedAt"
+  | "createdAt"
+  | "releaseDate"
+  | "startedAt"
+  | "completedAt"
+  | "title";
 type GetLibraryItemsParams = {
   userId: string;
   status?: LibraryItemStatus;
@@ -67,7 +60,7 @@ export class LibraryService extends BaseService {
     try {
       this.logger.info({ igdbId }, "Finding game by IGDB ID");
       const result = await findGameByIgdbId(igdbId);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, igdbId },
           "Failed to find game"
@@ -76,13 +69,48 @@ export class LibraryService extends BaseService {
       }
       return this.success(result.data);
     } catch (error) {
-      this.logger.error(
-        { error, igdbId },
-        "Unexpected error in findGameByIgdbId"
+      return this.handleError(error, "Failed to find game by IGDB ID");
+    }
+  }
+
+  async getMostRecentPlayingGame(params: { userId: string }): Promise<
+    ServiceResult<{
+      gameId: string;
+      igdbId: number;
+      name: string;
+      coverImageId: string | null;
+    } | null>
+  > {
+    try {
+      this.logger.info(params, "Finding most recent playing game");
+      const result = await findMostRecentPlayingGame(params);
+      if (!result.success) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to find most recent playing game"
+        );
+        return this.error("Failed to find most recent playing game");
+      }
+
+      if (!result.data) {
+        this.logger.info(params, "No playing games found");
+        return this.success(null);
+      }
+
+      const game = {
+        gameId: result.data.game.id,
+        igdbId: result.data.game.igdbId,
+        name: result.data.game.title,
+        coverImageId: result.data.game.coverImage,
+      };
+
+      this.logger.info(
+        { ...params, gameId: game.gameId },
+        "Most recent playing game found"
       );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.success(game);
+    } catch (error) {
+      return this.handleError(error, "Failed to get most recent playing game");
     }
   }
   async findMostRecentLibraryItemByGameId(params: {
@@ -92,7 +120,7 @@ export class LibraryService extends BaseService {
     try {
       this.logger.info(params, "Finding most recent library item");
       const result = await findMostRecentLibraryItemByGameId(params);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find library item"
@@ -104,13 +132,7 @@ export class LibraryService extends BaseService {
         : null;
       return this.success(domainItem);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in findMostRecentLibraryItemByGameId"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to find most recent library item");
     }
   }
   async updateLibraryItem(params: {
@@ -128,7 +150,7 @@ export class LibraryService extends BaseService {
         libraryItemId: params.libraryItem.id,
         userId: params.userId,
       });
-      if (!currentItemResult.ok) {
+      if (!currentItemResult.success) {
         this.logger.error(
           { error: currentItemResult.error, ...params },
           "Failed to fetch library item for update"
@@ -144,7 +166,7 @@ export class LibraryService extends BaseService {
           completedAt: params.libraryItem.completedAt,
         },
       });
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to update library item"
@@ -160,13 +182,7 @@ export class LibraryService extends BaseService {
       );
       return this.success(LibraryItemMapper.toDomain(result.data));
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in updateLibraryItem"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to update library item");
     }
   }
   async findAllLibraryItemsByGameId(params: {
@@ -176,7 +192,7 @@ export class LibraryService extends BaseService {
     try {
       this.logger.info(params, "Finding all library items for game");
       const result = await findAllLibraryItemsByGameId(params);
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, ...params },
           "Failed to find library items"
@@ -188,13 +204,7 @@ export class LibraryService extends BaseService {
       );
       return this.success(domainItems);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in findAllLibraryItemsByGameId"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to find all library items");
     }
   }
   async getLibraryItems(
@@ -205,7 +215,7 @@ export class LibraryService extends BaseService {
   > {
     try {
       this.logger.info({ userId: params.userId }, "Fetching library items");
-      const validation = GetLibraryItemsSchema.safeParse(params);
+      const validation = GetLibraryItemsServiceSchema.safeParse(params);
       if (!validation.success) {
         this.logger.warn(
           { errors: validation.error.issues },
@@ -222,7 +232,7 @@ export class LibraryService extends BaseService {
         skip: offset,
         take: limit,
       });
-      if (!result.ok) {
+      if (!result.success) {
         this.logger.error(
           { error: result.error, userId: params.userId },
           "Failed to fetch library items"
@@ -251,13 +261,7 @@ export class LibraryService extends BaseService {
         hasMore,
       });
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in getLibraryItems"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to get library items");
     }
   }
   async deleteLibraryItem(params: {
@@ -283,7 +287,7 @@ export class LibraryService extends BaseService {
         libraryItemId: params.libraryItemId,
         userId: params.userId,
       });
-      if (!deleteResult.ok) {
+      if (!deleteResult.success) {
         if (deleteResult.error.code === "NOT_FOUND") {
           this.logger.warn(
             { libraryItemId: params.libraryItemId, userId: params.userId },
@@ -305,13 +309,7 @@ export class LibraryService extends BaseService {
       );
       return this.success(undefined);
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in deleteLibraryItem"
-      );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+      return this.handleError(error, "Failed to delete library item");
     }
   }
   async createLibraryItem(params: {
@@ -347,7 +345,7 @@ export class LibraryService extends BaseService {
           completedAt: params.libraryItem.completedAt,
         },
       });
-      if (!result.ok) {
+      if (!result.success) {
         if (result.error.code === "DUPLICATE") {
           this.logger.warn(
             { userId: params.userId, gameId: params.gameId },
@@ -367,13 +365,62 @@ export class LibraryService extends BaseService {
       );
       return this.success(LibraryItemMapper.toDomain(result.data));
     } catch (error) {
-      this.logger.error(
-        { error, ...params },
-        "Unexpected error in createLibraryItem"
+      return this.handleError(error, "Failed to create library item");
+    }
+  }
+
+  async getRandomWantToPlayGame(params: { userId: string }): Promise<
+    ServiceResult<{
+      id: string;
+      igdbId: number;
+      title: string;
+      slug: string;
+      coverImage: string | null;
+    } | null>
+  > {
+    try {
+      this.logger.info(params, "Fetching random want-to-play game");
+
+      const result = await findWantToPlayItemsForUser({
+        userId: params.userId,
+      });
+
+      if (!result.success) {
+        this.logger.error(
+          { error: result.error, ...params },
+          "Failed to fetch want-to-play items"
+        );
+        return this.error("Failed to fetch want-to-play games");
+      }
+
+      const items = result.data;
+
+      if (items.length === 0) {
+        this.logger.info(params, "No want-to-play games found");
+        return this.success(null);
+      }
+
+      const randomIndex = Math.floor(Math.random() * items.length);
+      const randomItem = items[randomIndex];
+
+      this.logger.info(
+        {
+          userId: params.userId,
+          gameId: randomItem.game.id,
+          gameTitle: randomItem.game.title,
+        },
+        "Random want-to-play game selected"
       );
-      return this.error(
-        error instanceof Error ? error.message : "An unexpected error occurred"
-      );
+
+      return this.success({
+        id: randomItem.game.id,
+        igdbId: randomItem.game.igdbId,
+        title: randomItem.game.title,
+        slug: randomItem.game.slug,
+        coverImage: randomItem.game.coverImage,
+      });
+    } catch (error) {
+      return this.handleError(error, "Failed to get random want-to-play game");
     }
   }
 }

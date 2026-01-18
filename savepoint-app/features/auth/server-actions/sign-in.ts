@@ -1,7 +1,6 @@
 "use server";
 
 import { signIn } from "@/auth";
-import { z } from "zod";
 
 import { SignInFormData, signInSchema } from "@/features/auth/lib/types";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -14,12 +13,21 @@ export async function signInAction(data: SignInFormData) {
   const logger = createLogger({
     [LOGGER_CONTEXT.SERVER_ACTION]: "signInAction",
   });
+
+  const validated = signInSchema.safeParse(data);
+  if (!validated.success) {
+    logger.warn({ err: validated.error }, "Validation error during sign in");
+    return {
+      success: false as const,
+      error: validated.error.issues[0]?.message ?? "Validation error",
+    };
+  }
+
   try {
-    const validatedData = signInSchema.parse(data);
     logger.info({ method: "credentials" }, "Signing in user");
     await signIn("credentials", {
-      email: validatedData.email,
-      password: validatedData.password,
+      email: validated.data.email,
+      password: validated.data.password,
       redirectTo: "/dashboard",
     });
     return {
@@ -27,13 +35,6 @@ export async function signInAction(data: SignInFormData) {
       message: "Signed in successfully",
     };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      logger.warn({ err: error }, "Validation error during sign in");
-      return {
-        success: false as const,
-        error: error.issues[0]?.message ?? "Validation error",
-      };
-    }
     if (isNextAuthRedirect(error)) {
       logger.debug("Redirecting after successful sign in");
       throw error;

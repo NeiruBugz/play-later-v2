@@ -47,7 +47,7 @@ export class ProfileService extends BaseService {
           createdAt: true,
         },
       });
-      if (!userResult.ok) {
+      if (!userResult.success) {
         this.logger.error(
           { userId: input.userId, error: userResult.error },
           "Error fetching user by ID"
@@ -96,7 +96,7 @@ export class ProfileService extends BaseService {
         }),
         getLibraryStatsByUserId(input.userId),
       ]);
-      if (!userResult.ok) {
+      if (!userResult.success) {
         this.logger.error(
           { userId: input.userId, error: userResult.error },
           "Error fetching user by ID"
@@ -110,7 +110,7 @@ export class ProfileService extends BaseService {
         this.logger.warn({ userId: input.userId }, "User not found");
         return this.error("User not found", ServiceErrorCode.NOT_FOUND);
       }
-      if (!statsResult.ok) {
+      if (!statsResult.success) {
         this.logger.error(
           { userId: input.userId, error: statsResult.error },
           "Failed to load library stats"
@@ -149,7 +149,7 @@ export class ProfileService extends BaseService {
       );
       const normalized = input.username.toLowerCase();
       const existingUserResult = await findUserByNormalizedUsername(normalized);
-      if (!existingUserResult.ok) {
+      if (!existingUserResult.success) {
         this.logger.error(
           { username: input.username, error: existingUserResult.error },
           "Error checking username availability"
@@ -189,7 +189,7 @@ export class ProfileService extends BaseService {
       const currentUserResult = await findUserById(input.userId, {
         select: { username: true },
       });
-      if (!currentUserResult.ok) {
+      if (!currentUserResult.success) {
         this.logger.error(
           { userId: input.userId, error: currentUserResult.error },
           "Error fetching user by ID"
@@ -224,7 +224,7 @@ export class ProfileService extends BaseService {
         usernameNormalized: input.username.toLowerCase(),
         image: input.avatarUrl,
       });
-      if (!userResult.ok) {
+      if (!userResult.success) {
         this.logger.error(
           { userId: input.userId, error: userResult.error },
           "Error updating user profile"
@@ -258,7 +258,7 @@ export class ProfileService extends BaseService {
       const userResult = await findUserById(input.userId, {
         select: { id: true },
       });
-      if (!userResult.ok) {
+      if (!userResult.success) {
         this.logger.error(
           { userId: input.userId, error: userResult.error },
           "Error fetching user by ID"
@@ -301,7 +301,7 @@ export class ProfileService extends BaseService {
           createdAt: true,
         },
       });
-      if (!userResult.ok) {
+      if (!userResult.success) {
         this.logger.error(
           { userId: input.userId, error: userResult.error },
           "Error fetching user by ID"
@@ -383,7 +383,7 @@ export class ProfileService extends BaseService {
         image: input.avatarUrl,
         profileSetupCompletedAt: new Date(),
       });
-      if (!userResult.ok) {
+      if (!userResult.success) {
         this.logger.error(
           { userId: input.userId, error: userResult.error },
           "Error updating user profile"
@@ -438,7 +438,7 @@ export class ProfileService extends BaseService {
       const userResult = await findUserById(input.userId, {
         select: { id: true },
       });
-      if (!userResult.ok) {
+      if (!userResult.success) {
         this.logger.error(
           { userId: input.userId, error: userResult.error },
           "Error verifying user existence"
