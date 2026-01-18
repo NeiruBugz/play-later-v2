@@ -29,7 +29,7 @@ export class PlatformService extends BaseService {
       this.logger.info("Fetching system platforms");
 
       const platforms = await findSystemPlatforms();
-      if (!isRepositorySuccess(platforms) || !platforms.success) {
+      if (!isRepositorySuccess(platforms)) {
         this.logger.error(
           { error: platforms.error },
           "Failed to fetch system platforms"
