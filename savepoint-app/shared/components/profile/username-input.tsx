@@ -17,8 +17,12 @@ export function UsernameInput({
   error: externalError,
   disabled = false,
   onValidationChange,
+  currentUsername,
 }: UsernameInputProps) {
-  const { validationStatus, validationMessage } = useUsernameValidation(value);
+  const { validationStatus, validationMessage } = useUsernameValidation(
+    value,
+    currentUsername
+  );
   const displayError = externalError || validationMessage;
   const showError =
     (externalError || validationStatus === "error") && displayError;

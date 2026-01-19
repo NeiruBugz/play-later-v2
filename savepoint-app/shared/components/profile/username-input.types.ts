@@ -5,4 +5,5 @@ export interface UsernameInputProps {
   error?: string;
   disabled?: boolean;
   onValidationChange?: (hasError: boolean) => void;
+  currentUsername?: string;
 }

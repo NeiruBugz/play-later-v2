@@ -43,3 +43,4 @@ export {
   cn,
 } from "./ui";
 export { createServerAction, type ActionResult } from "./server-action";
+export { getFirstValidationError } from "./validation";

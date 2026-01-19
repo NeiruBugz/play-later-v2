@@ -13,7 +13,8 @@ interface UseUsernameValidationResult {
   validationMessage: string;
 }
 export function useUsernameValidation(
-  username: string
+  username: string,
+  currentUsername?: string
 ): UseUsernameValidationResult {
   const [validationStatus, setValidationStatus] =
     useState<ValidationStatus>("idle");
@@ -38,6 +39,13 @@ export function useUsernameValidation(
       );
       return;
     }
+
+    if (currentUsername && username === currentUsername) {
+      setValidationStatus("idle");
+      setValidationMessage("");
+      return;
+    }
+
     setValidationStatus("validating");
     setValidationMessage("");
     const controller = new AbortController();

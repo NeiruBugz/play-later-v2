@@ -109,6 +109,7 @@ export function ProfileSetupForm({ defaultUsername }: ProfileSetupFormProps) {
               error={showServerError ? state.message : undefined}
               disabled={isFormPending}
               onValidationChange={setHasValidationError}
+              currentUsername={defaultUsername}
             />
             <p className="body-sm text-muted-foreground">
               Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.

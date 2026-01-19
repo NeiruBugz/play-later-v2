@@ -94,6 +94,7 @@ export function ProfileSettingsForm({
               error={showServerError ? state.message : undefined}
               disabled={isPending}
               onValidationChange={setHasValidationError}
+              currentUsername={currentUsername ?? undefined}
             />
             <p className="body-sm text-muted-foreground">
               Must be 3-25 characters. Letters, numbers, and (_, -, .) allowed.
