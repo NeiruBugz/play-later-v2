@@ -4,8 +4,11 @@ import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
 import type {
+  GetOwnedGamesInput,
   GetPlayerSummaryInput,
   ResolveVanityUrlInput,
+  SteamOwnedGame,
+  SteamOwnedGamesResponse,
   SteamPlayerSummariesResponse,
   SteamProfile,
   SteamResolveVanityResponse,
@@ -162,5 +165,77 @@ export class SteamService extends BaseService {
     }
 
     return this.success(resolveResult.data);
+  }
+
+  async getOwnedGames(
+    params: GetOwnedGamesInput
+  ): Promise<ServiceResult<SteamOwnedGame[]>> {
+    const { steamId64 } = params;
+
+    logger.info({ steamId64 }, "Fetching owned games from Steam");
+
+    try {
+      const url = new URL(
+        `${this.baseUrl}/IPlayerService/GetOwnedGames/v1/`
+      );
+      url.searchParams.set("key", this.apiKey);
+      url.searchParams.set("steamid", steamId64);
+      url.searchParams.set("include_appinfo", "1");
+      url.searchParams.set("include_played_free_games", "1");
+      url.searchParams.set("include_extended_appinfo", "1");
+
+      const response = await fetch(url.toString());
+
+      if (!response.ok) {
+        logger.error(
+          { status: response.status, statusText: response.statusText },
+          "Steam API request failed"
+        );
+        return this.error(
+          "Failed to fetch owned games from Steam",
+          ServiceErrorCode.EXTERNAL_SERVICE_ERROR
+        );
+      }
+
+      const data = (await response.json()) as SteamOwnedGamesResponse;
+
+      if (!data.response.games) {
+        logger.info(
+          { steamId64, gameCount: data.response.game_count },
+          "No games found or library is private"
+        );
+
+        if (data.response.game_count > 0) {
+          return this.error(
+            "Steam game library is private. Please set your game details to public in Steam privacy settings.",
+            ServiceErrorCode.UNAUTHORIZED
+          );
+        }
+
+        return this.success([]);
+      }
+
+      const ownedGames: SteamOwnedGame[] = data.response.games.map((game) => ({
+        appId: game.appid,
+        name: game.name,
+        playtimeForever: game.playtime_forever,
+        playtimeWindows: game.playtime_windows_forever ?? 0,
+        playtimeMac: game.playtime_mac_forever ?? 0,
+        playtimeLinux: game.playtime_linux_forever ?? 0,
+        imgIconUrl: game.img_icon_url ?? null,
+        imgLogoUrl: game.img_logo_url ?? null,
+        rtimeLastPlayed: game.rtime_last_played ?? null,
+      }));
+
+      logger.info(
+        { steamId64, gameCount: ownedGames.length },
+        "Successfully fetched owned games"
+      );
+
+      return this.success(ownedGames);
+    } catch (error) {
+      logger.error({ error, steamId64 }, "Error fetching owned games");
+      return this.handleError(error, "Failed to fetch owned games from Steam");
+    }
   }
 }

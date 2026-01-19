@@ -42,3 +42,36 @@ export type GetPlayerSummaryInput = {
 export type ValidateSteamIdInput = {
   input: string;
 };
+
+export type SteamOwnedGame = {
+  appId: number;
+  name: string;
+  playtimeForever: number;
+  playtimeWindows: number;
+  playtimeMac: number;
+  playtimeLinux: number;
+  imgIconUrl: string | null;
+  imgLogoUrl: string | null;
+  rtimeLastPlayed: number | null;
+};
+
+export type SteamOwnedGamesResponse = {
+  response: {
+    game_count: number;
+    games?: Array<{
+      appid: number;
+      name: string;
+      playtime_forever: number;
+      playtime_windows_forever?: number;
+      playtime_mac_forever?: number;
+      playtime_linux_forever?: number;
+      img_icon_url?: string;
+      img_logo_url?: string;
+      rtime_last_played?: number;
+    }>;
+  };
+};
+
+export type GetOwnedGamesInput = {
+  steamId64: string;
+};

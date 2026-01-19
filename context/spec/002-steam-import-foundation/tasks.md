@@ -46,9 +46,9 @@ Allow users to connect via Steam OAuth as the primary method.
 
 Allow users to fetch their owned games from Steam and store in ImportedGame table.
 
-- [ ] Extend ImportedGame schema with `playtimeWindows`, `playtimeMac`, `playtimeLinux`, `lastPlayedAt` fields and run migration **[Agent: nextjs-expert]**
-- [ ] Create `ImportedGameRepository` with `upsertMany()`, `findByUserId()`, `countByUserId()` methods **[Agent: nextjs-expert]**
-- [ ] Add `getOwnedGames()` method to SteamService **[Agent: nextjs-expert]**
+- [x] Extend ImportedGame schema with `playtimeWindows`, `playtimeMac`, `playtimeLinux`, `lastPlayedAt` fields and run migration **[Agent: nextjs-expert]**
+- [x] Create `ImportedGameRepository` with `upsertMany()`, `findByUserId()`, `countByUserId()` methods **[Agent: nextjs-expert]**
+- [x] Add `getOwnedGames()` method to SteamService **[Agent: nextjs-expert]**
 - [ ] Create `fetch-steam-games.handler.ts` that fetches from Steam and upserts to database **[Agent: nextjs-expert]**
 - [ ] Create `POST /api/steam/games` route for fetching Steam library **[Agent: nextjs-expert]**
 - [ ] Create `ImportPathSelector` component with "Fetch & Curate" button (manual path only) **[Agent: nextjs-expert]**
