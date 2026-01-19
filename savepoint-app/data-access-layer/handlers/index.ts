@@ -19,3 +19,9 @@ export type {
   GetPlatformsHandlerInput,
   GetPlatformsHandlerOutput,
 } from "./platform/types";
+
+export { connectSteamHandler } from "./steam-import/steam-connect.handler";
+export type {
+  ConnectSteamHandlerInput,
+  ConnectSteamHandlerOutput,
+} from "./steam-import/types";

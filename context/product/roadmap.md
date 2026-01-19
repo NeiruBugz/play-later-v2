@@ -26,9 +26,9 @@ _The highest priority features that form the core foundation of SavePoint—enab
   - [x] **Journey Status Tracking:** Allow users to mark games with status indicators (Want to Play, Owned, Playing, Played) to organize their collection by intent.
   - [x] **Library View & Organization:** Display the user's gaming library in a clear, browsable format with filtering by status and platform.
 
-- [ ] **Gaming Journal**
-  - [ ] **Write Journal Entries:** Provide a form for users to write reflections and memories about their gaming experiences, linked to specific games.
-  - [ ] **View Personal Journal:** Display a chronological timeline of the user's journal entries to revisit past reflections.
+- [x] **Gaming Journal**
+  - [x] **Write Journal Entries:** Provide a form for users to write reflections and memories about their gaming experiences, linked to specific games.
+  - [x] **View Personal Journal:** Display a chronological timeline of the user's journal entries to revisit past reflections.
 
 ---
 
@@ -39,11 +39,12 @@ _Once the foundational features are complete, we will move on to these high-valu
 - [ ] **Steam Library Integration**
 
   _Philosophy: SavePoint is for games you intend to experience, not a catalog. Steam import is curation, not bulk transfer. See [Product Definition](product-definition.md#23-ux-principles)._
-
   - [ ] **Stage 1: Technical Foundation**
-    - [ ] Steam OAuth connection (secure account linking)
-    - [ ] Lambda pipeline integration (fetch Steam library → IGDB enrichment → database)
-    - [ ] Imported games stored separately from library (staging area)
+    - [ ] **Lambda Integration:** Connect existing Lambda pipeline (fetch Steam library → IGDB enrichment → `ImportedGame` staging table)
+    - [ ] **Feature Flag:** Environment-based toggle to disable Steam import flow in production (avoid AWS costs until ready)
+    - [ ] **Local Testing:** SAM/LocalStack setup for local Lambda invocation during development
+    - [ ] Steam profile connection UI (Steam ID input)
+    - [ ] Imported games stored in `ImportedGame` table (existing schema: storefront, playtime, IGDB match status)
 
   - [ ] **Stage 2: Curation UX Research**
     - [ ] Research: How to present 100+ games without overwhelming users
@@ -59,6 +60,43 @@ _Once the foundational features are complete, we will move on to these high-valu
   - [ ] **Stage 4: Ongoing Sync**
     - [ ] Re-import detects new games only (no duplicates)
     - [ ] Optional: periodic sync for new purchases
+
+- [ ] **PlayStation Trophy Integration** _(Research Complete)_
+
+  _Import games based on earned trophies. Uses unofficial PSN API with "About Me" verification (same approach as PSNProfiles). See [research/playstation-integration.md](../research/playstation-integration.md)._
+
+  - [ ] **Stage 1: Account Linking**
+    - [ ] PSN username input with verification code flow
+    - [ ] "About Me" verification via psn-api library
+    - [ ] Store verified PSN account link in database
+
+  - [ ] **Stage 2: Trophy Import**
+    - [ ] Fetch trophy list (games with trophies earned)
+    - [ ] Match to IGDB games (similar to Steam import)
+    - [ ] Store in `ImportedGame` staging table
+
+  - [ ] **Stage 3: Curation** _(Shared with Steam)_
+    - [ ] Reuse Steam import curation UI
+    - [ ] User selects which trophy games to track
+
+- [ ] **Xbox Game Pass Integration** _(Research Complete)_
+
+  _Import games and achievements via OpenXBL API. Supports full game library (not just achievements). See [research/xbox-integration.md](../research/xbox-integration.md)._
+
+  - [ ] **Stage 1: Account Linking**
+    - [ ] OpenXBL OAuth integration ("Login with Xbox")
+    - [ ] Store Xbox XUID and access credentials
+    - [ ] Gamertag display in user profile
+
+  - [ ] **Stage 2: Game Import**
+    - [ ] Fetch title history (full owned games)
+    - [ ] Match to IGDB games (similar to Steam import)
+    - [ ] Store in `ImportedGame` staging table
+    - [ ] Include achievement data for enrichment
+
+  - [ ] **Stage 3: Curation** _(Shared with Steam/PlayStation)_
+    - [ ] Reuse platform import curation UI
+    - [ ] User selects which Xbox games to track
 
 - [ ] **Discovery & Exploration**
   - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.

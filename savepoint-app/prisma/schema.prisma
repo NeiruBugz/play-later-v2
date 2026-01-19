@@ -184,6 +184,7 @@ model ImportedGame {
 
   @@index([userId, deletedAt])
   @@index([storefrontGameId])
+  @@index([userId, playtime])
 }
 
 enum Storefront {

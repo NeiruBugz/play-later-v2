@@ -8,7 +8,7 @@ export type HandlerResult<TData> =
       success: false;
       error: string;
       status: number;
-      headers?: HeadersInit;
+      headers?: Record<string, string>;
     };
 
 export interface RequestContext {

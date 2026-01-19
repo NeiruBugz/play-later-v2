@@ -80,3 +80,17 @@ export type GetRedirectAfterAuthResult = ServiceResult<{
   redirectTo: string;
   isNewUser: boolean;
 }>;
+export type SteamConnectionData = {
+  steamId64: string;
+  displayName: string;
+  avatarUrl: string;
+  profileUrl: string;
+};
+export type SteamConnectionStatus =
+  | { connected: false }
+  | { connected: true; profile: SteamConnectionData };
+export type GetSteamConnectionStatusInput = {
+  userId: string;
+};
+export type GetSteamConnectionStatusResult =
+  ServiceResult<SteamConnectionStatus>;

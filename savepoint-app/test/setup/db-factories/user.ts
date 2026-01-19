@@ -15,6 +15,8 @@ export type UserFactoryOptions = {
   usernameNormalized?: string;
   steamId64?: string;
   steamUsername?: string;
+  steamAvatar?: string;
+  steamProfileURL?: string;
   password?: string;
 };
 
@@ -32,6 +34,8 @@ export const createUserData = (
     usernameNormalized: overrides.usernameNormalized || username.toLowerCase(),
     steamId64: overrides.steamId64 || faker.string.numeric(17),
     steamUsername: overrides.steamUsername || faker.internet.username(),
+    steamAvatar: overrides.steamAvatar,
+    steamProfileURL: overrides.steamProfileURL,
     password: overrides.password,
   };
 };

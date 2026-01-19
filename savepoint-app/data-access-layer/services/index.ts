@@ -70,3 +70,11 @@ export {
   type OnboardingStep,
   type OnboardingProgress,
 } from "./onboarding";
+export {
+  SteamService,
+  SteamOpenIdService,
+  type SteamProfile,
+  type ResolveVanityUrlInput,
+  type GetPlayerSummaryInput,
+  type ValidateSteamIdInput,
+} from "./steam";

@@ -4,6 +4,7 @@ import {
   findUserById,
   findUserByNormalizedUsername,
   getLibraryStatsByUserId,
+  getUserSteamData,
   updateUserProfile,
 } from "@/data-access-layer/repository";
 
@@ -27,6 +28,8 @@ import type {
   GetProfileResult,
   GetProfileWithStatsInput,
   GetProfileWithStatsResult,
+  GetSteamConnectionStatusInput,
+  GetSteamConnectionStatusResult,
   UpdateAvatarUrlInput,
   UpdateAvatarUrlResult,
   UpdateProfileInput,
@@ -459,6 +462,46 @@ export class ProfileService extends BaseService {
         "Error verifying user existence"
       );
       return this.handleError(error, "Failed to verify user account");
+    }
+  }
+  async getSteamConnectionStatus(
+    input: GetSteamConnectionStatusInput
+  ): Promise<GetSteamConnectionStatusResult> {
+    try {
+      this.logger.info(
+        { userId: input.userId },
+        "Fetching Steam connection status"
+      );
+      const steamDataResult = await getUserSteamData({ userId: input.userId });
+      if (!steamDataResult.success) {
+        this.logger.error(
+          { userId: input.userId, error: steamDataResult.error },
+          "Error fetching Steam connection data"
+        );
+        return this.error(
+          "Failed to fetch Steam connection status",
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+      const steamData = steamDataResult.data;
+      if (!steamData || !steamData.steamId64 || !steamData.steamUsername) {
+        return this.success({ connected: false });
+      }
+      return this.success({
+        connected: true,
+        profile: {
+          steamId64: steamData.steamId64,
+          displayName: steamData.steamUsername,
+          avatarUrl: steamData.steamAvatar || "",
+          profileUrl: steamData.steamProfileURL || "",
+        },
+      });
+    } catch (error) {
+      this.logger.error(
+        { error, userId: input.userId },
+        "Error fetching Steam connection status"
+      );
+      return this.handleError(error, "Failed to fetch Steam connection status");
     }
   }
 }

@@ -92,6 +92,7 @@ export async function getUserSteamData({ userId }: { userId: string }): Promise<
   RepositoryResult<{
     steamId64: string | null;
     steamUsername: string | null;
+    steamAvatar: string | null;
     steamProfileURL: string | null;
     steamConnectedAt: Date | null;
   } | null>
@@ -102,6 +103,7 @@ export async function getUserSteamData({ userId }: { userId: string }): Promise<
       select: {
         steamId64: true,
         steamUsername: true,
+        steamAvatar: true,
         steamProfileURL: true,
         steamConnectedAt: true,
       },
