@@ -357,7 +357,11 @@ export class SteamService extends BaseService {
     const { userId, profile } = params;
 
     logger.info(
-      { userId, steamId64: profile.steamId64, displayName: profile.displayName },
+      {
+        userId,
+        steamId64: profile.steamId64,
+        displayName: profile.displayName,
+      },
       "Connecting Steam account"
     );
 

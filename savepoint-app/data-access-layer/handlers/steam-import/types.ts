@@ -1,6 +1,5 @@
-import type { ImportedGame } from "@prisma/client";
-
 import type { SteamProfile } from "@/data-access-layer/services/steam/types";
+import type { ImportedGame } from "@prisma/client";
 
 export type ConnectSteamHandlerInput = {
   steamId: string;

@@ -1,10 +1,9 @@
+import { defaultSteamProfile } from "@/test/mocks/handlers";
+import { server } from "@/test/setup/client-setup";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { toast } from "sonner";
-
-import { defaultSteamProfile } from "@/test/mocks/handlers";
-import { server } from "@/test/setup/client-setup";
 
 import { disconnectSteam } from "../server-actions/disconnect-steam";
 import type { SteamConnectionStatus } from "../types";
@@ -49,10 +48,8 @@ const elements = {
     screen.getByRole("link", { name: /sign in with steam/i }),
   getManualFormLabel: () => screen.getByText(/enter your steam id manually/i),
   getSteamIdInput: () => screen.getByLabelText(/steam id or profile url/i),
-  querySteamIdInput: () =>
-    screen.queryByLabelText(/steam id or profile url/i),
-  getSubmitButton: () =>
-    screen.getByRole("button", { name: /connect steam/i }),
+  querySteamIdInput: () => screen.queryByLabelText(/steam id or profile url/i),
+  getSubmitButton: () => screen.getByRole("button", { name: /connect steam/i }),
   getConnectingButton: () =>
     screen.getByRole("button", { name: /connecting/i }),
   getValidationError: () => screen.getByText(/steam id is required/i),
@@ -65,9 +62,7 @@ const elements = {
   queryDialogTitle: () =>
     screen.queryByRole("heading", { name: /disconnect steam account/i }),
   getDialogDescription: () =>
-    screen.getByText(
-      /are you sure you want to disconnect your steam account/i
-    ),
+    screen.getByText(/are you sure you want to disconnect your steam account/i),
   getImportedGamesMessage: () =>
     screen.getByText(/your imported games will be preserved in your library/i),
   getConnectedTitle: () => screen.getByText(/steam account connected/i),
@@ -94,7 +89,9 @@ const actions = {
   },
   clickDialogCancel: async () => {
     const dialog = elements.getDialog();
-    const cancelButton = within(dialog).getByRole("button", { name: /cancel/i });
+    const cancelButton = within(dialog).getByRole("button", {
+      name: /cancel/i,
+    });
     await userEvent.click(cancelButton);
   },
   clickDialogConfirmDisconnect: async () => {

@@ -101,9 +101,9 @@ describe("isSteamApiUnavailableError", () => {
     expect(
       isSteamApiUnavailableError("Steam API error. Please try again later.")
     ).toBe(true);
-    expect(
-      isSteamApiUnavailableError("STEAM - TRY AGAIN LATER, please")
-    ).toBe(true);
+    expect(isSteamApiUnavailableError("STEAM - TRY AGAIN LATER, please")).toBe(
+      true
+    );
   });
 
   it("returns false for non-Steam unavailability errors", () => {
@@ -143,9 +143,9 @@ describe("isSteamRateLimitError", () => {
   });
 
   it("returns true for 'wait and try again' variations", () => {
-    expect(
-      isSteamRateLimitError("Please wait a moment and try again")
-    ).toBe(true);
+    expect(isSteamRateLimitError("Please wait a moment and try again")).toBe(
+      true
+    );
     expect(isSteamRateLimitError("Wait before you try again")).toBe(true);
     expect(isSteamRateLimitError("WAIT - TRY AGAIN in a minute")).toBe(true);
   });

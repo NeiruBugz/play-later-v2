@@ -39,7 +39,10 @@ describe("SteamProfileNotFoundError", () => {
     const onRetry = vi.fn();
 
     render(
-      <SteamProfileNotFoundError message="Test error message" onRetry={onRetry} />
+      <SteamProfileNotFoundError
+        message="Test error message"
+        onRetry={onRetry}
+      />
     );
 
     expect(
@@ -60,7 +63,10 @@ describe("SteamProfileNotFoundError", () => {
     const onRetry = vi.fn();
 
     render(
-      <SteamProfileNotFoundError message="Test error message" onRetry={onRetry} />
+      <SteamProfileNotFoundError
+        message="Test error message"
+        onRetry={onRetry}
+      />
     );
 
     const retryButton = screen.getByRole("button", { name: /try again/i });
