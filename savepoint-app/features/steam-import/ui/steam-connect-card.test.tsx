@@ -1,13 +1,14 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { toast } from "sonner";
+
+import { defaultSteamProfile } from "@/test/mocks/handlers";
+import { server } from "@/test/setup/client-setup";
 
 import { disconnectSteam } from "../server-actions/disconnect-steam";
 import type { SteamConnectionStatus } from "../types";
 import { SteamConnectCard } from "./steam-connect-card";
-
-const mockFetch = vi.fn();
-global.fetch = mockFetch as never;
 
 const mockSearchParams = new Map<string, string>();
 const mockUseSearchParams = vi.fn(() => ({
@@ -40,6 +41,81 @@ vi.mock("../server-actions/disconnect-steam", () => ({
   disconnectSteam: vi.fn(),
 }));
 
+const elements = {
+  getCardTitle: () => screen.getByText(/connect steam account/i),
+  getCardDescription: () =>
+    screen.getByText(/link your steam account to import your game library/i),
+  getOAuthButton: () =>
+    screen.getByRole("link", { name: /sign in with steam/i }),
+  getManualFormLabel: () => screen.getByText(/enter your steam id manually/i),
+  getSteamIdInput: () => screen.getByLabelText(/steam id or profile url/i),
+  querySteamIdInput: () =>
+    screen.queryByLabelText(/steam id or profile url/i),
+  getSubmitButton: () =>
+    screen.getByRole("button", { name: /connect steam/i }),
+  getConnectingButton: () =>
+    screen.getByRole("button", { name: /connecting/i }),
+  getValidationError: () => screen.getByText(/steam id is required/i),
+  getDisconnectButton: () =>
+    screen.getByRole("button", { name: /disconnect/i }),
+  getDialog: () => screen.getByRole("dialog"),
+  queryDialog: () => screen.queryByRole("dialog"),
+  getDialogTitle: () =>
+    screen.getByRole("heading", { name: /disconnect steam account/i }),
+  queryDialogTitle: () =>
+    screen.queryByRole("heading", { name: /disconnect steam account/i }),
+  getDialogDescription: () =>
+    screen.getByText(
+      /are you sure you want to disconnect your steam account/i
+    ),
+  getImportedGamesMessage: () =>
+    screen.getByText(/your imported games will be preserved in your library/i),
+  getConnectedTitle: () => screen.getByText(/steam account connected/i),
+  queryConnectedTitle: () => screen.queryByText(/steam account connected/i),
+  getProfileDisplayName: (name: string) => screen.getByText(name),
+  getProfileSteamId: (steamId: string) => screen.getByText(steamId),
+  getProfileAvatar: (altText: string) => screen.getByAltText(altText),
+  getErrorMessage: (message: RegExp | string) => screen.getByText(message),
+};
+
+const actions = {
+  typeSteamId: async (steamId: string) => {
+    await userEvent.type(elements.getSteamIdInput(), steamId);
+  },
+  submitForm: async () => {
+    await userEvent.click(elements.getSubmitButton());
+  },
+  typeAndSubmit: async (steamId: string) => {
+    await actions.typeSteamId(steamId);
+    await actions.submitForm();
+  },
+  clickDisconnect: async () => {
+    await userEvent.click(elements.getDisconnectButton());
+  },
+  clickDialogCancel: async () => {
+    const dialog = elements.getDialog();
+    const cancelButton = within(dialog).getByRole("button", { name: /cancel/i });
+    await userEvent.click(cancelButton);
+  },
+  clickDialogConfirmDisconnect: async () => {
+    const dialog = elements.getDialog();
+    const confirmButton = within(dialog).getAllByRole("button", {
+      name: /disconnect/i,
+    })[0];
+    await userEvent.click(confirmButton);
+  },
+};
+
+const connectedStatus: SteamConnectionStatus = {
+  connected: true,
+  profile: {
+    steamId64: "76561198012345678",
+    displayName: "ConnectedUser",
+    avatarUrl: "https://example.com/avatar.jpg",
+    profileUrl: "https://example.com/profile",
+  },
+};
+
 describe("SteamConnectCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -47,112 +123,52 @@ describe("SteamConnectCard", () => {
     mockReplace.mockClear();
   });
 
-  describe("not connected state", () => {
+  describe("given not connected state", () => {
     it("should display the OAuth button and manual form when not connected", () => {
       render(<SteamConnectCard />);
 
-      expect(screen.getByText(/connect steam account/i)).toBeVisible();
-      expect(
-        screen.getByText(/link your steam account to import your game library/i)
-      ).toBeVisible();
+      expect(elements.getCardTitle()).toBeVisible();
+      expect(elements.getCardDescription()).toBeVisible();
 
-      // Check OAuth button
-      const oauthButton = screen.getByRole("link", {
-        name: /sign in with steam/i,
-      });
+      const oauthButton = elements.getOAuthButton();
       expect(oauthButton).toBeVisible();
       expect(oauthButton).toHaveAttribute("href", "/api/steam/auth");
 
-      // Check manual form
-      expect(screen.getByText(/enter your steam id manually/i)).toBeVisible();
-      expect(screen.getByLabelText(/steam id or profile url/i)).toBeVisible();
-      expect(
-        screen.getByRole("button", { name: /connect steam/i })
-      ).toBeVisible();
+      expect(elements.getManualFormLabel()).toBeVisible();
+      expect(elements.getSteamIdInput()).toBeVisible();
+      expect(elements.getSubmitButton()).toBeVisible();
     });
 
     it("should display validation error when submitting empty form", async () => {
-      const user = userEvent.setup();
       render(<SteamConnectCard />);
 
-      const submitButton = screen.getByRole("button", {
-        name: /connect steam/i,
-      });
-      await user.click(submitButton);
+      await actions.submitForm();
 
       await waitFor(() => {
-        expect(screen.getByText(/steam id is required/i)).toBeVisible();
+        expect(elements.getValidationError()).toBeVisible();
       });
     });
 
     it("should show loading state while connecting", async () => {
-      const user = userEvent.setup();
-      mockFetch.mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            setTimeout(
-              () =>
-                resolve({
-                  ok: true,
-                  json: () =>
-                    Promise.resolve({
-                      profile: {
-                        steamId64: "76561198012345678",
-                        displayName: "TestUser",
-                        avatarUrl: "https://example.com/avatar.jpg",
-                        profileUrl: "https://example.com/profile",
-                      },
-                    }),
-                }),
-              100
-            );
-          })
-      );
-
-      render(<SteamConnectCard />);
-
-      const input = screen.getByLabelText(/steam id or profile url/i);
-      await user.type(input, "76561198012345678");
-
-      const submitButton = screen.getByRole("button", {
-        name: /connect steam/i,
-      });
-      await user.click(submitButton);
-
-      expect(screen.getByText(/connecting\.\.\./i)).toBeVisible();
-      expect(submitButton).toBeDisabled();
-    });
-
-    // TODO: Fix these tests - mock fetch setup issue causing "Network error" in catch block
-    // The mock fetch is not being properly consumed by the component's fetch call.
-    // Need to investigate why userEvent interactions might be consuming the mock.
-    // See: https://github.com/testing-library/user-event/issues for potential patterns
-    it.skip("should connect successfully with valid Steam ID", async () => {
-      const user = userEvent.setup();
-      const mockProfile = {
-        steamId64: "76561198012345678",
-        displayName: "TestUser",
-        avatarUrl: "https://example.com/avatar.jpg",
-        profileUrl: "https://example.com/profile",
-      };
-
-      mockFetch.mockImplementation(() =>
-        Promise.resolve({
-          ok: true,
-          headers: new Headers({ "content-type": "application/json" }),
-          json: () => Promise.resolve({ profile: mockProfile }),
+      server.use(
+        http.post("/api/steam/connect", async () => {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          return HttpResponse.json({ profile: defaultSteamProfile });
         })
       );
 
       render(<SteamConnectCard />);
 
-      const input = screen.getByLabelText(/steam id or profile url/i);
-      await user.type(input, "76561198012345678");
+      await actions.typeAndSubmit("76561198012345678");
 
-      const submitButton = screen.getByRole("button", {
-        name: /connect steam/i,
-      });
-      await user.click(submitButton);
+      expect(elements.getConnectingButton()).toBeVisible();
+      expect(elements.getConnectingButton()).toBeDisabled();
+    });
+
+    it("should connect successfully with valid Steam ID", async () => {
+      render(<SteamConnectCard />);
+
+      await actions.typeAndSubmit("76561198012345678");
 
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalledWith(
@@ -161,152 +177,126 @@ describe("SteamConnectCard", () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText("TestUser")).toBeVisible();
-        expect(screen.getByText("76561198012345678")).toBeVisible();
+        expect(elements.getProfileDisplayName("TestUser")).toBeVisible();
+        expect(elements.getProfileSteamId("76561198012345678")).toBeVisible();
       });
     });
 
-    it.skip("should display error message on failed connection", async () => {
-      const user = userEvent.setup();
-
-      mockFetch.mockImplementation(() =>
-        Promise.resolve({
-          ok: false,
-          headers: new Headers({ "content-type": "application/json" }),
-          json: () => Promise.resolve({ error: "Invalid Steam ID" }),
+    it("should display error message on failed connection", async () => {
+      server.use(
+        http.post("/api/steam/connect", () => {
+          return HttpResponse.json(
+            { error: "Invalid Steam ID" },
+            { status: 400 }
+          );
         })
       );
 
       render(<SteamConnectCard />);
 
-      const input = screen.getByLabelText(/steam id or profile url/i);
-      await user.type(input, "invalid");
-
-      const submitButton = screen.getByRole("button", {
-        name: /connect steam/i,
-      });
-      await user.click(submitButton);
+      await actions.typeAndSubmit("invalid");
 
       await waitFor(() => {
-        expect(screen.getByText(/invalid steam id/i)).toBeVisible();
+        expect(elements.getErrorMessage(/invalid steam id/i)).toBeVisible();
       });
     });
 
     it("should display network error on fetch failure", async () => {
-      const user = userEvent.setup();
-      mockFetch.mockRejectedValueOnce(new Error("Network error"));
+      server.use(
+        http.post("/api/steam/connect", () => {
+          return HttpResponse.error();
+        })
+      );
 
       render(<SteamConnectCard />);
 
-      const input = screen.getByLabelText(/steam id or profile url/i);
-      await user.type(input, "76561198012345678");
-
-      const submitButton = screen.getByRole("button", {
-        name: /connect steam/i,
-      });
-      await user.click(submitButton);
+      await actions.typeAndSubmit("76561198012345678");
 
       await waitFor(() => {
         expect(
-          screen.getByText(/network error\. please try again\./i)
+          elements.getErrorMessage(/network error\. please try again\./i)
         ).toBeVisible();
       });
     });
 
-    it("should show success toast when ?steam=connected in URL", () => {
-      mockSearchParams.set("steam", "connected");
+    describe("given URL search params", () => {
+      it.each([
+        {
+          params: { steam: "connected" },
+          expectedToast: {
+            type: "success" as const,
+            message: "Steam account connected successfully!",
+          },
+        },
+        {
+          params: { steam: "error", reason: "unauthorized" },
+          expectedToast: {
+            type: "error" as const,
+            message: "You must be logged in to connect Steam",
+          },
+        },
+        {
+          params: { steam: "error", reason: "validation" },
+          expectedToast: {
+            type: "error" as const,
+            message: "Steam authentication failed. Please try again.",
+          },
+        },
+        {
+          params: { steam: "error", reason: "profile" },
+          expectedToast: {
+            type: "error" as const,
+            message: "Could not fetch your Steam profile. Please try again.",
+          },
+        },
+        {
+          params: { steam: "error", reason: "server" },
+          expectedToast: {
+            type: "error" as const,
+            message: "An unexpected error occurred. Please try again.",
+          },
+        },
+        {
+          params: { steam: "error", reason: "unknown" },
+          expectedToast: {
+            type: "error" as const,
+            message: "Failed to connect Steam account",
+          },
+        },
+        {
+          params: { steam: "error" },
+          expectedToast: {
+            type: "error" as const,
+            message: "Failed to connect Steam account",
+          },
+        },
+      ])(
+        "should show $expectedToast.type toast when URL has steam=$params.steam and reason=$params.reason",
+        ({ params, expectedToast }) => {
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined) {
+              mockSearchParams.set(key, value);
+            }
+          });
 
-      render(<SteamConnectCard />);
+          render(<SteamConnectCard />);
 
-      expect(toast.success).toHaveBeenCalledWith(
-        "Steam account connected successfully!"
-      );
-    });
-
-    it("should show error toast when ?steam=error&reason=unauthorized in URL", () => {
-      mockSearchParams.set("steam", "error");
-      mockSearchParams.set("reason", "unauthorized");
-
-      render(<SteamConnectCard />);
-
-      expect(toast.error).toHaveBeenCalledWith(
-        "You must be logged in to connect Steam"
-      );
-    });
-
-    it("should show error toast when ?steam=error&reason=validation in URL", () => {
-      mockSearchParams.set("steam", "error");
-      mockSearchParams.set("reason", "validation");
-
-      render(<SteamConnectCard />);
-
-      expect(toast.error).toHaveBeenCalledWith(
-        "Steam authentication failed. Please try again."
-      );
-    });
-
-    it("should show error toast when ?steam=error&reason=profile in URL", () => {
-      mockSearchParams.set("steam", "error");
-      mockSearchParams.set("reason", "profile");
-
-      render(<SteamConnectCard />);
-
-      expect(toast.error).toHaveBeenCalledWith(
-        "Could not fetch your Steam profile. Please try again."
-      );
-    });
-
-    it("should show error toast when ?steam=error&reason=server in URL", () => {
-      mockSearchParams.set("steam", "error");
-      mockSearchParams.set("reason", "server");
-
-      render(<SteamConnectCard />);
-
-      expect(toast.error).toHaveBeenCalledWith(
-        "An unexpected error occurred. Please try again."
-      );
-    });
-
-    it("should show generic error toast when ?steam=error with unknown reason", () => {
-      mockSearchParams.set("steam", "error");
-      mockSearchParams.set("reason", "unknown");
-
-      render(<SteamConnectCard />);
-
-      expect(toast.error).toHaveBeenCalledWith(
-        "Failed to connect Steam account"
-      );
-    });
-
-    it("should show generic error toast when ?steam=error without reason", () => {
-      mockSearchParams.set("steam", "error");
-
-      render(<SteamConnectCard />);
-
-      expect(toast.error).toHaveBeenCalledWith(
-        "Failed to connect Steam account"
+          expect(toast[expectedToast.type]).toHaveBeenCalledWith(
+            expectedToast.message
+          );
+        }
       );
     });
   });
 
-  describe("connected state", () => {
-    const connectedStatus: SteamConnectionStatus = {
-      connected: true,
-      profile: {
-        steamId64: "76561198012345678",
-        displayName: "ConnectedUser",
-        avatarUrl: "https://example.com/avatar.jpg",
-        profileUrl: "https://example.com/profile",
-      },
-    };
-
+  describe("given connected state", () => {
     it("should display connected profile information", () => {
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      expect(screen.getByText(/steam account connected/i)).toBeVisible();
-      expect(screen.getByText("ConnectedUser")).toBeVisible();
-      expect(screen.getByText("76561198012345678")).toBeVisible();
-      expect(screen.getByAltText("ConnectedUser")).toHaveAttribute(
+      expect(elements.getConnectedTitle()).toBeVisible();
+      expect(elements.getProfileDisplayName("ConnectedUser")).toBeVisible();
+      expect(elements.getProfileSteamId("76561198012345678")).toBeVisible();
+      expect(elements.getProfileAvatar("ConnectedUser")).toHaveAttribute(
         "src",
         "https://example.com/avatar.jpg"
       );
@@ -315,52 +305,30 @@ describe("SteamConnectCard", () => {
     it("should display disconnect button", () => {
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      expect(screen.getByRole("button", { name: /disconnect/i })).toBeVisible();
+      expect(elements.getDisconnectButton()).toBeVisible();
     });
 
     it("should open confirmation dialog when disconnect is clicked", async () => {
-      const user = userEvent.setup();
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      const disconnectButton = screen.getByRole("button", {
-        name: /disconnect/i,
-      });
-      await user.click(disconnectButton);
+      await actions.clickDisconnect();
 
-      expect(
-        screen.getByRole("heading", { name: /disconnect steam account/i })
-      ).toBeVisible();
-      expect(
-        screen.getByText(
-          /are you sure you want to disconnect your steam account/i
-        )
-      ).toBeVisible();
+      expect(elements.getDialogTitle()).toBeVisible();
+      expect(elements.getDialogDescription()).toBeVisible();
     });
 
     it("should close dialog when cancel button is clicked", async () => {
-      const user = userEvent.setup();
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      const disconnectButton = screen.getByRole("button", {
-        name: /disconnect/i,
-      });
-      await user.click(disconnectButton);
-
-      const dialog = screen.getByRole("dialog");
-      const cancelButton = within(dialog).getByRole("button", {
-        name: /cancel/i,
-      });
-      await user.click(cancelButton);
+      await actions.clickDisconnect();
+      await actions.clickDialogCancel();
 
       await waitFor(() => {
-        expect(
-          screen.queryByRole("heading", { name: /disconnect steam account/i })
-        ).not.toBeInTheDocument();
+        expect(elements.queryDialogTitle()).not.toBeInTheDocument();
       });
     });
 
     it("should call disconnect action and update UI on successful disconnect", async () => {
-      const user = userEvent.setup();
       vi.mocked(disconnectSteam).mockResolvedValue({
         success: true,
         data: undefined,
@@ -368,16 +336,8 @@ describe("SteamConnectCard", () => {
 
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      const disconnectButton = screen.getByRole("button", {
-        name: /disconnect/i,
-      });
-      await user.click(disconnectButton);
-
-      const dialog = screen.getByRole("dialog");
-      const confirmButton = within(dialog).getAllByRole("button", {
-        name: /disconnect/i,
-      })[0];
-      await user.click(confirmButton);
+      await actions.clickDisconnect();
+      await actions.clickDialogConfirmDisconnect();
 
       await waitFor(() => {
         expect(disconnectSteam).toHaveBeenCalledWith({});
@@ -390,15 +350,12 @@ describe("SteamConnectCard", () => {
       });
 
       await waitFor(() => {
-        expect(
-          screen.queryByText(/steam account connected/i)
-        ).not.toBeInTheDocument();
-        expect(screen.getByText(/connect steam account/i)).toBeVisible();
+        expect(elements.queryConnectedTitle()).not.toBeInTheDocument();
+        expect(elements.getCardTitle()).toBeVisible();
       });
     });
 
     it("should show error toast when disconnect fails", async () => {
-      const user = userEvent.setup();
       const errorMessage = "Failed to disconnect Steam account";
       vi.mocked(disconnectSteam).mockResolvedValue({
         success: false,
@@ -407,26 +364,17 @@ describe("SteamConnectCard", () => {
 
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      const disconnectButton = screen.getByRole("button", {
-        name: /disconnect/i,
-      });
-      await user.click(disconnectButton);
-
-      const dialog = screen.getByRole("dialog");
-      const confirmButton = within(dialog).getAllByRole("button", {
-        name: /disconnect/i,
-      })[0];
-      await user.click(confirmButton);
+      await actions.clickDisconnect();
+      await actions.clickDialogConfirmDisconnect();
 
       await waitFor(() => {
         expect(toast.error).toHaveBeenCalledWith(errorMessage);
       });
 
-      expect(screen.getByText("ConnectedUser")).toBeVisible();
+      expect(elements.getProfileDisplayName("ConnectedUser")).toBeVisible();
     });
 
     it("should show loading state during disconnect", async () => {
-      const user = userEvent.setup();
       vi.mocked(disconnectSteam).mockImplementation(
         () =>
           new Promise((resolve) => {
@@ -443,16 +391,14 @@ describe("SteamConnectCard", () => {
 
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      const disconnectButton = screen.getByRole("button", {
-        name: /disconnect/i,
-      });
-      await user.click(disconnectButton);
+      await actions.clickDisconnect();
 
-      const dialog = screen.getByRole("dialog");
+      const dialog = elements.getDialog();
       const confirmButton = within(dialog).getAllByRole("button", {
         name: /disconnect/i,
       })[0];
-      await user.click(confirmButton);
+
+      await userEvent.click(confirmButton);
 
       expect(confirmButton).toBeDisabled();
       expect(
@@ -461,27 +407,17 @@ describe("SteamConnectCard", () => {
     });
 
     it("should preserve imported games message in disconnect dialog", async () => {
-      const user = userEvent.setup();
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      const disconnectButton = screen.getByRole("button", {
-        name: /disconnect/i,
-      });
-      await user.click(disconnectButton);
+      await actions.clickDisconnect();
 
-      expect(
-        screen.getByText(
-          /your imported games will be preserved in your library/i
-        )
-      ).toBeVisible();
+      expect(elements.getImportedGamesMessage()).toBeVisible();
     });
 
     it("should not display the form when connected", () => {
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
-      expect(
-        screen.queryByLabelText(/steam id or profile url/i)
-      ).not.toBeInTheDocument();
+      expect(elements.querySteamIdInput()).not.toBeInTheDocument();
     });
   });
 });
