@@ -4,6 +4,7 @@ export type SteamProfile = {
   displayName: string;
   avatarUrl: string;
   profileUrl: string;
+  isPublic?: boolean;
 };
 
 // Steam owned game from Steam API

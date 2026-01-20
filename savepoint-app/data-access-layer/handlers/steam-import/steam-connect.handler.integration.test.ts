@@ -167,6 +167,7 @@ describe("connectSteamHandler (integration)", () => {
           displayName: "TestPlayer",
           avatarUrl: "https://example.com/avatar.jpg",
           profileUrl: "https://steamcommunity.com/id/testplayer/",
+          isPublic: true,
         });
 
         const updatedUser = await getTestDatabase().user.findUnique({

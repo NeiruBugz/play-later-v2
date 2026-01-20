@@ -42,6 +42,12 @@ export function useSteamConnection(
         body: JSON.stringify({ steamId }),
       });
 
+      const contentType = response.headers.get("content-type");
+      if (!contentType?.includes("application/json")) {
+        setError("Unexpected response format");
+        return;
+      }
+
       const result = await response.json();
 
       if (!response.ok) {

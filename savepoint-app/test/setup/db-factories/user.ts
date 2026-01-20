@@ -34,8 +34,10 @@ export const createUserData = (
     usernameNormalized: overrides.usernameNormalized || username.toLowerCase(),
     steamId64: overrides.steamId64 || faker.string.numeric(17),
     steamUsername: overrides.steamUsername || faker.internet.username(),
-    steamAvatar: overrides.steamAvatar,
-    steamProfileURL: overrides.steamProfileURL,
+    steamAvatar: overrides.steamAvatar || faker.image.avatar(),
+    steamProfileURL:
+      overrides.steamProfileURL ||
+      `https://steamcommunity.com/profiles/${faker.string.numeric(17)}`,
     password: overrides.password,
   };
 };

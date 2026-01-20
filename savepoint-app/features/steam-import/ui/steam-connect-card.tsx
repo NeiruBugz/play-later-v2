@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { IconContext } from "react-icons";
@@ -60,6 +60,8 @@ export function SteamConnectCard({
   initialStatus = { connected: false },
 }: SteamConnectCardProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [connectionStatus, setConnectionStatus] =
     useState<SteamConnectionStatus>(initialStatus);
   const [isLoading, setIsLoading] = useState(false);
@@ -84,6 +86,7 @@ export function SteamConnectCard({
 
     if (steamStatus === "connected") {
       toast.success("Steam account connected successfully!");
+      router.replace(pathname, { scroll: false });
     } else if (steamStatus === "error") {
       const errorMessages: Record<string, string> = {
         unauthorized: "You must be logged in to connect Steam",
@@ -94,8 +97,9 @@ export function SteamConnectCard({
       toast.error(
         errorMessages[reason || ""] || "Failed to connect Steam account"
       );
+      router.replace(pathname, { scroll: false });
     }
-  }, [searchParams]);
+  }, [searchParams, router, pathname]);
 
   const connectSteam = async (data: ConnectSteamInput) => {
     setIsLoading(true);

@@ -6,7 +6,6 @@ import {
 import { NextResponse, type NextRequest } from "next/server";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-import { prisma } from "@/shared/lib/app/db";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.API_ROUTE]: "steam-auth-callback",
@@ -58,17 +57,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const profile = profileResult.data;
 
-    // 4. Update User record
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        steamId64: profile.steamId64,
-        steamUsername: profile.displayName,
-        steamAvatar: profile.avatarUrl,
-        steamProfileURL: profile.profileUrl,
-        steamConnectedAt: new Date(),
-      },
+    // 4. Update User record via service
+    const connectResult = await steamService.connectSteamAccount({
+      userId,
+      profile,
     });
+
+    if (!connectResult.success) {
+      logger.error(
+        { userId, steamId64, error: connectResult.error },
+        "Failed to save Steam connection"
+      );
+      return NextResponse.redirect(`${settingsUrl}?steam=error&reason=server`);
+    }
 
     logger.info({ userId, steamId64 }, "Steam account connected via OpenID");
 

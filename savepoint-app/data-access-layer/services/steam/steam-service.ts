@@ -1,4 +1,7 @@
-import { disconnectSteam as disconnectSteamRepo } from "@/data-access-layer/repository/user/user-repository";
+import {
+  disconnectSteam as disconnectSteamRepo,
+  updateUserSteamData,
+} from "@/data-access-layer/repository/user/user-repository";
 import { env } from "@/env.mjs";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -32,8 +35,10 @@ export class SteamService extends BaseService {
     logger.info({ vanityUrl }, "Resolving Steam vanity URL");
 
     try {
-      const url = `${this.baseUrl}/ISteamUser/ResolveVanityURL/v1/?key=${this.apiKey}&vanityurl=${vanityUrl}`;
-      const response = await fetch(url);
+      const url = new URL(`${this.baseUrl}/ISteamUser/ResolveVanityURL/v1/`);
+      url.searchParams.set("key", this.apiKey);
+      url.searchParams.set("vanityurl", vanityUrl);
+      const response = await fetch(url.toString());
 
       if (!response.ok) {
         logger.error(
@@ -342,6 +347,49 @@ export class SteamService extends BaseService {
     } catch (error) {
       logger.error({ error, userId }, "Error disconnecting Steam account");
       return this.handleError(error, "Failed to disconnect Steam account");
+    }
+  }
+
+  async connectSteamAccount(params: {
+    userId: string;
+    profile: SteamProfile;
+  }): Promise<ServiceResult<void>> {
+    const { userId, profile } = params;
+
+    logger.info(
+      { userId, steamId64: profile.steamId64, displayName: profile.displayName },
+      "Connecting Steam account"
+    );
+
+    try {
+      const result = await updateUserSteamData({
+        userId,
+        steamId: profile.steamId64,
+        username: profile.displayName,
+        avatar: profile.avatarUrl,
+        profileUrl: profile.profileUrl,
+        connectedAt: new Date(),
+      });
+
+      if (!result.success) {
+        logger.error(
+          { userId, error: result.error },
+          "Failed to connect Steam account"
+        );
+        return this.error(
+          result.error.message,
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      logger.info(
+        { userId, steamId64: profile.steamId64 },
+        "Steam account connected successfully"
+      );
+      return this.success(undefined);
+    } catch (error) {
+      logger.error({ error, userId }, "Error connecting Steam account");
+      return this.handleError(error, "Failed to connect Steam account");
     }
   }
 }

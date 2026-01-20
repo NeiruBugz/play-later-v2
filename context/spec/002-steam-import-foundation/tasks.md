@@ -32,7 +32,7 @@ Allow users to connect Steam via manual ID entry and see their connection status
 
 ## Slice 3: Steam OpenID Authentication
 
-Allow users to connect via Steam OAuth as the primary method.
+Allow users to connect via Steam OpenID 2.0 as the primary method.
 
 - [x] Create `SteamOpenIdService` with `getAuthUrl()` and `validateCallback()` methods **[Agent: nextjs-expert]**
 - [x] Create `GET /api/steam/auth` route that redirects to Steam login **[Agent: nextjs-expert]**

@@ -7,7 +7,7 @@ import {
   DEFAULT_RATE_LIMIT_REQUESTS,
   RATE_LIMIT_RETRY_AFTER_SECONDS,
 } from "@/shared/constants";
-import { createLogger, LOGGER_CONTEXT, prisma } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
 import type { HandlerResult, RequestContext } from "../types";
@@ -123,29 +123,14 @@ export async function connectSteamHandler(
 
   const profile = profileResult.data;
 
-  try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        steamId64: profile.steamId64,
-        steamUsername: profile.displayName,
-        steamAvatar: profile.avatarUrl,
-        steamProfileURL: profile.profileUrl,
-        steamConnectedAt: new Date(),
-      },
-    });
+  const connectResult = await steamService.connectSteamAccount({
+    userId,
+    profile,
+  });
 
-    logger.info(
-      {
-        userId,
-        steamId64: profile.steamId64,
-        displayName: profile.displayName,
-      },
-      "Steam account connected successfully"
-    );
-  } catch (error) {
+  if (!connectResult.success) {
     logger.error(
-      { error, userId, steamId64 },
+      { userId, steamId64, error: connectResult.error },
       "Failed to update user with Steam data"
     );
     return {
@@ -155,6 +140,15 @@ export async function connectSteamHandler(
     };
   }
 
+  logger.info(
+    {
+      userId,
+      steamId64: profile.steamId64,
+      displayName: profile.displayName,
+    },
+    "Steam account connected successfully"
+  );
+
   return {
     success: true,
     data: {
@@ -163,6 +157,7 @@ export async function connectSteamHandler(
         displayName: profile.displayName,
         avatarUrl: profile.avatarUrl,
         profileUrl: profile.profileUrl,
+        isPublic: profile.isPublic,
       },
     },
     status: HTTP_STATUS.OK,

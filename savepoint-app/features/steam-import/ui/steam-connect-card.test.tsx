@@ -14,8 +14,11 @@ const mockUseSearchParams = vi.fn(() => ({
   get: (key: string) => mockSearchParams.get(key) ?? null,
 }));
 
+const mockReplace = vi.fn();
 vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams(),
+  useRouter: () => ({ replace: mockReplace }),
+  usePathname: () => "/profile/settings",
 }));
 
 vi.mock("sonner", () => ({
@@ -41,6 +44,7 @@ describe("SteamConnectCard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSearchParams.clear();
+    mockReplace.mockClear();
   });
 
   describe("not connected state", () => {
@@ -119,6 +123,10 @@ describe("SteamConnectCard", () => {
       expect(submitButton).toBeDisabled();
     });
 
+    // TODO: Fix these tests - mock fetch setup issue causing "Network error" in catch block
+    // The mock fetch is not being properly consumed by the component's fetch call.
+    // Need to investigate why userEvent interactions might be consuming the mock.
+    // See: https://github.com/testing-library/user-event/issues for potential patterns
     it.skip("should connect successfully with valid Steam ID", async () => {
       const user = userEvent.setup();
       const mockProfile = {
@@ -128,10 +136,13 @@ describe("SteamConnectCard", () => {
         profileUrl: "https://example.com/profile",
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ profile: mockProfile }),
-      });
+      mockFetch.mockImplementation(() =>
+        Promise.resolve({
+          ok: true,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: () => Promise.resolve({ profile: mockProfile }),
+        })
+      );
 
       render(<SteamConnectCard />);
 
@@ -157,10 +168,14 @@ describe("SteamConnectCard", () => {
 
     it.skip("should display error message on failed connection", async () => {
       const user = userEvent.setup();
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        json: () => Promise.resolve({ error: "Invalid Steam ID" }),
-      });
+
+      mockFetch.mockImplementation(() =>
+        Promise.resolve({
+          ok: false,
+          headers: new Headers({ "content-type": "application/json" }),
+          json: () => Promise.resolve({ error: "Invalid Steam ID" }),
+        })
+      );
 
       render(<SteamConnectCard />);
 
