@@ -76,3 +76,18 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "sqs_event_source" {
+  description = "SQS event source configuration for the Lambda function"
+  type = object({
+    queue_arn               = string
+    batch_size              = optional(number, 10)
+    maximum_batching_window = optional(number, 0)
+    enabled                 = optional(bool, true)
+    function_response_types = optional(list(string), [])
+    scaling_config = optional(object({
+      maximum_concurrency = optional(number, 10)
+    }), null)
+  })
+  default = null
+}

@@ -21,3 +21,7 @@ enable_cognito_native = false
 
 # Optional: attach S3 access policy to an existing ECS task role by name
 # s3_ecs_task_role_name = "savepoint-dev-task-role"
+
+# --- Lambda & Steam Import ---
+# Enable SQS event source for Steam Import Lambda (can disable for testing)
+# enable_steam_import_event_source = true

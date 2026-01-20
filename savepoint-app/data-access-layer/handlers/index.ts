@@ -21,7 +21,13 @@ export type {
 } from "./platform/types";
 
 export { connectSteamHandler } from "./steam-import/steam-connect.handler";
+export { fetchSteamGamesHandler } from "./steam-import/fetch-steam-games.handler";
+export { importedGamesHandler } from "./steam-import/imported-games.handler";
 export type {
   ConnectSteamHandlerInput,
   ConnectSteamHandlerOutput,
+  FetchSteamGamesHandlerInput,
+  FetchSteamGamesHandlerOutput,
+  ImportedGamesHandlerInput,
+  ImportedGamesHandlerOutput,
 } from "./steam-import/types";

@@ -49,11 +49,11 @@ Allow users to fetch their owned games from Steam and store in ImportedGame tabl
 - [x] Extend ImportedGame schema with `playtimeWindows`, `playtimeMac`, `playtimeLinux`, `lastPlayedAt` fields and run migration **[Agent: nextjs-expert]**
 - [x] Create `ImportedGameRepository` with `upsertMany()`, `findByUserId()`, `countByUserId()` methods **[Agent: nextjs-expert]**
 - [x] Add `getOwnedGames()` method to SteamService **[Agent: nextjs-expert]**
-- [ ] Create `fetch-steam-games.handler.ts` that fetches from Steam and upserts to database **[Agent: nextjs-expert]**
-- [ ] Create `POST /api/steam/games` route for fetching Steam library **[Agent: nextjs-expert]**
-- [ ] Create `ImportPathSelector` component with "Fetch & Curate" button (manual path only) **[Agent: nextjs-expert]**
-- [ ] Create `use-fetch-steam-games.ts` mutation hook **[Agent: nextjs-expert]**
-- [ ] Add integration tests for fetch handler and repository **[Agent: typescript-test-expert]**
+- [x] Create `fetch-steam-games.handler.ts` that fetches from Steam and upserts to database **[Agent: nextjs-expert]**
+- [x] Create `POST /api/steam/games` route for fetching Steam library **[Agent: nextjs-expert]**
+- [x] Create `ImportPathSelector` component with "Fetch & Curate" button (manual path only) **[Agent: nextjs-expert]**
+- [x] Create `use-fetch-steam-games.ts` mutation hook **[Agent: nextjs-expert]**
+- [x] Add integration tests for fetch handler and repository **[Agent: typescript-test-expert]**
 
 ---
 
@@ -61,25 +61,25 @@ Allow users to fetch their owned games from Steam and store in ImportedGame tabl
 
 Display the imported games with pagination.
 
-- [ ] Create `imported-games.handler.ts` with pagination support **[Agent: nextjs-expert]**
-- [ ] Create `GET /api/steam/games` route for listing imported games **[Agent: nextjs-expert]**
-- [ ] Create `ImportedGameCard` component showing name, playtime, last played **[Agent: nextjs-expert]**
-- [ ] Create `ImportedGamesList` component with pagination controls **[Agent: nextjs-expert]**
-- [ ] Create `use-imported-games.ts` TanStack Query hook for list fetching **[Agent: nextjs-expert]**
-- [ ] Add component tests for ImportedGameCard and ImportedGamesList **[Agent: typescript-test-expert]**
+- [x] Create `imported-games.handler.ts` with pagination support **[Agent: nextjs-expert]**
+- [x] Create `GET /api/steam/games` route for listing imported games **[Agent: nextjs-expert]**
+- [x] Create `ImportedGameCard` component showing name, playtime, last played **[Agent: nextjs-expert]**
+- [x] Create `ImportedGamesList` component with pagination controls **[Agent: nextjs-expert]**
+- [x] Create `use-imported-games.ts` TanStack Query hook for list fetching **[Agent: nextjs-expert]**
+- [x] Add component tests for ImportedGameCard and ImportedGamesList **[Agent: typescript-test-expert]**
 
----
+--- 
 
 ## Slice 6: Search and Filter Imported Games
 
 Add search, filtering, and sorting capabilities to the imported games list.
 
-- [ ] Extend `imported-games.handler.ts` with search, filter, and sort parameters **[Agent: nextjs-expert]**
-- [ ] Update `ImportedGamesList` with search input (debounced) **[Agent: nextjs-expert]**
-- [ ] Add filter dropdowns (playtime status, playtime range, platform, last played) **[Agent: nextjs-expert]**
-- [ ] Add sort selector (name, playtime, last played, recently added) **[Agent: nextjs-expert]**
-- [ ] Add filter chips and "Clear all filters" action **[Agent: nextjs-expert]**
-- [ ] Add integration tests for filter combinations **[Agent: typescript-test-expert]**
+- [x] Extend `imported-games.handler.ts` with search, filter, and sort parameters **[Agent: nextjs-expert]**
+- [x] Update `ImportedGamesList` with search input (debounced) **[Agent: nextjs-expert]**
+- [x] Add filter dropdowns (playtime status, playtime range, platform, last played) **[Agent: nextjs-expert]**
+- [x] Add sort selector (name, playtime, last played, recently added) **[Agent: nextjs-expert]**
+- [x] Add filter chips and "Clear all filters" action **[Agent: nextjs-expert]**
+- [x] Add integration tests for filter combinations **[Agent: typescript-test-expert]**
 
 ---
 
@@ -87,9 +87,9 @@ Add search, filtering, and sorting capabilities to the imported games list.
 
 Allow users to disconnect their Steam account.
 
-- [ ] Create `disconnect-steam.ts` server action (only updates User record, no Steam API) **[Agent: nextjs-expert]**
-- [ ] Update `SteamConnectCard` to show disconnect option when connected **[Agent: nextjs-expert]**
-- [ ] Add tests for disconnect action **[Agent: typescript-test-expert]**
+- [x] Create `disconnect-steam.ts` server action (only updates User record, no Steam API) **[Agent: nextjs-expert]**
+- [x] Update `SteamConnectCard` to show disconnect option when connected **[Agent: nextjs-expert]**
+- [x] Add tests for disconnect action **[Agent: typescript-test-expert]**
 
 ---
 
@@ -97,10 +97,10 @@ Allow users to disconnect their Steam account.
 
 Add feature flag for background sync and scaffold the UI.
 
-- [ ] Add `ENABLE_STEAM_BACKGROUND_SYNC` to `env.mjs` with validation **[Agent: nextjs-expert]**
-- [ ] Create `features/steam-import/config.ts` with `steamImportConfig` **[Agent: nextjs-expert]**
-- [ ] Update `ImportPathSelector` to show "Background Sync" option with "Coming Soon" badge when flag is OFF **[Agent: nextjs-expert]**
-- [ ] Create `POST /api/steam/sync` route that returns 403 when feature is disabled **[Agent: nextjs-expert]**
+- [x] Add `ENABLE_STEAM_BACKGROUND_SYNC` to `env.mjs` with validation **[Agent: nextjs-expert]**
+- [x] Create `features/steam-import/config.ts` with `steamImportConfig` **[Agent: nextjs-expert]**
+- [x] Update `ImportPathSelector` to show "Background Sync" option with "Coming Soon" badge when flag is OFF **[Agent: nextjs-expert]**
+- [x] Create `POST /api/steam/sync` route that returns 403 when feature is disabled **[Agent: nextjs-expert]**
 
 ---
 
@@ -108,12 +108,12 @@ Add feature flag for background sync and scaffold the UI.
 
 Connect to the existing Lambda pipeline via SQS (feature-flagged).
 
-- [ ] Create Terraform module for SQS queue and DLQ in `infra/modules/steam-import/` **[Agent: terraform-infrastructure]**
-- [ ] Add SQS event source mapping for Lambda **[Agent: terraform-infrastructure]**
-- [ ] Create `trigger-background-sync.ts` server action that pushes to SQS **[Agent: nextjs-expert]**
-- [ ] Update `POST /api/steam/sync` to enable when feature flag is ON **[Agent: nextjs-expert]**
-- [ ] Create `ImportStatusToast` component for background sync notifications **[Agent: nextjs-expert]**
-- [ ] Update `ImportPathSelector` to enable Background Sync button when flag is ON **[Agent: nextjs-expert]**
+- [x] Create Terraform module for SQS queue and DLQ in `infra/modules/steam-import/` **[Agent: terraform-infrastructure]**
+- [x] Add SQS event source mapping for Lambda **[Agent: terraform-infrastructure]**
+- [x] Create `trigger-background-sync.ts` server action that pushes to SQS **[Agent: nextjs-expert]**
+- [x] Update `POST /api/steam/sync` to enable when feature flag is ON **[Agent: nextjs-expert]**
+- [x] Create `ImportStatusToast` component for background sync notifications **[Agent: nextjs-expert]**
+- [x] Update `ImportPathSelector` to enable Background Sync button when flag is ON **[Agent: nextjs-expert]**
 
 ---
 
@@ -121,9 +121,9 @@ Connect to the existing Lambda pipeline via SQS (feature-flagged).
 
 Implement user-friendly error messages for all failure scenarios.
 
-- [ ] Add error handling for private Steam profiles with link to privacy settings **[Agent: nextjs-expert]**
-- [ ] Add error handling for invalid Steam ID format **[Agent: nextjs-expert]**
-- [ ] Add error handling for Steam API unavailability **[Agent: nextjs-expert]**
-- [ ] Add error handling for rate limiting **[Agent: nextjs-expert]**
-- [ ] Add "Try Again" / "Retry" actions to all error states **[Agent: nextjs-expert]**
-- [ ] Add error handling tests **[Agent: typescript-test-expert]**
+- [x] Add error handling for private Steam profiles with link to privacy settings **[Agent: nextjs-expert]**
+- [x] Add error handling for invalid Steam ID format **[Agent: nextjs-expert]**
+- [x] Add error handling for Steam API unavailability **[Agent: nextjs-expert]**
+- [x] Add error handling for rate limiting **[Agent: nextjs-expert]**
+- [x] Add "Try Again" / "Retry" actions to all error states **[Agent: nextjs-expert]**
+- [x] Add error handling tests **[Agent: typescript-test-expert]**

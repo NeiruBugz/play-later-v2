@@ -78,3 +78,8 @@ export {
   type GetPlayerSummaryInput,
   type ValidateSteamIdInput,
 } from "./steam";
+export {
+  ImportedGameService,
+  type FindImportedGamesByUserIdInput,
+  type FindImportedGamesByUserIdResult,
+} from "./imported-game";

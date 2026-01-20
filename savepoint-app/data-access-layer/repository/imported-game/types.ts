@@ -1,4 +1,4 @@
-import type { ImportedGame, IgdbMatchStatus, Storefront } from "@prisma/client";
+import type { IgdbMatchStatus, ImportedGame, Storefront } from "@prisma/client";
 
 export type CreateImportedGameInput = {
   name: string;
@@ -22,12 +22,7 @@ export type PlaytimeRange =
   | "10_to_50h"
   | "over_50h";
 export type Platform = "all" | "windows" | "mac" | "linux";
-export type LastPlayed =
-  | "all"
-  | "30_days"
-  | "1_year"
-  | "over_1_year"
-  | "never";
+export type LastPlayed = "all" | "30_days" | "1_year" | "over_1_year" | "never";
 export type SortBy =
   | "name_asc"
   | "name_desc"

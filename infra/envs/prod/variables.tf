@@ -73,3 +73,9 @@ variable "lambda_log_level" {
   description = "Log level for Lambda functions (DEBUG, INFO, WARNING, ERROR)"
   default     = "INFO"
 }
+
+variable "enable_steam_import_event_source" {
+  type        = bool
+  description = "Enable SQS event source mapping for Steam Import Lambda"
+  default     = true
+}

@@ -1,3 +1,4 @@
+import { disconnectSteam as disconnectSteamRepo } from "@/data-access-layer/repository/user/user-repository";
 import { env } from "@/env.mjs";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -39,6 +40,21 @@ export class SteamService extends BaseService {
           { status: response.status, statusText: response.statusText },
           "Steam API request failed"
         );
+
+        if (response.status === 429) {
+          return this.error(
+            "Too many requests to Steam. Please wait a moment and try again.",
+            ServiceErrorCode.RATE_LIMITED
+          );
+        }
+
+        if (response.status >= 500) {
+          return this.error(
+            "Steam is temporarily unavailable. Please try again later.",
+            ServiceErrorCode.STEAM_API_UNAVAILABLE
+          );
+        }
+
         return this.error(
           "Failed to resolve Steam vanity URL",
           ServiceErrorCode.EXTERNAL_SERVICE_ERROR
@@ -62,6 +78,17 @@ export class SteamService extends BaseService {
       return this.error("Steam profile not found", ServiceErrorCode.NOT_FOUND);
     } catch (error) {
       logger.error({ error, vanityUrl }, "Error resolving vanity URL");
+
+      if (
+        error instanceof TypeError &&
+        (error.message.includes("fetch") || error.message.includes("network"))
+      ) {
+        return this.error(
+          "Steam is temporarily unavailable. Please try again later.",
+          ServiceErrorCode.STEAM_API_UNAVAILABLE
+        );
+      }
+
       return this.handleError(error, "Failed to resolve Steam vanity URL");
     }
   }
@@ -82,6 +109,21 @@ export class SteamService extends BaseService {
           { status: response.status, statusText: response.statusText },
           "Steam API request failed"
         );
+
+        if (response.status === 429) {
+          return this.error(
+            "Too many requests to Steam. Please wait a moment and try again.",
+            ServiceErrorCode.RATE_LIMITED
+          );
+        }
+
+        if (response.status >= 500) {
+          return this.error(
+            "Steam is temporarily unavailable. Please try again later.",
+            ServiceErrorCode.STEAM_API_UNAVAILABLE
+          );
+        }
+
         return this.error(
           "Failed to fetch player summary",
           ServiceErrorCode.EXTERNAL_SERVICE_ERROR
@@ -105,8 +147,8 @@ export class SteamService extends BaseService {
       if (!isPublic) {
         logger.warn({ steamId64 }, "Steam profile is private");
         return this.error(
-          "Steam profile is private. Please set your profile to public to import your library.",
-          ServiceErrorCode.UNAUTHORIZED
+          "Your Steam profile game details are set to private. To import your library, please set your game details to public in Steam Privacy Settings.",
+          ServiceErrorCode.STEAM_PROFILE_PRIVATE
         );
       }
 
@@ -126,6 +168,17 @@ export class SteamService extends BaseService {
       return this.success(profile);
     } catch (error) {
       logger.error({ error, steamId64 }, "Error fetching player summary");
+
+      if (
+        error instanceof TypeError &&
+        (error.message.includes("fetch") || error.message.includes("network"))
+      ) {
+        return this.error(
+          "Steam is temporarily unavailable. Please try again later.",
+          ServiceErrorCode.STEAM_API_UNAVAILABLE
+        );
+      }
+
       return this.handleError(error, "Failed to fetch Steam player summary");
     }
   }
@@ -175,9 +228,7 @@ export class SteamService extends BaseService {
     logger.info({ steamId64 }, "Fetching owned games from Steam");
 
     try {
-      const url = new URL(
-        `${this.baseUrl}/IPlayerService/GetOwnedGames/v1/`
-      );
+      const url = new URL(`${this.baseUrl}/IPlayerService/GetOwnedGames/v1/`);
       url.searchParams.set("key", this.apiKey);
       url.searchParams.set("steamid", steamId64);
       url.searchParams.set("include_appinfo", "1");
@@ -191,6 +242,21 @@ export class SteamService extends BaseService {
           { status: response.status, statusText: response.statusText },
           "Steam API request failed"
         );
+
+        if (response.status === 429) {
+          return this.error(
+            "Too many requests to Steam. Please wait a moment and try again.",
+            ServiceErrorCode.RATE_LIMITED
+          );
+        }
+
+        if (response.status >= 500) {
+          return this.error(
+            "Steam is temporarily unavailable. Please try again later.",
+            ServiceErrorCode.STEAM_API_UNAVAILABLE
+          );
+        }
+
         return this.error(
           "Failed to fetch owned games from Steam",
           ServiceErrorCode.EXTERNAL_SERVICE_ERROR
@@ -207,8 +273,8 @@ export class SteamService extends BaseService {
 
         if (data.response.game_count > 0) {
           return this.error(
-            "Steam game library is private. Please set your game details to public in Steam privacy settings.",
-            ServiceErrorCode.UNAUTHORIZED
+            "Your Steam profile game details are set to private. To import your library, please set your game details to public in Steam Privacy Settings.",
+            ServiceErrorCode.STEAM_PROFILE_PRIVATE
           );
         }
 
@@ -235,7 +301,47 @@ export class SteamService extends BaseService {
       return this.success(ownedGames);
     } catch (error) {
       logger.error({ error, steamId64 }, "Error fetching owned games");
+
+      if (
+        error instanceof TypeError &&
+        (error.message.includes("fetch") || error.message.includes("network"))
+      ) {
+        return this.error(
+          "Steam is temporarily unavailable. Please try again later.",
+          ServiceErrorCode.STEAM_API_UNAVAILABLE
+        );
+      }
+
       return this.handleError(error, "Failed to fetch owned games from Steam");
+    }
+  }
+
+  async disconnectSteam(params: {
+    userId: string;
+  }): Promise<ServiceResult<void>> {
+    const { userId } = params;
+
+    logger.info({ userId }, "Disconnecting Steam account");
+
+    try {
+      const result = await disconnectSteamRepo({ userId });
+
+      if (!result.success) {
+        logger.error(
+          { userId, error: result.error },
+          "Failed to disconnect Steam account"
+        );
+        return this.error(
+          result.error.message,
+          ServiceErrorCode.INTERNAL_ERROR
+        );
+      }
+
+      logger.info({ userId }, "Steam account disconnected successfully");
+      return this.success(undefined);
+    } catch (error) {
+      logger.error({ error, userId }, "Error disconnecting Steam account");
+      return this.handleError(error, "Failed to disconnect Steam account");
     }
   }
 }

@@ -130,7 +130,7 @@ describe("SteamService", () => {
       }
     });
 
-    it("should return EXTERNAL_SERVICE_ERROR when Steam API returns HTTP error", async () => {
+    it("should return STEAM_API_UNAVAILABLE when Steam API returns 5xx error", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
           return HttpResponse.json(
@@ -146,12 +146,14 @@ describe("SteamService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.EXTERNAL_SERVICE_ERROR);
-        expect(result.error).toBe("Failed to resolve Steam vanity URL");
+        expect(result.code).toBe(ServiceErrorCode.STEAM_API_UNAVAILABLE);
+        expect(result.error).toBe(
+          "Steam is temporarily unavailable. Please try again later."
+        );
       }
     });
 
-    it("should return INTERNAL_ERROR when Steam API request fails (network error)", async () => {
+    it("should return STEAM_API_UNAVAILABLE when Steam API request fails (network error)", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
           return HttpResponse.error();
@@ -164,7 +166,33 @@ describe("SteamService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        expect(result.code).toBe(ServiceErrorCode.STEAM_API_UNAVAILABLE);
+        expect(result.error).toBe(
+          "Steam is temporarily unavailable. Please try again later."
+        );
+      }
+    });
+
+    it("should return RATE_LIMITED when Steam API returns 429 error", async () => {
+      server.use(
+        http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
+          return HttpResponse.json(
+            { error: "Too Many Requests" },
+            { status: 429 }
+          );
+        })
+      );
+
+      const result = await service.resolveVanityURL({
+        vanityUrl: mockVanityUrl,
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.code).toBe(ServiceErrorCode.RATE_LIMITED);
+        expect(result.error).toBe(
+          "Too many requests to Steam. Please wait a moment and try again."
+        );
       }
     });
   });
@@ -244,8 +272,10 @@ describe("SteamService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.UNAUTHORIZED);
-        expect(result.error).toContain("Steam profile is private");
+        expect(result.code).toBe(ServiceErrorCode.STEAM_PROFILE_PRIVATE);
+        expect(result.error).toContain(
+          "Steam profile game details are set to private"
+        );
       }
     });
 
@@ -273,7 +303,7 @@ describe("SteamService", () => {
       }
     });
 
-    it("should return EXTERNAL_SERVICE_ERROR when Steam API returns HTTP error", async () => {
+    it("should return STEAM_API_UNAVAILABLE when Steam API returns 5xx error", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/`, () => {
           return HttpResponse.json(
@@ -289,12 +319,14 @@ describe("SteamService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.EXTERNAL_SERVICE_ERROR);
-        expect(result.error).toBe("Failed to fetch player summary");
+        expect(result.code).toBe(ServiceErrorCode.STEAM_API_UNAVAILABLE);
+        expect(result.error).toBe(
+          "Steam is temporarily unavailable. Please try again later."
+        );
       }
     });
 
-    it("should return INTERNAL_ERROR when Steam API request fails (network error)", async () => {
+    it("should return STEAM_API_UNAVAILABLE when Steam API request fails (network error)", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/`, () => {
           return HttpResponse.error();
@@ -307,7 +339,33 @@ describe("SteamService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        expect(result.code).toBe(ServiceErrorCode.STEAM_API_UNAVAILABLE);
+        expect(result.error).toBe(
+          "Steam is temporarily unavailable. Please try again later."
+        );
+      }
+    });
+
+    it("should return RATE_LIMITED when Steam API returns 429 error", async () => {
+      server.use(
+        http.get(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/`, () => {
+          return HttpResponse.json(
+            { error: "Too Many Requests" },
+            { status: 429 }
+          );
+        })
+      );
+
+      const result = await service.getPlayerSummary({
+        steamId64: mockSteamId64,
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.code).toBe(ServiceErrorCode.RATE_LIMITED);
+        expect(result.error).toBe(
+          "Too many requests to Steam. Please wait a moment and try again."
+        );
       }
     });
   });

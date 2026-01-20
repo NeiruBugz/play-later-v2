@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 
+import { disconnectSteam } from "../server-actions/disconnect-steam";
 import type { SteamConnectionStatus } from "../types";
 import { SteamConnectCard } from "./steam-connect-card";
 
@@ -30,6 +31,10 @@ vi.mock("next/image", () => ({
     // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt={alt} />
   ),
+}));
+
+vi.mock("../server-actions/disconnect-steam", () => ({
+  disconnectSteam: vi.fn(),
 }));
 
 describe("SteamConnectCard", () => {
@@ -298,7 +303,7 @@ describe("SteamConnectCard", () => {
       expect(screen.getByRole("button", { name: /disconnect/i })).toBeVisible();
     });
 
-    it("should show placeholder toast when disconnect is clicked", async () => {
+    it("should open confirmation dialog when disconnect is clicked", async () => {
       const user = userEvent.setup();
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
@@ -307,9 +312,153 @@ describe("SteamConnectCard", () => {
       });
       await user.click(disconnectButton);
 
-      expect(toast.info).toHaveBeenCalledWith(
-        "Disconnect functionality coming soon"
+      expect(
+        screen.getByRole("heading", { name: /disconnect steam account/i })
+      ).toBeVisible();
+      expect(
+        screen.getByText(
+          /are you sure you want to disconnect your steam account/i
+        )
+      ).toBeVisible();
+    });
+
+    it("should close dialog when cancel button is clicked", async () => {
+      const user = userEvent.setup();
+      render(<SteamConnectCard initialStatus={connectedStatus} />);
+
+      const disconnectButton = screen.getByRole("button", {
+        name: /disconnect/i,
+      });
+      await user.click(disconnectButton);
+
+      const dialog = screen.getByRole("dialog");
+      const cancelButton = within(dialog).getByRole("button", {
+        name: /cancel/i,
+      });
+      await user.click(cancelButton);
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("heading", { name: /disconnect steam account/i })
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it("should call disconnect action and update UI on successful disconnect", async () => {
+      const user = userEvent.setup();
+      vi.mocked(disconnectSteam).mockResolvedValue({
+        success: true,
+        data: undefined,
+      });
+
+      render(<SteamConnectCard initialStatus={connectedStatus} />);
+
+      const disconnectButton = screen.getByRole("button", {
+        name: /disconnect/i,
+      });
+      await user.click(disconnectButton);
+
+      const dialog = screen.getByRole("dialog");
+      const confirmButton = within(dialog).getAllByRole("button", {
+        name: /disconnect/i,
+      })[0];
+      await user.click(confirmButton);
+
+      await waitFor(() => {
+        expect(disconnectSteam).toHaveBeenCalledWith({});
+      });
+
+      await waitFor(() => {
+        expect(toast.success).toHaveBeenCalledWith(
+          "Steam account disconnected successfully"
+        );
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText(/steam account connected/i)
+        ).not.toBeInTheDocument();
+        expect(screen.getByText(/connect steam account/i)).toBeVisible();
+      });
+    });
+
+    it("should show error toast when disconnect fails", async () => {
+      const user = userEvent.setup();
+      const errorMessage = "Failed to disconnect Steam account";
+      vi.mocked(disconnectSteam).mockResolvedValue({
+        success: false,
+        error: errorMessage,
+      });
+
+      render(<SteamConnectCard initialStatus={connectedStatus} />);
+
+      const disconnectButton = screen.getByRole("button", {
+        name: /disconnect/i,
+      });
+      await user.click(disconnectButton);
+
+      const dialog = screen.getByRole("dialog");
+      const confirmButton = within(dialog).getAllByRole("button", {
+        name: /disconnect/i,
+      })[0];
+      await user.click(confirmButton);
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith(errorMessage);
+      });
+
+      expect(screen.getByText("ConnectedUser")).toBeVisible();
+    });
+
+    it("should show loading state during disconnect", async () => {
+      const user = userEvent.setup();
+      vi.mocked(disconnectSteam).mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(
+              () =>
+                resolve({
+                  success: true,
+                  data: undefined,
+                }),
+              100
+            );
+          })
       );
+
+      render(<SteamConnectCard initialStatus={connectedStatus} />);
+
+      const disconnectButton = screen.getByRole("button", {
+        name: /disconnect/i,
+      });
+      await user.click(disconnectButton);
+
+      const dialog = screen.getByRole("dialog");
+      const confirmButton = within(dialog).getAllByRole("button", {
+        name: /disconnect/i,
+      })[0];
+      await user.click(confirmButton);
+
+      expect(confirmButton).toBeDisabled();
+      expect(
+        within(dialog).getByRole("button", { name: /cancel/i })
+      ).toBeDisabled();
+    });
+
+    it("should preserve imported games message in disconnect dialog", async () => {
+      const user = userEvent.setup();
+      render(<SteamConnectCard initialStatus={connectedStatus} />);
+
+      const disconnectButton = screen.getByRole("button", {
+        name: /disconnect/i,
+      });
+      await user.click(disconnectButton);
+
+      expect(
+        screen.getByText(
+          /your imported games will be preserved in your library/i
+        )
+      ).toBeVisible();
     });
 
     it("should not display the form when connected", () => {

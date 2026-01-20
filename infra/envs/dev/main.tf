@@ -68,6 +68,26 @@ module "lambda_imports_bucket" {
 }
 
 # =============================================================================
+# Steam Import Queue
+# =============================================================================
+
+module "steam_import_queue" {
+  source       = "../../modules/steam-import"
+  project_name = var.project_name
+  environment  = var.environment
+
+  # Sender principals will be updated when we add the API Gateway/NextAuth integration
+  sender_principals = ["*"]
+
+  # Queue configuration
+  visibility_timeout_seconds    = 300     # 5 minutes - matches Lambda timeout
+  message_retention_seconds     = 604800  # 7 days
+  dlq_message_retention_seconds = 1209600 # 14 days
+  receive_wait_time_seconds     = 20      # Long polling
+  max_receive_count             = 3       # Retry 3 times before DLQ
+}
+
+# =============================================================================
 # Lambda Functions
 # =============================================================================
 
@@ -87,6 +107,18 @@ module "steam_import_lambda" {
     AWS_DEFAULT_REGION       = var.region
     LOG_LEVEL                = var.lambda_log_level
     STEAM_API_KEY_SECRET_ARN = module.lambda_secrets.secret_arns["steam-api-key"]
+  }
+
+  # SQS Event Source Mapping
+  sqs_event_source = {
+    queue_arn               = module.steam_import_queue.queue_arn
+    batch_size              = 1 # Process one sync request at a time
+    maximum_batching_window = 0 # Process immediately
+    enabled                 = var.enable_steam_import_event_source
+    function_response_types = ["ReportBatchItemFailures"] # Partial batch failures
+    scaling_config = {
+      maximum_concurrency = 5 # Max 5 concurrent executions
+    }
   }
 }
 
@@ -197,4 +229,23 @@ output "igdb_enrichment_lambda_arn" {
 output "database_import_lambda_arn" {
   value       = module.database_import_lambda.function_arn
   description = "ARN of the Database Import Lambda function"
+}
+
+# =============================================================================
+# Steam Import Queue Outputs
+# =============================================================================
+
+output "steam_import_queue_url" {
+  value       = module.steam_import_queue.queue_url
+  description = "URL of the Steam library sync queue"
+}
+
+output "steam_import_queue_arn" {
+  value       = module.steam_import_queue.queue_arn
+  description = "ARN of the Steam library sync queue"
+}
+
+output "steam_import_dlq_url" {
+  value       = module.steam_import_queue.dlq_url
+  description = "URL of the Steam library sync dead letter queue"
 }

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { IconContext } from "react-icons";
 import { FaSteam } from "react-icons/fa";
@@ -19,11 +19,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 
+import {
+  isSteamApiUnavailableError,
+  isSteamPrivacyError,
+  isSteamProfileNotFoundError,
+  isSteamRateLimitError,
+} from "../lib/utils";
 import { connectSteamSchema, type ConnectSteamInput } from "../schemas";
+import { disconnectSteam } from "../server-actions/disconnect-steam";
 import type { SteamConnectionStatus } from "../types";
+import { SteamApiUnavailableError } from "./steam-api-unavailable-error";
+import { SteamPrivacyError } from "./steam-privacy-error";
+import { SteamProfileNotFoundError } from "./steam-profile-not-found-error";
+import { SteamRateLimitError } from "./steam-rate-limit-error";
 
 type SteamConnectCardProps = {
   initialStatus?: SteamConnectionStatus;
@@ -45,6 +64,8 @@ export function SteamConnectCard({
     useState<SteamConnectionStatus>(initialStatus);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const {
     register,
@@ -103,40 +124,98 @@ export function SteamConnectCard({
     }
   };
 
-  const handleDisconnect = () => {
-    toast.info("Disconnect functionality coming soon");
+  const handleDisconnectClick = () => {
+    setShowDisconnectDialog(true);
+  };
+
+  const handleDisconnectConfirm = () => {
+    startTransition(async () => {
+      const result = await disconnectSteam({});
+
+      if (result.success) {
+        setConnectionStatus({ connected: false });
+        setShowDisconnectDialog(false);
+        toast.success("Steam account disconnected successfully");
+      } else {
+        toast.error(result.error || "Failed to disconnect Steam account");
+      }
+    });
   };
 
   if (connectionStatus.connected) {
     const { profile } = connectionStatus;
 
     return (
-      <Card variant="elevated">
-        <CardHeader spacing="comfortable">
-          <CardTitle className="flex items-center gap-2">
-            <SteamIcon className="h-5 w-5" />
-            Steam Account Connected
-          </CardTitle>
-        </CardHeader>
-        <CardContent spacing="comfortable" className="flex items-center gap-4">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
-            <Image
-              src={profile.avatarUrl}
-              alt={profile.displayName}
-              fill
-              className="object-cover"
-              sizes="64px"
-            />
-          </div>
-          <div className="flex-1">
-            <p className="font-medium">{profile.displayName}</p>
-            <p className="text-muted-foreground text-sm">{profile.steamId64}</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={handleDisconnect}>
-            Disconnect
-          </Button>
-        </CardContent>
-      </Card>
+      <>
+        <Card variant="elevated">
+          <CardHeader spacing="comfortable">
+            <CardTitle className="flex items-center gap-2">
+              <SteamIcon className="h-5 w-5" />
+              Steam Account Connected
+            </CardTitle>
+          </CardHeader>
+          <CardContent
+            spacing="comfortable"
+            className="flex items-center gap-4"
+          >
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
+              <Image
+                src={profile.avatarUrl}
+                alt={profile.displayName}
+                fill
+                className="object-cover"
+                sizes="64px"
+              />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">{profile.displayName}</p>
+              <p className="text-muted-foreground text-sm">
+                {profile.steamId64}
+              </p>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDisconnectClick}
+              disabled={isPending}
+            >
+              Disconnect
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Dialog
+          open={showDisconnectDialog}
+          onOpenChange={setShowDisconnectDialog}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Disconnect Steam Account</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to disconnect your Steam account? Your
+                imported games will be preserved in your library, but you will
+                need to reconnect to import new games or update your Steam data.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowDisconnectDialog(false)}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDisconnectConfirm}
+                loading={isPending}
+              >
+                Disconnect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
@@ -203,9 +282,33 @@ export function SteamConnectCard({
               )}
             </div>
             {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+              <>
+                {isSteamRateLimitError(error) ? (
+                  <SteamRateLimitError
+                    message={error}
+                    onRetry={() => handleSubmit(connectSteam)()}
+                  />
+                ) : isSteamApiUnavailableError(error) ? (
+                  <SteamApiUnavailableError
+                    message={error}
+                    onRetry={() => handleSubmit(connectSteam)()}
+                  />
+                ) : isSteamPrivacyError(error) ? (
+                  <SteamPrivacyError
+                    message={error}
+                    onRetry={() => handleSubmit(connectSteam)()}
+                  />
+                ) : isSteamProfileNotFoundError(error) ? (
+                  <SteamProfileNotFoundError
+                    message={error}
+                    onRetry={() => handleSubmit(connectSteam)()}
+                  />
+                ) : (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+              </>
             )}
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? (

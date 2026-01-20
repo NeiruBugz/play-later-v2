@@ -2,6 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 
+import { checkUsernameAvailability } from "@/shared/server-actions/profile";
+
 import { updateProfileFormAction } from "../server-actions/update-profile";
 import { ProfileSettingsForm } from "./profile-settings-form";
 
@@ -19,6 +21,8 @@ vi.mock("@/shared/server-actions/profile", () => ({
   uploadAvatar: vi.fn(),
   checkUsernameAvailability: vi.fn(),
 }));
+
+const mockCheckUsernameAvailability = vi.mocked(checkUsernameAvailability);
 
 const mockUpdateProfileFormAction = vi.mocked(updateProfileFormAction);
 const mockToastSuccess = vi.mocked(toast.success);
@@ -59,6 +63,11 @@ describe("ProfileSettingsForm", () => {
     vi.clearAllMocks();
     mockUpdateProfileFormAction.mockResolvedValue({
       status: "idle",
+    });
+    // Default: username is available
+    mockCheckUsernameAvailability.mockResolvedValue({
+      success: true,
+      available: true,
     });
   });
 

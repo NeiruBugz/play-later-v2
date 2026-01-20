@@ -79,6 +79,8 @@ export async function connectSteamHandler(
       [ServiceErrorCode.UNAUTHORIZED]: HTTP_STATUS.FORBIDDEN,
       [ServiceErrorCode.EXTERNAL_SERVICE_ERROR]:
         HTTP_STATUS.SERVICE_UNAVAILABLE,
+      [ServiceErrorCode.STEAM_API_UNAVAILABLE]: HTTP_STATUS.SERVICE_UNAVAILABLE,
+      [ServiceErrorCode.RATE_LIMITED]: HTTP_STATUS.TOO_MANY_REQUESTS,
     };
 
     return {
@@ -103,8 +105,11 @@ export async function connectSteamHandler(
     const statusMap: Partial<Record<ServiceErrorCode, number>> = {
       [ServiceErrorCode.NOT_FOUND]: HTTP_STATUS.NOT_FOUND,
       [ServiceErrorCode.UNAUTHORIZED]: HTTP_STATUS.FORBIDDEN,
+      [ServiceErrorCode.STEAM_PROFILE_PRIVATE]: HTTP_STATUS.FORBIDDEN,
       [ServiceErrorCode.EXTERNAL_SERVICE_ERROR]:
         HTTP_STATUS.SERVICE_UNAVAILABLE,
+      [ServiceErrorCode.STEAM_API_UNAVAILABLE]: HTTP_STATUS.SERVICE_UNAVAILABLE,
+      [ServiceErrorCode.RATE_LIMITED]: HTTP_STATUS.TOO_MANY_REQUESTS,
     };
 
     return {

@@ -349,8 +349,11 @@ describe("connectSteamHandler (integration)", () => {
 
       if (!result.success) {
         expect(result.status).toBe(HTTP_STATUS.FORBIDDEN);
-        expect(result.error).toContain("Steam profile is private");
-        expect(result.error).toContain("set your profile to public");
+        expect(result.error).toContain(
+          "Your Steam profile game details are set to private"
+        );
+        expect(result.error).toContain("To import your library");
+        expect(result.error).toContain("Steam Privacy Settings");
       }
     });
   });
@@ -409,7 +412,9 @@ describe("connectSteamHandler (integration)", () => {
 
       if (!result.success) {
         expect(result.status).toBe(HTTP_STATUS.SERVICE_UNAVAILABLE);
-        expect(result.error).toContain("Failed to fetch player summary");
+        expect(result.error).toBe(
+          "Steam is temporarily unavailable. Please try again later."
+        );
       }
     });
 
