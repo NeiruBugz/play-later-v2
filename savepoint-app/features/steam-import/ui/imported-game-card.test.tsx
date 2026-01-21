@@ -33,6 +33,18 @@ const createMockImportedGame = (
   ...overrides,
 });
 
+const elements = {
+  getGameName: (name: string) => screen.getByText(name),
+  getHeading: () => screen.getByRole("heading", { level: 3 }),
+  getPlaytime: (time: string) => screen.getByText(time),
+  getNeverPlayedText: () => screen.getByText("Never played"),
+  getLastPlayedText: (text: string) => screen.getByText(text),
+  getImage: (alt: string) => screen.getByAltText(alt),
+  queryImage: (alt: string) => screen.queryByAltText(alt),
+  getFallbackLetter: (letter: string) => screen.getByText(letter),
+  getBulletSeparator: () => screen.getByText("•"),
+};
+
 describe("ImportedGameCard", () => {
   beforeEach(() => {
     vi.setSystemTime(new Date("2026-01-20T12:00:00Z"));
@@ -48,7 +60,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("The Witcher 3")).toBeVisible();
+      expect(elements.getGameName("The Witcher 3")).toBeVisible();
     });
 
     it("should truncate long game names", () => {
@@ -58,8 +70,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      const heading = screen.getByRole("heading", { level: 3 });
-      expect(heading).toHaveClass("truncate");
+      expect(elements.getHeading()).toHaveClass("truncate");
     });
   });
 
@@ -69,7 +80,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("12.5 hrs")).toBeVisible();
+      expect(elements.getPlaytime("12.5 hrs")).toBeVisible();
     });
 
     it("should format playtime in minutes when < 60 minutes", () => {
@@ -77,7 +88,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("45 min")).toBeVisible();
+      expect(elements.getPlaytime("45 min")).toBeVisible();
     });
 
     it("should display 'Never played' when playtime is 0", () => {
@@ -85,7 +96,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("Never played")).toBeVisible();
+      expect(elements.getNeverPlayedText()).toBeVisible();
     });
 
     it("should display 'Never played' when playtime is null", () => {
@@ -93,7 +104,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("Never played")).toBeVisible();
+      expect(elements.getNeverPlayedText()).toBeVisible();
     });
 
     it("should format playtime with one decimal place", () => {
@@ -101,7 +112,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("2.1 hrs")).toBeVisible();
+      expect(elements.getPlaytime("2.1 hrs")).toBeVisible();
     });
   });
 
@@ -112,7 +123,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("Last played: 5 days ago")).toBeVisible();
+      expect(elements.getLastPlayedText("Last played: 5 days ago")).toBeVisible();
     });
 
     it("should format recent date relatively (today)", () => {
@@ -121,7 +132,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("Last played: today")).toBeVisible();
+      expect(elements.getLastPlayedText("Last played: today")).toBeVisible();
     });
 
     it("should format recent date relatively (yesterday)", () => {
@@ -130,7 +141,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("Last played: yesterday")).toBeVisible();
+      expect(elements.getLastPlayedText("Last played: yesterday")).toBeVisible();
     });
 
     it("should format old date absolutely when > 7 days ago", () => {
@@ -139,7 +150,9 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("Last played: Jan 12, 2026")).toBeVisible();
+      expect(
+        elements.getLastPlayedText("Last played: Jan 12, 2026")
+      ).toBeVisible();
     });
 
     it("should display 'Never' when lastPlayedAt is null", () => {
@@ -147,7 +160,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("Last played: Never")).toBeVisible();
+      expect(elements.getLastPlayedText("Last played: Never")).toBeVisible();
     });
   });
 
@@ -160,7 +173,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      const image = screen.getByAltText("Team Fortress 2");
+      const image = elements.getImage("Team Fortress 2");
       expect(image).toBeVisible();
       expect(image).toHaveAttribute(
         "src",
@@ -176,8 +189,8 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("P")).toBeVisible();
-      expect(screen.queryByAltText("Portal 2")).not.toBeInTheDocument();
+      expect(elements.getFallbackLetter("P")).toBeVisible();
+      expect(elements.queryImage("Portal 2")).not.toBeInTheDocument();
     });
 
     it("should show fallback when appId is null", () => {
@@ -189,8 +202,8 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("H")).toBeVisible();
-      expect(screen.queryByAltText("Half-Life")).not.toBeInTheDocument();
+      expect(elements.getFallbackLetter("H")).toBeVisible();
+      expect(elements.queryImage("Half-Life")).not.toBeInTheDocument();
     });
 
     it("should uppercase first letter in fallback", () => {
@@ -201,7 +214,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("D")).toBeVisible();
+      expect(elements.getFallbackLetter("D")).toBeVisible();
     });
 
     it("should handle empty string icon gracefully", () => {
@@ -212,7 +225,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("C")).toBeVisible();
+      expect(elements.getFallbackLetter("C")).toBeVisible();
     });
   });
 
@@ -222,8 +235,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      const heading = screen.getByRole("heading", { level: 3 });
-      expect(heading).toHaveTextContent("Team Fortress 2");
+      expect(elements.getHeading()).toHaveTextContent("Team Fortress 2");
     });
 
     it("should have proper alt text for Steam icon", () => {
@@ -234,7 +246,7 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByAltText("Stardew Valley")).toBeVisible();
+      expect(elements.getImage("Stardew Valley")).toBeVisible();
     });
   });
 
@@ -247,9 +259,11 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(screen.getByText("•")).toBeVisible();
-      expect(screen.getByText("2.0 hrs")).toBeVisible();
-      expect(screen.getByText("Last played: 2 days ago")).toBeVisible();
+      expect(elements.getBulletSeparator()).toBeVisible();
+      expect(elements.getPlaytime("2.0 hrs")).toBeVisible();
+      expect(
+        elements.getLastPlayedText("Last played: 2 days ago")
+      ).toBeVisible();
     });
   });
 });

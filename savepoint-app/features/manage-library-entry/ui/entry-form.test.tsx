@@ -38,7 +38,13 @@ const elements = {
   getPlatformCombobox: () =>
     screen.getByRole("combobox", { name: /platform/i }),
   getPlatformLabel: () => screen.getByText("Platform (Optional)"),
+  getPlatformDescription: () =>
+    screen.getByText("Select the platform you'll play on (optional)"),
   getStatusButtons: () => screen.getAllByRole("button"),
+  getStatusRadio: (label: string) =>
+    screen.getByRole("radio", { name: new RegExp(label, "i") }),
+  findPlatformOption: (name: string) =>
+    screen.findByRole("option", { name }),
   getSubmitButton: () => {
     const buttons = screen.getAllByRole("button");
     return (
@@ -54,14 +60,12 @@ const actions = {
     await userEvent.click(elements.getSubmitButton());
   },
   selectStatus: async (statusLabel: string) => {
-    const statusButton = screen.getByRole("radio", {
-      name: new RegExp(statusLabel, "i"),
-    });
+    const statusButton = elements.getStatusRadio(statusLabel);
     await userEvent.click(statusButton);
   },
   selectPlatform: async (platformName: string) => {
     await userEvent.click(elements.getPlatformCombobox());
-    const option = await screen.findByRole("option", { name: platformName });
+    const option = await elements.findPlatformOption(platformName);
     await userEvent.click(option);
   },
 };
@@ -114,9 +118,7 @@ describe("EntryForm - AddForm variant", () => {
     it("should show platform description indicating it is optional", () => {
       renderEntryForm();
 
-      expect(
-        screen.getByText("Select the platform you'll play on (optional)")
-      ).toBeVisible();
+      expect(elements.getPlatformDescription()).toBeVisible();
     });
   });
 

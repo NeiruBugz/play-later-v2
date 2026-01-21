@@ -4,68 +4,58 @@ import { describe, expect, it, vi } from "vitest";
 
 import { SteamApiUnavailableError } from "./steam-api-unavailable-error";
 
-describe("SteamApiUnavailableError", () => {
-  it("renders the error message", () => {
-    render(
-      <SteamApiUnavailableError message="Steam is temporarily unavailable. Please try again later." />
-    );
+const elements = {
+  getTitle: () => screen.getByText("Steam Service Unavailable"),
+  getMessage: (msg: string) => screen.getByText(msg),
+  getRetryButton: () => screen.getByRole("button", { name: /try again/i }),
+  queryRetryButton: () => screen.queryByRole("button", { name: /try again/i }),
+  getAlert: () => screen.getByRole("alert"),
+};
 
-    expect(screen.getByText("Steam Service Unavailable")).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Steam is temporarily unavailable. Please try again later."
-      )
-    ).toBeInTheDocument();
+const actions = {
+  clickRetry: async () => {
+    await userEvent.click(elements.getRetryButton());
+  },
+};
+
+describe("SteamApiUnavailableError", () => {
+  const mockMessage =
+    "Steam is temporarily unavailable. Please try again later.";
+
+  it("renders the error message", () => {
+    render(<SteamApiUnavailableError message={mockMessage} />);
+
+    expect(elements.getTitle()).toBeInTheDocument();
+    expect(elements.getMessage(mockMessage)).toBeInTheDocument();
   });
 
   it("renders retry button when onRetry is provided", () => {
     const onRetry = vi.fn();
 
-    render(
-      <SteamApiUnavailableError
-        message="Steam is temporarily unavailable. Please try again later."
-        onRetry={onRetry}
-      />
-    );
+    render(<SteamApiUnavailableError message={mockMessage} onRetry={onRetry} />);
 
-    expect(
-      screen.getByRole("button", { name: /try again/i })
-    ).toBeInTheDocument();
+    expect(elements.getRetryButton()).toBeInTheDocument();
   });
 
   it("does not render retry button when onRetry is not provided", () => {
-    render(
-      <SteamApiUnavailableError message="Steam is temporarily unavailable. Please try again later." />
-    );
+    render(<SteamApiUnavailableError message={mockMessage} />);
 
-    expect(
-      screen.queryByRole("button", { name: /try again/i })
-    ).not.toBeInTheDocument();
+    expect(elements.queryRetryButton()).not.toBeInTheDocument();
   });
 
   it("calls onRetry when retry button is clicked", async () => {
-    const user = userEvent.setup();
     const onRetry = vi.fn();
 
-    render(
-      <SteamApiUnavailableError
-        message="Steam is temporarily unavailable. Please try again later."
-        onRetry={onRetry}
-      />
-    );
+    render(<SteamApiUnavailableError message={mockMessage} onRetry={onRetry} />);
 
-    const retryButton = screen.getByRole("button", { name: /try again/i });
-    await user.click(retryButton);
+    await actions.clickRetry();
 
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
   it("renders with warning alert style", () => {
-    render(
-      <SteamApiUnavailableError message="Steam is temporarily unavailable. Please try again later." />
-    );
+    render(<SteamApiUnavailableError message={mockMessage} />);
 
-    const alert = screen.getByRole("alert");
-    expect(alert).toBeInTheDocument();
+    expect(elements.getAlert()).toBeInTheDocument();
   });
 });

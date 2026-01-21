@@ -36,6 +36,43 @@ const createMockGamesList = (count: number): ImportedGame[] =>
     createMockImportedGame(`game-${i + 1}`, `Game ${i + 1}`)
   );
 
+const elements = {
+  getSkeletons: () => screen.getAllByRole("status", { hidden: true }),
+  queryGameByName: (name: string) => screen.queryByText(name),
+  getGameByName: (name: string) => screen.getByText(name),
+  getErrorTitle: () => screen.getByText("Failed to Load Games"),
+  getErrorMessage: (msg: string) => screen.getByText(msg),
+  getRetryButton: () => screen.getByRole("button", { name: /retry/i }),
+  queryRetryButton: () => screen.queryByRole("button", { name: /retry/i }),
+  getEmptyTitle: () => screen.getByText("No games imported yet"),
+  getEmptyDescription: () =>
+    screen.getByText(
+      "Import your Steam library to see your games here. Connect your Steam account to get started."
+    ),
+  getCountHeader: (text: string) => screen.getByText(text),
+  getList: () => screen.getByRole("list", { name: /imported games/i }),
+  getListItems: () => screen.getAllByRole("listitem"),
+  getPagination: () => screen.getByRole("navigation", { name: /pagination/i }),
+  queryPagination: () =>
+    screen.queryByRole("navigation", { name: /pagination/i }),
+  getPageIndicator: (text: string) => screen.getByText(text),
+  getPreviousButton: () =>
+    screen.getByRole("button", { name: /go to previous page/i }),
+  getNextButton: () => screen.getByRole("button", { name: /go to next page/i }),
+};
+
+const actions = {
+  clickRetry: async () => {
+    await userEvent.click(elements.getRetryButton());
+  },
+  clickNext: async () => {
+    await userEvent.click(elements.getNextButton());
+  },
+  clickPrevious: async () => {
+    await userEvent.click(elements.getPreviousButton());
+  },
+};
+
 describe("ImportedGamesList", () => {
   describe("loading state", () => {
     it("should show loading skeleton when isLoading is true", () => {
@@ -50,7 +87,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const skeletons = screen.getAllByRole("status", { hidden: true });
+      const skeletons = elements.getSkeletons();
       expect(skeletons.length).toBeGreaterThan(0);
     });
 
@@ -66,8 +103,8 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const cardSkeletons = screen
-        .getAllByRole("status", { hidden: true })
+      const cardSkeletons = elements
+        .getSkeletons()
         .filter((el) => el.classList.contains("h-20"));
       expect(cardSkeletons).toHaveLength(5);
     });
@@ -86,7 +123,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.queryByText("Game 1")).not.toBeInTheDocument();
+      expect(elements.queryGameByName("Game 1")).not.toBeInTheDocument();
     });
   });
 
@@ -105,8 +142,8 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("Failed to Load Games")).toBeVisible();
-      expect(screen.getByText("Failed to load games")).toBeVisible();
+      expect(elements.getErrorTitle()).toBeVisible();
+      expect(elements.getErrorMessage("Failed to load games")).toBeVisible();
     });
 
     it("should show retry button in error state when onRetry is provided", () => {
@@ -125,11 +162,10 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByRole("button", { name: /retry/i })).toBeVisible();
+      expect(elements.getRetryButton()).toBeVisible();
     });
 
     it("should call onRetry when retry button is clicked", async () => {
-      const user = userEvent.setup();
       const error = new Error("Network error");
       const onRetry = vi.fn();
 
@@ -145,8 +181,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const retryButton = screen.getByRole("button", { name: /retry/i });
-      await user.click(retryButton);
+      await actions.clickRetry();
 
       expect(onRetry).toHaveBeenCalledTimes(1);
     });
@@ -165,9 +200,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(
-        screen.queryByRole("button", { name: /retry/i })
-      ).not.toBeInTheDocument();
+      expect(elements.queryRetryButton()).not.toBeInTheDocument();
     });
 
     it("should show default error message when error message is empty", () => {
@@ -185,7 +218,7 @@ describe("ImportedGamesList", () => {
       );
 
       expect(
-        screen.getByText(
+        elements.getErrorMessage(
           "An error occurred while loading your imported games. Please try again."
         )
       ).toBeVisible();
@@ -204,12 +237,8 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("No games imported yet")).toBeVisible();
-      expect(
-        screen.getByText(
-          "Import your Steam library to see your games here. Connect your Steam account to get started."
-        )
-      ).toBeVisible();
+      expect(elements.getEmptyTitle()).toBeVisible();
+      expect(elements.getEmptyDescription()).toBeVisible();
     });
 
     it("should not show pagination in empty state", () => {
@@ -223,9 +252,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(
-        screen.queryByRole("navigation", { name: /pagination/i })
-      ).not.toBeInTheDocument();
+      expect(elements.queryPagination()).not.toBeInTheDocument();
     });
   });
 
@@ -243,7 +270,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("25 games")).toBeVisible();
+      expect(elements.getCountHeader("25 games")).toBeVisible();
     });
 
     it("should render total count header correctly with singular", () => {
@@ -259,7 +286,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("1 game")).toBeVisible();
+      expect(elements.getCountHeader("1 game")).toBeVisible();
     });
 
     it("should render list of ImportedGameCard components", () => {
@@ -275,9 +302,9 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("Game 1")).toBeVisible();
-      expect(screen.getByText("Game 2")).toBeVisible();
-      expect(screen.getByText("Game 3")).toBeVisible();
+      expect(elements.getGameByName("Game 1")).toBeVisible();
+      expect(elements.getGameByName("Game 2")).toBeVisible();
+      expect(elements.getGameByName("Game 3")).toBeVisible();
     });
 
     it("should render games in a list with proper ARIA role", () => {
@@ -293,11 +320,8 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const list = screen.getByRole("list", { name: /imported games/i });
-      expect(list).toBeVisible();
-
-      const listItems = screen.getAllByRole("listitem");
-      expect(listItems).toHaveLength(2);
+      expect(elements.getList()).toBeVisible();
+      expect(elements.getListItems()).toHaveLength(2);
     });
   });
 
@@ -315,9 +339,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(
-        screen.getByRole("navigation", { name: /pagination/i })
-      ).toBeVisible();
+      expect(elements.getPagination()).toBeVisible();
     });
 
     it("should not render pagination controls when totalPages = 1", () => {
@@ -333,9 +355,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(
-        screen.queryByRole("navigation", { name: /pagination/i })
-      ).not.toBeInTheDocument();
+      expect(elements.queryPagination()).not.toBeInTheDocument();
     });
 
     it("should show correct page indicator text", () => {
@@ -351,7 +371,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("Page 2 of 5")).toBeVisible();
+      expect(elements.getPageIndicator("Page 2 of 5")).toBeVisible();
     });
 
     it("should disable Previous button on first page", () => {
@@ -367,10 +387,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const previousButton = screen.getByRole("button", {
-        name: /go to previous page/i,
-      });
-      expect(previousButton).toBeDisabled();
+      expect(elements.getPreviousButton()).toBeDisabled();
     });
 
     it("should disable Next button on last page", () => {
@@ -386,10 +403,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const nextButton = screen.getByRole("button", {
-        name: /go to next page/i,
-      });
-      expect(nextButton).toBeDisabled();
+      expect(elements.getNextButton()).toBeDisabled();
     });
 
     it("should enable Previous button when not on first page", () => {
@@ -405,10 +419,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const previousButton = screen.getByRole("button", {
-        name: /go to previous page/i,
-      });
-      expect(previousButton).toBeEnabled();
+      expect(elements.getPreviousButton()).toBeEnabled();
     });
 
     it("should enable Next button when not on last page", () => {
@@ -424,14 +435,10 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const nextButton = screen.getByRole("button", {
-        name: /go to next page/i,
-      });
-      expect(nextButton).toBeEnabled();
+      expect(elements.getNextButton()).toBeEnabled();
     });
 
     it("should call onPageChange with incremented page when Next is clicked", async () => {
-      const user = userEvent.setup();
       const onPageChange = vi.fn();
       const games = createMockGamesList(10);
 
@@ -445,16 +452,12 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const nextButton = screen.getByRole("button", {
-        name: /go to next page/i,
-      });
-      await user.click(nextButton);
+      await actions.clickNext();
 
       expect(onPageChange).toHaveBeenCalledWith(2);
     });
 
     it("should call onPageChange with decremented page when Previous is clicked", async () => {
-      const user = userEvent.setup();
       const onPageChange = vi.fn();
       const games = createMockGamesList(10);
 
@@ -468,10 +471,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const previousButton = screen.getByRole("button", {
-        name: /go to previous page/i,
-      });
-      await user.click(previousButton);
+      await actions.clickPrevious();
 
       expect(onPageChange).toHaveBeenCalledWith(1);
     });
@@ -489,7 +489,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("Page 1 of 5")).toBeVisible();
+      expect(elements.getPageIndicator("Page 1 of 5")).toBeVisible();
     });
   });
 
@@ -507,9 +507,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(
-        screen.getByRole("navigation", { name: /pagination/i })
-      ).toBeVisible();
+      expect(elements.getPagination()).toBeVisible();
     });
 
     it("should have aria-live region for page indicator", () => {
@@ -525,7 +523,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      const pageIndicator = screen.getByText("Page 1 of 3");
+      const pageIndicator = elements.getPageIndicator("Page 1 of 3");
       expect(pageIndicator).toHaveAttribute("aria-live", "polite");
     });
 
@@ -542,12 +540,8 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(
-        screen.getByRole("button", { name: /go to previous page/i })
-      ).toBeVisible();
-      expect(
-        screen.getByRole("button", { name: /go to next page/i })
-      ).toBeVisible();
+      expect(elements.getPreviousButton()).toBeVisible();
+      expect(elements.getNextButton()).toBeVisible();
     });
   });
 
@@ -565,9 +559,7 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(
-        screen.queryByRole("navigation", { name: /pagination/i })
-      ).not.toBeInTheDocument();
+      expect(elements.queryPagination()).not.toBeInTheDocument();
     });
 
     it("should handle last page with fewer items than pageSize", () => {
@@ -583,11 +575,9 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("27 games")).toBeVisible();
-      expect(screen.getByText("Page 3 of 3")).toBeVisible();
-
-      const listItems = screen.getAllByRole("listitem");
-      expect(listItems).toHaveLength(7);
+      expect(elements.getCountHeader("27 games")).toBeVisible();
+      expect(elements.getPageIndicator("Page 3 of 3")).toBeVisible();
+      expect(elements.getListItems()).toHaveLength(7);
     });
 
     it("should handle large totalCount correctly", () => {
@@ -603,8 +593,8 @@ describe("ImportedGamesList", () => {
         />
       );
 
-      expect(screen.getByText("1234 games")).toBeVisible();
-      expect(screen.getByText("Page 5 of 124")).toBeVisible();
+      expect(elements.getCountHeader("1234 games")).toBeVisible();
+      expect(elements.getPageIndicator("Page 5 of 124")).toBeVisible();
     });
   });
 });

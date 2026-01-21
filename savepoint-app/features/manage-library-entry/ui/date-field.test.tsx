@@ -16,6 +16,7 @@ const elements = {
   getDescription: () => screen.queryByText(/when did you start playing/i),
   getErrorMessage: () => screen.queryByRole("alert"),
   queryErrorMessage: () => screen.queryByRole("alert"),
+  getSubmitButton: () => screen.getByRole("button", { name: "Submit" }),
 };
 
 const actions = {
@@ -34,6 +35,9 @@ const actions = {
     const input = elements.getDateInput() as HTMLInputElement;
     await userEvent.clear(input);
     await userEvent.type(input, dateString);
+  },
+  submitForm: async () => {
+    await userEvent.click(elements.getSubmitButton());
   },
 };
 
@@ -174,7 +178,7 @@ describe("DateField", () => {
       renderDateFieldInForm({ onSubmit });
 
       await actions.typeDate("2025-01-20");
-      await userEvent.click(screen.getByRole("button", { name: "Submit" }));
+      await actions.submitForm();
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith(
@@ -193,7 +197,7 @@ describe("DateField", () => {
       const onSubmit = vi.fn();
       renderDateFieldInForm({ onSubmit });
 
-      await userEvent.click(screen.getByRole("button", { name: "Submit" }));
+      await actions.submitForm();
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
@@ -208,7 +212,7 @@ describe("DateField", () => {
       renderDateFieldInForm({ defaultValue: testDate, onSubmit });
 
       await actions.clearDate();
-      await userEvent.click(screen.getByRole("button", { name: "Submit" }));
+      await actions.submitForm();
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({

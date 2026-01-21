@@ -39,6 +39,7 @@ const elements = {
   getValidationError: () => screen.getByText(/username must/i),
   queryServerError: () => screen.queryByText(/username already exists/i),
   getServerError: () => screen.getByText(/username already exists/i),
+  getAvatarUrlInput: () => screen.getByTestId("avatar-url-input"),
 };
 
 const actions = {
@@ -114,7 +115,7 @@ describe("ProfileSettingsForm", () => {
         />
       );
 
-      const hiddenInput = screen.getByTestId("avatar-url-input");
+      const hiddenInput = elements.getAvatarUrlInput();
       expect(hiddenInput).toBeInTheDocument();
       expect(hiddenInput).toHaveValue("https://example.com/avatar.jpg");
     });
@@ -124,8 +125,7 @@ describe("ProfileSettingsForm", () => {
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
 
-      const hiddenInput = screen.getByTestId("avatar-url-input");
-      expect(hiddenInput).toHaveValue("");
+      expect(elements.getAvatarUrlInput()).toHaveValue("");
     });
   });
 

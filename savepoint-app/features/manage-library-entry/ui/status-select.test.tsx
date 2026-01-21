@@ -17,9 +17,12 @@ const elements = {
   getOptions: () => screen.getAllByRole("option"),
   getOptionByLabel: (label: string) =>
     screen.getByRole("option", { name: new RegExp(label, "i") }),
+  getFormLabel: () => screen.getByText("Journey Status"),
   getFormDescription: () =>
     screen.getByText("Select your current journey status with this game"),
   getCustomDescription: (text: string) => screen.getByText(text),
+  getOptionDescription: (description: string) =>
+    screen.getAllByText(description)[0],
 };
 
 const actions = {
@@ -61,7 +64,7 @@ describe("StatusSelect", () => {
     it("should display form label and default description", () => {
       renderStatusSelectInForm();
 
-      expect(screen.getByText("Journey Status")).toBeVisible();
+      expect(elements.getFormLabel()).toBeVisible();
       expect(elements.getFormDescription()).toBeVisible();
       expect(elements.getTrigger()).toBeVisible();
     });
@@ -92,7 +95,7 @@ describe("StatusSelect", () => {
         await actions.clickTrigger();
 
         expect(elements.getOptionByLabel(label)).toBeVisible();
-        expect(screen.getAllByText(description)[0]).toBeVisible();
+        expect(elements.getOptionDescription(description)).toBeVisible();
       }
     );
   });

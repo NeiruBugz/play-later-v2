@@ -26,8 +26,8 @@ const createMockEntry = (
 
 const elements = {
   getButton: () => screen.getByRole("option"),
-  getPlatformText: () => screen.getByText(/PC|No Platform|PlayStation 5/),
-  getStatusBadge: () => screen.getByText(/Want to Play|Owned|Playing|Played/i),
+  getPlatformText: (text: string) => screen.getByText(text),
+  getStatusBadge: (status: string) => screen.getByText(status),
 };
 
 const actions = {
@@ -50,7 +50,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("PC")).toBeVisible();
+      expect(elements.getPlatformText("PC")).toBeVisible();
     });
 
     it("should display PlayStation 5 platform", () => {
@@ -59,7 +59,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("PlayStation 5")).toBeVisible();
+      expect(elements.getPlatformText("PlayStation 5")).toBeVisible();
     });
 
     it("should display Nintendo Switch platform", () => {
@@ -68,7 +68,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("Nintendo Switch")).toBeVisible();
+      expect(elements.getPlatformText("Nintendo Switch")).toBeVisible();
     });
   });
 
@@ -79,7 +79,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("No Platform")).toBeVisible();
+      expect(elements.getPlatformText("No Platform")).toBeVisible();
     });
 
     it("should display 'No Platform' when platform is undefined", () => {
@@ -88,7 +88,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("No Platform")).toBeVisible();
+      expect(elements.getPlatformText("No Platform")).toBeVisible();
     });
   });
 
@@ -101,7 +101,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("Want to Play")).toBeVisible();
+      expect(elements.getStatusBadge("Want to Play")).toBeVisible();
     });
 
     it("should display status badge for Owned", () => {
@@ -110,7 +110,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("Owned")).toBeVisible();
+      expect(elements.getStatusBadge("Owned")).toBeVisible();
     });
 
     it("should display status badge for Playing", () => {
@@ -119,7 +119,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("Playing")).toBeVisible();
+      expect(elements.getStatusBadge("Playing")).toBeVisible();
     });
 
     it("should display status badge for Played", () => {
@@ -128,7 +128,7 @@ describe("EntryRow", () => {
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(screen.getByText("Played")).toBeVisible();
+      expect(elements.getStatusBadge("Played")).toBeVisible();
     });
   });
 

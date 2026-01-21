@@ -75,6 +75,8 @@ const elements = {
   getContentError: () => screen.queryByText(/content is required/i),
   getAutoLinkMessage: () =>
     screen.queryByText(/automatically linked to your library item/i),
+  getLibraryItemOption: (name: RegExp) =>
+    screen.getByRole("option", { name }),
 };
 
 const actions = {
@@ -386,7 +388,7 @@ describe("JournalEntryForm", () => {
         });
 
         await userEvent.click(elements.getLibraryItemSelect()!);
-        await userEvent.click(screen.getByRole("option", { name: /steam/i }));
+        await userEvent.click(elements.getLibraryItemOption(/steam/i));
 
         await actions.typeTitle("Test");
         await actions.typeContent("Content");
