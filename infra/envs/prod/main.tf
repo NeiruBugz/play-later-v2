@@ -74,8 +74,10 @@ module "steam_import_queue" {
   project_name = var.project_name
   environment  = var.environment
 
-  # Sender principals will be updated when we add the API Gateway/NextAuth integration
-  sender_principals = ["*"]
+  # TODO: Replace ["*"] with actual IAM role ARN for the Next.js server/ECS task
+  # Example: sender_principals = [module.ecs_task_role.arn]
+  # Security: ["*"] allows any AWS principal to send messages - MUST be restricted in production
+  sender_principals = var.steam_import_sender_principals
 
   # Queue configuration
   visibility_timeout_seconds    = 300     # 5 minutes - matches Lambda timeout

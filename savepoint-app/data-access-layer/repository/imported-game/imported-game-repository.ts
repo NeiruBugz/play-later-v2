@@ -8,6 +8,7 @@ import {
 } from "@/data-access-layer/repository/types";
 import { Prisma } from "@prisma/client";
 
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { prisma } from "@/shared/lib/app/db";
 
 import type {
@@ -15,6 +16,10 @@ import type {
   ImportedGameQueryOptions,
   PaginatedImportedGames,
 } from "./types";
+
+const logger = createLogger({
+  [LOGGER_CONTEXT.REPOSITORY]: "imported-game-repository",
+});
 
 export async function upsertManyImportedGames(
   userId: string,
@@ -114,13 +119,13 @@ export async function findImportedGamesByUserId(
       };
     }
 
-    if (playtimeStatus === "played") {
-      whereClause.playtime = { gt: 0 };
-    } else if (playtimeStatus === "never_played") {
-      whereClause.playtime = { equals: 0 };
-    }
-
     if (playtimeRange !== "all") {
+      if (playtimeStatus !== "all") {
+        logger.warn(
+          { playtimeStatus, playtimeRange },
+          "Both playtimeStatus and playtimeRange filters provided - using playtimeRange"
+        );
+      }
       switch (playtimeRange) {
         case "under_1h":
           whereClause.playtime = { lt: 60 };
@@ -135,6 +140,10 @@ export async function findImportedGamesByUserId(
           whereClause.playtime = { gte: 3000 };
           break;
       }
+    } else if (playtimeStatus === "played") {
+      whereClause.playtime = { gt: 0 };
+    } else if (playtimeStatus === "never_played") {
+      whereClause.playtime = { equals: 0 };
     }
 
     if (platform !== "all") {

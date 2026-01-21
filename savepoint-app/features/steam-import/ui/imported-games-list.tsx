@@ -382,8 +382,14 @@ export function ImportedGamesList({
     return <ErrorState error={error} onRetry={onRetry} />;
   }
 
-  const hasNoGamesAtAll = totalCount === 0 && !search;
-  const hasNoSearchResults = totalCount === 0 && search;
+  const hasActiveFiltersExcludingSearch =
+    activeFilters.filter((f) => f.key !== "search").length > 0;
+  const hasNoGamesAtAll =
+    totalCount === 0 && !search && !hasActiveFiltersExcludingSearch;
+  const hasNoSearchResults =
+    totalCount === 0 && search && !hasActiveFiltersExcludingSearch;
+  const hasNoFilterResults =
+    totalCount === 0 && hasActiveFiltersExcludingSearch && !search;
 
   if (hasNoGamesAtAll) {
     return (
@@ -590,6 +596,18 @@ export function ImportedGamesList({
           title="No games found"
           description={`No games match "${search}". Try a different search term.`}
           spacing="compact"
+        />
+      ) : hasNoFilterResults ? (
+        <EmptyState
+          icon={Search}
+          title="No games match your filters"
+          description="Try adjusting your filter criteria to see more games."
+          spacing="compact"
+          action={{
+            label: "Clear all filters",
+            onClick: handleClearAllFilters,
+            variant: "secondary",
+          }}
         />
       ) : (
         <>

@@ -61,6 +61,10 @@ variable "max_receive_count" {
 
 variable "sender_principals" {
   type        = list(string)
-  description = "List of AWS principal ARNs allowed to send messages to the queue"
-  default     = ["*"]
+  description = "List of AWS principal ARNs allowed to send messages to the queue. Use [\"*\"] only for development - production should specify explicit IAM ARNs."
+
+  validation {
+    condition     = length(var.sender_principals) > 0
+    error_message = "sender_principals must contain at least one principal ARN."
+  }
 }

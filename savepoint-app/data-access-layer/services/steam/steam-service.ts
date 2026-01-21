@@ -22,6 +22,31 @@ import type {
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "SteamService" });
 
 const STEAM_ID_64_REGEX = /^\d{17}$/;
+const DEFAULT_TIMEOUT_MS = 30000;
+
+async function fetchWithTimeout(
+  url: string | URL,
+  options: RequestInit & { timeout?: number } = {}
+): Promise<Response> {
+  const { timeout = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url.toString(), {
+      ...fetchOptions,
+      signal: controller.signal,
+    });
+    return response;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(`Request timed out after ${timeout}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 export class SteamService extends BaseService {
   private apiKey = env.STEAM_API_KEY;
@@ -38,7 +63,7 @@ export class SteamService extends BaseService {
       const url = new URL(`${this.baseUrl}/ISteamUser/ResolveVanityURL/v1/`);
       url.searchParams.set("key", this.apiKey);
       url.searchParams.set("vanityurl", vanityUrl);
-      const response = await fetch(url.toString());
+      const response = await fetchWithTimeout(url.toString());
 
       if (!response.ok) {
         logger.error(
@@ -84,6 +109,13 @@ export class SteamService extends BaseService {
     } catch (error) {
       logger.error({ error, vanityUrl }, "Error resolving vanity URL");
 
+      if (error instanceof Error && error.message.includes("timed out")) {
+        return this.error(
+          "Steam is taking too long to respond. Please try again later.",
+          ServiceErrorCode.STEAM_API_UNAVAILABLE
+        );
+      }
+
       if (
         error instanceof TypeError &&
         (error.message.includes("fetch") || error.message.includes("network"))
@@ -107,7 +139,7 @@ export class SteamService extends BaseService {
 
     try {
       const url = `${this.baseUrl}/ISteamUser/GetPlayerSummaries/v2/?key=${this.apiKey}&steamids=${steamId64}`;
-      const response = await fetch(url);
+      const response = await fetchWithTimeout(url);
 
       if (!response.ok) {
         logger.error(
@@ -173,6 +205,13 @@ export class SteamService extends BaseService {
       return this.success(profile);
     } catch (error) {
       logger.error({ error, steamId64 }, "Error fetching player summary");
+
+      if (error instanceof Error && error.message.includes("timed out")) {
+        return this.error(
+          "Steam is taking too long to respond. Please try again later.",
+          ServiceErrorCode.STEAM_API_UNAVAILABLE
+        );
+      }
 
       if (
         error instanceof TypeError &&
@@ -240,7 +279,7 @@ export class SteamService extends BaseService {
       url.searchParams.set("include_played_free_games", "1");
       url.searchParams.set("include_extended_appinfo", "1");
 
-      const response = await fetch(url.toString());
+      const response = await fetchWithTimeout(url.toString());
 
       if (!response.ok) {
         logger.error(
@@ -306,6 +345,13 @@ export class SteamService extends BaseService {
       return this.success(ownedGames);
     } catch (error) {
       logger.error({ error, steamId64 }, "Error fetching owned games");
+
+      if (error instanceof Error && error.message.includes("timed out")) {
+        return this.error(
+          "Steam is taking too long to respond. Please try again later.",
+          ServiceErrorCode.STEAM_API_UNAVAILABLE
+        );
+      }
 
       if (
         error instanceof TypeError &&

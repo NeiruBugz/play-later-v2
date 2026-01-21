@@ -8,6 +8,7 @@ export const LOGGER_CONTEXT = {
   DATABASE: "database",
   HANDLER: "handler",
   USE_CASE: "useCase",
+  REPOSITORY: "repository",
 } as const;
 export type LoggerContextKey =
   (typeof LOGGER_CONTEXT)[keyof typeof LOGGER_CONTEXT];

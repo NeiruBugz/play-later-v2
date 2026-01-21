@@ -68,7 +68,7 @@ Display the imported games with pagination.
 - [x] Create `use-imported-games.ts` TanStack Query hook for list fetching **[Agent: nextjs-expert]**
 - [x] Add component tests for ImportedGameCard and ImportedGamesList **[Agent: typescript-test-expert]**
 
---- 
+---
 
 ## Slice 6: Search and Filter Imported Games
 

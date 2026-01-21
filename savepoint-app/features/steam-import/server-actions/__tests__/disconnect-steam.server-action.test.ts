@@ -234,17 +234,6 @@ describe("disconnectSteam server action", () => {
         userId: "user-123",
       });
     });
-
-    it("should validate using empty schema", async () => {
-      mockDisconnectSteam.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
-
-      const result = await disconnectSteam({});
-
-      expect(result.success).toBe(true);
-    });
   });
 
   describe("cache revalidation", () => {

@@ -44,6 +44,14 @@ export const triggerBackgroundSync = createServerAction<
       };
     }
 
+    if (!env.STEAM_SYNC_QUEUE_URL) {
+      logger.error("STEAM_SYNC_QUEUE_URL is not configured");
+      return {
+        success: false,
+        error: "Background sync is not configured. Please contact support.",
+      };
+    }
+
     const profileService = new ProfileService();
     const steamConnectionResult = await profileService.getSteamConnectionStatus(
       {
@@ -105,7 +113,7 @@ export const triggerBackgroundSync = createServerAction<
         MessageBody: JSON.stringify(message),
         ...(isFifoQueue && {
           MessageGroupId: userId,
-          MessageDeduplicationId: `${userId}-${Date.now()}`,
+          MessageDeduplicationId: `${userId}-${input.type}`,
         }),
       });
 

@@ -111,7 +111,7 @@ enable_steam_import_event_source = false
 
 ### Message Flow
 
-```
+```text
 NextAuth API Route
       ↓
    SendMessage to SQS
@@ -324,7 +324,7 @@ sender_principals = [
 2. **Common Causes**:
    - Lambda timeout (300s)
    - Unhandled exceptions in Lambda code
-   - Steam API rate limiting
+   - Steam API rate-limiting
    - Invalid message format
 
 3. **Reprocessing Failed Messages**:

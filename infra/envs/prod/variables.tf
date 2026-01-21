@@ -79,3 +79,9 @@ variable "enable_steam_import_event_source" {
   description = "Enable SQS event source mapping for Steam Import Lambda"
   default     = true
 }
+
+variable "steam_import_sender_principals" {
+  type        = list(string)
+  description = "AWS principal ARNs allowed to send messages to the Steam import queue. MUST specify explicit ARNs in production - do not use [\"*\"]."
+  default     = ["*"]
+}

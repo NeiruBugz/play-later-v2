@@ -5,6 +5,7 @@ import {
 } from "@/data-access-layer/handlers";
 import { NextResponse } from "next/server";
 
+import { importedGamesQuerySchema } from "@/features/steam-import/schemas";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
@@ -98,43 +99,36 @@ export async function GET(request: Request): Promise<NextResponse> {
     }
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "25", 10);
-    const search = searchParams.get("search") || undefined;
-    const playtimeStatus = (searchParams.get("playtimeStatus") || undefined) as
-      | "all"
-      | "played"
-      | "never_played"
-      | undefined;
-    const playtimeRange = (searchParams.get("playtimeRange") || undefined) as
-      | "all"
-      | "under_1h"
-      | "1_to_10h"
-      | "10_to_50h"
-      | "over_50h"
-      | undefined;
-    const platform = (searchParams.get("platform") || undefined) as
-      | "all"
-      | "windows"
-      | "mac"
-      | "linux"
-      | undefined;
-    const lastPlayed = (searchParams.get("lastPlayed") || undefined) as
-      | "all"
-      | "30_days"
-      | "1_year"
-      | "over_1_year"
-      | "never"
-      | undefined;
-    const sortBy = (searchParams.get("sortBy") || undefined) as
-      | "name_asc"
-      | "name_desc"
-      | "playtime_desc"
-      | "playtime_asc"
-      | "last_played_desc"
-      | "last_played_asc"
-      | "added_desc"
-      | undefined;
+    const queryParams = Object.fromEntries(
+      [...searchParams.entries()].map(([k, v]) => [k, v || undefined])
+    );
+
+    const parseResult = importedGamesQuerySchema.safeParse(queryParams);
+
+    if (!parseResult.success) {
+      logger.warn(
+        { userId, errors: parseResult.error.flatten().fieldErrors },
+        "Invalid query parameters for imported games list"
+      );
+      return NextResponse.json(
+        {
+          error: "Invalid query parameters",
+          details: parseResult.error.flatten().fieldErrors,
+        },
+        { status: HTTP_STATUS.BAD_REQUEST }
+      );
+    }
+
+    const {
+      page,
+      limit,
+      search,
+      playtimeStatus,
+      playtimeRange,
+      platform,
+      lastPlayed,
+      sortBy,
+    } = parseResult.data;
 
     logger.info(
       {
