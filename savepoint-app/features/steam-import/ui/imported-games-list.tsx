@@ -386,8 +386,7 @@ export function ImportedGamesList({
     activeFilters.filter((f) => f.key !== "search").length > 0;
   const hasNoGamesAtAll =
     totalCount === 0 && !search && !hasActiveFiltersExcludingSearch;
-  const hasNoSearchResults =
-    totalCount === 0 && search && !hasActiveFiltersExcludingSearch;
+  const hasNoSearchResults = totalCount === 0 && !!search;
   const hasNoFilterResults =
     totalCount === 0 && hasActiveFiltersExcludingSearch && !search;
 

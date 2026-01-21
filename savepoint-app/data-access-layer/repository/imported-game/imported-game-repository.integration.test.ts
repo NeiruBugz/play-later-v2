@@ -204,7 +204,7 @@ describe("ImportedGameRepository Integration Tests", () => {
       expect(findResult.success).toBe(true);
       if (findResult.success) {
         const gameId = findResult.data.items[0].id;
-        await softDeleteImportedGame(gameId);
+        await softDeleteImportedGame(gameId, user.id);
       }
 
       const updatedGames: CreateImportedGameInput[] = [
@@ -675,7 +675,7 @@ describe("ImportedGameRepository Integration Tests", () => {
       });
       expect(findResult.success).toBe(true);
       if (findResult.success) {
-        await softDeleteImportedGame(findResult.data.items[0].id);
+        await softDeleteImportedGame(findResult.data.items[0].id, user.id);
       }
 
       const countResult = await countImportedGamesByUserId(user.id);

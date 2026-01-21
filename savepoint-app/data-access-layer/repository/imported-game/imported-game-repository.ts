@@ -252,11 +252,12 @@ export async function countImportedGamesByUserId(
 }
 
 export async function softDeleteImportedGame(
-  id: string
+  id: string,
+  userId: string
 ): Promise<RepositoryResult<void>> {
   try {
     await prisma.importedGame.update({
-      where: { id },
+      where: { id, userId },
       data: { deletedAt: new Date() },
     });
     return repositorySuccess(undefined);
