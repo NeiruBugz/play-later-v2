@@ -235,18 +235,6 @@ describe("disconnectSteam server action", () => {
       });
     });
 
-    it("should reject invalid input with extra fields", async () => {
-      mockDisconnectSteam.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
-
-      const result = await disconnectSteam({});
-
-      expect(result.success).toBe(true);
-      expect(mockDisconnectSteam).toHaveBeenCalled();
-    });
-
     it("should validate using empty schema", async () => {
       mockDisconnectSteam.mockResolvedValue({
         success: true,

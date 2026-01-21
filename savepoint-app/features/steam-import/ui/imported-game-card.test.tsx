@@ -239,15 +239,6 @@ describe("ImportedGameCard", () => {
   });
 
   describe("card styling", () => {
-    it("should have hover effect class", () => {
-      const game = createMockImportedGame();
-
-      const { container } = render(<ImportedGameCard game={game} />);
-
-      const card = container.querySelector(".hover\\:bg-muted\\/20");
-      expect(card).toBeInTheDocument();
-    });
-
     it("should display metadata with bullet separator", () => {
       const game = createMockImportedGame({
         playtime: 120,

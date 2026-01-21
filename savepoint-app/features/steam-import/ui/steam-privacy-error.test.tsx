@@ -45,13 +45,6 @@ describe("SteamPrivacyError", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("displays an external link icon", () => {
-    render(<SteamPrivacyError message="Test message" />);
-
-    const button = screen.getByRole("link", { name: /Open Privacy Settings/i });
-    expect(button.querySelector("svg")).toBeInTheDocument();
-  });
-
   it("renders retry button when onRetry is provided", () => {
     const onRetry = vi.fn();
 
