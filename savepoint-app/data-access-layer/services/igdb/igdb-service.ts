@@ -203,6 +203,11 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
           },
           "IGDB API request failed"
         );
+
+        if (response.status === 429) {
+          throw new Error("IGDB_RATE_LIMITED");
+        }
+
         throw new Error(
           `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
         );
@@ -308,6 +313,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       });
     } catch (error) {
       logger.error({ error, searchQuery: name }, "Error searching games");
+      if (error instanceof Error && error.message === "IGDB_RATE_LIMITED") {
+        return this.error(
+          "IGDB API rate limit exceeded. Please try again in a moment.",
+          ServiceErrorCode.IGDB_RATE_LIMITED
+        );
+      }
       return this.handleError(error, "Failed to find games");
     }
   }
@@ -352,6 +363,12 @@ export class IgdbService extends BaseService implements IgdbServiceInterface {
       }
     } catch (error) {
       logger.error({ error, gameId }, "Error fetching game details");
+      if (error instanceof Error && error.message === "IGDB_RATE_LIMITED") {
+        return this.error(
+          "IGDB API rate limit exceeded. Please try again in a moment.",
+          ServiceErrorCode.IGDB_RATE_LIMITED
+        );
+      }
       return this.handleError(error, "Failed to fetch game details");
     }
   }

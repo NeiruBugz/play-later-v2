@@ -37,6 +37,7 @@ export type ImportedGamesHandlerInput = {
     | "last_played_desc"
     | "last_played_asc"
     | "added_desc";
+  showAlreadyImported?: boolean;
 };
 
 export type ImportedGamesHandlerOutput = {

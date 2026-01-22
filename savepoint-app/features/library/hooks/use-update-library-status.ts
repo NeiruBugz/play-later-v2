@@ -3,12 +3,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import type {
-  LibraryItemStatus,
-  LibraryItemWithGameDomain,
-} from "@/shared/types";
+import type { LibraryItemStatus } from "@/shared/types";
 
 import { updateLibraryStatusAction } from "../server-actions/update-library-status";
+
+type LibraryPageData = {
+  items: { id: number; status: LibraryItemStatus }[];
+  total: number;
+  hasMore: boolean;
+};
+
+type InfiniteLibraryData = {
+  pages: LibraryPageData[];
+  pageParams: unknown[];
+};
 
 type UpdateLibraryStatusParams = {
   libraryItemId: number;
@@ -36,15 +44,21 @@ export function useUpdateLibraryStatus() {
         queryKey: ["library"],
       });
 
-      queryClient.setQueriesData<LibraryItemWithGameDomain[]>(
+      queryClient.setQueriesData<InfiniteLibraryData>(
         { queryKey: ["library"] },
         (oldData) => {
-          if (!oldData) return oldData;
-          return oldData.map((item) =>
-            item.id === params.libraryItemId
-              ? { ...item, status: params.status }
-              : item
-          );
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) =>
+                item.id === params.libraryItemId
+                  ? { ...item, status: params.status }
+                  : item
+              ),
+            })),
+          };
         }
       );
 

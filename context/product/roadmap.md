@@ -39,23 +39,25 @@ _Once the foundational features are complete, we will move on to these high-valu
 - [ ] **Steam Library Integration**
 
   _Philosophy: SavePoint is for games you intend to experience, not a catalog. Steam import is curation, not bulk transfer. See [Product Definition](product-definition.md#23-ux-principles)._
-  - [ ] **Stage 1: Technical Foundation**
-    - [ ] **Lambda Integration:** Connect existing Lambda pipeline (fetch Steam library → IGDB enrichment → `ImportedGame` staging table)
-    - [ ] **Feature Flag:** Environment-based toggle to disable Steam import flow in production (avoid AWS costs until ready)
-    - [ ] **Local Testing:** SAM/LocalStack setup for local Lambda invocation during development
-    - [ ] Steam profile connection UI (Steam ID input)
-    - [ ] Imported games stored in `ImportedGame` table (existing schema: storefront, playtime, IGDB match status)
+  - [x] **Stage 1: Technical Foundation**
+    - [x] **Lambda Integration:** Connect existing Lambda pipeline (fetch Steam library → IGDB enrichment → `ImportedGame` staging table)
+    - [x] **Feature Flag:** Environment-based toggle to disable Steam import flow in production (avoid AWS costs until ready)
+    - [x] **Local Testing:** SAM/LocalStack setup for local Lambda invocation during development
+    - [x] Steam profile connection UI (Steam ID input)
+    - [x] Imported games stored in `ImportedGame` table (existing schema: storefront, playtime, IGDB match status)
 
-  - [ ] **Stage 2: Curation UX Research**
-    - [ ] Research: How to present 100+ games without overwhelming users
-    - [ ] Evaluate approaches: playtime filtering, configurable criteria, smart grouping
-    - [ ] Define the curation flow and create functional spec
+  - [ ] **Stage 2: Individual Curation Interface**
+    - [ ] Paginated list of imported Steam games with sorting/filtering
+    - [ ] Individual import: click game → auto-match IGDB via Steam App ID → add to library
+    - [ ] Manual IGDB search for games that don't auto-match
+    - [ ] Smart status assignment (playtime/recency → Owned/Playing/Played)
+    - [ ] Dismiss action to soft-delete unwanted games from list
 
-  - [ ] **Stage 3: Curation Interface**
-    - [ ] Present imported games for user selection ("Choose games to track")
-    - [ ] Smart defaults: games with playtime pre-selected, never-launched unchecked
-    - [ ] Bulk actions: Select All / Deselect All
-    - [ ] Selected games added to library with chosen status
+  - [ ] **Stage 3: Bulk Selection & Import** _(Future Enhancement)_
+    - [ ] Checkbox selection on each game row
+    - [ ] Bulk actions: Select All / Deselect All / Select All on Page
+    - [ ] Bulk import: import multiple selected games at once
+    - [ ] Selection state persists across pagination
 
   - [ ] **Stage 4: Ongoing Sync**
     - [ ] Re-import detects new games only (no duplicates)
@@ -64,7 +66,6 @@ _Once the foundational features are complete, we will move on to these high-valu
 - [ ] **PlayStation Trophy Integration** _(Research Complete)_
 
   _Import games based on earned trophies. Uses unofficial PSN API with "About Me" verification (same approach as PSNProfiles). See [research/playstation-integration.md](../research/playstation-integration.md)._
-
   - [ ] **Stage 1: Account Linking**
     - [ ] PSN username input with verification code flow
     - [ ] "About Me" verification via psn-api library
@@ -82,7 +83,6 @@ _Once the foundational features are complete, we will move on to these high-valu
 - [ ] **Xbox Game Pass Integration** _(Research Complete)_
 
   _Import games and achievements via OpenXBL API. Supports full game library (not just achievements). See [research/xbox-integration.md](../research/xbox-integration.md)._
-
   - [ ] **Stage 1: Account Linking**
     - [ ] OpenXBL OAuth integration ("Login with Xbox")
     - [ ] Store Xbox XUID and access credentials

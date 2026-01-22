@@ -128,6 +128,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       platform,
       lastPlayed,
       sortBy,
+      showAlreadyImported,
     } = parseResult.data;
 
     logger.info(
@@ -141,6 +142,7 @@ export async function GET(request: Request): Promise<NextResponse> {
         platform,
         lastPlayed,
         sortBy,
+        showAlreadyImported,
       },
       "Imported games list request received"
     );
@@ -155,6 +157,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       platform,
       lastPlayed,
       sortBy,
+      showAlreadyImported,
     });
 
     if (!result.success) {

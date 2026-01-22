@@ -43,8 +43,7 @@ const elements = {
   getStatusButtons: () => screen.getAllByRole("button"),
   getStatusRadio: (label: string) =>
     screen.getByRole("radio", { name: new RegExp(label, "i") }),
-  findPlatformOption: (name: string) =>
-    screen.findByRole("option", { name }),
+  findPlatformOption: (name: string) => screen.findByRole("option", { name }),
   getSubmitButton: () => {
     const buttons = screen.getAllByRole("button");
     return (

@@ -41,6 +41,7 @@ export type ImportedGameQueryOptions = {
   platform?: Platform;
   lastPlayed?: LastPlayed;
   sortBy?: SortBy;
+  matchStatus?: IgdbMatchStatus[];
 };
 
 export type PaginatedImportedGames = {

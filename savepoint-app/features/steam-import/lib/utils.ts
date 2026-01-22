@@ -32,3 +32,5 @@ export function isSteamRateLimitError(errorMessage: string): boolean {
     (lower.includes("wait") && lower.includes("try again"))
   );
 }
+
+export { calculateSmartStatus } from "./calculate-smart-status";

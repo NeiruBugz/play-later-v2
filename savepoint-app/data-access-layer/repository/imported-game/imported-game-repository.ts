@@ -6,7 +6,11 @@ import {
   repositorySuccess,
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
-import { Prisma } from "@prisma/client";
+import {
+  Prisma,
+  type IgdbMatchStatus,
+  type ImportedGame,
+} from "@prisma/client";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { prisma } from "@/shared/lib/app/db";
@@ -101,6 +105,7 @@ export async function findImportedGamesByUserId(
       platform = "all",
       lastPlayed = "all",
       sortBy = "added_desc",
+      matchStatus,
     } = options;
 
     const validatedLimit = Math.min(Math.max(1, limit), 100);
@@ -111,6 +116,12 @@ export async function findImportedGamesByUserId(
       userId,
       deletedAt: null,
     };
+
+    if (matchStatus && matchStatus.length > 0) {
+      whereClause.igdbMatchStatus = {
+        in: matchStatus,
+      };
+    }
 
     if (search) {
       whereClause.name = {
@@ -235,6 +246,27 @@ export async function findImportedGamesByUserId(
   }
 }
 
+export async function findImportedGameById(
+  id: string,
+  userId: string
+): Promise<RepositoryResult<ImportedGame | null>> {
+  try {
+    const game = await prisma.importedGame.findFirst({
+      where: {
+        id,
+        userId,
+        deletedAt: null,
+      },
+    });
+    return repositorySuccess(game);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find imported game: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
 export async function countImportedGamesByUserId(
   userId: string
 ): Promise<RepositoryResult<number>> {
@@ -274,6 +306,41 @@ export async function softDeleteImportedGame(
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to soft delete imported game: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+export async function updateImportedGameStatus(
+  id: string,
+  userId: string,
+  status: IgdbMatchStatus
+): Promise<RepositoryResult<ImportedGame>> {
+  try {
+    const updated = await prisma.importedGame.update({
+      where: {
+        id,
+        userId,
+        deletedAt: null,
+      },
+      data: {
+        igdbMatchStatus: status,
+        updatedAt: new Date(),
+      },
+    });
+    return repositorySuccess(updated);
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return repositoryError(
+        RepositoryErrorCode.NOT_FOUND,
+        "Imported game not found or access denied"
+      );
+    }
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to update imported game status: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }

@@ -17,6 +17,7 @@ export type FindImportedGamesByUserIdInput = {
   platform?: Platform;
   lastPlayed?: LastPlayed;
   sortBy?: SortBy;
+  showAlreadyImported?: boolean;
 };
 
 export type FindImportedGamesByUserIdResult = {
@@ -25,4 +26,9 @@ export type FindImportedGamesByUserIdResult = {
   page: number;
   limit: number;
   totalPages: number;
+};
+
+export type DismissImportedGameInput = {
+  importedGameId: string;
+  userId: string;
 };

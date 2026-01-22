@@ -32,7 +32,9 @@ describe("SteamApiUnavailableError", () => {
   it("renders retry button when onRetry is provided", () => {
     const onRetry = vi.fn();
 
-    render(<SteamApiUnavailableError message={mockMessage} onRetry={onRetry} />);
+    render(
+      <SteamApiUnavailableError message={mockMessage} onRetry={onRetry} />
+    );
 
     expect(elements.getRetryButton()).toBeInTheDocument();
   });
@@ -46,7 +48,9 @@ describe("SteamApiUnavailableError", () => {
   it("calls onRetry when retry button is clicked", async () => {
     const onRetry = vi.fn();
 
-    render(<SteamApiUnavailableError message={mockMessage} onRetry={onRetry} />);
+    render(
+      <SteamApiUnavailableError message={mockMessage} onRetry={onRetry} />
+    );
 
     await actions.clickRetry();
 

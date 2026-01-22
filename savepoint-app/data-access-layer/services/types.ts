@@ -22,6 +22,7 @@ export enum ServiceErrorCode {
   STEAM_PROFILE_PRIVATE = "STEAM_PROFILE_PRIVATE",
   STEAM_API_UNAVAILABLE = "STEAM_API_UNAVAILABLE",
   RATE_LIMITED = "RATE_LIMITED",
+  IGDB_RATE_LIMITED = "IGDB_RATE_LIMITED",
 }
 export type PaginatedResult<TItem> = {
   items: TItem[];

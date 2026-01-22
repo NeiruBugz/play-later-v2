@@ -32,6 +32,11 @@ export const importedGamesQuerySchema = z.object({
       "added_desc",
     ])
     .default("name_asc"),
+  showAlreadyImported: z
+    .enum(["true", "false"])
+    .optional()
+    .default("false")
+    .transform((val) => val === "true"),
 });
 
 // Type inference helpers
