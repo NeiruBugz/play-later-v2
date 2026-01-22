@@ -1,10 +1,9 @@
 "use server";
 
-import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
-import { createLogger, LOGGER_CONTEXT, type ActionResult } from "@/shared/lib";
+import { createServerAction } from "@/shared/lib";
 import type { LibraryItemDomain } from "@/shared/types";
 
 import {
@@ -13,37 +12,21 @@ import {
 } from "../schemas";
 import { addToLibraryAction } from "./add-to-library-action";
 
-const logger = createLogger({
-  [LOGGER_CONTEXT.SERVER_ACTION]: "updateLibraryStatusAction",
-});
+export const updateLibraryStatusAction = createServerAction<
+  UpdateLibraryStatusByIgdbInput,
+  LibraryItemDomain
+>({
+  actionName: "updateLibraryStatusAction",
+  schema: UpdateLibraryStatusByIgdbSchema,
+  requireAuth: true,
+  handler: async ({ input, userId, logger }) => {
+    const { igdbId, status } = input;
 
-export async function updateLibraryStatusAction(
-  input: UpdateLibraryStatusByIgdbInput
-): Promise<ActionResult<LibraryItemDomain>> {
-  try {
-    logger.info(
-      { igdbId: input.igdbId, status: input.status },
-      "Updating library status"
-    );
-    const parsed = UpdateLibraryStatusByIgdbSchema.safeParse(input);
-    if (!parsed.success) {
-      logger.warn({ errors: parsed.error.issues }, "Invalid input data");
-      return {
-        success: false,
-        error: "Invalid input data",
-      };
-    }
-    const { igdbId, status } = parsed.data;
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn("Unauthenticated user attempted to update library status");
-      return {
-        success: false,
-        error: "You must be logged in to update your library",
-      };
-    }
+    logger.info({ igdbId, status, userId }, "Updating library status");
+
     const libraryService = new LibraryService();
     const gameResult = await libraryService.findGameByIgdbId(igdbId);
+
     if (!gameResult.success || !gameResult.data) {
       logger.info(
         { igdbId, userId },
@@ -51,12 +34,14 @@ export async function updateLibraryStatusAction(
       );
       return addToLibraryAction({ igdbId, status, platform: undefined });
     }
+
     const game = gameResult.data;
     const libraryItemsResult =
       await libraryService.findMostRecentLibraryItemByGameId({
-        userId,
+        userId: userId!,
         gameId: game.id,
       });
+
     if (!libraryItemsResult.success) {
       logger.error(
         { error: libraryItemsResult.error, userId, gameId: game.id },
@@ -67,6 +52,7 @@ export async function updateLibraryStatusAction(
         error: "Failed to find library items",
       };
     }
+
     if (!libraryItemsResult.data) {
       logger.info(
         { igdbId, userId },
@@ -74,14 +60,16 @@ export async function updateLibraryStatusAction(
       );
       return addToLibraryAction({ igdbId, status, platform: undefined });
     }
+
     const mostRecentItem = libraryItemsResult.data;
     const updateResult = await libraryService.updateLibraryItem({
-      userId,
+      userId: userId!,
       libraryItem: {
         id: mostRecentItem.id,
         status,
       },
     });
+
     if (!updateResult.success) {
       logger.error(
         { error: updateResult.error, userId, libraryItemId: mostRecentItem.id },
@@ -92,6 +80,7 @@ export async function updateLibraryStatusAction(
         error: "Failed to update library status",
       };
     }
+
     revalidatePath(`/games/${game.slug}`);
     logger.info(
       {
@@ -101,19 +90,10 @@ export async function updateLibraryStatusAction(
       },
       "Library status updated successfully"
     );
+
     return {
       success: true,
       data: updateResult.data,
     };
-  } catch (error) {
-    logger.error(
-      { error, igdbId: input.igdbId },
-      "Unexpected error in updateLibraryStatusAction"
-    );
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "An unexpected error occurred",
-    };
-  }
-}
+  },
+});

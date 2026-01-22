@@ -2,9 +2,12 @@ import { z } from "zod";
 
 import { LibraryItemStatus } from "@/shared/types";
 
-export const AddToLibrarySchema = z.object({
+const BaseIgdbStatusSchema = z.object({
   igdbId: z.number().int().positive(),
   status: z.enum(LibraryItemStatus),
+});
+
+export const AddToLibrarySchema = BaseIgdbStatusSchema.extend({
   platform: z.string().optional(),
   startedAt: z.date().optional(),
   completedAt: z.date().optional(),
@@ -22,19 +25,13 @@ export const UpdateLibraryEntrySchema = z.object({
   completedAt: z.date().optional(),
 });
 
-export const UpdateLibraryStatusByIgdbSchema = z.object({
-  igdbId: z.number().int().positive(),
-  status: z.enum(LibraryItemStatus),
-});
+export const UpdateLibraryStatusByIgdbSchema = BaseIgdbStatusSchema;
 
 export const GetLibraryStatusForGamesSchema = z.object({
   igdbIds: z.array(z.number().int().positive()).min(1).max(100),
 });
 
-export const QuickAddToLibrarySchema = z.object({
-  igdbId: z.number().int().positive(),
-  status: z.enum(LibraryItemStatus),
-});
+export const QuickAddToLibrarySchema = BaseIgdbStatusSchema;
 
 export type AddToLibraryInput = z.infer<typeof AddToLibrarySchema>;
 export type UpdateLibraryStatusInput = z.infer<

@@ -39,6 +39,14 @@ export const importedGamesQuerySchema = z.object({
     .transform((val) => val === "true"),
 });
 
+// Import to library action
+export const ImportToLibrarySchema = z.object({
+  importedGameId: z.string().cuid(),
+  status: z.enum(["want_to_play", "owned", "playing", "played"]).optional(),
+  manualIgdbId: z.number().int().positive().optional(),
+});
+
 // Type inference helpers
 export type ConnectSteamInput = z.infer<typeof connectSteamSchema>;
 export type ImportedGamesQuery = z.infer<typeof importedGamesQuerySchema>;
+export type ImportToLibraryInput = z.infer<typeof ImportToLibrarySchema>;

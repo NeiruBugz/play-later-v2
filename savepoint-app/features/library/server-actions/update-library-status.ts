@@ -2,18 +2,14 @@
 
 import { LibraryService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { createServerAction } from "@/shared/lib";
-import { LibraryItemStatus, type LibraryItemDomain } from "@/shared/types";
+import type { LibraryItemDomain } from "@/shared/types";
 
-const UpdateLibraryStatusSchema = z.object({
-  libraryItemId: z.number().int().positive(),
-  status: z.enum(LibraryItemStatus),
-});
-export type UpdateLibraryStatusInput = z.infer<
-  typeof UpdateLibraryStatusSchema
->;
+import {
+  UpdateLibraryStatusSchema,
+  type UpdateLibraryStatusInput,
+} from "../schemas";
 
 export const updateLibraryStatusAction = createServerAction<
   UpdateLibraryStatusInput,

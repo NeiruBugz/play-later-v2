@@ -6,11 +6,12 @@ import {
   USER_NAME_MIN_LENGTH,
 } from "@/shared/constants";
 
-export const signInSchema = z.object({
+export const SignInSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
 });
-export const signUpSchema = signInSchema.extend({
+
+export const SignUpSchema = SignInSchema.extend({
   password: z
     .string()
     .min(
@@ -30,6 +31,7 @@ export const signUpSchema = signInSchema.extend({
     )
     .optional(),
 });
-export type SignInValues = z.infer<typeof signInSchema>;
-export type SignUpValues = z.infer<typeof signUpSchema>;
-export type CredentialsFormValues = SignInValues & Partial<SignUpValues>;
+
+export type SignInInput = z.infer<typeof SignInSchema>;
+export type SignUpInput = z.infer<typeof SignUpSchema>;
+export type CredentialsFormValues = SignInInput & Partial<SignUpInput>;

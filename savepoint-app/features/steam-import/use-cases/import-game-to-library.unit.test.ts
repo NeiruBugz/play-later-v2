@@ -404,7 +404,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("NOT_FOUND");
         expect(result.error).toBe("Failed to fetch imported game");
       }
 
@@ -426,7 +425,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("NOT_FOUND");
         expect(result.error).toBe("Imported game not found or access denied");
       }
     });
@@ -457,7 +455,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("NO_MATCH");
         expect(result.error).toBe("Cannot match game without Steam App ID");
       }
 
@@ -492,7 +489,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("NO_MATCH");
         expect(result.error).toBe("No IGDB match found for this Steam game");
       }
 
@@ -525,7 +521,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("NETWORK_ERROR");
         expect(result.error).toBe("Network connection failed");
       }
 
@@ -552,7 +547,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("NETWORK_ERROR");
         expect(result.error).toContain("rate limit");
       }
 
@@ -584,7 +578,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("IGDB_ERROR");
         expect(result.error).toBe("Invalid Steam App ID format");
       }
 
@@ -618,7 +611,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("IGDB_ERROR");
         expect(result.error).toBe("Failed to check game existence");
       }
     });
@@ -648,7 +640,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("IGDB_ERROR");
         expect(result.error).toBe("Failed to fetch game details from IGDB");
       }
     });
@@ -678,7 +669,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("IGDB_ERROR");
         expect(result.error).toBe("Game not found in IGDB");
       }
     });
@@ -708,7 +698,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("IGDB_ERROR");
         expect(result.error).toBe("Game not found in IGDB");
       }
     });
@@ -743,7 +732,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("IGDB_ERROR");
         expect(result.error).toBe("Failed to create game record");
       }
     });
@@ -778,7 +766,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("IGDB_ERROR");
         expect(result.error).toBe("Failed to create game record");
       }
     });
@@ -813,7 +800,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("IGDB_ERROR");
         expect(result.error).toBe("Database constraint violation");
       }
     });
@@ -850,7 +836,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("DUPLICATE");
         expect(result.error).toBe("Game already in library");
       }
 
@@ -897,7 +882,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("DUPLICATE");
         expect(result.error).toBe("Game already in library");
       }
     });
@@ -931,7 +915,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("NO_MATCH");
       }
     });
 
@@ -1007,7 +990,6 @@ describe("importGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.errorCode).toBe("DUPLICATE");
       }
     });
   });

@@ -48,12 +48,6 @@ type ImportGameToLibraryResult =
   | {
       success: false;
       error: string;
-      errorCode:
-        | "NOT_FOUND"
-        | "NO_MATCH"
-        | "DUPLICATE"
-        | "IGDB_ERROR"
-        | "NETWORK_ERROR";
     };
 
 export async function importGameToLibrary(
@@ -75,7 +69,6 @@ export async function importGameToLibrary(
     return {
       success: false,
       error: "Failed to fetch imported game",
-      errorCode: "NOT_FOUND",
     };
   }
 
@@ -85,7 +78,6 @@ export async function importGameToLibrary(
     return {
       success: false,
       error: "Imported game not found or access denied",
-      errorCode: "NOT_FOUND",
     };
   }
 
@@ -128,7 +120,6 @@ export async function importGameToLibrary(
       return {
         success: false,
         error: "Cannot match game without Steam App ID",
-        errorCode: "NO_MATCH",
       };
     }
 
@@ -154,7 +145,6 @@ export async function importGameToLibrary(
           success: false,
           error:
             matchResult.error || "Network error occurred. Please try again.",
-          errorCode: "NETWORK_ERROR",
         };
       }
 
@@ -176,7 +166,6 @@ export async function importGameToLibrary(
       return {
         success: false,
         error: matchResult.error || "IGDB matching failed",
-        errorCode: "IGDB_ERROR",
       };
     }
 
@@ -199,7 +188,6 @@ export async function importGameToLibrary(
       return {
         success: false,
         error: "No IGDB match found for this Steam game",
-        errorCode: "NO_MATCH",
       };
     }
 
@@ -220,7 +208,6 @@ export async function importGameToLibrary(
     return {
       success: false,
       error: "Failed to check game existence",
-      errorCode: "IGDB_ERROR",
     };
   }
 
@@ -251,7 +238,6 @@ export async function importGameToLibrary(
         return {
           success: false,
           error: "Failed to fetch game details from IGDB",
-          errorCode: "IGDB_ERROR",
         };
       }
 
@@ -263,7 +249,6 @@ export async function importGameToLibrary(
       return {
         success: false,
         error: "Game not found in IGDB",
-        errorCode: "IGDB_ERROR",
       };
     }
 
@@ -280,7 +265,6 @@ export async function importGameToLibrary(
       return {
         success: false,
         error: "Failed to create game record",
-        errorCode: "IGDB_ERROR",
       };
     }
 
@@ -289,7 +273,6 @@ export async function importGameToLibrary(
       return {
         success: false,
         error: "Failed to create game record",
-        errorCode: "IGDB_ERROR",
       };
     }
 
@@ -332,7 +315,6 @@ export async function importGameToLibrary(
     return {
       success: false,
       error: "Game already in library",
-      errorCode: "DUPLICATE",
     };
   }
 
@@ -354,7 +336,6 @@ export async function importGameToLibrary(
     return {
       success: false,
       error: createResult.error || "Failed to create library item",
-      errorCode: "IGDB_ERROR",
     };
   }
 

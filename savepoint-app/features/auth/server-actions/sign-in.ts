@@ -2,19 +2,19 @@
 
 import { signIn } from "@/auth";
 
-import { SignInFormData, signInSchema } from "@/features/auth/lib/types";
+import { SignInSchema, type SignInInput } from "@/features/auth/schemas";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import {
   isAuthenticationError,
   isNextAuthRedirect,
 } from "@/shared/lib/auth/handle-next-auth-error";
 
-export async function signInAction(data: SignInFormData) {
+export async function signInAction(data: SignInInput) {
   const logger = createLogger({
     [LOGGER_CONTEXT.SERVER_ACTION]: "signInAction",
   });
 
-  const validated = signInSchema.safeParse(data);
+  const validated = SignInSchema.safeParse(data);
   if (!validated.success) {
     logger.warn({ err: validated.error }, "Validation error during sign in");
     return {

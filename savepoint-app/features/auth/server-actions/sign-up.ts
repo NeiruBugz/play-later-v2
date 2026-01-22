@@ -3,15 +3,15 @@
 import { signIn } from "@/auth";
 import { AuthService } from "@/data-access-layer/services";
 
-import { SignUpFormData, signUpSchema } from "@/features/auth/lib/types";
+import { SignUpSchema, type SignUpInput } from "@/features/auth/schemas";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { isNextAuthRedirect } from "@/shared/lib/auth/handle-next-auth-error";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.SERVER_ACTION]: "signUpAction",
 });
-export async function signUpAction(data: SignUpFormData) {
-  const validated = signUpSchema.safeParse(data);
+export async function signUpAction(data: SignUpInput) {
+  const validated = SignUpSchema.safeParse(data);
   if (!validated.success) {
     logger.warn({ err: validated.error }, "Validation error during sign up");
     return {

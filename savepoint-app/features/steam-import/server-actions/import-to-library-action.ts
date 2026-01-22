@@ -1,24 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 import { createServerAction, type ActionResult } from "@/shared/lib";
 
+import { ImportToLibrarySchema, type ImportToLibraryInput } from "../schemas";
 import { importGameToLibrary } from "../use-cases/import-game-to-library";
-
-const ImportToLibrarySchema = z.object({
-  importedGameId: z.string().cuid(),
-  status: z.enum(["want_to_play", "owned", "playing", "played"]).optional(),
-  manualIgdbId: z.number().int().positive().optional(),
-});
 
 type ImportToLibraryOutput = {
   gameSlug: string;
 };
 
 export const importToLibraryAction = createServerAction<
-  z.infer<typeof ImportToLibrarySchema>,
+  ImportToLibraryInput,
   ImportToLibraryOutput
 >({
   actionName: "importToLibraryAction",
@@ -42,10 +36,7 @@ export const importToLibraryAction = createServerAction<
     });
 
     if (!result.success) {
-      logger.warn(
-        { error: result.error, errorCode: result.errorCode },
-        "Import to library failed"
-      );
+      logger.warn({ error: result.error }, "Import to library failed");
       return {
         success: false,
         error: result.error,

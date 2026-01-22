@@ -15,10 +15,10 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 
 import {
-  signInSchema,
-  signUpSchema,
+  SignInSchema,
+  SignUpSchema,
   type CredentialsFormValues,
-} from "../lib/validation";
+} from "../schemas";
 import { signInAction } from "../server-actions/sign-in";
 import { signUpAction } from "../server-actions/sign-up";
 
@@ -34,7 +34,7 @@ export function CredentialsForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [isPending, startTransition] = useTransition();
   const schema = useMemo(
-    () => (mode === "signup" ? signUpSchema : signInSchema),
+    () => (mode === "signup" ? SignUpSchema : SignInSchema),
     [mode]
   );
   const {
