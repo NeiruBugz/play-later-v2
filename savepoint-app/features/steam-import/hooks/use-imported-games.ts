@@ -3,47 +3,19 @@
 import type { ImportedGame } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 
-type UseImportedGamesOptions = {
-  page?: number;
-  limit?: number;
-  enabled?: boolean;
-  search?: string;
-  playtimeStatus?: "all" | "played" | "never_played";
-  playtimeRange?: "all" | "under_1h" | "1_to_10h" | "10_to_50h" | "over_50h";
-  platform?: "all" | "windows" | "mac" | "linux";
-  lastPlayed?: "all" | "30_days" | "1_year" | "over_1_year" | "never";
-  sortBy?:
-    | "name_asc"
-    | "name_desc"
-    | "playtime_desc"
-    | "playtime_asc"
-    | "last_played_desc"
-    | "last_played_asc"
-    | "added_desc";
-};
+import type {
+  ImportedGamesResponse,
+  PaginationInfo,
+  UseImportedGamesOptions,
+} from "../types";
 
 type UseImportedGamesResult = {
   games: ImportedGame[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  pagination: PaginationInfo;
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
   refetch: () => void;
-};
-
-type ImportedGamesResponse = {
-  games: ImportedGame[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
 };
 
 export function useImportedGames(
@@ -59,6 +31,7 @@ export function useImportedGames(
     platform,
     lastPlayed,
     sortBy = "added_desc",
+    showAlreadyImported = false,
   } = options ?? {};
 
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -73,6 +46,7 @@ export function useImportedGames(
         platform,
         lastPlayed,
         sortBy,
+        showAlreadyImported,
       },
     ],
     queryFn: async (): Promise<ImportedGamesResponse> => {
@@ -90,6 +64,8 @@ export function useImportedGames(
       if (lastPlayed && lastPlayed !== "all")
         params.set("lastPlayed", lastPlayed);
       if (sortBy) params.set("sortBy", sortBy);
+      if (showAlreadyImported)
+        params.set("showAlreadyImported", showAlreadyImported.toString());
 
       const response = await fetch(`/api/steam/games?${params.toString()}`, {
         method: "GET",

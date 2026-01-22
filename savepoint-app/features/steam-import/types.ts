@@ -66,4 +66,35 @@ export type ImportedGamesQueryOptions = {
   platform?: PlatformFilter;
   lastPlayed?: LastPlayedFilter;
   sortBy?: SortOption;
+  showAlreadyImported?: boolean;
+};
+
+// Library status for importing games
+export type LibraryStatus = "want_to_play" | "owned" | "playing" | "played";
+
+// Hook options for useImportedGames
+export type UseImportedGamesOptions = ImportedGamesQueryOptions & {
+  enabled?: boolean;
+};
+
+// Pagination info returned from API
+export type PaginationInfo = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+// Response shape from imported games API
+export type ImportedGamesResponse = {
+  games: import("@prisma/client").ImportedGame[];
+  pagination: PaginationInfo;
+};
+
+// Filter values for UI components (subset of ImportedGamesQueryOptions)
+export type FilterValues = {
+  playtimeStatus?: PlaytimeStatus;
+  playtimeRange?: PlaytimeRange;
+  platform?: PlatformFilter;
+  lastPlayed?: LastPlayedFilter;
 };
