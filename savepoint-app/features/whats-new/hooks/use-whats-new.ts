@@ -2,8 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { getActiveAnnouncements, STORAGE_KEY } from "../config";
-import type { FeatureAnnouncement } from "../types";
+import {
+  getActiveAnnouncements,
+  STORAGE_KEY,
+} from "@/features/whats-new/config";
+import type { FeatureAnnouncement } from "@/features/whats-new/types";
 
 const SHOW_DELAY_MS = 1000;
 
@@ -75,11 +78,13 @@ export function useWhatsNew(): UseWhatsNewReturn {
 
   const dismiss = useCallback(() => {
     const current = unseenAnnouncements[currentIndex];
+    const hasMoreItems = currentIndex < unseenAnnouncements.length - 1;
+
     if (current) {
       markAsSeen(current.id);
     }
 
-    if (currentIndex < unseenAnnouncements.length - 1) {
+    if (hasMoreItems) {
       setCurrentIndex((prev) => prev + 1);
     } else {
       setIsOpen(false);

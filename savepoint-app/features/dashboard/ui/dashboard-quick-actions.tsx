@@ -51,9 +51,9 @@ function QuickActionCard({
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold">{title}</h3>
-          <span className="body-sm text-muted-foreground line-clamp-2 block">
+          <div className="body-sm text-muted-foreground line-clamp-2 block">
             {isLoading ? <Skeleton className="h-4 w-full" /> : description}
-          </span>
+          </div>
         </div>
       </div>
     </Card>

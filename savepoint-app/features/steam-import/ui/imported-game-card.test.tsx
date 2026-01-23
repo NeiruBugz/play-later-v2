@@ -102,6 +102,7 @@ const actions = {
 
 describe("ImportedGameCard", () => {
   beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date("2026-01-20T12:00:00Z"));
     mockDismissMutate.mockClear();
     mockDismissGame.isPending = false;

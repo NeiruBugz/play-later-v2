@@ -29,9 +29,6 @@ _The highest priority features that form the core foundation of SavePoint—enab
 - [x] **Gaming Journal**
   - [x] **Write Journal Entries:** Provide a form for users to write reflections and memories about their gaming experiences, linked to specific games.
   - [x] **View Personal Journal:** Display a chronological timeline of the user's journal entries to revisit past reflections.
-- [x] **Gaming Journal**
-  - [x] **Write Journal Entries:** Provide a form for users to write reflections and memories about their gaming experiences, linked to specific games.
-  - [x] **View Personal Journal:** Display a chronological timeline of the user's journal entries to revisit past reflections.
 
 ---
 

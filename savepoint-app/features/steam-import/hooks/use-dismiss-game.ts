@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { dismissImportedGameAction } from "../server-actions/dismiss-imported-game-action";
+import { dismissImportedGameAction } from "@/features/steam-import/server-actions/dismiss-imported-game-action";
 
 type DismissGameParams = {
   importedGameId: string;

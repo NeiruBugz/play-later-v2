@@ -5,14 +5,11 @@ import {
   LibraryItemStatus,
   type LibraryItemDomain,
 } from "@/data-access-layer/domain/library";
-import {
-  findGameByIgdbId,
-  findImportedGameById,
-  updateImportedGameStatus,
-} from "@/data-access-layer/repository";
+import { findGameByIgdbId } from "@/data-access-layer/repository";
 import {
   GameDetailService,
   IgdbService,
+  ImportedGameService,
   LibraryService,
   ServiceErrorCode,
 } from "@/data-access-layer/services";
@@ -60,7 +57,11 @@ export async function importGameToLibrary(
     "Starting game import to library"
   );
 
-  const importedGameResult = await findImportedGameById(importedGameId, userId);
+  const importedGameService = new ImportedGameService();
+  const importedGameResult = await importedGameService.findById({
+    id: importedGameId,
+    userId,
+  });
   if (!importedGameResult.success) {
     logger.error(
       { error: importedGameResult.error, importedGameId, userId },
@@ -106,11 +107,11 @@ export async function importGameToLibrary(
         { importedGameId },
         "Cannot auto-match: missing storefrontGameId"
       );
-      const updateStatusResult = await updateImportedGameStatus(
-        importedGameId,
+      const updateStatusResult = await importedGameService.updateStatus({
+        id: importedGameId,
         userId,
-        "UNMATCHED"
-      );
+        status: "UNMATCHED",
+      });
       if (!updateStatusResult.success) {
         logger.error(
           { error: updateStatusResult.error, importedGameId },
@@ -152,11 +153,11 @@ export async function importGameToLibrary(
         { error: matchResult.error, importedGameId },
         "Steam to IGDB matching failed"
       );
-      const updateStatusResult = await updateImportedGameStatus(
-        importedGameId,
+      const updateStatusResult = await importedGameService.updateStatus({
+        id: importedGameId,
         userId,
-        "UNMATCHED"
-      );
+        status: "UNMATCHED",
+      });
       if (!updateStatusResult.success) {
         logger.error(
           { error: updateStatusResult.error, importedGameId },
@@ -174,11 +175,11 @@ export async function importGameToLibrary(
         { importedGameId, steamAppId: importedGame.storefrontGameId },
         "No IGDB match found for Steam game"
       );
-      const updateStatusResult = await updateImportedGameStatus(
-        importedGameId,
+      const updateStatusResult = await importedGameService.updateStatus({
+        id: importedGameId,
         userId,
-        "UNMATCHED"
-      );
+        status: "UNMATCHED",
+      });
       if (!updateStatusResult.success) {
         logger.error(
           { error: updateStatusResult.error, importedGameId },
@@ -290,21 +291,28 @@ export async function importGameToLibrary(
     gameId,
   });
 
-  if (
-    existingItemsResult.success &&
-    existingItemsResult.data &&
-    existingItemsResult.data.length > 0
-  ) {
+  if (!existingItemsResult.success) {
+    logger.error(
+      { error: existingItemsResult.error, userId, gameId },
+      "Failed to check library"
+    );
+    return {
+      success: false,
+      error: "Failed to check library",
+    };
+  }
+
+  if (existingItemsResult.data && existingItemsResult.data.length > 0) {
     logger.warn(
       { userId, gameId, existingCount: existingItemsResult.data.length },
       "Game already in user library (marking as MATCHED)"
     );
 
-    const updateStatusResult = await updateImportedGameStatus(
-      importedGameId,
+    const updateStatusResult = await importedGameService.updateStatus({
+      id: importedGameId,
       userId,
-      "MATCHED"
-    );
+      status: "MATCHED",
+    });
     if (!updateStatusResult.success) {
       logger.error(
         { error: updateStatusResult.error, importedGameId },
@@ -339,11 +347,11 @@ export async function importGameToLibrary(
     };
   }
 
-  const updateStatusResult = await updateImportedGameStatus(
-    importedGameId,
+  const updateStatusResult = await importedGameService.updateStatus({
+    id: importedGameId,
     userId,
-    "MATCHED"
-  );
+    status: "MATCHED",
+  });
   if (!updateStatusResult.success) {
     logger.error(
       { error: updateStatusResult.error, importedGameId },

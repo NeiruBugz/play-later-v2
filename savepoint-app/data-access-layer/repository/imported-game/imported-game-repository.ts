@@ -12,7 +12,6 @@ import {
   type ImportedGame,
 } from "@prisma/client";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { prisma } from "@/shared/lib/app/db";
 
 import type {
@@ -20,10 +19,6 @@ import type {
   ImportedGameQueryOptions,
   PaginatedImportedGames,
 } from "./types";
-
-const logger = createLogger({
-  [LOGGER_CONTEXT.REPOSITORY]: "imported-game-repository",
-});
 
 export async function upsertManyImportedGames(
   userId: string,
@@ -131,12 +126,6 @@ export async function findImportedGamesByUserId(
     }
 
     if (playtimeRange !== "all") {
-      if (playtimeStatus !== "all") {
-        logger.warn(
-          { playtimeStatus, playtimeRange },
-          "Both playtimeStatus and playtimeRange filters provided - using playtimeRange"
-        );
-      }
       switch (playtimeRange) {
         case "under_1h":
           whereClause.playtime = { lt: 60 };
@@ -316,12 +305,23 @@ export async function updateImportedGameStatus(
   status: IgdbMatchStatus
 ): Promise<RepositoryResult<ImportedGame>> {
   try {
-    const updated = await prisma.importedGame.update({
+    const existingGame = await prisma.importedGame.findFirst({
       where: {
         id,
         userId,
         deletedAt: null,
       },
+    });
+
+    if (!existingGame) {
+      return repositoryError(
+        RepositoryErrorCode.NOT_FOUND,
+        "Imported game not found or access denied"
+      );
+    }
+
+    const updated = await prisma.importedGame.update({
+      where: { id },
       data: {
         igdbMatchStatus: status,
         updatedAt: new Date(),
@@ -329,15 +329,6 @@ export async function updateImportedGameStatus(
     });
     return repositorySuccess(updated);
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
-      return repositoryError(
-        RepositoryErrorCode.NOT_FOUND,
-        "Imported game not found or access denied"
-      );
-    }
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to update imported game status: ${error instanceof Error ? error.message : "Unknown error"}`

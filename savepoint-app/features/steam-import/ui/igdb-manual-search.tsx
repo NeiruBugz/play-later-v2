@@ -56,6 +56,8 @@ export function IgdbManualSearch({
   const debouncedQuery = useDebouncedValue(query, 300);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const searchGames = async () => {
       if (debouncedQuery.length < 3) {
         setSearchResults([]);
@@ -68,24 +70,35 @@ export function IgdbManualSearch({
 
       try {
         const response = await fetch(
-          `/api/games/search?q=${encodeURIComponent(debouncedQuery)}&offset=0`
+          `/api/games/search?q=${encodeURIComponent(debouncedQuery)}&offset=0`,
+          { signal: controller.signal }
         );
+
+        if (controller.signal.aborted) return;
 
         if (!response.ok) {
           throw new Error("Search failed");
         }
 
         const data: SearchResult = await response.json();
+        if (controller.signal.aborted) return;
         setSearchResults(data.games);
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
         setError("Failed to search games. Please try again.");
         setSearchResults([]);
       } finally {
-        setIsSearching(false);
+        if (!controller.signal.aborted) {
+          setIsSearching(false);
+        }
       }
     };
 
     void searchGames();
+
+    return () => {
+      controller.abort();
+    };
   }, [debouncedQuery]);
 
   return (

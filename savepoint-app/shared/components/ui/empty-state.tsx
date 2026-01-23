@@ -125,13 +125,13 @@ export function EmptyState({
 
       {action && (
         <div className="mt-md" role="group" aria-labelledby="empty-state-title">
-          {action.href ? (
-            <Button asChild variant={action.variant} disabled={action.disabled}>
+          {action.href && !action.disabled ? (
+            <Button asChild variant={action.variant}>
               <Link href={action.href}>{action.label}</Link>
             </Button>
           ) : (
             <Button
-              onClick={action.onClick}
+              onClick={action.disabled ? undefined : action.onClick}
               variant={action.variant}
               disabled={action.disabled}
             >

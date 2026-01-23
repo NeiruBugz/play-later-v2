@@ -144,7 +144,8 @@ describe("IgdbManualSearch", () => {
         () => {
           expect(mockFetch).toHaveBeenCalledTimes(1);
           expect(mockFetch).toHaveBeenCalledWith(
-            "/api/games/search?q=zelda&offset=0"
+            "/api/games/search?q=zelda&offset=0",
+            expect.objectContaining({ signal: expect.any(AbortSignal) })
           );
         },
         { timeout: WAIT_TIMEOUT }
@@ -197,7 +198,8 @@ describe("IgdbManualSearch", () => {
       await waitFor(
         () => {
           expect(mockFetch).toHaveBeenCalledWith(
-            "/api/games/search?q=dark%20souls&offset=0"
+            "/api/games/search?q=dark%20souls&offset=0",
+            expect.objectContaining({ signal: expect.any(AbortSignal) })
           );
         },
         { timeout: WAIT_TIMEOUT }
@@ -217,7 +219,8 @@ describe("IgdbManualSearch", () => {
       await waitFor(
         () => {
           expect(mockFetch).toHaveBeenCalledWith(
-            "/api/games/search?q=game%20%26%20watch&offset=0"
+            "/api/games/search?q=game%20%26%20watch&offset=0",
+            expect.objectContaining({ signal: expect.any(AbortSignal) })
           );
         },
         { timeout: WAIT_TIMEOUT }
@@ -237,7 +240,8 @@ describe("IgdbManualSearch", () => {
       await waitFor(
         () => {
           expect(mockFetch).toHaveBeenCalledWith(
-            "/api/games/search?q=zelda&offset=0"
+            "/api/games/search?q=zelda&offset=0",
+            expect.objectContaining({ signal: expect.any(AbortSignal) })
           );
         },
         { timeout: WAIT_TIMEOUT }

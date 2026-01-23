@@ -1,5 +1,5 @@
 import { ServiceErrorCode } from "../types";
-import { matchSteamGameToIgdb } from "./igdb-matcher";
+import { matchSteamGameToIgdb, resetTokenCache } from "./igdb-matcher";
 
 vi.mock("@/env.mjs", () => ({
   env: {
@@ -18,6 +18,7 @@ describe("matchSteamGameToIgdb", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mockFetch.mockReset();
+    resetTokenCache();
   });
 
   describe("validation", () => {
@@ -77,10 +78,18 @@ describe("matchSteamGameToIgdb", () => {
     });
 
     it("should return null when no match found in IGDB", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
-      });
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => [],
+        });
 
       const result = await matchSteamGameToIgdb({ steamAppId: "999999" });
 
@@ -171,11 +180,20 @@ describe("matchSteamGameToIgdb", () => {
     });
 
     it("should return IGDB_RATE_LIMITED when API returns 429", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 429,
-        statusText: "Too Many Requests",
-      });
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 429,
+          statusText: "Too Many Requests",
+          text: async () => "Rate limited",
+        });
 
       const result = await matchSteamGameToIgdb({ steamAppId: "570" });
 

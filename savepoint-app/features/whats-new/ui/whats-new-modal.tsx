@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { useWhatsNew } from "@/features/whats-new/hooks";
+import type { AnnouncementCategory } from "@/features/whats-new/types";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -13,9 +15,6 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { cn } from "@/shared/lib/ui/utils";
-
-import { useWhatsNew } from "../hooks";
-import type { AnnouncementCategory } from "../types";
 
 const CATEGORY_LABELS: Record<AnnouncementCategory, string> = {
   feature: "New Feature",

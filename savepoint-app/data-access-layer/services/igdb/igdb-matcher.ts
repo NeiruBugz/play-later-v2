@@ -18,7 +18,10 @@ const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "IgdbMatcher" });
 const STEAM_STORE_URL = "https://store.steampowered.com/app";
 
 const MatchSteamGameSchema = z.object({
-  steamAppId: z.string().min(1, "Steam App ID is required"),
+  steamAppId: z
+    .string()
+    .min(1, "Steam App ID is required")
+    .regex(/^\d+$/, "Steam App ID must contain only digits"),
 });
 
 export type MatchSteamGameParams = z.infer<typeof MatchSteamGameSchema>;
@@ -29,6 +32,11 @@ export interface MatchSteamGameResult {
 
 let tokenCache: TwitchTokenResponse | null = null;
 let tokenExpiry: number = 0;
+
+export function resetTokenCache(): void {
+  tokenCache = null;
+  tokenExpiry = 0;
+}
 
 async function getToken(): Promise<string> {
   if (tokenCache && getTimeStamp() < tokenExpiry) {
@@ -97,8 +105,11 @@ async function makeIgdbRequest(
         throw new Error("IGDB_RATE_LIMITED");
       }
 
+      const errorBody = await response
+        .text()
+        .catch(() => "Unable to read body");
       throw new Error(
-        `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
+        `IGDB API error: ${response.status} ${response.statusText} - ${errorBody}`
       );
     }
 
