@@ -43,10 +43,17 @@ export type ImportedGameQueryOptions = {
   sortBy?: SortBy;
 };
 
+export type RepositoryWarning = {
+  code: string;
+  message: string;
+  context?: Record<string, unknown>;
+};
+
 export type PaginatedImportedGames = {
   items: ImportedGame[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
+  warnings?: RepositoryWarning[];
 };

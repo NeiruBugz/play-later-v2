@@ -8,18 +8,14 @@ import {
 } from "@/data-access-layer/repository/types";
 import { Prisma } from "@prisma/client";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { prisma } from "@/shared/lib/app/db";
 
 import type {
   CreateImportedGameInput,
   ImportedGameQueryOptions,
   PaginatedImportedGames,
+  RepositoryWarning,
 } from "./types";
-
-const logger = createLogger({
-  [LOGGER_CONTEXT.REPOSITORY]: "imported-game-repository",
-});
 
 export async function upsertManyImportedGames(
   userId: string,
@@ -30,11 +26,13 @@ export async function upsertManyImportedGames(
       let upsertedCount = 0;
 
       for (const game of games) {
+        const storefrontGameIdNormalized = game.storefrontGameId ?? null;
+
         const existingGame = await tx.importedGame.findFirst({
           where: {
             userId,
             storefront: game.storefront,
-            storefrontGameId: game.storefrontGameId,
+            storefrontGameId: storefrontGameIdNormalized,
             deletedAt: null,
           },
         });
@@ -60,7 +58,7 @@ export async function upsertManyImportedGames(
               userId,
               name: game.name,
               storefront: game.storefront,
-              storefrontGameId: game.storefrontGameId,
+              storefrontGameId: storefrontGameIdNormalized,
               playtime: game.playtime ?? 0,
               playtimeWindows: game.playtimeWindows ?? 0,
               playtimeMac: game.playtimeMac ?? 0,
@@ -103,6 +101,8 @@ export async function findImportedGamesByUserId(
       sortBy = "added_desc",
     } = options;
 
+    const warnings: RepositoryWarning[] = [];
+
     const validatedLimit = Math.min(Math.max(1, limit), 100);
     const validatedPage = Math.max(1, page);
     const skip = (validatedPage - 1) * validatedLimit;
@@ -121,10 +121,12 @@ export async function findImportedGamesByUserId(
 
     if (playtimeRange !== "all") {
       if (playtimeStatus !== "all") {
-        logger.warn(
-          { playtimeStatus, playtimeRange },
-          "Both playtimeStatus and playtimeRange filters provided - using playtimeRange"
-        );
+        warnings.push({
+          code: "CONFLICTING_FILTERS",
+          message:
+            "Both playtimeStatus and playtimeRange filters provided - using playtimeRange",
+          context: { playtimeStatus, playtimeRange },
+        });
       }
       switch (playtimeRange) {
         case "under_1h":
@@ -226,6 +228,7 @@ export async function findImportedGamesByUserId(
       page: validatedPage,
       limit: validatedLimit,
       totalPages: Math.ceil(total / validatedLimit),
+      ...(warnings.length > 0 && { warnings }),
     });
   } catch (error) {
     return repositoryError(

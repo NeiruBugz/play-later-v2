@@ -123,7 +123,9 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(elements.getLastPlayedText("Last played: 5 days ago")).toBeVisible();
+      expect(
+        elements.getLastPlayedText("Last played: 5 days ago")
+      ).toBeVisible();
     });
 
     it("should format recent date relatively (today)", () => {
@@ -141,7 +143,9 @@ describe("ImportedGameCard", () => {
 
       render(<ImportedGameCard game={game} />);
 
-      expect(elements.getLastPlayedText("Last played: yesterday")).toBeVisible();
+      expect(
+        elements.getLastPlayedText("Last played: yesterday")
+      ).toBeVisible();
     });
 
     it("should format old date absolutely when > 7 days ago", () => {
