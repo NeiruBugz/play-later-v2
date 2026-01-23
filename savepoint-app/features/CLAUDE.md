@@ -144,6 +144,24 @@ import { LibraryCard } from "@/features/library/ui";
 1. Only import from `library`'s public API (barrel exports)
 2. Library components should remain presentational where possible
 
+### Cross-Feature Import Exception: `whats-new`
+
+**Exception**: The `whats-new` feature provides an app-wide announcement modal for new features and updates.
+
+**Rationale**: The modal needs to appear on any protected page to announce new features to users. It's self-contained with localStorage-based state management.
+
+```typescript
+// ✅ Allowed - documented architectural exception
+import { WhatsNewModal } from "@/features/whats-new";
+```
+
+**Authorized consumers:**
+- `app/(protected)/layout.tsx`
+
+**Rules for this exception:**
+1. Only import from `whats-new`'s public API (barrel exports)
+2. Modal is self-contained with its own state management
+
 ### Use-Cases for Multi-Service Orchestration
 When a feature needs multiple services, create a use-case:
 
