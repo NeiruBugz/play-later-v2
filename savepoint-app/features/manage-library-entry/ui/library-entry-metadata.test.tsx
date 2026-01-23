@@ -53,6 +53,8 @@ const elements = {
     }),
   getPlatformLabel: () => screen.queryByText("Platform:"),
   getPlatformValue: (platform: string) => screen.getByText(platform),
+  getDateText: (text: string) => screen.getByText(text),
+  getMetadataCard: () => screen.getByTestId("library-entry-metadata-card"),
 };
 
 describe("LibraryEntryMetadata", () => {
@@ -62,7 +64,7 @@ describe("LibraryEntryMetadata", () => {
       render(<LibraryEntryMetadata item={item} />);
 
       expect(elements.getCreatedLabel()).toBeVisible();
-      expect(screen.getByText("today")).toBeVisible();
+      expect(elements.getDateText("today")).toBeVisible();
     });
 
     it("should not display updated date when same as created", () => {
@@ -98,7 +100,7 @@ describe("LibraryEntryMetadata", () => {
 
       render(<LibraryEntryMetadata item={item} />);
 
-      expect(screen.getByText("3 days ago")).toBeVisible();
+      expect(elements.getDateText("3 days ago")).toBeVisible();
     });
 
     it("should format updated date as relative time", () => {
@@ -111,7 +113,7 @@ describe("LibraryEntryMetadata", () => {
 
       render(<LibraryEntryMetadata item={item} />);
 
-      expect(screen.getByText("today")).toBeVisible();
+      expect(elements.getDateText("today")).toBeVisible();
     });
   });
 
@@ -153,7 +155,7 @@ describe("LibraryEntryMetadata", () => {
       const item = createMockLibraryItem();
       render(<LibraryEntryMetadata item={item} />);
 
-      const card = screen.getByTestId("library-entry-metadata-card");
+      const card = elements.getMetadataCard();
       expect(card).toHaveClass("bg-muted/50");
       expect(card).toHaveClass("border");
       expect(card).toHaveClass("rounded-lg");
@@ -163,10 +165,10 @@ describe("LibraryEntryMetadata", () => {
       const item = createMockLibraryItem();
       render(<LibraryEntryMetadata item={item} />);
 
-      const card = screen.getByTestId("library-entry-metadata-card");
+      const card = elements.getMetadataCard();
       expect(card).toBeVisible();
 
-      expect(screen.getByText("Created:")).toBeVisible();
+      expect(elements.getCreatedLabel()).toBeVisible();
     });
   });
 });

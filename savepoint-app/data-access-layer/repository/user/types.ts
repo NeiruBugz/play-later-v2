@@ -7,6 +7,8 @@ export type UpdateUserSteamDataInput = {
   steamId: string | null;
   username: string | null;
   avatar: string | null;
+  profileUrl?: string | null;
+  connectedAt?: Date | null;
 };
 export type GetUserByUsernameInput = {
   username: string;

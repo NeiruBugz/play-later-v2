@@ -41,6 +41,8 @@ export async function updateUserSteamData({
   steamId,
   username,
   avatar,
+  profileUrl,
+  connectedAt,
 }: UpdateUserSteamDataInput): Promise<RepositoryResult<User>> {
   try {
     const updated = await prisma.user.update({
@@ -49,6 +51,8 @@ export async function updateUserSteamData({
         steamId64: steamId,
         steamUsername: username,
         steamAvatar: avatar,
+        ...(profileUrl !== undefined && { steamProfileURL: profileUrl }),
+        ...(connectedAt !== undefined && { steamConnectedAt: connectedAt }),
       },
     });
     return repositorySuccess(updated);
@@ -92,6 +96,7 @@ export async function getUserSteamData({ userId }: { userId: string }): Promise<
   RepositoryResult<{
     steamId64: string | null;
     steamUsername: string | null;
+    steamAvatar: string | null;
     steamProfileURL: string | null;
     steamConnectedAt: Date | null;
   } | null>
@@ -102,6 +107,7 @@ export async function getUserSteamData({ userId }: { userId: string }): Promise<
       select: {
         steamId64: true,
         steamUsername: true,
+        steamAvatar: true,
         steamProfileURL: true,
         steamConnectedAt: true,
       },

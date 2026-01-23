@@ -87,3 +87,17 @@ export {
   updateJournalEntry,
   deleteJournalEntry,
 } from "./journal/journal-repository";
+export {
+  upsertManyImportedGames,
+  findImportedGamesByUserId,
+  countImportedGamesByUserId,
+  softDeleteImportedGame,
+  type CreateImportedGameInput,
+  type ImportedGameQueryOptions,
+  type PaginatedImportedGames,
+  type PlaytimeStatus,
+  type PlaytimeRange,
+  type Platform,
+  type LastPlayed,
+  type SortBy,
+} from "./imported-game";

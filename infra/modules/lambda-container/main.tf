@@ -1,9 +1,10 @@
 data "aws_region" "current" {}
 
 locals {
-  has_s3_access      = length(var.s3_bucket_arns) > 0
-  has_secrets_access = length(var.secrets_arns) > 0
-  has_vpc_config     = var.vpc_config != null
+  has_s3_access        = length(var.s3_bucket_arns) > 0
+  has_secrets_access   = length(var.secrets_arns) > 0
+  has_vpc_config       = var.vpc_config != null
+  has_sqs_event_source = var.sqs_event_source != null
 
   default_tags = {
     ManagedBy = "terraform"
@@ -96,6 +97,29 @@ resource "aws_iam_role_policy" "secrets_access" {
   })
 }
 
+resource "aws_iam_role_policy" "sqs_access" {
+  count = local.has_sqs_event_source ? 1 : 0
+
+  name = "${var.function_name}-sqs-access"
+  role = aws_iam_role.this.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "SQSEventSourceAccess"
+        Effect = "Allow"
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = var.sqs_event_source.queue_arn
+      }
+    ]
+  })
+}
+
 resource "aws_cloudwatch_log_group" "this" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
@@ -137,8 +161,32 @@ resource "aws_lambda_function" "this" {
     aws_iam_role_policy_attachment.basic_execution,
     aws_iam_role_policy_attachment.vpc_execution,
     aws_iam_role_policy.s3_access,
-    aws_iam_role_policy.secrets_access
+    aws_iam_role_policy.secrets_access,
+    aws_iam_role_policy.sqs_access
   ]
 
   tags = local.tags
+}
+
+resource "aws_lambda_event_source_mapping" "sqs" {
+  count = local.has_sqs_event_source ? 1 : 0
+
+  event_source_arn = var.sqs_event_source.queue_arn
+  function_name    = aws_lambda_function.this.arn
+  enabled          = var.sqs_event_source.enabled
+
+  batch_size                         = var.sqs_event_source.batch_size
+  maximum_batching_window_in_seconds = var.sqs_event_source.maximum_batching_window
+  function_response_types            = var.sqs_event_source.function_response_types
+
+  dynamic "scaling_config" {
+    for_each = var.sqs_event_source.scaling_config != null ? [var.sqs_event_source.scaling_config] : []
+    content {
+      maximum_concurrency = scaling_config.value.maximum_concurrency
+    }
+  }
+
+  depends_on = [
+    aws_iam_role_policy.sqs_access
+  ]
 }

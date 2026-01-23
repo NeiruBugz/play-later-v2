@@ -173,6 +173,10 @@ model ImportedGame {
   storefront       Storefront
   storefrontGameId String?
   playtime         Int?             @default(0)
+  playtimeWindows  Int?             @default(0)
+  playtimeMac      Int?             @default(0)
+  playtimeLinux    Int?             @default(0)
+  lastPlayedAt     DateTime?
   img_icon_url     String?
   img_logo_url     String?
   igdbMatchStatus  IgdbMatchStatus  @default(PENDING)
@@ -184,6 +188,7 @@ model ImportedGame {
 
   @@index([userId, deletedAt])
   @@index([storefrontGameId])
+  @@index([userId, playtime])
 }
 
 enum Storefront {

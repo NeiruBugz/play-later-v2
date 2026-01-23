@@ -73,3 +73,15 @@ variable "lambda_log_level" {
   description = "Log level for Lambda functions (DEBUG, INFO, WARNING, ERROR)"
   default     = "INFO"
 }
+
+variable "enable_steam_import_event_source" {
+  type        = bool
+  description = "Enable SQS event source mapping for Steam Import Lambda"
+  default     = true
+}
+
+variable "steam_import_sender_principals" {
+  type        = list(string)
+  description = "AWS principal ARNs allowed to send messages to the Steam import queue. MUST specify explicit ARNs in production - do not use [\"*\"]."
+  default     = ["*"]
+}

@@ -21,6 +21,8 @@ const elements = {
   getRadioGroup: () =>
     screen.getByRole("radiogroup", { name: /journey status/i }),
   getFormLabel: () => screen.getByText("Status"),
+  getChipByLabel: (label: string) =>
+    screen.getByRole("radio", { name: new RegExp(label, "i") }),
 };
 
 const actions = {
@@ -93,9 +95,7 @@ describe("StatusChipGroup", () => {
       ({ label }) => {
         renderStatusChipGroupInForm();
 
-        const chip = screen.getByRole("radio", {
-          name: new RegExp(label, "i"),
-        });
+        const chip = elements.getChipByLabel(label);
         expect(chip).toBeVisible();
         expect(chip).toHaveAttribute("type", "button");
       }

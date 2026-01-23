@@ -26,7 +26,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
   return (
     <div className="space-y-2xl">
       <div className="gap-xl flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div className="gap-lg flex items-center">
+        <div className="gap-lg flex items-center pb-24">
           <div className="shrink-0">
             {profile.image ? (
               <Image

@@ -37,3 +37,13 @@ output "log_group_arn" {
   description = "The ARN of the CloudWatch log group"
   value       = aws_cloudwatch_log_group.this.arn
 }
+
+output "event_source_mapping_uuid" {
+  description = "UUID of the SQS event source mapping (if configured)"
+  value       = try(aws_lambda_event_source_mapping.sqs[0].uuid, null)
+}
+
+output "event_source_mapping_state" {
+  description = "State of the SQS event source mapping (if configured)"
+  value       = try(aws_lambda_event_source_mapping.sqs[0].state, null)
+}

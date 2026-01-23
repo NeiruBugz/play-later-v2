@@ -56,6 +56,8 @@ const elements = {
     screen.getByRole("button", { name: `Filter by ${status}` }),
   getPlatformOption: (platform: string) =>
     screen.getByRole("option", { name: platform }),
+  getSortOption: (option: string) =>
+    screen.getByRole("option", { name: option }),
   getClearFiltersButton: () =>
     screen.getByRole("button", { name: "Clear all filters" }),
   queryClearFiltersButton: () =>
@@ -76,7 +78,7 @@ const actions = {
     userEvent.click(elements.getPlatformOption(platform)),
   selectSort: async (option: string) => {
     await userEvent.click(elements.getSortSelect());
-    await userEvent.click(screen.getByRole("option", { name: option }));
+    await userEvent.click(elements.getSortOption(option));
   },
 };
 
@@ -302,14 +304,10 @@ describe("LibraryPageView", () => {
       await userEvent.click(elements.getPlatformFilter());
 
       await waitFor(() => {
-        expect(
-          screen.getByRole("option", { name: "PC (Windows)" })
-        ).toBeVisible();
+        expect(elements.getPlatformOption("PC (Windows)")).toBeVisible();
       });
 
-      await userEvent.click(
-        screen.getByRole("option", { name: "PC (Windows)" })
-      );
+      await userEvent.click(elements.getPlatformOption("PC (Windows)"));
 
       // Re-render to reflect platform filter and show clear button
       rerender(<LibraryPageView />);

@@ -2,6 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 
+import { checkUsernameAvailability } from "@/shared/server-actions/profile";
+
 import { updateProfileFormAction } from "../server-actions/update-profile";
 import { ProfileSettingsForm } from "./profile-settings-form";
 
@@ -20,6 +22,8 @@ vi.mock("@/shared/server-actions/profile", () => ({
   checkUsernameAvailability: vi.fn(),
 }));
 
+const mockCheckUsernameAvailability = vi.mocked(checkUsernameAvailability);
+
 const mockUpdateProfileFormAction = vi.mocked(updateProfileFormAction);
 const mockToastSuccess = vi.mocked(toast.success);
 
@@ -35,6 +39,7 @@ const elements = {
   getValidationError: () => screen.getByText(/username must/i),
   queryServerError: () => screen.queryByText(/username already exists/i),
   getServerError: () => screen.getByText(/username already exists/i),
+  getAvatarUrlInput: () => screen.getByTestId("avatar-url-input"),
 };
 
 const actions = {
@@ -59,6 +64,11 @@ describe("ProfileSettingsForm", () => {
     vi.clearAllMocks();
     mockUpdateProfileFormAction.mockResolvedValue({
       status: "idle",
+    });
+    // Default: username is available
+    mockCheckUsernameAvailability.mockResolvedValue({
+      success: true,
+      available: true,
     });
   });
 
@@ -105,7 +115,7 @@ describe("ProfileSettingsForm", () => {
         />
       );
 
-      const hiddenInput = screen.getByTestId("avatar-url-input");
+      const hiddenInput = elements.getAvatarUrlInput();
       expect(hiddenInput).toBeInTheDocument();
       expect(hiddenInput).toHaveValue("https://example.com/avatar.jpg");
     });
@@ -115,8 +125,7 @@ describe("ProfileSettingsForm", () => {
         <ProfileSettingsForm currentUsername="testuser" currentAvatar={null} />
       );
 
-      const hiddenInput = screen.getByTestId("avatar-url-input");
-      expect(hiddenInput).toHaveValue("");
+      expect(elements.getAvatarUrlInput()).toHaveValue("");
     });
   });
 
