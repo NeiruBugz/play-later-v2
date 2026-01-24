@@ -365,8 +365,10 @@ Always use top-level `import type` (not inline):
 
 ```typescript
 // ✅ Good
+import type { User } from "./user";
+
 // ❌ Bad
-import { type User, type User } from "./user";
+import { type User } from "./user";
 ```
 
 ### Function Return Types
@@ -646,6 +648,9 @@ features/feature-name/
 - **`manage-library-entry`**: Library entry CRUD operations (modal UI, server actions, add-to-library use-case)
 - **`library`**: User's game library views and management
 - **`journal`**: Journal entry management
+- **`steam-import`**: Steam library import with curation UI, filtering, and IGDB matching
+- **`setup-profile`**: Initial profile setup wizard
+- **`whats-new`**: Feature announcements modal
 
 ### Adding a New Service
 

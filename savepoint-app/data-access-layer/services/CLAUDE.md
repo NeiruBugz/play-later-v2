@@ -19,11 +19,16 @@ See [README.md](./README.md) for comprehensive documentation on the service laye
 |---------|---------|
 | `ProfileService` | User profile and library stats |
 | `AuthService` | Sign-up/sign-in (credentials only) |
-| `IgdbService` | IGDB API client (21+ methods) |
+| `IgdbService` | IGDB API client (game search, details, franchises) |
 | `LibraryService` | Library item operations |
 | `JournalService` | Journal entry management |
 | `PlatformService` | Platform metadata |
 | `GameDetailService` | Game detail aggregation |
+| `GameService` | Basic game lookups by ID |
+| `OnboardingService` | 5-step onboarding checklist tracking |
+| `SteamService` | Steam Web API (owned games, player summary, connect/disconnect) |
+| `SteamOpenIdService` | Steam OpenID authentication flow |
+| `ImportedGameService` | Imported games management (find, dismiss, status updates) |
 
 ## When Working on Services
 

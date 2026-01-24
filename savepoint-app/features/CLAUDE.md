@@ -14,15 +14,18 @@ Features provide **user-facing functionality** organized by business domain:
 ```
 features/
 ├── auth/                     # Authentication flows
-├── game-search/              # Game search functionality
-├── game-detail/              # Game detail page components
 ├── browse-related-games/     # Related/franchise games browsing
-├── manage-library-entry/     # Library entry CRUD modal
-├── library/                  # User library views
-├── profile/                  # User profile management
 ├── dashboard/                # Dashboard components
+├── game-detail/              # Game detail page components
+├── game-search/              # Game search functionality
 ├── journal/                  # Journal entry management
-└── onboarding/               # Onboarding and getting started
+├── library/                  # User library views
+├── manage-library-entry/     # Library entry CRUD modal
+├── onboarding/               # Onboarding and getting started
+├── profile/                  # User profile management
+├── setup-profile/            # Initial profile setup wizard
+├── steam-import/             # Steam library import and curation
+└── whats-new/                # Feature announcements modal
 ```
 
 ## Feature Module Structure
