@@ -6,7 +6,11 @@ import {
   repositorySuccess,
   type RepositoryResult,
 } from "@/data-access-layer/repository/types";
-import { Prisma } from "@prisma/client";
+import {
+  Prisma,
+  type IgdbMatchStatus,
+  type ImportedGame,
+} from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
 
@@ -14,7 +18,6 @@ import type {
   CreateImportedGameInput,
   ImportedGameQueryOptions,
   PaginatedImportedGames,
-  RepositoryWarning,
 } from "./types";
 
 export async function upsertManyImportedGames(
@@ -26,13 +29,11 @@ export async function upsertManyImportedGames(
       let upsertedCount = 0;
 
       for (const game of games) {
-        const storefrontGameIdNormalized = game.storefrontGameId ?? null;
-
         const existingGame = await tx.importedGame.findFirst({
           where: {
             userId,
             storefront: game.storefront,
-            storefrontGameId: storefrontGameIdNormalized,
+            storefrontGameId: game.storefrontGameId,
             deletedAt: null,
           },
         });
@@ -58,7 +59,7 @@ export async function upsertManyImportedGames(
               userId,
               name: game.name,
               storefront: game.storefront,
-              storefrontGameId: storefrontGameIdNormalized,
+              storefrontGameId: game.storefrontGameId,
               playtime: game.playtime ?? 0,
               playtimeWindows: game.playtimeWindows ?? 0,
               playtimeMac: game.playtimeMac ?? 0,
@@ -99,9 +100,8 @@ export async function findImportedGamesByUserId(
       platform = "all",
       lastPlayed = "all",
       sortBy = "added_desc",
+      matchStatus,
     } = options;
-
-    const warnings: RepositoryWarning[] = [];
 
     const validatedLimit = Math.min(Math.max(1, limit), 100);
     const validatedPage = Math.max(1, page);
@@ -112,6 +112,12 @@ export async function findImportedGamesByUserId(
       deletedAt: null,
     };
 
+    if (matchStatus && matchStatus.length > 0) {
+      whereClause.igdbMatchStatus = {
+        in: matchStatus,
+      };
+    }
+
     if (search) {
       whereClause.name = {
         contains: search,
@@ -120,14 +126,6 @@ export async function findImportedGamesByUserId(
     }
 
     if (playtimeRange !== "all") {
-      if (playtimeStatus !== "all") {
-        warnings.push({
-          code: "CONFLICTING_FILTERS",
-          message:
-            "Both playtimeStatus and playtimeRange filters provided - using playtimeRange",
-          context: { playtimeStatus, playtimeRange },
-        });
-      }
       switch (playtimeRange) {
         case "under_1h":
           whereClause.playtime = { lt: 60 };
@@ -228,12 +226,32 @@ export async function findImportedGamesByUserId(
       page: validatedPage,
       limit: validatedLimit,
       totalPages: Math.ceil(total / validatedLimit),
-      ...(warnings.length > 0 && { warnings }),
     });
   } catch (error) {
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to find imported games: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+export async function findImportedGameById(
+  id: string,
+  userId: string
+): Promise<RepositoryResult<ImportedGame | null>> {
+  try {
+    const game = await prisma.importedGame.findFirst({
+      where: {
+        id,
+        userId,
+        deletedAt: null,
+      },
+    });
+    return repositorySuccess(game);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to find imported game: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }
@@ -277,6 +295,43 @@ export async function softDeleteImportedGame(
     return repositoryError(
       RepositoryErrorCode.DATABASE_ERROR,
       `Failed to soft delete imported game: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
+export async function updateImportedGameStatus(
+  id: string,
+  userId: string,
+  status: IgdbMatchStatus
+): Promise<RepositoryResult<ImportedGame>> {
+  try {
+    const existingGame = await prisma.importedGame.findFirst({
+      where: {
+        id,
+        userId,
+        deletedAt: null,
+      },
+    });
+
+    if (!existingGame) {
+      return repositoryError(
+        RepositoryErrorCode.NOT_FOUND,
+        "Imported game not found or access denied"
+      );
+    }
+
+    const updated = await prisma.importedGame.update({
+      where: { id },
+      data: {
+        igdbMatchStatus: status,
+        updatedAt: new Date(),
+      },
+    });
+    return repositorySuccess(updated);
+  } catch (error) {
+    return repositoryError(
+      RepositoryErrorCode.DATABASE_ERROR,
+      `Failed to update imported game status: ${error instanceof Error ? error.message : "Unknown error"}`
     );
   }
 }

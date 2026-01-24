@@ -1,9 +1,25 @@
 import type { ImportedGame } from "@prisma/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { ImportedGamesList } from "@/features/steam-import/ui/imported-games-list";
+import { ImportedGamesList } from "./imported-games-list";
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+const renderWithQueryClient = (ui: React.ReactElement) => {
+  const queryClient = createTestQueryClient();
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+};
 
 vi.mock("next/image", () => ({
   default: ({ src, alt }: { src: string; alt: string }) => (
@@ -47,7 +63,7 @@ const elements = {
   getEmptyTitle: () => screen.getByText("No games imported yet"),
   getEmptyDescription: () =>
     screen.getByText(
-      "Import your Steam library to see your games here. Connect your Steam account to get started."
+      "Sync your Steam library to see your games here. Click the button below to fetch your games from Steam."
     ),
   getCountHeader: (text: string) => screen.getByText(text),
   getList: () => screen.getByRole("list", { name: /imported games/i }),
@@ -260,7 +276,7 @@ describe("ImportedGamesList", () => {
     it("should render total count header correctly with plural", () => {
       const games = createMockGamesList(5);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -276,7 +292,7 @@ describe("ImportedGamesList", () => {
     it("should render total count header correctly with singular", () => {
       const games = createMockGamesList(1);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={1}
@@ -292,7 +308,7 @@ describe("ImportedGamesList", () => {
     it("should render list of ImportedGameCard components", () => {
       const games = createMockGamesList(3);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={3}
@@ -310,7 +326,7 @@ describe("ImportedGamesList", () => {
     it("should render games in a list with proper ARIA role", () => {
       const games = createMockGamesList(2);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={2}
@@ -329,7 +345,7 @@ describe("ImportedGamesList", () => {
     it("should render pagination controls when totalPages > 1", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -345,7 +361,7 @@ describe("ImportedGamesList", () => {
     it("should not render pagination controls when totalPages = 1", () => {
       const games = createMockGamesList(5);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={5}
@@ -361,7 +377,7 @@ describe("ImportedGamesList", () => {
     it("should show correct page indicator text", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={50}
@@ -377,7 +393,7 @@ describe("ImportedGamesList", () => {
     it("should disable Previous button on first page", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -393,7 +409,7 @@ describe("ImportedGamesList", () => {
     it("should disable Next button on last page", () => {
       const games = createMockGamesList(5);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -409,7 +425,7 @@ describe("ImportedGamesList", () => {
     it("should enable Previous button when not on first page", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -425,7 +441,7 @@ describe("ImportedGamesList", () => {
     it("should enable Next button when not on last page", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -442,7 +458,7 @@ describe("ImportedGamesList", () => {
       const onPageChange = vi.fn();
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -461,7 +477,7 @@ describe("ImportedGamesList", () => {
       const onPageChange = vi.fn();
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -479,7 +495,7 @@ describe("ImportedGamesList", () => {
     it("should calculate total pages correctly", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={47}
@@ -497,7 +513,7 @@ describe("ImportedGamesList", () => {
     it("should have proper navigation landmark for pagination", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -513,7 +529,7 @@ describe("ImportedGamesList", () => {
     it("should have aria-live region for page indicator", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -530,7 +546,7 @@ describe("ImportedGamesList", () => {
     it("should have proper button labels for screen readers", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={25}
@@ -549,7 +565,7 @@ describe("ImportedGamesList", () => {
     it("should handle exactly one page of games", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={10}
@@ -565,7 +581,7 @@ describe("ImportedGamesList", () => {
     it("should handle last page with fewer items than pageSize", () => {
       const games = createMockGamesList(7);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={27}
@@ -583,7 +599,7 @@ describe("ImportedGamesList", () => {
     it("should handle large totalCount correctly", () => {
       const games = createMockGamesList(10);
 
-      render(
+      renderWithQueryClient(
         <ImportedGamesList
           games={games}
           totalCount={1234}

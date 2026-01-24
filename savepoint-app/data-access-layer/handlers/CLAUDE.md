@@ -74,3 +74,7 @@ import { repository } from "@/data-access-layer/repository";  // Must use servic
 - `game-search/` - Public game search with rate limiting
 - `library/` - Library operations
 - `platform/` - Platform metadata
+- `steam-import/` - Steam library import flow
+  - `fetch-steam-games.handler.ts` - Fetch & import Steam library to DB
+  - `steam-connect.handler.ts` - Steam account connection via OpenID
+  - `imported-games.handler.ts` - Query paginated imported games

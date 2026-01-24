@@ -69,7 +69,7 @@ export type FullGameInfoResponse = {
   themes?: Theme[];
   franchise?: Franchise | number;
   franchises?: number[];
-  game_type: number;
+  game_type?: number | { id: number; name?: string };
   collections?: Pick<Collection, "id" | "name">[];
   game_engines?: Array<{ id: number; name?: string }>;
   player_perspectives?: Array<{ id: number; name?: string }>;
@@ -95,7 +95,7 @@ export type SearchResponse = {
   platforms?: Platform[];
   release_dates?: ReleaseDate[];
   slug: string;
-  game_type: number;
+  game_type?: number | { id: number; name?: string };
 };
 export type UpcomingReleaseResponse = {
   cover?: Cover;
@@ -135,7 +135,7 @@ export type FranchiseGamesResponse = {
     id: number;
     name: string;
     cover: Cover;
-    game_type: number;
+    game_type?: number | { id: number; name?: string };
   }>;
 };
 export enum GAME_TYPE {

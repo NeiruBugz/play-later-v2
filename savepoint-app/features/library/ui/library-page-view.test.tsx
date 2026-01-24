@@ -107,7 +107,9 @@ const renderComponent = () => {
     </ThemeProvider>
   );
 
-  return render(<LibraryPageView />, { wrapper: Wrapper });
+  return render(<LibraryPageView isSteamConnected={false} />, {
+    wrapper: Wrapper,
+  });
 };
 
 describe("LibraryPageView", () => {
@@ -186,7 +188,7 @@ describe("LibraryPageView", () => {
           expect.anything()
         );
 
-        rerender(<LibraryPageView />);
+        rerender(<LibraryPageView isSteamConnected={false} />);
 
         await waitFor(() => {
           expect(elements.getStatusButton("Want to Play")).toHaveAttribute(
@@ -244,7 +246,7 @@ describe("LibraryPageView", () => {
       );
 
       // Re-render to reflect platform filter change
-      rerender(<LibraryPageView />);
+      rerender(<LibraryPageView isSteamConnected={false} />);
 
       await waitFor(() => {
         expect(elements.getPlatformFilter()).toHaveTextContent("PC (Windows)");
@@ -291,7 +293,7 @@ describe("LibraryPageView", () => {
       await actions.clickStatusButton("Want to Play");
 
       // Re-render to reflect status change
-      rerender(<LibraryPageView />);
+      rerender(<LibraryPageView isSteamConnected={false} />);
 
       await waitFor(() => {
         expect(elements.getStatusButton("Want to Play")).toHaveAttribute(
@@ -310,7 +312,7 @@ describe("LibraryPageView", () => {
       await userEvent.click(elements.getPlatformOption("PC (Windows)"));
 
       // Re-render to reflect platform filter and show clear button
-      rerender(<LibraryPageView />);
+      rerender(<LibraryPageView isSteamConnected={false} />);
 
       await waitFor(() => {
         expect(elements.getClearFiltersButton()).toBeVisible();
@@ -333,7 +335,7 @@ describe("LibraryPageView", () => {
       expect(url.searchParams.get("search")).toBeNull();
 
       // Re-render to reflect cleared state
-      rerender(<LibraryPageView />);
+      rerender(<LibraryPageView isSteamConnected={false} />);
 
       await waitFor(() => {
         expect(elements.getAllStatusesButton()).toHaveAttribute(
@@ -385,7 +387,7 @@ describe("LibraryPageView", () => {
       );
 
       // Re-render to reflect updated URL state
-      rerender(<LibraryPageView />);
+      rerender(<LibraryPageView isSteamConnected={false} />);
 
       await waitFor(() => {
         expect(elements.getSortSelect()).toHaveTextContent("Title A-Z");
@@ -445,6 +447,57 @@ describe("LibraryPageView", () => {
 
       expect(elements.queryLibraryGrid()).not.toBeInTheDocument();
       expect(elements.queryEmptyState()).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Steam import button", () => {
+    it("does not display Import from Steam button when Steam is not connected", () => {
+      render(<LibraryPageView isSteamConnected={false} />, {
+        wrapper: ({ children }) => (
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SessionProvider session={null}>
+              <QueryClientProvider client={new QueryClient()}>
+                {children}
+              </QueryClientProvider>
+            </SessionProvider>
+          </ThemeProvider>
+        ),
+      });
+
+      const importButton = screen.queryByRole("link", {
+        name: /import from steam/i,
+      });
+      expect(importButton).not.toBeInTheDocument();
+    });
+
+    it("displays Import from Steam button when Steam is connected", () => {
+      render(<LibraryPageView isSteamConnected={true} />, {
+        wrapper: ({ children }) => (
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SessionProvider session={null}>
+              <QueryClientProvider client={new QueryClient()}>
+                {children}
+              </QueryClientProvider>
+            </SessionProvider>
+          </ThemeProvider>
+        ),
+      });
+
+      const importButton = screen.getByRole("link", {
+        name: /import from steam/i,
+      });
+      expect(importButton).toBeInTheDocument();
+      expect(importButton).toHaveAttribute("href", "/steam/games");
     });
   });
 });

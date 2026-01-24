@@ -30,6 +30,7 @@ export async function importedGamesHandler(
     platform,
     lastPlayed,
     sortBy,
+    showAlreadyImported = false,
   } = input;
 
   const validatedPage = Math.max(1, page);
@@ -46,6 +47,7 @@ export async function importedGamesHandler(
       platform,
       lastPlayed,
       sortBy,
+      showAlreadyImported,
     },
     "Fetching imported games"
   );
@@ -61,6 +63,7 @@ export async function importedGamesHandler(
     platform,
     lastPlayed,
     sortBy,
+    showAlreadyImported,
   });
 
   if (!result.success) {

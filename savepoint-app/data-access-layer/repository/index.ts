@@ -90,8 +90,10 @@ export {
 export {
   upsertManyImportedGames,
   findImportedGamesByUserId,
+  findImportedGameById,
   countImportedGamesByUserId,
   softDeleteImportedGame,
+  updateImportedGameStatus,
   type CreateImportedGameInput,
   type ImportedGameQueryOptions,
   type PaginatedImportedGames,

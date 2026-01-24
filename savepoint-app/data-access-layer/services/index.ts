@@ -82,4 +82,6 @@ export {
   ImportedGameService,
   type FindImportedGamesByUserIdInput,
   type FindImportedGamesByUserIdResult,
+  type FindImportedGameByIdInput,
+  type UpdateImportedGameStatusInput,
 } from "./imported-game";

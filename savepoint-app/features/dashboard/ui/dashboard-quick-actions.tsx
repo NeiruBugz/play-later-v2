@@ -51,9 +51,9 @@ function QuickActionCard({
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-base font-semibold">{title}</h3>
-          <p className="body-sm text-muted-foreground line-clamp-2">
+          <div className="body-sm text-muted-foreground line-clamp-2 block">
             {isLoading ? <Skeleton className="h-4 w-full" /> : description}
-          </p>
+          </div>
         </div>
       </div>
     </Card>
@@ -93,8 +93,12 @@ export function DashboardQuickActions() {
   useEffect(() => {
     async function fetchRandomGame() {
       setIsLoadingGame(true);
+      const minDelay = new Promise((resolve) => setTimeout(resolve, 400));
       try {
-        const result = await getRandomWantToPlayAction({});
+        const [result] = await Promise.all([
+          getRandomWantToPlayAction({}),
+          minDelay,
+        ]);
         if (result.success && result.data) {
           setRandomGame(result.data);
           setHasWantToPlayGames(true);
@@ -116,8 +120,12 @@ export function DashboardQuickActions() {
 
   const refreshRandomGame = async () => {
     setIsLoadingGame(true);
+    const minDelay = new Promise((resolve) => setTimeout(resolve, 400));
     try {
-      const result = await getRandomWantToPlayAction({});
+      const [result] = await Promise.all([
+        getRandomWantToPlayAction({}),
+        minDelay,
+      ]);
       if (result.success) {
         if (result.data) {
           setRandomGame(result.data);

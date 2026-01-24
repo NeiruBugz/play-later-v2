@@ -95,6 +95,11 @@ const PlayerPerspectiveSchema = z.object({
   name: z.string().optional(),
 });
 
+const GameTypeSchema = z.object({
+  id: z.number(),
+  name: z.string().optional(),
+});
+
 const SimilarGameSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -111,7 +116,7 @@ export const SearchResponseItemSchema = z.object({
   first_release_date: z.number().optional(),
   platforms: z.array(PlatformSchema).optional(),
   release_dates: z.array(ReleaseDateSchema).optional(),
-  game_type: z.number(),
+  game_type: z.union([z.number(), GameTypeSchema]).optional(),
 });
 
 export const FullGameInfoResponseSchema = z.object({
@@ -136,7 +141,7 @@ export const FullGameInfoResponseSchema = z.object({
   similar_games: z.array(SimilarGameSchema).optional(),
   franchise: z.union([z.number(), FranchiseSchema]).optional(),
   franchises: z.array(z.number()).optional(),
-  game_type: z.number(),
+  game_type: z.union([z.number(), GameTypeSchema]).optional(),
   collections: z.array(CollectionSchema).optional(),
 });
 

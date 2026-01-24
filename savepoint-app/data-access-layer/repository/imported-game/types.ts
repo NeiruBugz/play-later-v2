@@ -41,12 +41,7 @@ export type ImportedGameQueryOptions = {
   platform?: Platform;
   lastPlayed?: LastPlayed;
   sortBy?: SortBy;
-};
-
-export type RepositoryWarning = {
-  code: string;
-  message: string;
-  context?: Record<string, unknown>;
+  matchStatus?: IgdbMatchStatus[];
 };
 
 export type PaginatedImportedGames = {
@@ -55,5 +50,4 @@ export type PaginatedImportedGames = {
   page: number;
   limit: number;
   totalPages: number;
-  warnings?: RepositoryWarning[];
 };

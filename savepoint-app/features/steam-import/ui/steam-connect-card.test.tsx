@@ -71,6 +71,8 @@ const elements = {
   getProfileSteamId: (steamId: string) => screen.getByText(steamId),
   getProfileAvatar: (altText: string) => screen.getByAltText(altText),
   getErrorMessage: (message: RegExp | string) => screen.getByText(message),
+  getManageImportedGamesLink: () =>
+    screen.getByRole("link", { name: /manage imported games/i }),
 };
 
 const actions = {
@@ -415,6 +417,14 @@ describe("SteamConnectCard", () => {
       render(<SteamConnectCard initialStatus={connectedStatus} />);
 
       expect(elements.querySteamIdInput()).not.toBeInTheDocument();
+    });
+
+    it("should display manage imported games link when connected", () => {
+      render(<SteamConnectCard initialStatus={connectedStatus} />);
+
+      const manageLink = elements.getManageImportedGamesLink();
+      expect(manageLink).toBeVisible();
+      expect(manageLink).toHaveAttribute("href", "/steam/games");
     });
   });
 });

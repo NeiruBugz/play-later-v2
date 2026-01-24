@@ -61,11 +61,32 @@ export function createDatabaseGameFixture(overrides?: {
   slug?: string;
   title?: string;
 }) {
-  return {
+  const baseGame = {
     id: "game-456",
     igdbId: 12345,
     slug: "test-game",
     title: "Test Game",
+    createdAt: new Date("2025-01-01"),
+    updatedAt: new Date("2025-01-01"),
+    hltbId: null,
+    description: "A test game description",
+    coverImage: "test-cover.jpg",
+    releaseDate: new Date("2023-01-15"),
+    firstReleaseDate: new Date("2023-01-15"),
+    aggregatedRating: 85.5,
+    storyline: null,
+    url: null,
+    websites: [],
+    franchiseId: null,
+    mainStory: null,
+    mainExtra: null,
+    completionist: null,
+    steamAppId: null,
+    genres: [] as Array<{ genre: { id: string; name: string; slug: string } }>,
+    platforms: [] as Array<{
+      platform: { id: string; name: string; slug: string };
+    }>,
     ...overrides,
   };
+  return baseGame;
 }

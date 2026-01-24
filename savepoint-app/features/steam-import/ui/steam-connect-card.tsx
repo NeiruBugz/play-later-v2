@@ -1,8 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -158,33 +159,40 @@ export function SteamConnectCard({
               Steam Account Connected
             </CardTitle>
           </CardHeader>
-          <CardContent
-            spacing="comfortable"
-            className="flex items-center gap-4"
-          >
-            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
-              <Image
-                src={profile.avatarUrl}
-                alt={profile.displayName}
-                fill
-                className="object-cover"
-                sizes="64px"
-              />
+          <CardContent spacing="comfortable" className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
+                <Image
+                  src={profile.avatarUrl}
+                  alt={profile.displayName}
+                  fill
+                  className="object-cover"
+                  sizes="64px"
+                />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">{profile.displayName}</p>
+                <p className="text-muted-foreground text-sm">
+                  {profile.steamId64}
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDisconnectClick}
+                disabled={isPending}
+              >
+                Disconnect
+              </Button>
             </div>
-            <div className="flex-1">
-              <p className="font-medium">{profile.displayName}</p>
-              <p className="text-muted-foreground text-sm">
-                {profile.steamId64}
-              </p>
+            <div className="flex gap-2">
+              <Button asChild variant="default" size="sm" className="flex-1">
+                <Link href="/steam/games">
+                  <Download className="h-4 w-4" />
+                  Manage Imported Games
+                </Link>
+              </Button>
             </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDisconnectClick}
-              disabled={isPending}
-            >
-              Disconnect
-            </Button>
           </CardContent>
         </Card>
 

@@ -306,9 +306,10 @@ export async function findLibraryItemsPaginated(
 | `game-repository` | Game CRUD, search, Steam/IGDB lookups |
 | `library-repository` | Library items, status management |
 | `journal-repository` | Journal entries |
-| `user-repository` | User profiles, settings |
+| `user-repository` | User profiles, settings, Steam connection |
 | `platform-repository` | Gaming platforms |
 | `genre-repository` | Game genres |
+| `imported-game-repository` | Imported games from Steam (upsert, find, filter, status updates) |
 
 ## Exports
 
@@ -322,6 +323,7 @@ export * from "./journal/journal-repository";
 export * from "./user/user-repository";
 export * from "./platform/platform-repository";
 export * from "./genre/genre-repository";
+export * from "./imported-game/imported-game-repository";
 ```
 
 Import in services:

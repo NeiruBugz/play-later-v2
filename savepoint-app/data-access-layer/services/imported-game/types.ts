@@ -5,7 +5,7 @@ import type {
   PlaytimeStatus,
   SortBy,
 } from "@/data-access-layer/repository/imported-game/types";
-import type { ImportedGame } from "@prisma/client";
+import type { IgdbMatchStatus, ImportedGame } from "@prisma/client";
 
 export type FindImportedGamesByUserIdInput = {
   userId: string;
@@ -17,6 +17,7 @@ export type FindImportedGamesByUserIdInput = {
   platform?: Platform;
   lastPlayed?: LastPlayed;
   sortBy?: SortBy;
+  showAlreadyImported?: boolean;
 };
 
 export type FindImportedGamesByUserIdResult = {
@@ -25,4 +26,20 @@ export type FindImportedGamesByUserIdResult = {
   page: number;
   limit: number;
   totalPages: number;
+};
+
+export type DismissImportedGameInput = {
+  importedGameId: string;
+  userId: string;
+};
+
+export type FindImportedGameByIdInput = {
+  id: string;
+  userId: string;
+};
+
+export type UpdateImportedGameStatusInput = {
+  id: string;
+  userId: string;
+  status: IgdbMatchStatus;
 };

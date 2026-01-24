@@ -10,6 +10,7 @@ import {
   countImportedGamesByUserId,
   findImportedGamesByUserId,
   softDeleteImportedGame,
+  updateImportedGameStatus,
   upsertManyImportedGames,
 } from "./imported-game-repository";
 import type { CreateImportedGameInput } from "./types";
@@ -613,6 +614,303 @@ describe("ImportedGameRepository Integration Tests", () => {
         expect(result.data.limit).toBe(100);
       }
     });
+
+    it("should filter by matchStatus - single status (PENDING)", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Pending Game",
+          storefront: "STEAM",
+          storefrontGameId: "1",
+          playtime: 100,
+          igdbMatchStatus: "PENDING",
+        },
+        {
+          name: "Matched Game",
+          storefront: "STEAM",
+          storefrontGameId: "2",
+          playtime: 50,
+          igdbMatchStatus: "MATCHED",
+        },
+        {
+          name: "Unmatched Game",
+          storefront: "STEAM",
+          storefrontGameId: "3",
+          playtime: 75,
+          igdbMatchStatus: "UNMATCHED",
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const result = await findImportedGamesByUserId(user.id, {
+        matchStatus: ["PENDING"],
+        limit: 10,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.items).toHaveLength(1);
+        expect(result.data.items[0].name).toBe("Pending Game");
+        expect(result.data.items[0].igdbMatchStatus).toBe("PENDING");
+      }
+    });
+
+    it("should filter by matchStatus - multiple statuses (PENDING and UNMATCHED)", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Pending Game",
+          storefront: "STEAM",
+          storefrontGameId: "1",
+          playtime: 100,
+          igdbMatchStatus: "PENDING",
+        },
+        {
+          name: "Matched Game",
+          storefront: "STEAM",
+          storefrontGameId: "2",
+          playtime: 50,
+          igdbMatchStatus: "MATCHED",
+        },
+        {
+          name: "Unmatched Game",
+          storefront: "STEAM",
+          storefrontGameId: "3",
+          playtime: 75,
+          igdbMatchStatus: "UNMATCHED",
+        },
+        {
+          name: "Ignored Game",
+          storefront: "STEAM",
+          storefrontGameId: "4",
+          playtime: 25,
+          igdbMatchStatus: "IGNORED",
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const result = await findImportedGamesByUserId(user.id, {
+        matchStatus: ["PENDING", "UNMATCHED"],
+        limit: 10,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.items).toHaveLength(2);
+        const statuses = result.data.items.map((g) => g.igdbMatchStatus);
+        expect(statuses).toContain("PENDING");
+        expect(statuses).toContain("UNMATCHED");
+        expect(statuses).not.toContain("MATCHED");
+        expect(statuses).not.toContain("IGNORED");
+      }
+    });
+
+    it("should filter by matchStatus - all statuses", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Pending Game",
+          storefront: "STEAM",
+          storefrontGameId: "1",
+          playtime: 100,
+          igdbMatchStatus: "PENDING",
+        },
+        {
+          name: "Matched Game",
+          storefront: "STEAM",
+          storefrontGameId: "2",
+          playtime: 50,
+          igdbMatchStatus: "MATCHED",
+        },
+        {
+          name: "Unmatched Game",
+          storefront: "STEAM",
+          storefrontGameId: "3",
+          playtime: 75,
+          igdbMatchStatus: "UNMATCHED",
+        },
+        {
+          name: "Ignored Game",
+          storefront: "STEAM",
+          storefrontGameId: "4",
+          playtime: 25,
+          igdbMatchStatus: "IGNORED",
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const result = await findImportedGamesByUserId(user.id, {
+        matchStatus: ["PENDING", "MATCHED", "UNMATCHED", "IGNORED"],
+        limit: 10,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.items).toHaveLength(4);
+      }
+    });
+
+    it("should return empty result when filtering for status with no matching games", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Pending Game",
+          storefront: "STEAM",
+          storefrontGameId: "1",
+          playtime: 100,
+          igdbMatchStatus: "PENDING",
+        },
+        {
+          name: "Unmatched Game",
+          storefront: "STEAM",
+          storefrontGameId: "2",
+          playtime: 50,
+          igdbMatchStatus: "UNMATCHED",
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const result = await findImportedGamesByUserId(user.id, {
+        matchStatus: ["MATCHED"],
+        limit: 10,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.items).toHaveLength(0);
+        expect(result.data.total).toBe(0);
+      }
+    });
+
+    it("should show all games when no matchStatus filter provided", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Pending Game",
+          storefront: "STEAM",
+          storefrontGameId: "1",
+          playtime: 100,
+          igdbMatchStatus: "PENDING",
+        },
+        {
+          name: "Matched Game",
+          storefront: "STEAM",
+          storefrontGameId: "2",
+          playtime: 50,
+          igdbMatchStatus: "MATCHED",
+        },
+        {
+          name: "Unmatched Game",
+          storefront: "STEAM",
+          storefrontGameId: "3",
+          playtime: 75,
+          igdbMatchStatus: "UNMATCHED",
+        },
+        {
+          name: "Ignored Game",
+          storefront: "STEAM",
+          storefrontGameId: "4",
+          playtime: 25,
+          igdbMatchStatus: "IGNORED",
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const result = await findImportedGamesByUserId(user.id, {
+        limit: 10,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.items).toHaveLength(4);
+      }
+    });
+
+    it("should show all games when matchStatus is empty array", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Pending Game",
+          storefront: "STEAM",
+          storefrontGameId: "1",
+          playtime: 100,
+          igdbMatchStatus: "PENDING",
+        },
+        {
+          name: "Matched Game",
+          storefront: "STEAM",
+          storefrontGameId: "2",
+          playtime: 50,
+          igdbMatchStatus: "MATCHED",
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const result = await findImportedGamesByUserId(user.id, {
+        matchStatus: [],
+        limit: 10,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.items).toHaveLength(2);
+      }
+    });
+
+    it("should combine matchStatus filter with other filters", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Counter-Strike Pending",
+          storefront: "STEAM",
+          storefrontGameId: "1",
+          playtime: 100,
+          igdbMatchStatus: "PENDING",
+        },
+        {
+          name: "Counter-Strike Matched",
+          storefront: "STEAM",
+          storefrontGameId: "2",
+          playtime: 50,
+          igdbMatchStatus: "MATCHED",
+        },
+        {
+          name: "Team Fortress Pending",
+          storefront: "STEAM",
+          storefrontGameId: "3",
+          playtime: 75,
+          igdbMatchStatus: "PENDING",
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const result = await findImportedGamesByUserId(user.id, {
+        search: "counter-strike",
+        matchStatus: ["PENDING"],
+        limit: 10,
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.items).toHaveLength(1);
+        expect(result.data.items[0].name).toBe("Counter-Strike Pending");
+        expect(result.data.items[0].igdbMatchStatus).toBe("PENDING");
+      }
+    });
   });
 
   describe("countImportedGamesByUserId", () => {
@@ -683,6 +981,263 @@ describe("ImportedGameRepository Integration Tests", () => {
       expect(countResult.success).toBe(true);
       if (countResult.success) {
         expect(countResult.data).toBe(1);
+      }
+    });
+  });
+
+  describe("updateImportedGameStatus", () => {
+    it("should successfully update the IGDB match status", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Test Game",
+          storefront: "STEAM",
+          storefrontGameId: "123",
+          playtime: 100,
+          igdbMatchStatus: "PENDING",
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const findResult = await findImportedGamesByUserId(user.id, {
+        limit: 10,
+      });
+      expect(findResult.success).toBe(true);
+
+      if (findResult.success) {
+        const gameId = findResult.data.items[0].id;
+        expect(findResult.data.items[0].igdbMatchStatus).toBe("PENDING");
+
+        const updateResult = await updateImportedGameStatus(
+          gameId,
+          user.id,
+          "MATCHED"
+        );
+
+        expect(updateResult.success).toBe(true);
+        if (updateResult.success) {
+          expect(updateResult.data.igdbMatchStatus).toBe("MATCHED");
+          expect(updateResult.data.id).toBe(gameId);
+        }
+
+        const verifyResult = await findImportedGamesByUserId(user.id, {
+          limit: 10,
+        });
+        expect(verifyResult.success).toBe(true);
+        if (verifyResult.success) {
+          expect(verifyResult.data.items[0].igdbMatchStatus).toBe("MATCHED");
+        }
+      }
+    });
+
+    it("should update status through all valid states", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Test Game",
+          storefront: "STEAM",
+          storefrontGameId: "123",
+          playtime: 100,
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const findResult = await findImportedGamesByUserId(user.id, {
+        limit: 10,
+      });
+      expect(findResult.success).toBe(true);
+
+      if (findResult.success) {
+        const gameId = findResult.data.items[0].id;
+
+        const pendingResult = await updateImportedGameStatus(
+          gameId,
+          user.id,
+          "PENDING"
+        );
+        expect(pendingResult.success).toBe(true);
+        if (pendingResult.success) {
+          expect(pendingResult.data.igdbMatchStatus).toBe("PENDING");
+        }
+
+        const matchedResult = await updateImportedGameStatus(
+          gameId,
+          user.id,
+          "MATCHED"
+        );
+        expect(matchedResult.success).toBe(true);
+        if (matchedResult.success) {
+          expect(matchedResult.data.igdbMatchStatus).toBe("MATCHED");
+        }
+
+        const unmatchedResult = await updateImportedGameStatus(
+          gameId,
+          user.id,
+          "UNMATCHED"
+        );
+        expect(unmatchedResult.success).toBe(true);
+        if (unmatchedResult.success) {
+          expect(unmatchedResult.data.igdbMatchStatus).toBe("UNMATCHED");
+        }
+
+        const ignoredResult = await updateImportedGameStatus(
+          gameId,
+          user.id,
+          "IGNORED"
+        );
+        expect(ignoredResult.success).toBe(true);
+        if (ignoredResult.success) {
+          expect(ignoredResult.data.igdbMatchStatus).toBe("IGNORED");
+        }
+      }
+    });
+
+    it("should prevent updating another user's imported game", async () => {
+      const user1 = await createUser({ steamId64: "76561198012345678" });
+      const user2 = await createUser({ steamId64: "76561198087654321" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "User 1 Game",
+          storefront: "STEAM",
+          storefrontGameId: "123",
+          playtime: 100,
+        },
+      ];
+
+      await upsertManyImportedGames(user1.id, games);
+
+      const findResult = await findImportedGamesByUserId(user1.id, {
+        limit: 10,
+      });
+      expect(findResult.success).toBe(true);
+
+      if (findResult.success) {
+        const gameId = findResult.data.items[0].id;
+
+        const updateResult = await updateImportedGameStatus(
+          gameId,
+          user2.id,
+          "MATCHED"
+        );
+
+        expect(updateResult.success).toBe(false);
+        if (!updateResult.success) {
+          expect(updateResult.error.code).toBe("NOT_FOUND");
+          expect(updateResult.error.message).toBe(
+            "Imported game not found or access denied"
+          );
+        }
+
+        const verifyResult = await findImportedGamesByUserId(user1.id, {
+          limit: 10,
+        });
+        expect(verifyResult.success).toBe(true);
+        if (verifyResult.success) {
+          expect(verifyResult.data.items[0].igdbMatchStatus).toBe("PENDING");
+        }
+      }
+    });
+
+    it("should not update soft-deleted games", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Deleted Game",
+          storefront: "STEAM",
+          storefrontGameId: "123",
+          playtime: 100,
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const findResult = await findImportedGamesByUserId(user.id, {
+        limit: 10,
+      });
+      expect(findResult.success).toBe(true);
+
+      if (findResult.success) {
+        const gameId = findResult.data.items[0].id;
+
+        await softDeleteImportedGame(gameId, user.id);
+
+        const updateResult = await updateImportedGameStatus(
+          gameId,
+          user.id,
+          "MATCHED"
+        );
+
+        expect(updateResult.success).toBe(false);
+        if (!updateResult.success) {
+          expect(updateResult.error.code).toBe("NOT_FOUND");
+          expect(updateResult.error.message).toBe(
+            "Imported game not found or access denied"
+          );
+        }
+      }
+    });
+
+    it("should return NOT_FOUND error for non-existent game ID", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const updateResult = await updateImportedGameStatus(
+        "non-existent-id",
+        user.id,
+        "MATCHED"
+      );
+
+      expect(updateResult.success).toBe(false);
+      if (!updateResult.success) {
+        expect(updateResult.error.code).toBe("NOT_FOUND");
+        expect(updateResult.error.message).toBe(
+          "Imported game not found or access denied"
+        );
+      }
+    });
+
+    it("should update the updatedAt timestamp", async () => {
+      const user = await createUser({ steamId64: "76561198012345678" });
+
+      const games: CreateImportedGameInput[] = [
+        {
+          name: "Test Game",
+          storefront: "STEAM",
+          storefrontGameId: "123",
+          playtime: 100,
+        },
+      ];
+
+      await upsertManyImportedGames(user.id, games);
+
+      const findResult = await findImportedGamesByUserId(user.id, {
+        limit: 10,
+      });
+      expect(findResult.success).toBe(true);
+
+      if (findResult.success) {
+        const gameId = findResult.data.items[0].id;
+        const originalUpdatedAt = findResult.data.items[0].updatedAt;
+
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
+        const updateResult = await updateImportedGameStatus(
+          gameId,
+          user.id,
+          "MATCHED"
+        );
+
+        expect(updateResult.success).toBe(true);
+        if (updateResult.success) {
+          expect(updateResult.data.updatedAt.getTime()).toBeGreaterThan(
+            originalUpdatedAt.getTime()
+          );
+        }
       }
     });
   });

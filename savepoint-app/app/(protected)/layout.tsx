@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react";
 
 import { JournalFab } from "@/features/journal/ui/journal-fab";
+import { WhatsNewModal } from "@/features/whats-new";
 import { CommandPaletteProvider } from "@/shared/components/command-palette";
 import { Header } from "@/shared/components/header";
 import { MobileNav } from "@/shared/components/mobile-nav";
@@ -17,6 +18,7 @@ export default async function ProtectedLayout({ children }: PropsWithChildren) {
       <MobileNav />
       <JournalFab />
       <Toaster />
+      <WhatsNewModal />
     </CommandPaletteProvider>
   );
 }

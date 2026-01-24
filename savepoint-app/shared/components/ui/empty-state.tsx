@@ -54,6 +54,7 @@ export interface EmptyStateProps
     href?: string;
     onClick?: () => void;
     variant?: ButtonProps["variant"];
+    disabled?: boolean;
   };
   maxWidth?: "sm" | "md" | "lg" | "xl";
   role?: "status" | "alert";
@@ -124,12 +125,16 @@ export function EmptyState({
 
       {action && (
         <div className="mt-md" role="group" aria-labelledby="empty-state-title">
-          {action.href ? (
+          {action.href && !action.disabled ? (
             <Button asChild variant={action.variant}>
               <Link href={action.href}>{action.label}</Link>
             </Button>
           ) : (
-            <Button onClick={action.onClick} variant={action.variant}>
+            <Button
+              onClick={action.disabled ? undefined : action.onClick}
+              variant={action.variant}
+              disabled={action.disabled}
+            >
               {action.label}
             </Button>
           )}

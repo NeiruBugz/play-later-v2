@@ -1,11 +1,19 @@
 "use client";
 
 import type { ImportedGame } from "@prisma/client";
-import { ChevronLeft, ChevronRight, Gamepad2, Search, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Gamepad2,
+  RefreshCw,
+  Search,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import { EmptyState } from "@/shared/components/ui/empty-state";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -19,23 +27,11 @@ import {
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
+import type { FilterValues, SortOption } from "../types";
 import { ImportedGameCard } from "./imported-game-card";
 
-export type FilterValues = {
-  playtimeStatus?: "all" | "played" | "never_played";
-  playtimeRange?: "all" | "under_1h" | "1_to_10h" | "10_to_50h" | "over_50h";
-  platform?: "all" | "windows" | "mac" | "linux";
-  lastPlayed?: "all" | "30_days" | "1_year" | "over_1_year" | "never";
-};
-
-export type SortBy =
-  | "name_asc"
-  | "name_desc"
-  | "playtime_desc"
-  | "playtime_asc"
-  | "last_played_desc"
-  | "last_played_asc"
-  | "added_desc";
+export type { FilterValues };
+export type SortBy = SortOption;
 
 type ImportedGamesListProps = {
   games: ImportedGame[];
@@ -46,6 +42,8 @@ type ImportedGamesListProps = {
   error?: Error | null;
   onPageChange: (page: number) => void;
   onRetry?: () => void;
+  onSync?: () => void;
+  isSyncing?: boolean;
   search?: string;
   onSearchChange?: (search: string) => void;
   playtimeStatus?: "all" | "played" | "never_played";
@@ -53,8 +51,10 @@ type ImportedGamesListProps = {
   platform?: "all" | "windows" | "mac" | "linux";
   lastPlayed?: "all" | "30_days" | "1_year" | "over_1_year" | "never";
   sortBy?: SortBy;
+  showAlreadyImported?: boolean;
   onFilterChange?: (filters: FilterValues) => void;
   onSortChange?: (sortBy: SortBy) => void;
+  onShowAlreadyImportedChange?: (show: boolean) => void;
 };
 
 type ActiveFilter = {
@@ -298,6 +298,8 @@ export function ImportedGamesList({
   error = null,
   onPageChange,
   onRetry,
+  onSync,
+  isSyncing = false,
   search = "",
   onSearchChange,
   playtimeStatus = "all",
@@ -305,8 +307,10 @@ export function ImportedGamesList({
   platform = "all",
   lastPlayed = "all",
   sortBy = "added_desc",
+  showAlreadyImported = false,
   onFilterChange,
   onSortChange,
+  onShowAlreadyImportedChange,
 }: ImportedGamesListProps) {
   const [inputValue, setInputValue] = useState(search);
   const debouncedSearch = useDebouncedValue(inputValue, 300);
@@ -395,8 +399,18 @@ export function ImportedGamesList({
       <EmptyState
         icon={Gamepad2}
         title="No games imported yet"
-        description="Import your Steam library to see your games here. Connect your Steam account to get started."
+        description="Sync your Steam library to see your games here. Click the button below to fetch your games from Steam."
         spacing="spacious"
+        action={
+          onSync
+            ? {
+                label: isSyncing ? "Syncing..." : "Sync from Steam",
+                onClick: onSync,
+                variant: "default",
+                disabled: isSyncing,
+              }
+            : undefined
+        }
       />
     );
   }
@@ -463,6 +477,23 @@ export function ImportedGamesList({
               </SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Show Already Imported Toggle */}
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="show-already-imported"
+            checked={showAlreadyImported}
+            onCheckedChange={(checked: boolean) =>
+              onShowAlreadyImportedChange?.(checked === true)
+            }
+          />
+          <Label
+            htmlFor="show-already-imported"
+            className="text-muted-foreground cursor-pointer text-sm font-normal"
+          >
+            Show already imported games
+          </Label>
         </div>
 
         {/* Filter Dropdowns */}
@@ -615,6 +646,19 @@ export function ImportedGamesList({
               {totalCount} {totalCount === 1 ? "game" : "games"}
               {search && " found"}
             </h2>
+            {onSync && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onSync}
+                disabled={isSyncing}
+              >
+                <RefreshCw
+                  className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                />
+                {isSyncing ? "Syncing..." : "Refresh from Steam"}
+              </Button>
+            )}
           </div>
 
           <div className="space-y-xs" role="list" aria-label="Imported games">
