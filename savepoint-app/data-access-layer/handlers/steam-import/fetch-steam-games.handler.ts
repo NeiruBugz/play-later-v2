@@ -112,65 +112,105 @@ export async function fetchSteamGamesHandler(
 
   logger.info({ userId, totalGames }, "Fetched owned games from Steam");
 
+  const UPDATE_BATCH_SIZE = 100;
+
   let importedCount: number;
   try {
-    importedCount = await prisma.$transaction(async (tx) => {
-      let upsertedCount = 0;
-
-      for (const game of ownedGames) {
-        const existingGame = await tx.importedGame.findFirst({
-          where: {
-            userId,
-            storefront: "STEAM",
-            storefrontGameId: String(game.appId),
-            deletedAt: null,
-          },
-        });
-
-        if (existingGame) {
-          await tx.importedGame.update({
-            where: { id: existingGame.id },
-            data: {
-              name: game.name,
-              playtime: game.playtimeForever,
-              playtimeWindows: game.playtimeWindows,
-              playtimeMac: game.playtimeMac,
-              playtimeLinux: game.playtimeLinux,
-              lastPlayedAt:
-                game.rtimeLastPlayed && game.rtimeLastPlayed > 0
-                  ? new Date(game.rtimeLastPlayed * 1000)
-                  : null,
-              img_icon_url: game.imgIconUrl,
-              img_logo_url: game.imgLogoUrl,
-              updatedAt: new Date(),
-            },
-          });
-        } else {
-          await tx.importedGame.create({
-            data: {
-              userId,
-              name: game.name,
-              storefront: "STEAM",
-              storefrontGameId: String(game.appId),
-              playtime: game.playtimeForever,
-              playtimeWindows: game.playtimeWindows,
-              playtimeMac: game.playtimeMac,
-              playtimeLinux: game.playtimeLinux,
-              lastPlayedAt:
-                game.rtimeLastPlayed && game.rtimeLastPlayed > 0
-                  ? new Date(game.rtimeLastPlayed * 1000)
-                  : null,
-              img_icon_url: game.imgIconUrl,
-              img_logo_url: game.imgLogoUrl,
-              igdbMatchStatus: "PENDING",
-            },
-          });
-        }
-        upsertedCount++;
-      }
-
-      return upsertedCount;
+    // 1. Single query - get all existing games for this user/storefront
+    const existingGames = await prisma.importedGame.findMany({
+      where: {
+        userId,
+        storefront: "STEAM",
+        deletedAt: null,
+      },
+      select: { id: true, storefrontGameId: true },
     });
+    const existingMap = new Map(
+      existingGames.map((g) => [g.storefrontGameId, g.id])
+    );
+
+    // 2. Separate into creates and updates
+    const toCreate: typeof ownedGames = [];
+    const toUpdate: Array<{ id: string; game: (typeof ownedGames)[number] }> =
+      [];
+
+    for (const game of ownedGames) {
+      const existingId = existingMap.get(String(game.appId));
+      if (existingId) {
+        toUpdate.push({ id: existingId, game });
+      } else {
+        toCreate.push(game);
+      }
+    }
+
+    logger.info(
+      { userId, toCreate: toCreate.length, toUpdate: toUpdate.length },
+      "Separated games into creates and updates"
+    );
+
+    // 3. Bulk create new games (single query)
+    if (toCreate.length > 0) {
+      await prisma.importedGame.createMany({
+        data: toCreate.map((game) => ({
+          userId,
+          name: game.name,
+          storefront: "STEAM" as const,
+          storefrontGameId: String(game.appId),
+          playtime: game.playtimeForever,
+          playtimeWindows: game.playtimeWindows,
+          playtimeMac: game.playtimeMac,
+          playtimeLinux: game.playtimeLinux,
+          lastPlayedAt:
+            game.rtimeLastPlayed && game.rtimeLastPlayed > 0
+              ? new Date(game.rtimeLastPlayed * 1000)
+              : null,
+          img_icon_url: game.imgIconUrl,
+          img_logo_url: game.imgLogoUrl,
+          igdbMatchStatus: "PENDING" as const,
+        })),
+      });
+      logger.info({ userId, count: toCreate.length }, "Created new games");
+    }
+
+    // 4. Batch updates with extended timeout
+    for (let i = 0; i < toUpdate.length; i += UPDATE_BATCH_SIZE) {
+      const batch = toUpdate.slice(i, i + UPDATE_BATCH_SIZE);
+      const now = new Date();
+
+      await prisma.$transaction(
+        async (tx) => {
+          await Promise.all(
+            batch.map(({ id, game }) =>
+              tx.importedGame.update({
+                where: { id },
+                data: {
+                  name: game.name,
+                  playtime: game.playtimeForever,
+                  playtimeWindows: game.playtimeWindows,
+                  playtimeMac: game.playtimeMac,
+                  playtimeLinux: game.playtimeLinux,
+                  lastPlayedAt:
+                    game.rtimeLastPlayed && game.rtimeLastPlayed > 0
+                      ? new Date(game.rtimeLastPlayed * 1000)
+                      : null,
+                  img_icon_url: game.imgIconUrl,
+                  img_logo_url: game.imgLogoUrl,
+                  updatedAt: now,
+                },
+              })
+            )
+          );
+        },
+        { timeout: 30000 }
+      );
+
+      logger.debug(
+        { userId, batchIndex: i / UPDATE_BATCH_SIZE, batchSize: batch.length },
+        "Updated batch of games"
+      );
+    }
+
+    importedCount = toCreate.length + toUpdate.length;
   } catch (error) {
     logger.error({ error, userId }, "Failed to upsert imported games");
     return {
