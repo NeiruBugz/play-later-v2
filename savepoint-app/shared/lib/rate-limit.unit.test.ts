@@ -27,24 +27,24 @@ describe("checkRateLimit", () => {
   }
 
   describe("when user makes requests to rate-limited endpoint", () => {
-    it("should allow first 20 requests within the window", async () => {
+    it("should allow first 120 requests within the window", async () => {
       const mockRequest = createMockRequest(getUniqueIP());
 
       const results = [];
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 120; i++) {
         results.push(await checkRateLimit(mockRequest));
       }
 
       results.forEach((result, index) => {
         expect(result.allowed).toBe(true);
-        expect(result.remaining).toBe(20 - (index + 1));
+        expect(result.remaining).toBe(120 - (index + 1));
       });
     });
 
-    it("should deny the 21st request within the window", async () => {
+    it("should deny the 121st request within the window", async () => {
       const mockRequest = createMockRequest(getUniqueIP());
 
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 120; i++) {
         await checkRateLimit(mockRequest);
       }
 
@@ -57,18 +57,18 @@ describe("checkRateLimit", () => {
     it("should reset counter after window expires", async () => {
       const mockRequest = createMockRequest(getUniqueIP());
 
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 120; i++) {
         await checkRateLimit(mockRequest);
       }
 
       const deniedResult = await checkRateLimit(mockRequest);
       expect(deniedResult.allowed).toBe(false);
 
-      vi.advanceTimersByTime(60 * 60 * 1000 + 1);
+      vi.advanceTimersByTime(60_000 + 1);
 
       const newResult = await checkRateLimit(mockRequest);
       expect(newResult.allowed).toBe(true);
-      expect(newResult.remaining).toBe(19);
+      expect(newResult.remaining).toBe(119);
     });
 
     it("should track different IPs independently", async () => {
@@ -87,9 +87,9 @@ describe("checkRateLimit", () => {
       const result2 = await checkRateLimit(mockRequest2);
 
       expect(result1.allowed).toBe(true);
-      expect(result1.remaining).toBe(9);
+      expect(result1.remaining).toBe(109);
       expect(result2.allowed).toBe(true);
-      expect(result2.remaining).toBe(14);
+      expect(result2.remaining).toBe(114);
     });
 
     it("should respect custom limit and window parameters", async () => {
@@ -123,7 +123,7 @@ describe("checkRateLimit", () => {
       const result = await checkRateLimit(mockRequest);
 
       expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(19);
+      expect(result.remaining).toBe(119);
     });
   });
 
@@ -145,11 +145,11 @@ describe("checkRateLimit", () => {
         await checkRateLimit(mockRequest);
       }
 
-      vi.advanceTimersByTime(30 * 60 * 1000);
+      vi.advanceTimersByTime(30_000);
 
       const result = await checkRateLimit(mockRequest);
       expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(9);
+      expect(result.remaining).toBe(109);
     });
 
     it("should handle concurrent requests from different IPs", async () => {
@@ -166,7 +166,7 @@ describe("checkRateLimit", () => {
         const request = createMockRequest(ip);
         const { remaining, allowed } = await checkRateLimit(request);
         expect(allowed).toBe(true);
-        expect(remaining).toBe(9);
+        expect(remaining).toBe(109);
       }
     });
 
@@ -175,7 +175,7 @@ describe("checkRateLimit", () => {
         "10.0.0.1, 172.16.0.1, 192.168.1.1"
       );
 
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 120; i++) {
         await checkRateLimit(mockRequest);
       }
 

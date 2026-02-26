@@ -27,7 +27,7 @@ function initializeRateLimiter(): Ratelimit | null {
     });
     ratelimit = new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(DEFAULT_RATE_LIMIT_REQUESTS, "1 h"),
+      limiter: Ratelimit.slidingWindow(DEFAULT_RATE_LIMIT_REQUESTS, "1 m"),
       analytics: true,
       prefix: "savepoint:ratelimit",
     });
