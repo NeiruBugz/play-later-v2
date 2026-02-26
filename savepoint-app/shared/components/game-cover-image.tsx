@@ -3,7 +3,7 @@ import Image from "next/image";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 import { cn } from "@/shared/lib/ui/utils";
 
-type ImageSize = "thumbnail" | "cover_small" | "cover_big" | "hd";
+type ImageSize = "thumbnail" | "cover_small" | "cover_big" | "cover_big_2x" | "hd";
 type GameCoverImageProps = {
   imageId: string | null | undefined;
   gameTitle: string;
@@ -36,6 +36,12 @@ const SIZE_CONFIG: Record<
   cover_big: {
     igdbSize: "t_cover_big",
     apiSize: IMAGE_SIZES["c-big"],
+    blurDataUrl:
+      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY0IiBoZWlnaHQ9IjM1MiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjY0IiBoZWlnaHQ9IjM1MiIgZmlsbD0iI2U1ZTdlYiIvPjwvc3ZnPg==",
+  },
+  cover_big_2x: {
+    igdbSize: "t_cover_big_2x",
+    apiSize: IMAGE_SIZES["c-big-2x"],
     blurDataUrl:
       "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY0IiBoZWlnaHQ9IjM1MiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjY0IiBoZWlnaHQ9IjM1MiIgZmlsbD0iI2U1ZTdlYiIvPjwvc3ZnPg==",
   },

@@ -3,6 +3,10 @@ export const NEXT_IMAGE_SIZES = {
     height: 352,
     width: 264,
   },
+  "c-big-2x": {
+    height: 748,
+    width: 528,
+  },
   "c-sm": {
     height: 120,
     width: 90,
@@ -42,6 +46,7 @@ export const NEXT_IMAGE_SIZES = {
 } as const;
 export const IMAGE_SIZES = {
   "c-big": "t_cover_big",
+  "c-big-2x": "t_cover_big_2x",
   "c-sm": "t_cover_small",
   "full-hd": "t_1080p",
   hd: "t_720p",
