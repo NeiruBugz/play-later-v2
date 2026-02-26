@@ -112,7 +112,11 @@ export default async function GameDetailPage({
             </>
           )}
         </aside>
-        <main id="main-content" className="space-y-2xl" aria-label="Game information">
+        <main
+          id="main-content"
+          className="space-y-2xl"
+          aria-label="Game information"
+        >
           <header className="space-y-md">
             <h1 className="display-lg">{game.name}</h1>
             <GameReleaseDate firstReleaseDate={game.first_release_date} />

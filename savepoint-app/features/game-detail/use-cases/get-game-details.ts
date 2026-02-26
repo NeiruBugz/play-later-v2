@@ -87,13 +87,13 @@ export const getGameDetails = cache(async function getGameDetails(params: {
     try {
       gameData = await getCachedGameBySlug(params.slug)();
     } catch (error) {
-      logger.error(
-        { slug: params.slug, error },
-        "IGDB fetch failed"
-      );
+      logger.error({ slug: params.slug, error }, "IGDB fetch failed");
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to fetch game details",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch game details",
       };
     }
 

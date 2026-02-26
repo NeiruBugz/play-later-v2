@@ -3,7 +3,12 @@ import Image from "next/image";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 import { cn } from "@/shared/lib/ui/utils";
 
-type ImageSize = "thumbnail" | "cover_small" | "cover_big" | "cover_big_2x" | "hd";
+type ImageSize =
+  | "thumbnail"
+  | "cover_small"
+  | "cover_big"
+  | "cover_big_2x"
+  | "hd";
 type GameCoverImageProps = {
   imageId: string | null | undefined;
   gameTitle: string;
