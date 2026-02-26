@@ -101,7 +101,7 @@ _Once the foundational features are complete, we will move on to these high-valu
 - [ ] **Discovery & Exploration**
   - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.
   - [ ] **Enhanced Game Details:** Add franchise information, expansions, and related games to detail pages.
-
+´˝
 - [ ] **Curated Collections**
   - [ ] **Create Themed Collections:** Allow users to create personal, themed collections (e.g., "Cozy Winter Games," "Games That Made Me Think") from their library.
   - [ ] **Browse Personal Collections:** Display all of a user's collections in an organized view for easy navigation.

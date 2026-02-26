@@ -86,3 +86,6 @@ override.tf.json
 # Agents
 .claude/plans/
 .github/prompts
+
+# Worktrees
+.worktrees/

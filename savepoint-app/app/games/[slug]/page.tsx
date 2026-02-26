@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -16,6 +17,49 @@ import { getGameDetails } from "@/features/game-detail/use-cases/get-game-detail
 import { GenreBadges } from "@/shared/components/genre-badges";
 import { PlatformBadges } from "@/shared/components/platform-badges";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
+
+const IGDB_COVER_BASE_URL =
+  "https://images.igdb.com/igdb/image/upload/t_cover_big";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const result = await getGameDetails({ slug });
+
+  if (!result.success) {
+    return { title: "Game | SavePoint" };
+  }
+
+  const { game } = result.data;
+  const description = game.summary
+    ? game.summary.slice(0, 160)
+    : "Track, review, and manage your video game backlog on SavePoint.";
+  const coverImageUrl = game.cover?.image_id
+    ? `${IGDB_COVER_BASE_URL}/${game.cover.image_id}.jpg`
+    : undefined;
+  const images = coverImageUrl ? [{ url: coverImageUrl }] : undefined;
+
+  return {
+    title: `${game.name} | SavePoint`,
+    description,
+    alternates: { canonical: `/games/${slug}` },
+    openGraph: {
+      title: `${game.name} | SavePoint`,
+      description,
+      type: "website",
+      ...(images && { images }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${game.name} | SavePoint`,
+      description,
+      ...(images && { images }),
+    },
+  };
+}
 
 export default async function GameDetailPage({
   params,
@@ -68,7 +112,7 @@ export default async function GameDetailPage({
             </>
           )}
         </aside>
-        <main className="space-y-2xl" aria-label="Game information">
+        <main id="main-content" className="space-y-2xl" aria-label="Game information">
           <header className="space-y-md">
             <h1 className="display-lg">{game.name}</h1>
             <GameReleaseDate firstReleaseDate={game.first_release_date} />

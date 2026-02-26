@@ -1,6 +1,7 @@
 import { type Metadata, type Viewport } from "next";
 
 import { LoadingScreen } from "@/shared/components/loading-screen";
+import { SkipToContent } from "@/shared/components/skip-to-content";
 import { SpeedInsightsClient } from "@/shared/components/speed-insights";
 import { cn } from "@/shared/lib/ui/utils";
 import { Providers } from "@/shared/providers";
@@ -26,7 +27,6 @@ const fontMono = Geist_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   themeColor: [
     { color: "white", media: "(prefers-color-scheme: light)" },
     { color: "black", media: "(prefers-color-scheme: dark)" },
@@ -94,6 +94,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://images.igdb.com" />
+      </head>
       <body
         className={cn(
           "bg-background relative min-h-screen antialiased",
@@ -101,6 +104,7 @@ export default function RootLayout({
           `font-sans ${fontSans.variable} ${fontMono.variable} antialiased`
         )}
       >
+        <SkipToContent />
         <Providers
           attribute="class"
           defaultTheme="system"
