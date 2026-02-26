@@ -96,6 +96,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://images.igdb.com" />
+        <link rel="preconnect" href="https://va.vercel-scripts.com" />
       </head>
       <body
         className={cn(
