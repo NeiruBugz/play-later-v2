@@ -12,6 +12,10 @@ import {
 
 import { getGameDetails } from "./get-game-details";
 
+vi.mock("next/cache", () => ({
+  unstable_cache: (fn: (...args: unknown[]) => unknown) => () => fn(),
+}));
+
 vi.mock("@/data-access-layer/services", () => ({
   GameDetailService: vi.fn(),
   IgdbService: vi.fn(),
@@ -486,7 +490,7 @@ describe("getGameDetails", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("Unknown error");
+        expect(result.error).toBe("Failed to fetch game details");
       }
     });
 

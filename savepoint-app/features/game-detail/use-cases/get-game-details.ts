@@ -6,6 +6,7 @@ import {
   JournalService,
   LibraryService,
 } from "@/data-access-layer/services";
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
 import { createLogger } from "@/shared/lib/app/logger";
@@ -35,6 +36,44 @@ type GameDetailsResult = {
   journalEntries: JournalEntryDomain[];
 };
 
+const getCachedGameBySlug = (slug: string) =>
+  unstable_cache(
+    async () => {
+      const igdbService = new IgdbService();
+      const result = await igdbService.getGameDetailsBySlug({ slug });
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      return result.data;
+    },
+    ["igdb-game-detail", slug],
+    {
+      revalidate: 300,
+      tags: ["igdb-game-detail"],
+    }
+  );
+
+const getCachedTimesToBeat = (igdbId: number) =>
+  unstable_cache(
+    async () => {
+      const igdbService = new IgdbService();
+      const result = await igdbService.getTimesToBeat({ igdbId });
+
+      if (!result.success) {
+        return undefined;
+      }
+
+      return result.data.timesToBeat;
+    },
+    ["igdb-times-to-beat", String(igdbId)],
+    {
+      revalidate: 3600,
+      tags: ["igdb-times-to-beat"],
+    }
+  );
+
 export const getGameDetails = cache(async function getGameDetails(params: {
   slug: string;
   userId?: string;
@@ -43,21 +82,23 @@ export const getGameDetails = cache(async function getGameDetails(params: {
 > {
   try {
     logger.info({ slug: params.slug }, "Use case: Getting game details");
-    const igdbService = new IgdbService();
-    const igdbResult = await igdbService.getGameDetailsBySlug({
-      slug: params.slug,
-    });
-    if (!igdbResult.success) {
+
+    let gameData;
+    try {
+      gameData = await getCachedGameBySlug(params.slug)();
+    } catch (error) {
       logger.error(
-        { slug: params.slug, error: igdbResult.error },
+        { slug: params.slug, error },
         "IGDB fetch failed"
       );
       return {
         success: false,
-        error: igdbResult.error,
+        error: error instanceof Error ? error.message : "Failed to fetch game details",
       };
     }
-    const game = igdbResult.data.game;
+
+    const game = gameData.game;
+
     const gameDetailService = new GameDetailService();
     gameDetailService
       .populateGameInDatabase(game)
@@ -75,6 +116,7 @@ export const getGameDetails = cache(async function getGameDetails(params: {
           "Unexpected error during background game population"
         );
       });
+
     const franchiseIds: number[] = [];
     if (typeof game.franchise === "number" && game.franchise > 0) {
       franchiseIds.push(game.franchise);
@@ -88,6 +130,7 @@ export const getGameDetails = cache(async function getGameDetails(params: {
         }
       });
     }
+
     logger.info(
       {
         franchiseIds,
@@ -98,12 +141,7 @@ export const getGameDetails = cache(async function getGameDetails(params: {
       },
       "Determined franchise IDs for related games"
     );
-    const timesToBeatResult = await igdbService.getTimesToBeat({
-      igdbId: game.id,
-    });
-    const timesToBeat = timesToBeatResult.success
-      ? timesToBeatResult.data.timesToBeat
-      : undefined;
+
     let userLibraryStatus:
       | {
           mostRecent: LibraryItemDomain;
@@ -113,9 +151,15 @@ export const getGameDetails = cache(async function getGameDetails(params: {
       | undefined;
     let journalEntries: JournalEntryDomain[] = [];
     let gameId: string | undefined;
+
     if (params.userId) {
       const libraryService = new LibraryService();
-      const gameResult = await libraryService.findGameByIgdbId(game.id);
+
+      const [timesToBeat, gameResult] = await Promise.all([
+        getCachedTimesToBeat(game.id)(),
+        libraryService.findGameByIgdbId(game.id),
+      ]);
+
       if (gameResult.success && gameResult.data) {
         gameId = gameResult.data.id;
         const journalService = new JournalService();
@@ -171,16 +215,42 @@ export const getGameDetails = cache(async function getGameDetails(params: {
           );
         }
       }
+
+      logger.info(
+        {
+          igdbId: game.id,
+          slug: params.slug,
+          franchiseIdsCount: franchiseIds.length,
+          hasLibraryStatus: !!userLibraryStatus,
+        },
+        "Game details fetched successfully"
+      );
+
+      return {
+        success: true,
+        data: {
+          game,
+          gameId,
+          franchiseIds,
+          timesToBeat,
+          userLibraryStatus,
+          journalEntries,
+        },
+      };
     }
+
+    const timesToBeat = await getCachedTimesToBeat(game.id)();
+
     logger.info(
       {
         igdbId: game.id,
         slug: params.slug,
         franchiseIdsCount: franchiseIds.length,
-        hasLibraryStatus: !!userLibraryStatus,
+        hasLibraryStatus: false,
       },
       "Game details fetched successfully"
     );
+
     return {
       success: true,
       data: {
