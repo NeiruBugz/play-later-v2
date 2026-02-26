@@ -35,7 +35,7 @@ export const GameCoverImage = ({
     );
   }
 
-  const imageUrl = `https://images.igdb.com/igdb/image/upload/t_720p/${imageId}.jpg`;
+  const imageUrl = `https://images.igdb.com/igdb/image/upload/t_cover_big_2x/${imageId}.jpg`;
   return (
     <div
       className={cn(
