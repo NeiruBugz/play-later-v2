@@ -20,7 +20,6 @@ export const LibraryCard = memo(function LibraryCard({
   index = 0,
 }: LibraryCardProps & { index?: number }) {
   const { game, status } = item;
-  const hasMultipleEntries = game.entryCount > 1;
   const coverImageId =
     game.coverImage?.split("/").pop()?.replace(".jpg", "") ?? null;
   const isMobile = useMediaQuery("(max-width: 767px)");
@@ -53,7 +52,7 @@ export const LibraryCard = memo(function LibraryCard({
         <GameCoverImage
           imageId={coverImageId}
           gameTitle={game.title}
-          size="hd"
+          size="cover_big_2x"
           className="aspect-[3/4] w-full"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, (max-width: 1280px) 14vw, 12vw"
           priority={index < 6}
@@ -92,6 +91,7 @@ export const LibraryCard = memo(function LibraryCard({
   return (
     <Link
       href={`/games/${game.slug}`}
+      role="listitem"
       className={cn(
         "group relative block [&>[data-library-interactive]]:pointer-events-auto",
         "animate-stagger-in",
@@ -101,7 +101,7 @@ export const LibraryCard = memo(function LibraryCard({
       )}
       onClick={handleLinkInteraction}
       onMouseDown={handleLinkInteraction}
-      aria-label={`${game.title} - ${statusConfig.label}${hasMultipleEntries ? ` - ${game.entryCount} entries` : ""}`}
+      aria-label={game.title}
       style={{ animationDelay: `${staggerIndex * 50}ms` }}
     >
       {isMobile ? (

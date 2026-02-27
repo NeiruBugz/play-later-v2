@@ -63,7 +63,7 @@ const elements = {
   queryClearFiltersButton: () =>
     screen.queryByRole("button", { name: "Clear all filters" }),
   queryLibraryGrid: () =>
-    screen.queryByRole("feed", { name: "Your game library" }),
+    screen.queryByRole("list", { name: "Your game library" }),
   queryEmptyState: () => screen.queryByText(/your library is empty/i),
   queryErrorState: () => screen.queryByText(/failed to load library/i),
 };
