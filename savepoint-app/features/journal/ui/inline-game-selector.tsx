@@ -111,7 +111,7 @@ export function InlineGameSelector({
       <div className="bg-muted/20 px-lg py-md space-y-sm rounded-lg border border-dashed text-center">
         <div className="gap-md flex flex-col items-center">
           <div className="bg-muted/50 flex h-12 w-12 items-center justify-center rounded-full">
-            <Gamepad2 className="text-muted-foreground/60 h-6 w-6" />
+            <Gamepad2 className="text-muted-foreground h-6 w-6" />
           </div>
           <div className="space-y-xs">
             <p className="text-sm font-medium">No games in your library</p>

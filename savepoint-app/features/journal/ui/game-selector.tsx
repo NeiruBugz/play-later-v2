@@ -170,7 +170,7 @@ export function GameSelector({
         </div>
         <div className="gap-lg bg-muted/20 px-xl py-3xl flex flex-col items-center rounded-lg border border-dashed text-center">
           <div className="bg-muted/50 flex h-16 w-16 items-center justify-center rounded-full">
-            <Gamepad2 className="text-muted-foreground/60 h-8 w-8" />
+            <Gamepad2 className="text-muted-foreground h-8 w-8" />
           </div>
           <div className="space-y-xs">
             <p className="font-medium">No games in your library</p>

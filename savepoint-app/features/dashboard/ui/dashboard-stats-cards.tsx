@@ -76,7 +76,7 @@ function StatCard({
           </div>
 
           {percentage > 0 && (
-            <div className="body-xs text-muted-foreground/60 tabular-nums">
+            <div className="body-xs text-muted-foreground tabular-nums">
               {percentage}%
             </div>
           )}

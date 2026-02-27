@@ -90,9 +90,7 @@ export const LibraryItemCard = ({
                       {formatAbsoluteDate(item.startedAt)}
                     </time>
                   ) : (
-                    <span className="text-muted-foreground/60">
-                      Not started
-                    </span>
+                    <span className="text-muted-foreground">Not started</span>
                   )}
                 </span>
               </div>
@@ -106,7 +104,7 @@ export const LibraryItemCard = ({
                       {formatAbsoluteDate(item.completedAt)}
                     </time>
                   ) : (
-                    <span className="text-muted-foreground/60">Not yet</span>
+                    <span className="text-muted-foreground">Not yet</span>
                   )}
                 </span>
               </div>

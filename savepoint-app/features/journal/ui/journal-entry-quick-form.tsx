@@ -152,7 +152,7 @@ export function JournalEntryQuickForm({
                 ref={textareaRef}
                 placeholder="What's on your mind about this game?"
                 className={cn(
-                  "placeholder:text-muted-foreground/60 min-h-[140px] resize-none border-0 bg-transparent p-0 text-base leading-relaxed focus-visible:ring-0",
+                  "placeholder:text-muted-foreground min-h-[140px] resize-none border-0 bg-transparent p-0 text-base leading-relaxed focus-visible:ring-0",
                   "transition-all duration-200"
                 )}
                 disabled={createAction.isSubmitting}
@@ -167,7 +167,7 @@ export function JournalEntryQuickForm({
                     "text-xs transition-colors duration-200",
                     contentLength > MAX_CHARACTERS * 0.9
                       ? "text-destructive"
-                      : "text-muted-foreground/60"
+                      : "text-muted-foreground"
                   )}
                 >
                   {contentLength}/{MAX_CHARACTERS}
