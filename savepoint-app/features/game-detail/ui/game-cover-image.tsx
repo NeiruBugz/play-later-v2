@@ -50,6 +50,7 @@ export const GameCoverImage = ({
         fill
         className="object-cover"
         priority
+        fetchPriority="high"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 384px"
       />
     </div>
