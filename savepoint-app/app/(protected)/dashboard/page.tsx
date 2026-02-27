@@ -13,7 +13,8 @@ import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Your gaming dashboard",
+  description:
+    "Your gaming dashboard — track what you're playing, discover what to play next, and journal your gaming experiences.",
 };
 
 function StatsSkeleton() {
