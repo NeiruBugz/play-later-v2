@@ -12,6 +12,27 @@
 
 ---
 
+## Agent Mapping
+
+Tasks are assigned to specialized user-level agents (`~/.claude/agents/`). Tasks 1-4 are sequential. Tasks 5-9 can parallelize after Task 4. Task 10 runs after all implementation. Task 11 is final validation.
+
+| Task | Agent (`subagent_type`) | Rationale |
+|------|------------------------|-----------|
+| 1: Prisma Schema + Migration | `nextjs-expert` | Schema/service layer, project architecture |
+| 2: Domain Layer | `nextjs-expert` | Domain models, mappers, enums |
+| 3: Repository Layer | `nextjs-expert` | Repository pattern, Prisma queries |
+| 4: Service Layer + hasBeenPlayed | `nextjs-expert` | Business logic, Result types |
+| 5: Shared Config, CSS, Badge | `react-architect` | Design system, CSS variables, component variants |
+| 6: Library UI — Filters, Cards, Actions | `react-architect` | React components, FSD structure, UI patterns |
+| 7: Manage Library Entry — Forms | `nextjs-expert` | Server actions, Zod schemas, use-cases |
+| 8: Steam Import | `nextjs-expert` | Feature logic, status mapping |
+| 9: Dashboard | `nextjs-expert` | Stats cards, server actions |
+| 10: Test Updates + Full Test Run | `typescript-test-expert` | Bulk test updates, coverage verification |
+| 11: Type Check + Lint | `nextjs-expert` | Final validation pass |
+| 12: Manual Smoke Test | *(manual)* | Dev server verification |
+
+---
+
 ## File Map
 
 | Action | File | Responsibility |
