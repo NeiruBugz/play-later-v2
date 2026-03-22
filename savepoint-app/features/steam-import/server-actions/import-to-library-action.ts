@@ -30,7 +30,7 @@ export const importToLibraryAction = createServerAction<
 
     const result = await importGameToLibrary({
       importedGameId: input.importedGameId,
-      userId: userId!,
+      userId: userId,
       status: input.status ?? "owned",
       manualIgdbId: input.manualIgdbId,
     });

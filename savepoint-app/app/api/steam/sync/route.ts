@@ -1,10 +1,10 @@
-import { getServerUserId } from "@/shared/lib/auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { steamImportConfig } from "@/features/steam-import/config";
 import { triggerBackgroundSync } from "@/features/steam-import/server-actions";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
+import { isAuthFailure, requireApiAuth } from "@/shared/lib/auth";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 const logger = createLogger({ [LOGGER_CONTEXT.API_ROUTE]: "steam-sync" });
@@ -15,14 +15,9 @@ const RequestBodySchema = z.object({
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn("Unauthorized Steam sync attempt");
-      return NextResponse.json(
-        { success: false, error: "Authentication required" },
-        { status: HTTP_STATUS.UNAUTHORIZED }
-      );
-    }
+    const auth = await requireApiAuth();
+    if (isAuthFailure(auth)) return auth;
+    const { userId } = auth;
 
     logger.info(
       {

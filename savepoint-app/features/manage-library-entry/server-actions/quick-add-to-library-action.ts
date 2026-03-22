@@ -24,7 +24,7 @@ export const quickAddToLibraryAction = createServerAction<
     logger.info({ igdbId, status, userId }, "Quick-adding game to library");
 
     const result = await addGameToLibrary({
-      userId: userId!,
+      userId: userId,
       igdbId,
       status,
     });

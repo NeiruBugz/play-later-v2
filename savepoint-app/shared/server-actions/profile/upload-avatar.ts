@@ -22,7 +22,7 @@ export const uploadAvatar = createServerAction<
   handler: async ({ input, userId, logger }) => {
     logger.info({ userId }, "Uploading avatar to storage");
     const uploadResult = await AvatarStorageService.uploadAvatar(
-      userId!,
+      userId,
       input.file
     );
     if (!uploadResult.ok) {
@@ -38,7 +38,7 @@ export const uploadAvatar = createServerAction<
     const profileService = new ProfileService();
     logger.debug({ userId }, "Saving avatar URL to profile");
     const updateResult = await profileService.updateAvatarUrl({
-      userId: userId!,
+      userId: userId,
       avatarUrl: uploadResult.data.url,
     });
     if (!updateResult.success) {

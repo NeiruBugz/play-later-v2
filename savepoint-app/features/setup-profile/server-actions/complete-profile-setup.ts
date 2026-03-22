@@ -35,7 +35,7 @@ const performCompleteSetup = createServerAction<
     logger.info({ userId }, "Completing profile setup");
 
     const result = await profileService.completeSetup({
-      userId: userId!,
+      userId: userId,
       username: sanitizedData.username,
       avatarUrl: sanitizedData.avatarUrl,
     });

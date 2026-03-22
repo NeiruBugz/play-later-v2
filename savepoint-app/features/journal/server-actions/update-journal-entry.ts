@@ -27,7 +27,7 @@ export const updateJournalEntryAction = createServerAction<
     const updateParams: Parameters<
       typeof journalService.updateJournalEntry
     >[0] = {
-      userId: userId!,
+      userId: userId,
       entryId,
       updates: {},
     };

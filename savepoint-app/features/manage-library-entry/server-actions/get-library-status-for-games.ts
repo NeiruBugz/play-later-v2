@@ -38,7 +38,7 @@ export const getLibraryStatusForGames = createServerAction<
 
         const libraryResult =
           await libraryService.findMostRecentLibraryItemByGameId({
-            userId: userId!,
+            userId: userId,
             gameId: gameResult.data.id,
           });
 

@@ -1,4 +1,3 @@
-import { getServerUserId } from "@/shared/lib/auth";
 import {
   fetchSteamGamesHandler,
   importedGamesHandler,
@@ -7,20 +6,16 @@ import { NextResponse } from "next/server";
 
 import { importedGamesQuerySchema } from "@/features/steam-import/schemas";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
+import { isAuthFailure, requireApiAuth } from "@/shared/lib/auth";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 const logger = createLogger({ [LOGGER_CONTEXT.API_ROUTE]: "steam-games" });
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn("Unauthorized Steam games fetch attempt");
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: HTTP_STATUS.UNAUTHORIZED }
-      );
-    }
+    const auth = await requireApiAuth();
+    if (isAuthFailure(auth)) return auth;
+    const { userId } = auth;
 
     logger.info({ userId }, "Steam games fetch request received");
 
@@ -89,14 +84,9 @@ export async function POST(request: Request): Promise<NextResponse> {
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn("Unauthorized imported games list attempt");
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: HTTP_STATUS.UNAUTHORIZED }
-      );
-    }
+    const auth = await requireApiAuth();
+    if (isAuthFailure(auth)) return auth;
+    const { userId } = auth;
 
     const { searchParams } = new URL(request.url);
     const queryParams = Object.fromEntries(

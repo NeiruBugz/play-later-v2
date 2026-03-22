@@ -1,21 +1,16 @@
-import { getServerUserId } from "@/shared/lib/auth";
 import { getLibraryHandler } from "@/data-access-layer/handlers/library/get-library-handler";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
+import { isAuthFailure, requireApiAuth } from "@/shared/lib/auth";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 const logger = createLogger({ [LOGGER_CONTEXT.API_ROUTE]: "LibraryAPI" });
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn("Unauthorized library access attempt");
-      return NextResponse.json(
-        { success: false, error: "Authentication required" },
-        { status: HTTP_STATUS.UNAUTHORIZED }
-      );
-    }
+    const auth = await requireApiAuth();
+    if (isAuthFailure(auth)) return auth;
+    const { userId } = auth;
     const searchParams = request.nextUrl.searchParams;
     const rawStatus = searchParams.get("status");
     const rawPlatform = searchParams.get("platform");

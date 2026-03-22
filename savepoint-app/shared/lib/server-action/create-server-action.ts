@@ -6,23 +6,43 @@ import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 export type ActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
-type ServerActionOptions<TInput, TOutput> = {
-  actionName: string;
-  schema: ZodSchema<TInput>;
-  requireAuth?: boolean;
-  handler: (params: {
-    input: TInput;
-    userId?: string;
-    logger: ReturnType<typeof createLogger>;
-  }) => Promise<ActionResult<TOutput>>;
+
+type AuthenticatedHandlerParams<TInput> = {
+  input: TInput;
+  userId: string;
+  logger: ReturnType<typeof createLogger>;
 };
 
-export function createServerAction<TInput, TOutput>({
-  actionName,
-  schema,
-  requireAuth = true,
-  handler,
-}: ServerActionOptions<TInput, TOutput>) {
+type OptionalAuthHandlerParams<TInput> = {
+  input: TInput;
+  userId: string | undefined;
+  logger: ReturnType<typeof createLogger>;
+};
+
+type AuthenticatedServerActionOptions<TInput, TOutput> = {
+  actionName: string;
+  schema: ZodSchema<TInput>;
+  requireAuth?: true;
+  handler: (
+    params: AuthenticatedHandlerParams<TInput>
+  ) => Promise<ActionResult<TOutput>>;
+};
+
+type OptionalAuthServerActionOptions<TInput, TOutput> = {
+  actionName: string;
+  schema: ZodSchema<TInput>;
+  requireAuth: false;
+  handler: (
+    params: OptionalAuthHandlerParams<TInput>
+  ) => Promise<ActionResult<TOutput>>;
+};
+
+export function createServerAction<TInput, TOutput>(
+  options:
+    | AuthenticatedServerActionOptions<TInput, TOutput>
+    | OptionalAuthServerActionOptions<TInput, TOutput>
+) {
+  const { actionName, schema, requireAuth = true, handler } = options;
   const logger = createLogger({ [LOGGER_CONTEXT.SERVER_ACTION]: actionName });
   return async (input: TInput): Promise<ActionResult<TOutput>> => {
     try {
@@ -44,8 +64,10 @@ export function createServerAction<TInput, TOutput>({
             error: "You must be logged in to perform this action",
           };
         }
+      } else {
+        userId = await getServerUserId();
       }
-      return await handler({
+      return await (handler as (params: OptionalAuthHandlerParams<TInput>) => Promise<ActionResult<TOutput>>)({
         input: parsed.data,
         userId,
         logger,

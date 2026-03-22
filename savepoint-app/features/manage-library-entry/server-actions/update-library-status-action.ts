@@ -38,7 +38,7 @@ export const updateLibraryStatusAction = createServerAction<
     const game = gameResult.data;
     const libraryItemsResult =
       await libraryService.findMostRecentLibraryItemByGameId({
-        userId: userId!,
+        userId: userId,
         gameId: game.id,
       });
 
@@ -63,7 +63,7 @@ export const updateLibraryStatusAction = createServerAction<
 
     const mostRecentItem = libraryItemsResult.data;
     const updateResult = await libraryService.updateLibraryItem({
-      userId: userId!,
+      userId: userId,
       libraryItem: {
         id: mostRecentItem.id,
         status,

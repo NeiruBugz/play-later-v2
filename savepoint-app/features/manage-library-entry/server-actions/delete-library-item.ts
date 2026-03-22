@@ -26,7 +26,7 @@ export const deleteLibraryItemAction = createServerAction<
     const libraryService = new LibraryService();
     const result = await libraryService.deleteLibraryItem({
       libraryItemId,
-      userId: userId!,
+      userId: userId,
     });
 
     if (!result.success) {

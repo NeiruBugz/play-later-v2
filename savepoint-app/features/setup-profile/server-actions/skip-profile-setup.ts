@@ -16,7 +16,7 @@ export const skipProfileSetup = createServerAction<Record<string, never>, void>(
       logger.info({ userId }, "Marking profile setup as complete (skip)");
 
       const service = new ProfileService();
-      const result = await service.completeSetup({ userId: userId! });
+      const result = await service.completeSetup({ userId: userId });
 
       if (!result.success) {
         logger.error({ userId, reason: result.error }, "Skip setup failed");

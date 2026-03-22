@@ -22,7 +22,7 @@ export const getPlayingGameAction = createServerAction<
 
     const libraryService = new LibraryService();
     const result = await libraryService.getMostRecentPlayingGame({
-      userId: userId!,
+      userId: userId,
     });
 
     if (!result.success) {

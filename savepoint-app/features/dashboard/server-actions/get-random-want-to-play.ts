@@ -14,7 +14,7 @@ export const getRandomWantToPlayAction = createServerAction({
     logger.info({ userId }, "Fetching random want-to-play game");
 
     const service = new LibraryService();
-    const result = await service.getRandomWantToPlayGame({ userId: userId! });
+    const result = await service.getRandomWantToPlayGame({ userId: userId });
 
     if (!result.success) {
       logger.error({ error: result.error, userId }, "Service call failed");

@@ -26,7 +26,7 @@ export const updateLibraryStatusAction = createServerAction<
     );
     const libraryService = new LibraryService();
     const result = await libraryService.updateLibraryItem({
-      userId: userId!,
+      userId: userId,
       libraryItem: {
         id: libraryItemId,
         status,

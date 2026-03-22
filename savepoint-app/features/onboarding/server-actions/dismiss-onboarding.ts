@@ -19,7 +19,7 @@ export const dismissOnboarding = createServerAction<
     logger.info({ userId }, "Dismissing onboarding");
 
     const service = new OnboardingService();
-    const result = await service.dismiss({ userId: userId! });
+    const result = await service.dismiss({ userId: userId });
 
     if (!result.success) {
       logger.error(

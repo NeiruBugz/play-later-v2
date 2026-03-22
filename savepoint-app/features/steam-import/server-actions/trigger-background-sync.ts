@@ -55,7 +55,7 @@ export const triggerBackgroundSync = createServerAction<
     const profileService = new ProfileService();
     const steamConnectionResult = await profileService.getSteamConnectionStatus(
       {
-        userId: userId!,
+        userId: userId,
       }
     );
 
@@ -100,7 +100,7 @@ export const triggerBackgroundSync = createServerAction<
       });
 
       const message: SteamSyncMessage = {
-        userId: userId!,
+        userId: userId,
         steamId64,
         requestedAt: new Date().toISOString(),
         type: input.type,

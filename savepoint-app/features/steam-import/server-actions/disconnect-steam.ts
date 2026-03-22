@@ -16,7 +16,7 @@ export const disconnectSteam = createServerAction<Record<string, never>, void>({
     logger.info({ userId }, "Disconnecting Steam account");
 
     const steamService = new SteamService();
-    const result = await steamService.disconnectSteam({ userId: userId! });
+    const result = await steamService.disconnectSteam({ userId: userId });
 
     if (!result.success) {
       logger.error(

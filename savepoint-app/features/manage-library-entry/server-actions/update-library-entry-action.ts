@@ -23,7 +23,7 @@ export const updateLibraryEntryAction = createServerAction<
     logger.info({ libraryItemId, status, userId }, "Updating library entry");
     const libraryService = new LibraryService();
     const updateResult = await libraryService.updateLibraryItem({
-      userId: userId!,
+      userId: userId,
       libraryItem: {
         id: libraryItemId,
         status,

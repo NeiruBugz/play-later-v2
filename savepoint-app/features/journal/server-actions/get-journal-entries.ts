@@ -25,7 +25,7 @@ export const getJournalEntriesAction = createServerAction<
 
     const journalService = new JournalService();
     const result = await journalService.findJournalEntriesByUserId({
-      userId: userId!,
+      userId: userId,
       limit,
       cursor,
     });

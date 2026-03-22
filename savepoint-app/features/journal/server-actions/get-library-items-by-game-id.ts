@@ -23,7 +23,7 @@ export const getLibraryItemsByGameIdAction = createServerAction<
 
     const libraryService = new LibraryService();
     const result = await libraryService.findAllLibraryItemsByGameId({
-      userId: userId!,
+      userId: userId,
       gameId,
     });
 

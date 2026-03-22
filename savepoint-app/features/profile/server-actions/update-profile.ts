@@ -36,7 +36,7 @@ const performUpdateProfile = createServerAction<
     logger.info({ userId }, "Updating user profile");
 
     const result = await profileService.updateProfile({
-      userId: userId!,
+      userId: userId,
       username: sanitizedData.username,
       avatarUrl: sanitizedData.avatarUrl,
     });

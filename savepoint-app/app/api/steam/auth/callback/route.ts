@@ -1,10 +1,10 @@
-import { getServerUserId } from "@/shared/lib/auth";
 import {
   SteamOpenIdService,
   SteamService,
 } from "@/data-access-layer/services/steam";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { getServerUserId } from "@/shared/lib/auth";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 const logger = createLogger({

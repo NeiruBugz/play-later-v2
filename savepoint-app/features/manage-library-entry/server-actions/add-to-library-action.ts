@@ -19,7 +19,7 @@ export const addToLibraryAction = createServerAction<
     const { igdbId, status, platform, startedAt, completedAt } = input;
     logger.info({ igdbId, userId }, "Adding game to library");
     const result = await addGameToLibrary({
-      userId: userId!,
+      userId: userId,
       igdbId,
       status,
       platform,

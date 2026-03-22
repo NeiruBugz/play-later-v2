@@ -26,7 +26,7 @@ export const dismissImportedGameAction = createServerAction<
     const importedGameService = new ImportedGameService();
     const result = await importedGameService.dismissImportedGame({
       importedGameId: input.importedGameId,
-      userId: userId!,
+      userId: userId,
     });
 
     if (!result.success) {

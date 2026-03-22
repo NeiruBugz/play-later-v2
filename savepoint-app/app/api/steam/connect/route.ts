@@ -1,8 +1,8 @@
-import { getServerUserId } from "@/shared/lib/auth";
 import { connectSteamHandler } from "@/data-access-layer/handlers/steam-import";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
+import { isAuthFailure, requireApiAuth } from "@/shared/lib/auth";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 const logger = createLogger({ [LOGGER_CONTEXT.API_ROUTE]: "steam-connect" });
@@ -10,14 +10,9 @@ const logger = createLogger({ [LOGGER_CONTEXT.API_ROUTE]: "steam-connect" });
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // 1. Check authentication
-    const userId = await getServerUserId();
-    if (!userId) {
-      logger.warn("Unauthorized Steam connect attempt");
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: HTTP_STATUS.UNAUTHORIZED }
-      );
-    }
+    const auth = await requireApiAuth();
+    if (isAuthFailure(auth)) return auth;
+    const { userId } = auth;
 
     // 2. Parse request body
     let body: unknown;

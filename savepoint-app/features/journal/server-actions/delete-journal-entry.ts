@@ -24,7 +24,7 @@ export const deleteJournalEntryAction = createServerAction<
     const journalService = new JournalService();
 
     const result = await journalService.deleteJournalEntry({
-      userId: userId!,
+      userId: userId,
       entryId,
     });
 

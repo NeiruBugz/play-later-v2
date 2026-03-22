@@ -23,7 +23,7 @@ export const createJournalEntryAction = createServerAction<
     logger.info({ gameId, userId }, "Creating journal entry");
     const journalService = new JournalService();
     const result = await journalService.createJournalEntry({
-      userId: userId!,
+      userId: userId,
       gameId,
       title,
       content,
