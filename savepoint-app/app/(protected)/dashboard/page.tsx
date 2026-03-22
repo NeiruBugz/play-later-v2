@@ -9,7 +9,7 @@ import { DashboardStats } from "@/features/dashboard/ui/dashboard-stats";
 import { RecentlyAdded } from "@/features/dashboard/ui/recently-added";
 import { GettingStartedChecklist } from "@/features/onboarding";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { requireServerUserId } from "@/shared/lib/app/auth";
+import { requireServerUserId } from "@/shared/lib/auth";
 
 export const metadata: Metadata = {
   title: "Dashboard",

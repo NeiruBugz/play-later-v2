@@ -7,7 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-// ----- NextAuth Authorization Models ------//
+// ----- Better Auth Authorization Models ------//
 
 model Account {
   id                String  @id @default(cuid())
@@ -33,6 +33,8 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

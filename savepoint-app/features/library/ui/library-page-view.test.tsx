@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import {
   ReadonlyURLSearchParams,
@@ -99,11 +98,11 @@ const renderComponent = () => {
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <ThemeProvider>
-      <SessionProvider>
+      <>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>
-      </SessionProvider>
+      </>
     </ThemeProvider>
   );
 
@@ -460,11 +459,11 @@ describe("LibraryPageView", () => {
             enableSystem
             disableTransitionOnChange
           >
-            <SessionProvider session={null}>
+            <>
               <QueryClientProvider client={new QueryClient()}>
                 {children}
               </QueryClientProvider>
-            </SessionProvider>
+            </>
           </ThemeProvider>
         ),
       });
@@ -484,11 +483,11 @@ describe("LibraryPageView", () => {
             enableSystem
             disableTransitionOnChange
           >
-            <SessionProvider session={null}>
+            <>
               <QueryClientProvider client={new QueryClient()}>
                 {children}
               </QueryClientProvider>
-            </SessionProvider>
+            </>
           </ThemeProvider>
         ),
       });

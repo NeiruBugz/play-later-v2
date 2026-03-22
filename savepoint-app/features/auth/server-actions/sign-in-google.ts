@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { redirect } from "next/navigation";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
@@ -9,5 +9,5 @@ export async function signInWithGoogleAction() {
     [LOGGER_CONTEXT.SERVER_ACTION]: "signInWithGoogleAction",
   });
   logger.info({ method: "cognito" }, "Starting Google sign in");
-  await signIn("cognito", { redirectTo: "/dashboard" });
+  redirect("/api/auth/sign-in/social?provider=cognito&callbackURL=/dashboard");
 }

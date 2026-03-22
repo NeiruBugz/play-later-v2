@@ -1,39 +1,19 @@
-import * as authModule from "@/auth";
-
 import { signInWithGoogleAction } from "./sign-in-google";
 
-vi.mock("@/auth", () => ({
-  signIn: vi.fn(),
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn((url: string) => {
+    throw new Error(`NEXT_REDIRECT:${url}`);
+  }),
 }));
 
 describe("signInWithGoogleAction", () => {
-  let mockSignIn: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSignIn = vi.mocked(authModule.signIn);
   });
 
-  it("should call signIn with cognito provider and redirect to dashboard", async () => {
-    mockSignIn.mockResolvedValue(undefined);
-
-    await signInWithGoogleAction();
-
-    expect(mockSignIn).toHaveBeenCalledWith("cognito", {
-      redirectTo: "/dashboard",
-    });
-  });
-
-  it("should handle errors from NextAuth", async () => {
-    mockSignIn.mockRejectedValue(new Error("OAuth error"));
-
-    await expect(signInWithGoogleAction()).rejects.toThrow("OAuth error");
-  });
-
-  it("should allow NEXT_REDIRECT errors to bubble up", async () => {
-    const redirectError = new Error("NEXT_REDIRECT");
-    mockSignIn.mockRejectedValue(redirectError);
-
-    await expect(signInWithGoogleAction()).rejects.toThrow("NEXT_REDIRECT");
+  it("should redirect to Better Auth social sign-in endpoint", async () => {
+    await expect(signInWithGoogleAction()).rejects.toThrow(
+      "NEXT_REDIRECT:/api/auth/sign-in/social?provider=cognito&callbackURL=/dashboard"
+    );
   });
 });

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { ImportedGamesContainer } from "@/features/steam-import/ui";
 import { Button } from "@/shared/components/ui/button";
-import { requireServerUserId } from "@/shared/lib/app/auth";
+import { requireServerUserId } from "@/shared/lib/auth";
 
 export const dynamic = "force-dynamic";
 

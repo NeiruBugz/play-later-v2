@@ -1,10 +1,10 @@
-import { getServerUserId } from "@/auth";
+import { getServerUserId } from "@/shared/lib/auth";
 import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
 import { deleteJournalEntryAction } from "./delete-journal-entry";
 
-vi.mock("@/auth", () => ({
+vi.mock("@/shared/lib/auth", () => ({
   getServerUserId: vi.fn(),
 }));
 

@@ -27,7 +27,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-vi.mock("@/auth", () => ({
+vi.mock("@/shared/lib/auth", () => ({
   getServerUserId: vi.fn(),
 }));
 
@@ -50,7 +50,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       igdbId: 12345,
     });
 
-    const { getServerUserId } = await import("@/auth");
+    const { getServerUserId } = await import("@/shared/lib/auth");
     vi.mocked(getServerUserId).mockResolvedValue(testUser.id);
   });
 
@@ -172,7 +172,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
         status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
-      const { getServerUserId } = await import("@/auth");
+      const { getServerUserId } = await import("@/shared/lib/auth");
       vi.mocked(getServerUserId).mockResolvedValue(undefined);
 
       const result = await updateLibraryStatusAction({

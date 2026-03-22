@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { ProfileSetupForm } from "@/features/setup-profile";
-import { requireServerUserId } from "@/shared/lib/app/auth";
+import { requireServerUserId } from "@/shared/lib/auth";
 
 export const metadata: Metadata = {
   title: "Complete Your Profile - SavePoint",

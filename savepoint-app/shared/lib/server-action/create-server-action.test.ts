@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { createServerAction } from "./create-server-action";
 
-vi.mock("@/auth", () => ({
+vi.mock("@/shared/lib/auth", () => ({
   getServerUserId: vi.fn(),
 }));
 
@@ -19,7 +19,7 @@ vi.mock("@/shared/lib/logger", () => ({
   },
 }));
 
-const { getServerUserId } = await import("@/auth");
+const { getServerUserId } = await import("@/shared/lib/auth");
 const mockGetServerUserId = getServerUserId as Mock;
 
 const TestSchema = z.object({

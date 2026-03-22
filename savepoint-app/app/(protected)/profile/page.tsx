@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 
 import { ProfileView } from "@/features/profile/ui/profile-view";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-import { requireServerUserId } from "@/shared/lib/app/auth";
+import { requireServerUserId } from "@/shared/lib/auth";
 
 export const metadata: Metadata = {
   title: "Profile",

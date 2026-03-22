@@ -1,4 +1,4 @@
-import { getServerUserId } from "@/auth";
+import { getServerUserId } from "@/shared/lib/auth";
 import { connectSteamHandler } from "@/data-access-layer/handlers/steam-import";
 import { NextResponse, type NextRequest } from "next/server";
 

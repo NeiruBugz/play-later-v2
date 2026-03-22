@@ -1,4 +1,4 @@
-import { getServerUserId } from "@/auth";
+import { getServerUserId } from "@/shared/lib/auth";
 import { env } from "@/env.mjs";
 import { getTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";

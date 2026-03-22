@@ -21,12 +21,6 @@ export {
 } from "./igdb/types";
 export { IgdbService } from "./igdb/igdb-service";
 export {
-  type SignUpInput,
-  type AuthUserData,
-  type SignUpResult,
-} from "./auth/types";
-export { AuthService } from "./auth/auth-service";
-export {
   type GetProfileInput,
   type GetProfileResult,
   type GetProfileWithStatsInput,

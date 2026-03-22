@@ -4,7 +4,7 @@ import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { CommandPaletteProvider } from "@/shared/components/command-palette";
 import { Header } from "@/shared/components/header";
 import { MobileNav } from "@/shared/components/mobile-nav";
-import { getOptionalServerUserId } from "@/shared/lib/app/auth";
+import { getOptionalServerUserId } from "@/shared/lib/auth";
 
 export default async function GameDetailsLayout({
   children,

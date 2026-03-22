@@ -2,7 +2,7 @@ import { ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
 
 import { LibraryPageView } from "@/features/library/ui";
-import { requireServerUserId } from "@/shared/lib/app/auth";
+import { requireServerUserId } from "@/shared/lib/auth";
 
 export const metadata: Metadata = {
   title: "My Library",

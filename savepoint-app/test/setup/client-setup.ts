@@ -4,21 +4,27 @@ import { allHandlers } from "@/test/mocks/handlers";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
-vi.mock("next-auth/react", () => ({
-  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
-  useSession: vi.fn(() => ({
-    data: {
-      user: {
-        id: "test-user-id",
-        email: "test@example.com",
-        name: "Test User",
+vi.mock("@/shared/lib/auth/auth-client", () => ({
+  authClient: {
+    useSession: vi.fn(() => ({
+      data: {
+        user: {
+          id: "test-user-id",
+          email: "test@example.com",
+          name: "Test User",
+        },
+        session: { id: "test-session" },
       },
+      isPending: false,
+    })),
+    signIn: {
+      email: vi.fn(),
+      social: vi.fn(),
     },
-    status: "authenticated",
-  })),
-  signIn: vi.fn(),
-  signOut: vi.fn(),
+    signOut: vi.fn(),
+  },
 }));
+
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({

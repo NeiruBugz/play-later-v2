@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
-import { SessionProvider } from "next-auth/react";
 import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
@@ -24,11 +23,9 @@ export default function TestProviders({
 }: PropsWithChildren<ThemeProviderProps>) {
   return (
     <NextThemesProvider {...props}>
-      <SessionProvider>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
     </NextThemesProvider>
   );
 }

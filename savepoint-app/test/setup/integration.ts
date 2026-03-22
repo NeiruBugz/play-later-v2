@@ -9,14 +9,15 @@ import { resetTestDatabase } from "./database";
 // Mock server-only FIRST before any other imports to prevent "Client Component" errors
 vi.mock("server-only", () => ({}));
 
-// Mock @/auth to provide a mockable getServerUserId for integration tests
-vi.mock("@/auth", () => ({
+// Mock auth session to provide a mockable getServerUserId for integration tests
+vi.mock("@/shared/lib/auth/session", () => ({
   getServerUserId: vi.fn(),
+  requireServerUserId: vi.fn(),
+  getOptionalServerUserId: vi.fn(),
 }));
-
-process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";
 process.env.AUTH_URL = "http://localhost:3000";
+process.env.NEXT_PUBLIC_AUTH_URL = "http://localhost:3000";
 process.env.AUTH_COGNITO_ID = "test-cognito-id";
 process.env.AUTH_COGNITO_SECRET = "test-cognito-secret";
 process.env.AUTH_COGNITO_ISSUER =

@@ -1,4 +1,4 @@
-import { getServerUserId } from "@/auth";
+import { getServerUserId } from "@/shared/lib/auth";
 import { getLibraryHandler } from "@/data-access-layer/handlers/library/get-library-handler";
 import { NextResponse, type NextRequest } from "next/server";
 

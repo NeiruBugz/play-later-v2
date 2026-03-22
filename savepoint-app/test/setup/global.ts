@@ -7,9 +7,9 @@ import { resetUserCounter } from "./db-factories/user";
 
 expect.extend(allCustomMatcher);
 
-process.env.NEXTAUTH_SECRET = "test-secret";
 process.env.AUTH_SECRET = "test-secret";
 process.env.AUTH_URL = "http://localhost:3000";
+process.env.NEXT_PUBLIC_AUTH_URL = "http://localhost:3000";
 process.env.AUTH_COGNITO_ID = "test-cognito-id";
 process.env.AUTH_COGNITO_SECRET = "test-cognito-secret";
 process.env.AUTH_COGNITO_ISSUER =
@@ -74,10 +74,6 @@ vi.mock("@/shared/lib", () => {
     },
     logger: mockLogger,
     createLogger: vi.fn(() => mockLogger),
-    hashPassword: vi.fn(async (pwd: string) => `hashed:${pwd}`),
-    verifyPassword: vi.fn(
-      async (pwd: string, hash: string) => hash === `hashed:${pwd}`
-    ),
     getTimeStamp: vi.fn(() => Math.floor(Date.now() / 1000)),
     normalizeString: vi.fn((input: string) =>
       input
@@ -264,7 +260,7 @@ vi.mock("@/shared/lib/app/db", () => {
     },
   };
 });
-vi.mock("@/auth", () => ({
+vi.mock("@/shared/lib/auth", () => ({
   auth: vi.fn(),
   getServerUserId: vi.fn(),
 }));

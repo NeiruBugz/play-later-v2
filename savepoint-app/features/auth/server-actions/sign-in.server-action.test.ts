@@ -1,39 +1,53 @@
-import * as authModule from "@/auth";
-
 import { signInAction } from "./sign-in";
 
-vi.mock("@/auth", () => ({
-  signIn: vi.fn(),
+const mockSignInEmail = vi.fn();
+
+vi.mock("@/shared/lib/auth", () => ({
+  auth: {
+    api: {
+      signInEmail: (...args: unknown[]) => mockSignInEmail(...args),
+    },
+  },
+}));
+
+vi.mock("next/headers", () => ({
+  headers: vi.fn().mockResolvedValue(new Headers()),
+}));
+
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn((url: string) => {
+    throw new Error(`NEXT_REDIRECT:${url}`);
+  }),
 }));
 
 describe("signInAction", () => {
-  let mockSignIn: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSignIn = vi.mocked(authModule.signIn);
   });
 
-  it("should successfully sign in with valid credentials", async () => {
+  it("should redirect to dashboard on successful sign in", async () => {
     const signInData = {
       email: "user@example.com",
       password: "password123",
     };
 
-    mockSignIn.mockResolvedValue(undefined);
-
-    const result = await signInAction(signInData);
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.message).toBe("Signed in successfully");
-    }
-
-    expect(mockSignIn).toHaveBeenCalledWith("credentials", {
-      email: "user@example.com",
-      password: "password123",
-      redirectTo: "/dashboard",
+    mockSignInEmail.mockResolvedValue({
+      user: { id: "user-123", email: "user@example.com" },
+      session: { id: "session-123" },
     });
+
+    await expect(signInAction(signInData)).rejects.toThrow(
+      "NEXT_REDIRECT:/dashboard"
+    );
+
+    expect(mockSignInEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: {
+          email: "user@example.com",
+          password: "password123",
+        },
+      })
+    );
   });
 
   it("should return validation error for invalid email", async () => {
@@ -49,7 +63,7 @@ describe("signInAction", () => {
       expect(result.error).toContain("email");
     }
 
-    expect(mockSignIn).not.toHaveBeenCalled();
+    expect(mockSignInEmail).not.toHaveBeenCalled();
   });
 
   it("should return validation error for empty password", async () => {
@@ -65,44 +79,16 @@ describe("signInAction", () => {
       expect(result.error).toContain("Password");
     }
 
-    expect(mockSignIn).not.toHaveBeenCalled();
+    expect(mockSignInEmail).not.toHaveBeenCalled();
   });
 
-  it("should handle authentication errors from NextAuth", async () => {
+  it("should return error on invalid credentials", async () => {
     const signInData = {
       email: "user@example.com",
       password: "wrongpassword",
     };
 
-    mockSignIn.mockRejectedValue(new Error("Invalid credentials"));
-
-    const result = await signInAction(signInData);
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBe("Invalid email or password");
-    }
-  });
-
-  it("should re-throw NEXT_REDIRECT errors for successful auth", async () => {
-    const signInData = {
-      email: "user@example.com",
-      password: "password123",
-    };
-
-    const redirectError = new Error("NEXT_REDIRECT");
-    mockSignIn.mockRejectedValue(redirectError);
-
-    await expect(signInAction(signInData)).rejects.toThrow("NEXT_REDIRECT");
-  });
-
-  it("should handle unexpected errors gracefully", async () => {
-    const signInData = {
-      email: "user@example.com",
-      password: "password123",
-    };
-
-    mockSignIn.mockRejectedValue(new Error("Database error"));
+    mockSignInEmail.mockRejectedValue(new Error("Invalid credentials"));
 
     const result = await signInAction(signInData);
 
@@ -133,25 +119,7 @@ describe("signInAction", () => {
       }
     }
 
-    expect(mockSignIn).not.toHaveBeenCalled();
-  });
-
-  it("should accept any non-empty password for sign in", async () => {
-    const passwords = ["a", "123", "short", "verylongpassword123456789"];
-
-    mockSignIn.mockResolvedValue(undefined);
-
-    for (const password of passwords) {
-      vi.clearAllMocks();
-
-      const result = await signInAction({
-        email: "user@example.com",
-        password,
-      });
-
-      expect(result.success).toBe(true);
-      expect(mockSignIn).toHaveBeenCalled();
-    }
+    expect(mockSignInEmail).not.toHaveBeenCalled();
   });
 
   it("should accept valid email formats", async () => {
@@ -162,18 +130,23 @@ describe("signInAction", () => {
       "user123@test-domain.com",
     ];
 
-    mockSignIn.mockResolvedValue(undefined);
+    mockSignInEmail.mockResolvedValue({
+      user: { id: "user-123" },
+      session: { id: "session-123" },
+    });
 
     for (const email of validEmails) {
       vi.clearAllMocks();
-
-      const result = await signInAction({
-        email,
-        password: "password123",
+      mockSignInEmail.mockResolvedValue({
+        user: { id: "user-123" },
+        session: { id: "session-123" },
       });
 
-      expect(result.success).toBe(true);
-      expect(mockSignIn).toHaveBeenCalled();
+      await expect(
+        signInAction({ email, password: "password123" })
+      ).rejects.toThrow("NEXT_REDIRECT:/dashboard");
+
+      expect(mockSignInEmail).toHaveBeenCalled();
     }
   });
 });

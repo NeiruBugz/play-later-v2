@@ -1,4 +1,4 @@
-import { getServerUserId } from "@/auth";
+import { getServerUserId } from "@/shared/lib/auth";
 import {
   JournalEntryDomain,
   JournalMood,
@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 
 import { createJournalEntryAction } from "./create-journal-entry";
 
-vi.mock("@/auth", () => ({
+vi.mock("@/shared/lib/auth", () => ({
   getServerUserId: vi.fn(),
 }));
 

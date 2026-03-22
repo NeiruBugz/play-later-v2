@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 
 import { disconnectSteam } from "../disconnect-steam";
 
-vi.mock("@/auth", () => ({
+vi.mock("@/shared/lib/auth", () => ({
   getServerUserId: vi.fn(),
 }));
 
@@ -28,7 +28,7 @@ vi.mock("@/shared/lib", async (importOriginal) => {
   };
 });
 
-const { getServerUserId } = await import("@/auth");
+const { getServerUserId } = await import("@/shared/lib/auth");
 const { SteamService: MockSteamService } =
   await import("@/data-access-layer/services");
 const { revalidatePath } = await import("next/cache");

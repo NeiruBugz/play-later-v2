@@ -1,4 +1,4 @@
-import { getServerUserId } from "@/auth";
+import { getServerUserId } from "@/shared/lib/auth";
 import { SteamOpenIdService } from "@/data-access-layer/services/steam";
 import { NextResponse, type NextRequest } from "next/server";
 

@@ -2,7 +2,13 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 export const env = createEnv({
+  client: {
+    NEXT_PUBLIC_AUTH_URL: z.string().url({
+      message: "NEXT_PUBLIC_AUTH_URL is required",
+    }),
+  },
   runtimeEnv: {
+    NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
     AUTH_COGNITO_ID: process.env.AUTH_COGNITO_ID,
     AUTH_COGNITO_SECRET: process.env.AUTH_COGNITO_SECRET,
     AUTH_COGNITO_ISSUER: process.env.AUTH_COGNITO_ISSUER,

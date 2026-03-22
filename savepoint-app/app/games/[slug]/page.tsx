@@ -16,7 +16,7 @@ import { TimesToBeatSection } from "@/features/game-detail/ui/times-to-beat-sect
 import { getGameDetails } from "@/features/game-detail/use-cases/get-game-details";
 import { GenreBadges } from "@/shared/components/genre-badges";
 import { PlatformBadges } from "@/shared/components/platform-badges";
-import { getOptionalServerUserId } from "@/shared/lib/app/auth";
+import { getOptionalServerUserId } from "@/shared/lib/auth";
 
 const IGDB_COVER_BASE_URL =
   "https://images.igdb.com/igdb/image/upload/t_cover_big";

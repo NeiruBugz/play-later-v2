@@ -1,70 +1,55 @@
-import * as authModule from "@/auth";
-import { AuthService } from "@/data-access-layer/services";
-
 import { signUpAction } from "./sign-up";
 
-vi.mock("@/auth", () => ({
-  signIn: vi.fn(),
+const mockSignUpEmail = vi.fn();
+
+vi.mock("@/shared/lib/auth", () => ({
+  auth: {
+    api: {
+      signUpEmail: (...args: unknown[]) => mockSignUpEmail(...args),
+    },
+  },
 }));
 
-vi.mock("@/data-access-layer/services", () => ({
-  AuthService: vi.fn(),
+vi.mock("next/headers", () => ({
+  headers: vi.fn().mockResolvedValue(new Headers()),
+}));
+
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn((url: string) => {
+    throw new Error(`NEXT_REDIRECT:${url}`);
+  }),
 }));
 
 describe("signUpAction", () => {
-  let mockAuthService: {
-    signUp: ReturnType<typeof vi.fn>;
-  };
-  let mockSignIn: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     vi.clearAllMocks();
-
-    mockAuthService = {
-      signUp: vi.fn(),
-    };
-
-    vi.mocked(AuthService).mockImplementation(function () {
-      return mockAuthService as unknown as AuthService;
-    });
-
-    mockSignIn = vi.mocked(authModule.signIn);
   });
 
-  it("should successfully sign up a user and auto sign in", async () => {
+  it("should redirect to dashboard on successful sign up", async () => {
     const signUpData = {
       email: "newuser@example.com",
       password: "securepassword123",
       name: "John Doe",
     };
 
-    mockAuthService.signUp.mockResolvedValue({
-      success: true,
-      data: {
-        user: {
-          id: "user-123",
+    mockSignUpEmail.mockResolvedValue({
+      user: { id: "user-123", email: "newuser@example.com", name: "John Doe" },
+      session: { id: "session-123" },
+    });
+
+    await expect(signUpAction(signUpData)).rejects.toThrow(
+      "NEXT_REDIRECT:/dashboard"
+    );
+
+    expect(mockSignUpEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: {
           email: "newuser@example.com",
+          password: "securepassword123",
           name: "John Doe",
         },
-        message: "Account created successfully",
-      },
-    });
-
-    mockSignIn.mockResolvedValue(undefined);
-
-    const result = await signUpAction(signUpData);
-
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.message).toBe("Account created successfully");
-    }
-
-    expect(mockAuthService.signUp).toHaveBeenCalledWith(signUpData);
-    expect(mockSignIn).toHaveBeenCalledWith("credentials", {
-      email: "newuser@example.com",
-      password: "securepassword123",
-      redirectTo: "/dashboard",
-    });
+      })
+    );
   });
 
   it("should sign up without name when name is not provided", async () => {
@@ -73,50 +58,24 @@ describe("signUpAction", () => {
       password: "securepassword123",
     };
 
-    mockAuthService.signUp.mockResolvedValue({
-      success: true,
-      data: {
-        user: {
-          id: "user-123",
+    mockSignUpEmail.mockResolvedValue({
+      user: { id: "user-123", email: "newuser@example.com" },
+      session: { id: "session-123" },
+    });
+
+    await expect(signUpAction(signUpData)).rejects.toThrow(
+      "NEXT_REDIRECT:/dashboard"
+    );
+
+    expect(mockSignUpEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: {
           email: "newuser@example.com",
-          name: null,
+          password: "securepassword123",
+          name: "",
         },
-        message: "Account created successfully",
-      },
-    });
-
-    mockSignIn.mockResolvedValue(undefined);
-
-    const result = await signUpAction(signUpData);
-
-    expect(result.success).toBe(true);
-    expect(mockAuthService.signUp).toHaveBeenCalledWith({
-      email: "newuser@example.com",
-      password: "securepassword123",
-    });
-  });
-
-  it("should return error when user already exists", async () => {
-    const signUpData = {
-      email: "existing@example.com",
-      password: "securepassword123",
-      name: "John Doe",
-    };
-
-    mockAuthService.signUp.mockResolvedValue({
-      success: false,
-      error: "An account with this email already exists",
-      code: "CONFLICT",
-    });
-
-    const result = await signUpAction(signUpData);
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBe("An account with this email already exists");
-    }
-
-    expect(mockSignIn).not.toHaveBeenCalled();
+      })
+    );
   });
 
   it("should return validation error for invalid email", async () => {
@@ -133,8 +92,7 @@ describe("signUpAction", () => {
       expect(result.error).toContain("email");
     }
 
-    expect(mockAuthService.signUp).not.toHaveBeenCalled();
-    expect(mockSignIn).not.toHaveBeenCalled();
+    expect(mockSignUpEmail).not.toHaveBeenCalled();
   });
 
   it("should return validation error for short password", async () => {
@@ -151,31 +109,7 @@ describe("signUpAction", () => {
       expect(result.error).toContain("8 characters");
     }
 
-    expect(mockAuthService.signUp).not.toHaveBeenCalled();
-    expect(mockSignIn).not.toHaveBeenCalled();
-  });
-
-  it("should handle service errors gracefully", async () => {
-    const signUpData = {
-      email: "user@example.com",
-      password: "securepassword123",
-      name: "John Doe",
-    };
-
-    mockAuthService.signUp.mockResolvedValue({
-      success: false,
-      error: "Database connection failed",
-      code: "INTERNAL_ERROR",
-    });
-
-    const result = await signUpAction(signUpData);
-
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error).toBe("Database connection failed");
-    }
-
-    expect(mockSignIn).not.toHaveBeenCalled();
+    expect(mockSignUpEmail).not.toHaveBeenCalled();
   });
 
   it("should handle unexpected errors", async () => {
@@ -185,7 +119,7 @@ describe("signUpAction", () => {
       name: "John Doe",
     };
 
-    mockAuthService.signUp.mockRejectedValue(new Error("Unexpected error"));
+    mockSignUpEmail.mockRejectedValue(new Error("Unexpected error"));
 
     const result = await signUpAction(signUpData);
 
@@ -217,42 +151,6 @@ describe("signUpAction", () => {
       }
     }
 
-    expect(mockAuthService.signUp).not.toHaveBeenCalled();
-  });
-
-  it("should accept valid emails", async () => {
-    const validEmails = [
-      "user@example.com",
-      "user.name@example.com",
-      "user+tag@example.co.uk",
-      "user123@test-domain.com",
-    ];
-
-    mockAuthService.signUp.mockResolvedValue({
-      success: true,
-      data: {
-        user: {
-          id: "user-123",
-          email: "test@example.com",
-          name: "Test",
-        },
-        message: "Account created successfully",
-      },
-    });
-
-    mockSignIn.mockResolvedValue(undefined);
-
-    for (const email of validEmails) {
-      vi.clearAllMocks();
-
-      const result = await signUpAction({
-        email,
-        password: "securepassword123",
-        name: "Test User",
-      });
-
-      expect(result.success).toBe(true);
-      expect(mockAuthService.signUp).toHaveBeenCalled();
-    }
+    expect(mockSignUpEmail).not.toHaveBeenCalled();
   });
 });

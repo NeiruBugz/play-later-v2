@@ -1,4 +1,4 @@
-import { getServerUserId } from "@/auth";
+import { getServerUserId } from "@/shared/lib/auth";
 import {
   fetchSteamGamesHandler,
   importedGamesHandler,

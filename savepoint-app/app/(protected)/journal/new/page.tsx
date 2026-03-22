@@ -1,5 +1,5 @@
 import { NewJournalEntryPage } from "@/features/journal/ui/new-journal-entry-page";
-import { requireServerUserId } from "@/shared/lib/app/auth";
+import { requireServerUserId } from "@/shared/lib/auth";
 
 export const dynamic = "force-dynamic";
 

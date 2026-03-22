@@ -2,16 +2,14 @@ export {
   createLogger,
   logger,
   type Logger,
-  sessionErrorHandler,
-  verifyPassword,
-  hashPassword,
   prisma,
 } from "./app";
 export { LOGGER_CONTEXT, type LoggerContextKey } from "./app/logger-context";
 export {
-  isNextAuthRedirect,
-  isAuthenticationError,
-} from "./auth/handle-next-auth-error";
+  getServerUserId,
+  requireServerUserId,
+  getOptionalServerUserId,
+} from "./auth";
 export { formatRelativeDate, formatAbsoluteDate } from "./date";
 export { getGameUrl, isExternalGameId } from "./game";
 export {

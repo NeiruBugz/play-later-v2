@@ -6,21 +6,26 @@ export const mockAuthenticatedUser = {
   name: "Test User",
 };
 export const mockUnauthenticatedUser = null;
-export function mockAuth(user = mockAuthenticatedUser) {
-  return vi.fn().mockResolvedValue(
-    user
-      ? {
-          user,
-          expires: "2024-12-31",
-        }
-      : null
-  );
-}
+
 export function setupAuthMocks() {
   if (typeof vi !== "undefined") {
-    vi.mock("@/auth", () => ({
-      auth: mockAuth(),
+    vi.mock("@/shared/lib/auth", () => ({
       getServerUserId: vi.fn().mockResolvedValue(mockAuthenticatedUser.id),
+      requireServerUserId: vi.fn().mockResolvedValue(mockAuthenticatedUser.id),
+      getOptionalServerUserId: vi
+        .fn()
+        .mockResolvedValue(mockAuthenticatedUser.id),
+      auth: {
+        api: {
+          getSession: vi.fn().mockResolvedValue({
+            user: mockAuthenticatedUser,
+            session: {
+              id: "test-session",
+              expiresAt: new Date("2025-12-31"),
+            },
+          }),
+        },
+      },
     }));
   }
 }

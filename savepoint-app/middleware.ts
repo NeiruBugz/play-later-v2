@@ -2,8 +2,20 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { HSTS_MAX_AGE_SECONDS } from "@/shared/constants";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function middleware(_request: NextRequest) {
+const MAX_REDIRECT_COUNT = 2;
+const REDIRECT_LOOP_PATHS = ["/profile/setup", "/dashboard"];
+
+export function middleware(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  if (REDIRECT_LOOP_PATHS.includes(pathname)) {
+    const count = Number(searchParams.get("r") ?? "0");
+    if (count >= MAX_REDIRECT_COUNT) {
+      const dashboardUrl = new URL("/dashboard", request.url);
+      return NextResponse.redirect(dashboardUrl);
+    }
+  }
+
   const response = NextResponse.next();
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");

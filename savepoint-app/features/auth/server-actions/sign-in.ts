@@ -1,13 +1,11 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { SignInSchema, type SignInInput } from "@/features/auth/schemas";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-import {
-  isAuthenticationError,
-  isNextAuthRedirect,
-} from "@/shared/lib/auth/handle-next-auth-error";
+import { auth } from "@/shared/lib/auth";
 
 export async function signInAction(data: SignInInput) {
   const logger = createLogger({
@@ -25,28 +23,29 @@ export async function signInAction(data: SignInInput) {
 
   try {
     logger.info({ method: "credentials" }, "Signing in user");
-    await signIn("credentials", {
-      email: validated.data.email,
-      password: validated.data.password,
-      redirectTo: "/dashboard",
+    const result = await auth.api.signInEmail({
+      body: {
+        email: validated.data.email,
+        password: validated.data.password,
+      },
+      headers: await headers(),
     });
-    return {
-      success: true as const,
-      message: "Signed in successfully",
-    };
-  } catch (error) {
-    if (isNextAuthRedirect(error)) {
-      logger.debug("Redirecting after successful sign in");
-      throw error;
-    }
-    if (isAuthenticationError(error)) {
-      logger.warn({ err: error }, "Invalid credentials during sign in");
+
+    if (!result) {
       return {
         success: false as const,
         error: "Invalid email or password",
       };
     }
-    logger.error({ err: error }, "Unexpected error during sign in");
-    throw error;
+
+    logger.debug("Sign in successful, redirecting");
+  } catch (error) {
+    logger.warn({ err: error }, "Invalid credentials during sign in");
+    return {
+      success: false as const,
+      error: "Invalid email or password",
+    };
   }
+
+  redirect("/dashboard");
 }

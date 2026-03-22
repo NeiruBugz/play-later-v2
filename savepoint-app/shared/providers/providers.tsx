@@ -1,7 +1,6 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { SessionProvider } from "next-auth/react";
 import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
@@ -39,12 +38,10 @@ export function Providers({
 
   return (
     <NextThemesProvider {...props}>
-      <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={false}>
-        <QueryClientProvider client={queryClient}>
-          <NextTopLoader />
-          {children}
-        </QueryClientProvider>
-      </SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <NextTopLoader />
+        {children}
+      </QueryClientProvider>
     </NextThemesProvider>
   );
 }

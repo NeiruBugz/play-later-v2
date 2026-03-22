@@ -1,4 +1,4 @@
-import { getServerUserId } from "@/auth";
+import { getServerUserId } from "@/shared/lib/auth";
 import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import {
   cleanupDatabase,
@@ -186,7 +186,7 @@ describe("addToLibraryAction - Integration Tests", () => {
           username: `user-status-${i}`,
         });
 
-        const { getServerUserId } = await import("@/auth");
+        const { getServerUserId } = await import("@/shared/lib/auth");
         vi.mocked(getServerUserId).mockResolvedValue(user.id);
 
         const result = await addToLibraryAction({
@@ -204,7 +204,7 @@ describe("addToLibraryAction - Integration Tests", () => {
 
   describe("Error handling", () => {
     it("should return error when user is not authenticated", async () => {
-      const { getServerUserId } = await import("@/auth");
+      const { getServerUserId } = await import("@/shared/lib/auth");
       vi.mocked(getServerUserId).mockResolvedValue(undefined);
 
       const result = await addToLibraryAction({
@@ -478,7 +478,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
   describe("Error handling", () => {
     it("should return error when user is not authenticated", async () => {
-      const { getServerUserId } = await import("@/auth");
+      const { getServerUserId } = await import("@/shared/lib/auth");
       vi.mocked(getServerUserId).mockResolvedValue(undefined);
 
       const result = await updateLibraryStatusAction({
@@ -654,7 +654,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
         status: LibraryItemStatus.WANT_TO_PLAY,
       });
 
-      const { getServerUserId } = await import("@/auth");
+      const { getServerUserId } = await import("@/shared/lib/auth");
       vi.mocked(getServerUserId).mockResolvedValue(undefined);
 
       const result = await updateLibraryEntryAction({
