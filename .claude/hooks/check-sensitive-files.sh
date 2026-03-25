@@ -6,7 +6,7 @@ set -euo pipefail
 
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
-TOOL_INPUT=$(echo "$INPUT" | jq -r '.tool_input // empty')
+TOOL_INPUT=$(echo "$INPUT" | jq -c '.tool_input // {}')
 
 # Check a file path against sensitive patterns.
 # Returns 0 (match = sensitive), 1 (no match = safe).
