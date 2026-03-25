@@ -11,13 +11,18 @@ import { LibraryItemStatus } from "@prisma/client";
 import { ServiceErrorCode } from "../types";
 import { OnboardingService } from "./onboarding-service";
 
-vi.mock("@/data-access-layer/repository", () => ({
-  countLibraryItemsByUserId: vi.fn(),
-  hasLibraryItemWithStatus: vi.fn(),
-  countJournalEntriesByUserId: vi.fn(),
-  getOnboardingStatus: vi.fn(),
-  updateOnboardingDismissed: vi.fn(),
-}));
+vi.mock("@/data-access-layer/repository", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/data-access-layer/repository")>();
+  return {
+    ...actual,
+    countLibraryItemsByUserId: vi.fn(),
+    hasLibraryItemWithStatus: vi.fn(),
+    countJournalEntriesByUserId: vi.fn(),
+    getOnboardingStatus: vi.fn(),
+    updateOnboardingDismissed: vi.fn(),
+  };
+});
 
 describe("OnboardingService", () => {
   let service: OnboardingService;

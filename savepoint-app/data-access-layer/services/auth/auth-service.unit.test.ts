@@ -128,7 +128,7 @@ describe("AuthService", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toContain("Unique constraint");
+        expect(result.error).toBe("An account with this email already exists");
         expect(result.code).toBe(ServiceErrorCode.CONFLICT);
       }
     });

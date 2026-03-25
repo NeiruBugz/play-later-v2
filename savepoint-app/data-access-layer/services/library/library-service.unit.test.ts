@@ -10,18 +10,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LibraryService } from "./library-service";
 
-vi.mock("@/data-access-layer/repository", () => ({
-  findLibraryItemsWithFilters: vi.fn(),
-  findLibraryItemById: vi.fn(),
-  deleteLibraryItem: vi.fn(),
-  updateLibraryItem: vi.fn(),
-
-  createLibraryItem: vi.fn(),
-  findAllLibraryItemsByGameId: vi.fn(),
-  findGameByIgdbId: vi.fn(),
-  findMostRecentLibraryItemByGameId: vi.fn(),
-  findUserById: vi.fn(),
-}));
+vi.mock("@/data-access-layer/repository", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/data-access-layer/repository")>();
+  return {
+    ...actual,
+    findLibraryItemsWithFilters: vi.fn(),
+    findLibraryItemById: vi.fn(),
+    deleteLibraryItem: vi.fn(),
+    updateLibraryItem: vi.fn(),
+    createLibraryItem: vi.fn(),
+    findAllLibraryItemsByGameId: vi.fn(),
+    findGameByIgdbId: vi.fn(),
+    findMostRecentLibraryItemByGameId: vi.fn(),
+    findUserById: vi.fn(),
+  };
+});
 
 describe("LibraryService", () => {
   let service: LibraryService;

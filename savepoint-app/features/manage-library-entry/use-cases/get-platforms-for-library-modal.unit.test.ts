@@ -1,5 +1,4 @@
 import { getPlatformsForLibraryModal } from "@/data-access-layer/handlers/platform/get-platforms-for-library-modal";
-import * as platformRepository from "@/data-access-layer/repository/platform/platform-repository";
 import { GameDetailService } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import * as platformService from "@/data-access-layer/services/platform/platform-service";
@@ -18,10 +17,7 @@ vi.mock("@/data-access-layer/services/igdb/igdb-service", () => ({
 
 vi.mock("@/data-access-layer/services/platform/platform-service", () => ({
   getPlatformsForGame: vi.fn(),
-}));
-
-vi.mock("@/data-access-layer/repository/platform/platform-repository", () => ({
-  upsertPlatforms: vi.fn(),
+  savePlatforms: vi.fn(),
 }));
 
 describe("getPlatformsForLibraryModal", () => {
@@ -33,7 +29,7 @@ describe("getPlatformsForLibraryModal", () => {
     getGameDetails: ReturnType<typeof vi.fn>;
     getPlatforms: ReturnType<typeof vi.fn>;
   };
-  let mockUpsertPlatforms: ReturnType<typeof vi.fn>;
+  let mockSavePlatforms: ReturnType<typeof vi.fn>;
 
   const validIgdbId = 12345;
 
@@ -66,7 +62,7 @@ describe("getPlatformsForLibraryModal", () => {
       getPlatforms: vi.fn(),
     };
 
-    mockUpsertPlatforms = vi.mocked(platformRepository.upsertPlatforms);
+    mockSavePlatforms = vi.mocked(platformService.savePlatforms);
 
     vi.mocked(GameDetailService).mockImplementation(function () {
       return mockGameDetailService as unknown as GameDetailService;
@@ -115,7 +111,7 @@ describe("getPlatformsForLibraryModal", () => {
         data: { game: mockIgdbGame },
       });
 
-      mockUpsertPlatforms.mockResolvedValue({ ok: true, data: [] });
+      mockSavePlatforms.mockResolvedValue({ success: true, data: [] });
       mockGameDetailService.populateGameInDatabase.mockResolvedValue({
         success: true,
         data: null,
@@ -133,7 +129,7 @@ describe("getPlatformsForLibraryModal", () => {
       expect(mockIgdbService.getGameDetails).toHaveBeenCalledWith({
         gameId: validIgdbId,
       });
-      expect(mockUpsertPlatforms).toHaveBeenCalled();
+      expect(mockSavePlatforms).toHaveBeenCalled();
       expect(mockGameDetailService.populateGameInDatabase).toHaveBeenCalledWith(
         mockIgdbGame
       );
@@ -174,13 +170,13 @@ describe("getPlatformsForLibraryModal", () => {
         },
       });
 
-      mockUpsertPlatforms.mockResolvedValue({ ok: true, data: [] });
+      mockSavePlatforms.mockResolvedValue({ success: true, data: [] });
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
       expect(result.success).toBe(true);
       expect(mockIgdbService.getPlatforms).toHaveBeenCalled();
-      expect(mockUpsertPlatforms).toHaveBeenCalled();
+      expect(mockSavePlatforms).toHaveBeenCalled();
     });
 
     it("should return empty arrays when all fallbacks fail", async () => {
@@ -221,7 +217,7 @@ describe("getPlatformsForLibraryModal", () => {
         data: { game: mockIgdbGame },
       });
 
-      mockUpsertPlatforms.mockResolvedValue({ ok: true, data: [] });
+      mockSavePlatforms.mockResolvedValue({ success: true, data: [] });
       mockGameDetailService.populateGameInDatabase.mockResolvedValue({
         success: true,
         data: null,
@@ -280,9 +276,9 @@ describe("getPlatformsForLibraryModal", () => {
         data: { game: mockIgdbGame },
       });
 
-      mockUpsertPlatforms.mockResolvedValue({
-        ok: false,
-        error: { message: "Upsert failed" },
+      mockSavePlatforms.mockResolvedValue({
+        success: false,
+        error: "Upsert failed",
       });
       mockGameDetailService.populateGameInDatabase.mockResolvedValue({
         success: true,
@@ -327,7 +323,7 @@ describe("getPlatformsForLibraryModal", () => {
         },
       });
 
-      mockUpsertPlatforms.mockResolvedValue({ ok: true, data: [] });
+      mockSavePlatforms.mockResolvedValue({ success: true, data: [] });
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 

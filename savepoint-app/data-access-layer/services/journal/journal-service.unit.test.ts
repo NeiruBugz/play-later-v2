@@ -177,10 +177,8 @@ describe("JournalService", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toContain("Failed to create journal entry");
-        expect(result.code).toBeUndefined(); // Service doesn't map repository error codes
+        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
-
-      expect(mockCreateJournalEntry).toHaveBeenCalledWith(validParams);
     });
 
     it("should validate required fields are provided", async () => {

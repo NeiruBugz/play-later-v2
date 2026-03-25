@@ -63,7 +63,16 @@ export class OnboardingService {
   ): Promise<GetOnboardingProgressResult> {
     const { userId } = input;
 
-    const onboardingStatus = await getOnboardingStatus(userId);
+    let onboardingStatus;
+    try {
+      onboardingStatus = await getOnboardingStatus(userId);
+    } catch {
+      return serviceError(
+        "Failed to get onboarding status",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
+
     if (!onboardingStatus) {
       return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
     }
@@ -71,11 +80,21 @@ export class OnboardingService {
     const isDismissed = onboardingStatus.onboardingDismissedAt !== null;
     const isProfileSetup = onboardingStatus.profileSetupCompletedAt !== null;
 
-    const [libraryCount, hasPlaying, journalCount] = await Promise.all([
-      countLibraryItemsByUserId(userId),
-      hasLibraryItemWithStatus(userId, LibraryItemStatus.PLAYING),
-      countJournalEntriesByUserId(userId),
-    ]);
+    let libraryCount: number;
+    let hasPlaying: boolean;
+    let journalCount: number;
+    try {
+      [libraryCount, hasPlaying, journalCount] = await Promise.all([
+        countLibraryItemsByUserId(userId),
+        hasLibraryItemWithStatus(userId, LibraryItemStatus.PLAYING),
+        countJournalEntriesByUserId(userId),
+      ]);
+    } catch {
+      return serviceError(
+        "Failed to get onboarding progress",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
 
     const completionStatus: Record<string, boolean> = {
       "create-account": true,
@@ -110,7 +129,14 @@ export class OnboardingService {
   ): Promise<DismissOnboardingResult> {
     const { userId } = input;
 
-    await updateOnboardingDismissed(userId);
+    try {
+      await updateOnboardingDismissed(userId);
+    } catch {
+      return serviceError(
+        "Failed to dismiss onboarding",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
 
     return serviceSuccess(undefined);
   }
