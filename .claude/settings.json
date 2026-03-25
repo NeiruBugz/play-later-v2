@@ -10,6 +10,19 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/format-and-lint.sh",
+            "timeout": 30,
+            "statusMessage": "Formatting & linting..."
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
