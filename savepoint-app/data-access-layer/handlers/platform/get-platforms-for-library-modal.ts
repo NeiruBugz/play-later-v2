@@ -1,7 +1,9 @@
-import { upsertPlatforms } from "@/data-access-layer/repository";
 import { GameDetailService } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
-import { getPlatformsForGame } from "@/data-access-layer/services/platform/platform-service";
+import {
+  getPlatformsForGame,
+  savePlatforms,
+} from "@/data-access-layer/services/platform/platform-service";
 import type { Platform } from "@prisma/client";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -82,7 +84,7 @@ export async function getPlatformsForLibraryModal(
             typeof p.platform_type === "number" ? p.platform_type : undefined,
         }));
 
-        await upsertPlatforms(mappedPlatforms);
+        await savePlatforms(mappedPlatforms);
 
         const gameDetailService = new GameDetailService();
         await gameDetailService.populateGameInDatabase(igdbGame);
@@ -121,7 +123,7 @@ export async function getPlatformsForLibraryModal(
         slug: `platform-${p.id}`,
       }));
 
-      await upsertPlatforms(mappedPlatforms);
+      await savePlatforms(mappedPlatforms);
 
       const refreshedResult = await getPlatformsForGame(igdbId);
       if (refreshedResult.success) {

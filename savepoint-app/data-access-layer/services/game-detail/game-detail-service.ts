@@ -2,9 +2,11 @@ import "server-only";
 
 import {
   createGameWithRelations,
+  findGamesByIds,
   gameExistsByIgdbId,
   upsertGenres,
   upsertPlatforms,
+  type GameBasicInfo,
 } from "@/data-access-layer/repository";
 import type { Game } from "@prisma/client";
 
@@ -17,6 +19,20 @@ import {
   serviceSuccess,
   type ServiceResult,
 } from "../types";
+
+export async function getGamesByIds(
+  gameIds: string[]
+): Promise<ServiceResult<GameBasicInfo[]>> {
+  try {
+    const games = await findGamesByIds(gameIds);
+    return serviceSuccess(games);
+  } catch (error) {
+    return serviceError(
+      error instanceof Error ? error.message : "Failed to fetch games by IDs",
+      ServiceErrorCode.INTERNAL_ERROR
+    );
+  }
+}
 
 export class GameDetailService {
   private logger = createLogger({

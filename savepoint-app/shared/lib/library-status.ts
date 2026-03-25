@@ -90,6 +90,7 @@ export function getStatusVariant(
   return getStatusConfig(status).badgeVariant;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function shouldShowBadge(_status: LibraryItemStatus): boolean {
   return true;
 }

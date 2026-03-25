@@ -4,6 +4,7 @@ import {
   findGameByIgdbId,
   findPlatformsForGame,
   findSystemPlatforms,
+  upsertPlatforms,
 } from "@/data-access-layer/repository";
 import type { Platform } from "@prisma/client";
 
@@ -26,6 +27,29 @@ export async function getSystemPlatforms(): Promise<
     return serviceSuccess({ platforms });
   } catch (error) {
     return handleServiceError(error, "Failed to get system platforms");
+  }
+}
+
+type UpsertPlatformInput = {
+  id: number;
+  name?: string;
+  slug?: string;
+  abbreviation?: string;
+  alternative_name?: string;
+  generation?: number;
+  platform_family?: number;
+  platform_type?: number;
+  checksum?: string;
+};
+
+export async function savePlatforms(
+  platforms: UpsertPlatformInput[]
+): Promise<ServiceResult<Platform[]>> {
+  try {
+    const result = await upsertPlatforms(platforms);
+    return serviceSuccess(result);
+  } catch (error) {
+    return handleServiceError(error, "Failed to save platforms");
   }
 }
 

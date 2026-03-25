@@ -2,7 +2,6 @@ import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import {
   findGameByIgdbId,
   findImportedGameById,
-  NotFoundError,
   updateImportedGameStatus,
 } from "@/data-access-layer/repository";
 import {

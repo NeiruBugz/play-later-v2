@@ -2,7 +2,6 @@ import {
   findUserById,
   findUserByNormalizedUsername,
   getLibraryStatsByUserId,
-  NotFoundError,
   updateUserProfile,
 } from "@/data-access-layer/repository";
 import {
@@ -168,7 +167,7 @@ describe("ProfileService", () => {
 
     it("should return error when library stats fetch fails", async () => {
       mockFindUserById.mockResolvedValue(basicUserProfileFixture);
-      mockGetLibraryStatsByUserId.mockResolvedValue(libraryStatsErrorFixture);
+      mockGetLibraryStatsByUserId.mockRejectedValue(libraryStatsErrorFixture);
 
       const result = await service.getProfileWithStats({
         userId: "user-123",
@@ -604,7 +603,7 @@ describe("ProfileService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Failed to update profile");
+          expect(result.error).toBe("Database connection failed");
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
         }
       });

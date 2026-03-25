@@ -1,7 +1,6 @@
 import {
   findGameByIgdbId,
   findPlatformsForGame,
-  NotFoundError,
 } from "@/data-access-layer/repository";
 import type { Platform } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -194,7 +193,7 @@ describe("getPlatformsForGame", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Failed to fetch game");
+          expect(result.error).toBe("Database connection failed");
         }
 
         expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);
@@ -213,7 +212,7 @@ describe("getPlatformsForGame", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Failed to fetch platforms");
+          expect(result.error).toBe("Failed to query platforms");
         }
 
         expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);

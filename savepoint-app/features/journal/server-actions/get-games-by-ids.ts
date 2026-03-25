@@ -1,6 +1,6 @@
 "use server";
 
-import { findGamesByIds } from "@/data-access-layer/repository";
+import { getGamesByIds } from "@/data-access-layer/services";
 import { z } from "zod";
 
 import { createServerAction } from "@/shared/lib";
@@ -27,12 +27,19 @@ export const getGamesByIdsAction = createServerAction<
     const { gameIds } = input;
     logger.info({ gameIdsCount: gameIds.length }, "Fetching games by IDs");
 
-    const games = await findGamesByIds(gameIds);
+    const result = await getGamesByIds(gameIds);
 
-    logger.info({ gamesCount: games.length }, "Games fetched successfully");
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+
+    logger.info(
+      { gamesCount: result.data.length },
+      "Games fetched successfully"
+    );
     return {
       success: true,
-      data: games,
+      data: result.data,
     };
   },
 });

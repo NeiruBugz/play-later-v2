@@ -8,7 +8,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
@@ -17,12 +16,10 @@ import { useMediaQuery } from "@/shared/hooks/use-media-query";
 import type { DeleteConfirmationDialogProps } from "./delete-confirmation-dialog.types";
 
 function DeleteConfirmationContent({
-  itemDescription,
   isDeleting,
   onConfirm,
   onCancel,
 }: {
-  itemDescription: string;
   isDeleting: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -98,7 +95,6 @@ export const DeleteConfirmationDialog = ({
                 </Drawer.Description>
               </div>
               <DeleteConfirmationContent
-                itemDescription={itemDescription}
                 isDeleting={isDeleting}
                 onConfirm={handleConfirm}
                 onCancel={handleCancel}
@@ -121,7 +117,6 @@ export const DeleteConfirmationDialog = ({
           </DialogDescription>
         </DialogHeader>
         <DeleteConfirmationContent
-          itemDescription={itemDescription}
           isDeleting={isDeleting}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
