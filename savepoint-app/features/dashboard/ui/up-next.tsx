@@ -8,30 +8,30 @@ import {
   type LibraryItemWithGameDomain,
 } from "@/shared/types/library";
 
-const CONTINUE_PLAYING_LIMIT = 3;
+const UP_NEXT_LIMIT = 4;
 
-export interface ContinuePlayingData {
+export interface UpNextData {
   items: LibraryItemWithGameDomain[];
 }
 
-interface ContinuePlayingProps {
+interface UpNextProps {
   userId: string;
 }
 
-export async function ContinuePlaying({ userId }: ContinuePlayingProps) {
+export async function UpNext({ userId }: UpNextProps) {
   const logger = createLogger({
-    [LOGGER_CONTEXT.PAGE]: "ContinuePlaying",
+    [LOGGER_CONTEXT.PAGE]: "UpNext",
   });
 
   try {
     const service = new LibraryService();
 
-    logger.info({ userId }, "Fetching continue playing games");
+    logger.info({ userId }, "Fetching up next games");
 
     const result = await service.getLibraryItems({
       userId,
-      status: LibraryItemStatus.PLAYING,
-      sortBy: "startedAt",
+      status: LibraryItemStatus.UP_NEXT,
+      sortBy: "updatedAt",
       sortOrder: "desc",
       distinctByGame: true,
     });
@@ -39,33 +39,32 @@ export async function ContinuePlaying({ userId }: ContinuePlayingProps) {
     if (!result.success) {
       logger.error(
         { error: result.error, userId },
-        "Failed to fetch continue playing games"
+        "Failed to fetch up next games"
       );
       throw new Error(result.error);
     }
 
-    const limitedItems = result.data.items.slice(0, CONTINUE_PLAYING_LIMIT);
+    const limitedItems = result.data.items.slice(0, UP_NEXT_LIMIT);
 
     logger.info(
       { userId, count: limitedItems.length },
-      "Continue playing games fetched successfully"
+      "Up next games fetched successfully"
     );
 
     const { DashboardGameSection } = await import("./dashboard-game-section");
 
     return (
       <DashboardGameSection
-        title="Playing"
+        title="Up Next"
         items={limitedItems}
         totalCount={result.data.items.length}
-        viewAllHref="/library?status=PLAYING"
-        viewAllLabel="View All Playing"
-        emptyMessage="No games in progress. Start exploring something new!"
-        variant="hero"
+        viewAllHref="/library?status=UP_NEXT"
+        viewAllLabel="View All Up Next"
+        emptyMessage="No games queued up"
       />
     );
   } catch (error) {
-    logger.error({ error }, "Error in ContinuePlaying");
+    logger.error({ error }, "Error in UpNext");
     throw error;
   }
 }

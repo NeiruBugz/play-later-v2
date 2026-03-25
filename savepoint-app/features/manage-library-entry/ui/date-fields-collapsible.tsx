@@ -49,7 +49,7 @@ export function DateFieldsCollapsible({
     ? "Hide dates"
     : hasValues
       ? "Edit dates"
-      : "Add dates";
+      : "Start & finish dates";
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -87,7 +87,7 @@ export function DateFieldsCollapsible({
               htmlFor="started-date"
               className="text-muted-foreground text-xs"
             >
-              Started
+              Started playing
             </Label>
             <Input
               id="started-date"
@@ -104,7 +104,7 @@ export function DateFieldsCollapsible({
               htmlFor="completed-date"
               className="text-muted-foreground text-xs"
             >
-              Completed
+              Finished playing
             </Label>
             <Input
               id="completed-date"

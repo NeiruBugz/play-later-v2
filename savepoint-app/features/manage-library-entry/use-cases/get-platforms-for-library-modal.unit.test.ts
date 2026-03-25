@@ -1,3 +1,4 @@
+import { getPlatformsForLibraryModal } from "@/data-access-layer/handlers/platform/get-platforms-for-library-modal";
 import * as platformRepository from "@/data-access-layer/repository/platform/platform-repository";
 import { GameDetailService } from "@/data-access-layer/services/game-detail/game-detail-service";
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
@@ -6,8 +7,6 @@ import {
   createFullGameFixture,
   platformApiResponseFixture,
 } from "@/test/fixtures";
-
-import { getPlatformsForLibraryModal } from "@/data-access-layer/handlers/platform/get-platforms-for-library-modal";
 
 vi.mock("@/data-access-layer/services/game-detail/game-detail-service", () => ({
   GameDetailService: vi.fn(),

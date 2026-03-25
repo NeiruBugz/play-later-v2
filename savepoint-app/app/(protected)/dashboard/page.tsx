@@ -4,9 +4,9 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { ContinuePlaying } from "@/features/dashboard/ui/continue-playing";
-import { DashboardQuickActions } from "@/features/dashboard/ui/dashboard-quick-actions";
 import { DashboardStats } from "@/features/dashboard/ui/dashboard-stats";
 import { RecentlyAdded } from "@/features/dashboard/ui/recently-added";
+import { UpNext } from "@/features/dashboard/ui/up-next";
 import { GettingStartedChecklist } from "@/features/onboarding";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { requireServerUserId } from "@/shared/lib/app/auth";
@@ -16,16 +16,6 @@ export const metadata: Metadata = {
   description:
     "Your gaming dashboard — track what you're playing, discover what to play next, and journal your gaming experiences.",
 };
-
-function StatsSkeleton() {
-  return (
-    <div className="gap-lg grid md:grid-cols-3">
-      <Skeleton className="h-32" variant="card" />
-      <Skeleton className="h-32" variant="card" />
-      <Skeleton className="h-32" variant="card" />
-    </div>
-  );
-}
 
 function SectionSkeleton() {
   return (
@@ -42,6 +32,16 @@ function SectionSkeleton() {
 
 function OnboardingSkeleton() {
   return <Skeleton className="h-64" variant="card" />;
+}
+
+function StatsSkeleton() {
+  return (
+    <div className="gap-lg grid md:grid-cols-3">
+      <Skeleton className="h-32" variant="card" />
+      <Skeleton className="h-32" variant="card" />
+      <Skeleton className="h-32" variant="card" />
+    </div>
+  );
 }
 
 export default async function DashboardPage() {
@@ -62,19 +62,10 @@ export default async function DashboardPage() {
     <div className="space-y-3xl py-3xl">
       <header>
         <h1 className="heading-xl tracking-tight">Welcome back, {username}!</h1>
-        <p className="body-md text-muted-foreground">
-          Track your gaming journey and discover what to play next
-        </p>
       </header>
 
       <Suspense fallback={<OnboardingSkeleton />}>
         <GettingStartedChecklist userId={userId} />
-      </Suspense>
-
-      <DashboardQuickActions />
-
-      <Suspense fallback={<StatsSkeleton />}>
-        <DashboardStats userId={userId} />
       </Suspense>
 
       <Suspense fallback={<SectionSkeleton />}>
@@ -82,7 +73,15 @@ export default async function DashboardPage() {
       </Suspense>
 
       <Suspense fallback={<SectionSkeleton />}>
+        <UpNext userId={userId} />
+      </Suspense>
+
+      <Suspense fallback={<SectionSkeleton />}>
         <RecentlyAdded userId={userId} />
+      </Suspense>
+
+      <Suspense fallback={<StatsSkeleton />}>
+        <DashboardStats userId={userId} />
       </Suspense>
     </div>
   );

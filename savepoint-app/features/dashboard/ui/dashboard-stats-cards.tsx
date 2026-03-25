@@ -1,4 +1,3 @@
-import { LibraryItemStatus } from "@/shared/types/library";
 import { Library } from "lucide-react";
 import Link from "next/link";
 
@@ -13,6 +12,7 @@ import {
   LIBRARY_STATUS_CONFIG,
 } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import type { DashboardStatsData } from "./dashboard-stats";
 

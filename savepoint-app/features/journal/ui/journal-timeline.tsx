@@ -91,9 +91,11 @@ export function JournalTimeline({
     return (
       <div className="space-y-lg border-border/50 bg-muted/10 p-3xl flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed text-center">
         <div className="space-y-md">
-          <h2 className="heading-md font-medium">No journal entries yet</h2>
-          <p className="body-sm text-muted-foreground">
-            Start documenting your gaming journey
+          <h2 className="heading-md font-medium">Your Gaming Journal</h2>
+          <p className="body-sm text-muted-foreground max-w-sm">
+            Write about your gaming sessions — what you played, how far you got,
+            memorable moments, or quick thoughts. Entries are tied to games in
+            your library.
           </p>
         </div>
         <Button asChild size="lg">

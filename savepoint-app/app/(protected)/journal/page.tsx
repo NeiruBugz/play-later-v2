@@ -20,7 +20,7 @@ export default async function JournalPage() {
       <main className="py-3xl container mx-auto">
         <div className="space-y-3xl">
           <header>
-            <h1 className="heading-xl tracking-tight">My Journal</h1>
+            <h1 className="heading-xl tracking-tight">Journal</h1>
             <p className="body-md text-muted-foreground">
               Document your gaming journey
             </p>
@@ -61,7 +61,7 @@ export default async function JournalPage() {
     <main className="py-3xl container mx-auto">
       <div className="space-y-3xl">
         <header>
-          <h1 className="heading-xl tracking-tight">My Journal</h1>
+          <h1 className="heading-xl tracking-tight">Journal</h1>
           <p className="body-md text-muted-foreground">
             Document your gaming journey
           </p>

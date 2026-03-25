@@ -44,12 +44,12 @@ const createNavigationMock = () => {
 };
 
 const elements = {
-  getLibraryHeading: () => screen.getByRole("heading", { name: "My Library" }),
+  getLibraryHeading: () => screen.getByRole("heading", { name: "Library" }),
   getSortSelect: () => screen.getByRole("combobox", { name: "Sort by" }),
   getPlatformFilter: () =>
     screen.getByRole("combobox", { name: "Filter by platform" }),
   getSearchInput: () =>
-    screen.getByRole("searchbox", { name: "Search games by title" }),
+    screen.getByRole("searchbox", { name: "Filter library by title" }),
   getAllStatusesButton: () =>
     screen.getByRole("button", { name: "Show all statuses" }),
   getStatusButton: (status: string) =>

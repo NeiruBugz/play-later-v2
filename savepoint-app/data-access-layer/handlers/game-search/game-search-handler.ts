@@ -1,7 +1,6 @@
 import { isSuccessResult } from "@/data-access-layer/services";
 import { IgdbService } from "@/data-access-layer/services/igdb";
 
-import { SearchGamesSchema } from "./schemas";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,
@@ -11,6 +10,7 @@ import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
 import type { HandlerResult, RequestContext } from "../types";
+import { SearchGamesSchema } from "./schemas";
 import type { GameSearchHandlerInput, GameSearchHandlerOutput } from "./types";
 
 const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GameSearchHandler" });

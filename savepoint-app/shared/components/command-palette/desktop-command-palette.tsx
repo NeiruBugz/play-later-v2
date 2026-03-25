@@ -91,7 +91,7 @@ export function DesktopCommandPalette({
       <DialogContent className="max-w-2xl gap-0 p-0">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search for games..."
+            placeholder="Search all games to add..."
             value={query}
             onValueChange={setQuery}
           />

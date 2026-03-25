@@ -49,7 +49,7 @@ export function LibraryGrid() {
   const items = data?.pages.flatMap((page) => page.items) ?? [];
 
   if (items.length === 0) {
-    return <LibraryEmptyState />;
+    return <LibraryEmptyState status={filters.status} />;
   }
 
   return (

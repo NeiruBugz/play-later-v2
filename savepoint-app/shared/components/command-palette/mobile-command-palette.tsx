@@ -115,7 +115,7 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           >
             <div className="px-lg pt-md pb-md shrink-0">
               <CommandInput
-                placeholder="Search for games..."
+                placeholder="Search all games to add..."
                 value={query}
                 onValueChange={setQuery}
                 autoFocus

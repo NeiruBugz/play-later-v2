@@ -1,3 +1,4 @@
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import {
   findGameByIgdbId,
   findImportedGameById,
@@ -16,7 +17,7 @@ import {
   createFullGameFixture,
   createLibraryItemFixture,
 } from "@/test/fixtures";
-import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
+
 import { AcquisitionType, LibraryItemStatus } from "@/shared/types";
 
 import { importGameToLibrary } from "./import-game-to-library";

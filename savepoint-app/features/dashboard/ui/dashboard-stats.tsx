@@ -1,9 +1,9 @@
 import "server-only";
 
 import { LibraryService } from "@/data-access-layer/services";
-import { LibraryItemStatus } from "@/shared/types/library";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 export interface DashboardStatsData {
   wishlist: number;
@@ -118,6 +118,10 @@ export async function DashboardStats({ userId }: DashboardStatsProps) {
       { userId, total: stats.total },
       "Dashboard stats fetched successfully"
     );
+
+    if (stats.total < 10) {
+      return null;
+    }
 
     const { DashboardStatsCards } = await import("./dashboard-stats-cards");
 

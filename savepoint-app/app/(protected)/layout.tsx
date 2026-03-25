@@ -16,7 +16,7 @@ export default async function ProtectedLayout({ children }: PropsWithChildren) {
       <Header isAuthorised={Boolean(userId)} />
       <main
         id="main-content"
-        className="py-lg md:pb-lg container mx-auto pb-24"
+        className="px-lg pt-lg md:px-2xl md:pb-lg container mx-auto pb-36"
       >
         {children}
       </main>

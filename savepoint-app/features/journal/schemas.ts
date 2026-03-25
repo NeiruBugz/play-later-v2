@@ -1,7 +1,7 @@
-import { JournalMood } from "@/shared/types/journal";
 import { z } from "zod";
 
 import { MAX_CHARACTERS } from "@/shared/lib/rich-text";
+import { JournalMood } from "@/shared/types/journal";
 
 export const CreateJournalEntrySchema = z.object({
   gameId: z.string().min(1, "Game ID is required"),

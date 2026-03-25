@@ -1,10 +1,10 @@
 import { STATUS_BADGE_TEST_CASES } from "@fixtures/enum-test-cases";
-import { LibraryItemStatus } from "@/shared/types/library";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { FormField } from "@/shared/components/ui/form";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import { StatusChipGroup } from "./status-chip-group";
 

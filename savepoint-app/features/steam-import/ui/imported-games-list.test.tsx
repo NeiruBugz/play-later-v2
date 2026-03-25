@@ -28,7 +28,10 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-const createMockImportedGameDto = (id: string, name: string): ImportedGameDto => ({
+const createMockImportedGameDto = (
+  id: string,
+  name: string
+): ImportedGameDto => ({
   id,
   userId: "user-1",
   storefront: "STEAM",

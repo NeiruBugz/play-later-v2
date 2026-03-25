@@ -7,7 +7,6 @@ export {
   GameReleaseDate,
   JournalEntriesSection,
   LibraryStatusDisplay,
-  QuickActionButtons,
   TimesToBeatSection,
 } from "./ui";
 
@@ -18,7 +17,6 @@ export type {
   GameReleaseDateProps,
   JournalEntriesSectionProps,
   LibraryStatusDisplayProps,
-  QuickActionButtonsProps,
   TimesToBeatSectionProps,
 } from "./ui";
 

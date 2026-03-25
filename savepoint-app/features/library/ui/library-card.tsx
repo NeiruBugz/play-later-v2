@@ -68,14 +68,6 @@ export const LibraryCard = memo(function LibraryCard({
           fetchPriority={index < 6 ? "high" : "low"}
         />
 
-        <div className="duration-normal pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
-          <div className="p-lg flex h-full items-end">
-            <p className="body-sm line-clamp-3 font-semibold text-white drop-shadow-md">
-              {game.title}
-            </p>
-          </div>
-        </div>
-
         {showBadge && (
           <div className="absolute top-3 left-3 z-10">
             <Badge
@@ -89,6 +81,10 @@ export const LibraryCard = memo(function LibraryCard({
           </div>
         )}
       </div>
+
+      <p className="body-sm mt-sm text-foreground line-clamp-2 font-medium">
+        {game.title}
+      </p>
 
       {!isMobile && (
         <LibraryCardActionBar

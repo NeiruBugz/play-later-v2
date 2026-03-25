@@ -29,6 +29,7 @@ export function createProfileFixture(
           lastPlayed: new Date("2025-01-10T12:00:00.000Z"),
         },
       ],
+      journalCount: 7,
     },
     ...overrides,
   };

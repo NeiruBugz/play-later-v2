@@ -9,9 +9,13 @@ import {
   ServiceErrorCode,
 } from "@/data-access-layer/services";
 import { matchSteamGameToIgdb } from "@/data-access-layer/services/igdb/igdb-matcher";
-import { AcquisitionType, LibraryItemStatus, type LibraryItem } from "@/shared/types";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import {
+  AcquisitionType,
+  LibraryItemStatus,
+  type LibraryItem,
+} from "@/shared/types";
 
 import type { LibraryStatus } from "../types";
 

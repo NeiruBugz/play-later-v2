@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -43,6 +44,7 @@ interface EntryFormProps {
   onSuccess: () => void;
   onCancel?: () => void;
   onDelete?: (id: number) => void;
+  onAddPlatform?: () => void;
   className?: string;
 }
 
@@ -55,6 +57,7 @@ export function EntryForm({
   onSuccess,
   onCancel,
   onDelete,
+  onAddPlatform,
   className,
 }: EntryFormProps) {
   const {
@@ -117,6 +120,7 @@ export function EntryForm({
       onSuccess={onSuccess}
       onCancel={onCancel}
       onDelete={onDelete}
+      onAddPlatform={onAddPlatform}
       className={className}
     />
   );
@@ -245,6 +249,7 @@ interface EditFormProps {
   onSuccess: () => void;
   onCancel?: () => void;
   onDelete?: (id: number) => void;
+  onAddPlatform?: () => void;
   className?: string;
 }
 
@@ -253,6 +258,7 @@ function EditForm({
   onSuccess,
   onCancel,
   onDelete,
+  onAddPlatform,
   className,
 }: EditFormProps) {
   const form = useForm<UpdateLibraryEntryInput>({
@@ -332,6 +338,24 @@ function EditForm({
             </>
           )}
         </p>
+
+        {onAddPlatform && (
+          <div className="space-y-xs">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="w-full"
+              onClick={onAddPlatform}
+            >
+              <Plus className="mr-sm h-4 w-4" />
+              Track on another platform
+            </Button>
+            <p className="text-muted-foreground text-center text-xs">
+              Track progress separately on each platform
+            </p>
+          </div>
+        )}
 
         <div className="pt-md sm:pt-lg flex items-center justify-between">
           {onDelete ? (

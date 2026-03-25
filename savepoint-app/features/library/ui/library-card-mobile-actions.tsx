@@ -1,13 +1,12 @@
 "use client";
 
-import type { LibraryItemStatus } from "@/shared/types/library";
-
 import { Button } from "@/shared/components/ui/button";
 import {
   getStatusActions,
   getStatusVariant,
 } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
+import type { LibraryItemStatus } from "@/shared/types/library";
 
 import { useUpdateLibraryStatus } from "../hooks/use-update-library-status";
 

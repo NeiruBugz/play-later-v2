@@ -1,6 +1,7 @@
-import { LibraryItemStatus } from "@/shared/types/library";
 import { Archive, Bookmark, CheckCircle, Gamepad2, Star } from "lucide-react";
 import type { FC } from "react";
+
+import { LibraryItemStatus } from "@/shared/types/library";
 
 export type StatusBadgeVariant =
   | "wishlist"
@@ -89,10 +90,8 @@ export function getStatusVariant(
   return getStatusConfig(status).badgeVariant;
 }
 
-export function shouldShowBadge(status: LibraryItemStatus): boolean {
-  return (
-    status !== LibraryItemStatus.SHELF && status !== LibraryItemStatus.WISHLIST
-  );
+export function shouldShowBadge(_status: LibraryItemStatus): boolean {
+  return true;
 }
 
 export function getUpNextLabel(hasBeenPlayed: boolean): string {

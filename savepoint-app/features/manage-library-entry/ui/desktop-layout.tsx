@@ -65,7 +65,9 @@ export function DesktopLayout({
       <DialogContent
         className={cn(
           "gap-0 overflow-hidden p-0",
-          isAddMode ? "max-w-[480px]" : "max-w-[800px]"
+          isAddMode || (isManageMode && entries.length === 1)
+            ? "max-w-[480px]"
+            : "max-w-[800px]"
         )}
       >
         <DialogHeader className="border-border px-2xl pb-lg pt-2xl border-b">
@@ -90,47 +92,63 @@ export function DesktopLayout({
             />
           </div>
         ) : isManageMode ? (
-          <div className="flex min-h-[400px]">
-            <EntryList
-              entries={entries}
-              selectedId={state.selectedEntryId}
-              onSelect={selectEntry}
-              onAddNew={startAddNew}
-              isAddingNew={state.isAddingNew}
-              className="w-[240px] shrink-0"
-            />
-
-            <div className="p-2xl flex-1 overflow-y-auto">
-              {state.isAddingNew ? (
-                <EntryForm
-                  igdbId={igdbId}
-                  gameTitle={gameTitle}
-                  entry={null}
-                  isAddMode={true}
-                  existingPlatforms={existingPlatforms}
-                  onSuccess={handleSuccess}
-                  onCancel={cancelAddNew}
-                />
-              ) : selectedEntry ? (
-                <EntryForm
-                  key={selectedEntry.id}
-                  igdbId={igdbId}
-                  gameTitle={gameTitle}
-                  entry={selectedEntry}
-                  isAddMode={false}
-                  existingPlatforms={existingPlatforms}
-                  onSuccess={handleSuccess}
-                  onDelete={handleDelete}
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-muted-foreground text-sm">
-                    Select an entry to view details
-                  </p>
-                </div>
-              )}
+          entries.length === 1 ? (
+            <div className="p-2xl">
+              <EntryForm
+                key={selectedEntry?.id ?? entries[0].id}
+                igdbId={igdbId}
+                gameTitle={gameTitle}
+                entry={selectedEntry ?? entries[0]}
+                isAddMode={false}
+                existingPlatforms={existingPlatforms}
+                onSuccess={handleSuccess}
+                onDelete={handleDelete}
+                onAddPlatform={startAddNew}
+              />
             </div>
-          </div>
+          ) : (
+            <div className="flex min-h-[400px]">
+              <EntryList
+                entries={entries}
+                selectedId={state.selectedEntryId}
+                onSelect={selectEntry}
+                onAddNew={startAddNew}
+                isAddingNew={state.isAddingNew}
+                className="w-[240px] shrink-0"
+              />
+
+              <div className="p-2xl flex-1 overflow-y-auto">
+                {state.isAddingNew ? (
+                  <EntryForm
+                    igdbId={igdbId}
+                    gameTitle={gameTitle}
+                    entry={null}
+                    isAddMode={true}
+                    existingPlatforms={existingPlatforms}
+                    onSuccess={handleSuccess}
+                    onCancel={cancelAddNew}
+                  />
+                ) : selectedEntry ? (
+                  <EntryForm
+                    key={selectedEntry.id}
+                    igdbId={igdbId}
+                    gameTitle={gameTitle}
+                    entry={selectedEntry}
+                    isAddMode={false}
+                    existingPlatforms={existingPlatforms}
+                    onSuccess={handleSuccess}
+                    onDelete={handleDelete}
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-muted-foreground text-sm">
+                      Select an entry to view details
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
         ) : null}
       </DialogContent>
     </Dialog>

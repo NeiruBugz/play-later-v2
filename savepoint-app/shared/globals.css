@@ -13,7 +13,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.01 260);
   /* Primary accent - teal/cyan (#14b8a6) */
-  --primary: oklch(0.65 0.14 175);
+  --primary: oklch(0.62 0.16 172);
   --primary-foreground: oklch(0.99 0.002 175);
   /* Secondary - muted gray */
   --secondary: oklch(0.94 0.005 260);
@@ -39,9 +39,9 @@
   /* Borders and inputs */
   --border: oklch(0.9 0.005 260);
   --input: oklch(0.9 0.005 260);
-  --ring: oklch(0.65 0.14 175);
+  --ring: oklch(0.62 0.16 172);
   /* Chart colors */
-  --chart-1: oklch(0.65 0.14 175);
+  --chart-1: oklch(0.62 0.16 172);
   --chart-2: oklch(0.6 0.16 145);
   --chart-3: oklch(0.7 0.14 55);
   --chart-4: oklch(0.55 0.15 280);
@@ -51,12 +51,12 @@
   /* Sidebar */
   --sidebar: oklch(0.97 0.003 260);
   --sidebar-foreground: oklch(0.2 0.01 260);
-  --sidebar-primary: oklch(0.65 0.14 175);
+  --sidebar-primary: oklch(0.62 0.16 172);
   --sidebar-primary-foreground: oklch(0.99 0.002 175);
   --sidebar-accent: oklch(0.94 0.02 175);
   --sidebar-accent-foreground: oklch(0.2 0.01 260);
   --sidebar-border: oklch(0.9 0.005 260);
-  --sidebar-ring: oklch(0.65 0.14 175);
+  --sidebar-ring: oklch(0.62 0.16 172);
   /* Platform brand colors */
   --color-nintendo: #e60012;
   --color-playstation: #0070d1;
@@ -167,7 +167,7 @@
   --popover: oklch(0.18 0.005 260);
   --popover-foreground: oklch(0.93 0.005 260);
   /* Primary accent - teal/cyan */
-  --primary: oklch(0.72 0.15 175);
+  --primary: oklch(0.69 0.17 172);
   --primary-foreground: oklch(0.12 0.01 175);
   /* Secondary - elevated surface */
   --secondary: oklch(0.2 0.005 260);
@@ -193,9 +193,9 @@
   /* Borders and inputs - very subtle */
   --border: oklch(0.25 0.005 260);
   --input: oklch(0.2 0.005 260);
-  --ring: oklch(0.72 0.15 175);
+  --ring: oklch(0.69 0.17 172);
   /* Chart colors */
-  --chart-1: oklch(0.72 0.15 175);
+  --chart-1: oklch(0.69 0.17 172);
   --chart-2: oklch(0.7 0.17 145);
   --chart-3: oklch(0.75 0.14 55);
   --chart-4: oklch(0.65 0.15 280);
@@ -203,12 +203,12 @@
   /* Sidebar - slightly darker than background */
   --sidebar: oklch(0.1 0.005 260);
   --sidebar-foreground: oklch(0.9 0.005 260);
-  --sidebar-primary: oklch(0.72 0.15 175);
+  --sidebar-primary: oklch(0.69 0.17 172);
   --sidebar-primary-foreground: oklch(0.12 0.01 175);
   --sidebar-accent: oklch(0.18 0.02 175);
   --sidebar-accent-foreground: oklch(0.9 0.005 260);
   --sidebar-border: oklch(0.22 0.005 260);
-  --sidebar-ring: oklch(0.72 0.15 175);
+  --sidebar-ring: oklch(0.69 0.17 172);
   /* Custom shadows - deeper, more dramatic for dark mode */
   --shadow-paper-sm: 0 1px 3px 0 oklch(0 0 0 / 0.35);
   --shadow-paper:

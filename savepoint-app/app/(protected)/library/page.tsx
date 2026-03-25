@@ -5,7 +5,7 @@ import { LibraryPageView } from "@/features/library/ui";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export const metadata: Metadata = {
-  title: "My Library",
+  title: "Library",
   description:
     "Browse and manage your game library. Filter by status, platform, and sort your collection.",
 };

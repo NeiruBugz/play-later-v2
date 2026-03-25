@@ -8,6 +8,7 @@ export type RecentGame = {
 export type LibraryStats = {
   statusCounts: Record<string, number>;
   recentGames: RecentGame[];
+  journalCount: number;
 };
 
 export type ProfileWithStats = {

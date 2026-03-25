@@ -12,6 +12,7 @@ import {
 import { prisma } from "@/shared/lib/app/db";
 
 import { DuplicateError, NotFoundError } from "../errors";
+import { countJournalEntriesByUserId } from "../journal/journal-repository";
 import type {
   CreateLibraryItemInput,
   DeleteLibraryItemInput,
@@ -454,8 +455,9 @@ export async function getLibraryStatsByUserId(userId: string): Promise<{
     coverImage: string | null;
     lastPlayed: Date;
   }>;
+  journalCount: number;
 }> {
-  const [statusCountsRaw, recentItems] = await Promise.all([
+  const [statusCountsRaw, recentItems, journalCount] = await Promise.all([
     prisma.libraryItem.groupBy({
       by: ["status"],
       where: { userId },
@@ -471,6 +473,7 @@ export async function getLibraryStatsByUserId(userId: string): Promise<{
       orderBy: { updatedAt: "desc" },
       take: RECENT_GAMES_LIMIT,
     }),
+    countJournalEntriesByUserId(userId),
   ]);
   const statusCounts = statusCountsRaw.reduce(
     (acc, item) => {
@@ -485,7 +488,7 @@ export async function getLibraryStatsByUserId(userId: string): Promise<{
     coverImage: item.game.coverImage,
     lastPlayed: item.updatedAt,
   }));
-  return { statusCounts, recentGames };
+  return { statusCounts, recentGames, journalCount };
 }
 
 export async function findMostRecentLibraryItemByGameId(params: {

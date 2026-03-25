@@ -1,10 +1,10 @@
 import { STATUS_SELECT_OPTIONS } from "@fixtures/enum-test-cases";
-import { LibraryItemStatus } from "@/shared/types/library";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { FormField } from "@/shared/components/ui/form";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import { StatusSelect } from "./status-select";
 

@@ -24,6 +24,7 @@ export type RecentGame = {
 export type LibraryStats = {
   statusCounts: Record<string, number>;
   recentGames: RecentGame[];
+  journalCount: number;
 };
 export type GetProfileResult = ServiceResult<{ profile: Profile }>;
 export type ProfileWithStats = {

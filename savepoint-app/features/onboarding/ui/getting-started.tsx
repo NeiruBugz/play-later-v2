@@ -1,8 +1,8 @@
 "use client";
 
 import type { OnboardingProgress } from "@/data-access-layer/services";
-import { X } from "lucide-react";
-import { useTransition } from "react";
+import { ChevronDown, X } from "lucide-react";
+import { useState, useTransition } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -11,6 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/shared/components/ui/collapsible";
 import { cn } from "@/shared/lib/ui/utils";
 
 import { dismissOnboarding } from "../server-actions";
@@ -25,6 +30,8 @@ export function GettingStarted({ progress }: GettingStartedProps) {
   const progressPercentage = Math.round(
     (progress.completedCount / progress.totalCount) * 100
   );
+  const isNearComplete = progressPercentage >= 80;
+  const [isExpanded, setIsExpanded] = useState(!isNearComplete);
 
   const handleDismiss = () => {
     startTransition(async () => {
@@ -63,16 +70,35 @@ export function GettingStarted({ progress }: GettingStartedProps) {
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
-          <p className="body-xs text-muted-foreground">
-            {progress.completedCount} of {progress.totalCount} complete
-          </p>
         </div>
 
-        <div className="divide-border divide-y">
-          {progress.steps.map((step, index) => (
-            <OnboardingStep key={step.id} step={step} index={index} />
-          ))}
-        </div>
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+          <div className="flex items-center justify-between">
+            <p className="body-xs text-muted-foreground">
+              {isNearComplete && !isExpanded
+                ? `Almost done! ${progress.completedCount} of ${progress.totalCount} complete`
+                : `${progress.completedCount} of ${progress.totalCount} complete`}
+            </p>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-6 w-6">
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    isExpanded && "rotate-180"
+                  )}
+                />
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+
+          <CollapsibleContent>
+            <div className="divide-border divide-y">
+              {progress.steps.map((step, index) => (
+                <OnboardingStep key={step.id} step={step} index={index} />
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );

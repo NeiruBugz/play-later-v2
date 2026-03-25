@@ -20,6 +20,7 @@ type LibraryStatsRepo = {
     coverImage: string | null;
     lastPlayed: Date;
   }>;
+  journalCount: number;
 };
 export function mapUserToProfile(user: MinimalUser): Profile {
   return {
@@ -47,6 +48,7 @@ export function mapLibraryStats(stats: LibraryStatsRepo): LibraryStats {
   return {
     statusCounts: stats.statusCounts,
     recentGames: stats.recentGames.map(mapRecentGame),
+    journalCount: stats.journalCount,
   };
 }
 export function mapUserToProfileWithStats(

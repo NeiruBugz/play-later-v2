@@ -38,7 +38,7 @@ test.describe("[journal] Journal Empty State", () => {
     const journal = new JournalPage(page);
     await journal.goto();
 
-    await expect(journal.heading()).toHaveText("My Journal");
+    await expect(journal.heading()).toHaveText("Journal");
     await expect(journal.emptyStateText()).toBeVisible();
     await expect(journal.writeFirstEntryButton()).toBeVisible();
   });
@@ -107,7 +107,7 @@ test.describe("[journal] Journal With Entries", () => {
     const journal = new JournalPage(page);
     await journal.goto();
 
-    await expect(journal.heading()).toHaveText("My Journal");
+    await expect(journal.heading()).toHaveText("Journal");
     await expect(journal.journalEntriesHeading()).toBeVisible();
     await expect(journal.writeNewEntryButton()).toBeVisible();
     await expect(journal.entryCard("My First Entry")).toBeVisible();
@@ -304,6 +304,6 @@ test.describe("[journal] Create Entry Flow", () => {
     await journal.cancelButton().click();
     await page.waitForURL("/journal");
 
-    await expect(journal.heading()).toHaveText("My Journal");
+    await expect(journal.heading()).toHaveText("Journal");
   });
 });
