@@ -201,7 +201,19 @@ export async function importGameToLibrary(
     );
   }
 
-  const game = await findGameByIgdbId(igdbId);
+  let game;
+  try {
+    game = await findGameByIgdbId(igdbId);
+  } catch (error) {
+    logger.error(
+      { error, igdbId },
+      "Failed to check if game exists in database"
+    );
+    return {
+      success: false,
+      error: "Failed to check game existence",
+    };
+  }
 
   let gameId: string;
   let gameSlug: string;
