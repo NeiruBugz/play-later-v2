@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-import { getPlatformsForLibraryModal } from "@/features/manage-library-entry/use-cases";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import type { HandlerResult, RequestContext } from "../types";
+import { getPlatformsForLibraryModal } from "./get-platforms-for-library-modal";
 import type {
   GetPlatformsHandlerInput,
   GetPlatformsHandlerOutput,

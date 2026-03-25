@@ -1,12 +1,11 @@
 import type { Platform } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getPlatformsForLibraryModal } from "@/features/manage-library-entry/use-cases";
-
 import type { RequestContext } from "../types";
+import { getPlatformsForLibraryModal } from "./get-platforms-for-library-modal";
 import { getPlatformsHandler } from "./get-platforms-handler";
 
-vi.mock("@/features/manage-library-entry/use-cases");
+vi.mock("./get-platforms-for-library-modal");
 
 const mockGetPlatformsForLibraryModal = vi.mocked(getPlatformsForLibraryModal);
 

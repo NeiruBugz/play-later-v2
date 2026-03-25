@@ -1,10 +1,10 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { STATUS_BADGE_TEST_CASES } from "@fixtures/enum-test-cases";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { FormField } from "@/shared/components/ui/form";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import { StatusChipGroup } from "./status-chip-group";
 
@@ -13,10 +13,11 @@ type TestFormData = {
 };
 
 const elements = {
-  getWantToPlayChip: () => screen.getByRole("radio", { name: /want to play/i }),
-  getOwnedChip: () => screen.getByRole("radio", { name: /owned/i }),
-  getPlayingChip: () => screen.getByRole("radio", { name: /playing/i }),
-  getPlayedChip: () => screen.getByRole("radio", { name: /played/i }),
+  getWishlistChip: () => screen.getByRole("radio", { name: /wishlist/i }),
+  getShelfChip: () => screen.getByRole("radio", { name: /^shelf$/i }),
+  getUpNextChip: () => screen.getByRole("radio", { name: /up next/i }),
+  getPlayingChip: () => screen.getByRole("radio", { name: /^playing$/i }),
+  getPlayedChip: () => screen.getByRole("radio", { name: /^played$/i }),
   getAllChips: () => screen.getAllByRole("radio"),
   getRadioGroup: () =>
     screen.getByRole("radiogroup", { name: /journey status/i }),
@@ -26,11 +27,14 @@ const elements = {
 };
 
 const actions = {
-  selectWantToPlay: async () => {
-    await userEvent.click(elements.getWantToPlayChip());
+  selectWishlist: async () => {
+    await userEvent.click(elements.getWishlistChip());
   },
-  selectOwned: async () => {
-    await userEvent.click(elements.getOwnedChip());
+  selectShelf: async () => {
+    await userEvent.click(elements.getShelfChip());
+  },
+  selectUpNext: async () => {
+    await userEvent.click(elements.getUpNextChip());
   },
   selectPlaying: async () => {
     await userEvent.click(elements.getPlayingChip());
@@ -40,7 +44,9 @@ const actions = {
   },
 };
 
-function renderStatusChipGroupInForm(defaultStatus = LibraryItemStatus.PLAYED) {
+function renderStatusChipGroupInForm(
+  defaultStatus: LibraryItemStatus = LibraryItemStatus.PLAYED
+) {
   const TestForm = () => {
     const methods = useForm<TestFormData>({
       defaultValues: {
@@ -73,21 +79,22 @@ describe("StatusChipGroup", () => {
       expect(elements.getRadioGroup()).toBeVisible();
     });
 
-    it("should render exactly 4 status chips", () => {
+    it("should render exactly 5 status chips", () => {
       renderStatusChipGroupInForm();
 
       const chips = elements.getAllChips();
-      expect(chips).toHaveLength(4);
+      expect(chips).toHaveLength(5);
     });
 
-    it("should render chips in correct order: Want to Play, Owned, Playing, Played", () => {
+    it("should render chips in correct order: Up Next, Playing, Shelf, Played, Wishlist", () => {
       renderStatusChipGroupInForm();
 
       const chips = elements.getAllChips();
-      expect(chips[0]).toHaveTextContent("Want to Play");
-      expect(chips[1]).toHaveTextContent("Owned");
-      expect(chips[2]).toHaveTextContent("Playing");
+      expect(chips[0]).toHaveTextContent("Up Next");
+      expect(chips[1]).toHaveTextContent("Playing");
+      expect(chips[2]).toHaveTextContent("Shelf");
       expect(chips[3]).toHaveTextContent("Played");
+      expect(chips[4]).toHaveTextContent("Wishlist");
     });
 
     it.each(STATUS_BADGE_TEST_CASES)(
@@ -110,22 +117,22 @@ describe("StatusChipGroup", () => {
   });
 
   describe("given user selects a status chip", () => {
-    it("should select Want to Play chip when clicked", async () => {
+    it("should select Wishlist chip when clicked", async () => {
       renderStatusChipGroupInForm();
 
-      await actions.selectWantToPlay();
+      await actions.selectWishlist();
 
-      const wantToPlayChip = elements.getWantToPlayChip();
-      expect(wantToPlayChip).toHaveAttribute("aria-checked", "true");
+      const wishlistChip = elements.getWishlistChip();
+      expect(wishlistChip).toHaveAttribute("aria-checked", "true");
     });
 
-    it("should select Owned chip when clicked", async () => {
+    it("should select Shelf chip when clicked", async () => {
       renderStatusChipGroupInForm();
 
-      await actions.selectOwned();
+      await actions.selectShelf();
 
-      const ownedChip = elements.getOwnedChip();
-      expect(ownedChip).toHaveAttribute("aria-checked", "true");
+      const shelfChip = elements.getShelfChip();
+      expect(shelfChip).toHaveAttribute("aria-checked", "true");
     });
 
     it("should select Playing chip when clicked", async () => {
@@ -138,7 +145,7 @@ describe("StatusChipGroup", () => {
     });
 
     it("should select Played chip when clicked", async () => {
-      renderStatusChipGroupInForm(LibraryItemStatus.WANT_TO_PLAY);
+      renderStatusChipGroupInForm(LibraryItemStatus.WISHLIST);
 
       await actions.selectPlayed();
 
@@ -174,18 +181,18 @@ describe("StatusChipGroup", () => {
   });
 
   describe("given component renders with different default statuses", () => {
-    it("should render with Want to Play selected when default is WANT_TO_PLAY", () => {
-      renderStatusChipGroupInForm(LibraryItemStatus.WANT_TO_PLAY);
+    it("should render with Wishlist selected when default is WISHLIST", () => {
+      renderStatusChipGroupInForm(LibraryItemStatus.WISHLIST);
 
-      const wantToPlayChip = elements.getWantToPlayChip();
-      expect(wantToPlayChip).toHaveAttribute("aria-checked", "true");
+      const wishlistChip = elements.getWishlistChip();
+      expect(wishlistChip).toHaveAttribute("aria-checked", "true");
     });
 
-    it("should render with Owned selected when default is OWNED", () => {
-      renderStatusChipGroupInForm(LibraryItemStatus.OWNED);
+    it("should render with Shelf selected when default is SHELF", () => {
+      renderStatusChipGroupInForm(LibraryItemStatus.SHELF);
 
-      const ownedChip = elements.getOwnedChip();
-      expect(ownedChip).toHaveAttribute("aria-checked", "true");
+      const shelfChip = elements.getShelfChip();
+      expect(shelfChip).toHaveAttribute("aria-checked", "true");
     });
 
     it("should render with Playing selected when default is PLAYING", () => {

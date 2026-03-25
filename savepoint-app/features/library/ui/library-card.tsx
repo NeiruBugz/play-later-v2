@@ -6,9 +6,13 @@ import { memo } from "react";
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
 import { useMediaQuery } from "@/shared/hooks/use-media-query";
-import { getStatusConfig } from "@/shared/lib/library-status";
+import {
+  getStatusConfig,
+  getUpNextLabel,
+  shouldShowBadge,
+} from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
-import type { LibraryItemStatus } from "@/shared/types";
+import { LibraryItemStatus } from "@/shared/types";
 
 import { LibraryCardActionBar } from "./library-card-action-bar";
 import { LibraryCardMobileActions } from "./library-card-mobile-actions";
@@ -45,6 +49,11 @@ export const LibraryCard = memo(function LibraryCard({
   const staggerIndex = Math.min(index + 1, 12);
 
   const statusConfig = getStatusConfig(status);
+  const showBadge = shouldShowBadge(status);
+  const badgeLabel =
+    status === LibraryItemStatus.UP_NEXT
+      ? getUpNextLabel(item.hasBeenPlayed)
+      : statusConfig.label;
 
   const cardContent = (
     <>
@@ -59,30 +68,29 @@ export const LibraryCard = memo(function LibraryCard({
           fetchPriority={index < 6 ? "high" : "low"}
         />
 
-        <div className="duration-normal pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
-          <div className="p-lg flex h-full items-end">
-            <p className="body-sm line-clamp-3 font-semibold text-white drop-shadow-md">
-              {game.title}
-            </p>
+        {showBadge && (
+          <div className="absolute top-3 left-3 z-10">
+            <Badge
+              variant={statusConfig.badgeVariant}
+              role="status"
+              aria-label={`Status: ${badgeLabel}`}
+              className="shadow-paper-sm backdrop-blur-sm"
+            >
+              {badgeLabel}
+            </Badge>
           </div>
-        </div>
-
-        <div className="absolute top-3 left-3 z-10">
-          <Badge
-            variant={statusConfig.badgeVariant}
-            role="status"
-            aria-label={`Status: ${statusConfig.label}`}
-            className="shadow-paper-sm backdrop-blur-sm"
-          >
-            {statusConfig.label}
-          </Badge>
-        </div>
+        )}
       </div>
+
+      <p className="body-sm mt-sm text-foreground line-clamp-2 font-medium">
+        {game.title}
+      </p>
 
       {!isMobile && (
         <LibraryCardActionBar
           libraryItemId={item.id}
           currentStatus={status as LibraryItemStatus}
+          hasBeenPlayed={item.hasBeenPlayed}
         />
       )}
     </>
@@ -110,6 +118,7 @@ export const LibraryCard = memo(function LibraryCard({
             <LibraryCardMobileActions
               libraryItemId={item.id}
               currentStatus={status as LibraryItemStatus}
+              hasBeenPlayed={item.hasBeenPlayed}
             />
           }
         >

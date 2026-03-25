@@ -1,7 +1,6 @@
 import { SteamService } from "@/data-access-layer/services/steam/steam-service";
 import { ServiceErrorCode } from "@/data-access-layer/services/types";
 
-import { connectSteamSchema } from "@/features/steam-import/schemas";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,
@@ -11,6 +10,7 @@ import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
 import type { HandlerResult, RequestContext } from "../types";
+import { connectSteamSchema } from "./schemas";
 import type {
   ConnectSteamHandlerInput,
   ConnectSteamHandlerOutput,

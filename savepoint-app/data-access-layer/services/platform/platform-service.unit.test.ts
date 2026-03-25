@@ -2,29 +2,22 @@ import {
   findGameByIgdbId,
   findPlatformsForGame,
 } from "@/data-access-layer/repository";
-import {
-  repositoryError,
-  RepositoryErrorCode,
-  repositorySuccess,
-} from "@/data-access-layer/repository/types";
 import type { Platform } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { PlatformService } from "./platform-service";
+import { getPlatformsForGame } from "./platform-service";
 
 vi.mock("@/data-access-layer/repository", () => ({
   findGameByIgdbId: vi.fn(),
   findPlatformsForGame: vi.fn(),
 }));
 
-describe("PlatformService", () => {
-  let service: PlatformService;
+describe("getPlatformsForGame", () => {
   let mockFindGameByIgdbId: ReturnType<typeof vi.fn>;
   let mockFindPlatformsForGame: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    service = new PlatformService();
     mockFindGameByIgdbId = vi.mocked(findGameByIgdbId);
     mockFindPlatformsForGame = vi.mocked(findPlatformsForGame);
   });
@@ -101,15 +94,13 @@ describe("PlatformService", () => {
 
     describe("success scenarios", () => {
       it("should return success result with platforms when both repositories succeed", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(mockGame));
-        mockFindPlatformsForGame.mockResolvedValue(
-          repositorySuccess({
-            supportedPlatforms: mockSupportedPlatforms,
-            otherPlatforms: mockOtherPlatforms,
-          })
-        );
+        mockFindGameByIgdbId.mockResolvedValue(mockGame);
+        mockFindPlatformsForGame.mockResolvedValue({
+          supportedPlatforms: mockSupportedPlatforms,
+          otherPlatforms: mockOtherPlatforms,
+        });
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(true);
         if (result.success) {
@@ -128,15 +119,13 @@ describe("PlatformService", () => {
       });
 
       it("should return success with empty platform arrays", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(mockGame));
-        mockFindPlatformsForGame.mockResolvedValue(
-          repositorySuccess({
-            supportedPlatforms: [],
-            otherPlatforms: [],
-          })
-        );
+        mockFindGameByIgdbId.mockResolvedValue(mockGame);
+        mockFindPlatformsForGame.mockResolvedValue({
+          supportedPlatforms: [],
+          otherPlatforms: [],
+        });
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(true);
         if (result.success) {
@@ -146,15 +135,13 @@ describe("PlatformService", () => {
       });
 
       it("should return success with only supported platforms", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(mockGame));
-        mockFindPlatformsForGame.mockResolvedValue(
-          repositorySuccess({
-            supportedPlatforms: mockSupportedPlatforms,
-            otherPlatforms: [],
-          })
-        );
+        mockFindGameByIgdbId.mockResolvedValue(mockGame);
+        mockFindPlatformsForGame.mockResolvedValue({
+          supportedPlatforms: mockSupportedPlatforms,
+          otherPlatforms: [],
+        });
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(true);
         if (result.success) {
@@ -166,15 +153,13 @@ describe("PlatformService", () => {
       });
 
       it("should return success with only other platforms", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(mockGame));
-        mockFindPlatformsForGame.mockResolvedValue(
-          repositorySuccess({
-            supportedPlatforms: [],
-            otherPlatforms: mockOtherPlatforms,
-          })
-        );
+        mockFindGameByIgdbId.mockResolvedValue(mockGame);
+        mockFindPlatformsForGame.mockResolvedValue({
+          supportedPlatforms: [],
+          otherPlatforms: mockOtherPlatforms,
+        });
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(true);
         if (result.success) {
@@ -186,9 +171,9 @@ describe("PlatformService", () => {
 
     describe("game not found scenarios", () => {
       it("should return error when game does not exist in database", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(null));
+        mockFindGameByIgdbId.mockResolvedValue(null);
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -200,18 +185,15 @@ describe("PlatformService", () => {
       });
 
       it("should return error when findGameByIgdbId repository fails", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Database connection failed"
-          )
+        mockFindGameByIgdbId.mockRejectedValue(
+          new Error("Database connection failed")
         );
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Failed to fetch game");
+          expect(result.error).toBe("Database connection failed");
         }
 
         expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);
@@ -221,19 +203,16 @@ describe("PlatformService", () => {
 
     describe("platform fetch error scenarios", () => {
       it("should return error when findPlatformsForGame repository fails", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(mockGame));
-        mockFindPlatformsForGame.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Failed to query platforms"
-          )
+        mockFindGameByIgdbId.mockResolvedValue(mockGame);
+        mockFindPlatformsForGame.mockRejectedValue(
+          new Error("Failed to query platforms")
         );
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Failed to fetch platforms");
+          expect(result.error).toBe("Failed to query platforms");
         }
 
         expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);
@@ -246,7 +225,7 @@ describe("PlatformService", () => {
         const unexpectedError = new Error("Unexpected database error");
         mockFindGameByIgdbId.mockRejectedValue(unexpectedError);
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -255,11 +234,11 @@ describe("PlatformService", () => {
       });
 
       it("should handle unexpected exceptions from findPlatformsForGame", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(mockGame));
+        mockFindGameByIgdbId.mockResolvedValue(mockGame);
         const unexpectedError = new Error("Query timeout");
         mockFindPlatformsForGame.mockRejectedValue(unexpectedError);
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -270,7 +249,7 @@ describe("PlatformService", () => {
       it("should handle non-Error exceptions", async () => {
         mockFindGameByIgdbId.mockRejectedValue("String error");
 
-        const result = await service.getPlatformsForGame(validIgdbId);
+        const result = await getPlatformsForGame(validIgdbId);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -281,9 +260,9 @@ describe("PlatformService", () => {
 
     describe("edge cases", () => {
       it("should handle game with zero igdbId", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(null));
+        mockFindGameByIgdbId.mockResolvedValue(null);
 
-        const result = await service.getPlatformsForGame(0);
+        const result = await getPlatformsForGame(0);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -292,9 +271,9 @@ describe("PlatformService", () => {
       });
 
       it("should handle negative igdbId", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(null));
+        mockFindGameByIgdbId.mockResolvedValue(null);
 
-        const result = await service.getPlatformsForGame(-1);
+        const result = await getPlatformsForGame(-1);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -304,9 +283,9 @@ describe("PlatformService", () => {
 
       it("should handle very large igdbId", async () => {
         const largeIgdbId = 999999999;
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(null));
+        mockFindGameByIgdbId.mockResolvedValue(null);
 
-        const result = await service.getPlatformsForGame(largeIgdbId);
+        const result = await getPlatformsForGame(largeIgdbId);
 
         expect(result.success).toBe(false);
         if (!result.success) {
@@ -320,15 +299,13 @@ describe("PlatformService", () => {
     describe("service method isolation", () => {
       it("should not mutate input parameters", async () => {
         const inputIgdbId = 12345;
-        mockFindGameByIgdbId.mockResolvedValue(repositorySuccess(mockGame));
-        mockFindPlatformsForGame.mockResolvedValue(
-          repositorySuccess({
-            supportedPlatforms: mockSupportedPlatforms,
-            otherPlatforms: mockOtherPlatforms,
-          })
-        );
+        mockFindGameByIgdbId.mockResolvedValue(mockGame);
+        mockFindPlatformsForGame.mockResolvedValue({
+          supportedPlatforms: mockSupportedPlatforms,
+          otherPlatforms: mockOtherPlatforms,
+        });
 
-        await service.getPlatformsForGame(inputIgdbId);
+        await getPlatformsForGame(inputIgdbId);
 
         expect(inputIgdbId).toBe(12345);
       });
@@ -338,18 +315,18 @@ describe("PlatformService", () => {
 
         mockFindGameByIgdbId.mockImplementation(async () => {
           callOrder.push("findGameByIgdbId");
-          return repositorySuccess(mockGame);
+          return mockGame;
         });
 
         mockFindPlatformsForGame.mockImplementation(async () => {
           callOrder.push("findPlatformsForGame");
-          return repositorySuccess({
+          return {
             supportedPlatforms: mockSupportedPlatforms,
             otherPlatforms: mockOtherPlatforms,
-          });
+          };
         });
 
-        await service.getPlatformsForGame(validIgdbId);
+        await getPlatformsForGame(validIgdbId);
 
         expect(callOrder).toEqual(["findGameByIgdbId", "findPlatformsForGame"]);
       });

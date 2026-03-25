@@ -15,18 +15,19 @@ import { statusLabels } from "@/shared/lib/profile";
 
 import { prepareProfileData } from "../lib/prepare-profile-data";
 import { LogoutButton } from "./logout-button";
+import { ProfileStatsBar } from "./profile-stats-bar";
 import type { ProfileViewProps } from "./profile-view.types";
 
 export function ProfileView({ profile }: ProfileViewProps) {
-  const { displayName, joinDateFormatted, statusEntries } =
+  const { displayName, joinDateFormatted, statusEntries, quickStats } =
     prepareProfileData(profile);
 
-  const totalGames = statusEntries.reduce((sum, [, count]) => sum + count, 0);
+  const totalGames = quickStats.totalGames;
 
   return (
     <div className="space-y-2xl">
       <div className="gap-xl flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div className="gap-lg flex items-center pb-24">
+        <div className="gap-lg flex items-center">
           <div className="shrink-0">
             {profile.image ? (
               <Image
@@ -67,11 +68,18 @@ export function ProfileView({ profile }: ProfileViewProps) {
         </div>
       </div>
 
-      {statusEntries.length > 0 && (
+      <ProfileStatsBar
+        totalGames={quickStats.totalGames}
+        playing={quickStats.playing}
+        completed={quickStats.completed}
+        journalEntries={quickStats.journalEntries}
+      />
+
+      {statusEntries.length > 0 && totalGames >= 10 && (
         <div>
           <h2 className="heading-md mb-lg tracking-tight">Library Stats</h2>
           <div
-            className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+            className="grid grid-cols-2 gap-2 sm:grid-cols-4"
             data-testid="profile-stats-grid"
           >
             {statusEntries.map(([status, count], index) => {

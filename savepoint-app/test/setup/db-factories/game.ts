@@ -58,7 +58,7 @@ export const createGame = async (
 export type LibraryItemFactoryOptions = {
   userId: string;
   gameId: string;
-  status?: "WANT_TO_PLAY" | "OWNED" | "PLAYING" | "PLAYED";
+  status?: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED";
   platform?: string;
   acquisitionType?: "DIGITAL" | "PHYSICAL" | "SUBSCRIPTION";
   createdAt?: Date;
@@ -70,7 +70,7 @@ export const createLibraryItemData = (
   overrides: Partial<Omit<LibraryItemFactoryOptions, "userId" | "gameId">> = {}
 ) => {
   return {
-    status: overrides.status ?? ("WANT_TO_PLAY" as const),
+    status: overrides.status ?? ("SHELF" as const),
     platform: overrides.platform ?? "PC",
     acquisitionType: overrides.acquisitionType ?? ("DIGITAL" as const),
     createdAt: overrides.createdAt,

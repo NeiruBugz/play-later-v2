@@ -1,4 +1,3 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { Library } from "lucide-react";
 import Link from "next/link";
 
@@ -13,6 +12,7 @@ import {
   LIBRARY_STATUS_CONFIG,
 } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import type { DashboardStatsData } from "./dashboard-stats";
 
@@ -103,11 +103,15 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
     LibraryItemStatus,
     { count: number; gameStatus: GameStatus }
   > = {
-    [LibraryItemStatus.WANT_TO_PLAY]: {
-      count: stats.wantToPlay,
-      gameStatus: "WANT_TO_PLAY",
+    [LibraryItemStatus.WISHLIST]: {
+      count: stats.wishlist,
+      gameStatus: "WISHLIST",
     },
-    [LibraryItemStatus.OWNED]: { count: stats.owned, gameStatus: "OWNED" },
+    [LibraryItemStatus.SHELF]: { count: stats.shelf, gameStatus: "SHELF" },
+    [LibraryItemStatus.UP_NEXT]: {
+      count: stats.upNext,
+      gameStatus: "UP_NEXT",
+    },
     [LibraryItemStatus.PLAYING]: {
       count: stats.playing,
       gameStatus: "PLAYING",

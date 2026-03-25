@@ -91,7 +91,7 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     <Drawer.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-        <Drawer.Content className="bg-background fixed inset-x-0 bottom-0 z-50 mt-24 flex h-[96%] flex-col rounded-t-xl">
+        <Drawer.Content className="bg-background fixed inset-x-0 bottom-0 z-50 flex max-h-[100dvh] min-h-[60dvh] flex-col rounded-t-xl">
           <div className="mt-lg bg-muted mx-auto h-1.5 w-12 shrink-0 rounded-full" />
 
           <div className="border-border px-lg pb-md pt-sm flex items-center justify-between border-b">
@@ -102,86 +102,88 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 shrink-0"
+              className="h-10 w-10 shrink-0"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
 
-          <div className="flex-1 overflow-hidden">
-            <Command shouldFilter={false} className="h-full">
-              <div className="px-lg pt-md">
-                <CommandInput
-                  placeholder="Search for games..."
-                  value={query}
-                  onValueChange={setQuery}
-                />
-              </div>
-              <CommandList className="px-lg pb-lg max-h-full">
-                {isLoading && shouldSearch && (
-                  <div className="py-2xl flex items-center justify-center">
-                    <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
-                  </div>
-                )}
+          <Command
+            shouldFilter={false}
+            className="flex flex-1 flex-col overflow-hidden"
+          >
+            <div className="px-lg pt-md pb-md shrink-0">
+              <CommandInput
+                placeholder="Search all games to add..."
+                value={query}
+                onValueChange={setQuery}
+                autoFocus
+              />
+            </div>
+            <CommandList className="px-lg max-h-none flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+              {isLoading && shouldSearch && (
+                <div className="py-2xl flex items-center justify-center">
+                  <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
+                </div>
+              )}
 
-                {error && shouldSearch && (
+              {error && shouldSearch && (
+                <CommandEmpty>
+                  Failed to search games. Please try again.
+                </CommandEmpty>
+              )}
+
+              {!shouldSearch && !isLoadingRecent && recentGames.length > 0 && (
+                <CommandGroup heading="Recent Games">
+                  {recentGames.map((game) => (
+                    <GameResultItem
+                      key={game.id}
+                      game={{
+                        id: game.id,
+                        name: game.name,
+                        slug: game.slug,
+                        coverImageId: game.coverImageId,
+                        releaseYear: null,
+                        platforms: [],
+                      }}
+                      onSelect={() => handleGameSelect(game.slug)}
+                    />
+                  ))}
+                </CommandGroup>
+              )}
+
+              {!shouldSearch &&
+                !isLoadingRecent &&
+                recentGames.length === 0 && (
                   <CommandEmpty>
-                    Failed to search games. Please try again.
+                    Start typing to search for games...
                   </CommandEmpty>
                 )}
 
-                {!shouldSearch &&
-                  !isLoadingRecent &&
-                  recentGames.length > 0 && (
-                    <CommandGroup heading="Recent Games">
-                      {recentGames.map((game) => (
-                        <GameResultItem
-                          key={game.id}
-                          game={{
-                            id: game.id,
-                            name: game.name,
-                            slug: game.slug,
-                            coverImageId: game.coverImageId,
-                            releaseYear: null,
-                            platforms: [],
-                          }}
-                          onSelect={() => handleGameSelect(game.slug)}
-                        />
-                      ))}
-                    </CommandGroup>
-                  )}
+              {shouldSearch && !isLoading && searchResults.length > 0 && (
+                <CommandGroup heading="Search Results">
+                  {searchResults.map((game) => (
+                    <GameResultItem
+                      key={game.id}
+                      game={game}
+                      onSelect={() => handleGameSelect(game.slug)}
+                      onAddToLibrary={handleAddToLibrary}
+                    />
+                  ))}
+                </CommandGroup>
+              )}
 
-                {!shouldSearch &&
-                  !isLoadingRecent &&
-                  recentGames.length === 0 && (
-                    <CommandEmpty>
-                      Start typing to search for games...
-                    </CommandEmpty>
-                  )}
-
-                {shouldSearch && !isLoading && searchResults.length > 0 && (
-                  <CommandGroup heading="Search Results">
-                    {searchResults.map((game) => (
-                      <GameResultItem
-                        key={game.id}
-                        game={game}
-                        onSelect={() => handleGameSelect(game.slug)}
-                        onAddToLibrary={handleAddToLibrary}
-                      />
-                    ))}
-                  </CommandGroup>
+              {shouldSearch &&
+                !isLoading &&
+                searchResults.length === 0 &&
+                !error && (
+                  <CommandEmpty>
+                    No games found for &quot;{query}&quot;
+                  </CommandEmpty>
                 )}
-
-                {shouldSearch &&
-                  !isLoading &&
-                  searchResults.length === 0 &&
-                  !error && (
-                    <CommandEmpty>No games found for "{query}"</CommandEmpty>
-                  )}
-              </CommandList>
-            </Command>
-          </div>
+            </CommandList>
+          </Command>
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>

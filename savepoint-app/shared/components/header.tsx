@@ -3,6 +3,8 @@
 import { Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import {
   CommandPalette,
@@ -13,6 +15,15 @@ import { Button } from "@/shared/components/ui/button";
 
 export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   const { isOpen, open, close } = useCommandPaletteContext();
+  const pathname = usePathname();
+  const [isMac, setIsMac] = useState(true);
+
+  useEffect(() => {
+    setIsMac(navigator.platform?.includes("Mac") ?? false);
+  }, []);
+
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/");
   if (isAuthorised) {
     return (
       <>
@@ -37,25 +48,29 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
               <div className="gap-2xl hidden items-center md:flex">
                 <Link
                   href="/dashboard"
-                  className="body-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+                  className={`body-sm transition-colors ${isActive("/dashboard") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground font-medium"}`}
+                  aria-current={isActive("/dashboard") ? "page" : undefined}
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/library"
-                  className="body-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+                  className={`body-sm transition-colors ${isActive("/library") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground font-medium"}`}
+                  aria-current={isActive("/library") ? "page" : undefined}
                 >
                   Library
                 </Link>
                 <Link
                   href="/journal"
-                  className="body-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+                  className={`body-sm transition-colors ${isActive("/journal") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground font-medium"}`}
+                  aria-current={isActive("/journal") ? "page" : undefined}
                 >
                   Journal
                 </Link>
                 <Link
                   href="/profile"
-                  className="body-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+                  className={`body-sm transition-colors ${isActive("/profile") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground font-medium"}`}
+                  aria-current={isActive("/profile") ? "page" : undefined}
                 >
                   Profile
                 </Link>
@@ -69,7 +84,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
               >
                 <Search className="h-5 w-5" />
                 <kbd className="bg-muted text-muted-foreground pointer-events-none absolute -right-1 -bottom-1 hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
-                  ⌘K
+                  {isMac ? "⌘K" : "Ctrl+K"}
                 </kbd>
               </Button>
               <ThemeToggle />
@@ -109,7 +124,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
             >
               <Search className="h-5 w-5" />
               <kbd className="bg-muted text-muted-foreground pointer-events-none absolute -right-1 -bottom-1 hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
-                ⌘K
+                {isMac ? "⌘K" : "Ctrl+K"}
               </kbd>
             </Button>
             <ThemeToggle />

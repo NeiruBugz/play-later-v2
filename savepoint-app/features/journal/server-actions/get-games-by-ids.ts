@@ -1,6 +1,6 @@
 "use server";
 
-import { GameService } from "@/data-access-layer/services";
+import { getGamesByIds } from "@/data-access-layer/services";
 import { z } from "zod";
 
 import { createServerAction } from "@/shared/lib";
@@ -27,15 +27,10 @@ export const getGamesByIdsAction = createServerAction<
     const { gameIds } = input;
     logger.info({ gameIdsCount: gameIds.length }, "Fetching games by IDs");
 
-    const gameService = new GameService();
-    const result = await gameService.getGamesByIds({ ids: gameIds });
+    const result = await getGamesByIds(gameIds);
 
     if (!result.success) {
-      logger.error({ error: result.error }, "Failed to fetch games");
-      return {
-        success: false,
-        error: result.error,
-      };
+      return { success: false, error: result.error };
     }
 
     logger.info(

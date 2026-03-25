@@ -1,10 +1,10 @@
 "use server";
 
-import type { JournalEntryDomain } from "@/data-access-layer/domain/journal";
 import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
 import { createServerAction } from "@/shared/lib";
+import type { JournalEntryDomain } from "@/shared/types/journal";
 
 import {
   CreateJournalEntrySchema,

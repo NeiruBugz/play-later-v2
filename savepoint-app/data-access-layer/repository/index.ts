@@ -1,15 +1,4 @@
-export {
-  type RepositoryResult,
-  type RepositorySuccess,
-  type RepositoryFailure,
-  type RepositoryError,
-  RepositoryErrorCode,
-  repositorySuccess,
-  repositoryError,
-  isRepositorySuccess,
-  isRepositoryError,
-  withRepositoryError,
-} from "./types";
+export { NotFoundError, DuplicateError } from "./errors";
 export {
   createLibraryItem,
   deleteLibraryItem,
@@ -25,9 +14,9 @@ export {
   getOtherUsersLibraries,
   getOtherUsersLibrariesPaginated,
   getLibraryByUsername,
-  getWantToPlayItemsByUsername,
-  findWantToPlayItemsForUser,
-  findUpcomingWantToPlayItems,
+  getWishlistItemsByUsername,
+  findWishlistItemsForUser,
+  findUpcomingWishlistItems,
   findCurrentlyPlayingGames,
   findMostRecentPlayingGame,
   buildCollectionFilter,

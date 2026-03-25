@@ -1,10 +1,10 @@
 "use server";
 
-import type { JournalEntryDomain } from "@/data-access-layer/domain/journal";
 import { JournalService } from "@/data-access-layer/services";
 import { z } from "zod";
 
 import { createServerAction } from "@/shared/lib";
+import type { JournalEntryDomain } from "@/shared/types/journal";
 
 const GetJournalEntriesSchema = z.object({
   cursor: z.string().optional(),

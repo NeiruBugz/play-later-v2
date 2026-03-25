@@ -1,18 +1,15 @@
 import "server-only";
 
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import {
   countJournalEntriesByUserId,
   countLibraryItemsByUserId,
   getOnboardingStatus,
   hasLibraryItemWithStatus,
-  isRepositorySuccess,
   updateOnboardingDismissed,
 } from "@/data-access-layer/repository";
+import { LibraryItemStatus } from "@prisma/client";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
-import { BaseService, ServiceErrorCode } from "../types";
+import { serviceError, ServiceErrorCode, serviceSuccess } from "../types";
 import type {
   DismissOnboardingInput,
   DismissOnboardingResult,
@@ -21,10 +18,6 @@ import type {
   OnboardingProgress,
   OnboardingStep,
 } from "./types";
-
-const logger = createLogger({
-  [LOGGER_CONTEXT.SERVICE]: "OnboardingService",
-});
 
 const ONBOARDING_STEPS = [
   {
@@ -64,69 +57,40 @@ const ONBOARDING_STEPS = [
   },
 ] as const;
 
-export class OnboardingService extends BaseService {
+export class OnboardingService {
   async getProgress(
     input: GetOnboardingProgressInput
   ): Promise<GetOnboardingProgressResult> {
     const { userId } = input;
 
-    logger.info({ userId }, "Fetching onboarding progress");
-
-    const onboardingStatusResult = await getOnboardingStatus(userId);
-    if (!isRepositorySuccess(onboardingStatusResult)) {
-      logger.error(
-        { error: onboardingStatusResult.error, userId },
-        "Failed to get onboarding status"
-      );
-      return this.error(
+    let onboardingStatus;
+    try {
+      onboardingStatus = await getOnboardingStatus(userId);
+    } catch {
+      return serviceError(
         "Failed to get onboarding status",
         ServiceErrorCode.INTERNAL_ERROR
       );
     }
 
-    const onboardingStatus = onboardingStatusResult.data;
     if (!onboardingStatus) {
-      return this.error("User not found", ServiceErrorCode.NOT_FOUND);
+      return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
     }
 
     const isDismissed = onboardingStatus.onboardingDismissedAt !== null;
     const isProfileSetup = onboardingStatus.profileSetupCompletedAt !== null;
 
-    const [libraryCountResult, hasPlayingResult, journalCountResult] =
-      await Promise.all([
+    let libraryCount: number;
+    let hasPlaying: boolean;
+    let journalCount: number;
+    try {
+      [libraryCount, hasPlaying, journalCount] = await Promise.all([
         countLibraryItemsByUserId(userId),
         hasLibraryItemWithStatus(userId, LibraryItemStatus.PLAYING),
         countJournalEntriesByUserId(userId),
       ]);
-
-    if (!isRepositorySuccess(libraryCountResult)) {
-      logger.error(
-        { error: libraryCountResult.error, userId },
-        "Failed to count library items"
-      );
-      return this.error(
-        "Failed to get onboarding progress",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
-    }
-
-    if (!isRepositorySuccess(hasPlayingResult)) {
-      logger.error(
-        { error: hasPlayingResult.error, userId },
-        "Failed to check playing status"
-      );
-      return this.error(
-        "Failed to get onboarding progress",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
-    }
-
-    if (!isRepositorySuccess(journalCountResult)) {
-      logger.error(
-        { error: journalCountResult.error, userId },
-        "Failed to count journal entries"
-      );
-      return this.error(
+    } catch {
+      return serviceError(
         "Failed to get onboarding progress",
         ServiceErrorCode.INTERNAL_ERROR
       );
@@ -135,9 +99,9 @@ export class OnboardingService extends BaseService {
     const completionStatus: Record<string, boolean> = {
       "create-account": true,
       "setup-profile": isProfileSetup,
-      "add-first-game": libraryCountResult.data > 0,
-      "start-playing": hasPlayingResult.data,
-      "write-journal": journalCountResult.data > 0,
+      "add-first-game": libraryCount > 0,
+      "start-playing": hasPlaying,
+      "write-journal": journalCount > 0,
     };
 
     const steps: OnboardingStep[] = ONBOARDING_STEPS.map((step) => ({
@@ -157,12 +121,7 @@ export class OnboardingService extends BaseService {
       isComplete,
     };
 
-    logger.info(
-      { userId, completedCount, totalCount, isDismissed: progress.isDismissed },
-      "Onboarding progress fetched"
-    );
-
-    return this.success(progress);
+    return serviceSuccess(progress);
   }
 
   async dismiss(
@@ -170,21 +129,15 @@ export class OnboardingService extends BaseService {
   ): Promise<DismissOnboardingResult> {
     const { userId } = input;
 
-    logger.info({ userId }, "Dismissing onboarding");
-
-    const result = await updateOnboardingDismissed(userId);
-    if (!isRepositorySuccess(result)) {
-      logger.error(
-        { error: result.error, userId },
-        "Failed to dismiss onboarding"
-      );
-      return this.error(
+    try {
+      await updateOnboardingDismissed(userId);
+    } catch {
+      return serviceError(
         "Failed to dismiss onboarding",
         ServiceErrorCode.INTERNAL_ERROR
       );
     }
 
-    logger.info({ userId }, "Onboarding dismissed");
-    return this.success(undefined);
+    return serviceSuccess(undefined);
   }
 }

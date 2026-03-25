@@ -15,19 +15,19 @@ async function waitForGameInDatabase(
 
   while (Date.now() < deadline) {
     const result = await findGameByIgdbId(igdbId);
-    if (result.success && result.data) {
-      return result.data;
+    if (result) {
+      return result;
     }
     await new Promise((resolve) => setTimeout(resolve, interval));
   }
 
   const finalResult = await findGameByIgdbId(igdbId);
-  if (!finalResult.success || !finalResult.data) {
+  if (!finalResult) {
     throw new Error(
       `Game with igdbId ${igdbId} not found in database after ${timeout}ms`
     );
   }
-  return finalResult.data;
+  return finalResult;
 }
 
 describe("GameDetailService Integration Tests", () => {

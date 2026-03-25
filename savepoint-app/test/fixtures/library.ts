@@ -17,6 +17,7 @@ export function createLibraryItemFixture(
     acquisitionType: AcquisitionType.DIGITAL,
     startedAt: new Date("2025-01-15"),
     completedAt: null,
+    hasBeenPlayed: false,
     createdAt: new Date("2025-01-10"),
     updatedAt: new Date("2025-01-20"),
     game: {
@@ -26,7 +27,7 @@ export function createLibraryItemFixture(
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co1234.jpg",
       slug: "the-legend-of-zelda-breath-of-the-wild",
       releaseDate: new Date("2017-03-03"),
-      entryCount: 1,
+      _count: { libraryItems: 1 },
     },
     ...overrides,
   };
@@ -37,11 +38,12 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     id: 1,
     userId: "user-123",
     gameId: "game-1",
-    status: LibraryItemStatus.WANT_TO_PLAY,
+    status: LibraryItemStatus.WISHLIST,
     platform: "PC (Windows)",
     acquisitionType: AcquisitionType.DIGITAL,
     startedAt: null,
     completedAt: null,
+    hasBeenPlayed: false,
     createdAt: new Date("2024-01-15"),
     updatedAt: new Date("2024-01-15"),
     game: {
@@ -51,7 +53,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co1wyy.jpg",
       slug: "the-witcher-3-wild-hunt",
       releaseDate: new Date("2015-05-19"),
-      entryCount: 1,
+      _count: { libraryItems: 1 },
     },
   },
   {
@@ -63,6 +65,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     acquisitionType: AcquisitionType.DIGITAL,
     startedAt: new Date("2024-01-12"),
     completedAt: null,
+    hasBeenPlayed: false,
     createdAt: new Date("2024-01-10"),
     updatedAt: new Date("2024-01-12"),
     game: {
@@ -72,7 +75,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg",
       slug: "elden-ring",
       releaseDate: new Date("2022-02-25"),
-      entryCount: 1,
+      _count: { libraryItems: 1 },
     },
   },
   {
@@ -84,6 +87,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     acquisitionType: AcquisitionType.DIGITAL,
     startedAt: new Date("2024-01-06"),
     completedAt: new Date("2024-01-20"),
+    hasBeenPlayed: true,
     createdAt: new Date("2024-01-05"),
     updatedAt: new Date("2024-01-20"),
     game: {
@@ -93,18 +97,19 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co2i0v.jpg",
       slug: "hades",
       releaseDate: new Date("2020-09-17"),
-      entryCount: 1,
+      _count: { libraryItems: 1 },
     },
   },
   {
     id: 4,
     userId: "user-123",
     gameId: "game-4",
-    status: LibraryItemStatus.WANT_TO_PLAY,
+    status: LibraryItemStatus.WISHLIST,
     platform: "Nintendo Switch",
-    acquisitionType: null,
+    acquisitionType: AcquisitionType.DIGITAL,
     startedAt: null,
     completedAt: null,
+    hasBeenPlayed: false,
     createdAt: new Date("2024-01-18"),
     updatedAt: new Date("2024-01-18"),
     game: {
@@ -114,7 +119,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co5rmg.jpg",
       slug: "the-legend-of-zelda-tears-of-the-kingdom",
       releaseDate: new Date("2023-05-12"),
-      entryCount: 1,
+      _count: { libraryItems: 1 },
     },
   },
   {
@@ -126,6 +131,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     acquisitionType: AcquisitionType.PHYSICAL,
     startedAt: new Date("2024-01-08"),
     completedAt: null,
+    hasBeenPlayed: true,
     createdAt: new Date("2024-01-07"),
     updatedAt: new Date("2024-01-14"),
     game: {
@@ -135,7 +141,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co3pv2.jpg",
       slug: "horizon-forbidden-west",
       releaseDate: new Date("2022-02-18"),
-      entryCount: 1,
+      _count: { libraryItems: 1 },
     },
   },
   {
@@ -147,6 +153,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     acquisitionType: AcquisitionType.DIGITAL,
     startedAt: new Date("2024-01-22"),
     completedAt: null,
+    hasBeenPlayed: false,
     createdAt: new Date("2023-12-01"),
     updatedAt: new Date("2024-01-22"),
     game: {
@@ -156,7 +163,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co1x7l.jpg",
       slug: "dark-souls-iii",
       releaseDate: new Date("2016-04-12"),
-      entryCount: 2,
+      _count: { libraryItems: 2 },
     },
   },
 ];

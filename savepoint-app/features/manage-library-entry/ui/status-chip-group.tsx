@@ -10,6 +10,15 @@ import {
 } from "@/shared/components/ui/form";
 import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
+import { LibraryItemStatus } from "@/shared/types/library";
+
+const STATUS_HELPER_TEXT: Record<string, string> = {
+  [LibraryItemStatus.UP_NEXT]: "Queued to play soon",
+  [LibraryItemStatus.PLAYING]: "Currently in progress",
+  [LibraryItemStatus.SHELF]: "Owned, not actively playing",
+  [LibraryItemStatus.PLAYED]: "Finished or done with",
+  [LibraryItemStatus.WISHLIST]: "Want to get someday",
+};
 
 interface StatusChipGroupProps<T extends FieldValues> {
   field: ControllerRenderProps<T, Path<T>>;
@@ -41,7 +50,7 @@ export function StatusChipGroup<T extends FieldValues>({
                 aria-checked={isSelected}
                 onClick={() => field.onChange(option.value)}
                 className={cn(
-                  "px-md py-xs sm:px-lg sm:py-sm rounded-md border text-xs font-medium sm:text-sm",
+                  "px-lg py-sm sm:px-lg sm:py-sm rounded-md border text-sm font-medium",
                   "duration-fast ease-out-expo transition-all",
                   "focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none",
                   isSelected && [
@@ -63,6 +72,11 @@ export function StatusChipGroup<T extends FieldValues>({
         </div>
       </FormControl>
       <FormMessage />
+      {field.value && STATUS_HELPER_TEXT[field.value as string] && (
+        <p className="text-muted-foreground text-xs">
+          {STATUS_HELPER_TEXT[field.value as string]}
+        </p>
+      )}
     </FormItem>
   );
 }

@@ -2,7 +2,7 @@ import type { z } from "zod";
 
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
-import type { BaseService, ServiceResult } from "../types";
+import type { ServiceResult } from "../types";
 import type {
   CollectionGamesByIdSchema,
   EventLogoSchema,
@@ -282,7 +282,7 @@ export interface CollectionGamesResult {
   games: Array<CollectionGame>;
 }
 
-export interface IgdbService extends BaseService {
+export interface IgdbService {
   searchGamesByName(
     params: GameSearchParams
   ): Promise<ServiceResult<GameSearchResult>>;

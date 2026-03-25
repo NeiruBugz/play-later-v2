@@ -11,7 +11,6 @@ import { GameDescription } from "@/features/game-detail/ui/game-description";
 import { GameReleaseDate } from "@/features/game-detail/ui/game-release-date";
 import { JournalEntriesSection } from "@/features/game-detail/ui/journal-entries-section";
 import { LibraryStatusDisplay } from "@/features/game-detail/ui/library-status-display";
-import { QuickActionButtons } from "@/features/game-detail/ui/quick-action-buttons";
 import { TimesToBeatSection } from "@/features/game-detail/ui/times-to-beat-section";
 import { getGameDetails } from "@/features/game-detail/use-cases/get-game-details";
 import { GenreBadges } from "@/shared/components/genre-badges";
@@ -103,11 +102,6 @@ export default async function GameDetailPage({
                 userLibraryStatus={userLibraryStatus}
                 igdbId={game.id}
                 gameTitle={game.name}
-              />
-              <QuickActionButtons
-                igdbId={game.id}
-                gameTitle={game.name}
-                currentStatus={userLibraryStatus?.mostRecent.status}
               />
             </>
           )}

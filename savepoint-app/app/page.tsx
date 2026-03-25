@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { BookOpen, Clock, Heart, Library, Sparkles, Users } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -18,14 +19,18 @@ export default async function Page() {
         <div className="relative">
           <nav className="px-lg py-2xl container mx-auto flex items-center justify-between">
             <div className="gap-md flex items-center">
-              <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
-                <BookOpen className="text-primary-foreground h-5 w-5" />
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="SavePoint Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+              />
               <span className="heading-sm text-foreground font-semibold">
                 SavePoint
               </span>
             </div>
-            <div className="gap-2xl flex items-center">
+            <div className="gap-2xl hidden items-center md:flex">
               <a
                 href="#features"
                 className="body-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -44,8 +49,14 @@ export default async function Page() {
               <Button
                 size="sm"
                 className="bg-primary text-primary-foreground hover:bg-primary/90"
+                asChild
               >
-                Get Started
+                <Link href="/login">Get Started</Link>
+              </Button>
+            </div>
+            <div className="flex items-center md:hidden">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/login">Sign In</Link>
               </Button>
             </div>
           </nav>
@@ -76,8 +87,9 @@ export default async function Page() {
                   size="lg"
                   variant="outline"
                   className="px-3xl bg-transparent"
+                  asChild
                 >
-                  Learn More
+                  <a href="#philosophy">Learn More</a>
                 </Button>
               </div>
               <p className="body-sm text-muted-foreground">
@@ -188,8 +200,11 @@ export default async function Page() {
                   evolved, revisit cherished memories, and reflect on the worlds
                   you've explored.
                 </p>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Explore Timeline
+                <Button
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  asChild
+                >
+                  <Link href="/login">Explore Timeline</Link>
                 </Button>
               </div>
               <div className="from-primary/20 to-secondary/20 relative aspect-4/3 overflow-hidden rounded-lg bg-linear-to-br">
@@ -220,15 +235,17 @@ export default async function Page() {
               <Button
                 size="lg"
                 className="bg-primary text-primary-foreground hover:bg-primary/90 px-3xl"
+                asChild
               >
-                Create Your Library
+                <Link href="/login">Create Your Library</Link>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="px-3xl bg-transparent"
+                asChild
               >
-                View Demo
+                <Link href="/login">View Demo</Link>
               </Button>
             </div>
           </div>
@@ -239,9 +256,13 @@ export default async function Page() {
           <div className="gap-3xl grid md:grid-cols-4">
             <div className="space-y-xl">
               <div className="gap-md flex items-center">
-                <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-lg">
-                  <BookOpen className="text-primary-foreground h-5 w-5" />
-                </div>
+                <Image
+                  src="/logo.svg"
+                  alt="SavePoint Logo"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8"
+                />
                 <span className="heading-sm font-semibold">SavePoint</span>
               </div>
               <p className="body-sm text-muted-foreground">

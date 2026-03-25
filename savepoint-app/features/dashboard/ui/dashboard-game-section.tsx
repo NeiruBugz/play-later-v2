@@ -1,10 +1,10 @@
-import type { LibraryItemWithGameDomain } from "@/data-access-layer/domain/library";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { LibraryCard } from "@/features/library/ui/library-card";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
+import type { LibraryItemWithGameDomain } from "@/shared/types/library";
 
 interface DashboardGameSectionProps {
   title: string;
@@ -13,6 +13,8 @@ interface DashboardGameSectionProps {
   viewAllLabel?: string;
   emptyMessage?: string;
   className?: string;
+  variant?: "default" | "hero";
+  totalCount?: number;
 }
 
 export function DashboardGameSection({
@@ -22,23 +24,31 @@ export function DashboardGameSection({
   viewAllLabel = "View All",
   emptyMessage = "No games to show",
   className,
+  variant = "default",
+  totalCount,
 }: DashboardGameSectionProps) {
+  const gridClass =
+    variant === "hero"
+      ? "gap-lg grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+      : "gap-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6";
+
   return (
     <section className={cn("space-y-xl", className)}>
       <div className="flex items-center justify-between">
         <h2 className="heading-md tracking-tight">{title}</h2>
-        {items.length > 0 && (
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={viewAllHref} className="group">
-              {viewAllLabel}
-              <ChevronRight className="ml-sm h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Button>
-        )}
+        {items.length > 0 &&
+          (totalCount === undefined || totalCount > items.length) && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={viewAllHref} className="group">
+                {viewAllLabel}
+                <ChevronRight className="ml-sm h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </Button>
+          )}
       </div>
 
       {items.length > 0 ? (
-        <div className="gap-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <div className={gridClass}>
           {items.map((item, index) => (
             <LibraryCard key={item.id} item={item} index={index} />
           ))}

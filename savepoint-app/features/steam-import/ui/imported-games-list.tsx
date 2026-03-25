@@ -1,6 +1,6 @@
 "use client";
 
-import type { ImportedGame } from "@prisma/client";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import {
   ChevronLeft,
   ChevronRight,
@@ -34,7 +34,7 @@ export type { FilterValues };
 export type SortBy = SortOption;
 
 type ImportedGamesListProps = {
-  games: ImportedGame[];
+  games: ImportedGameDto[];
   totalCount: number;
   currentPage: number;
   pageSize: number;

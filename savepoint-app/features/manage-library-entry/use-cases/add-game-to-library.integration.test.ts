@@ -1,11 +1,8 @@
-import {
-  AcquisitionType,
-  LibraryItemStatus,
-} from "@/data-access-layer/domain/library";
 import { setupDatabase } from "@/test/setup/database";
 import { createGame, createUser } from "@/test/setup/db-factories";
 
 import { prisma } from "@/shared/lib/app/db";
+import { AcquisitionType, LibraryItemStatus } from "@/shared/types/library";
 
 import { addGameToLibrary } from "./add-game-to-library";
 
@@ -103,7 +100,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
       });
 
@@ -112,9 +109,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
 
       expect(result.data.libraryItem.userId).toBe(testUser.id);
       expect(result.data.libraryItem.gameId).toBe(testGame.id);
-      expect(result.data.libraryItem.status).toBe(
-        LibraryItemStatus.WANT_TO_PLAY
-      );
+      expect(result.data.libraryItem.status).toBe(LibraryItemStatus.WISHLIST);
       expect(result.data.libraryItem.platform).toBe("PlayStation 5");
       expect(result.data.libraryItem.acquisitionType).toBe(
         AcquisitionType.DIGITAL
@@ -125,7 +120,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
         where: { id: result.data.libraryItem.id },
       });
       expect(libraryItem).toBeTruthy();
-      expect(libraryItem?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(libraryItem?.status).toBe(LibraryItemStatus.WISHLIST);
     });
 
     it("should add game with dates when provided", async () => {
@@ -156,13 +151,13 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -184,7 +179,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: newIgdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
@@ -210,7 +205,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: 888,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -228,7 +223,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: 777,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -243,7 +238,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: "non-existent-user-id",
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -258,7 +253,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
@@ -271,7 +266,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
@@ -283,8 +278,8 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
 
     it("should work with all library statuses", async () => {
       const statuses = [
-        LibraryItemStatus.WANT_TO_PLAY,
-        LibraryItemStatus.OWNED,
+        LibraryItemStatus.WISHLIST,
+        LibraryItemStatus.SHELF,
         LibraryItemStatus.PLAYING,
         LibraryItemStatus.PLAYED,
       ];
@@ -314,7 +309,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const firstResult = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(firstResult.success).toBe(true);
@@ -325,7 +320,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const secondResult = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(secondResult.success).toBe(false);
@@ -338,7 +333,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const firstResult = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "Steam",
       });
 
@@ -350,7 +345,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const secondResult = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(secondResult.success).toBe(true);
@@ -373,7 +368,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const firstResult = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(firstResult.success).toBe(true);
@@ -384,7 +379,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const secondResult = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
       });
 
@@ -410,21 +405,21 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       const steamResult = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "Steam",
       });
 
       const ps5Result = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
       });
 
       const noPlatformResult = await addGameToLibrary({
         userId: testUser.id,
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(steamResult.success).toBe(true);

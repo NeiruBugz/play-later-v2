@@ -1,16 +1,20 @@
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
+import {
+  handleServiceError,
+  serviceError,
+  ServiceErrorCode,
+  serviceSuccess,
+  type ServiceResult,
+} from "../types";
 
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "SteamOpenIdService" });
 
-export class SteamOpenIdService extends BaseService {
+export class SteamOpenIdService {
   private readonly steamOpenIdUrl = "https://steamcommunity.com/openid/login";
   private readonly openIdNamespace = "http://specs.openid.net/auth/2.0";
 
   getAuthUrl(returnUrl: string): string {
-    logger.info({ returnUrl }, "Generating Steam OpenID auth URL");
-
     try {
       const origin = new URL(returnUrl).origin;
 
@@ -36,12 +40,10 @@ export class SteamOpenIdService extends BaseService {
   async validateCallback(
     params: URLSearchParams
   ): Promise<ServiceResult<string>> {
-    logger.info("Validating Steam OpenID callback");
-
     const mode = params.get("openid.mode");
     if (mode !== "id_res") {
       logger.warn({ mode }, "Invalid OpenID mode");
-      return this.error(
+      return serviceError(
         "Invalid OpenID mode",
         ServiceErrorCode.VALIDATION_ERROR
       );
@@ -51,7 +53,7 @@ export class SteamOpenIdService extends BaseService {
       const isValid = await this.verifySignature(params);
       if (!isValid) {
         logger.warn("Invalid OpenID signature");
-        return this.error(
+        return serviceError(
           "Invalid OpenID signature",
           ServiceErrorCode.UNAUTHORIZED
         );
@@ -60,7 +62,7 @@ export class SteamOpenIdService extends BaseService {
       const claimedId = params.get("openid.claimed_id");
       if (!claimedId) {
         logger.warn("Missing claimed_id in OpenID response");
-        return this.error(
+        return serviceError(
           "Missing claimed_id",
           ServiceErrorCode.VALIDATION_ERROR
         );
@@ -72,20 +74,16 @@ export class SteamOpenIdService extends BaseService {
           { claimedId },
           "Could not extract Steam ID from claimed_id"
         );
-        return this.error(
+        return serviceError(
           "Could not extract Steam ID",
           ServiceErrorCode.VALIDATION_ERROR
         );
       }
 
-      logger.info(
-        { steamId64 },
-        "Successfully validated Steam OpenID callback"
-      );
-      return this.success(steamId64);
+      return serviceSuccess(steamId64);
     } catch (error) {
       logger.error({ error }, "Failed to validate Steam OpenID callback");
-      return this.handleError(error, "Failed to validate OpenID callback");
+      return handleServiceError(error, "Failed to validate OpenID callback");
     }
   }
 

@@ -12,7 +12,7 @@ describe("AddToLibrarySchema", () => {
     it("should successfully validate complete data including platform", () => {
       const validInput = {
         igdbId: 12345,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
         startedAt: new Date("2025-01-15"),
         completedAt: new Date("2025-01-20"),
@@ -45,7 +45,7 @@ describe("AddToLibrarySchema", () => {
     it("should successfully validate when platform is explicitly undefined", () => {
       const inputWithExplicitUndefined = {
         igdbId: 12345,
-        status: LibraryItemStatus.OWNED,
+        status: LibraryItemStatus.SHELF,
         platform: undefined,
       };
 
@@ -80,7 +80,7 @@ describe("AddToLibrarySchema", () => {
     it("should accept platform when provided", () => {
       const inputWithPlatform = {
         igdbId: 11111,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PC",
       };
 
@@ -121,7 +121,7 @@ describe("AddToLibrarySchema", () => {
   describe("given invalid input", () => {
     it("should reject when igdbId is missing", () => {
       const invalidInput = {
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       };
 
       const result = AddToLibrarySchema.safeParse(invalidInput);
@@ -304,7 +304,7 @@ describe("UpdateLibraryStatusByIgdbSchema", () => {
   it("should validate correct input", () => {
     const validInput = {
       igdbId: 54321,
-      status: LibraryItemStatus.WANT_TO_PLAY,
+      status: LibraryItemStatus.WISHLIST,
     };
 
     const result = UpdateLibraryStatusByIgdbSchema.safeParse(validInput);

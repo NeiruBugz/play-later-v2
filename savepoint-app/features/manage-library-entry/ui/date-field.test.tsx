@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -29,7 +29,7 @@ const actions = {
     const input = elements.getDateInput() as HTMLInputElement;
     await userEvent.click(input);
     await userEvent.clear(input);
-    input.blur();
+    fireEvent.blur(input);
   },
   changeDate: async (dateString: string) => {
     const input = elements.getDateInput() as HTMLInputElement;

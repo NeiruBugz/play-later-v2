@@ -44,24 +44,24 @@ const createNavigationMock = () => {
 };
 
 const elements = {
-  getLibraryHeading: () => screen.getByRole("heading", { name: "My Library" }),
+  getLibraryHeading: () => screen.getByRole("heading", { name: "Library" }),
   getSortSelect: () => screen.getByRole("combobox", { name: "Sort by" }),
   getPlatformFilter: () =>
     screen.getByRole("combobox", { name: "Filter by platform" }),
   getSearchInput: () =>
-    screen.getByRole("searchbox", { name: "Search games by title" }),
+    screen.getByRole("searchbox", { name: "Filter library by title" }),
   getAllStatusesButton: () =>
-    screen.getByRole("button", { name: "Show all statuses" }),
+    screen.getAllByRole("button", { name: "Show all statuses" })[0],
   getStatusButton: (status: string) =>
-    screen.getByRole("button", { name: `Filter by ${status}` }),
+    screen.getAllByRole("button", { name: `Filter by ${status}` })[0],
   getPlatformOption: (platform: string) =>
     screen.getByRole("option", { name: platform }),
   getSortOption: (option: string) =>
     screen.getByRole("option", { name: option }),
   getClearFiltersButton: () =>
-    screen.getByRole("button", { name: "Clear all filters" }),
+    screen.getAllByRole("button", { name: "Clear all filters" })[0],
   queryClearFiltersButton: () =>
-    screen.queryByRole("button", { name: "Clear all filters" }),
+    screen.queryAllByRole("button", { name: "Clear all filters" })[0] ?? null,
   queryLibraryGrid: () =>
     screen.queryByRole("list", { name: "Your game library" }),
   queryEmptyState: () => screen.queryByText(/your library is empty/i),
@@ -137,8 +137,9 @@ describe("LibraryPageView", () => {
         expect(elements.getAllStatusesButton()).toBeVisible();
       });
 
-      expect(elements.getStatusButton("Want to Play")).toBeVisible();
-      expect(elements.getStatusButton("Owned")).toBeVisible();
+      expect(elements.getStatusButton("Wishlist")).toBeVisible();
+      expect(elements.getStatusButton("Shelf")).toBeVisible();
+      expect(elements.getStatusButton("Up Next")).toBeVisible();
       expect(elements.getStatusButton("Playing")).toBeVisible();
       expect(elements.getStatusButton("Played")).toBeVisible();
     });
@@ -181,17 +182,17 @@ describe("LibraryPageView", () => {
         const { mockPush } = createNavigationMock();
         const { rerender } = renderComponent();
 
-        await actions.clickStatusButton("Want to Play");
+        await actions.clickStatusButton("Wishlist");
 
         expect(mockPush).toHaveBeenCalledWith(
-          expect.stringContaining("status=WANT_TO_PLAY"),
+          expect.stringContaining("status=WISHLIST"),
           expect.anything()
         );
 
         rerender(<LibraryPageView isSteamConnected={false} />);
 
         await waitFor(() => {
-          expect(elements.getStatusButton("Want to Play")).toHaveAttribute(
+          expect(elements.getStatusButton("Wishlist")).toHaveAttribute(
             "aria-pressed",
             "true"
           );
@@ -286,17 +287,17 @@ describe("LibraryPageView", () => {
       const { rerender } = renderComponent();
 
       await waitFor(() => {
-        expect(elements.getStatusButton("Want to Play")).toBeVisible();
+        expect(elements.getStatusButton("Wishlist")).toBeVisible();
       });
 
       // Apply status filter
-      await actions.clickStatusButton("Want to Play");
+      await actions.clickStatusButton("Wishlist");
 
       // Re-render to reflect status change
       rerender(<LibraryPageView isSteamConnected={false} />);
 
       await waitFor(() => {
-        expect(elements.getStatusButton("Want to Play")).toHaveAttribute(
+        expect(elements.getStatusButton("Wishlist")).toHaveAttribute(
           "aria-pressed",
           "true"
         );

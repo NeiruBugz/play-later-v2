@@ -1,14 +1,14 @@
 import "server-only";
 
-import {
-  LibraryItemStatus,
-  type LibraryItemWithGameDomain,
-} from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import {
+  LibraryItemStatus,
+  type LibraryItemWithGameDomain,
+} from "@/shared/types/library";
 
-const CONTINUE_PLAYING_LIMIT = 6;
+const CONTINUE_PLAYING_LIMIT = 3;
 
 export interface ContinuePlayingData {
   items: LibraryItemWithGameDomain[];
@@ -55,11 +55,13 @@ export async function ContinuePlaying({ userId }: ContinuePlayingProps) {
 
     return (
       <DashboardGameSection
-        title="Continue Playing"
+        title="Playing"
         items={limitedItems}
+        totalCount={result.data.items.length}
         viewAllHref="/library?status=PLAYING"
         viewAllLabel="View All Playing"
         emptyMessage="No games in progress. Start exploring something new!"
+        variant="hero"
       />
     );
   } catch (error) {

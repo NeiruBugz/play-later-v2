@@ -1,15 +1,10 @@
 import "server-only";
 
-import {
-  repositoryError,
-  RepositoryErrorCode,
-  repositorySuccess,
-  type RepositoryResult,
-} from "@/data-access-layer/repository/types";
 import { Prisma, type User } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
 
+import { DuplicateError, NotFoundError } from "../errors";
 import {
   type GetUserBySteamIdInput,
   type GetUserByUsernameInput,
@@ -20,22 +15,12 @@ import {
 export async function getUserBySteamId({
   userId,
   steamId,
-}: GetUserBySteamIdInput): Promise<RepositoryResult<User | null>> {
-  try {
-    const user = await prisma.user.findFirst({
-      where: {
-        steamId64: steamId,
-        id: { not: userId },
-      },
-    });
-    return repositorySuccess(user);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get user by Steam ID: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+}: GetUserBySteamIdInput): Promise<User | null> {
+  return prisma.user.findFirst({
+    where: { steamId64: steamId, id: { not: userId } },
+  });
 }
+
 export async function updateUserSteamData({
   userId,
   steamId,
@@ -43,9 +28,9 @@ export async function updateUserSteamData({
   avatar,
   profileUrl,
   connectedAt,
-}: UpdateUserSteamDataInput): Promise<RepositoryResult<User>> {
+}: UpdateUserSteamDataInput): Promise<User> {
   try {
-    const updated = await prisma.user.update({
+    return await prisma.user.update({
       where: { id: userId },
       data: {
         steamId64: steamId,
@@ -55,155 +40,111 @@ export async function updateUserSteamData({
         ...(connectedAt !== undefined && { steamConnectedAt: connectedAt }),
       },
     });
-    return repositorySuccess(updated);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
+      throw new NotFoundError("User not found");
     }
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to update user Steam data: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+    throw error;
   }
 }
+
 export async function getUserByUsername({
   username,
-}: GetUserByUsernameInput): Promise<
-  RepositoryResult<{ username: string | null }>
-> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { usernameNormalized: username.toLowerCase().trim() },
-      select: {
-        username: true,
-      },
-    });
-    if (!user) {
-      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
-    }
-    return repositorySuccess(user);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get user by username: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+}: GetUserByUsernameInput): Promise<{ username: string | null } | null> {
+  return prisma.user.findUnique({
+    where: { usernameNormalized: username.toLowerCase().trim() },
+    select: { username: true },
+  });
 }
-export async function getUserSteamData({ userId }: { userId: string }): Promise<
-  RepositoryResult<{
-    steamId64: string | null;
-    steamUsername: string | null;
-    steamAvatar: string | null;
-    steamProfileURL: string | null;
-    steamConnectedAt: Date | null;
-  } | null>
-> {
-  try {
-    const data = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        steamId64: true,
-        steamUsername: true,
-        steamAvatar: true,
-        steamProfileURL: true,
-        steamConnectedAt: true,
-      },
-    });
-    return repositorySuccess(data);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get user Steam data: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+
+export async function getUserSteamData({
+  userId,
+}: {
+  userId: string;
+}): Promise<{
+  steamId64: string | null;
+  steamUsername: string | null;
+  steamAvatar: string | null;
+  steamProfileURL: string | null;
+  steamConnectedAt: Date | null;
+} | null> {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      steamId64: true,
+      steamUsername: true,
+      steamAvatar: true,
+      steamProfileURL: true,
+      steamConnectedAt: true,
+    },
+  });
 }
-export async function getUserInfo({ userId }: { userId: string }): Promise<
-  RepositoryResult<{
-    id: string;
-    name: string | null;
-    username: string | null;
-    steamProfileURL: string | null;
-    steamConnectedAt: Date | null;
-    email: string | null;
-  } | null>
-> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        steamProfileURL: true,
-        steamConnectedAt: true,
-        email: true,
-      },
-    });
-    return repositorySuccess(user);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get user info: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+
+export async function getUserInfo({ userId }: { userId: string }): Promise<{
+  id: string;
+  name: string | null;
+  username: string | null;
+  steamProfileURL: string | null;
+  steamConnectedAt: Date | null;
+  email: string | null;
+} | null> {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      steamProfileURL: true,
+      steamConnectedAt: true,
+      email: true,
+    },
+  });
 }
+
 export async function updateUserData({
   userId,
   username,
   steamProfileUrl,
-}: UpdateUserDataInput): Promise<RepositoryResult<User>> {
+}: UpdateUserDataInput): Promise<User> {
   try {
-    const updated = await prisma.user.update({
+    return await prisma.user.update({
       where: { id: userId },
-      data: {
-        username,
-        steamProfileURL: steamProfileUrl,
-      },
+      data: { username, steamProfileURL: steamProfileUrl },
     });
-    return repositorySuccess(updated);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
+      throw new NotFoundError("User not found");
     }
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to update user data: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+    throw error;
   }
 }
+
 export async function getUserSteamId({
   steamUsername,
   userId,
 }: {
   steamUsername: string;
   userId: string;
-}): Promise<RepositoryResult<{ steamId64: string | null } | null>> {
-  try {
-    const data = await prisma.user.findUnique({
-      where: { steamUsername, id: userId },
-      select: { steamId64: true },
-    });
-    return repositorySuccess(data);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get user Steam ID: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+}): Promise<{ steamId64: string | null } | null> {
+  return prisma.user.findUnique({
+    where: { steamUsername, id: userId },
+    select: { steamId64: true },
+  });
 }
+
 export async function disconnectSteam({
   userId,
 }: {
   userId: string;
-}): Promise<RepositoryResult<User>> {
+}): Promise<User> {
   try {
-    const updated = await prisma.user.update({
+    return await prisma.user.update({
       where: { id: userId },
       data: {
         steamId64: null,
@@ -213,150 +154,98 @@ export async function disconnectSteam({
         steamConnectedAt: null,
       },
     });
-    return repositorySuccess(updated);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
+      throw new NotFoundError("User not found");
     }
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to disconnect Steam: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+    throw error;
   }
 }
+
 export async function findUserByEmail(
   email: string
-): Promise<RepositoryResult<{ id: string } | null>> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { email: email.trim().toLowerCase() },
-      select: { id: true },
-    });
-    return repositorySuccess(user);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to find user by email: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+): Promise<{ id: string } | null> {
+  return prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+    select: { id: true },
+  });
 }
+
 export async function createUserWithCredentials(input: {
   email: string;
   password: string;
   name?: string | null;
-}): Promise<
-  RepositoryResult<{ id: string; email: string | null; name: string | null }>
-> {
+}): Promise<{ id: string; email: string | null; name: string | null }> {
   try {
-    const user = await prisma.user.create({
+    return await prisma.user.create({
       data: {
         email: input.email.trim().toLowerCase(),
         password: input.password,
         name: input.name ?? null,
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-      },
+      select: { id: true, email: true, name: true },
     });
-    return repositorySuccess(user);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
-      return repositoryError(
-        RepositoryErrorCode.ALREADY_EXISTS,
-        "User with this email already exists"
-      );
+      throw new DuplicateError("User with this email already exists");
     }
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to create user: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+    throw error;
   }
 }
+
 export async function findUserById<T extends Prisma.UserSelect>(
   userId: string,
   options: { select: T }
-): Promise<RepositoryResult<Prisma.UserGetPayload<{ select: T }> | null>> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: options.select,
-    });
-    return repositorySuccess(user);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to find user by ID: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+): Promise<Prisma.UserGetPayload<{ select: T }> | null> {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: options.select,
+  });
 }
+
 export async function findUserByNormalizedUsername(
   usernameNormalized: string
-): Promise<RepositoryResult<{ id: string } | null>> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { usernameNormalized },
-      select: { id: true },
-    });
-    return repositorySuccess(user);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to find user by normalized username: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+): Promise<{ id: string } | null> {
+  return prisma.user.findUnique({
+    where: { usernameNormalized },
+    select: { id: true },
+  });
 }
-export async function updateOnboardingDismissed(
-  userId: string
-): Promise<RepositoryResult<void>> {
+
+export async function updateOnboardingDismissed(userId: string): Promise<void> {
   try {
     await prisma.user.update({
       where: { id: userId },
       data: { onboardingDismissedAt: new Date() },
     });
-    return repositorySuccess(undefined);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
+      throw new NotFoundError("User not found");
     }
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to update onboarding dismissed: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+    throw error;
   }
 }
 
-export async function getOnboardingStatus(userId: string): Promise<
-  RepositoryResult<{
-    profileSetupCompletedAt: Date | null;
-    onboardingDismissedAt: Date | null;
-  } | null>
-> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        profileSetupCompletedAt: true,
-        onboardingDismissedAt: true,
-      },
-    });
-    return repositorySuccess(user);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to get onboarding status: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+export async function getOnboardingStatus(userId: string): Promise<{
+  profileSetupCompletedAt: Date | null;
+  onboardingDismissedAt: Date | null;
+} | null> {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      profileSetupCompletedAt: true,
+      onboardingDismissedAt: true,
+    },
+  });
 }
 
 export async function updateUserProfile(
@@ -367,18 +256,16 @@ export async function updateUserProfile(
     image?: string;
     profileSetupCompletedAt?: Date | null;
   }
-): Promise<
-  RepositoryResult<{
-    id: string;
-    username: string | null;
-    usernameNormalized: string | null;
-    steamProfileURL: string | null;
-    image: string | null;
-    profileSetupCompletedAt: Date | null;
-  }>
-> {
+): Promise<{
+  id: string;
+  username: string | null;
+  usernameNormalized: string | null;
+  steamProfileURL: string | null;
+  image: string | null;
+  profileSetupCompletedAt: Date | null;
+}> {
   try {
-    const updated = await prisma.user.update({
+    return await prisma.user.update({
       where: { id: userId },
       data,
       select: {
@@ -390,17 +277,13 @@ export async function updateUserProfile(
         profileSetupCompletedAt: true,
       },
     });
-    return repositorySuccess(updated);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      return repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found");
+      throw new NotFoundError("User not found");
     }
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to update user profile: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+    throw error;
   }
 }

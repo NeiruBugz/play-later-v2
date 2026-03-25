@@ -1,4 +1,4 @@
-import type { ImportedGame } from "@prisma/client";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -41,9 +41,9 @@ vi.mock("./import-game-modal", () => ({
   ),
 }));
 
-const createMockImportedGame = (
-  overrides: Partial<ImportedGame> = {}
-): ImportedGame => ({
+const createMockImportedGameDto = (
+  overrides: Partial<ImportedGameDto> = {}
+): ImportedGameDto => ({
   id: "game-1",
   userId: "user-1",
   storefront: "STEAM",
@@ -114,7 +114,7 @@ describe("ImportedGameCard", () => {
 
   describe("game name rendering", () => {
     it("should render game name correctly", () => {
-      const game = createMockImportedGame({ name: "The Witcher 3" });
+      const game = createMockImportedGameDto({ name: "The Witcher 3" });
 
       render(<ImportedGameCard game={game} />);
 
@@ -122,7 +122,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should truncate long game names", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         name: "A Very Long Game Name That Should Be Truncated Eventually",
       });
 
@@ -134,7 +134,7 @@ describe("ImportedGameCard", () => {
 
   describe("playtime formatting", () => {
     it("should format playtime in hours when >= 60 minutes", () => {
-      const game = createMockImportedGame({ playtime: 750 });
+      const game = createMockImportedGameDto({ playtime: 750 });
 
       render(<ImportedGameCard game={game} />);
 
@@ -142,7 +142,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should format playtime in minutes when < 60 minutes", () => {
-      const game = createMockImportedGame({ playtime: 45 });
+      const game = createMockImportedGameDto({ playtime: 45 });
 
       render(<ImportedGameCard game={game} />);
 
@@ -150,7 +150,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should display 'Never played' when playtime is 0", () => {
-      const game = createMockImportedGame({ playtime: 0 });
+      const game = createMockImportedGameDto({ playtime: 0 });
 
       render(<ImportedGameCard game={game} />);
 
@@ -158,7 +158,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should display 'Never played' when playtime is null", () => {
-      const game = createMockImportedGame({ playtime: null });
+      const game = createMockImportedGameDto({ playtime: null });
 
       render(<ImportedGameCard game={game} />);
 
@@ -166,7 +166,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should format playtime with one decimal place", () => {
-      const game = createMockImportedGame({ playtime: 127 });
+      const game = createMockImportedGameDto({ playtime: 127 });
 
       render(<ImportedGameCard game={game} />);
 
@@ -177,7 +177,7 @@ describe("ImportedGameCard", () => {
   describe("last played date formatting", () => {
     it("should format recent date relatively (5 days ago)", () => {
       const fiveDaysAgo = new Date("2026-01-15T12:00:00Z");
-      const game = createMockImportedGame({ lastPlayedAt: fiveDaysAgo });
+      const game = createMockImportedGameDto({ lastPlayedAt: fiveDaysAgo });
 
       render(<ImportedGameCard game={game} />);
 
@@ -188,7 +188,7 @@ describe("ImportedGameCard", () => {
 
     it("should format recent date relatively (today)", () => {
       const today = new Date("2026-01-20T10:00:00Z");
-      const game = createMockImportedGame({ lastPlayedAt: today });
+      const game = createMockImportedGameDto({ lastPlayedAt: today });
 
       render(<ImportedGameCard game={game} />);
 
@@ -197,7 +197,7 @@ describe("ImportedGameCard", () => {
 
     it("should format recent date relatively (yesterday)", () => {
       const yesterday = new Date("2026-01-19T12:00:00Z");
-      const game = createMockImportedGame({ lastPlayedAt: yesterday });
+      const game = createMockImportedGameDto({ lastPlayedAt: yesterday });
 
       render(<ImportedGameCard game={game} />);
 
@@ -208,7 +208,7 @@ describe("ImportedGameCard", () => {
 
     it("should format old date absolutely when > 7 days ago", () => {
       const eightDaysAgo = new Date("2026-01-12T12:00:00Z");
-      const game = createMockImportedGame({ lastPlayedAt: eightDaysAgo });
+      const game = createMockImportedGameDto({ lastPlayedAt: eightDaysAgo });
 
       render(<ImportedGameCard game={game} />);
 
@@ -218,7 +218,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should display 'Never' when lastPlayedAt is null", () => {
-      const game = createMockImportedGame({ lastPlayedAt: null });
+      const game = createMockImportedGameDto({ lastPlayedAt: null });
 
       render(<ImportedGameCard game={game} />);
 
@@ -228,7 +228,7 @@ describe("ImportedGameCard", () => {
 
   describe("icon rendering", () => {
     it("should show Steam icon when iconHash and appId are available", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         img_icon_url: "abc123def456",
         storefrontGameId: "440",
       });
@@ -244,7 +244,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should show fallback with first letter when icon is not available", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         name: "Portal 2",
         img_icon_url: null,
       });
@@ -256,7 +256,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should show fallback when appId is null", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         name: "Half-Life",
         img_icon_url: "abc123",
         storefrontGameId: null,
@@ -269,7 +269,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should uppercase first letter in fallback", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         name: "dota 2",
         img_icon_url: null,
       });
@@ -280,7 +280,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should handle empty string icon gracefully", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         name: "Counter-Strike",
         img_icon_url: "",
       });
@@ -293,7 +293,7 @@ describe("ImportedGameCard", () => {
 
   describe("accessibility", () => {
     it("should have heading role for game name", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -301,7 +301,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should have proper alt text for Steam icon", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         name: "Stardew Valley",
         img_icon_url: "icon123",
       });
@@ -314,7 +314,7 @@ describe("ImportedGameCard", () => {
 
   describe("card styling", () => {
     it("should display metadata with bullet separator", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 120,
         lastPlayedAt: new Date("2026-01-18T12:00:00Z"),
       });
@@ -330,35 +330,35 @@ describe("ImportedGameCard", () => {
   });
 
   describe("smart status badge", () => {
-    it("should display 'Owned' badge for games with 0 playtime", () => {
-      const game = createMockImportedGame({
+    it("should display 'Shelf' badge for games with 0 playtime", () => {
+      const game = createMockImportedGameDto({
         playtime: 0,
         lastPlayedAt: null,
       });
 
       render(<ImportedGameCard game={game} />);
 
-      expect(elements.getStatusBadgeByLabel("Owned")).toBeVisible();
+      expect(elements.getStatusBadgeByLabel("Shelf")).toBeVisible();
       expect(elements.getStatusBadge()).toHaveAttribute(
         "aria-label",
-        "Status: Owned"
+        "Status: Shelf"
       );
     });
 
-    it("should display 'Owned' badge for games with null playtime", () => {
-      const game = createMockImportedGame({
+    it("should display 'Shelf' badge for games with null playtime", () => {
+      const game = createMockImportedGameDto({
         playtime: null,
         lastPlayedAt: null,
       });
 
       render(<ImportedGameCard game={game} />);
 
-      expect(elements.getStatusBadgeByLabel("Owned")).toBeVisible();
+      expect(elements.getStatusBadgeByLabel("Shelf")).toBeVisible();
     });
 
     it("should display 'Playing' badge for games played within last 7 days", () => {
       const threeDaysAgo = new Date("2026-01-17T12:00:00Z");
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 100,
         lastPlayedAt: threeDaysAgo,
       });
@@ -374,7 +374,7 @@ describe("ImportedGameCard", () => {
 
     it("should display 'Playing' badge for game played today", () => {
       const today = new Date("2026-01-20T10:00:00Z");
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 250,
         lastPlayedAt: today,
       });
@@ -386,7 +386,7 @@ describe("ImportedGameCard", () => {
 
     it("should display 'Played' badge for games played exactly 7 days ago (boundary test)", () => {
       const exactlySevenDaysAgo = new Date("2026-01-13T12:00:00Z");
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 600,
         lastPlayedAt: exactlySevenDaysAgo,
       });
@@ -398,7 +398,7 @@ describe("ImportedGameCard", () => {
 
     it("should display 'Played' badge for games played more than 7 days ago", () => {
       const tenDaysAgo = new Date("2026-01-10T12:00:00Z");
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 1500,
         lastPlayedAt: tenDaysAgo,
       });
@@ -413,7 +413,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should display 'Played' badge for games with playtime but no lastPlayedAt date", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 500,
         lastPlayedAt: null,
       });
@@ -424,7 +424,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should have status role for accessibility", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 100,
         lastPlayedAt: new Date("2026-01-19T12:00:00Z"),
       });
@@ -439,7 +439,7 @@ describe("ImportedGameCard", () => {
 
   describe("dismiss button", () => {
     it("should render dismiss button", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -447,7 +447,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should call dismiss mutation with correct game ID when clicked", async () => {
-      const game = createMockImportedGame({ id: "test-game-123" });
+      const game = createMockImportedGameDto({ id: "test-game-123" });
 
       render(<ImportedGameCard game={game} />);
 
@@ -461,7 +461,7 @@ describe("ImportedGameCard", () => {
 
     it("should disable dismiss button when dismiss mutation is pending", () => {
       mockDismissGame.isPending = true;
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -469,7 +469,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should have proper accessibility attributes", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -481,7 +481,7 @@ describe("ImportedGameCard", () => {
 
   describe("import button and modal", () => {
     it("should render import button", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -489,7 +489,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should not show modal initially", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -498,7 +498,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should open import modal when import button is clicked", async () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         name: "Test Game",
       });
 
@@ -512,7 +512,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should close modal when close button is clicked", async () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -524,7 +524,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should pass correct game data to modal", async () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         id: "test-game-123",
         name: "Portal 2",
       });
@@ -538,7 +538,7 @@ describe("ImportedGameCard", () => {
 
     it("should disable import button when dismiss mutation is pending", () => {
       mockDismissGame.isPending = true;
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -546,7 +546,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should have proper accessibility attributes", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 
@@ -559,7 +559,7 @@ describe("ImportedGameCard", () => {
     });
 
     it("should use default variant for primary action", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(<ImportedGameCard game={game} />);
 

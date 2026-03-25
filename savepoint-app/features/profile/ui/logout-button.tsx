@@ -9,7 +9,7 @@ export function LogoutButton() {
     signOut();
   };
   return (
-    <Button onClick={handleLogoutClick} variant="destructive">
+    <Button onClick={handleLogoutClick} variant="outline" size="sm">
       Logout
     </Button>
   );

@@ -71,7 +71,7 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "group gap-xs px-lg py-sm flex flex-col items-center",
+                "group gap-xs px-lg py-sm flex min-h-[44px] min-w-[44px] flex-col items-center justify-center",
                 "duration-fast rounded-lg transition-all",
                 "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
                 active

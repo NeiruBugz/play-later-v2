@@ -1,3 +1,4 @@
+import { NotFoundError } from "@/data-access-layer/repository";
 import {
   cleanupDatabase,
   resetTestDatabase,
@@ -59,25 +60,18 @@ describe("ImportedGameRepository Integration Tests", () => {
         },
       ];
 
-      const result = await upsertManyImportedGames(user.id, games);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(2);
-      }
+      const count = await upsertManyImportedGames(user.id, games);
+      expect(count).toBe(2);
 
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
         sortBy: "name_asc",
       });
-      expect(findResult.success).toBe(true);
-      if (findResult.success) {
-        expect(findResult.data.items).toHaveLength(2);
-        expect(findResult.data.items[0].name).toBe("Game 1");
-        expect(findResult.data.items[0].storefrontGameId).toBe("440");
-        expect(findResult.data.items[0].playtime).toBe(120);
-        expect(findResult.data.items[1].name).toBe("Game 2");
-      }
+      expect(findResult.items).toHaveLength(2);
+      expect(findResult.items[0].name).toBe("Game 1");
+      expect(findResult.items[0].storefrontGameId).toBe("440");
+      expect(findResult.items[0].playtime).toBe(120);
+      expect(findResult.items[1].name).toBe("Game 2");
     });
 
     it("should update existing imported games when they already exist", async () => {
@@ -115,31 +109,24 @@ describe("ImportedGameRepository Integration Tests", () => {
         },
       ];
 
-      const result = await upsertManyImportedGames(user.id, updatedGames);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(1);
-      }
+      const count = await upsertManyImportedGames(user.id, updatedGames);
+      expect(count).toBe(1);
 
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
-      if (findResult.success) {
-        expect(findResult.data.items).toHaveLength(1);
-        const game = findResult.data.items[0];
-        expect(game.name).toBe("Updated Name");
-        expect(game.playtime).toBe(200);
-        expect(game.playtimeWindows).toBe(150);
-        expect(game.playtimeMac).toBe(30);
-        expect(game.playtimeLinux).toBe(20);
-        expect(game.img_icon_url).toBe("new_icon.jpg");
-        expect(game.img_logo_url).toBe("new_logo.jpg");
-        expect(game.lastPlayedAt?.toISOString()).toBe(
-          new Date("2024-01-15").toISOString()
-        );
-      }
+      expect(findResult.items).toHaveLength(1);
+      const game = findResult.items[0];
+      expect(game.name).toBe("Updated Name");
+      expect(game.playtime).toBe(200);
+      expect(game.playtimeWindows).toBe(150);
+      expect(game.playtimeMac).toBe(30);
+      expect(game.playtimeLinux).toBe(20);
+      expect(game.img_icon_url).toBe("new_icon.jpg");
+      expect(game.img_logo_url).toBe("new_logo.jpg");
+      expect(game.lastPlayedAt?.toISOString()).toBe(
+        new Date("2024-01-15").toISOString()
+      );
     });
 
     it("should handle games with null/undefined optional fields", async () => {
@@ -160,28 +147,21 @@ describe("ImportedGameRepository Integration Tests", () => {
         },
       ];
 
-      const result = await upsertManyImportedGames(user.id, games);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(1);
-      }
+      const count = await upsertManyImportedGames(user.id, games);
+      expect(count).toBe(1);
 
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
-      if (findResult.success) {
-        const game = findResult.data.items[0];
-        expect(game.name).toBe("Minimal Game");
-        expect(game.playtime).toBe(0);
-        expect(game.playtimeWindows).toBe(0);
-        expect(game.playtimeMac).toBe(0);
-        expect(game.playtimeLinux).toBe(0);
-        expect(game.img_icon_url).toBeNull();
-        expect(game.img_logo_url).toBeNull();
-        expect(game.lastPlayedAt).toBeNull();
-      }
+      const game = findResult.items[0];
+      expect(game.name).toBe("Minimal Game");
+      expect(game.playtime).toBe(0);
+      expect(game.playtimeWindows).toBe(0);
+      expect(game.playtimeMac).toBe(0);
+      expect(game.playtimeLinux).toBe(0);
+      expect(game.img_icon_url).toBeNull();
+      expect(game.img_logo_url).toBeNull();
+      expect(game.lastPlayedAt).toBeNull();
     });
 
     it("should not update soft-deleted games", async () => {
@@ -196,17 +176,13 @@ describe("ImportedGameRepository Integration Tests", () => {
         },
       ];
 
-      const initialResult = await upsertManyImportedGames(user.id, games);
-      expect(initialResult.success).toBe(true);
+      await upsertManyImportedGames(user.id, games);
 
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
-      if (findResult.success) {
-        const gameId = findResult.data.items[0].id;
-        await softDeleteImportedGame(gameId, user.id);
-      }
+      const gameId = findResult.items[0].id;
+      await softDeleteImportedGame(gameId, user.id);
 
       const updatedGames: CreateImportedGameInput[] = [
         {
@@ -217,17 +193,13 @@ describe("ImportedGameRepository Integration Tests", () => {
         },
       ];
 
-      const updateResult = await upsertManyImportedGames(user.id, updatedGames);
-      expect(updateResult.success).toBe(true);
+      await upsertManyImportedGames(user.id, updatedGames);
 
       const finalFindResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(finalFindResult.success).toBe(true);
-      if (finalFindResult.success) {
-        expect(finalFindResult.data.items).toHaveLength(1);
-        expect(finalFindResult.data.items[0].name).toBe("Updated Deleted Game");
-      }
+      expect(finalFindResult.items).toHaveLength(1);
+      expect(finalFindResult.items[0].name).toBe("Updated Deleted Game");
     });
 
     it("should isolate games by userId", async () => {
@@ -253,16 +225,9 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(user1Games.success).toBe(true);
-      expect(user2Games.success).toBe(true);
-
-      if (user1Games.success && user2Games.success) {
-        expect(user1Games.data.items).toHaveLength(1);
-        expect(user2Games.data.items).toHaveLength(1);
-        expect(user1Games.data.items[0].id).not.toBe(
-          user2Games.data.items[0].id
-        );
-      }
+      expect(user1Games.items).toHaveLength(1);
+      expect(user2Games.items).toHaveLength(1);
+      expect(user1Games.items[0].id).not.toBe(user2Games.items[0].id);
     });
   });
 
@@ -287,14 +252,11 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(10);
-        expect(result.data.total).toBe(30);
-        expect(result.data.page).toBe(1);
-        expect(result.data.limit).toBe(10);
-        expect(result.data.totalPages).toBe(3);
-      }
+      expect(result.items).toHaveLength(10);
+      expect(result.total).toBe(30);
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(10);
+      expect(result.totalPages).toBe(3);
     });
 
     it("should return second page of results", async () => {
@@ -317,11 +279,8 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(10);
-        expect(result.data.page).toBe(2);
-      }
+      expect(result.items).toHaveLength(10);
+      expect(result.page).toBe(2);
     });
 
     it("should return empty array for user with no games", async () => {
@@ -329,11 +288,8 @@ describe("ImportedGameRepository Integration Tests", () => {
 
       const result = await findImportedGamesByUserId(user.id, { limit: 10 });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(0);
-        expect(result.data.total).toBe(0);
-      }
+      expect(result.items).toHaveLength(0);
+      expect(result.total).toBe(0);
     });
 
     it("should filter by search query", async () => {
@@ -367,13 +323,10 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(2);
-        expect(
-          result.data.items.some((g) => g.name.includes("Counter-Strike"))
-        ).toBe(true);
-      }
+      expect(result.items).toHaveLength(2);
+      expect(result.items.some((g) => g.name.includes("Counter-Strike"))).toBe(
+        true
+      );
     });
 
     it("should filter by playtime status - played", async () => {
@@ -401,11 +354,8 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(1);
-        expect(result.data.items[0].name).toBe("Played Game");
-      }
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].name).toBe("Played Game");
     });
 
     it("should filter by playtime status - never played", async () => {
@@ -433,11 +383,8 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(1);
-        expect(result.data.items[0].name).toBe("Never Played Game");
-      }
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].name).toBe("Never Played Game");
     });
 
     it("should filter by playtime range - under 1h", async () => {
@@ -465,11 +412,8 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(1);
-        expect(result.data.items[0].name).toBe("Short Game");
-      }
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].name).toBe("Short Game");
     });
 
     it("should filter by platform - Windows", async () => {
@@ -503,11 +447,8 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(1);
-        expect(result.data.items[0].name).toBe("Windows Game");
-      }
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].name).toBe("Windows Game");
     });
 
     it("should sort by name ascending", async () => {
@@ -541,12 +482,9 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items[0].name).toBe("Alpha Game");
-        expect(result.data.items[1].name).toBe("Beta Game");
-        expect(result.data.items[2].name).toBe("Zebra Game");
-      }
+      expect(result.items[0].name).toBe("Alpha Game");
+      expect(result.items[1].name).toBe("Beta Game");
+      expect(result.items[2].name).toBe("Zebra Game");
     });
 
     it("should sort by playtime descending", async () => {
@@ -580,12 +518,9 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items[0].playtime).toBe(200);
-        expect(result.data.items[1].playtime).toBe(100);
-        expect(result.data.items[2].playtime).toBe(50);
-      }
+      expect(result.items[0].playtime).toBe(200);
+      expect(result.items[1].playtime).toBe(100);
+      expect(result.items[2].playtime).toBe(50);
     });
 
     it("should enforce limit validation (max 100)", async () => {
@@ -608,11 +543,8 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 200,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items.length).toBeLessThanOrEqual(100);
-        expect(result.data.limit).toBe(100);
-      }
+      expect(result.items.length).toBeLessThanOrEqual(100);
+      expect(result.limit).toBe(100);
     });
 
     it("should filter by matchStatus - single status (PENDING)", async () => {
@@ -649,12 +581,9 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(1);
-        expect(result.data.items[0].name).toBe("Pending Game");
-        expect(result.data.items[0].igdbMatchStatus).toBe("PENDING");
-      }
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].name).toBe("Pending Game");
+      expect(result.items[0].igdbMatchStatus).toBe("PENDING");
     });
 
     it("should filter by matchStatus - multiple statuses (PENDING and UNMATCHED)", async () => {
@@ -698,15 +627,12 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(2);
-        const statuses = result.data.items.map((g) => g.igdbMatchStatus);
-        expect(statuses).toContain("PENDING");
-        expect(statuses).toContain("UNMATCHED");
-        expect(statuses).not.toContain("MATCHED");
-        expect(statuses).not.toContain("IGNORED");
-      }
+      expect(result.items).toHaveLength(2);
+      const statuses = result.items.map((g) => g.igdbMatchStatus);
+      expect(statuses).toContain("PENDING");
+      expect(statuses).toContain("UNMATCHED");
+      expect(statuses).not.toContain("MATCHED");
+      expect(statuses).not.toContain("IGNORED");
     });
 
     it("should filter by matchStatus - all statuses", async () => {
@@ -750,10 +676,7 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(4);
-      }
+      expect(result.items).toHaveLength(4);
     });
 
     it("should return empty result when filtering for status with no matching games", async () => {
@@ -783,11 +706,8 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(0);
-        expect(result.data.total).toBe(0);
-      }
+      expect(result.items).toHaveLength(0);
+      expect(result.total).toBe(0);
     });
 
     it("should show all games when no matchStatus filter provided", async () => {
@@ -830,10 +750,7 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(4);
-      }
+      expect(result.items).toHaveLength(4);
     });
 
     it("should show all games when matchStatus is empty array", async () => {
@@ -863,10 +780,7 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(2);
-      }
+      expect(result.items).toHaveLength(2);
     });
 
     it("should combine matchStatus filter with other filters", async () => {
@@ -904,12 +818,9 @@ describe("ImportedGameRepository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.items).toHaveLength(1);
-        expect(result.data.items[0].name).toBe("Counter-Strike Pending");
-        expect(result.data.items[0].igdbMatchStatus).toBe("PENDING");
-      }
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].name).toBe("Counter-Strike Pending");
+      expect(result.items[0].igdbMatchStatus).toBe("PENDING");
     });
   });
 
@@ -929,23 +840,15 @@ describe("ImportedGameRepository Integration Tests", () => {
 
       await upsertManyImportedGames(user.id, games);
 
-      const result = await countImportedGamesByUserId(user.id);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(15);
-      }
+      const count = await countImportedGamesByUserId(user.id);
+      expect(count).toBe(15);
     });
 
     it("should return 0 for user with no games", async () => {
       const user = await createUser({ steamId64: "76561198012345678" });
 
-      const result = await countImportedGamesByUserId(user.id);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(0);
-      }
+      const count = await countImportedGamesByUserId(user.id);
+      expect(count).toBe(0);
     });
 
     it("should not count soft-deleted games", async () => {
@@ -971,17 +874,10 @@ describe("ImportedGameRepository Integration Tests", () => {
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
-      if (findResult.success) {
-        await softDeleteImportedGame(findResult.data.items[0].id, user.id);
-      }
+      await softDeleteImportedGame(findResult.items[0].id, user.id);
 
-      const countResult = await countImportedGamesByUserId(user.id);
-
-      expect(countResult.success).toBe(true);
-      if (countResult.success) {
-        expect(countResult.data).toBe(1);
-      }
+      const count = await countImportedGamesByUserId(user.id);
+      expect(count).toBe(1);
     });
   });
 
@@ -1004,32 +900,22 @@ describe("ImportedGameRepository Integration Tests", () => {
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
+      const gameId = findResult.items[0].id;
+      expect(findResult.items[0].igdbMatchStatus).toBe("PENDING");
 
-      if (findResult.success) {
-        const gameId = findResult.data.items[0].id;
-        expect(findResult.data.items[0].igdbMatchStatus).toBe("PENDING");
+      const updateResult = await updateImportedGameStatus(
+        gameId,
+        user.id,
+        "MATCHED"
+      );
 
-        const updateResult = await updateImportedGameStatus(
-          gameId,
-          user.id,
-          "MATCHED"
-        );
+      expect(updateResult.igdbMatchStatus).toBe("MATCHED");
+      expect(updateResult.id).toBe(gameId);
 
-        expect(updateResult.success).toBe(true);
-        if (updateResult.success) {
-          expect(updateResult.data.igdbMatchStatus).toBe("MATCHED");
-          expect(updateResult.data.id).toBe(gameId);
-        }
-
-        const verifyResult = await findImportedGamesByUserId(user.id, {
-          limit: 10,
-        });
-        expect(verifyResult.success).toBe(true);
-        if (verifyResult.success) {
-          expect(verifyResult.data.items[0].igdbMatchStatus).toBe("MATCHED");
-        }
-      }
+      const verifyResult = await findImportedGamesByUserId(user.id, {
+        limit: 10,
+      });
+      expect(verifyResult.items[0].igdbMatchStatus).toBe("MATCHED");
     });
 
     it("should update status through all valid states", async () => {
@@ -1049,51 +935,35 @@ describe("ImportedGameRepository Integration Tests", () => {
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
+      const gameId = findResult.items[0].id;
 
-      if (findResult.success) {
-        const gameId = findResult.data.items[0].id;
+      const pendingResult = await updateImportedGameStatus(
+        gameId,
+        user.id,
+        "PENDING"
+      );
+      expect(pendingResult.igdbMatchStatus).toBe("PENDING");
 
-        const pendingResult = await updateImportedGameStatus(
-          gameId,
-          user.id,
-          "PENDING"
-        );
-        expect(pendingResult.success).toBe(true);
-        if (pendingResult.success) {
-          expect(pendingResult.data.igdbMatchStatus).toBe("PENDING");
-        }
+      const matchedResult = await updateImportedGameStatus(
+        gameId,
+        user.id,
+        "MATCHED"
+      );
+      expect(matchedResult.igdbMatchStatus).toBe("MATCHED");
 
-        const matchedResult = await updateImportedGameStatus(
-          gameId,
-          user.id,
-          "MATCHED"
-        );
-        expect(matchedResult.success).toBe(true);
-        if (matchedResult.success) {
-          expect(matchedResult.data.igdbMatchStatus).toBe("MATCHED");
-        }
+      const unmatchedResult = await updateImportedGameStatus(
+        gameId,
+        user.id,
+        "UNMATCHED"
+      );
+      expect(unmatchedResult.igdbMatchStatus).toBe("UNMATCHED");
 
-        const unmatchedResult = await updateImportedGameStatus(
-          gameId,
-          user.id,
-          "UNMATCHED"
-        );
-        expect(unmatchedResult.success).toBe(true);
-        if (unmatchedResult.success) {
-          expect(unmatchedResult.data.igdbMatchStatus).toBe("UNMATCHED");
-        }
-
-        const ignoredResult = await updateImportedGameStatus(
-          gameId,
-          user.id,
-          "IGNORED"
-        );
-        expect(ignoredResult.success).toBe(true);
-        if (ignoredResult.success) {
-          expect(ignoredResult.data.igdbMatchStatus).toBe("IGNORED");
-        }
-      }
+      const ignoredResult = await updateImportedGameStatus(
+        gameId,
+        user.id,
+        "IGNORED"
+      );
+      expect(ignoredResult.igdbMatchStatus).toBe("IGNORED");
     });
 
     it("should prevent updating another user's imported game", async () => {
@@ -1114,33 +984,16 @@ describe("ImportedGameRepository Integration Tests", () => {
       const findResult = await findImportedGamesByUserId(user1.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
+      const gameId = findResult.items[0].id;
 
-      if (findResult.success) {
-        const gameId = findResult.data.items[0].id;
+      await expect(
+        updateImportedGameStatus(gameId, user2.id, "MATCHED")
+      ).rejects.toThrow(NotFoundError);
 
-        const updateResult = await updateImportedGameStatus(
-          gameId,
-          user2.id,
-          "MATCHED"
-        );
-
-        expect(updateResult.success).toBe(false);
-        if (!updateResult.success) {
-          expect(updateResult.error.code).toBe("NOT_FOUND");
-          expect(updateResult.error.message).toBe(
-            "Imported game not found or access denied"
-          );
-        }
-
-        const verifyResult = await findImportedGamesByUserId(user1.id, {
-          limit: 10,
-        });
-        expect(verifyResult.success).toBe(true);
-        if (verifyResult.success) {
-          expect(verifyResult.data.items[0].igdbMatchStatus).toBe("PENDING");
-        }
-      }
+      const verifyResult = await findImportedGamesByUserId(user1.id, {
+        limit: 10,
+      });
+      expect(verifyResult.items[0].igdbMatchStatus).toBe("PENDING");
     });
 
     it("should not update soft-deleted games", async () => {
@@ -1160,45 +1013,21 @@ describe("ImportedGameRepository Integration Tests", () => {
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
+      const gameId = findResult.items[0].id;
 
-      if (findResult.success) {
-        const gameId = findResult.data.items[0].id;
+      await softDeleteImportedGame(gameId, user.id);
 
-        await softDeleteImportedGame(gameId, user.id);
-
-        const updateResult = await updateImportedGameStatus(
-          gameId,
-          user.id,
-          "MATCHED"
-        );
-
-        expect(updateResult.success).toBe(false);
-        if (!updateResult.success) {
-          expect(updateResult.error.code).toBe("NOT_FOUND");
-          expect(updateResult.error.message).toBe(
-            "Imported game not found or access denied"
-          );
-        }
-      }
+      await expect(
+        updateImportedGameStatus(gameId, user.id, "MATCHED")
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("should return NOT_FOUND error for non-existent game ID", async () => {
       const user = await createUser({ steamId64: "76561198012345678" });
 
-      const updateResult = await updateImportedGameStatus(
-        "non-existent-id",
-        user.id,
-        "MATCHED"
-      );
-
-      expect(updateResult.success).toBe(false);
-      if (!updateResult.success) {
-        expect(updateResult.error.code).toBe("NOT_FOUND");
-        expect(updateResult.error.message).toBe(
-          "Imported game not found or access denied"
-        );
-      }
+      await expect(
+        updateImportedGameStatus("non-existent-id", user.id, "MATCHED")
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("should update the updatedAt timestamp", async () => {
@@ -1218,27 +1047,20 @@ describe("ImportedGameRepository Integration Tests", () => {
       const findResult = await findImportedGamesByUserId(user.id, {
         limit: 10,
       });
-      expect(findResult.success).toBe(true);
+      const gameId = findResult.items[0].id;
+      const originalUpdatedAt = findResult.items[0].updatedAt;
 
-      if (findResult.success) {
-        const gameId = findResult.data.items[0].id;
-        const originalUpdatedAt = findResult.data.items[0].updatedAt;
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
-        await new Promise((resolve) => setTimeout(resolve, 10));
+      const updateResult = await updateImportedGameStatus(
+        gameId,
+        user.id,
+        "MATCHED"
+      );
 
-        const updateResult = await updateImportedGameStatus(
-          gameId,
-          user.id,
-          "MATCHED"
-        );
-
-        expect(updateResult.success).toBe(true);
-        if (updateResult.success) {
-          expect(updateResult.data.updatedAt.getTime()).toBeGreaterThan(
-            originalUpdatedAt.getTime()
-          );
-        }
-      }
+      expect(updateResult.updatedAt.getTime()).toBeGreaterThan(
+        originalUpdatedAt.getTime()
+      );
     });
   });
 });

@@ -9,7 +9,7 @@ export class LibraryPage {
   }
 
   heading(): Locator {
-    return this.page.getByRole("heading", { name: "My Library", level: 1 });
+    return this.page.getByRole("heading", { name: "Library", level: 1 });
   }
 
   sortBySelect(): Locator {

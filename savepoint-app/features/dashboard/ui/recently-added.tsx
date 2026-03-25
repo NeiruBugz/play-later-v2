@@ -1,9 +1,9 @@
 import "server-only";
 
-import type { LibraryItemWithGameDomain } from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import type { LibraryItemWithGameDomain } from "@/shared/types/library";
 
 const RECENTLY_ADDED_LIMIT = 6;
 

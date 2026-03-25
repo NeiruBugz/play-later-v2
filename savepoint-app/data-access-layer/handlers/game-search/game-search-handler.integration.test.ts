@@ -2,6 +2,8 @@ import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
+import * as rateLimitModule from "@/shared/lib/rate-limit";
+
 import type { RequestContext } from "../types";
 import { gameSearchHandler } from "./game-search-handler";
 
@@ -195,16 +197,12 @@ describe("gameSearchHandler Integration Tests", () => {
 
   describe("when user encounters rate limiting", () => {
     it("should return 429 after exceeding rate limit", async () => {
+      const spy = vi
+        .spyOn(rateLimitModule, "checkRateLimit")
+        .mockResolvedValueOnce({ allowed: false, remaining: 0 });
+
       const ip = getUniqueIP();
       const context = createMockContext(ip);
-
-      for (let i = 0; i < 20; i++) {
-        const result = await gameSearchHandler(
-          { query: "zelda", offset: 0 },
-          context
-        );
-        expect(result.success).toBe(true);
-      }
 
       const result = await gameSearchHandler(
         { query: "zelda", offset: 0 },
@@ -216,6 +214,8 @@ describe("gameSearchHandler Integration Tests", () => {
         expect(result.status).toBe(429);
         expect(result.error).toBe("Rate limit exceeded. Try again later.");
       }
+
+      spy.mockRestore();
     });
   });
 

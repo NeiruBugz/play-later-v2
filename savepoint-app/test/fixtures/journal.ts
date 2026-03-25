@@ -1,11 +1,8 @@
-import {
-  JournalVisibility,
-  type JournalEntryDomain,
-} from "@/data-access-layer/domain/journal";
+import { JournalVisibility, type JournalEntry } from "@prisma/client";
 
 export function createJournalEntryFixture(
-  overrides?: Partial<JournalEntryDomain>
-): JournalEntryDomain {
+  overrides?: Partial<JournalEntry>
+): JournalEntry {
   return {
     id: "entry-1",
     userId: "user-1",

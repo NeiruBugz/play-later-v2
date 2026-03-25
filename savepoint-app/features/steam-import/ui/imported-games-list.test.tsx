@@ -1,4 +1,4 @@
-import type { ImportedGame } from "@prisma/client";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -28,7 +28,10 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-const createMockImportedGame = (id: string, name: string): ImportedGame => ({
+const createMockImportedGameDto = (
+  id: string,
+  name: string
+): ImportedGameDto => ({
   id,
   userId: "user-1",
   storefront: "STEAM",
@@ -47,9 +50,9 @@ const createMockImportedGame = (id: string, name: string): ImportedGame => ({
   deletedAt: null,
 });
 
-const createMockGamesList = (count: number): ImportedGame[] =>
+const createMockGamesList = (count: number): ImportedGameDto[] =>
   Array.from({ length: count }, (_, i) =>
-    createMockImportedGame(`game-${i + 1}`, `Game ${i + 1}`)
+    createMockImportedGameDto(`game-${i + 1}`, `Game ${i + 1}`)
   );
 
 const elements = {
@@ -305,7 +308,7 @@ describe("ImportedGamesList", () => {
       expect(elements.getCountHeader("1 game")).toBeVisible();
     });
 
-    it("should render list of ImportedGameCard components", () => {
+    it("should render list of ImportedGameDtoCard components", () => {
       const games = createMockGamesList(3);
 
       renderWithQueryClient(

@@ -32,6 +32,7 @@ export function createSimpleLibraryItemFixture(
     acquisitionType: "DIGITAL",
     startedAt: new Date("2025-01-01"),
     completedAt: null,
+    hasBeenPlayed: false,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-02"),
     ...overrides,

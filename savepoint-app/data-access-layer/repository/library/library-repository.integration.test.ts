@@ -1,4 +1,3 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library/enums";
 import {
   getTestDatabase,
   resetTestDatabase,
@@ -9,8 +8,8 @@ import {
   createLibraryItem,
   createUser,
 } from "@/test/setup/db-factories";
+import { LibraryItemStatus } from "@prisma/client";
 
-import { isRepositorySuccess } from "../types";
 import { findLibraryItemsWithFilters } from "./library-repository";
 
 describe("LibraryRepository - Integration Tests", () => {
@@ -43,19 +42,16 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game3.id,
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
         });
 
         const result = await findLibraryItemsWithFilters({ userId: user.id });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(3);
-          expect(result.data.total).toBe(3);
-          expect(
-            result.data.items.every((item) => item.userId === user.id)
-          ).toBe(true);
-        }
+        expect(result.items).toHaveLength(3);
+        expect(result.total).toBe(3);
+        expect(result.items.every((item) => item.userId === user.id)).toBe(
+          true
+        );
       });
 
       it("should filter by status correctly", async () => {
@@ -77,7 +73,7 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game3.id,
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
         });
 
         const result = await findLibraryItemsWithFilters({
@@ -85,15 +81,12 @@ describe("LibraryRepository - Integration Tests", () => {
           status: LibraryItemStatus.PLAYING,
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(2);
-          expect(
-            result.data.items.every(
-              (item) => item.status === LibraryItemStatus.PLAYING
-            )
-          ).toBe(true);
-        }
+        expect(result.items).toHaveLength(2);
+        expect(
+          result.items.every(
+            (item) => item.status === LibraryItemStatus.PLAYING
+          )
+        ).toBe(true);
       });
 
       it("should filter by platform correctly", async () => {
@@ -123,13 +116,8 @@ describe("LibraryRepository - Integration Tests", () => {
           platform: "PC",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(2);
-          expect(
-            result.data.items.every((item) => item.platform === "PC")
-          ).toBe(true);
-        }
+        expect(result.items).toHaveLength(2);
+        expect(result.items.every((item) => item.platform === "PC")).toBe(true);
       });
 
       it("should filter by game title search (case-insensitive)", async () => {
@@ -151,15 +139,12 @@ describe("LibraryRepository - Integration Tests", () => {
           search: "zelda",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(2);
-          expect(
-            result.data.items.every((item) =>
-              item.game.title.toLowerCase().includes("zelda")
-            )
-          ).toBe(true);
-        }
+        expect(result.items).toHaveLength(2);
+        expect(
+          result.items.every((item) =>
+            item.game.title.toLowerCase().includes("zelda")
+          )
+        ).toBe(true);
       });
 
       it("should apply multiple filters simultaneously", async () => {
@@ -194,23 +179,18 @@ describe("LibraryRepository - Integration Tests", () => {
           search: "dark souls",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(2);
-          expect(
-            result.data.items.every((item) => item.platform === "PC")
-          ).toBe(true);
-          expect(
-            result.data.items.every(
-              (item) => item.status === LibraryItemStatus.PLAYING
-            )
-          ).toBe(true);
-          expect(
-            result.data.items.every((item) =>
-              item.game.title.toLowerCase().includes("dark souls")
-            )
-          ).toBe(true);
-        }
+        expect(result.items).toHaveLength(2);
+        expect(result.items.every((item) => item.platform === "PC")).toBe(true);
+        expect(
+          result.items.every(
+            (item) => item.status === LibraryItemStatus.PLAYING
+          )
+        ).toBe(true);
+        expect(
+          result.items.every((item) =>
+            item.game.title.toLowerCase().includes("dark souls")
+          )
+        ).toBe(true);
       });
     });
 
@@ -240,13 +220,10 @@ describe("LibraryRepository - Integration Tests", () => {
           sortOrder: "asc",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(3);
-          expect(result.data.items[0].game.title).toBe("Oldest Game");
-          expect(result.data.items[1].game.title).toBe("Middle Game");
-          expect(result.data.items[2].game.title).toBe("Newest Game");
-        }
+        expect(result.items).toHaveLength(3);
+        expect(result.items[0].game.title).toBe("Oldest Game");
+        expect(result.items[1].game.title).toBe("Middle Game");
+        expect(result.items[2].game.title).toBe("Newest Game");
       });
 
       it("should sort by releaseDate descending", async () => {
@@ -274,13 +251,10 @@ describe("LibraryRepository - Integration Tests", () => {
           sortOrder: "desc",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(3);
-          expect(result.data.items[0].game.title).toBe("Newest Game");
-          expect(result.data.items[1].game.title).toBe("Middle Game");
-          expect(result.data.items[2].game.title).toBe("Oldest Game");
-        }
+        expect(result.items).toHaveLength(3);
+        expect(result.items[0].game.title).toBe("Newest Game");
+        expect(result.items[1].game.title).toBe("Middle Game");
+        expect(result.items[2].game.title).toBe("Oldest Game");
       });
 
       it("should sort by startedAt ascending with null handling", async () => {
@@ -326,14 +300,11 @@ describe("LibraryRepository - Integration Tests", () => {
           sortOrder: "asc",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(3);
-          expect(result.data.items[0].game.title).toBe("Started First");
-          expect(result.data.items[1].game.title).toBe("Started Second");
-          expect(result.data.items[2].game.title).toBe("Not Started");
-          expect(result.data.items[2].startedAt).toBeNull();
-        }
+        expect(result.items).toHaveLength(3);
+        expect(result.items[0].game.title).toBe("Started First");
+        expect(result.items[1].game.title).toBe("Started Second");
+        expect(result.items[2].game.title).toBe("Not Started");
+        expect(result.items[2].startedAt).toBeNull();
       });
     });
 
@@ -347,7 +318,7 @@ describe("LibraryRepository - Integration Tests", () => {
         const item1 = await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
         });
         await prisma.libraryItem.update({
           where: { id: item1.id },
@@ -379,12 +350,9 @@ describe("LibraryRepository - Integration Tests", () => {
           distinctByGame: true,
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(1);
-          expect(result.data.items[0].id).toBe(item3.id);
-          expect(result.data.items[0].status).toBe(LibraryItemStatus.PLAYED);
-        }
+        expect(result.items).toHaveLength(1);
+        expect(result.items[0].id).toBe(item3.id);
+        expect(result.items[0].status).toBe(LibraryItemStatus.PLAYED);
       });
 
       it("should return all items when distinctByGame is false", async () => {
@@ -394,7 +362,7 @@ describe("LibraryRepository - Integration Tests", () => {
         await createLibraryItem({
           userId: user.id,
           gameId: game.id,
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
         });
         await createLibraryItem({
           userId: user.id,
@@ -412,10 +380,7 @@ describe("LibraryRepository - Integration Tests", () => {
           distinctByGame: false,
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(3);
-        }
+        expect(result.items).toHaveLength(3);
       });
 
       it("should deduplicate multiple games correctly", async () => {
@@ -466,18 +431,15 @@ describe("LibraryRepository - Integration Tests", () => {
           distinctByGame: true,
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(2);
-          const gameIds = result.data.items.map((item) => item.gameId).sort();
-          expect(gameIds).toEqual([game1.id, game2.id].sort());
-          expect(
-            result.data.items.find((item) => item.gameId === game1.id)?.id
-          ).toBe(item2.id);
-          expect(
-            result.data.items.find((item) => item.gameId === game2.id)?.id
-          ).toBe(item4.id);
-        }
+        expect(result.items).toHaveLength(2);
+        const gameIds = result.items.map((item) => item.gameId).sort();
+        expect(gameIds).toEqual([game1.id, game2.id].sort());
+        expect(result.items.find((item) => item.gameId === game1.id)?.id).toBe(
+          item2.id
+        );
+        expect(result.items.find((item) => item.gameId === game2.id)?.id).toBe(
+          item4.id
+        );
       });
     });
 
@@ -495,11 +457,8 @@ describe("LibraryRepository - Integration Tests", () => {
           distinctByGame: true,
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(1);
-          expect(result.data.items[0].game._count.libraryItems).toBe(3);
-        }
+        expect(result.items).toHaveLength(1);
+        expect(result.items[0].game._count.libraryItems).toBe(3);
       });
 
       it("should count only the user's library items per game", async () => {
@@ -518,11 +477,8 @@ describe("LibraryRepository - Integration Tests", () => {
           distinctByGame: true,
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(1);
-          expect(result.data.items[0].game._count.libraryItems).toBe(2);
-        }
+        expect(result.items).toHaveLength(1);
+        expect(result.items[0].game._count.libraryItems).toBe(2);
       });
     });
 
@@ -532,10 +488,7 @@ describe("LibraryRepository - Integration Tests", () => {
 
         const result = await findLibraryItemsWithFilters({ userId: user.id });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(0);
-        }
+        expect(result.items).toHaveLength(0);
       });
 
       it("should enforce row-level security (user can only see their own items)", async () => {
@@ -550,14 +503,10 @@ describe("LibraryRepository - Integration Tests", () => {
         const result1 = await findLibraryItemsWithFilters({ userId: user1.id });
         const result2 = await findLibraryItemsWithFilters({ userId: user2.id });
 
-        expect(isRepositorySuccess(result1)).toBe(true);
-        expect(isRepositorySuccess(result2)).toBe(true);
-        if (isRepositorySuccess(result1) && isRepositorySuccess(result2)) {
-          expect(result1.data.items).toHaveLength(1);
-          expect(result2.data.items).toHaveLength(1);
-          expect(result1.data.items[0].game.title).toBe("User 1 Game");
-          expect(result2.data.items[0].game.title).toBe("User 2 Game");
-        }
+        expect(result1.items).toHaveLength(1);
+        expect(result2.items).toHaveLength(1);
+        expect(result1.items[0].game.title).toBe("User 1 Game");
+        expect(result2.items[0].game.title).toBe("User 2 Game");
       });
 
       it("should handle special characters in search", async () => {
@@ -575,13 +524,10 @@ describe("LibraryRepository - Integration Tests", () => {
           search: "zelda: breath",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(1);
-          expect(result.data.items[0].game.title).toBe(
-            "The Legend of Zelda: Breath of the Wild"
-          );
-        }
+        expect(result.items).toHaveLength(1);
+        expect(result.items[0].game.title).toBe(
+          "The Legend of Zelda: Breath of the Wild"
+        );
       });
 
       it("should handle empty string in search", async () => {
@@ -595,10 +541,7 @@ describe("LibraryRepository - Integration Tests", () => {
           search: "",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(1);
-        }
+        expect(result.items).toHaveLength(1);
       });
 
       it("should return empty array when search matches no games", async () => {
@@ -612,10 +555,7 @@ describe("LibraryRepository - Integration Tests", () => {
           search: "nonexistent game title",
         });
 
-        expect(isRepositorySuccess(result)).toBe(true);
-        if (isRepositorySuccess(result)) {
-          expect(result.data.items).toHaveLength(0);
-        }
+        expect(result.items).toHaveLength(0);
       });
 
       it("should handle games with null release date in sorting", async () => {
@@ -643,20 +583,13 @@ describe("LibraryRepository - Integration Tests", () => {
           sortOrder: "asc",
         });
 
-        expect(isRepositorySuccess(resultAsc)).toBe(true);
-        if (isRepositorySuccess(resultAsc)) {
-          expect(resultAsc.data.items).toHaveLength(3);
-          expect(resultAsc.data.items[0].game.title).toBe(
-            "Another Game With Release Date"
-          );
-          expect(resultAsc.data.items[1].game.title).toBe(
-            "Game With Release Date"
-          );
-          expect(resultAsc.data.items[2].game.title).toBe(
-            "Game Without Release Date"
-          );
-          expect(resultAsc.data.items[2].game.releaseDate).toBeNull();
-        }
+        expect(resultAsc.items).toHaveLength(3);
+        expect(resultAsc.items[0].game.title).toBe(
+          "Another Game With Release Date"
+        );
+        expect(resultAsc.items[1].game.title).toBe("Game With Release Date");
+        expect(resultAsc.items[2].game.title).toBe("Game Without Release Date");
+        expect(resultAsc.items[2].game.releaseDate).toBeNull();
 
         const resultDesc = await findLibraryItemsWithFilters({
           userId: user.id,
@@ -664,20 +597,15 @@ describe("LibraryRepository - Integration Tests", () => {
           sortOrder: "desc",
         });
 
-        expect(isRepositorySuccess(resultDesc)).toBe(true);
-        if (isRepositorySuccess(resultDesc)) {
-          expect(resultDesc.data.items).toHaveLength(3);
-          expect(resultDesc.data.items[0].game.title).toBe(
-            "Game Without Release Date"
-          );
-          expect(resultDesc.data.items[0].game.releaseDate).toBeNull();
-          expect(resultDesc.data.items[1].game.title).toBe(
-            "Game With Release Date"
-          );
-          expect(resultDesc.data.items[2].game.title).toBe(
-            "Another Game With Release Date"
-          );
-        }
+        expect(resultDesc.items).toHaveLength(3);
+        expect(resultDesc.items[0].game.title).toBe(
+          "Game Without Release Date"
+        );
+        expect(resultDesc.items[0].game.releaseDate).toBeNull();
+        expect(resultDesc.items[1].game.title).toBe("Game With Release Date");
+        expect(resultDesc.items[2].game.title).toBe(
+          "Another Game With Release Date"
+        );
       });
     });
   });

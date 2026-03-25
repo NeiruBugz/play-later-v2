@@ -100,7 +100,7 @@ model Game {
 
 model LibraryItem {
   id              Int               @id @default(autoincrement())
-  status          LibraryItemStatus @default(PLAYED)
+  status          LibraryItemStatus @default(SHELF)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   platform        String?
@@ -111,6 +111,7 @@ model LibraryItem {
   User            User              @relation(fields: [userId], references: [id])
   startedAt       DateTime?
   completedAt     DateTime?
+  hasBeenPlayed   Boolean           @default(false)
   JournalEntry    JournalEntry[]
 
   @@index([userId, status])
@@ -198,8 +199,9 @@ enum Storefront {
 }
 
 enum LibraryItemStatus {
-  WANT_TO_PLAY
-  OWNED
+  WISHLIST
+  SHELF
+  UP_NEXT
   PLAYING
   PLAYED
 }

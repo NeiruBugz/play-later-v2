@@ -11,9 +11,17 @@ export function prepareProfileData(profile: ProfileWithStats) {
   const statusEntries = Object.entries(profile.stats.statusCounts).filter(
     ([, count]) => count > 0
   );
+  const totalGames = statusEntries.reduce((sum, [, count]) => sum + count, 0);
+  const quickStats = {
+    totalGames,
+    playing: profile.stats.statusCounts["PLAYING"] ?? 0,
+    completed: profile.stats.statusCounts["PLAYED"] ?? 0,
+    journalEntries: profile.stats.journalCount,
+  };
   return {
     displayName,
     joinDateFormatted,
     statusEntries,
+    quickStats,
   };
 }

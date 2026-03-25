@@ -1,6 +1,6 @@
 "use client";
 
-import type { ImportedGame } from "@prisma/client";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
@@ -32,17 +32,21 @@ import { IgdbManualSearch } from "./igdb-manual-search";
 type ImportGameModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  game: ImportedGame;
+  game: ImportedGameDto;
 };
 
 const STATUS_OPTIONS = [
   {
-    value: LibraryItemStatus.WANT_TO_PLAY,
-    label: "Want to Play",
+    value: LibraryItemStatus.WISHLIST,
+    label: "Wishlist",
   },
   {
-    value: LibraryItemStatus.OWNED,
-    label: "Owned",
+    value: LibraryItemStatus.SHELF,
+    label: "Shelf",
+  },
+  {
+    value: LibraryItemStatus.UP_NEXT,
+    label: "Up Next",
   },
   {
     value: LibraryItemStatus.PLAYING,

@@ -1,6 +1,7 @@
 export const statusLabels: Record<string, string> = {
-  WANT_TO_PLAY: "Want to Play",
-  OWNED: "Owned",
+  WISHLIST: "Wishlist",
+  SHELF: "Shelf",
+  UP_NEXT: "Up Next",
   PLAYING: "Playing",
   PLAYED: "Played",
 };

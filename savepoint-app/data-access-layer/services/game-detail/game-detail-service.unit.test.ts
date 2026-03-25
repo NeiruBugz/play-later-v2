@@ -1,4 +1,3 @@
-import { RepositoryErrorCode } from "@/data-access-layer/repository/types";
 import { ServiceErrorCode } from "@/data-access-layer/services/types";
 import type { Game } from "@prisma/client";
 
@@ -73,22 +72,10 @@ describe("GameDetailService - Unit Tests", () => {
         updatedAt: new Date(),
       };
 
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: false,
-      });
-      mockUpsertGenres.mockResolvedValue({
-        success: true,
-        data: [],
-      });
-      mockUpsertPlatforms.mockResolvedValue({
-        success: true,
-        data: [],
-      });
-      mockCreateGameWithRelations.mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertGenres.mockResolvedValue([]);
+      mockUpsertPlatforms.mockResolvedValue([]);
+      mockCreateGameWithRelations.mockResolvedValue(mockGame);
 
       const igdbGame = createMockIgdbGame();
       const result = await service.populateGameInDatabase(igdbGame);
@@ -102,10 +89,7 @@ describe("GameDetailService - Unit Tests", () => {
     });
 
     it("should return success with null when game already exists", async () => {
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: true,
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(true);
 
       const igdbGame = createMockIgdbGame();
       const result = await service.populateGameInDatabase(igdbGame);
@@ -121,17 +105,8 @@ describe("GameDetailService - Unit Tests", () => {
     });
 
     it("should return error when genre upsert fails", async () => {
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: false,
-      });
-      mockUpsertGenres.mockResolvedValue({
-        success: false,
-        error: {
-          code: RepositoryErrorCode.DATABASE_ERROR,
-          message: "Failed to upsert genres",
-        },
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertGenres.mockRejectedValue(new Error("Failed to upsert genres"));
 
       const igdbGame = createMockIgdbGame({
         genres: [{ id: 1, name: "Action", slug: "action" }],
@@ -149,21 +124,11 @@ describe("GameDetailService - Unit Tests", () => {
     });
 
     it("should return error when platform upsert fails", async () => {
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: false,
-      });
-      mockUpsertGenres.mockResolvedValue({
-        success: true,
-        data: [],
-      });
-      mockUpsertPlatforms.mockResolvedValue({
-        success: false,
-        error: {
-          code: RepositoryErrorCode.DATABASE_ERROR,
-          message: "Failed to upsert platforms",
-        },
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertGenres.mockResolvedValue([]);
+      mockUpsertPlatforms.mockRejectedValue(
+        new Error("Failed to upsert platforms")
+      );
 
       const igdbGame = createMockIgdbGame({
         platforms: [{ id: 1, name: "PC", slug: "pc" }],
@@ -180,25 +145,12 @@ describe("GameDetailService - Unit Tests", () => {
     });
 
     it("should return error when game creation fails", async () => {
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: false,
-      });
-      mockUpsertGenres.mockResolvedValue({
-        success: true,
-        data: [],
-      });
-      mockUpsertPlatforms.mockResolvedValue({
-        success: true,
-        data: [],
-      });
-      mockCreateGameWithRelations.mockResolvedValue({
-        success: false,
-        error: {
-          code: RepositoryErrorCode.DATABASE_ERROR,
-          message: "Failed to create game",
-        },
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertGenres.mockResolvedValue([]);
+      mockUpsertPlatforms.mockResolvedValue([]);
+      mockCreateGameWithRelations.mockRejectedValue(
+        new Error("Failed to create game")
+      );
 
       const igdbGame = createMockIgdbGame();
       const result = await service.populateGameInDatabase(igdbGame);
@@ -249,37 +201,25 @@ describe("GameDetailService - Unit Tests", () => {
         checksum: null,
       };
 
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: false,
-      });
-      mockUpsertGenres.mockResolvedValue({
-        success: true,
-        data: [mockGenre],
-      });
-      mockUpsertPlatforms.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertGenres.mockResolvedValue([mockGenre]);
+      mockUpsertPlatforms.mockResolvedValue([]);
       mockCreateGameWithRelations.mockResolvedValue({
-        success: true,
-        data: {
-          id: "game-uuid",
-          title: "Test Game",
-          slug: "test-game",
-          igdbId: 12345,
-          hltbId: null,
-          description: null,
-          coverImage: "co_test",
-          releaseDate: null,
-          mainStory: null,
-          mainExtra: null,
-          completionist: null,
-          steamAppId: null,
-          franchiseId: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        id: "game-uuid",
+        title: "Test Game",
+        slug: "test-game",
+        igdbId: 12345,
+        hltbId: null,
+        description: null,
+        coverImage: "co_test",
+        releaseDate: null,
+        mainStory: null,
+        mainExtra: null,
+        completionist: null,
+        steamAppId: null,
+        franchiseId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       const igdbGame = createMockIgdbGame({
@@ -314,37 +254,25 @@ describe("GameDetailService - Unit Tests", () => {
         platformType: null,
       };
 
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: false,
-      });
-      mockUpsertGenres.mockResolvedValue({
-        success: true,
-        data: [],
-      });
-      mockUpsertPlatforms.mockResolvedValue({
-        success: true,
-        data: [mockPlatform],
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertGenres.mockResolvedValue([]);
+      mockUpsertPlatforms.mockResolvedValue([mockPlatform]);
       mockCreateGameWithRelations.mockResolvedValue({
-        success: true,
-        data: {
-          id: "game-uuid",
-          title: "Test Game",
-          slug: "test-game",
-          igdbId: 12345,
-          hltbId: null,
-          description: null,
-          coverImage: "co_test",
-          releaseDate: null,
-          mainStory: null,
-          mainExtra: null,
-          completionist: null,
-          steamAppId: null,
-          franchiseId: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        id: "game-uuid",
+        title: "Test Game",
+        slug: "test-game",
+        igdbId: 12345,
+        hltbId: null,
+        description: null,
+        coverImage: "co_test",
+        releaseDate: null,
+        mainStory: null,
+        mainExtra: null,
+        completionist: null,
+        steamAppId: null,
+        franchiseId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       const igdbGame = createMockIgdbGame({
@@ -368,33 +296,24 @@ describe("GameDetailService - Unit Tests", () => {
     });
 
     it("should skip genre processing when genres array is empty", async () => {
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: false,
-      });
-      mockUpsertPlatforms.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertPlatforms.mockResolvedValue([]);
       mockCreateGameWithRelations.mockResolvedValue({
-        success: true,
-        data: {
-          id: "game-uuid",
-          title: "Test Game",
-          slug: "test-game",
-          igdbId: 12345,
-          hltbId: null,
-          description: null,
-          coverImage: "co_test",
-          releaseDate: null,
-          mainStory: null,
-          mainExtra: null,
-          completionist: null,
-          steamAppId: null,
-          franchiseId: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        id: "game-uuid",
+        title: "Test Game",
+        slug: "test-game",
+        igdbId: 12345,
+        hltbId: null,
+        description: null,
+        coverImage: "co_test",
+        releaseDate: null,
+        mainStory: null,
+        mainExtra: null,
+        completionist: null,
+        steamAppId: null,
+        franchiseId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       const igdbGame = createMockIgdbGame({ genres: [] });
@@ -410,33 +329,24 @@ describe("GameDetailService - Unit Tests", () => {
     });
 
     it("should skip platform processing when platforms array is empty", async () => {
-      mockGameExistsByIgdbId.mockResolvedValue({
-        success: true,
-        data: false,
-      });
-      mockUpsertGenres.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertGenres.mockResolvedValue([]);
       mockCreateGameWithRelations.mockResolvedValue({
-        success: true,
-        data: {
-          id: "game-uuid",
-          title: "Test Game",
-          slug: "test-game",
-          igdbId: 12345,
-          hltbId: null,
-          description: null,
-          coverImage: "co_test",
-          releaseDate: null,
-          mainStory: null,
-          mainExtra: null,
-          completionist: null,
-          steamAppId: null,
-          franchiseId: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+        id: "game-uuid",
+        title: "Test Game",
+        slug: "test-game",
+        igdbId: 12345,
+        hltbId: null,
+        description: null,
+        coverImage: "co_test",
+        releaseDate: null,
+        mainStory: null,
+        mainExtra: null,
+        completionist: null,
+        steamAppId: null,
+        franchiseId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
 
       const igdbGame = createMockIgdbGame({ platforms: [] });

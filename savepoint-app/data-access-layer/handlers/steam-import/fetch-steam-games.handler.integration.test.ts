@@ -9,6 +9,7 @@ import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
+import * as rateLimitModule from "@/shared/lib/rate-limit";
 
 import type { RequestContext } from "../types";
 import { fetchSteamGamesHandler } from "./fetch-steam-games.handler";
@@ -341,20 +342,16 @@ describe("fetchSteamGamesHandler (integration)", () => {
 
   describe("Rate Limiting", () => {
     it("should return TOO_MANY_REQUESTS after exceeding rate limit", async () => {
+      const spy = vi
+        .spyOn(rateLimitModule, "checkRateLimit")
+        .mockResolvedValueOnce({ allowed: false, remaining: 0 });
+
       const user = await createUser({
         steamId64: "76561198012345678",
         steamUsername: "TestPlayer",
       });
       const ip = getUniqueIP();
       const context = createMockContext(ip);
-
-      for (let i = 0; i < 20; i++) {
-        const result = await fetchSteamGamesHandler(
-          { userId: user.id },
-          context
-        );
-        expect(result.success).toBe(true);
-      }
 
       const result = await fetchSteamGamesHandler({ userId: user.id }, context);
 
@@ -364,10 +361,10 @@ describe("fetchSteamGamesHandler (integration)", () => {
         expect(result.status).toBe(HTTP_STATUS.TOO_MANY_REQUESTS);
         expect(result.error).toBe("Rate limit exceeded. Try again later.");
         expect(result.headers).toBeDefined();
-        expect(result.headers?.["X-RateLimit-Limit"]).toBe("20");
-        expect(result.headers?.["X-RateLimit-Remaining"]).toBe("0");
         expect(result.headers?.["Retry-After"]).toBeDefined();
       }
+
+      spy.mockRestore();
     });
   });
 

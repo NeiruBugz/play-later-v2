@@ -225,13 +225,13 @@ export interface TestLibraryItem {
 export async function createTestLibraryItem(data: {
   userId: string;
   gameId: string;
-  status?: "WANT_TO_PLAY" | "OWNED" | "PLAYING" | "PLAYED";
+  status?: "WISHLIST" | "SHELF" | "UP_NEXT" | "PLAYING" | "PLAYED";
 }): Promise<TestLibraryItem> {
   const libraryItem = await getPrisma().libraryItem.create({
     data: {
       userId: data.userId,
       gameId: data.gameId,
-      status: data.status ?? "WANT_TO_PLAY",
+      status: data.status ?? "SHELF",
     },
   });
   return {

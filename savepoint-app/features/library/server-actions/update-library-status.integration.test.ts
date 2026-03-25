@@ -1,4 +1,3 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { setupDatabase } from "@/test/setup/database";
 import {
   createGame,
@@ -7,6 +6,7 @@ import {
 } from "@/test/setup/db-factories";
 
 import { prisma } from "@/shared/lib/app/db";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import { updateLibraryStatusAction } from "./update-library-status";
 
@@ -59,7 +59,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryStatusAction({
@@ -83,7 +83,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const statuses: LibraryItemStatus[] = [
@@ -107,7 +107,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   });
 
   describe("Status transition validation", () => {
-    it("should allow moving TO Want to Play from other statuses", async () => {
+    it("should allow moving TO Wishlist from other statuses", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
@@ -116,24 +116,24 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
       if (!result.success) return;
-      expect(result.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
 
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
-      expect(dbItem?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(dbItem?.status).toBe(LibraryItemStatus.WISHLIST);
     });
 
-    it("should allow updating Want to Play TO other statuses", async () => {
+    it("should allow updating Wishlist TO other statuses", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryStatusAction({
@@ -146,21 +146,21 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       expect(result.data.status).toBe(LibraryItemStatus.PLAYING);
     });
 
-    it("should allow staying in Want to Play status (same status update)", async () => {
+    it("should allow staying in Wishlist status (same status update)", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryStatusAction({
         libraryItemId: libraryItem.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
       if (!result.success) return;
-      expect(result.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
     });
   });
 
@@ -169,7 +169,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const { getServerUserId } = await import("@/auth");
@@ -194,7 +194,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: otherUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryStatusAction({
@@ -209,7 +209,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const dbItem = await prisma.libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
-      expect(dbItem?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(dbItem?.status).toBe(LibraryItemStatus.WISHLIST);
     });
 
     it("should return error when library item doesn't exist", async () => {
@@ -230,7 +230,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     it("should return error for invalid input - negative library item ID", async () => {
       const result = await updateLibraryStatusAction({
         libraryItemId: -1,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -241,7 +241,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     it("should return error for invalid input - zero library item ID", async () => {
       const result = await updateLibraryStatusAction({
         libraryItemId: 0,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -253,7 +253,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryStatusAction({
@@ -275,7 +275,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       await updateLibraryStatusAction({

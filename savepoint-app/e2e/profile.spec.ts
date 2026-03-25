@@ -128,17 +128,17 @@ test.describe("Profile Page - With Library Items", () => {
       createTestLibraryItem({
         userId: user.id,
         gameId: game1.id,
-        status: "WANT_TO_PLAY",
+        status: "WISHLIST",
       }),
       createTestLibraryItem({
         userId: user.id,
         gameId: game2.id,
-        status: "WANT_TO_PLAY",
+        status: "WISHLIST",
       }),
       createTestLibraryItem({
         userId: user.id,
         gameId: game3.id,
-        status: "WANT_TO_PLAY",
+        status: "WISHLIST",
       }),
       createTestLibraryItem({
         userId: user.id,
@@ -201,11 +201,9 @@ test.describe("Profile Page - With Library Items", () => {
   test("should display human-readable status labels", async ({ page }) => {
     const profile = new ProfilePage(page);
     await profile.goto();
-    await expect(profile.statusCard("Want to Play")).toBeVisible();
+    await expect(profile.statusCard("Wishlist")).toBeVisible();
     await expect(profile.statusCard("Playing")).toBeVisible();
-    await expect(
-      page.getByText("WANT_TO_PLAY", { exact: true })
-    ).not.toBeVisible();
+    await expect(page.getByText("WISHLIST", { exact: true })).not.toBeVisible();
     await expect(page.getByText("PLAYING", { exact: true })).not.toBeVisible();
   });
 

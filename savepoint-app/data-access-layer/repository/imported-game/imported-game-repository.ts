@@ -1,12 +1,6 @@
 import "server-only";
 
 import {
-  repositoryError,
-  RepositoryErrorCode,
-  repositorySuccess,
-  type RepositoryResult,
-} from "@/data-access-layer/repository/types";
-import {
   Prisma,
   type IgdbMatchStatus,
   type ImportedGame,
@@ -14,6 +8,7 @@ import {
 
 import { prisma } from "@/shared/lib/app/db";
 
+import { NotFoundError } from "../errors";
 import type {
   CreateImportedGameInput,
   ImportedGameQueryOptions,
@@ -23,279 +18,231 @@ import type {
 export async function upsertManyImportedGames(
   userId: string,
   games: CreateImportedGameInput[]
-): Promise<RepositoryResult<number>> {
-  try {
-    const result = await prisma.$transaction(async (tx) => {
-      let upsertedCount = 0;
+): Promise<number> {
+  return prisma.$transaction(async (tx) => {
+    let upsertedCount = 0;
 
-      for (const game of games) {
-        const existingGame = await tx.importedGame.findFirst({
-          where: {
-            userId,
-            storefront: game.storefront,
-            storefrontGameId: game.storefrontGameId,
-            deletedAt: null,
+    for (const game of games) {
+      const existingGame = await tx.importedGame.findFirst({
+        where: {
+          userId,
+          storefront: game.storefront,
+          storefrontGameId: game.storefrontGameId,
+          deletedAt: null,
+        },
+      });
+
+      if (existingGame) {
+        await tx.importedGame.update({
+          where: { id: existingGame.id },
+          data: {
+            name: game.name,
+            playtime: game.playtime ?? 0,
+            playtimeWindows: game.playtimeWindows ?? 0,
+            playtimeMac: game.playtimeMac ?? 0,
+            playtimeLinux: game.playtimeLinux ?? 0,
+            lastPlayedAt: game.lastPlayedAt,
+            img_icon_url: game.img_icon_url,
+            img_logo_url: game.img_logo_url,
+            updatedAt: new Date(),
           },
         });
-
-        if (existingGame) {
-          await tx.importedGame.update({
-            where: { id: existingGame.id },
-            data: {
-              name: game.name,
-              playtime: game.playtime ?? 0,
-              playtimeWindows: game.playtimeWindows ?? 0,
-              playtimeMac: game.playtimeMac ?? 0,
-              playtimeLinux: game.playtimeLinux ?? 0,
-              lastPlayedAt: game.lastPlayedAt,
-              img_icon_url: game.img_icon_url,
-              img_logo_url: game.img_logo_url,
-              updatedAt: new Date(),
-            },
-          });
-        } else {
-          await tx.importedGame.create({
-            data: {
-              userId,
-              name: game.name,
-              storefront: game.storefront,
-              storefrontGameId: game.storefrontGameId,
-              playtime: game.playtime ?? 0,
-              playtimeWindows: game.playtimeWindows ?? 0,
-              playtimeMac: game.playtimeMac ?? 0,
-              playtimeLinux: game.playtimeLinux ?? 0,
-              lastPlayedAt: game.lastPlayedAt,
-              img_icon_url: game.img_icon_url,
-              img_logo_url: game.img_logo_url,
-              igdbMatchStatus: game.igdbMatchStatus ?? "PENDING",
-            },
-          });
-        }
-        upsertedCount++;
+      } else {
+        await tx.importedGame.create({
+          data: {
+            userId,
+            name: game.name,
+            storefront: game.storefront,
+            storefrontGameId: game.storefrontGameId,
+            playtime: game.playtime ?? 0,
+            playtimeWindows: game.playtimeWindows ?? 0,
+            playtimeMac: game.playtimeMac ?? 0,
+            playtimeLinux: game.playtimeLinux ?? 0,
+            lastPlayedAt: game.lastPlayedAt,
+            img_icon_url: game.img_icon_url,
+            img_logo_url: game.img_logo_url,
+            igdbMatchStatus: game.igdbMatchStatus ?? "PENDING",
+          },
+        });
       }
+      upsertedCount++;
+    }
 
-      return upsertedCount;
-    });
-
-    return repositorySuccess(result);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to upsert imported games: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+    return upsertedCount;
+  });
 }
 
 export async function findImportedGamesByUserId(
   userId: string,
   options: ImportedGameQueryOptions = {}
-): Promise<RepositoryResult<PaginatedImportedGames>> {
-  try {
-    const {
-      search,
-      page = 1,
-      limit = 25,
-      playtimeStatus = "all",
-      playtimeRange = "all",
-      platform = "all",
-      lastPlayed = "all",
-      sortBy = "added_desc",
-      matchStatus,
-    } = options;
+): Promise<PaginatedImportedGames> {
+  const {
+    search,
+    page = 1,
+    limit = 25,
+    playtimeStatus = "all",
+    playtimeRange = "all",
+    platform = "all",
+    lastPlayed = "all",
+    sortBy = "added_desc",
+    matchStatus,
+  } = options;
 
-    const validatedLimit = Math.min(Math.max(1, limit), 100);
-    const validatedPage = Math.max(1, page);
-    const skip = (validatedPage - 1) * validatedLimit;
+  const validatedLimit = Math.min(Math.max(1, limit), 100);
+  const validatedPage = Math.max(1, page);
+  const skip = (validatedPage - 1) * validatedLimit;
 
-    const whereClause: Prisma.ImportedGameWhereInput = {
-      userId,
-      deletedAt: null,
-    };
+  const whereClause: Prisma.ImportedGameWhereInput = {
+    userId,
+    deletedAt: null,
+  };
 
-    if (matchStatus && matchStatus.length > 0) {
-      whereClause.igdbMatchStatus = {
-        in: matchStatus,
-      };
-    }
-
-    if (search) {
-      whereClause.name = {
-        contains: search,
-        mode: "insensitive",
-      };
-    }
-
-    if (playtimeRange !== "all") {
-      switch (playtimeRange) {
-        case "under_1h":
-          whereClause.playtime = { lt: 60 };
-          break;
-        case "1_to_10h":
-          whereClause.playtime = { gte: 60, lt: 600 };
-          break;
-        case "10_to_50h":
-          whereClause.playtime = { gte: 600, lt: 3000 };
-          break;
-        case "over_50h":
-          whereClause.playtime = { gte: 3000 };
-          break;
-      }
-    } else if (playtimeStatus === "played") {
-      whereClause.playtime = { gt: 0 };
-    } else if (playtimeStatus === "never_played") {
-      whereClause.playtime = { equals: 0 };
-    }
-
-    if (platform !== "all") {
-      switch (platform) {
-        case "windows":
-          whereClause.playtimeWindows = { gt: 0 };
-          break;
-        case "mac":
-          whereClause.playtimeMac = { gt: 0 };
-          break;
-        case "linux":
-          whereClause.playtimeLinux = { gt: 0 };
-          break;
-      }
-    }
-
-    if (lastPlayed !== "all") {
-      const now = new Date();
-      switch (lastPlayed) {
-        case "30_days":
-          whereClause.lastPlayedAt = {
-            gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
-          };
-          break;
-        case "1_year":
-          whereClause.lastPlayedAt = {
-            gte: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000),
-          };
-          break;
-        case "over_1_year":
-          whereClause.lastPlayedAt = {
-            lt: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000),
-          };
-          break;
-        case "never":
-          whereClause.lastPlayedAt = null;
-          break;
-      }
-    }
-
-    let orderByClause: Prisma.ImportedGameOrderByWithRelationInput;
-    switch (sortBy) {
-      case "name_asc":
-        orderByClause = { name: "asc" };
-        break;
-      case "name_desc":
-        orderByClause = { name: "desc" };
-        break;
-      case "playtime_desc":
-        orderByClause = { playtime: "desc" };
-        break;
-      case "playtime_asc":
-        orderByClause = { playtime: "asc" };
-        break;
-      case "last_played_desc":
-        orderByClause = { lastPlayedAt: { sort: "desc", nulls: "last" } };
-        break;
-      case "last_played_asc":
-        orderByClause = { lastPlayedAt: { sort: "asc", nulls: "last" } };
-        break;
-      case "added_desc":
-      default:
-        orderByClause = { createdAt: "desc" };
-        break;
-    }
-
-    const [items, total] = await Promise.all([
-      prisma.importedGame.findMany({
-        where: whereClause,
-        orderBy: orderByClause,
-        skip,
-        take: validatedLimit,
-      }),
-      prisma.importedGame.count({ where: whereClause }),
-    ]);
-
-    return repositorySuccess({
-      items,
-      total,
-      page: validatedPage,
-      limit: validatedLimit,
-      totalPages: Math.ceil(total / validatedLimit),
-    });
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to find imported games: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+  if (matchStatus && matchStatus.length > 0) {
+    whereClause.igdbMatchStatus = { in: matchStatus };
   }
+
+  if (search) {
+    whereClause.name = { contains: search, mode: "insensitive" };
+  }
+
+  if (playtimeRange !== "all") {
+    switch (playtimeRange) {
+      case "under_1h":
+        whereClause.playtime = { lt: 60 };
+        break;
+      case "1_to_10h":
+        whereClause.playtime = { gte: 60, lt: 600 };
+        break;
+      case "10_to_50h":
+        whereClause.playtime = { gte: 600, lt: 3000 };
+        break;
+      case "over_50h":
+        whereClause.playtime = { gte: 3000 };
+        break;
+    }
+  } else if (playtimeStatus === "played") {
+    whereClause.playtime = { gt: 0 };
+  } else if (playtimeStatus === "never_played") {
+    whereClause.playtime = { equals: 0 };
+  }
+
+  if (platform !== "all") {
+    switch (platform) {
+      case "windows":
+        whereClause.playtimeWindows = { gt: 0 };
+        break;
+      case "mac":
+        whereClause.playtimeMac = { gt: 0 };
+        break;
+      case "linux":
+        whereClause.playtimeLinux = { gt: 0 };
+        break;
+    }
+  }
+
+  if (lastPlayed !== "all") {
+    const now = new Date();
+    switch (lastPlayed) {
+      case "30_days":
+        whereClause.lastPlayedAt = {
+          gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
+        };
+        break;
+      case "1_year":
+        whereClause.lastPlayedAt = {
+          gte: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000),
+        };
+        break;
+      case "over_1_year":
+        whereClause.lastPlayedAt = {
+          lt: new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000),
+        };
+        break;
+      case "never":
+        whereClause.lastPlayedAt = null;
+        break;
+    }
+  }
+
+  let orderByClause: Prisma.ImportedGameOrderByWithRelationInput;
+  switch (sortBy) {
+    case "name_asc":
+      orderByClause = { name: "asc" };
+      break;
+    case "name_desc":
+      orderByClause = { name: "desc" };
+      break;
+    case "playtime_desc":
+      orderByClause = { playtime: "desc" };
+      break;
+    case "playtime_asc":
+      orderByClause = { playtime: "asc" };
+      break;
+    case "last_played_desc":
+      orderByClause = { lastPlayedAt: { sort: "desc", nulls: "last" } };
+      break;
+    case "last_played_asc":
+      orderByClause = { lastPlayedAt: { sort: "asc", nulls: "last" } };
+      break;
+    case "added_desc":
+    default:
+      orderByClause = { createdAt: "desc" };
+      break;
+  }
+
+  const [items, total] = await Promise.all([
+    prisma.importedGame.findMany({
+      where: whereClause,
+      orderBy: orderByClause,
+      skip,
+      take: validatedLimit,
+    }),
+    prisma.importedGame.count({ where: whereClause }),
+  ]);
+
+  return {
+    items,
+    total,
+    page: validatedPage,
+    limit: validatedLimit,
+    totalPages: Math.ceil(total / validatedLimit),
+  };
 }
 
 export async function findImportedGameById(
   id: string,
   userId: string
-): Promise<RepositoryResult<ImportedGame | null>> {
-  try {
-    const game = await prisma.importedGame.findFirst({
-      where: {
-        id,
-        userId,
-        deletedAt: null,
-      },
-    });
-    return repositorySuccess(game);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to find imported game: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+): Promise<ImportedGame | null> {
+  return prisma.importedGame.findFirst({
+    where: { id, userId, deletedAt: null },
+  });
 }
 
 export async function countImportedGamesByUserId(
   userId: string
-): Promise<RepositoryResult<number>> {
-  try {
-    const count = await prisma.importedGame.count({
-      where: { userId, deletedAt: null },
-    });
-    return repositorySuccess(count);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to count imported games: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
-  }
+): Promise<number> {
+  return prisma.importedGame.count({
+    where: { userId, deletedAt: null },
+  });
 }
 
 export async function softDeleteImportedGame(
   id: string,
   userId: string
-): Promise<RepositoryResult<void>> {
+): Promise<void> {
   try {
     await prisma.importedGame.update({
       where: { id, userId },
       data: { deletedAt: new Date() },
     });
-    return repositorySuccess(undefined);
   } catch (error) {
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      return repositoryError(
-        RepositoryErrorCode.NOT_FOUND,
-        "Imported game not found"
-      );
+      throw new NotFoundError("Imported game not found");
     }
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to soft delete imported game: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+    throw error;
   }
 }
 
@@ -303,35 +250,17 @@ export async function updateImportedGameStatus(
   id: string,
   userId: string,
   status: IgdbMatchStatus
-): Promise<RepositoryResult<ImportedGame>> {
-  try {
-    const existingGame = await prisma.importedGame.findFirst({
-      where: {
-        id,
-        userId,
-        deletedAt: null,
-      },
-    });
+): Promise<ImportedGame> {
+  const existingGame = await prisma.importedGame.findFirst({
+    where: { id, userId, deletedAt: null },
+  });
 
-    if (!existingGame) {
-      return repositoryError(
-        RepositoryErrorCode.NOT_FOUND,
-        "Imported game not found or access denied"
-      );
-    }
-
-    const updated = await prisma.importedGame.update({
-      where: { id },
-      data: {
-        igdbMatchStatus: status,
-        updatedAt: new Date(),
-      },
-    });
-    return repositorySuccess(updated);
-  } catch (error) {
-    return repositoryError(
-      RepositoryErrorCode.DATABASE_ERROR,
-      `Failed to update imported game status: ${error instanceof Error ? error.message : "Unknown error"}`
-    );
+  if (!existingGame) {
+    throw new NotFoundError("Imported game not found or access denied");
   }
+
+  return prisma.importedGame.update({
+    where: { id },
+    data: { igdbMatchStatus: status, updatedAt: new Date() },
+  });
 }

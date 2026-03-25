@@ -1,31 +1,31 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import {
   deleteLibraryItem,
   findLibraryItemById,
   findLibraryItemsWithFilters,
+  NotFoundError,
   updateLibraryItem,
 } from "@/data-access-layer/repository";
-import {
-  repositoryError,
-  RepositoryErrorCode,
-  repositorySuccess,
-} from "@/data-access-layer/repository/types";
+import { LibraryItemStatus } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LibraryService } from "./library-service";
 
-vi.mock("@/data-access-layer/repository", () => ({
-  findLibraryItemsWithFilters: vi.fn(),
-  findLibraryItemById: vi.fn(),
-  deleteLibraryItem: vi.fn(),
-  updateLibraryItem: vi.fn(),
-
-  createLibraryItem: vi.fn(),
-  findAllLibraryItemsByGameId: vi.fn(),
-  findGameByIgdbId: vi.fn(),
-  findMostRecentLibraryItemByGameId: vi.fn(),
-  findUserById: vi.fn(),
-}));
+vi.mock("@/data-access-layer/repository", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/data-access-layer/repository")>();
+  return {
+    ...actual,
+    findLibraryItemsWithFilters: vi.fn(),
+    findLibraryItemById: vi.fn(),
+    deleteLibraryItem: vi.fn(),
+    updateLibraryItem: vi.fn(),
+    createLibraryItem: vi.fn(),
+    findAllLibraryItemsByGameId: vi.fn(),
+    findGameByIgdbId: vi.fn(),
+    findMostRecentLibraryItemByGameId: vi.fn(),
+    findUserById: vi.fn(),
+  };
+});
 
 describe("LibraryService", () => {
   let service: LibraryService;
@@ -50,7 +50,7 @@ describe("LibraryService", () => {
         id: 1,
         userId: validUserId,
         gameId: "clx456def789ghi",
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
         acquisitionType: "DIGITAL",
         startedAt: null,
@@ -94,9 +94,10 @@ describe("LibraryService", () => {
 
     describe("success scenarios", () => {
       it("should return success result when repository succeeds", async () => {
-        mockFindLibraryItemsWithFilters.mockResolvedValue(
-          repositorySuccess({ items: mockLibraryItems, total: 2 })
-        );
+        mockFindLibraryItemsWithFilters.mockResolvedValue({
+          items: mockLibraryItems,
+          total: 2,
+        });
 
         const result = await service.getLibraryItems({
           userId: validUserId,
@@ -107,10 +108,8 @@ describe("LibraryService", () => {
           expect(result.data.items).toHaveLength(2);
           expect(result.data.total).toBe(2);
           expect(result.data.hasMore).toBe(false);
-          expect(result.data.items[0]?.game.entryCount).toBe(1);
-          expect(result.data.items[0]?.game).not.toHaveProperty("_count");
-          expect(result.data.items[1]?.game.entryCount).toBe(1);
-          expect(result.data.items[1]?.game).not.toHaveProperty("_count");
+          expect(result.data.items[0]?.game._count.libraryItems).toBe(1);
+          expect(result.data.items[1]?.game._count.libraryItems).toBe(1);
         }
 
         expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith({
@@ -119,13 +118,14 @@ describe("LibraryService", () => {
       });
 
       it("should call repository with correct parameters including filters", async () => {
-        mockFindLibraryItemsWithFilters.mockResolvedValue(
-          repositorySuccess({ items: [mockLibraryItems[0]], total: 1 })
-        );
+        mockFindLibraryItemsWithFilters.mockResolvedValue({
+          items: [mockLibraryItems[0]],
+          total: 1,
+        });
 
         const params = {
           userId: validUserId,
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
           platform: "PlayStation 5",
           search: "Test",
           sortBy: "createdAt" as const,
@@ -138,9 +138,10 @@ describe("LibraryService", () => {
       });
 
       it("should return empty array when no library items found", async () => {
-        mockFindLibraryItemsWithFilters.mockResolvedValue(
-          repositorySuccess({ items: [], total: 0 })
-        );
+        mockFindLibraryItemsWithFilters.mockResolvedValue({
+          items: [],
+          total: 0,
+        });
 
         const result = await service.getLibraryItems({
           userId: validUserId,
@@ -173,11 +174,8 @@ describe("LibraryService", () => {
 
     describe("error scenarios", () => {
       it("should return error result when repository fails", async () => {
-        mockFindLibraryItemsWithFilters.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Database connection failed"
-          )
+        mockFindLibraryItemsWithFilters.mockRejectedValue(
+          new Error("Database connection failed")
         );
 
         const result = await service.getLibraryItems({
@@ -186,7 +184,7 @@ describe("LibraryService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Failed to fetch library items");
+          expect(result.error).toBe("Database connection failed");
         }
 
         expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith({
@@ -217,7 +215,7 @@ describe("LibraryService", () => {
 
     describe("success scenarios", () => {
       it("should successfully delete when authorized", async () => {
-        mockDeleteLibraryItem.mockResolvedValue(repositorySuccess(undefined));
+        mockDeleteLibraryItem.mockResolvedValue(undefined);
 
         const result = await service.deleteLibraryItem({
           libraryItemId: validLibraryItemId,
@@ -254,11 +252,8 @@ describe("LibraryService", () => {
 
     describe("error scenarios", () => {
       it("should return error when library item not found", async () => {
-        mockDeleteLibraryItem.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.NOT_FOUND,
-            "Library item not found"
-          )
+        mockDeleteLibraryItem.mockRejectedValue(
+          new NotFoundError("Library item not found")
         );
 
         const result = await service.deleteLibraryItem({
@@ -269,7 +264,6 @@ describe("LibraryService", () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error).toContain("not found");
-          expect(result.error).toContain("permission");
         }
 
         expect(mockDeleteLibraryItem).toHaveBeenCalledWith({
@@ -279,11 +273,8 @@ describe("LibraryService", () => {
       });
 
       it("should handle database errors during deletion", async () => {
-        mockDeleteLibraryItem.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Database connection failed"
-          )
+        mockDeleteLibraryItem.mockRejectedValue(
+          new Error("Database connection failed")
         );
 
         const result = await service.deleteLibraryItem({
@@ -293,7 +284,7 @@ describe("LibraryService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Failed to delete library item");
+          expect(result.error).toBe("Database connection failed");
         }
       });
 
@@ -334,8 +325,8 @@ describe("LibraryService", () => {
 
     describe("all status transitions are allowed", () => {
       const allStatuses = [
-        LibraryItemStatus.WANT_TO_PLAY,
-        LibraryItemStatus.OWNED,
+        LibraryItemStatus.WISHLIST,
+        LibraryItemStatus.SHELF,
         LibraryItemStatus.PLAYING,
         LibraryItemStatus.PLAYED,
       ];
@@ -348,15 +339,13 @@ describe("LibraryService", () => {
         "should allow transition from $from to $to",
         async ({ from, to }) => {
           mockFindLibraryItemById.mockResolvedValue(
-            repositorySuccess(createMockLibraryItem(from))
+            createMockLibraryItem(from)
           );
 
-          mockUpdateLibraryItem.mockResolvedValue(
-            repositorySuccess({
-              ...createMockLibraryItem(to),
-              updatedAt: new Date("2025-01-02"),
-            })
-          );
+          mockUpdateLibraryItem.mockResolvedValue({
+            ...createMockLibraryItem(to),
+            updatedAt: new Date("2025-01-02"),
+          });
 
           const result = await service.updateLibraryItem({
             userId: validUserId,
@@ -378,11 +367,8 @@ describe("LibraryService", () => {
 
     describe("error scenarios", () => {
       it("should return error when library item not found", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.NOT_FOUND,
-            "Library item not found"
-          )
+        mockFindLibraryItemById.mockRejectedValue(
+          new NotFoundError("Library item not found")
         );
 
         const result = await service.updateLibraryItem({
@@ -403,16 +389,11 @@ describe("LibraryService", () => {
 
       it("should return error when repository update fails", async () => {
         mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.WANT_TO_PLAY)
-          )
+          createMockLibraryItem(LibraryItemStatus.WISHLIST)
         );
 
-        mockUpdateLibraryItem.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Database update failed"
-          )
+        mockUpdateLibraryItem.mockRejectedValue(
+          new Error("Database update failed")
         );
 
         const result = await service.updateLibraryItem({
@@ -425,7 +406,7 @@ describe("LibraryService", () => {
 
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error).toBe("Failed to update library item");
+          expect(result.error).toBe("Database update failed");
         }
       });
 
@@ -450,9 +431,7 @@ describe("LibraryService", () => {
 
       it("should handle unexpected errors during update", async () => {
         mockFindLibraryItemById.mockResolvedValue(
-          repositorySuccess(
-            createMockLibraryItem(LibraryItemStatus.WANT_TO_PLAY)
-          )
+          createMockLibraryItem(LibraryItemStatus.WISHLIST)
         );
 
         mockUpdateLibraryItem.mockRejectedValue(

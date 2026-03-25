@@ -1,11 +1,7 @@
-import {
-  AcquisitionType,
-  LibraryItemStatus,
-} from "@/data-access-layer/domain/library";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import {
   findGameByIgdbId,
   findImportedGameById,
-  RepositoryErrorCode,
   updateImportedGameStatus,
 } from "@/data-access-layer/repository";
 import {
@@ -20,7 +16,8 @@ import {
   createFullGameFixture,
   createLibraryItemFixture,
 } from "@/test/fixtures";
-import type { ImportedGame } from "@prisma/client";
+
+import { AcquisitionType, LibraryItemStatus } from "@/shared/types";
 
 import { importGameToLibrary } from "./import-game-to-library";
 
@@ -47,7 +44,7 @@ describe("importGameToLibrary", () => {
   const validIgdbId = 12345;
   const validSteamAppId = "570";
 
-  const mockImportedGame: ImportedGame = {
+  const mockImportedGameDto: ImportedGameDto = {
     id: validImportedGameId,
     userId: validUserId,
     name: "Dota 2",
@@ -85,7 +82,7 @@ describe("importGameToLibrary", () => {
     id: 1,
     userId: validUserId,
     gameId: mockGame.id,
-    status: LibraryItemStatus.WANT_TO_PLAY,
+    status: LibraryItemStatus.WISHLIST,
     platform: null,
     acquisitionType: AcquisitionType.DIGITAL,
     startedAt: null,
@@ -125,15 +122,9 @@ describe("importGameToLibrary", () => {
 
   describe("success scenarios", () => {
     it("should successfully import game with manual IGDB ID when game exists in database", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -146,14 +137,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "MATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "MATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -173,7 +164,7 @@ describe("importGameToLibrary", () => {
         userId: validUserId,
         gameId: mockGame.id,
         libraryItem: {
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
           acquisitionType: AcquisitionType.DIGITAL,
           platform: "PC (Microsoft Windows)",
         },
@@ -186,20 +177,14 @@ describe("importGameToLibrary", () => {
     });
 
     it("should successfully import game with auto-matching from Steam", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
       vi.mocked(matchSteamGameToIgdb).mockResolvedValue({
         success: true,
         data: { game: mockIgdbGame },
       });
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -212,14 +197,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "MATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "MATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(true);
@@ -234,20 +219,14 @@ describe("importGameToLibrary", () => {
     });
 
     it("should fetch and populate game from IGDB when not in database (auto-match)", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
       vi.mocked(matchSteamGameToIgdb).mockResolvedValue({
         success: true,
         data: { game: mockIgdbGame },
       });
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(null);
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue({
         success: true,
@@ -265,14 +244,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "MATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "MATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(true);
@@ -283,15 +262,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should fetch and populate game from IGDB when not in database (manual IGDB ID)", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(null);
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -314,14 +287,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "MATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "MATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -335,16 +308,10 @@ describe("importGameToLibrary", () => {
       );
     });
 
-    it("should create library item with OWNED status when status is 'owned'", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+    it("should create library item with SHELF status when status is 'shelf'", async () => {
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -353,7 +320,7 @@ describe("importGameToLibrary", () => {
 
       const ownedLibraryItem = {
         ...mockLibraryItem,
-        status: LibraryItemStatus.OWNED,
+        status: LibraryItemStatus.SHELF,
       };
       mockLibraryService.createLibraryItem.mockResolvedValue({
         success: true,
@@ -361,14 +328,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "MATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "MATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "owned",
+        status: "shelf",
         manualIgdbId: validIgdbId,
       });
 
@@ -378,7 +345,7 @@ describe("importGameToLibrary", () => {
         userId: validUserId,
         gameId: mockGame.id,
         libraryItem: {
-          status: LibraryItemStatus.OWNED,
+          status: LibraryItemStatus.SHELF,
           acquisitionType: AcquisitionType.DIGITAL,
           platform: "PC (Microsoft Windows)",
         },
@@ -388,18 +355,14 @@ describe("importGameToLibrary", () => {
 
   describe("error scenarios - NOT_FOUND", () => {
     it("should return NOT_FOUND when imported game fetch fails", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: false,
-        error: {
-          code: RepositoryErrorCode.DATABASE_ERROR,
-          message: "Database error",
-        },
-      });
+      vi.mocked(findImportedGameById).mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -412,15 +375,12 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return NOT_FOUND when imported game does not exist", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(null);
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -433,24 +393,23 @@ describe("importGameToLibrary", () => {
   describe("error scenarios - NO_MATCH", () => {
     it("should return NO_MATCH when storefrontGameId is missing for auto-match", async () => {
       const importedGameWithoutAppId = {
-        ...mockImportedGame,
+        ...mockImportedGameDto,
         storefrontGameId: null,
       };
 
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: importedGameWithoutAppId,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(
+        importedGameWithoutAppId
+      );
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...importedGameWithoutAppId, igdbMatchStatus: "UNMATCHED" },
+        ...importedGameWithoutAppId,
+        igdbMatchStatus: "UNMATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -466,10 +425,7 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return NO_MATCH when Steam to IGDB matching returns no game", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
       vi.mocked(matchSteamGameToIgdb).mockResolvedValue({
         success: true,
@@ -477,14 +433,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "UNMATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "UNMATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -502,10 +458,7 @@ describe("importGameToLibrary", () => {
 
   describe("error scenarios - IGDB_ERROR", () => {
     it("should return NETWORK_ERROR on network errors and NOT update status", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
       vi.mocked(matchSteamGameToIgdb).mockResolvedValue({
         success: false,
@@ -516,7 +469,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -528,10 +481,7 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return NETWORK_ERROR on rate limit errors and NOT update status", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
       vi.mocked(matchSteamGameToIgdb).mockResolvedValue({
         success: false,
@@ -542,7 +492,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -554,10 +504,7 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return IGDB_ERROR when Steam to IGDB matching fails (non-network error)", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
       vi.mocked(matchSteamGameToIgdb).mockResolvedValue({
         success: false,
@@ -566,14 +513,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "UNMATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "UNMATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -589,23 +536,16 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return IGDB_ERROR when findGameByIgdbId fails", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: false,
-        error: {
-          code: RepositoryErrorCode.DATABASE_ERROR,
-          message: "Database connection error",
-        },
-      });
+      vi.mocked(findGameByIgdbId).mockRejectedValue(
+        new Error("Database connection error")
+      );
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -616,15 +556,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return IGDB_ERROR when IGDB getGameDetails fails (manual IGDB ID)", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(null);
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: false,
@@ -634,7 +568,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -645,15 +579,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return IGDB_ERROR when IGDB returns no game data", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(null);
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -663,7 +591,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -674,15 +602,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return IGDB_ERROR when IGDB returns invalid data structure", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(null);
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -692,7 +614,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -703,15 +625,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return IGDB_ERROR when populateGameInDatabase fails", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(null);
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -726,7 +642,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -737,15 +653,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return IGDB_ERROR when populateGameInDatabase returns no data", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(null);
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -760,7 +670,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -771,15 +681,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return IGDB_ERROR when library item creation fails", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -794,7 +698,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -807,15 +711,9 @@ describe("importGameToLibrary", () => {
 
   describe("error scenarios - DUPLICATE", () => {
     it("should return DUPLICATE when game already exists in user's library", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -823,14 +721,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "MATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "MATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -848,15 +746,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should return DUPLICATE when multiple library items exist for the game", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
 
       const multipleItems = [
         mockLibraryItem,
@@ -869,14 +761,14 @@ describe("importGameToLibrary", () => {
       });
 
       vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: true,
-        data: { ...mockImportedGame, igdbMatchStatus: "MATCHED" },
+        ...mockImportedGameDto,
+        igdbMatchStatus: "MATCHED",
       });
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -890,27 +782,22 @@ describe("importGameToLibrary", () => {
   describe("edge cases", () => {
     it("should handle failure to update imported game status after UNMATCHED gracefully", async () => {
       const importedGameWithoutAppId = {
-        ...mockImportedGame,
+        ...mockImportedGameDto,
         storefrontGameId: null,
       };
 
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: importedGameWithoutAppId,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(
+        importedGameWithoutAppId
+      );
 
-      vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: false,
-        error: {
-          code: RepositoryErrorCode.DATABASE_ERROR,
-          message: "Database error",
-        },
-      });
+      vi.mocked(updateImportedGameStatus).mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -919,15 +806,9 @@ describe("importGameToLibrary", () => {
     });
 
     it("should handle failure to update imported game status after successful import gracefully", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -939,18 +820,14 @@ describe("importGameToLibrary", () => {
         data: mockLibraryItem,
       });
 
-      vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: false,
-        error: {
-          code: RepositoryErrorCode.DATABASE_ERROR,
-          message: "Database error",
-        },
-      });
+      vi.mocked(updateImportedGameStatus).mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -958,33 +835,23 @@ describe("importGameToLibrary", () => {
     });
 
     it("should handle failure to update imported game status after DUPLICATE gracefully", async () => {
-      vi.mocked(findImportedGameById).mockResolvedValue({
-        success: true,
-        data: mockImportedGame,
-      });
+      vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
-      vi.mocked(findGameByIgdbId).mockResolvedValue({
-        success: true,
-        data: mockGame,
-      });
+      vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
         data: [mockLibraryItem],
       });
 
-      vi.mocked(updateImportedGameStatus).mockResolvedValue({
-        success: false,
-        error: {
-          code: RepositoryErrorCode.DATABASE_ERROR,
-          message: "Database error",
-        },
-      });
+      vi.mocked(updateImportedGameStatus).mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 

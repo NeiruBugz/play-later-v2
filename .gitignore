@@ -30,6 +30,7 @@ build
 # misc
 .DS_Store
 *.pem
+*.key
 
 # debug
 npm-debug.log*
@@ -89,3 +90,4 @@ override.tf.json
 
 # Worktrees
 .worktrees/
+.claude/worktrees/

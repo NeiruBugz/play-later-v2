@@ -1,10 +1,5 @@
 "use server";
 
-import {
-  AcquisitionType,
-  LibraryItemStatus,
-  type LibraryItemDomain,
-} from "@/data-access-layer/domain/library";
 import { findGameByIgdbId } from "@/data-access-layer/repository";
 import {
   GameDetailService,
@@ -16,6 +11,11 @@ import {
 import { matchSteamGameToIgdb } from "@/data-access-layer/services/igdb/igdb-matcher";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import {
+  AcquisitionType,
+  LibraryItemStatus,
+  type LibraryItem,
+} from "@/shared/types";
 
 import type { LibraryStatus } from "../types";
 
@@ -24,8 +24,9 @@ const logger = createLogger({
 });
 
 const LIBRARY_STATUS_MAP: Record<LibraryStatus, LibraryItemStatus> = {
-  want_to_play: LibraryItemStatus.WANT_TO_PLAY,
-  owned: LibraryItemStatus.OWNED,
+  wishlist: LibraryItemStatus.WISHLIST,
+  shelf: LibraryItemStatus.SHELF,
+  up_next: LibraryItemStatus.UP_NEXT,
   playing: LibraryItemStatus.PLAYING,
   played: LibraryItemStatus.PLAYED,
 };
@@ -40,7 +41,7 @@ type ImportGameToLibraryInput = {
 type ImportGameToLibraryResult =
   | {
       success: true;
-      data: { libraryItem: LibraryItemDomain; gameSlug: string };
+      data: { libraryItem: LibraryItem; gameSlug: string };
     }
   | {
       success: false;
@@ -200,10 +201,12 @@ export async function importGameToLibrary(
     );
   }
 
-  const gameResult = await findGameByIgdbId(igdbId);
-  if (!gameResult.success) {
+  let game;
+  try {
+    game = await findGameByIgdbId(igdbId);
+  } catch (error) {
     logger.error(
-      { error: gameResult.error, igdbId },
+      { error, igdbId },
       "Failed to check if game exists in database"
     );
     return {
@@ -215,9 +218,9 @@ export async function importGameToLibrary(
   let gameId: string;
   let gameSlug: string;
 
-  if (gameResult.data) {
-    gameId = gameResult.data.id;
-    gameSlug = gameResult.data.slug;
+  if (game) {
+    gameId = game.id;
+    gameSlug = game.slug;
     logger.info(
       { gameId, igdbId, slug: gameSlug },
       "Game already exists in database"

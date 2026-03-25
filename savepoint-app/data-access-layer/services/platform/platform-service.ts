@@ -1,104 +1,77 @@
 import "server-only";
 
 import {
-  PlatformMapper,
-  type PlatformDomain,
-} from "@/data-access-layer/domain/platform";
-import {
   findGameByIgdbId,
   findPlatformsForGame,
   findSystemPlatforms,
-  isRepositorySuccess,
+  upsertPlatforms,
 } from "@/data-access-layer/repository";
+import type { Platform } from "@prisma/client";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { UniquePlatformResult } from "@/shared/types/platform";
 
-import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
+import {
+  handleServiceError,
+  serviceError,
+  serviceSuccess,
+  type ServiceResult,
+} from "../types";
 
-export class PlatformService extends BaseService {
-  private logger = createLogger({
-    [LOGGER_CONTEXT.SERVICE]: "PlatformService",
-  });
-  async getSystemPlatforms(): Promise<
-    ServiceResult<{
-      platforms: UniquePlatformResult[];
-    }>
-  > {
-    try {
-      this.logger.info("Fetching system platforms");
-
-      const platforms = await findSystemPlatforms();
-      if (!isRepositorySuccess(platforms)) {
-        this.logger.error(
-          { error: platforms.error },
-          "Failed to fetch system platforms"
-        );
-        return this.error(
-          platforms.error.message,
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      this.logger.info(
-        { count: platforms.data.length },
-        "System platforms fetched successfully"
-      );
-      return this.success({ platforms: platforms.data });
-    } catch (error) {
-      return this.handleError(error, "Failed to get system platforms");
-    }
+export async function getSystemPlatforms(): Promise<
+  ServiceResult<{
+    platforms: UniquePlatformResult[];
+  }>
+> {
+  try {
+    const platforms = await findSystemPlatforms();
+    return serviceSuccess({ platforms });
+  } catch (error) {
+    return handleServiceError(error, "Failed to get system platforms");
   }
+}
 
-  async getPlatformsForGame(igdbId: number): Promise<
-    ServiceResult<{
-      supportedPlatforms: PlatformDomain[];
-      otherPlatforms: PlatformDomain[];
-    }>
-  > {
-    try {
-      this.logger.info({ igdbId }, "Fetching platforms for game");
+type UpsertPlatformInput = {
+  id: number;
+  name?: string;
+  slug?: string;
+  abbreviation?: string;
+  alternative_name?: string;
+  generation?: number;
+  platform_family?: number;
+  platform_type?: number;
+  checksum?: string;
+};
 
-      const gameResult = await findGameByIgdbId(igdbId);
-      if (!gameResult.success) {
-        this.logger.error(
-          { error: gameResult.error, igdbId },
-          "Failed to fetch game"
-        );
-        return this.error("Failed to fetch game");
-      }
-      if (!gameResult.data) {
-        this.logger.warn({ igdbId }, "Game not found");
-        return this.error("Game not found");
-      }
+export async function savePlatforms(
+  platforms: UpsertPlatformInput[]
+): Promise<ServiceResult<Platform[]>> {
+  try {
+    const result = await upsertPlatforms(platforms);
+    return serviceSuccess(result);
+  } catch (error) {
+    return handleServiceError(error, "Failed to save platforms");
+  }
+}
 
-      const result = await findPlatformsForGame(gameResult.data.id);
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, gameId: gameResult.data.id, igdbId },
-          "Failed to fetch platforms"
-        );
-        return this.error("Failed to fetch platforms");
-      }
-
-      const supportedPlatforms = PlatformMapper.toDomainList(
-        result.data.supportedPlatforms
-      );
-      const otherPlatforms = PlatformMapper.toDomainList(
-        result.data.otherPlatforms
-      );
-
-      this.logger.info(
-        {
-          igdbId,
-          supportedCount: supportedPlatforms.length,
-          otherCount: otherPlatforms.length,
-        },
-        "Platforms fetched successfully"
-      );
-      return this.success({ supportedPlatforms, otherPlatforms });
-    } catch (error) {
-      return this.handleError(error, "Failed to get platforms for game");
+export async function getPlatformsForGame(igdbId: number): Promise<
+  ServiceResult<{
+    supportedPlatforms: Platform[];
+    otherPlatforms: Platform[];
+  }>
+> {
+  try {
+    const game = await findGameByIgdbId(igdbId);
+    if (!game) {
+      return serviceError("Game not found");
     }
+
+    const platformData = await findPlatformsForGame(game.id);
+
+    return serviceSuccess({
+      supportedPlatforms: platformData.supportedPlatforms,
+      otherPlatforms: platformData.otherPlatforms,
+    });
+  } catch (error) {
+    return handleServiceError(error, "Failed to get platforms for game");
   }
 }

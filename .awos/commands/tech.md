@@ -58,6 +58,12 @@ Follow this process precisely.
 
 2.  **Detailed Implementation (Assume but Verify):**
     - Work through the sections of the template (System Changes, API, etc.).
+    - **LEVEL OF DETAIL:** Describe structures and contracts, not implementations. The spec should be reviewable and not go stale.
+      - For schemas: list table names, key columns, and relationships in a table format (no full DDL/ORM code)
+      - For APIs: specify endpoints, methods, and payload shapes (no handler code)
+      - For configs: list required env vars and their purpose (no full file contents)
+      - For files: specify paths and responsibilities (no full implementations)
+      - Reference official docs for exact syntax/requirements rather than duplicating them
     - **CRITICAL BEHAVIOR:** For each section, you must propose a specific implementation detail based on the architecture, state it as an assumption, and ask for approval.
     - Example: "For the database, the functional spec implies we need to store the image location. I'll **assume** we should add a new `avatar_url` (TEXT) column to the `users` table. **Is that assumption correct?**"
     - Example: "For the API, I'll propose a `POST /api/v1/users/me/avatar` endpoint that accepts a multipart/form-data request. **Does that fit the requirements?**"
@@ -74,4 +80,6 @@ Follow this process precisely.
 
 1.  **Identify Path:** The output path is the `technical-considerations.md` file inside the directory you identified in Step 1.
 2.  **Save File:** Once the user approves the draft, write the final content into this file.
-3.  **Conclude:** Announce the completion and the file's location: "The technical specification has been saved. You can find it at `context/spec/[directory-name]/technical-considerations.md`. Let’s break it into tasks with `/awos:tasks`"
+3.  **Check for New Capabilities:** Review the technical specification you just saved. Determine whether it introduces technologies, frameworks, tools, or testing approaches that are NOT already covered by the project’s existing architecture and specialist agents.
+    - **If new capabilities are needed:** Build a pre-filled `/awos:hire` command that includes the specific technologies and the spec context. Conclude with: "The technical specification has been saved to `context/spec/[directory-name]/technical-considerations.md`. This spec introduces new capabilities that may benefit from specialist agents. Run the following to set up the right agents, then break it into tasks with `/awos:tasks`:" followed by a code block containing `/awos:hire cover [directory-name]: need [comma-separated list of new technologies/capabilities identified]`.
+    - **If no new capabilities are needed:** Conclude with: "The technical specification has been saved to `context/spec/[directory-name]/technical-considerations.md`. Let’s break it into tasks with `/awos:tasks`."

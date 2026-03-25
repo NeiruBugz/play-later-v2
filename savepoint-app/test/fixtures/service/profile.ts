@@ -20,44 +20,36 @@ export const newUserProfileFixture = {
   createdAt: new Date("2024-03-01"),
 };
 export const libraryStatsSuccessFixture = {
-  success: true as const,
-  data: {
-    statusCounts: {
-      WANT_TO_PLAY: 5,
-      OWNED: 3,
-      PLAYING: 2,
-      PLAYED: 10,
-    },
-    recentGames: [
-      {
-        gameId: "game-1",
-        title: "Test Game 1",
-        coverImage: "https://example.com/cover1.jpg",
-        lastPlayed: new Date("2024-03-01"),
-      },
-      {
-        gameId: "game-2",
-        title: "Test Game 2",
-        coverImage: null,
-        lastPlayed: new Date("2024-02-28"),
-      },
-    ],
+  statusCounts: {
+    WISHLIST: 5,
+    SHELF: 3,
+    PLAYING: 2,
+    PLAYED: 10,
   },
+  recentGames: [
+    {
+      gameId: "game-1",
+      title: "Test Game 1",
+      coverImage: "https://example.com/cover1.jpg",
+      lastPlayed: new Date("2024-03-01"),
+    },
+    {
+      gameId: "game-2",
+      title: "Test Game 2",
+      coverImage: null,
+      lastPlayed: new Date("2024-02-28"),
+    },
+  ],
+  journalCount: 5,
 };
 export const libraryStatsEmptyFixture = {
-  success: true as const,
-  data: {
-    statusCounts: {},
-    recentGames: [],
-  },
+  statusCounts: {},
+  recentGames: [],
+  journalCount: 0,
 };
-export const libraryStatsErrorFixture = {
-  success: false as const,
-  error: {
-    code: "STATS_FETCH_FAILED",
-    message: "Failed to fetch library stats",
-  },
-};
+export const libraryStatsErrorFixture = new Error(
+  "Failed to fetch library stats"
+);
 export const userForUnchangedUsernameFixture = {
   id: "user-123",
   username: "existinguser",

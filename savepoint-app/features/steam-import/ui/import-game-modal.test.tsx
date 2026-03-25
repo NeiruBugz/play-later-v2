@@ -1,4 +1,4 @@
-import type { ImportedGame } from "@prisma/client";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -29,8 +29,9 @@ vi.mock("@/shared/lib/date", () => ({
 vi.mock("@/shared/lib/library-status", () => ({
   getStatusConfig: vi.fn((status: LibraryItemStatus) => {
     const statusMap = {
-      [LibraryItemStatus.WANT_TO_PLAY]: { label: "Want to Play" },
-      [LibraryItemStatus.OWNED]: { label: "Owned" },
+      [LibraryItemStatus.WISHLIST]: { label: "Wishlist" },
+      [LibraryItemStatus.SHELF]: { label: "Shelf" },
+      [LibraryItemStatus.UP_NEXT]: { label: "Up Next" },
       [LibraryItemStatus.PLAYING]: { label: "Playing" },
       [LibraryItemStatus.PLAYED]: { label: "Played" },
     };
@@ -50,9 +51,9 @@ vi.mock("../hooks/use-import-game", () => ({
   }),
 }));
 
-const createMockImportedGame = (
-  overrides: Partial<ImportedGame> = {}
-): ImportedGame => ({
+const createMockImportedGameDto = (
+  overrides: Partial<ImportedGameDto> = {}
+): ImportedGameDto => ({
   id: "game-1",
   userId: "user-1",
   storefront: "STEAM",
@@ -127,7 +128,7 @@ describe("ImportGameModal", () => {
 
   describe("modal visibility", () => {
     it("should render dialog when isOpen is true", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -137,7 +138,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should not render dialog when isOpen is false", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={false} onClose={mockOnClose} game={game} />
@@ -149,7 +150,7 @@ describe("ImportGameModal", () => {
 
   describe("game information display", () => {
     it("should display game name in dialog description", () => {
-      const game = createMockImportedGame({ name: "The Witcher 3" });
+      const game = createMockImportedGameDto({ name: "The Witcher 3" });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -159,7 +160,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should truncate long game names", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         name: "A Very Long Game Name That Should Be Truncated Eventually",
       });
 
@@ -174,7 +175,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should display dialog title", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -186,7 +187,7 @@ describe("ImportGameModal", () => {
 
   describe("playtime formatting", () => {
     it("should format playtime in hours when >= 60 minutes", () => {
-      const game = createMockImportedGame({ playtime: 750 });
+      const game = createMockImportedGameDto({ playtime: 750 });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -196,7 +197,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should format playtime in minutes when < 60 minutes", () => {
-      const game = createMockImportedGame({ playtime: 45 });
+      const game = createMockImportedGameDto({ playtime: 45 });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -206,7 +207,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should display 'Never played' when playtime is 0", () => {
-      const game = createMockImportedGame({ playtime: 0 });
+      const game = createMockImportedGameDto({ playtime: 0 });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -216,7 +217,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should display 'Never played' when playtime is null", () => {
-      const game = createMockImportedGame({ playtime: null });
+      const game = createMockImportedGameDto({ playtime: null });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -226,7 +227,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should display playtime label", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -239,7 +240,7 @@ describe("ImportGameModal", () => {
   describe("last played date formatting", () => {
     it("should format recent date relatively (5 days ago)", () => {
       const fiveDaysAgo = new Date("2026-01-15T12:00:00Z");
-      const game = createMockImportedGame({ lastPlayedAt: fiveDaysAgo });
+      const game = createMockImportedGameDto({ lastPlayedAt: fiveDaysAgo });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -250,7 +251,7 @@ describe("ImportGameModal", () => {
 
     it("should format recent date relatively (today)", () => {
       const today = new Date("2026-01-20T10:00:00Z");
-      const game = createMockImportedGame({ lastPlayedAt: today });
+      const game = createMockImportedGameDto({ lastPlayedAt: today });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -261,7 +262,7 @@ describe("ImportGameModal", () => {
 
     it("should format recent date relatively (yesterday)", () => {
       const yesterday = new Date("2026-01-19T12:00:00Z");
-      const game = createMockImportedGame({ lastPlayedAt: yesterday });
+      const game = createMockImportedGameDto({ lastPlayedAt: yesterday });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -271,7 +272,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should display 'Never' when lastPlayedAt is null", () => {
-      const game = createMockImportedGame({ lastPlayedAt: null });
+      const game = createMockImportedGameDto({ lastPlayedAt: null });
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -281,7 +282,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should display last played label", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -292,8 +293,8 @@ describe("ImportGameModal", () => {
   });
 
   describe("smart status default", () => {
-    it("should default to OWNED status for games with 0 playtime", () => {
-      const game = createMockImportedGame({
+    it("should default to SHELF status for games with 0 playtime", () => {
+      const game = createMockImportedGameDto({
         playtime: 0,
         lastPlayedAt: null,
       });
@@ -302,12 +303,12 @@ describe("ImportGameModal", () => {
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
       );
 
-      expect(elements.getSmartDefaultText("Owned")).toBeVisible();
-      expect(elements.getSelectedStatusText("Owned")).toBeVisible();
+      expect(elements.getSmartDefaultText("Shelf")).toBeVisible();
+      expect(elements.getSelectedStatusText("Shelf")).toBeVisible();
     });
 
-    it("should default to OWNED status for games with null playtime", () => {
-      const game = createMockImportedGame({
+    it("should default to SHELF status for games with null playtime", () => {
+      const game = createMockImportedGameDto({
         playtime: null,
         lastPlayedAt: null,
       });
@@ -316,12 +317,12 @@ describe("ImportGameModal", () => {
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
       );
 
-      expect(elements.getSmartDefaultText("Owned")).toBeVisible();
+      expect(elements.getSmartDefaultText("Shelf")).toBeVisible();
     });
 
     it("should default to PLAYING status for games played within last 7 days", () => {
       const threeDaysAgo = new Date("2026-01-17T12:00:00Z");
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 100,
         lastPlayedAt: threeDaysAgo,
       });
@@ -336,7 +337,7 @@ describe("ImportGameModal", () => {
 
     it("should default to PLAYING status for game played today", () => {
       const today = new Date("2026-01-20T10:00:00Z");
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 250,
         lastPlayedAt: today,
       });
@@ -350,7 +351,7 @@ describe("ImportGameModal", () => {
 
     it("should default to PLAYED status for games played exactly 7 days ago (boundary test)", () => {
       const exactlySevenDaysAgo = new Date("2026-01-13T12:00:00Z");
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 600,
         lastPlayedAt: exactlySevenDaysAgo,
       });
@@ -365,7 +366,7 @@ describe("ImportGameModal", () => {
 
     it("should default to PLAYED status for games played more than 7 days ago", () => {
       const tenDaysAgo = new Date("2026-01-10T12:00:00Z");
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 1500,
         lastPlayedAt: tenDaysAgo,
       });
@@ -378,7 +379,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should default to PLAYED status for games with playtime but no lastPlayedAt date", () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 500,
         lastPlayedAt: null,
       });
@@ -393,7 +394,7 @@ describe("ImportGameModal", () => {
 
   describe("status selection", () => {
     it("should render status select dropdown", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -403,8 +404,8 @@ describe("ImportGameModal", () => {
       expect(elements.getStatusLabel()).toBeVisible();
     });
 
-    it("should allow user to change status to Want to Play", async () => {
-      const game = createMockImportedGame({
+    it("should allow user to change status to Wishlist", async () => {
+      const game = createMockImportedGameDto({
         playtime: 100,
         lastPlayedAt: new Date("2026-01-19T12:00:00Z"),
       });
@@ -413,13 +414,13 @@ describe("ImportGameModal", () => {
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
       );
 
-      await actions.selectStatus(/want to play/i);
+      await actions.selectStatus(/^wishlist$/i);
 
-      expect(elements.getSelectedStatusText("Want to Play")).toBeVisible();
+      expect(elements.getSelectedStatusText("Wishlist")).toBeVisible();
     });
 
-    it("should allow user to change status to Owned", async () => {
-      const game = createMockImportedGame({
+    it("should allow user to change status to Shelf", async () => {
+      const game = createMockImportedGameDto({
         playtime: 100,
         lastPlayedAt: new Date("2026-01-19T12:00:00Z"),
       });
@@ -428,13 +429,13 @@ describe("ImportGameModal", () => {
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
       );
 
-      await actions.selectStatus(/^owned$/i);
+      await actions.selectStatus(/^shelf$/i);
 
-      expect(elements.getSelectedStatusText("Owned")).toBeVisible();
+      expect(elements.getSelectedStatusText("Shelf")).toBeVisible();
     });
 
     it("should allow user to change status to Played", async () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 100,
         lastPlayedAt: new Date("2026-01-19T12:00:00Z"),
       });
@@ -449,7 +450,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should allow user to change status multiple times", async () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         playtime: 0,
         lastPlayedAt: null,
       });
@@ -458,7 +459,7 @@ describe("ImportGameModal", () => {
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
       );
 
-      expect(elements.getSelectedStatusText("Owned")).toBeVisible();
+      expect(elements.getSelectedStatusText("Shelf")).toBeVisible();
 
       await actions.selectStatus(/playing/i);
       expect(elements.getSelectedStatusText("Playing")).toBeVisible();
@@ -470,7 +471,7 @@ describe("ImportGameModal", () => {
 
   describe("import button", () => {
     it("should render import button", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -480,7 +481,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should call import mutation with correct parameters when clicked", async () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         id: "test-game-123",
         playtime: 0,
         lastPlayedAt: null,
@@ -496,7 +497,7 @@ describe("ImportGameModal", () => {
       expect(mockImportMutate).toHaveBeenCalledWith(
         {
           importedGameId: "test-game-123",
-          status: "owned",
+          status: "shelf",
         },
         expect.objectContaining({
           onSuccess: expect.any(Function),
@@ -505,7 +506,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should map PLAYING status to 'playing' when importing", async () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         id: "game-123",
         playtime: 100,
         lastPlayedAt: new Date("2026-01-19T12:00:00Z"),
@@ -526,8 +527,8 @@ describe("ImportGameModal", () => {
       );
     });
 
-    it("should map OWNED status to 'owned' when importing", async () => {
-      const game = createMockImportedGame({
+    it("should map SHELF status to 'shelf' when importing", async () => {
+      const game = createMockImportedGameDto({
         id: "game-456",
         playtime: 0,
         lastPlayedAt: null,
@@ -542,14 +543,14 @@ describe("ImportGameModal", () => {
       expect(mockImportMutate).toHaveBeenCalledWith(
         {
           importedGameId: "game-456",
-          status: "owned",
+          status: "shelf",
         },
         expect.any(Object)
       );
     });
 
     it("should map PLAYED status to 'played' when importing", async () => {
-      const game = createMockImportedGame({
+      const game = createMockImportedGameDto({
         id: "game-789",
         playtime: 1000,
         lastPlayedAt: new Date("2026-01-10T12:00:00Z"),
@@ -570,8 +571,8 @@ describe("ImportGameModal", () => {
       );
     });
 
-    it("should map WANT_TO_PLAY status to 'want_to_play' when importing", async () => {
-      const game = createMockImportedGame({
+    it("should map WISHLIST status to 'wishlist' when importing", async () => {
+      const game = createMockImportedGameDto({
         id: "game-999",
         playtime: 100,
         lastPlayedAt: new Date("2026-01-19T12:00:00Z"),
@@ -581,14 +582,14 @@ describe("ImportGameModal", () => {
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
       );
 
-      await actions.selectStatus(/want to play/i);
+      await actions.selectStatus(/wishlist/i);
 
       await actions.clickImport();
 
       expect(mockImportMutate).toHaveBeenCalledWith(
         {
           importedGameId: "game-999",
-          status: "want_to_play",
+          status: "wishlist",
         },
         expect.any(Object)
       );
@@ -598,7 +599,7 @@ describe("ImportGameModal", () => {
   describe("loading state", () => {
     it("should show button with loading prop when mutation is pending", () => {
       mockIsPending = true;
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -611,7 +612,7 @@ describe("ImportGameModal", () => {
 
     it("should disable import button when mutation is pending", () => {
       mockIsPending = true;
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -622,7 +623,7 @@ describe("ImportGameModal", () => {
 
     it("should disable cancel button when mutation is pending", () => {
       mockIsPending = true;
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -633,7 +634,7 @@ describe("ImportGameModal", () => {
 
     it("should not show button as loading when mutation is not pending", () => {
       mockIsPending = false;
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -645,7 +646,7 @@ describe("ImportGameModal", () => {
 
     it("should enable buttons when mutation is not pending", () => {
       mockIsPending = false;
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -658,7 +659,7 @@ describe("ImportGameModal", () => {
 
   describe("success handling", () => {
     it("should close modal on successful import", async () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       mockImportMutate.mockImplementation((params, { onSuccess }) => {
         onSuccess();
@@ -676,7 +677,7 @@ describe("ImportGameModal", () => {
 
   describe("cancel button", () => {
     it("should render cancel button", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -686,7 +687,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should call onClose when cancel button is clicked", async () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -698,7 +699,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should have secondary variant", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -711,7 +712,7 @@ describe("ImportGameModal", () => {
 
   describe("accessibility", () => {
     it("should have dialog role", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -721,7 +722,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should have accessible heading", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -733,7 +734,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should have label for status select", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />
@@ -747,7 +748,7 @@ describe("ImportGameModal", () => {
     });
 
     it("should have descriptive button text", () => {
-      const game = createMockImportedGame();
+      const game = createMockImportedGameDto();
 
       render(
         <ImportGameModal isOpen={true} onClose={mockOnClose} game={game} />

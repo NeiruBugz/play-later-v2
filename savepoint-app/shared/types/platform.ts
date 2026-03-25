@@ -1,9 +1,12 @@
-export {
-  type PlatformDomain,
-  type PlatformSummaryDomain,
-  type PlatformDTO,
-  type PlatformSummaryDTO,
-} from "@/data-access-layer/domain/platform";
+export type { Platform } from "@prisma/client";
+
+export type PlatformDomain = import("@prisma/client").Platform;
+
+export type PlatformSummaryDomain = {
+  id: string;
+  name: string;
+  slug: string;
+};
 
 export type UniquePlatformResult = {
   id: string;
