@@ -83,7 +83,7 @@ describe("importGameToLibrary", () => {
     id: 1,
     userId: validUserId,
     gameId: mockGame.id,
-    status: LibraryItemStatus.WANT_TO_PLAY,
+    status: LibraryItemStatus.WISHLIST,
     platform: null,
     acquisitionType: AcquisitionType.DIGITAL,
     startedAt: null,
@@ -145,7 +145,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -165,7 +165,7 @@ describe("importGameToLibrary", () => {
         userId: validUserId,
         gameId: mockGame.id,
         libraryItem: {
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
           acquisitionType: AcquisitionType.DIGITAL,
           platform: "PC (Microsoft Windows)",
         },
@@ -205,7 +205,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(true);
@@ -252,7 +252,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(true);
@@ -295,7 +295,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -309,7 +309,7 @@ describe("importGameToLibrary", () => {
       );
     });
 
-    it("should create library item with OWNED status when status is 'owned'", async () => {
+    it("should create library item with SHELF status when status is 'shelf'", async () => {
       vi.mocked(findImportedGameById).mockResolvedValue(mockImportedGameDto);
 
       vi.mocked(findGameByIgdbId).mockResolvedValue(mockGame);
@@ -321,7 +321,7 @@ describe("importGameToLibrary", () => {
 
       const ownedLibraryItem = {
         ...mockLibraryItem,
-        status: LibraryItemStatus.OWNED,
+        status: LibraryItemStatus.SHELF,
       };
       mockLibraryService.createLibraryItem.mockResolvedValue({
         success: true,
@@ -336,7 +336,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "owned",
+        status: "shelf",
         manualIgdbId: validIgdbId,
       });
 
@@ -346,7 +346,7 @@ describe("importGameToLibrary", () => {
         userId: validUserId,
         gameId: mockGame.id,
         libraryItem: {
-          status: LibraryItemStatus.OWNED,
+          status: LibraryItemStatus.SHELF,
           acquisitionType: AcquisitionType.DIGITAL,
           platform: "PC (Microsoft Windows)",
         },
@@ -363,7 +363,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -381,7 +381,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -410,7 +410,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -441,7 +441,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -470,7 +470,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -493,7 +493,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -521,7 +521,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -546,7 +546,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -569,7 +569,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -592,7 +592,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -615,7 +615,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -643,7 +643,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -671,7 +671,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -699,7 +699,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -729,7 +729,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -769,7 +769,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -798,7 +798,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
       });
 
       expect(result.success).toBe(false);
@@ -828,7 +828,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
@@ -852,7 +852,7 @@ describe("importGameToLibrary", () => {
       const result = await importGameToLibrary({
         importedGameId: validImportedGameId,
         userId: validUserId,
-        status: "want_to_play",
+        status: "wishlist",
         manualIgdbId: validIgdbId,
       });
 
