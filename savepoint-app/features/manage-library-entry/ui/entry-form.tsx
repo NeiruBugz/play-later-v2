@@ -339,23 +339,7 @@ function EditForm({
           )}
         </p>
 
-        {onAddPlatform && (
-          <div className="space-y-xs">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="w-full"
-              onClick={onAddPlatform}
-            >
-              <Plus className="mr-sm h-4 w-4" />
-              Track on another platform
-            </Button>
-            <p className="text-muted-foreground text-center text-xs">
-              Track progress separately on each platform
-            </p>
-          </div>
-        )}
+        {/* TODO: "Track on another platform" hidden — onAddPlatform handler is a no-op */}
 
         <div className="pt-md sm:pt-lg flex items-center justify-between">
           {onDelete ? (
