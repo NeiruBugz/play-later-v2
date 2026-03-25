@@ -127,7 +127,7 @@ export function CredentialsForm() {
             {errors.name?.message && (
               <p
                 id="name-error"
-                className="caption text-destructive"
+                className="text-destructive text-sm"
                 role="alert"
               >
                 {errors.name.message}
@@ -150,7 +150,7 @@ export function CredentialsForm() {
           {errors.email?.message && (
             <p
               id="email-error"
-              className="caption text-destructive"
+              className="text-destructive text-sm"
               role="alert"
             >
               {errors.email.message}

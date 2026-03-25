@@ -1,9 +1,7 @@
-import {
-  AcquisitionType,
-  LibraryItemStatus,
-  type LibraryItemDomain,
-} from "@/data-access-layer/domain/library";
+import { AcquisitionType, LibraryItemStatus } from "@/shared/types/library";
 import { render, screen } from "@testing-library/react";
+
+import type { LibraryItemDomain } from "@/shared/types/library";
 
 import { LibraryEntryMetadata } from "./library-entry-metadata";
 
@@ -32,13 +30,14 @@ const createMockLibraryItem = (
   id: 1,
   userId: "user1",
   gameId: "game1",
-  status: LibraryItemStatus.WANT_TO_PLAY,
+  status: LibraryItemStatus.WISHLIST,
   platform: "PC",
   acquisitionType: AcquisitionType.DIGITAL,
   createdAt: new Date("2025-01-27T12:00:00Z"),
   updatedAt: new Date("2025-01-27T12:00:00Z"),
   startedAt: null,
   completedAt: null,
+  hasBeenPlayed: false,
   ...overrides,
 });
 

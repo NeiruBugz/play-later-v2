@@ -98,7 +98,7 @@ export const QuickActionButtons = ({
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "focus-visible:ring-ring gap-xs py-lg flex h-auto flex-col border focus-visible:ring-2 focus-visible:ring-offset-2",
+                  "focus-visible:ring-ring gap-xs py-lg flex h-auto flex-col rounded-md border focus-visible:ring-2 focus-visible:ring-offset-2",
                   "duration-normal ease-out-expo transition-all",
                   isActive && activeClass,
                   isOptimisticActive && "opacity-80"

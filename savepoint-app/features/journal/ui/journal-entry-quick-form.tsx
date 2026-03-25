@@ -43,6 +43,7 @@ interface JournalEntryQuickFormProps {
   gameId: string;
   onSuccess: (entry: JournalEntryDomain) => void;
   onCancel?: () => void;
+  onDirtyChange?: (isDirty: boolean) => void;
   className?: string;
 }
 
@@ -50,6 +51,7 @@ export function JournalEntryQuickForm({
   gameId,
   onSuccess,
   onCancel,
+  onDirtyChange,
   className,
 }: JournalEntryQuickFormProps) {
   const [libraryItems, setLibraryItems] = useState<
@@ -88,6 +90,13 @@ export function JournalEntryQuickForm({
     }, 100);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      onDirtyChange?.(form.formState.isDirty);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, onDirtyChange]);
 
   useEffect(() => {
     setIsLoadingLibraryItems(true);
@@ -239,6 +248,7 @@ export function JournalEntryQuickForm({
                   <Input
                     id="playSession"
                     type="number"
+                    inputMode="numeric"
                     min="0"
                     step="1"
                     placeholder="0"

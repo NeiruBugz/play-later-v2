@@ -31,24 +31,32 @@ const strokeWidths = {
   cover: 4,
 };
 
-export type GameStatus = "WANT_TO_PLAY" | "OWNED" | "PLAYING" | "PLAYED";
+export type GameStatus =
+  | "WISHLIST"
+  | "SHELF"
+  | "UP_NEXT"
+  | "PLAYING"
+  | "PLAYED";
 
 export type LibraryItemStatusType =
-  | "WANT_TO_PLAY"
-  | "OWNED"
+  | "WISHLIST"
+  | "SHELF"
+  | "UP_NEXT"
   | "PLAYING"
   | "PLAYED";
 
 const statusColors: Record<GameStatus, string> = {
-  WANT_TO_PLAY: "var(--status-want-to-play)",
-  OWNED: "var(--status-owned)",
+  WISHLIST: "var(--status-wishlist)",
+  SHELF: "var(--status-shelf)",
+  UP_NEXT: "var(--status-up-next)",
   PLAYING: "var(--status-playing)",
   PLAYED: "var(--status-played)",
 };
 
 const statusDefaults: Record<GameStatus, number> = {
-  WANT_TO_PLAY: 0,
-  OWNED: 10,
+  WISHLIST: 0,
+  SHELF: 10,
+  UP_NEXT: 25,
   PLAYING: 50,
   PLAYED: 100,
 };
@@ -57,16 +65,18 @@ export function mapLibraryStatusToGameStatus(
   libraryStatus: LibraryItemStatusType | string
 ): GameStatus {
   switch (libraryStatus) {
-    case "WANT_TO_PLAY":
-      return "WANT_TO_PLAY";
-    case "OWNED":
-      return "OWNED";
+    case "WISHLIST":
+      return "WISHLIST";
+    case "SHELF":
+      return "SHELF";
+    case "UP_NEXT":
+      return "UP_NEXT";
     case "PLAYING":
       return "PLAYING";
     case "PLAYED":
       return "PLAYED";
     default:
-      return "WANT_TO_PLAY";
+      return "WISHLIST";
   }
 }
 
@@ -86,7 +96,7 @@ export interface ProgressRingProps extends VariantProps<
 
 export function ProgressRing({
   progress,
-  status = "WANT_TO_PLAY",
+  status = "WISHLIST",
   size = "md",
   animated = true,
   showPercentage = false,

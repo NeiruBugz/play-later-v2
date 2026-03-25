@@ -1,4 +1,4 @@
-import { PlatformService } from "@/data-access-layer/services/platform/platform-service";
+import { getSystemPlatforms } from "@/data-access-layer/services/platform/platform-service";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -16,8 +16,7 @@ export async function getUniquePlatformsHandler(
 ): Promise<HandlerResult<{ platforms: UniquePlatformResult[] }>> {
   logger.info({ ip: context.ip }, "Processing unique platforms fetch request");
 
-  const platformService = new PlatformService();
-  const result = await platformService.getSystemPlatforms();
+  const result = await getSystemPlatforms();
 
   if (!result.success) {
     return {

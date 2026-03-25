@@ -1,3 +1,4 @@
+import { NotFoundError } from "@/data-access-layer/repository";
 import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createLibraryItem } from "@/test/setup/db-factories";
 
@@ -36,36 +37,28 @@ describe("Journal Repository Integration Tests", () => {
     });
     testUserId = user.id;
 
-    const genreResult = await upsertGenre({
+    const genre = await upsertGenre({
       id: 999,
       name: "Test Genre",
       slug: "test-genre",
     });
-    const platformResult = await upsertPlatform({
+    const platform = await upsertPlatform({
       id: 999,
       name: "Test Platform",
       slug: "test-platform",
     });
 
-    if (!genreResult.success || !platformResult.success) {
-      throw new Error("Failed to set up test data");
-    }
-
-    const gameResult = await createGameWithRelations({
+    const game = await createGameWithRelations({
       igdbGame: {
         id: 12345,
         name: "Test Game",
         slug: "test-game",
       },
-      genreIds: [genreResult.data.id],
-      platformIds: [platformResult.data.id],
+      genreIds: [genre.id],
+      platformIds: [platform.id],
     });
 
-    if (!gameResult.success) {
-      throw new Error("Failed to create test game");
-    }
-
-    testGameId = gameResult.data.id;
+    testGameId = game.id;
   });
 
   describe("findJournalEntriesByGameId", () => {
@@ -76,10 +69,7 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual([]);
-      }
+      expect(result).toEqual([]);
     });
 
     it("should return journal entries in reverse chronological order", async () => {
@@ -121,14 +111,10 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(3);
-
-        expect(result.data[0].id).toBe(entry3.id);
-        expect(result.data[1].id).toBe(entry2.id);
-        expect(result.data[2].id).toBe(entry1.id);
-      }
+      expect(result).toHaveLength(3);
+      expect(result[0].id).toBe(entry3.id);
+      expect(result[1].id).toBe(entry2.id);
+      expect(result[2].id).toBe(entry1.id);
     });
 
     it("should limit results to specified number", async () => {
@@ -152,14 +138,10 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(3);
-
-        expect(result.data[0].title).toBe("Entry 5");
-        expect(result.data[1].title).toBe("Entry 4");
-        expect(result.data[2].title).toBe("Entry 3");
-      }
+      expect(result).toHaveLength(3);
+      expect(result[0].title).toBe("Entry 5");
+      expect(result[1].title).toBe("Entry 4");
+      expect(result[2].title).toBe("Entry 3");
     });
 
     it("should only return entries for the specified user", async () => {
@@ -197,18 +179,15 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(1);
-        expect(result.data[0].title).toBe("User 1 Entry");
-        expect(result.data[0].userId).toBe(testUserId);
-      }
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe("User 1 Entry");
+      expect(result[0].userId).toBe(testUserId);
     });
 
     it("should only return entries for the specified game", async () => {
       const { prisma } = await import("@/shared/lib/app/db");
 
-      const otherGameResult = await createGameWithRelations({
+      const otherGame = await createGameWithRelations({
         igdbGame: {
           id: 54321,
           name: "Other Game",
@@ -217,10 +196,6 @@ describe("Journal Repository Integration Tests", () => {
         genreIds: [],
         platformIds: [],
       });
-
-      if (!otherGameResult.success) {
-        throw new Error("Failed to create other game");
-      }
 
       await prisma.journalEntry.create({
         data: {
@@ -234,7 +209,7 @@ describe("Journal Repository Integration Tests", () => {
       await prisma.journalEntry.create({
         data: {
           userId: testUserId,
-          gameId: otherGameResult.data.id,
+          gameId: otherGame.id,
           title: "Game 2 Entry",
           content: "Content for game 2",
         },
@@ -246,12 +221,9 @@ describe("Journal Repository Integration Tests", () => {
         limit: 3,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(1);
-        expect(result.data[0].title).toBe("Game 1 Entry");
-        expect(result.data[0].gameId).toBe(testGameId);
-      }
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe("Game 1 Entry");
+      expect(result[0].gameId).toBe(testGameId);
     });
 
     it("should use default limit of 3 when not specified", async () => {
@@ -274,24 +246,18 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(3);
-      }
+      expect(result).toHaveLength(3);
     });
   });
 
   describe("countJournalEntriesByGameId", () => {
     it("should return 0 when no journal entries exist", async () => {
-      const result = await countJournalEntriesByGameId({
+      const count = await countJournalEntriesByGameId({
         gameId: testGameId,
         userId: testUserId,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(0);
-      }
+      expect(count).toBe(0);
     });
 
     it("should return correct count of journal entries", async () => {
@@ -308,15 +274,12 @@ describe("Journal Repository Integration Tests", () => {
         });
       }
 
-      const result = await countJournalEntriesByGameId({
+      const count = await countJournalEntriesByGameId({
         gameId: testGameId,
         userId: testUserId,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(5);
-      }
+      expect(count).toBe(5);
     });
 
     it("should only count entries for the specified user", async () => {
@@ -348,21 +311,18 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      const result = await countJournalEntriesByGameId({
+      const count = await countJournalEntriesByGameId({
         gameId: testGameId,
         userId: testUserId,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(1);
-      }
+      expect(count).toBe(1);
     });
 
     it("should only count entries for the specified game", async () => {
       const { prisma } = await import("@/shared/lib/app/db");
 
-      const otherGameResult = await createGameWithRelations({
+      const otherGame = await createGameWithRelations({
         igdbGame: {
           id: 54321,
           name: "Other Game",
@@ -371,10 +331,6 @@ describe("Journal Repository Integration Tests", () => {
         genreIds: [],
         platformIds: [],
       });
-
-      if (!otherGameResult.success) {
-        throw new Error("Failed to create other game");
-      }
 
       await prisma.journalEntry.create({
         data: {
@@ -388,21 +344,18 @@ describe("Journal Repository Integration Tests", () => {
       await prisma.journalEntry.create({
         data: {
           userId: testUserId,
-          gameId: otherGameResult.data.id,
+          gameId: otherGame.id,
           title: "Game 2 Entry",
           content: "Content for game 2",
         },
       });
 
-      const result = await countJournalEntriesByGameId({
+      const count = await countJournalEntriesByGameId({
         gameId: testGameId,
         userId: testUserId,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(1);
-      }
+      expect(count).toBe(1);
     });
   });
 
@@ -415,21 +368,18 @@ describe("Journal Repository Integration Tests", () => {
         content: "This is my first journal entry about this game.",
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          userId: testUserId,
-          gameId: testGameId,
-          title: "My First Entry",
-          content: "This is my first journal entry about this game.",
-          mood: null,
-          playSession: null,
-          libraryItemId: null,
-        });
-        expect(result.data.id).toBeDefined();
-        expect(result.data.createdAt).toBeInstanceOf(Date);
-        expect(result.data.updatedAt).toBeInstanceOf(Date);
-      }
+      expect(result).toMatchObject({
+        userId: testUserId,
+        gameId: testGameId,
+        title: "My First Entry",
+        content: "This is my first journal entry about this game.",
+        mood: null,
+        playSession: null,
+        libraryItemId: null,
+      });
+      expect(result.id).toBeDefined();
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.updatedAt).toBeInstanceOf(Date);
     });
 
     it("should successfully create journal entry with optional fields", async () => {
@@ -449,23 +399,19 @@ describe("Journal Repository Integration Tests", () => {
         libraryItemId: libraryItem.id,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          userId: testUserId,
-          gameId: testGameId,
-          title: "Entry with Optional Fields",
-          content: "This entry has mood, playSession, and libraryItemId.",
-          mood: "EXCITED",
-          playSession: 5,
-          libraryItemId: libraryItem.id,
-        });
-      }
+      expect(result).toMatchObject({
+        userId: testUserId,
+        gameId: testGameId,
+        title: "Entry with Optional Fields",
+        content: "This entry has mood, playSession, and libraryItemId.",
+        mood: "EXCITED",
+        playSession: 5,
+        libraryItemId: libraryItem.id,
+      });
     });
 
     it("should set createdAt and updatedAt timestamps correctly", async () => {
       const beforeCreate = new Date();
-      // Small delay to ensure timestamps are different
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       const result = await createJournalEntry({
@@ -477,77 +423,53 @@ describe("Journal Repository Integration Tests", () => {
 
       const afterCreate = new Date();
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.createdAt.getTime()).toBeGreaterThanOrEqual(
-          beforeCreate.getTime()
-        );
-        expect(result.data.createdAt.getTime()).toBeLessThanOrEqual(
-          afterCreate.getTime()
-        );
-        expect(result.data.updatedAt.getTime()).toBeGreaterThanOrEqual(
-          beforeCreate.getTime()
-        );
-        expect(result.data.updatedAt.getTime()).toBeLessThanOrEqual(
-          afterCreate.getTime()
-        );
-        // createdAt and updatedAt should be equal on creation
-        expect(result.data.createdAt.getTime()).toBe(
-          result.data.updatedAt.getTime()
-        );
-      }
+      expect(result.createdAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCreate.getTime()
+      );
+      expect(result.createdAt.getTime()).toBeLessThanOrEqual(
+        afterCreate.getTime()
+      );
+      expect(result.updatedAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCreate.getTime()
+      );
+      expect(result.updatedAt.getTime()).toBeLessThanOrEqual(
+        afterCreate.getTime()
+      );
+      expect(result.createdAt.getTime()).toBe(result.updatedAt.getTime());
     });
 
-    it("should return error when userId is invalid", async () => {
-      const result = await createJournalEntry({
-        userId: "invalid-user-id",
-        gameId: testGameId,
-        title: "Invalid User Test",
-        content: "This should fail due to invalid userId.",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("DATABASE_ERROR");
-        expect(result.error.message).toContain(
-          "Failed to create journal entry"
-        );
-      }
+    it("should throw error when userId is invalid", async () => {
+      await expect(
+        createJournalEntry({
+          userId: "invalid-user-id",
+          gameId: testGameId,
+          title: "Invalid User Test",
+          content: "This should fail due to invalid userId.",
+        })
+      ).rejects.toThrow();
     });
 
-    it("should return error when gameId is invalid", async () => {
-      const result = await createJournalEntry({
-        userId: testUserId,
-        gameId: "invalid-game-id",
-        title: "Invalid Game Test",
-        content: "This should fail due to invalid gameId.",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("DATABASE_ERROR");
-        expect(result.error.message).toContain(
-          "Failed to create journal entry"
-        );
-      }
+    it("should throw error when gameId is invalid", async () => {
+      await expect(
+        createJournalEntry({
+          userId: testUserId,
+          gameId: "invalid-game-id",
+          title: "Invalid Game Test",
+          content: "This should fail due to invalid gameId.",
+        })
+      ).rejects.toThrow();
     });
 
-    it("should return error when libraryItemId is invalid", async () => {
-      const result = await createJournalEntry({
-        userId: testUserId,
-        gameId: testGameId,
-        title: "Invalid Library Item Test",
-        content: "This should fail due to invalid libraryItemId.",
-        libraryItemId: 99999, // Non-existent library item ID
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("DATABASE_ERROR");
-        expect(result.error.message).toContain(
-          "Failed to create journal entry"
-        );
-      }
+    it("should throw error when libraryItemId is invalid", async () => {
+      await expect(
+        createJournalEntry({
+          userId: testUserId,
+          gameId: testGameId,
+          title: "Invalid Library Item Test",
+          content: "This should fail due to invalid libraryItemId.",
+          libraryItemId: 99999,
+        })
+      ).rejects.toThrow();
     });
   });
 
@@ -571,20 +493,17 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          id: entry.id,
-          userId: testUserId,
-          gameId: testGameId,
-          title: "My Entry",
-          content: "This is my journal entry.",
-          mood: "EXCITED",
-          playSession: 5,
-        });
-        expect(result.data.createdAt).toBeInstanceOf(Date);
-        expect(result.data.updatedAt).toBeInstanceOf(Date);
-      }
+      expect(result).toMatchObject({
+        id: entry.id,
+        userId: testUserId,
+        gameId: testGameId,
+        title: "My Entry",
+        content: "This is my journal entry.",
+        mood: "EXCITED",
+        playSession: 5,
+      });
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.updatedAt).toBeInstanceOf(Date);
     });
 
     it("should retrieve all fields correctly", async () => {
@@ -613,39 +532,32 @@ describe("Journal Repository Integration Tests", () => {
         userId: testUserId,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.id).toBe(entry.id);
-        expect(result.data.userId).toBe(testUserId);
-        expect(result.data.gameId).toBe(testGameId);
-        expect(result.data.title).toBe("Complete Entry");
-        expect(result.data.content).toBe("Entry with all fields");
-        expect(result.data.mood).toBe("RELAXED");
-        expect(result.data.playSession).toBe(10);
-        expect(result.data.libraryItemId).toBe(libraryItem.id);
-        expect(result.data.visibility).toBe("PRIVATE");
-        expect(result.data.createdAt).toBeInstanceOf(Date);
-        expect(result.data.updatedAt).toBeInstanceOf(Date);
-        expect(result.data.publishedAt).toBeNull();
-      }
+      expect(result.id).toBe(entry.id);
+      expect(result.userId).toBe(testUserId);
+      expect(result.gameId).toBe(testGameId);
+      expect(result.title).toBe("Complete Entry");
+      expect(result.content).toBe("Entry with all fields");
+      expect(result.mood).toBe("RELAXED");
+      expect(result.playSession).toBe(10);
+      expect(result.libraryItemId).toBe(libraryItem.id);
+      expect(result.visibility).toBe("PRIVATE");
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.updatedAt).toBeInstanceOf(Date);
+      expect(result.publishedAt).toBeNull();
     });
 
-    it("should return error when entry doesn't exist", async () => {
+    it("should throw NotFoundError when entry doesn't exist", async () => {
       const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
 
-      const result = await findJournalEntryById({
-        entryId: nonExistentId,
-        userId: testUserId,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("NOT_FOUND");
-        expect(result.error.message).toContain("Journal entry not found");
-      }
+      await expect(
+        findJournalEntryById({
+          entryId: nonExistentId,
+          userId: testUserId,
+        })
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("should return error when entry exists but user doesn't own it", async () => {
+    it("should throw NotFoundError when entry exists but user doesn't own it", async () => {
       const { prisma } = await import("@/shared/lib/app/db");
 
       const otherUser = await prisma.user.create({
@@ -665,16 +577,12 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      const result = await findJournalEntryById({
-        entryId: entry.id,
-        userId: testUserId,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("NOT_FOUND");
-        expect(result.error.message).toContain("Journal entry not found");
-      }
+      await expect(
+        findJournalEntryById({
+          entryId: entry.id,
+          userId: testUserId,
+        })
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -685,10 +593,7 @@ describe("Journal Repository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual([]);
-      }
+      expect(result).toEqual([]);
     });
 
     it("should return entries ordered by updatedAt DESC (most recently updated first)", async () => {
@@ -733,13 +638,10 @@ describe("Journal Repository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(3);
-        expect(result.data[0].id).toBe(entry2.id);
-        expect(result.data[1].id).toBe(entry3.id);
-        expect(result.data[2].id).toBe(entry1.id);
-      }
+      expect(result).toHaveLength(3);
+      expect(result[0].id).toBe(entry2.id);
+      expect(result[1].id).toBe(entry3.id);
+      expect(result[2].id).toBe(entry1.id);
     });
 
     it("should handle cursor-based pagination (first page)", async () => {
@@ -765,12 +667,9 @@ describe("Journal Repository Integration Tests", () => {
         limit: 2,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(2);
-        expect(result.data[0].id).toBe(entries[0].id);
-        expect(result.data[1].id).toBe(entries[1].id);
-      }
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe(entries[0].id);
+      expect(result[1].id).toBe(entries[1].id);
     });
 
     it("should handle cursor-based pagination (subsequent pages)", async () => {
@@ -796,10 +695,7 @@ describe("Journal Repository Integration Tests", () => {
         limit: 2,
       });
 
-      expect(firstPageResult.success).toBe(true);
-      if (!firstPageResult.success) return;
-
-      const cursor = firstPageResult.data[firstPageResult.data.length - 1].id;
+      const cursor = firstPageResult[firstPageResult.length - 1].id;
 
       const secondPageResult = await findJournalEntriesByUserId({
         userId: testUserId,
@@ -807,12 +703,9 @@ describe("Journal Repository Integration Tests", () => {
         cursor,
       });
 
-      expect(secondPageResult.success).toBe(true);
-      if (secondPageResult.success) {
-        expect(secondPageResult.data).toHaveLength(2);
-        expect(secondPageResult.data[0].id).toBe(entries[2].id);
-        expect(secondPageResult.data[1].id).toBe(entries[3].id);
-      }
+      expect(secondPageResult).toHaveLength(2);
+      expect(secondPageResult[0].id).toBe(entries[2].id);
+      expect(secondPageResult[1].id).toBe(entries[3].id);
     });
 
     it("should only return entries belonging to the specified user", async () => {
@@ -858,31 +751,22 @@ describe("Journal Repository Integration Tests", () => {
         limit: 10,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(2);
-        expect(
-          result.data.every(
-            (entry: { userId: string }) => entry.userId === testUserId
-          )
-        ).toBe(true);
-      }
+      expect(result).toHaveLength(2);
+      expect(
+        result.every((entry: { userId: string }) => entry.userId === testUserId)
+      ).toBe(true);
     });
 
-    it("should return error when cursor points to non-existent entry", async () => {
+    it("should throw NotFoundError when cursor points to non-existent entry", async () => {
       const nonExistentCursor = "clxxxxxxxxxxxxxxxxxxxxxxxx";
 
-      const result = await findJournalEntriesByUserId({
-        userId: testUserId,
-        limit: 10,
-        cursor: nonExistentCursor,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("NOT_FOUND");
-        expect(result.error.message).toContain("Cursor entry not found");
-      }
+      await expect(
+        findJournalEntriesByUserId({
+          userId: testUserId,
+          limit: 10,
+          cursor: nonExistentCursor,
+        })
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("should handle limit boundary case: limit = 0", async () => {
@@ -902,10 +786,7 @@ describe("Journal Repository Integration Tests", () => {
         limit: 0,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual([]);
-      }
+      expect(result).toEqual([]);
     });
 
     it("should handle limit boundary case: limit = 1", async () => {
@@ -937,11 +818,8 @@ describe("Journal Repository Integration Tests", () => {
         limit: 1,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(1);
-        expect(result.data[0].title).toBe("Entry 2");
-      }
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe("Entry 2");
     });
 
     it("should handle limit boundary case: very high limit", async () => {
@@ -963,10 +841,7 @@ describe("Journal Repository Integration Tests", () => {
         limit: 1000,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(5);
-      }
+      expect(result).toHaveLength(5);
     });
 
     it("should return empty array when cursor is last entry", async () => {
@@ -999,10 +874,7 @@ describe("Journal Repository Integration Tests", () => {
         cursor: lastEntry.id,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual([]);
-      }
+      expect(result).toEqual([]);
     });
   });
 
@@ -1019,30 +891,24 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      const result = await deleteJournalEntry({
+      await deleteJournalEntry({
         entryId: entry.id,
         userId: testUserId,
       });
-
-      expect(result.success).toBe(true);
     });
 
-    it("should return error when entry doesn't exist", async () => {
+    it("should throw NotFoundError when entry doesn't exist", async () => {
       const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
 
-      const result = await deleteJournalEntry({
-        entryId: nonExistentId,
-        userId: testUserId,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("NOT_FOUND");
-        expect(result.error.message).toContain("Journal entry not found");
-      }
+      await expect(
+        deleteJournalEntry({
+          entryId: nonExistentId,
+          userId: testUserId,
+        })
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("should return error when entry exists but user doesn't own it", async () => {
+    it("should throw NotFoundError when entry exists but user doesn't own it", async () => {
       const { prisma } = await import("@/shared/lib/app/db");
 
       const otherUser = await prisma.user.create({
@@ -1062,16 +928,12 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      const result = await deleteJournalEntry({
-        entryId: entry.id,
-        userId: testUserId,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("NOT_FOUND");
-        expect(result.error.message).toContain("Journal entry not found");
-      }
+      await expect(
+        deleteJournalEntry({
+          entryId: entry.id,
+          userId: testUserId,
+        })
+      ).rejects.toThrow(NotFoundError);
 
       const dbEntry = await prisma.journalEntry.findUnique({
         where: { id: entry.id },
@@ -1092,26 +954,22 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      const deleteResult = await deleteJournalEntry({
+      await deleteJournalEntry({
         entryId: entry.id,
         userId: testUserId,
       });
-
-      expect(deleteResult.success).toBe(true);
 
       const dbEntry = await prisma.journalEntry.findUnique({
         where: { id: entry.id },
       });
       expect(dbEntry).toBeNull();
 
-      const findResult = await findJournalEntryById({
-        entryId: entry.id,
-        userId: testUserId,
-      });
-      expect(findResult.success).toBe(false);
-      if (!findResult.success) {
-        expect(findResult.error.code).toBe("NOT_FOUND");
-      }
+      await expect(
+        findJournalEntryById({
+          entryId: entry.id,
+          userId: testUserId,
+        })
+      ).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -1149,19 +1007,16 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          id: entry.id,
-          userId: testUserId,
-          gameId: testGameId,
-          title: "Updated Title",
-          content: "Updated content",
-          mood: "RELAXED",
-          playSession: 10,
-          libraryItemId: libraryItem.id,
-        });
-      }
+      expect(result).toMatchObject({
+        id: entry.id,
+        userId: testUserId,
+        gameId: testGameId,
+        title: "Updated Title",
+        content: "Updated content",
+        mood: "RELAXED",
+        playSession: 10,
+        libraryItemId: libraryItem.id,
+      });
     });
 
     it("should successfully perform partial update (only title)", async () => {
@@ -1186,13 +1041,10 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.title).toBe("New Title Only");
-        expect(result.data.content).toBe("Original content");
-        expect(result.data.mood).toBe("EXCITED");
-        expect(result.data.playSession).toBe(5);
-      }
+      expect(result.title).toBe("New Title Only");
+      expect(result.content).toBe("Original content");
+      expect(result.mood).toBe("EXCITED");
+      expect(result.playSession).toBe(5);
     });
 
     it("should successfully perform partial update (only content)", async () => {
@@ -1216,12 +1068,9 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.title).toBe("Original Title");
-        expect(result.data.content).toBe("Only the content changed");
-        expect(result.data.mood).toBe("FRUSTRATED");
-      }
+      expect(result.title).toBe("Original Title");
+      expect(result.content).toBe("Only the content changed");
+      expect(result.mood).toBe("FRUSTRATED");
     });
 
     it("should automatically update the updatedAt timestamp", async () => {
@@ -1249,14 +1098,11 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.updatedAt.getTime()).toBeGreaterThan(now.getTime());
-        expect(result.data.createdAt.getTime()).toBe(now.getTime());
-      }
+      expect(result.updatedAt.getTime()).toBeGreaterThan(now.getTime());
+      expect(result.createdAt.getTime()).toBe(now.getTime());
     });
 
-    it("should return error when user doesn't own the entry", async () => {
+    it("should throw NotFoundError when user doesn't own the entry", async () => {
       const { prisma } = await import("@/shared/lib/app/db");
 
       const otherUser = await prisma.user.create({
@@ -1276,37 +1122,29 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      const result = await updateJournalEntry({
-        entryId: entry.id,
-        userId: testUserId,
-        updates: {
-          title: "Trying to update",
-        },
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("NOT_FOUND");
-        expect(result.error.message).toContain("Journal entry not found");
-      }
+      await expect(
+        updateJournalEntry({
+          entryId: entry.id,
+          userId: testUserId,
+          updates: {
+            title: "Trying to update",
+          },
+        })
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("should return error when entry doesn't exist", async () => {
+    it("should throw NotFoundError when entry doesn't exist", async () => {
       const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
 
-      const result = await updateJournalEntry({
-        entryId: nonExistentId,
-        userId: testUserId,
-        updates: {
-          title: "Trying to update non-existent entry",
-        },
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.code).toBe("NOT_FOUND");
-        expect(result.error.message).toContain("Journal entry not found");
-      }
+      await expect(
+        updateJournalEntry({
+          entryId: nonExistentId,
+          userId: testUserId,
+          updates: {
+            title: "Trying to update non-existent entry",
+          },
+        })
+      ).rejects.toThrow(NotFoundError);
     });
 
     it("should successfully set optional fields to null", async () => {
@@ -1340,14 +1178,11 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.mood).toBeNull();
-        expect(result.data.playSession).toBeNull();
-        expect(result.data.libraryItemId).toBeNull();
-        expect(result.data.title).toBe("Entry with Optional Fields");
-        expect(result.data.content).toBe("Content");
-      }
+      expect(result.mood).toBeNull();
+      expect(result.playSession).toBeNull();
+      expect(result.libraryItemId).toBeNull();
+      expect(result.title).toBe("Entry with Optional Fields");
+      expect(result.content).toBe("Content");
     });
 
     it("should verify changes persist in database", async () => {
@@ -1362,7 +1197,7 @@ describe("Journal Repository Integration Tests", () => {
         },
       });
 
-      const updateResult = await updateJournalEntry({
+      await updateJournalEntry({
         entryId: entry.id,
         userId: testUserId,
         updates: {
@@ -1371,8 +1206,6 @@ describe("Journal Repository Integration Tests", () => {
           mood: "ACCOMPLISHED",
         },
       });
-
-      expect(updateResult.success).toBe(true);
 
       const dbEntry = await prisma.journalEntry.findUnique({
         where: { id: entry.id },

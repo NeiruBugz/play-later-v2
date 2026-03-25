@@ -1,16 +1,12 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import {
   countJournalEntriesByUserId,
   countLibraryItemsByUserId,
   getOnboardingStatus,
   hasLibraryItemWithStatus,
+  NotFoundError,
   updateOnboardingDismissed,
 } from "@/data-access-layer/repository";
-import {
-  repositoryError,
-  RepositoryErrorCode,
-  repositorySuccess,
-} from "@/data-access-layer/repository/types";
+import { LibraryItemStatus } from "@prisma/client";
 
 import { ServiceErrorCode } from "../types";
 import { OnboardingService } from "./onboarding-service";
@@ -21,9 +17,6 @@ vi.mock("@/data-access-layer/repository", () => ({
   countJournalEntriesByUserId: vi.fn(),
   getOnboardingStatus: vi.fn(),
   updateOnboardingDismissed: vi.fn(),
-  isRepositorySuccess: <TData>(result: {
-    success: boolean;
-  }): result is { success: true; data: TData } => result.success === true,
 }));
 
 describe("OnboardingService", () => {
@@ -49,15 +42,13 @@ describe("OnboardingService", () => {
 
     describe("success scenarios", () => {
       it("should return progress with all steps incomplete for new user", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositorySuccess({
-            profileSetupCompletedAt: null,
-            onboardingDismissedAt: null,
-          })
-        );
-        mockCountLibraryItems.mockResolvedValue(repositorySuccess(0));
-        mockHasPlayingItem.mockResolvedValue(repositorySuccess(false));
-        mockCountJournalEntries.mockResolvedValue(repositorySuccess(0));
+        mockGetOnboardingStatus.mockResolvedValue({
+          profileSetupCompletedAt: null,
+          onboardingDismissedAt: null,
+        });
+        mockCountLibraryItems.mockResolvedValue(0);
+        mockHasPlayingItem.mockResolvedValue(false);
+        mockCountJournalEntries.mockResolvedValue(0);
 
         const result = await service.getProgress({ userId });
 
@@ -88,15 +79,13 @@ describe("OnboardingService", () => {
       });
 
       it("should return progress with some steps complete", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositorySuccess({
-            profileSetupCompletedAt: new Date(),
-            onboardingDismissedAt: null,
-          })
-        );
-        mockCountLibraryItems.mockResolvedValue(repositorySuccess(3));
-        mockHasPlayingItem.mockResolvedValue(repositorySuccess(false));
-        mockCountJournalEntries.mockResolvedValue(repositorySuccess(0));
+        mockGetOnboardingStatus.mockResolvedValue({
+          profileSetupCompletedAt: new Date(),
+          onboardingDismissedAt: null,
+        });
+        mockCountLibraryItems.mockResolvedValue(3);
+        mockHasPlayingItem.mockResolvedValue(false);
+        mockCountJournalEntries.mockResolvedValue(0);
 
         const result = await service.getProgress({ userId });
 
@@ -118,15 +107,13 @@ describe("OnboardingService", () => {
       });
 
       it("should return progress with all steps complete", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositorySuccess({
-            profileSetupCompletedAt: new Date(),
-            onboardingDismissedAt: null,
-          })
-        );
-        mockCountLibraryItems.mockResolvedValue(repositorySuccess(5));
-        mockHasPlayingItem.mockResolvedValue(repositorySuccess(true));
-        mockCountJournalEntries.mockResolvedValue(repositorySuccess(2));
+        mockGetOnboardingStatus.mockResolvedValue({
+          profileSetupCompletedAt: new Date(),
+          onboardingDismissedAt: null,
+        });
+        mockCountLibraryItems.mockResolvedValue(5);
+        mockHasPlayingItem.mockResolvedValue(true);
+        mockCountJournalEntries.mockResolvedValue(2);
 
         const result = await service.getProgress({ userId });
 
@@ -143,15 +130,13 @@ describe("OnboardingService", () => {
       });
 
       it("should return isDismissed true when user has dismissed", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositorySuccess({
-            profileSetupCompletedAt: null,
-            onboardingDismissedAt: new Date(),
-          })
-        );
-        mockCountLibraryItems.mockResolvedValue(repositorySuccess(0));
-        mockHasPlayingItem.mockResolvedValue(repositorySuccess(false));
-        mockCountJournalEntries.mockResolvedValue(repositorySuccess(0));
+        mockGetOnboardingStatus.mockResolvedValue({
+          profileSetupCompletedAt: null,
+          onboardingDismissedAt: new Date(),
+        });
+        mockCountLibraryItems.mockResolvedValue(0);
+        mockHasPlayingItem.mockResolvedValue(false);
+        mockCountJournalEntries.mockResolvedValue(0);
 
         const result = await service.getProgress({ userId });
 
@@ -163,15 +148,13 @@ describe("OnboardingService", () => {
       });
 
       it("should include step metadata with action URLs and labels", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositorySuccess({
-            profileSetupCompletedAt: null,
-            onboardingDismissedAt: null,
-          })
-        );
-        mockCountLibraryItems.mockResolvedValue(repositorySuccess(0));
-        mockHasPlayingItem.mockResolvedValue(repositorySuccess(false));
-        mockCountJournalEntries.mockResolvedValue(repositorySuccess(0));
+        mockGetOnboardingStatus.mockResolvedValue({
+          profileSetupCompletedAt: null,
+          onboardingDismissedAt: null,
+        });
+        mockCountLibraryItems.mockResolvedValue(0);
+        mockHasPlayingItem.mockResolvedValue(false);
+        mockCountJournalEntries.mockResolvedValue(0);
 
         const result = await service.getProgress({ userId });
 
@@ -200,7 +183,7 @@ describe("OnboardingService", () => {
 
     describe("error scenarios", () => {
       it("should return NOT_FOUND when user does not exist", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(repositorySuccess(null));
+        mockGetOnboardingStatus.mockResolvedValue(null);
 
         const result = await service.getProgress({ userId });
 
@@ -212,11 +195,8 @@ describe("OnboardingService", () => {
       });
 
       it("should return error when getOnboardingStatus fails", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Database connection failed"
-          )
+        mockGetOnboardingStatus.mockRejectedValue(
+          new Error("Database connection failed")
         );
 
         const result = await service.getProgress({ userId });
@@ -229,20 +209,15 @@ describe("OnboardingService", () => {
       });
 
       it("should return error when countLibraryItems fails", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositorySuccess({
-            profileSetupCompletedAt: null,
-            onboardingDismissedAt: null,
-          })
+        mockGetOnboardingStatus.mockResolvedValue({
+          profileSetupCompletedAt: null,
+          onboardingDismissedAt: null,
+        });
+        mockCountLibraryItems.mockRejectedValue(
+          new Error("Failed to count library items")
         );
-        mockCountLibraryItems.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Failed to count library items"
-          )
-        );
-        mockHasPlayingItem.mockResolvedValue(repositorySuccess(false));
-        mockCountJournalEntries.mockResolvedValue(repositorySuccess(0));
+        mockHasPlayingItem.mockResolvedValue(false);
+        mockCountJournalEntries.mockResolvedValue(0);
 
         const result = await service.getProgress({ userId });
 
@@ -254,20 +229,15 @@ describe("OnboardingService", () => {
       });
 
       it("should return error when hasLibraryItemWithStatus fails", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositorySuccess({
-            profileSetupCompletedAt: null,
-            onboardingDismissedAt: null,
-          })
+        mockGetOnboardingStatus.mockResolvedValue({
+          profileSetupCompletedAt: null,
+          onboardingDismissedAt: null,
+        });
+        mockCountLibraryItems.mockResolvedValue(1);
+        mockHasPlayingItem.mockRejectedValue(
+          new Error("Failed to check playing status")
         );
-        mockCountLibraryItems.mockResolvedValue(repositorySuccess(1));
-        mockHasPlayingItem.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Failed to check playing status"
-          )
-        );
-        mockCountJournalEntries.mockResolvedValue(repositorySuccess(0));
+        mockCountJournalEntries.mockResolvedValue(0);
 
         const result = await service.getProgress({ userId });
 
@@ -279,19 +249,14 @@ describe("OnboardingService", () => {
       });
 
       it("should return error when countJournalEntries fails", async () => {
-        mockGetOnboardingStatus.mockResolvedValue(
-          repositorySuccess({
-            profileSetupCompletedAt: null,
-            onboardingDismissedAt: null,
-          })
-        );
-        mockCountLibraryItems.mockResolvedValue(repositorySuccess(1));
-        mockHasPlayingItem.mockResolvedValue(repositorySuccess(true));
-        mockCountJournalEntries.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Failed to count journal entries"
-          )
+        mockGetOnboardingStatus.mockResolvedValue({
+          profileSetupCompletedAt: null,
+          onboardingDismissedAt: null,
+        });
+        mockCountLibraryItems.mockResolvedValue(1);
+        mockHasPlayingItem.mockResolvedValue(true);
+        mockCountJournalEntries.mockRejectedValue(
+          new Error("Failed to count journal entries")
         );
 
         const result = await service.getProgress({ userId });
@@ -310,9 +275,7 @@ describe("OnboardingService", () => {
 
     describe("success scenarios", () => {
       it("should dismiss onboarding successfully", async () => {
-        mockUpdateOnboardingDismissed.mockResolvedValue(
-          repositorySuccess(undefined)
-        );
+        mockUpdateOnboardingDismissed.mockResolvedValue(undefined);
 
         const result = await service.dismiss({ userId });
 
@@ -323,11 +286,8 @@ describe("OnboardingService", () => {
 
     describe("error scenarios", () => {
       it("should return error when updateOnboardingDismissed fails", async () => {
-        mockUpdateOnboardingDismissed.mockResolvedValue(
-          repositoryError(
-            RepositoryErrorCode.DATABASE_ERROR,
-            "Database connection failed"
-          )
+        mockUpdateOnboardingDismissed.mockRejectedValue(
+          new Error("Database connection failed")
         );
 
         const result = await service.dismiss({ userId });
@@ -340,8 +300,8 @@ describe("OnboardingService", () => {
       });
 
       it("should return error when user not found", async () => {
-        mockUpdateOnboardingDismissed.mockResolvedValue(
-          repositoryError(RepositoryErrorCode.NOT_FOUND, "User not found")
+        mockUpdateOnboardingDismissed.mockRejectedValue(
+          new NotFoundError("User not found")
         );
 
         const result = await service.dismiss({ userId: "nonexistent" });

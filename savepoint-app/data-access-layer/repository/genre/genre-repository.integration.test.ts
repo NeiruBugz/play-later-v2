@@ -1,6 +1,5 @@
 import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 
-import { isRepositorySuccess } from "../types";
 import {
   findGenreByIgdbId,
   upsertGenre,
@@ -27,13 +26,10 @@ describe("GenreRepository - Integration Tests", () => {
 
       const result = await upsertGenre(igdbGenre);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data.igdbId).toBe(1);
-        expect(result.data.name).toBe("Action");
-        expect(result.data.slug).toBe("action");
-        expect(result.data.checksum).toBe("abc123");
-      }
+      expect(result.igdbId).toBe(1);
+      expect(result.name).toBe("Action");
+      expect(result.slug).toBe("action");
+      expect(result.checksum).toBe("abc123");
     });
 
     it("should update existing genre on second upsert", async () => {
@@ -48,18 +44,12 @@ describe("GenreRepository - Integration Tests", () => {
       };
       const result = await upsertGenre(updated);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data.name).toBe("Action-Adventure");
-        expect(result.data.slug).toBe("action-adventure");
-        expect(result.data.checksum).toBe("updated123");
-      }
+      expect(result.name).toBe("Action-Adventure");
+      expect(result.slug).toBe("action-adventure");
+      expect(result.checksum).toBe("updated123");
 
       const findResult = await findGenreByIgdbId(1);
-      expect(isRepositorySuccess(findResult)).toBe(true);
-      if (isRepositorySuccess(findResult)) {
-        expect(findResult.data?.name).toBe("Action-Adventure");
-      }
+      expect(findResult?.name).toBe("Action-Adventure");
     });
 
     it("should handle genre with missing optional fields", async () => {
@@ -67,13 +57,10 @@ describe("GenreRepository - Integration Tests", () => {
 
       const result = await upsertGenre(igdbGenre);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data.igdbId).toBe(2);
-        expect(result.data.name).toBe("Unknown Genre");
-        expect(result.data.slug).toBe("genre-2");
-        expect(result.data.checksum).toBeNull();
-      }
+      expect(result.igdbId).toBe(2);
+      expect(result.name).toBe("Unknown Genre");
+      expect(result.slug).toBe("genre-2");
+      expect(result.checksum).toBeNull();
     });
   });
 
@@ -87,24 +74,14 @@ describe("GenreRepository - Integration Tests", () => {
 
       const result = await upsertGenres(genres);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data).toHaveLength(3);
-        expect(result.data.map((g) => g.name)).toEqual([
-          "Action",
-          "RPG",
-          "Strategy",
-        ]);
-      }
+      expect(result).toHaveLength(3);
+      expect(result.map((g) => g.name)).toEqual(["Action", "RPG", "Strategy"]);
     });
 
     it("should handle empty array", async () => {
       const result = await upsertGenres([]);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data).toHaveLength(0);
-      }
+      expect(result).toHaveLength(0);
     });
 
     it("should update existing and create new genres in bulk operation", async () => {
@@ -117,16 +94,13 @@ describe("GenreRepository - Integration Tests", () => {
 
       const result = await upsertGenres(genres);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data).toHaveLength(2);
+      expect(result).toHaveLength(2);
 
-        const actionGenre = result.data.find((g) => g.igdbId === 1);
-        expect(actionGenre?.name).toBe("Action-Updated");
+      const actionGenre = result.find((g) => g.igdbId === 1);
+      expect(actionGenre?.name).toBe("Action-Updated");
 
-        const rpgGenre = result.data.find((g) => g.igdbId === 2);
-        expect(rpgGenre?.name).toBe("RPG");
-      }
+      const rpgGenre = result.find((g) => g.igdbId === 2);
+      expect(rpgGenre?.name).toBe("RPG");
     });
   });
 
@@ -136,21 +110,15 @@ describe("GenreRepository - Integration Tests", () => {
 
       const result = await findGenreByIgdbId(1);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data).not.toBeNull();
-        expect(result.data?.igdbId).toBe(1);
-        expect(result.data?.name).toBe("Action");
-      }
+      expect(result).not.toBeNull();
+      expect(result?.igdbId).toBe(1);
+      expect(result?.name).toBe("Action");
     });
 
     it("should return null for non-existent genre", async () => {
       const result = await findGenreByIgdbId(999);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data).toBeNull();
-      }
+      expect(result).toBeNull();
     });
 
     it("should find genre after upsert", async () => {
@@ -164,11 +132,8 @@ describe("GenreRepository - Integration Tests", () => {
 
       const result = await findGenreByIgdbId(5);
 
-      expect(isRepositorySuccess(result)).toBe(true);
-      if (isRepositorySuccess(result)) {
-        expect(result.data?.name).toBe("Platformer");
-        expect(result.data?.checksum).toBe("xyz789");
-      }
+      expect(result?.name).toBe("Platformer");
+      expect(result?.checksum).toBe("xyz789");
     });
   });
 });

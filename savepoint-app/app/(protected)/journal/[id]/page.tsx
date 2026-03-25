@@ -1,4 +1,5 @@
-import { GameService, JournalService } from "@/data-access-layer/services";
+import { findGameById } from "@/data-access-layer/repository";
+import { JournalService } from "@/data-access-layer/services";
 import { notFound } from "next/navigation";
 
 import { JournalEntryDetail } from "@/features/journal/ui/journal-entry-detail";
@@ -26,15 +27,11 @@ export default async function JournalEntryPage({
 
   const entry = entryResult.data;
 
-  // Fetch game information using service layer
-  const gameService = new GameService();
-  const gameResult = await gameService.getGameById({ id: entry.gameId });
+  const game = await findGameById(entry.gameId);
 
-  if (!gameResult.success || !gameResult.data) {
+  if (!game) {
     notFound();
   }
-
-  const game = gameResult.data;
 
   return (
     <main className="py-3xl container mx-auto">

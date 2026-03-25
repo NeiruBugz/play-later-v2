@@ -1,6 +1,6 @@
 export interface DeleteConfirmationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   itemDescription: string;
 }

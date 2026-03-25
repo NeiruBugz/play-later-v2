@@ -3,13 +3,20 @@ import "server-only";
 import {
   findImportedGameById,
   findImportedGamesByUserId,
+  NotFoundError,
   updateImportedGameStatus,
 } from "@/data-access-layer/repository";
 import type { IgdbMatchStatus, ImportedGame } from "@prisma/client";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
+import {
+  handleServiceError,
+  serviceError,
+  ServiceErrorCode,
+  serviceSuccess,
+  type ServiceResult,
+} from "../types";
 import type {
   DismissImportedGameInput,
   FindImportedGameByIdInput,
@@ -18,7 +25,7 @@ import type {
   UpdateImportedGameStatusInput,
 } from "./types";
 
-export class ImportedGameService extends BaseService {
+export class ImportedGameService {
   private logger = createLogger({
     [LOGGER_CONTEXT.SERVICE]: "ImportedGameService",
   });
@@ -40,22 +47,6 @@ export class ImportedGameService extends BaseService {
         showAlreadyImported = false,
       } = input;
 
-      this.logger.info(
-        {
-          userId,
-          page,
-          limit,
-          search,
-          playtimeStatus,
-          playtimeRange,
-          platform,
-          lastPlayed,
-          sortBy,
-          showAlreadyImported,
-        },
-        "Finding imported games by user ID"
-      );
-
       if (
         playtimeStatus &&
         playtimeStatus !== "all" &&
@@ -72,7 +63,7 @@ export class ImportedGameService extends BaseService {
         ? ["PENDING", "UNMATCHED", "MATCHED"]
         : ["PENDING", "UNMATCHED"];
 
-      const result = await findImportedGamesByUserId(userId, {
+      const data = await findImportedGamesByUserId(userId, {
         search,
         page,
         limit,
@@ -84,30 +75,9 @@ export class ImportedGameService extends BaseService {
         matchStatus,
       });
 
-      if (!result.success) {
-        this.logger.error(
-          { userId, error: result.error },
-          "Failed to find imported games"
-        );
-        return this.error(
-          "Failed to fetch imported games",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      this.logger.info(
-        {
-          userId,
-          total: result.data.total,
-          page: result.data.page,
-          totalPages: result.data.totalPages,
-        },
-        "Successfully found imported games"
-      );
-
-      return this.success(result.data);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(error, "Failed to find imported games");
+      return handleServiceError(error, "Failed to find imported games");
     }
   }
 
@@ -117,41 +87,21 @@ export class ImportedGameService extends BaseService {
     try {
       const { importedGameId, userId } = input;
 
-      this.logger.info({ importedGameId, userId }, "Dismissing imported game");
-
-      const result = await updateImportedGameStatus(
-        importedGameId,
-        userId,
-        "IGNORED"
-      );
-
-      if (!result.success) {
-        this.logger.error(
-          { importedGameId, userId, error: result.error },
-          "Failed to dismiss imported game"
-        );
-
-        if (result.error.code === "NOT_FOUND") {
-          return this.error(
+      try {
+        await updateImportedGameStatus(importedGameId, userId, "IGNORED");
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          return serviceError(
             "Imported game not found or access denied",
             ServiceErrorCode.NOT_FOUND
           );
         }
-
-        return this.error(
-          "Failed to dismiss imported game",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
+        throw error;
       }
 
-      this.logger.info(
-        { importedGameId, userId },
-        "Successfully dismissed imported game"
-      );
-
-      return this.success(undefined);
+      return serviceSuccess(undefined);
     } catch (error) {
-      return this.handleError(error, "Failed to dismiss imported game");
+      return handleServiceError(error, "Failed to dismiss imported game");
     }
   }
 
@@ -161,24 +111,11 @@ export class ImportedGameService extends BaseService {
     try {
       const { id, userId } = input;
 
-      this.logger.info({ id, userId }, "Finding imported game by ID");
+      const data = await findImportedGameById(id, userId);
 
-      const result = await findImportedGameById(id, userId);
-
-      if (!result.success) {
-        this.logger.error(
-          { id, userId, error: result.error },
-          "Failed to find imported game"
-        );
-        return this.error(
-          "Failed to find imported game",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      return this.success(result.data);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(error, "Failed to find imported game");
+      return handleServiceError(error, "Failed to find imported game");
     }
   }
 
@@ -188,37 +125,21 @@ export class ImportedGameService extends BaseService {
     try {
       const { id, userId, status } = input;
 
-      this.logger.info({ id, userId, status }, "Updating imported game status");
+      try {
+        const data = await updateImportedGameStatus(id, userId, status);
 
-      const result = await updateImportedGameStatus(id, userId, status);
-
-      if (!result.success) {
-        this.logger.error(
-          { id, userId, status, error: result.error },
-          "Failed to update imported game status"
-        );
-
-        if (result.error.code === "NOT_FOUND") {
-          return this.error(
+        return serviceSuccess(data);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          return serviceError(
             "Imported game not found or access denied",
             ServiceErrorCode.NOT_FOUND
           );
         }
-
-        return this.error(
-          "Failed to update imported game status",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
+        throw error;
       }
-
-      this.logger.info(
-        { id, userId, status },
-        "Successfully updated imported game status"
-      );
-
-      return this.success(result.data);
     } catch (error) {
-      return this.handleError(error, "Failed to update imported game status");
+      return handleServiceError(error, "Failed to update imported game status");
     }
   }
 }

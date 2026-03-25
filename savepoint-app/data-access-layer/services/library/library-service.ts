@@ -1,30 +1,34 @@
 import "server-only";
 
 import {
-  AcquisitionType,
-  LibraryItemMapper,
-  LibraryItemStatus,
-  mapAcquisitionTypeToPrisma,
-  mapLibraryItemStatusToPrisma,
-  type LibraryItemDomain,
-  type LibraryItemWithGameDomain,
-} from "@/data-access-layer/domain/library";
-import {
   createLibraryItem,
   deleteLibraryItem,
+  DuplicateError,
   findAllLibraryItemsByGameId,
   findGameByIgdbId,
   findLibraryItemById,
   findLibraryItemsWithFilters,
   findMostRecentLibraryItemByGameId,
   findMostRecentPlayingGame,
-  findWantToPlayItemsForUser,
+  findWishlistItemsForUser,
+  NotFoundError,
   updateLibraryItem,
+  type FindLibraryItemsResult,
 } from "@/data-access-layer/repository";
+import {
+  AcquisitionType,
+  LibraryItemStatus,
+  type LibraryItem,
+} from "@prisma/client";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { BaseService, type ServiceResult } from "../types";
+import {
+  handleServiceError,
+  serviceError,
+  serviceSuccess,
+  type ServiceResult,
+} from "../types";
 import {
   DeleteLibraryItemSchema,
   GetLibraryItemsServiceSchema,
@@ -50,26 +54,18 @@ type GetLibraryItemsParams = {
 };
 
 export type GetLibraryItemsResult = {
-  items: LibraryItemWithGameDomain[];
+  items: FindLibraryItemsResult["items"];
   total: number;
   hasMore: boolean;
 };
-export class LibraryService extends BaseService {
+export class LibraryService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "LibraryService" });
   async findGameByIgdbId(igdbId: number) {
     try {
-      this.logger.info({ igdbId }, "Finding game by IGDB ID");
-      const result = await findGameByIgdbId(igdbId);
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, igdbId },
-          "Failed to find game"
-        );
-        return this.error("Failed to find game");
-      }
-      return this.success(result.data);
+      const game = await findGameByIgdbId(igdbId);
+      return serviceSuccess(game);
     } catch (error) {
-      return this.handleError(error, "Failed to find game by IGDB ID");
+      return handleServiceError(error, "Failed to find game by IGDB ID");
     }
   }
 
@@ -82,57 +78,39 @@ export class LibraryService extends BaseService {
     } | null>
   > {
     try {
-      this.logger.info(params, "Finding most recent playing game");
-      const result = await findMostRecentPlayingGame(params);
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to find most recent playing game"
-        );
-        return this.error("Failed to find most recent playing game");
-      }
+      const data = await findMostRecentPlayingGame(params);
 
-      if (!result.data) {
-        this.logger.info(params, "No playing games found");
-        return this.success(null);
+      if (!data) {
+        return serviceSuccess(null);
       }
 
       const game = {
-        gameId: result.data.game.id,
-        igdbId: result.data.game.igdbId,
-        name: result.data.game.title,
-        coverImageId: result.data.game.coverImage,
+        gameId: data.game.id,
+        igdbId: data.game.igdbId,
+        name: data.game.title,
+        coverImageId: data.game.coverImage,
       };
 
-      this.logger.info(
-        { ...params, gameId: game.gameId },
-        "Most recent playing game found"
-      );
-      return this.success(game);
+      return serviceSuccess(game);
     } catch (error) {
-      return this.handleError(error, "Failed to get most recent playing game");
+      return handleServiceError(
+        error,
+        "Failed to get most recent playing game"
+      );
     }
   }
   async findMostRecentLibraryItemByGameId(params: {
     userId: string;
     gameId: string;
-  }): Promise<ServiceResult<LibraryItemDomain | null>> {
+  }): Promise<ServiceResult<LibraryItem | null>> {
     try {
-      this.logger.info(params, "Finding most recent library item");
-      const result = await findMostRecentLibraryItemByGameId(params);
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to find library item"
-        );
-        return this.error("Failed to find library item");
-      }
-      const domainItem = result.data
-        ? LibraryItemMapper.toDomain(result.data)
-        : null;
-      return this.success(domainItem);
+      const data = await findMostRecentLibraryItemByGameId(params);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(error, "Failed to find most recent library item");
+      return handleServiceError(
+        error,
+        "Failed to find most recent library item"
+      );
     }
   }
   async updateLibraryItem(params: {
@@ -145,66 +123,36 @@ export class LibraryService extends BaseService {
     };
   }) {
     try {
-      this.logger.info(params, "Updating library item");
-      const currentItemResult = await findLibraryItemById({
+      await findLibraryItemById({
         libraryItemId: params.libraryItem.id,
         userId: params.userId,
       });
-      if (!currentItemResult.success) {
-        this.logger.error(
-          { error: currentItemResult.error, ...params },
-          "Failed to fetch library item for update"
-        );
-        return this.error("Library item not found");
-      }
-      const result = await updateLibraryItem({
+      const isTransitioningToPlayed =
+        params.libraryItem.status === LibraryItemStatus.PLAYED;
+      const data = await updateLibraryItem({
         userId: params.userId,
         libraryItem: {
           id: params.libraryItem.id,
-          status: mapLibraryItemStatusToPrisma(params.libraryItem.status),
+          status: params.libraryItem.status,
           startedAt: params.libraryItem.startedAt,
           completedAt: params.libraryItem.completedAt,
+          ...(isTransitioningToPlayed && { hasBeenPlayed: true }),
         },
       });
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to update library item"
-        );
-        return this.error("Failed to update library item");
-      }
-      this.logger.info(
-        {
-          libraryItemId: params.libraryItem.id,
-          newStatus: params.libraryItem.status,
-        },
-        "Library item updated successfully"
-      );
-      return this.success(LibraryItemMapper.toDomain(result.data));
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(error, "Failed to update library item");
+      return handleServiceError(error, "Failed to update library item");
     }
   }
   async findAllLibraryItemsByGameId(params: {
     userId: string;
     gameId: string;
-  }): Promise<ServiceResult<LibraryItemDomain[]>> {
+  }): Promise<ServiceResult<LibraryItem[]>> {
     try {
-      this.logger.info(params, "Finding all library items for game");
-      const result = await findAllLibraryItemsByGameId(params);
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to find library items"
-        );
-        return this.error("Failed to find library items");
-      }
-      const domainItems = result.data.map((item) =>
-        LibraryItemMapper.toDomain(item)
-      );
-      return this.success(domainItems);
+      const data = await findAllLibraryItemsByGameId(params);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(error, "Failed to find all library items");
+      return handleServiceError(error, "Failed to find all library items");
     }
   }
   async getLibraryItems(
@@ -214,54 +162,34 @@ export class LibraryService extends BaseService {
     | { success: false; error: string }
   > {
     try {
-      this.logger.info({ userId: params.userId }, "Fetching library items");
       const validation = GetLibraryItemsServiceSchema.safeParse(params);
       if (!validation.success) {
         this.logger.warn(
           { errors: validation.error.issues },
           "Invalid input parameters"
         );
-        return this.error(
+        return serviceError(
           validation.error.issues[0]?.message ?? "Invalid input parameters"
         );
       }
 
       const { offset, limit, ...restParams } = validation.data;
-      const result = await findLibraryItemsWithFilters({
+      const data = await findLibraryItemsWithFilters({
         ...restParams,
         skip: offset,
         take: limit,
       });
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, userId: params.userId },
-          "Failed to fetch library items"
-        );
-        return this.error("Failed to fetch library items");
-      }
 
-      const domainItems = LibraryItemMapper.toWithGameDomainList(
-        result.data.items
-      );
       const currentOffset = offset ?? 0;
-      const hasMore = currentOffset + domainItems.length < result.data.total;
+      const hasMore = currentOffset + data.items.length < data.total;
 
-      this.logger.info(
-        {
-          count: domainItems.length,
-          total: result.data.total,
-          hasMore,
-          userId: params.userId,
-        },
-        "Library items fetched successfully"
-      );
-      return this.success({
-        items: domainItems,
-        total: result.data.total,
+      return serviceSuccess({
+        items: data.items,
+        total: data.total,
         hasMore,
       });
     } catch (error) {
-      return this.handleError(error, "Failed to get library items");
+      return handleServiceError(error, "Failed to get library items");
     }
   }
   async deleteLibraryItem(params: {
@@ -269,47 +197,36 @@ export class LibraryService extends BaseService {
     userId: string;
   }): Promise<ServiceResult<void>> {
     try {
-      this.logger.info(
-        { libraryItemId: params.libraryItemId, userId: params.userId },
-        "Attempting to delete library item"
-      );
       const validation = DeleteLibraryItemSchema.safeParse(params);
       if (!validation.success) {
         this.logger.warn(
           { errors: validation.error.issues },
           "Invalid input parameters"
         );
-        return this.error(
+        return serviceError(
           validation.error.issues[0]?.message ?? "Invalid input parameters"
         );
       }
-      const deleteResult = await deleteLibraryItem({
-        libraryItemId: params.libraryItemId,
-        userId: params.userId,
-      });
-      if (!deleteResult.success) {
-        if (deleteResult.error.code === "NOT_FOUND") {
+      try {
+        await deleteLibraryItem({
+          libraryItemId: params.libraryItemId,
+          userId: params.userId,
+        });
+      } catch (error) {
+        if (error instanceof NotFoundError) {
           this.logger.warn(
             { libraryItemId: params.libraryItemId, userId: params.userId },
             "Library item not found or unauthorized delete attempt"
           );
-          return this.error(
+          return serviceError(
             "Library item not found or you do not have permission to delete it"
           );
         }
-        this.logger.error(
-          { error: deleteResult.error },
-          "Failed to delete library item"
-        );
-        return this.error("Failed to delete library item");
+        throw error;
       }
-      this.logger.info(
-        { libraryItemId: params.libraryItemId },
-        "Library item deleted successfully"
-      );
-      return this.success(undefined);
+      return serviceSuccess(undefined);
     } catch (error) {
-      return this.handleError(error, "Failed to delete library item");
+      return handleServiceError(error, "Failed to delete library item");
     }
   }
   async createLibraryItem(params: {
@@ -324,52 +241,37 @@ export class LibraryService extends BaseService {
     };
   }) {
     try {
-      this.logger.info(
-        {
+      const isPlayed = params.libraryItem.status === LibraryItemStatus.PLAYED;
+      try {
+        const data = await createLibraryItem({
           userId: params.userId,
           gameId: params.gameId,
-          status: params.libraryItem.status,
-        },
-        "Creating library item"
-      );
-      const result = await createLibraryItem({
-        userId: params.userId,
-        gameId: params.gameId,
-        libraryItem: {
-          status: mapLibraryItemStatusToPrisma(params.libraryItem.status),
-          acquisitionType: mapAcquisitionTypeToPrisma(
-            params.libraryItem.acquisitionType
-          ),
-          platform: params.libraryItem.platform,
-          startedAt: params.libraryItem.startedAt,
-          completedAt: params.libraryItem.completedAt,
-        },
-      });
-      if (!result.success) {
-        if (result.error.code === "DUPLICATE") {
+          libraryItem: {
+            status: params.libraryItem.status,
+            acquisitionType: params.libraryItem.acquisitionType,
+            platform: params.libraryItem.platform,
+            startedAt: params.libraryItem.startedAt,
+            completedAt: params.libraryItem.completedAt,
+            ...(isPlayed && { hasBeenPlayed: true }),
+          },
+        });
+        return serviceSuccess(data);
+      } catch (error) {
+        if (error instanceof DuplicateError) {
           this.logger.warn(
             { userId: params.userId, gameId: params.gameId },
             "Duplicate library item attempted"
           );
-          return this.error("Game already in library");
+          return serviceError("Game already in library");
         }
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to create library item"
-        );
-        return this.error("Failed to create library item");
+        throw error;
       }
-      this.logger.info(
-        { libraryItemId: result.data.id, userId: params.userId },
-        "Library item created successfully"
-      );
-      return this.success(LibraryItemMapper.toDomain(result.data));
     } catch (error) {
-      return this.handleError(error, "Failed to create library item");
+      return handleServiceError(error, "Failed to create library item");
     }
   }
 
-  async getRandomWantToPlayGame(params: { userId: string }): Promise<
+  async getRandomWishlistGame(params: { userId: string }): Promise<
     ServiceResult<{
       id: string;
       igdbId: number;
@@ -379,40 +281,18 @@ export class LibraryService extends BaseService {
     } | null>
   > {
     try {
-      this.logger.info(params, "Fetching random want-to-play game");
-
-      const result = await findWantToPlayItemsForUser({
+      const items = await findWishlistItemsForUser({
         userId: params.userId,
       });
 
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to fetch want-to-play items"
-        );
-        return this.error("Failed to fetch want-to-play games");
-      }
-
-      const items = result.data;
-
       if (items.length === 0) {
-        this.logger.info(params, "No want-to-play games found");
-        return this.success(null);
+        return serviceSuccess(null);
       }
 
       const randomIndex = Math.floor(Math.random() * items.length);
       const randomItem = items[randomIndex];
 
-      this.logger.info(
-        {
-          userId: params.userId,
-          gameId: randomItem.game.id,
-          gameTitle: randomItem.game.title,
-        },
-        "Random want-to-play game selected"
-      );
-
-      return this.success({
+      return serviceSuccess({
         id: randomItem.game.id,
         igdbId: randomItem.game.igdbId,
         title: randomItem.game.title,
@@ -420,7 +300,7 @@ export class LibraryService extends BaseService {
         coverImage: randomItem.game.coverImage,
       });
     } catch (error) {
-      return this.handleError(error, "Failed to get random want-to-play game");
+      return handleServiceError(error, "Failed to get random wishlist game");
     }
   }
 }

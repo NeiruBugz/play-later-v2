@@ -1,4 +1,4 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
+import { LibraryItemStatus } from "@prisma/client";
 import { z } from "zod";
 
 export const LibrarySortBySchema = z.enum([

@@ -12,7 +12,7 @@ import { Card } from "@/shared/components/ui/card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { cn } from "@/shared/lib/ui/utils";
 
-import { getRandomWantToPlayAction } from "../server-actions";
+import { getRandomWishlistGameAction } from "../server-actions";
 
 interface QuickActionCardProps {
   title: string;
@@ -88,28 +88,24 @@ export function DashboardQuickActions() {
     slug: string;
   } | null>(null);
   const [isLoadingGame, setIsLoadingGame] = useState(true);
-  const [hasWantToPlayGames, setHasWantToPlayGames] = useState(true);
+  const [hasWishlistGames, setHasWishlistGames] = useState(true);
 
   useEffect(() => {
     async function fetchRandomGame() {
       setIsLoadingGame(true);
-      const minDelay = new Promise((resolve) => setTimeout(resolve, 400));
       try {
-        const [result] = await Promise.all([
-          getRandomWantToPlayAction({}),
-          minDelay,
-        ]);
+        const result = await getRandomWishlistGameAction({});
         if (result.success && result.data) {
           setRandomGame(result.data);
-          setHasWantToPlayGames(true);
+          setHasWishlistGames(true);
         } else {
           setRandomGame(null);
-          setHasWantToPlayGames(false);
+          setHasWishlistGames(false);
         }
       } catch (error) {
         console.error("Failed to fetch random game:", error);
         setRandomGame(null);
-        setHasWantToPlayGames(false);
+        setHasWishlistGames(false);
       } finally {
         setIsLoadingGame(false);
       }
@@ -120,19 +116,15 @@ export function DashboardQuickActions() {
 
   const refreshRandomGame = async () => {
     setIsLoadingGame(true);
-    const minDelay = new Promise((resolve) => setTimeout(resolve, 400));
     try {
-      const [result] = await Promise.all([
-        getRandomWantToPlayAction({}),
-        minDelay,
-      ]);
+      const result = await getRandomWishlistGameAction({});
       if (result.success) {
         if (result.data) {
           setRandomGame(result.data);
-          setHasWantToPlayGames(true);
+          setHasWishlistGames(true);
         } else {
           setRandomGame(null);
-          setHasWantToPlayGames(false);
+          setHasWishlistGames(false);
         }
       }
     } catch (error) {
@@ -163,16 +155,16 @@ export function DashboardQuickActions() {
           <QuickActionCard
             title="What's next?"
             description={
-              hasWantToPlayGames && randomGame
+              hasWishlistGames && randomGame
                 ? randomGame.title
-                : "No games in your Want to Play list"
+                : "No games in your Wishlist"
             }
             icon={<Dices className="h-5 w-5" />}
             href={randomGame ? `/games/${randomGame.slug}` : undefined}
-            disabled={!hasWantToPlayGames || !randomGame}
+            disabled={!hasWishlistGames || !randomGame}
             isLoading={isLoadingGame}
           />
-          {hasWantToPlayGames && randomGame && !isLoadingGame && (
+          {hasWishlistGames && randomGame && !isLoadingGame && (
             <Button
               variant="ghost"
               size="sm"

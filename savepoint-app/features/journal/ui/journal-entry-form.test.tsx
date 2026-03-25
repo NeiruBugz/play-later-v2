@@ -119,10 +119,14 @@ describe("JournalEntryForm", () => {
   });
 
   describe("given component rendered in create mode", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       renderWithTestProviders(
         <JournalEntryForm gameId="game-1" onSuccess={mockOnSuccess} />
       );
+      // Wait for useEffect (getLibraryItemsByGameIdAction) to settle
+      await waitFor(() => {
+        expect(mockGetLibraryItemsByGameIdAction).toHaveBeenCalled();
+      });
     });
 
     it("should display all form fields", () => {
@@ -280,7 +284,7 @@ describe("JournalEntryForm", () => {
 
   describe("given component rendered with library items", () => {
     describe("when user has exactly one library item", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         const mockLibraryItem: LibraryItemDomain = {
           id: 1,
           platform: "Steam",
@@ -290,6 +294,7 @@ describe("JournalEntryForm", () => {
           acquisitionType: AcquisitionType.DIGITAL,
           startedAt: null,
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -302,6 +307,9 @@ describe("JournalEntryForm", () => {
         renderWithTestProviders(
           <JournalEntryForm gameId="game-1" onSuccess={mockOnSuccess} />
         );
+        await waitFor(() => {
+          expect(mockGetLibraryItemsByGameIdAction).toHaveBeenCalled();
+        });
       });
 
       it("should auto-link library item", async () => {
@@ -337,7 +345,7 @@ describe("JournalEntryForm", () => {
     });
 
     describe("when user has multiple library items", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         const mockLibraryItems: LibraryItemDomain[] = [
           {
             id: 1,
@@ -348,6 +356,7 @@ describe("JournalEntryForm", () => {
             acquisitionType: AcquisitionType.DIGITAL,
             startedAt: null,
             completedAt: null,
+            hasBeenPlayed: false,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -360,6 +369,7 @@ describe("JournalEntryForm", () => {
             acquisitionType: AcquisitionType.DIGITAL,
             startedAt: null,
             completedAt: null,
+            hasBeenPlayed: false,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -373,6 +383,9 @@ describe("JournalEntryForm", () => {
         renderWithTestProviders(
           <JournalEntryForm gameId="game-1" onSuccess={mockOnSuccess} />
         );
+        await waitFor(() => {
+          expect(mockGetLibraryItemsByGameIdAction).toHaveBeenCalled();
+        });
       });
 
       it("should show library item selector", async () => {
@@ -407,7 +420,7 @@ describe("JournalEntryForm", () => {
   });
 
   describe("given component rendered in edit mode", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       renderWithTestProviders(
         <JournalEntryForm
           gameId="game-1"
@@ -416,6 +429,9 @@ describe("JournalEntryForm", () => {
           onCancel={mockOnCancel}
         />
       );
+      await waitFor(() => {
+        expect(mockGetLibraryItemsByGameIdAction).toHaveBeenCalled();
+      });
     });
 
     it("should pre-populate form fields with entry data", async () => {
@@ -524,7 +540,7 @@ describe("JournalEntryForm", () => {
   });
 
   describe("given component rendered with onCancel prop", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       renderWithTestProviders(
         <JournalEntryForm
           gameId="game-1"
@@ -532,6 +548,9 @@ describe("JournalEntryForm", () => {
           onCancel={mockOnCancel}
         />
       );
+      await waitFor(() => {
+        expect(mockGetLibraryItemsByGameIdAction).toHaveBeenCalled();
+      });
     });
 
     it("should display cancel button", () => {
@@ -546,10 +565,13 @@ describe("JournalEntryForm", () => {
   });
 
   describe("given component rendered without onCancel prop", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       renderWithTestProviders(
         <JournalEntryForm gameId="game-1" onSuccess={mockOnSuccess} />
       );
+      await waitFor(() => {
+        expect(mockGetLibraryItemsByGameIdAction).toHaveBeenCalled();
+      });
     });
 
     it("should not display cancel button", () => {

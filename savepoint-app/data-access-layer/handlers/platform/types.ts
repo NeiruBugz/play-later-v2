@@ -1,4 +1,4 @@
-import type { PlatformDomain } from "@/data-access-layer/domain/platform";
+import type { PlatformDomain } from "@/shared/types/platform";
 
 export type GetPlatformsHandlerInput = {
   igdbId: number;

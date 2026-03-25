@@ -102,7 +102,7 @@ describe("getLibraryHandler", () => {
 
       const params = {
         userId: "clx123abc456def789ghi",
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
         search: "zelda",
         sortBy: "createdAt" as const,
@@ -146,7 +146,7 @@ describe("getLibraryHandler", () => {
 
       const params = {
         userId: "clx123abc456def789ghi",
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
         search: "zelda",
         sortBy: "createdAt" as const,
@@ -157,7 +157,7 @@ describe("getLibraryHandler", () => {
 
       expect(mockGetLibraryItems).toHaveBeenCalledWith({
         userId: "clx123abc456def789ghi",
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
         search: "zelda",
         sortBy: "createdAt",
@@ -193,11 +193,12 @@ describe("getLibraryHandler", () => {
           id: 1,
           userId: "clx123abc456def789ghi",
           gameId: "clx456def789ghi123jkl",
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
           platform: "PlayStation 5",
-          acquisitionType: null,
+          acquisitionType: "DIGITAL",
           startedAt: null,
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date("2025-01-01"),
           updatedAt: new Date("2025-01-01"),
           game: {
@@ -206,7 +207,7 @@ describe("getLibraryHandler", () => {
             coverImage: "https://example.com/cover.jpg",
             slug: "the-legend-of-zelda-breath-of-the-wild",
             releaseDate: new Date("2017-03-03"),
-            entryCount: 1,
+            _count: { libraryItems: 1 },
           },
         },
       ];
@@ -262,9 +263,10 @@ describe("getLibraryHandler", () => {
           gameId: "clx789ghi123jkl456mno",
           status: LibraryItemStatus.PLAYING,
           platform: "PC",
-          acquisitionType: null,
+          acquisitionType: "DIGITAL",
           startedAt: new Date("2025-01-15"),
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date("2025-01-10"),
           updatedAt: new Date("2025-01-15"),
           game: {
@@ -273,7 +275,7 @@ describe("getLibraryHandler", () => {
             coverImage: "https://example.com/elden-ring.jpg",
             slug: "elden-ring",
             releaseDate: new Date("2022-02-25"),
-            entryCount: 1,
+            _count: { libraryItems: 1 },
           },
         },
       ];
@@ -427,11 +429,12 @@ describe("getLibraryHandler", () => {
           id: 1,
           userId: "clx123abc456def789ghi",
           gameId: "clx456def789ghi123jkl",
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.WISHLIST,
           platform: "PlayStation 5",
-          acquisitionType: null,
+          acquisitionType: "DIGITAL",
           startedAt: null,
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date("2025-01-01"),
           updatedAt: new Date("2025-01-01"),
           game: {
@@ -440,7 +443,7 @@ describe("getLibraryHandler", () => {
             coverImage: "https://example.com/cover.jpg",
             slug: "the-legend-of-zelda-breath-of-the-wild",
             releaseDate: new Date("2017-03-03"),
-            entryCount: 2,
+            _count: { libraryItems: 2 },
           },
         },
         {
@@ -449,9 +452,10 @@ describe("getLibraryHandler", () => {
           gameId: "clx789ghi123jkl456mno",
           status: LibraryItemStatus.PLAYING,
           platform: "PC",
-          acquisitionType: null,
+          acquisitionType: "DIGITAL",
           startedAt: new Date("2025-01-15"),
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date("2025-01-10"),
           updatedAt: new Date("2025-01-15"),
           game: {
@@ -460,7 +464,7 @@ describe("getLibraryHandler", () => {
             coverImage: "https://example.com/elden-ring.jpg",
             slug: "elden-ring",
             releaseDate: new Date("2022-02-25"),
-            entryCount: 1,
+            _count: { libraryItems: 1 },
           },
         },
       ];
@@ -479,8 +483,8 @@ describe("getLibraryHandler", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.items).toHaveLength(2);
-        expect(result.data.items[0]?.game.entryCount).toBe(2);
-        expect(result.data.items[1]?.game.entryCount).toBe(1);
+        expect(result.data.items[0]?.game._count.libraryItems).toBe(2);
+        expect(result.data.items[1]?.game._count.libraryItems).toBe(1);
       }
     });
   });

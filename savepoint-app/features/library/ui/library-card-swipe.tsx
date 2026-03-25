@@ -129,7 +129,7 @@ export function LibraryCardSwipe({
   return (
     <div className={cn("relative overflow-hidden", className)}>
       <div
-        className="relative transition-transform duration-300 ease-out"
+        className="relative transition-transform duration-300 ease-out motion-reduce:transition-none"
         style={{
           transform: `translateX(${translateX}px)`,
         }}
@@ -153,30 +153,25 @@ export function LibraryCardSwipe({
       </div>
 
       {!isRevealed && (
-        <div className="pointer-events-none absolute top-0 right-0 flex h-full w-12 items-center justify-center opacity-40">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            className="animate-pulse text-white/60"
-            aria-hidden="true"
-          >
-            <path
-              d="M12 4L8 10L12 16"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M16 4L12 10L16 16"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+        <div className="pointer-events-none absolute top-0 right-0 flex h-full w-12 items-center justify-center">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black/30 backdrop-blur-sm">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="none"
+              className="text-white/80"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 4L8 10L12 16"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
         </div>
       )}
     </div>

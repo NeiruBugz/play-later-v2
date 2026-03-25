@@ -1,12 +1,10 @@
 import "server-only";
 
-import {
-  LibraryItemStatus,
-  type LibraryItemWithGameDomain,
-} from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import type { LibraryItemWithGameDomain } from "@/shared/types/library";
 
 const CONTINUE_PLAYING_LIMIT = 6;
 

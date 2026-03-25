@@ -11,9 +11,14 @@ import type { Game } from "@prisma/client";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import type { FullGameInfoResponse } from "@/shared/types";
 
-import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
+import {
+  serviceError,
+  ServiceErrorCode,
+  serviceSuccess,
+  type ServiceResult,
+} from "../types";
 
-export class GameDetailService extends BaseService {
+export class GameDetailService {
   private logger = createLogger({
     [LOGGER_CONTEXT.SERVICE]: "GameDetailService",
   });
@@ -27,29 +32,19 @@ export class GameDetailService extends BaseService {
         "Starting background game population"
       );
 
-      const existsResult = await gameExistsByIgdbId(igdbGame.id);
-      if (existsResult.success && existsResult.data) {
+      const exists = await gameExistsByIgdbId(igdbGame.id);
+      if (exists) {
         this.logger.debug(
           { igdbId: igdbGame.id },
           "Game already in database, skipping"
         );
-        return this.success(null);
+        return serviceSuccess(null);
       }
 
       let genreIds: string[] = [];
       if (igdbGame.genres && igdbGame.genres.length > 0) {
-        const genresResult = await upsertGenres(igdbGame.genres);
-        if (!genresResult.success) {
-          this.logger.error(
-            { error: genresResult.error },
-            "Failed to upsert genres"
-          );
-          return this.error(
-            `Failed to upsert genres: ${genresResult.error.message}`,
-            ServiceErrorCode.INTERNAL_ERROR
-          );
-        }
-        genreIds = genresResult.data.map((g) => g.id);
+        const genres = await upsertGenres(igdbGame.genres);
+        genreIds = genres.map((g) => g.id);
       }
 
       let platformIds: string[] = [];
@@ -69,21 +64,11 @@ export class GameDetailService extends BaseService {
             typeof p.platform_type === "number" ? p.platform_type : undefined,
           checksum: p.checksum,
         }));
-        const platformsResult = await upsertPlatforms(mappedPlatforms);
-        if (!platformsResult.success) {
-          this.logger.error(
-            { error: platformsResult.error },
-            "Failed to upsert platforms"
-          );
-          return this.error(
-            `Failed to upsert platforms: ${platformsResult.error.message}`,
-            ServiceErrorCode.INTERNAL_ERROR
-          );
-        }
-        platformIds = platformsResult.data.map((p) => p.id);
+        const platforms = await upsertPlatforms(mappedPlatforms);
+        platformIds = platforms.map((p) => p.id);
       }
 
-      const gameResult = await createGameWithRelations({
+      const game = await createGameWithRelations({
         igdbGame: {
           id: igdbGame.id,
           name: igdbGame.name,
@@ -100,29 +85,13 @@ export class GameDetailService extends BaseService {
         platformIds,
       });
 
-      if (!gameResult.success) {
-        this.logger.error({ error: gameResult.error }, "Failed to create game");
-        return this.error(
-          `Failed to create game: ${gameResult.error.message}`,
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      this.logger.info(
-        {
-          igdbId: igdbGame.id,
-          gameId: gameResult.data.id,
-          slug: igdbGame.slug,
-        },
-        "Game populated in database successfully"
-      );
-      return this.success(gameResult.data);
+      return serviceSuccess(game);
     } catch (error) {
       this.logger.warn(
         { error, igdbId: igdbGame.id, slug: igdbGame.slug },
         "Background game population failed - will retry on next access"
       );
-      return this.error(
+      return serviceError(
         error instanceof Error ? error.message : "Unknown error",
         ServiceErrorCode.INTERNAL_ERROR
       );

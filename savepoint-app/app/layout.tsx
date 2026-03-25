@@ -27,6 +27,7 @@ const fontMono = Geist_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  interactiveWidget: "resizes-content",
   themeColor: [
     { color: "white", media: "(prefers-color-scheme: light)" },
     { color: "black", media: "(prefers-color-scheme: dark)" },
@@ -100,7 +101,7 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "bg-background relative min-h-screen antialiased",
+          "bg-background relative min-h-dvh antialiased",
           "selection:bg-primary/20 selection:text-primary-foreground",
           `font-sans ${fontSans.variable} ${fontMono.variable} antialiased`
         )}
@@ -112,7 +113,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div id="root" className="relative flex min-h-screen flex-col">
+          <div id="root" className="relative flex min-h-dvh flex-col">
             <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
           </div>
           <SpeedInsightsClient />

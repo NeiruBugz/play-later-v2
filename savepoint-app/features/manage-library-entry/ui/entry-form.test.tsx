@@ -130,11 +130,12 @@ describe("EntryForm - AddForm variant", () => {
           id: 1,
           userId: "user-123",
           gameId: "game-123",
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.SHELF,
           platform: null,
-          acquisitionType: null,
+          acquisitionType: "DIGITAL" as const,
           startedAt: null,
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -153,7 +154,7 @@ describe("EntryForm - AddForm variant", () => {
       const callArgs = vi.mocked(addToLibraryAction).mock.calls[0][0];
       expect(callArgs).toMatchObject({
         igdbId: 12345,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.SHELF,
       });
       expect(callArgs.platform).toBe("");
     });
@@ -166,11 +167,12 @@ describe("EntryForm - AddForm variant", () => {
           id: 1,
           userId: "user-123",
           gameId: "game-123",
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.SHELF,
           platform: null,
-          acquisitionType: null,
+          acquisitionType: "DIGITAL" as const,
           startedAt: null,
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -196,11 +198,12 @@ describe("EntryForm - AddForm variant", () => {
           id: 1,
           userId: "user-123",
           gameId: "game-123",
-          status: LibraryItemStatus.WANT_TO_PLAY,
+          status: LibraryItemStatus.SHELF,
           platform: "PlayStation 5",
-          acquisitionType: null,
+          acquisitionType: "DIGITAL" as const,
           startedAt: null,
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -220,7 +223,7 @@ describe("EntryForm - AddForm variant", () => {
       const callArgs = vi.mocked(addToLibraryAction).mock.calls[0][0];
       expect(callArgs).toMatchObject({
         igdbId: 12345,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.SHELF,
         platform: "PlayStation 5",
       });
     });
@@ -236,9 +239,10 @@ describe("EntryForm - AddForm variant", () => {
           gameId: "game-123",
           status: LibraryItemStatus.PLAYING,
           platform: null,
-          acquisitionType: null,
+          acquisitionType: "DIGITAL" as const,
           startedAt: null,
           completedAt: null,
+          hasBeenPlayed: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

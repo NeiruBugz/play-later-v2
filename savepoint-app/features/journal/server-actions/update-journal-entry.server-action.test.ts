@@ -1,11 +1,9 @@
 import { getServerUserId } from "@/auth";
-import {
-  JournalMood,
-  JournalVisibility,
-  type JournalEntryDomain,
-} from "@/data-access-layer/domain/journal";
 import { JournalService } from "@/data-access-layer/services";
+import { JournalMood, JournalVisibility } from "@/shared/types/journal";
 import { revalidatePath } from "next/cache";
+
+import type { JournalEntryDomain } from "@/shared/types/journal";
 
 import { updateJournalEntryAction } from "./update-journal-entry";
 

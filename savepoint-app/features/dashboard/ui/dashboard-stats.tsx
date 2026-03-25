@@ -1,13 +1,14 @@
 import "server-only";
 
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 export interface DashboardStatsData {
-  wantToPlay: number;
-  owned: number;
+  wishlist: number;
+  shelf: number;
+  upNext: number;
   playing: number;
   played: number;
   total: number;
@@ -27,43 +28,60 @@ export async function DashboardStats({ userId }: DashboardStatsProps) {
 
     logger.info({ userId }, "Fetching dashboard stats");
 
-    const [wantToPlayResult, ownedResult, playingResult, playedResult] =
-      await Promise.all([
-        service.getLibraryItems({
-          userId,
-          status: LibraryItemStatus.WANT_TO_PLAY,
-          distinctByGame: true,
-        }),
-        service.getLibraryItems({
-          userId,
-          status: LibraryItemStatus.OWNED,
-          distinctByGame: true,
-        }),
-        service.getLibraryItems({
-          userId,
-          status: LibraryItemStatus.PLAYING,
-          distinctByGame: true,
-        }),
-        service.getLibraryItems({
-          userId,
-          status: LibraryItemStatus.PLAYED,
-          distinctByGame: true,
-        }),
-      ]);
+    const [
+      wishlistResult,
+      shelfResult,
+      upNextResult,
+      playingResult,
+      playedResult,
+    ] = await Promise.all([
+      service.getLibraryItems({
+        userId,
+        status: LibraryItemStatus.WISHLIST,
+        distinctByGame: true,
+      }),
+      service.getLibraryItems({
+        userId,
+        status: LibraryItemStatus.SHELF,
+        distinctByGame: true,
+      }),
+      service.getLibraryItems({
+        userId,
+        status: LibraryItemStatus.UP_NEXT,
+        distinctByGame: true,
+      }),
+      service.getLibraryItems({
+        userId,
+        status: LibraryItemStatus.PLAYING,
+        distinctByGame: true,
+      }),
+      service.getLibraryItems({
+        userId,
+        status: LibraryItemStatus.PLAYED,
+        distinctByGame: true,
+      }),
+    ]);
 
-    if (!wantToPlayResult.success) {
+    if (!wishlistResult.success) {
       logger.error(
-        { error: wantToPlayResult.error, userId },
-        "Failed to fetch want to play stats"
+        { error: wishlistResult.error, userId },
+        "Failed to fetch wishlist stats"
       );
-      throw new Error(wantToPlayResult.error);
+      throw new Error(wishlistResult.error);
     }
-    if (!ownedResult.success) {
+    if (!shelfResult.success) {
       logger.error(
-        { error: ownedResult.error, userId },
-        "Failed to fetch owned stats"
+        { error: shelfResult.error, userId },
+        "Failed to fetch shelf stats"
       );
-      throw new Error(ownedResult.error);
+      throw new Error(shelfResult.error);
+    }
+    if (!upNextResult.success) {
+      logger.error(
+        { error: upNextResult.error, userId },
+        "Failed to fetch up next stats"
+      );
+      throw new Error(upNextResult.error);
     }
     if (!playingResult.success) {
       logger.error(
@@ -81,14 +99,20 @@ export async function DashboardStats({ userId }: DashboardStatsProps) {
     }
 
     const stats: DashboardStatsData = {
-      wantToPlay: wantToPlayResult.data.total,
-      owned: ownedResult.data.total,
+      wishlist: wishlistResult.data.total,
+      shelf: shelfResult.data.total,
+      upNext: upNextResult.data.total,
       playing: playingResult.data.total,
       played: playedResult.data.total,
       total: 0,
     };
 
-    stats.total = stats.wantToPlay + stats.owned + stats.playing + stats.played;
+    stats.total =
+      stats.wishlist +
+      stats.shelf +
+      stats.upNext +
+      stats.playing +
+      stats.played;
 
     logger.info(
       { userId, total: stats.total },

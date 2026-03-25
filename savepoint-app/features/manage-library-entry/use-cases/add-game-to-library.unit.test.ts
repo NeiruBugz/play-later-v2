@@ -50,7 +50,7 @@ describe("addGameToLibrary", () => {
 
   const validUserId = "clx123abc456def";
   const validIgdbId = 12345;
-  const validStatus: LibraryItemStatusType = LibraryItemStatus.WANT_TO_PLAY;
+  const validStatus: LibraryItemStatusType = LibraryItemStatus.WISHLIST;
 
   const mockGame = createDatabaseGameFixture({
     id: "game-456",
@@ -320,7 +320,7 @@ describe("addGameToLibrary", () => {
     it("should allow adding same game with different status", async () => {
       const existingItem = {
         ...mockLibraryItem,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       };
 
       mockProfileService.verifyUserExists.mockResolvedValue({

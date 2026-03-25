@@ -1,5 +1,5 @@
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { STATUS_SELECT_OPTIONS } from "@fixtures/enum-test-cases";
+import { LibraryItemStatus } from "@/shared/types/library";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
@@ -39,7 +39,7 @@ function renderStatusSelectInForm(props = {}) {
   const TestForm = () => {
     const methods = useForm<TestFormData>({
       defaultValues: {
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       },
     });
 
@@ -78,13 +78,13 @@ describe("StatusSelect", () => {
   });
 
   describe("given user opens the select dropdown", () => {
-    it("should display all 4 status options", async () => {
+    it("should display all 5 status options", async () => {
       renderStatusSelectInForm();
 
       await actions.clickTrigger();
 
       const options = elements.getOptions();
-      expect(options).toHaveLength(4);
+      expect(options).toHaveLength(5);
     });
 
     it.each(STATUS_SELECT_OPTIONS)(

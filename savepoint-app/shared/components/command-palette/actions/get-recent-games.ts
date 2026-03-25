@@ -1,7 +1,7 @@
 "use server";
 
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services";
+import { LibraryItemStatus } from "@/shared/types/library";
 import { z } from "zod";
 
 import { createServerAction } from "@/shared/lib";

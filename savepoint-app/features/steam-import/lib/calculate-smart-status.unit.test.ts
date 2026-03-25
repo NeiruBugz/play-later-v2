@@ -1,4 +1,4 @@
-import type { ImportedGame } from "@prisma/client";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import { describe, expect, it } from "vitest";
 
 import { LibraryItemStatus } from "@/shared/types";
@@ -6,7 +6,7 @@ import { LibraryItemStatus } from "@/shared/types";
 import { calculateSmartStatus } from "./calculate-smart-status";
 
 describe("calculateSmartStatus", () => {
-  const baseImportedGame: ImportedGame = {
+  const baseImportedGameDto: ImportedGameDto = {
     id: "test-id",
     name: "Test Game",
     storefront: "STEAM",
@@ -25,53 +25,53 @@ describe("calculateSmartStatus", () => {
     userId: "user-123",
   };
 
-  describe("OWNED status", () => {
-    it("returns OWNED when playtime is 0", () => {
-      const game: ImportedGame = {
-        ...baseImportedGame,
+  describe("SHELF status", () => {
+    it("returns SHELF when playtime is 0", () => {
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 0,
         lastPlayedAt: null,
       };
 
-      expect(calculateSmartStatus(game)).toBe(LibraryItemStatus.OWNED);
+      expect(calculateSmartStatus(game)).toBe(LibraryItemStatus.SHELF);
     });
 
-    it("returns OWNED when playtime is null", () => {
-      const game: ImportedGame = {
-        ...baseImportedGame,
+    it("returns SHELF when playtime is null", () => {
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: null,
         lastPlayedAt: null,
       };
 
-      expect(calculateSmartStatus(game)).toBe(LibraryItemStatus.OWNED);
+      expect(calculateSmartStatus(game)).toBe(LibraryItemStatus.SHELF);
     });
 
-    it("returns OWNED when playtime is undefined", () => {
-      const game: ImportedGame = {
-        ...baseImportedGame,
+    it("returns SHELF when playtime is undefined", () => {
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: undefined as unknown as null,
         lastPlayedAt: null,
       };
 
-      expect(calculateSmartStatus(game)).toBe(LibraryItemStatus.OWNED);
+      expect(calculateSmartStatus(game)).toBe(LibraryItemStatus.SHELF);
     });
 
-    it("returns OWNED even if lastPlayedAt is set but playtime is 0", () => {
-      const game: ImportedGame = {
-        ...baseImportedGame,
+    it("returns SHELF even if lastPlayedAt is set but playtime is 0", () => {
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 0,
         lastPlayedAt: new Date(),
       };
 
-      expect(calculateSmartStatus(game)).toBe(LibraryItemStatus.OWNED);
+      expect(calculateSmartStatus(game)).toBe(LibraryItemStatus.SHELF);
     });
   });
 
   describe("PLAYING status", () => {
     it("returns PLAYING when played within 7 days", () => {
       const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 120,
         lastPlayedAt: twoDaysAgo,
       };
@@ -81,8 +81,8 @@ describe("calculateSmartStatus", () => {
 
     it("returns PLAYING when played today", () => {
       const now = new Date();
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 60,
         lastPlayedAt: now,
       };
@@ -92,8 +92,8 @@ describe("calculateSmartStatus", () => {
 
     it("returns PLAYING when played 6 days ago", () => {
       const sixDaysAgo = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000);
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 300,
         lastPlayedAt: sixDaysAgo,
       };
@@ -105,8 +105,8 @@ describe("calculateSmartStatus", () => {
   describe("PLAYED status", () => {
     it("returns PLAYED when played more than 7 days ago", () => {
       const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 500,
         lastPlayedAt: tenDaysAgo,
       };
@@ -116,8 +116,8 @@ describe("calculateSmartStatus", () => {
 
     it("returns PLAYED when played 30 days ago", () => {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 1000,
         lastPlayedAt: thirtyDaysAgo,
       };
@@ -126,8 +126,8 @@ describe("calculateSmartStatus", () => {
     });
 
     it("returns PLAYED when lastPlayedAt is null but playtime exists", () => {
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 250,
         lastPlayedAt: null,
       };
@@ -136,8 +136,8 @@ describe("calculateSmartStatus", () => {
     });
 
     it("returns PLAYED when playtime > 0 but lastPlayedAt is undefined", () => {
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 150,
         lastPlayedAt: undefined as unknown as null,
       };
@@ -151,8 +151,8 @@ describe("calculateSmartStatus", () => {
       const exactlySevenDaysAgo = new Date(
         Date.now() - 7 * 24 * 60 * 60 * 1000
       );
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 100,
         lastPlayedAt: exactlySevenDaysAgo,
       };
@@ -164,8 +164,8 @@ describe("calculateSmartStatus", () => {
       const almostSevenDays = new Date(
         Date.now() - (7 * 24 * 60 * 60 * 1000 - 60 * 1000)
       );
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 200,
         lastPlayedAt: almostSevenDays,
       };
@@ -174,8 +174,8 @@ describe("calculateSmartStatus", () => {
     });
 
     it("handles very large playtime values", () => {
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 999999,
         lastPlayedAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
       };
@@ -185,8 +185,8 @@ describe("calculateSmartStatus", () => {
 
     it("handles very small playtime values (1 minute)", () => {
       const yesterday = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
-      const game: ImportedGame = {
-        ...baseImportedGame,
+      const game: ImportedGameDto = {
+        ...baseImportedGameDto,
         playtime: 1,
         lastPlayedAt: yesterday,
       };

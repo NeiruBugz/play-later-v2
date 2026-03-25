@@ -56,42 +56,29 @@ export function isErrorResult<TData>(
 ): result is { success: false; error: string; code?: ServiceErrorCode } {
   return result.success === false;
 }
-export abstract class BaseService {
-  protected success<TData>(data: TData): ServiceResult<TData> {
-    return {
-      success: true,
-      data,
-    };
+
+export function serviceSuccess<TData>(data: TData): ServiceResult<TData> {
+  return { success: true, data };
+}
+
+export function serviceError(
+  message: string,
+  code?: ServiceErrorCode
+): ServiceResult<never> {
+  return { success: false, error: message, code };
+}
+
+export function handleServiceError(
+  error: unknown,
+  fallbackMessage = "An unexpected error occurred"
+): ServiceResult<never> {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  ) {
+    return serviceError("Resource already exists", ServiceErrorCode.CONFLICT);
   }
-  protected error(
-    message: string,
-    code?: ServiceErrorCode
-  ): ServiceResult<never> {
-    return {
-      success: false,
-      error: message,
-      code,
-    };
-  }
-  protected handleError(
-    error: unknown,
-    fallbackMessage = "An unexpected error occurred"
-  ): ServiceResult<never> {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      return this.error("Resource already exists", ServiceErrorCode.CONFLICT);
-    }
-    const message = error instanceof Error ? error.message : fallbackMessage;
-    logger.error(
-      {
-        error,
-        service: this.constructor.name,
-        message,
-      },
-      "Service error occurred"
-    );
-    return this.error(message, ServiceErrorCode.INTERNAL_ERROR);
-  }
+  const message = error instanceof Error ? error.message : fallbackMessage;
+  logger.error({ error, message }, "Service error occurred");
+  return serviceError(message, ServiceErrorCode.INTERNAL_ERROR);
 }

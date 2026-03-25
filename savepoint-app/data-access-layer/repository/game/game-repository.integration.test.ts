@@ -1,3 +1,4 @@
+import { DuplicateError } from "@/data-access-layer/repository";
 import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 
 import { upsertGenre } from "../genre/genre-repository";
@@ -21,23 +22,19 @@ describe("Game Repository Integration Tests", () => {
   let testPlatformId: string;
 
   beforeEach(async () => {
-    const genreResult = await upsertGenre({
+    const genre = await upsertGenre({
       id: 999,
       name: "Test Genre",
       slug: "test-genre",
     });
-    const platformResult = await upsertPlatform({
+    const platform = await upsertPlatform({
       id: 999,
       name: "Test Platform",
       slug: "test-platform",
     });
 
-    if (!genreResult.success || !platformResult.success) {
-      throw new Error("Failed to set up test data");
-    }
-
-    testGenreId = genreResult.data.id;
-    testPlatformId = platformResult.data.id;
+    testGenreId = genre.id;
+    testPlatformId = platform.id;
   });
 
   it("should create a game with genres and platforms", async () => {
@@ -56,12 +53,9 @@ describe("Game Repository Integration Tests", () => {
       platformIds: [testPlatformId],
     });
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.title).toBe("Test Game");
-      expect(result.data.slug).toBe("test-game");
-      expect(result.data.igdbId).toBe(12345);
-    }
+    expect(result.title).toBe("Test Game");
+    expect(result.slug).toBe("test-game");
+    expect(result.igdbId).toBe(12345);
   });
 
   it("should find game by slug", async () => {
@@ -79,12 +73,10 @@ describe("Game Repository Integration Tests", () => {
 
     const result = await findGameBySlug("test-game");
 
-    expect(result.success).toBe(true);
-    if (result.success && result.data) {
-      expect(result.data.title).toBe("Test Game");
-      expect(result.data.genres).toHaveLength(1);
-      expect(result.data.platforms).toHaveLength(1);
-    }
+    expect(result).not.toBeNull();
+    expect(result?.title).toBe("Test Game");
+    expect(result?.genres).toHaveLength(1);
+    expect(result?.platforms).toHaveLength(1);
   });
 
   it("should find game by IGDB ID", async () => {
@@ -102,10 +94,8 @@ describe("Game Repository Integration Tests", () => {
 
     const result = await findGameByIgdbId(12345);
 
-    expect(result.success).toBe(true);
-    if (result.success && result.data) {
-      expect(result.data.igdbId).toBe(12345);
-    }
+    expect(result).not.toBeNull();
+    expect(result?.igdbId).toBe(12345);
   });
 
   it("should check if game exists by IGDB ID", async () => {
@@ -121,18 +111,11 @@ describe("Game Repository Integration Tests", () => {
       platformIds: [testPlatformId],
     });
 
-    const existsResult = await gameExistsByIgdbId(12345);
-    const notExistsResult = await gameExistsByIgdbId(99999);
+    const exists = await gameExistsByIgdbId(12345);
+    const notExists = await gameExistsByIgdbId(99999);
 
-    expect(existsResult.success).toBe(true);
-    if (existsResult.success) {
-      expect(existsResult.data).toBe(true);
-    }
-
-    expect(notExistsResult.success).toBe(true);
-    if (notExistsResult.success) {
-      expect(notExistsResult.data).toBe(false);
-    }
+    expect(exists).toBe(true);
+    expect(notExists).toBe(false);
   });
 
   it("should handle duplicate game creation", async () => {
@@ -142,41 +125,31 @@ describe("Game Repository Integration Tests", () => {
       slug: "test-game",
     };
 
-    const result1 = await createGameWithRelations({
+    await createGameWithRelations({
       igdbGame,
       genreIds: [testGenreId],
       platformIds: [testPlatformId],
     });
 
-    const result2 = await createGameWithRelations({
-      igdbGame,
-      genreIds: [testGenreId],
-      platformIds: [testPlatformId],
-    });
-
-    expect(result1.success).toBe(true);
-    expect(result2.success).toBe(false);
-    if (!result2.success) {
-      expect(result2.error.code).toBe("DUPLICATE");
-    }
+    await expect(
+      createGameWithRelations({
+        igdbGame,
+        genreIds: [testGenreId],
+        platformIds: [testPlatformId],
+      })
+    ).rejects.toThrow(DuplicateError);
   });
 
   it("should return null when game slug is not found", async () => {
     const result = await findGameBySlug("non-existent-slug");
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBeNull();
-    }
+    expect(result).toBeNull();
   });
 
   it("should return null when game IGDB ID is not found", async () => {
     const result = await findGameByIgdbId(99999);
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBeNull();
-    }
+    expect(result).toBeNull();
   });
 
   it("should create game without genres and platforms", async () => {
@@ -192,15 +165,10 @@ describe("Game Repository Integration Tests", () => {
       platformIds: [],
     });
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.title).toBe("Game Without Relations");
+    expect(result.title).toBe("Game Without Relations");
 
-      const gameWithRelations = await findGameByIgdbId(11111);
-      if (gameWithRelations.success && gameWithRelations.data) {
-        expect(gameWithRelations.data.genres).toHaveLength(0);
-        expect(gameWithRelations.data.platforms).toHaveLength(0);
-      }
-    }
+    const gameWithRelations = await findGameByIgdbId(11111);
+    expect(gameWithRelations?.genres).toHaveLength(0);
+    expect(gameWithRelations?.platforms).toHaveLength(0);
   });
 });

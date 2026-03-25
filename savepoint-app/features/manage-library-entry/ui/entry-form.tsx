@@ -150,7 +150,7 @@ function AddForm({
     resolver: zodResolver(AddToLibrarySchema),
     defaultValues: {
       igdbId,
-      status: LibraryItemStatus.WANT_TO_PLAY,
+      status: LibraryItemStatus.SHELF,
       platform: "",
     },
   });
@@ -167,7 +167,7 @@ function AddForm({
     onSuccess: () => {
       form.reset({
         igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.SHELF,
         platform: "",
       });
       onSuccess();

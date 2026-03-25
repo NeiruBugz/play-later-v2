@@ -1,6 +1,6 @@
 "use client";
 
-import type { ImportedGame } from "@prisma/client";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import { Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -20,7 +20,7 @@ import {
 import { ImportGameModal } from "./import-game-modal";
 
 type ImportedGameCardProps = {
-  game: ImportedGame;
+  game: ImportedGameDto;
 };
 
 export function ImportedGameCard({ game }: ImportedGameCardProps) {

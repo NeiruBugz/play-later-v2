@@ -30,6 +30,10 @@ const nextConfig = {
         hostname: "localhost",
         protocol: "http",
       },
+      {
+        hostname: "https://authjs.dev",
+        protocol: "https",
+      }
     ],
   },
   reactStrictMode: true,

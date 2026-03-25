@@ -7,59 +7,38 @@ import {
 
 import { createLogger, hashPassword, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { BaseService, ServiceErrorCode } from "../types";
+import {
+  handleServiceError,
+  serviceError,
+  ServiceErrorCode,
+  serviceSuccess,
+} from "../types";
 import { mapToAuthUserData } from "./mappers";
 import type { SignUpInput, SignUpResult } from "./types";
 
-export class AuthService extends BaseService {
+export class AuthService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "AuthService" });
   async signUp(input: SignUpInput): Promise<SignUpResult> {
     try {
-      this.logger.info({ userId: "unknown" }, "User sign up attempt");
       const normalizedEmail = input.email.trim().toLowerCase();
-      const existingUserResult = await findUserByEmail(normalizedEmail);
-      if (!existingUserResult.success) {
-        this.logger.error(
-          { userId: "unknown", error: existingUserResult.error },
-          "Error checking for existing user"
-        );
-        return this.error(
-          "Failed to verify email availability",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-      if (existingUserResult.data) {
+      const existingUser = await findUserByEmail(normalizedEmail);
+      if (existingUser) {
         this.logger.warn(
           { userId: "unknown" },
           "Sign up failed: email already exists"
         );
-        return this.error(
+        return serviceError(
           "An account with this email already exists",
           ServiceErrorCode.CONFLICT
         );
       }
       const hashedPassword = await hashPassword(input.password);
-      const createUserResult = await createUserWithCredentials({
+      const user = await createUserWithCredentials({
         email: normalizedEmail,
         password: hashedPassword,
         name: input.name ?? null,
       });
-      if (!createUserResult.success) {
-        this.logger.error(
-          { userId: "unknown", error: createUserResult.error },
-          "Error creating user account"
-        );
-        return this.error(
-          createUserResult.error.message,
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-      const user = createUserResult.data;
-      this.logger.info(
-        { userId: user.id },
-        "User account created successfully"
-      );
-      return this.success({
+      return serviceSuccess({
         user: mapToAuthUserData({
           id: user.id,
           email: user.email ?? normalizedEmail,
@@ -77,7 +56,7 @@ export class AuthService extends BaseService {
           { userId: "unknown", error },
           "Sign up failed: unique constraint violation"
         );
-        return this.error(
+        return serviceError(
           "An account with this email already exists",
           ServiceErrorCode.CONFLICT
         );
@@ -86,7 +65,7 @@ export class AuthService extends BaseService {
         { error, userId: "unknown" },
         "Error creating user account"
       );
-      return this.handleError(error, "Failed to create account");
+      return handleServiceError(error, "Failed to create account");
     }
   }
 }

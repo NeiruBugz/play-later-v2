@@ -16,6 +16,7 @@ export type CreateLibraryItemInput = {
     platform?: string;
     startedAt?: Date;
     completedAt?: Date;
+    hasBeenPlayed?: boolean;
   };
 };
 export type DeleteLibraryItemInput = {
@@ -30,6 +31,7 @@ export type UpdateLibraryItemInput = {
     platform?: string;
     startedAt?: Date;
     completedAt?: Date;
+    hasBeenPlayed?: boolean;
   };
 };
 export type GetLibraryItemsForUserByIgdbIdInput = {
@@ -58,23 +60,3 @@ export type AddGameToUserLibraryInput = {
     acquisitionType: AcquisitionType;
   };
 };
-export type LibraryStatsResult =
-  | {
-      ok: true;
-      data: {
-        statusCounts: Record<string, number>;
-        recentGames: Array<{
-          gameId: string;
-          title: string;
-          coverImage: string | null;
-          lastPlayed: Date;
-        }>;
-      };
-    }
-  | {
-      ok: false;
-      error: {
-        code: string;
-        message: string;
-      };
-    };

@@ -1,4 +1,4 @@
-import { JournalMood } from "@/data-access-layer/domain/journal";
+import { JournalMood } from "@/shared/types/journal";
 import { z } from "zod";
 
 import { MAX_CHARACTERS } from "@/shared/lib/rich-text";

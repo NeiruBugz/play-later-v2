@@ -47,75 +47,70 @@ vi.mock("@/shared/lib/library-status", () => {
   const MockIcon = ({ className }: { className?: string }) => null;
   const createStatusConfig = () => [
     {
-      value: "WANT_TO_PLAY",
-      label: "Want to Play",
-      description: "On your radar, haven't started",
-      badgeVariant: "wantToPlay",
+      value: "UP_NEXT",
+      label: "Up Next",
+      description: "Want to play or replay",
+      badgeVariant: "upNext",
       icon: MockIcon,
-      ariaLabel: "Mark as Want to Play",
-    },
-    {
-      value: "OWNED",
-      label: "Owned",
-      description: "In your library, haven't started",
-      badgeVariant: "owned",
-      icon: MockIcon,
-      ariaLabel: "Mark as Owned",
+      ariaLabel: "Up Next",
     },
     {
       value: "PLAYING",
       label: "Playing",
-      description: "Currently engaged",
+      description: "Actively engaged",
       badgeVariant: "playing",
       icon: MockIcon,
-      ariaLabel: "Mark as Playing",
+      ariaLabel: "Playing",
+    },
+    {
+      value: "SHELF",
+      label: "Shelf",
+      description: "Own it, sitting there",
+      badgeVariant: "shelf",
+      icon: MockIcon,
+      ariaLabel: "On Shelf",
     },
     {
       value: "PLAYED",
       label: "Played",
-      description: "Have experienced it",
+      description: "Have experienced",
       badgeVariant: "played",
       icon: MockIcon,
-      ariaLabel: "Mark as Played",
+      ariaLabel: "Played",
+    },
+    {
+      value: "WISHLIST",
+      label: "Wishlist",
+      description: "Want it someday",
+      badgeVariant: "wishlist",
+      icon: MockIcon,
+      ariaLabel: "Wishlisted",
     },
   ];
 
+  const configArray = createStatusConfig();
+  const configMap = new Map(configArray.map((c) => [c.value, c]));
+
   return {
-    LIBRARY_STATUS_CONFIG: createStatusConfig(),
-    LIBRARY_STATUS_LABELS: {
-      WANT_TO_PLAY: "Want to Play",
-      OWNED: "Owned",
-      PLAYING: "Playing",
-      PLAYED: "Played",
-    },
-    LIBRARY_STATUS_VARIANTS: {
-      WANT_TO_PLAY: "wantToPlay",
-      OWNED: "owned",
-      PLAYING: "playing",
-      PLAYED: "played",
-    },
+    LIBRARY_STATUS_CONFIG: configArray,
+    LIBRARY_STATUS_MAP: configMap,
     getStatusLabel: vi.fn((status: string) => {
-      const labels: Record<string, string> = {
-        WANT_TO_PLAY: "Want to Play",
-        OWNED: "Owned",
-        PLAYING: "Playing",
-        PLAYED: "Played",
-      };
-      return labels[status] || status;
+      return configMap.get(status)?.label ?? status;
     }),
     getStatusVariant: vi.fn((status: string) => {
-      const variants: Record<string, string> = {
-        WANT_TO_PLAY: "wantToPlay",
-        OWNED: "owned",
-        PLAYING: "playing",
-        PLAYED: "played",
-      };
-      return variants[status] || "secondary";
+      return configMap.get(status)?.badgeVariant ?? "secondary";
     }),
     getStatusIcon: vi.fn(() => MockIcon),
     getStatusConfig: vi.fn((status: string) => {
-      return createStatusConfig().find((c) => c.value === status);
+      return configMap.get(status);
     }),
+    shouldShowBadge: vi.fn((status: string) => {
+      return status !== "SHELF" && status !== "WISHLIST";
+    }),
+    getUpNextLabel: vi.fn((hasBeenPlayed: boolean) => {
+      return hasBeenPlayed ? "Replay" : "Up Next";
+    }),
+    getStatusActions: vi.fn(() => []),
   };
 });
 

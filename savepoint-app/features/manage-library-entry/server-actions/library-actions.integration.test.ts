@@ -1,5 +1,4 @@
 import { getServerUserId } from "@/auth";
-import { LibraryItemStatus } from "@/data-access-layer/domain/library";
 import {
   cleanupDatabase,
   getTestDatabase,
@@ -11,6 +10,7 @@ import {
   createLibraryItem,
   createUser,
 } from "@/test/setup/db-factories";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 import { addToLibraryAction } from "./add-to-library-action";
 import { updateLibraryEntryAction } from "./update-library-entry-action";
@@ -116,7 +116,7 @@ describe("addToLibraryAction - Integration Tests", () => {
     it("should add game to library when game exists in database", async () => {
       const result = await addToLibraryAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
       });
 
@@ -125,19 +125,19 @@ describe("addToLibraryAction - Integration Tests", () => {
 
       expect(result.data.userId).toBe(testUser.id);
       expect(result.data.gameId).toBe(testGame.id);
-      expect(result.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
 
       const libraryItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: result.data.id },
       });
       expect(libraryItem).toBeTruthy();
-      expect(libraryItem?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(libraryItem?.status).toBe(LibraryItemStatus.WISHLIST);
     });
 
     it("should add game with platform information", async () => {
       const result = await addToLibraryAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
       });
 
@@ -156,7 +156,7 @@ describe("addToLibraryAction - Integration Tests", () => {
     it("should add game without platform information", async () => {
       const result = await addToLibraryAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
@@ -173,8 +173,8 @@ describe("addToLibraryAction - Integration Tests", () => {
 
     it("should handle all journey statuses", async () => {
       const statuses = [
-        LibraryItemStatus.WANT_TO_PLAY,
-        LibraryItemStatus.OWNED,
+        LibraryItemStatus.WISHLIST,
+        LibraryItemStatus.SHELF,
         LibraryItemStatus.PLAYING,
         LibraryItemStatus.PLAYED,
       ];
@@ -209,7 +209,7 @@ describe("addToLibraryAction - Integration Tests", () => {
 
       const result = await addToLibraryAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PC",
       });
 
@@ -221,7 +221,7 @@ describe("addToLibraryAction - Integration Tests", () => {
     it("should allow adding the same game multiple times (current data model supports multiple entries)", async () => {
       const firstResult = await addToLibraryAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PC",
       });
 
@@ -230,7 +230,7 @@ describe("addToLibraryAction - Integration Tests", () => {
 
       const secondResult = await addToLibraryAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PlayStation 5",
       });
 
@@ -238,14 +238,14 @@ describe("addToLibraryAction - Integration Tests", () => {
       if (!secondResult.success) return;
 
       expect(firstResult.data.id).not.toBe(secondResult.data.id);
-      expect(firstResult.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
-      expect(secondResult.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(firstResult.data.status).toBe(LibraryItemStatus.WISHLIST);
+      expect(secondResult.data.status).toBe(LibraryItemStatus.WISHLIST);
     });
 
     it("should return error for invalid input", async () => {
       const result = await addToLibraryAction({
         igdbId: -1,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PC",
       });
 
@@ -261,7 +261,7 @@ describe("addToLibraryAction - Integration Tests", () => {
 
       const result = await addToLibraryAction({
         igdbId: newIgdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PC",
       });
 
@@ -269,7 +269,7 @@ describe("addToLibraryAction - Integration Tests", () => {
       if (!result.success) return;
 
       expect(result.data.userId).toBe(testUser.id);
-      expect(result.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
 
       const game = await getTestDatabase().game.findUnique({
         where: { igdbId: newIgdbId },
@@ -337,7 +337,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const initialLibraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryStatusAction({
@@ -361,7 +361,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const oldItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -369,7 +369,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const recentItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryStatusAction({
@@ -386,14 +386,14 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
       const dbOldItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: oldItem.id },
       });
-      expect(dbOldItem?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(dbOldItem?.status).toBe(LibraryItemStatus.WISHLIST);
     });
 
     it("should handle all journey status transitions", async () => {
       const initialLibraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const statuses = [
@@ -421,7 +421,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     it("should create new library item if game exists but not in library", async () => {
       const result = await updateLibraryStatusAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
@@ -429,7 +429,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       expect(result.data.userId).toBe(testUser.id);
       expect(result.data.gameId).toBe(testGame.id);
-      expect(result.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
 
       const libraryItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: result.data.id },
@@ -440,7 +440,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     it("should create library item with null platform when using quick action", async () => {
       const result = await updateLibraryStatusAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
@@ -460,14 +460,14 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         igdbId: newIgdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(true);
       if (!result.success) return;
 
       expect(result.data.userId).toBe(testUser.id);
-      expect(result.data.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(result.data.status).toBe(LibraryItemStatus.WISHLIST);
 
       const game = await getTestDatabase().game.findUnique({
         where: { igdbId: newIgdbId },
@@ -483,7 +483,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
 
       const result = await updateLibraryStatusAction({
         igdbId: testGame.igdbId,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -494,7 +494,7 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
     it("should return error for invalid input", async () => {
       const result = await updateLibraryStatusAction({
         igdbId: -1,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -539,7 +539,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryEntryAction({
@@ -563,7 +563,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PC",
       });
 
@@ -619,13 +619,13 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const item1 = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const item2 = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryEntryAction({
@@ -642,7 +642,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const dbItem2 = await getTestDatabase().libraryItem.findUnique({
         where: { id: item2.id },
       });
-      expect(dbItem2?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(dbItem2?.status).toBe(LibraryItemStatus.WISHLIST);
     });
   });
 
@@ -651,7 +651,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const { getServerUserId } = await import("@/auth");
@@ -670,7 +670,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
     it("should return error for invalid input - negative library item ID", async () => {
       const result = await updateLibraryEntryAction({
         libraryItemId: -1,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -681,7 +681,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
     it("should return error for invalid input - zero library item ID", async () => {
       const result = await updateLibraryEntryAction({
         libraryItemId: 0,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       expect(result.success).toBe(false);
@@ -711,7 +711,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: otherUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryEntryAction({
@@ -726,14 +726,14 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
       });
-      expect(dbItem?.status).toBe(LibraryItemStatus.WANT_TO_PLAY);
+      expect(dbItem?.status).toBe(LibraryItemStatus.WISHLIST);
     });
 
     it("should return error for invalid status enum", async () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
 
       const result = await updateLibraryEntryAction({
@@ -752,7 +752,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PC",
       });
 
@@ -772,7 +772,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
       const libraryItem = await createLibraryItem({
         userId: testUser.id,
         gameId: testGame.id,
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
         platform: "PC",
       });
 

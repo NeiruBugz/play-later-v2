@@ -1,11 +1,6 @@
 import "server-only";
 
 import {
-  JournalEntryMapper,
-  JournalMood,
-  type JournalEntryDomain,
-} from "@/data-access-layer/domain/journal";
-import {
   createJournalEntry,
   deleteJournalEntry,
   findJournalEntriesByGameId,
@@ -13,32 +8,25 @@ import {
   findJournalEntryById,
   updateJournalEntry,
 } from "@/data-access-layer/repository";
+import { JournalMood, type JournalEntry } from "@prisma/client";
 
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import {
+  handleServiceError,
+  serviceSuccess,
+  type ServiceResult,
+} from "../types";
 
-import { BaseService, type ServiceResult } from "../types";
-
-export class JournalService extends BaseService {
-  private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "JournalService" });
+export class JournalService {
   async findJournalEntriesByGameId(params: {
     userId: string;
     gameId: string;
     limit?: number;
   }) {
     try {
-      this.logger.info(params, "Finding journal entries for game");
-      const result = await findJournalEntriesByGameId(params);
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to find journal entries"
-        );
-        return this.error("Failed to find journal entries");
-      }
-      const domainEntries = JournalEntryMapper.toDomainList(result.data);
-      return this.success(domainEntries);
+      const data = await findJournalEntriesByGameId(params);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(
+      return handleServiceError(
         error,
         "Failed to find journal entries by game ID"
       );
@@ -64,54 +52,30 @@ export class JournalService extends BaseService {
     playSession?: number;
     libraryItemId?: number;
     timezone?: string;
-  }): Promise<ServiceResult<JournalEntryDomain>> {
+  }): Promise<ServiceResult<JournalEntry>> {
     try {
-      this.logger.info(params, "Creating journal entry");
-
       const finalTitle =
         params.title?.trim() || this.generateAutoTitle(params.timezone);
 
-      const result = await createJournalEntry({
+      const data = await createJournalEntry({
         ...params,
         title: finalTitle,
       });
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to create journal entry"
-        );
-        return this.error(result.error.message);
-      }
-      const domainEntry = JournalEntryMapper.toDomain(result.data);
-      this.logger.info(
-        { entryId: domainEntry.id, ...params },
-        "Journal entry created successfully"
-      );
-      return this.success(domainEntry);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(error, "Failed to create journal entry");
+      return handleServiceError(error, "Failed to create journal entry");
     }
   }
 
   async findJournalEntryById(params: {
     entryId: string;
     userId: string;
-  }): Promise<ServiceResult<JournalEntryDomain>> {
+  }): Promise<ServiceResult<JournalEntry>> {
     try {
-      this.logger.info(params, "Finding journal entry by ID");
-      const result = await findJournalEntryById(params);
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to find journal entry"
-        );
-        return this.error(result.error.message);
-      }
-      const domainEntry = JournalEntryMapper.toDomain(result.data);
-      this.logger.info({ ...params }, "Journal entry found successfully");
-      return this.success(domainEntry);
+      const data = await findJournalEntryById(params);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(error, "Failed to find journal entry by ID");
+      return handleServiceError(error, "Failed to find journal entry by ID");
     }
   }
 
@@ -119,39 +83,19 @@ export class JournalService extends BaseService {
     userId: string;
     limit?: number;
     cursor?: string;
-  }): Promise<ServiceResult<JournalEntryDomain[]>> {
+  }): Promise<ServiceResult<JournalEntry[]>> {
     try {
       const { userId, limit = 20, cursor } = params;
 
-      this.logger.info(
-        { userId, limit, cursor },
-        "Finding journal entries for user"
-      );
-
-      const result = await findJournalEntriesByUserId({
+      const data = await findJournalEntriesByUserId({
         userId,
         limit,
         cursor,
       });
 
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to find journal entries for user"
-        );
-        return this.error(result.error.message);
-      }
-
-      const domainEntries = JournalEntryMapper.toDomainList(result.data);
-
-      this.logger.info(
-        { userId, count: domainEntries.length },
-        "Journal entries found successfully"
-      );
-
-      return this.success(domainEntries);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(
+      return handleServiceError(
         error,
         "Failed to find journal entries by user ID"
       );
@@ -168,36 +112,19 @@ export class JournalService extends BaseService {
       playSession?: number | null;
       libraryItemId?: number | null;
     };
-  }): Promise<ServiceResult<JournalEntryDomain>> {
+  }): Promise<ServiceResult<JournalEntry>> {
     try {
       const { userId, entryId, updates } = params;
 
-      this.logger.info({ userId, entryId }, "Updating journal entry");
-
-      const result = await updateJournalEntry({
+      const data = await updateJournalEntry({
         entryId,
         userId,
         updates,
       });
 
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to update journal entry"
-        );
-        return this.error(result.error.message);
-      }
-
-      const domainEntry = JournalEntryMapper.toDomain(result.data);
-
-      this.logger.info(
-        { userId, entryId },
-        "Journal entry updated successfully"
-      );
-
-      return this.success(domainEntry);
+      return serviceSuccess(data);
     } catch (error) {
-      return this.handleError(error, "Failed to update journal entry");
+      return handleServiceError(error, "Failed to update journal entry");
     }
   }
 
@@ -208,26 +135,11 @@ export class JournalService extends BaseService {
     try {
       const { userId, entryId } = params;
 
-      this.logger.info({ userId, entryId }, "Deleting journal entry");
+      await deleteJournalEntry({ entryId, userId });
 
-      const result = await deleteJournalEntry({ entryId, userId });
-
-      if (!result.success) {
-        this.logger.error(
-          { error: result.error, ...params },
-          "Failed to delete journal entry"
-        );
-        return this.error(result.error.message);
-      }
-
-      this.logger.info(
-        { userId, entryId },
-        "Journal entry deleted successfully"
-      );
-
-      return this.success(undefined);
+      return serviceSuccess(undefined);
     } catch (error) {
-      return this.handleError(error, "Failed to delete journal entry");
+      return handleServiceError(error, "Failed to delete journal entry");
     }
   }
 }

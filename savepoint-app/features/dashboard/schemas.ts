@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-export const GetRandomWantToPlaySchema = z.object({
+export const GetRandomWishlistGameSchema = z.object({
   // No input parameters needed - uses authenticated userId from context
 });
 
-export type GetRandomWantToPlayInput = z.infer<
-  typeof GetRandomWantToPlaySchema
+export type GetRandomWishlistGameInput = z.infer<
+  typeof GetRandomWishlistGameSchema
 >;

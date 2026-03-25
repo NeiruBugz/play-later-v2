@@ -1,6 +1,6 @@
 "use client";
 
-import type { ImportedGame } from "@prisma/client";
+import type { ImportedGameDto } from "@/data-access-layer/domain/imported-game";
 import { useQuery } from "@tanstack/react-query";
 
 import type {
@@ -10,7 +10,7 @@ import type {
 } from "../types";
 
 type UseImportedGamesResult = {
-  games: ImportedGame[];
+  games: ImportedGameDto[];
   pagination: PaginationInfo;
   isLoading: boolean;
   isError: boolean;

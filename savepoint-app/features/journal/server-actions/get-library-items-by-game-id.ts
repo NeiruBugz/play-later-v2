@@ -1,10 +1,10 @@
 "use server";
 
-import type { LibraryItemDomain } from "@/data-access-layer/domain/library";
 import { LibraryService } from "@/data-access-layer/services";
 import { z } from "zod";
 
 import { createServerAction } from "@/shared/lib";
+import type { LibraryItemDomain } from "@/shared/types/library";
 
 const GetLibraryItemsByGameIdSchema = z.object({
   gameId: z.string().min(1, "Game ID is required"),

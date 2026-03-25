@@ -59,35 +59,31 @@ export default async function DashboardPage() {
     : "there";
 
   return (
-    <main className="py-3xl container mx-auto">
-      <div className="space-y-3xl">
-        <header>
-          <h1 className="heading-xl tracking-tight">
-            Welcome back, {username}!
-          </h1>
-          <p className="body-md text-muted-foreground">
-            Track your gaming journey and discover what to play next
-          </p>
-        </header>
+    <div className="space-y-3xl py-3xl">
+      <header>
+        <h1 className="heading-xl tracking-tight">Welcome back, {username}!</h1>
+        <p className="body-md text-muted-foreground">
+          Track your gaming journey and discover what to play next
+        </p>
+      </header>
 
-        <Suspense fallback={<OnboardingSkeleton />}>
-          <GettingStartedChecklist userId={userId} />
-        </Suspense>
+      <Suspense fallback={<OnboardingSkeleton />}>
+        <GettingStartedChecklist userId={userId} />
+      </Suspense>
 
-        <DashboardQuickActions />
+      <DashboardQuickActions />
 
-        <Suspense fallback={<StatsSkeleton />}>
-          <DashboardStats userId={userId} />
-        </Suspense>
+      <Suspense fallback={<StatsSkeleton />}>
+        <DashboardStats userId={userId} />
+      </Suspense>
 
-        <Suspense fallback={<SectionSkeleton />}>
-          <ContinuePlaying userId={userId} />
-        </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
+        <ContinuePlaying userId={userId} />
+      </Suspense>
 
-        <Suspense fallback={<SectionSkeleton />}>
-          <RecentlyAdded userId={userId} />
-        </Suspense>
-      </div>
-    </main>
+      <Suspense fallback={<SectionSkeleton />}>
+        <RecentlyAdded userId={userId} />
+      </Suspense>
+    </div>
   );
 }

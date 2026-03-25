@@ -1,4 +1,4 @@
-import type { JournalEntryDomain } from "@/data-access-layer/domain/journal";
+import type { JournalEntryDomain } from "@/shared/types/journal";
 
 import type { ServiceResult } from "../types";
 

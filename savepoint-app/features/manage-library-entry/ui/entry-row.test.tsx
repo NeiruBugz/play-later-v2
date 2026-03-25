@@ -1,10 +1,8 @@
-import {
-  AcquisitionType,
-  LibraryItemStatus,
-  type LibraryItemDomain,
-} from "@/data-access-layer/domain/library";
+import { AcquisitionType, LibraryItemStatus } from "@/shared/types/library";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+import type { LibraryItemDomain } from "@/shared/types/library";
 
 import { EntryRow } from "./entry-row";
 
@@ -21,6 +19,7 @@ const createMockEntry = (
   updatedAt: new Date("2025-01-27T12:00:00Z"),
   startedAt: null,
   completedAt: null,
+  hasBeenPlayed: false,
   ...overrides,
 });
 
@@ -93,24 +92,24 @@ describe("EntryRow", () => {
   });
 
   describe("given entry with different statuses", () => {
-    it("should display status badge for Want to Play", () => {
+    it("should display status badge for Wishlist", () => {
       const entry = createMockEntry({
-        status: LibraryItemStatus.WANT_TO_PLAY,
+        status: LibraryItemStatus.WISHLIST,
       });
       render(
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(elements.getStatusBadge("Want to Play")).toBeVisible();
+      expect(elements.getStatusBadge("Wishlist")).toBeVisible();
     });
 
-    it("should display status badge for Owned", () => {
-      const entry = createMockEntry({ status: LibraryItemStatus.OWNED });
+    it("should display status badge for Shelf", () => {
+      const entry = createMockEntry({ status: LibraryItemStatus.SHELF });
       render(
         <EntryRow entry={entry} isSelected={false} onClick={mockOnClick} />
       );
 
-      expect(elements.getStatusBadge("Owned")).toBeVisible();
+      expect(elements.getStatusBadge("Shelf")).toBeVisible();
     });
 
     it("should display status badge for Playing", () => {

@@ -70,7 +70,12 @@ export type ImportedGamesQueryOptions = {
 };
 
 // Library status for importing games
-export type LibraryStatus = "want_to_play" | "owned" | "playing" | "played";
+export type LibraryStatus =
+  | "wishlist"
+  | "shelf"
+  | "up_next"
+  | "playing"
+  | "played";
 
 // Hook options for useImportedGames
 export type UseImportedGamesOptions = ImportedGamesQueryOptions & {
@@ -87,7 +92,7 @@ export type PaginationInfo = {
 
 // Response shape from imported games API
 export type ImportedGamesResponse = {
-  games: import("@prisma/client").ImportedGame[];
+  games: import("@/data-access-layer/domain/imported-game").ImportedGameDto[];
   pagination: PaginationInfo;
 };
 

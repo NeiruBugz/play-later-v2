@@ -41,7 +41,7 @@ export function StatusChipGroup<T extends FieldValues>({
                 aria-checked={isSelected}
                 onClick={() => field.onChange(option.value)}
                 className={cn(
-                  "px-md py-xs sm:px-lg sm:py-sm rounded-md border text-xs font-medium sm:text-sm",
+                  "px-lg py-sm sm:px-lg sm:py-sm rounded-md border text-sm font-medium",
                   "duration-fast ease-out-expo transition-all",
                   "focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none",
                   isSelected && [

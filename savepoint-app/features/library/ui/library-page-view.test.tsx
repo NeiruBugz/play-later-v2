@@ -137,8 +137,9 @@ describe("LibraryPageView", () => {
         expect(elements.getAllStatusesButton()).toBeVisible();
       });
 
-      expect(elements.getStatusButton("Want to Play")).toBeVisible();
-      expect(elements.getStatusButton("Owned")).toBeVisible();
+      expect(elements.getStatusButton("Wishlist")).toBeVisible();
+      expect(elements.getStatusButton("Shelf")).toBeVisible();
+      expect(elements.getStatusButton("Up Next")).toBeVisible();
       expect(elements.getStatusButton("Playing")).toBeVisible();
       expect(elements.getStatusButton("Played")).toBeVisible();
     });
@@ -181,17 +182,17 @@ describe("LibraryPageView", () => {
         const { mockPush } = createNavigationMock();
         const { rerender } = renderComponent();
 
-        await actions.clickStatusButton("Want to Play");
+        await actions.clickStatusButton("Wishlist");
 
         expect(mockPush).toHaveBeenCalledWith(
-          expect.stringContaining("status=WANT_TO_PLAY"),
+          expect.stringContaining("status=WISHLIST"),
           expect.anything()
         );
 
         rerender(<LibraryPageView isSteamConnected={false} />);
 
         await waitFor(() => {
-          expect(elements.getStatusButton("Want to Play")).toHaveAttribute(
+          expect(elements.getStatusButton("Wishlist")).toHaveAttribute(
             "aria-pressed",
             "true"
           );
@@ -286,17 +287,17 @@ describe("LibraryPageView", () => {
       const { rerender } = renderComponent();
 
       await waitFor(() => {
-        expect(elements.getStatusButton("Want to Play")).toBeVisible();
+        expect(elements.getStatusButton("Wishlist")).toBeVisible();
       });
 
       // Apply status filter
-      await actions.clickStatusButton("Want to Play");
+      await actions.clickStatusButton("Wishlist");
 
       // Re-render to reflect status change
       rerender(<LibraryPageView isSteamConnected={false} />);
 
       await waitFor(() => {
-        expect(elements.getStatusButton("Want to Play")).toHaveAttribute(
+        expect(elements.getStatusButton("Wishlist")).toHaveAttribute(
           "aria-pressed",
           "true"
         );

@@ -1,12 +1,8 @@
 import {
   createUserWithCredentials,
+  DuplicateError,
   findUserByEmail,
 } from "@/data-access-layer/repository";
-import {
-  repositoryError,
-  RepositoryErrorCode,
-  repositorySuccess,
-} from "@/data-access-layer/repository/types";
 import {
   createdUserFixture,
   createdUserWithNullEmailFixture,
@@ -17,7 +13,6 @@ import {
   signUpInputForUniqueConstraintViolationFixture,
   signUpInputWithoutNameFixture,
 } from "@fixtures/service/auth";
-import { Prisma } from "@prisma/client";
 
 import { hashPassword } from "@/shared/lib";
 
@@ -41,11 +36,9 @@ describe("AuthService", () => {
   describe("signUp", () => {
     const givenHashedPassword = "$2a$10$hashedpassword";
     it("should normalize email casing before lookup and creation", async () => {
-      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
+      mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockCreateUserWithCredentials.mockResolvedValue(
-        repositorySuccess(createdUserFixture)
-      );
+      mockCreateUserWithCredentials.mockResolvedValue(createdUserFixture);
 
       const result = await service.signUp(signUpInputFixture);
 
@@ -63,11 +56,9 @@ describe("AuthService", () => {
     });
 
     it("should successfully create a new user with hashed password", async () => {
-      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
+      mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockCreateUserWithCredentials.mockResolvedValue(
-        repositorySuccess(createdUserFixture)
-      );
+      mockCreateUserWithCredentials.mockResolvedValue(createdUserFixture);
 
       const result = await service.signUp(signUpInputFixture);
 
@@ -87,10 +78,10 @@ describe("AuthService", () => {
     });
 
     it("should create user without name when name is not provided", async () => {
-      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
+      mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
       mockCreateUserWithCredentials.mockResolvedValue(
-        repositorySuccess(createdUserWithoutNameFixture)
+        createdUserWithoutNameFixture
       );
 
       const result = await service.signUp(signUpInputWithoutNameFixture);
@@ -108,9 +99,7 @@ describe("AuthService", () => {
     });
 
     it("should return error when user already exists", async () => {
-      mockFindUserByEmail.mockResolvedValue(
-        repositorySuccess(existingUserFixture)
-      );
+      mockFindUserByEmail.mockResolvedValue(existingUserFixture);
 
       const result = await service.signUp(signUpInputForExistingUserFixture);
 
@@ -126,18 +115,11 @@ describe("AuthService", () => {
     });
 
     it("should handle unique constraint violation from database", async () => {
-      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
+      mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
 
-      const prismaError = new Prisma.PrismaClientKnownRequestError(
-        "Unique constraint failed on the fields: (`email`)",
-        {
-          code: "P2002",
-          clientVersion: "5.0.0",
-        }
-      );
-      mockCreateUserWithCredentials.mockResolvedValue(
-        repositoryError(RepositoryErrorCode.DUPLICATE, prismaError.message)
+      mockCreateUserWithCredentials.mockRejectedValue(
+        new DuplicateError("Unique constraint failed on the fields: (`email`)")
       );
 
       const result = await service.signUp(
@@ -147,12 +129,12 @@ describe("AuthService", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toContain("Unique constraint");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        expect(result.code).toBe(ServiceErrorCode.CONFLICT);
       }
     });
 
     it("should handle password hashing errors", async () => {
-      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
+      mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockRejectedValue(new Error("Hashing failed"));
 
       const result = await service.signUp(signUpInputFixture);
@@ -167,13 +149,10 @@ describe("AuthService", () => {
     });
 
     it("should handle database errors during user creation", async () => {
-      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
+      mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
-      mockCreateUserWithCredentials.mockResolvedValue(
-        repositoryError(
-          RepositoryErrorCode.DATABASE_ERROR,
-          "Database connection failed"
-        )
+      mockCreateUserWithCredentials.mockRejectedValue(
+        new Error("Database connection failed")
       );
 
       const result = await service.signUp(signUpInputFixture);
@@ -186,10 +165,10 @@ describe("AuthService", () => {
     });
 
     it("should handle case when database returns user with null email", async () => {
-      mockFindUserByEmail.mockResolvedValue(repositorySuccess(null));
+      mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
       mockCreateUserWithCredentials.mockResolvedValue(
-        repositorySuccess(createdUserWithNullEmailFixture)
+        createdUserWithNullEmailFixture
       );
 
       const result = await service.signUp(signUpInputFixture);

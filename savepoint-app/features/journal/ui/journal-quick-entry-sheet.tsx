@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Drawer } from "vaul";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
@@ -76,6 +76,8 @@ export function JournalQuickEntrySheet({
   const [selectedGame, setSelectedGame] = useState<SelectedGame | null>(null);
   const [isLoadingGame, setIsLoadingGame] = useState(false);
   const [showGameSelector, setShowGameSelector] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const isDirtyRef = useRef(false);
 
   useEffect(() => {
     if (isOpen && !selectedGame) {
@@ -130,18 +132,33 @@ export function JournalQuickEntrySheet({
   };
 
   const handleSuccess = () => {
+    isDirtyRef.current = false;
     onClose();
     setSelectedGame(null);
     setShowGameSelector(false);
   };
 
-  const handleClose = () => {
+  const forceClose = useCallback(() => {
+    isDirtyRef.current = false;
+    setShowDiscardConfirm(false);
     onClose();
     setTimeout(() => {
       setSelectedGame(null);
       setShowGameSelector(false);
     }, 200);
-  };
+  }, [onClose]);
+
+  const handleClose = useCallback(() => {
+    if (isDirtyRef.current) {
+      setShowDiscardConfirm(true);
+      return;
+    }
+    forceClose();
+  }, [forceClose]);
+
+  const handleDirtyChange = useCallback((dirty: boolean) => {
+    isDirtyRef.current = dirty;
+  }, []);
 
   const renderContent = () => {
     if (isLoadingGame) {
@@ -171,10 +188,32 @@ export function JournalQuickEntrySheet({
           gameId={selectedGame.id}
           onSuccess={handleSuccess}
           onCancel={handleClose}
+          onDirtyChange={handleDirtyChange}
         />
       </>
     );
   };
+
+  const discardConfirmOverlay = showDiscardConfirm && (
+    <div className="bg-background/95 gap-lg p-lg absolute inset-0 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
+      <p className="text-center font-medium">Discard unsaved entry?</p>
+      <p className="text-muted-foreground text-center text-sm">
+        Your journal entry hasn&apos;t been saved yet.
+      </p>
+      <div className="gap-md flex">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowDiscardConfirm(false)}
+        >
+          Keep editing
+        </Button>
+        <Button variant="destructive" size="sm" onClick={forceClose}>
+          Discard
+        </Button>
+      </div>
+    </div>
+  );
 
   if (isMobile) {
     return (
@@ -204,14 +243,17 @@ export function JournalQuickEntrySheet({
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="h-8 w-8 shrink-0"
+                className="h-10 w-10 shrink-0"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="p-lg flex-1 overflow-y-auto">{renderContent()}</div>
+            <div className="p-lg relative flex-1 overflow-y-auto">
+              {renderContent()}
+              {discardConfirmOverlay}
+            </div>
           </Drawer.Content>
         </Drawer.Portal>
       </Drawer.Root>
@@ -220,7 +262,7 @@ export function JournalQuickEntrySheet({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="relative sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
             Quick Journal Entry
@@ -229,6 +271,7 @@ export function JournalQuickEntrySheet({
         </DialogHeader>
 
         {renderContent()}
+        {discardConfirmOverlay}
       </DialogContent>
     </Dialog>
   );

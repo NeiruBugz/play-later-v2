@@ -4,17 +4,17 @@ import { LibraryService } from "@/data-access-layer/services";
 
 import { createServerAction } from "@/shared/lib";
 
-import { GetRandomWantToPlaySchema } from "../schemas";
+import { GetRandomWishlistGameSchema } from "../schemas";
 
-export const getRandomWantToPlayAction = createServerAction({
-  actionName: "getRandomWantToPlayAction",
-  schema: GetRandomWantToPlaySchema,
+export const getRandomWishlistGameAction = createServerAction({
+  actionName: "getRandomWishlistGameAction",
+  schema: GetRandomWishlistGameSchema,
   requireAuth: true,
   handler: async ({ userId, logger }) => {
-    logger.info({ userId }, "Fetching random want-to-play game");
+    logger.info({ userId }, "Fetching random wishlist game");
 
     const service = new LibraryService();
-    const result = await service.getRandomWantToPlayGame({ userId: userId! });
+    const result = await service.getRandomWishlistGame({ userId: userId! });
 
     if (!result.success) {
       logger.error({ error: result.error, userId }, "Service call failed");
@@ -26,7 +26,7 @@ export const getRandomWantToPlayAction = createServerAction({
 
     logger.info(
       { userId, hasGame: result.data !== null },
-      "Random want-to-play game action completed"
+      "Random wishlist game action completed"
     );
 
     return {
