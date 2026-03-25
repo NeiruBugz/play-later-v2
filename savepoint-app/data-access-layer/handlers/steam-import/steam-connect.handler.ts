@@ -1,7 +1,7 @@
 import { SteamService } from "@/data-access-layer/services/steam/steam-service";
 import { ServiceErrorCode } from "@/data-access-layer/services/types";
 
-import { connectSteamSchema } from "@/features/steam-import/schemas";
+import { connectSteamSchema } from "./schemas";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,

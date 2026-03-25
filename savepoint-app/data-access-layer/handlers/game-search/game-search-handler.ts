@@ -1,7 +1,7 @@
 import { isSuccessResult } from "@/data-access-layer/services";
 import { IgdbService } from "@/data-access-layer/services/igdb";
 
-import { SearchGamesSchema } from "@/features/game-search/schemas";
+import { SearchGamesSchema } from "./schemas";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,

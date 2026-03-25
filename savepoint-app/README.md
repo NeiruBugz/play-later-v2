@@ -85,18 +85,26 @@ But I'm a Software Engineer, so I can build my own tool to cover all my needs fo
 - **[Playwright](https://playwright.dev/)** - End-to-end testing
 - **[ESLint](https://eslint.org/)** - Code linting
 - **[Prettier](https://prettier.io/)** - Code formatting
-- **[Bun](https://bun.sh/)** - Package manager and runtime
+- **[pnpm](https://pnpm.io/)** - Package manager
 
 ## 📁 Project Structure
 
 ```
 ├── app/                    # Next.js App Router pages
 ├── features/              # Feature-specific code (components, server actions, types)
-│   ├── add-game/          # Game addition functionality
+│   ├── auth/              # Authentication flows
+│   ├── browse-related-games/ # Related/franchise games
 │   ├── dashboard/         # User dashboard
-│   ├── steam-integration/ # Steam API integration
-│   ├── view-collection/   # Collection management
-│   └── ...
+│   ├── game-detail/       # Game detail page
+│   ├── game-search/       # Game search interface
+│   ├── journal/           # Gaming journal entries
+│   ├── library/           # Library views and filtering
+│   ├── manage-library-entry/ # Library entry CRUD
+│   ├── onboarding/        # User onboarding
+│   ├── profile/           # User profile
+│   ├── setup-profile/     # Initial profile setup
+│   ├── steam-import/      # Steam library import
+│   └── whats-new/         # What's new page
 ├── shared/               # Shared utilities and components
 │   ├── components/       # Reusable UI components
 │   ├── lib/             # Shared utilities and repositories
@@ -110,7 +118,7 @@ But I'm a Software Engineer, so I can build my own tool to cover all my needs fo
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) (recommended) or Node.js 18+
+- [pnpm](https://pnpm.io/) and Node.js 20+
 - PostgreSQL database
 - Steam API key (optional, for Steam integration)
 - IGDB API credentials

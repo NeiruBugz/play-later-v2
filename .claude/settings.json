@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|Glob|Grep|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/check-sensitive-files.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "playwright@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "awos-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "provectus/awos"
+      }
+    }
+  }
+}

@@ -1,12 +1,9 @@
 import { z } from "zod";
 
-// Steam ID validation (17-digit Steam ID64 or custom URL)
-export const steamIdSchema = z.string().min(1, "Steam ID is required");
-
-// Connect Steam request
-export const connectSteamSchema = z.object({
-  steamId: steamIdSchema,
-});
+export {
+  connectSteamSchema,
+  type ConnectSteamInput,
+} from "@/data-access-layer/handlers/steam-import/schemas";
 
 // Imported games query params
 export const importedGamesQuerySchema = z.object({
@@ -42,11 +39,12 @@ export const importedGamesQuerySchema = z.object({
 // Import to library action
 export const ImportToLibrarySchema = z.object({
   importedGameId: z.string().cuid(),
-  status: z.enum(["want_to_play", "owned", "playing", "played"]).optional(),
+  status: z
+    .enum(["wishlist", "shelf", "up_next", "playing", "played"])
+    .optional(),
   manualIgdbId: z.number().int().positive().optional(),
 });
 
 // Type inference helpers
-export type ConnectSteamInput = z.infer<typeof connectSteamSchema>;
 export type ImportedGamesQuery = z.infer<typeof importedGamesQuerySchema>;
 export type ImportToLibraryInput = z.infer<typeof ImportToLibrarySchema>;

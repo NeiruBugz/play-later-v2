@@ -8,7 +8,7 @@
 
 **Tech Stack:** Prisma + PostgreSQL (Neon), Next.js 15, React 19, TanStack Query, Zod, Vitest, shadcn/ui, Tailwind CSS 4
 
-**Spec:** `docs/superpowers/specs/2026-03-19-library-status-redesign-design.md`
+**Spec:** `context/spec/005-library-status-redesign/functional-spec.md`
 
 ---
 
