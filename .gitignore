@@ -90,3 +90,4 @@ override.tf.json
 
 # Worktrees
 .worktrees/
+.claude/worktrees/
