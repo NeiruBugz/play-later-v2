@@ -2,89 +2,76 @@
 
 ## P0 — Fix Immediately
 
-### 1. Add browser MCP for UI verification
-
-- **Dimension:** AI Development Tooling
-- **Check:** AI-07
-- **Effort:** Low
-- **Details:** Add Playwright MCP server to `.mcp.json`. The primary application is a Next.js web UI — without a browser MCP, the agent cannot visually verify any UI changes. Install `@anthropic/mcp-playwright` or equivalent and configure in `.mcp.json`.
-
-### 2. Add AI agent security hooks
-
-- **Dimension:** Security Guardrails
-- **Check:** SEC-02
-- **Effort:** Low
-- **Details:** Add `PreToolUse` hooks in `.claude/settings.json` to block `Read`, `Glob`, and `Bash` access to sensitive file patterns: `.env`, `.env.local`, `.env.production`, `*.pem`, `*.key`, `credentials*`, `secrets*`, `*.p12`, `*.pfx`. Example hook structure:
-  ```json
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Read|Glob|Bash",
-        "command": "check-sensitive-patterns.sh"
-      }
-    ]
-  }
-  ```
-
-## P1 — Fix Soon
-
-### 3. Trim CLAUDE.md files to <200 lines
-
-- **Dimension:** AI Development Tooling
-- **Check:** AI-06
-- **Effort:** Medium
-- **Details:** 5 of 9 CLAUDE.md files exceed 200 lines (up to 345). The root copy is 899 lines. Remove: directory tree listings, code template examples, tutorial-style prose, architecture diagrams duplicated across files. Apply the key test: "Would removing this line cause Claude to make mistakes?" If not, cut it.
-
-### 4. Add CLAUDE.md for lambdas-py/ and infra/
+### 1. Create root CLAUDE.md
 
 - **Dimension:** AI Development Tooling
 - **Check:** AI-01
 - **Effort:** Low
-- **Details:** lambdas-py/ and infra/ have zero AI context files. Create CLAUDE.md for each with: project purpose, key commands (build, test, deploy), non-obvious conventions, and gotchas. Keep under 200 lines each.
+- **Details:** No root CLAUDE.md exists. Create one with: project purpose ("SavePoint is a game library management app"), cross-service architecture overview (how savepoint-app, lambdas-py, and infra relate), key commands (build, test, lint, dev for each layer), git workflow, and CI notes. This is the single highest-impact fix — without it, AI agents have no top-level orientation.
 
-### 5. Use context/spec/ for all feature specs
+## P1 — Fix Soon
+
+### 2. Add dev server run instructions to CLAUDE.md
+
+- **Dimension:** AI Development Tooling
+- **Check:** AI-07
+- **Effort:** Low
+- **Details:** No CLAUDE.md file documents how to start the Next.js dev server (`pnpm dev`), required env vars, or database setup steps. Add these to root or savepoint-app CLAUDE.md so the agent can start and observe the application.
+
+### 3. Create specs for new features before implementation
 
 - **Dimension:** Spec-Driven Development
 - **Check:** SDD-04
 - **Effort:** Low
-- **Details:** The library-status-redesign spec was placed in `docs/superpowers/` outside the AWOS structure. Future feature specs should go in `context/spec/NNN-feature-name/` with the full triad (functional-spec.md, technical-considerations.md, tasks.md). Consider moving the existing spec.
+- **Details:** Only 50% of feature branches correlate with spec activity. Three recent features (auth migration, images, username-validation) were built without specs. Use `/awos:spec` for new features to reach the 70%+ target.
 
-### 6. Deliver cross-layer features in single branches
+### 4. Generate tasks.md for spec 005-library-status-redesign
+
+- **Dimension:** Spec-Driven Development
+- **Check:** SDD-05
+- **Effort:** Low
+- **Details:** `context/spec/005-library-status-redesign/` has functional-spec.md and technical-considerations.md but is missing tasks.md. Run `/awos:tasks` to complete the triad.
+
+### 5. Include cross-layer changes in feature branches
 
 - **Dimension:** End-to-End Delivery
 - **Check:** E2E-01
-- **Effort:** Medium
-- **Details:** Only ~20% of feature branches touch multiple service directories. When a feature requires changes across savepoint-app, lambdas-py, or infra, include all changes in a single feature branch rather than separate commits/branches per layer.
+- **Effort:** Low
+- **Details:** Only 15% of feature branches touch multiple service directories. When features require infrastructure or Lambda changes (e.g., new SQS queue, new Lambda handler, Terraform resource), include those changes in the same feature branch rather than separate commits on main.
 
 ## P2 — Improve When Possible
 
-### 7. Split igdb-service.unit.test.ts
+### 6. Fix repository bypass violations
 
 - **Dimension:** Code Architecture
-- **Check:** ARCH-06
+- **Check:** ARCH-02
 - **Effort:** Low
-- **Details:** `data-access-layer/services/igdb/igdb-service.unit.test.ts` is 3260 lines — exceeds the 2000-line absolute limit. Split into focused test suites by method or concern (e.g., `igdb-search.unit.test.ts`, `igdb-game-detail.unit.test.ts`).
+- **Details:** Three files import directly from `@/data-access-layer/repository` bypassing the service layer: `features/steam-import/use-cases/import-game-to-library.ts`, `features/journal/server-actions/get-games-by-ids.ts`, and `app/(protected)/journal/page.tsx`. Route these through DAL services as documented in the DAL CLAUDE.md.
 
-### 8. Fix stale README claims
+### 7. Clean up CLAUDE.md files
 
-- **Dimension:** Documentation Quality
-- **Check:** DOC-04
+- **Dimension:** AI Development Tooling
+- **Check:** AI-06
 - **Effort:** Low
-- **Details:** Three inaccurate claims found:
-  - Root README says "two top-level modules" — add lambdas-py
-  - savepoint-app README lists nonexistent feature dirs (add-game/, steam-integration/, view-collection/) — update to actual dirs
-  - savepoint-app README references Bun — replace with pnpm
+- **Details:** Remove directory tree listings in `app/CLAUDE.md` (lines 15-33) and `data-access-layer/CLAUDE.md` (lines 39-71). Remove template/tutorial code from handler and service CLAUDE.md files. Deduplicate import rules between DAL parent and sub-layer files.
 
-### 9. Fix architectural boundary violations
-
-- **Dimension:** Code Architecture
-- **Check:** ARCH-02, ARCH-04
-- **Effort:** Medium
-- **Details:** (a) DAL handlers import from features layer (reverse dependency) — move shared schemas/use-cases to DAL or shared layer. (b) 5 steam-import files import `@prisma/client` types directly — use domain types instead. (c) 2 use-cases bypass service layer to access repository — route through services.
-
-### 10. Add *.key to .gitignore
+### 8. Expand .gitignore coverage
 
 - **Dimension:** Security Guardrails
 - **Check:** SEC-05
 - **Effort:** Low
-- **Details:** Add `*.key` glob pattern to the root `.gitignore` file. Currently `*.pem` is covered but `*.key` (TLS private keys) is not.
+- **Details:** Add `*.p12`, `*.pfx`, `credentials*`, `secrets*` patterns to .gitignore. These are currently covered by AI agent hooks but not by git itself.
+
+### 9. Fix stale documentation
+
+- **Dimension:** Documentation Quality
+- **Checks:** DOC-02, DOC-04
+- **Effort:** Low
+- **Details:** Remove dead link to `./documentation/` at line 492 of `savepoint-app/README.md`. Add a brief README.md to `scripts/` describing the shell utilities.
+
+### 10. Add root-level cross-layer tooling
+
+- **Dimension:** End-to-End Delivery
+- **Check:** E2E-05
+- **Effort:** Medium
+- **Details:** Create a root `Makefile` or `Taskfile` with unified commands: `dev` (start all layers), `test` (run all test suites), `lint` (lint all layers). Extend `pr-checks.yml` to also validate lambdas-py (ruff, mypy, pytest). Consider adding lambdas-py and infra to pnpm-workspace or using a polyglot task runner.

@@ -1,20 +1,18 @@
-# Code Architecture Audit
+# Code Architecture — Audit Results
 
 **Date:** 2026-03-25
-**Dimension:** code-architecture
-**Score:** 66.7 / 100
-**Grade:** C
+**Score:** 80% — Grade **B**
 
 ## Results
 
 | # | Check | Severity | Status | Evidence |
 |---|-------|----------|--------|----------|
-| ARCH-01 | Declared or recognizable architectural pattern | high | PASS | Feature-Sliced Design (features/) + layered DAL (handlers/services/repository/domain) explicitly documented in CLAUDE.md files across savepoint-app/features/, savepoint-app/data-access-layer/, savepoint-app/shared/, and savepoint-app/app/. lambdas-py uses handlers/services/models/clients layered pattern. |
-| ARCH-02 | Module boundaries are respected | high | WARN | 2 violations: (1) `game-search` imports from `manage-library-entry` without being listed as an authorized consumer in features/CLAUDE.md. (2) DAL handlers import from features layer (reverse dependency): `handlers/game-search/game-search-handler.ts` imports `features/game-search/schemas`, `handlers/platform/get-platforms-handler.ts` imports `features/manage-library-entry/use-cases`. DAL should not depend on features. |
-| ARCH-03 | Single Responsibility Principle in modules | medium | PASS | All 13 feature modules have clear, descriptive domain names. `manage-library-entry` (55 files) and `steam-import` (47 files) are the largest but maintain focused subdirectories (ui/, server-actions/, use-cases/, hooks/). `test/helpers` and `test/utils` are acceptable for test infrastructure. No god modules detected. |
-| ARCH-04 | Separation of concerns across layers | high | WARN | Mostly well-separated via DAL layers + features. 2 issues: (1) 5 files in `features/steam-import/` import `@prisma/client` types directly, leaking persistence model into feature layer. (2) 2 use-cases bypass services to access repository directly: `features/manage-library-entry/use-cases/get-platforms-for-library-modal.ts` and `features/steam-import/use-cases/import-game-to-library.ts` both import from `@/data-access-layer/repository`. |
-| ARCH-05 | Consistent file and directory naming conventions | medium | PASS | Consistent kebab-case for all TS/TSX files and directories. No PascalCase filenames found. Python layer uses snake_case consistently. Test files use `.test.ts`/`.test.tsx` or `.unit.test.ts`/`.integration.test.ts` suffixes consistently. Type files use `.types.ts` suffix. |
-| ARCH-06 | Reasonable file sizes | medium | FAIL | 25 of 600 source files (4.2%) exceed 500 lines -- under the 5% threshold. However, `data-access-layer/services/igdb/igdb-service.unit.test.ts` is 3260 lines, exceeding the 2000-line absolute limit. Other large files: `igdb-service.ts` (1389), `library-repository.ts` (921), `imported-games-list.tsx` (683). |
+| ARCH-01 | Declared or recognizable architectural pattern | high | PASS | Architecture explicitly documented in per-layer CLAUDE.md files. savepoint-app uses FSD-like pattern (app/, features/, shared/) with a layered Data Access Layer (handlers/services/repository/domain). lambdas-py uses handlers/clients/services/models layered pattern. infra uses standard Terraform modules/envs layout. |
+| ARCH-02 | Module boundaries are respected | high | WARN | Import direction is generally correct (app -> features -> shared; features -> DAL services). 2 violations found: (1) features/steam-import and features/journal import directly from `@/data-access-layer/repository` bypassing services (documented as prohibited). (2) app/(protected)/journal/page.tsx and app/(protected)/journal/[id]/page.tsx import directly from `@/data-access-layer/repository` (CLAUDE.md says "Never direct" repository access from app). Cross-feature imports (game-search -> manage-library-entry, game-detail -> journal, dashboard -> library) are documented in features/CLAUDE.md exception table. shared/ has zero upward imports. |
+| ARCH-03 | Single Responsibility Principle in modules | medium | PASS | All 14 feature directories have clear, domain-specific names (auth, library, journal, game-detail, steam-import, etc.). Each feature internally organizes into ui/, hooks/, server-actions/, use-cases/. DAL subdivides cleanly by domain (game, library, journal, platform, user). No god modules; largest feature (steam-import) stays focused on Steam import workflow. No catch-all helpers/ or misc/ directories. |
+| ARCH-04 | Separation of concerns across layers | high | PASS | Clear separation: UI components in features/*/ui/ contain no data access; server actions use next-safe-action; business logic lives in DAL services; data access is isolated in DAL repository. Sampled 8 UI files -- none contain fetch calls, SQL, or direct prisma usage. app/ pages delegate to features and services. journal/page.tsx mixes a minor data-join concern but uses service + repository, not raw DB calls. |
+| ARCH-05 | Consistent file and directory naming conventions | medium | PASS | TypeScript layer: consistent kebab-case for all files and directories (library-card.tsx, use-library-data.ts, game-detail/). Type files use .types.ts suffix. Test files use .test.ts/.unit.test.ts/.integration.test.ts consistently. Python layer: consistent snake_case (database_import.py, igdb_enrichment.py). Terraform: standard main.tf/variables.tf/outputs.tf per module. No PascalCase source files found outside generated Prisma models. |
+| ARCH-06 | Reasonable file sizes | medium | PASS | Excluding generated Prisma models, 6 of ~485 source files exceed 500 lines (1.2%): igdb-service.ts (1271), database.py (769), library-repository.ts (697), database_import.py (696), imported-games-list.tsx (683), db.py (526). No non-generated source file exceeds 2000 lines. Well under the 5% threshold. |
 
 ## Scoring
 
@@ -23,23 +21,19 @@
 | ARCH-01 | high | 2 | PASS | 0 |
 | ARCH-02 | high | 2 | WARN | 1 |
 | ARCH-03 | medium | 1 | PASS | 0 |
-| ARCH-04 | high | 2 | WARN | 1 |
+| ARCH-04 | high | 2 | PASS | 0 |
 | ARCH-05 | medium | 1 | PASS | 0 |
-| ARCH-06 | medium | 1 | FAIL | 1 |
+| ARCH-06 | medium | 1 | PASS | 0 |
 
 **Max points:** 9
-**Deductions:** 3
-**Score:** (9 - 3) / 9 * 100 = 66.7
-**Grade:** C
+**Deductions:** 1
+**Score:** (9 - 1) / 9 * 100 = 88.9 -> 89%
+**Grade:** B
 
 ## Summary
 
-The project has a well-documented, explicitly declared architecture combining Feature-Sliced Design with a layered Data Access Layer. Documentation is thorough with CLAUDE.md files at each architectural boundary defining import rules, responsibilities, and cross-feature exceptions.
+The project has a well-documented, explicitly declared architecture combining a Feature-Sliced Design variant with a layered Data Access Layer. Each architectural boundary has its own CLAUDE.md file defining responsibilities, import rules, and allowed cross-feature exceptions.
 
-Three areas need attention:
+One area needs attention:
 
-1. **Boundary violations:** DAL handlers importing from the features layer creates a reverse dependency (features should depend on DAL, not vice versa). The `game-search` feature imports from `manage-library-entry` without being documented as an authorized consumer.
-
-2. **Layer leakage:** Some feature use-cases bypass the service layer to access repositories directly, and `steam-import` imports `@prisma/client` types, coupling feature code to the persistence model.
-
-3. **File size:** One test file (`igdb-service.unit.test.ts` at 3260 lines) exceeds the 2000-line limit and should be split into focused test suites.
+1. **Repository bypass violations:** Three files (features/steam-import/use-cases/import-game-to-library.ts, features/journal/server-actions/get-games-by-ids.ts, and app/(protected)/journal/page.tsx) import directly from `@/data-access-layer/repository`, bypassing the service layer. The DAL CLAUDE.md explicitly prohibits this pattern -- repository access should go through services or use-cases that call services.

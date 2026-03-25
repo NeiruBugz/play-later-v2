@@ -6,313 +6,334 @@
   <title>Code Audit Report — 2026-03-25</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; color: #1a1a1a; line-height: 1.5; }
-    .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-    header { text-align: center; padding: 40px 0 24px; border-bottom: 2px solid #e5e7eb; margin-bottom: 32px; }
-    header h1 { font-size: 1.5rem; font-weight: 600; color: #374151; margin-bottom: 4px; }
-    header .date { color: #6b7280; font-size: 0.9rem; margin-bottom: 16px; }
-    .score-hero { display: flex; align-items: baseline; justify-content: center; gap: 12px; margin: 16px 0; }
-    .score-number { font-size: 4rem; font-weight: 700; color: #ea580c; }
-    .score-pct { font-size: 1.5rem; color: #6b7280; }
-    .grade-badge { display: inline-block; font-size: 2rem; font-weight: 700; width: 56px; height: 56px; line-height: 56px; text-align: center; border-radius: 12px; color: #fff; }
-    .grade-A { background: #22c55e; } .grade-B { background: #3b82f6; } .grade-C { background: #ea580c; } .grade-D { background: #ef4444; } .grade-F { background: #991b1b; }
-    .toolbar { position: sticky; top: 0; z-index: 10; background: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 8px 0; margin-bottom: 24px; text-align: center; }
-    .toolbar button { padding: 6px 16px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; cursor: pointer; font-size: 0.85rem; color: #374151; transition: all 0.15s; }
-    .toolbar button:hover { background: #f3f4f6; }
-    .toolbar button.active { background: #1f2937; color: #fff; border-color: #1f2937; }
-    h2 { font-size: 1.25rem; font-weight: 600; margin: 32px 0 16px; color: #111827; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 24px; }
-    th { background: #f9fafb; text-align: left; padding: 8px 10px; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; white-space: nowrap; }
-    td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
-    tbody tr:nth-child(even) { background: #fafafa; }
-    .summary-row-D td, .summary-row-F td { background: #fef2f2; }
-    .status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
-    .status-PASS { background: #dcfce7; color: #166534; }
-    .status-WARN { background: #fef9c3; color: #854d0e; }
-    .status-FAIL { background: #fee2e2; color: #991b1b; }
-    .status-SKIP { background: #f3f4f6; color: #6b7280; }
-    .severity { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px;
+      background: #fff;
+      color: #1a1a1a;
+      line-height: 1.5;
+    }
+    header {
+      text-align: center;
+      padding: 32px 0 24px;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 24px;
+    }
+    header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+    header .project { color: #6b7280; font-size: 0.95rem; }
+    header .date { color: #6b7280; font-size: 0.875rem; margin-top: 4px; }
+    .score-hero {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 8px;
+      margin: 16px 0 8px;
+    }
+    .score-number { font-size: 3.5rem; font-weight: 800; }
+    .score-grade { font-size: 2rem; font-weight: 700; padding: 4px 16px; border-radius: 8px; }
+    .grade-A { background: #dcfce7; color: #166534; }
+    .grade-B { background: #dbeafe; color: #1e40af; }
+    .grade-C { background: #ffedd5; color: #9a3412; }
+    .grade-D { background: #fee2e2; color: #991b1b; }
+    .grade-F { background: #fecaca; color: #7f1d1d; }
+    .delta-badge {
+      display: inline-block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 12px;
+      background: #dcfce7;
+      color: #166534;
+    }
+    .delta-negative { background: #fee2e2; color: #991b1b; }
+    .filter-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 8px 16px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .filter-bar button {
+      background: #1e40af;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .filter-bar button:hover { background: #1e3a8a; }
+    .filter-bar span { font-size: 0.8125rem; color: #6b7280; }
+    h2 { font-size: 1.25rem; font-weight: 700; margin: 28px 0 12px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      margin-bottom: 16px;
+    }
+    th {
+      text-align: left;
+      padding: 8px 10px;
+      background: #f9fafb;
+      border-bottom: 2px solid #e5e7eb;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+    }
+    td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
+    tr:nth-child(even) td { background: #fafafa; }
+    tr.row-D td, tr.row-F td { background: #fff5f5; }
+    .status-PASS { color: #22c55e; font-weight: 700; }
+    .status-WARN { color: #eab308; font-weight: 700; }
+    .status-FAIL { color: #ef4444; font-weight: 700; }
+    .status-SKIP { color: #9ca3af; font-weight: 700; }
+    .sev { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; }
     .sev-critical { background: #fee2e2; color: #991b1b; }
     .sev-high { background: #ffedd5; color: #9a3412; }
     .sev-medium { background: #fef9c3; color: #854d0e; }
     .sev-low { background: #f3f4f6; color: #6b7280; }
-    .priority { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 700; }
-    .pri-P0 { background: #fee2e2; color: #991b1b; }
-    .pri-P1 { background: #ffedd5; color: #9a3412; }
-    .pri-P2 { background: #fef9c3; color: #854d0e; }
-    details { margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-    summary { padding: 12px 16px; background: #f9fafb; cursor: pointer; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+    .pri { font-weight: 700; }
+    .pri-P0 { color: #ef4444; }
+    .pri-P1 { color: #f59e0b; }
+    .pri-P2 { color: #6b7280; }
+    details { margin-bottom: 8px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    summary {
+      padding: 12px 16px;
+      background: #f9fafb;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
     summary:hover { background: #f3f4f6; }
+    summary .dim-score { margin-left: auto; font-size: 0.8125rem; }
     details[open] summary { border-bottom: 1px solid #e5e7eb; }
-    details .detail-body { padding: 0; }
-    details table { margin: 0; }
-    .dim-score { margin-left: auto; font-size: 0.85rem; font-weight: 400; color: #6b7280; }
-    .evidence { max-width: 360px; font-size: 0.8rem; color: #4b5563; }
+    details .detail-body { padding: 12px 16px; }
     body.issues-only tr[data-status='PASS'],
     body.issues-only tr[data-status='SKIP'] { display: none; }
     @media print {
-      .toolbar { display: none; }
+      .filter-bar { display: none; }
       details { break-inside: avoid; }
       details[open] summary { border-bottom: 1px solid #e5e7eb; }
-      summary::marker { display: none; }
-      details { border: 1px solid #ccc; }
+      summary::marker { content: ""; }
     }
     @media (max-width: 640px) {
-      .score-number { font-size: 3rem; }
-      table { font-size: 0.78rem; }
-      td, th { padding: 6px 6px; }
-      .evidence { max-width: 200px; }
+      table { font-size: 0.75rem; }
+      th, td { padding: 6px 6px; }
+      .score-number { font-size: 2.5rem; }
     }
   </style>
 </head>
 <body>
-<div class="container">
+  <header>
+    <h1>Code Audit Report</h1>
+    <div class="project">play-later-v2</div>
+    <div class="date">2026-03-25</div>
+    <div class="score-hero">
+      <span class="score-number">77%</span>
+      <span class="score-grade grade-B">B</span>
+    </div>
+    <div class="delta-badge">+4 vs previous run</div>
+  </header>
 
-<header>
-  <h1>play-later-v2</h1>
-  <div class="date">Code Audit &mdash; 2026-03-25</div>
-  <div class="score-hero">
-    <span class="score-number">73</span><span class="score-pct">%</span>
-    <span class="grade-badge grade-C">C</span>
+  <div class="filter-bar">
+    <button id="filterBtn" onclick="toggleFilter()">Show issues only</button>
+    <span id="filterLabel">Showing all checks</span>
   </div>
-</header>
 
-<div class="toolbar">
-  <button id="filter-btn" onclick="toggleFilter()">Show issues only</button>
-</div>
+  <h2>Summary</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Dimension</th><th>Score</th><th>Grade</th><th>Delta</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Project Topology</td><td>100%</td><td><span class="score-grade grade-A" style="font-size:.75rem;padding:1px 8px;">A</span></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>2</td><td>Code Architecture</td><td>89%</td><td><span class="score-grade grade-B" style="font-size:.75rem;padding:1px 8px;">B</span></td><td>+22</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>3</td><td>Documentation Quality</td><td>75%</td><td><span class="score-grade grade-B" style="font-size:.75rem;padding:1px 8px;">B</span></td><td>-8</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+      <tr class="row-D"><td>4</td><td>AI Development Tooling</td><td>48%</td><td><span class="score-grade grade-D" style="font-size:.75rem;padding:1px 8px;">D</span></td><td>+15</td><td>2</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>5</td><td>Security Guardrails</td><td>69%</td><td><span class="score-grade grade-C" style="font-size:.75rem;padding:1px 8px;">C</span></td><td>0</td><td>2</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>6</td><td>Software Best Practices</td><td>100%</td><td><span class="score-grade grade-A" style="font-size:.75rem;padding:1px 8px;">A</span></td><td>+4</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>7</td><td>Spec-Driven Development</td><td>82%</td><td><span class="score-grade grade-B" style="font-size:.75rem;padding:1px 8px;">B</span></td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr class="row-D"><td>8</td><td>End-to-End Delivery</td><td>50%</td><td><span class="score-grade grade-D" style="font-size:.75rem;padding:1px 8px;">D</span></td><td>0</td><td>0</td><td>2</td><td>1</td><td>0</td></tr>
+    </tbody>
+  </table>
 
-<h2>Summary</h2>
-<table>
-  <thead>
-    <tr><th>#</th><th>Dimension</th><th>Score</th><th>Grade</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>1</td><td>Project Topology</td><td>100%</td><td><span class="grade-badge grade-A" style="font-size:0.75rem;width:28px;height:28px;line-height:28px;border-radius:6px;">A</span></td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-    <tr class="summary-row-F"><td>2</td><td>AI Development Tooling</td><td>33%</td><td><span class="grade-badge grade-F" style="font-size:0.75rem;width:28px;height:28px;line-height:28px;border-radius:6px;">F</span></td><td>2</td><td>1</td><td>0</td><td>1</td></tr>
-    <tr><td>3</td><td>Code Architecture</td><td>67%</td><td><span class="grade-badge grade-C" style="font-size:0.75rem;width:28px;height:28px;line-height:28px;border-radius:6px;">C</span></td><td>0</td><td>2</td><td>1</td><td>0</td></tr>
-    <tr><td>4</td><td>Documentation Quality</td><td>83%</td><td><span class="grade-badge grade-B" style="font-size:0.75rem;width:28px;height:28px;line-height:28px;border-radius:6px;">B</span></td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
-    <tr><td>5</td><td>Security Guardrails</td><td>69%</td><td><span class="grade-badge grade-C" style="font-size:0.75rem;width:28px;height:28px;line-height:28px;border-radius:6px;">C</span></td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
-    <tr><td>6</td><td>Software Best Practices</td><td>96%</td><td><span class="grade-badge grade-A" style="font-size:0.75rem;width:28px;height:28px;line-height:28px;border-radius:6px;">A</span></td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
-    <tr><td>7</td><td>Spec-Driven Development</td><td>82%</td><td><span class="grade-badge grade-B" style="font-size:0.75rem;width:28px;height:28px;line-height:28px;border-radius:6px;">B</span></td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
-    <tr class="summary-row-D"><td>8</td><td>End-to-End Delivery</td><td>50%</td><td><span class="grade-badge grade-D" style="font-size:0.75rem;width:28px;height:28px;line-height:28px;border-radius:6px;">D</span></td><td>0</td><td>2</td><td>1</td><td>0</td></tr>
-  </tbody>
-</table>
+  <h2>Dimension Details</h2>
 
-<h2>Dimension Details</h2>
+  <details>
+    <summary>Project Topology <span class="dim-score"><span class="score-grade grade-A" style="font-size:.75rem;padding:1px 8px;">A</span> 100%</span></summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>TOPO-01</td><td>Repository structure type</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Monorepo via pnpm workspaces; 2 build roots: savepoint-app, lambdas-py</td></tr>
+          <tr data-status="PASS"><td>TOPO-02</td><td>Application layer inventory</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>4 layers: Next.js web app, Python Lambda workers, Terraform IaC, shell scripts</td></tr>
+          <tr data-status="PASS"><td>TOPO-03</td><td>Database and storage detection</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>PostgreSQL 16.6 (Prisma + SQLAlchemy), AWS S3, LocalStack</td></tr>
+          <tr data-status="PASS"><td>TOPO-04</td><td>Infrastructure layer detection</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Terraform (29 .tf files, 7 modules, 2 envs), docker-compose</td></tr>
+          <tr data-status="PASS"><td>TOPO-05</td><td>Language inventory</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>TypeScript/JS (593), SQL (46), Python (38), HCL (29)</td></tr>
+          <tr data-status="PASS"><td>TOPO-06</td><td>Inter-layer communication</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>AWS SQS, S3 CSV exchange, shared PostgreSQL</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<!-- Project Topology -->
-<details>
-  <summary>
-    <span class="grade-badge grade-A" style="font-size:0.65rem;width:24px;height:24px;line-height:24px;border-radius:5px;">A</span>
-    Project Topology
-    <span class="dim-score">100%</span>
-  </summary>
-  <div class="detail-body">
-    <table>
-      <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
-      <tbody>
-        <tr data-status="PASS"><td>1</td><td>Repository structure type</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">Monorepo via pnpm workspaces; 3 roots: savepoint-app, lambdas-py, infra</td></tr>
-        <tr data-status="PASS"><td>2</td><td>Application layer inventory</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">3 layers: Next.js web app, Python Lambdas, Terraform IaC</td></tr>
-        <tr data-status="PASS"><td>3</td><td>Database and storage detection</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">PostgreSQL 16.6 (Prisma), AWS S3, LocalStack</td></tr>
-        <tr data-status="PASS"><td>4</td><td>Infrastructure layer detection</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">Terraform (29 .tf files, 7 modules, 2 envs), docker-compose</td></tr>
-        <tr data-status="PASS"><td>5</td><td>Language inventory</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">TypeScript (602), SQL (46), Python (38), HCL (29), JS (6), CSS (1)</td></tr>
-        <tr data-status="PASS"><td>6</td><td>Inter-layer communication</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">AWS SQS (app&rarr;Lambda), AWS S3 (shared storage)</td></tr>
-      </tbody>
-    </table>
-  </div>
-</details>
+  <details>
+    <summary>Code Architecture <span class="dim-score"><span class="score-grade grade-B" style="font-size:.75rem;padding:1px 8px;">B</span> 89%</span></summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>ARCH-01</td><td>Declared architectural pattern</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>FSD + layered DAL explicitly documented per layer</td></tr>
+          <tr data-status="WARN"><td>ARCH-02</td><td>Module boundaries respected</td><td><span class="sev sev-high">high</span></td><td class="status-WARN">WARN</td><td>3 files bypass service layer importing directly from repository</td></tr>
+          <tr data-status="PASS"><td>ARCH-03</td><td>Single Responsibility</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>All 14 feature modules focused with descriptive names</td></tr>
+          <tr data-status="PASS"><td>ARCH-04</td><td>Separation of concerns</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Clear separation; UI contains no data access logic</td></tr>
+          <tr data-status="PASS"><td>ARCH-05</td><td>Consistent naming</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Consistent kebab-case (TS) and snake_case (Python)</td></tr>
+          <tr data-status="PASS"><td>ARCH-06</td><td>Reasonable file sizes</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>1.2% of files exceed 500 lines; none exceed 2000</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<!-- AI Development Tooling -->
-<details>
-  <summary>
-    <span class="grade-badge grade-F" style="font-size:0.65rem;width:24px;height:24px;line-height:24px;border-radius:5px;">F</span>
-    AI Development Tooling
-    <span class="dim-score">33%</span>
-  </summary>
-  <div class="detail-body">
-    <table>
-      <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
-      <tbody>
-        <tr data-status="WARN"><td>1</td><td>CLAUDE.md ecosystem context</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">savepoint-app well-covered (9 module files); lambdas-py/ and infra/ have zero AI context; root CLAUDE.md deleted on working tree</td></tr>
-        <tr data-status="PASS"><td>2</td><td>Custom slash commands</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">9 AWOS commands in .claude/commands/awos/</td></tr>
-        <tr data-status="PASS"><td>3</td><td>Skills configured</td><td><span class="severity sev-low">low</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">3 skills: frontend-design, react-best-practices, react-feature-sliced-design</td></tr>
-        <tr data-status="PASS"><td>4</td><td>MCP servers configured</td><td><span class="severity sev-low">low</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">1 server in .mcp.json (awos-recruitment)</td></tr>
-        <tr data-status="FAIL"><td>5</td><td>Hooks configured</td><td><span class="severity sev-low">low</span></td><td><span class="status status-FAIL">FAIL</span></td><td class="evidence">No hooks in .claude/settings.json</td></tr>
-        <tr data-status="FAIL"><td>6</td><td>CLAUDE.md quality</td><td><span class="severity sev-high">high</span></td><td><span class="status status-FAIL">FAIL</span></td><td class="evidence">5/9 files exceed 200 lines (up to 345); extensive directory trees, code templates, tutorial prose; root copy is 899 lines</td></tr>
-        <tr data-status="FAIL"><td>7</td><td>Agent can run and observe app</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-FAIL">FAIL</span></td><td class="evidence">No browser MCP for Next.js UI; no local invoke for Lambda; no plan/diff MCP for Terraform</td></tr>
-      </tbody>
-    </table>
-  </div>
-</details>
+  <details>
+    <summary>Documentation Quality <span class="dim-score"><span class="score-grade grade-B" style="font-size:.75rem;padding:1px 8px;">B</span> 75%</span></summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>DOC-01</td><td>Root README useful</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>Setup instructions present (pnpm install, pnpm dev)</td></tr>
+          <tr data-status="WARN"><td>DOC-02</td><td>Service-level READMEs</td><td><span class="sev sev-high">high</span></td><td class="status-WARN">WARN</td><td>3/4 service dirs have READMEs; scripts/ missing</td></tr>
+          <tr data-status="SKIP"><td>DOC-03</td><td>API documentation</td><td><span class="sev sev-high">high</span></td><td class="status-SKIP">SKIP</td><td>Small internal API with co-located client</td></tr>
+          <tr data-status="WARN"><td>DOC-04</td><td>No stale documentation</td><td><span class="sev sev-medium">medium</span></td><td class="status-WARN">WARN</td><td>Dead link to ./documentation/ in savepoint-app/README.md</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<!-- Code Architecture -->
-<details>
-  <summary>
-    <span class="grade-badge grade-C" style="font-size:0.65rem;width:24px;height:24px;line-height:24px;border-radius:5px;">C</span>
-    Code Architecture
-    <span class="dim-score">67%</span>
-  </summary>
-  <div class="detail-body">
-    <table>
-      <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
-      <tbody>
-        <tr data-status="PASS"><td>1</td><td>Declared architectural pattern</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">FSD + layered DAL explicitly documented</td></tr>
-        <tr data-status="WARN"><td>2</td><td>Module boundaries respected</td><td><span class="severity sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">DAL handlers import from features layer (reverse dep); game-search imports manage-library-entry undocumented</td></tr>
-        <tr data-status="PASS"><td>3</td><td>Single Responsibility</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">All 13 feature modules focused with descriptive names</td></tr>
-        <tr data-status="WARN"><td>4</td><td>Separation of concerns</td><td><span class="severity sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">5 steam-import files import @prisma/client directly; 2 use-cases bypass service layer</td></tr>
-        <tr data-status="PASS"><td>5</td><td>Consistent naming</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">Consistent kebab-case (TS) and snake_case (Python)</td></tr>
-        <tr data-status="FAIL"><td>6</td><td>Reasonable file sizes</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-FAIL">FAIL</span></td><td class="evidence">igdb-service.unit.test.ts at 3260 lines exceeds 2000-line limit</td></tr>
-      </tbody>
-    </table>
-  </div>
-</details>
+  <details open>
+    <summary>AI Development Tooling <span class="dim-score"><span class="score-grade grade-D" style="font-size:.75rem;padding:1px 8px;">D</span> 48%</span></summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="FAIL"><td>AI-01</td><td>CLAUDE.md ecosystem context</td><td><span class="sev sev-critical">critical</span></td><td class="status-FAIL">FAIL</td><td>No root CLAUDE.md; no project purpose or cross-service context anywhere</td></tr>
+          <tr data-status="PASS"><td>AI-02</td><td>Custom slash commands</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>9 AWOS commands in .claude/commands/awos/</td></tr>
+          <tr data-status="PASS"><td>AI-03</td><td>Skills configured</td><td><span class="sev sev-low">low</span></td><td class="status-PASS">PASS</td><td>3 skills configured</td></tr>
+          <tr data-status="PASS"><td>AI-04</td><td>MCP servers configured</td><td><span class="sev sev-low">low</span></td><td class="status-PASS">PASS</td><td>awos-recruitment + Playwright plugin</td></tr>
+          <tr data-status="PASS"><td>AI-05</td><td>Hooks configured</td><td><span class="sev sev-low">low</span></td><td class="status-PASS">PASS</td><td>PreToolUse hook for sensitive file blocking</td></tr>
+          <tr data-status="WARN"><td>AI-06</td><td>CLAUDE.md quality</td><td><span class="sev sev-high">high</span></td><td class="status-WARN">WARN</td><td>Directory trees and code templates in some files; import rules duplicated</td></tr>
+          <tr data-status="WARN"><td>AI-07</td><td>Agent can run and observe app</td><td><span class="sev sev-critical">critical</span></td><td class="status-WARN">WARN</td><td>Playwright enabled but no dev server docs; Lambda lacks local invoke</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<!-- Documentation Quality -->
-<details>
-  <summary>
-    <span class="grade-badge grade-B" style="font-size:0.65rem;width:24px;height:24px;line-height:24px;border-radius:5px;">B</span>
-    Documentation Quality
-    <span class="dim-score">83%</span>
-  </summary>
-  <div class="detail-body">
-    <table>
-      <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
-      <tbody>
-        <tr data-status="PASS"><td>1</td><td>Root README useful</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">Setup instructions present (pnpm install, pnpm dev)</td></tr>
-        <tr data-status="PASS"><td>2</td><td>Service-level READMEs</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">All 3 service dirs have READMEs</td></tr>
-        <tr data-status="SKIP"><td>3</td><td>API documentation</td><td><span class="severity sev-high">high</span></td><td><span class="status status-SKIP">SKIP</span></td><td class="evidence">Small internal API with co-located client</td></tr>
-        <tr data-status="FAIL"><td>4</td><td>No stale documentation</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-FAIL">FAIL</span></td><td class="evidence">3/5 sampled claims inaccurate: missing lambdas-py, nonexistent feature dirs, Bun instead of pnpm</td></tr>
-      </tbody>
-    </table>
-  </div>
-</details>
+  <details>
+    <summary>Security Guardrails <span class="dim-score"><span class="score-grade grade-C" style="font-size:.75rem;padding:1px 8px;">C</span> 69%</span></summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="WARN"><td>SEC-01</td><td>.env files gitignored</td><td><span class="sev sev-critical">critical</span></td><td class="status-WARN">WARN</td><td>.env.test committed with localhost test credentials</td></tr>
+          <tr data-status="PASS"><td>SEC-02</td><td>AI agent hooks restrict sensitive files</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>PreToolUse hooks block .env, *.pem, *.key, credentials*, secrets*</td></tr>
+          <tr data-status="PASS"><td>SEC-03</td><td>.env.example exists</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Templates at root and both service dirs</td></tr>
+          <tr data-status="WARN"><td>SEC-04</td><td>No secrets in committed files</td><td><span class="sev sev-critical">critical</span></td><td class="status-WARN">WARN</td><td>Test fixtures only (TestPassword123!, postgres:postgres)</td></tr>
+          <tr data-status="WARN"><td>SEC-05</td><td>Sensitive files in .gitignore</td><td><span class="sev sev-high">high</span></td><td class="status-WARN">WARN</td><td>Missing *.p12, *.pfx, credentials*, secrets* patterns</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<!-- Security Guardrails -->
-<details>
-  <summary>
-    <span class="grade-badge grade-C" style="font-size:0.65rem;width:24px;height:24px;line-height:24px;border-radius:5px;">C</span>
-    Security Guardrails
-    <span class="dim-score">69%</span>
-  </summary>
-  <div class="detail-body">
-    <table>
-      <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
-      <tbody>
-        <tr data-status="PASS"><td>1</td><td>.env files gitignored</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">.env patterns in .gitignore; tracked files are examples/test only</td></tr>
-        <tr data-status="FAIL"><td>2</td><td>AI agent hooks restrict sensitive files</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-FAIL">FAIL</span></td><td class="evidence">No PreToolUse hooks blocking .env, *.pem, *.key access</td></tr>
-        <tr data-status="PASS"><td>3</td><td>.env.example exists</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">Templates at root and both service dirs with placeholders</td></tr>
-        <tr data-status="PASS"><td>4</td><td>No secrets in committed files</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">Only test fixtures found</td></tr>
-        <tr data-status="WARN"><td>5</td><td>Sensitive files in .gitignore</td><td><span class="severity sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">*.key pattern missing from all .gitignore files</td></tr>
-      </tbody>
-    </table>
-  </div>
-</details>
+  <details>
+    <summary>Software Best Practices <span class="dim-score"><span class="score-grade grade-A" style="font-size:.75rem;padding:1px 8px;">A</span> 100%</span></summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>SBP-01</td><td>Linting configured</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>ESLint + Ruff with CI enforcement</td></tr>
+          <tr data-status="PASS"><td>SBP-02</td><td>Formatting automated</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Prettier + lint-staged + Ruff; CI-enforced</td></tr>
+          <tr data-status="PASS"><td>SBP-03</td><td>Type safety enforced</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>strict: true in TypeScript and mypy</td></tr>
+          <tr data-status="PASS"><td>SBP-04</td><td>Test infrastructure</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>98+ test files across Vitest, Playwright, pytest</td></tr>
+          <tr data-status="PASS"><td>SBP-05</td><td>CI/CD pipeline</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>4 GitHub Actions workflows</td></tr>
+          <tr data-status="PASS"><td>SBP-06</td><td>Error handling consistent</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Result pattern; global handlers; structured logging</td></tr>
+          <tr data-status="PASS"><td>SBP-07</td><td>Dependencies managed</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Lock files + Dependabot weekly</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<!-- Software Best Practices -->
-<details>
-  <summary>
-    <span class="grade-badge grade-A" style="font-size:0.65rem;width:24px;height:24px;line-height:24px;border-radius:5px;">A</span>
-    Software Best Practices
-    <span class="dim-score">96%</span>
-  </summary>
-  <div class="detail-body">
-    <table>
-      <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
-      <tbody>
-        <tr data-status="PASS"><td>1</td><td>Linting configured</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">ESLint + ruff with CI enforcement</td></tr>
-        <tr data-status="PASS"><td>2</td><td>Formatting automated</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">Prettier + ruff with CI format-check</td></tr>
-        <tr data-status="PASS"><td>3</td><td>Type safety enforced</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">strict: true in both TS and Python (mypy)</td></tr>
-        <tr data-status="PASS"><td>4</td><td>Test infrastructure</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">107 test files (Vitest + Playwright + pytest)</td></tr>
-        <tr data-status="PASS"><td>5</td><td>CI/CD pipeline</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">4 GitHub Actions workflows covering lint, test, deploy</td></tr>
-        <tr data-status="PASS"><td>6</td><td>Error handling consistent</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">Result pattern throughout; global error handlers; pino logging</td></tr>
-        <tr data-status="WARN"><td>7</td><td>Dependencies managed</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">Lock files present; no Dependabot/Renovate configured</td></tr>
-      </tbody>
-    </table>
-  </div>
-</details>
+  <details>
+    <summary>Spec-Driven Development <span class="dim-score"><span class="score-grade grade-B" style="font-size:.75rem;padding:1px 8px;">B</span> 82%</span></summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>SDD-01</td><td>AWOS installed</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>9 commands, 9 wrappers, context dirs present</td></tr>
+          <tr data-status="PASS"><td>SDD-02</td><td>Product context complete</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>All 3 foundational docs substantive</td></tr>
+          <tr data-status="PASS"><td>SDD-03</td><td>Architecture reflects reality</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Core stack confirmed; no major drift</td></tr>
+          <tr data-status="WARN"><td>SDD-04</td><td>Features via specs</td><td><span class="sev sev-critical">critical</span></td><td class="status-WARN">WARN</td><td>50% of feature branches have spec correlation</td></tr>
+          <tr data-status="WARN"><td>SDD-05</td><td>Spec directories complete</td><td><span class="sev sev-high">high</span></td><td class="status-WARN">WARN</td><td>3/4 specs complete; 005 missing tasks.md</td></tr>
+          <tr data-status="PASS"><td>SDD-06</td><td>No stale specs</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>All specs show progress</td></tr>
+          <tr data-status="PASS"><td>SDD-07</td><td>Agent assignments</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>91% annotated with domain-appropriate agents</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<!-- Spec-Driven Development -->
-<details>
-  <summary>
-    <span class="grade-badge grade-B" style="font-size:0.65rem;width:24px;height:24px;line-height:24px;border-radius:5px;">B</span>
-    Spec-Driven Development
-    <span class="dim-score">82%</span>
-  </summary>
-  <div class="detail-body">
-    <table>
-      <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
-      <tbody>
-        <tr data-status="PASS"><td>1</td><td>AWOS installed</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">9 commands, 6 templates, context dirs present</td></tr>
-        <tr data-status="PASS"><td>2</td><td>Product context complete</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">product-definition, roadmap, architecture all substantive</td></tr>
-        <tr data-status="WARN"><td>3</td><td>Architecture reflects reality</td><td><span class="severity sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">DB schema section lists stale status values vs actual enums</td></tr>
-        <tr data-status="WARN"><td>4</td><td>Features via specs</td><td><span class="severity sev-critical">critical</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">2/4 features (50%) have specs in context/spec/; library-status-redesign in docs/superpowers/</td></tr>
-        <tr data-status="PASS"><td>5</td><td>Spec directories complete</td><td><span class="severity sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">2/2 specs have full triad</td></tr>
-        <tr data-status="PASS"><td>6</td><td>No stale specs</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">All specs show completion progress</td></tr>
-        <tr data-status="PASS"><td>7</td><td>Agent assignments</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">100% annotated (84/84 sub-tasks) with domain-appropriate agents</td></tr>
-      </tbody>
-    </table>
-  </div>
-</details>
+  <details open>
+    <summary>End-to-End Delivery <span class="dim-score"><span class="score-grade grade-D" style="font-size:.75rem;padding:1px 8px;">D</span> 50%</span></summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="FAIL"><td>E2E-01</td><td>Cross-layer feature branches</td><td><span class="sev sev-high">high</span></td><td class="status-FAIL">FAIL</td><td>15% of branches touch 2+ service dirs; dev concentrated in savepoint-app</td></tr>
+          <tr data-status="PASS"><td>E2E-02</td><td>No layer-split branching</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>No -backend/-frontend branch pairs</td></tr>
+          <tr data-status="WARN"><td>E2E-03</td><td>Spec-to-delivery traceability</td><td><span class="sev sev-high">high</span></td><td class="status-WARN">WARN</td><td>One-directional tracing only; commits don't reference spec paths</td></tr>
+          <tr data-status="PASS"><td>E2E-04</td><td>No orphaned artifacts</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>All layers connected via SQS, shared DB, deploy pipeline</td></tr>
+          <tr data-status="WARN"><td>E2E-05</td><td>Shared ownership enablers</td><td><span class="sev sev-medium">medium</span></td><td class="status-WARN">WARN</td><td>docker-compose exists; no root task runner, PR checks only validate Next.js</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-<!-- End-to-End Delivery -->
-<details>
-  <summary>
-    <span class="grade-badge grade-D" style="font-size:0.65rem;width:24px;height:24px;line-height:24px;border-radius:5px;">D</span>
-    End-to-End Delivery
-    <span class="dim-score">50%</span>
-  </summary>
-  <div class="detail-body">
-    <table>
-      <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
-      <tbody>
-        <tr data-status="FAIL"><td>1</td><td>Cross-layer feature branches</td><td><span class="severity sev-high">high</span></td><td><span class="status status-FAIL">FAIL</span></td><td class="evidence">~20% of branches touch 2+ service dirs (below 25% threshold)</td></tr>
-        <tr data-status="PASS"><td>2</td><td>No layer-split branching</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">No -backend/-frontend branch pairs</td></tr>
-        <tr data-status="WARN"><td>3</td><td>Spec-to-delivery traceability</td><td><span class="severity sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">Tasks checked off correlate with PRs but no bidirectional references</td></tr>
-        <tr data-status="PASS"><td>4</td><td>No orphaned artifacts</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td class="evidence">All layers connected via deploy pipeline and SQS bridge</td></tr>
-        <tr data-status="WARN"><td>5</td><td>Shared ownership enablers</td><td><span class="severity sev-medium">medium</span></td><td><span class="status status-WARN">WARN</span></td><td class="evidence">docker-compose + deploy pipeline exist; no root task runner, PR checks only cover savepoint-app</td></tr>
-      </tbody>
-    </table>
-  </div>
-</details>
+  <h2>Recommendations</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Priority</th><th>Effort</th><th>Dimension</th><th>Recommendation</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td><span class="pri pri-P0">P0</span></td><td>Low</td><td>AI Development Tooling</td><td>Create root CLAUDE.md with project purpose, cross-service architecture, and key commands</td></tr>
+      <tr><td>2</td><td><span class="pri pri-P1">P1</span></td><td>Low</td><td>AI Development Tooling</td><td>Add dev server run instructions to CLAUDE.md ecosystem</td></tr>
+      <tr><td>3</td><td><span class="pri pri-P1">P1</span></td><td>Low</td><td>Spec-Driven Development</td><td>Create specs for new features before implementation; target 70%+ ratio</td></tr>
+      <tr><td>4</td><td><span class="pri pri-P1">P1</span></td><td>Low</td><td>Spec-Driven Development</td><td>Generate tasks.md for spec 005-library-status-redesign</td></tr>
+      <tr><td>5</td><td><span class="pri pri-P1">P1</span></td><td>Low</td><td>End-to-End Delivery</td><td>Include cross-layer changes in feature branches when features span layers</td></tr>
+      <tr><td>6</td><td><span class="pri pri-P2">P2</span></td><td>Low</td><td>Code Architecture</td><td>Fix 3 repository bypass violations; route through service layer</td></tr>
+      <tr><td>7</td><td><span class="pri pri-P2">P2</span></td><td>Low</td><td>AI Development Tooling</td><td>Remove directory trees and code templates from CLAUDE.md files</td></tr>
+      <tr><td>8</td><td><span class="pri pri-P2">P2</span></td><td>Low</td><td>Security Guardrails</td><td>Add *.p12, *.pfx, credentials*, secrets* to .gitignore</td></tr>
+      <tr><td>9</td><td><span class="pri pri-P2">P2</span></td><td>Low</td><td>Documentation Quality</td><td>Fix dead link in savepoint-app/README.md; add README to scripts/</td></tr>
+      <tr><td>10</td><td><span class="pri pri-P2">P2</span></td><td>Medium</td><td>End-to-End Delivery</td><td>Add root Makefile/Taskfile; extend PR checks to lambdas-py</td></tr>
+    </tbody>
+  </table>
 
-<h2>Recommendations</h2>
-<table>
-  <thead>
-    <tr><th>#</th><th>Priority</th><th>Effort</th><th>Dimension</th><th>Recommendation</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>1</td><td><span class="priority pri-P0">P0</span></td><td>Low</td><td>AI Development Tooling</td><td>Add Playwright MCP to .mcp.json for UI verification</td></tr>
-    <tr><td>2</td><td><span class="priority pri-P0">P0</span></td><td>Low</td><td>Security Guardrails</td><td>Add PreToolUse hooks in .claude/settings.json to block AI access to .env, *.pem, *.key</td></tr>
-    <tr><td>3</td><td><span class="priority pri-P1">P1</span></td><td>Low</td><td>AI Development Tooling</td><td>Add CLAUDE.md for lambdas-py/ and infra/</td></tr>
-    <tr><td>4</td><td><span class="priority pri-P1">P1</span></td><td>Low</td><td>Spec-Driven Development</td><td>Place all new feature specs in context/spec/ using AWOS workflow</td></tr>
-    <tr><td>5</td><td><span class="priority pri-P1">P1</span></td><td>Medium</td><td>AI Development Tooling</td><td>Trim all CLAUDE.md files to &lt;200 lines</td></tr>
-    <tr><td>6</td><td><span class="priority pri-P1">P1</span></td><td>Medium</td><td>End-to-End Delivery</td><td>Include cross-layer changes in single feature branches</td></tr>
-    <tr><td>7</td><td><span class="priority pri-P2">P2</span></td><td>Low</td><td>Code Architecture</td><td>Split igdb-service.unit.test.ts (3260 lines) into focused suites</td></tr>
-    <tr><td>8</td><td><span class="priority pri-P2">P2</span></td><td>Low</td><td>Documentation Quality</td><td>Fix stale README claims: add lambdas-py, update feature dirs, replace Bun refs</td></tr>
-    <tr><td>9</td><td><span class="priority pri-P2">P2</span></td><td>Low</td><td>Security Guardrails</td><td>Add *.key to .gitignore</td></tr>
-    <tr><td>10</td><td><span class="priority pri-P2">P2</span></td><td>Medium</td><td>Code Architecture</td><td>Fix DAL&rarr;features reverse imports and @prisma/client leakage</td></tr>
-  </tbody>
-</table>
-
-<div style="text-align:center;color:#9ca3af;font-size:0.75rem;margin-top:40px;padding:16px 0;border-top:1px solid #f3f4f6;">
-  Generated by AWOS Audit &mdash; 2026-03-25
-</div>
-
-</div>
-
-<script>
-function toggleFilter() {
-  const body = document.body;
-  const btn = document.getElementById('filter-btn');
-  body.classList.toggle('issues-only');
-  if (body.classList.contains('issues-only')) {
-    btn.textContent = 'Show all';
-    btn.classList.add('active');
-  } else {
-    btn.textContent = 'Show issues only';
-    btn.classList.remove('active');
-  }
-}
-</script>
+  <script>
+    function toggleFilter() {
+      document.body.classList.toggle('issues-only');
+      const active = document.body.classList.contains('issues-only');
+      document.getElementById('filterBtn').textContent = active ? 'Show all' : 'Show issues only';
+      document.getElementById('filterLabel').textContent = active ? 'Showing issues only (FAIL + WARN)' : 'Showing all checks';
+    }
+  </script>
 </body>
 </html>
