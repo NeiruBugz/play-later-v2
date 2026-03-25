@@ -54,6 +54,24 @@ _Once the foundational features are complete, we will move on to these high-valu
     - [x] Fix DAL→features reverse imports and @prisma/client leakage (ARCH-02/04)
     - [x] Configure Dependabot or Renovate for automated dependency updates (SBP-07)
 
+- [ ] **Code Health & Developer Experience (Round 2)** _(Audit: 2026-03-25 — Score 77% Grade B)_
+
+  - [ ] **P0: Immediate Fixes**
+    - [ ] Create root CLAUDE.md with project purpose, cross-service architecture, and key commands (AI-01)
+
+  - [ ] **P1: Fix Soon**
+    - [ ] Add dev server run instructions (pnpm dev, env vars, DB setup) to CLAUDE.md ecosystem (AI-07)
+    - [ ] Create specs for new features before implementation; target 70%+ spec-to-branch ratio (SDD-04)
+    - [ ] Generate tasks.md for spec 005-library-status-redesign (SDD-05)
+    - [ ] Include cross-layer changes (lambdas-py, infra) in feature branches when features span layers (E2E-01)
+
+  - [ ] **P2: Improve When Possible**
+    - [ ] Fix 3 repository bypass violations — route through service layer (ARCH-02)
+    - [ ] Remove directory trees and code templates from CLAUDE.md files (AI-06)
+    - [ ] Add *.p12, *.pfx, credentials*, secrets* to .gitignore (SEC-05)
+    - [ ] Fix dead link in savepoint-app/README.md; add README to scripts/ (DOC-02/04)
+    - [ ] Add root Makefile/Taskfile with cross-layer commands; extend PR checks to lambdas-py (E2E-05)
+
 - [ ] **Steam Library Integration**
 
   _Philosophy: SavePoint is for games you intend to experience, not a catalog. Steam import is curation, not bulk transfer. See [Product Definition](product-definition.md#23-ux-principles)._
