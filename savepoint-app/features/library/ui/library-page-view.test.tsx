@@ -51,17 +51,17 @@ const elements = {
   getSearchInput: () =>
     screen.getByRole("searchbox", { name: "Filter library by title" }),
   getAllStatusesButton: () =>
-    screen.getByRole("button", { name: "Show all statuses" }),
+    screen.getAllByRole("button", { name: "Show all statuses" })[0],
   getStatusButton: (status: string) =>
-    screen.getByRole("button", { name: `Filter by ${status}` }),
+    screen.getAllByRole("button", { name: `Filter by ${status}` })[0],
   getPlatformOption: (platform: string) =>
     screen.getByRole("option", { name: platform }),
   getSortOption: (option: string) =>
     screen.getByRole("option", { name: option }),
   getClearFiltersButton: () =>
-    screen.getByRole("button", { name: "Clear all filters" }),
+    screen.getAllByRole("button", { name: "Clear all filters" })[0],
   queryClearFiltersButton: () =>
-    screen.queryByRole("button", { name: "Clear all filters" }),
+    screen.queryAllByRole("button", { name: "Clear all filters" })[0] ?? null,
   queryLibraryGrid: () =>
     screen.queryByRole("list", { name: "Your game library" }),
   queryEmptyState: () => screen.queryByText(/your library is empty/i),
