@@ -29,14 +29,14 @@
   - [x] Create `scripts/README.md` documenting `init-localstack.sh` and `localstack-cors.json` **[Agent: general-purpose]**
   - [x] Verify: grep .gitignore for new patterns, confirm dead link removed, confirm scripts/README.md exists **[Agent: general-purpose]**
 
-- [ ] **Slice 4: Repository Bypass Fixes (REQ-06)**
-  - [ ] Extend `GameService` with `getGameByIgdbId(igdbId: number)` method wrapping `findGameByIgdbId` from game repository **[Agent: nextjs-fullstack]**
-  - [ ] Extend `GameService` with `getGamesByIds(gameIds: string[])` method wrapping `findGamesByIds` from game repository **[Agent: nextjs-fullstack]**
-  - [ ] Update `features/steam-import/use-cases/import-game-to-library.ts` to import from service instead of repository **[Agent: nextjs-fullstack]**
-  - [ ] Update `features/journal/server-actions/get-games-by-ids.ts` to import from service instead of repository **[Agent: nextjs-fullstack]**
-  - [ ] Update `app/(protected)/journal/page.tsx` to import from service instead of repository **[Agent: nextjs-fullstack]**
-  - [ ] Verify: `grep -r "@/data-access-layer/repository" savepoint-app/features/ savepoint-app/app/` returns zero matches **[Agent: nextjs-fullstack]**
-  - [ ] Verify: `pnpm --filter savepoint typecheck` passes and existing tests pass **[Agent: nextjs-fullstack]**
+- [x] **Slice 4: Repository Bypass Fixes (REQ-06)**
+  - [x] Extend `GameService` with `getGameByIgdbId(igdbId: number)` method wrapping `findGameByIgdbId` from game repository **[Agent: nextjs-fullstack]**
+  - [x] Extend `GameService` with `getGamesByIds(gameIds: string[])` method wrapping `findGamesByIds` from game repository **[Agent: nextjs-fullstack]**
+  - [x] Update `features/steam-import/use-cases/import-game-to-library.ts` to import from service instead of repository **[Agent: nextjs-fullstack]**
+  - [x] Update `features/journal/server-actions/get-games-by-ids.ts` to import from service instead of repository **[Agent: nextjs-fullstack]**
+  - [x] Update `app/(protected)/journal/page.tsx` to import from service instead of repository **[Agent: nextjs-fullstack]**
+  - [x] Verify: `grep -r "@/data-access-layer/repository" savepoint-app/features/ savepoint-app/app/` returns zero matches **[Agent: nextjs-fullstack]**
+  - [x] Verify: `pnpm --filter savepoint typecheck` passes and existing tests pass **[Agent: nextjs-fullstack]**
 
 - [x] **Slice 5: Root Makefile (REQ-10, part 1)**
   - [x] Create root `Makefile` with `.PHONY` targets: `dev`, `test`, `lint`, `format`, `typecheck` **[Agent: general-purpose]**
@@ -53,9 +53,9 @@
   - [x] Add `paths` filter on `lambdas-py/**` so job skips when no Python files changed **[Agent: general-purpose]**
   - [x] Verify: push to test branch, confirm new CI job appears **[Agent: general-purpose]**
 
-- [ ] **Slice 7: Generate tasks.md for Spec 005 (REQ-04)**
-  - [ ] Execute `/awos:tasks 005` to generate `context/spec/005-library-status-redesign/tasks.md` **[Agent: general-purpose]**
-  - [ ] Verify file contains vertical slices with `**[Agent: agent-name]**` format sub-tasks **[Agent: general-purpose]**
+- [x] **Slice 7: Generate tasks.md for Spec 005 (REQ-04)**
+  - [x] Execute `/awos:tasks 005` to generate `context/spec/005-library-status-redesign/tasks.md` **[Agent: general-purpose]**
+  - [x] Verify file contains vertical slices with `**[Agent: agent-name]**` format sub-tasks **[Agent: general-purpose]**
 
 - [ ] **Slice 8: Final Validation**
   - [ ] Re-run `/awos:audit` and verify overall score >= 85% **[Agent: general-purpose]**
