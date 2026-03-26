@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   createGameWithRelations,
+  findGameById,
   findGameByIgdbId,
   findGamesByIds,
   gameExistsByIgdbId,
@@ -46,6 +47,20 @@ export async function getGamesByIds(
   } catch (error) {
     return serviceError(
       error instanceof Error ? error.message : "Failed to fetch games by IDs",
+      ServiceErrorCode.INTERNAL_ERROR
+    );
+  }
+}
+
+export async function getGameById(
+  gameId: string
+): Promise<ServiceResult<GameBasicInfo | null>> {
+  try {
+    const game = await findGameById(gameId);
+    return serviceSuccess(game);
+  } catch (error) {
+    return serviceError(
+      error instanceof Error ? error.message : "Failed to fetch game by ID",
       ServiceErrorCode.INTERNAL_ERROR
     );
   }
