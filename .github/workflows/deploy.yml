@@ -7,6 +7,7 @@ on:
 jobs:
   infra:
     name: Provision AWS Infra (Terraform)
+    if: false # temporarily disabled
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -75,7 +76,7 @@ jobs:
     name: Run Database Migrations
     runs-on: ubuntu-latest
     environment: production
-    needs: [infra]
+    # needs: [infra] # temporarily disabled
     
     steps:
       - name: Checkout code
@@ -143,6 +144,7 @@ jobs:
 
   deploy-vercel:
     name: Deploy to Vercel
+    if: false # temporarily disabled
     runs-on: ubuntu-latest
     environment: production
     needs: [migrate]
