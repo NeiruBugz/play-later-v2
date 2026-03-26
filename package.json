@@ -15,13 +15,9 @@
       "fast-xml-parser": ">=5.3.8"
     },
     "onlyBuiltDependencies": [
-      "@prisma/engines",
       "@tailwindcss/oxide",
       "@vercel/speed-insights",
-      "esbuild",
-      "msw",
-      "sharp",
-      "unrs-resolver"
+      "prisma"
     ]
   },
   "scripts": {}
