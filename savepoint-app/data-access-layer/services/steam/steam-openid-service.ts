@@ -14,7 +14,7 @@ export class SteamOpenIdService {
   private readonly steamOpenIdUrl = "https://steamcommunity.com/openid/login";
   private readonly openIdNamespace = "http://specs.openid.net/auth/2.0";
 
-  getAuthUrl(returnUrl: string): string {
+  getAuthUrl(returnUrl: string): ServiceResult<string> {
     try {
       const origin = new URL(returnUrl).origin;
 
@@ -30,10 +30,10 @@ export class SteamOpenIdService {
       const authUrl = `${this.steamOpenIdUrl}?${params.toString()}`;
       logger.debug({ authUrl }, "Generated Steam OpenID auth URL");
 
-      return authUrl;
+      return serviceSuccess(authUrl);
     } catch (error) {
       logger.error({ error, returnUrl }, "Failed to generate auth URL");
-      throw error;
+      return handleServiceError(error, "Failed to generate auth URL");
     }
   }
 

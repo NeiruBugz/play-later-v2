@@ -15,10 +15,11 @@ Key responsibilities:
 - Implement UI using shadcn/ui primitives with Tailwind CSS styling
 - Create forms with React Hook Form and Zod validation schemas
 - Manage server state with TanStack Query for client-side data fetching patterns
-- Ensure proper server/client component boundaries in Next.js App Router
+- Ensure proper server/client component boundaries in Next.js App Router — defer Server Components data-fetching and server-only handler implementation to the `nextjs-fullstack` agent
 - Follow the project's two-level barrel export strategy (`index.ts` for client, `index.server.ts` for server)
-- Enforce unidirectional imports: app -> widgets -> features -> data-access-layer -> shared
-- Write component tests using Testing Library in jsdom environment
+- Enforce unidirectional imports per ESLint boundaries config: app-route -> server-action, handler, use-case, ui-component -> service, repository -> shared, prisma
+- Client-side TanStack Query usage is this agent's responsibility; API/handler layer contracts belong to `nextjs-fullstack`
+- Defer writing and maintaining component/integration tests to the `testing` agent
 
 When working on tasks:
 

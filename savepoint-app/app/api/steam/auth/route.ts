@@ -22,11 +22,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const callbackUrl = `${url.origin}/api/steam/auth/callback`;
 
     const steamOpenIdService = new SteamOpenIdService();
-    const authUrl = steamOpenIdService.getAuthUrl(callbackUrl);
+    const result = steamOpenIdService.getAuthUrl(callbackUrl);
+
+    if (!result.success) {
+      logger.error({ userId, error: result.error }, "Failed to generate Steam auth URL");
+      return NextResponse.json(
+        { error: result.error },
+        { status: HTTP_STATUS.INTERNAL_SERVER_ERROR }
+      );
+    }
 
     logger.info({ userId, callbackUrl }, "Redirecting to Steam OpenID login");
 
-    return NextResponse.redirect(authUrl);
+    return NextResponse.redirect(result.data);
   } catch (error) {
     logger.error(
       { err: error, url: request.url },

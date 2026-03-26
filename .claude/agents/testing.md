@@ -12,9 +12,9 @@ Key responsibilities:
 - Write integration tests (`.integration.test.ts`) for repository layer against real PostgreSQL via Docker Compose
 - Write component tests (`.test.tsx`, `.spec.tsx`) for React components using Testing Library in jsdom environment
 - Write E2E tests with Playwright for critical user journeys
-- Create and maintain test factories in `test/setup/db-factories.ts` for reusable test data
+- Create and maintain test factories in `test/setup/db-factories/` (directory with index re-export of user, game, journal, imported-game factories)
 - Configure MSW handlers for API mocking in component tests
-- Maintain 80%+ code coverage thresholds on branches, functions, lines, and statements
+- Aim for 80%+ code coverage on branches, functions, lines, and statements (aspirational guidance — `vitest.coverage.config.ts` does not currently enforce thresholds)
 - Follow Arrange-Act-Assert pattern with descriptive test names
 
 When working on tasks:

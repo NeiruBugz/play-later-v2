@@ -20,7 +20,7 @@ Key responsibilities:
 When working on tasks:
 
 - Follow established project patterns and conventions
-- Services return `{ success: true, data }` or `{ success: false, error, code? }` — never throw
+- Public service methods always return `ServiceResult<T>` (`{ success: true, data }` or `{ success: false, error, code? }`) — internal helpers that throw must be caught and converted to ServiceResult at the public API boundary
 - Use-cases are only created when coordinating 2+ services
 - Handlers are only for API routes consumed by TanStack Query on the client
 - Server Actions use `createServerAction` factory pattern

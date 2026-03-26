@@ -137,7 +137,7 @@ export class IgdbService implements IgdbServiceInterface {
     logger.debug("IgdbService initialized");
   }
 
-  private async requestTwitchToken() {
+  private async requestTwitchToken(): Promise<ServiceResult<TwitchTokenResponse>> {
     try {
       logger.debug("Requesting new Twitch access token");
       const res = await fetch(TOKEN_URL, {
@@ -148,31 +148,34 @@ export class IgdbService implements IgdbServiceInterface {
           { status: res.status, statusText: res.statusText },
           "Failed to fetch Twitch token"
         );
-        throw new Error(`Failed to fetch token: ${res.statusText}`);
+        return serviceError(
+          `Failed to fetch token: ${res.statusText}`,
+          ServiceErrorCode.EXTERNAL_SERVICE_ERROR
+        );
       }
       const token = (await res.json()) as unknown as TwitchTokenResponse;
       this.token = token;
       this.tokenExpiry =
         getTimeStamp() + token.expires_in - TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS;
-      return token;
+      return serviceSuccess(token);
     } catch (thrown) {
       logger.error({ error: thrown }, "Error requesting Twitch token");
-      handleServiceError(thrown);
+      return handleServiceError(thrown);
     }
   }
 
-  private async getToken() {
+  private async getToken(): Promise<string | null> {
     if (this.token && getTimeStamp() < this.tokenExpiry) {
       return this.token.access_token;
     }
-    const token = await this.requestTwitchToken();
-    if (token) {
-      this.token = token;
-      this.tokenExpiry =
-        getTimeStamp() + token.expires_in - TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS;
-      return token.access_token;
+    const result = await this.requestTwitchToken();
+    if (!result.success) {
+      return null;
     }
-    return null;
+    this.token = result.data;
+    this.tokenExpiry =
+      getTimeStamp() + result.data.expires_in - TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS;
+    return result.data.access_token;
   }
 
   private async makeRequest<T>(
@@ -181,11 +184,8 @@ export class IgdbService implements IgdbServiceInterface {
     try {
       logger.debug({ resource: options.resource }, "Making IGDB API request");
       const accessToken = await this.getToken();
-      if (accessToken === undefined) {
+      if (!accessToken) {
         logger.error("No valid access token available for IGDB request");
-        handleServiceError(
-          new Error("Unauthorized: No valid token available.")
-        );
         return undefined;
       }
       const response = await fetch(`${API_URL}${options.resource}`, {

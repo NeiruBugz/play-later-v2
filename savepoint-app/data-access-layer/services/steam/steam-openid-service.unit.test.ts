@@ -14,21 +14,23 @@ describe("SteamOpenIdService", () => {
     it("generates correct Steam OpenID auth URL", () => {
       const returnUrl = "http://localhost:6060/auth/steam/callback";
 
-      const authUrl = service.getAuthUrl(returnUrl);
+      const result = service.getAuthUrl(returnUrl);
 
-      expect(authUrl).toContain("https://steamcommunity.com/openid/login?");
-      expect(authUrl).toContain(
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toContain("https://steamcommunity.com/openid/login?");
+      expect(result.data).toContain(
         "openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0"
       );
-      expect(authUrl).toContain("openid.mode=checkid_setup");
-      expect(authUrl).toContain(
+      expect(result.data).toContain("openid.mode=checkid_setup");
+      expect(result.data).toContain(
         `openid.return_to=${encodeURIComponent(returnUrl)}`
       );
-      expect(authUrl).toContain("openid.realm=http%3A%2F%2Flocalhost%3A6060");
-      expect(authUrl).toContain(
+      expect(result.data).toContain("openid.realm=http%3A%2F%2Flocalhost%3A6060");
+      expect(result.data).toContain(
         "openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select"
       );
-      expect(authUrl).toContain(
+      expect(result.data).toContain(
         "openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select"
       );
     });
@@ -37,17 +39,24 @@ describe("SteamOpenIdService", () => {
       const returnUrl =
         "https://savepoint.example.com/auth/steam/callback?foo=bar";
 
-      const authUrl = service.getAuthUrl(returnUrl);
+      const result = service.getAuthUrl(returnUrl);
 
-      expect(authUrl).toContain(
+      expect(result.success).toBe(true);
+      if (!result.success) return;
+      expect(result.data).toContain(
         "openid.realm=https%3A%2F%2Fsavepoint.example.com"
       );
     });
 
-    it("throws error when return URL is invalid", () => {
+    it("returns error when return URL is invalid", () => {
       const invalidUrl = "not-a-valid-url";
 
-      expect(() => service.getAuthUrl(invalidUrl)).toThrow();
+      const result = service.getAuthUrl(invalidUrl);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+      }
     });
   });
 
