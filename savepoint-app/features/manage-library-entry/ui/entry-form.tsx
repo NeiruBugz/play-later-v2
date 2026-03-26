@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -258,7 +257,6 @@ function EditForm({
   onSuccess,
   onCancel,
   onDelete,
-  onAddPlatform,
   className,
 }: EditFormProps) {
   const form = useForm<UpdateLibraryEntryInput>({
