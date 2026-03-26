@@ -489,7 +489,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - [Live Demo](https://play-later.vercel.com)
-- [Documentation](./documentation/)
 - [Issues](https://github.com/yourusername/play-later-v2/issues)
 
 ## 🙏 Acknowledgments

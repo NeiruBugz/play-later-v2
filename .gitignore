@@ -91,3 +91,9 @@ override.tf.json
 # Worktrees
 .worktrees/
 .claude/worktrees/
+
+# Certificates & secrets
+*.p12
+*.pfx
+credentials*
+secrets*

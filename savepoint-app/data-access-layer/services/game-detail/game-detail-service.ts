@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   createGameWithRelations,
+  findGameByIgdbId,
   findGamesByIds,
   gameExistsByIgdbId,
   upsertGenres,
@@ -19,6 +20,22 @@ import {
   serviceSuccess,
   type ServiceResult,
 } from "../types";
+
+export async function getGameByIgdbId(
+  igdbId: number
+): Promise<ServiceResult<Awaited<ReturnType<typeof findGameByIgdbId>>>> {
+  try {
+    const game = await findGameByIgdbId(igdbId);
+    return serviceSuccess(game);
+  } catch (error) {
+    return serviceError(
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch game by IGDB ID",
+      ServiceErrorCode.INTERNAL_ERROR
+    );
+  }
+}
 
 export async function getGamesByIds(
   gameIds: string[]
