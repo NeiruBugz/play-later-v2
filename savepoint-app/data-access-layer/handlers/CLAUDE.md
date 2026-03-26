@@ -23,38 +23,6 @@ See [README.md](./README.md) for comprehensive documentation on the handlers lay
 4. Export from `handlers/index.ts`
 5. Write both unit and integration tests
 
-### Handler Template
-
-```typescript
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-import type { HandlerResult, RequestContext } from "../types";
-
-const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "MyHandler" });
-
-export async function myHandler(
-  input: Input,
-  context: RequestContext
-): Promise<HandlerResult<Output>> {
-  // 1. Validate input
-  // 2. Check rate limiting
-  // 3. Call service/use-case
-  // 4. Return structured result
-}
-```
-
-## Import Rules (ESLint Enforced)
-
-```typescript
-// ✅ Handlers can import
-import { SomeService } from "@/data-access-layer/services";
-import { someUseCase } from "@/features/x/use-cases";
-
-// ❌ Handlers CANNOT import
-import { repository } from "@/data-access-layer/repository";  // Must use services
-```
-
-**Only API routes can import handlers** - violations fail CI.
-
 ## Testing Requirements
 
 | Test Type | Suffix | Purpose |

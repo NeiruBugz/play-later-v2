@@ -5,29 +5,29 @@
 
 ---
 
-- [ ] **Slice 1: Root CLAUDE.md + Documentation Foundation (REQ-01, 02, 03, 05)**
-  - [ ] Create root `CLAUDE.md` with project overview: what SavePoint is, target audience **[Agent: general-purpose]**
-  - [ ] Add architecture section: monorepo structure (savepoint-app, lambdas-py, infra), communication (SQS, S3 CSV, shared PostgreSQL) **[Agent: general-purpose]**
-  - [ ] Add Quick Start section: `docker compose up -d`, `pnpm install`, dev server, env setup via `.env.example`, db migrations **[Agent: general-purpose]**
-  - [ ] Add Commands by Layer table: dev/test/lint/build for savepoint-app, lambdas-py, infra **[Agent: general-purpose]**
-  - [ ] Add Git Workflow section: branch naming (`feat/`, `fix/`, `chore/`), conventional commits, cross-layer branches in single branch (REQ-05) **[Agent: general-purpose]**
-  - [ ] Add Spec-First Workflow section: new features require spec in `context/spec/`, workflow `/awos:spec` → `/awos:tech` → `/awos:tasks` → `/awos:implement`, feature branches reference spec dir in first commit (REQ-03) **[Agent: general-purpose]**
-  - [ ] Add CI Overview section: pr-checks.yml (lint, format, typecheck, tests, migration validation), deploy.yml, e2e.yml **[Agent: general-purpose]**
-  - [ ] Verify file is under 200 lines and does not duplicate service-level CLAUDE.md content **[Agent: general-purpose]**
+- [x] **Slice 1: Root CLAUDE.md + Documentation Foundation (REQ-01, 02, 03, 05)**
+  - [x] Create root `CLAUDE.md` with project overview: what SavePoint is, target audience **[Agent: general-purpose]**
+  - [x] Add architecture section: monorepo structure (savepoint-app, lambdas-py, infra), communication (SQS, S3 CSV, shared PostgreSQL) **[Agent: general-purpose]**
+  - [x] Add Quick Start section: `docker compose up -d`, `pnpm install`, dev server, env setup via `.env.example`, db migrations **[Agent: general-purpose]**
+  - [x] Add Commands by Layer table: dev/test/lint/build for savepoint-app, lambdas-py, infra **[Agent: general-purpose]**
+  - [x] Add Git Workflow section: branch naming (`feat/`, `fix/`, `chore/`), conventional commits, cross-layer branches in single branch (REQ-05) **[Agent: general-purpose]**
+  - [x] Add Spec-First Workflow section: new features require spec in `context/spec/`, workflow `/awos:spec` → `/awos:tech` → `/awos:tasks` → `/awos:implement`, feature branches reference spec dir in first commit (REQ-03) **[Agent: general-purpose]**
+  - [x] Add CI Overview section: pr-checks.yml (lint, format, typecheck, tests, migration validation), deploy.yml, e2e.yml **[Agent: general-purpose]**
+  - [x] Verify file is under 200 lines and does not duplicate service-level CLAUDE.md content **[Agent: general-purpose]**
 
-- [ ] **Slice 2: CLAUDE.md Cleanup (REQ-07)**
-  - [ ] Remove directory tree listing from `savepoint-app/app/CLAUDE.md` (keep non-obvious auth/middleware behavior notes) **[Agent: general-purpose]**
-  - [ ] Remove directory tree listing from `savepoint-app/data-access-layer/CLAUDE.md` (keep data flow rules and cross-layer import constraints) **[Agent: general-purpose]**
-  - [ ] Remove template/boilerplate code examples from `savepoint-app/data-access-layer/handlers/CLAUDE.md` (keep non-obvious patterns) **[Agent: general-purpose]**
-  - [ ] Remove template/boilerplate code examples from `savepoint-app/data-access-layer/services/CLAUDE.md` (keep non-obvious patterns) **[Agent: general-purpose]**
-  - [ ] Consolidate duplicated import rules: keep in parent `data-access-layer/CLAUDE.md`, remove redundant copies from children **[Agent: general-purpose]**
-  - [ ] Verify all CLAUDE.md files are under 200 lines via `wc -l` **[Agent: general-purpose]**
+- [x] **Slice 2: CLAUDE.md Cleanup (REQ-07)**
+  - [x] Remove directory tree listing from `savepoint-app/app/CLAUDE.md` (keep non-obvious auth/middleware behavior notes) **[Agent: general-purpose]**
+  - [x] Remove directory tree listing from `savepoint-app/data-access-layer/CLAUDE.md` (keep data flow rules and cross-layer import constraints) **[Agent: general-purpose]**
+  - [x] Remove template/boilerplate code examples from `savepoint-app/data-access-layer/handlers/CLAUDE.md` (keep non-obvious patterns) **[Agent: general-purpose]**
+  - [x] Remove template/boilerplate code examples from `savepoint-app/data-access-layer/services/CLAUDE.md` (keep non-obvious patterns) **[Agent: general-purpose]**
+  - [x] Consolidate duplicated import rules: keep in parent `data-access-layer/CLAUDE.md`, remove redundant copies from children **[Agent: general-purpose]**
+  - [x] Verify all CLAUDE.md files are under 200 lines via `wc -l` **[Agent: general-purpose]**
 
-- [ ] **Slice 3: .gitignore + Stale Docs Fix (REQ-08, 09)**
-  - [ ] Append `*.p12`, `*.pfx`, `credentials*`, `secrets*` to root `.gitignore` under a `# Certificates & secrets` section **[Agent: general-purpose]**
-  - [ ] Remove or fix dead `./documentation/` link in `savepoint-app/README.md` (around line 492) **[Agent: general-purpose]**
-  - [ ] Create `scripts/README.md` documenting `init-localstack.sh` and `localstack-cors.json` **[Agent: general-purpose]**
-  - [ ] Verify: grep .gitignore for new patterns, confirm dead link removed, confirm scripts/README.md exists **[Agent: general-purpose]**
+- [x] **Slice 3: .gitignore + Stale Docs Fix (REQ-08, 09)**
+  - [x] Append `*.p12`, `*.pfx`, `credentials*`, `secrets*` to root `.gitignore` under a `# Certificates & secrets` section **[Agent: general-purpose]**
+  - [x] Remove or fix dead `./documentation/` link in `savepoint-app/README.md` (around line 492) **[Agent: general-purpose]**
+  - [x] Create `scripts/README.md` documenting `init-localstack.sh` and `localstack-cors.json` **[Agent: general-purpose]**
+  - [x] Verify: grep .gitignore for new patterns, confirm dead link removed, confirm scripts/README.md exists **[Agent: general-purpose]**
 
 - [ ] **Slice 4: Repository Bypass Fixes (REQ-06)**
   - [ ] Extend `GameService` with `getGameByIgdbId(igdbId: number)` method wrapping `findGameByIgdbId` from game repository **[Agent: nextjs-fullstack]**

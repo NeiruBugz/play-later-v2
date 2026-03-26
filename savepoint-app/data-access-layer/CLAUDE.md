@@ -34,42 +34,6 @@ API Routes / Server Actions
     PostgreSQL
 ```
 
-## Directory Structure
-
-```
-data-access-layer/
-├── handlers/             # HTTP request orchestration
-│   ├── game-search/      # Game search handler
-│   ├── library/          # Library handlers
-│   ├── platform/         # Platform handlers
-│   └── types.ts          # Handler types (HandlerResult)
-│
-├── services/             # Business logic layer
-│   ├── auth/             # Authentication service
-│   ├── igdb/             # IGDB API client
-│   ├── library/          # Library operations
-│   ├── journal/          # Journal service
-│   ├── profile/          # Profile service
-│   ├── platform/         # Platform service
-│   ├── game-detail/      # Game detail aggregation
-│   └── types.ts          # Service types (ServiceResult)
-│
-├── repository/           # Data access (Prisma only)
-│   ├── game/             # Game repository
-│   ├── library/          # Library repository
-│   ├── journal/          # Journal repository
-│   ├── platform/         # Platform repository
-│   ├── user/             # User repository
-│   └── genre/            # Genre repository
-│
-├── domain/               # Domain models and mappers
-│   ├── library/          # LibraryItem mapper
-│   ├── journal/          # JournalEntry mapper
-│   └── platform/         # Platform mapper
-│
-└── index.ts              # Main exports
-```
-
 ## Layer Responsibilities
 
 | Layer | Responsibility | Returns |
