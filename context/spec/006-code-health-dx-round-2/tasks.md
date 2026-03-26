@@ -38,20 +38,20 @@
   - [ ] Verify: `grep -r "@/data-access-layer/repository" savepoint-app/features/ savepoint-app/app/` returns zero matches **[Agent: nextjs-fullstack]**
   - [ ] Verify: `pnpm --filter savepoint typecheck` passes and existing tests pass **[Agent: nextjs-fullstack]**
 
-- [ ] **Slice 5: Root Makefile (REQ-10, part 1)**
-  - [ ] Create root `Makefile` with `.PHONY` targets: `dev`, `test`, `lint`, `format`, `typecheck` **[Agent: general-purpose]**
-  - [ ] `dev` target: `docker compose up -d && pnpm --filter savepoint dev` **[Agent: general-purpose]**
-  - [ ] `test` target: `pnpm --filter savepoint test && cd lambdas-py && uv run pytest` **[Agent: general-purpose]**
-  - [ ] `lint` target: `pnpm --filter savepoint lint && cd lambdas-py && uv run ruff check .` **[Agent: general-purpose]**
-  - [ ] `format` target: `pnpm --filter savepoint format:check && cd lambdas-py && uv run ruff format --check .` **[Agent: general-purpose]**
-  - [ ] `typecheck` target: `pnpm --filter savepoint typecheck && cd lambdas-py && uv run mypy .` **[Agent: general-purpose]**
-  - [ ] Verify: run `make lint` locally to confirm commands execute **[Agent: general-purpose]**
+- [x] **Slice 5: Root Makefile (REQ-10, part 1)**
+  - [x] Create root `Makefile` with `.PHONY` targets: `dev`, `test`, `lint`, `format`, `typecheck` **[Agent: general-purpose]**
+  - [x] `dev` target: `docker compose up -d && pnpm --filter savepoint dev` **[Agent: general-purpose]**
+  - [x] `test` target: `pnpm --filter savepoint test && cd lambdas-py && uv run pytest` **[Agent: general-purpose]**
+  - [x] `lint` target: `pnpm --filter savepoint lint && cd lambdas-py && uv run ruff check .` **[Agent: general-purpose]**
+  - [x] `format` target: `pnpm --filter savepoint format:check && cd lambdas-py && uv run ruff format --check .` **[Agent: general-purpose]**
+  - [x] `typecheck` target: `pnpm --filter savepoint typecheck && cd lambdas-py && uv run mypy .` **[Agent: general-purpose]**
+  - [x] Verify: run `make lint` locally to confirm commands execute **[Agent: general-purpose]**
 
-- [ ] **Slice 6: CI Workflow Expansion (REQ-10, part 2)**
-  - [ ] Add `lambdas-py-checks` job to `.github/workflows/pr-checks.yml` **[Agent: general-purpose]**
-  - [ ] Job steps: setup Python 3.12 (`actions/setup-python@v5`), install uv, `uv sync`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy .`, `uv run pytest` **[Agent: general-purpose]**
-  - [ ] Add `paths` filter on `lambdas-py/**` so job skips when no Python files changed **[Agent: general-purpose]**
-  - [ ] Verify: push to test branch, confirm new CI job appears **[Agent: general-purpose]**
+- [x] **Slice 6: CI Workflow Expansion (REQ-10, part 2)**
+  - [x] Add `lambdas-py-checks` job to `.github/workflows/pr-checks.yml` **[Agent: general-purpose]**
+  - [x] Job steps: setup Python 3.12 (`actions/setup-python@v5`), install uv, `uv sync`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy .`, `uv run pytest` **[Agent: general-purpose]**
+  - [x] Add `paths` filter on `lambdas-py/**` so job skips when no Python files changed **[Agent: general-purpose]**
+  - [x] Verify: push to test branch, confirm new CI job appears **[Agent: general-purpose]**
 
 - [ ] **Slice 7: Generate tasks.md for Spec 005 (REQ-04)**
   - [ ] Execute `/awos:tasks 005` to generate `context/spec/005-library-status-redesign/tasks.md` **[Agent: general-purpose]**

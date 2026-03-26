@@ -257,3 +257,54 @@ jobs:
               echo "✅ No destructive operations found in new migrations"
             fi
           fi
+
+  lambdas-py-checks:
+    name: Python Lambdas Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for lambdas-py changes
+        id: check-changes
+        run: |
+          CHANGES=$(git diff --name-only origin/main...HEAD -- lambdas-py/ || true)
+          if [ -z "$CHANGES" ]; then
+            echo "No lambdas-py changes detected"
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "lambdas-py changes detected:"
+            echo "$CHANGES"
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Python
+        if: steps.check-changes.outputs.has-changes == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        if: steps.check-changes.outputs.has-changes == 'true'
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        if: steps.check-changes.outputs.has-changes == 'true'
+        run: cd lambdas-py && uv sync
+
+      - name: Ruff lint
+        if: steps.check-changes.outputs.has-changes == 'true'
+        run: cd lambdas-py && uv run ruff check .
+
+      - name: Ruff format check
+        if: steps.check-changes.outputs.has-changes == 'true'
+        run: cd lambdas-py && uv run ruff format --check .
+
+      - name: Mypy type check
+        if: steps.check-changes.outputs.has-changes == 'true'
+        run: cd lambdas-py && uv run mypy .
+
+      - name: Run tests
+        if: steps.check-changes.outputs.has-changes == 'true'
+        run: cd lambdas-py && uv run pytest
