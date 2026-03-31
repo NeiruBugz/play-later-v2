@@ -4,7 +4,7 @@ _This roadmap outlines our strategic direction based on customer needs and busin
 
 ---
 
-### Phase 1: Core Foundation _(Complete)_
+## Phase 1: Core Foundation _(Complete)_
 
 _The highest priority features that form the core foundation of SavePoint—enabling users to track their gaming library and begin journaling._
 
@@ -32,7 +32,7 @@ _The highest priority features that form the core foundation of SavePoint—enab
 
 ---
 
-### Phase 2: Near-Term Priorities
+## Phase 2: Near-Term Priorities
 
 _Specced features in implementation order. Each has a functional specification in `context/spec/`._
 
@@ -115,7 +115,7 @@ _Specced features in implementation order. Each has a functional specification i
 
 ---
 
-### Phase 3: Platform Integrations
+## Phase 3: Platform Integrations
 
 _Expand library import beyond Steam to other major gaming platforms._
 
@@ -160,7 +160,7 @@ _Expand library import beyond Steam to other major gaming platforms._
 
 ---
 
-### Phase 4: Community & Discovery
+## Phase 4: Community & Discovery
 
 _Features planned for future consideration. Their priority and scope may be refined based on user feedback from earlier phases._
 

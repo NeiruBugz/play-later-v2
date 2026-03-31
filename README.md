@@ -42,7 +42,7 @@ Product planning and spec-driven development is managed via AWOS commands in Cla
 
 **Typical flow:** `/awos:product` → `/awos:roadmap` → `/awos:spec` → `/awos:tech` → `/awos:tasks` → `/awos:implement` → `/awos:verify`
 
-**Linear integration:** Specs become Linear Projects, task slices become Linear Issues. Sync state is stored in `context/spec/[name]/linear-sync.json`. The sync runs automatically at the end of `/awos:roadmap`, `/awos:spec`, and `/awos:tasks`.
+**Linear integration:** Specs become Linear Projects, task slices become Linear Issues. Sync state is stored in `context/spec/[index]-[name]/linear-sync.json`. The sync runs automatically at the end of `/awos:roadmap`, `/awos:spec`, and `/awos:tasks`.
 
 **Key directories:**
 - `.awos/commands/` — Command definitions

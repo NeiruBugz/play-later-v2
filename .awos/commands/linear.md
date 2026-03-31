@@ -26,7 +26,7 @@ Synchronize the AWOS spec/task structure to Linear. Each spec becomes a Linear P
 
 # PROCESS
 
-### Step 1: Identify Specs to Sync
+## Step 1: Identify Specs to Sync
 
 1. Read `context/product/roadmap.md`.
 2. Find all **incomplete** (`- [ ]`) roadmap items that reference a spec number (e.g., `_(Spec 006)_`).
@@ -34,7 +34,7 @@ Synchronize the AWOS spec/task structure to Linear. Each spec becomes a Linear P
 4. For each identified spec, read `context/spec/[index]-[name]/functional-spec.md` and `context/spec/[index]-[name]/tasks.md` (if it exists).
 5. Read `context/spec/[index]-[name]/linear-sync.json` if it exists — this contains previously synced Linear IDs.
 
-### Step 2: Sync Projects
+## Step 2: Sync Projects
 
 For each spec identified in Step 1:
 
@@ -56,7 +56,7 @@ For each spec identified in Step 1:
 1. Read the stored project ID.
 2. Update the project using `save_project` with `id` parameter — sync name, summary, state, and description.
 
-### Step 3: Sync Issues (Tasks)
+## Step 3: Sync Issues (Tasks)
 
 For each spec that has a `tasks.md`:
 
@@ -72,12 +72,15 @@ For each spec that has a `tasks.md`:
      - `state`: `"Done"` if all sub-tasks are `[x]`, `"Todo"` if all are `[ ]`, `"In Progress"` if mixed
      - `assignee`: `"me"`
      - `priority`: `2` (High) for the first incomplete slice, `3` (Normal) for others
-   - Store the issue ID in `linear-sync.json` keyed by slice name.
+   - Store the issue ID and `lastSyncedAwosState` in `linear-sync.json` keyed by slice name.
 
    **If already in `linear-sync.json`:**
-   - Update the existing issue: sync `state` based on current checkbox status, update `description` if sub-tasks changed.
+   - Compute the AWOS state from checkboxes (`"Done"` / `"In Progress"` / `"Todo"`).
+   - Only push `state` to Linear when the computed state differs from `lastSyncedAwosState` in `linear-sync.json`. Otherwise, skip the state update to preserve manual Linear status changes.
+   - Always sync `description` if sub-tasks changed.
+   - When pushing a state change, update `lastSyncedAwosState` in `linear-sync.json`.
 
-### Step 4: Save Sync State
+## Step 4: Save Sync State
 
 Write `linear-sync.json` for each spec directory with the structure:
 
@@ -87,19 +90,20 @@ Write `linear-sync.json` for each spec directory with the structure:
   "projectUrl": "https://linear.app/play-later/project/...",
   "lastSynced": "2026-03-31T12:00:00Z",
   "issues": {
-    "Slice 1: Root CLAUDE.md + Documentation Foundation": {
+    "Slice 1: Root CLAUDE.md + Documentation Foundation (REQ-01, 02, 03, 05)": {
       "issueId": "PLA-123",
-      "linearId": "uuid"
+      "linearId": "uuid",
+      "lastSyncedAwosState": "Todo"
     }
   }
 }
 ```
 
-### Step 5: Report
+## Step 5: Report
 
 After syncing, print a summary table:
 
-```
+```text
 | Spec | Linear Project | Issues | Status |
 |------|---------------|--------|--------|
 | 006  | Created       | 8 new  | Planned |
