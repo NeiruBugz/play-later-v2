@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/nailbadiullin/Developer/personal/play-later-v2/.claude/hooks/check-sensitive-files.sh"
+            "command": ".claude/hooks/check-sensitive-files.sh"
           }
         ]
       }
@@ -17,8 +17,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/nailbadiullin/Developer/personal/play-later-v2/.claude/hooks/format-and-lint.sh",
-            "timeout": 30000,
+            "command": ".claude/hooks/format-and-lint.sh",
+            "timeout": 30,
             "statusMessage": "Formatting & linting..."
           }
         ]
