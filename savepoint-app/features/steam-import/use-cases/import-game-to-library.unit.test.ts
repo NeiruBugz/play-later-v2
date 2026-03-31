@@ -137,7 +137,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: mockGame });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: mockGame,
+      });
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -203,7 +206,10 @@ describe("importGameToLibrary", () => {
         data: { game: mockIgdbGame },
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: mockGame });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: mockGame,
+      });
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -251,7 +257,10 @@ describe("importGameToLibrary", () => {
         data: { game: mockIgdbGame },
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: null });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue({
         success: true,
@@ -295,7 +304,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: null });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -348,7 +360,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: mockGame });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: mockGame,
+      });
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -631,7 +646,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: null });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: false,
@@ -657,7 +675,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: null });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -683,7 +704,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: null });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -709,7 +733,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: null });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -740,7 +767,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: null });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: null,
+      });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
         success: true,
@@ -771,7 +801,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: mockGame });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: mockGame,
+      });
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -804,7 +837,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: mockGame });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: mockGame,
+      });
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -845,7 +881,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: mockGame });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: mockGame,
+      });
 
       const multipleItems = [
         mockLibraryItem,
@@ -913,7 +952,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: mockGame });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: mockGame,
+      });
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
@@ -946,7 +988,10 @@ describe("importGameToLibrary", () => {
         data: mockImportedGameDto,
       });
 
-      vi.mocked(getGameByIgdbId).mockResolvedValue({ success: true, data: mockGame });
+      vi.mocked(getGameByIgdbId).mockResolvedValue({
+        success: true,
+        data: mockGame,
+      });
 
       mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
         success: true,
