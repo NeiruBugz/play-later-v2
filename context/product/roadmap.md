@@ -4,12 +4,12 @@ _This roadmap outlines our strategic direction based on customer needs and busin
 
 ---
 
-### Phase 1: Core Foundation
+## Phase 1: Core Foundation _(Complete)_
 
 _The highest priority features that form the core foundation of SavePoint—enabling users to track their gaming library and begin journaling._
 
 - [x] **Technical Foundation & Refactoring**
-  - [x] **IGDB Integration Consolidation:** Refactor IGDB implementation to eliminate duplication between `shared/lib/igdb.ts` and `data-access-layer/services/igdb/igdb-service.ts`. Extract types to `igdb-api-types` package for unified type definitions. Deprecate legacy utility in favor of service layer pattern. ✅ **Completed:** All 18 methods migrated, legacy implementation removed, comprehensive documentation in place.
+  - [x] **IGDB Integration Consolidation:** Refactor IGDB implementation to eliminate duplication between `shared/lib/igdb.ts` and `data-access-layer/services/igdb/igdb-service.ts`. Extract types to `igdb-api-types` package for unified type definitions. Deprecate legacy utility in favor of service layer pattern.
 
 - [x] **User Account Essentials**
   - [x] **Google OAuth Sign-Up & Login:** Allow users to create an account and sign in using Google OAuth as the primary authentication method.
@@ -32,11 +32,11 @@ _The highest priority features that form the core foundation of SavePoint—enab
 
 ---
 
-### Phase 2: Enhanced Discovery & Integration
+## Phase 2: Near-Term Priorities
 
-_Once the foundational features are complete, we will move on to these high-value additions that enhance discovery and reduce manual work._
+_Specced features in implementation order. Each has a functional specification in `context/spec/`._
 
-- [x] **Code Health & Developer Experience** _(Audit: 2026-03-25 — Score 73% Grade C)_
+- [x] **Code Health & Developer Experience** _(Spec 004 — Completed)_
 
   - [x] **P0: Immediate Fixes**
     - [x] Add Playwright MCP to .mcp.json for UI verification (AI-07)
@@ -54,7 +54,18 @@ _Once the foundational features are complete, we will move on to these high-valu
     - [x] Fix DAL→features reverse imports and @prisma/client leakage (ARCH-02/04)
     - [x] Configure Dependabot or Renovate for automated dependency updates (SBP-07)
 
-- [ ] **Code Health & Developer Experience (Round 2)** _(Audit: 2026-03-25 — Score 77% Grade B)_
+- [x] **Steam Library Integration — Stage 1: Technical Foundation** _(Spec 002 — Completed)_
+  - [x] **Lambda Integration:** Connect existing Lambda pipeline (fetch Steam library → IGDB enrichment → `ImportedGame` staging table)
+  - [x] **Feature Flag:** Environment-based toggle to disable Steam import flow in production (avoid AWS costs until ready)
+  - [x] **Local Testing:** SAM/LocalStack setup for local Lambda invocation during development
+  - [x] Steam profile connection UI (Steam ID input)
+  - [x] Imported games stored in `ImportedGame` table (existing schema: storefront, playtime, IGDB match status)
+
+- [x] **Library Status Redesign** _(Spec 005 — Completed)_
+
+  _Redesigned the 4-status model based on real user feedback. Addressed confusion around "Owned" status, added replay intent, and created a unified "what can I play?" view. See [spec](../spec/005-library-status-redesign/functional-spec.md)._
+
+- [ ] **Code Health & Developer Experience (Round 2)** _(Spec 006)_
 
   - [ ] **P0: Immediate Fixes**
     - [ ] Create root CLAUDE.md with project purpose, cross-service architecture, and key commands (AI-01)
@@ -72,15 +83,13 @@ _Once the foundational features are complete, we will move on to these high-valu
     - [ ] Fix dead link in savepoint-app/README.md; add README to scripts/ (DOC-02/04)
     - [ ] Add root Makefile/Taskfile with cross-layer commands; extend PR checks to lambdas-py (E2E-05)
 
-- [ ] **Steam Library Integration**
+- [ ] **FSD Architecture Compliance** _(Spec 007)_
+
+  _Fix FSD layer violations, missing public APIs, and domain code cleanup. See [spec](../spec/007-fsd-architecture-compliance/functional-spec.md)._
+
+- [ ] **Steam Library Integration — Stages 2 & 3: Curation** _(Spec 003)_
 
   _Philosophy: SavePoint is for games you intend to experience, not a catalog. Steam import is curation, not bulk transfer. See [Product Definition](product-definition.md#23-ux-principles)._
-  - [x] **Stage 1: Technical Foundation**
-    - [x] **Lambda Integration:** Connect existing Lambda pipeline (fetch Steam library → IGDB enrichment → `ImportedGame` staging table)
-    - [x] **Feature Flag:** Environment-based toggle to disable Steam import flow in production (avoid AWS costs until ready)
-    - [x] **Local Testing:** SAM/LocalStack setup for local Lambda invocation during development
-    - [x] Steam profile connection UI (Steam ID input)
-    - [x] Imported games stored in `ImportedGame` table (existing schema: storefront, playtime, IGDB match status)
 
   - [ ] **Stage 2: Individual Curation Interface**
     - [ ] Paginated list of imported Steam games with sorting/filtering
@@ -89,15 +98,30 @@ _Once the foundational features are complete, we will move on to these high-valu
     - [ ] Smart status assignment (playtime/recency → Owned/Playing/Played)
     - [ ] Dismiss action to soft-delete unwanted games from list
 
-  - [ ] **Stage 3: Bulk Selection & Import** _(Future Enhancement)_
+  - [ ] **Stage 3: Bulk Selection & Import**
     - [ ] Checkbox selection on each game row
     - [ ] Bulk actions: Select All / Deselect All / Select All on Page
     - [ ] Bulk import: import multiple selected games at once
     - [ ] Selection state persists across pagination
 
-  - [ ] **Stage 4: Ongoing Sync**
-    - [ ] Re-import detects new games only (no duplicates)
-    - [ ] Optional: periodic sync for new purchases
+- [ ] **Social Engagement** _(Spec 008)_
+
+  _Follow other users, view activity feed of status changes and library adds. Includes public user profiles. See [spec](../spec/008-social-engagement/functional-spec.md)._
+  - [ ] Public user profiles with display name, avatar, stats, recent activity, and library preview
+  - [ ] Profile visibility toggle (public/private)
+  - [ ] Follow/unfollow from profile pages with public follow lists
+  - [ ] Activity feed widget on dashboard (status changes + library adds from followed users)
+  - [ ] Empty state with popular activity for users with no follows
+
+---
+
+## Phase 3: Platform Integrations
+
+_Expand library import beyond Steam to other major gaming platforms._
+
+- [ ] **Steam Library Integration — Stage 4: Ongoing Sync**
+  - [ ] Re-import detects new games only (no duplicates)
+  - [ ] Optional: periodic sync for new purchases
 
 - [ ] **PlayStation Trophy Integration** _(Research Complete)_
 
@@ -134,32 +158,24 @@ _Once the foundational features are complete, we will move on to these high-valu
     - [ ] Reuse platform import curation UI
     - [ ] User selects which Xbox games to track
 
-- [ ] **Discovery & Exploration**
-  - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.
-  - [ ] **Enhanced Game Details:** Add franchise information, expansions, and related games to detail pages.
-´˝
-- [ ] **Curated Collections**
-  - [ ] **Create Themed Collections:** Allow users to create personal, themed collections (e.g., "Cozy Winter Games," "Games That Made Me Think") from their library.
-  - [ ] **Browse Personal Collections:** Display all of a user's collections in an organized view for easy navigation.
-
 ---
 
-### Phase 3: Community & Social Features
+## Phase 4: Community & Discovery
 
 _Features planned for future consideration. Their priority and scope may be refined based on user feedback from earlier phases._
 
 - [ ] **Community Reflections**
   - [ ] **Public Reflections:** Enable users to optionally make their journal entries public to share perspectives with the community.
   - [ ] **Browse Community Reflections:** Allow users to read how others experienced the same games before diving in themselves.
-  - [ ] **User Profiles:** Create public user profiles showing shared collections and public journal entries.
 
-- [ ] **Social Engagement**
-  - [ ] **Follow Other Users:** Allow users to follow other patient gamers whose taste and perspectives resonate with them.
-  - [ ] **Activity Feed:** Display a feed of gaming reflections and collection updates from followed users (inspired by Letterboxd and Goodreads).
-  - [ ] **Reflection Likes & Engagement:** Enable users to like and engage with others' reflections to build community connection.
+- [ ] **Curated Collections**
+  - [ ] **Create Themed Collections:** Allow users to create personal, themed collections (e.g., "Cozy Winter Games," "Games That Made Me Think") from their library.
+  - [ ] **Browse Personal Collections:** Display all of a user's collections in an organized view for easy navigation.
+
+- [ ] **Discovery & Exploration**
+  - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.
+  - [ ] **Enhanced Game Details:** Add franchise information, expansions, and related games to detail pages.
 
 - [ ] **Advanced Discovery**
   - [ ] **Mood-Based Recommendations:** Help users find "the right game for right now" through mood-based filtering ("I want something cozy tonight").
   - [ ] **Community Collections:** Allow users to share their themed collections publicly for others to discover and draw inspiration from.
-
----

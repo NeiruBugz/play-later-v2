@@ -1,0 +1,15 @@
+{
+  "projectId": "e9f5fee9-78f1-4b2d-bf4a-d9a95071cc16",
+  "projectUrl": "https://linear.app/play-later/project/006-code-health-dx-round-2-0d161ac10530",
+  "lastSynced": "2026-03-31T08:24:00Z",
+  "issues": {
+    "Slice 1: Root CLAUDE.md + Documentation Foundation (REQ-01, 02, 03, 05)": { "issueId": "PLA-88", "linearId": "PLA-88", "lastSyncedAwosState": "Todo" },
+    "Slice 2: CLAUDE.md Cleanup (REQ-07)": { "issueId": "PLA-89", "linearId": "PLA-89", "lastSyncedAwosState": "Todo" },
+    "Slice 3: .gitignore + Stale Docs Fix (REQ-08, 09)": { "issueId": "PLA-90", "linearId": "PLA-90", "lastSyncedAwosState": "Todo" },
+    "Slice 4: Repository Bypass Fixes (REQ-06)": { "issueId": "PLA-91", "linearId": "PLA-91", "lastSyncedAwosState": "Todo" },
+    "Slice 5: Root Makefile (REQ-10, part 1)": { "issueId": "PLA-92", "linearId": "PLA-92", "lastSyncedAwosState": "Todo" },
+    "Slice 6: CI Workflow Expansion (REQ-10, part 2)": { "issueId": "PLA-93", "linearId": "PLA-93", "lastSyncedAwosState": "Todo" },
+    "Slice 7: Generate tasks.md for Spec 005 (REQ-04)": { "issueId": "PLA-94", "linearId": "PLA-94", "lastSyncedAwosState": "Todo" },
+    "Slice 8: Final Validation": { "issueId": "PLA-95", "linearId": "PLA-95", "lastSyncedAwosState": "Todo" }
+  }
+}

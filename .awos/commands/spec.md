@@ -89,4 +89,5 @@ Your first goal is to determine the **topic** - the single, specific feature or 
 1.  **Create Short Name:** Once the user approves the draft, generate a short, kebab-case name from the specification's title (e.g., "User Profile Picture Upload" becomes `user-profile-picture-upload`).
 2.  **Execute Directory Script:** Execute the shell script with the short name as a parameter: `.awos/scripts/create-spec-directory.sh [short-name]`. This will create a new directory (e.g., `context/spec/001-user-profile-picture-upload`).
 3.  **Save the File:** Write the final, approved specification content into the `functional-spec.md` file within the newly created directory.
-4.  **Conclude:** Announce the final action and provide the full path to the new file: "Perfect. I have saved the functional specification. You can find it at `context/spec/[directory-name]/functional-spec.md`. Now, it's time to work on the technical considerations with `/awos:tech`"
+4.  **Sync to Linear:** After saving, execute `/awos:linear` to create a Linear Project for the new spec.
+5.  **Conclude:** Announce the final action and provide the full path to the new file: "Perfect. I have saved the functional specification and synced to Linear. You can find it at `context/spec/[directory-name]/functional-spec.md`. Now, it's time to work on the technical considerations with `/awos:tech`"
