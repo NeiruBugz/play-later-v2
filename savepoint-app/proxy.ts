@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { HSTS_MAX_AGE_SECONDS } from "@/shared/constants";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function middleware(_request: NextRequest) {
+export function proxy(_request: NextRequest) {
   const response = NextResponse.next();
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
