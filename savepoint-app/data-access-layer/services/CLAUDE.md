@@ -40,81 +40,11 @@ See [README.md](./README.md) for comprehensive documentation on the service laye
 4. Export from `services/index.ts`
 5. Add unit tests with mocked repositories
 
-### Service Template
+## Key Patterns
 
-```typescript
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-import { BaseService, ServiceErrorCode, type ServiceResult } from "../types";
-import { findSomething } from "@/data-access-layer/repository";
-
-const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "MyService" });
-
-export class MyService extends BaseService {
-  async getSomething(input: Input): Promise<ServiceResult<Output>> {
-    logger.info({ ...input }, "Getting something");
-
-    // 1. Validate input
-    const validation = MySchema.safeParse(input);
-    if (!validation.success) {
-      return this.error("Invalid input", ServiceErrorCode.VALIDATION_ERROR);
-    }
-
-    // 2. Call repository
-    const data = await findSomething(validation.data.id);
-    if (!data) {
-      return this.error("Not found", ServiceErrorCode.NOT_FOUND);
-    }
-
-    // 3. Return success
-    return this.success({ data });
-  }
-}
-```
-
-## Import Rules
-
-```typescript
-// ✅ Services can import
-import { findGameById } from "@/data-access-layer/repository";
-import { LibraryItemMapper } from "@/data-access-layer/domain";
-
-// ❌ Services CANNOT import
-import { OtherService } from "@/data-access-layer/services/other";  // Use use-cases
-import { gameHandler } from "@/data-access-layer/handlers";          // Wrong direction
-```
-
-**Services NEVER call other services** - use use-cases for orchestration.
-
-## Result Pattern
-
-```typescript
-// Success
-return this.success({ profile, stats });
-
-// Error
-return this.error("User not found", ServiceErrorCode.NOT_FOUND);
-```
-
-## Testing Requirements
-
-- Unit tests with mocked repositories
-- Test all error paths
-- Verify logging calls
-
-```typescript
-vi.mock("@/data-access-layer/repository");
-
-describe("ProfileService", () => {
-  it("returns NOT_FOUND when user does not exist", async () => {
-    vi.mocked(findUserById).mockResolvedValue(null);
-
-    const result = await service.getProfile({ userId: "xxx" });
-
-    expect(result.success).toBe(false);
-    expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-  });
-});
-```
+- Services extend `BaseService` and return `ServiceResult` via `this.success()` / `this.error()`
+- Services NEVER call other services -- use use-cases for orchestration
+- Unit tests mock repositories; test all error paths and verify logging calls
 
 ## Security Guidelines
 

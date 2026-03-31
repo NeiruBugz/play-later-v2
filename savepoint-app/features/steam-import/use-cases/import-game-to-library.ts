@@ -1,8 +1,8 @@
 "use server";
 
-import { findGameByIgdbId } from "@/data-access-layer/repository";
 import {
   GameDetailService,
+  getGameByIgdbId,
   IgdbService,
   ImportedGameService,
   LibraryService,
@@ -201,12 +201,10 @@ export async function importGameToLibrary(
     );
   }
 
-  let game;
-  try {
-    game = await findGameByIgdbId(igdbId);
-  } catch (error) {
+  const gameResult = await getGameByIgdbId(igdbId);
+  if (!gameResult.success) {
     logger.error(
-      { error, igdbId },
+      { error: gameResult.error, igdbId },
       "Failed to check if game exists in database"
     );
     return {
@@ -214,6 +212,7 @@ export async function importGameToLibrary(
       error: "Failed to check game existence",
     };
   }
+  const game = gameResult.data;
 
   let gameId: string;
   let gameSlug: string;

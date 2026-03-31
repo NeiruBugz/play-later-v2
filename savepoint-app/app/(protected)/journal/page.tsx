@@ -1,5 +1,4 @@
-import { findGamesByIds } from "@/data-access-layer/repository";
-import { JournalService } from "@/data-access-layer/services";
+import { getGamesByIds, JournalService } from "@/data-access-layer/services";
 
 import { JournalTimeline } from "@/features/journal/ui/journal-timeline";
 import { requireServerUserId } from "@/shared/lib/app/auth";
@@ -42,7 +41,8 @@ export default async function JournalPage() {
       ? [...new Set(entries.map((entry) => entry.gameId))]
       : [];
 
-  const games = gameIds.length > 0 ? await findGamesByIds(gameIds) : [];
+  const gamesResult = gameIds.length > 0 ? await getGamesByIds(gameIds) : null;
+  const games = gamesResult?.success ? gamesResult.data : [];
   const gameRecord: Record<
     string,
     { id: string; title: string; slug: string; coverImage: string | null }

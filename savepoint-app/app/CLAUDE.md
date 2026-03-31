@@ -10,29 +10,6 @@ The App Router is a **thin adapter layer** that:
 - Delegates business logic to features and services
 - Handles HTTP concerns (caching, headers, responses)
 
-## Directory Structure
-
-```
-app/
-├── (protected)/          # Route group requiring authentication
-│   ├── dashboard/        # User dashboard
-│   ├── library/          # Game library management
-│   └── profile/          # User profile and settings
-├── api/                  # API route handlers
-│   ├── auth/             # NextAuth endpoints
-│   ├── games/            # Game search and details
-│   └── library/          # Library operations
-├── games/                # Public game pages
-│   ├── search/           # Game search page
-│   └── [slug]/           # Dynamic game detail page
-├── login/                # Authentication page
-├── layout.tsx            # Root layout
-├── page.tsx              # Home page
-├── error.tsx             # Error boundary
-├── not-found.tsx         # 404 page
-└── loading.tsx           # Loading state
-```
-
 ## Architectural Rules
 
 ### What Belongs Here

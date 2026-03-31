@@ -67,6 +67,8 @@ export {
 export { JournalService } from "./journal/journal-service";
 export {
   GameDetailService,
+  getGameById,
+  getGameByIgdbId,
   getGamesByIds,
 } from "./game-detail/game-detail-service";
 export {
