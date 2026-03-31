@@ -65,7 +65,10 @@ export {
   type JournalService as IJournalService,
 } from "./journal/types";
 export { JournalService } from "./journal/journal-service";
-export { GameDetailService, getGamesByIds } from "./game-detail/game-detail-service";
+export {
+  GameDetailService,
+  getGamesByIds,
+} from "./game-detail/game-detail-service";
 export {
   OnboardingService,
   type OnboardingStep,
