@@ -5,9 +5,12 @@ import { checkUsernameAvailability } from "@/features/profile/server-actions/che
 
 import { useUsernameValidation } from "./use-username-validation";
 
-vi.mock("@/features/profile/server-actions/check-username-availability", () => ({
-  checkUsernameAvailability: vi.fn(),
-}));
+vi.mock(
+  "@/features/profile/server-actions/check-username-availability",
+  () => ({
+    checkUsernameAvailability: vi.fn(),
+  })
+);
 
 const mockCheckUsernameAvailability = vi.mocked(checkUsernameAvailability);
 

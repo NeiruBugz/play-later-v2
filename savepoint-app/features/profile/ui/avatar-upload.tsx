@@ -4,9 +4,9 @@ import { Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 
+import { uploadAvatar } from "@/features/profile/server-actions/upload-avatar";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
-import { uploadAvatar } from "@/features/profile/server-actions/upload-avatar";
 
 import type { AvatarUploadProps } from "./avatar-upload.types";
 
