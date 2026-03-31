@@ -1,0 +1,16 @@
+{
+  "projectId": "1fcafdc7-5d46-44c5-aef7-c35a961d5fba",
+  "projectUrl": "https://linear.app/play-later/project/007-fsd-architecture-compliance-bdfcf4c1f53b",
+  "lastSynced": "2026-03-31T08:24:15Z",
+  "issues": {
+    "Slice 1: ESLint Boundaries + Dead Code Cleanup": { "issueId": "PLA-96", "linearId": "PLA-96" },
+    "Slice 2: Domain Types Migration": { "issueId": "PLA-97", "linearId": "PLA-97" },
+    "Slice 3: Domain Business Logic Migration": { "issueId": "PLA-98", "linearId": "PLA-98" },
+    "Slice 4: Command Palette → features/command-palette/": { "issueId": "PLA-99", "linearId": "PLA-99" },
+    "Slice 5: GameCard → widgets/game-card/": { "issueId": "PLA-100", "linearId": "PLA-100" },
+    "Slice 6: Profile Server Actions + Domain Components": { "issueId": "PLA-101", "linearId": "PLA-101" },
+    "Slice 7: Public API Barrel Files for All Features": { "issueId": "PLA-102", "linearId": "PLA-102" },
+    "Slice 8: CLAUDE.md Files + Documentation Updates": { "issueId": "PLA-103", "linearId": "PLA-103" },
+    "Slice 9: Final Validation": { "issueId": "PLA-104", "linearId": "PLA-104" }
+  }
+}

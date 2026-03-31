@@ -1,0 +1,15 @@
+{
+  "projectId": "e9f5fee9-78f1-4b2d-bf4a-d9a95071cc16",
+  "projectUrl": "https://linear.app/play-later/project/006-code-health-dx-round-2-0d161ac10530",
+  "lastSynced": "2026-03-31T08:24:00Z",
+  "issues": {
+    "Slice 1: Root CLAUDE.md + Documentation Foundation": { "issueId": "PLA-88", "linearId": "PLA-88" },
+    "Slice 2: CLAUDE.md Cleanup": { "issueId": "PLA-89", "linearId": "PLA-89" },
+    "Slice 3: .gitignore + Stale Docs Fix": { "issueId": "PLA-90", "linearId": "PLA-90" },
+    "Slice 4: Repository Bypass Fixes": { "issueId": "PLA-91", "linearId": "PLA-91" },
+    "Slice 5: Root Makefile": { "issueId": "PLA-92", "linearId": "PLA-92" },
+    "Slice 6: CI Workflow Expansion": { "issueId": "PLA-93", "linearId": "PLA-93" },
+    "Slice 7: Generate tasks.md for Spec 005": { "issueId": "PLA-94", "linearId": "PLA-94" },
+    "Slice 8: Final Validation": { "issueId": "PLA-95", "linearId": "PLA-95" }
+  }
+}
