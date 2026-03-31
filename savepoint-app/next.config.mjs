@@ -1,8 +1,5 @@
 /** @type {import("next").NextConfig} */
 const nextConfig = {
-  eslint: {
-    dirs: ["app", "features", "shared", "test", ".", "data-access-layer"],
-  },
   serverExternalPackages: ["pino", "pino-pretty"],
   images: {
     remotePatterns: [
@@ -38,8 +35,8 @@ const nextConfig = {
   },
   reactStrictMode: true,
   typedRoutes: true,
+  reactCompiler: true,
   experimental: {
-    reactCompiler: true,
     serverActions: {
       bodySizeLimit: "4mb",
     },
