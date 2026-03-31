@@ -1,11 +1,5 @@
 export type { HandlerResult, RequestContext, Handler } from "./types";
 
-export { gameSearchHandler } from "./game-search/game-search-handler";
-export type {
-  GameSearchHandlerInput,
-  GameSearchHandlerOutput,
-} from "./game-search/types";
-
 export { getLibraryHandler } from "./library/get-library-handler";
 export type {
   GetLibraryHandlerInput,
