@@ -85,65 +85,42 @@ const eslintConfig = [
       ],
     },
     rules: {
-      "boundaries/element-types": [
+      "boundaries/dependencies": [
         "warn",
         {
           default: "disallow",
           rules: [
-            // App routes can use everything except direct repository/prisma access
-            // Can also import from other app routes (layouts, shared app components)
             {
-              from: "app-route",
-              allow: [
-                "app-route",
-                "handler",
-                "use-case",
-                "service",
-                "server-action",
-                "ui-component",
-                "shared",
-              ],
+              from: [["app-route"]],
+              allow: [["app-route"], ["handler"], ["use-case"], ["service"], ["server-action"], ["ui-component"], ["shared"]],
             },
-            // Server actions can use use-cases and services
-            // Can import from other server actions for shared utilities
             {
-              from: "server-action",
-              allow: ["server-action", "use-case", "service", "shared"],
+              from: [["server-action"]],
+              allow: [["server-action"], ["use-case"], ["service"], ["shared"]],
             },
-            // Handlers orchestrate use-cases and services
-            // Handlers are the controller layer for API routes
             {
-              from: "handler",
-              allow: ["handler", "use-case", "service", "shared"],
+              from: [["handler"]],
+              allow: [["handler"], ["use-case"], ["service"], ["shared"]],
             },
-            // Use-cases orchestrate services only
-            // May need to import types from app layer
             {
-              from: "use-case",
-              allow: ["service", "shared"],
+              from: [["use-case"]],
+              allow: [["service"], ["shared"]],
             },
-            // UI components can call server actions, use-cases (for Server Components), and use shared utilities
             {
-              from: "ui-component",
-              allow: ["use-case", "server-action", "shared", "ui-component"],
+              from: [["ui-component"]],
+              allow: [["use-case"], ["server-action"], ["shared"], ["ui-component"]],
             },
-            // Services can only use repositories and shared utilities
-            // Allow service-to-service imports for shared types (e.g., ServiceError, base classes)
-            // CRITICAL: Services should NOT instantiate other services
             {
-              from: "service",
-              allow: ["service", "repository", "shared"],
+              from: [["service"]],
+              allow: [["service"], ["repository"], ["shared"]],
             },
-            // Repositories can only use Prisma, shared utilities, and repository types
-            // Allow repository-to-repository for shared types (e.g., RepositoryResult)
             {
-              from: "repository",
-              allow: ["repository", "prisma", "shared"],
+              from: [["repository"]],
+              allow: [["repository"], ["prisma"], ["shared"]],
             },
-            // Shared can use other shared (utilities, components, types)
             {
-              from: "shared",
-              allow: ["shared"],
+              from: [["shared"]],
+              allow: [["shared"]],
             },
           ],
         },
