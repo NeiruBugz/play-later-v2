@@ -1,7 +1,7 @@
 import { ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
 
-import { LibraryPageView } from "@/features/library/ui";
+import { LibraryPageView } from "@/features/library";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export const metadata: Metadata = {

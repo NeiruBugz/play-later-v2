@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 
-import { checkUsernameAvailability } from "@/shared/server-actions/profile";
+import { checkUsernameAvailability } from "@/features/profile/server-actions/check-username-availability";
 
 import { updateProfileFormAction } from "../server-actions/update-profile";
 import { ProfileSettingsForm } from "./profile-settings-form";
@@ -17,10 +17,16 @@ vi.mock("../server-actions/update-profile", () => ({
   updateProfileFormAction: vi.fn(),
 }));
 
-vi.mock("@/shared/server-actions/profile", () => ({
+vi.mock("@/features/profile/server-actions/upload-avatar", () => ({
   uploadAvatar: vi.fn(),
-  checkUsernameAvailability: vi.fn(),
 }));
+
+vi.mock(
+  "@/features/profile/server-actions/check-username-availability",
+  () => ({
+    checkUsernameAvailability: vi.fn(),
+  })
+);
 
 const mockCheckUsernameAvailability = vi.mocked(checkUsernameAvailability);
 

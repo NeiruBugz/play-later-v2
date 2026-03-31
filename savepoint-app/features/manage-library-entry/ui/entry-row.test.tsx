@@ -1,11 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import {
-  AcquisitionType,
-  LibraryItemStatus,
-  type LibraryItemDomain,
-} from "@/shared/types/library";
+import type { LibraryItemDomain } from "@/features/library/types";
+import { AcquisitionType, LibraryItemStatus } from "@/shared/types/library";
 
 import { EntryRow } from "./entry-row";
 

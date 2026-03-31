@@ -13,7 +13,6 @@ export {
   isAuthenticationError,
 } from "./auth/handle-next-auth-error";
 export { formatRelativeDate, formatAbsoluteDate } from "./date";
-export { getGameUrl, isExternalGameId } from "./game";
 export {
   platformMapper,
   platformToBackgroundColor,

@@ -1,4 +1,4 @@
-import type { JournalEntryDomain } from "@/shared/types/journal";
+import type { JournalEntryDomain } from "@/features/journal/types";
 
 import type { ServiceResult } from "../types";
 

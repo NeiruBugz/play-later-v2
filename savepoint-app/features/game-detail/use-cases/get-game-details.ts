@@ -9,13 +9,11 @@ import {
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
+import type { JournalEntryDomain } from "@/features/journal/types";
+import type { LibraryItemDomain } from "@/features/library/types";
 import { createLogger } from "@/shared/lib/app/logger";
 import { LOGGER_CONTEXT } from "@/shared/lib/app/logger-context";
-import type {
-  FullGameInfoResponse,
-  JournalEntryDomain,
-  LibraryItemDomain,
-} from "@/shared/types";
+import type { FullGameInfoResponse } from "@/shared/types";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.USE_CASE]: "getGameDetailsUseCase",

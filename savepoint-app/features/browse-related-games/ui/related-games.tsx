@@ -1,6 +1,6 @@
 import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 
-import { GameCard } from "@/shared/components/game-card";
+import { GameCard } from "@/widgets/game-card";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import {
   Tabs,

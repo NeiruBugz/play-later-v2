@@ -1,4 +1,4 @@
-import type { JournalEntryDomain } from "@/shared/types";
+import type { JournalEntryDomain } from "@/features/journal/types";
 
 export interface JournalEntriesSectionProps {
   journalEntries: JournalEntryDomain[];

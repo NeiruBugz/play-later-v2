@@ -4,9 +4,9 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
+import type { JournalEntryDomain } from "@/features/journal/types";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
-import type { JournalEntryDomain } from "@/shared/types/journal";
 
 import { getGamesByIdsAction } from "../server-actions/get-games-by-ids";
 import { getJournalEntriesAction } from "../server-actions/get-journal-entries";

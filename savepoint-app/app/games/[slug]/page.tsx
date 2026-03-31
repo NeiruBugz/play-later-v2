@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { GenreBadges } from "@/widgets/game-card";
 import {
   RelatedGames,
   RelatedGamesSkeleton,
 } from "@/features/browse-related-games";
-import { GameCoverImage } from "@/features/game-detail/ui/game-cover-image";
-import { GameDescription } from "@/features/game-detail/ui/game-description";
-import { GameReleaseDate } from "@/features/game-detail/ui/game-release-date";
-import { JournalEntriesSection } from "@/features/game-detail/ui/journal-entries-section";
-import { LibraryStatusDisplay } from "@/features/game-detail/ui/library-status-display";
-import { TimesToBeatSection } from "@/features/game-detail/ui/times-to-beat-section";
-import { getGameDetails } from "@/features/game-detail/use-cases/get-game-details";
-import { GenreBadges } from "@/shared/components/genre-badges";
+import {
+  GameCoverImage,
+  GameDescription,
+  GameReleaseDate,
+  JournalEntriesSection,
+  LibraryStatusDisplay,
+  TimesToBeatSection,
+} from "@/features/game-detail";
+import { getGameDetails } from "@/features/game-detail/index.server";
 import { PlatformBadges } from "@/shared/components/platform-badges";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
 

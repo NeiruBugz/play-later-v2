@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-import { AuthPageView } from "@/features/auth/ui/auth-page-view";
+import { AuthPageView } from "@/features/auth";
 
 export default async function AuthPage() {
   const session = await auth();

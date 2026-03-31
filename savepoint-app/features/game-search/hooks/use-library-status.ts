@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { getLibraryStatusForGames } from "@/features/manage-library-entry/server-actions";

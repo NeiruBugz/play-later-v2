@@ -3,11 +3,11 @@
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
-import { createServerAction, type ActionResult } from "@/shared/lib";
 import {
   CompleteProfileSetupSchema,
   type CompleteProfileSetupInput,
-} from "@/shared/lib/profile";
+} from "@/features/profile/lib";
+import { createServerAction, type ActionResult } from "@/shared/lib";
 
 type CompleteSetupData = {
   username: string | null;

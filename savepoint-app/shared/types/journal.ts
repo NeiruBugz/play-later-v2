@@ -19,5 +19,3 @@ export type JournalVisibility =
   (typeof JournalVisibility)[keyof typeof JournalVisibility];
 
 export type { JournalEntry } from "@prisma/client";
-
-export type JournalEntryDomain = import("@prisma/client").JournalEntry;

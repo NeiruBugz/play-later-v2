@@ -2,10 +2,10 @@
 
 import { ChevronRight, Gamepad2 } from "lucide-react";
 
+import type { LibraryItemDomain } from "@/features/library/types";
 import { Badge } from "@/shared/components/ui/badge";
 import { getStatusLabel, getStatusVariant } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
-import type { LibraryItemDomain } from "@/shared/types";
 
 interface EntryRowProps {
   entry: LibraryItemDomain;

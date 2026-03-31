@@ -2,7 +2,7 @@ import { IgdbService } from "@/data-access-layer/services";
 import { unstable_cache } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { SearchGamesSchema } from "@/features/game-search/schemas";
+import { SearchGamesSchema } from "@/features/game-search";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";

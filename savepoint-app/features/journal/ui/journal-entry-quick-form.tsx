@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import type { JournalEntryDomain } from "@/features/journal/types";
 import { Button } from "@/shared/components/ui/button";
 import {
   Collapsible,
@@ -26,7 +27,6 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 import { MAX_CHARACTERS } from "@/shared/lib/rich-text";
 import { cn } from "@/shared/lib/ui/utils";
-import type { JournalEntryDomain } from "@/shared/types";
 
 import type { CreateJournalEntryInput } from "../schemas";
 import { createJournalEntryAction } from "../server-actions/create-journal-entry";

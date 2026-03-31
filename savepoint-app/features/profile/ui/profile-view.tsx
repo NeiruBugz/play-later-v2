@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import Link from "next/link";
 
+import { statusLabels } from "@/features/profile/lib";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import {
@@ -11,7 +12,6 @@ import {
   ProgressRing,
 } from "@/shared/components/ui/progress-ring";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
-import { statusLabels } from "@/shared/lib/profile";
 
 import { prepareProfileData } from "../lib/prepare-profile-data";
 import { LogoutButton } from "./logout-button";

@@ -2,11 +2,9 @@ import "server-only";
 
 import { LibraryService } from "@/data-access-layer/services";
 
+import type { LibraryItemWithGameDomain } from "@/features/library/types";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-import {
-  LibraryItemStatus,
-  type LibraryItemWithGameDomain,
-} from "@/shared/types/library";
+import { LibraryItemStatus } from "@/shared/types/library";
 
 const UP_NEXT_LIMIT = 4;
 

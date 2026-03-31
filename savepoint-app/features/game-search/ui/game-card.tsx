@@ -3,7 +3,7 @@
 import {
   GameCardFooter,
   GameCard as UnifiedGameCard,
-} from "@/shared/components/game-card";
+} from "@/widgets/game-card";
 import { Badge } from "@/shared/components/ui/badge";
 import { getStatusConfig } from "@/shared/lib/library-status";
 

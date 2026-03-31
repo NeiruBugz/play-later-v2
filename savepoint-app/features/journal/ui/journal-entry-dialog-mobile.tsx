@@ -3,9 +3,9 @@
 import { X } from "lucide-react";
 import { Drawer } from "vaul";
 
+import type { JournalEntryDomain } from "@/features/journal/types";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
-import type { JournalEntryDomain } from "@/shared/types";
 
 import { JournalEntryQuickForm } from "./journal-entry-quick-form";
 

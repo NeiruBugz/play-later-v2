@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import type { JournalEntryDomain } from "@/shared/types";
+import type { JournalEntryDomain } from "@/features/journal/types";
 
 import { getPlayingGameAction } from "../server-actions/get-playing-game";
 import { InlineGameSelector } from "./inline-game-selector";

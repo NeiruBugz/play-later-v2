@@ -1,9 +1,8 @@
 import type { PropsWithChildren } from "react";
 
+import { Header, MobileNav } from "@/widgets/header";
+import { CommandPaletteProvider } from "@/features/command-palette";
 import { BrowserBackButton } from "@/shared/components/browser-back-button";
-import { CommandPaletteProvider } from "@/shared/components/command-palette";
-import { Header } from "@/shared/components/header";
-import { MobileNav } from "@/shared/components/mobile-nav";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
 
 export default async function GameDetailsLayout({

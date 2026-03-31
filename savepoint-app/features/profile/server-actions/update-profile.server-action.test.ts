@@ -2,7 +2,7 @@ import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
-import type { UpdateProfileFormState } from "@/shared/types/profile";
+import type { UpdateProfileFormState } from "@/features/profile/types";
 
 import { updateProfile, updateProfileFormAction } from "./update-profile";
 

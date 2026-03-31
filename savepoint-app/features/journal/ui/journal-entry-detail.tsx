@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { GameCard } from "@/shared/components/game-card";
+import { GameCard } from "@/widgets/game-card";
+import type { JournalEntryDomain } from "@/features/journal/types";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -15,7 +16,6 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatRelativeDate } from "@/shared/lib/date";
-import type { JournalEntryDomain } from "@/shared/types";
 
 import { deleteJournalEntryAction } from "../server-actions/delete-journal-entry";
 import { DeleteEntryDialog } from "./delete-entry-dialog";

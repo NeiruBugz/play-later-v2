@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useReducer } from "react";
 
-import type { LibraryItemDomain } from "@/shared/types";
+import type { LibraryItemDomain } from "@/features/library/types";
 
 export type ModalView = "add" | "manage";
 

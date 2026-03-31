@@ -1,4 +1,4 @@
-import type { ProfileWithStats } from "@/shared/types/profile";
+import type { ProfileWithStats } from "@/features/profile/types";
 
 export interface ProfileViewProps {
   profile: ProfileWithStats;

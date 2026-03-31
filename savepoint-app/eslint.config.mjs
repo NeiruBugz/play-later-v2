@@ -35,6 +35,7 @@ const eslintConfig = [
       "boundaries/include": [
         "app/**/*",
         "features/**/*",
+        "widgets/**/*",
         "shared/**/*",
         "data-access-layer/**/*",
         "prisma/**/*",
@@ -68,6 +69,11 @@ const eslintConfig = [
           mode: "file",
         },
         {
+          type: "widget",
+          pattern: "widgets/**/*",
+          mode: "file",
+        },
+        {
           type: "handler",
           pattern: "data-access-layer/handlers/**/*",
           mode: "file",
@@ -92,7 +98,7 @@ const eslintConfig = [
           rules: [
             {
               from: [["app-route"]],
-              allow: [["app-route"], ["handler"], ["use-case"], ["service"], ["server-action"], ["ui-component"], ["shared"]],
+              allow: [["app-route"], ["handler"], ["use-case"], ["service"], ["server-action"], ["ui-component"], ["widget"], ["shared"]],
             },
             {
               from: [["server-action"]],
@@ -108,7 +114,11 @@ const eslintConfig = [
             },
             {
               from: [["ui-component"]],
-              allow: [["use-case"], ["server-action"], ["shared"], ["ui-component"]],
+              allow: [["use-case"], ["server-action"], ["shared"], ["ui-component"], ["widget"]],
+            },
+            {
+              from: [["widget"]],
+              allow: [["ui-component"], ["server-action"], ["shared"]],
             },
             {
               from: [["service"]],
