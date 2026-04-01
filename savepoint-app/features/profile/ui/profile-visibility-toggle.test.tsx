@@ -153,6 +153,25 @@ describe("ProfileVisibilityToggle", () => {
     });
   });
 
+  describe("given username is empty", () => {
+    it("disables the switch", () => {
+      render(<ProfileVisibilityToggle isPublicProfile={false} username="" />);
+
+      const toggle = screen.getByRole("switch", {
+        name: /toggle public profile visibility/i,
+      });
+      expect(toggle).toBeDisabled();
+    });
+
+    it("shows a message to set username first", () => {
+      render(<ProfileVisibilityToggle isPublicProfile={false} username="" />);
+
+      expect(
+        screen.getByText(/set a username first to enable public profile/i)
+      ).toBeVisible();
+    });
+  });
+
   describe("given the server action fails", () => {
     it("shows an error toast with the failure message", async () => {
       mockUpdateProfile.mockResolvedValue({

@@ -39,20 +39,22 @@ export function ProfileVisibilityToggle({
   }
 
   return (
-    <div className="flex items-center justify-between gap-lg rounded-lg border p-lg">
+    <div className="gap-lg p-lg flex items-center justify-between rounded-lg border">
       <div className="space-y-xs">
         <Label htmlFor="public-profile-toggle" className="body-sm font-medium">
           Public profile
         </Label>
         <p className="body-sm text-muted-foreground">
-          Allow other users to see your profile and gaming activity
+          {username
+            ? "Allow other users to see your profile and gaming activity"
+            : "Set a username first to enable public profile"}
         </p>
       </div>
       <Switch
         id="public-profile-toggle"
         checked={optimisticIsPublic}
         onCheckedChange={handleToggle}
-        disabled={isPending}
+        disabled={isPending || !username}
         aria-label="Toggle public profile visibility"
       />
     </div>
