@@ -90,3 +90,13 @@ export {
   type FindImportedGameByIdInput,
   type UpdateImportedGameStatusInput,
 } from "./imported-game";
+export { SocialService } from "./social/social-service";
+export {
+  type FollowCounts,
+  type FollowUserResult,
+  type UnfollowUserResult,
+  type IsFollowingResult,
+  type GetFollowCountsResult,
+  type GetFollowersResult,
+  type GetFollowingResult,
+} from "./social/types";

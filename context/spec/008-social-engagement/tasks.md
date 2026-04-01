@@ -17,16 +17,16 @@
   - [x] Write integration tests for follow-repository: create, duplicate prevention, delete, counts, cascade on user delete **[Agent: typescript-test-expert]**
   - [x] Verify: `pnpm --filter savepoint test:backend` passes; migration applies cleanly **[Agent: nextjs-fullstack]**
 
-- [ ] **Slice 2: SocialService + Follow/Unfollow Server Actions**
-  - [ ] Create `services/social/social-service.ts` (class-based) with: `followUser`, `unfollowUser`, `isFollowing`, `getFollowCounts`, `getFollowers`, `getFollowing` **[Agent: nextjs-fullstack]**
-  - [ ] `followUser` validates: not self-follow, target user exists and `isPublicProfile = true`, then delegates to repo **[Agent: nextjs-fullstack]**
-  - [ ] Create `services/social/types.ts` with service-specific types **[Agent: nextjs-fullstack]**
-  - [ ] Export from `services/index.ts` **[Agent: nextjs-fullstack]**
-  - [ ] Create `features/social/` directory structure: `ui/`, `server-actions/`, `hooks/`, `types.ts`, `index.ts`, `index.server.ts` **[Agent: nextjs-fullstack]**
-  - [ ] Create `features/social/server-actions/follow-user.ts` using `createServerAction` with `requireAuth`, Zod schema for `followingId` **[Agent: nextjs-fullstack]**
-  - [ ] Create `features/social/server-actions/unfollow-user.ts` using same pattern **[Agent: nextjs-fullstack]**
-  - [ ] Write unit tests for SocialService: self-follow prevention, target not public, duplicate follow, happy path follow/unfollow **[Agent: typescript-test-expert]**
-  - [ ] Verify: `pnpm --filter savepoint test` passes **[Agent: nextjs-fullstack]**
+- [x] **Slice 2: SocialService + Follow/Unfollow Server Actions**
+  - [x] Create `services/social/social-service.ts` (class-based) with: `followUser`, `unfollowUser`, `isFollowing`, `getFollowCounts`, `getFollowers`, `getFollowing` **[Agent: nextjs-fullstack]**
+  - [x] `followUser` validates: not self-follow, target user exists and `isPublicProfile = true`, then delegates to repo **[Agent: nextjs-fullstack]**
+  - [x] Create `services/social/types.ts` with service-specific types **[Agent: nextjs-fullstack]**
+  - [x] Export from `services/index.ts` **[Agent: nextjs-fullstack]**
+  - [x] Create `features/social/` directory structure: `ui/`, `server-actions/`, `hooks/`, `types.ts`, `index.ts`, `index.server.ts` **[Agent: nextjs-fullstack]**
+  - [x] Create `features/social/server-actions/follow-user.ts` using `createServerAction` with `requireAuth`, Zod schema for `followingId` **[Agent: nextjs-fullstack]**
+  - [x] Create `features/social/server-actions/unfollow-user.ts` using same pattern **[Agent: nextjs-fullstack]**
+  - [x] Write unit tests for SocialService: self-follow prevention, target not public, duplicate follow, happy path follow/unfollow **[Agent: typescript-test-expert]**
+  - [x] Verify: `pnpm --filter savepoint test` passes **[Agent: nextjs-fullstack]**
 
 - [ ] **Slice 3: Public Profile Visibility Toggle in Settings**
   - [ ] Extend `UpdateProfileInput` Zod schema in `features/profile/lib/schemas.ts` with `isPublicProfile: z.boolean().optional()` **[Agent: nextjs-fullstack]**
