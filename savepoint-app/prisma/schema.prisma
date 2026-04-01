@@ -53,6 +53,7 @@ model User {
   password                String? // For credentials authentication
   username                String?                @unique
   usernameNormalized      String?                @unique
+  isPublicProfile         Boolean                @default(false)
   profileSetupCompletedAt DateTime?
   onboardingDismissedAt   DateTime?
   createdAt               DateTime               @default(now())
@@ -70,6 +71,8 @@ model User {
   IgnoredImportedGames    IgnoredImportedGames[]
 
   ImportedGame ImportedGame[]
+  followers    Follow[]             @relation("UserFollowers")
+  following    Follow[]             @relation("UserFollowing")
 }
 
 // ----- Application Models ------//
@@ -103,6 +106,7 @@ model LibraryItem {
   status          LibraryItemStatus @default(SHELF)
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+  statusChangedAt DateTime?
   platform        String?
   userId          String
   acquisitionType AcquisitionType   @default(DIGITAL)
@@ -288,4 +292,18 @@ model GamePlatform {
   @@id([gameId, platformId])
   @@index([gameId])
   @@index([platformId])
+}
+
+// ----- Social Models ------//
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }

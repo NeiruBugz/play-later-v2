@@ -92,3 +92,18 @@ export {
   type LastPlayed,
   type SortBy,
 } from "./imported-game";
+export {
+  createFollow,
+  deleteFollow,
+  findFollowers,
+  findFollowing,
+  countFollowers,
+  countFollowing,
+  isFollowing,
+} from "./follow/follow-repository";
+export {
+  type FollowUserProfile,
+  type PaginationOptions,
+  type PaginatedFollowersResult,
+  type PaginatedFollowingResult,
+} from "./follow/types";
