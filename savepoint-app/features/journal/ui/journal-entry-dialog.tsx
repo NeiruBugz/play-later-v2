@@ -1,7 +1,7 @@
 "use client";
 
+import type { JournalEntryDomain } from "@/features/journal/types";
 import { useMediaQuery } from "@/shared/hooks/use-media-query";
-import type { JournalEntryDomain } from "@/shared/types";
 
 import { JournalEntryDialogDesktop } from "./journal-entry-dialog-desktop";
 import { JournalEntryDialogMobile } from "./journal-entry-dialog-mobile";

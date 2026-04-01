@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { GameCardCover } from "@/shared/components/game-card/game-card-cover";
+import { GameCardCover } from "@/widgets/game-card";
+import type { JournalEntryDomain } from "@/features/journal/types";
 import { Badge } from "@/shared/components/ui/badge";
 import {
   Card,
@@ -10,7 +11,7 @@ import {
 } from "@/shared/components/ui/card";
 import { formatRelativeDate } from "@/shared/lib/date";
 import { stripHtmlTags } from "@/shared/lib/rich-text";
-import { JournalMood, type JournalEntryDomain } from "@/shared/types";
+import { JournalMood } from "@/shared/types";
 
 interface GameInfo {
   id: string;

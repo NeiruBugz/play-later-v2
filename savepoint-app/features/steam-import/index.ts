@@ -1,4 +1,3 @@
-// UI Components
 export {
   ImportedGameCard,
   ImportedGamesContainer,
@@ -18,7 +17,6 @@ export {
 } from "./ui";
 export type { FilterValues, SortBy } from "./ui";
 
-// Hooks
 export {
   useSteamConnection,
   useFetchSteamGames,
@@ -28,14 +26,20 @@ export {
 } from "./hooks";
 export type { UseSteamConnectionReturn } from "./hooks";
 
-// Server Actions
-export { disconnectSteam } from "./server-actions";
-
-// Config
 export { steamImportConfig } from "./config";
 export type { SteamImportConfig } from "./config";
 
-// Utilities
+export {
+  importedGamesQuerySchema,
+  ImportToLibrarySchema,
+  connectSteamSchema,
+} from "./schemas";
+export type {
+  ConnectSteamInput,
+  ImportedGamesQuery,
+  ImportToLibraryInput,
+} from "./schemas";
+
 export { calculateSmartStatus } from "./lib/utils";
 export {
   formatPlaytime,
@@ -43,7 +47,6 @@ export {
   getSteamIconUrl,
 } from "./lib/formatters";
 
-// Types
 export type {
   SteamProfile,
   SteamOwnedGame,

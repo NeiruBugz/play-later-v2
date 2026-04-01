@@ -20,4 +20,4 @@ export type {
   TimesToBeatSectionProps,
 } from "./ui";
 
-export { getGameDetails } from "./use-cases/get-game-details";
+export type { TimesToBeatData } from "./types";

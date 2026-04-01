@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { ContinuePlaying } from "@/features/dashboard/ui/continue-playing";
-import { DashboardStats } from "@/features/dashboard/ui/dashboard-stats";
-import { RecentlyAdded } from "@/features/dashboard/ui/recently-added";
-import { UpNext } from "@/features/dashboard/ui/up-next";
+import {
+  ContinuePlaying,
+  DashboardStats,
+  RecentlyAdded,
+  UpNext,
+} from "@/features/dashboard/index.server";
 import { GettingStartedChecklist } from "@/features/onboarding";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { requireServerUserId } from "@/shared/lib/app/auth";

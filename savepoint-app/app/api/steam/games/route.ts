@@ -5,7 +5,7 @@ import {
 } from "@/data-access-layer/handlers";
 import { NextResponse } from "next/server";
 
-import { importedGamesQuerySchema } from "@/features/steam-import/schemas";
+import { importedGamesQuerySchema } from "@/features/steam-import";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 

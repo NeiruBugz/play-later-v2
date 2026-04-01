@@ -1,8 +1,5 @@
-import {
-  AcquisitionType,
-  LibraryItemStatus,
-  type LibraryItemWithGameDomain,
-} from "@/shared/types";
+import type { LibraryItemWithGameDomain } from "@/features/library/types";
+import { AcquisitionType, LibraryItemStatus } from "@/shared/types";
 import type { UniquePlatformResult } from "@/shared/types/platform";
 
 export function createLibraryItemFixture(

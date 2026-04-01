@@ -2,9 +2,9 @@
 
 import { Plus } from "lucide-react";
 
+import type { LibraryItemDomain } from "@/features/library/types";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { cn } from "@/shared/lib/ui/utils";
-import type { LibraryItemDomain } from "@/shared/types";
 
 interface EntryTabsProps {
   entries: LibraryItemDomain[];

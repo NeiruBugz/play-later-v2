@@ -4,10 +4,13 @@ User-facing functionality organized by business domain. Each feature co-locates 
 
 ## Architectural Rules
 
-**Features CANNOT import from other features** except documented exceptions below.
-- Use `shared/` for cross-feature types and components
-- Use `data-access-layer/services` for cross-domain data access
+**Import hierarchy** (features can only import from lower layers):
+- `shared/` -- reusable utilities, UI primitives, types
+- `data-access-layer/services` -- cross-domain data access
 - Features must NOT import from `data-access-layer/repository` directly
+- Features must NOT import from `widgets/` or `app/`
+
+**Features CANNOT import from other features** except documented exceptions below.
 
 ### Cross-Feature Import Exceptions
 
@@ -15,11 +18,14 @@ These features are authorized for cross-feature imports. Only import from their 
 
 | Feature | Rationale | Authorized Consumers |
 |---------|-----------|---------------------|
-| `manage-library-entry` | Shared UI library for library operations (modal, forms, status controls) | `game-detail/ui/`, `library/ui/` |
+| `manage-library-entry` | Shared UI library for library operations (modal, forms, status controls) | `game-detail/ui/`, `library/ui/`, `game-search/ui/`, `game-search/hooks/` |
 | `onboarding` | Getting-started components for new users | `app/(protected)/dashboard/page.tsx` |
 | `journal` | Journal entries displayed alongside game info | `game-detail/ui/`, `app/(protected)/dashboard/page.tsx` |
 | `library` | Library display components (LibraryCard) on dashboard | `app/(protected)/dashboard/page.tsx` |
 | `whats-new` | App-wide announcement modal | `app/(protected)/layout.tsx` |
+| `profile` | Profile UI components (AvatarUpload, UsernameInput) and server actions | `setup-profile/ui/` |
+| `command-palette` | App-wide Cmd+K search palette | `widgets/header/`, `app/(protected)/layout.tsx`, `app/games/layout.tsx` |
+| `game-search` | Search hooks reused by command palette | `command-palette/ui/` |
 
 **Rules for all exceptions:**
 1. Only import from the feature's public API (barrel exports)

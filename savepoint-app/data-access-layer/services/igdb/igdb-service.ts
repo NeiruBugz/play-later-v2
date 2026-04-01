@@ -6,6 +6,7 @@ import {
   SECONDS_PER_HOUR,
   TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS,
 } from "@/shared/constants";
+import { ALLOWED_GAME_CATEGORIES } from "@/shared/constants/game";
 import {
   createLogger,
   getTimeStamp,
@@ -23,108 +24,48 @@ import {
   type ServiceResult,
 } from "../types";
 import {
-  buildAggregatedRatingQuery,
-  buildArtworksQuery,
   buildCollectionGamesQuery,
-  buildCompletionTimesQuery,
-  buildEventLogoQuery,
-  buildExpansionsQuery,
   buildFranchiseDetailsQuery,
   buildFranchiseGamesCountQuery,
   buildFranchiseGamesQuery,
-  buildGameBySteamAppIdQuery,
   buildGameDetailsByIdQuery,
   buildGameDetailsBySlugQuery,
-  buildGameGenresQuery,
   buildGameSearchQuery,
-  buildPlatformSearchQuery,
   buildPlatformsQuery,
-  buildScreenshotsQuery,
-  buildSimilarGamesQuery,
   buildTimesToBeatQuery,
-  buildTopRatedGamesQuery,
-  buildUpcomingEventsQuery,
-  buildUpcomingReleasesQuery,
 } from "./queries";
 import {
-  ArtworkItemSchema,
   CollectionGamesByIdSchema,
   CollectionWithGamesSchema,
-  EventItemSchema,
-  EventLogoItemSchema,
-  EventLogoSchema,
   FranchiseDetailsSchema,
   FranchiseGameItemSchema,
   FranchiseGamesSchema,
   FranchiseItemSchema,
   FullGameInfoResponseSchema,
-  GameAggregatedRatingSchema,
-  GameArtworksSchema,
-  GameBySteamAppIdItemSchema,
-  GameCompletionTimesItemSchema,
   GameDetailsBySlugSchema,
   GameDetailsSchema,
-  GameExpansionsSchema,
-  GameGenresSchema,
-  GameScreenshotsSchema,
   GameSearchSchema,
-  GameWithExpansionsSchema,
-  GameWithGenresSchema,
-  GameWithRatingSchema,
-  GameWithSimilarSchema,
-  GetGameBySteamAppIdSchema,
-  GetGameCompletionTimesSchema,
   PlatformItemSchema,
-  PlatformSearchSchema,
-  ScreenshotItemSchema,
   SearchResponseItemSchema,
-  SimilarGamesSchema,
   TimesToBeatItemSchema,
   TimesToBeatSchema,
-  TopRatedGameItemSchema,
-  UpcomingReleaseItemSchema,
-  UpcomingReleasesByIdsSchema,
 } from "./schemas";
 import type {
   CollectionGamesResult,
-  EventLogoResult,
   FranchiseDetailsResult,
   FranchiseGamesResult,
-  GameAggregatedRatingResult,
-  GameArtworksResult,
-  GameBySteamAppIdResult,
-  GameCompletionTimesResult,
   GameDetailsBySlugResult,
   GameDetailsParams,
   GameDetailsResult,
-  GameExpansionsResult,
-  GameGenresResult,
-  GameScreenshotsResult,
   GameSearchParams,
   GameSearchResult,
-  GetEventLogoParams,
   GetFranchiseDetailsParams,
   GetFranchiseGamesParams,
-  GetGameAggregatedRatingParams,
-  GetGameArtworksParams,
-  GetGameBySteamAppIdParams,
-  GetGameCompletionTimesParams,
   GetGameDetailsBySlugParams,
-  GetGameExpansionsParams,
-  GetGameGenresParams,
-  GetGameScreenshotsParams,
-  GetSimilarGamesParams,
   GetTimesToBeatParams,
-  GetUpcomingReleasesByIdsParams,
   IgdbService as IgdbServiceInterface,
-  PlatformSearchResult,
   PlatformsResult,
-  SearchPlatformByNameParams,
-  SimilarGamesResult,
   TimesToBeatResult,
-  TopRatedGamesResult,
-  UpcomingGamingEventsResult,
-  UpcomingReleasesResult,
 } from "./types";
 
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "IgdbService" });
@@ -420,441 +361,6 @@ export class IgdbService implements IgdbServiceInterface {
     }
   }
 
-  async getGameBySteamAppId(
-    params: GetGameBySteamAppIdParams
-  ): Promise<ServiceResult<GameBySteamAppIdResult>> {
-    const validation = GetGameBySteamAppIdSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, steamAppId: params.steamAppId },
-        "Steam app ID validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ?? "Valid Steam app ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { steamAppId } = validation.data;
-
-    try {
-      const query = buildGameBySteamAppIdQuery(steamAppId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/games" },
-        z.array(GameBySteamAppIdItemSchema)
-      );
-
-      if (!response || response.length === 0) {
-        logger.warn({ steamAppId }, "No IGDB game found for Steam app ID");
-        return serviceError(
-          `No IGDB game found for Steam app ID ${steamAppId}`,
-          ServiceErrorCode.NOT_FOUND
-        );
-      }
-
-      return serviceSuccess({
-        game: response[0],
-      });
-    } catch (error) {
-      logger.error(
-        { error, steamAppId },
-        "Error fetching game by Steam app ID"
-      );
-      return handleServiceError(error, "Failed to fetch game by Steam app ID");
-    }
-  }
-
-  async getTopRatedGames(): Promise<ServiceResult<TopRatedGamesResult>> {
-    try {
-      const query = buildTopRatedGamesQuery();
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/games" },
-        z.array(TopRatedGameItemSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch top-rated games from IGDB API");
-        return serviceError(
-          "Failed to fetch top-rated games",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (response.length === 0) {
-        return serviceSuccess({
-          games: [],
-        });
-      }
-
-      return serviceSuccess({
-        games: response,
-      });
-    } catch (error) {
-      logger.error({ error }, "Error fetching top-rated games");
-      return handleServiceError(error, "Failed to fetch top-rated games");
-    }
-  }
-
-  async searchPlatformByName(
-    params: SearchPlatformByNameParams
-  ): Promise<ServiceResult<PlatformSearchResult>> {
-    const validation = PlatformSearchSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, platformName: params.platformName },
-        "Platform search validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ??
-          "Platform name is required for search",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { platformName } = validation.data;
-
-    try {
-      const query = buildPlatformSearchQuery(platformName);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/platforms" },
-        z.array(PlatformItemSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to search platforms from IGDB API");
-        return serviceError(
-          "Failed to search platforms",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (response.length === 0) {
-        logger.warn({ platformName }, "No platforms found matching search");
-        return serviceError(
-          `No platforms found matching "${platformName}"`,
-          ServiceErrorCode.NOT_FOUND
-        );
-      }
-
-      return serviceSuccess({
-        platforms: response,
-      });
-    } catch (error) {
-      logger.error({ error, platformName }, "Error searching platforms");
-      return handleServiceError(error, "Failed to search platforms");
-    }
-  }
-
-  async getGameScreenshots(
-    params: GetGameScreenshotsParams
-  ): Promise<ServiceResult<GameScreenshotsResult>> {
-    const validation = GameScreenshotsSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, gameId: params.gameId },
-        "Game screenshots validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ?? "Valid game ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { gameId } = validation.data;
-
-    try {
-      const query = buildScreenshotsQuery(gameId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/screenshots" },
-        z.array(ScreenshotItemSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch game screenshots from IGDB API");
-        return serviceError(
-          "Failed to fetch game screenshots",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (response.length === 0) {
-        return serviceSuccess({
-          screenshots: [],
-        });
-      }
-
-      return serviceSuccess({
-        screenshots: response,
-      });
-    } catch (error) {
-      logger.error({ error, gameId }, "Error fetching game screenshots");
-      return handleServiceError(error, "Failed to fetch game screenshots");
-    }
-  }
-
-  async getGameAggregatedRating(
-    params: GetGameAggregatedRatingParams
-  ): Promise<ServiceResult<GameAggregatedRatingResult>> {
-    const validation = GameAggregatedRatingSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, gameId: params.gameId },
-        "Game aggregated rating validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ?? "Valid game ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { gameId } = validation.data;
-
-    try {
-      const query = buildAggregatedRatingQuery(gameId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/games" },
-        z.array(GameWithRatingSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch game aggregated rating from IGDB API");
-        return serviceError(
-          "Failed to fetch game aggregated rating",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (response.length === 0) {
-        logger.warn({ gameId }, "No game found with ID");
-        return serviceError(
-          `No game found with ID ${gameId}`,
-          ServiceErrorCode.NOT_FOUND
-        );
-      }
-
-      const game = response[0];
-      return serviceSuccess({
-        gameId: game.id,
-        rating: game.aggregated_rating,
-        count: game.aggregated_rating_count,
-      });
-    } catch (error) {
-      logger.error({ error, gameId }, "Error fetching game aggregated rating");
-      return handleServiceError(
-        error,
-        "Failed to fetch game aggregated rating"
-      );
-    }
-  }
-
-  async getSimilarGames(
-    params: GetSimilarGamesParams
-  ): Promise<ServiceResult<SimilarGamesResult>> {
-    const validation = SimilarGamesSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, gameId: params.gameId },
-        "Similar games validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ?? "Valid game ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { gameId } = validation.data;
-
-    try {
-      const query = buildSimilarGamesQuery(gameId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/games" },
-        z.array(GameWithSimilarSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch similar games from IGDB API");
-        return serviceError(
-          "Failed to fetch similar games",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      const similarGames = response[0]?.similar_games ?? [];
-
-      if (response.length === 0 || !response[0] || similarGames.length === 0) {
-        return serviceSuccess({
-          similarGames: [],
-        });
-      }
-
-      return serviceSuccess({
-        similarGames,
-      });
-    } catch (error) {
-      logger.error({ error, gameId }, "Error fetching similar games");
-      return handleServiceError(error, "Failed to fetch similar games");
-    }
-  }
-
-  async getGameGenres(
-    params: GetGameGenresParams
-  ): Promise<ServiceResult<GameGenresResult>> {
-    const validation = GameGenresSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, gameId: params.gameId },
-        "Game genres validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ?? "Valid game ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { gameId } = validation.data;
-
-    try {
-      const query = buildGameGenresQuery(gameId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/games" },
-        z.array(GameWithGenresSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch game genres from IGDB API");
-        return serviceError(
-          "Failed to fetch game genres",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      const genres = response[0]?.genres ?? [];
-
-      if (response.length === 0 || !response[0] || genres.length === 0) {
-        return serviceSuccess({
-          genres: [],
-        });
-      }
-
-      return serviceSuccess({
-        genres,
-      });
-    } catch (error) {
-      logger.error({ error, gameId }, "Error fetching game genres");
-      return handleServiceError(error, "Failed to fetch game genres");
-    }
-  }
-
-  async getGameCompletionTimes(
-    params: GetGameCompletionTimesParams
-  ): Promise<ServiceResult<GameCompletionTimesResult>> {
-    const validation = GetGameCompletionTimesSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, gameId: params.gameId },
-        "Game completion times validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ?? "Valid game ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { gameId } = validation.data;
-
-    try {
-      const query = buildCompletionTimesQuery(gameId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/game_time_to_beats" },
-        z.array(GameCompletionTimesItemSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch game completion times from IGDB API");
-        return serviceError(
-          "Failed to fetch game completion times",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (!response || response.length === 0) {
-        return serviceSuccess({
-          completionTimes: null,
-        });
-      }
-
-      return serviceSuccess({
-        completionTimes: response[0],
-      });
-    } catch (error) {
-      logger.error({ error, gameId }, "Error fetching game completion times");
-      return handleServiceError(error, "Failed to fetch game completion times");
-    }
-  }
-
-  async getGameExpansions(
-    params: GetGameExpansionsParams
-  ): Promise<ServiceResult<GameExpansionsResult>> {
-    const validation = GameExpansionsSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, gameId: params.gameId },
-        "Game expansions validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ?? "Valid game ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { gameId } = validation.data;
-
-    try {
-      const query = buildExpansionsQuery(gameId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/games" },
-        z.array(GameWithExpansionsSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch game expansions from IGDB API");
-        return serviceError(
-          "Failed to fetch game expansions",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      const expansions = response[0]?.expansions ?? [];
-
-      if (
-        !response ||
-        response.length === 0 ||
-        !response[0] ||
-        expansions.length === 0
-      ) {
-        return serviceSuccess({
-          expansions: [],
-        });
-      }
-
-      return serviceSuccess({
-        expansions,
-      });
-    } catch (error) {
-      logger.error({ error, gameId }, "Error fetching game expansions");
-      return handleServiceError(error, "Failed to fetch game expansions");
-    }
-  }
-
   async getFranchiseGames(
     params: GetFranchiseGamesParams
   ): Promise<ServiceResult<FranchiseGamesResult>> {
@@ -979,191 +485,6 @@ export class IgdbService implements IgdbServiceInterface {
     }
   }
 
-  async getGameArtworks(
-    params: GetGameArtworksParams
-  ): Promise<ServiceResult<GameArtworksResult>> {
-    const validation = GameArtworksSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, gameId: params.gameId },
-        "Game artworks validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ?? "Valid game ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { gameId } = validation.data;
-
-    try {
-      const query = buildArtworksQuery(gameId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/artworks" },
-        z.array(ArtworkItemSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch game artworks from IGDB API");
-        return serviceError(
-          "Failed to fetch game artworks",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (response.length === 0) {
-        return serviceSuccess({
-          artworks: [],
-        });
-      }
-
-      return serviceSuccess({
-        artworks: response,
-      });
-    } catch (error) {
-      logger.error({ error, gameId }, "Error fetching game artworks");
-      return handleServiceError(error, "Failed to fetch game artworks");
-    }
-  }
-
-  async getUpcomingReleasesByIds(
-    params: GetUpcomingReleasesByIdsParams
-  ): Promise<ServiceResult<UpcomingReleasesResult>> {
-    const validation = UpcomingReleasesByIdsSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues },
-        "Upcoming releases validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ??
-          "At least one valid game ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { ids } = validation.data;
-
-    try {
-      const query = buildUpcomingReleasesQuery(ids);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/games" },
-        z.array(UpcomingReleaseItemSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch upcoming releases from IGDB API");
-        return serviceError(
-          "Failed to fetch upcoming releases",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (response.length === 0) {
-        return serviceSuccess({
-          releases: [],
-        });
-      }
-
-      return serviceSuccess({
-        releases: response,
-      });
-    } catch (error) {
-      logger.error({ error, ids }, "Error fetching upcoming releases");
-      return handleServiceError(error, "Failed to fetch upcoming releases");
-    }
-  }
-
-  async getUpcomingGamingEvents(): Promise<
-    ServiceResult<UpcomingGamingEventsResult>
-  > {
-    try {
-      const query = buildUpcomingEventsQuery();
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/events" },
-        z.array(EventItemSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch upcoming gaming events from IGDB API");
-        return serviceError(
-          "Failed to fetch upcoming gaming events",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (response.length === 0) {
-        return serviceSuccess({
-          events: [],
-        });
-      }
-
-      return serviceSuccess({
-        events: response,
-      });
-    } catch (error) {
-      logger.error({ error }, "Error fetching upcoming gaming events");
-      return handleServiceError(
-        error,
-        "Failed to fetch upcoming gaming events"
-      );
-    }
-  }
-
-  async getEventLogo(
-    params: GetEventLogoParams
-  ): Promise<ServiceResult<EventLogoResult>> {
-    const validation = EventLogoSchema.safeParse(params);
-    if (!validation.success) {
-      logger.warn(
-        { errors: validation.error.issues, logoId: params.logoId },
-        "Event logo validation failed"
-      );
-      return serviceError(
-        validation.error.issues[0]?.message ??
-          "Valid event logo ID is required",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
-    }
-
-    const { logoId } = validation.data;
-
-    try {
-      const query = buildEventLogoQuery(logoId);
-
-      const response = await this.makeValidatedRequest(
-        { body: query, resource: "/event_logos" },
-        z.array(EventLogoItemSchema)
-      );
-
-      if (response === undefined) {
-        logger.error("Failed to fetch event logo from IGDB API");
-        return serviceError(
-          "Failed to fetch event logo",
-          ServiceErrorCode.INTERNAL_ERROR
-        );
-      }
-
-      if (!response || response.length === 0) {
-        logger.warn({ logoId }, "Event logo not found");
-        return serviceError(
-          `Event logo with ID ${logoId} not found`,
-          ServiceErrorCode.NOT_FOUND
-        );
-      }
-
-      return serviceSuccess({
-        logo: response[0],
-      });
-    } catch (error) {
-      logger.error({ error, logoId }, "Error fetching event logo");
-      return handleServiceError(error, "Failed to fetch event logo");
-    }
-  }
-
   async getTimesToBeat(
     params: GetTimesToBeatParams
   ): Promise<ServiceResult<TimesToBeatResult>> {
@@ -1262,7 +583,14 @@ export class IgdbService implements IgdbServiceInterface {
         return serviceError("Collection not found", ServiceErrorCode.NOT_FOUND);
       }
 
-      return serviceSuccess(response[0]);
+      const collection = response[0];
+      const allowedTypes = new Set<number>(ALLOWED_GAME_CATEGORIES);
+      const filteredGames = collection.games.filter(
+        (game) =>
+          game.game_type === undefined || allowedTypes.has(game.game_type)
+      );
+
+      return serviceSuccess({ ...collection, games: filteredGames });
     } catch (error) {
       logger.error({ error, collectionId }, "Error fetching collection games");
       return handleServiceError(error, "Failed to fetch collection games");

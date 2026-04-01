@@ -1,7 +1,7 @@
 import { JournalService } from "@/data-access-layer/services";
 import { notFound } from "next/navigation";
 
-import { EditJournalEntryPage as EditJournalEntryPageContent } from "@/features/journal/ui/edit-journal-entry-page";
+import { EditJournalEntryPage as EditJournalEntryPageContent } from "@/features/journal";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export const dynamic = "force-dynamic";

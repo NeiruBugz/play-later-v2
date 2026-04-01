@@ -83,7 +83,7 @@ _Specced features in implementation order. Each has a functional specification i
     - [ ] Fix dead link in savepoint-app/README.md; add README to scripts/ (DOC-02/04)
     - [ ] Add root Makefile/Taskfile with cross-layer commands; extend PR checks to lambdas-py (E2E-05)
 
-- [ ] **FSD Architecture Compliance** _(Spec 007)_
+- [x] **FSD Architecture Compliance** _(Spec 007)_
 
   _Fix FSD layer violations, missing public APIs, and domain code cleanup. See [spec](../spec/007-fsd-architecture-compliance/functional-spec.md)._
 

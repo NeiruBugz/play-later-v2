@@ -1,4 +1,4 @@
-import type { LibraryItemWithGameDomain } from "@/shared/types";
+import type { LibraryItemWithGameDomain } from "@/features/library/types";
 
 export type { LibraryItemWithGameDomain };
 

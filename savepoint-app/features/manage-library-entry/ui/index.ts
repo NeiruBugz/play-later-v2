@@ -44,7 +44,7 @@ export { QuickAddPopover } from "./quick-add-popover";
 export type { QuickAddPopoverProps } from "./quick-add-popover.types";
 
 // Constants
-export * from "./constants";
+export { STATUS_OPTIONS } from "./constants";
 
 // Hook exports
 export { useLibraryModal } from "../hooks/use-library-modal";

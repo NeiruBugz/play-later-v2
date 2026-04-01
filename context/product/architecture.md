@@ -519,6 +519,8 @@ app → processes → pages → widgets → features → entities → shared
 ```
 app/ (Next.js App Router)
     ↓
+widgets/ (Composite UI blocks reused across layouts)
+    ↓
 features/ (FSD Slices)
     ↓
 data-access-layer/ (Custom: handlers → services → repository → domain)
@@ -533,7 +535,7 @@ Prisma → PostgreSQL
 | Standard FSD | SavePoint Implementation | Rationale |
 |--------------|-------------------------|-----------|
 | `entities/` layer | `shared/types/` + `data-access-layer/domain/` | Entities are Prisma models; domain types in shared |
-| `widgets/` layer | Colocated in `features/*/ui/` | Complex components stay within their feature |
+| `widgets/` layer | `widgets/` directory | Composite UI blocks (GameCard, Header) reused across layouts |
 | `pages/` layer | `app/` (Next.js App Router) | Next.js convention takes precedence |
 | `processes/` layer | `features/*/use-cases/` | Use-cases handle multi-service orchestration |
 | Direct feature → entity | Feature → service → repository | Added abstraction for business logic |
@@ -564,61 +566,61 @@ features/[feature-name]/
 | Feature | Responsibility |
 |---------|---------------|
 | `auth` | Authentication flows (sign-in/up) |
+| `command-palette` | App-wide Cmd+K search palette |
 | `game-search` | Game search interface |
 | `game-detail` | Game detail page composition |
 | `browse-related-games` | Related/franchise games with infinite scroll |
 | `manage-library-entry` | Library entry CRUD (modal, forms, actions) |
 | `library` | User's game library views |
-| `profile` | User profile display/settings |
+| `profile` | User profile display/settings, avatar upload, username validation |
 | `setup-profile` | Initial profile creation |
 | `dashboard` | Dashboard overview |
 | `journal` | Journal entry system |
+| `onboarding` | New user getting-started flow |
+| `steam-import` | Steam library import pipeline trigger |
+| `whats-new` | App-wide announcement modal |
+
+### Existing Widgets
+
+| Widget | Responsibility |
+|--------|---------------|
+| `header` | App-wide navigation header + mobile nav |
+| `game-card` | Compound game card component (cover, content, header, meta, footer, skeleton, genre badges) |
 
 ### Cross-Feature Import Rules
 
-**Rule**: Features should NOT import from other features.
+**Rule**: Features should NOT import from other features. Exceptions are documented in `features/CLAUDE.md`.
 
-**Documented Exception**: `manage-library-entry` is treated as a **shared UI library** for library operations across features:
-
-```typescript
-// Allowed cross-feature imports (architectural exception)
-import { LibraryModal } from "@/features/manage-library-entry/ui";
-import { updateLibraryStatusAction } from "@/features/manage-library-entry/server-actions";
-```
-
-**Consumers of manage-library-entry:**
-- `game-detail/ui/add-to-library-button.tsx`
-- `game-detail/ui/library-status-display.tsx`
-- `game-detail/ui/quick-action-buttons.tsx`
+**Key exceptions:** `manage-library-entry` (shared UI library for library operations), `command-palette` (consumed by widgets/header), `profile` (consumed by setup-profile), `game-search` (consumed by command-palette). See `features/CLAUDE.md` for the full authorized imports table.
 
 ### Barrel Export Strategy
 
-**Two-level exports** enable both deep and barrel imports:
+**Split barrel pattern** respecting the Next.js server/client boundary:
 
-**Level 1** - Sublayer (`features/feature/ui/index.ts`):
 ```typescript
-export { ComponentA } from "./component-a";
-export type { ComponentAProps } from "./component-a.types";
+// features/X/index.ts (client-safe)
+export { ComponentA } from "./ui/component-a";
+export { useHookA } from "./hooks/use-hook-a";
+export type { TypeA } from "./types";
+
+// features/X/index.server.ts (server-only)
+export { serverActionA } from "./server-actions/action-a";
+export { useCaseA } from "./use-cases/use-case-a";
 ```
 
-**Level 2** - Feature root (`features/feature/index.ts`):
-```typescript
-export * from "./ui";
-export * from "./hooks";
-export * from "./server-actions";
-```
+All exports are explicit named exports — no wildcard re-exports (`export * from`). All `app/` pages and layouts import from barrel exports, not internal segment paths.
 
 ### FSD Compliance Summary
 
 | Principle | Status | Implementation |
 |-----------|--------|----------------|
-| **Layered architecture** | ✅ Applied | app → features → data-access → shared |
+| **Layered architecture** | ✅ Applied | app → widgets → features → data-access → shared |
 | **Sliced structure** | ✅ Applied | Features organized by business domain |
-| **Public API (barrel exports)** | ✅ Applied | Two-level export strategy |
-| **Unidirectional imports** | ✅ Enforced | ESLint boundaries plugin |
-| **Feature isolation** | ⚠️ Partial | Documented exception for `manage-library-entry` |
-| **Entities layer** | ❌ Modified | Replaced with domain types in shared |
-| **Widgets layer** | ❌ Omitted | Colocated within features |
+| **Public API (barrel exports)** | ✅ Applied | Split barrel pattern (index.ts + index.server.ts) |
+| **Unidirectional imports** | ✅ Enforced | ESLint boundaries plugin, zero violations |
+| **Feature isolation** | ⚠️ Partial | Documented exceptions in features/CLAUDE.md |
+| **Entities layer** | ❌ Modified | Replaced with domain types in features + shared enums |
+| **Widgets layer** | ✅ Applied | `widgets/` for composite UI (GameCard, Header) |
 
 ### Boundary Enforcement
 
@@ -626,11 +628,12 @@ Import rules enforced via `eslint-plugin-boundaries`:
 
 | From | Allowed Imports |
 |------|-----------------|
-| `app-route` | handler, use-case, service, server-action, ui-component, shared |
+| `app-route` | handler, use-case, service, server-action, ui-component, widget, shared |
+| `widget` | ui-component, server-action, shared |
 | `server-action` | use-case, service, shared |
 | `handler` | use-case, service, shared |
 | `use-case` | service, shared |
-| `ui-component` | use-case, server-action, shared |
+| `ui-component` | use-case, server-action, widget, shared |
 | `service` | repository, shared |
 | `repository` | prisma, shared |
 | `shared` | shared only |
@@ -771,11 +774,17 @@ Import rules enforced via `eslint-plugin-boundaries`:
 
 **Document Metadata:**
 
-- **Version:** 2.0
-- **Last Updated:** 2025-01-17 (Comprehensive architecture review with expert agents)
+- **Version:** 2.1
+- **Last Updated:** 2026-03-31 (FSD Architecture Compliance — Spec 007)
 - **Status:** Active
 - **Maintained By:** Solo developer with AI assistance
 - **Review Cadence:** After each major phase completion
+- **Changes in v2.1:**
+  - Added `widgets/` layer to FSD hierarchy (GameCard, Header)
+  - Updated layer diagram, boundary enforcement table, and compliance summary
+  - Added `command-palette`, `onboarding`, `steam-import`, `whats-new` to feature list
+  - Updated barrel export strategy to split pattern (index.ts + index.server.ts)
+  - Updated cross-feature import rules to reference features/CLAUDE.md
 - **Changes in v2.0:**
   - Added four-layer architecture diagram with layer selection matrix
   - Documented Result type patterns for each layer

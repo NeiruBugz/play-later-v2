@@ -18,7 +18,6 @@ export {
   type GameDetailsParams,
   type GameDetailsResult,
   type PlatformsResult,
-  type TopRatedGamesResult,
   type IgdbService as IgdbServiceInterface,
 } from "./igdb/types";
 export { IgdbService } from "./igdb/igdb-service";

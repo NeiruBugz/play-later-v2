@@ -4,13 +4,13 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { toast } from "sonner";
 
+import type { JournalEntryDomain } from "@/features/journal/types";
+import type { LibraryItemDomain } from "@/features/library/types";
 import { ActionResult } from "@/shared/lib";
 import {
   AcquisitionType,
   JournalVisibility,
   LibraryItemStatus,
-  type JournalEntryDomain,
-  type LibraryItemDomain,
 } from "@/shared/types";
 
 import { createJournalEntryAction } from "../server-actions/create-journal-entry";

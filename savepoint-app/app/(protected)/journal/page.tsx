@@ -1,6 +1,6 @@
 import { getGamesByIds, JournalService } from "@/data-access-layer/services";
 
-import { JournalTimeline } from "@/features/journal/ui/journal-timeline";
+import { JournalTimeline } from "@/features/journal";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export const dynamic = "force-dynamic";

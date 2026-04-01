@@ -3,12 +3,12 @@
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 import { revalidatePath } from "next/cache";
 
-import { createServerAction, type ActionResult } from "@/shared/lib";
 import {
   UpdateProfileSchema,
   type UpdateProfileInput,
-} from "@/shared/lib/profile";
-import type { UpdateProfileFormState } from "@/shared/types/profile";
+} from "@/features/profile/lib";
+import type { UpdateProfileFormState } from "@/features/profile/types";
+import { createServerAction, type ActionResult } from "@/shared/lib";
 
 type UpdateProfileData = {
   username: string | null;

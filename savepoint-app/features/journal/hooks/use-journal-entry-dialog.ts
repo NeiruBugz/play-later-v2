@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
-import type { JournalEntryDomain } from "@/shared/types";
+import type { JournalEntryDomain } from "@/features/journal/types";
 
 interface UseJournalEntryDialogOptions {
   onEntryCreated?: (entry: JournalEntryDomain) => void;

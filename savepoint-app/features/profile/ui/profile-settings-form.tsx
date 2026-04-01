@@ -3,7 +3,9 @@
 import { useActionState, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
-import { AvatarUpload, UsernameInput } from "@/shared/components/profile";
+import { initialFormState } from "@/features/profile/lib";
+import { AvatarUpload } from "@/features/profile/ui/avatar-upload";
+import { UsernameInput } from "@/features/profile/ui/username-input";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -13,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { initialFormState } from "@/shared/lib/profile";
 
 import { updateProfileFormAction } from "../server-actions/update-profile";
 import type { ProfileSettingsFormProps } from "./profile-settings-form.types";

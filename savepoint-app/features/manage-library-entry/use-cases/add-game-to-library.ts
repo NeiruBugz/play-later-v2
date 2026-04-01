@@ -5,12 +5,9 @@ import { IgdbService } from "@/data-access-layer/services/igdb/igdb-service";
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 
+import type { LibraryItemDomain } from "@/features/library/types";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-import {
-  AcquisitionType,
-  type LibraryItemDomain,
-  type LibraryItemStatus,
-} from "@/shared/types";
+import { AcquisitionType, type LibraryItemStatus } from "@/shared/types";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.USE_CASE]: "addGameToLibraryUseCase",

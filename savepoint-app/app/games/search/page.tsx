@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import type { Metadata } from "next";
 
-import { GameSearchInput } from "@/features/game-search/ui/game-search-input";
+import { GameSearchInput } from "@/features/game-search";
 
 export const dynamic = "force-dynamic";
 

@@ -2,8 +2,8 @@ import { getServerUserId } from "@/auth";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { steamImportConfig } from "@/features/steam-import/config";
-import { triggerBackgroundSync } from "@/features/steam-import/server-actions";
+import { steamImportConfig } from "@/features/steam-import";
+import { triggerBackgroundSync } from "@/features/steam-import/index.server";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 

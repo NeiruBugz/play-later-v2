@@ -1,5 +1,6 @@
 "use client";
 
+import type { JournalEntryDomain } from "@/features/journal/types";
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-import type { JournalEntryDomain } from "@/shared/types";
 
 import { JournalEntryQuickForm } from "./journal-entry-quick-form";
 

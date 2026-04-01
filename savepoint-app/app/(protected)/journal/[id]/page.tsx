@@ -1,7 +1,7 @@
 import { getGameById, JournalService } from "@/data-access-layer/services";
 import { notFound } from "next/navigation";
 
-import { JournalEntryDetail } from "@/features/journal/ui/journal-entry-detail";
+import { JournalEntryDetail } from "@/features/journal";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
 export const dynamic = "force-dynamic";

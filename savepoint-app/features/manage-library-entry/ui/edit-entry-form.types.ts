@@ -1,4 +1,4 @@
-import type { LibraryItemDomain } from "@/shared/types";
+import type { LibraryItemDomain } from "@/features/library/types";
 
 export interface EditEntryFormProps {
   item: LibraryItemDomain;

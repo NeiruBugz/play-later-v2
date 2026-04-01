@@ -5,19 +5,16 @@ import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import type { LibraryItemDomain } from "@/features/library/types";
+import { useGetPlatforms } from "@/features/manage-library-entry/hooks/use-get-platforms";
 import { Button } from "@/shared/components/ui/button";
 import { Form, FormField } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { useGetPlatforms } from "@/shared/hooks/game";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 import { getStatusLabel } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
-import {
-  LibraryItemStatus,
-  type LibraryItemDomain,
-  type PlatformDomain,
-} from "@/shared/types";
+import { LibraryItemStatus, type PlatformDomain } from "@/shared/types";
 
 import {
   AddToLibrarySchema,

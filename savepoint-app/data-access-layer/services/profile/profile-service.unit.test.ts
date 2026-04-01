@@ -25,7 +25,7 @@ import {
   userWithUsernameNotRecentFixture,
 } from "@/test/fixtures/service/profile";
 
-import { validateUsername } from "@/shared/lib/profile";
+import { validateUsername } from "@/features/profile/lib";
 
 import { ServiceErrorCode } from "../types";
 import { ProfileService } from "./profile-service";
@@ -37,7 +37,7 @@ vi.mock("@/data-access-layer/repository", () => ({
   updateUserProfile: vi.fn(),
 }));
 
-vi.mock("@/shared/lib/profile", () => ({
+vi.mock("@/features/profile/lib", () => ({
   validateUsername: vi.fn(),
 }));
 

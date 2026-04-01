@@ -151,53 +151,6 @@ export const PlatformItemSchema = z.object({
   abbreviation: z.string().optional(),
 });
 
-export const ScreenshotItemSchema = z.object({
-  id: z.number(),
-  game: z.number(),
-  image_id: z.string(),
-  url: z.string().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
-});
-
-export const GameWithRatingSchema = z.object({
-  id: z.number(),
-  aggregated_rating: z.number().optional(),
-  aggregated_rating_count: z.number().optional(),
-});
-
-export const GameWithSimilarSchema = z.object({
-  id: z.number(),
-  similar_games: z.array(z.number()).optional(),
-});
-
-export const GameWithGenresSchema = z.object({
-  id: z.number(),
-  genres: z.array(GenreSchema).optional(),
-});
-
-export const GameCompletionTimesItemSchema = z.object({
-  id: z.number(),
-  game_id: z.number().optional(),
-  gameplay_main: z.number().optional(),
-  gameplay_main_extra: z.number().optional(),
-  gameplay_completionist: z.number().optional(),
-  completeness: z.number().optional(),
-  created_at: z.number().optional(),
-});
-
-export const ExpansionSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  cover: CoverSchema.optional(),
-  release_dates: z.array(ReleaseDateSchema).optional(),
-});
-
-export const GameWithExpansionsSchema = z.object({
-  id: z.number(),
-  expansions: z.array(ExpansionSchema).optional(),
-});
-
 export const FranchiseGameItemSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -208,53 +161,6 @@ export const FranchiseGameItemSchema = z.object({
 export const FranchiseItemSchema = z.object({
   id: z.number(),
   name: z.string(),
-});
-
-export const ArtworkItemSchema = z.object({
-  id: z.number(),
-  alpha_channel: z.boolean().optional(),
-  animated: z.boolean().optional(),
-  checksum: z.string(),
-  game: z.number(),
-  height: z.number().optional(),
-  image_id: z.string(),
-  url: z.string().optional(),
-  width: z.number().optional(),
-});
-
-export const UpcomingReleaseItemSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  cover: z
-    .object({ id: z.number().optional(), image_id: z.string() })
-    .optional(),
-  first_release_date: z.number(),
-  release_dates: z.array(ReleaseDateSchema).optional(),
-});
-
-export const EventItemSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  checksum: z.string().optional(),
-  created_at: z.number().optional(),
-  description: z.string().optional(),
-  end_time: z.number().optional(),
-  event_logo: z.union([z.number(), z.object({ id: z.number() })]).optional(),
-  event_networks: z.array(z.number()).optional(),
-  games: z.array(z.number()).optional(),
-  live_stream_url: z.string().optional(),
-  slug: z.string().optional(),
-  start_time: z.number(),
-  time_zone: z.string().optional(),
-  updated_at: z.number().optional(),
-  videos: z.array(z.number()).optional(),
-});
-
-export const EventLogoItemSchema = z.object({
-  id: z.number(),
-  width: z.number().optional(),
-  height: z.number().optional(),
-  image_id: z.string(),
 });
 
 export const TimesToBeatItemSchema = z.object({
@@ -275,18 +181,6 @@ export const CollectionWithGamesSchema = z.object({
   id: z.number(),
   name: z.string(),
   games: z.array(CollectionGameItemSchema),
-});
-
-export const TopRatedGameItemSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  aggregated_rating: z.number().optional(),
-  cover: z.object({ image_id: z.string() }).optional(),
-});
-
-export const GameBySteamAppIdItemSchema = z.object({
-  id: z.number(),
-  name: z.string(),
 });
 
 export const TwitchTokenResponseSchema = z.object({

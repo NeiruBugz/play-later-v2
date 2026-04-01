@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { LibraryItemDomain } from "@/features/library/types";
 import { createServerAction } from "@/shared/lib";
-import type { LibraryItemDomain } from "@/shared/types";
 
 import { AddToLibrarySchema, type AddToLibraryInput } from "../schemas";
 import { addGameToLibrary } from "../use-cases/add-game-to-library";

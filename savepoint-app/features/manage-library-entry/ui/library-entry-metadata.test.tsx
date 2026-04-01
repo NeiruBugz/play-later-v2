@@ -1,10 +1,7 @@
 import { render, screen } from "@testing-library/react";
 
-import {
-  AcquisitionType,
-  LibraryItemStatus,
-  type LibraryItemDomain,
-} from "@/shared/types/library";
+import type { LibraryItemDomain } from "@/features/library/types";
+import { AcquisitionType, LibraryItemStatus } from "@/shared/types/library";
 
 import { LibraryEntryMetadata } from "./library-entry-metadata";
 

@@ -3,8 +3,8 @@
 import { LibraryService } from "@/data-access-layer/services";
 import { z } from "zod";
 
+import type { LibraryItemDomain } from "@/features/library/types";
 import { createServerAction } from "@/shared/lib";
-import type { LibraryItemDomain } from "@/shared/types/library";
 
 const GetLibraryItemsByGameIdSchema = z.object({
   gameId: z.string().min(1, "Game ID is required"),

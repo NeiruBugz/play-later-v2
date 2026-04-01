@@ -6,7 +6,7 @@ import {
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { ProfileView } from "@/features/profile/ui/profile-view";
+import { ProfileView } from "@/features/profile";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 

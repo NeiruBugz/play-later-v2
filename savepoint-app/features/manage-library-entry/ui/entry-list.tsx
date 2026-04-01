@@ -2,9 +2,9 @@
 
 import { Plus } from "lucide-react";
 
+import type { LibraryItemDomain } from "@/features/library/types";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
-import type { LibraryItemDomain } from "@/shared/types";
 
 import { EntryRow } from "./entry-row";
 

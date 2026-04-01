@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { ImportedGamesContainer } from "@/features/steam-import/ui";
+import { ImportedGamesContainer } from "@/features/steam-import";
 import { Button } from "@/shared/components/ui/button";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 

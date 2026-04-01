@@ -2,15 +2,13 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 
+import type { LibraryItemWithGameDomain } from "@/features/library/types";
 import {
   LIBRARY_DATA_GC_TIME_MS,
   LIBRARY_DATA_STALE_TIME_MS,
   LIBRARY_PAGE_SIZE,
 } from "@/shared/constants";
-import type {
-  LibraryItemStatus,
-  LibraryItemWithGameDomain,
-} from "@/shared/types";
+import type { LibraryItemStatus } from "@/shared/types";
 
 export type LibraryFilters = {
   status?: LibraryItemStatus;

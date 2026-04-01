@@ -7,6 +7,3 @@ export const FRANCHISE_GAMES_INITIAL_LIMIT = 20;
 export const LIBRARY_PAGE_SIZE = 24;
 
 export const IGDB_SINGLE_RESULT_LIMIT = 1;
-export const IGDB_PLATFORM_SEARCH_LIMIT = 10;
-export const IGDB_SCREENSHOT_LIMIT = 50;
-export const IGDB_ARTWORK_LIMIT = 50;

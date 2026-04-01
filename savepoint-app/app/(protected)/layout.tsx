@@ -1,10 +1,9 @@
 import type { PropsWithChildren } from "react";
 
-import { JournalFab } from "@/features/journal/ui/journal-fab";
+import { Header, MobileNav } from "@/widgets/header";
+import { CommandPaletteProvider } from "@/features/command-palette";
+import { JournalFab } from "@/features/journal";
 import { WhatsNewModal } from "@/features/whats-new";
-import { CommandPaletteProvider } from "@/shared/components/command-palette";
-import { Header } from "@/shared/components/header";
-import { MobileNav } from "@/shared/components/mobile-nav";
 import { Toaster } from "@/shared/components/ui/sonner";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 

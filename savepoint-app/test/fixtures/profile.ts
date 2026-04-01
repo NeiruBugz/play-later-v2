@@ -1,4 +1,4 @@
-import type { ProfileWithStats } from "@/shared/types/profile";
+import type { ProfileWithStats } from "@/features/profile/types";
 
 export function createProfileFixture(
   overrides?: Partial<ProfileWithStats>

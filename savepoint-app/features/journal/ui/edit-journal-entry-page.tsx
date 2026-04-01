@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import type { JournalEntryDomain } from "@/shared/types";
+import type { JournalEntryDomain } from "@/features/journal/types";
 
 import { JournalEntryForm } from "./journal-entry-form";
 

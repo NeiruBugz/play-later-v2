@@ -1,10 +1,10 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
+import type { LibraryItemWithGameDomain } from "@/features/library/types";
 import { LibraryCard } from "@/features/library/ui/library-card";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
-import type { LibraryItemWithGameDomain } from "@/shared/types/library";
 
 interface DashboardGameSectionProps {
   title: string;

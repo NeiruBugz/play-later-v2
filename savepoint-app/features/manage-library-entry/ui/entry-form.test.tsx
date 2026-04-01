@@ -8,7 +8,7 @@ import { LibraryItemStatus } from "@/shared/types";
 import { addToLibraryAction } from "../server-actions";
 import { EntryForm } from "./entry-form";
 
-vi.mock("@/shared/hooks/game", () => ({
+vi.mock("@/features/manage-library-entry/hooks/use-get-platforms", () => ({
   useGetPlatforms: vi.fn(() => ({
     data: {
       supportedPlatforms: [

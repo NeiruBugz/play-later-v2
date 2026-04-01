@@ -13,7 +13,6 @@ export {
   isAuthenticationError,
 } from "./auth/handle-next-auth-error";
 export { formatRelativeDate, formatAbsoluteDate } from "./date";
-export { getGameUrl, isExternalGameId } from "./game";
 export {
   platformMapper,
   platformToBackgroundColor,
@@ -37,10 +36,6 @@ export {
   capitalizeString,
   normalizeGameTitle,
   normalizeString,
-  updateListParams,
-  parseListParams,
-  type ListParams,
   cn,
 } from "./ui";
 export { createServerAction, type ActionResult } from "./server-action";
-export { getFirstValidationError } from "./validation";

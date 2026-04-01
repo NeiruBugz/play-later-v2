@@ -1,4 +1,5 @@
-import type { LibraryItemDomain, LibraryItemStatus } from "@/shared/types";
+import type { LibraryItemDomain } from "@/features/library/types";
+import type { LibraryItemStatus } from "@/shared/types";
 
 export interface LibraryStatusDisplayProps {
   gameId?: string;

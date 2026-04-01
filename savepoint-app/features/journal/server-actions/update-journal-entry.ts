@@ -3,8 +3,8 @@
 import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
+import type { JournalEntryDomain } from "@/features/journal/types";
 import { createServerAction } from "@/shared/lib";
-import type { JournalEntryDomain } from "@/shared/types/journal";
 
 import {
   UpdateJournalEntrySchema,

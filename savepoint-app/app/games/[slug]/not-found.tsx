@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 
-import { GameNotFound } from "@/features/game-detail/ui/game-not-found";
+import { GameNotFound } from "@/features/game-detail";
 
 export default function GameNotFoundPage() {
   const params = useParams();

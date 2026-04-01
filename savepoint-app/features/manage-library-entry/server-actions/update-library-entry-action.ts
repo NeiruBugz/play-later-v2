@@ -3,8 +3,8 @@
 import { LibraryService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
+import type { LibraryItemDomain } from "@/features/library/types";
 import { createServerAction } from "@/shared/lib";
-import type { LibraryItemDomain } from "@/shared/types";
 
 import {
   UpdateLibraryEntrySchema,
