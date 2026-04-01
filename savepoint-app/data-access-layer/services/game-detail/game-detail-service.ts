@@ -135,6 +135,14 @@ export class GameDetailService {
 
       return serviceSuccess(game);
     } catch (error) {
+      if (error instanceof Error && error.name === "DuplicateError") {
+        this.logger.debug(
+          { igdbId: igdbGame.id, slug: igdbGame.slug },
+          "Game already populated by concurrent request, skipping"
+        );
+        return serviceSuccess(null);
+      }
+
       this.logger.warn(
         { error, igdbId: igdbGame.id, slug: igdbGame.slug },
         "Background game population failed - will retry on next access"
