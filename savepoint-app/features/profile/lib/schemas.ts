@@ -13,6 +13,7 @@ export type CheckUsernameInput = z.infer<typeof CheckUsernameSchema>;
 export const UpdateProfileSchema = z.object({
   username: z.string().min(USERNAME_MIN_LENGTH).max(USERNAME_MAX_LENGTH),
   avatarUrl: z.string().optional(),
+  isPublicProfile: z.boolean().optional(),
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
 export const UploadAvatarSchema = z.object({

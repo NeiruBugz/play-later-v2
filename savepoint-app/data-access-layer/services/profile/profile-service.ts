@@ -52,6 +52,7 @@ export class ProfileService {
           email: true,
           name: true,
           createdAt: true,
+          isPublicProfile: true,
         },
       });
       if (!user) {
@@ -80,6 +81,7 @@ export class ProfileService {
             email: true,
             name: true,
             createdAt: true,
+            isPublicProfile: true,
           },
         }),
         getLibraryStatsByUserId(input.userId),
@@ -155,6 +157,9 @@ export class ProfileService {
         username: input.username,
         usernameNormalized: input.username.toLowerCase(),
         image: input.avatarUrl,
+        ...(input.isPublicProfile !== undefined && {
+          isPublicProfile: input.isPublicProfile,
+        }),
       });
       return serviceSuccess({
         username: updatedUser.username,

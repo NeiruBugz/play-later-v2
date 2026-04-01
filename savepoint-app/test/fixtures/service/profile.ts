@@ -4,6 +4,7 @@ export const basicUserProfileFixture = {
   email: "test@example.com",
   name: "Test User",
   createdAt: new Date("2024-01-15"),
+  isPublicProfile: false,
 };
 export const userProfileWithNullFieldsFixture = {
   username: null,

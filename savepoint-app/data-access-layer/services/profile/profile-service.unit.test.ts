@@ -79,6 +79,7 @@ describe("ProfileService", () => {
           email: true,
           name: true,
           createdAt: true,
+          isPublicProfile: true,
         },
       });
     });
@@ -146,6 +147,7 @@ describe("ProfileService", () => {
           email: true,
           name: true,
           createdAt: true,
+          isPublicProfile: true,
         },
       });
       expect(mockGetLibraryStatsByUserId).toHaveBeenCalledWith("user-123");

@@ -12,6 +12,7 @@ export type Profile = {
   email: string | null;
   name: string | null;
   createdAt: Date;
+  isPublicProfile: boolean;
 };
 
 export type RecentGame = {
@@ -33,6 +34,7 @@ export type ProfileWithStats = {
   email: string | null;
   name: string | null;
   createdAt: Date;
+  isPublicProfile: boolean;
   stats: LibraryStats;
 };
 export type GetProfileWithStatsResult = ServiceResult<{
@@ -48,6 +50,7 @@ export type UpdateProfileInput = {
   userId: string;
   username: string;
   avatarUrl?: string;
+  isPublicProfile?: boolean;
 };
 export type UpdateProfileResult = ServiceResult<{
   username: string | null;

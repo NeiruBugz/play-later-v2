@@ -28,14 +28,14 @@
   - [x] Write unit tests for SocialService: self-follow prevention, target not public, duplicate follow, happy path follow/unfollow **[Agent: typescript-test-expert]**
   - [x] Verify: `pnpm --filter savepoint test` passes **[Agent: nextjs-fullstack]**
 
-- [ ] **Slice 3: Public Profile Visibility Toggle in Settings**
-  - [ ] Extend `UpdateProfileInput` Zod schema in `features/profile/lib/schemas.ts` with `isPublicProfile: z.boolean().optional()` **[Agent: nextjs-fullstack]**
-  - [ ] Extend `ProfileWithStats` type in `features/profile/types.ts` with `isPublicProfile: boolean` **[Agent: nextjs-fullstack]**
-  - [ ] Update profile data preparation to include `isPublicProfile` from User record **[Agent: nextjs-fullstack]**
-  - [ ] Create `features/profile/ui/profile-visibility-toggle.tsx` — Switch component with label "Public profile", description text, calls `updateProfile` server action **[Agent: react-frontend]**
-  - [ ] Add `ProfileVisibilityToggle` to the settings page at `app/(protected)/profile/settings/page.tsx` as a new Card section **[Agent: react-frontend]**
-  - [ ] Write component test for toggle: renders current state, toggles on click, calls server action **[Agent: typescript-test-expert]**
-  - [ ] Verify: dev server running, toggle visible in settings, state persists after page reload **[Agent: nextjs-fullstack]**
+- [x] **Slice 3: Public Profile Visibility Toggle in Settings**
+  - [x] Extend `UpdateProfileInput` Zod schema in `features/profile/lib/schemas.ts` with `isPublicProfile: z.boolean().optional()` **[Agent: nextjs-fullstack]**
+  - [x] Extend `ProfileWithStats` type in `features/profile/types.ts` with `isPublicProfile: boolean` **[Agent: nextjs-fullstack]**
+  - [x] Update profile data preparation to include `isPublicProfile` from User record **[Agent: nextjs-fullstack]**
+  - [x] Create `features/profile/ui/profile-visibility-toggle.tsx` — Switch component with label "Public profile", description text, calls `updateProfile` server action **[Agent: react-frontend]**
+  - [x] Add `ProfileVisibilityToggle` to the settings page at `app/(protected)/profile/settings/page.tsx` as a new Card section **[Agent: react-frontend]**
+  - [x] Write component test for toggle: renders current state, toggles on click, calls server action **[Agent: typescript-test-expert]**
+  - [x] Verify: dev server running, toggle visible in settings, state persists after page reload **[Agent: nextjs-fullstack]**
 
 - [ ] **Slice 4: Public Profile Page at `/u/[username]`**
   - [ ] Add `getPublicProfile(username)` method to `ProfileService` — fetches user by username, returns null if not found or `isPublicProfile = false`, includes game count, followers/following counts **[Agent: nextjs-fullstack]**

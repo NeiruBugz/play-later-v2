@@ -11,6 +11,7 @@ type MinimalUser = {
   email: string | null;
   name: string | null;
   createdAt: Date;
+  isPublicProfile?: boolean;
 };
 type LibraryStatsRepo = {
   statusCounts: Record<string, number>;
@@ -29,6 +30,7 @@ export function mapUserToProfile(user: MinimalUser): Profile {
     email: user.email,
     name: user.name,
     createdAt: user.createdAt,
+    isPublicProfile: user.isPublicProfile ?? false,
   };
 }
 export function mapRecentGame(item: {
@@ -52,11 +54,12 @@ export function mapLibraryStats(stats: LibraryStatsRepo): LibraryStats {
   };
 }
 export function mapUserToProfileWithStats(
-  user: MinimalUser,
+  user: MinimalUser & { isPublicProfile: boolean },
   stats: LibraryStatsRepo
 ): ProfileWithStats {
   return {
     ...mapUserToProfile(user),
+    isPublicProfile: user.isPublicProfile,
     stats: mapLibraryStats(stats),
   };
 }

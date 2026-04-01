@@ -254,6 +254,7 @@ export async function updateUserProfile(
     username?: string;
     usernameNormalized?: string;
     image?: string;
+    isPublicProfile?: boolean;
     profileSetupCompletedAt?: Date | null;
   }
 ): Promise<{
@@ -262,6 +263,7 @@ export async function updateUserProfile(
   usernameNormalized: string | null;
   steamProfileURL: string | null;
   image: string | null;
+  isPublicProfile: boolean;
   profileSetupCompletedAt: Date | null;
 }> {
   try {
@@ -274,6 +276,7 @@ export async function updateUserProfile(
         usernameNormalized: true,
         steamProfileURL: true,
         image: true,
+        isPublicProfile: true,
         profileSetupCompletedAt: true,
       },
     });

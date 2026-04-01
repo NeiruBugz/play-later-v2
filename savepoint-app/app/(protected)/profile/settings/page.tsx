@@ -2,7 +2,10 @@ import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { ProfileSettingsForm } from "@/features/profile";
+import {
+  ProfileSettingsForm,
+  ProfileVisibilityToggle,
+} from "@/features/profile";
 import { SteamConnectCard } from "@/features/steam-import";
 import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import {
@@ -44,6 +47,21 @@ export default async function ProfileSettingsPage() {
             currentUsername={profileResult.data.profile.username}
             currentAvatar={profileResult.data.profile.image}
           />
+
+          <Card className="hover:none w-full max-w-2xl">
+            <CardHeader>
+              <CardTitle>Privacy</CardTitle>
+              <CardDescription>
+                Control who can see your profile and library
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ProfileVisibilityToggle
+                isPublicProfile={profileResult.data.profile.isPublicProfile}
+                username={profileResult.data.profile.username ?? ""}
+              />
+            </CardContent>
+          </Card>
 
           <Card className="hover:none w-full max-w-2xl">
             <CardHeader>

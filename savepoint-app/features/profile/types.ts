@@ -17,6 +17,7 @@ export type ProfileWithStats = {
   email: string | null;
   name: string | null;
   createdAt: Date;
+  isPublicProfile: boolean;
   stats: LibraryStats;
 };
 
