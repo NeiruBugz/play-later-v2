@@ -6,7 +6,6 @@ import { prisma } from "@/shared/lib/app/db";
 
 import { DuplicateError } from "../errors";
 import type {
-  FollowUserProfile,
   PaginatedFollowersResult,
   PaginatedFollowingResult,
   PaginationOptions,

@@ -15,6 +15,7 @@ export function createLibraryItemFixture(
     startedAt: new Date("2025-01-15"),
     completedAt: null,
     hasBeenPlayed: false,
+    statusChangedAt: null,
     createdAt: new Date("2025-01-10"),
     updatedAt: new Date("2025-01-20"),
     game: {
@@ -41,6 +42,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     startedAt: null,
     completedAt: null,
     hasBeenPlayed: false,
+    statusChangedAt: null,
     createdAt: new Date("2024-01-15"),
     updatedAt: new Date("2024-01-15"),
     game: {
@@ -63,6 +65,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     startedAt: new Date("2024-01-12"),
     completedAt: null,
     hasBeenPlayed: false,
+    statusChangedAt: null,
     createdAt: new Date("2024-01-10"),
     updatedAt: new Date("2024-01-12"),
     game: {
@@ -85,6 +88,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     startedAt: new Date("2024-01-06"),
     completedAt: new Date("2024-01-20"),
     hasBeenPlayed: true,
+    statusChangedAt: null,
     createdAt: new Date("2024-01-05"),
     updatedAt: new Date("2024-01-20"),
     game: {
@@ -107,6 +111,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     startedAt: null,
     completedAt: null,
     hasBeenPlayed: false,
+    statusChangedAt: null,
     createdAt: new Date("2024-01-18"),
     updatedAt: new Date("2024-01-18"),
     game: {
@@ -129,6 +134,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     startedAt: new Date("2024-01-08"),
     completedAt: null,
     hasBeenPlayed: true,
+    statusChangedAt: null,
     createdAt: new Date("2024-01-07"),
     updatedAt: new Date("2024-01-14"),
     game: {
@@ -151,6 +157,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     startedAt: new Date("2024-01-22"),
     completedAt: null,
     hasBeenPlayed: false,
+    statusChangedAt: null,
     createdAt: new Date("2023-12-01"),
     updatedAt: new Date("2024-01-22"),
     game: {

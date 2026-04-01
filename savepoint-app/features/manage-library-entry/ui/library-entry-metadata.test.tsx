@@ -38,6 +38,7 @@ const createMockLibraryItem = (
   startedAt: null,
   completedAt: null,
   hasBeenPlayed: false,
+  statusChangedAt: null,
   ...overrides,
 });
 
