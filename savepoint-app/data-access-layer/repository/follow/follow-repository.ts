@@ -56,7 +56,7 @@ export async function findFollowers(
       select: {
         follower: { select: FOLLOWER_USER_SELECT },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ createdAt: "desc" }, { followerId: "desc" }],
       ...(opts?.skip !== undefined && { skip: opts.skip }),
       ...(opts?.take !== undefined && { take: opts.take }),
     }),
@@ -79,7 +79,7 @@ export async function findFollowing(
       select: {
         following: { select: FOLLOWER_USER_SELECT },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ createdAt: "desc" }, { followingId: "desc" }],
       ...(opts?.skip !== undefined && { skip: opts.skip }),
       ...(opts?.take !== undefined && { take: opts.take }),
     }),
