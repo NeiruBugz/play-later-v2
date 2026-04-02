@@ -10,6 +10,16 @@ type ApiResponse = {
   error?: string;
 };
 
+function normalizeFeedDates(feed: PaginatedFeed): PaginatedFeed {
+  return {
+    ...feed,
+    items: feed.items.map((item) => ({
+      ...item,
+      timestamp: new Date(item.timestamp),
+    })),
+  };
+}
+
 async function fetchFeed(cursor?: FeedCursor): Promise<PaginatedFeed> {
   const params = new URLSearchParams();
   if (cursor) {
@@ -23,13 +33,7 @@ async function fetchFeed(cursor?: FeedCursor): Promise<PaginatedFeed> {
   if (!json.success) {
     throw new Error(json.error ?? "Failed to fetch activity feed");
   }
-  return {
-    ...json.data,
-    items: json.data.items.map((item) => ({
-      ...item,
-      timestamp: new Date(item.timestamp),
-    })),
-  };
+  return normalizeFeedDates(json.data);
 }
 
 type UseActivityFeedOptions = {
@@ -44,7 +48,7 @@ export function useActivityFeed(options?: UseActivityFeedOptions) {
     initialPageParam: undefined as FeedCursor | undefined,
     ...(options?.initialData && {
       initialData: {
-        pages: [options.initialData],
+        pages: [normalizeFeedDates(options.initialData)],
         pageParams: [undefined],
       },
     }),
