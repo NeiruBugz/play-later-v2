@@ -1,6 +1,9 @@
 import {
+  countLibraryItemsByUserId,
+  findLibraryPreview,
   findUserById,
   findUserByNormalizedUsername,
+  findUserByUsername,
   getLibraryStatsByUserId,
   updateUserProfile,
 } from "@/data-access-layer/repository";
@@ -31,8 +34,11 @@ import { ServiceErrorCode } from "../types";
 import { ProfileService } from "./profile-service";
 
 vi.mock("@/data-access-layer/repository", () => ({
+  countLibraryItemsByUserId: vi.fn(),
+  findLibraryPreview: vi.fn(),
   findUserById: vi.fn(),
   findUserByNormalizedUsername: vi.fn(),
+  findUserByUsername: vi.fn(),
   getLibraryStatsByUserId: vi.fn(),
   updateUserProfile: vi.fn(),
 }));
@@ -43,8 +49,11 @@ vi.mock("@/features/profile/lib", () => ({
 
 describe("ProfileService", () => {
   let service: ProfileService;
+  let mockCountLibraryItemsByUserId: ReturnType<typeof vi.fn>;
+  let mockFindLibraryPreview: ReturnType<typeof vi.fn>;
   let mockFindUserById: ReturnType<typeof vi.fn>;
   let mockFindUserByNormalizedUsername: ReturnType<typeof vi.fn>;
+  let mockFindUserByUsername: ReturnType<typeof vi.fn>;
   let mockGetLibraryStatsByUserId: ReturnType<typeof vi.fn>;
   let mockUpdateUserProfile: ReturnType<typeof vi.fn>;
   let mockValidateUsername: ReturnType<typeof vi.fn>;
@@ -52,8 +61,12 @@ describe("ProfileService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     service = new ProfileService();
+    mockCountLibraryItemsByUserId = vi.mocked(countLibraryItemsByUserId);
+    mockFindLibraryPreview = vi.mocked(findLibraryPreview);
+    mockFindLibraryPreview.mockResolvedValue([]);
     mockFindUserById = vi.mocked(findUserById);
     mockFindUserByNormalizedUsername = vi.mocked(findUserByNormalizedUsername);
+    mockFindUserByUsername = vi.mocked(findUserByUsername);
     mockGetLibraryStatsByUserId = vi.mocked(getLibraryStatsByUserId);
     mockUpdateUserProfile = vi.mocked(updateUserProfile);
     mockValidateUsername = vi.mocked(validateUsername);
@@ -195,6 +208,98 @@ describe("ProfileService", () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toBe("Connection timeout");
+        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+      }
+    });
+  });
+
+  describe("getPublicProfile", () => {
+    const publicUserFixture = {
+      id: "user-public-123",
+      name: "Public User",
+      username: "publicuser",
+      image: "https://example.com/avatar.jpg",
+      isPublicProfile: true,
+      createdAt: new Date("2024-01-15"),
+    };
+
+    const privateUserFixture = {
+      id: "user-private-456",
+      name: "Private User",
+      username: "privateuser",
+      image: null,
+      isPublicProfile: false,
+      createdAt: new Date("2024-01-15"),
+    };
+
+    it("should return profile data for a public user", async () => {
+      mockFindUserByUsername.mockResolvedValue(publicUserFixture);
+      mockCountLibraryItemsByUserId.mockResolvedValue(42);
+
+      const result = await service.getPublicProfile("publicuser");
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.profile).toEqual({
+          id: "user-public-123",
+          name: "Public User",
+          username: "publicuser",
+          image: "https://example.com/avatar.jpg",
+          gameCount: 42,
+          libraryPreview: [],
+        });
+      }
+
+      expect(mockFindUserByUsername).toHaveBeenCalledWith("publicuser");
+    });
+
+    it("should fetch game count in the happy path", async () => {
+      mockFindUserByUsername.mockResolvedValue(publicUserFixture);
+      mockCountLibraryItemsByUserId.mockResolvedValue(15);
+
+      await service.getPublicProfile("publicuser");
+
+      expect(mockCountLibraryItemsByUserId).toHaveBeenCalledWith(
+        "user-public-123"
+      );
+    });
+
+    it("should return null profile for a private user", async () => {
+      mockFindUserByUsername.mockResolvedValue(privateUserFixture);
+
+      const result = await service.getPublicProfile("privateuser");
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.profile).toBeNull();
+      }
+
+      expect(mockCountLibraryItemsByUserId).not.toHaveBeenCalled();
+    });
+
+    it("should return null profile for a non-existent username", async () => {
+      mockFindUserByUsername.mockResolvedValue(null);
+
+      const result = await service.getPublicProfile("unknownuser");
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.profile).toBeNull();
+      }
+
+      expect(mockCountLibraryItemsByUserId).not.toHaveBeenCalled();
+    });
+
+    it("should handle unexpected errors", async () => {
+      mockFindUserByUsername.mockRejectedValue(
+        new Error("Database connection failed")
+      );
+
+      const result = await service.getPublicProfile("publicuser");
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Database connection failed");
         expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
       }
     });

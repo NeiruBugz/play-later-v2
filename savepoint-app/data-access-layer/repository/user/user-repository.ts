@@ -218,6 +218,28 @@ export async function findUserByNormalizedUsername(
   });
 }
 
+const PUBLIC_PROFILE_SELECT = {
+  id: true,
+  name: true,
+  username: true,
+  image: true,
+  isPublicProfile: true,
+  createdAt: true,
+} satisfies Prisma.UserSelect;
+
+export type PublicProfileUser = Prisma.UserGetPayload<{
+  select: typeof PUBLIC_PROFILE_SELECT;
+}>;
+
+export async function findUserByUsername(
+  username: string
+): Promise<PublicProfileUser | null> {
+  return prisma.user.findUnique({
+    where: { usernameNormalized: username.toLowerCase().trim() },
+    select: PUBLIC_PROFILE_SELECT,
+  });
+}
+
 export async function updateOnboardingDismissed(userId: string): Promise<void> {
   try {
     await prisma.user.update({

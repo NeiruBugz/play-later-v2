@@ -1,10 +1,30 @@
 export type FeedEventType = "LIBRARY_ADD" | "STATUS_CHANGE";
 
-// TODO: Expand with full feed item fields once activity feed is implemented
 export type FeedItem = {
   id: string;
   eventType: FeedEventType;
-  userId: string;
-  gameId: string;
-  createdAt: Date;
+  status: string;
+  timestamp: Date;
+  user: {
+    id: string;
+    name: string | null;
+    username: string | null;
+    image: string | null;
+  };
+  game: {
+    id: string;
+    title: string;
+    coverImage: string | null;
+    slug: string;
+  };
+};
+
+export type FeedCursor = {
+  timestamp: string;
+  id: string;
+};
+
+export type PaginatedFeed = {
+  items: FeedItem[];
+  nextCursor: FeedCursor | null;
 };

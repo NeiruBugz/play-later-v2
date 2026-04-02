@@ -67,6 +67,7 @@ export const updateLibraryStatusAction = createServerAction<
       libraryItem: {
         id: mostRecentItem.id,
         status,
+        statusChangedAt: new Date(),
       },
     });
 

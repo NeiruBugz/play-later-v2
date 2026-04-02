@@ -25,3 +25,9 @@ export type {
   ImportedGamesHandlerInput,
   ImportedGamesHandlerOutput,
 } from "./steam-import/types";
+
+export { activityFeedHandler } from "./social/activity-feed-handler";
+export type {
+  ActivityFeedHandlerInput,
+  ActivityFeedHandlerOutput,
+} from "./social/types";

@@ -578,6 +578,7 @@ features/[feature-name]/
 | `journal` | Journal entry system |
 | `onboarding` | New user getting-started flow |
 | `steam-import` | Steam library import pipeline trigger |
+| `social` | Follow system, activity feed, public profile interactions |
 | `whats-new` | App-wide announcement modal |
 
 ### Existing Widgets

@@ -31,6 +31,7 @@ export type UpdateLibraryItemInput = {
     platform?: string;
     startedAt?: Date;
     completedAt?: Date;
+    statusChangedAt?: Date;
     hasBeenPlayed?: boolean;
   };
 };

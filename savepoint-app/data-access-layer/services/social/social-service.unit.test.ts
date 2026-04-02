@@ -225,14 +225,44 @@ describe("SocialService", () => {
   describe("getFollowers", () => {
     const userId = "clxuser1234567ab";
     const mockPaginatedResult = {
-      items: [],
+      followers: [],
       total: 0,
-      page: 1,
-      pageSize: 20,
-      hasMore: false,
     };
 
+    it("should return NOT_FOUND when user does not exist", async () => {
+      mockFindUserById.mockResolvedValue(null);
+
+      const result = await service.getFollowers(userId, 1);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+      }
+
+      expect(mockFindFollowers).not.toHaveBeenCalled();
+    });
+
+    it("should return NOT_FOUND when user has a private profile", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: false,
+      });
+
+      const result = await service.getFollowers(userId, 1);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+      }
+
+      expect(mockFindFollowers).not.toHaveBeenCalled();
+    });
+
     it("should call findFollowers with skip=0 and take=20 for the first page", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: true,
+      });
       mockFindFollowers.mockResolvedValue(mockPaginatedResult);
 
       const result = await service.getFollowers(userId, 1);
@@ -246,6 +276,10 @@ describe("SocialService", () => {
     });
 
     it("should calculate the correct skip offset for subsequent pages", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: true,
+      });
       mockFindFollowers.mockResolvedValue(mockPaginatedResult);
 
       await service.getFollowers(userId, 3);
@@ -257,6 +291,10 @@ describe("SocialService", () => {
     });
 
     it("should default to page 1 when page is not provided", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: true,
+      });
       mockFindFollowers.mockResolvedValue(mockPaginatedResult);
 
       await service.getFollowers(userId);
@@ -268,6 +306,10 @@ describe("SocialService", () => {
     });
 
     it("should return the paginated result from the repository", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: true,
+      });
       mockFindFollowers.mockResolvedValue(mockPaginatedResult);
 
       const result = await service.getFollowers(userId, 1);
@@ -282,14 +324,44 @@ describe("SocialService", () => {
   describe("getFollowing", () => {
     const userId = "clxuser1234567ab";
     const mockPaginatedResult = {
-      items: [],
+      following: [],
       total: 0,
-      page: 1,
-      pageSize: 20,
-      hasMore: false,
     };
 
+    it("should return NOT_FOUND when user does not exist", async () => {
+      mockFindUserById.mockResolvedValue(null);
+
+      const result = await service.getFollowing(userId, 1);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+      }
+
+      expect(mockFindFollowing).not.toHaveBeenCalled();
+    });
+
+    it("should return NOT_FOUND when user has a private profile", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: false,
+      });
+
+      const result = await service.getFollowing(userId, 1);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
+      }
+
+      expect(mockFindFollowing).not.toHaveBeenCalled();
+    });
+
     it("should call findFollowing with skip=0 and take=20 for the first page", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: true,
+      });
       mockFindFollowing.mockResolvedValue(mockPaginatedResult);
 
       const result = await service.getFollowing(userId, 1);
@@ -303,6 +375,10 @@ describe("SocialService", () => {
     });
 
     it("should calculate the correct skip offset for subsequent pages", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: true,
+      });
       mockFindFollowing.mockResolvedValue(mockPaginatedResult);
 
       await service.getFollowing(userId, 2);
@@ -314,6 +390,10 @@ describe("SocialService", () => {
     });
 
     it("should default to page 1 when page is not provided", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: true,
+      });
       mockFindFollowing.mockResolvedValue(mockPaginatedResult);
 
       await service.getFollowing(userId);
@@ -325,6 +405,10 @@ describe("SocialService", () => {
     });
 
     it("should return the paginated result from the repository", async () => {
+      mockFindUserById.mockResolvedValue({
+        id: userId,
+        isPublicProfile: true,
+      });
       mockFindFollowing.mockResolvedValue(mockPaginatedResult);
 
       const result = await service.getFollowing(userId, 1);

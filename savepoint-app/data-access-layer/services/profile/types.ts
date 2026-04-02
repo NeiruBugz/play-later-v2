@@ -98,3 +98,19 @@ export type GetSteamConnectionStatusInput = {
 };
 export type GetSteamConnectionStatusResult =
   ServiceResult<SteamConnectionStatus>;
+export type LibraryPreviewGame = {
+  title: string;
+  coverImage: string | null;
+  slug: string;
+};
+export type PublicProfile = {
+  id: string;
+  name: string | null;
+  username: string;
+  image: string | null;
+  gameCount: number;
+  libraryPreview: LibraryPreviewGame[];
+};
+export type GetPublicProfileResult = ServiceResult<{
+  profile: PublicProfile | null;
+}>;

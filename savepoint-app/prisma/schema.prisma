@@ -71,8 +71,8 @@ model User {
   IgnoredImportedGames    IgnoredImportedGames[]
 
   ImportedGame ImportedGame[]
-  followers    Follow[]             @relation("UserFollowers")
-  following    Follow[]             @relation("UserFollowing")
+  followers    Follow[]             @relation("UserIsFollowed")
+  following    Follow[]             @relation("UserFollows")
 }
 
 // ----- Application Models ------//
@@ -300,8 +300,8 @@ model Follow {
   followingId String
   createdAt   DateTime @default(now())
 
-  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
-  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  follower  User @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserIsFollowed", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@id([followerId, followingId])
   @@index([followerId])

@@ -50,9 +50,14 @@ export async function findFollowers(
   userId: string,
   opts?: PaginationOptions
 ): Promise<PaginatedFollowersResult> {
+  const publicFilter = {
+    followingId: userId,
+    follower: { isPublicProfile: true },
+  };
+
   const [follows, total] = await prisma.$transaction([
     prisma.follow.findMany({
-      where: { followingId: userId },
+      where: publicFilter,
       select: {
         follower: { select: FOLLOWER_USER_SELECT },
       },
@@ -60,7 +65,7 @@ export async function findFollowers(
       ...(opts?.skip !== undefined && { skip: opts.skip }),
       ...(opts?.take !== undefined && { take: opts.take }),
     }),
-    prisma.follow.count({ where: { followingId: userId } }),
+    prisma.follow.count({ where: publicFilter }),
   ]);
 
   return {
@@ -73,9 +78,14 @@ export async function findFollowing(
   userId: string,
   opts?: PaginationOptions
 ): Promise<PaginatedFollowingResult> {
+  const publicFilter = {
+    followerId: userId,
+    following: { isPublicProfile: true },
+  };
+
   const [follows, total] = await prisma.$transaction([
     prisma.follow.findMany({
-      where: { followerId: userId },
+      where: publicFilter,
       select: {
         following: { select: FOLLOWER_USER_SELECT },
       },
@@ -83,7 +93,7 @@ export async function findFollowing(
       ...(opts?.skip !== undefined && { skip: opts.skip }),
       ...(opts?.take !== undefined && { take: opts.take }),
     }),
-    prisma.follow.count({ where: { followerId: userId } }),
+    prisma.follow.count({ where: publicFilter }),
   ]);
 
   return {

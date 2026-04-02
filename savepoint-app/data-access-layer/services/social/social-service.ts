@@ -130,6 +130,18 @@ export class SocialService {
     page?: number
   ): Promise<GetFollowersResult> {
     try {
+      const user = await findUserById(userId, {
+        select: { id: true, isPublicProfile: true },
+      });
+
+      if (!user || !user.isPublicProfile) {
+        this.logger.warn({ userId }, "getFollowers called for non-public user");
+        return serviceError(
+          "User not found or profile is private",
+          ServiceErrorCode.NOT_FOUND
+        );
+      }
+
       const currentPage = page ?? 1;
       const skip = (currentPage - 1) * DEFAULT_PAGE_SIZE;
 
@@ -149,6 +161,18 @@ export class SocialService {
     page?: number
   ): Promise<GetFollowingResult> {
     try {
+      const user = await findUserById(userId, {
+        select: { id: true, isPublicProfile: true },
+      });
+
+      if (!user || !user.isPublicProfile) {
+        this.logger.warn({ userId }, "getFollowing called for non-public user");
+        return serviceError(
+          "User not found or profile is private",
+          ServiceErrorCode.NOT_FOUND
+        );
+      }
+
       const currentPage = page ?? 1;
       const skip = (currentPage - 1) * DEFAULT_PAGE_SIZE;
 

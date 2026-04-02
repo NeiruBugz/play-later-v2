@@ -6,6 +6,8 @@ export type { ProfileSettingsFormProps } from "./ui/profile-settings-form.types"
 export { ProfileStatsBar } from "./ui/profile-stats-bar";
 export { ProfileView } from "./ui/profile-view";
 export type { ProfileViewProps } from "./ui/profile-view.types";
+export { PublicProfileView } from "./ui/public-profile-view";
+export type { PublicProfileViewProps } from "./ui/public-profile-view";
 export { ProfileVisibilityToggle } from "./ui/profile-visibility-toggle";
 export { UsernameInput } from "./ui/username-input";
 export type { UsernameInputProps } from "./ui/username-input.types";

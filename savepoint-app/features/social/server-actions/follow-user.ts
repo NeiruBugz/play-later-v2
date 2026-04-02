@@ -7,7 +7,7 @@ import { z } from "zod";
 import { createServerAction } from "@/shared/lib";
 
 const FollowUserSchema = z.object({
-  followingId: z.string(),
+  followingId: z.string().min(1),
 });
 
 type FollowUserInput = z.infer<typeof FollowUserSchema>;
@@ -34,7 +34,7 @@ export const followUserAction = createServerAction<FollowUserInput, void>({
       };
     }
 
-    revalidatePath(`/profile/${followingId}`);
+    revalidatePath("/u/[username]", "page");
     logger.info({ userId, followingId }, "User followed successfully");
 
     return {

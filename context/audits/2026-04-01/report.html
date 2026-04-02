@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Audit Report — 2026-04-01</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px 64px;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+    header h1 { font-size: 1.6rem; margin-bottom: 4px; }
+    header .meta { color: #6b7280; font-size: 0.9rem; margin-bottom: 12px; }
+    .score-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .overall-score {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+    .grade-A { background: #16a34a; }
+    .grade-B { background: #2563eb; }
+    .grade-C { background: #ea580c; }
+    .grade-D { background: #dc2626; }
+    .grade-F { background: #7f1d1d; }
+    .delta-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    /* Filter toolbar */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 8px 0;
+      margin-bottom: 24px;
+    }
+    .toolbar button {
+      padding: 6px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .toolbar button:hover { background: #f3f4f6; }
+    .toolbar button.active { background: #1f2937; color: #fff; border-color: #1f2937; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 8px; }
+    th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    th { background: #f9fafb; font-weight: 600; white-space: nowrap; }
+    tbody tr:nth-child(even) { background: #f9fafb; }
+    td:first-child, th:first-child { width: 36px; text-align: center; }
+
+    /* Summary table highlights */
+    tr.row-grade-D td, tr.row-grade-F td { background: #fef2f2; }
+
+    /* Status cells */
+    .status-PASS { color: #16a34a; font-weight: 600; }
+    .status-WARN { color: #ca8a04; font-weight: 600; }
+    .status-FAIL { color: #dc2626; font-weight: 600; }
+    .status-SKIP { color: #9ca3af; font-weight: 600; }
+
+    /* Severity badges */
+    .sev {
+      display: inline-block;
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .sev-critical { background: #dc2626; }
+    .sev-high { background: #ea580c; }
+    .sev-medium { background: #ca8a04; }
+    .sev-low { background: #9ca3af; }
+
+    /* Priority badges */
+    .pri-P0 { color: #dc2626; font-weight: 700; }
+    .pri-P1 { color: #ea580c; font-weight: 700; }
+    .pri-P2 { color: #2563eb; font-weight: 600; }
+    .pri-P3 { color: #6b7280; font-weight: 600; }
+
+    /* Details / collapsible */
+    details { margin-bottom: 16px; }
+    summary {
+      cursor: pointer;
+      padding: 10px 12px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "\25B6"; font-size: 0.7rem; transition: transform 0.15s; }
+    details[open] > summary::before { transform: rotate(90deg); }
+    details .detail-body { padding: 12px 0 0; }
+
+    /* Section headings */
+    h2 { font-size: 1.2rem; margin: 32px 0 12px; }
+
+    /* Filter: issues only */
+    body.issues-only tr[data-status='PASS'],
+    body.issues-only tr[data-status='SKIP'] {
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      table { font-size: 0.78rem; }
+      th, td { padding: 6px 6px; }
+      .overall-score { font-size: 1.5rem; }
+      header h1 { font-size: 1.3rem; }
+    }
+
+    /* Print */
+    @media print {
+      .toolbar { display: none; }
+      details { display: block; }
+      details > summary { display: none; }
+      details .detail-body { display: block !important; }
+      body.issues-only tr[data-status='PASS'],
+      body.issues-only tr[data-status='SKIP'] {
+        display: table-row;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>SavePoint (play-later-v2)</h1>
+  <div class="meta">Code Audit Report &mdash; 2026-04-01</div>
+  <div class="score-row">
+    <span class="overall-score">91%</span>
+    <span class="grade-badge grade-A">A</span>
+    <span class="delta-badge">+14 vs 2026-03-25</span>
+  </div>
+  <div class="meta" style="margin-top:6px;">Previous audit: 2026-03-25 &mdash; 77% Grade B</div>
+</header>
+
+<div class="toolbar">
+  <button id="filterBtn" onclick="toggleFilter()">Show issues only</button>
+</div>
+
+<!-- Summary Table -->
+<section>
+  <h2>Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Dimension</th><th>Score</th><th>Grade</th><th>Delta</th>
+        <th>Critical</th><th>High</th><th>Medium</th><th>Low</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td><td>Project Topology</td><td>100%</td>
+        <td><span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+      </tr>
+      <tr>
+        <td>2</td><td>Code Architecture</td><td>100%</td>
+        <td><span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span></td>
+        <td>+11</td><td>0</td><td>0</td><td>0</td><td>0</td>
+      </tr>
+      <tr>
+        <td>3</td><td>Documentation Quality</td><td>92%</td>
+        <td><span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span></td>
+        <td>+17</td><td>0</td><td>0</td><td>1</td><td>0</td>
+      </tr>
+      <tr>
+        <td>4</td><td>AI Development Tooling</td><td>86%</td>
+        <td><span class="grade-badge grade-B" style="font-size:0.75rem;padding:1px 8px;">B</span></td>
+        <td>+38</td><td>0</td><td>0</td><td>0</td><td>0</td>
+      </tr>
+      <tr>
+        <td>5</td><td>Security Guardrails</td><td>100%</td>
+        <td><span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span></td>
+        <td>+31</td><td>0</td><td>0</td><td>0</td><td>0</td>
+      </tr>
+      <tr>
+        <td>6</td><td>Software Best Practices</td><td>100%</td>
+        <td><span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span></td>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+      </tr>
+      <tr>
+        <td>7</td><td>Spec-Driven Development</td><td>82%</td>
+        <td><span class="grade-badge grade-B" style="font-size:0.75rem;padding:1px 8px;">B</span></td>
+        <td>0</td><td>0</td><td>0</td><td>2</td><td>0</td>
+      </tr>
+      <tr>
+        <td>8</td><td>End-to-End Delivery</td><td>64%</td>
+        <td><span class="grade-badge grade-C" style="font-size:0.75rem;padding:1px 8px;">C</span></td>
+        <td>+14</td><td>0</td><td>1</td><td>1</td><td>0</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Per-Dimension Details -->
+<section>
+  <h2>Dimension Details</h2>
+
+  <!-- 1. Project Topology -->
+  <details>
+    <summary>
+      1. Project Topology
+      <span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span>
+      <span style="font-size:0.85rem;color:#6b7280;">100%</span>
+    </summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>TOPO-01</td><td>Repository structure type</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Monorepo -- 3 independent build roots: savepoint-app/, lambdas-py/, infra/</td></tr>
+          <tr data-status="PASS"><td>TOPO-02</td><td>Application layer inventory</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>3 layers: Next.js 15 fullstack, Python Lambda workers, Terraform IaC</td></tr>
+          <tr data-status="PASS"><td>TOPO-03</td><td>Database and storage detection</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>PostgreSQL 16 via Prisma + SQLAlchemy; S3 via LocalStack</td></tr>
+          <tr data-status="PASS"><td>TOPO-04</td><td>Infrastructure layer detection</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Terraform (26 .tf files) with modules for Cognito, ECR, Lambda, S3, SQS</td></tr>
+          <tr data-status="PASS"><td>TOPO-05</td><td>Language inventory</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>TypeScript/TSX (595), SQL (47), Python (38), HCL (26)</td></tr>
+          <tr data-status="PASS"><td>TOPO-06</td><td>Inter-layer communication</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>SQS queues, S3 CSV hand-off, shared PostgreSQL</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- 2. Code Architecture -->
+  <details>
+    <summary>
+      2. Code Architecture
+      <span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span>
+      <span style="font-size:0.85rem;color:#6b7280;">100%</span>
+    </summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>ARCH-01</td><td>Declared architectural pattern</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>FSD + layered DAL (savepoint-app), handlers/clients/services (lambdas-py), Terraform modules (infra)</td></tr>
+          <tr data-status="PASS"><td>ARCH-02</td><td>Module boundaries respected</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Clean import directions; no layer violations in sampled files</td></tr>
+          <tr data-status="PASS"><td>ARCH-03</td><td>Single Responsibility</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>No god modules; shared/ (110 files) well-partitioned into focused sub-modules</td></tr>
+          <tr data-status="PASS"><td>ARCH-04</td><td>Separation of concerns</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Clear three-tier separation; pages delegate to features/services</td></tr>
+          <tr data-status="PASS"><td>ARCH-05</td><td>Consistent naming</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Consistent kebab-case (TS) and snake_case (Python)</td></tr>
+          <tr data-status="PASS"><td>ARCH-06</td><td>Reasonable file sizes</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>4.8% exceed 500 lines (under 5% threshold); no file exceeds 2000 lines</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- 3. Documentation Quality -->
+  <details>
+    <summary>
+      3. Documentation Quality
+      <span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span>
+      <span style="font-size:0.85rem;color:#6b7280;">92%</span>
+    </summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>DOC-01</td><td>Root README useful</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>Setup instructions present (pnpm install, pnpm dev)</td></tr>
+          <tr data-status="PASS"><td>DOC-02</td><td>Service-level READMEs</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>All 3 service dirs have READMEs with setup/build/test docs</td></tr>
+          <tr data-status="SKIP"><td>DOC-03</td><td>API documentation</td><td><span class="sev sev-high">high</span></td><td class="status-SKIP">SKIP</td><td>Small internal API with co-located client</td></tr>
+          <tr data-status="WARN"><td>DOC-04</td><td>No stale documentation</td><td><span class="sev sev-medium">medium</span></td><td class="status-WARN">WARN</td><td>savepoint-app/README.md references shared/lib/repository/ but DAL moved to data-access-layer/</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- 4. AI Development Tooling -->
+  <details>
+    <summary>
+      4. AI Development Tooling
+      <span class="grade-badge grade-B" style="font-size:0.75rem;padding:1px 8px;">B</span>
+      <span style="font-size:0.85rem;color:#6b7280;">86%</span>
+    </summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>AI-01</td><td>CLAUDE.md ecosystem context</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>28 CLAUDE.md files covering project purpose, commands, conventions, gotchas across all layers</td></tr>
+          <tr data-status="PASS"><td>AI-02</td><td>Custom slash commands</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>10 custom commands in .claude/commands/awos/</td></tr>
+          <tr data-status="PASS"><td>AI-03</td><td>Skills configured</td><td><span class="sev sev-low">low</span></td><td class="status-PASS">PASS</td><td>4 skills: frontend-design, react-best-practices, react-feature-sliced-design, terraform-conventions</td></tr>
+          <tr data-status="PASS"><td>AI-04</td><td>MCP servers configured</td><td><span class="sev sev-low">low</span></td><td class="status-PASS">PASS</td><td>3 MCP servers + Playwright plugin</td></tr>
+          <tr data-status="PASS"><td>AI-05</td><td>Hooks configured</td><td><span class="sev sev-low">low</span></td><td class="status-PASS">PASS</td><td>PreToolUse (sensitive file blocking) + PostToolUse (format-and-lint)</td></tr>
+          <tr data-status="PASS"><td>AI-06</td><td>CLAUDE.md quality</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>All 28 files under 200 lines; non-obvious, well-structured, no bloat or duplication</td></tr>
+          <tr data-status="WARN"><td>AI-07</td><td>Agent can run and observe app</td><td><span class="sev sev-critical">critical</span></td><td class="status-WARN">WARN</td><td>Web UI (Playwright), API (curl), Infra (terraform-mcp-server) covered; Lambda local invoke tooling missing</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- 5. Security Guardrails -->
+  <details>
+    <summary>
+      5. Security Guardrails
+      <span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span>
+      <span style="font-size:0.85rem;color:#6b7280;">100%</span>
+    </summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>SEC-01</td><td>.env files gitignored</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>.env patterns in .gitignore; tracked env files are only examples/test placeholders</td></tr>
+          <tr data-status="PASS"><td>SEC-02</td><td>AI agent hooks restrict sensitive files</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>PreToolUse hooks block .env, *.pem, *.key, credentials*, secrets*, *.p12, *.pfx</td></tr>
+          <tr data-status="PASS"><td>SEC-03</td><td>.env.example exists</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Templates at root and both service dirs with placeholders</td></tr>
+          <tr data-status="PASS"><td>SEC-04</td><td>No secrets in committed files</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>No real secrets found in any committed files</td></tr>
+          <tr data-status="PASS"><td>SEC-05</td><td>Sensitive files in .gitignore</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Covers all sensitive file types relevant to TS/Python/Terraform stack</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- 6. Software Best Practices -->
+  <details>
+    <summary>
+      6. Software Best Practices
+      <span class="grade-badge grade-A" style="font-size:0.75rem;padding:1px 8px;">A</span>
+      <span style="font-size:0.85rem;color:#6b7280;">100%</span>
+    </summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>SBP-01</td><td>Linting configured</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>ESLint + Ruff with CI enforcement</td></tr>
+          <tr data-status="PASS"><td>SBP-02</td><td>Formatting automated</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Prettier + Ruff; CI-enforced format checks</td></tr>
+          <tr data-status="PASS"><td>SBP-03</td><td>Type safety enforced</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>strict: true in both TypeScript and mypy</td></tr>
+          <tr data-status="PASS"><td>SBP-04</td><td>Test infrastructure</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>95+ test files across Vitest, Playwright, pytest</td></tr>
+          <tr data-status="PASS"><td>SBP-05</td><td>CI/CD pipeline</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>4 GitHub Actions workflows covering lint, test, deploy</td></tr>
+          <tr data-status="PASS"><td>SBP-06</td><td>Error handling consistent</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>handleServiceError (61 usages), createServerAction (29 actions), global error boundaries</td></tr>
+          <tr data-status="PASS"><td>SBP-07</td><td>Dependencies managed</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Lock files for all 3 ecosystems; Dependabot weekly</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- 7. Spec-Driven Development -->
+  <details>
+    <summary>
+      7. Spec-Driven Development
+      <span class="grade-badge grade-B" style="font-size:0.75rem;padding:1px 8px;">B</span>
+      <span style="font-size:0.85rem;color:#6b7280;">82%</span>
+    </summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="PASS"><td>SDD-01</td><td>AWOS installed</td><td><span class="sev sev-critical">critical</span></td><td class="status-PASS">PASS</td><td>10 commands, 10 wrappers, context dirs present</td></tr>
+          <tr data-status="PASS"><td>SDD-02</td><td>Product context complete</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>product-definition, roadmap, architecture all substantive</td></tr>
+          <tr data-status="PASS"><td>SDD-03</td><td>Architecture reflects reality</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Core stack confirmed; no major drift</td></tr>
+          <tr data-status="WARN"><td>SDD-04</td><td>Features via specs</td><td><span class="sev sev-critical">critical</span></td><td class="status-WARN">WARN</td><td>67% of feature branches touch spec files (under 70% threshold)</td></tr>
+          <tr data-status="PASS"><td>SDD-05</td><td>Spec directories complete</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>7/7 spec directories have full triad</td></tr>
+          <tr data-status="WARN"><td>SDD-06</td><td>No stale specs</td><td><span class="sev sev-medium">medium</span></td><td class="status-WARN">WARN</td><td>Spec 002 is Draft with 55/55 tasks done; spec 005 has no Status field with 0/57 tasks checked despite feature shipped</td></tr>
+          <tr data-status="WARN"><td>SDD-07</td><td>Agent assignments</td><td><span class="sev sev-medium">medium</span></td><td class="status-WARN">WARN</td><td>87.7% annotated; no QA-specific agent for verification tasks</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <!-- 8. End-to-End Delivery -->
+  <details>
+    <summary>
+      8. End-to-End Delivery
+      <span class="grade-badge grade-C" style="font-size:0.75rem;padding:1px 8px;">C</span>
+      <span style="font-size:0.85rem;color:#6b7280;">64%</span>
+    </summary>
+    <div class="detail-body">
+      <table>
+        <thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr data-status="FAIL"><td>E2E-01</td><td>Cross-layer feature branches</td><td><span class="sev sev-high">high</span></td><td class="status-FAIL">FAIL</td><td>0/8 recent feature branches touch 2+ service directories; all work in savepoint-app only</td></tr>
+          <tr data-status="PASS"><td>E2E-02</td><td>No layer-split branching</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>No layer-split branch pairs found</td></tr>
+          <tr data-status="PASS"><td>E2E-03</td><td>Spec-to-delivery traceability</td><td><span class="sev sev-high">high</span></td><td class="status-PASS">PASS</td><td>Bidirectional tracing: commits reference specs, tasks.md tracks completion</td></tr>
+          <tr data-status="WARN"><td>E2E-04</td><td>No orphaned artifacts</td><td><span class="sev sev-medium">medium</span></td><td class="status-WARN">WARN</td><td>Follow model (WIP) and Review model have no dedicated API/UI consumer</td></tr>
+          <tr data-status="PASS"><td>E2E-05</td><td>Shared ownership enablers</td><td><span class="sev sev-medium">medium</span></td><td class="status-PASS">PASS</td><td>Root Makefile, docker-compose, unified CI covering both layers</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<!-- Recommendations -->
+<section>
+  <h2>Recommendations</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Priority</th><th>Effort</th><th>Dimension</th><th>Recommendation</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td><span class="pri-P1">P1</span></td><td>Low</td><td>Spec-Driven Development</td><td>Update spec 002 status to Completed (55/55 tasks done) and add Status field to spec 005</td></tr>
+      <tr><td>2</td><td><span class="pri-P1">P1</span></td><td>Low</td><td>Spec-Driven Development</td><td>Create specs for new features before implementation to reach 70%+ spec-to-branch ratio</td></tr>
+      <tr><td>3</td><td><span class="pri-P1">P1</span></td><td>Low</td><td>End-to-End Delivery</td><td>Include lambdas-py and infra changes in feature branches when features span layers</td></tr>
+      <tr><td>4</td><td><span class="pri-P1">P1</span></td><td>Low</td><td>AI Development Tooling</td><td>Configure Lambda local invoke tooling (SAM CLI or LocalStack invoke) for agent observability</td></tr>
+      <tr><td>5</td><td><span class="pri-P2">P2</span></td><td>Low</td><td>Spec-Driven Development</td><td>Add a QA/testing agent for verification sub-tasks instead of reusing implementation agents</td></tr>
+      <tr><td>6</td><td><span class="pri-P2">P2</span></td><td>Low</td><td>Documentation Quality</td><td>Update savepoint-app/README.md to reference data-access-layer/ instead of shared/lib/repository/</td></tr>
+      <tr><td>7</td><td><span class="pri-P2">P2</span></td><td>Low</td><td>End-to-End Delivery</td><td>Remove or connect orphaned Review model; Follow model is WIP (acceptable)</td></tr>
+      <tr><td>8</td><td><span class="pri-P2">P2</span></td><td>Low</td><td>Spec-Driven Development</td><td>Check off completed tasks in spec 005 tasks.md to reflect shipped feature</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<script>
+function toggleFilter() {
+  var body = document.body;
+  var btn = document.getElementById('filterBtn');
+  body.classList.toggle('issues-only');
+  if (body.classList.contains('issues-only')) {
+    btn.textContent = 'Show all';
+    btn.classList.add('active');
+  } else {
+    btn.textContent = 'Show issues only';
+    btn.classList.remove('active');
+  }
+}
+</script>
+
+</body>
+</html>

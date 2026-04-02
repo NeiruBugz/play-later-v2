@@ -27,6 +27,7 @@ export const updateLibraryEntryAction = createServerAction<
       libraryItem: {
         id: libraryItemId,
         status,
+        ...(status !== undefined && { statusChangedAt: new Date() }),
         ...(startedAt !== undefined && { startedAt }),
         ...(completedAt !== undefined && { completedAt }),
       },

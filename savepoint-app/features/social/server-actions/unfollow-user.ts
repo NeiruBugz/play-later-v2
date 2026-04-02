@@ -4,10 +4,10 @@ import { SocialService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { createServerAction, type ActionResult } from "@/shared/lib";
+import { createServerAction } from "@/shared/lib";
 
 const UnfollowUserSchema = z.object({
-  followingId: z.string(),
+  followingId: z.string().min(1),
 });
 export type UnfollowUserInput = z.infer<typeof UnfollowUserSchema>;
 
@@ -15,7 +15,7 @@ export const unfollowUserAction = createServerAction<UnfollowUserInput, void>({
   actionName: "unfollowUserAction",
   schema: UnfollowUserSchema,
   requireAuth: true,
-  handler: async ({ input, userId, logger }): Promise<ActionResult<void>> => {
+  handler: async ({ input, userId, logger }) => {
     const { followingId } = input;
 
     logger.info({ followingId }, "Attempting to unfollow user");
@@ -34,7 +34,7 @@ export const unfollowUserAction = createServerAction<UnfollowUserInput, void>({
       };
     }
 
-    revalidatePath(`/profile/${followingId}`);
+    revalidatePath("/u/[username]", "page");
 
     logger.info({ userId, followingId }, "User unfollowed successfully");
 
