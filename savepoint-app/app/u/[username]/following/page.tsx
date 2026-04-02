@@ -64,7 +64,9 @@ export default async function FollowingPage({
 
   return (
     <div className="space-y-lg">
-      <h1 className="heading-lg tracking-tight">{displayName}&apos;s Following</h1>
+      <h1 className="heading-lg tracking-tight">
+        {displayName}&apos;s Following
+      </h1>
       <FollowingList
         users={followingResult.data.following}
         total={followingResult.data.total}

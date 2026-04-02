@@ -1,7 +1,6 @@
+import type { FollowUserProfile } from "@/data-access-layer/repository";
 import Image from "next/image";
 import Link from "next/link";
-
-import type { FollowUserProfile } from "@/data-access-layer/repository";
 
 type FollowersListProps = {
   users: FollowUserProfile[];
