@@ -30,6 +30,7 @@ export const updateLibraryStatusAction = createServerAction<
       libraryItem: {
         id: libraryItemId,
         status,
+        statusChangedAt: new Date(),
       },
     });
     if (!result.success) {

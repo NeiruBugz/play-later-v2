@@ -9,6 +9,7 @@ export function createProfileFixture(
     email: "test@example.com",
     image: "https://example.com/avatar.jpg",
     createdAt: new Date("2024-01-15T00:00:00.000Z"),
+    isPublicProfile: false,
     stats: {
       statusCounts: {
         WANT_TO_PLAY: 5,

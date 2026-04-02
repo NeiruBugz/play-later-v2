@@ -1,6 +1,16 @@
 {
   "projectId": "402a90ba-3200-4e03-a249-01ac561d9efb",
   "projectUrl": "https://linear.app/play-later/project/003-steam-import-curation-6c832537a2b5",
-  "lastSynced": "2026-03-31T08:23:01Z",
-  "issues": {}
+  "lastSynced": "2026-04-01T06:21:00Z",
+  "issues": {
+    "Slice 1: Display smart status badge on game cards": { "issueId": "PLA-124", "linearId": "PLA-124", "lastSyncedAwosState": "Done" },
+    "Slice 2: Add \"Dismiss\" action to game cards": { "issueId": "PLA-125", "linearId": "PLA-125", "lastSyncedAwosState": "Done" },
+    "Slice 3: Update list filter to hide dismissed/imported games": { "issueId": "PLA-126", "linearId": "PLA-126", "lastSyncedAwosState": "Done" },
+    "Slice 4: IGDB matcher service (port from Lambda)": { "issueId": "PLA-127", "linearId": "PLA-127", "lastSyncedAwosState": "Done" },
+    "Slice 5: Basic import action (auto-match happy path)": { "issueId": "PLA-128", "linearId": "PLA-128", "lastSyncedAwosState": "Done" },
+    "Slice 6: Import modal with status selector": { "issueId": "PLA-129", "linearId": "PLA-129", "lastSyncedAwosState": "Done" },
+    "Slice 7: Manual IGDB search (when auto-match fails)": { "issueId": "PLA-130", "linearId": "PLA-130", "lastSyncedAwosState": "Done" },
+    "Slice 8: Entry points from Library and Profile pages": { "issueId": "PLA-131", "linearId": "PLA-131", "lastSyncedAwosState": "Done" },
+    "Slice 9: Error handling polish": { "issueId": "PLA-132", "linearId": "PLA-132", "lastSyncedAwosState": "Done" }
+  }
 }

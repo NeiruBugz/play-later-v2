@@ -199,6 +199,7 @@ describe("getLibraryHandler", () => {
           startedAt: null,
           completedAt: null,
           hasBeenPlayed: false,
+          statusChangedAt: null,
           createdAt: new Date("2025-01-01"),
           updatedAt: new Date("2025-01-01"),
           game: {
@@ -267,6 +268,7 @@ describe("getLibraryHandler", () => {
           startedAt: new Date("2025-01-15"),
           completedAt: null,
           hasBeenPlayed: false,
+          statusChangedAt: null,
           createdAt: new Date("2025-01-10"),
           updatedAt: new Date("2025-01-15"),
           game: {
@@ -435,6 +437,7 @@ describe("getLibraryHandler", () => {
           startedAt: null,
           completedAt: null,
           hasBeenPlayed: false,
+          statusChangedAt: null,
           createdAt: new Date("2025-01-01"),
           updatedAt: new Date("2025-01-01"),
           game: {
@@ -456,6 +459,7 @@ describe("getLibraryHandler", () => {
           startedAt: new Date("2025-01-15"),
           completedAt: null,
           hasBeenPlayed: false,
+          statusChangedAt: null,
           createdAt: new Date("2025-01-10"),
           updatedAt: new Date("2025-01-15"),
           game: {

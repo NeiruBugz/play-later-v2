@@ -25,6 +25,7 @@ export {
   findAllLibraryItemsByGameId,
   findLibraryItemsWithFilters,
   countLibraryItemsByUserId,
+  findLibraryPreview,
   hasLibraryItemWithStatus,
   type FindLibraryItemsResult,
 } from "./library/library-repository";
@@ -39,6 +40,7 @@ export {
   disconnectSteam,
   findUserById,
   findUserByNormalizedUsername,
+  findUserByUsername,
   updateUserProfile,
   findUserByEmail,
   createUserWithCredentials,
@@ -92,3 +94,27 @@ export {
   type LastPlayed,
   type SortBy,
 } from "./imported-game";
+export {
+  createFollow,
+  deleteFollow,
+  findFollowers,
+  findFollowing,
+  countFollowers,
+  countFollowing,
+  isFollowing,
+} from "./follow/follow-repository";
+export {
+  type FollowUserProfile,
+  type PaginationOptions,
+  type PaginatedFollowersResult,
+  type PaginatedFollowingResult,
+} from "./follow/types";
+export {
+  findFeedForUser,
+  findPopularFeed,
+} from "./activity-feed/activity-feed-repository";
+export {
+  type FeedItemRow,
+  type FeedCursor,
+  type PaginatedFeedResult,
+} from "./activity-feed/types";

@@ -26,6 +26,7 @@ These features are authorized for cross-feature imports. Only import from their 
 | `profile` | Profile UI components (AvatarUpload, UsernameInput) and server actions | `setup-profile/ui/` |
 | `command-palette` | App-wide Cmd+K search palette | `widgets/header/`, `app/(protected)/layout.tsx`, `app/games/layout.tsx` |
 | `game-search` | Search hooks reused by command palette | `command-palette/ui/` |
+| `social` | Follow system, activity feed, public profile interactions | `profile/ui/`, `app/(protected)/dashboard/page.tsx`, `app/u/[username]/` |
 
 **Rules for all exceptions:**
 1. Only import from the feature's public API (barrel exports)

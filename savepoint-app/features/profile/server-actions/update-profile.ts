@@ -30,6 +30,7 @@ const performUpdateProfile = createServerAction<
     const sanitizedData: UpdateProfileInput = {
       username: input.username.trim(),
       avatarUrl: input.avatarUrl,
+      isPublicProfile: input.isPublicProfile,
     };
 
     const profileService = new ProfileService();
@@ -39,6 +40,7 @@ const performUpdateProfile = createServerAction<
       userId: userId!,
       username: sanitizedData.username,
       avatarUrl: sanitizedData.avatarUrl,
+      isPublicProfile: sanitizedData.isPublicProfile,
     });
 
     if (!result.success) {

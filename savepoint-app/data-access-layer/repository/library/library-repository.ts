@@ -529,6 +529,33 @@ export type FindLibraryItemsResult = {
   total: number;
 };
 
+export async function findLibraryPreview(
+  userId: string,
+  limit: number = 6
+): Promise<
+  Array<{
+    game: {
+      title: string;
+      coverImage: string | null;
+      slug: string;
+    };
+  }>
+> {
+  return prisma.libraryItem.findMany({
+    where: {
+      userId,
+      status: { in: ["PLAYING", "PLAYED"] },
+    },
+    select: {
+      game: {
+        select: { title: true, coverImage: true, slug: true },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: limit,
+  });
+}
+
 export async function countLibraryItemsByUserId(
   userId: string
 ): Promise<number> {

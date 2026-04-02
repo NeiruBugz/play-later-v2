@@ -120,13 +120,15 @@ export class LibraryService {
       status: LibraryItemStatus;
       startedAt?: Date;
       completedAt?: Date;
+      statusChangedAt?: Date;
     };
   }) {
     try {
-      await findLibraryItemById({
+      const existingItem = await findLibraryItemById({
         libraryItemId: params.libraryItem.id,
         userId: params.userId,
       });
+      const statusChanged = params.libraryItem.status !== existingItem.status;
       const isTransitioningToPlayed =
         params.libraryItem.status === LibraryItemStatus.PLAYED;
       const data = await updateLibraryItem({
@@ -136,6 +138,9 @@ export class LibraryService {
           status: params.libraryItem.status,
           startedAt: params.libraryItem.startedAt,
           completedAt: params.libraryItem.completedAt,
+          statusChangedAt:
+            params.libraryItem.statusChangedAt ??
+            (statusChanged ? new Date() : undefined),
           ...(isTransitioningToPlayed && { hasBeenPlayed: true }),
         },
       });

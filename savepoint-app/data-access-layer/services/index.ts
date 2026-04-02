@@ -44,6 +44,8 @@ export {
   type CheckSetupStatusResult,
   type Profile,
   type ProfileWithStats,
+  type PublicProfile,
+  type GetPublicProfileResult,
   type LibraryStats,
   type RecentGame,
 } from "./profile/types";
@@ -90,3 +92,18 @@ export {
   type FindImportedGameByIdInput,
   type UpdateImportedGameStatusInput,
 } from "./imported-game";
+export { SocialService } from "./social/social-service";
+export { ActivityFeedService } from "./activity-feed/activity-feed-service";
+export {
+  type GetFeedForUserResult,
+  type GetPopularFeedResult,
+} from "./activity-feed/types";
+export {
+  type FollowCounts,
+  type FollowUserResult,
+  type UnfollowUserResult,
+  type IsFollowingResult,
+  type GetFollowCountsResult,
+  type GetFollowersResult,
+  type GetFollowingResult,
+} from "./social/types";

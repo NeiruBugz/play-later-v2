@@ -1,8 +1,11 @@
 import "server-only";
 
 import {
+  countLibraryItemsByUserId,
+  findLibraryPreview,
   findUserById,
   findUserByNormalizedUsername,
+  findUserByUsername,
   getLibraryStatsByUserId,
   getUserSteamData,
   updateUserProfile,
@@ -33,6 +36,7 @@ import type {
   GetProfileResult,
   GetProfileWithStatsInput,
   GetProfileWithStatsResult,
+  GetPublicProfileResult,
   GetSteamConnectionStatusInput,
   GetSteamConnectionStatusResult,
   UpdateAvatarUrlInput,
@@ -52,6 +56,7 @@ export class ProfileService {
           email: true,
           name: true,
           createdAt: true,
+          isPublicProfile: true,
         },
       });
       if (!user) {
@@ -80,6 +85,7 @@ export class ProfileService {
             email: true,
             name: true,
             createdAt: true,
+            isPublicProfile: true,
           },
         }),
         getLibraryStatsByUserId(input.userId),
@@ -96,6 +102,34 @@ export class ProfileService {
         "Error fetching profile with stats"
       );
       return handleServiceError(error, "Failed to fetch profile with stats");
+    }
+  }
+  async getPublicProfile(username: string): Promise<GetPublicProfileResult> {
+    try {
+      const user = await findUserByUsername(username);
+
+      if (!user || !user.isPublicProfile) {
+        return serviceSuccess({ profile: null });
+      }
+
+      const [gameCount, libraryPreview] = await Promise.all([
+        countLibraryItemsByUserId(user.id),
+        findLibraryPreview(user.id),
+      ]);
+
+      return serviceSuccess({
+        profile: {
+          id: user.id,
+          name: user.name,
+          username: user.username!,
+          image: user.image,
+          gameCount,
+          libraryPreview: libraryPreview.map((item) => item.game),
+        },
+      });
+    } catch (error) {
+      this.logger.error({ error, username }, "Error fetching public profile");
+      return handleServiceError(error, "Failed to fetch public profile");
     }
   }
   async checkUsernameAvailability(
@@ -155,6 +189,9 @@ export class ProfileService {
         username: input.username,
         usernameNormalized: input.username.toLowerCase(),
         image: input.avatarUrl,
+        ...(input.isPublicProfile !== undefined && {
+          isPublicProfile: input.isPublicProfile,
+        }),
       });
       return serviceSuccess({
         username: updatedUser.username,

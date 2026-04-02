@@ -365,6 +365,85 @@ describe("LibraryService", () => {
       );
     });
 
+    describe("statusChangedAt propagation", () => {
+      it("should pass statusChangedAt to repository when provided", async () => {
+        const statusChangedAt = new Date("2025-06-01T12:00:00Z");
+        mockFindLibraryItemById.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.WISHLIST)
+        );
+        mockUpdateLibraryItem.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+
+        await service.updateLibraryItem({
+          userId: validUserId,
+          libraryItem: {
+            id: libraryItemId,
+            status: LibraryItemStatus.PLAYING,
+            statusChangedAt,
+          },
+        });
+
+        expect(mockUpdateLibraryItem).toHaveBeenCalledWith(
+          expect.objectContaining({
+            libraryItem: expect.objectContaining({
+              statusChangedAt,
+            }),
+          })
+        );
+      });
+
+      it("should auto-set statusChangedAt when status changes and no explicit value provided", async () => {
+        mockFindLibraryItemById.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.WISHLIST)
+        );
+        mockUpdateLibraryItem.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+
+        await service.updateLibraryItem({
+          userId: validUserId,
+          libraryItem: {
+            id: libraryItemId,
+            status: LibraryItemStatus.PLAYING,
+          },
+        });
+
+        expect(mockUpdateLibraryItem).toHaveBeenCalledWith(
+          expect.objectContaining({
+            libraryItem: expect.objectContaining({
+              statusChangedAt: expect.any(Date),
+            }),
+          })
+        );
+      });
+
+      it("should not set statusChangedAt when status is unchanged", async () => {
+        mockFindLibraryItemById.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+        mockUpdateLibraryItem.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+
+        await service.updateLibraryItem({
+          userId: validUserId,
+          libraryItem: {
+            id: libraryItemId,
+            status: LibraryItemStatus.PLAYING,
+          },
+        });
+
+        expect(mockUpdateLibraryItem).toHaveBeenCalledWith(
+          expect.objectContaining({
+            libraryItem: expect.objectContaining({
+              statusChangedAt: undefined,
+            }),
+          })
+        );
+      });
+    });
+
     describe("error scenarios", () => {
       it("should return error when library item not found", async () => {
         mockFindLibraryItemById.mockRejectedValue(
