@@ -195,11 +195,11 @@ describe("FollowRepository - Integration Tests", () => {
   });
 
   describe("countFollowers", () => {
-    it("should return the correct number of followers", async () => {
+    it("should return the correct number of public followers", async () => {
       const target = await createUser();
-      const follower1 = await createUser();
-      const follower2 = await createUser();
-      const follower3 = await createUser();
+      const follower1 = await createUser({ isPublicProfile: true });
+      const follower2 = await createUser({ isPublicProfile: true });
+      const follower3 = await createUser({ isPublicProfile: true });
 
       await createFollow(follower1.id, target.id);
       await createFollow(follower2.id, target.id);
@@ -208,6 +208,19 @@ describe("FollowRepository - Integration Tests", () => {
       const count = await countFollowers(target.id);
 
       expect(count).toBe(3);
+    });
+
+    it("should exclude private followers from the count", async () => {
+      const target = await createUser();
+      const publicFollower = await createUser({ isPublicProfile: true });
+      const privateFollower = await createUser({ isPublicProfile: false });
+
+      await createFollow(publicFollower.id, target.id);
+      await createFollow(privateFollower.id, target.id);
+
+      const count = await countFollowers(target.id);
+
+      expect(count).toBe(1);
     });
 
     it("should return zero when user has no followers", async () => {
@@ -220,10 +233,10 @@ describe("FollowRepository - Integration Tests", () => {
   });
 
   describe("countFollowing", () => {
-    it("should return the correct number of users being followed", async () => {
+    it("should return the correct number of public users being followed", async () => {
       const follower = await createUser();
-      const target1 = await createUser();
-      const target2 = await createUser();
+      const target1 = await createUser({ isPublicProfile: true });
+      const target2 = await createUser({ isPublicProfile: true });
 
       await createFollow(follower.id, target1.id);
       await createFollow(follower.id, target2.id);
@@ -231,6 +244,19 @@ describe("FollowRepository - Integration Tests", () => {
       const count = await countFollowing(follower.id);
 
       expect(count).toBe(2);
+    });
+
+    it("should exclude private users from the count", async () => {
+      const follower = await createUser();
+      const publicTarget = await createUser({ isPublicProfile: true });
+      const privateTarget = await createUser({ isPublicProfile: false });
+
+      await createFollow(follower.id, publicTarget.id);
+      await createFollow(follower.id, privateTarget.id);
+
+      const count = await countFollowing(follower.id);
+
+      expect(count).toBe(1);
     });
 
     it("should return zero when user follows nobody", async () => {
