@@ -170,30 +170,30 @@ describe("ActivityFeedItem", () => {
       expect(screen.getByText("Playing")).toBeInTheDocument();
     });
 
-    it("formats WANT_TO_PLAY status as 'Want to Play'", () => {
+    it("formats WISHLIST status as 'Wishlist'", () => {
       render(
         <ActivityFeedItem
           item={buildFeedItem({
             eventType: "STATUS_CHANGE",
-            status: "WANT_TO_PLAY",
+            status: "WISHLIST",
           })}
         />
       );
 
-      expect(screen.getByText("Want to Play")).toBeInTheDocument();
+      expect(screen.getByText("Wishlist")).toBeInTheDocument();
     });
 
-    it("formats COMPLETED status as 'Completed'", () => {
+    it("formats PLAYED status as 'Played'", () => {
       render(
         <ActivityFeedItem
           item={buildFeedItem({
             eventType: "STATUS_CHANGE",
-            status: "COMPLETED",
+            status: "PLAYED",
           })}
         />
       );
 
-      expect(screen.getByText("Completed")).toBeInTheDocument();
+      expect(screen.getByText("Played")).toBeInTheDocument();
     });
   });
 
