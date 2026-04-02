@@ -4,12 +4,11 @@ import Link from "next/link";
 import type { FeedItem } from "../types";
 
 const STATUS_LABELS: Record<string, string> = {
-  PLAYING: "Playing",
-  WANT_TO_PLAY: "Want to Play",
-  COMPLETED: "Completed",
+  WISHLIST: "Wishlist",
   SHELF: "Shelf",
-  DROPPED: "Dropped",
-  ON_HOLD: "On Hold",
+  UP_NEXT: "Up Next",
+  PLAYING: "Playing",
+  PLAYED: "Played",
 };
 
 function formatStatus(status: string): string {

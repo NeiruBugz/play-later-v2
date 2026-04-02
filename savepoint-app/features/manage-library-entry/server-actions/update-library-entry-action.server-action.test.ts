@@ -114,23 +114,17 @@ describe("updateLibraryEntryAction", () => {
       expect(callArg.libraryItem.statusChangedAt).toBeInstanceOf(Date);
     });
 
-    it("should NOT pass statusChangedAt when status is undefined", async () => {
-      mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: mockLibraryItem,
-      });
+    it("should reject input and NOT call service when status is omitted", async () => {
+      const result = await updateLibraryEntryAction({
+        libraryItemId: 1,
+        startedAt: new Date("2025-05-01"),
+      } as any);
 
-      const service = new (MockLibraryService as any)();
-      await service.updateLibraryItem({
-        userId: "user-123",
-        libraryItem: {
-          id: 1,
-          status: undefined,
-        },
-      });
-
-      const callArg = mockUpdateLibraryItem.mock.calls[0][0];
-      expect(callArg.libraryItem.statusChangedAt).toBeUndefined();
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Invalid input data");
+      }
+      expect(mockUpdateLibraryItem).not.toHaveBeenCalled();
     });
 
     it("should call updateLibraryItem with correct userId and libraryItemId", async () => {

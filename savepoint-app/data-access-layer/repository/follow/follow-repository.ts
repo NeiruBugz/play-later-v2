@@ -103,11 +103,15 @@ export async function findFollowing(
 }
 
 export async function countFollowers(userId: string): Promise<number> {
-  return prisma.follow.count({ where: { followingId: userId } });
+  return prisma.follow.count({
+    where: { followingId: userId, follower: { isPublicProfile: true } },
+  });
 }
 
 export async function countFollowing(userId: string): Promise<number> {
-  return prisma.follow.count({ where: { followerId: userId } });
+  return prisma.follow.count({
+    where: { followerId: userId, following: { isPublicProfile: true } },
+  });
 }
 
 export async function isFollowing(

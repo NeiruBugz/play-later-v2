@@ -62,6 +62,15 @@ export const updateLibraryStatusAction = createServerAction<
     }
 
     const mostRecentItem = libraryItemsResult.data;
+
+    if (status === mostRecentItem.status) {
+      logger.info(
+        { igdbId, userId, status },
+        "Status unchanged, skipping update"
+      );
+      return { success: true, data: mostRecentItem };
+    }
+
     const updateResult = await libraryService.updateLibraryItem({
       userId: userId!,
       libraryItem: {

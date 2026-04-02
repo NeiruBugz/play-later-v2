@@ -2,7 +2,12 @@ import { ActivityFeedService } from "@/data-access-layer/services";
 import { z } from "zod";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
+import {
+  DEFAULT_RATE_LIMIT_REQUESTS,
+  RATE_LIMIT_RETRY_AFTER_SECONDS,
+} from "@/shared/constants";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { checkRateLimit } from "@/shared/lib/rate-limit";
 
 import type { HandlerResult, RequestContext } from "../types";
 import type {
@@ -76,6 +81,24 @@ export async function activityFeedHandler(
       success: false,
       error: validation.error.issues[0]?.message ?? "Invalid query parameters",
       status: HTTP_STATUS.BAD_REQUEST,
+    };
+  }
+
+  const rateLimitResult = await checkRateLimit({
+    headers: context.headers,
+    ip: context.ip,
+  });
+  if (!rateLimitResult.allowed) {
+    logger.warn({ userId, ip: context.ip }, "Rate limit exceeded");
+    return {
+      success: false,
+      error: "Rate limit exceeded. Try again later.",
+      status: HTTP_STATUS.TOO_MANY_REQUESTS,
+      headers: {
+        "X-RateLimit-Limit": String(DEFAULT_RATE_LIMIT_REQUESTS),
+        "X-RateLimit-Remaining": "0",
+        "Retry-After": String(RATE_LIMIT_RETRY_AFTER_SECONDS),
+      },
     };
   }
 

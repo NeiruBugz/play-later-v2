@@ -23,7 +23,13 @@ async function fetchFeed(cursor?: FeedCursor): Promise<PaginatedFeed> {
   if (!json.success) {
     throw new Error(json.error ?? "Failed to fetch activity feed");
   }
-  return json.data;
+  return {
+    ...json.data,
+    items: json.data.items.map((item) => ({
+      ...item,
+      timestamp: new Date(item.timestamp),
+    })),
+  };
 }
 
 type UseActivityFeedOptions = {
