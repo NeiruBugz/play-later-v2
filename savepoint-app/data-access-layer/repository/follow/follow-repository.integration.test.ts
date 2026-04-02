@@ -71,8 +71,14 @@ describe("FollowRepository - Integration Tests", () => {
   describe("findFollowers", () => {
     it("should return paginated list of followers with user profile data", async () => {
       const target = await createUser({ name: "Target User" });
-      const follower1 = await createUser({ name: "Follower One" });
-      const follower2 = await createUser({ name: "Follower Two" });
+      const follower1 = await createUser({
+        name: "Follower One",
+        isPublicProfile: true,
+      });
+      const follower2 = await createUser({
+        name: "Follower Two",
+        isPublicProfile: true,
+      });
 
       await createFollow(follower1.id, target.id);
       await createFollow(follower2.id, target.id);
@@ -100,9 +106,9 @@ describe("FollowRepository - Integration Tests", () => {
     it("should respect pagination options", async () => {
       const target = await createUser();
       const followers = await Promise.all([
-        createUser(),
-        createUser(),
-        createUser(),
+        createUser({ isPublicProfile: true }),
+        createUser({ isPublicProfile: true }),
+        createUser({ isPublicProfile: true }),
       ]);
 
       for (const follower of followers) {
@@ -128,8 +134,14 @@ describe("FollowRepository - Integration Tests", () => {
   describe("findFollowing", () => {
     it("should return paginated list of followed users with user profile data", async () => {
       const follower = await createUser({ name: "The Follower" });
-      const followed1 = await createUser({ name: "Followed One" });
-      const followed2 = await createUser({ name: "Followed Two" });
+      const followed1 = await createUser({
+        name: "Followed One",
+        isPublicProfile: true,
+      });
+      const followed2 = await createUser({
+        name: "Followed Two",
+        isPublicProfile: true,
+      });
 
       await createFollow(follower.id, followed1.id);
       await createFollow(follower.id, followed2.id);
@@ -157,9 +169,9 @@ describe("FollowRepository - Integration Tests", () => {
     it("should respect pagination options", async () => {
       const follower = await createUser();
       const targets = await Promise.all([
-        createUser(),
-        createUser(),
-        createUser(),
+        createUser({ isPublicProfile: true }),
+        createUser({ isPublicProfile: true }),
+        createUser({ isPublicProfile: true }),
       ]);
 
       for (const target of targets) {

@@ -18,6 +18,7 @@ export type UserFactoryOptions = {
   steamAvatar?: string;
   steamProfileURL?: string;
   password?: string;
+  isPublicProfile?: boolean;
 };
 
 export const createUserData = (
@@ -39,6 +40,9 @@ export const createUserData = (
       overrides.steamProfileURL ||
       `https://steamcommunity.com/profiles/${faker.string.numeric(17)}`,
     password: overrides.password,
+    ...(overrides.isPublicProfile !== undefined && {
+      isPublicProfile: overrides.isPublicProfile,
+    }),
   };
 };
 
