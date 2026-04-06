@@ -89,16 +89,15 @@ export function JournalTimeline({
 
   if (entries.length === 0) {
     return (
-      <div className="space-y-lg border-border/50 bg-muted/10 p-3xl flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed text-center">
-        <div className="space-y-md">
-          <h2 className="heading-md font-medium">Your Gaming Journal</h2>
-          <p className="body-sm text-muted-foreground max-w-sm">
-            Write about your gaming sessions — what you played, how far you got,
-            memorable moments, or quick thoughts. Entries are tied to games in
-            your library.
+      <div className="bg-card border-border/10 space-y-xl flex min-h-[280px] flex-col items-center justify-center rounded-lg border px-6 py-12 text-center">
+        <div className="space-y-sm max-w-md">
+          <h2 className="text-lg font-semibold">Your Gaming Journal</h2>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Capture your gaming sessions — what you played, memorable moments,
+            and quick thoughts. Entries are tied to games in your library.
           </p>
         </div>
-        <Button asChild size="lg">
+        <Button asChild>
           <Link href="/journal/new">Write Your First Entry</Link>
         </Button>
       </div>
