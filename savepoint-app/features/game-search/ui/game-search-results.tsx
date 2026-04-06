@@ -45,7 +45,7 @@ export const GameSearchResults = memo(function GameSearchResults({
         className={
           view === "list"
             ? "gap-lg flex flex-col"
-            : "gap-xl grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+            : "grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7"
         }
         role="status"
         aria-label="Loading search results"
@@ -109,7 +109,7 @@ export const GameSearchResults = memo(function GameSearchResults({
           ))}
         </div>
       ) : (
-        <div className="gap-xl grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7">
           {gamesWithStatus.map((game) => (
             <GameGridCard key={game.id} game={game} />
           ))}
