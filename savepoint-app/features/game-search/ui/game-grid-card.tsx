@@ -26,7 +26,7 @@ export const GameGridCard = ({ game }: GameCardProps) => {
     >
       <Card
         variant="interactive"
-        className="duration-normal ease-out-expo hover:shadow-paper-md overflow-hidden rounded-lg transition-all hover:scale-[1.02]"
+        className="duration-normal ease-out-expo overflow-hidden rounded-lg transition-all hover:brightness-110"
       >
         <div className="relative">
           <GameCoverImage

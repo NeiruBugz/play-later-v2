@@ -105,7 +105,7 @@ export const LibraryCard = memo(function LibraryCard({
         "animate-stagger-in",
         `stagger-${staggerIndex}`,
         "duration-normal ease-out-expo rounded-lg transition-all",
-        !isMobile && "hover:shadow-paper-md hover:scale-[1.02]"
+        !isMobile && "hover:brightness-110"
       )}
       onClick={handleLinkInteraction}
       onMouseDown={handleLinkInteraction}

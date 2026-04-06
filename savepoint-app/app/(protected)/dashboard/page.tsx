@@ -72,6 +72,10 @@ export default async function DashboardPage() {
         <GettingStartedChecklist userId={userId} />
       </Suspense>
 
+      <Suspense fallback={<StatsSkeleton />}>
+        <DashboardStats userId={userId} />
+      </Suspense>
+
       <Suspense fallback={<SectionSkeleton />}>
         <ContinuePlaying userId={userId} />
       </Suspense>
@@ -82,10 +86,6 @@ export default async function DashboardPage() {
 
       <Suspense fallback={<SectionSkeleton />}>
         <RecentlyAdded userId={userId} />
-      </Suspense>
-
-      <Suspense fallback={<StatsSkeleton />}>
-        <DashboardStats userId={userId} />
       </Suspense>
 
       <Suspense fallback={<ActivityFeedSkeleton />}>

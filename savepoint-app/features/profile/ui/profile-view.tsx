@@ -16,9 +16,9 @@ import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 import { prepareProfileData } from "../lib/prepare-profile-data";
 import { LogoutButton } from "./logout-button";
 import { ProfileStatsBar } from "./profile-stats-bar";
-import type { ProfileViewProps } from "./profile-view.types";
+import type { ProfileViewProps, SocialCounts } from "./profile-view.types";
 
-export function ProfileView({ profile }: ProfileViewProps) {
+export function ProfileView({ profile, socialCounts }: ProfileViewProps) {
   const { displayName, joinDateFormatted, statusEntries, quickStats } =
     prepareProfileData(profile);
 
@@ -75,7 +75,11 @@ export function ProfileView({ profile }: ProfileViewProps) {
         journalEntries={quickStats.journalEntries}
       />
 
-      {statusEntries.length > 0 && totalGames >= 10 && (
+      {socialCounts && profile.username && (
+        <SocialStatsRow counts={socialCounts} username={profile.username} />
+      )}
+
+      {statusEntries.length > 0 && totalGames >= 3 && (
         <div>
           <h2 className="heading-md mb-lg tracking-tight">Library Stats</h2>
           <div
@@ -91,7 +95,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
                 <Card
                   key={status}
                   variant="interactive"
-                  className="animate-fade-in p-lg transition-all hover:scale-[1.02]"
+                  className="animate-fade-in p-lg transition-all hover:brightness-110"
                   style={{ animationDelay: `${(index + 1) * 50}ms` }}
                   data-testid="profile-status-card"
                 >
@@ -186,6 +190,43 @@ export function ProfileView({ profile }: ProfileViewProps) {
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+function SocialStatsRow({
+  counts,
+  username,
+}: {
+  counts: SocialCounts;
+  username: string;
+}) {
+  return (
+    <div
+      className="text-muted-foreground flex items-center gap-1.5 text-sm"
+      data-testid="profile-social-stats"
+    >
+      <Link
+        href={`/u/${username}/followers`}
+        className="hover:text-foreground transition-colors"
+      >
+        <span className="text-foreground font-semibold tabular-nums">
+          {counts.followers}
+        </span>{" "}
+        {counts.followers === 1 ? "Follower" : "Followers"}
+      </Link>
+
+      <span className="text-border mx-1">&middot;</span>
+
+      <Link
+        href={`/u/${username}/following`}
+        className="hover:text-foreground transition-colors"
+      >
+        <span className="text-foreground font-semibold tabular-nums">
+          {counts.following}
+        </span>{" "}
+        Following
+      </Link>
     </div>
   );
 }

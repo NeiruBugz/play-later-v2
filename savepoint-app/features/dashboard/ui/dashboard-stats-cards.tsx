@@ -53,7 +53,7 @@ function StatCard({
         className={cn(
           "p-xl relative overflow-hidden",
           "duration-normal ease-out-expo transition-all",
-          "hover:shadow-paper-md hover:scale-[1.02]"
+          "hover:shadow-paper-md"
         )}
       >
         <div className="gap-lg flex items-center">
@@ -82,13 +82,13 @@ function StatCard({
           )}
         </div>
 
-        {/* <div
-          className="duration-slow ease-out-expo absolute bottom-0 left-0 h-1 transition-all"
+        <div
+          className="duration-slow ease-out-expo absolute bottom-0 left-0 h-0.5 transition-all"
           style={{
             width: `${percentage}%`,
             backgroundColor: `var(--status-${status.toLowerCase()})`,
           }}
-        /> */}
+        />
       </Card>
     </Link>
   );

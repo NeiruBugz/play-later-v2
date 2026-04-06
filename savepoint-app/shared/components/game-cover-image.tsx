@@ -104,8 +104,7 @@ export function GameCoverImage({
         fill
         className={cn(
           "object-cover",
-          enableHoverEffect &&
-            "transition-transform duration-300 group-hover:scale-105",
+          enableHoverEffect && "transition-all duration-300",
           imageClassName
         )}
         loading={priority ? undefined : "lazy"}
