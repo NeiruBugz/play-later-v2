@@ -39,15 +39,7 @@ function OnboardingSkeleton() {
 }
 
 function StatsSkeleton() {
-  return (
-    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-      <Skeleton className="h-48 sm:col-span-2 lg:row-span-2" variant="card" />
-      <Skeleton className="h-24" variant="card" />
-      <Skeleton className="h-24" variant="card" />
-      <Skeleton className="h-24" variant="card" />
-      <Skeleton className="h-24" variant="card" />
-    </div>
-  );
+  return <Skeleton className="h-48" variant="card" />;
 }
 
 function ActivitySkeleton() {
