@@ -101,10 +101,10 @@ export default async function GameDetailPage({
           aria-hidden="true"
         >
           <div
-            className="absolute inset-x-0 bottom-0 z-10 h-[350px]"
+            className="absolute inset-0 z-10"
             style={{
               background:
-                "linear-gradient(to bottom, transparent 0%, var(--background) 100%)",
+                "linear-gradient(to bottom, transparent 0%, transparent 10%, color-mix(in srgb, var(--background) 60%, transparent) 50%, var(--background) 70%)",
             }}
           />
           <Image
