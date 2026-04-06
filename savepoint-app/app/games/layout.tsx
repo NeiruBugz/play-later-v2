@@ -2,7 +2,6 @@ import type { PropsWithChildren } from "react";
 
 import { Header, MobileNav } from "@/widgets/header";
 import { CommandPaletteProvider } from "@/features/command-palette";
-import { BrowserBackButton } from "@/shared/components/browser-back-button";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
 
 export default async function GameDetailsLayout({
@@ -12,10 +11,7 @@ export default async function GameDetailsLayout({
   return (
     <CommandPaletteProvider>
       <Header isAuthorised={userId !== null} />
-      <div className="px-lg py-3xl md:pb-3xl container mx-auto pb-24">
-        <BrowserBackButton />
-        <div className="mx-auto max-w-5xl">{children}</div>
-      </div>
+      <div className="md:pb-3xl pb-24">{children}</div>
       {userId && <MobileNav />}
     </CommandPaletteProvider>
   );

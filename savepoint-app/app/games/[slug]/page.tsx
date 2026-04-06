@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -17,6 +18,7 @@ import {
 } from "@/features/game-detail";
 import { getGameDetails } from "@/features/game-detail/index.server";
 import { PlatformBadges } from "@/shared/components/platform-badges";
+import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
 
 const IGDB_COVER_BASE_URL =
@@ -86,60 +88,101 @@ export default async function GameDetailPage({
     game.genres
       ?.map((g) => g.name)
       .filter((name): name is string => name !== undefined) ?? [];
+  const bannerImageId = game.screenshots?.[0]?.image_id;
+  const bannerUrl = bannerImageId
+    ? `${IMAGE_API}/${IMAGE_SIZES["2x_full-hd"]}/${bannerImageId}.jpg`
+    : null;
+
   return (
-    <div className="px-lg py-2xl md:px-2xl lg:px-3xl container mx-auto">
-      <div className="gap-2xl lg:gap-3xl flex flex-col lg:grid lg:grid-cols-[minmax(280px,320px)_1fr]">
-        <aside
-          className="space-y-xl lg:top-3xl lg:sticky lg:self-start"
-          aria-label="Game details sidebar"
+    <div className="relative">
+      {bannerUrl && (
+        <div
+          className="absolute inset-x-0 top-0 -z-10 h-[450px] overflow-hidden"
+          aria-hidden="true"
         >
-          <GameCoverImage
-            imageId={game.cover?.image_id}
-            gameTitle={game.name}
-            libraryStatus={userLibraryStatus?.mostRecent.status}
+          <div
+            className="absolute inset-x-0 bottom-0 z-10 h-[350px]"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 0%, var(--background) 100%)",
+            }}
           />
-          {userId && (
-            <>
-              <LibraryStatusDisplay
-                userLibraryStatus={userLibraryStatus}
-                igdbId={game.id}
+          <Image
+            src={bannerUrl}
+            alt=""
+            fill
+            className="object-cover object-top"
+            priority
+            sizes="100vw"
+          />
+        </div>
+      )}
+
+      <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div
+          className={`gap-y-lg flex flex-col lg:grid lg:grid-cols-[240px_1fr] lg:gap-x-10 ${bannerUrl ? "pt-[280px] sm:pt-[320px] lg:pt-[340px]" : "pt-8"}`}
+        >
+          <aside
+            className="mx-auto w-full max-w-[280px] sm:max-w-[240px] lg:sticky lg:top-20 lg:mx-0 lg:max-w-none lg:self-start"
+            aria-label="Game details sidebar"
+          >
+            <div className="space-y-xl">
+              <GameCoverImage
+                imageId={game.cover?.image_id}
+                gameTitle={game.name}
+                libraryStatus={userLibraryStatus?.mostRecent.status}
+              />
+              {userId && (
+                <LibraryStatusDisplay
+                  userLibraryStatus={userLibraryStatus}
+                  igdbId={game.id}
+                  gameTitle={game.name}
+                />
+              )}
+            </div>
+          </aside>
+
+          <main
+            id="main-content"
+            className="space-y-2xl pb-3xl min-w-0"
+            aria-label="Game information"
+          >
+            <header className="space-y-md">
+              <h1 className="heading-xl lg:display-lg tracking-tight">
+                {game.name}
+              </h1>
+              <GameReleaseDate firstReleaseDate={game.first_release_date} />
+              <GameDescription summary={game.summary} />
+              {genres.length > 0 && (
+                <div className="pt-sm flex items-baseline gap-3">
+                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                    Genres
+                  </span>
+                  <GenreBadges genres={genres} />
+                </div>
+              )}
+              {platforms.length > 0 && (
+                <div className="flex items-baseline gap-3">
+                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                    Platforms
+                  </span>
+                  <PlatformBadges platforms={platforms} />
+                </div>
+              )}
+            </header>
+            <TimesToBeatSection timesToBeat={timesToBeat} />
+            {userId && gameId && (
+              <JournalEntriesSection
+                journalEntries={journalEntries}
+                gameId={gameId}
                 gameTitle={game.name}
               />
-            </>
-          )}
-        </aside>
-        <main
-          id="main-content"
-          className="space-y-2xl"
-          aria-label="Game information"
-        >
-          <header className="space-y-md">
-            <h1 className="display-lg">{game.name}</h1>
-            <GameReleaseDate firstReleaseDate={game.first_release_date} />
-            {platforms.length > 0 && (
-              <div className="pt-xs">
-                <PlatformBadges platforms={platforms} />
-              </div>
             )}
-            {genres.length > 0 && (
-              <div className="pt-xs">
-                <GenreBadges genres={genres} />
-              </div>
-            )}
-          </header>
-          <GameDescription summary={game.summary} />
-          <TimesToBeatSection timesToBeat={timesToBeat} />
-          {userId && gameId && (
-            <JournalEntriesSection
-              journalEntries={journalEntries}
-              gameId={gameId}
-              gameTitle={game.name}
-            />
-          )}
-          <Suspense fallback={<RelatedGamesSkeleton />}>
-            <RelatedGames collections={collections} />
-          </Suspense>
-        </main>
+            <Suspense fallback={<RelatedGamesSkeleton />}>
+              <RelatedGames collections={collections} />
+            </Suspense>
+          </main>
+        </div>
       </div>
     </div>
   );
