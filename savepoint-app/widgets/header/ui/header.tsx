@@ -27,8 +27,8 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   if (isAuthorised) {
     return (
       <>
-        <header className="border-border py-lg md:py-xl container mx-auto border-b">
-          <div className="flex items-center justify-between">
+        <header className="bg-background/80 border-border/10 py-lg md:py-xl sticky top-0 z-50 border-b backdrop-blur-xl">
+          <div className="container mx-auto flex items-center justify-between">
             <h1 className="heading-md md:heading-xl tracking-tight">
               <Link
                 href="/dashboard"
@@ -97,8 +97,8 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   }
   return (
     <>
-      <header className="border-border py-lg md:py-xl container mx-auto border-b">
-        <div className="flex items-center justify-between">
+      <header className="bg-background/80 border-border/10 py-lg md:py-xl sticky top-0 z-50 border-b backdrop-blur-xl">
+        <div className="container mx-auto flex items-center justify-between">
           <h1 className="heading-md md:heading-xl tracking-tight">
             <Link
               href="/dashboard"

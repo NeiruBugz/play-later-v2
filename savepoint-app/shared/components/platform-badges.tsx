@@ -72,7 +72,7 @@ export const PlatformBadges = ({ platforms }: { platforms: string[] }) => {
                   variant="subtle"
                   className="gap-xs px-sm flex h-5 items-center text-[11px]"
                 >
-                  <Icon className="h-3 w-3 opacity-70" />
+                  <Icon className="h-3 w-3" />
                   <span>{abbreviated}</span>
                 </Badge>
               </TooltipTrigger>
