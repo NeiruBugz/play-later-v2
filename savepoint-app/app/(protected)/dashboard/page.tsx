@@ -10,7 +10,6 @@ import {
   UpNext,
 } from "@/features/dashboard/index.server";
 import { GettingStartedChecklist } from "@/features/onboarding";
-import { ActivityFeedSkeleton } from "@/features/social";
 import { ActivityFeed } from "@/features/social/index.server";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { requireServerUserId } from "@/shared/lib/app/auth";
