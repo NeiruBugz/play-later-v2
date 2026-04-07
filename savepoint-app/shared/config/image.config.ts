@@ -49,6 +49,7 @@ export const IMAGE_SIZES = {
   "c-big-2x": "t_cover_big_2x",
   "c-sm": "t_cover_small",
   "full-hd": "t_1080p",
+  "2x_full-hd": "t_1080p_2x",
   hd: "t_720p",
   logo: "t_logo_med",
   micro: "t_micro",

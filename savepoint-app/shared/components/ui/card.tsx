@@ -3,16 +3,16 @@ import * as React from "react";
 
 import { cn } from "@/shared/lib/ui/utils";
 
-const cardVariants = cva("rounded-sm border transition-all duration-normal", {
+const cardVariants = cva("rounded-lg border transition-all duration-normal", {
   variants: {
     variant: {
       default:
-        "bg-card border-border/20 hover:border-border/40 hover:bg-muted/10",
+        "bg-card border-border/10 hover:border-border/25 hover:bg-muted/10",
       interactive:
-        "bg-card border-border/20 hover:border-border/40 hover:shadow-paper-md hover:scale-[1.01] cursor-pointer",
-      elevated: "bg-card border-border/20 shadow-paper hover:shadow-paper-md",
-      flat: "bg-card border-border",
-      outlined: "bg-card border-border hover:border-primary/40",
+        "bg-card border-border/10 hover:border-border/25 hover:brightness-110 cursor-pointer",
+      elevated: "bg-card border-border/10 shadow-paper hover:shadow-paper-md",
+      flat: "bg-card border-border/10",
+      outlined: "bg-card border-border/20 hover:border-primary/40",
     },
   },
   defaultVariants: {

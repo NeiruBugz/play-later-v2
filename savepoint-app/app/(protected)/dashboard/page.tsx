@@ -10,7 +10,6 @@ import {
   UpNext,
 } from "@/features/dashboard/index.server";
 import { GettingStartedChecklist } from "@/features/onboarding";
-import { ActivityFeedSkeleton } from "@/features/social";
 import { ActivityFeed } from "@/features/social/index.server";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { requireServerUserId } from "@/shared/lib/app/auth";
@@ -25,7 +24,7 @@ function SectionSkeleton() {
   return (
     <div className="space-y-lg">
       <Skeleton className="h-8 w-48" variant="title" />
-      <div className="gap-lg grid sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7">
         {[...Array(4)].map((_, i) => (
           <Skeleton key={i} variant="gameCard" />
         ))}
@@ -39,13 +38,11 @@ function OnboardingSkeleton() {
 }
 
 function StatsSkeleton() {
-  return (
-    <div className="gap-lg grid md:grid-cols-3">
-      <Skeleton className="h-32" variant="card" />
-      <Skeleton className="h-32" variant="card" />
-      <Skeleton className="h-32" variant="card" />
-    </div>
-  );
+  return <Skeleton className="h-48" variant="card" />;
+}
+
+function ActivitySkeleton() {
+  return <Skeleton className="h-48" variant="card" />;
 }
 
 export default async function DashboardPage() {
@@ -63,8 +60,8 @@ export default async function DashboardPage() {
     : "there";
 
   return (
-    <div className="space-y-3xl py-3xl">
-      <header>
+    <div className="py-3xl">
+      <header className="mb-2xl">
         <h1 className="heading-xl tracking-tight">Welcome back, {username}!</h1>
       </header>
 
@@ -72,25 +69,35 @@ export default async function DashboardPage() {
         <GettingStartedChecklist userId={userId} />
       </Suspense>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <ContinuePlaying userId={userId} />
-      </Suspense>
+      <div className="grid gap-2 lg:grid-cols-[1fr_1fr]">
+        <div className="space-y-2">
+          <Suspense fallback={<StatsSkeleton />}>
+            <DashboardStats userId={userId} />
+          </Suspense>
+        </div>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <UpNext userId={userId} />
-      </Suspense>
+        <div className="space-y-2">
+          <Suspense fallback={<SectionSkeleton />}>
+            <ContinuePlaying userId={userId} />
+          </Suspense>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <RecentlyAdded userId={userId} />
-      </Suspense>
+          <Suspense fallback={<SectionSkeleton />}>
+            <UpNext userId={userId} />
+          </Suspense>
+        </div>
+      </div>
 
-      <Suspense fallback={<StatsSkeleton />}>
-        <DashboardStats userId={userId} />
-      </Suspense>
+      <div className="mt-2">
+        <Suspense fallback={<SectionSkeleton />}>
+          <RecentlyAdded userId={userId} />
+        </Suspense>
+      </div>
 
-      <Suspense fallback={<ActivityFeedSkeleton />}>
-        <ActivityFeed userId={userId} />
-      </Suspense>
+      <div className="mt-2">
+        <Suspense fallback={<ActivitySkeleton />}>
+          <ActivityFeed userId={userId} />
+        </Suspense>
+      </div>
     </div>
   );
 }

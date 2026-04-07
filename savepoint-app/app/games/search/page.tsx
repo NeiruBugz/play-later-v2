@@ -21,11 +21,11 @@ export default async function GameSearchPage({
   const userId = session?.user?.id;
 
   return (
-    <div className="px-2xl container mx-auto">
-      <div className="space-y-3xl">
-        <div className="space-y-lg">
-          <h1 className="heading-xl">Search Games</h1>
-          <p className="body-md text-muted-foreground">
+    <div className="px-2xl py-2xl container mx-auto">
+      <div className="space-y-xl">
+        <div className="space-y-sm">
+          <h1 className="heading-lg">Search Games</h1>
+          <p className="text-muted-foreground text-sm">
             Find games to add to your SavePoint library
           </p>
         </div>

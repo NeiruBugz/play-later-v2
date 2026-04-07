@@ -46,8 +46,8 @@
   --chart-3: oklch(0.7 0.14 55);
   --chart-4: oklch(0.55 0.15 280);
   --chart-5: oklch(0.6 0.18 25);
-  /* Border radius - tight, cinematic (Letterboxd-style) */
-  --radius: 0.25rem;
+  /* Border radius - rounded, modern */
+  --radius: 0.5rem;
   /* Sidebar */
   --sidebar: oklch(0.97 0.003 260);
   --sidebar-foreground: oklch(0.2 0.01 260);
@@ -110,14 +110,11 @@
   /* Custom shadows - subtle, cinematic */
   --shadow-paper-sm: 0 1px 2px 0 oklch(0 0 0 / 0.04);
   --shadow-paper:
-    0 2px 8px 0 oklch(0 0 0 / 0.06),
-    0 1px 3px 0 oklch(0 0 0 / 0.04);
+    0 2px 8px 0 oklch(0 0 0 / 0.06), 0 1px 3px 0 oklch(0 0 0 / 0.04);
   --shadow-paper-md:
-    0 4px 12px 0 oklch(0 0 0 / 0.08),
-    0 2px 4px 0 oklch(0 0 0 / 0.05);
+    0 4px 12px 0 oklch(0 0 0 / 0.08), 0 2px 4px 0 oklch(0 0 0 / 0.05);
   --shadow-paper-lg:
-    0 8px 24px 0 oklch(0 0 0 / 0.1),
-    0 4px 8px 0 oklch(0 0 0 / 0.06);
+    0 8px 24px 0 oklch(0 0 0 / 0.1), 0 4px 8px 0 oklch(0 0 0 / 0.06);
   /* Semantic spacing scale - Tailwind-aligned */
   --space-xs: 0.25rem; /* 4px - very tight (Tailwind 1) */
   --space-sm: 0.375rem; /* 6px - tight (Tailwind 1.5) */
@@ -158,26 +155,26 @@
 }
 
 .dark {
-  /* Base colors - Letterboxd-style deep dark */
-  --background: oklch(0.12 0.005 260);
-  --foreground: oklch(0.93 0.005 260);
+  /* Base colors - Backloggd-style dark (#16181c) */
+  --background: oklch(0.155 0.007 260);
+  --foreground: oklch(0.93 0.005 250);
   /* Surface colors - subtle elevation */
-  --card: oklch(0.16 0.005 260);
-  --card-foreground: oklch(0.93 0.005 260);
-  --popover: oklch(0.18 0.005 260);
-  --popover-foreground: oklch(0.93 0.005 260);
+  --card: oklch(0.18 0.007 260);
+  --card-foreground: oklch(0.93 0.005 250);
+  --popover: oklch(0.2 0.007 260);
+  --popover-foreground: oklch(0.93 0.005 250);
   /* Primary accent - teal/cyan */
   --primary: oklch(0.69 0.17 172);
   --primary-foreground: oklch(0.12 0.01 175);
   /* Secondary - elevated surface */
-  --secondary: oklch(0.2 0.005 260);
-  --secondary-foreground: oklch(0.9 0.005 260);
+  --secondary: oklch(0.2 0.008 250);
+  --secondary-foreground: oklch(0.9 0.005 250);
   /* Muted */
-  --muted: oklch(0.2 0.005 260);
-  --muted-foreground: oklch(0.6 0.005 260);
+  --muted: oklch(0.2 0.008 250);
+  --muted-foreground: oklch(0.6 0.005 250);
   /* Accent - subtle teal tint */
-  --accent: oklch(0.22 0.02 175);
-  --accent-foreground: oklch(0.93 0.005 260);
+  --accent: oklch(0.22 0.02 200);
+  --accent-foreground: oklch(0.93 0.005 250);
   /* Destructive */
   --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(0.99 0 0);
@@ -191,8 +188,8 @@
   --info: oklch(0.7 0.14 240);
   --info-foreground: oklch(0.99 0 0);
   /* Borders and inputs - very subtle */
-  --border: oklch(0.25 0.005 260);
-  --input: oklch(0.2 0.005 260);
+  --border: oklch(0.24 0.008 250);
+  --input: oklch(0.2 0.008 250);
   --ring: oklch(0.69 0.17 172);
   /* Chart colors */
   --chart-1: oklch(0.69 0.17 172);
@@ -201,25 +198,22 @@
   --chart-4: oklch(0.65 0.15 280);
   --chart-5: oklch(0.65 0.18 25);
   /* Sidebar - slightly darker than background */
-  --sidebar: oklch(0.1 0.005 260);
-  --sidebar-foreground: oklch(0.9 0.005 260);
+  --sidebar: oklch(0.12 0.008 250);
+  --sidebar-foreground: oklch(0.9 0.005 250);
   --sidebar-primary: oklch(0.69 0.17 172);
   --sidebar-primary-foreground: oklch(0.12 0.01 175);
-  --sidebar-accent: oklch(0.18 0.02 175);
-  --sidebar-accent-foreground: oklch(0.9 0.005 260);
-  --sidebar-border: oklch(0.22 0.005 260);
+  --sidebar-accent: oklch(0.18 0.02 200);
+  --sidebar-accent-foreground: oklch(0.9 0.005 250);
+  --sidebar-border: oklch(0.22 0.008 250);
   --sidebar-ring: oklch(0.69 0.17 172);
   /* Custom shadows - deeper, more dramatic for dark mode */
   --shadow-paper-sm: 0 1px 3px 0 oklch(0 0 0 / 0.35);
   --shadow-paper:
-    0 2px 12px 0 oklch(0 0 0 / 0.45),
-    0 1px 4px 0 oklch(0 0 0 / 0.3);
+    0 2px 12px 0 oklch(0 0 0 / 0.45), 0 1px 4px 0 oklch(0 0 0 / 0.3);
   --shadow-paper-md:
-    0 4px 20px 0 oklch(0 0 0 / 0.5),
-    0 2px 8px 0 oklch(0 0 0 / 0.35);
+    0 4px 20px 0 oklch(0 0 0 / 0.5), 0 2px 8px 0 oklch(0 0 0 / 0.35);
   --shadow-paper-lg:
-    0 8px 40px 0 oklch(0 0 0 / 0.6),
-    0 4px 16px 0 oklch(0 0 0 / 0.4);
+    0 8px 40px 0 oklch(0 0 0 / 0.6), 0 4px 16px 0 oklch(0 0 0 / 0.4);
 
   /* Status colors - vibrant for dark mode */
   --status-wishlist: oklch(0.65 0.15 260);

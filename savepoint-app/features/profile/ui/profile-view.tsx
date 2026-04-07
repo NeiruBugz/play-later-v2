@@ -6,19 +6,13 @@ import Link from "next/link";
 
 import { statusLabels } from "@/features/profile/lib";
 import { Button } from "@/shared/components/ui/button";
-import { Card } from "@/shared/components/ui/card";
-import {
-  mapLibraryStatusToGameStatus,
-  ProgressRing,
-} from "@/shared/components/ui/progress-ring";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 
 import { prepareProfileData } from "../lib/prepare-profile-data";
 import { LogoutButton } from "./logout-button";
-import { ProfileStatsBar } from "./profile-stats-bar";
-import type { ProfileViewProps } from "./profile-view.types";
+import type { ProfileViewProps, SocialCounts } from "./profile-view.types";
 
-export function ProfileView({ profile }: ProfileViewProps) {
+export function ProfileView({ profile, socialCounts }: ProfileViewProps) {
   const { displayName, joinDateFormatted, statusEntries, quickStats } =
     prepareProfileData(profile);
 
@@ -68,56 +62,58 @@ export function ProfileView({ profile }: ProfileViewProps) {
         </div>
       </div>
 
-      <ProfileStatsBar
-        totalGames={quickStats.totalGames}
-        playing={quickStats.playing}
-        completed={quickStats.completed}
-        journalEntries={quickStats.journalEntries}
-      />
+      {socialCounts && profile.username && (
+        <SocialStatsRow counts={socialCounts} username={profile.username} />
+      )}
 
-      {statusEntries.length > 0 && totalGames >= 10 && (
-        <div>
-          <h2 className="heading-md mb-lg tracking-tight">Library Stats</h2>
+      {statusEntries.length > 0 && totalGames > 0 && (
+        <div data-testid="profile-stats-grid">
+          <div className="mb-lg flex h-3 overflow-hidden rounded-full">
+            {statusEntries.map(([status, count]) => {
+              const percentage =
+                totalGames > 0 ? (count / totalGames) * 100 : 0;
+              return (
+                <div
+                  key={status}
+                  className="transition-all duration-500"
+                  style={{
+                    width: `${percentage}%`,
+                    backgroundColor: `var(--status-${status === "UP_NEXT" ? "upNext" : status.toLowerCase()})`,
+                  }}
+                />
+              );
+            })}
+          </div>
           <div
-            className="grid grid-cols-2 gap-2 sm:grid-cols-4"
-            data-testid="profile-stats-grid"
+            className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4"
+            data-testid="profile-status-cards"
           >
-            {statusEntries.map(([status, count], index) => {
-              const gameStatus = mapLibraryStatusToGameStatus(status);
+            {statusEntries.map(([status, count]) => {
               const percentage =
                 totalGames > 0 ? Math.round((count / totalGames) * 100) : 0;
-
               return (
-                <Card
-                  key={status}
-                  variant="interactive"
-                  className="animate-fade-in p-lg transition-all hover:scale-[1.02]"
-                  style={{ animationDelay: `${(index + 1) * 50}ms` }}
-                  data-testid="profile-status-card"
-                >
-                  <div className="flex items-center gap-3">
-                    <ProgressRing
-                      status={gameStatus}
-                      progress={percentage}
-                      size="sm"
-                      showPercentage
-                    />
-                    <div>
-                      <p
-                        className="text-2xl font-semibold tabular-nums"
-                        data-testid="profile-status-count"
-                      >
-                        {count}
-                      </p>
-                      <p
-                        className="text-muted-foreground text-xs font-medium"
-                        data-testid="profile-status-label"
-                      >
-                        {statusLabels[status] || status}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
+                <div key={status}>
+                  <p
+                    className="text-2xl font-bold tabular-nums"
+                    data-testid="profile-status-count"
+                  >
+                    {statusLabels[status] || status}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    <span className="text-foreground font-semibold tabular-nums">
+                      {count}
+                    </span>{" "}
+                    Games{" "}
+                    <span
+                      className="tabular-nums"
+                      style={{
+                        color: `var(--status-${status === "UP_NEXT" ? "upNext" : status.toLowerCase()})`,
+                      }}
+                    >
+                      {percentage}%
+                    </span>
+                  </p>
+                </div>
               );
             })}
           </div>
@@ -128,7 +124,7 @@ export function ProfileView({ profile }: ProfileViewProps) {
         <div>
           <h2 className="heading-md mb-lg tracking-tight">Recently Played</h2>
           <div
-            className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7"
+            className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8"
             data-testid="profile-recent-games-grid"
           >
             {profile.stats.recentGames.map((game, index) => {
@@ -186,6 +182,43 @@ export function ProfileView({ profile }: ProfileViewProps) {
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+function SocialStatsRow({
+  counts,
+  username,
+}: {
+  counts: SocialCounts;
+  username: string;
+}) {
+  return (
+    <div
+      className="text-muted-foreground flex items-center gap-1.5 text-sm"
+      data-testid="profile-social-stats"
+    >
+      <Link
+        href={`/u/${username}/followers`}
+        className="hover:text-foreground transition-colors"
+      >
+        <span className="text-foreground font-semibold tabular-nums">
+          {counts.followers}
+        </span>{" "}
+        {counts.followers === 1 ? "Follower" : "Followers"}
+      </Link>
+
+      <span className="text-border mx-1">&middot;</span>
+
+      <Link
+        href={`/u/${username}/following`}
+        className="hover:text-foreground transition-colors"
+      >
+        <span className="text-foreground font-semibold tabular-nums">
+          {counts.following}
+        </span>{" "}
+        Following
+      </Link>
     </div>
   );
 }

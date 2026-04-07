@@ -16,11 +16,11 @@ export default async function JournalPage() {
 
   if (!entriesResult.success) {
     return (
-      <main className="py-3xl container mx-auto">
-        <div className="space-y-3xl">
+      <main className="py-2xl container mx-auto">
+        <div className="space-y-xl">
           <header>
-            <h1 className="heading-xl tracking-tight">Journal</h1>
-            <p className="body-md text-muted-foreground">
+            <h1 className="heading-lg tracking-tight">Journal</h1>
+            <p className="text-muted-foreground text-sm">
               Document your gaming journey
             </p>
           </header>

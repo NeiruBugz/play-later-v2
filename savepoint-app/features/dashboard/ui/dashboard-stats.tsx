@@ -119,7 +119,7 @@ export async function DashboardStats({ userId }: DashboardStatsProps) {
       "Dashboard stats fetched successfully"
     );
 
-    if (stats.total < 10) {
+    if (stats.total < 3) {
       return null;
     }
 

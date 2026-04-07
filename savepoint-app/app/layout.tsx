@@ -109,7 +109,7 @@ export default function RootLayout({
         <SkipToContent />
         <Providers
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { LibraryItemWithGameDomain } from "@/features/library/types";
 import { LibraryCard } from "@/features/library/ui/library-card";
 import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
 import { cn } from "@/shared/lib/ui/utils";
 
 interface DashboardGameSectionProps {
@@ -29,19 +30,22 @@ export function DashboardGameSection({
 }: DashboardGameSectionProps) {
   const gridClass =
     variant === "hero"
-      ? "gap-lg grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-      : "gap-lg grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6";
+      ? "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
+      : "grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7";
 
   return (
-    <section className={cn("space-y-xl", className)}>
-      <div className="flex items-center justify-between">
-        <h2 className="heading-md tracking-tight">{title}</h2>
+    <Card variant="flat" className={cn("p-lg overflow-hidden", className)}>
+      <div className="mb-lg flex items-center justify-between">
+        <h2 className="text-sm font-semibold tracking-tight">{title}</h2>
         {items.length > 0 &&
           (totalCount === undefined || totalCount > items.length) && (
-            <Button variant="ghost" size="sm" asChild>
-              <Link href={viewAllHref} className="group">
+            <Button variant="ghost" size="sm" asChild className="h-auto p-0">
+              <Link
+                href={viewAllHref}
+                className="text-muted-foreground hover:text-foreground group text-xs"
+              >
                 {viewAllLabel}
-                <ChevronRight className="ml-sm h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ChevronRight className="ml-xs h-3 w-3 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
           )}
@@ -56,7 +60,7 @@ export function DashboardGameSection({
       ) : (
         <EmptySection message={emptyMessage} href={viewAllHref} />
       )}
-    </section>
+    </Card>
   );
 }
 
