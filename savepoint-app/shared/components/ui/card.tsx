@@ -3,22 +3,27 @@ import * as React from "react";
 
 import { cn } from "@/shared/lib/ui/utils";
 
-const cardVariants = cva("rounded-lg border transition-all duration-normal", {
-  variants: {
-    variant: {
-      default:
-        "bg-card border-border/10 hover:border-border/25 hover:bg-muted/10",
-      interactive:
-        "bg-card border-border/10 hover:border-border/25 hover:brightness-110 cursor-pointer",
-      elevated: "bg-card border-border/10 shadow-paper hover:shadow-paper-md",
-      flat: "bg-card border-border/10",
-      outlined: "bg-card border-border/20 hover:border-primary/40",
+const cardVariants = cva(
+  "rounded-lg border transition-all duration-normal y2k-border-glow y2k:bg-card/70 y2k:backdrop-blur-md",
+  {
+    variants: {
+      variant: {
+        default:
+          "bg-card border-border/10 hover:border-border/25 hover:bg-muted/10 y2k:hover:border-primary/20 y2k-glow-hover",
+        interactive:
+          "bg-card border-border/10 hover:border-border/25 hover:brightness-110 cursor-pointer y2k:hover:border-primary/30 y2k-glow-hover",
+        elevated:
+          "bg-card border-border/10 shadow-paper hover:shadow-paper-md y2k-glow",
+        flat: "bg-card border-border/10",
+        outlined:
+          "bg-card border-border/20 hover:border-primary/40 y2k:border-primary/15",
+      },
     },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
 
 const cardHeaderVariants = cva("flex flex-col", {
   variants: {

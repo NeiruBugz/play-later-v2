@@ -58,6 +58,7 @@ export function MobileNav() {
         "fixed inset-x-0 bottom-0 z-50 md:hidden",
         "bg-background/95 backdrop-blur-md",
         "border-border border-t",
+        "y2k:bg-background/60 y2k:border-t-0 y2k:shadow-[0_-1px_0_oklch(0.78_0.18_195/0.2),0_-4px_20px_oklch(0.78_0.18_195/0.05)] y2k:backdrop-blur-2xl",
         "pb-[env(safe-area-inset-bottom)]"
       )}
     >

@@ -62,7 +62,13 @@ export default async function DashboardPage() {
   return (
     <div className="py-3xl">
       <header className="mb-2xl">
-        <h1 className="heading-xl tracking-tight">Welcome back, {username}!</h1>
+        <h1 className="heading-xl y2k-chrome-text y2k:display-lg tracking-tight">
+          Welcome back, {username}!
+        </h1>
+        <div className="y2k-status-bar mt-lg y2k:block hidden" />
+        <p className="text-muted-foreground body-sm mt-md y2k-neon-text y2k:block y2k:tracking-[0.25em] y2k:uppercase y2k:text-xs hidden">
+          System Online
+        </p>
       </header>
 
       <Suspense fallback={<OnboardingSkeleton />}>

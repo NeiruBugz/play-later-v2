@@ -27,7 +27,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   if (isAuthorised) {
     return (
       <>
-        <header className="bg-background/80 border-border/10 py-lg md:py-xl sticky top-0 z-50 border-b backdrop-blur-xl">
+        <header className="bg-background/60 border-border/10 py-lg md:py-xl y2k-glass-strong y2k:border-b-0 y2k:shadow-[0_1px_0_oklch(0.78_0.18_195/0.15)] sticky top-0 z-50 border-b backdrop-blur-2xl">
           <div className="container mx-auto flex items-center justify-between">
             <h1 className="heading-md md:heading-xl tracking-tight">
               <Link
@@ -41,35 +41,37 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
                   height={40}
                   className="h-8 w-8 md:h-10 md:w-10"
                 />
-                <span>SavePoint</span>
+                <span className="y2k-chrome-text y2k:tracking-wider">
+                  SavePoint
+                </span>
               </Link>
             </h1>
             <nav className="gap-lg md:gap-2xl flex items-center">
               <div className="gap-2xl hidden items-center md:flex">
                 <Link
                   href="/dashboard"
-                  className={`body-sm transition-colors ${isActive("/dashboard") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground font-medium"}`}
+                  className={`body-sm transition-all ${isActive("/dashboard") ? "text-foreground y2k-neon-text y2k-neon-underline font-semibold" : "text-muted-foreground hover:text-foreground y2k:hover:text-primary/70 font-medium"}`}
                   aria-current={isActive("/dashboard") ? "page" : undefined}
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/library"
-                  className={`body-sm transition-colors ${isActive("/library") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground font-medium"}`}
+                  className={`body-sm transition-all ${isActive("/library") ? "text-foreground y2k-neon-text y2k-neon-underline font-semibold" : "text-muted-foreground hover:text-foreground y2k:hover:text-primary/70 font-medium"}`}
                   aria-current={isActive("/library") ? "page" : undefined}
                 >
                   Library
                 </Link>
                 <Link
                   href="/journal"
-                  className={`body-sm transition-colors ${isActive("/journal") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground font-medium"}`}
+                  className={`body-sm transition-all ${isActive("/journal") ? "text-foreground y2k-neon-text y2k-neon-underline font-semibold" : "text-muted-foreground hover:text-foreground y2k:hover:text-primary/70 font-medium"}`}
                   aria-current={isActive("/journal") ? "page" : undefined}
                 >
                   Journal
                 </Link>
                 <Link
                   href="/profile"
-                  className={`body-sm transition-colors ${isActive("/profile") ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground font-medium"}`}
+                  className={`body-sm transition-all ${isActive("/profile") ? "text-foreground y2k-neon-text y2k-neon-underline font-semibold" : "text-muted-foreground hover:text-foreground y2k:hover:text-primary/70 font-medium"}`}
                   aria-current={isActive("/profile") ? "page" : undefined}
                 >
                   Profile
@@ -97,7 +99,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   }
   return (
     <>
-      <header className="bg-background/80 border-border/10 py-lg md:py-xl sticky top-0 z-50 border-b backdrop-blur-xl">
+      <header className="bg-background/60 border-border/10 py-lg md:py-xl y2k-glass-strong y2k:border-b-0 y2k:shadow-[0_1px_0_oklch(0.78_0.18_195/0.15)] sticky top-0 z-50 border-b backdrop-blur-2xl">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="heading-md md:heading-xl tracking-tight">
             <Link

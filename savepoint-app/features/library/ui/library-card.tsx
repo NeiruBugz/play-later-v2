@@ -57,7 +57,7 @@ export const LibraryCard = memo(function LibraryCard({
 
   const cardContent = (
     <>
-      <div className="relative overflow-hidden rounded-lg">
+      <div className="y2k:ring-primary/25 y2k:group-hover:ring-primary/60 y2k:ring-1 y2k:transition-all y2k:duration-300 y2k:group-hover:shadow-[0_0_20px_oklch(0.78_0.18_195/0.35),0_0_40px_oklch(0.78_0.18_195/0.1)] y2k:group-hover:scale-[1.02] relative overflow-hidden rounded-lg">
         <GameCoverImage
           imageId={coverImageId}
           gameTitle={game.title}

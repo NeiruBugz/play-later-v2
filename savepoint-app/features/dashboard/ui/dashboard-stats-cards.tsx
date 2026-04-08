@@ -24,15 +24,20 @@ const STATUS_CSS_MAP: Record<string, string> = {
 
 export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
   return (
-    <Card variant="elevated" className="p-xl overflow-hidden">
+    <Card
+      variant="elevated"
+      className="p-xl y2k-gradient-cyan y2k-border-pulse overflow-hidden"
+    >
       <Link href="/library" className="block">
         <div className="mb-lg flex items-center gap-3">
-          <Library className="text-muted-foreground h-5 w-5" />
-          <span className="text-muted-foreground text-sm font-medium tracking-wider uppercase">
+          <Library className="text-muted-foreground y2k-neon-text h-5 w-5" />
+          <span className="text-muted-foreground y2k-neon-text y2k:tracking-[0.2em] text-sm font-medium tracking-wider uppercase">
             Library
           </span>
         </div>
-        <p className="mb-xs text-5xl font-bold tabular-nums">{stats.total}</p>
+        <p className="mb-xs y2k-chrome-text text-5xl font-bold tabular-nums">
+          {stats.total}
+        </p>
         <p className="text-muted-foreground mb-xl text-sm">Total Games</p>
 
         <div className="mb-lg flex h-2.5 overflow-hidden rounded-full">
