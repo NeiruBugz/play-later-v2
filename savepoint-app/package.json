@@ -107,7 +107,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "dotenv": "17.2.3",
     "eslint": "9.39.1",
-    "eslint-config-next": "15.5.7",
+    "eslint-config-next": "16.2.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-boundaries": "6.0.2",
