@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/shared/lib/ui/utils";
 
 const cardVariants = cva(
-  "rounded-lg border transition-all duration-normal y2k-border-glow y2k:bg-card/70 y2k:backdrop-blur-md",
+  "rounded-lg border transition-all duration-normal y2k-border-glow y2k-corner-brackets y2k:bg-card/70 y2k:backdrop-blur-md",
   {
     variants: {
       variant: {

@@ -66,7 +66,7 @@ export default async function DashboardPage() {
           Welcome back, {username}!
         </h1>
         <div className="y2k-status-bar mt-lg y2k:block hidden" />
-        <p className="text-muted-foreground body-sm mt-md y2k-neon-text y2k:block y2k:tracking-[0.25em] y2k:uppercase y2k:text-xs hidden">
+        <p className="text-muted-foreground body-sm mt-md y2k-neon-text y2k-mono y2k-typing-cursor y2k:block y2k:tracking-[0.25em] y2k:uppercase y2k:text-xs hidden">
           System Online
         </p>
       </header>

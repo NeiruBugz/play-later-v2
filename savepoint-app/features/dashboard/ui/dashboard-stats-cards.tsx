@@ -31,16 +31,18 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
       <Link href="/library" className="block">
         <div className="mb-lg flex items-center gap-3">
           <Library className="text-muted-foreground y2k-neon-text h-5 w-5" />
-          <span className="text-muted-foreground y2k-neon-text y2k:tracking-[0.2em] text-sm font-medium tracking-wider uppercase">
+          <span className="text-muted-foreground y2k-neon-text y2k-mono y2k:tracking-[0.2em] text-sm font-medium tracking-wider uppercase">
             Library
           </span>
         </div>
-        <p className="mb-xs y2k-chrome-text text-5xl font-bold tabular-nums">
+        <p className="mb-xs y2k-chrome-text y2k:text-6xl text-5xl font-bold tabular-nums">
           {stats.total}
         </p>
-        <p className="text-muted-foreground mb-xl text-sm">Total Games</p>
+        <p className="text-muted-foreground y2k-mono mb-xl text-sm">
+          Total Games
+        </p>
 
-        <div className="mb-lg flex h-2.5 overflow-hidden rounded-full">
+        <div className="mb-lg y2k-progress-glow y2k:h-3 flex h-2.5 overflow-hidden rounded-full">
           {LIBRARY_STATUS_CONFIG.map((statusConfig) => {
             const count = getStatCount(stats, statusConfig.value);
             const pct = stats.total > 0 ? (count / stats.total) * 100 : 0;

@@ -13,7 +13,7 @@ export function LibraryPageView({ isSteamConnected }: LibraryPageViewProps) {
   return (
     <div className="py-2xl container mx-auto">
       <div className="mb-xl gap-lg flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="heading-lg">Library</h1>
+        <h1 className="heading-lg y2k-chrome-text">Library</h1>
         {isSteamConnected && (
           <Button asChild variant="default" size="sm">
             <Link href="/steam/games">

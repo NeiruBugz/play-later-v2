@@ -36,7 +36,7 @@ export function DashboardGameSection({
   return (
     <Card variant="flat" className={cn("p-lg overflow-hidden", className)}>
       <div className="mb-lg flex items-center justify-between">
-        <h2 className="y2k-neon-text y2k:tracking-[0.15em] y2k:uppercase y2k-neon-underline text-sm font-semibold tracking-tight">
+        <h2 className="y2k-neon-text y2k:tracking-[0.15em] y2k:uppercase y2k-neon-underline y2k-section-marker y2k-mono text-sm font-semibold tracking-tight">
           {title}
         </h2>
         {items.length > 0 &&

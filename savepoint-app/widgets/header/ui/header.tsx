@@ -27,7 +27,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   if (isAuthorised) {
     return (
       <>
-        <header className="bg-background/60 border-border/10 py-lg md:py-xl y2k-glass-strong y2k:border-b-0 y2k:shadow-[0_1px_0_oklch(0.78_0.18_195/0.15)] sticky top-0 z-50 border-b backdrop-blur-2xl">
+        <header className="bg-background/60 border-border/10 py-lg md:py-xl y2k-glass-strong y2k:border-b-0 y2k:shadow-[0_1px_0_oklch(0.72_0.22_145/0.15)] sticky top-0 z-50 border-b backdrop-blur-2xl">
           <div className="container mx-auto flex items-center justify-between">
             <h1 className="heading-md md:heading-xl tracking-tight">
               <Link
@@ -39,7 +39,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
                   alt="SavePoint Logo"
                   width={40}
                   height={40}
-                  className="h-8 w-8 md:h-10 md:w-10"
+                  className="y2k-logo-glow h-8 w-8 md:h-10 md:w-10"
                 />
                 <span className="y2k-chrome-text y2k:tracking-wider">
                   SavePoint
@@ -99,7 +99,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   }
   return (
     <>
-      <header className="bg-background/60 border-border/10 py-lg md:py-xl y2k-glass-strong y2k:border-b-0 y2k:shadow-[0_1px_0_oklch(0.78_0.18_195/0.15)] sticky top-0 z-50 border-b backdrop-blur-2xl">
+      <header className="bg-background/60 border-border/10 py-lg md:py-xl y2k-glass-strong y2k:border-b-0 y2k:shadow-[0_1px_0_oklch(0.72_0.22_145/0.15)] sticky top-0 z-50 border-b backdrop-blur-2xl">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="heading-md md:heading-xl tracking-tight">
             <Link
@@ -111,9 +111,11 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
                 alt="SavePoint Logo"
                 width={40}
                 height={40}
-                className="h-8 w-8 md:h-10 md:w-10"
+                className="y2k-logo-glow h-8 w-8 md:h-10 md:w-10"
               />
-              <span>SavePoint</span>
+              <span className="y2k-chrome-text y2k:tracking-wider">
+                SavePoint
+              </span>
             </Link>
           </h1>
           <nav className="gap-lg md:gap-2xl flex items-center">
