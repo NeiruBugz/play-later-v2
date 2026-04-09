@@ -90,7 +90,7 @@ export function LibraryFilters() {
   }, []);
 
   useEffect(() => {
-    const currentSearch = searchParams.get("search");
+    const currentSearch = searchParams.get("search") ?? "";
     if (debouncedSearch !== currentSearch) {
       updateFilter("search", debouncedSearch || undefined);
     }
