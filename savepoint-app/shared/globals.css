@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *, .y2k *));
+@custom-variant dark (&:is(.dark *, .y2k *, .jewel *));
 @custom-variant y2k (&:is(.y2k *));
+@custom-variant jewel (&:is(.jewel *));
 
 :root {
   /* Base colors - clean light theme */
@@ -287,11 +288,9 @@
   --shadow-paper:
     0 2px 12px 0 oklch(0 0 0 / 0.6), 0 0 8px 0 oklch(0.72 0.22 145 / 0.1);
   --shadow-paper-md:
-    0 4px 20px 0 oklch(0 0 0 / 0.65),
-    0 0 16px 0 oklch(0.72 0.22 145 / 0.12);
+    0 4px 20px 0 oklch(0 0 0 / 0.65), 0 0 16px 0 oklch(0.72 0.22 145 / 0.12);
   --shadow-paper-lg:
-    0 8px 40px 0 oklch(0 0 0 / 0.75),
-    0 0 30px 0 oklch(0.72 0.22 145 / 0.15);
+    0 8px 40px 0 oklch(0 0 0 / 0.75), 0 0 30px 0 oklch(0.72 0.22 145 / 0.15);
   /* Y2K-specific tokens — Xbox green */
   --y2k-glow-cyan: oklch(0.72 0.22 145);
   --y2k-glow-magenta: oklch(0.6 0.18 165);
@@ -299,8 +298,7 @@
   --y2k-scanline-opacity: 0.05;
   --y2k-glass-opacity: 0.4;
   --y2k-border-glow:
-    0 0 10px oklch(0.72 0.22 145 / 0.45),
-    0 0 3px oklch(0.72 0.22 145 / 0.7),
+    0 0 10px oklch(0.72 0.22 145 / 0.45), 0 0 3px oklch(0.72 0.22 145 / 0.7),
     inset 0 0 6px oklch(0.72 0.22 145 / 0.1);
   --radius: 0.125rem;
   /* Status colors */
@@ -313,6 +311,102 @@
   --status-playing: oklch(0.72 0.22 145);
   --status-playing-foreground: oklch(0.08 0.02 145);
   --status-played: oklch(0.65 0.18 165);
+  --status-played-foreground: oklch(0.08 0.02 165);
+}
+
+.jewel {
+  /* Jewel — synthesized theme: PS2 indigo void + Xbox green emission + GC pearl chrome */
+
+  /* Base colors — PS2 indigo-black void */
+  --jewel-core: oklch(0.72 0.22 145);
+  --jewel-core-bright: oklch(0.82 0.28 145);
+  --jewel-void: oklch(0.1 0.035 270);
+  --jewel-void-raised: oklch(0.14 0.035 265);
+  --jewel-pearl: oklch(0.96 0.015 85);
+  --jewel-pearl-dim: oklch(0.72 0.02 85);
+  --jewel-spark: oklch(0.68 0.25 340);
+
+  /* Mapped to shared design tokens so existing components inherit */
+  --background: var(--jewel-void);
+  --foreground: var(--jewel-pearl);
+  --card: var(--jewel-void-raised);
+  --card-foreground: var(--jewel-pearl);
+  --popover: oklch(0.16 0.04 268);
+  --popover-foreground: var(--jewel-pearl);
+  --primary: var(--jewel-core);
+  --primary-foreground: oklch(0.08 0.02 145);
+  --secondary: oklch(0.16 0.035 268);
+  --secondary-foreground: var(--jewel-pearl);
+  --muted: oklch(0.15 0.035 268);
+  --muted-foreground: var(--jewel-pearl-dim);
+  --accent: oklch(0.18 0.045 268);
+  --accent-foreground: var(--jewel-pearl);
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --success: var(--jewel-core-bright);
+  --success-foreground: oklch(0.08 0.02 145);
+  --warning: oklch(0.78 0.16 75);
+  --warning-foreground: oklch(0.12 0.02 75);
+  --info: oklch(0.65 0.15 240);
+  --info-foreground: oklch(0.99 0 0);
+  --border: oklch(0.22 0.04 268);
+  --input: oklch(0.14 0.035 265);
+  --ring: var(--jewel-core);
+
+  /* Chart */
+  --chart-1: var(--jewel-core);
+  --chart-2: var(--jewel-core-bright);
+  --chart-3: var(--jewel-pearl);
+  --chart-4: oklch(0.6 0.15 240);
+  --chart-5: var(--jewel-spark);
+
+  /* Sidebar */
+  --sidebar: oklch(0.08 0.03 270);
+  --sidebar-foreground: var(--jewel-pearl);
+  --sidebar-primary: var(--jewel-core);
+  --sidebar-primary-foreground: oklch(0.08 0.02 145);
+  --sidebar-accent: oklch(0.14 0.04 268);
+  --sidebar-accent-foreground: var(--jewel-pearl);
+  --sidebar-border: oklch(0.2 0.04 268);
+  --sidebar-ring: var(--jewel-core);
+
+  /* Shadows — green bloom over indigo */
+  --shadow-paper-sm:
+    0 1px 3px 0 oklch(0 0 0 / 0.5), 0 0 4px 0 oklch(0.72 0.22 145 / 0.08);
+  --shadow-paper:
+    0 2px 12px 0 oklch(0 0 0 / 0.6), 0 0 10px 0 oklch(0.72 0.22 145 / 0.12);
+  --shadow-paper-md:
+    0 4px 20px 0 oklch(0 0 0 / 0.65), 0 0 18px 0 oklch(0.72 0.22 145 / 0.14);
+  --shadow-paper-lg:
+    0 8px 40px 0 oklch(0 0 0 / 0.75), 0 0 32px 0 oklch(0.72 0.22 145 / 0.16);
+
+  /* Jewel-specific tokens */
+  --jewel-chrome-edge: linear-gradient(
+    135deg,
+    oklch(0.96 0.015 85 / 0.7) 0%,
+    oklch(0.55 0.03 220 / 0.3) 35%,
+    oklch(0.18 0.04 268 / 0.6) 100%
+  );
+  --jewel-glass-fill: oklch(0.14 0.035 265 / 0.55);
+  --jewel-glass-tint: oklch(0.72 0.22 145 / 0.04);
+  --jewel-glass-blur: blur(16px) saturate(1.4);
+  --jewel-neon-bloom:
+    0 0 2px oklch(0.72 0.22 145 / 0.9), 0 0 10px oklch(0.72 0.22 145 / 0.5),
+    0 0 30px oklch(0.72 0.22 145 / 0.2);
+  --jewel-scanline-opacity: 0.04;
+
+  --radius: 0.375rem;
+
+  /* Status colors */
+  --status-wishlist: oklch(0.65 0.15 270);
+  --status-wishlist-foreground: oklch(0.99 0 0);
+  --status-shelf: oklch(0.78 0.14 85);
+  --status-shelf-foreground: oklch(0.12 0.01 85);
+  --status-upNext: oklch(0.78 0.16 75);
+  --status-upNext-foreground: oklch(0.12 0.01 75);
+  --status-playing: var(--jewel-core);
+  --status-playing-foreground: oklch(0.08 0.02 145);
+  --status-played: oklch(0.72 0.18 165);
   --status-played-foreground: oklch(0.08 0.02 165);
 }
 
@@ -569,6 +663,95 @@
   }
 }
 
+/* Jewel motion grammar — four named transitions */
+
+@keyframes jewel-unfold {
+  0% {
+    opacity: 0;
+    transform: perspective(800px) rotateX(-30deg) scale(0.85);
+    filter: blur(8px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(800px) rotateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes jewel-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes jewel-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-16px) skewX(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) skewX(0);
+  }
+}
+
+@keyframes jewel-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 2px oklch(0.72 0.22 145 / 0.6),
+      0 0 8px oklch(0.72 0.22 145 / 0.25),
+      0 0 24px oklch(0.72 0.22 145 / 0.12);
+  }
+  50% {
+    transform: scale(1.008);
+    box-shadow:
+      0 0 3px oklch(0.72 0.22 145 / 0.85),
+      0 0 14px oklch(0.72 0.22 145 / 0.4),
+      0 0 36px oklch(0.72 0.22 145 / 0.18);
+  }
+}
+
+@keyframes jewel-breathe-subtle {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes jewel-chrome-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes jewel-tower-rise {
+  0% {
+    height: 0%;
+    opacity: 0;
+  }
+  100% {
+    height: var(--tower-h, 0%);
+    opacity: 1;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -647,6 +830,79 @@
         oklch(0.72 0.22 145 / 0.03) 0px,
         transparent 1px,
         transparent 40px
+      );
+  }
+
+  /* Jewel base — ambient environment */
+
+  .jewel ::selection {
+    background: oklch(0.72 0.22 145 / 0.35);
+    color: var(--jewel-pearl);
+  }
+
+  .jewel ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .jewel ::-webkit-scrollbar-track {
+    background: oklch(0.08 0.03 270);
+  }
+  .jewel ::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      oklch(0.72 0.22 145 / 0.5),
+      oklch(0.55 0.18 165 / 0.4)
+    );
+    border-radius: 4px;
+  }
+  .jewel ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      oklch(0.82 0.28 145 / 0.8),
+      oklch(0.72 0.22 145 / 0.6)
+    );
+    box-shadow: 0 0 6px oklch(0.72 0.22 145 / 0.4);
+  }
+
+  /* CRT scanlines — subtle, never distracting */
+  .jewel body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      oklch(0 0 0 / var(--jewel-scanline-opacity, 0.04)) 2px,
+      oklch(0 0 0 / var(--jewel-scanline-opacity, 0.04)) 3px
+    );
+  }
+
+  /* Ambient light sources — indigo void with green emission from top-left,
+     pearl warmth from bottom-right. Directional, not uniform. */
+  .jewel body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        ellipse 90% 60% at 15% 0%,
+        oklch(0.72 0.22 145 / 0.14),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 70% 50% at 100% 100%,
+        oklch(0.96 0.015 85 / 0.05),
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 50% 40% at 50% 50%,
+        oklch(0.14 0.04 270 / 0.4),
+        transparent 70%
       );
   }
 }
@@ -1738,6 +1994,318 @@
     font-size: 0.85em;
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Jewel Design System — chrome, glass, neon                           */
+  /* Scoped to .jewel theme                                              */
+  /* ------------------------------------------------------------------ */
+
+  /* Material: Chrome — cool pearl→indigo gradient border.
+     Used for outer shells, frames, dividers. Never an accent. */
+  .jewel .jewel-chrome {
+    position: relative;
+    border: 1px solid transparent;
+    background-image:
+      linear-gradient(var(--jewel-void-raised), var(--jewel-void-raised)),
+      var(--jewel-chrome-edge);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  .jewel .jewel-chrome-thin {
+    border: 1px solid oklch(0.72 0.02 85 / 0.32);
+    box-shadow:
+      inset 0 1px 0 oklch(0.96 0.015 85 / 0.14),
+      inset 0 -1px 0 oklch(0 0 0 / 0.4),
+      inset 1px 0 0 oklch(0.96 0.015 85 / 0.06);
+  }
+
+  /* Material: Glass — translucent panel with backdrop blur, green inner tint.
+     Used for cards, panels, modals. Never hard-edged. */
+  .jewel .jewel-glass {
+    background:
+      linear-gradient(135deg, var(--jewel-glass-tint) 0%, transparent 40%),
+      var(--jewel-glass-fill);
+    backdrop-filter: var(--jewel-glass-blur);
+    -webkit-backdrop-filter: var(--jewel-glass-blur);
+    border: 1px solid oklch(0.72 0.22 145 / 0.14);
+    box-shadow:
+      inset 0 1px 0 oklch(0.96 0.015 85 / 0.06),
+      inset 0 0 24px oklch(0.72 0.22 145 / 0.04),
+      0 4px 20px oklch(0 0 0 / 0.5);
+  }
+
+  .jewel .jewel-glass-strong {
+    background:
+      linear-gradient(135deg, oklch(0.72 0.22 145 / 0.06) 0%, transparent 45%),
+      oklch(0.12 0.035 268 / 0.75);
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    border: 1px solid oklch(0.72 0.22 145 / 0.22);
+    box-shadow:
+      inset 0 1px 0 oklch(0.96 0.015 85 / 0.08),
+      0 8px 32px oklch(0 0 0 / 0.6);
+  }
+
+  /* Material: Neon — point-source emission, 3-layer falloff.
+     Always anchored to a direction (top-left by default). */
+  .jewel .jewel-neon {
+    box-shadow: var(--jewel-neon-bloom);
+  }
+
+  .jewel .jewel-neon-text {
+    color: var(--jewel-core-bright);
+    text-shadow:
+      0 0 4px oklch(0.72 0.22 145 / 0.9),
+      0 0 12px oklch(0.72 0.22 145 / 0.5),
+      0 0 30px oklch(0.72 0.22 145 / 0.2);
+  }
+
+  /* Top-left point-source emission — implies a light bulb off-canvas */
+  .jewel .jewel-neon-bloom {
+    position: relative;
+    isolation: isolate;
+  }
+  .jewel .jewel-neon-bloom::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at 15% 15%,
+      oklch(0.72 0.22 145 / 0.25) 0%,
+      oklch(0.72 0.22 145 / 0.08) 25%,
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+
+  /* Hover: rise + bloom, ceremonially */
+  .jewel .jewel-hover-rise {
+    transition:
+      transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 320ms ease-out;
+    will-change: transform;
+  }
+  .jewel .group:hover .jewel-hover-rise,
+  .jewel .jewel-hover-rise:hover {
+    transform: translateY(-5px) scale(1.015);
+    box-shadow:
+      0 0 3px oklch(0.82 0.28 145 / 0.9),
+      0 0 20px oklch(0.72 0.22 145 / 0.55),
+      0 0 56px oklch(0.72 0.22 145 / 0.22),
+      0 16px 40px oklch(0 0 0 / 0.6);
+    border-color: oklch(0.82 0.28 145 / 0.65);
+  }
+
+  /* Motion grammar — four named transitions */
+  .jewel .jewel-unfold {
+    animation: jewel-unfold 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .jewel .jewel-rise {
+    animation: jewel-rise 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .jewel .jewel-sweep {
+    animation: jewel-sweep 300ms cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+  .jewel .jewel-breathe {
+    animation: jewel-breathe 6s ease-in-out infinite;
+  }
+  .jewel .jewel-breathe-slow {
+    animation: jewel-breathe 8s ease-in-out infinite;
+  }
+
+  /* Typography roles */
+  .jewel .jewel-display {
+    font-family: "Geist", system-ui, sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .jewel .jewel-meta {
+    font-family: "Geist Mono", "DM Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--jewel-pearl-dim);
+  }
+
+  .jewel .jewel-meta-tilt {
+    font-family: "Geist Mono", "DM Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--jewel-pearl-dim);
+    transform: skewX(-6deg);
+    display: inline-block;
+  }
+
+  /* Ceremonial: magenta-spark — rare, allowlisted uses only */
+  .jewel .jewel-spark {
+    color: var(--jewel-spark);
+    text-shadow:
+      0 0 4px oklch(0.68 0.25 340 / 0.8),
+      0 0 14px oklch(0.68 0.25 340 / 0.4);
+  }
+  .jewel .jewel-spark-bloom {
+    box-shadow:
+      0 0 3px oklch(0.68 0.25 340 / 0.9),
+      0 0 12px oklch(0.68 0.25 340 / 0.5),
+      0 0 32px oklch(0.68 0.25 340 / 0.2);
+    border-color: oklch(0.68 0.25 340 / 0.5);
+  }
+
+  /* PS2 boot-tower stat visualization — vertical glass columns rising by count */
+  .jewel .jewel-tower {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: linear-gradient(
+      180deg,
+      oklch(0.72 0.22 145 / 0.04),
+      oklch(0.72 0.22 145 / 0.02)
+    );
+    border: 1px solid oklch(0.72 0.22 145 / 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: inset 0 0 12px oklch(0 0 0 / 0.4);
+  }
+
+  .jewel .jewel-tower-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--tower-h, 0%);
+    background-image: linear-gradient(
+      180deg,
+      oklch(0.96 0.015 85 / 0.25) 0%,
+      transparent 30%
+    );
+    box-shadow:
+      inset 0 1px 0 oklch(0.96 0.015 85 / 0.4),
+      0 0 16px oklch(0.72 0.22 145 / 0.5),
+      0 -2px 12px currentColor;
+    animation: jewel-tower-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .jewel .jewel-tower-count {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: "Geist Mono", "DM Mono", monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--jewel-pearl);
+    text-shadow: 0 0 4px oklch(0 0 0 / 0.8);
+    z-index: 2;
+  }
+
+  .jewel .jewel-dot {
+    box-shadow:
+      0 0 4px currentColor,
+      0 0 10px oklch(from currentColor l c h / 0.4);
+  }
+
+  /* Horizontal segmented progress bar with neon sheen */
+  .jewel .jewel-progress-glow {
+    background: oklch(0.08 0.03 270);
+    border: 1px solid oklch(0.72 0.22 145 / 0.2);
+    box-shadow:
+      inset 0 1px 2px oklch(0 0 0 / 0.6),
+      0 0 12px oklch(0.72 0.22 145 / 0.25);
+  }
+
+  /* Header logo emission */
+  .jewel .jewel-logo-glow {
+    filter: drop-shadow(0 0 6px oklch(0.72 0.22 145 / 0.7))
+      drop-shadow(0 0 14px oklch(0.72 0.22 145 / 0.3));
+  }
+
+  /* Nav link states */
+  .jewel .jewel-nav-inactive {
+    font-family: "Geist Mono", "DM Mono", monospace;
+    font-weight: 400;
+  }
+
+  .jewel .jewel-nav-active {
+    position: relative;
+    font-family: "Geist Mono", "DM Mono", monospace;
+    font-weight: 600;
+    color: var(--jewel-core-bright);
+    text-shadow:
+      0 0 4px oklch(0.72 0.22 145 / 0.8),
+      0 0 12px oklch(0.72 0.22 145 / 0.4);
+  }
+  .jewel .jewel-nav-active::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: -2px;
+    right: -2px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(0.82 0.28 145 / 0.9) 20%,
+      oklch(0.82 0.28 145) 50%,
+      oklch(0.82 0.28 145 / 0.9) 80%,
+      transparent
+    );
+    box-shadow: 0 0 6px oklch(0.72 0.22 145 / 0.6);
+  }
+
+  /* Badge treatment — applied to every Badge under .jewel.
+     Gives glass-backed body + neon glow that tints with the variant color. */
+  .jewel .jewel-badge {
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    backdrop-filter: blur(8px) saturate(1.3);
+    -webkit-backdrop-filter: blur(8px) saturate(1.3);
+    box-shadow:
+      0 0 2px currentColor,
+      0 0 10px oklch(from currentColor l c h / 0.35),
+      inset 0 1px 0 oklch(0.96 0.015 85 / 0.18),
+      inset 0 -1px 0 oklch(0 0 0 / 0.3);
+    border-color: oklch(from currentColor l c h / 0.4);
+    text-shadow: 0 0 6px oklch(from currentColor l c h / 0.5);
+  }
+
+  /* Corner brackets — subtle tactical framing for hero surfaces */
+  .jewel .jewel-corners {
+    position: relative;
+  }
+  .jewel .jewel-corners::before,
+  .jewel .jewel-corners::after {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .jewel .jewel-corners::before {
+    top: 4px;
+    left: 4px;
+    border-top: 1px solid oklch(0.72 0.22 145 / 0.7);
+    border-left: 1px solid oklch(0.72 0.22 145 / 0.7);
+    filter: drop-shadow(0 0 3px oklch(0.72 0.22 145 / 0.5));
+  }
+  .jewel .jewel-corners::after {
+    bottom: 4px;
+    right: 4px;
+    border-bottom: 1px solid oklch(0.72 0.22 145 / 0.5);
+    border-right: 1px solid oklch(0.72 0.22 145 / 0.5);
+    filter: drop-shadow(0 0 3px oklch(0.72 0.22 145 / 0.3));
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-in-up,
@@ -1749,7 +2317,12 @@
     .animate-pulse-glow,
     .animate-shimmer,
     .y2k-border-pulse,
-    .y2k-hue-shift {
+    .y2k-hue-shift,
+    .jewel-unfold,
+    .jewel-rise,
+    .jewel-sweep,
+    .jewel-breathe,
+    .jewel-breathe-slow {
       animation: none;
       opacity: 1;
       transform: none;

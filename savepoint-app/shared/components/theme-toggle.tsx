@@ -1,6 +1,6 @@
 "use client";
 
-import { Monitor, Moon, Sparkles, Sun } from "lucide-react";
+import { Gem, Monitor, Moon, Sparkles, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,6 +11,7 @@ const THEMES = [
   { value: "light", label: "Light", icon: Sun },
   { value: "dark", label: "Dark", icon: Moon },
   { value: "y2k", label: "Y2K", icon: Sparkles },
+  { value: "jewel", label: "Jewel", icon: Gem },
   { value: "system", label: "System", icon: Monitor },
 ] as const;
 
@@ -69,7 +70,8 @@ export function ThemeToggle() {
         size="icon"
         className={cn(
           "h-8 w-8",
-          theme === "y2k" && "y2k-text-glow text-primary"
+          theme === "y2k" && "y2k-text-glow text-primary",
+          theme === "jewel" && "jewel-neon-text"
         )}
         onClick={() => setOpen(!open)}
         aria-label="Change theme"
@@ -83,7 +85,8 @@ export function ThemeToggle() {
           className={cn(
             "border-border bg-popover text-popover-foreground shadow-paper-md absolute top-full right-0 z-50 mt-2 min-w-[140px] rounded-lg border p-1",
             "animate-scale-in",
-            theme === "y2k" && "y2k-border-glow"
+            theme === "y2k" && "y2k-border-glow",
+            theme === "jewel" && "jewel-glass-strong jewel-neon"
           )}
           role="menu"
         >

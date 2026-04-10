@@ -76,9 +76,13 @@ export default async function DashboardPage() {
       </Suspense>
 
       <div className="grid gap-2 lg:grid-cols-[1fr_1fr]">
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <Suspense fallback={<StatsSkeleton />}>
             <DashboardStats userId={userId} />
+          </Suspense>
+
+          <Suspense fallback={<ActivitySkeleton />}>
+            <ActivityFeed userId={userId} />
           </Suspense>
         </div>
 
@@ -96,12 +100,6 @@ export default async function DashboardPage() {
       <div className="mt-2">
         <Suspense fallback={<SectionSkeleton />}>
           <RecentlyAdded userId={userId} />
-        </Suspense>
-      </div>
-
-      <div className="mt-2">
-        <Suspense fallback={<ActivitySkeleton />}>
-          <ActivityFeed userId={userId} />
         </Suspense>
       </div>
     </div>

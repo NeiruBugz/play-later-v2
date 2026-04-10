@@ -4,16 +4,16 @@ import * as React from "react";
 import { cn } from "@/shared/lib/ui/utils";
 
 const cardVariants = cva(
-  "rounded-lg border transition-all duration-normal y2k-border-glow y2k-corner-brackets y2k:bg-card/70 y2k:backdrop-blur-md",
+  "rounded-lg border transition-all duration-normal y2k-border-glow y2k-corner-brackets y2k:bg-card/70 y2k:backdrop-blur-md jewel-glass jewel-neon-bloom jewel-corners",
   {
     variants: {
       variant: {
         default:
           "bg-card border-border/10 hover:border-border/25 hover:bg-muted/10 y2k:hover:border-primary/20 y2k-glow-hover",
         interactive:
-          "bg-card border-border/10 hover:border-border/25 hover:brightness-110 cursor-pointer y2k:hover:border-primary/30 y2k-glow-hover",
+          "bg-card border-border/10 hover:border-border/25 hover:brightness-110 cursor-pointer y2k:hover:border-primary/30 y2k-glow-hover jewel-hover-rise",
         elevated:
-          "bg-card border-border/10 shadow-paper hover:shadow-paper-md y2k-glow",
+          "bg-card border-border/10 shadow-paper hover:shadow-paper-md y2k-glow jewel-hover-rise",
         flat: "bg-card border-border/10",
         outlined:
           "bg-card border-border/20 hover:border-primary/40 y2k:border-primary/15",

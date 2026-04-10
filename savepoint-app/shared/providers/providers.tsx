@@ -38,7 +38,10 @@ export function Providers({
   const queryClient = useState(() => getQueryClient())[0];
 
   return (
-    <NextThemesProvider {...props} themes={["light", "dark", "y2k", "system"]}>
+    <NextThemesProvider
+      {...props}
+      themes={["light", "dark", "y2k", "jewel", "system"]}
+    >
       <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={false}>
         <QueryClientProvider client={queryClient}>
           <NextTopLoader />

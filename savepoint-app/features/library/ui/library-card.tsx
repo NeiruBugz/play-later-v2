@@ -57,7 +57,26 @@ export const LibraryCard = memo(function LibraryCard({
 
   const cardContent = (
     <>
-      <div className="y2k:ring-primary/25 y2k:group-hover:ring-primary/60 y2k:ring-1 y2k:transition-all y2k:duration-300 y2k:group-hover:shadow-[0_0_20px_oklch(0.72_0.22_145/0.35),0_0_40px_oklch(0.72_0.22_145/0.1)] y2k:group-hover:scale-[1.02] relative overflow-hidden rounded-lg">
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-lg",
+          // Y2K legacy treatment
+          "y2k:ring-primary/25 y2k:group-hover:ring-primary/60 y2k:ring-1 y2k:transition-all y2k:duration-300 y2k:group-hover:shadow-[0_0_20px_oklch(0.72_0.22_145/0.35),0_0_40px_oklch(0.72_0.22_145/0.1)] y2k:group-hover:scale-[1.02]",
+          // Jewel: chrome edge + glass inner tint + neon bloom from top-left + ceremonial hover
+          // (Custom classes self-scope via `.jewel .jewel-*` CSS rules — no variant prefix needed)
+          "jewel-chrome-thin jewel-glass jewel-neon-bloom jewel-hover-rise jewel-corners",
+          // Staggered ambient breathing — slow, per-card offset
+          !isMobile && "jewel-breathe-slow"
+        )}
+        style={
+          !isMobile
+            ? ({
+                // Stagger breathe start so the grid doesn't pulse in unison
+                animationDelay: `${(staggerIndex * 220) % 2000}ms`,
+              } as React.CSSProperties)
+            : undefined
+        }
+      >
         <GameCoverImage
           imageId={coverImageId}
           gameTitle={game.title}
@@ -74,7 +93,7 @@ export const LibraryCard = memo(function LibraryCard({
               variant={statusConfig.badgeVariant}
               role="status"
               aria-label={`Status: ${badgeLabel}`}
-              className="shadow-paper-sm backdrop-blur-sm"
+              className="shadow-paper-sm jewel-glass-strong jewel-neon-text jewel:border-primary/40 backdrop-blur-sm"
             >
               {badgeLabel}
             </Badge>
@@ -82,7 +101,21 @@ export const LibraryCard = memo(function LibraryCard({
         )}
       </div>
 
-      <p className="body-sm mt-sm text-foreground line-clamp-2 font-medium">
+      {/* Jewel: tactical meta strip — lives BELOW the cover, not inside it,
+          so it doesn't collide with the hover action bar */}
+      <div
+        aria-hidden
+        className="jewel:flex mt-1.5 hidden items-center justify-between gap-2"
+      >
+        <span className="jewel-meta truncate text-[0.58rem] tracking-[0.14em] opacity-60">
+          // {game.slug.slice(0, 14)}
+        </span>
+        <span className="jewel-meta-tilt text-[0.58rem] opacity-50">
+          {String(index + 1).padStart(3, "0")}
+        </span>
+      </div>
+
+      <p className="body-sm mt-sm text-foreground jewel-display jewel:mt-1 jewel:text-[0.75rem] jewel:font-normal jewel:leading-[1.25] jewel:tracking-[0.04em] line-clamp-2 font-medium">
         {game.title}
       </p>
 
