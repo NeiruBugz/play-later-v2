@@ -25,7 +25,7 @@ export async function ActivityFeed({ userId }: { userId: string }) {
     const popularItems = popularResult.success ? popularResult.data.items : [];
 
     return (
-      <Card variant="flat">
+      <Card variant="flat" className="flex flex-1 flex-col">
         <CardHeader spacing="comfortable">
           <CardTitle>Activity Feed</CardTitle>
         </CardHeader>
@@ -38,7 +38,7 @@ export async function ActivityFeed({ userId }: { userId: string }) {
   }
 
   return (
-    <Card variant="flat">
+    <Card variant="flat" className="flex flex-1 flex-col">
       <CardHeader spacing="comfortable">
         <CardTitle>Activity Feed</CardTitle>
       </CardHeader>

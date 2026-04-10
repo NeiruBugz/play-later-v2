@@ -62,7 +62,13 @@ export default async function DashboardPage() {
   return (
     <div className="py-3xl">
       <header className="mb-2xl">
-        <h1 className="heading-xl tracking-tight">Welcome back, {username}!</h1>
+        <h1 className="heading-xl y2k-chrome-text y2k:display-lg tracking-tight">
+          Welcome back, {username}!
+        </h1>
+        <div className="y2k-status-bar mt-lg y2k:block hidden" />
+        <p className="text-muted-foreground body-sm mt-md y2k-neon-text y2k-mono y2k-typing-cursor y2k:block y2k:tracking-[0.25em] y2k:uppercase y2k:text-xs hidden">
+          System Online
+        </p>
       </header>
 
       <Suspense fallback={<OnboardingSkeleton />}>
@@ -70,9 +76,13 @@ export default async function DashboardPage() {
       </Suspense>
 
       <div className="grid gap-2 lg:grid-cols-[1fr_1fr]">
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <Suspense fallback={<StatsSkeleton />}>
             <DashboardStats userId={userId} />
+          </Suspense>
+
+          <Suspense fallback={<ActivitySkeleton />}>
+            <ActivityFeed userId={userId} />
           </Suspense>
         </div>
 
@@ -90,12 +100,6 @@ export default async function DashboardPage() {
       <div className="mt-2">
         <Suspense fallback={<SectionSkeleton />}>
           <RecentlyAdded userId={userId} />
-        </Suspense>
-      </div>
-
-      <div className="mt-2">
-        <Suspense fallback={<ActivitySkeleton />}>
-          <ActivityFeed userId={userId} />
         </Suspense>
       </div>
     </div>

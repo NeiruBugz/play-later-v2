@@ -126,7 +126,7 @@ export default async function GameDetailPage({
             className="mx-auto w-full max-w-[280px] sm:max-w-[240px] lg:sticky lg:top-20 lg:mx-0 lg:max-w-none lg:self-start"
             aria-label="Game details sidebar"
           >
-            <div className="space-y-xl">
+            <div className="space-y-xl jewel-corners jewel:p-2 jewel:rounded-lg">
               <GameCoverImage
                 imageId={game.cover?.image_id}
                 gameTitle={game.name}
@@ -148,23 +148,31 @@ export default async function GameDetailPage({
             aria-label="Game information"
           >
             <header className="space-y-md">
-              <h1 className="heading-xl lg:display-lg tracking-tight">
+              <div
+                aria-hidden
+                className="jewel:flex jewel-meta hidden items-center gap-3 opacity-60"
+              >
+                <span>// GAME.DETAIL</span>
+                <span className="h-px flex-1 bg-[oklch(0.72_0.22_145/0.3)]" />
+                <span>{slug.slice(0, 12).toUpperCase()}</span>
+              </div>
+              <h1 className="heading-xl lg:display-lg jewel-display jewel:tracking-[0.02em] tracking-tight">
                 {game.name}
               </h1>
               <GameReleaseDate firstReleaseDate={game.first_release_date} />
               <GameDescription summary={game.summary} />
               {genres.length > 0 && (
                 <div className="pt-sm flex items-baseline gap-3">
-                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                    Genres
+                  <span className="text-muted-foreground jewel-meta text-xs font-medium tracking-wider uppercase">
+                    // Genres
                   </span>
                   <GenreBadges genres={genres} />
                 </div>
               )}
               {platforms.length > 0 && (
                 <div className="flex items-baseline gap-3">
-                  <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                    Platforms
+                  <span className="text-muted-foreground jewel-meta text-xs font-medium tracking-wider uppercase">
+                    // Platforms
                   </span>
                   <PlatformBadges platforms={platforms} />
                 </div>
