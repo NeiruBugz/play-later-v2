@@ -612,18 +612,27 @@ class TestLambdaHandler:
 
     def test_handler_with_valid_event(self, valid_event: dict[str, str]) -> None:
         """Test handler with valid event."""
-        with patch("lambdas.handlers.igdb_enrichment._enrich_steam_library") as mock_enrich:
-            mock_enrich.return_value = IgdbEnrichmentResponse(
-                success=True,
-                s3_enriched_location="s3://bucket/enriched.csv",
-                stats=EnrichmentStats(processed=5, matched=2, unmatched=1, filtered=2),
-            )
+        import asyncio
 
-            result = handler(valid_event, None)
+        fresh_loop = asyncio.new_event_loop()
+        try:
+            with (
+                patch("lambdas.handlers.igdb_enrichment._loop", fresh_loop),
+                patch("lambdas.handlers.igdb_enrichment._enrich_steam_library") as mock_enrich,
+            ):
+                mock_enrich.return_value = IgdbEnrichmentResponse(
+                    success=True,
+                    s3_enriched_location="s3://bucket/enriched.csv",
+                    stats=EnrichmentStats(processed=5, matched=2, unmatched=1, filtered=2),
+                )
 
-            assert result["success"] is True
-            assert result["s3_enriched_location"] == "s3://bucket/enriched.csv"
-            assert result["stats"]["processed"] == 5
+                result = handler(valid_event, None)
+
+                assert result["success"] is True
+                assert result["s3_enriched_location"] == "s3://bucket/enriched.csv"
+                assert result["stats"]["processed"] == 5
+        finally:
+            fresh_loop.close()
 
     def test_handler_with_invalid_event(self) -> None:
         """Test handler with invalid event data."""
