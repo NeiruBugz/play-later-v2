@@ -241,12 +241,10 @@ class TestEdgeCases:
         assert classify_steam_app("game - dlc").classification == AppClassification.DLC
         assert classify_steam_app("Game - Dlc").classification == AppClassification.DLC
         assert (
-            classify_steam_app("GAME - SOUNDTRACK").classification
-            == AppClassification.SOUNDTRACK
+            classify_steam_app("GAME - SOUNDTRACK").classification == AppClassification.SOUNDTRACK
         )
         assert (
-            classify_steam_app("game - soundtrack").classification
-            == AppClassification.SOUNDTRACK
+            classify_steam_app("game - soundtrack").classification == AppClassification.SOUNDTRACK
         )
 
     def test_soundtrack_as_compound_word(self) -> None:

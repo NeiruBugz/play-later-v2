@@ -78,9 +78,7 @@ def mock_steam_response_empty() -> dict[str, object]:
 class TestSteamClientValidation:
     """Test Steam ID validation."""
 
-    async def test_valid_steam_id(
-        self, steam_api_key: str, valid_steam_id: str
-    ) -> None:
+    async def test_valid_steam_id(self, steam_api_key: str, valid_steam_id: str) -> None:
         """Test that valid Steam ID passes validation."""
         client = SteamClient(api_key=steam_api_key)
         # Should not raise
@@ -129,9 +127,9 @@ class TestSteamClientGetOwnedGames:
     ) -> None:
         """Test successful fetch of multiple games."""
         # Mock the Steam API endpoint
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(200, json=mock_steam_response_success))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(200, json=mock_steam_response_success)
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             games = await client.get_owned_games(valid_steam_id)
@@ -161,9 +159,9 @@ class TestSteamClientGetOwnedGames:
         mock_steam_response_empty: dict[str, object],
     ) -> None:
         """Test handling of empty game library (private profile or no games)."""
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(200, json=mock_steam_response_empty))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(200, json=mock_steam_response_empty)
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             games = await client.get_owned_games(valid_steam_id)
@@ -172,16 +170,14 @@ class TestSteamClientGetOwnedGames:
         assert games == []
 
     @respx.mock
-    async def test_private_profile_handling(
-        self, steam_api_key: str, valid_steam_id: str
-    ) -> None:
+    async def test_private_profile_handling(self, steam_api_key: str, valid_steam_id: str) -> None:
         """Test handling of private Steam profile."""
         # Steam API returns empty response for private profiles
         private_response = {"response": {}}
 
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(200, json=private_response))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(200, json=private_response)
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             games = await client.get_owned_games(valid_steam_id)
@@ -195,13 +191,11 @@ class TestSteamClientErrorHandling:
     """Test error handling in Steam client."""
 
     @respx.mock
-    async def test_invalid_api_key(
-        self, steam_api_key: str, valid_steam_id: str
-    ) -> None:
+    async def test_invalid_api_key(self, steam_api_key: str, valid_steam_id: str) -> None:
         """Test handling of invalid API key (401 response)."""
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(401, text="Unauthorized"))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(401, text="Unauthorized")
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             with pytest.raises(SteamApiError) as exc_info:
@@ -211,13 +205,11 @@ class TestSteamClientErrorHandling:
         assert exc_info.value.details["status_code"] == 401
 
     @respx.mock
-    async def test_rate_limiting(
-        self, steam_api_key: str, valid_steam_id: str
-    ) -> None:
+    async def test_rate_limiting(self, steam_api_key: str, valid_steam_id: str) -> None:
         """Test handling of rate limiting (429 response)."""
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(429, text="Too Many Requests"))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(429, text="Too Many Requests")
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             with pytest.raises(SteamApiError) as exc_info:
@@ -227,14 +219,12 @@ class TestSteamClientErrorHandling:
         assert exc_info.value.details["status_code"] == 429
 
     @respx.mock
-    async def test_network_timeout(
-        self, steam_api_key: str, valid_steam_id: str
-    ) -> None:
+    async def test_network_timeout(self, steam_api_key: str, valid_steam_id: str) -> None:
         """Test handling of network timeout after retries exhausted."""
         # Mock will be called 3 times due to tenacity retry (stop_after_attempt(3))
-        route = respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(side_effect=httpx.TimeoutException("Connection timeout"))
+        route = respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            side_effect=httpx.TimeoutException("Connection timeout")
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             with pytest.raises(SteamApiError) as exc_info:
@@ -249,13 +239,11 @@ class TestSteamClientErrorHandling:
         assert isinstance(exc_info.value.__cause__, httpx.TimeoutException)
 
     @respx.mock
-    async def test_malformed_json_response(
-        self, steam_api_key: str, valid_steam_id: str
-    ) -> None:
+    async def test_malformed_json_response(self, steam_api_key: str, valid_steam_id: str) -> None:
         """Test handling of malformed JSON response."""
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(200, text="Not valid JSON"))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(200, text="Not valid JSON")
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             with pytest.raises(SteamApiError) as exc_info:
@@ -270,9 +258,9 @@ class TestSteamClientErrorHandling:
         """Test handling of response with invalid structure."""
         invalid_response = {"invalid": "structure"}
 
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(200, json=invalid_response))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(200, json=invalid_response)
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             with pytest.raises(SteamApiError) as exc_info:
@@ -281,13 +269,11 @@ class TestSteamClientErrorHandling:
         assert "Invalid response structure" in exc_info.value.message
 
     @respx.mock
-    async def test_server_error(
-        self, steam_api_key: str, valid_steam_id: str
-    ) -> None:
+    async def test_server_error(self, steam_api_key: str, valid_steam_id: str) -> None:
         """Test handling of server error (500 response)."""
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(500, text="Internal Server Error"))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(500, text="Internal Server Error")
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             with pytest.raises(SteamApiError) as exc_info:
@@ -296,13 +282,11 @@ class TestSteamClientErrorHandling:
         assert exc_info.value.details["status_code"] == 500
 
     @respx.mock
-    async def test_network_error(
-        self, steam_api_key: str, valid_steam_id: str
-    ) -> None:
+    async def test_network_error(self, steam_api_key: str, valid_steam_id: str) -> None:
         """Test handling of network connection error."""
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(side_effect=httpx.NetworkError("Connection refused"))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            side_effect=httpx.NetworkError("Connection refused")
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             with pytest.raises(SteamApiError) as exc_info:
@@ -323,9 +307,9 @@ class TestSteamClientContextManager:
         mock_steam_response_success: dict[str, object],
     ) -> None:
         """Test that context manager properly closes HTTP client."""
-        respx.get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
-        ).mock(return_value=httpx.Response(200, json=mock_steam_response_success))
+        respx.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/").mock(
+            return_value=httpx.Response(200, json=mock_steam_response_success)
+        )
 
         async with SteamClient(api_key=steam_api_key) as client:
             await client.get_owned_games(valid_steam_id)

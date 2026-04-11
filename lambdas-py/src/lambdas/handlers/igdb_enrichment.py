@@ -28,17 +28,13 @@ class IgdbEnrichmentEvent(BaseModel):
     """Input event for the igdb_enrichment Lambda."""
 
     user_id: str = Field(..., min_length=1, description="The SavePoint user ID")
-    s3_location: str = Field(
-        ..., description="S3 URI of the raw CSV file (s3://bucket/key)"
-    )
+    s3_location: str = Field(..., description="S3 URI of the raw CSV file (s3://bucket/key)")
 
 
 class EnrichmentStats(BaseModel):
     """Statistics from the enrichment process."""
 
-    processed: int = Field(
-        ..., description="Total number of Steam apps processed from CSV"
-    )
+    processed: int = Field(..., description="Total number of Steam apps processed from CSV")
     matched: int = Field(..., description="Number of games matched with IGDB")
     unmatched: int = Field(..., description="Number of games not found in IGDB")
     filtered: int = Field(..., description="Number of apps filtered (DLC, demos, etc.)")
@@ -273,9 +269,7 @@ async def _enrich_steam_library(
 
     except Exception as e:
         logger.exception("Unexpected error during enrichment")
-        return IgdbEnrichmentResponse(
-            success=False, error=f"Unexpected error: {e}"
-        )
+        return IgdbEnrichmentResponse(success=False, error=f"Unexpected error: {e}")
 
 
 def _populate_igdb_data(row: EnrichedGameRow, igdb_game: IgdbGame) -> EnrichedGameRow:
@@ -376,9 +370,7 @@ def handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
             validated_event = IgdbEnrichmentEvent(**event)
         except Exception as e:
             logger.error("Invalid event", error=str(e))
-            return IgdbEnrichmentResponse(
-                success=False, error=f"Invalid input: {e}"
-            ).model_dump()
+            return IgdbEnrichmentResponse(success=False, error=f"Invalid input: {e}").model_dump()
 
         # Run async enrichment on the module-level event loop
         response = _loop.run_until_complete(_enrich_steam_library(validated_event))
@@ -386,6 +378,4 @@ def handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
 
     except Exception as e:
         logger.exception("Unexpected error in igdb_enrichment handler")
-        return IgdbEnrichmentResponse(
-            success=False, error=f"Unexpected error: {e}"
-        ).model_dump()
+        return IgdbEnrichmentResponse(success=False, error=f"Unexpected error: {e}").model_dump()

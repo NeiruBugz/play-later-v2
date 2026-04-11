@@ -57,7 +57,10 @@ _CLASSIFICATION_PATTERNS: list[tuple[re.Pattern[str], AppClassification, str]] =
         "season pass",
     ),
     (
-        re.compile(r"[-:\s]+(expansion|blood\s+and\s+wine|phantom\s+liberty|shadow\s+of\s+the\s+erdtree)(\s+pack)?\b", re.IGNORECASE),
+        re.compile(
+            r"[-:\s]+(expansion|blood\s+and\s+wine|phantom\s+liberty|shadow\s+of\s+the\s+erdtree)(\s+pack)?\b",
+            re.IGNORECASE,
+        ),
         AppClassification.DLC,
         "expansion",
     ),

@@ -107,9 +107,7 @@ async def test_game_metadata_structure(
     print(f"   Played games with last_played: {len(games_with_last_played)}/{len(played_games)}")
 
     # Most games should have basic metadata
-    assert len(games_with_icons) > len(games) * 0.5, (
-        "Expected >50% of games to have icon URLs"
-    )
+    assert len(games_with_icons) > len(games) * 0.5, "Expected >50% of games to have icon URLs"
 
 
 @pytest.mark.integration

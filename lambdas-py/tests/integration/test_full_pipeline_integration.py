@@ -218,23 +218,17 @@ def test_full_pipeline_steam_to_database(
     try:
         # Count ImportedGame records for test user
         imported_games_count = (
-            session.query(ImportedGame)
-            .filter(ImportedGame.userId == test_user_id)
-            .count()
+            session.query(ImportedGame).filter(ImportedGame.userId == test_user_id).count()
         )
 
         # Count LibraryItem records for test user
         library_items_count = (
-            session.query(LibraryItem)
-            .filter(LibraryItem.userId == test_user_id)
-            .count()
+            session.query(LibraryItem).filter(LibraryItem.userId == test_user_id).count()
         )
 
         # Get sample ImportedGame to verify data
         sample_imported = (
-            session.query(ImportedGame)
-            .filter(ImportedGame.userId == test_user_id)
-            .first()
+            session.query(ImportedGame).filter(ImportedGame.userId == test_user_id).first()
         )
 
         assert imported_games_count > 0, "Should have ImportedGame records in DB"
@@ -263,7 +257,9 @@ def test_full_pipeline_steam_to_database(
     print("🎉 Full Pipeline Test Completed Successfully!")
     print("=" * 70)
     print(f"   Total Duration: {total_duration:.1f}s")
-    print(f"   Games Processed: {enrichment_result.stats.processed if enrichment_result.stats else 0}")
+    print(
+        f"   Games Processed: {enrichment_result.stats.processed if enrichment_result.stats else 0}"
+    )
     print(f"   Match Rate: {match_rate:.1f}%")
     print(f"   Database Records: {imported_games_count}")
     print("=" * 70 + "\n")

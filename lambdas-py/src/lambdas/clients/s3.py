@@ -28,7 +28,9 @@ class S3Client:
         region: AWS region for S3 operations
     """
 
-    def __init__(self, bucket: str, region: str = "us-east-1", endpoint_url: str | None = None) -> None:
+    def __init__(
+        self, bucket: str, region: str = "us-east-1", endpoint_url: str | None = None
+    ) -> None:
         """Initialize S3 client.
 
         Args:
@@ -109,13 +111,17 @@ class S3Client:
         writer.writeheader()
 
         for game in games:
-            writer.writerow({
-                "appid": game.appid,
-                "name": game.name or "",
-                "playtime_forever": game.playtime_forever,
-                "img_icon_url": game.img_icon_url or "",
-                "rtime_last_played": str(game.rtime_last_played) if game.rtime_last_played is not None else "",
-            })
+            writer.writerow(
+                {
+                    "appid": game.appid,
+                    "name": game.name or "",
+                    "playtime_forever": game.playtime_forever,
+                    "img_icon_url": game.img_icon_url or "",
+                    "rtime_last_played": str(game.rtime_last_played)
+                    if game.rtime_last_played is not None
+                    else "",
+                }
+            )
 
         csv_content = output.getvalue()
         output.close()
@@ -149,7 +155,9 @@ class S3Client:
                 "name": row["name"] if row["name"] else None,
                 "playtime_forever": int(row["playtime_forever"]),
                 "img_icon_url": row["img_icon_url"] if row["img_icon_url"] else None,
-                "rtime_last_played": int(row["rtime_last_played"]) if row["rtime_last_played"] else None,
+                "rtime_last_played": int(row["rtime_last_played"])
+                if row["rtime_last_played"]
+                else None,
             }
             games.append(game)
 

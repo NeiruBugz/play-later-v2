@@ -134,9 +134,7 @@ class TestSteamImportHandler:
             assert result["error"] is None
 
             # Verify Steam client was called correctly
-            mock_steam_instance.get_owned_games.assert_called_once_with(
-                "76561198012345678"
-            )
+            mock_steam_instance.get_owned_games.assert_called_once_with("76561198012345678")
 
             # Verify S3 client was called correctly
             mock_s3_instance.upload_games.assert_called_once_with(
@@ -165,13 +163,10 @@ class TestSteamImportHandler:
             assert result["game_count"] == 0
             assert result["error"] is None
 
-    def test_handler_returns_correct_game_count(
-        self, valid_event: dict[str, str]
-    ) -> None:
+    def test_handler_returns_correct_game_count(self, valid_event: dict[str, str]) -> None:
         """Handler should return correct game count."""
         games = [
-            SteamOwnedGame(appid=i, name=f"Game {i}", playtime_forever=100 * i)
-            for i in range(1, 6)
+            SteamOwnedGame(appid=i, name=f"Game {i}", playtime_forever=100 * i) for i in range(1, 6)
         ]
 
         with (
@@ -317,9 +312,7 @@ class TestSteamImportHandler:
             mock_settings.return_value.steam_api_key = SecretStr("test-key")
 
             mock_steam_instance = AsyncMock()
-            mock_steam_instance.get_owned_games.side_effect = RuntimeError(
-                "Unexpected issue"
-            )
+            mock_steam_instance.get_owned_games.side_effect = RuntimeError("Unexpected issue")
             mock_steam.return_value.__aenter__.return_value = mock_steam_instance
 
             # Call handler
@@ -361,9 +354,7 @@ class TestSteamImportHandler:
             mock_steam.assert_called_once_with(api_key="test-api-key")
 
             # Verify get_owned_games was called with correct Steam ID
-            mock_steam_instance.get_owned_games.assert_called_once_with(
-                "76561198012345678"
-            )
+            mock_steam_instance.get_owned_games.assert_called_once_with("76561198012345678")
 
     def test_handler_calls_s3_client_correctly(
         self, valid_event: dict[str, str], sample_games: list[SteamOwnedGame]

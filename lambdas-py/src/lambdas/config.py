@@ -65,9 +65,7 @@ class Settings(BaseSettings):
         valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
         upper_v = v.upper()
         if upper_v not in valid_levels:
-            raise ValueError(
-                f"Invalid log level: {v}. Must be one of {', '.join(valid_levels)}"
-            )
+            raise ValueError(f"Invalid log level: {v}. Must be one of {', '.join(valid_levels)}")
         return upper_v
 
     @field_validator("database_url", mode="before")

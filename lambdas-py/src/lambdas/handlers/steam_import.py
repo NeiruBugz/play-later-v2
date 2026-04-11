@@ -122,9 +122,7 @@ def handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
             validated_event = SteamImportEvent(**event)
         except Exception as e:
             logger.error("Invalid event", error=str(e))
-            return SteamImportResponse(
-                success=False, error=f"Invalid input: {e}"
-            ).model_dump()
+            return SteamImportResponse(success=False, error=f"Invalid input: {e}").model_dump()
 
         # Run async import
         response = asyncio.run(_import_steam_library(validated_event))
@@ -132,6 +130,4 @@ def handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
 
     except Exception as e:
         logger.exception("Unexpected error in steam_import handler")
-        return SteamImportResponse(
-            success=False, error=f"Unexpected error: {e}"
-        ).model_dump()
+        return SteamImportResponse(success=False, error=f"Unexpected error: {e}").model_dump()

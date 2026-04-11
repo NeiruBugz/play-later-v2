@@ -124,9 +124,7 @@ def skip_if_no_database(integration_env_vars: dict[str, str | None]) -> None:
         pytest.skip: If database URL is missing
     """
     if not integration_env_vars.get("DATABASE_URL"):
-        pytest.skip(
-            "Database URL not provided. Set DATABASE_URL in .env.integration"
-        )
+        pytest.skip("Database URL not provided. Set DATABASE_URL in .env.integration")
 
 
 @pytest.fixture(scope="session")
