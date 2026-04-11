@@ -94,13 +94,16 @@ export function useLibraryModal({
 }: UseLibraryModalOptions) {
   const [state, dispatch] = useReducer(modalReducer, initialState);
 
+  const firstExistingId =
+    existingItems.length > 0 ? existingItems[0]!.id : null;
+
   useEffect(() => {
     if (isOpen) {
-      if (mode === "edit" && existingItems.length > 0) {
+      if (mode === "edit" && firstExistingId !== null) {
         dispatch({
           type: "SET_VIEW",
           view: "manage",
-          firstEntryId: existingItems[0].id,
+          firstEntryId: firstExistingId,
         });
       } else {
         dispatch({ type: "SET_VIEW", view: "add" });
@@ -108,7 +111,7 @@ export function useLibraryModal({
     } else {
       dispatch({ type: "RESET" });
     }
-  }, [isOpen, mode, existingItems.length]);
+  }, [isOpen, mode, firstExistingId]);
 
   const selectedEntry = useMemo(() => {
     if (state.selectedEntryId === null) return null;

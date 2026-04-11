@@ -33,10 +33,16 @@ export function ProfileSettingsForm({
     initialFormState
   );
   useEffect(() => {
-    if (state.status === "success") {
+    if (state.status !== "success") return;
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (cancelled) return;
       toast.success(state.message ?? "Profile updated successfully!");
       setUsername((current) => state.submittedUsername ?? current.trim());
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [state]);
   const handleAvatarUploadSuccess = (url: string) => {
     setAvatarUrl(url);

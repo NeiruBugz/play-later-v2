@@ -1,9 +1,13 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import { useEffect, useId, useState } from "react";
+import { useId, useSyncExternalStore } from "react";
 
 import { cn } from "@/shared/lib/ui/utils";
+
+const subscribeNoop = () => () => {};
+const getTrue = () => true;
+const getFalse = () => false;
 
 const progressRingVariants = cva(
   "relative inline-flex items-center justify-center",
@@ -107,11 +111,7 @@ export function ProgressRing({
   children,
 }: ProgressRingProps) {
   const id = useId();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(subscribeNoop, getTrue, getFalse);
 
   const actualProgress = progress ?? statusDefaults[status];
   const clampedProgress = Math.max(0, Math.min(100, actualProgress));

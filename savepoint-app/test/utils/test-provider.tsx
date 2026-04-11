@@ -48,7 +48,9 @@ export function createQueryWrapper() {
       },
     },
   });
-  return ({ children }: PropsWithChildren) => (
+  const QueryWrapper = ({ children }: PropsWithChildren) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  QueryWrapper.displayName = "QueryWrapper";
+  return QueryWrapper;
 }

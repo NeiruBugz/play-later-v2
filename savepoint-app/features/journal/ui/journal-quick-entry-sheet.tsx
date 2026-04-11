@@ -82,10 +82,15 @@ export function JournalQuickEntrySheet({
   useEffect(() => {
     if (isOpen && !selectedGame) {
       let isCancelled = false;
-      setIsLoadingGame(true);
-      getPlayingGameAction()
+      Promise.resolve()
+        .then(() => {
+          if (isCancelled) return;
+          setIsLoadingGame(true);
+          return getPlayingGameAction();
+        })
         .then((result) => {
-          if (!isCancelled && result.success && result.data) {
+          if (isCancelled || !result) return;
+          if (result.success && result.data) {
             setSelectedGame({
               id: result.data.id,
               title: result.data.title,

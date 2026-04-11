@@ -73,7 +73,8 @@ export default async function Page() {
               </h1>
               <p className="body-lg text-muted-foreground mx-auto max-w-2xl text-pretty">
                 Curate your collection and journal your experiences. Games are
-                not chores to complete—they're worlds to explore and remember.
+                not chores to complete—they&apos;re worlds to explore and
+                remember.
               </p>
               <div className="gap-xl pt-xl flex flex-col items-center justify-center sm:flex-row">
                 <Button
@@ -106,7 +107,7 @@ export default async function Page() {
               A Different Approach to Gaming
             </h2>
             <p className="body-lg text-muted-foreground text-pretty">
-              Your game collection isn't a backlog—it's a library of
+              Your game collection isn&apos;t a backlog—it&apos;s a library of
               opportunities. SavePoint helps you be intentional about your
               gaming journey, preserving memories and reflections along the way.
             </p>
@@ -158,8 +159,8 @@ export default async function Page() {
               </div>
               <h3 className="heading-lg font-semibold">Curated Collections</h3>
               <p className="body-md text-muted-foreground">
-                Create themed collections like "Cozy Winter Games" or "Games
-                That Made Me Think."
+                Create themed collections like &ldquo;Cozy Winter Games&rdquo;
+                or &ldquo;Games That Made Me Think.&rdquo;
               </p>
             </Card>
             <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
@@ -198,7 +199,7 @@ export default async function Page() {
                 <p className="body-lg text-muted-foreground">
                   View your gaming journey chronologically. See how your tastes
                   evolved, revisit cherished memories, and reflect on the worlds
-                  you've explored.
+                  you&apos;ve explored.
                 </p>
                 <Button
                   className="bg-primary text-primary-foreground hover:bg-primary/90"

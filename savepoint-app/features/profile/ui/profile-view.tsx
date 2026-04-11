@@ -24,7 +24,7 @@ export function ProfileView({ profile, socialCounts }: ProfileViewProps) {
         aria-hidden
         className="jewel:flex jewel-meta hidden items-center gap-3 opacity-60"
       >
-        <span>// PROFILE.VIEW</span>
+        <span>{"// PROFILE.VIEW"}</span>
         <span className="h-px flex-1 bg-[oklch(0.72_0.22_145/0.3)]" />
         <span>
           {(profile.username ?? profile.email ?? "USER")
@@ -170,7 +170,7 @@ export function ProfileView({ profile, socialCounts }: ProfileViewProps) {
             aria-hidden
             className="jewel:flex jewel-meta mb-md hidden items-center gap-3 opacity-60"
           >
-            <span>// RECENT.PLAYS</span>
+            <span>{"// RECENT.PLAYS"}</span>
             <span className="h-px flex-1 bg-[oklch(0.72_0.22_145/0.25)]" />
             <span>
               {String(profile.stats.recentGames.length).padStart(3, "0")}

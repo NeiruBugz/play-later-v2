@@ -134,8 +134,8 @@ export function ImportGameModal({
           <div className="space-y-4 overflow-hidden py-4">
             <div className="bg-muted/50 rounded-lg p-3 text-sm">
               <p className="text-muted-foreground">
-                We couldn't automatically match this Steam game to our database.
-                Please search and select the correct game manually.
+                We couldn&apos;t automatically match this Steam game to our
+                database. Please search and select the correct game manually.
               </p>
             </div>
 

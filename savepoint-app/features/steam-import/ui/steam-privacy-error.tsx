@@ -29,7 +29,7 @@ export function SteamPrivacyError({
             <p>{message}</p>
             <ol className="ml-4 list-decimal space-y-1 text-sm">
               <li>Visit your Steam Privacy Settings</li>
-              <li>Set "Game details" to "Public"</li>
+              <li>Set &quot;Game details&quot; to &quot;Public&quot;</li>
               <li>Return here and try again</li>
             </ol>
           </div>

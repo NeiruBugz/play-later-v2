@@ -2,10 +2,14 @@
 
 import { Gem, Monitor, Moon, Sparkles, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
+
+const subscribeNoop = () => () => {};
+const getMounted = () => true;
+const getMountedServer = () => false;
 
 const THEMES = [
   { value: "light", label: "Light", icon: Sun },
@@ -15,20 +19,37 @@ const THEMES = [
   { value: "system", label: "System", icon: Monitor },
 ] as const;
 
-function getThemeIcon(theme: string | undefined) {
-  const config = THEMES.find((t) => t.value === theme);
-  return config?.icon ?? Sun;
+function ThemeIcon({
+  theme,
+  className,
+}: {
+  theme: string | undefined;
+  className?: string;
+}) {
+  switch (theme) {
+    case "dark":
+      return <Moon className={className} />;
+    case "y2k":
+      return <Sparkles className={className} />;
+    case "jewel":
+      return <Gem className={className} />;
+    case "system":
+      return <Monitor className={className} />;
+    case "light":
+    default:
+      return <Sun className={className} />;
+  }
 }
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    subscribeNoop,
+    getMounted,
+    getMountedServer
+  );
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -61,8 +82,6 @@ export function ThemeToggle() {
     );
   }
 
-  const CurrentIcon = getThemeIcon(theme);
-
   return (
     <div ref={menuRef} className="relative">
       <Button
@@ -77,7 +96,10 @@ export function ThemeToggle() {
         aria-label="Change theme"
         aria-expanded={open}
       >
-        <CurrentIcon className="text-muted-foreground hover:text-foreground h-4 w-4 transition-colors" />
+        <ThemeIcon
+          theme={theme}
+          className="text-muted-foreground hover:text-foreground h-4 w-4 transition-colors"
+        />
       </Button>
 
       {open && (
