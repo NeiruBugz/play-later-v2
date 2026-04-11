@@ -25,7 +25,16 @@ function subscribe(listener: () => void) {
   listeners.add(listener);
   const storageHandler = (event: StorageEvent) => {
     if (event.storageArea !== window.localStorage) return;
-    if (event.key === STORAGE_KEY || event.key === null) {
+    if (event.key === STORAGE_KEY) {
+      inMemoryView =
+        event.newValue === "list" || event.newValue === "grid"
+          ? event.newValue
+          : null;
+      listener();
+      return;
+    }
+    if (event.key === null) {
+      inMemoryView = null;
       listener();
     }
   };
