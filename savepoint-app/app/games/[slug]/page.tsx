@@ -152,7 +152,7 @@ export default async function GameDetailPage({
                 aria-hidden
                 className="jewel:flex jewel-meta hidden items-center gap-3 opacity-60"
               >
-                <span>// GAME.DETAIL</span>
+                <span>{"// GAME.DETAIL"}</span>
                 <span className="h-px flex-1 bg-[oklch(0.72_0.22_145/0.3)]" />
                 <span>{slug.slice(0, 12).toUpperCase()}</span>
               </div>
@@ -164,7 +164,7 @@ export default async function GameDetailPage({
               {genres.length > 0 && (
                 <div className="pt-sm flex items-baseline gap-3">
                   <span className="text-muted-foreground jewel-meta text-xs font-medium tracking-wider uppercase">
-                    // Genres
+                    {"// Genres"}
                   </span>
                   <GenreBadges genres={genres} />
                 </div>
@@ -172,7 +172,7 @@ export default async function GameDetailPage({
               {platforms.length > 0 && (
                 <div className="flex items-baseline gap-3">
                   <span className="text-muted-foreground jewel-meta text-xs font-medium tracking-wider uppercase">
-                    // Platforms
+                    {"// Platforms"}
                   </span>
                   <PlatformBadges platforms={platforms} />
                 </div>

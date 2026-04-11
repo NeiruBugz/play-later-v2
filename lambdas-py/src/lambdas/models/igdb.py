@@ -91,7 +91,9 @@ class IgdbGame(BaseModel):
             'https://images.igdb.com/igdb/image/upload/t_cover_big/abc123.jpg'
         """
         if self.cover and self.cover.image_id:
-            return f"https://images.igdb.com/igdb/image/upload/t_cover_big/{self.cover.image_id}.jpg"
+            return (
+                f"https://images.igdb.com/igdb/image/upload/t_cover_big/{self.cover.image_id}.jpg"
+            )
         if self.cover and self.cover.url:
             url = self.cover.url
             if url.startswith("//"):

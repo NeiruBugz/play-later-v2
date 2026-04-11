@@ -39,18 +39,29 @@ export function DesktopCommandPalette({
   const { data, isLoading, error } = useGameSearch(debouncedQuery);
 
   useEffect(() => {
-    if (isOpen) {
-      setIsLoadingRecent(true);
-      getRecentGamesAction()
-        .then((result) => {
-          if (result.success && result.data) {
-            setRecentGames(result.data);
-          }
-        })
-        .finally(() => {
-          setIsLoadingRecent(false);
-        });
-    }
+    if (!isOpen) return;
+    let cancelled = false;
+    Promise.resolve()
+      .then(() => {
+        if (cancelled) return;
+        setIsLoadingRecent(true);
+        return getRecentGamesAction();
+      })
+      .then((result) => {
+        if (cancelled || !result) return;
+        if (result.success && result.data) {
+          setRecentGames(result.data);
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) console.error("Failed to fetch recent games:", error);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingRecent(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen]);
 
   const handleGameSelect = (slug: string) => {
@@ -148,7 +159,9 @@ export function DesktopCommandPalette({
               !isLoading &&
               searchResults.length === 0 &&
               !error && (
-                <CommandEmpty>No games found for "{query}"</CommandEmpty>
+                <CommandEmpty>
+                  No games found for &ldquo;{query}&rdquo;
+                </CommandEmpty>
               )}
           </CommandList>
         </Command>

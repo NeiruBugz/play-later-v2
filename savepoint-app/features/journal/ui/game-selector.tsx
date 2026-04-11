@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Gamepad2, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Button } from "@/shared/components/ui/button";
@@ -85,13 +85,17 @@ export function GameSelector({
     gcTime: 10 * 60 * 1000,
   });
 
-  const uniqueGames = libraryItems
-    ? Array.from(
-        new Map(
-          libraryItems.items.map((item) => [item.game.id, item.game])
-        ).values()
-      )
-    : [];
+  const uniqueGames = useMemo(
+    () =>
+      libraryItems
+        ? Array.from(
+            new Map(
+              libraryItems.items.map((item) => [item.game.id, item.game])
+            ).values()
+          )
+        : [],
+    [libraryItems]
+  );
 
   const filteredGames = uniqueGames.filter((game) =>
     game.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -263,7 +267,7 @@ export function GameSelector({
       {searchQuery && (
         <p className="text-muted-foreground text-xs">
           {filteredGames.length} result{filteredGames.length !== 1 ? "s" : ""}{" "}
-          for "{searchQuery}"
+          for &ldquo;{searchQuery}&rdquo;
         </p>
       )}
 
@@ -272,7 +276,7 @@ export function GameSelector({
           <Search className="text-muted-foreground/40 h-8 w-8" />
           <div className="space-y-xs">
             <p className="text-muted-foreground text-sm">
-              No games found matching "{searchQuery}"
+              No games found matching &ldquo;{searchQuery}&rdquo;
             </p>
             <button
               type="button"

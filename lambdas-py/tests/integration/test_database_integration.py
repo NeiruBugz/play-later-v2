@@ -163,7 +163,9 @@ def test_upsert_imported_game_update(
     print("\n✅ Updated ImportedGame:")
     print(f"   ID: {imported_game_2.id}")
     print(f"   Playtime: {imported_game_1.playtime} → {imported_game_2.playtime} minutes")
-    print(f"   Status: {imported_game_1.igdbMatchStatus.value} → {imported_game_2.igdbMatchStatus.value}")
+    print(
+        f"   Status: {imported_game_1.igdbMatchStatus.value} → {imported_game_2.igdbMatchStatus.value}"
+    )
 
 
 @pytest.mark.integration
@@ -190,9 +192,7 @@ def test_upsert_game_with_genres_platforms(
     db_service.upsert_genre(GenreData(igdb_id=31, name="Adventure", slug="adventure"))
 
     # Upsert platforms (side effects: creates records in DB for game association)
-    db_service.upsert_platform(
-        PlatformData(igdb_id=6, name="PC (Microsoft Windows)", slug="win")
-    )
+    db_service.upsert_platform(PlatformData(igdb_id=6, name="PC (Microsoft Windows)", slug="win"))
     db_service.upsert_platform(PlatformData(igdb_id=48, name="PlayStation 4", slug="ps4"))
 
     # Upsert game with genres and platforms

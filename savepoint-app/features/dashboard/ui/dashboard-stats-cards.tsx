@@ -37,7 +37,7 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
         <div className="mb-lg flex items-center gap-3">
           <Library className="text-muted-foreground y2k-neon-text jewel-neon-text h-5 w-5" />
           <span className="text-muted-foreground y2k-neon-text y2k-mono y2k:tracking-[0.2em] jewel-meta jewel:text-[0.72rem] text-sm font-medium tracking-wider uppercase">
-            // LIBRARY
+            {"// LIBRARY"}
           </span>
         </div>
         <p className="mb-xs y2k-chrome-text y2k:text-6xl jewel:text-6xl jewel-neon-text jewel:tracking-[-0.02em] text-5xl font-bold tabular-nums">

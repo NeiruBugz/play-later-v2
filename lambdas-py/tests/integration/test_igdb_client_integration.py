@@ -79,7 +79,7 @@ async def test_search_game_by_steam_app_id_success(igdb_client: IgdbClient) -> N
 
     found_games: list[tuple[int, IgdbGame]] = []
 
-    for steam_app_id, expected_name_contains in test_games:
+    for steam_app_id, _expected_name_contains in test_games:
         game = await igdb_client.get_game_by_steam_app_id(steam_app_id)
 
         if game is not None:
@@ -213,11 +213,11 @@ async def test_rate_limiting_with_multiple_requests(igdb_client: IgdbClient) -> 
 
     # Test with multiple different Steam app IDs
     steam_app_ids = [
-        570,   # Dota 2
-        730,   # CS2
-        440,   # TF2
-        220,   # Half-Life 2
-        620,   # Portal 2
+        570,  # Dota 2
+        730,  # CS2
+        440,  # TF2
+        220,  # Half-Life 2
+        620,  # Portal 2
     ]
 
     import time
@@ -225,10 +225,7 @@ async def test_rate_limiting_with_multiple_requests(igdb_client: IgdbClient) -> 
     start_time = time.time()
 
     # Make multiple requests concurrently
-    tasks = [
-        igdb_client.get_game_by_steam_app_id(app_id)
-        for app_id in steam_app_ids
-    ]
+    tasks = [igdb_client.get_game_by_steam_app_id(app_id) for app_id in steam_app_ids]
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -246,7 +243,9 @@ async def test_rate_limiting_with_multiple_requests(igdb_client: IgdbClient) -> 
     print(f"   Average per request: {total_duration / len(steam_app_ids):.2f}s")
 
     # Should not have any rate limit errors
-    rate_limit_errors = [e for e in errors if isinstance(e, IgdbApiError) and "rate limit" in str(e).lower()]
+    rate_limit_errors = [
+        e for e in errors if isinstance(e, IgdbApiError) and "rate limit" in str(e).lower()
+    ]
     assert len(rate_limit_errors) == 0, "Should not hit rate limits with proper throttling"
 
     # With rate limiting of 4 req/sec, 5 requests should take at least 1.25 seconds
@@ -325,7 +324,7 @@ async def test_game_details_by_igdb_id(igdb_client: IgdbClient) -> None:
         print(f"   Genres: {', '.join(g.name for g in game.genres)}")
 
     if game.platforms:
-        platforms = ', '.join(p.name for p in game.platforms[:5])
+        platforms = ", ".join(p.name for p in game.platforms[:5])
         print(f"   Platforms: {platforms}")
 
     if game.first_release_date:
@@ -388,7 +387,9 @@ async def test_game_with_rich_metadata(igdb_client: IgdbClient) -> None:
 
     if game.cover:
         metadata_score += 1
-        assert game.cover.url is not None or game.cover.image_id is not None, "Cover should have url or image_id"
+        assert game.cover.url is not None or game.cover.image_id is not None, (
+            "Cover should have url or image_id"
+        )
 
     if game.genres:
         metadata_score += 1

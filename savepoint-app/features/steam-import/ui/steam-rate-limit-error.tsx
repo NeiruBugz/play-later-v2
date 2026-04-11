@@ -26,7 +26,7 @@ export function SteamRateLimitError({
             <p>{message}</p>
             <p className="text-sm">
               Please wait a moment before trying again. This limit helps protect
-              Steam's servers from being overwhelmed.
+              Steam&apos;s servers from being overwhelmed.
             </p>
           </div>
         </AlertDescription>

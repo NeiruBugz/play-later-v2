@@ -220,9 +220,7 @@ class TestIgdbClientGameLookup:
             return_value=httpx.Response(200, json=mock_token_response)
         )
 
-        respx.post("https://api.igdb.com/v4/games").mock(
-            return_value=httpx.Response(200, json=[])
-        )
+        respx.post("https://api.igdb.com/v4/games").mock(return_value=httpx.Response(200, json=[]))
 
         async with IgdbClient(**igdb_credentials) as client:
             game = await client.get_game_by_steam_app_id(999999)
@@ -273,9 +271,7 @@ class TestIgdbClientGameLookup:
         )
 
         # Mock games endpoint with empty response
-        respx.post("https://api.igdb.com/v4/games").mock(
-            return_value=httpx.Response(200, json=[])
-        )
+        respx.post("https://api.igdb.com/v4/games").mock(return_value=httpx.Response(200, json=[]))
 
         async with IgdbClient(**igdb_credentials) as client:
             game = await client.get_game_by_id(999999)

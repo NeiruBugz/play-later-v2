@@ -556,9 +556,7 @@ def _update_game_platforms(session: Session, game: Game, platform_igdb_ids: list
         logger.debug("No platforms to update for Game", game_id=game.id)
         return
 
-    logger.debug(
-        "Updating Game platforms", game_id=game.id, platform_count=len(platform_igdb_ids)
-    )
+    logger.debug("Updating Game platforms", game_id=game.id, platform_count=len(platform_igdb_ids))
 
     # Remove existing platform relationships
     session.query(GamePlatform).filter(GamePlatform.gameId == game.id).delete()
@@ -632,7 +630,9 @@ def create_library_item(session: Session, data: LibraryItemData) -> LibraryItem:
         )
 
     # Determine status based on playtime
-    status = LibraryItemStatus.CURIOUS_ABOUT if data.playtime == 0 else LibraryItemStatus.EXPERIENCED
+    status = (
+        LibraryItemStatus.CURIOUS_ABOUT if data.playtime == 0 else LibraryItemStatus.EXPERIENCED
+    )
 
     logger.debug("Determined LibraryItem status", status=status.value, playtime=data.playtime)
 

@@ -124,9 +124,7 @@ def skip_if_no_database(integration_env_vars: dict[str, str | None]) -> None:
         pytest.skip: If database URL is missing
     """
     if not integration_env_vars.get("DATABASE_URL"):
-        pytest.skip(
-            "Database URL not provided. Set DATABASE_URL in .env.integration"
-        )
+        pytest.skip("Database URL not provided. Set DATABASE_URL in .env.integration")
 
 
 @pytest.fixture(scope="session")
@@ -154,8 +152,17 @@ def integration_settings() -> Settings:
 
     Returns:
         Settings loaded from environment variables.
+
+    Notes:
+        Skips the session of integration tests that reach this fixture if
+        the required env vars are missing, so the suite degrades to
+        skipped-not-errored when no .env.integration is present (e.g. on CI
+        without secrets).
     """
-    return get_settings()
+    try:
+        return get_settings()
+    except Exception as exc:
+        pytest.skip(f"Integration settings unavailable: {exc}")
 
 
 # =============================================================================
@@ -191,12 +198,13 @@ def test_steam_id(integration_env_vars: dict[str, str | None]) -> str:
     Returns:
         Steam ID 64 from environment
 
-    Raises:
-        ValueError: If TEST_STEAM_ID is not set
+    Notes:
+        Skips dependent tests when TEST_STEAM_ID is not set, so the suite
+        degrades gracefully when run without integration credentials.
     """
     steam_id = integration_env_vars.get("TEST_STEAM_ID")
     if not steam_id:
-        raise ValueError("TEST_STEAM_ID not set in environment")
+        pytest.skip("TEST_STEAM_ID not set in environment")
     return steam_id
 
 
@@ -292,12 +300,13 @@ def test_user_id(integration_env_vars: dict[str, str | None]) -> str:
     Returns:
         Test user ID from environment
 
-    Raises:
-        ValueError: If TEST_USER_ID is not set
+    Notes:
+        Skips dependent tests when TEST_USER_ID is not set, so the suite
+        degrades gracefully when run without integration credentials.
     """
     user_id = integration_env_vars.get("TEST_USER_ID")
     if not user_id:
-        raise ValueError("TEST_USER_ID not set in environment")
+        pytest.skip("TEST_USER_ID not set in environment")
     return user_id
 
 

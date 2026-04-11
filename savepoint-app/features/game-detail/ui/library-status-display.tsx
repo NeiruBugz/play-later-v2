@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { deleteLibraryItemAction } from "@/features/manage-library-entry/server-actions";
+import { LibraryStatusIcon } from "@/shared/components/library-status-icon";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -15,11 +16,7 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { formatAbsoluteDate } from "@/shared/lib/date";
-import {
-  getStatusIcon,
-  getStatusLabel,
-  getStatusVariant,
-} from "@/shared/lib/library-status";
+import { getStatusLabel, getStatusVariant } from "@/shared/lib/library-status";
 
 import { AddToLibraryButton } from "./add-to-library-button";
 import type { LibraryStatusDisplayProps } from "./library-status-display.types";
@@ -59,7 +56,6 @@ export const LibraryStatusDisplay = ({
   }
 
   const status = userLibraryStatus.mostRecent.status;
-  const Icon = getStatusIcon(status);
   const statusLabel = getStatusLabel(status);
   const badgeVariant = getStatusVariant(status);
   const updatedDate = formatAbsoluteDate(userLibraryStatus.updatedAt);
@@ -87,7 +83,8 @@ export const LibraryStatusDisplay = ({
               className="text-sm"
               aria-label={`Status: ${statusLabel}`}
             >
-              <Icon
+              <LibraryStatusIcon
+                status={status}
                 className="mr-xs h-3.5 w-3.5"
                 aria-hidden="true"
                 data-testid="library-status-icon"

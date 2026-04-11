@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 import {
   CommandPalette,
@@ -12,6 +12,10 @@ import {
 } from "@/features/command-palette";
 import { ThemeToggle } from "@/shared/components/theme-toggle";
 import { Button } from "@/shared/components/ui/button";
+
+const subscribeNoop = () => () => {};
+const getIsMac = () => navigator.platform?.includes("Mac") ?? false;
+const getIsMacServer = () => true;
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -23,11 +27,7 @@ const NAV_LINKS = [
 export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   const { isOpen, open, close } = useCommandPaletteContext();
   const pathname = usePathname();
-  const [isMac, setIsMac] = useState(true);
-
-  useEffect(() => {
-    setIsMac(navigator.platform?.includes("Mac") ?? false);
-  }, []);
+  const isMac = useSyncExternalStore(subscribeNoop, getIsMac, getIsMacServer);
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");

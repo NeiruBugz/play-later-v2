@@ -48,7 +48,7 @@ class IgdbClient:
         client_secret: str,
         base_url: str = "https://api.igdb.com/v4",
         twitch_url: str = "https://id.twitch.tv/oauth2/token",
-        rate_limit: int = 4,
+        rate_limit: int = 4,  # noqa: ARG002  kept for API compatibility; see note below
         cache_ttl: int = 3600,
     ) -> None:
         """Initialize IGDB client.

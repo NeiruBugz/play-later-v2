@@ -84,9 +84,7 @@ class SteamClient:
         wait=wait_exponential(multiplier=1, min=1, max=10),
         reraise=True,
     )
-    async def _make_request(
-        self, path: str, params: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def _make_request(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
         """Make HTTP request to Steam API with retry logic.
 
         Args:
@@ -162,9 +160,7 @@ class SteamClient:
             raise
 
         except Exception as e:
-            self._logger.error(
-                "Unexpected error in Steam API request", path=path, error=str(e)
-            )
+            self._logger.error("Unexpected error in Steam API request", path=path, error=str(e))
             raise SteamApiError(
                 message="Unexpected error while calling Steam API",
                 details={"path": path, "error": str(e)},

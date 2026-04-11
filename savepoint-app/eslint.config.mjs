@@ -1,21 +1,20 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypeScript from "eslint-config-next/typescript";
 import boundaries from "eslint-plugin-boundaries";
 import jestDom from "eslint-plugin-jest-dom";
 import testingLibrary from "eslint-plugin-testing-library";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
 const eslintConfig = [
-  ...compat.config({
-    extends: ["plugin:@next/next/core-web-vitals", "next/typescript"],
-  }),
+  ...nextCoreWebVitals,
+  ...nextTypeScript,
+  {
+    rules: {
+      // React Compiler informational warning for libraries whose APIs
+      // (e.g. react-hook-form's watch, @tanstack/react-virtual) cannot be
+      // auto-memoized. Not a correctness issue; silenced project-wide.
+      "react-hooks/incompatible-library": "off",
+    },
+  },
   // Architectural boundaries: focus on data flow only
   {
     plugins: {

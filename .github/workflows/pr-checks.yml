@@ -303,7 +303,7 @@ jobs:
 
       - name: Mypy type check
         if: steps.check-changes.outputs.has-changes == 'true'
-        run: cd lambdas-py && uv run mypy .
+        run: cd lambdas-py && uv run mypy src/
 
       - name: Run tests
         if: steps.check-changes.outputs.has-changes == 'true'

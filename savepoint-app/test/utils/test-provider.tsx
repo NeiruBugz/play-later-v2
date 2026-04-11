@@ -5,7 +5,7 @@ import {
   ThemeProvider as NextThemesProvider,
   type ThemeProviderProps,
 } from "next-themes";
-import { type PropsWithChildren } from "react";
+import type { FC, PropsWithChildren } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,7 +48,9 @@ export function createQueryWrapper() {
       },
     },
   });
-  return ({ children }: PropsWithChildren) => (
+  const QueryWrapper: FC<PropsWithChildren> = ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  QueryWrapper.displayName = "QueryWrapper";
+  return QueryWrapper;
 }

@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import {
   getActiveAnnouncements,
@@ -20,61 +26,88 @@ interface UseWhatsNewReturn {
   dismissAll: () => void;
 }
 
-function getSeenIds(): string[] {
+function readSeenIds(): string[] {
   if (typeof window === "undefined") return [];
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) return [];
+    const parsed: unknown = JSON.parse(stored);
+    return Array.isArray(parsed) && parsed.every((id) => typeof id === "string")
+      ? parsed
+      : [];
   } catch {
     return [];
   }
 }
 
-function saveSeenIds(ids: string[]): void {
+function writeSeenIds(ids: string[]): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
   } catch {
     // localStorage unavailable
   }
 }
 
+const listeners = new Set<() => void>();
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  const storageHandler = (event: StorageEvent) => {
+    if (event.storageArea !== window.localStorage) return;
+    if (event.key === STORAGE_KEY || event.key === null) {
+      listener();
+    }
+  };
+  window.addEventListener("storage", storageHandler);
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener("storage", storageHandler);
+  };
+}
+
+const getSnapshot = () => JSON.stringify(readSeenIds());
+const getServerSnapshot = () => "[]";
+
+function useSeenIds(): [string[], (id: string) => void] {
+  const serialized = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot
+  );
+  const seenIds = useMemo<string[]>(() => JSON.parse(serialized), [serialized]);
+
+  const markAsSeen = useCallback((id: string) => {
+    const current = readSeenIds();
+    if (current.includes(id)) return;
+    const updated = [...current, id];
+    writeSeenIds(updated);
+    listeners.forEach((listener) => listener());
+  }, []);
+
+  return [seenIds, markAsSeen];
+}
+
 export function useWhatsNew(): UseWhatsNewReturn {
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [seenIds, setSeenIds] = useState<string[]>([]);
+  const [seenIds, markAsSeen] = useSeenIds();
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  useEffect(() => {
-    const storedIds = getSeenIds();
-    setSeenIds(storedIds);
-    setIsHydrated(true);
-  }, []);
-
   const activeAnnouncements = getActiveAnnouncements();
-  const unseenAnnouncements = isHydrated
-    ? activeAnnouncements.filter((a) => !seenIds.includes(a.id))
-    : [];
+  const unseenAnnouncements = useMemo(
+    () => activeAnnouncements.filter((a) => !seenIds.includes(a.id)),
+    [activeAnnouncements, seenIds]
+  );
+
+  const hasUnseen = unseenAnnouncements.length > 0;
 
   useEffect(() => {
-    if (!isHydrated) return;
-    if (unseenAnnouncements.length === 0) return;
-
+    if (!hasUnseen) return;
     const timer = setTimeout(() => {
       setIsOpen(true);
     }, SHOW_DELAY_MS);
-
     return () => clearTimeout(timer);
-  }, [isHydrated, unseenAnnouncements.length]);
-
-  const markAsSeen = useCallback((id: string) => {
-    setSeenIds((prev) => {
-      if (prev.includes(id)) return prev;
-      const updated = [...prev, id];
-      saveSeenIds(updated);
-      return updated;
-    });
-  }, []);
+  }, [hasUnseen]);
 
   const dismiss = useCallback(() => {
     const current = unseenAnnouncements[currentIndex];

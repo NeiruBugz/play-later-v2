@@ -190,7 +190,9 @@ describe("DateField", () => {
 
       const submittedData = onSubmit.mock.calls[0][0];
       const submittedDate = submittedData.startedAt as Date;
-      expect(submittedDate.toISOString().split("T")[0]).toBe("2025-01-20");
+      expect(submittedDate.getFullYear()).toBe(2025);
+      expect(submittedDate.getMonth()).toBe(0);
+      expect(submittedDate.getDate()).toBe(20);
     });
 
     it("should submit undefined when date is not provided", async () => {

@@ -85,16 +85,25 @@ export function JournalEntryForm({
     },
   });
 
-  // Fetch library items when component mounts or gameId changes
   useEffect(() => {
+    let cancelled = false;
     if (!gameId) {
-      setLibraryItems([]);
-      return;
+      Promise.resolve().then(() => {
+        if (!cancelled) setLibraryItems([]);
+      });
+      return () => {
+        cancelled = true;
+      };
     }
 
-    setIsLoadingLibraryItems(true);
-    getLibraryItemsByGameIdAction({ gameId })
+    Promise.resolve()
+      .then(() => {
+        if (cancelled) return;
+        setIsLoadingLibraryItems(true);
+        return getLibraryItemsByGameIdAction({ gameId });
+      })
       .then((result) => {
+        if (cancelled || !result) return;
         if (result.success) {
           const items = result.data.map((item) => ({
             id: item.id,
@@ -102,18 +111,20 @@ export function JournalEntryForm({
           }));
           setLibraryItems(items);
 
-          // Auto-link if exactly one library item exists (only in create mode)
           if (items.length === 1 && !isEditMode) {
             form.setValue("libraryItemId", items[0]!.id);
           }
         }
       })
       .catch((error) => {
-        console.error("Failed to fetch library items:", error);
+        if (!cancelled) console.error("Failed to fetch library items:", error);
       })
       .finally(() => {
-        setIsLoadingLibraryItems(false);
+        if (!cancelled) setIsLoadingLibraryItems(false);
       });
+    return () => {
+      cancelled = true;
+    };
   }, [gameId, isEditMode, form]);
 
   const createAction = useFormSubmission({
@@ -214,7 +225,7 @@ export function JournalEntryForm({
           name="content"
           render={({ field }) => (
             <div className="space-y-md">
-              <Label htmlFor="content">What's on your mind?</Label>
+              <Label htmlFor="content">What&apos;s on your mind?</Label>
               <Textarea
                 id="content"
                 {...field}

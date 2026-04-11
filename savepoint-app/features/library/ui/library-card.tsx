@@ -108,7 +108,7 @@ export const LibraryCard = memo(function LibraryCard({
         className="jewel:flex mt-1.5 hidden items-center justify-between gap-2"
       >
         <span className="jewel-meta truncate text-[0.58rem] tracking-[0.14em] opacity-60">
-          // {game.slug.slice(0, 14)}
+          {`// ${game.slug.slice(0, 14)}`}
         </span>
         <span className="jewel-meta-tilt text-[0.58rem] opacity-50">
           {String(index + 1).padStart(3, "0")}

@@ -194,9 +194,7 @@ def test_upsert_imported_game_updates_existing_record(
 # ==================== Genre Tests ====================
 
 
-def test_upsert_genre_creates_new_record(
-    mock_session: MagicMock, genre_data: GenreData
-) -> None:
+def test_upsert_genre_creates_new_record(mock_session: MagicMock, genre_data: GenreData) -> None:
     """Test that upsert_genre creates a new record when none exists."""
     # Mock query to return None (no existing record)
     mock_result = MagicMock()
@@ -353,12 +351,12 @@ def test_upsert_game_creates_new_record_with_igdb_match(
                     col_name = col.get("name") or col.get("entity")
                 elif isinstance(col, (tuple, list)) and len(col) > 0:
                     col_name = col[0]
-                
+
                 # Check column name or string representation for Genre
                 check_str = str(col_name) if col_name else col_str
                 if "Genre" in check_str:
                     return mock_genres_result
-                
+
                 # Check column name or string representation for Platform
                 if "Platform" in check_str:
                     return mock_platforms_result
@@ -439,9 +437,7 @@ def test_upsert_game_matches_by_steam_app_id_fallback(
     assert len(game_add_calls) == 0
 
 
-def test_upsert_game_updates_existing_record(
-    mock_session: MagicMock, game_data: GameData
-) -> None:
+def test_upsert_game_updates_existing_record(mock_session: MagicMock, game_data: GameData) -> None:
     """Test that upsert_game updates an existing record matched by igdbId."""
     # Mock existing Game
     existing = Game(
@@ -639,8 +635,8 @@ def test_game_data_validator_handles_none_genre_ids() -> None:
         igdb_id=1020,
         title="Test Game",
         slug="test-game",
-        genre_ids=None,  # type: ignore[arg-type]
-        platform_ids=None,  # type: ignore[arg-type]
+        genre_ids=None,
+        platform_ids=None,
     )
     assert data.genre_ids == []
     assert data.platform_ids == []
@@ -653,7 +649,7 @@ def test_game_data_validator_rejects_non_list() -> None:
             igdb_id=1020,
             title="Test Game",
             slug="test-game",
-            genre_ids="not a list",  # type: ignore[arg-type]
+            genre_ids="not a list",
         )
 
 
