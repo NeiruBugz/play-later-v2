@@ -128,6 +128,8 @@ def handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
         response = asyncio.run(_import_steam_library(validated_event))
         return response.model_dump()
 
-    except Exception as e:
+    except Exception:
         logger.exception("Unexpected error in steam_import handler")
-        return SteamImportResponse(success=False, error=f"Unexpected error: {e}").model_dump()
+        return SteamImportResponse(
+            success=False, error="Unexpected error in steam_import handler"
+        ).model_dump()

@@ -267,9 +267,9 @@ async def _enrich_steam_library(
         logger.error("S3 error", error=str(e), error_code=e.code)
         return IgdbEnrichmentResponse(success=False, error=f"S3 error: {e.message}")
 
-    except Exception as e:
+    except Exception:
         logger.exception("Unexpected error during enrichment")
-        return IgdbEnrichmentResponse(success=False, error=f"Unexpected error: {e}")
+        return IgdbEnrichmentResponse(success=False, error="Unexpected error during enrichment")
 
 
 def _populate_igdb_data(row: EnrichedGameRow, igdb_game: IgdbGame) -> EnrichedGameRow:
@@ -376,6 +376,8 @@ def handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
         response = _loop.run_until_complete(_enrich_steam_library(validated_event))
         return response.model_dump()
 
-    except Exception as e:
+    except Exception:
         logger.exception("Unexpected error in igdb_enrichment handler")
-        return IgdbEnrichmentResponse(success=False, error=f"Unexpected error: {e}").model_dump()
+        return IgdbEnrichmentResponse(
+            success=False, error="Unexpected error in igdb_enrichment handler"
+        ).model_dump()

@@ -15,7 +15,15 @@ import { Input } from "@/shared/components/ui/input";
 import type { DateFieldProps } from "./date-field.types";
 
 const isDateValue = (value: unknown): value is Date => {
-  return value !== null && value !== undefined && value instanceof Date;
+  return value instanceof Date && !Number.isNaN(value.getTime());
+};
+
+const parseLocalDate = (dateValue: string): Date | undefined => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+  if (!match) return undefined;
+  const [, year, month, day] = match;
+  const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
 };
 
 export const DateField = <T extends FieldValues = FieldValues>({
@@ -27,7 +35,7 @@ export const DateField = <T extends FieldValues = FieldValues>({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = e.target.value;
-    onChange(dateValue ? new Date(dateValue) : undefined);
+    onChange(dateValue ? parseLocalDate(dateValue) : undefined);
   };
 
   const inputValue = isDateValue(value) ? format(value, "yyyy-MM-dd") : "";
