@@ -1,30 +1,30 @@
-import { IgdbService } from "@/data-access-layer/services/igdb";
-import type { GameSearchResult } from "@/data-access-layer/services/igdb/types";
-import type { ServiceResult } from "@/data-access-layer/services/types";
+import {
+  igdbSearchHandler,
+  type HandlerResult,
+  type IgdbSearchHandlerOutput,
+} from "@/data-access-layer/handlers";
 import type { NextRequest } from "next/server";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
-import { checkRateLimit } from "@/shared/lib/rate-limit";
 import { GAME_TYPE } from "@/shared/types";
 
 import { GET } from "./route";
 
-// Mocks
-vi.mock("next/cache", () => ({
-  unstable_cache: vi.fn((fn) => fn),
+vi.mock("@/data-access-layer/handlers", () => ({
+  igdbSearchHandler: {
+    search: vi.fn(),
+  },
 }));
-vi.mock("@/data-access-layer/services/igdb/igdb-service");
-vi.mock("@/shared/lib/rate-limit");
 
-const mockCheckRateLimit = vi.mocked(checkRateLimit);
+const mockHandlerSearch = vi.mocked(igdbSearchHandler.search);
 
-// Helper to create mock request
 function createMockRequest(query: string, offset: number = 0): NextRequest {
   const url = new URL(
     `http://localhost/api/games/search?q=${encodeURIComponent(query)}&offset=${offset}`
   );
   return {
     nextUrl: url,
+    url: url.toString(),
     headers: {
       get: vi.fn().mockReturnValue("127.0.0.1"),
     },
@@ -32,30 +32,14 @@ function createMockRequest(query: string, offset: number = 0): NextRequest {
 }
 
 describe("GET /api/games/search", () => {
-  let mockSearchGamesByName: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Mock IgdbService instance
-    mockSearchGamesByName = vi.fn();
-    vi.mocked(IgdbService).mockImplementation(function () {
-      return {
-        searchGamesByName: mockSearchGamesByName,
-      } as unknown as IgdbService;
-    });
-
-    // Default: allow rate limit
-    mockCheckRateLimit.mockResolvedValue({
-      allowed: true,
-      remaining: 19,
-    });
   });
 
-  it("should return games when valid query is provided", async () => {
-    // Setup mock
-    const mockSearchResult: ServiceResult<GameSearchResult> = {
+  it("should return games when handler returns success", async () => {
+    const handlerResult: HandlerResult<IgdbSearchHandlerOutput> = {
       success: true,
+      status: HTTP_STATUS.OK,
       data: {
         games: [
           {
@@ -71,86 +55,110 @@ describe("GET /api/games/search", () => {
         count: 1,
       },
     };
-    mockSearchGamesByName.mockResolvedValue(mockSearchResult);
+    mockHandlerSearch.mockResolvedValue(handlerResult);
 
-    // Execute
     const request = createMockRequest("zelda");
     const response = await GET(request);
 
-    // Assert
     const data = await response.json();
     expect(response.status).toBe(HTTP_STATUS.OK);
     expect(data.games).toHaveLength(1);
     expect(data.games[0].name).toBe("The Legend of Zelda: Breath of the Wild");
     expect(data.count).toBe(1);
 
-    // Verify service was called correctly
-    expect(mockSearchGamesByName).toHaveBeenCalledWith({
-      name: "zelda",
-      offset: 0,
-    });
+    expect(mockHandlerSearch).toHaveBeenCalledWith(
+      { query: "zelda", offset: 0 },
+      expect.objectContaining({
+        ip: "127.0.0.1",
+        headers: expect.anything(),
+        url: expect.any(URL),
+      })
+    );
   });
 
-  describe("when rate limit is exceeded", () => {
-    it("should return 429 when rate limit exceeded", async () => {
-      // Override default rate limit mock
-      mockCheckRateLimit.mockResolvedValue({
-        allowed: false,
-        remaining: 0,
+  describe("when handler returns rate limit error", () => {
+    it("should return 429 with handler-provided headers", async () => {
+      mockHandlerSearch.mockResolvedValue({
+        success: false,
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
+        error: "Rate limit exceeded. Try again later.",
+        headers: {
+          "X-RateLimit-Limit": "20",
+          "X-RateLimit-Remaining": "0",
+          "Retry-After": "60",
+        },
       });
 
-      // Execute
       const request = createMockRequest("zelda");
       const response = await GET(request);
 
-      // Assert
       expect(response.status).toBe(HTTP_STATUS.TOO_MANY_REQUESTS);
       const data = await response.json();
       expect(data.error).toBe("Rate limit exceeded. Try again later.");
-
-      // Verify IGDB service was NOT called
-      expect(mockSearchGamesByName).not.toHaveBeenCalled();
+      expect(response.headers.get("Retry-After")).toBe("60");
+      expect(response.headers.get("X-RateLimit-Limit")).toBe("20");
+      expect(response.headers.get("X-RateLimit-Remaining")).toBe("0");
     });
   });
 
-  describe("when IGDB service fails", () => {
-    it("should return 500 when IGDB service returns error", async () => {
-      // Setup: service returns error
-      const mockErrorResult: ServiceResult<GameSearchResult> = {
+  describe("when handler returns service failure", () => {
+    it("should propagate handler error and status", async () => {
+      mockHandlerSearch.mockResolvedValue({
         success: false,
-        error: "IGDB API is unavailable",
-      };
-      mockSearchGamesByName.mockResolvedValue(mockErrorResult);
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        error:
+          "Game search is temporarily unavailable. Please try again later.",
+      });
 
-      // Execute
       const request = createMockRequest("zelda");
       const response = await GET(request);
 
-      // Assert
       expect(response.status).toBe(HTTP_STATUS.INTERNAL_SERVER_ERROR);
       const data = await response.json();
       expect(data.error).toBe(
         "Game search is temporarily unavailable. Please try again later."
       );
     });
+  });
 
-    it("should call service on each request when errors occur (errors not cached)", async () => {
-      // Setup: service returns error
-      const mockErrorResult: ServiceResult<GameSearchResult> = {
-        success: false,
-        error: "IGDB API is unavailable",
-      };
-      mockSearchGamesByName.mockResolvedValue(mockErrorResult);
+  describe("when handler throws unexpectedly", () => {
+    it("should return generic 500", async () => {
+      mockHandlerSearch.mockRejectedValue(new Error("boom"));
 
-      // Execute: make two requests
-      const request1 = createMockRequest("zelda");
-      await GET(request1);
+      const request = createMockRequest("zelda");
+      const response = await GET(request);
 
-      const request2 = createMockRequest("zelda");
-      await GET(request2);
+      expect(response.status).toBe(HTTP_STATUS.INTERNAL_SERVER_ERROR);
+      const data = await response.json();
+      expect(data.error).toBe(
+        "Game search is temporarily unavailable. Please try again later."
+      );
+    });
+  });
 
-      // Assert: service was called TWICE (errors not cached)
-      expect(mockSearchGamesByName).toHaveBeenCalledTimes(2);
+  describe("offset parsing", () => {
+    it("should default invalid offset to 0", async () => {
+      mockHandlerSearch.mockResolvedValue({
+        success: true,
+        status: HTTP_STATUS.OK,
+        data: { games: [], count: 0 },
+      });
+
+      const url = new URL(
+        "http://localhost/api/games/search?q=mario&offset=-5"
+      );
+      const request = {
+        nextUrl: url,
+        url: url.toString(),
+        headers: { get: vi.fn().mockReturnValue("127.0.0.1") },
+      } as unknown as NextRequest;
+
+      await GET(request);
+
+      expect(mockHandlerSearch).toHaveBeenCalledWith(
+        { query: "mario", offset: 0 },
+        expect.anything()
+      );
     });
   });
 });

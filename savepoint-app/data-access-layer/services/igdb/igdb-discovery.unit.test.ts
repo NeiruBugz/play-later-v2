@@ -1,3 +1,5 @@
+import { __resetTokenCacheForTests } from "@/shared/lib/igdb";
+
 import { ServiceErrorCode } from "../types";
 import { IgdbService } from "./igdb-service";
 
@@ -20,6 +22,7 @@ describe("IgdbService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetch.mockReset();
+    __resetTokenCacheForTests();
     service = new IgdbService();
   });
 
@@ -41,14 +44,6 @@ describe("IgdbService", () => {
             cover: { image_id: "cover2" },
           },
         ];
-
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
@@ -106,14 +101,6 @@ describe("IgdbService", () => {
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
-
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
           json: async () => [],
         });
 
@@ -156,14 +143,6 @@ describe("IgdbService", () => {
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
-
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
           json: async () => mockResponse,
         });
 
@@ -189,14 +168,6 @@ describe("IgdbService", () => {
 
       it("should handle API returning empty array", async () => {
         const params = { franchiseId: 777, currentGameId: 5 };
-
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
 
         mockFetch.mockResolvedValueOnce({
           ok: true,
@@ -307,19 +278,20 @@ describe("IgdbService", () => {
       it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
         const params = { franchiseId: 123, currentGameId: 1 };
 
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
-
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          status: 500,
-          statusText: "Internal Server Error",
-        });
+        mockFetch
+          .mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+              access_token: "test_token",
+              expires_in: 3600,
+            }),
+          })
+          .mockResolvedValue({
+            ok: false,
+            status: 500,
+            statusText: "Internal Server Error",
+            headers: { get: () => null },
+          });
 
         const result = await service.getFranchiseGames(params);
 
@@ -346,18 +318,18 @@ describe("IgdbService", () => {
       it("should return INTERNAL_ERROR when API returns undefined", async () => {
         const params = { franchiseId: 456, currentGameId: 1 };
 
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
-
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => undefined,
-        });
+        mockFetch
+          .mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+              access_token: "test_token",
+              expires_in: 3600,
+            }),
+          })
+          .mockResolvedValue({
+            ok: true,
+            json: async () => undefined,
+          });
 
         const result = await service.getFranchiseGames(params);
 
@@ -463,19 +435,20 @@ describe("IgdbService", () => {
       it("should return INTERNAL_ERROR when IGDB API fails", async () => {
         const params = { collectionId: 123 };
 
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
-
-        mockFetch.mockResolvedValueOnce({
-          ok: false,
-          status: 500,
-          statusText: "Internal Server Error",
-        });
+        mockFetch
+          .mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+              access_token: "test_token",
+              expires_in: 3600,
+            }),
+          })
+          .mockResolvedValue({
+            ok: false,
+            status: 500,
+            statusText: "Internal Server Error",
+            headers: { get: () => null },
+          });
 
         const result = await service.getCollectionGamesById(params);
 

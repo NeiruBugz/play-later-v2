@@ -1,3 +1,5 @@
+import { __resetTokenCacheForTests } from "@/shared/lib/igdb";
+
 import { IgdbService } from "./igdb-service";
 
 vi.mock("@/env.mjs", () => ({
@@ -19,6 +21,7 @@ describe("IgdbService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFetch.mockReset();
+    __resetTokenCacheForTests();
     service = new IgdbService();
   });
 

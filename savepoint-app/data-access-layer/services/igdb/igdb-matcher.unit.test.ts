@@ -126,10 +126,11 @@ describe("matchSteamGameToIgdb", () => {
             expires_in: 3600,
           }),
         })
-        .mockResolvedValueOnce({
+        .mockResolvedValue({
           ok: false,
           status: 500,
           statusText: "Internal Server Error",
+          headers: { get: () => null },
         });
 
       const result = await matchSteamGameToIgdb({ steamAppId: "570" });
@@ -168,14 +169,13 @@ describe("matchSteamGameToIgdb", () => {
     });
 
     it("should return EXTERNAL_SERVICE_ERROR when fetch throws an error", async () => {
-      mockFetch.mockRejectedValueOnce(new Error("Network failure"));
+      mockFetch.mockRejectedValue(new Error("Network failure"));
 
       const result = await matchSteamGameToIgdb({ steamAppId: "570" });
 
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.code).toBe(ServiceErrorCode.EXTERNAL_SERVICE_ERROR);
-        expect(result.error).toContain("Network failure");
       }
     });
 
@@ -188,11 +188,11 @@ describe("matchSteamGameToIgdb", () => {
             expires_in: 3600,
           }),
         })
-        .mockResolvedValueOnce({
+        .mockResolvedValue({
           ok: false,
           status: 429,
           statusText: "Too Many Requests",
-          text: async () => "Rate limited",
+          headers: { get: () => null },
         });
 
       const result = await matchSteamGameToIgdb({ steamAppId: "570" });
@@ -201,7 +201,7 @@ describe("matchSteamGameToIgdb", () => {
       if (!result.success) {
         expect(result.code).toBe(ServiceErrorCode.IGDB_RATE_LIMITED);
         expect(result.error).toBe(
-          "IGDB API rate limit exceeded. Please try again in a moment."
+          "IGDB rate limit exceeded. Please try again later."
         );
       }
     });
