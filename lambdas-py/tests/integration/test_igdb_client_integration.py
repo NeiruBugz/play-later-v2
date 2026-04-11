@@ -79,7 +79,7 @@ async def test_search_game_by_steam_app_id_success(igdb_client: IgdbClient) -> N
 
     found_games: list[tuple[int, IgdbGame]] = []
 
-    for steam_app_id, expected_name_contains in test_games:
+    for steam_app_id, _expected_name_contains in test_games:
         game = await igdb_client.get_game_by_steam_app_id(steam_app_id)
 
         if game is not None:
