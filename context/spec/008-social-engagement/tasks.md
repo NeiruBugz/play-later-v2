@@ -1,7 +1,7 @@
 # Tasks: Social Engagement
 
 - **Spec:** [functional-spec.md](functional-spec.md) | [technical-considerations.md](technical-considerations.md)
-- **Status:** Ready
+- **Status:** Completed
 
 ---
 

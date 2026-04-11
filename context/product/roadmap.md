@@ -30,30 +30,6 @@ _The highest priority features that form the core foundation of SavePoint—enab
   - [x] **Write Journal Entries:** Provide a form for users to write reflections and memories about their gaming experiences, linked to specific games.
   - [x] **View Personal Journal:** Display a chronological timeline of the user's journal entries to revisit past reflections.
 
----
-
-## Phase 2: Near-Term Priorities
-
-_Specced features in implementation order. Each has a functional specification in `context/spec/`._
-
-- [x] **Code Health & Developer Experience** _(Spec 004 — Completed)_
-
-  - [x] **P0: Immediate Fixes**
-    - [x] Add Playwright MCP to .mcp.json for UI verification (AI-07)
-    - [x] Add PreToolUse security hooks in .claude/settings.json (SEC-02)
-    - [x] Add *.key to root .gitignore (SEC-05)
-
-  - [x] **P1: Fix Soon**
-    - [x] Trim all CLAUDE.md files to <200 lines (AI-06)
-    - [x] Add CLAUDE.md for lambdas-py/ and infra/ (AI-01)
-    - [x] Fix stale README claims: add lambdas-py, update feature dirs, replace Bun refs (DOC-04)
-    - [x] Move library-status-redesign spec to context/spec/ (SDD-04)
-
-  - [x] **P2: Improve When Possible**
-    - [x] Split igdb-service.unit.test.ts into focused suites (ARCH-06)
-    - [x] Fix DAL→features reverse imports and @prisma/client leakage (ARCH-02/04)
-    - [x] Configure Dependabot or Renovate for automated dependency updates (SBP-07)
-
 - [x] **Steam Library Integration — Stage 1: Technical Foundation** _(Spec 002 — Completed)_
   - [x] **Lambda Integration:** Connect existing Lambda pipeline (fetch Steam library → IGDB enrichment → `ImportedGame` staging table)
   - [x] **Feature Flag:** Environment-based toggle to disable Steam import flow in production (avoid AWS costs until ready)
@@ -61,9 +37,24 @@ _Specced features in implementation order. Each has a functional specification i
   - [x] Steam profile connection UI (Steam ID input)
   - [x] Imported games stored in `ImportedGame` table (existing schema: storefront, playtime, IGDB match status)
 
+- [x] **Code Health & Developer Experience** _(Spec 004 — Completed)_
 - [x] **Library Status Redesign** _(Spec 005 — Completed)_
+- [x] **FSD Architecture Compliance** _(Spec 007 — Completed)_
 
-  _Redesigned the 4-status model based on real user feedback. Addressed confusion around "Owned" status, added replay intent, and created a unified "what can I play?" view. See [spec](../spec/005-library-status-redesign/functional-spec.md)._
+- [x] **Social Engagement** _(Spec 008 — Completed)_
+
+  _Follow other users, view activity feed of status changes and library adds. Includes public user profiles. See [spec](../spec/008-social-engagement/functional-spec.md)._
+  - [x] Public user profiles with display name, avatar, stats, recent activity, and library preview
+  - [x] Profile visibility toggle (public/private)
+  - [x] Follow/unfollow from profile pages with public follow lists
+  - [x] Activity feed widget on dashboard (status changes + library adds from followed users)
+  - [x] Empty state with popular activity for users with no follows
+
+---
+
+## Phase 2: Internal Velocity
+
+_Features that ship independently of external APIs, third-party services, or AWS Lambda pipelines. Prioritized upfront so progress is not blocked by external-dependency work. Each relies only on our own database and already-integrated IGDB metadata._
 
 - [ ] **Code Health & Developer Experience (Round 2)** _(Spec 006)_
 
@@ -83,9 +74,32 @@ _Specced features in implementation order. Each has a functional specification i
     - [ ] Fix dead link in savepoint-app/README.md; add README to scripts/ (DOC-02/04)
     - [ ] Add root Makefile/Taskfile with cross-layer commands; extend PR checks to lambdas-py (E2E-05)
 
-- [x] **FSD Architecture Compliance** _(Spec 007)_
+- [ ] **Community Reflections** _(Spec TBD)_
 
-  _Fix FSD layer violations, missing public APIs, and domain code cleanup. See [spec](../spec/007-fsd-architecture-compliance/functional-spec.md)._
+  _Builds on the already-shipped public profiles from Spec 008._
+  - [ ] **Public Reflections:** Enable users to optionally make their journal entries public to share perspectives with the community.
+  - [ ] **Browse Community Reflections:** Allow users to read how others experienced the same games before diving in themselves.
+
+- [ ] **Curated Collections** _(Spec TBD)_
+
+  - [ ] **Create Themed Collections:** Allow users to create personal, themed collections (e.g., "Cozy Winter Games," "Games That Made Me Think") from their library.
+  - [ ] **Browse Personal Collections:** Display all of a user's collections in an organized view for easy navigation.
+
+- [ ] **Discovery & Exploration** _(Spec TBD)_
+
+  _Uses already-integrated IGDB — no new external dependency._
+  - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.
+  - [ ] **Enhanced Game Details:** Add franchise information, expansions, and related games to detail pages.
+
+- [ ] **Advanced Discovery** _(Spec TBD)_
+
+  - [ ] **Mood-Based Recommendations:** Help users find "the right game for right now" through mood-based filtering ("I want something cozy tonight").
+
+---
+
+## Phase 3: Platform Integrations
+
+_Expand library import to external gaming platforms. Gated on external APIs (Steam, PSN, Xbox) and the AWS Lambda enrichment pipeline. Deferred until Phase 2 internal work is shipped so progress is not blocked by third-party constraints._
 
 - [ ] **Steam Library Integration — Stages 2 & 3: Curation** _(Spec 003)_
 
@@ -103,21 +117,6 @@ _Specced features in implementation order. Each has a functional specification i
     - [ ] Bulk actions: Select All / Deselect All / Select All on Page
     - [ ] Bulk import: import multiple selected games at once
     - [ ] Selection state persists across pagination
-
-- [ ] **Social Engagement** _(Spec 008)_
-
-  _Follow other users, view activity feed of status changes and library adds. Includes public user profiles. See [spec](../spec/008-social-engagement/functional-spec.md)._
-  - [ ] Public user profiles with display name, avatar, stats, recent activity, and library preview
-  - [ ] Profile visibility toggle (public/private)
-  - [ ] Follow/unfollow from profile pages with public follow lists
-  - [ ] Activity feed widget on dashboard (status changes + library adds from followed users)
-  - [ ] Empty state with popular activity for users with no follows
-
----
-
-## Phase 3: Platform Integrations
-
-_Expand library import beyond Steam to other major gaming platforms._
 
 - [ ] **Steam Library Integration — Stage 4: Ongoing Sync**
   - [ ] Re-import detects new games only (no duplicates)
@@ -160,22 +159,9 @@ _Expand library import beyond Steam to other major gaming platforms._
 
 ---
 
-## Phase 4: Community & Discovery
+## Phase 4: Community Scaling
 
-_Features planned for future consideration. Their priority and scope may be refined based on user feedback from earlier phases._
+_Features that build on Phase 2 community foundations. Depends on Curated Collections shipping first._
 
-- [ ] **Community Reflections**
-  - [ ] **Public Reflections:** Enable users to optionally make their journal entries public to share perspectives with the community.
-  - [ ] **Browse Community Reflections:** Allow users to read how others experienced the same games before diving in themselves.
-
-- [ ] **Curated Collections**
-  - [ ] **Create Themed Collections:** Allow users to create personal, themed collections (e.g., "Cozy Winter Games," "Games That Made Me Think") from their library.
-  - [ ] **Browse Personal Collections:** Display all of a user's collections in an organized view for easy navigation.
-
-- [ ] **Discovery & Exploration**
-  - [ ] **Similar Games Discovery:** Show similar game recommendations based on IGDB data to help users discover their next experience.
-  - [ ] **Enhanced Game Details:** Add franchise information, expansions, and related games to detail pages.
-
-- [ ] **Advanced Discovery**
-  - [ ] **Mood-Based Recommendations:** Help users find "the right game for right now" through mood-based filtering ("I want something cozy tonight").
-  - [ ] **Community Collections:** Allow users to share their themed collections publicly for others to discover and draw inspiration from.
+- [ ] **Community Collections**
+  - [ ] Allow users to share their themed collections publicly for others to discover and draw inspiration from.

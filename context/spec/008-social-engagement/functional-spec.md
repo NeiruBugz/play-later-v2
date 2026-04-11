@@ -1,7 +1,7 @@
 # Functional Specification: Social Engagement
 
 - **Roadmap Item:** Social Engagement — Follow other users and view an activity feed of their gaming updates
-- **Status:** Draft
+- **Status:** Completed
 - **Author:** Nail
 
 ---

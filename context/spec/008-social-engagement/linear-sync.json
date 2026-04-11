@@ -1,67 +1,67 @@
 {
   "projectId": "cb691856-9c3f-401b-aa3e-fd1477aa2805",
   "projectUrl": "https://linear.app/play-later/project/008-social-engagement-7d1e49a8d3",
-  "lastSynced": "2026-04-01T06:21:00Z",
+  "lastSynced": "2026-04-11T06:58:00Z",
   "issues": {
     "Slice 1: Schema Migration + Follow Repository": {
       "issueId": "PLA-112",
       "linearId": "PLA-112",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 2: SocialService + Follow/Unfollow Server Actions": {
       "issueId": "PLA-113",
       "linearId": "PLA-113",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 3: Public Profile Visibility Toggle in Settings": {
       "issueId": "PLA-114",
       "linearId": "PLA-114",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 4: Public Profile Page at /u/[username]": {
       "issueId": "PLA-115",
       "linearId": "PLA-115",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 5: Follow Button on Public Profile": {
       "issueId": "PLA-116",
       "linearId": "PLA-116",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 6: Followers/Following Lists": {
       "issueId": "PLA-117",
       "linearId": "PLA-117",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 7: statusChangedAt Tracking in Library Server Actions": {
       "issueId": "PLA-118",
       "linearId": "PLA-118",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 8: Activity Feed Service + Repository": {
       "issueId": "PLA-119",
       "linearId": "PLA-119",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 9: Activity Feed Widget on Dashboard (RSC)": {
       "issueId": "PLA-120",
       "linearId": "PLA-120",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 10: Infinite Scroll Feed with API Route + TanStack Query": {
       "issueId": "PLA-121",
       "linearId": "PLA-121",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 11: Empty State / Popular Feed": {
       "issueId": "PLA-122",
       "linearId": "PLA-122",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     },
     "Slice 12: Final Validation + Documentation": {
       "issueId": "PLA-123",
       "linearId": "PLA-123",
-      "lastSyncedAwosState": "Todo"
+      "lastSyncedAwosState": "Done"
     }
   }
 }
