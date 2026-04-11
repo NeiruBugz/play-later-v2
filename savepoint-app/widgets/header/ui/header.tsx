@@ -61,7 +61,7 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
                     <Link
                       key={href}
                       href={href}
-                      className={`body-sm transition-all jewel:uppercase jewel:tracking-[0.14em] jewel:text-[0.72rem] ${
+                      className={`body-sm jewel:uppercase jewel:tracking-[0.14em] jewel:text-[0.72rem] transition-all ${
                         active
                           ? "text-foreground y2k-neon-text y2k-neon-underline jewel-nav-active font-semibold"
                           : "text-muted-foreground hover:text-foreground y2k:hover:text-primary/70 jewel:hover:text-primary jewel-nav-inactive font-medium"

@@ -51,7 +51,7 @@ export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
             Hidden in non-jewel themes, which keep the original horizontal progress bar. */}
         <div
           aria-hidden
-          className="jewel:flex mb-lg hidden items-end justify-between gap-3 h-24"
+          className="jewel:flex mb-lg hidden h-24 items-end justify-between gap-3"
         >
           {LIBRARY_STATUS_CONFIG.map((statusConfig, i) => {
             const count = getStatCount(stats, statusConfig.value);
