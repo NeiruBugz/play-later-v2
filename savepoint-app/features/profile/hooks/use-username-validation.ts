@@ -47,6 +47,12 @@ function getSyncValidation(
   return { kind: "async" };
 }
 
+type AsyncResolution = {
+  forUsername: string;
+  status: "available" | "error";
+  message: string;
+};
+
 export function useUsernameValidation(
   username: string,
   currentUsername?: string
@@ -56,10 +62,8 @@ export function useUsernameValidation(
     [username, currentUsername]
   );
 
-  const [asyncResult, setAsyncResult] = useState<{
-    status: ValidationStatus;
-    message: string;
-  }>({ status: "validating", message: "" });
+  const [asyncResolution, setAsyncResolution] =
+    useState<AsyncResolution | null>(null);
 
   useEffect(() => {
     if (syncResult.kind === "resolved") return;
@@ -70,17 +74,23 @@ export function useUsernameValidation(
         const result = await checkUsernameAvailability({ username });
         if (controller.signal.aborted) return;
         if (result.success) {
-          setAsyncResult(
-            result.available
+          setAsyncResolution({
+            forUsername: username,
+            ...(result.available
               ? { status: "available", message: "Username available" }
-              : { status: "error", message: "Username already exists" }
-          );
+              : { status: "error", message: "Username already exists" }),
+          });
         } else {
-          setAsyncResult({ status: "error", message: result.error });
+          setAsyncResolution({
+            forUsername: username,
+            status: "error",
+            message: result.error,
+          });
         }
       } catch {
         if (controller.signal.aborted) return;
-        setAsyncResult({
+        setAsyncResolution({
+          forUsername: username,
           status: "error",
           message: "Failed to check username availability",
         });
@@ -98,8 +108,13 @@ export function useUsernameValidation(
       validationMessage: syncResult.message,
     };
   }
-  return {
-    validationStatus: asyncResult.status,
-    validationMessage: asyncResult.message,
-  };
+
+  if (asyncResolution && asyncResolution.forUsername === username) {
+    return {
+      validationStatus: asyncResolution.status,
+      validationMessage: asyncResolution.message,
+    };
+  }
+
+  return { validationStatus: "validating", validationMessage: "" };
 }

@@ -30,7 +30,11 @@ function readSeenIds(): string[] {
   if (typeof window === "undefined") return [];
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    const parsed: unknown = JSON.parse(stored);
+    return Array.isArray(parsed) && parsed.every((id) => typeof id === "string")
+      ? parsed
+      : [];
   } catch {
     return [];
   }
@@ -49,8 +53,16 @@ const listeners = new Set<() => void>();
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
+  const storageHandler = (event: StorageEvent) => {
+    if (event.storageArea !== window.localStorage) return;
+    if (event.key === STORAGE_KEY || event.key === null) {
+      listener();
+    }
+  };
+  window.addEventListener("storage", storageHandler);
   return () => {
     listeners.delete(listener);
+    window.removeEventListener("storage", storageHandler);
   };
 }
 

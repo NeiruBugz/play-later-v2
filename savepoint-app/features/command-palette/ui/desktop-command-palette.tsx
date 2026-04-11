@@ -53,6 +53,9 @@ export function DesktopCommandPalette({
           setRecentGames(result.data);
         }
       })
+      .catch((error) => {
+        if (!cancelled) console.error("Failed to fetch recent games:", error);
+      })
       .finally(() => {
         if (!cancelled) setIsLoadingRecent(false);
       });
