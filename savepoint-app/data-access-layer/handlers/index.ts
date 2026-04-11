@@ -31,3 +31,9 @@ export type {
   ActivityFeedHandlerInput,
   ActivityFeedHandlerOutput,
 } from "./social/types";
+
+export { igdbSearchHandler } from "./igdb/igdb-handler";
+export type {
+  IgdbSearchHandlerInput,
+  IgdbSearchHandlerOutput,
+} from "./igdb/types";

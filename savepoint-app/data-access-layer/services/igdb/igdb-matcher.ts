@@ -1,14 +1,12 @@
-import { env } from "@/env.mjs";
 import { z } from "zod";
 
-import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
-import { TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS } from "@/shared/constants";
-import { createLogger, getTimeStamp, LOGGER_CONTEXT } from "@/shared/lib";
-import type {
-  FullGameInfoResponse,
-  RequestOptions,
-  TwitchTokenResponse,
-} from "@/shared/types";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import {
+  __resetTokenCacheForTests,
+  igdbFetch,
+  IgdbRateLimitError,
+} from "@/shared/lib/igdb";
+import type { FullGameInfoResponse } from "@/shared/types";
 
 import { ServiceErrorCode, type ServiceResult } from "../types";
 import { FullGameInfoResponseSchema } from "./schemas";
@@ -30,102 +28,8 @@ export interface MatchSteamGameResult {
   game: FullGameInfoResponse | null;
 }
 
-let tokenCache: TwitchTokenResponse | null = null;
-let tokenExpiry: number = 0;
-
 export function resetTokenCache(): void {
-  tokenCache = null;
-  tokenExpiry = 0;
-}
-
-async function getToken(): Promise<string> {
-  if (tokenCache && getTimeStamp() < tokenExpiry) {
-    return tokenCache.access_token;
-  }
-
-  logger.debug("Requesting new Twitch access token for Steam matching");
-
-  const res = await fetch(TOKEN_URL, {
-    method: "POST",
-  });
-
-  if (!res.ok) {
-    logger.error(
-      { status: res.status, statusText: res.statusText },
-      "Failed to fetch Twitch token"
-    );
-    throw new Error(`Failed to fetch token: ${res.statusText}`);
-  }
-
-  const token = (await res.json()) as TwitchTokenResponse;
-  tokenCache = token;
-  tokenExpiry =
-    getTimeStamp() + token.expires_in - TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS;
-
-  logger.info(
-    { expiresIn: token.expires_in },
-    "Twitch access token acquired for Steam matching"
-  );
-
-  return token.access_token;
-}
-
-async function makeIgdbRequest(
-  options: RequestOptions
-): Promise<unknown[] | undefined> {
-  try {
-    logger.debug(
-      { resource: options.resource },
-      "Making IGDB API request for Steam matching"
-    );
-
-    const accessToken = await getToken();
-
-    const response = await fetch(`${API_URL}${options.resource}`, {
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${accessToken}`,
-        "Client-ID": env.IGDB_CLIENT_ID,
-      },
-      method: "POST",
-      body: options.body,
-    });
-
-    if (!response.ok) {
-      logger.error(
-        {
-          resource: options.resource,
-          status: response.status,
-          statusText: response.statusText,
-        },
-        "IGDB API request failed for Steam matching"
-      );
-
-      if (response.status === 429) {
-        throw new Error("IGDB_RATE_LIMITED");
-      }
-
-      const errorBody = await response
-        .text()
-        .catch(() => "Unable to read body");
-      throw new Error(
-        `IGDB API error: ${response.status} ${response.statusText} - ${errorBody}`
-      );
-    }
-
-    logger.debug(
-      { resource: options.resource, status: response.status },
-      "IGDB API request successful for Steam matching"
-    );
-
-    return (await response.json()) as unknown[];
-  } catch (error) {
-    logger.error(
-      { error, resource: options.resource },
-      "Error making IGDB API request for Steam matching"
-    );
-    throw error;
-  }
+  __resetTokenCacheForTests();
 }
 
 /**
@@ -180,16 +84,7 @@ export async function matchSteamGameToIgdb(
       limit 1;
     `;
 
-    const response = await makeIgdbRequest({ body: query, resource: "/games" });
-
-    if (!response) {
-      logger.error({ steamAppId }, "No response from IGDB for Steam matching");
-      return {
-        success: false,
-        error: "Failed to get response from IGDB",
-        code: ServiceErrorCode.EXTERNAL_SERVICE_ERROR,
-      };
-    }
+    const response = await igdbFetch<unknown[]>("/games", query);
 
     const result = z.array(FullGameInfoResponseSchema).safeParse(response);
 
@@ -229,10 +124,10 @@ export async function matchSteamGameToIgdb(
   } catch (error) {
     logger.error({ error, steamAppId }, "Error matching Steam game to IGDB");
 
-    if (error instanceof Error && error.message === "IGDB_RATE_LIMITED") {
+    if (error instanceof IgdbRateLimitError) {
       return {
         success: false,
-        error: "IGDB API rate limit exceeded. Please try again in a moment.",
+        error: "IGDB rate limit exceeded. Please try again later.",
         code: ServiceErrorCode.IGDB_RATE_LIMITED,
       };
     }

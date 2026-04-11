@@ -39,7 +39,7 @@ vi.mock("@/env.mjs", () => ({
 
 vi.mock("@/shared/config/igdb", () => ({
   API_URL: "https://api.igdb.com/v4",
-  TOKEN_URL:
+  getTokenUrl: () =>
     "https://id.twitch.tv/oauth2/token?client_id=test&client_secret=test&grant_type=client_credentials",
 }));
 

@@ -1,20 +1,22 @@
-import { env } from "@/env.mjs";
 import { z } from "zod";
 
-import { API_URL, TOKEN_URL } from "@/shared/config/igdb";
-import {
-  SECONDS_PER_HOUR,
-  TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS,
-} from "@/shared/constants";
+import { SECONDS_PER_HOUR } from "@/shared/constants";
 import { ALLOWED_GAME_CATEGORIES } from "@/shared/constants/game";
 import {
   createLogger,
-  getTimeStamp,
   LOGGER_CONTEXT,
   normalizeGameTitle,
   normalizeString,
 } from "@/shared/lib";
-import { RequestOptions, TwitchTokenResponse } from "@/shared/types";
+import {
+  IgdbAuthError,
+  igdbFetch,
+  IgdbHttpError,
+  IgdbNetworkError,
+  IgdbRateLimitError,
+  IgdbServerError,
+} from "@/shared/lib/igdb";
+import type { RequestOptions } from "@/shared/types";
 
 import {
   handleServiceError,
@@ -71,122 +73,61 @@ import type {
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "IgdbService" });
 
 export class IgdbService implements IgdbServiceInterface {
-  private token: TwitchTokenResponse | null = null;
-  private tokenExpiry: number = 0;
-
   constructor() {
     logger.debug("IgdbService initialized");
-  }
-
-  private async requestTwitchToken() {
-    try {
-      logger.debug("Requesting new Twitch access token");
-      const res = await fetch(TOKEN_URL, {
-        method: "POST",
-      });
-      if (!res.ok) {
-        logger.error(
-          { status: res.status, statusText: res.statusText },
-          "Failed to fetch Twitch token"
-        );
-        throw new Error(`Failed to fetch token: ${res.statusText}`);
-      }
-      const token = (await res.json()) as unknown as TwitchTokenResponse;
-      this.token = token;
-      this.tokenExpiry =
-        getTimeStamp() + token.expires_in - TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS;
-      return token;
-    } catch (thrown) {
-      logger.error({ error: thrown }, "Error requesting Twitch token");
-      handleServiceError(thrown);
-    }
-  }
-
-  private async getToken() {
-    if (this.token && getTimeStamp() < this.tokenExpiry) {
-      return this.token.access_token;
-    }
-    const token = await this.requestTwitchToken();
-    if (token) {
-      this.token = token;
-      this.tokenExpiry =
-        getTimeStamp() + token.expires_in - TOKEN_EXPIRY_SAFETY_MARGIN_SECONDS;
-      return token.access_token;
-    }
-    return null;
-  }
-
-  private async makeRequest<T>(
-    options: RequestOptions
-  ): Promise<T | undefined> {
-    try {
-      logger.debug({ resource: options.resource }, "Making IGDB API request");
-      const accessToken = await this.getToken();
-      if (accessToken === undefined) {
-        logger.error("No valid access token available for IGDB request");
-        handleServiceError(
-          new Error("Unauthorized: No valid token available.")
-        );
-        return undefined;
-      }
-      const response = await fetch(`${API_URL}${options.resource}`, {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${accessToken}`,
-          "Client-ID": env.IGDB_CLIENT_ID,
-        },
-        method: "POST",
-        body: options.body,
-      });
-      if (!response.ok) {
-        logger.error(
-          {
-            resource: options.resource,
-            status: response.status,
-            statusText: response.statusText,
-          },
-          "IGDB API request failed"
-        );
-
-        if (response.status === 429) {
-          throw new Error("IGDB_RATE_LIMITED");
-        }
-
-        throw new Error(
-          `IGDB API error: ${response.statusText} ${JSON.stringify(response)}`
-        );
-      }
-      logger.debug(
-        { resource: options.resource, status: response.status },
-        "IGDB API request successful"
-      );
-      return (await response.json()) as unknown as T;
-    } catch (thrown) {
-      logger.error(
-        { error: thrown, resource: options.resource },
-        "Error making IGDB API request"
-      );
-      handleServiceError(thrown);
-      return undefined;
-    }
   }
 
   private async makeValidatedRequest<T>(
     options: RequestOptions,
     schema: z.ZodType<T>
   ): Promise<T | undefined> {
-    const response = await this.makeRequest<unknown>(options);
-    if (response === undefined) return undefined;
-
-    const result = schema.safeParse(response);
-    if (!result.success) {
-      logger.error(
-        { errors: result.error.issues, resource: options.resource },
-        "IGDB response validation failed"
+    try {
+      const response = await igdbFetch<unknown>(
+        options.resource,
+        options.body ?? ""
       );
-      return undefined;
+      const parsed = schema.safeParse(response);
+      if (!parsed.success) {
+        logger.error(
+          { errors: parsed.error.issues, resource: options.resource },
+          "IGDB response validation failed"
+        );
+        return undefined;
+      }
+      return parsed.data;
+    } catch (thrown) {
+      logger.error(
+        { error: thrown, resource: options.resource },
+        "IGDB fetch failed"
+      );
+      throw thrown;
     }
-    return result.data;
+  }
+
+  private mapIgdbError(
+    error: unknown,
+    fallbackMessage: string
+  ): ServiceResult<never> {
+    if (error instanceof IgdbRateLimitError) {
+      return serviceError(
+        "IGDB rate limit exceeded. Please try again later.",
+        ServiceErrorCode.IGDB_RATE_LIMITED
+      );
+    }
+    if (error instanceof IgdbAuthError) {
+      return serviceError(
+        "IGDB authentication failed.",
+        ServiceErrorCode.INTERNAL_ERROR
+      );
+    }
+    if (
+      error instanceof IgdbServerError ||
+      error instanceof IgdbNetworkError ||
+      error instanceof IgdbHttpError
+    ) {
+      return serviceError(fallbackMessage, ServiceErrorCode.INTERNAL_ERROR);
+    }
+    return handleServiceError(error, fallbackMessage);
   }
 
   private buildSearchFilterConditions(
@@ -244,13 +185,7 @@ export class IgdbService implements IgdbServiceInterface {
       });
     } catch (error) {
       logger.error({ error, searchQuery: name }, "Error searching games");
-      if (error instanceof Error && error.message === "IGDB_RATE_LIMITED") {
-        return serviceError(
-          "IGDB API rate limit exceeded. Please try again in a moment.",
-          ServiceErrorCode.IGDB_RATE_LIMITED
-        );
-      }
-      return handleServiceError(error, "Failed to find games");
+      return this.mapIgdbError(error, "Failed to find games");
     }
   }
 
@@ -289,13 +224,7 @@ export class IgdbService implements IgdbServiceInterface {
       }
     } catch (error) {
       logger.error({ error, gameId }, "Error fetching game details");
-      if (error instanceof Error && error.message === "IGDB_RATE_LIMITED") {
-        return serviceError(
-          "IGDB API rate limit exceeded. Please try again in a moment.",
-          ServiceErrorCode.IGDB_RATE_LIMITED
-        );
-      }
-      return handleServiceError(error, "Failed to fetch game details");
+      return this.mapIgdbError(error, "Failed to fetch game details");
     }
   }
 
@@ -334,7 +263,7 @@ export class IgdbService implements IgdbServiceInterface {
       });
     } catch (error) {
       logger.error({ error, slug }, "Error fetching game details by slug");
-      return handleServiceError(error, "Failed to fetch game by slug");
+      return this.mapIgdbError(error, "Failed to fetch game by slug");
     }
   }
 
@@ -357,7 +286,7 @@ export class IgdbService implements IgdbServiceInterface {
         platforms,
       });
     } catch (error) {
-      return handleServiceError(error, "Failed to fetch platforms");
+      return this.mapIgdbError(error, "Failed to fetch platforms");
     }
   }
 
@@ -442,7 +371,7 @@ export class IgdbService implements IgdbServiceInterface {
       });
     } catch (error) {
       logger.error({ error, franchiseId }, "Error fetching franchise games");
-      return handleServiceError(error, "Failed to fetch franchise games");
+      return this.mapIgdbError(error, "Failed to fetch franchise games");
     }
   }
 
@@ -481,7 +410,7 @@ export class IgdbService implements IgdbServiceInterface {
       });
     } catch (error) {
       logger.error({ error, franchiseId }, "Error fetching franchise details");
-      return handleServiceError(error, "Failed to fetch franchise details");
+      return this.mapIgdbError(error, "Failed to fetch franchise details");
     }
   }
 
@@ -540,7 +469,7 @@ export class IgdbService implements IgdbServiceInterface {
       });
     } catch (error) {
       logger.error({ error, igdbId }, "Error fetching times to beat");
-      return handleServiceError(error, "Failed to fetch times to beat");
+      return this.mapIgdbError(error, "Failed to fetch times to beat");
     }
   }
 
@@ -593,7 +522,7 @@ export class IgdbService implements IgdbServiceInterface {
       return serviceSuccess({ ...collection, games: filteredGames });
     } catch (error) {
       logger.error({ error, collectionId }, "Error fetching collection games");
-      return handleServiceError(error, "Failed to fetch collection games");
+      return this.mapIgdbError(error, "Failed to fetch collection games");
     }
   }
 }
