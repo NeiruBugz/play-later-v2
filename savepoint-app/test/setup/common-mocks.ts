@@ -37,12 +37,6 @@ vi.mock("@/env.mjs", () => ({
   },
 }));
 
-vi.mock("@/shared/config/igdb", () => ({
-  API_URL: "https://api.igdb.com/v4",
-  getTokenUrl: () =>
-    "https://id.twitch.tv/oauth2/token?client_id=test&client_secret=test&grant_type=client_credentials",
-}));
-
 vi.mock("@/shared/lib/library-status", () => {
   const MockIcon = ({ className }: { className?: string }) => null;
   const createStatusConfig = () => [

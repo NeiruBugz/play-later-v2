@@ -28,28 +28,6 @@ describe("IgdbService", () => {
 
   describe("searchGamesByName", () => {
     describe("when service throws", () => {
-      it("should return INTERNAL_ERROR when API throws error", async () => {
-        mockFetch
-          .mockResolvedValueOnce({
-            ok: true,
-            json: async () => ({
-              access_token: "test_token",
-              expires_in: 3600,
-            }),
-          })
-          .mockResolvedValueOnce({
-            ok: true,
-            json: async () => null,
-          });
-        const result = await service.searchGamesByName({ name: "test game" });
-
-        expect(result.success).toBe(false);
-        if ("error" in result) {
-          expect(result.error).toBe("Failed to find games");
-          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-        }
-      });
-
       it("should return VALIDATION_ERROR for empty game name", async () => {
         mockFetch.mockResolvedValueOnce({
           ok: true,

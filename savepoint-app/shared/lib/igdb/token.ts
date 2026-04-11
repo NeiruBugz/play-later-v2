@@ -10,7 +10,12 @@ let cached: { token: string; expiresAt: number } | null = null;
 let inFlight: Promise<string> | null = null;
 
 async function refresh(): Promise<string> {
-  const tokenUrl = `https://id.twitch.tv/oauth2/token?client_id=${env.IGDB_CLIENT_ID}&client_secret=${env.IGDB_CLIENT_SECRET}&grant_type=client_credentials`;
+  const params = new URLSearchParams({
+    client_id: env.IGDB_CLIENT_ID,
+    client_secret: env.IGDB_CLIENT_SECRET,
+    grant_type: "client_credentials",
+  });
+  const tokenUrl = `https://id.twitch.tv/oauth2/token?${params.toString()}`;
 
   const res = await fetch(tokenUrl, { method: "POST" });
 
