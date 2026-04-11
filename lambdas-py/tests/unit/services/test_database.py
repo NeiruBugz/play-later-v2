@@ -635,8 +635,8 @@ def test_game_data_validator_handles_none_genre_ids() -> None:
         igdb_id=1020,
         title="Test Game",
         slug="test-game",
-        genre_ids=None,  # type: ignore[arg-type]
-        platform_ids=None,  # type: ignore[arg-type]
+        genre_ids=None,
+        platform_ids=None,
     )
     assert data.genre_ids == []
     assert data.platform_ids == []
@@ -649,7 +649,7 @@ def test_game_data_validator_rejects_non_list() -> None:
             igdb_id=1020,
             title="Test Game",
             slug="test-game",
-            genre_ids="not a list",  # type: ignore[arg-type]
+            genre_ids="not a list",
         )
 
 
