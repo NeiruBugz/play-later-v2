@@ -23,9 +23,9 @@
       "yaml": "2.8.3"
     },
     "onlyBuiltDependencies": [
+      "@prisma/engines",
       "@tailwindcss/oxide",
-      "@vercel/speed-insights",
-      "prisma"
+      "@vercel/speed-insights"
     ]
   },
   "scripts": {}
