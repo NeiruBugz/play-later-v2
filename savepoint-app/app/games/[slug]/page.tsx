@@ -131,6 +131,7 @@ export default async function GameDetailPage({
                 imageId={game.cover?.image_id}
                 gameTitle={game.name}
                 libraryStatus={userLibraryStatus?.mostRecent.status}
+                style={{ viewTransitionName: `game-cover-${game.id}` }}
               />
               {userId && (
                 <LibraryStatusDisplay

@@ -204,6 +204,7 @@ describe("getLibraryHandler", () => {
           updatedAt: new Date("2025-01-01"),
           game: {
             id: "clx456def789ghi123jkl",
+            igdbId: 7346,
             title: "The Legend of Zelda: Breath of the Wild",
             coverImage: "https://example.com/cover.jpg",
             slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -273,6 +274,7 @@ describe("getLibraryHandler", () => {
           updatedAt: new Date("2025-01-15"),
           game: {
             id: "clx789ghi123jkl456mno",
+            igdbId: 119133,
             title: "Elden Ring",
             coverImage: "https://example.com/elden-ring.jpg",
             slug: "elden-ring",
@@ -442,6 +444,7 @@ describe("getLibraryHandler", () => {
           updatedAt: new Date("2025-01-01"),
           game: {
             id: "clx456def789ghi123jkl",
+            igdbId: 7346,
             title: "The Legend of Zelda: Breath of the Wild",
             coverImage: "https://example.com/cover.jpg",
             slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -464,6 +467,7 @@ describe("getLibraryHandler", () => {
           updatedAt: new Date("2025-01-15"),
           game: {
             id: "clx789ghi123jkl456mno",
+            igdbId: 119133,
             title: "Elden Ring",
             coverImage: "https://example.com/elden-ring.jpg",
             slug: "elden-ring",

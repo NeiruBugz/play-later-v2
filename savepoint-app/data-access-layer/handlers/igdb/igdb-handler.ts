@@ -1,6 +1,6 @@
 import { IgdbService } from "@/data-access-layer/services";
 import { ServiceErrorCode } from "@/data-access-layer/services/types";
-import { unstable_cache } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 
 import { SearchGamesSchema } from "@/features/game-search";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
@@ -22,33 +22,32 @@ const SEARCH_REVALIDATE_SECONDS = 300;
 
 const normalizeQuery = (query: string): string => query.trim().toLowerCase();
 
-const getCachedIgdbSearch = (normalizedQuery: string, offset: number) =>
-  unstable_cache(
-    async (): Promise<IgdbSearchHandlerOutput> => {
-      logger.info(
-        { query: normalizedQuery, offset },
-        "IGDB search cache miss - fetching from service"
-      );
+async function getCachedIgdbSearch(
+  normalizedQuery: string,
+  offset: number
+): Promise<IgdbSearchHandlerOutput> {
+  "use cache";
+  cacheLife({ revalidate: SEARCH_REVALIDATE_SECONDS });
+  cacheTag("igdb:search", `igdb:search:${normalizedQuery}`);
 
-      const result = await igdbService.searchGamesByName({
-        name: normalizedQuery,
-        offset,
-      });
-
-      if (!result.success) {
-        throw Object.assign(new Error(result.error), {
-          code: result.code ?? ServiceErrorCode.INTERNAL_ERROR,
-        });
-      }
-
-      return result.data;
-    },
-    ["igdb", "search", normalizedQuery, String(offset)],
-    {
-      revalidate: SEARCH_REVALIDATE_SECONDS,
-      tags: ["igdb:search", `igdb:search:${normalizedQuery}`],
-    }
+  logger.info(
+    { query: normalizedQuery, offset },
+    "IGDB search cache miss - fetching from service"
   );
+
+  const result = await igdbService.searchGamesByName({
+    name: normalizedQuery,
+    offset,
+  });
+
+  if (!result.success) {
+    throw Object.assign(new Error(result.error), {
+      code: result.code ?? ServiceErrorCode.INTERNAL_ERROR,
+    });
+  }
+
+  return result.data;
+}
 
 function mapServiceErrorCodeToStatus(code: ServiceErrorCode | undefined) {
   switch (code) {
@@ -108,7 +107,7 @@ async function search(
   );
 
   try {
-    const data = await getCachedIgdbSearch(normalizedQuery, offset)();
+    const data = await getCachedIgdbSearch(normalizedQuery, offset);
     return {
       success: true,
       data,

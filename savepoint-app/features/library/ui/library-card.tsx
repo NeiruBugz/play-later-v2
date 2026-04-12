@@ -85,6 +85,7 @@ export const LibraryCard = memo(function LibraryCard({
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, (max-width: 1280px) 14vw, 12vw"
           priority={index < 6}
           fetchPriority={index < 6 ? "high" : "low"}
+          style={{ viewTransitionName: `game-cover-${game.igdbId}` }}
         />
 
         {showBadge && (

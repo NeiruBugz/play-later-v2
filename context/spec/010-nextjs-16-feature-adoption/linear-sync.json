@@ -1,0 +1,37 @@
+{
+  "projectId": "c80d5707-d1ba-4897-b313-db491b3707ba",
+  "projectUrl": "https://linear.app/play-later/project/010-nextjs-16-feature-adoption-db9bb21980f0",
+  "lastSynced": "2026-04-12T09:59:15Z",
+  "issues": {
+    "Slice 1: Enable cacheComponents + state preservation validation": {
+      "issueId": "PLA-139",
+      "linearId": "PLA-139",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 2: Migrate unstable_cache → \"use cache\" in IGDB search handler": {
+      "issueId": "PLA-140",
+      "linearId": "PLA-140",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 3: Migrate unstable_cache → \"use cache\" in game detail use-case": {
+      "issueId": "PLA-141",
+      "linearId": "PLA-141",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 4: Add caching to platform handlers": {
+      "issueId": "PLA-142",
+      "linearId": "PLA-142",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 5: Enable viewTransition + shared element audit": {
+      "issueId": "PLA-143",
+      "linearId": "PLA-143",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 6: Final regression gate": {
+      "issueId": "PLA-144",
+      "linearId": "PLA-144",
+      "lastSyncedAwosState": "Todo"
+    }
+  }
+}

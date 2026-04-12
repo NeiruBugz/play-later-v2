@@ -36,7 +36,9 @@ const nextConfig = {
   reactStrictMode: true,
   typedRoutes: true,
   reactCompiler: true,
+  cacheComponents: true,
   experimental: {
+    viewTransition: true,
     serverActions: {
       bodySizeLimit: "4mb",
     },

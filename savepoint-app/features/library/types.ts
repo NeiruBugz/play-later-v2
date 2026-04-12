@@ -3,6 +3,7 @@ export type LibraryItemDomain = import("@prisma/client").LibraryItem;
 export type LibraryItemWithGameDomain = import("@prisma/client").LibraryItem & {
   game: {
     id: string;
+    igdbId: number;
     title: string;
     coverImage: string | null;
     slug: string;

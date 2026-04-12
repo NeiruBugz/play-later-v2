@@ -21,6 +21,7 @@ type GameCoverImageProps = {
   sizes?: string;
   enableHoverEffect?: boolean;
   fetchPriority?: "auto" | "high" | "low";
+  style?: React.CSSProperties;
 };
 const SIZE_CONFIG: Record<
   ImageSize,
@@ -70,6 +71,7 @@ export function GameCoverImage({
   sizes,
   enableHoverEffect = true,
   fetchPriority = "auto",
+  style,
 }: GameCoverImageProps) {
   const config = SIZE_CONFIG[size];
   if (!imageId && !showPlaceholder) {
@@ -82,6 +84,7 @@ export function GameCoverImage({
           "bg-muted text-muted-foreground flex items-center justify-center",
           className
         )}
+        style={style}
       >
         {placeholderContent ?? (
           <div className="text-center text-xs">No Cover</div>
@@ -97,6 +100,7 @@ export function GameCoverImage({
     <div
       className={cn("bg-muted relative overflow-hidden", className)}
       data-testid="game-cover-container"
+      style={style}
     >
       <Image
         src={src}

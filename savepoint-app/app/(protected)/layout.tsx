@@ -7,7 +7,6 @@ import { WhatsNewModal } from "@/features/whats-new";
 import { Toaster } from "@/shared/components/ui/sonner";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
-export const dynamic = "force-dynamic";
 export default async function ProtectedLayout({ children }: PropsWithChildren) {
   const userId = await requireServerUserId();
   return (

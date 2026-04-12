@@ -57,8 +57,8 @@
   - [x] Execute `/awos:tasks 005` to generate `context/spec/005-library-status-redesign/tasks.md` **[Agent: general-purpose]**
   - [x] Verify file contains vertical slices with `**[Agent: agent-name]**` format sub-tasks **[Agent: general-purpose]**
 
-- [ ] **Slice 8: Final Validation**
-  - [ ] Re-run `/awos:audit` and verify overall score >= 85% **[Agent: general-purpose]**
-  - [ ] Verify AI Development Tooling dimension >= 75% (Grade B) **[Agent: general-purpose]**
-  - [ ] Verify End-to-End Delivery dimension >= 60% (Grade C) **[Agent: general-purpose]**
-  - [ ] Fix any remaining P0 findings **[Agent: general-purpose]**
+- [x] **Slice 8: Final Validation**
+  - [x] Re-run `/awos:audit` and verify overall score >= 85% **[Agent: general-purpose]**
+  - [x] Verify AI Development Tooling dimension >= 75% (Grade B) **[Agent: general-purpose]**
+  - [x] Verify End-to-End Delivery dimension >= 60% (Grade C) **[Agent: general-purpose]**
+  - [x] Fix any remaining P0 findings **[Agent: general-purpose]**

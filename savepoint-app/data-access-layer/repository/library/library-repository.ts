@@ -514,6 +514,7 @@ export async function findAllLibraryItemsByGameId(params: {
 type LibraryItemWithGameAndCount = LibraryItem & {
   game: {
     id: string;
+    igdbId: number;
     title: string;
     coverImage: string | null;
     slug: string;
@@ -643,6 +644,7 @@ export async function findLibraryItemsWithFilters(params: {
         game: {
           select: {
             id: true,
+            igdbId: true,
             title: true,
             coverImage: true,
             slug: true,

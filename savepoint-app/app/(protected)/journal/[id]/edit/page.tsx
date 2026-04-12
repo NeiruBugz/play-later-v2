@@ -4,8 +4,6 @@ import { notFound } from "next/navigation";
 import { EditJournalEntryPage as EditJournalEntryPageContent } from "@/features/journal";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
-export const dynamic = "force-dynamic";
-
 export default async function EditJournalEntryPage({
   params,
 }: {

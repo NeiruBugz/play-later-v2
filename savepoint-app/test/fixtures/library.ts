@@ -20,6 +20,7 @@ export function createLibraryItemFixture(
     updatedAt: new Date("2025-01-20"),
     game: {
       id: "game-123",
+      igdbId: 7346,
       title: "The Legend of Zelda: Breath of the Wild",
       coverImage:
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co1234.jpg",
@@ -47,6 +48,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     updatedAt: new Date("2024-01-15"),
     game: {
       id: "game-1",
+      igdbId: 1942,
       title: "The Witcher 3: Wild Hunt",
       coverImage:
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co1wyy.jpg",
@@ -70,6 +72,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     updatedAt: new Date("2024-01-12"),
     game: {
       id: "game-2",
+      igdbId: 119133,
       title: "Elden Ring",
       coverImage:
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co4jni.jpg",
@@ -93,6 +96,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     updatedAt: new Date("2024-01-20"),
     game: {
       id: "game-3",
+      igdbId: 113539,
       title: "Hades",
       coverImage:
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co2i0v.jpg",
@@ -116,6 +120,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     updatedAt: new Date("2024-01-18"),
     game: {
       id: "game-4",
+      igdbId: 119388,
       title: "The Legend of Zelda: Tears of the Kingdom",
       coverImage:
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co5rmg.jpg",
@@ -139,6 +144,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     updatedAt: new Date("2024-01-14"),
     game: {
       id: "game-5",
+      igdbId: 119171,
       title: "Horizon Forbidden West",
       coverImage:
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co3pv2.jpg",
@@ -162,6 +168,7 @@ export const libraryItemsFixture: LibraryItemWithGameDomain[] = [
     updatedAt: new Date("2024-01-22"),
     game: {
       id: "game-6",
+      igdbId: 11133,
       title: "Dark Souls III",
       coverImage:
         "https://images.igdb.com/igdb/image/upload/t_cover_big/co1x7l.jpg",
