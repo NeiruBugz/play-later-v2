@@ -7,8 +7,6 @@ import { ImportedGamesContainer } from "@/features/steam-import";
 import { Button } from "@/shared/components/ui/button";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
-export const dynamic = "force-dynamic";
-
 export default async function SteamGamesPage() {
   const userId = await requireServerUserId();
 

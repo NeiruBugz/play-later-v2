@@ -6,7 +6,7 @@ import {
   JournalService,
   LibraryService,
 } from "@/data-access-layer/services";
-import { unstable_cache } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { cache } from "react";
 
 import type { JournalEntryDomain } from "@/features/journal/types";
@@ -34,43 +34,35 @@ type GameDetailsResult = {
   journalEntries: JournalEntryDomain[];
 };
 
-const getCachedGameBySlug = (slug: string) =>
-  unstable_cache(
-    async () => {
-      const igdbService = new IgdbService();
-      const result = await igdbService.getGameDetailsBySlug({ slug });
+async function getCachedGameBySlug(slug: string) {
+  "use cache";
+  cacheLife({ revalidate: 300 });
+  cacheTag("igdb-game-detail");
 
-      if (!result.success) {
-        throw new Error(result.error);
-      }
+  const igdbService = new IgdbService();
+  const result = await igdbService.getGameDetailsBySlug({ slug });
 
-      return result.data;
-    },
-    ["igdb-game-detail", slug],
-    {
-      revalidate: 300,
-      tags: ["igdb-game-detail"],
-    }
-  );
+  if (!result.success) {
+    throw new Error(result.error);
+  }
 
-const getCachedTimesToBeat = (igdbId: number) =>
-  unstable_cache(
-    async () => {
-      const igdbService = new IgdbService();
-      const result = await igdbService.getTimesToBeat({ igdbId });
+  return result.data;
+}
 
-      if (!result.success) {
-        return undefined;
-      }
+async function getCachedTimesToBeat(igdbId: number) {
+  "use cache";
+  cacheLife({ revalidate: 3600 });
+  cacheTag("igdb-times-to-beat");
 
-      return result.data.timesToBeat;
-    },
-    ["igdb-times-to-beat", String(igdbId)],
-    {
-      revalidate: 3600,
-      tags: ["igdb-times-to-beat"],
-    }
-  );
+  const igdbService = new IgdbService();
+  const result = await igdbService.getTimesToBeat({ igdbId });
+
+  if (!result.success) {
+    return undefined;
+  }
+
+  return result.data.timesToBeat;
+}
 
 export const getGameDetails = cache(async function getGameDetails(params: {
   slug: string;
@@ -83,7 +75,7 @@ export const getGameDetails = cache(async function getGameDetails(params: {
 
     let gameData;
     try {
-      gameData = await getCachedGameBySlug(params.slug)();
+      gameData = await getCachedGameBySlug(params.slug);
     } catch (error) {
       logger.error({ slug: params.slug, error }, "IGDB fetch failed");
       return {
@@ -154,7 +146,7 @@ export const getGameDetails = cache(async function getGameDetails(params: {
       const libraryService = new LibraryService();
 
       const [timesToBeat, gameResult] = await Promise.all([
-        getCachedTimesToBeat(game.id)(),
+        getCachedTimesToBeat(game.id),
         libraryService.findGameByIgdbId(game.id),
       ]);
 
@@ -237,7 +229,7 @@ export const getGameDetails = cache(async function getGameDetails(params: {
       };
     }
 
-    const timesToBeat = await getCachedTimesToBeat(game.id)();
+    const timesToBeat = await getCachedTimesToBeat(game.id);
 
     logger.info(
       {

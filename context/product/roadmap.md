@@ -56,23 +56,16 @@ _The highest priority features that form the core foundation of SavePoint—enab
 
 _Features that ship independently of external APIs, third-party services, or AWS Lambda pipelines. Prioritized upfront so progress is not blocked by external-dependency work. Each relies only on our own database and already-integrated IGDB metadata._
 
-- [ ] **Code Health & Developer Experience (Round 2)** _(Spec 006)_
+- [x] **Next.js 16 Feature Adoption** _(Spec 010 — Completed)_
 
-  - [ ] **P0: Immediate Fixes**
-    - [ ] Create root CLAUDE.md with project purpose, cross-service architecture, and key commands (AI-01)
+  _Adopted `cacheComponents` for back-nav state preservation, migrated all `unstable_cache` to `"use cache"` directive, added 24h caching to platform endpoints, enabled `experimental.viewTransition` with cover-image morphs across Library/Search/Detail routes. 1,209 tests pass, zero `unstable_cache` imports remain. See [spec](../spec/010-nextjs-16-feature-adoption/functional-spec.md)._
 
-  - [ ] **P1: Fix Soon**
-    - [ ] Add dev server run instructions (pnpm dev, env vars, DB setup) to CLAUDE.md ecosystem (AI-07)
-    - [ ] Create specs for new features before implementation; target 70%+ spec-to-branch ratio (SDD-04)
-    - [ ] Generate tasks.md for spec 005-library-status-redesign (SDD-05)
-    - [ ] Include cross-layer changes (lambdas-py, infra) in feature branches when features span layers (E2E-01)
+- [x] **Code Health & Developer Experience (Round 2)** _(Spec 006 — Completed)_
 
-  - [ ] **P2: Improve When Possible**
-    - [ ] Fix 3 repository bypass violations — route through service layer (ARCH-02)
-    - [ ] Remove directory trees and code templates from CLAUDE.md files (AI-06)
-    - [ ] Add *.p12, *.pfx, credentials*, secrets* to .gitignore (SEC-05)
-    - [ ] Fix dead link in savepoint-app/README.md; add README to scripts/ (DOC-02/04)
-    - [ ] Add root Makefile/Taskfile with cross-layer commands; extend PR checks to lambdas-py (E2E-05)
+  _Shipped in PR #184 plus follow-ups. Root `CLAUDE.md`, `Makefile`, `scripts/README.md`, repository-bypass fixes, `.gitignore` hardening, `lambdas-py` CI job all merged._
+  - [x] **P0:** Root CLAUDE.md with project purpose, cross-service architecture, and key commands (AI-01)
+  - [x] **P1:** Dev server run instructions in CLAUDE.md ecosystem (AI-07); tasks.md generated for spec 005 (SDD-05); cross-layer branching convention documented (E2E-01)
+  - [x] **P2:** Repository bypass violations fixed (ARCH-02); CLAUDE.md files trimmed (AI-06); `.gitignore` hardened for certs/secrets (SEC-05); stale `savepoint-app/README.md` link fixed and `scripts/README.md` added (DOC-02/04); root `Makefile` with cross-layer targets and `lambdas-py` CI job added (E2E-05)
 
 - [ ] **Community Reflections** _(Spec TBD)_
 

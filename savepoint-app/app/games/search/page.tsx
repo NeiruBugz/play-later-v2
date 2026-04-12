@@ -3,8 +3,6 @@ import type { Metadata } from "next";
 
 import { GameSearchInput } from "@/features/game-search";
 
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Search Games | SavePoint",
   description: "Search our extensive game database powered by IGDB",

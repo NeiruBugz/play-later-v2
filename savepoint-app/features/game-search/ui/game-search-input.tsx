@@ -25,11 +25,17 @@ export const GameSearchInput = ({
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const debouncedQuery = useDebouncedValue(query, SEARCH_INPUT_DEBOUNCE_MS);
+
   useEffect(() => {
-    if (initialQuery && query !== initialQuery) {
-      router.replace("/games/search", { scroll: false });
+    const params = new URLSearchParams();
+    if (debouncedQuery) {
+      params.set("q", debouncedQuery);
     }
-  }, [query, initialQuery, router]);
+    const search = params.toString();
+    const url = search ? `/games/search?${search}` : "/games/search";
+    router.replace(url, { scroll: false });
+  }, [debouncedQuery, router]);
+
   return (
     <div className="space-y-3xl">
       <Input

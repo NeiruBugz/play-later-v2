@@ -5,4 +5,5 @@ export interface GameCoverImageProps {
   gameTitle: string;
   className?: string;
   libraryStatus?: LibraryItemStatus | null;
+  style?: React.CSSProperties;
 }

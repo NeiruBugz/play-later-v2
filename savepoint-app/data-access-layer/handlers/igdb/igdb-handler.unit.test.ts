@@ -4,24 +4,11 @@ import { ServiceErrorCode } from "@/data-access-layer/services/types";
 
 import { igdbSearchHandler } from "./igdb-handler";
 
-// In-memory cache that mirrors unstable_cache de-duplication by key array.
-// This is required because Next.js unstable_cache throws in the Node test
-// environment ("Invariant: incrementalCache missing"). The mock preserves the
-// cache-hit/miss semantics that the tests verify.
-const cacheStore = new Map<string, unknown>();
-
+// "use cache" functions call cacheLife/cacheTag at runtime. In the Node test
+// environment these APIs are unavailable, so we stub them as no-ops.
 vi.mock("next/cache", () => ({
-  unstable_cache:
-    (fn: (...args: unknown[]) => Promise<unknown>, keyParts: string[]) =>
-    async (...args: unknown[]) => {
-      const cacheKey = [...keyParts, ...args].join(":");
-      if (cacheStore.has(cacheKey)) {
-        return cacheStore.get(cacheKey);
-      }
-      const result = await fn(...args);
-      cacheStore.set(cacheKey, result);
-      return result;
-    },
+  cacheLife: vi.fn(),
+  cacheTag: vi.fn(),
 }));
 
 // vi.hoisted runs before vi.mock factories and before the module under test
@@ -65,7 +52,6 @@ const mockSearchResult: GameSearchResult = {
 
 describe("igdbSearchHandler.search", () => {
   beforeEach(() => {
-    cacheStore.clear();
     mockSearchGamesByName.mockReset();
     mockSearchGamesByName.mockResolvedValue({
       success: true,
@@ -87,18 +73,16 @@ describe("igdbSearchHandler.search", () => {
     expect(mockSearchGamesByName).toHaveBeenCalledTimes(1);
   });
 
-  it("cache reuse: identical query called twice only invokes the service once", async () => {
-    await igdbSearchHandler.search({ query: "zelda", offset: 0 }, makeCtx());
-    await igdbSearchHandler.search({ query: "zelda", offset: 0 }, makeCtx());
+  it("normalization: passes lowercased trimmed query to the service", async () => {
+    await igdbSearchHandler.search(
+      { query: "  Zelda  ", offset: 0 },
+      makeCtx()
+    );
 
-    expect(mockSearchGamesByName).toHaveBeenCalledTimes(1);
-  });
-
-  it("normalization: 'Zelda' and 'zelda' share the same cache entry", async () => {
-    await igdbSearchHandler.search({ query: "Zelda", offset: 0 }, makeCtx());
-    await igdbSearchHandler.search({ query: "zelda", offset: 0 }, makeCtx());
-
-    expect(mockSearchGamesByName).toHaveBeenCalledTimes(1);
+    expect(mockSearchGamesByName).toHaveBeenCalledWith({
+      name: "zelda",
+      offset: 0,
+    });
   });
 
   it("returns status 429 when service returns IGDB_RATE_LIMITED", async () => {

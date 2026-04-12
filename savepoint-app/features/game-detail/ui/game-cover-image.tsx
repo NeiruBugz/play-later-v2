@@ -11,6 +11,7 @@ export const GameCoverImage = ({
   imageId,
   gameTitle,
   className,
+  style,
 }: GameCoverImageProps) => {
   const hasCover = imageId && imageId.trim() !== "";
 
@@ -23,6 +24,7 @@ export const GameCoverImage = ({
         )}
         aria-label="No cover image available"
         data-testid="game-cover-placeholder"
+        style={style}
       >
         <Gamepad2
           className="text-muted-foreground h-16 w-16"
@@ -43,6 +45,7 @@ export const GameCoverImage = ({
         className
       )}
       data-testid="game-cover-image"
+      style={style}
     >
       <Image
         src={imageUrl}

@@ -5,6 +5,13 @@ import type { RequestContext } from "../types";
 import { getPlatformsForLibraryModal } from "./get-platforms-for-library-modal";
 import { getPlatformsHandler } from "./get-platforms-handler";
 
+// "use cache" functions call cacheLife/cacheTag at runtime. In the Node test
+// environment these APIs are unavailable, so we stub them as no-ops.
+vi.mock("next/cache", () => ({
+  cacheLife: vi.fn(),
+  cacheTag: vi.fn(),
+}));
+
 vi.mock("./get-platforms-for-library-modal");
 
 const mockGetPlatformsForLibraryModal = vi.mocked(getPlatformsForLibraryModal);

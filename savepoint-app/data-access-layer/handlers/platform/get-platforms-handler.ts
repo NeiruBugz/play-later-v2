@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { z } from "zod";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
@@ -17,6 +18,26 @@ const logger = createLogger({
 const GetPlatformsSchema = z.object({
   igdbId: z.number().int().positive("IGDB ID must be a positive integer"),
 });
+
+const PLATFORMS_REVALIDATE_SECONDS = 86400;
+
+async function getCachedGamePlatforms(
+  igdbId: number
+): Promise<GetPlatformsHandlerOutput> {
+  "use cache";
+  cacheLife({ revalidate: PLATFORMS_REVALIDATE_SECONDS });
+  cacheTag("platforms:game", `platforms:game:${igdbId}`);
+
+  logger.info({ igdbId }, "Game platforms cache miss - fetching from use-case");
+
+  const result = await getPlatformsForLibraryModal({ igdbId });
+
+  if (!result.success) {
+    throw new Error(result.error);
+  }
+
+  return result.data;
+}
 
 export async function getPlatformsHandler(
   input: GetPlatformsHandlerInput,
@@ -38,33 +59,34 @@ export async function getPlatformsHandler(
     };
   }
 
-  const result = await getPlatformsForLibraryModal({
-    igdbId: validation.data.igdbId,
-  });
+  try {
+    const data = await getCachedGamePlatforms(validation.data.igdbId);
 
-  if (!result.success) {
-    logger.error(
-      { igdbId, error: result.error },
-      "Use-case failed to fetch platforms"
+    logger.info(
+      {
+        igdbId,
+        supportedCount: data.supportedPlatforms.length,
+        otherCount: data.otherPlatforms.length,
+      },
+      "Platforms fetched successfully"
     );
     return {
+      success: true,
+      data,
+      status: HTTP_STATUS.OK,
+    };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch platforms for game";
+
+    logger.error({ igdbId, error }, "Use-case failed to fetch platforms");
+
+    return {
       success: false,
-      error: result.error,
+      error: message,
       status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     };
   }
-
-  logger.info(
-    {
-      igdbId,
-      supportedCount: result.data.supportedPlatforms.length,
-      otherCount: result.data.otherPlatforms.length,
-    },
-    "Platforms fetched successfully"
-  );
-  return {
-    success: true,
-    data: result.data,
-    status: HTTP_STATUS.OK,
-  };
 }

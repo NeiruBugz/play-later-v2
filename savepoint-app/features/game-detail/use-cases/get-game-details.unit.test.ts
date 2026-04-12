@@ -13,7 +13,8 @@ import {
 import { getGameDetails } from "./get-game-details";
 
 vi.mock("next/cache", () => ({
-  unstable_cache: (fn: (...args: unknown[]) => unknown) => () => fn(),
+  cacheLife: vi.fn(),
+  cacheTag: vi.fn(),
 }));
 
 vi.mock("@/data-access-layer/services", () => ({

@@ -35,6 +35,7 @@ export const GameGridCard = ({ game }: GameCardProps) => {
             size="hd"
             className="aspect-[3/4] w-full"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            style={{ viewTransitionName: `game-cover-${game.id}` }}
           />
 
           {hasLibraryStatus && statusConfig && (

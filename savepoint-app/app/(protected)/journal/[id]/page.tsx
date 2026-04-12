@@ -4,8 +4,6 @@ import { notFound } from "next/navigation";
 import { JournalEntryDetail } from "@/features/journal";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
-export const dynamic = "force-dynamic";
-
 export default async function JournalEntryPage({
   params,
 }: {

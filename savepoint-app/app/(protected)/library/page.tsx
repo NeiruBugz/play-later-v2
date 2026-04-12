@@ -9,8 +9,6 @@ export const metadata: Metadata = {
   description:
     "Browse and manage your game library. Filter by status, platform, and sort your collection.",
 };
-
-export const dynamic = "force-dynamic";
 export default async function LibraryPage() {
   const userId = await requireServerUserId();
 
