@@ -595,7 +595,7 @@ describe("getProfilePageData", () => {
       expect(result.success).toBe(false);
     });
 
-    it("should return null-profile result when getPublicProfile returns profile: null (user not found or private)", async () => {
+    it("should return failure when getPublicProfile returns profile: null (user not found)", async () => {
       mockProfileService.getPublicProfile.mockResolvedValue({
         success: true,
         data: { profile: null },
@@ -603,9 +603,9 @@ describe("getProfilePageData", () => {
 
       const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile).toBeNull();
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Profile not found");
       }
     });
   });

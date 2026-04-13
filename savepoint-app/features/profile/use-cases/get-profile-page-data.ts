@@ -147,16 +147,7 @@ async function getProfilePageDataImpl(
       return { success: false, error: publicResult.error };
     }
     if (!publicResult.data.profile) {
-      return {
-        success: true,
-        data: {
-          profile: null as unknown as ProfileResponse,
-          gameCount: 0,
-          socialCounts: { followers: 0, following: 0 },
-          viewer: { isOwner: false, isAuthenticated: Boolean(viewerId) },
-          isPrivate: false,
-        },
-      };
+      return { success: false, error: "Profile not found" };
     }
 
     const pub = publicResult.data.profile;

@@ -1,7 +1,7 @@
 # Functional Specification: Unified Profile View
 
 - **Roadmap Item:** Unified Profile — Consolidate private dashboard and public profile into a single tabbed profile experience
-- **Status:** Completed
+- **Status:** In Review (pending QA sign-off)
 - **Author:** Nail Badiullin
 
 ---
