@@ -1,7 +1,7 @@
 import type {
-  FeedCursor as RepoFeedCursor,
   FeedItemRow,
   PaginatedFeedResult,
+  FeedCursor as RepoFeedCursor,
 } from "@/data-access-layer/repository";
 
 import type { PaginatedFeed } from "@/features/social/types";
