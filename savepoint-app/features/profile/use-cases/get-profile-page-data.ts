@@ -78,6 +78,7 @@ async function getProfilePageDataImpl(
       createdAt: Date;
       isPublicProfile: boolean;
       stats: LibraryStats;
+      gameCount: number;
       libraryPreview: LibraryPreviewGame[];
     } | null = null;
 
@@ -89,20 +90,22 @@ async function getProfilePageDataImpl(
         return { success: false, error: statsResult.error };
       }
       const statsProfile = statsResult?.success
-        ? (statsResult.data.profile as unknown as {
-            username: string;
-            name: string | null;
-            image: string | null;
-            email: string | null;
-            createdAt: Date;
-            isPublicProfile: boolean;
-            stats: LibraryStats;
-            libraryPreview: LibraryPreviewGame[];
-          })
+        ? statsResult.data.profile
         : null;
 
       if (statsProfile && statsProfile.username === username) {
-        ownerProfileRaw = { ...statsProfile, id: viewerId };
+        ownerProfileRaw = {
+          id: viewerId,
+          username: statsProfile.username,
+          name: statsProfile.name,
+          image: statsProfile.image,
+          email: statsProfile.email,
+          createdAt: statsProfile.createdAt,
+          isPublicProfile: statsProfile.isPublicProfile,
+          stats: statsProfile.stats,
+          gameCount: statsProfile.gameCount,
+          libraryPreview: statsProfile.libraryPreview,
+        };
       }
     }
 
@@ -113,10 +116,6 @@ async function getProfilePageDataImpl(
       if (!followCountsResult.success) {
         return { success: false, error: followCountsResult.error };
       }
-
-      const ownerGameCount = Object.values(
-        ownerProfileRaw.stats.statusCounts
-      ).reduce((total, count) => total + count, 0);
 
       return {
         success: true,
@@ -132,7 +131,7 @@ async function getProfilePageDataImpl(
           },
           stats: ownerProfileRaw.stats,
           libraryPreview: ownerProfileRaw.libraryPreview,
-          gameCount: ownerGameCount,
+          gameCount: ownerProfileRaw.gameCount,
           socialCounts: followCountsResult.data,
           viewer: {
             isOwner: true,
@@ -160,16 +159,7 @@ async function getProfilePageDataImpl(
       };
     }
 
-    const pub = publicResult.data.profile as unknown as {
-      id: string;
-      username: string;
-      name: string | null;
-      image: string | null;
-      gameCount: number;
-      libraryPreview: LibraryPreviewGame[];
-      isPublicProfile: boolean;
-      createdAt: Date;
-    };
+    const pub = publicResult.data.profile;
 
     const isAuthenticated = viewerId !== undefined && viewerId !== null;
     const isOwner = false;
@@ -216,9 +206,7 @@ async function getProfilePageDataImpl(
       if (!visitorStatsResult.success) {
         return { success: false, error: visitorStatsResult.error };
       }
-      const visitorStatsProfile = visitorStatsResult.data
-        .profile as unknown as { stats: LibraryStats };
-      data.stats = visitorStatsProfile.stats;
+      data.stats = visitorStatsResult.data.profile.stats;
     }
 
     return { success: true, data };

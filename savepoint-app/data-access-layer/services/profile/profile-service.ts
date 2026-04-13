@@ -77,7 +77,7 @@ export class ProfileService {
     input: GetProfileWithStatsInput
   ): Promise<GetProfileWithStatsResult> {
     try {
-      const [user, stats] = await Promise.all([
+      const [user, stats, gameCount, libraryPreview] = await Promise.all([
         findUserById(input.userId, {
           select: {
             username: true,
@@ -89,12 +89,19 @@ export class ProfileService {
           },
         }),
         getLibraryStatsByUserId(input.userId),
+        countLibraryItemsByUserId(input.userId),
+        findLibraryPreview(input.userId),
       ]);
       if (!user) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
       }
-      const profile = mapUserToProfileWithStats(user, stats);
+      const profile = mapUserToProfileWithStats(
+        user,
+        stats,
+        gameCount,
+        libraryPreview.map((item) => item.game)
+      );
       return serviceSuccess({ profile });
     } catch (error) {
       this.logger.error(
@@ -108,8 +115,23 @@ export class ProfileService {
     try {
       const user = await findUserByUsername(username);
 
-      if (!user || !user.isPublicProfile) {
+      if (!user) {
         return serviceSuccess({ profile: null });
+      }
+
+      if (!user.isPublicProfile) {
+        return serviceSuccess({
+          profile: {
+            id: user.id,
+            name: user.name,
+            username: user.username!,
+            image: user.image,
+            gameCount: 0,
+            libraryPreview: [],
+            isPublicProfile: false,
+            createdAt: user.createdAt,
+          },
+        });
       }
 
       const [gameCount, libraryPreview] = await Promise.all([
@@ -125,6 +147,8 @@ export class ProfileService {
           image: user.image,
           gameCount,
           libraryPreview: libraryPreview.map((item) => item.game),
+          isPublicProfile: true,
+          createdAt: user.createdAt,
         },
       });
     } catch (error) {

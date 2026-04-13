@@ -1,15 +1,15 @@
 "use client";
 
-import {
-  type FeedItemRow,
-  type PaginatedFeedResult,
-} from "@/data-access-layer/repository";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 import { useActivityLog } from "../hooks/use-activity-log";
+import type {
+  ActivityLogItem as FeedItemRow,
+  ActivityLogPage as PaginatedFeedResult,
+} from "../lib/activity-log-types";
 
 const STATUS_LABELS: Record<string, string> = {
   WISHLIST: "Wishlist",
@@ -90,8 +90,8 @@ function GameCoverThumbnail({
       </div>
     );
   }
-  const isIgdbUrl = coverImage.includes("igdb.com");
-  const src = isIgdbUrl
+  const isFullUrl = /^https?:\/\//i.test(coverImage);
+  const src = isFullUrl
     ? coverImage
     : `https://images.igdb.com/igdb/image/upload/t_thumb/${coverImage}.jpg`;
   return (

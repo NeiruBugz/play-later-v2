@@ -1,11 +1,11 @@
 "use client";
 
-import {
-  type FeedCursor,
-  type PaginatedFeedResult,
-} from "@/data-access-layer/repository";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
+import type {
+  ActivityLogCursor as FeedCursor,
+  ActivityLogPage as PaginatedFeedResult,
+} from "../lib/activity-log-types";
 import { fetchUserActivityAction } from "../server-actions/fetch-user-activity-action";
 
 function normalizeDates(result: PaginatedFeedResult): PaginatedFeedResult {

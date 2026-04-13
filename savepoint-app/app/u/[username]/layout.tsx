@@ -43,6 +43,7 @@ export default async function PublicProfileLayout({
               name: profile.name,
               image: profile.image,
               isPublicProfile: profile.isPublicProfile,
+              email: profile.email,
             }}
             socialCounts={socialCounts}
             viewer={viewer}

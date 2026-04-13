@@ -1,6 +1,9 @@
 "use server";
 
 import { ActivityFeedService } from "@/data-access-layer/services/activity-feed/activity-feed-service";
+import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
+
+import { getOptionalServerUserId } from "@/shared/lib/app/auth";
 
 import type {
   ActivityLogCursor,
@@ -13,13 +16,31 @@ export type FetchUserActivityInput = {
   limit?: number;
 };
 
+function toIsoString(timestamp: Date | string): string {
+  return typeof timestamp === "string" ? timestamp : timestamp.toISOString();
+}
+
 export async function fetchUserActivityAction(
   input: FetchUserActivityInput
 ): Promise<ActivityLogPage> {
+  const viewerUserId = await getOptionalServerUserId();
+  const profileService = new ProfileService();
+
+  const profileResult = await profileService.getProfile({
+    userId: input.userId,
+  });
+  if (!profileResult.success) {
+    throw new Error(profileResult.error);
+  }
+  const isOwner = viewerUserId === input.userId;
+  if (!profileResult.data.profile.isPublicProfile && !isOwner) {
+    throw new Error("Profile is private");
+  }
+
   const service = new ActivityFeedService();
   const serviceCursor = input.cursor
     ? {
-        timestamp: input.cursor.timestamp.toISOString(),
+        timestamp: toIsoString(input.cursor.timestamp),
         id: String(input.cursor.id),
       }
     : undefined;

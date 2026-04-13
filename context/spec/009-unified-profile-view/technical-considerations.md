@@ -26,7 +26,7 @@ Replace the two separate profile views (`ProfileView` at `/profile` and `PublicP
 
 ### 2.1 Routing Architecture
 
-```
+```text
 app/u/[username]/
 ├── layout.tsx              Fetches profile data. Renders ProfileHeader.
 │                           Privacy gate: if private && !isOwner, render
@@ -90,7 +90,7 @@ Replaces `getPublicProfilePageData` from `features/social/use-cases/` (that file
 
 Returns a shape like:
 
-```
+```ts
 {
   profile: { id, username, name, image, createdAt, isPublicProfile, email? },
   stats?: LibraryStats,            // omitted when private && !isOwner

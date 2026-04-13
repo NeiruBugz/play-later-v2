@@ -1,9 +1,9 @@
 import type {
-  FeedCursor,
-  FeedItemRow,
-  PaginatedFeedResult,
-} from "@/data-access-layer/repository";
+  ActivityFeedItem,
+  ActivityFeedPage,
+  ActivityFeedRepoCursor,
+} from "@/data-access-layer/services/activity-feed/types";
 
-export type ActivityLogItem = FeedItemRow;
-export type ActivityLogCursor = FeedCursor;
-export type ActivityLogPage = PaginatedFeedResult;
+export type ActivityLogItem = ActivityFeedItem;
+export type ActivityLogCursor = ActivityFeedRepoCursor;
+export type ActivityLogPage = ActivityFeedPage;

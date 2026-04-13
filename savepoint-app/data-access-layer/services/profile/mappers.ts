@@ -1,4 +1,5 @@
 import type {
+  LibraryPreviewGame,
   LibraryStats,
   Profile,
   ProfileWithStats,
@@ -55,10 +56,14 @@ export function mapLibraryStats(stats: LibraryStatsRepo): LibraryStats {
 }
 export function mapUserToProfileWithStats(
   user: MinimalUser,
-  stats: LibraryStatsRepo
+  stats: LibraryStatsRepo,
+  gameCount: number,
+  libraryPreview: LibraryPreviewGame[]
 ): ProfileWithStats {
   return {
     ...mapUserToProfile(user),
     stats: mapLibraryStats(stats),
+    gameCount,
+    libraryPreview,
   };
 }
