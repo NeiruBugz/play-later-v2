@@ -1,0 +1,32 @@
+{
+  "projectId": "b43aa7e7-0738-4574-9c35-fe6736bf921e",
+  "projectUrl": "https://linear.app/play-later/project/011-star-ratings-aab1b1c4bf75",
+  "lastSynced": "2026-04-13T15:15:00Z",
+  "issues": {
+    "Slice 1: Persist + display a rating on game detail (read-only, manually seeded)": {
+      "issueId": "PLA-152",
+      "url": "https://linear.app/play-later/issue/PLA-152/slice-1-persist-display-a-rating-on-game-detail-read-only-manually",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 2: Owner can set, change, and clear a rating from game detail": {
+      "issueId": "PLA-153",
+      "url": "https://linear.app/play-later/issue/PLA-153/slice-2-owner-can-set-change-and-clear-a-rating-from-game-detail",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 3: Rating displays on library cards (private + public)": {
+      "issueId": "PLA-154",
+      "url": "https://linear.app/play-later/issue/PLA-154/slice-3-rating-displays-on-library-cards-private-public",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 4: Sort and filter the owner's Library by rating (URL-addressable)": {
+      "issueId": "PLA-155",
+      "url": "https://linear.app/play-later/issue/PLA-155/slice-4-sort-and-filter-the-owners-library-by-rating-url-addressable",
+      "lastSyncedAwosState": "Todo"
+    },
+    "Slice 5: Rating Distribution histogram on profile Overview": {
+      "issueId": "PLA-156",
+      "url": "https://linear.app/play-later/issue/PLA-156/slice-5-rating-distribution-histogram-on-profile-overview",
+      "lastSyncedAwosState": "Todo"
+    }
+  }
+}
