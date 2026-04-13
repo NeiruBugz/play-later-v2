@@ -1,7 +1,7 @@
 # Functional Specification: Star Ratings
 
 - **Roadmap Item:** Star Ratings — 1–5 with half-steps on library entries, visible on cards and detail, sortable/filterable, with a rating histogram on the profile
-- **Status:** Draft
+- **Status:** Completed
 - **Author:** Nail Badiullin
 
 ---
@@ -41,10 +41,10 @@ Every library entry can carry a 1–5 rating with half-step precision (0.5 throu
 
 **Acceptance Criteria:**
 
-- [ ] Users can assign any of the 10 half-step values (0.5–5.0) to a library entry
-- [ ] Entries can have no rating (null); "no rating" is a valid, first-class state
-- [ ] Users can clear an existing rating back to "no rating"
-- [ ] Users can change an existing rating to a different value
+- [x] Users can assign any of the 10 half-step values (0.5–5.0) to a library entry
+- [x] Entries can have no rating (null); "no rating" is a valid, first-class state
+- [x] Users can clear an existing rating back to "no rating"
+- [x] Users can change an existing rating to a different value
 
 ### 2.2 Rating Any Library Entry
 
@@ -53,9 +53,9 @@ Every library entry can carry a 1–5 rating with half-step precision (0.5 throu
 
 **Acceptance Criteria:**
 
-- [ ] A user can rate a game in any of the four statuses
-- [ ] Changing a game's status does not modify the existing rating
-- [ ] Setting or changing a rating does not modify the game's status
+- [x] A user can rate a game in any of the four statuses
+- [x] Changing a game's status does not modify the existing rating
+- [x] Setting or changing a rating does not modify the game's status
 
 ### 2.3 Rating Input Component
 
@@ -68,14 +68,14 @@ A single reusable **Rating Input** component is the only way to set or change a 
 
 **Acceptance Criteria:**
 
-- [ ] The Rating Input renders 5 stars with half-step precision
-- [ ] Hovering previews the value under the cursor; moving the cursor away restores the previous preview to the saved value
-- [ ] Clicking a star commits that value
-- [ ] Clicking the currently-selected value clears the rating
-- [ ] The component is used on the game detail page (owner view) for editing the rating on a library entry
-- [ ] An unrated game shows an empty control (no filled stars)
-- [ ] A rated game shows stars filled to the rating value
-- [ ] On save failure, the UI reverts and an inline error is shown
+- [x] The Rating Input renders 5 stars with half-step precision
+- [x] Hovering previews the value under the cursor; moving the cursor away restores the previous preview to the saved value
+- [x] Clicking a star commits that value
+- [x] Clicking the currently-selected value clears the rating
+- [x] The component is used on the game detail page (owner view) for editing the rating on a library entry
+- [x] An unrated game shows an empty control (no filled stars)
+- [x] A rated game shows stars filled to the rating value
+- [x] On save failure, the UI reverts and an inline error is shown
 
 ### 2.4 Rating Display on Library Cards
 
@@ -85,9 +85,9 @@ A single reusable **Rating Input** component is the only way to set or change a 
 
 **Acceptance Criteria:**
 
-- [ ] Rated library cards show their rating as stars only (no numeric "4.5")
-- [ ] Unrated library cards show no rating UI (not a zero-filled control)
-- [ ] The rating on a card is not editable (no click-to-rate from the card)
+- [x] Rated library cards show their rating as stars only (no numeric "4.5")
+- [x] Unrated library cards show no rating UI (not a zero-filled control)
+- [x] The rating on a card is not editable (no click-to-rate from the card)
 
 ### 2.5 Sort and Filter Library by Rating
 
@@ -101,14 +101,14 @@ The owner's authenticated Library page (`/library`) gains rating-based sort and 
 
 **Acceptance Criteria:**
 
-- [ ] Library page exposes a sort control with "Highest rated" and "Lowest rated" options
-- [ ] Library page exposes a rating filter using the same Rating Input component used to set a rating
-- [ ] Library page exposes an "Unrated only" toggle
-- [ ] Sorting by rating places unrated entries at the end of the list, in both directions
-- [ ] Filtering by minimum rating excludes unrated entries
-- [ ] "Unrated only" shows only entries with no rating
-- [ ] Sort and filter state persists in the URL (query parameters) and is restored on reload
-- [ ] The public Library tab on `/u/{username}/library` does **not** gain sort/filter controls (it remains read-only per Spec 009)
+- [x] Library page exposes a sort control with "Highest rated" and "Lowest rated" options
+- [x] Library page exposes a rating filter using the same Rating Input component used to set a rating
+- [x] Library page exposes an "Unrated only" toggle
+- [x] Sorting by rating places unrated entries at the end of the list, in both directions
+- [x] Filtering by minimum rating excludes unrated entries
+- [x] "Unrated only" shows only entries with no rating
+- [x] Sort and filter state persists in the URL (query parameters) and is restored on reload
+- [x] The public Library tab on `/u/{username}/library` does **not** gain sort/filter controls (it remains read-only per Spec 009)
 
 ### 2.6 Rating Histogram on Profile Overview
 
@@ -119,12 +119,12 @@ The owner's authenticated Library page (`/library`) gains rating-based sort and 
 
 **Acceptance Criteria:**
 
-- [ ] Profile Overview shows a Rating Distribution bar chart when the user has ≥ 5 rated entries
-- [ ] The chart has one bar per half-step value (0.5–5.0), 10 bars total
-- [ ] Bar heights reflect counts of entries at each rating
-- [ ] Hovering or tapping a bar reveals the exact count and rating value
-- [ ] The chart is hidden entirely when the user has fewer than 5 rated entries
-- [ ] The chart is visible to visitors of public profiles; hidden on private profiles (consistent with Spec 009 privacy gating)
+- [x] Profile Overview shows a Rating Distribution bar chart when the user has ≥ 5 rated entries
+- [x] The chart has one bar per half-step value (0.5–5.0), 10 bars total
+- [x] Bar heights reflect counts of entries at each rating
+- [x] Hovering or tapping a bar reveals the exact count and rating value
+- [x] The chart is hidden entirely when the user has fewer than 5 rated entries
+- [x] The chart is visible to visitors of public profiles; hidden on private profiles (consistent with Spec 009 privacy gating)
 
 ### 2.7 Visibility and Privacy
 
@@ -136,9 +136,9 @@ The owner's authenticated Library page (`/library`) gains rating-based sort and 
 
 **Acceptance Criteria:**
 
-- [ ] Owner sees all their ratings regardless of `isPublicProfile`
-- [ ] Visitor to a public profile sees the owner's ratings on library cards and the histogram
-- [ ] Visitor to a private profile sees no rating data (not in payload, not in UI)
+- [x] Owner sees all their ratings regardless of `isPublicProfile`
+- [x] Visitor to a public profile sees the owner's ratings on library cards and the histogram
+- [x] Visitor to a private profile sees no rating data (not in payload, not in UI)
 
 ---
 
