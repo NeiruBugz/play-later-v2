@@ -15,6 +15,19 @@ const PROFILE_USER_ID = "profile-user-id";
 const VIEWER_USER_ID = "viewer-user-id";
 const USERNAME = "gameruser";
 
+const ratingHistogramFixture = [
+  { rating: 1, count: 0 },
+  { rating: 2, count: 1 },
+  { rating: 3, count: 0 },
+  { rating: 4, count: 2 },
+  { rating: 5, count: 1 },
+  { rating: 6, count: 0 },
+  { rating: 7, count: 3 },
+  { rating: 8, count: 4 },
+  { rating: 9, count: 2 },
+  { rating: 10, count: 1 },
+];
+
 const baseProfileWithStats = {
   username: USERNAME,
   name: "Gamer User",
@@ -42,6 +55,8 @@ const baseProfileWithStats = {
       slug: "elden-ring",
     },
   ],
+  ratingHistogram: ratingHistogramFixture,
+  ratedCount: 14,
 };
 
 const followCounts = { followers: 42, following: 13 };
@@ -107,6 +122,18 @@ describe("getProfilePageData", () => {
       if (result.success) {
         expect(result.data.stats).toBeDefined();
         expect(result.data.libraryPreview).toBeDefined();
+      }
+    });
+
+    it("should include ratingHistogram and ratedCount in stats", async () => {
+      const result = await getProfilePageData(USERNAME, PROFILE_USER_ID);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.stats?.ratingHistogram).toEqual(
+          ratingHistogramFixture
+        );
+        expect(result.data.stats?.ratedCount).toBe(14);
       }
     });
 
@@ -214,6 +241,18 @@ describe("getProfilePageData", () => {
       if (result.success) {
         expect(result.data.stats).toBeDefined();
         expect(result.data.libraryPreview).toBeDefined();
+      }
+    });
+
+    it("should include ratingHistogram and ratedCount in stats", async () => {
+      const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.stats?.ratingHistogram).toEqual(
+          ratingHistogramFixture
+        );
+        expect(result.data.stats?.ratedCount).toBe(14);
       }
     });
 
@@ -366,6 +405,16 @@ describe("getProfilePageData", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.stats).toBeUndefined();
+      }
+    });
+
+    it("should omit ratingHistogram and ratedCount when profile is private and viewer is not owner", async () => {
+      const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.stats?.ratingHistogram).toBeUndefined();
+        expect(result.data.stats?.ratedCount).toBeUndefined();
       }
     });
 

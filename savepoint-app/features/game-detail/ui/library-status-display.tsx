@@ -80,7 +80,7 @@ export const LibraryStatusDisplay = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-lg">
-          <div className="gap-md flex items-center" role="status">
+          <div role="status">
             <Badge
               variant={badgeVariant}
               className="text-sm"
@@ -94,6 +94,11 @@ export const LibraryStatusDisplay = ({
               />
               {statusLabel}
             </Badge>
+          </div>
+          <div className="gap-xs flex flex-col">
+            <span className="text-muted-foreground text-xs font-medium">
+              Your rating
+            </span>
             <LibraryRatingControl
               libraryItemId={libraryItemId}
               initialRating={rating}

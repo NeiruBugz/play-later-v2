@@ -1,17 +1,16 @@
-import type {
-  LibraryPreviewGame,
-  LibraryStats,
-} from "@/data-access-layer/services/profile/types";
+import type { LibraryPreviewGame } from "@/data-access-layer/services/profile/types";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 
 import { statusLabels } from "../lib/constants";
+import type { ProfilePageLibraryStats } from "../use-cases/get-profile-page-data";
 import { ProfileStatsBar } from "./profile-stats-bar";
+import { RatingHistogram } from "./rating-histogram";
 
 type OverviewTabProps = {
-  stats: LibraryStats;
+  stats: ProfilePageLibraryStats;
   libraryPreview: LibraryPreviewGame[];
   gameCount: number;
 };
@@ -43,6 +42,11 @@ export function OverviewTab({
         playing={playing}
         completed={completed}
         journalEntries={journalEntries}
+      />
+
+      <RatingHistogram
+        ratingHistogram={stats.ratingHistogram}
+        ratedCount={stats.ratedCount}
       />
 
       {showLibraryStatsGrid && (

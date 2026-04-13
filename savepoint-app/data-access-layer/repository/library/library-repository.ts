@@ -769,6 +769,24 @@ export async function findLibraryItemsWithFilters(params: {
   return { items: sortedItems, total: sortedItems.length };
 }
 
+export async function getRatingHistogram({
+  userId,
+}: {
+  userId: string;
+}): Promise<RepositoryResult<Array<{ rating: number; count: number }>>> {
+  const bins = await prisma.libraryItem.groupBy({
+    by: ["rating"],
+    where: { userId, rating: { not: null } },
+    _count: { _all: true },
+  });
+  const histogram = Array.from({ length: 10 }, (_, i) => {
+    const rating = i + 1;
+    const bin = bins.find((b) => b.rating === rating);
+    return { rating, count: bin?._count._all ?? 0 };
+  });
+  return repositorySuccess(histogram);
+}
+
 export async function setRating({
   libraryItemId,
   userId,

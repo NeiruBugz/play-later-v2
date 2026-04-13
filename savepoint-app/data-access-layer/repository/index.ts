@@ -36,6 +36,7 @@ export {
   findLibraryPreview,
   hasLibraryItemWithStatus,
   setRating,
+  getRatingHistogram,
   type FindLibraryItemsResult,
 } from "./library/library-repository";
 export {

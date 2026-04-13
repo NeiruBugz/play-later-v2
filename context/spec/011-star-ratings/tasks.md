@@ -17,7 +17,7 @@ Sliced for incremental, runnable delivery. Each slice leaves the app in a workin
 
   _Adds the full mutation path. End-to-end: click stars → optimistic update → server persists → reload reflects new value._
 
-  - [ ] Extend `data-access-layer/repository/library-item/...` with `setRating({ libraryItemId, userId, rating })` (returns `RepositoryResult<void>`, ownership-scoped). Add integration test covering set, update, clear, and ownership rejection. **[Agent: prisma-database]**
+  - [x] Extend `data-access-layer/repository/library-item/...` with `setRating({ libraryItemId, userId, rating })` (returns `RepositoryResult<void>`, ownership-scoped). Add integration test covering set, update, clear, and ownership rejection. **[Agent: prisma-database]**
   - [x] Extend `data-access-layer/services/library/library-service.ts` with `setRating` method using a Zod schema (`rating: number.int().min(1).max(10).nullable()`). Add unit tests for validation rejections (0, 11, 5.5, NaN) and pass-through. **[Agent: typescript-test-expert]**
   - [x] Create `features/manage-library-entry/server-actions/set-library-rating.ts` using `authorizedActionClient`. On success call `revalidatePath('/library')` and `revalidatePath(\`/u/${username}\`)`. Barrel-export from `index.server.ts`. Add server-action test (happy path, validation rejection, unauthenticated rejection). **[Agent: nextjs-fullstack]**
   - [x] Extend `RatingInput` to support interactive mode: hover preview (left/right half of star), click-to-commit, click-on-current-value clears, keyboard nav (`←`/`→`/`Enter`/`Escape`). Ignore double-click within 150ms of last commit. Add component tests for hover/click/clear/keyboard/a11y. **[Agent: react-frontend]**
@@ -42,13 +42,13 @@ Sliced for incremental, runnable delivery. Each slice leaves the app in a workin
   - [x] Update the Library page Server Component to read `searchParams.sort`, `searchParams.minRating`, `searchParams.unratedOnly` and pass to the service. Add component test for URL round-trip on each control. **[Agent: nextjs-fullstack]**
   - [x] Verify: in dev, set `?sort=rating-desc&minRating=8`, confirm only ≥4-star entries appear in descending order with unrated last; toggle `Unrated only`, confirm only nulls show; share the URL and confirm state restores on cold load. **[Agent: testing]**
 
-- [ ] **Slice 5: Rating Distribution histogram on profile Overview**
+- [x] **Slice 5: Rating Distribution histogram on profile Overview**
 
   _Profile Overview gains a 10-bar histogram, hidden below 5 rated entries, privacy-gated via Spec 009._
 
-  - [ ] Add `getRatingHistogram({ userId })` to the library-item repository: `GROUP BY rating` where `rating IS NOT NULL`, returns 10 bins. Add integration test (sparse + dense distributions, all-null user). **[Agent: prisma-database]**
-  - [ ] Extend `ProfileService.getProfileWithStats` return shape with `ratingHistogram` and `ratedCount`. Update existing unit tests to assert new fields without breaking other consumers. **[Agent: typescript-test-expert]**
-  - [ ] Extend `features/profile/use-cases/get-profile-page-data.ts` to surface `ratingHistogram` and `ratedCount` on `ProfilePageData.stats` for owner + public-visitor non-private branches; omit on private-visitor branch. Update use-case unit tests for all three branches. **[Agent: nextjs-fullstack]**
-  - [ ] Create `features/profile/ui/rating-histogram.tsx` rendering 10 Tailwind bars, hover/tap reveals count + rating, hidden when `ratedCount < 5`. Add component tests (threshold gate, proportional bar heights, a11y). **[Agent: react-frontend]**
-  - [ ] Mount `RatingHistogram` on the profile Overview tab in `app/u/[username]/(tabs)/page.tsx` (or appropriate route file), reading from `ProfilePageData`. **[Agent: nextjs-fullstack]**
-  - [ ] Verify: as owner with <5 ratings, confirm widget hidden; rate a 5th game, refresh, confirm widget appears with correct bars; visit public profile, confirm visible; flip `isPublicProfile=false` and visit as anon, confirm absent. Run full test suite. **[Agent: testing]**
+  - [x] Add `getRatingHistogram({ userId })` to the library-item repository: `GROUP BY rating` where `rating IS NOT NULL`, returns 10 bins. Add integration test (sparse + dense distributions, all-null user). **[Agent: prisma-database]**
+  - [x] Extend `ProfileService.getProfileWithStats` return shape with `ratingHistogram` and `ratedCount`. Update existing unit tests to assert new fields without breaking other consumers. **[Agent: typescript-test-expert]**
+  - [x] Extend `features/profile/use-cases/get-profile-page-data.ts` to surface `ratingHistogram` and `ratedCount` on `ProfilePageData.stats` for owner + public-visitor non-private branches; omit on private-visitor branch. Update use-case unit tests for all three branches. **[Agent: nextjs-fullstack]**
+  - [x] Create `features/profile/ui/rating-histogram.tsx` rendering 10 Tailwind bars, hover/tap reveals count + rating, hidden when `ratedCount < 5`. Add component tests (threshold gate, proportional bar heights, a11y). **[Agent: react-frontend]**
+  - [x] Mount `RatingHistogram` on the profile Overview tab in `app/u/[username]/(tabs)/page.tsx` (or appropriate route file), reading from `ProfilePageData`. **[Agent: nextjs-fullstack]**
+  - [x] Verify: as owner with <5 ratings, confirm widget hidden; rate a 5th game, refresh, confirm widget appears with correct bars; visit public profile, confirm visible; flip `isPublicProfile=false` and visit as anon, confirm absent. Run full test suite. **[Agent: testing]**

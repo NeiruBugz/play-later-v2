@@ -1,6 +1,7 @@
 import "server-only";
 
 import { ProfileService, SocialService } from "@/data-access-layer/services";
+import type { RatingHistogramEntry } from "@/data-access-layer/services/profile/types";
 import { cache } from "react";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
@@ -19,7 +20,7 @@ type ProfileResponse = {
   email?: string | null;
 };
 
-type LibraryStats = {
+export type ProfilePageLibraryStats = {
   statusCounts: Record<string, number>;
   recentGames: Array<{
     gameId: string;
@@ -28,7 +29,11 @@ type LibraryStats = {
     lastPlayed: Date;
   }>;
   journalCount: number;
+  ratingHistogram: RatingHistogramEntry[];
+  ratedCount: number;
 };
+
+type LibraryStats = ProfilePageLibraryStats;
 
 type LibraryPreviewGame = {
   title: string;
@@ -102,7 +107,11 @@ async function getProfilePageDataImpl(
           email: statsProfile.email,
           createdAt: statsProfile.createdAt,
           isPublicProfile: statsProfile.isPublicProfile,
-          stats: statsProfile.stats,
+          stats: {
+            ...statsProfile.stats,
+            ratingHistogram: statsProfile.ratingHistogram,
+            ratedCount: statsProfile.ratedCount,
+          },
           gameCount: statsProfile.gameCount,
           libraryPreview: statsProfile.libraryPreview,
         };
@@ -197,7 +206,11 @@ async function getProfilePageDataImpl(
       if (!visitorStatsResult.success) {
         return { success: false, error: visitorStatsResult.error };
       }
-      data.stats = visitorStatsResult.data.profile.stats;
+      data.stats = {
+        ...visitorStatsResult.data.profile.stats,
+        ratingHistogram: visitorStatsResult.data.profile.ratingHistogram,
+        ratedCount: visitorStatsResult.data.profile.ratedCount,
+      };
     }
 
     return { success: true, data };

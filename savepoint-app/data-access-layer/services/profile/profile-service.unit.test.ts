@@ -5,6 +5,7 @@ import {
   findUserByNormalizedUsername,
   findUserByUsername,
   getLibraryStatsByUserId,
+  getRatingHistogram,
   updateUserProfile,
 } from "@/data-access-layer/repository";
 import {
@@ -40,6 +41,7 @@ vi.mock("@/data-access-layer/repository", () => ({
   findUserByNormalizedUsername: vi.fn(),
   findUserByUsername: vi.fn(),
   getLibraryStatsByUserId: vi.fn(),
+  getRatingHistogram: vi.fn(),
   updateUserProfile: vi.fn(),
 }));
 
@@ -55,6 +57,7 @@ describe("ProfileService", () => {
   let mockFindUserByNormalizedUsername: ReturnType<typeof vi.fn>;
   let mockFindUserByUsername: ReturnType<typeof vi.fn>;
   let mockGetLibraryStatsByUserId: ReturnType<typeof vi.fn>;
+  let mockGetRatingHistogram: ReturnType<typeof vi.fn>;
   let mockUpdateUserProfile: ReturnType<typeof vi.fn>;
   let mockValidateUsername: ReturnType<typeof vi.fn>;
 
@@ -68,6 +71,14 @@ describe("ProfileService", () => {
     mockFindUserByNormalizedUsername = vi.mocked(findUserByNormalizedUsername);
     mockFindUserByUsername = vi.mocked(findUserByUsername);
     mockGetLibraryStatsByUserId = vi.mocked(getLibraryStatsByUserId);
+    mockGetRatingHistogram = vi.mocked(getRatingHistogram);
+    mockGetRatingHistogram.mockResolvedValue({
+      ok: true,
+      data: Array.from({ length: 10 }, (_, i) => ({
+        rating: i + 1,
+        count: 0,
+      })),
+    });
     mockUpdateUserProfile = vi.mocked(updateUserProfile);
     mockValidateUsername = vi.mocked(validateUsername);
   });
@@ -151,6 +162,8 @@ describe("ProfileService", () => {
         expect(result.data.profile.stats.recentGames[0].title).toBe(
           "Test Game 1"
         );
+        expect(result.data.profile.ratingHistogram).toHaveLength(10);
+        expect(result.data.profile.ratedCount).toBe(0);
       }
 
       expect(mockFindUserById).toHaveBeenCalledWith("user-123", {
@@ -164,6 +177,27 @@ describe("ProfileService", () => {
         },
       });
       expect(mockGetLibraryStatsByUserId).toHaveBeenCalledWith("user-123");
+      expect(mockGetRatingHistogram).toHaveBeenCalledWith({
+        userId: "user-123",
+      });
+    });
+
+    it("should return correct ratingHistogram and ratedCount when games are rated", async () => {
+      mockFindUserById.mockResolvedValue(basicUserProfileFixture);
+      mockGetLibraryStatsByUserId.mockResolvedValue(libraryStatsSuccessFixture);
+      const histogram = Array.from({ length: 10 }, (_, i) => ({
+        rating: i + 1,
+        count: i < 3 ? 0 : i === 4 ? 7 : i === 7 ? 3 : 0,
+      }));
+      mockGetRatingHistogram.mockResolvedValue({ ok: true, data: histogram });
+
+      const result = await service.getProfileWithStats({ userId: "user-123" });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.profile.ratingHistogram).toEqual(histogram);
+        expect(result.data.profile.ratedCount).toBe(10);
+      }
     });
 
     it("should return error when user is not found", async () => {

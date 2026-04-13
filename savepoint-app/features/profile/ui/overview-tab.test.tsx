@@ -1,9 +1,7 @@
-import type {
-  LibraryPreviewGame,
-  LibraryStats,
-} from "@/data-access-layer/services/profile/types";
+import type { LibraryPreviewGame } from "@/data-access-layer/services/profile/types";
 import { render, screen } from "@testing-library/react";
 
+import type { ProfilePageLibraryStats } from "../use-cases/get-profile-page-data";
 import { OverviewTab } from "./overview-tab";
 import { ProfileStatsBar } from "./profile-stats-bar";
 
@@ -13,7 +11,7 @@ vi.mock("./profile-stats-bar", () => ({
 
 const mockProfileStatsBar = vi.mocked(ProfileStatsBar);
 
-const BASE_STATS: LibraryStats = {
+const BASE_STATS: ProfilePageLibraryStats = {
   statusCounts: {
     PLAYING: 3,
     COMPLETED: 5,
@@ -34,6 +32,8 @@ const BASE_STATS: LibraryStats = {
     },
   ],
   journalCount: 7,
+  ratingHistogram: [],
+  ratedCount: 0,
 };
 
 const BASE_LIBRARY_PREVIEW: LibraryPreviewGame[] = [
@@ -43,7 +43,7 @@ const BASE_LIBRARY_PREVIEW: LibraryPreviewGame[] = [
 ];
 
 type RenderOptions = {
-  stats?: LibraryStats;
+  stats?: ProfilePageLibraryStats;
   libraryPreview?: LibraryPreviewGame[];
   gameCount?: number;
 };
