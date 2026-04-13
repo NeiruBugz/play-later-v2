@@ -43,7 +43,9 @@ type SortField =
   | "releaseDate"
   | "startedAt"
   | "completedAt"
-  | "title";
+  | "title"
+  | "rating-desc"
+  | "rating-asc";
 type GetLibraryItemsParams = {
   userId: string;
   status?: LibraryItemStatus;
@@ -51,6 +53,8 @@ type GetLibraryItemsParams = {
   search?: string;
   sortBy?: SortField;
   sortOrder?: "asc" | "desc";
+  minRating?: number;
+  unratedOnly?: boolean;
   distinctByGame?: boolean;
   offset?: number;
   limit?: number;
@@ -182,6 +186,11 @@ export class LibraryService {
       }
 
       const { offset, limit, ...restParams } = validation.data;
+
+      if (restParams.unratedOnly) {
+        restParams.minRating = undefined;
+      }
+
       const data = await findLibraryItemsWithFilters({
         ...restParams,
         skip: offset,

@@ -141,6 +141,85 @@ describe("LibraryService", () => {
         expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith(params);
       });
 
+      it("should forward minRating to repository", async () => {
+        mockFindLibraryItemsWithFilters.mockResolvedValue({
+          items: [mockLibraryItems[0]],
+          total: 1,
+        });
+
+        await service.getLibraryItems({ userId: validUserId, minRating: 5 });
+
+        expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith(
+          expect.objectContaining({ userId: validUserId, minRating: 5 })
+        );
+      });
+
+      it("should forward unratedOnly to repository", async () => {
+        mockFindLibraryItemsWithFilters.mockResolvedValue({
+          items: mockLibraryItems,
+          total: 2,
+        });
+
+        await service.getLibraryItems({
+          userId: validUserId,
+          unratedOnly: true,
+        });
+
+        expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith(
+          expect.objectContaining({ userId: validUserId, unratedOnly: true })
+        );
+      });
+
+      it("should drop minRating when unratedOnly is true", async () => {
+        mockFindLibraryItemsWithFilters.mockResolvedValue({
+          items: mockLibraryItems,
+          total: 2,
+        });
+
+        await service.getLibraryItems({
+          userId: validUserId,
+          unratedOnly: true,
+          minRating: 7,
+        });
+
+        const callArgs = mockFindLibraryItemsWithFilters.mock
+          .calls[0][0] as Record<string, unknown>;
+        expect(callArgs.unratedOnly).toBe(true);
+        expect(callArgs.minRating).toBeUndefined();
+      });
+
+      it("should forward sortBy rating-desc to repository", async () => {
+        mockFindLibraryItemsWithFilters.mockResolvedValue({
+          items: mockLibraryItems,
+          total: 2,
+        });
+
+        await service.getLibraryItems({
+          userId: validUserId,
+          sortBy: "rating-desc",
+        });
+
+        expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith(
+          expect.objectContaining({ sortBy: "rating-desc" })
+        );
+      });
+
+      it("should forward sortBy rating-asc to repository", async () => {
+        mockFindLibraryItemsWithFilters.mockResolvedValue({
+          items: mockLibraryItems,
+          total: 2,
+        });
+
+        await service.getLibraryItems({
+          userId: validUserId,
+          sortBy: "rating-asc",
+        });
+
+        expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith(
+          expect.objectContaining({ sortBy: "rating-asc" })
+        );
+      });
+
       it("should return empty array when no library items found", async () => {
         mockFindLibraryItemsWithFilters.mockResolvedValue({
           items: [],

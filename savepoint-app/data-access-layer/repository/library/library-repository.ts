@@ -586,13 +586,17 @@ export async function findLibraryItemsWithFilters(params: {
   status?: LibraryItemStatus;
   platform?: string;
   search?: string;
+  minRating?: number;
+  unratedOnly?: boolean;
   sortBy?:
     | "updatedAt"
     | "createdAt"
     | "releaseDate"
     | "startedAt"
     | "completedAt"
-    | "title";
+    | "title"
+    | "rating-desc"
+    | "rating-asc";
   sortOrder?: "asc" | "desc";
   distinctByGame?: boolean;
   skip?: number;
@@ -603,12 +607,19 @@ export async function findLibraryItemsWithFilters(params: {
     status,
     platform,
     search,
+    minRating,
+    unratedOnly,
     sortBy = "updatedAt",
     sortOrder = "desc",
     distinctByGame = false,
     skip,
     take,
   } = params;
+  const ratingFilter: Pick<Prisma.LibraryItemWhereInput, "rating"> = unratedOnly
+    ? { rating: null }
+    : minRating !== undefined
+      ? { rating: { gte: minRating } }
+      : {};
   const whereClause: Prisma.LibraryItemWhereInput = {
     userId,
     ...(status && { status }),
@@ -616,6 +627,7 @@ export async function findLibraryItemsWithFilters(params: {
     ...(search && {
       game: { title: { contains: search, mode: "insensitive" } },
     }),
+    ...ratingFilter,
   };
   let orderByClause: Prisma.LibraryItemOrderByWithRelationInput;
   switch (sortBy) {
@@ -630,6 +642,12 @@ export async function findLibraryItemsWithFilters(params: {
       break;
     case "title":
       orderByClause = { game: { title: sortOrder } };
+      break;
+    case "rating-desc":
+      orderByClause = { rating: { sort: "desc", nulls: "last" } };
+      break;
+    case "rating-asc":
+      orderByClause = { rating: { sort: "asc", nulls: "last" } };
       break;
     case "updatedAt":
       orderByClause = { updatedAt: sortOrder };
@@ -720,6 +738,22 @@ export async function findLibraryItemsWithFilters(params: {
         const bTitle = b.game.title.toLowerCase();
         const comparison = aTitle.localeCompare(bTitle);
         return sortOrder === "asc" ? comparison : -comparison;
+      }
+      case "rating-desc": {
+        const aValue = a.rating;
+        const bValue = b.rating;
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return 1;
+        if (bValue == null) return -1;
+        return bValue - aValue;
+      }
+      case "rating-asc": {
+        const aValue = a.rating;
+        const bValue = b.rating;
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return 1;
+        if (bValue == null) return -1;
+        return aValue - bValue;
       }
       case "updatedAt": {
         const comparison = a.updatedAt.getTime() - b.updatedAt.getTime();

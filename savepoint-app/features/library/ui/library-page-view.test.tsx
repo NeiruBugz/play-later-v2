@@ -19,17 +19,22 @@ import { LibraryPageView } from "./library-page-view";
  * Creates a stateful navigation mock that synchronizes useRouter and useSearchParams.
  * When router.push is called with a URL, the searchParams are updated accordingly.
  */
-const createNavigationMock = () => {
-  let currentParams = new URLSearchParams();
+const createNavigationMock = (initialQuery = "") => {
+  let currentParams = new URLSearchParams(initialQuery);
 
   const mockPush = vi.fn((url: string) => {
     const urlObj = new URL(url, "http://localhost");
     currentParams = urlObj.searchParams;
   });
 
+  const mockReplace = vi.fn((url: string) => {
+    const urlObj = new URL(url, "http://localhost");
+    currentParams = urlObj.searchParams;
+  });
+
   vi.mocked(useRouter).mockReturnValue({
     push: mockPush,
-    replace: vi.fn(),
+    replace: mockReplace,
     back: vi.fn(),
     forward: vi.fn(),
     refresh: vi.fn(),
@@ -40,7 +45,7 @@ const createNavigationMock = () => {
     () => currentParams as ReadonlyURLSearchParams
   );
 
-  return { mockPush, getParams: () => currentParams };
+  return { mockPush, mockReplace, getParams: () => currentParams };
 };
 
 const elements = {
@@ -448,6 +453,110 @@ describe("LibraryPageView", () => {
 
       expect(elements.queryLibraryGrid()).not.toBeInTheDocument();
       expect(elements.queryEmptyState()).not.toBeInTheDocument();
+    });
+  });
+
+  describe("rating-based sort, min-rating, and unrated-only URL round-trip", () => {
+    it("writes sortBy=rating-desc (no sortOrder) when 'Highest rated' is selected", async () => {
+      const { mockPush } = createNavigationMock();
+      renderComponent();
+
+      await waitFor(() => {
+        expect(elements.getSortSelect()).toBeVisible();
+      });
+
+      mockPush.mockClear();
+
+      await actions.selectSort("Highest rated");
+
+      expect(mockPush).toHaveBeenCalledTimes(1);
+      const pushedUrl = new URL(
+        mockPush.mock.calls[0][0] as string,
+        "http://localhost"
+      );
+      expect(pushedUrl.searchParams.get("sortBy")).toBe("rating-desc");
+      expect(pushedUrl.searchParams.get("sortOrder")).toBeNull();
+    });
+
+    it("restores 'Highest rated' label when URL contains ?sortBy=rating-desc", async () => {
+      createNavigationMock("sortBy=rating-desc");
+      renderComponent();
+
+      await waitFor(() => {
+        expect(elements.getSortSelect()).toHaveTextContent("Highest rated");
+      });
+    });
+
+    it("forwards minRating to /api/library request when present in URL", async () => {
+      createNavigationMock("minRating=8");
+
+      let requestedUrl: string | null = null;
+      server.use(
+        http.get("/api/library", ({ request }) => {
+          requestedUrl = request.url;
+          return HttpResponse.json({
+            success: true,
+            data: { items: [], total: 0, hasMore: false },
+          });
+        })
+      );
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(requestedUrl).not.toBeNull();
+      });
+
+      const url = new URL(requestedUrl as unknown as string);
+      expect(url.searchParams.get("minRating")).toBe("8");
+    });
+
+    it("forwards unratedOnly=1 to /api/library request when present in URL", async () => {
+      createNavigationMock("unratedOnly=1");
+
+      let requestedUrl: string | null = null;
+      server.use(
+        http.get("/api/library", ({ request }) => {
+          requestedUrl = request.url;
+          return HttpResponse.json({
+            success: true,
+            data: { items: [], total: 0, hasMore: false },
+          });
+        })
+      );
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(requestedUrl).not.toBeNull();
+      });
+
+      const url = new URL(requestedUrl as unknown as string);
+      expect(url.searchParams.get("unratedOnly")).toBe("1");
+    });
+
+    it("ignores invalid minRating (out of range) and omits it from the API request", async () => {
+      createNavigationMock("minRating=99");
+
+      let requestedUrl: string | null = null;
+      server.use(
+        http.get("/api/library", ({ request }) => {
+          requestedUrl = request.url;
+          return HttpResponse.json({
+            success: true,
+            data: { items: [], total: 0, hasMore: false },
+          });
+        })
+      );
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(requestedUrl).not.toBeNull();
+      });
+
+      const url = new URL(requestedUrl as unknown as string);
+      expect(url.searchParams.get("minRating")).toBeNull();
     });
   });
 

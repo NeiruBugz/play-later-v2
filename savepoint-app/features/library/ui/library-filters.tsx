@@ -11,6 +11,8 @@ import {
   CollapsibleTrigger,
 } from "@/shared/components/ui/collapsible";
 import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { RatingInput } from "@/shared/components/ui/rating-input";
 import {
   Select,
   SelectContent,
@@ -18,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Switch } from "@/shared/components/ui/switch";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
   LIBRARY_STATUS_CONFIG,
@@ -33,6 +36,8 @@ const PRIMARY_SORT_OPTIONS = [
   { value: "createdAt-desc", label: "Recently Added" },
   { value: "title-asc", label: "Title A-Z" },
   { value: "title-desc", label: "Title Z-A" },
+  { value: "rating-desc", label: "Highest rated" },
+  { value: "rating-asc", label: "Lowest rated" },
 ] as const;
 
 const ADVANCED_SORT_OPTIONS = [
@@ -76,6 +81,53 @@ export function LibraryFilters() {
     [router, searchParams]
   );
 
+  const updateMergedParams = useCallback(
+    (updates: Record<string, string | null | undefined>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === undefined || value === "") {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      const qs = params.toString();
+      router.replace(qs ? `/library?${qs}` : `/library`, { scroll: false });
+    },
+    [router, searchParams]
+  );
+
+  const minRatingParam = searchParams.get("minRating");
+  const parsedMinRating = minRatingParam ? Number(minRatingParam) : null;
+  const minRatingValue =
+    parsedMinRating !== null &&
+    Number.isFinite(parsedMinRating) &&
+    parsedMinRating >= 1 &&
+    parsedMinRating <= 10
+      ? parsedMinRating
+      : null;
+  const unratedOnly = searchParams.get("unratedOnly") === "1";
+
+  const handleMinRatingChange = useCallback(
+    (next: number | null) => {
+      updateMergedParams({
+        minRating: next === null ? null : String(next),
+      });
+    },
+    [updateMergedParams]
+  );
+
+  const handleClearMinRating = useCallback(() => {
+    updateMergedParams({ minRating: null });
+  }, [updateMergedParams]);
+
+  const handleUnratedOnlyChange = useCallback(
+    (checked: boolean) => {
+      updateMergedParams({ unratedOnly: checked ? "1" : null });
+    },
+    [updateMergedParams]
+  );
+
   const clearAllFilters = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("status");
@@ -98,6 +150,9 @@ export function LibraryFilters() {
 
   const getCurrentSortValue = useCallback((): string => {
     const sortBy = searchParams.get("sortBy") ?? "updatedAt";
+    if (sortBy === "rating-desc" || sortBy === "rating-asc") {
+      return sortBy;
+    }
     const sortOrder = searchParams.get("sortOrder") ?? "desc";
     return `${sortBy}-${sortOrder}`;
   }, [searchParams]);
@@ -111,10 +166,15 @@ export function LibraryFilters() {
 
   const handleSortChange = useCallback(
     (value: string) => {
-      const [sortBy, sortOrder] = value.split("-");
       const params = new URLSearchParams(searchParams.toString());
-      params.set("sortBy", sortBy);
-      params.set("sortOrder", sortOrder);
+      if (value === "rating-desc" || value === "rating-asc") {
+        params.set("sortBy", value);
+        params.delete("sortOrder");
+      } else {
+        const [sortBy, sortOrder] = value.split("-");
+        params.set("sortBy", sortBy);
+        params.set("sortOrder", sortOrder);
+      }
       router.push(`/library?${params.toString()}`, { scroll: false });
     },
     [router, searchParams]
@@ -303,6 +363,43 @@ export function LibraryFilters() {
             <X className="h-4 w-4" aria-hidden="true" />
           </Button>
         )}
+      </div>
+
+      {/* Row 4: Rating filters (min rating + unrated only) */}
+      <div className="gap-lg flex flex-col md:flex-row md:flex-wrap md:items-center">
+        <div className="gap-sm flex items-center">
+          <Label className="text-sm font-medium">Minimum rating</Label>
+          <RatingInput
+            value={minRatingValue}
+            readOnly={false}
+            onChange={handleMinRatingChange}
+            size="sm"
+            aria-label="Minimum rating filter"
+          />
+          {minRatingValue !== null && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearMinRating}
+              className="h-9"
+              aria-label="Clear minimum rating"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </Button>
+          )}
+        </div>
+
+        <div className="gap-sm flex items-center">
+          <Switch
+            id="unrated-only"
+            checked={unratedOnly}
+            onCheckedChange={handleUnratedOnlyChange}
+            aria-label="Show only unrated games"
+          />
+          <Label htmlFor="unrated-only" className="text-sm font-medium">
+            Unrated only
+          </Label>
+        </div>
       </div>
 
       {/* Row 3 mobile: collapsible platform + sort */}

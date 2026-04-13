@@ -32,15 +32,15 @@ Sliced for incremental, runnable delivery. Each slice leaves the app in a workin
   - [x] In `widgets/game-card/...` (or existing meta slot), conditionally render `<RatingInput value={rating} readOnly size="sm" />` when `rating !== null`; render nothing when null. **[Agent: react-frontend]**
   - [x] Verify: with multiple library items at varied ratings (incl. one unrated), confirm cards render correct stars on `/library` and on `/u/{me}/library`. Visit a public profile other than your own (or use a seeded test user) and confirm public visibility. Confirm a private profile shows nothing. **[Agent: testing]**
 
-- [ ] **Slice 4: Sort and filter the owner's Library by rating (URL-addressable)**
+- [x] **Slice 4: Sort and filter the owner's Library by rating (URL-addressable)**
 
   _Library page exposes Sort, Min-rating, and Unrated-only controls; state persists in URL._
 
-  - [ ] Extend `findManyForUser` in the library-item repository: optional `minRating`, `unratedOnly`, and `sort: "rating-desc" | "rating-asc"` with `NULLS LAST`. Service-layer precedence: `unratedOnly=1` wins over `minRating`. Add integration tests covering each combination + NULLS LAST ordering + precedence. **[Agent: prisma-database]**
-  - [ ] Extend `LibraryService.getLibraryForUser` to forward new params. Unit-test pass-through and precedence rule. **[Agent: typescript-test-expert]**
-  - [ ] In `features/library/ui/...` add controls to the existing filter bar: Sort `<Select>` adds `rating-desc` / `rating-asc`, Min-rating uses `<RatingInput>` (interactive) with a Clear button, `Unrated only` `<Switch>`. All three call `router.replace` with merged query params. **[Agent: react-frontend]**
-  - [ ] Update the Library page Server Component to read `searchParams.sort`, `searchParams.minRating`, `searchParams.unratedOnly` and pass to the service. Add component test for URL round-trip on each control. **[Agent: nextjs-fullstack]**
-  - [ ] Verify: in dev, set `?sort=rating-desc&minRating=8`, confirm only ≥4-star entries appear in descending order with unrated last; toggle `Unrated only`, confirm only nulls show; share the URL and confirm state restores on cold load. **[Agent: testing]**
+  - [x] Extend `findManyForUser` in the library-item repository: optional `minRating`, `unratedOnly`, and `sort: "rating-desc" | "rating-asc"` with `NULLS LAST`. Service-layer precedence: `unratedOnly=1` wins over `minRating`. Add integration tests covering each combination + NULLS LAST ordering + precedence. **[Agent: prisma-database]**
+  - [x] Extend `LibraryService.getLibraryForUser` to forward new params. Unit-test pass-through and precedence rule. **[Agent: typescript-test-expert]**
+  - [x] In `features/library/ui/...` add controls to the existing filter bar: Sort `<Select>` adds `rating-desc` / `rating-asc`, Min-rating uses `<RatingInput>` (interactive) with a Clear button, `Unrated only` `<Switch>`. All three call `router.replace` with merged query params. **[Agent: react-frontend]**
+  - [x] Update the Library page Server Component to read `searchParams.sort`, `searchParams.minRating`, `searchParams.unratedOnly` and pass to the service. Add component test for URL round-trip on each control. **[Agent: nextjs-fullstack]**
+  - [x] Verify: in dev, set `?sort=rating-desc&minRating=8`, confirm only ≥4-star entries appear in descending order with unrated last; toggle `Unrated only`, confirm only nulls show; share the URL and confirm state restores on cold load. **[Agent: testing]**
 
 - [ ] **Slice 5: Rating Distribution histogram on profile Overview**
 

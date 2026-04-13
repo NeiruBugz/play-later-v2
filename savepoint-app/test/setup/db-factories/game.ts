@@ -64,6 +64,7 @@ export type LibraryItemFactoryOptions = {
   createdAt?: Date;
   startedAt?: Date;
   completedAt?: Date;
+  rating?: number | null;
 };
 
 export const createLibraryItemData = (
@@ -76,6 +77,7 @@ export const createLibraryItemData = (
     createdAt: overrides.createdAt,
     startedAt: overrides.startedAt,
     completedAt: overrides.completedAt,
+    rating: overrides.rating,
   };
 };
 
