@@ -296,6 +296,7 @@ describe("JournalEntryForm", () => {
           completedAt: null,
           hasBeenPlayed: false,
           statusChangedAt: null,
+          rating: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -359,6 +360,7 @@ describe("JournalEntryForm", () => {
             completedAt: null,
             hasBeenPlayed: false,
             statusChangedAt: null,
+            rating: null,
             createdAt: new Date(),
             updatedAt: new Date(),
           },
@@ -373,6 +375,7 @@ describe("JournalEntryForm", () => {
             completedAt: null,
             hasBeenPlayed: false,
             statusChangedAt: null,
+            rating: null,
             createdAt: new Date(),
             updatedAt: new Date(),
           },

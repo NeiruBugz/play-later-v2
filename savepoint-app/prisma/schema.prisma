@@ -116,17 +116,20 @@ model LibraryItem {
   startedAt       DateTime?
   completedAt     DateTime?
   hasBeenPlayed   Boolean           @default(false)
+  rating          Int?
   JournalEntry    JournalEntry[]
 
   @@index([userId, status])
   @@index([userId, platform])
   @@index([userId, createdAt])
+  @@index([userId, rating])
   @@index([gameId])
   @@map("LibraryItem")
 }
 
 model Review {
   id          Int      @id @default(autoincrement())
+  /// Legacy/unused. Pending Reviews spec (Phase 2B). User-facing ratings live on LibraryItem.rating (1-10 half-step scale).
   rating      Int      @default(0) // Rating from 0 to 10
   content     String? // Optional review text
   createdAt   DateTime @default(now())

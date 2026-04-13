@@ -6,6 +6,7 @@ export interface LibraryStatusDisplayProps {
   userLibraryStatus?: {
     mostRecent: {
       status: LibraryItemStatus;
+      rating: number | null;
     };
     updatedAt: Date;
     allItems: LibraryItemDomain[];

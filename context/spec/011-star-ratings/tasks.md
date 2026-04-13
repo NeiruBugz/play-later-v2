@@ -8,12 +8,12 @@ Sliced for incremental, runnable delivery. Each slice leaves the app in a workin
 
   _Smallest visible value: schema accepts a rating; the game detail page renders it for a library entry. No input yet — values seeded via Prisma Studio for verification._
 
-  - [ ] Add nullable `rating Int?` column to `LibraryItem` with `CHECK (rating IS NULL OR rating BETWEEN 1 AND 10)` and `@@index([userId, rating])` in `prisma/schema.prisma`. Add comment to `Review.rating` marking it legacy/unused. Generate migration via `prisma migrate dev`. **[Agent: prisma-database]**
-  - [ ] Create `shared/components/ui/rating-input.tsx` as a controlled client component supporting `readOnly` mode only (display 5 stars with half-step precision from a 1–10 integer; render empty state when `value === null`). Include `size` prop and `aria-label`. **[Agent: react-frontend]**
-  - [ ] Wire `<RatingInput value={libraryItem.rating} readOnly size="md" />` into the owner section of `features/game-detail/ui/...` (next to the status control). Plumb `rating` through whatever read path already feeds the owner-side library entry. **[Agent: nextjs-fullstack]**
-  - [ ] Verify: run `pnpm --filter savepoint dev`, manually seed a `LibraryItem.rating` via Prisma Studio (e.g., 7 → 3.5 stars), open the game detail page, confirm stars render correctly; clear the rating to NULL and confirm empty state. Confirm `pnpm --filter savepoint typecheck && pnpm --filter savepoint test --project=unit` passes. **[Agent: testing]**
+  - [x] Add nullable `rating Int?` column to `LibraryItem` with `CHECK (rating IS NULL OR rating BETWEEN 1 AND 10)` and `@@index([userId, rating])` in `prisma/schema.prisma`. Add comment to `Review.rating` marking it legacy/unused. Generate migration via `prisma migrate dev`. **[Agent: prisma-database]**
+  - [x] Create `shared/components/ui/rating-input.tsx` as a controlled client component supporting `readOnly` mode only (display 5 stars with half-step precision from a 1–10 integer; render empty state when `value === null`). Include `size` prop and `aria-label`. **[Agent: react-frontend]**
+  - [x] Wire `<RatingInput value={libraryItem.rating} readOnly size="md" />` into the owner section of `features/game-detail/ui/...` (next to the status control). Plumb `rating` through whatever read path already feeds the owner-side library entry. **[Agent: nextjs-fullstack]**
+  - [x] Verify: run `pnpm --filter savepoint dev`, manually seed a `LibraryItem.rating` via Prisma Studio (e.g., 7 → 3.5 stars), open the game detail page, confirm stars render correctly; clear the rating to NULL and confirm empty state. Confirm `pnpm --filter savepoint typecheck && pnpm --filter savepoint test --project=unit` passes. **[Agent: testing]**
 
-- [ ] **Slice 2: Owner can set, change, and clear a rating from game detail**
+- [x] **Slice 1: Owner can set, change, and clear a rating from game detail**
 
   _Adds the full mutation path. End-to-end: click stars → optimistic update → server persists → reload reflects new value._
 

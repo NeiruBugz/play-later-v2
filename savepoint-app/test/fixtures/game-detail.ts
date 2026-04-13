@@ -34,6 +34,7 @@ export function createSimpleLibraryItemFixture(
     completedAt: null,
     hasBeenPlayed: false,
     statusChangedAt: null,
+    rating: null,
     createdAt: new Date("2025-01-01"),
     updatedAt: new Date("2025-01-02"),
     ...overrides,

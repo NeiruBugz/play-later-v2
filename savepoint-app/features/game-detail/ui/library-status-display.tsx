@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
+import { RatingInput } from "@/shared/components/ui/rating-input";
 import { formatAbsoluteDate } from "@/shared/lib/date";
 import { getStatusLabel, getStatusVariant } from "@/shared/lib/library-status";
 
@@ -56,6 +57,7 @@ export const LibraryStatusDisplay = ({
   }
 
   const status = userLibraryStatus.mostRecent.status;
+  const rating = userLibraryStatus.mostRecent.rating;
   const statusLabel = getStatusLabel(status);
   const badgeVariant = getStatusVariant(status);
   const updatedDate = formatAbsoluteDate(userLibraryStatus.updatedAt);
@@ -91,6 +93,7 @@ export const LibraryStatusDisplay = ({
               />
               {statusLabel}
             </Badge>
+            <RatingInput value={rating} readOnly size="md" />
           </div>
           <p className="text-muted-foreground text-xs">
             <time dateTime={userLibraryStatus.updatedAt.toISOString()}>
