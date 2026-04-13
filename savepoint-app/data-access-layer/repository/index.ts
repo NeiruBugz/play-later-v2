@@ -112,6 +112,7 @@ export {
 export {
   findFeedForUser,
   findPopularFeed,
+  findActivityByUserId,
 } from "./activity-feed/activity-feed-repository";
 export {
   type FeedItemRow,

@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  findActivityByUserId,
   findFeedForUser,
   findPopularFeed,
   type FeedItemRow,
@@ -17,7 +18,11 @@ import type {
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 import { handleServiceError, serviceSuccess } from "../types";
-import type { GetFeedForUserResult, GetPopularFeedResult } from "./types";
+import type {
+  GetFeedForUserResult,
+  GetPopularFeedResult,
+  GetUserActivityResult,
+} from "./types";
 
 const DEFAULT_FEED_LIMIT = 20;
 
@@ -116,6 +121,32 @@ export class ActivityFeedService {
       return serviceSuccess(mapPaginatedResult(result));
     } catch (error) {
       return handleServiceError(error, "Failed to fetch popular feed");
+    }
+  }
+
+  async getUserActivity(
+    userId: string,
+    cursor?: FeedCursor,
+    limit?: number
+  ): Promise<GetUserActivityResult> {
+    try {
+      const feedLimit = limit ?? DEFAULT_FEED_LIMIT;
+      const parsedCursor = parseCursor(cursor);
+
+      this.logger.debug(
+        { userId, cursor: parsedCursor, limit: feedLimit },
+        "Fetching user activity"
+      );
+
+      const result = await findActivityByUserId(
+        userId,
+        parsedCursor,
+        feedLimit
+      );
+
+      return serviceSuccess(mapPaginatedResult(result));
+    } catch (error) {
+      return handleServiceError(error, "Failed to fetch user activity");
     }
   }
 }
