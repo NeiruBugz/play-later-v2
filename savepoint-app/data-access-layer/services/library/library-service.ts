@@ -11,6 +11,7 @@ import {
   findMostRecentLibraryItemByGameId,
   findMostRecentPlayingGame,
   findWishlistItemsForUser,
+  setRating as libraryRepositorySetRating,
   NotFoundError,
   updateLibraryItem,
   type FindLibraryItemsResult,
@@ -26,12 +27,14 @@ import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import {
   handleServiceError,
   serviceError,
+  ServiceErrorCode,
   serviceSuccess,
   type ServiceResult,
 } from "../types";
 import {
   DeleteLibraryItemSchema,
   GetLibraryItemsServiceSchema,
+  SetRatingSchema,
 } from "./schemas";
 
 type SortField =
@@ -273,6 +276,37 @@ export class LibraryService {
       }
     } catch (error) {
       return handleServiceError(error, "Failed to create library item");
+    }
+  }
+
+  async setRating(params: {
+    libraryItemId: number;
+    userId: string;
+    rating: number | null;
+  }): Promise<ServiceResult<void>> {
+    try {
+      const validation = SetRatingSchema.safeParse(params);
+      if (!validation.success) {
+        this.logger.warn(
+          { errors: validation.error.issues },
+          "Invalid rating input"
+        );
+        return serviceError(
+          validation.error.issues[0]?.message ?? "Invalid rating",
+          ServiceErrorCode.VALIDATION_ERROR
+        );
+      }
+      const result = await libraryRepositorySetRating(validation.data);
+      if (!result.ok) {
+        this.logger.warn(
+          { libraryItemId: params.libraryItemId, userId: params.userId },
+          "Library item not found or unauthorized rating attempt"
+        );
+        return serviceError(result.error.message, ServiceErrorCode.NOT_FOUND);
+      }
+      return serviceSuccess(undefined);
+    } catch (error) {
+      return handleServiceError(error, "Failed to set rating");
     }
   }
 

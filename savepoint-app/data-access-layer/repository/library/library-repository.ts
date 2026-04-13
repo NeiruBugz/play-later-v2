@@ -11,7 +11,14 @@ import {
 } from "@/shared/constants";
 import { prisma } from "@/shared/lib/app/db";
 
-import { DuplicateError, NotFoundError } from "../errors";
+import {
+  DuplicateError,
+  NotFoundError,
+  repositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+  type RepositoryResult,
+} from "../errors";
 import { countJournalEntriesByUserId } from "../journal/journal-repository";
 import type {
   CreateLibraryItemInput,
@@ -726,4 +733,36 @@ export async function findLibraryItemsWithFilters(params: {
     }
   });
   return { items: sortedItems, total: sortedItems.length };
+}
+
+export async function setRating({
+  libraryItemId,
+  userId,
+  rating,
+}: {
+  libraryItemId: number | string;
+  userId: string;
+  rating: number | null;
+}): Promise<RepositoryResult<void>> {
+  const numericId =
+    typeof libraryItemId === "string"
+      ? Number.parseInt(libraryItemId, 10)
+      : libraryItemId;
+  if (!Number.isInteger(numericId)) {
+    return repositoryError(
+      RepositoryErrorCode.NOT_FOUND,
+      "Library item not found"
+    );
+  }
+  const result = await prisma.libraryItem.updateMany({
+    where: { id: numericId, userId },
+    data: { rating },
+  });
+  if (result.count === 0) {
+    return repositoryError(
+      RepositoryErrorCode.NOT_FOUND,
+      "Library item not found"
+    );
+  }
+  return repositorySuccess(undefined);
 }

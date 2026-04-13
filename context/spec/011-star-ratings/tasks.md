@@ -4,7 +4,7 @@ Sliced for incremental, runnable delivery. Each slice leaves the app in a workin
 
 ---
 
-- [ ] **Slice 1: Persist + display a rating on game detail (read-only, manually seeded)**
+- [x] **Slice 1: Persist + display a rating on game detail (read-only, manually seeded)**
 
   _Smallest visible value: schema accepts a rating; the game detail page renders it for a library entry. No input yet — values seeded via Prisma Studio for verification._
 
@@ -13,16 +13,16 @@ Sliced for incremental, runnable delivery. Each slice leaves the app in a workin
   - [x] Wire `<RatingInput value={libraryItem.rating} readOnly size="md" />` into the owner section of `features/game-detail/ui/...` (next to the status control). Plumb `rating` through whatever read path already feeds the owner-side library entry. **[Agent: nextjs-fullstack]**
   - [x] Verify: run `pnpm --filter savepoint dev`, manually seed a `LibraryItem.rating` via Prisma Studio (e.g., 7 → 3.5 stars), open the game detail page, confirm stars render correctly; clear the rating to NULL and confirm empty state. Confirm `pnpm --filter savepoint typecheck && pnpm --filter savepoint test --project=unit` passes. **[Agent: testing]**
 
-- [x] **Slice 1: Owner can set, change, and clear a rating from game detail**
+- [x] **Slice 2: Owner can set, change, and clear a rating from game detail**
 
   _Adds the full mutation path. End-to-end: click stars → optimistic update → server persists → reload reflects new value._
 
   - [ ] Extend `data-access-layer/repository/library-item/...` with `setRating({ libraryItemId, userId, rating })` (returns `RepositoryResult<void>`, ownership-scoped). Add integration test covering set, update, clear, and ownership rejection. **[Agent: prisma-database]**
-  - [ ] Extend `data-access-layer/services/library/library-service.ts` with `setRating` method using a Zod schema (`rating: number.int().min(1).max(10).nullable()`). Add unit tests for validation rejections (0, 11, 5.5, NaN) and pass-through. **[Agent: typescript-test-expert]**
-  - [ ] Create `features/manage-library-entry/server-actions/set-library-rating.ts` using `authorizedActionClient`. On success call `revalidatePath('/library')` and `revalidatePath(\`/u/${username}\`)`. Barrel-export from `index.server.ts`. Add server-action test (happy path, validation rejection, unauthenticated rejection). **[Agent: nextjs-fullstack]**
-  - [ ] Extend `RatingInput` to support interactive mode: hover preview (left/right half of star), click-to-commit, click-on-current-value clears, keyboard nav (`←`/`→`/`Enter`/`Escape`). Ignore double-click within 150ms of last commit. Add component tests for hover/click/clear/keyboard/a11y. **[Agent: react-frontend]**
-  - [ ] Wire interactive `RatingInput` into game detail (owner only) with optimistic-update wrapper: local state flips immediately, server action fires, on failure revert + sonner toast. **[Agent: nextjs-fullstack]**
-  - [ ] Verify: in dev, rate a game from detail page, refresh, confirm persistence; clear rating; trigger a server-side error (temporarily throw in service) and confirm UI reverts and toast appears. Run `pnpm --filter savepoint test`. **[Agent: testing]**
+  - [x] Extend `data-access-layer/services/library/library-service.ts` with `setRating` method using a Zod schema (`rating: number.int().min(1).max(10).nullable()`). Add unit tests for validation rejections (0, 11, 5.5, NaN) and pass-through. **[Agent: typescript-test-expert]**
+  - [x] Create `features/manage-library-entry/server-actions/set-library-rating.ts` using `authorizedActionClient`. On success call `revalidatePath('/library')` and `revalidatePath(\`/u/${username}\`)`. Barrel-export from `index.server.ts`. Add server-action test (happy path, validation rejection, unauthenticated rejection). **[Agent: nextjs-fullstack]**
+  - [x] Extend `RatingInput` to support interactive mode: hover preview (left/right half of star), click-to-commit, click-on-current-value clears, keyboard nav (`←`/`→`/`Enter`/`Escape`). Ignore double-click within 150ms of last commit. Add component tests for hover/click/clear/keyboard/a11y. **[Agent: react-frontend]**
+  - [x] Wire interactive `RatingInput` into game detail (owner only) with optimistic-update wrapper: local state flips immediately, server action fires, on failure revert + sonner toast. **[Agent: nextjs-fullstack]**
+  - [x] Verify: in dev, rate a game from detail page, refresh, confirm persistence; clear rating; trigger a server-side error (temporarily throw in service) and confirm UI reverts and toast appears. Run `pnpm --filter savepoint test`. **[Agent: testing]**
 
 - [ ] **Slice 3: Rating displays on library cards (private + public)**
 

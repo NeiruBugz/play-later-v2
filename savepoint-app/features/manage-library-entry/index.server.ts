@@ -4,6 +4,7 @@ export { updateLibraryStatusAction } from "./server-actions/update-library-statu
 export { deleteLibraryItemAction } from "./server-actions/delete-library-item";
 export { getLibraryStatusForGames } from "./server-actions/get-library-status-for-games";
 export { quickAddToLibraryAction } from "./server-actions/quick-add-to-library-action";
+export { setLibraryRatingAction } from "./server-actions/set-library-rating";
 
 export {
   addGameToLibrary,

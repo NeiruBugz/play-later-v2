@@ -33,6 +33,11 @@ export const GetLibraryStatusForGamesSchema = z.object({
 
 export const QuickAddToLibrarySchema = BaseIgdbStatusSchema;
 
+export const SetLibraryRatingSchema = z.object({
+  libraryItemId: z.number().int().positive(),
+  rating: z.number().int().min(1).max(10).nullable(),
+});
+
 export type AddToLibraryInput = z.infer<typeof AddToLibrarySchema>;
 export type UpdateLibraryStatusInput = z.infer<
   typeof UpdateLibraryStatusSchema
@@ -45,3 +50,4 @@ export type GetLibraryStatusForGamesInput = z.infer<
   typeof GetLibraryStatusForGamesSchema
 >;
 export type QuickAddToLibraryInput = z.infer<typeof QuickAddToLibrarySchema>;
+export type SetLibraryRatingInput = z.infer<typeof SetLibraryRatingSchema>;

@@ -31,3 +31,9 @@ export const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
   userId: z.string().cuid(),
 });
+
+export const SetRatingSchema = z.object({
+  libraryItemId: z.number().int().positive(),
+  userId: z.string(),
+  rating: z.number().int().min(1).max(10).nullable(),
+});
