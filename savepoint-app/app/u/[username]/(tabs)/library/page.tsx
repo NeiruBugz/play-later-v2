@@ -52,6 +52,7 @@ export default async function ProfileLibraryPage({
     id: item.id,
     status: item.status,
     hasBeenPlayed: item.hasBeenPlayed,
+    rating: item.rating,
     game: {
       title: item.game.title,
       coverImage: item.game.coverImage,

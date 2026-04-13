@@ -24,13 +24,13 @@ Sliced for incremental, runnable delivery. Each slice leaves the app in a workin
   - [x] Wire interactive `RatingInput` into game detail (owner only) with optimistic-update wrapper: local state flips immediately, server action fires, on failure revert + sonner toast. **[Agent: nextjs-fullstack]**
   - [x] Verify: in dev, rate a game from detail page, refresh, confirm persistence; clear rating; trigger a server-side error (temporarily throw in service) and confirm UI reverts and toast appears. Run `pnpm --filter savepoint test`. **[Agent: testing]**
 
-- [ ] **Slice 3: Rating displays on library cards (private + public)**
+- [x] **Slice 3: Rating displays on library cards (private + public)**
 
   _Cards everywhere — owner Library page and public `/u/{username}/library` — show the rating._
 
-  - [ ] Ensure `rating` is included in the payload returned by the owner's library data path and in the public Library tab payload (Spec 009 `getProfilePageData` and library-tab data fetcher). Verify additive shape. **[Agent: nextjs-fullstack]**
-  - [ ] In `widgets/game-card/...` (or existing meta slot), conditionally render `<RatingInput value={rating} readOnly size="sm" />` when `rating !== null`; render nothing when null. **[Agent: react-frontend]**
-  - [ ] Verify: with multiple library items at varied ratings (incl. one unrated), confirm cards render correct stars on `/library` and on `/u/{me}/library`. Visit a public profile other than your own (or use a seeded test user) and confirm public visibility. Confirm a private profile shows nothing. **[Agent: testing]**
+  - [x] Ensure `rating` is included in the payload returned by the owner's library data path and in the public Library tab payload (Spec 009 `getProfilePageData` and library-tab data fetcher). Verify additive shape. **[Agent: nextjs-fullstack]**
+  - [x] In `widgets/game-card/...` (or existing meta slot), conditionally render `<RatingInput value={rating} readOnly size="sm" />` when `rating !== null`; render nothing when null. **[Agent: react-frontend]**
+  - [x] Verify: with multiple library items at varied ratings (incl. one unrated), confirm cards render correct stars on `/library` and on `/u/{me}/library`. Visit a public profile other than your own (or use a seeded test user) and confirm public visibility. Confirm a private profile shows nothing. **[Agent: testing]**
 
 - [ ] **Slice 4: Sort and filter the owner's Library by rating (URL-addressable)**
 

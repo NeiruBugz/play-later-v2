@@ -5,6 +5,7 @@ import { memo } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
+import { RatingInput } from "@/shared/components/ui/rating-input";
 import { useMediaQuery } from "@/shared/hooks/use-media-query";
 import {
   getStatusConfig,
@@ -119,6 +120,12 @@ export const LibraryCard = memo(function LibraryCard({
       <p className="body-sm mt-sm text-foreground jewel-display jewel:mt-1 jewel:text-[0.75rem] jewel:font-normal jewel:leading-[1.25] jewel:tracking-[0.04em] line-clamp-2 font-medium">
         {game.title}
       </p>
+
+      {item.rating !== null && item.rating !== undefined && (
+        <div className="mt-1" data-testid="library-card-rating">
+          <RatingInput value={item.rating} readOnly size="sm" />
+        </div>
+      )}
 
       {!isMobile && (
         <LibraryCardActionBar
