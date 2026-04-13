@@ -1,4 +1,5 @@
 import {
+  findActivityByUserId,
   findFeedForUser,
   findPopularFeed,
 } from "@/data-access-layer/repository";
@@ -7,6 +8,7 @@ import { ServiceErrorCode } from "../types";
 import { ActivityFeedService } from "./activity-feed-service";
 
 vi.mock("@/data-access-layer/repository", () => ({
+  findActivityByUserId: vi.fn(),
   findFeedForUser: vi.fn(),
   findPopularFeed: vi.fn(),
 }));
@@ -38,12 +40,14 @@ describe("ActivityFeedService", () => {
   let service: ActivityFeedService;
   let mockFindFeedForUser: ReturnType<typeof vi.fn>;
   let mockFindPopularFeed: ReturnType<typeof vi.fn>;
+  let mockFindActivityByUserId: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     service = new ActivityFeedService();
     mockFindFeedForUser = vi.mocked(findFeedForUser);
     mockFindPopularFeed = vi.mocked(findPopularFeed);
+    mockFindActivityByUserId = vi.mocked(findActivityByUserId);
   });
 
   describe("getFeedForUser", () => {
@@ -296,6 +300,120 @@ describe("ActivityFeedService", () => {
         expect(result.success).toBe(false);
         if (!result.success) {
           expect(result.error).toBe("Network failure");
+          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
+        }
+      });
+    });
+  });
+
+  describe("getUserActivity", () => {
+    const userId = "user-999";
+
+    describe("success path", () => {
+      it("should return success with mapped paginated feed when repository resolves", async () => {
+        const row = buildFeedItemRow({ statusChangedAt: null });
+        mockFindActivityByUserId.mockResolvedValue({
+          items: [row],
+          nextCursor: null,
+        });
+
+        const result = await service.getUserActivity(userId);
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.items).toHaveLength(1);
+          expect(result.data.nextCursor).toBeNull();
+        }
+      });
+
+      it("should pass userId, parsed cursor, and limit to findActivityByUserId", async () => {
+        mockFindActivityByUserId.mockResolvedValue({
+          items: [],
+          nextCursor: null,
+        });
+
+        const cursor = { timestamp: "2024-03-01T00:00:00.000Z", id: "77" };
+        await service.getUserActivity(userId, cursor, 10);
+
+        expect(mockFindActivityByUserId).toHaveBeenCalledWith(
+          userId,
+          { timestamp: new Date("2024-03-01T00:00:00.000Z"), id: 77 },
+          10
+        );
+      });
+
+      it("should use default limit of 20 when no limit argument is provided", async () => {
+        mockFindActivityByUserId.mockResolvedValue({
+          items: [],
+          nextCursor: null,
+        });
+
+        await service.getUserActivity(userId);
+
+        expect(mockFindActivityByUserId).toHaveBeenCalledWith(
+          userId,
+          undefined,
+          20
+        );
+      });
+
+      it("should pass undefined cursor to repository when no cursor is provided", async () => {
+        mockFindActivityByUserId.mockResolvedValue({
+          items: [],
+          nextCursor: null,
+        });
+
+        await service.getUserActivity(userId);
+
+        expect(mockFindActivityByUserId).toHaveBeenCalledWith(
+          userId,
+          undefined,
+          20
+        );
+      });
+
+      it("should convert nextCursor Date timestamp and number id to strings", async () => {
+        const cursorDate = new Date("2025-01-10T08:00:00.000Z");
+        mockFindActivityByUserId.mockResolvedValue({
+          items: [],
+          nextCursor: { timestamp: cursorDate, id: 55 },
+        });
+
+        const result = await service.getUserActivity(userId);
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.nextCursor).toEqual({
+            timestamp: cursorDate.toISOString(),
+            id: "55",
+          });
+        }
+      });
+
+      it("should return null nextCursor when repository returns null", async () => {
+        mockFindActivityByUserId.mockResolvedValue({
+          items: [],
+          nextCursor: null,
+        });
+
+        const result = await service.getUserActivity(userId);
+
+        expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data.nextCursor).toBeNull();
+        }
+      });
+    });
+
+    describe("error handling", () => {
+      it("should return INTERNAL_ERROR when repository throws", async () => {
+        mockFindActivityByUserId.mockRejectedValue(new Error("DB timeout"));
+
+        const result = await service.getUserActivity(userId);
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error).toBe("DB timeout");
           expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
         }
       });

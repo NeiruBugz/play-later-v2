@@ -6,7 +6,6 @@ import {
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { ProfileView } from "@/features/profile";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
@@ -30,9 +29,9 @@ export default async function ProfilePage() {
     }
     redirect("/error");
   }
-  return (
-    <main className="py-3xl container mx-auto" data-testid="profile-page">
-      <ProfileView profile={result.data.profile} />
-    </main>
-  );
+  const username = result.data.profile.username;
+  if (!username) {
+    redirect("/profile/setup");
+  }
+  redirect(`/u/${username}`);
 }

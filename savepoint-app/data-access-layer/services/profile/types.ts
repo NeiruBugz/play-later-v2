@@ -36,6 +36,8 @@ export type ProfileWithStats = {
   createdAt: Date;
   isPublicProfile: boolean;
   stats: LibraryStats;
+  gameCount: number;
+  libraryPreview: LibraryPreviewGame[];
 };
 export type GetProfileWithStatsResult = ServiceResult<{
   profile: ProfileWithStats;
@@ -110,6 +112,8 @@ export type PublicProfile = {
   image: string | null;
   gameCount: number;
   libraryPreview: LibraryPreviewGame[];
+  isPublicProfile: boolean;
+  createdAt: Date;
 };
 export type GetPublicProfileResult = ServiceResult<{
   profile: PublicProfile | null;

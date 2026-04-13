@@ -240,13 +240,14 @@ describe("ProfileService", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.profile).toEqual({
+        expect(result.data.profile).toMatchObject({
           id: "user-public-123",
           name: "Public User",
           username: "publicuser",
           image: "https://example.com/avatar.jpg",
           gameCount: 42,
           libraryPreview: [],
+          isPublicProfile: true,
         });
       }
 
@@ -264,14 +265,20 @@ describe("ProfileService", () => {
       );
     });
 
-    it("should return null profile for a private user", async () => {
+    it("should return a minimal profile with isPublicProfile=false for a private user", async () => {
       mockFindUserByUsername.mockResolvedValue(privateUserFixture);
 
       const result = await service.getPublicProfile("privateuser");
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.profile).toBeNull();
+        expect(result.data.profile).toMatchObject({
+          id: "user-private-456",
+          username: "privateuser",
+          isPublicProfile: false,
+          gameCount: 0,
+          libraryPreview: [],
+        });
       }
 
       expect(mockCountLibraryItemsByUserId).not.toHaveBeenCalled();

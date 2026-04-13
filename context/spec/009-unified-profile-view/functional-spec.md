@@ -1,7 +1,7 @@
 # Functional Specification: Unified Profile View
 
 - **Roadmap Item:** Unified Profile — Consolidate private dashboard and public profile into a single tabbed profile experience
-- **Status:** Draft
+- **Status:** In Review (pending QA sign-off)
 - **Author:** Nail Badiullin
 
 ---
@@ -45,13 +45,13 @@ The profile header is always visible at the top of the profile, regardless of wh
 
 **Acceptance Criteria:**
 
-- [ ] Profile header shows avatar, display name, @username, and social counts for all viewers
-- [ ] Follower count links to `/u/{username}/followers`; following count links to `/u/{username}/following`
-- [ ] Owner sees "Edit Profile" button, "Logout" button, and their email address
-- [ ] Email is not present in the page response for non-owner requests (server-side gating)
-- [ ] Authenticated non-owner visitors see Follow/Unfollow button
-- [ ] Unauthenticated visitors see no follow control
-- [ ] Owner viewing their own profile sees no follow control
+- [x] Profile header shows avatar, display name, @username, and social counts for all viewers
+- [x] Follower count links to `/u/{username}/followers`; following count links to `/u/{username}/following`
+- [x] Owner sees "Edit Profile" button, "Logout" button, and their email address
+- [x] Email is not present in the page response for non-owner requests (server-side gating)
+- [x] Authenticated non-owner visitors see Follow/Unfollow button
+- [x] Unauthenticated visitors see no follow control
+- [x] Owner viewing their own profile sees no follow control
 
 ### 2.2 Tab Navigation
 
@@ -68,13 +68,13 @@ The profile uses URL-based tab navigation with three tabs: **Overview**, **Libra
 
 **Acceptance Criteria:**
 
-- [ ] Three tabs are visible below the header: Overview, Library, Activity
-- [ ] Active tab is visually distinguished from inactive tabs
-- [ ] Clicking "Library" navigates to `/u/{username}/library`
-- [ ] Clicking "Activity" navigates to `/u/{username}/activity`
-- [ ] Clicking "Overview" navigates to `/u/{username}`
-- [ ] Browser back button returns to the previous tab
-- [ ] Tab bar does not appear on `/u/{username}/followers` or `/u/{username}/following`
+- [x] Three tabs are visible below the header: Overview, Library, Activity
+- [x] Active tab is visually distinguished from inactive tabs
+- [x] Clicking "Library" navigates to `/u/{username}/library`
+- [x] Clicking "Activity" navigates to `/u/{username}/activity`
+- [x] Clicking "Overview" navigates to `/u/{username}`
+- [x] Browser back button returns to the previous tab
+- [x] Tab bar does not appear on `/u/{username}/followers` or `/u/{username}/following`
 
 ### 2.3 Overview Tab
 
@@ -89,12 +89,12 @@ The Overview tab (at `/u/{username}`) shows a summary of the user's gaming profi
 
 **Acceptance Criteria:**
 
-- [ ] Stats bar shows game count, playing, completed, and journal entries
-- [ ] Library stats grid appears when user has >= 10 games
-- [ ] Library stats grid is hidden (not shown with empty state) when user has < 10 games
-- [ ] Recently Played section shows games with timestamps, hidden when no data
-- [ ] Library Preview section shows up to 6 game covers, hidden when no games
-- [ ] All data is publicly accessible (no auth required for visitors to see stats)
+- [x] Stats bar shows game count, playing, completed, and journal entries
+- [x] Library stats grid appears when user has >= 10 games
+- [x] Library stats grid is hidden (not shown with empty state) when user has < 10 games
+- [x] Recently Played section shows games with timestamps, hidden when no data
+- [x] Library Preview section shows up to 6 game covers, hidden when no games
+- [x] All data is publicly accessible (no auth required for visitors to see stats)
 
 ### 2.4 Library Tab
 
@@ -106,11 +106,11 @@ The Library tab (at `/u/{username}/library`) shows a public read-only view of th
 
 **Acceptance Criteria:**
 
-- [ ] Library tab shows game covers in a grid layout
-- [ ] Each game cover displays a status badge (Playing, Completed, Want to Play, etc.)
-- [ ] Clicking a game cover navigates to the game's detail page
-- [ ] No filtering or sorting controls are present
-- [ ] Library data is accessible without authentication (for public profiles)
+- [x] Library tab shows game covers in a grid layout
+- [x] Each game cover displays a status badge (Playing, Completed, Want to Play, etc.)
+- [x] Clicking a game cover navigates to the game's detail page
+- [x] No filtering or sorting controls are present
+- [x] Library data is accessible without authentication (for public profiles)
 
 ### 2.5 Activity Tab
 
@@ -122,12 +122,12 @@ The Activity tab (at `/u/{username}/activity`) shows the profile user's own acti
 
 **Acceptance Criteria:**
 
-- [ ] Activity tab shows a chronological list of the user's library actions
-- [ ] "Game added" events are shown (e.g., "Added [Game] to library")
-- [ ] "Status changed" events are shown (e.g., "Changed [Game] to Playing")
-- [ ] Journal entries do not appear in the activity log
-- [ ] Follow events do not appear in the activity log
-- [ ] Activity data is accessible without authentication (for public profiles)
+- [x] Activity tab shows a chronological list of the user's library actions
+- [x] "Game added" events are shown (e.g., "Added [Game] to library")
+- [x] "Status changed" events are shown (e.g., "Changed [Game] to Playing")
+- [x] Journal entries do not appear in the activity log
+- [x] Follow events do not appear in the activity log
+- [x] Activity data is accessible without authentication (for public profiles)
 
 ### 2.6 Privacy Gating
 
@@ -139,12 +139,12 @@ Profile visibility is controlled by the `isPublicProfile` setting. Privacy behav
 
 **Acceptance Criteria:**
 
-- [ ] Owner with `isPublicProfile=false` sees their full profile with all tabs and data
-- [ ] Visitor viewing a private profile sees avatar, display name, and @username
-- [ ] Visitor viewing a private profile sees "This profile is private" message
-- [ ] Visitor viewing a private profile does not see tabs, stats, games, or activity
-- [ ] Direct URL to `/u/{username}/library` on a private profile shows the private message, not library data
-- [ ] The system distinguishes between "profile is private" and "user not found" — showing appropriate messages for each
+- [x] Owner with `isPublicProfile=false` sees their full profile with all tabs and data
+- [x] Visitor viewing a private profile sees avatar, display name, and @username
+- [x] Visitor viewing a private profile sees "This profile is private" message
+- [x] Visitor viewing a private profile does not see tabs, stats, games, or activity
+- [x] Direct URL to `/u/{username}/library` on a private profile shows the private message, not library data
+- [x] The system distinguishes between "profile is private" and "user not found" — showing appropriate messages for each
 
 ### 2.7 Routing and Redirects
 
@@ -155,12 +155,12 @@ Profile visibility is controlled by the `isPublicProfile` setting. Privacy behav
 
 **Acceptance Criteria:**
 
-- [ ] Authenticated user with username: `/profile` redirects to `/u/{their-username}`
-- [ ] Authenticated user without username: `/profile` redirects to `/profile/setup`
-- [ ] `/profile/settings` remains accessible and unchanged
-- [ ] `/profile/setup` remains accessible and unchanged
-- [ ] `/u/{username}/followers` renders without the tab bar
-- [ ] `/u/{username}/following` renders without the tab bar
+- [x] Authenticated user with username: `/profile` redirects to `/u/{their-username}`
+- [x] Authenticated user without username: `/profile` redirects to `/profile/setup`
+- [x] `/profile/settings` remains accessible and unchanged
+- [x] `/profile/setup` remains accessible and unchanged
+- [x] `/u/{username}/followers` renders without the tab bar
+- [x] `/u/{username}/following` renders without the tab bar
 
 ---
 

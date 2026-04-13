@@ -62,7 +62,15 @@ const performUpdateProfile = createServerAction<
 export async function updateProfile(
   data: UpdateProfileInput
 ): Promise<ActionResult<UpdateProfileData>> {
-  return performUpdateProfile(data);
+  const result = await performUpdateProfile(data);
+  if (result.success) {
+    revalidatePath("/profile/settings");
+    revalidatePath("/profile");
+    if (result.data.username) {
+      revalidatePath(`/u/${result.data.username}`);
+    }
+  }
+  return result;
 }
 
 export async function updateProfileFormAction(

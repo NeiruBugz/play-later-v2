@@ -107,6 +107,32 @@ export async function findFeedForUser(
   };
 }
 
+export async function findActivityByUserId(
+  userId: string,
+  cursor?: FeedCursor,
+  limit: number = DEFAULT_FEED_LIMIT
+): Promise<PaginatedFeedResult> {
+  const effectiveLimit = clampLimit(limit);
+  const cursorCondition = buildCursorCondition(cursor);
+
+  const rows = await prisma.$queryRaw<Array<Record<string, unknown>>>`
+    SELECT ${SELECT_COLUMNS}
+    FROM "LibraryItem" li
+    JOIN "User" u ON u."id" = li."userId"
+    JOIN "Game" g ON g."id" = li."gameId"
+    WHERE li."userId" = ${userId}
+      ${cursorCondition}
+    ${ORDER_BY}
+    LIMIT ${effectiveLimit}`;
+
+  const items = mapRawRows(rows);
+
+  return {
+    items,
+    nextCursor: buildNextCursor(items, effectiveLimit),
+  };
+}
+
 export async function findPopularFeed(
   excludeUserId?: string,
   cursor?: FeedCursor,
