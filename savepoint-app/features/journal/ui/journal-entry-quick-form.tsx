@@ -27,17 +27,42 @@ import { Textarea } from "@/shared/components/ui/textarea";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 import { MAX_CHARACTERS } from "@/shared/lib/rich-text";
 import { cn } from "@/shared/lib/ui/utils";
+import { JournalMood } from "@/shared/types/journal";
 
 import type { CreateJournalEntryInput } from "../schemas";
 import { createJournalEntryAction } from "../server-actions/create-journal-entry";
 import { getLibraryItemsByGameIdAction } from "../server-actions/get-library-items-by-game-id";
 
+const MOOD_OPTIONS: { value: JournalMood; emoji: string; label: string }[] = [
+  { value: JournalMood.EXCITED, emoji: "🔥", label: "Hyped" },
+  { value: JournalMood.RELAXED, emoji: "😌", label: "Chill" },
+  { value: JournalMood.ACCOMPLISHED, emoji: "🏆", label: "Proud" },
+  { value: JournalMood.FRUSTRATED, emoji: "😵‍💫", label: "Fried" },
+  { value: JournalMood.CURIOUS, emoji: "🔍", label: "Curious" },
+  { value: JournalMood.NOSTALGIC, emoji: "🕯️", label: "Nostalgic" },
+];
+
 type FormData = {
   title?: string;
-  content: string;
+  content?: string;
+  playedMinutes?: number;
   playSession?: number;
   libraryItemId?: number;
+  mood?: JournalMood;
+  tagsInput?: string;
 };
+
+function parseTags(input: string | undefined): string[] {
+  if (!input) return [];
+  return Array.from(
+    new Set(
+      input
+        .split(",")
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0 && t.length <= 30)
+    )
+  ).slice(0, 10);
+}
 
 interface JournalEntryQuickFormProps {
   gameId: string;
@@ -63,24 +88,45 @@ export function JournalEntryQuickForm({
 
   const form = useForm<FormData>({
     resolver: zodResolver(
-      z.object({
-        title: z.string().optional(),
-        content: z
-          .string()
-          .min(1, "Share your thoughts...")
-          .max(
-            MAX_CHARACTERS,
-            `Content must not exceed ${MAX_CHARACTERS} characters`
-          ),
-        playSession: z.number().int().positive().optional(),
-        libraryItemId: z.number().int().positive().optional(),
-      })
+      z
+        .object({
+          title: z.string().optional(),
+          content: z
+            .string()
+            .max(
+              MAX_CHARACTERS,
+              `Content must not exceed ${MAX_CHARACTERS} characters`
+            )
+            .optional(),
+          playedMinutes: z
+            .number()
+            .int()
+            .positive("Playtime must be a positive number")
+            .max(60 * 24 * 7)
+            .optional(),
+          playSession: z.number().int().positive().optional(),
+          libraryItemId: z.number().int().positive().optional(),
+          mood: z.enum(JournalMood).optional(),
+          tagsInput: z.string().optional(),
+        })
+        .refine(
+          (data) =>
+            (data.content?.trim().length ?? 0) > 0 ||
+            (data.playedMinutes ?? 0) > 0,
+          {
+            message: "Log some playtime or jot a thought",
+            path: ["content"],
+          }
+        )
     ),
     defaultValues: {
       title: "",
       content: "",
+      playedMinutes: undefined,
       playSession: undefined,
       libraryItemId: undefined,
+      mood: undefined,
+      tagsInput: "",
     },
   });
 
@@ -131,12 +177,17 @@ export function JournalEntryQuickForm({
   });
 
   const handleSubmit = async (data: FormData) => {
+    const tags = parseTags(data.tagsInput);
     const createData: CreateJournalEntryInput = {
       gameId,
+      kind: "QUICK",
       title: data.title || undefined,
-      content: data.content,
+      content: data.content?.trim() || "",
+      playedMinutes: data.playedMinutes,
       playSession: data.playSession,
       libraryItemId: data.libraryItemId,
+      mood: data.mood,
+      tags: tags.length > 0 ? tags : undefined,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     };
     await createAction.handleSubmit(createData);
@@ -144,6 +195,10 @@ export function JournalEntryQuickForm({
 
   const showLibraryItemSelector = libraryItems.length > 1;
   const contentLength = form.watch("content")?.length ?? 0;
+  const playedMinutesValue = form.watch("playedMinutes");
+  const canSubmit =
+    contentLength > 0 ||
+    (playedMinutesValue !== undefined && playedMinutesValue > 0);
 
   return (
     <Form {...form}>
@@ -153,15 +208,46 @@ export function JournalEntryQuickForm({
       >
         <FormField
           control={form.control}
+          name="playedMinutes"
+          render={({ field }) => (
+            <div className="space-y-sm">
+              <Label
+                htmlFor="playedMinutes"
+                className="text-muted-foreground text-sm"
+              >
+                Playtime (minutes)
+              </Label>
+              <Input
+                id="playedMinutes"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                step="1"
+                placeholder="30"
+                disabled={createAction.isSubmitting}
+                className="border-muted bg-transparent"
+                {...field}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  field.onChange(value === "" ? undefined : Number(value));
+                }}
+                value={field.value ?? ""}
+              />
+            </div>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="content"
           render={({ field }) => (
             <div className="space-y-sm">
               <Textarea
                 {...field}
                 ref={textareaRef}
-                placeholder="What's on your mind about this game?"
+                placeholder="Any thoughts? (optional)"
                 className={cn(
-                  "placeholder:text-muted-foreground min-h-[140px] resize-none border-0 bg-transparent p-0 text-base leading-relaxed focus-visible:ring-0",
+                  "placeholder:text-muted-foreground min-h-[100px] resize-none border-0 bg-transparent p-0 text-base leading-relaxed focus-visible:ring-0",
                   "transition-all duration-200"
                 )}
                 disabled={createAction.isSubmitting}
@@ -191,6 +277,63 @@ export function JournalEntryQuickForm({
                   </p>
                 )}
               </div>
+            </div>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="mood"
+          render={({ field }) => (
+            <div className="space-y-sm">
+              <Label className="text-muted-foreground text-sm">
+                Mood (optional)
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {MOOD_OPTIONS.map((option) => {
+                  const selected = field.value === option.value;
+                  return (
+                    <button
+                      type="button"
+                      key={option.value}
+                      onClick={() =>
+                        field.onChange(selected ? undefined : option.value)
+                      }
+                      disabled={createAction.isSubmitting}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-sm transition-colors",
+                        selected
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-border text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <span className="mr-1" aria-hidden>
+                        {option.emoji}
+                      </span>
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tagsInput"
+          render={({ field }) => (
+            <div className="space-y-sm">
+              <Label htmlFor="tags" className="text-muted-foreground text-sm">
+                Tags (optional, comma-separated)
+              </Label>
+              <Input
+                id="tags"
+                placeholder="late-night, co-op, boss-fight"
+                disabled={createAction.isSubmitting}
+                className="border-muted bg-transparent"
+                {...field}
+              />
             </div>
           )}
         />
@@ -325,10 +468,10 @@ export function JournalEntryQuickForm({
           <Button
             type="submit"
             size="sm"
-            disabled={createAction.isSubmitting || contentLength === 0}
+            disabled={createAction.isSubmitting || !canSubmit}
             className="min-w-[80px]"
           >
-            {createAction.isSubmitting ? "Saving..." : "Save"}
+            {createAction.isSubmitting ? "Saving..." : "Log it"}
           </Button>
         </div>
       </form>
