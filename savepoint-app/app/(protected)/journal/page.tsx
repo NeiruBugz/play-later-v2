@@ -67,7 +67,8 @@ export default async function JournalPage() {
         <header>
           <h1 className="heading-xl tracking-tight">Journal</h1>
           <p className="body-md text-muted-foreground">
-            Document your gaming journey
+            Your sessions and reflections, tied to the games you played them
+            for.
           </p>
         </header>
 

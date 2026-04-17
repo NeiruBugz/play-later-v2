@@ -95,14 +95,14 @@ export function JournalTimeline({
     return (
       <div className="bg-card border-border/10 space-y-xl flex min-h-[280px] flex-col items-center justify-center rounded-lg border px-6 py-12 text-center">
         <div className="space-y-sm max-w-md">
-          <h2 className="text-lg font-semibold">Your Gaming Journal</h2>
+          <h2 className="text-lg font-semibold">Nothing logged yet</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Capture your gaming sessions — what you played, memorable moments,
-            and quick thoughts. Entries are tied to games in your library.
+            Log tonight&apos;s session — a playtime count or a quick thought is
+            enough. Reflections can come later.
           </p>
         </div>
         <Button asChild>
-          <Link href="/journal/new">Write Your First Entry</Link>
+          <Link href="/journal/new">Log a session</Link>
         </Button>
       </div>
     );

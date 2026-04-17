@@ -1,6 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -14,8 +15,17 @@ import { cn } from "@/shared/lib/ui/utils";
 
 import { JournalQuickEntrySheet } from "./journal-quick-entry-sheet";
 
+// Pages that already expose their own primary journal CTA — hide the FAB
+// to avoid duplicate entry points.
+const HIDDEN_PATHNAMES = [/^\/journal(?:\/|$)/, /^\/games\/[^/]+$/];
+
 export function JournalFab() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  if (pathname && HIDDEN_PATHNAMES.some((re) => re.test(pathname))) {
+    return null;
+  }
 
   return (
     <>
