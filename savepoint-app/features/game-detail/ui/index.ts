@@ -1,3 +1,4 @@
+export { ActualPlaytime } from "./actual-playtime";
 export { AddToLibraryButton } from "./add-to-library-button";
 export { GameCoverImage } from "./game-cover-image";
 export { GameDescription } from "./game-description";

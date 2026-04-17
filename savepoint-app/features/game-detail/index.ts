@@ -1,4 +1,5 @@
 export {
+  ActualPlaytime,
   AddToLibraryButton,
   GameCoverImage,
   GameDescription,
