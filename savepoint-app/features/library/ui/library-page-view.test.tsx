@@ -53,6 +53,9 @@ const elements = {
   getSortSelect: () => screen.getByRole("combobox", { name: "Sort by" }),
   getPlatformFilter: () =>
     screen.getByRole("combobox", { name: "Filter by platform" }),
+  getMoreFiltersButton: () =>
+    screen.getByRole("button", { name: /more/i, expanded: false }),
+  queryMoreFiltersButton: () => screen.queryByRole("button", { name: /more/i }),
   getSearchInput: () =>
     screen.getByRole("searchbox", { name: "Filter library by title" }),
   getAllStatusesButton: () =>
@@ -84,6 +87,12 @@ const actions = {
   selectSort: async (option: string) => {
     await userEvent.click(elements.getSortSelect());
     await userEvent.click(elements.getSortOption(option));
+  },
+  openMoreFilters: async () => {
+    const button = elements.queryMoreFiltersButton();
+    if (button && button.getAttribute("aria-expanded") !== "true") {
+      await userEvent.click(button);
+    }
   },
 };
 
@@ -131,8 +140,10 @@ describe("LibraryPageView", () => {
       });
 
       expect(elements.getSortSelect()).toBeVisible();
-      expect(elements.getPlatformFilter()).toBeVisible();
       expect(elements.getSearchInput()).toBeVisible();
+
+      await actions.openMoreFilters();
+      expect(elements.getPlatformFilter()).toBeVisible();
     });
 
     it("displays all status buttons", async () => {
@@ -216,6 +227,11 @@ describe("LibraryPageView", () => {
       renderComponent();
 
       await waitFor(() => {
+        expect(elements.getLibraryHeading()).toBeVisible();
+      });
+
+      await actions.openMoreFilters();
+      await waitFor(() => {
         expect(elements.getPlatformFilter()).toBeVisible();
       });
 
@@ -235,6 +251,11 @@ describe("LibraryPageView", () => {
       const { rerender } = renderComponent();
 
       await waitFor(() => {
+        expect(elements.getLibraryHeading()).toBeVisible();
+      });
+
+      await actions.openMoreFilters();
+      await waitFor(() => {
         expect(elements.getPlatformFilter()).toBeVisible();
       });
 
@@ -253,6 +274,8 @@ describe("LibraryPageView", () => {
 
       // Re-render to reflect platform filter change
       rerender(<LibraryPageView isSteamConnected={false} />);
+
+      await actions.openMoreFilters();
 
       await waitFor(() => {
         expect(elements.getPlatformFilter()).toHaveTextContent("PC (Windows)");
@@ -309,6 +332,10 @@ describe("LibraryPageView", () => {
       });
 
       // Apply platform filter
+      await actions.openMoreFilters();
+      await waitFor(() => {
+        expect(elements.getPlatformFilter()).toBeVisible();
+      });
       await userEvent.click(elements.getPlatformFilter());
 
       await waitFor(() => {
