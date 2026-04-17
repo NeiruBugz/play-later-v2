@@ -23,7 +23,7 @@ export const LIBRARY_STATUS_CONFIG: readonly StatusConfig[] = [
   {
     value: LibraryItemStatus.UP_NEXT,
     label: "Up Next",
-    description: "Want to play or replay",
+    description: "Queued to play next",
     badgeVariant: "upNext",
     icon: Star,
     ariaLabel: "Up Next",
@@ -31,7 +31,7 @@ export const LIBRARY_STATUS_CONFIG: readonly StatusConfig[] = [
   {
     value: LibraryItemStatus.PLAYING,
     label: "Playing",
-    description: "Actively engaged",
+    description: "Playing it now",
     badgeVariant: "playing",
     icon: Gamepad2,
     ariaLabel: "Playing",
@@ -39,15 +39,15 @@ export const LIBRARY_STATUS_CONFIG: readonly StatusConfig[] = [
   {
     value: LibraryItemStatus.SHELF,
     label: "Shelf",
-    description: "Own it, sitting there",
+    description: "On your shelf",
     badgeVariant: "shelf",
     icon: Archive,
-    ariaLabel: "On Shelf",
+    ariaLabel: "On the shelf",
   },
   {
     value: LibraryItemStatus.PLAYED,
     label: "Played",
-    description: "Have experienced",
+    description: "Set down, for now or forever",
     badgeVariant: "played",
     icon: CheckCircle,
     ariaLabel: "Played",
@@ -114,12 +114,12 @@ export function getStatusActions(
       return [
         {
           targetStatus: LibraryItemStatus.UP_NEXT,
-          label: "Up Next",
+          label: "Queue it",
           icon: Star,
         },
         {
           targetStatus: LibraryItemStatus.PLAYED,
-          label: "Played",
+          label: "Mark as played",
           icon: CheckCircle,
         },
       ];
@@ -128,12 +128,12 @@ export function getStatusActions(
         return [
           {
             targetStatus: LibraryItemStatus.PLAYING,
-            label: "Playing",
+            label: "Start playing",
             icon: Gamepad2,
           },
           {
             targetStatus: LibraryItemStatus.PLAYED,
-            label: "Played",
+            label: "Set it down",
             icon: CheckCircle,
           },
         ];
@@ -141,12 +141,12 @@ export function getStatusActions(
       return [
         {
           targetStatus: LibraryItemStatus.PLAYING,
-          label: "Playing",
+          label: "Start playing",
           icon: Gamepad2,
         },
         {
           targetStatus: LibraryItemStatus.SHELF,
-          label: "Back to Shelf",
+          label: "Back to the shelf",
           icon: Archive,
         },
       ];
@@ -154,21 +154,25 @@ export function getStatusActions(
       return [
         {
           targetStatus: LibraryItemStatus.PLAYED,
-          label: "Played",
+          label: "Set it down",
           icon: CheckCircle,
         },
-        { targetStatus: LibraryItemStatus.UP_NEXT, label: "Pause", icon: Star },
+        {
+          targetStatus: LibraryItemStatus.UP_NEXT,
+          label: "Pause for now",
+          icon: Star,
+        },
       ];
     case LibraryItemStatus.PLAYED:
       return [
         {
           targetStatus: LibraryItemStatus.UP_NEXT,
-          label: "Replay",
+          label: "Queue a replay",
           icon: Star,
         },
         {
           targetStatus: LibraryItemStatus.SHELF,
-          label: "Back to Shelf",
+          label: "Back to the shelf",
           icon: Archive,
         },
       ];
@@ -176,7 +180,7 @@ export function getStatusActions(
       return [
         {
           targetStatus: LibraryItemStatus.SHELF,
-          label: "Move to Shelf",
+          label: "Put on the shelf",
           icon: Archive,
         },
       ];
