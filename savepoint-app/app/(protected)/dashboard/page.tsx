@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import {
   ContinuePlaying,
   DashboardStats,
+  QuickLogHero,
   RecentlyAdded,
   UpNext,
 } from "@/features/dashboard/index.server";
@@ -56,20 +57,14 @@ export default async function DashboardPage() {
 
   const profileResult = await service.getProfileWithStats({ userId });
   const username = isSuccessResult(profileResult)
-    ? profileResult.data.profile.username
+    ? (profileResult.data.profile.username ?? "there")
     : "there";
 
   return (
     <div className="py-3xl">
-      <header className="mb-2xl">
-        <h1 className="heading-xl y2k-chrome-text y2k:display-lg tracking-tight">
-          Welcome back, {username}!
-        </h1>
-        <div className="y2k-status-bar mt-lg y2k:block hidden" />
-        <p className="text-muted-foreground body-sm mt-md y2k-neon-text y2k-mono y2k-typing-cursor y2k:block y2k:tracking-[0.25em] y2k:uppercase y2k:text-xs hidden">
-          System Online
-        </p>
-      </header>
+      <Suspense fallback={<StatsSkeleton />}>
+        <QuickLogHero userId={userId} username={username} />
+      </Suspense>
 
       <Suspense fallback={<OnboardingSkeleton />}>
         <GettingStartedChecklist userId={userId} />
