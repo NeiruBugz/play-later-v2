@@ -55,9 +55,12 @@ export function LibraryGrid() {
     return <LibraryEmptyState status={filters.status} />;
   }
 
+  // Prefer the server-reported total so the nudge fires on first render for
+  // large queues, not only after the user loads more pages.
+  const queueSize = data?.pages[0]?.total ?? items.length;
   const showUpNextNudge =
     filters.status === LibraryItemStatus.UP_NEXT &&
-    items.length > UP_NEXT_NUDGE_THRESHOLD;
+    queueSize > UP_NEXT_NUDGE_THRESHOLD;
 
   return (
     <div className="space-y-xl pb-12">
