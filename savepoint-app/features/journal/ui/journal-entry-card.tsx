@@ -11,6 +11,7 @@ import {
 } from "@/shared/components/ui/card";
 import { formatRelativeDate } from "@/shared/lib/date";
 import { stripHtmlTags } from "@/shared/lib/rich-text";
+import { cn } from "@/shared/lib/ui/utils";
 import { JournalMood } from "@/shared/types";
 
 interface GameInfo {
@@ -26,10 +27,10 @@ interface JournalEntryCardProps {
 }
 
 const MOOD_LABELS: Record<JournalMood, string> = {
-  [JournalMood.EXCITED]: "Excited",
-  [JournalMood.RELAXED]: "Relaxed",
-  [JournalMood.FRUSTRATED]: "Frustrated",
-  [JournalMood.ACCOMPLISHED]: "Accomplished",
+  [JournalMood.EXCITED]: "Hyped",
+  [JournalMood.RELAXED]: "Chill",
+  [JournalMood.FRUSTRATED]: "Fried",
+  [JournalMood.ACCOMPLISHED]: "Proud",
   [JournalMood.CURIOUS]: "Curious",
   [JournalMood.NOSTALGIC]: "Nostalgic",
 };
@@ -42,7 +43,83 @@ function getContentPreview(content: string, maxLength: number = 100): string {
   return `${plainText.slice(0, maxLength)}...`;
 }
 
+function formatPlaytime(minutes: number): string {
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (remainder === 0) return `${hours}h`;
+  return `${hours}h ${remainder}m`;
+}
+
+function QuickEntryCard({ entry, game }: JournalEntryCardProps) {
+  const plainNote = entry.content ? stripHtmlTags(entry.content).trim() : "";
+  const hasPlaytime =
+    entry.playedMinutes !== null && entry.playedMinutes !== undefined;
+  const hasTags = entry.tags.length > 0;
+
+  return (
+    <Link href={`/journal/${entry.id}`} className="group block">
+      <Card
+        className={cn(
+          "cursor-pointer transition-colors",
+          "hover:border-primary/40"
+        )}
+      >
+        <CardContent className="p-md gap-md flex items-center">
+          {game.coverImage && (
+            <GameCardCover
+              imageId={game.coverImage}
+              gameTitle={game.title}
+              size="cover_small"
+              aspectRatio="portrait"
+              className="h-12 w-9 flex-shrink-0"
+              enableHoverEffect={false}
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline gap-2">
+              <span className="body-sm truncate font-medium">{game.title}</span>
+              {hasPlaytime && (
+                <span className="body-sm text-muted-foreground tabular-nums">
+                  · {formatPlaytime(entry.playedMinutes!)}
+                </span>
+              )}
+              <span className="body-sm text-muted-foreground ml-auto flex-shrink-0">
+                {formatRelativeDate(entry.updatedAt)}
+              </span>
+            </div>
+            {plainNote && (
+              <p className="body-sm text-muted-foreground mt-1 line-clamp-1">
+                {plainNote}
+              </p>
+            )}
+            {(entry.mood || hasTags) && (
+              <div className="mt-1 flex flex-wrap items-center gap-1">
+                {entry.mood && (
+                  <Badge variant="secondary" className="text-xs">
+                    {MOOD_LABELS[entry.mood]}
+                  </Badge>
+                )}
+                {entry.tags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-muted-foreground text-xs"
+                  >{`#${tag}`}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 export function JournalEntryCard({ entry, game }: JournalEntryCardProps) {
+  if (entry.kind === "QUICK") {
+    return <QuickEntryCard entry={entry} game={game} />;
+  }
+
   const displayTitle = entry.title || "Untitled Entry";
   const contentPreview = getContentPreview(entry.content, 100);
 
