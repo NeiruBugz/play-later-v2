@@ -1,3 +1,11 @@
+export const JournalEntryKind = {
+  QUICK: "QUICK",
+  REFLECTION: "REFLECTION",
+} as const;
+
+export type JournalEntryKind =
+  (typeof JournalEntryKind)[keyof typeof JournalEntryKind];
+
 export const JournalMood = {
   EXCITED: "EXCITED",
   RELAXED: "RELAXED",

@@ -1,4 +1,8 @@
-import { JournalVisibility, type JournalEntry } from "@prisma/client";
+import {
+  JournalEntryKind,
+  JournalVisibility,
+  type JournalEntry,
+} from "@prisma/client";
 
 export function createJournalEntryFixture(
   overrides?: Partial<JournalEntry>
@@ -8,8 +12,11 @@ export function createJournalEntryFixture(
     userId: "user-1",
     gameId: "game-1",
     libraryItemId: null,
+    kind: JournalEntryKind.REFLECTION,
     title: "Test Entry",
     content: "This is a test journal entry content.\nWith multiple lines.",
+    playedMinutes: null,
+    tags: [],
     mood: null,
     playSession: null,
     visibility: JournalVisibility.PRIVATE,

@@ -36,7 +36,13 @@ export default async function JournalPage() {
 
   const gameIds =
     entries.length > 0
-      ? [...new Set(entries.map((entry) => entry.gameId))]
+      ? [
+          ...new Set(
+            entries
+              .map((entry) => entry.gameId)
+              .filter((id): id is string => id !== null)
+          ),
+        ]
       : [];
 
   const gamesResult = gameIds.length > 0 ? await getGamesByIds(gameIds) : null;

@@ -59,9 +59,13 @@ export function JournalTimeline({
       setEntries((prev) => [...prev, ...newEntries]);
       setHasMore(newEntries.length === 20);
 
-      // Fetch games for new entries
+      // Fetch games for new entries (skip game-less entries)
       const newGameIds = [
-        ...new Set(newEntries.map((entry) => entry.gameId)),
+        ...new Set(
+          newEntries
+            .map((entry) => entry.gameId)
+            .filter((id): id is string => id !== null)
+        ),
       ].filter((id) => !games.has(id));
 
       if (newGameIds.length > 0) {
@@ -115,9 +119,11 @@ export function JournalTimeline({
 
       <div className="space-y-lg">
         {entries.map((entry) => {
+          if (entry.gameId === null) {
+            return null;
+          }
           const game = games.get(entry.gameId);
           if (!game) {
-            // Skip entries with missing games (shouldn't happen, but handle gracefully)
             return null;
           }
           return (
