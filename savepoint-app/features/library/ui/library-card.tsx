@@ -123,11 +123,15 @@ export const LibraryCard = memo(function LibraryCard({
         {game.title}
       </p>
 
-      {item.rating !== null && item.rating !== undefined && (
-        <div className="mt-1" data-testid="library-card-rating">
+      <div
+        className="mt-0.5 h-4"
+        data-testid="library-card-rating"
+        aria-hidden={item.rating === null || item.rating === undefined}
+      >
+        {item.rating !== null && item.rating !== undefined && (
           <RatingInput value={item.rating} readOnly size="sm" />
-        </div>
-      )}
+        )}
+      </div>
 
       {!isMobile && (
         <LibraryCardActionBar
