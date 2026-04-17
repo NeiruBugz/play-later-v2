@@ -4,7 +4,6 @@ import Link from "next/link";
 import { memo } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
-import { Badge } from "@/shared/components/ui/badge";
 import { RatingInput } from "@/shared/components/ui/rating-input";
 import { useMediaQuery } from "@/shared/hooks/use-media-query";
 import {
@@ -92,16 +91,15 @@ export const LibraryCard = memo(function LibraryCard({
         />
 
         {showBadge && (
-          <div className="absolute top-3 left-3 z-10">
-            <Badge
-              variant={statusConfig.badgeVariant}
-              role="status"
-              aria-label={`Status: ${badgeLabel}`}
-              className="shadow-paper-sm jewel-glass-strong jewel-neon-text jewel:border-primary/40 backdrop-blur-sm"
-            >
-              {badgeLabel}
-            </Badge>
-          </div>
+          <span
+            role="status"
+            aria-label={`Status: ${badgeLabel}`}
+            title={badgeLabel}
+            className="absolute top-2 left-2 z-10 h-2.5 w-2.5 rounded-full ring-2 ring-black/30"
+            style={{
+              backgroundColor: `var(--status-${statusConfig.badgeVariant})`,
+            }}
+          />
         )}
       </div>
 
@@ -122,6 +120,19 @@ export const LibraryCard = memo(function LibraryCard({
       <p className="body-sm mt-sm text-foreground jewel-display jewel:mt-1 jewel:text-[0.75rem] jewel:font-normal jewel:leading-[1.25] jewel:tracking-[0.04em] line-clamp-2 font-medium">
         {game.title}
       </p>
+
+      {showBadge && (
+        <p className="text-muted-foreground mt-0.5 flex items-center gap-1 text-[11px] leading-none">
+          <span
+            aria-hidden
+            className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+            style={{
+              backgroundColor: `var(--status-${statusConfig.badgeVariant})`,
+            }}
+          />
+          <span className="truncate">{badgeLabel}</span>
+        </p>
+      )}
 
       <div
         className="mt-0.5 h-4"
