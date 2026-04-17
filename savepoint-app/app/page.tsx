@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { BookOpen, Clock, Heart, Library, Sparkles, Users } from "lucide-react";
+import { BookOpen, Clock, Heart, Library, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -153,36 +153,21 @@ export default async function Page() {
                 Experienced. No pressure, just progress.
               </p>
             </Card>
-            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
+            <Card className="border-border bg-card space-y-xl p-3xl relative transition-shadow hover:shadow-lg">
               <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
                 <Heart className="text-secondary h-6 w-6" />
               </div>
-              <h3 className="heading-lg font-semibold">Curated Collections</h3>
+              <div className="gap-md flex items-center">
+                <h3 className="heading-lg font-semibold">
+                  Curated Collections
+                </h3>
+                <span className="body-sm bg-muted text-muted-foreground px-md rounded-full py-1 font-medium">
+                  Coming soon
+                </span>
+              </div>
               <p className="body-md text-muted-foreground">
                 Create themed collections like &ldquo;Cozy Winter Games&rdquo;
                 or &ldquo;Games That Made Me Think.&rdquo;
-              </p>
-            </Card>
-            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
-              <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-                <Sparkles className="text-primary h-6 w-6" />
-              </div>
-              <h3 className="heading-lg font-semibold">Discovery</h3>
-              <p className="body-md text-muted-foreground">
-                Find similar games through IGDB integration. Discover your next
-                adventure thoughtfully.
-              </p>
-            </Card>
-            <Card className="border-border bg-card space-y-xl p-3xl transition-shadow hover:shadow-lg">
-              <div className="bg-secondary/10 flex h-12 w-12 items-center justify-center rounded-lg">
-                <Users className="text-secondary h-6 w-6" />
-              </div>
-              <h3 className="heading-lg font-semibold">
-                Community Reflections
-              </h3>
-              <p className="body-md text-muted-foreground">
-                Read and share perspectives on games. Connect with fellow
-                patient gamers.
               </p>
             </Card>
           </div>
