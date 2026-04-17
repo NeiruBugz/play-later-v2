@@ -1,5 +1,7 @@
 # Steam Library Import Pipeline - AWS Lambda Functions
 
+> **Status: not currently deployed.** This pipeline is kept as a reference implementation for a future IGDB/Steam import service. The code is functional and tested, but infrastructure is not provisioned. Removing it would require re-implementation effort if the pipeline is revived later, so the code stays in the repo. Do not spend time hardening or updating deployment docs until the service is brought online.
+
 Python-based AWS Lambda functions for importing and enriching Steam game libraries.
 
 ## Project Structure
