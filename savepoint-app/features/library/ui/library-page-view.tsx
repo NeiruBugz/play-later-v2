@@ -1,9 +1,5 @@
-import { Download } from "lucide-react";
-import Link from "next/link";
-
 import { LibraryFilters } from "@/features/library/ui/library-filters";
 import { LibraryGrid } from "@/features/library/ui/library-grid";
-import { Button } from "@/shared/components/ui/button";
 
 type LibraryPageViewProps = {
   isSteamConnected: boolean;
@@ -12,18 +8,10 @@ type LibraryPageViewProps = {
 export function LibraryPageView({ isSteamConnected }: LibraryPageViewProps) {
   return (
     <div className="py-2xl container mx-auto">
-      <div className="mb-xl gap-lg flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-xl">
         <h1 className="heading-lg y2k-chrome-text">Library</h1>
-        {isSteamConnected && (
-          <Button asChild variant="default" size="sm">
-            <Link href="/steam/games">
-              <Download className="h-4 w-4" aria-hidden="true" />
-              Import from Steam
-            </Link>
-          </Button>
-        )}
       </div>
-      <LibraryFilters />
+      <LibraryFilters isSteamConnected={isSteamConnected} />
       <LibraryGrid />
     </div>
   );

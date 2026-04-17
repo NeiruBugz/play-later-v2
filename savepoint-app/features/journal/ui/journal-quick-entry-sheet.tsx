@@ -29,6 +29,12 @@ interface SelectedGame {
 interface JournalQuickEntrySheetProps {
   isOpen: boolean;
   onClose: () => void;
+  /**
+   * When provided, the sheet opens pre-filled with this game and skips the
+   * auto-fetch of the currently-playing game. Useful when opening from a
+   * specific dashboard tile or game detail page.
+   */
+  preselectedGame?: SelectedGame;
 }
 
 function SelectedGameHeader({
@@ -71,16 +77,19 @@ function SelectedGameHeader({
 export function JournalQuickEntrySheet({
   isOpen,
   onClose,
+  preselectedGame,
 }: JournalQuickEntrySheetProps) {
   const isMobile = useMediaQuery("(max-width: 767px)");
-  const [selectedGame, setSelectedGame] = useState<SelectedGame | null>(null);
+  const [selectedGame, setSelectedGame] = useState<SelectedGame | null>(
+    preselectedGame ?? null
+  );
   const [isLoadingGame, setIsLoadingGame] = useState(false);
   const [showGameSelector, setShowGameSelector] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const isDirtyRef = useRef(false);
 
   useEffect(() => {
-    if (isOpen && !selectedGame) {
+    if (isOpen && !selectedGame && !preselectedGame) {
       let isCancelled = false;
       Promise.resolve()
         .then(() => {
@@ -113,7 +122,7 @@ export function JournalQuickEntrySheet({
         isCancelled = true;
       };
     }
-  }, [isOpen, selectedGame]);
+  }, [isOpen, selectedGame, preselectedGame]);
 
   const handleGameSelect = (
     gameId: string,

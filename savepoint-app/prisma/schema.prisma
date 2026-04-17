@@ -116,17 +116,20 @@ model LibraryItem {
   startedAt       DateTime?
   completedAt     DateTime?
   hasBeenPlayed   Boolean           @default(false)
+  rating          Int?
   JournalEntry    JournalEntry[]
 
   @@index([userId, status])
   @@index([userId, platform])
   @@index([userId, createdAt])
+  @@index([userId, rating])
   @@index([gameId])
   @@map("LibraryItem")
 }
 
 model Review {
   id          Int      @id @default(autoincrement())
+  /// Legacy/unused. Pending Reviews spec (Phase 2B). User-facing ratings live on LibraryItem.rating (1-10 half-step scale).
   rating      Int      @default(0) // Rating from 0 to 10
   content     String? // Optional review text
   createdAt   DateTime @default(now())
@@ -139,20 +142,23 @@ model Review {
 }
 
 model JournalEntry {
-  id          String            @id @default(cuid())
-  title       String? // Optional title for the entry
-  content     String            @db.Text // Rich text journal content
-  mood        JournalMood? // Optional mood indicator
-  playSession Int? // Session number for this game
-  visibility  JournalVisibility @default(PRIVATE)
+  id             String            @id @default(cuid())
+  kind           JournalEntryKind  @default(QUICK)
+  title          String? // Optional title for the entry
+  content        String            @db.Text // Body text; required for REFLECTION, optional for QUICK
+  playedMinutes  Int? // Minutes played in this session (QUICK entries)
+  tags           String[]          @default([])
+  mood           JournalMood? // Optional mood indicator
+  playSession    Int? // Session number for this game
+  visibility     JournalVisibility @default(PRIVATE)
 
   // Relationships
   userId        String
-  gameId        String
+  gameId        String? // Nullable to forward-proof future game-less entries
   libraryItemId Int? // Optional link to library item
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  game        Game         @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  game        Game?        @relation(fields: [gameId], references: [id], onDelete: Cascade)
   libraryItem LibraryItem? @relation(fields: [libraryItemId], references: [id], onDelete: SetNull)
 
   // Metadata
@@ -214,6 +220,11 @@ enum AcquisitionType {
   PHYSICAL
   DIGITAL
   SUBSCRIPTION
+}
+
+enum JournalEntryKind {
+  QUICK // Lightweight log: playtime + optional note
+  REFLECTION // Long-form reflection with title + rich content
 }
 
 enum JournalMood {

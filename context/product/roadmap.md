@@ -73,7 +73,7 @@ _Everything we can ship on our own data + IGDB, with no AWS / external platform 
 
 _Primitives that unlock the rest of the phase._
 
-- [ ] **Star Ratings** _(Spec TBD)_
+- [x] **Star Ratings** _(Spec 011)_
   - [ ] 1–10 (or 1–5 with half-steps) rating on each library entry
   - [ ] Rating visible on library cards and game detail
   - [ ] Sort/filter library by rating

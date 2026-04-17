@@ -22,8 +22,23 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const rawSearch = searchParams.get("search");
     const rawSortBy = searchParams.get("sortBy");
     const rawSortOrder = searchParams.get("sortOrder");
+    const rawMinRating = searchParams.get("minRating");
+    const rawUnratedOnly = searchParams.get("unratedOnly");
     const rawOffset = searchParams.get("offset");
     const rawLimit = searchParams.get("limit");
+
+    const parsedMinRating =
+      rawMinRating !== null && rawMinRating !== ""
+        ? Number.parseInt(rawMinRating, 10)
+        : undefined;
+    const minRating =
+      typeof parsedMinRating === "number" &&
+      Number.isFinite(parsedMinRating) &&
+      parsedMinRating >= 1 &&
+      parsedMinRating <= 10
+        ? parsedMinRating
+        : undefined;
+    const unratedOnly = rawUnratedOnly === "1" ? true : undefined;
     const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
     const url = new URL(request.url);
     logger.info(
@@ -34,6 +49,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         search: rawSearch,
         sortBy: rawSortBy,
         sortOrder: rawSortOrder,
+        minRating: rawMinRating,
+        unratedOnly: rawUnratedOnly,
         offset: rawOffset,
         limit: rawLimit,
         ip,
@@ -54,8 +71,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             | "startedAt"
             | "completedAt"
             | "title"
+            | "rating-desc"
+            | "rating-asc"
             | undefined) ?? undefined,
         sortOrder: (rawSortOrder as "asc" | "desc" | undefined) ?? undefined,
+        minRating,
+        unratedOnly,
         offset: rawOffset ? parseInt(rawOffset, 10) : undefined,
         limit: rawLimit ? parseInt(rawLimit, 10) : undefined,
       },

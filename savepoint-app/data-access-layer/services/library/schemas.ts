@@ -8,6 +8,8 @@ export const LibrarySortBySchema = z.enum([
   "startedAt",
   "completedAt",
   "title",
+  "rating-desc",
+  "rating-asc",
 ]);
 
 export const LibrarySortOrderSchema = z.enum(["asc", "desc"]);
@@ -19,6 +21,8 @@ export const GetLibraryItemsBaseSchema = z.object({
   search: z.string().optional(),
   sortBy: LibrarySortBySchema.optional(),
   sortOrder: LibrarySortOrderSchema.optional(),
+  minRating: z.number().int().min(1).max(10).optional(),
+  unratedOnly: z.boolean().optional(),
   offset: z.number().int().min(0).optional(),
   limit: z.number().int().min(1).max(100).optional(),
 });
@@ -30,4 +34,10 @@ export const GetLibraryItemsServiceSchema = GetLibraryItemsBaseSchema.extend({
 export const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
   userId: z.string().cuid(),
+});
+
+export const SetRatingSchema = z.object({
+  libraryItemId: z.number().int().positive(),
+  userId: z.string(),
+  rating: z.number().int().min(1).max(10).nullable(),
 });

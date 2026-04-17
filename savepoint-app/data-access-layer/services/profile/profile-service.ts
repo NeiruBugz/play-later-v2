@@ -7,6 +7,7 @@ import {
   findUserByNormalizedUsername,
   findUserByUsername,
   getLibraryStatsByUserId,
+  getRatingHistogram,
   getUserSteamData,
   updateUserProfile,
 } from "@/data-access-layer/repository";
@@ -77,30 +78,39 @@ export class ProfileService {
     input: GetProfileWithStatsInput
   ): Promise<GetProfileWithStatsResult> {
     try {
-      const [user, stats, gameCount, libraryPreview] = await Promise.all([
-        findUserById(input.userId, {
-          select: {
-            username: true,
-            image: true,
-            email: true,
-            name: true,
-            createdAt: true,
-            isPublicProfile: true,
-          },
-        }),
-        getLibraryStatsByUserId(input.userId),
-        countLibraryItemsByUserId(input.userId),
-        findLibraryPreview(input.userId),
-      ]);
+      const [user, stats, gameCount, libraryPreview, histogramResult] =
+        await Promise.all([
+          findUserById(input.userId, {
+            select: {
+              username: true,
+              image: true,
+              email: true,
+              name: true,
+              createdAt: true,
+              isPublicProfile: true,
+            },
+          }),
+          getLibraryStatsByUserId(input.userId),
+          countLibraryItemsByUserId(input.userId),
+          findLibraryPreview(input.userId),
+          getRatingHistogram({ userId: input.userId }),
+        ]);
       if (!user) {
         this.logger.warn({ userId: input.userId }, "User not found");
         return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
       }
+      const ratingHistogram = histogramResult.ok ? histogramResult.data : [];
+      const ratedCount = ratingHistogram.reduce(
+        (sum, entry) => sum + entry.count,
+        0
+      );
       const profile = mapUserToProfileWithStats(
         user,
         stats,
         gameCount,
-        libraryPreview.map((item) => item.game)
+        libraryPreview.map((item) => item.game),
+        ratingHistogram,
+        ratedCount
       );
       return serviceSuccess({ profile });
     } catch (error) {

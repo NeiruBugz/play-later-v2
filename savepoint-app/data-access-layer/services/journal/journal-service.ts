@@ -8,7 +8,11 @@ import {
   findJournalEntryById,
   updateJournalEntry,
 } from "@/data-access-layer/repository";
-import { JournalMood, type JournalEntry } from "@prisma/client";
+import {
+  JournalEntryKind,
+  JournalMood,
+  type JournalEntry,
+} from "@prisma/client";
 
 import {
   handleServiceError,
@@ -46,8 +50,11 @@ export class JournalService {
   async createJournalEntry(params: {
     userId: string;
     gameId: string;
+    kind?: JournalEntryKind;
     title?: string;
     content: string;
+    playedMinutes?: number;
+    tags?: string[];
     mood?: JournalMood;
     playSession?: number;
     libraryItemId?: number;
@@ -106,8 +113,11 @@ export class JournalService {
     userId: string;
     entryId: string;
     updates: {
+      kind?: JournalEntryKind;
       title?: string;
       content?: string;
+      playedMinutes?: number | null;
+      tags?: string[];
       mood?: JournalMood | null;
       playSession?: number | null;
       libraryItemId?: number | null;

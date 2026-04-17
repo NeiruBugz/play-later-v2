@@ -19,14 +19,27 @@ export const createJournalEntryAction = createServerAction<
   schema: CreateJournalEntrySchema,
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
-    const { gameId, title, content, mood, playSession, libraryItemId } = input;
+    const {
+      gameId,
+      kind,
+      title,
+      content,
+      playedMinutes,
+      tags,
+      mood,
+      playSession,
+      libraryItemId,
+    } = input;
     logger.info({ gameId, userId }, "Creating journal entry");
     const journalService = new JournalService();
     const result = await journalService.createJournalEntry({
       userId: userId!,
       gameId,
+      kind,
       title,
       content,
+      playedMinutes,
+      tags,
       mood,
       playSession,
       libraryItemId,

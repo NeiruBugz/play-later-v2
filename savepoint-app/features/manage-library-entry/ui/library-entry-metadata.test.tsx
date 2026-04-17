@@ -37,6 +37,7 @@ const createMockLibraryItem = (
   updatedAt: new Date("2025-01-27T12:00:00Z"),
   startedAt: null,
   completedAt: null,
+  rating: null,
   hasBeenPlayed: false,
   statusChangedAt: null,
   ...overrides,

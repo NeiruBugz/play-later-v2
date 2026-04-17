@@ -5,7 +5,9 @@ export interface LibraryStatusDisplayProps {
   gameId?: string;
   userLibraryStatus?: {
     mostRecent: {
+      id: number;
       status: LibraryItemStatus;
+      rating: number | null;
     };
     updatedAt: Date;
     allItems: LibraryItemDomain[];

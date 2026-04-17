@@ -9,6 +9,7 @@ import {
   RelatedGamesSkeleton,
 } from "@/features/browse-related-games";
 import {
+  ActualPlaytime,
   GameCoverImage,
   GameDescription,
   GameReleaseDate,
@@ -179,7 +180,37 @@ export default async function GameDetailPage({
                 </div>
               )}
             </header>
-            <TimesToBeatSection timesToBeat={timesToBeat} />
+            {userId && gameId && (
+              <section
+                className="space-y-lg animate-fade-in"
+                aria-labelledby="playtime-heading"
+              >
+                <h2 id="playtime-heading" className="heading-md font-semibold">
+                  Playtime
+                </h2>
+                <ActualPlaytime
+                  totalMinutes={journalEntries.reduce(
+                    (sum, entry) =>
+                      sum +
+                      (entry.playedMinutes !== null &&
+                      entry.playedMinutes !== undefined
+                        ? entry.playedMinutes
+                        : 0),
+                    0
+                  )}
+                  sessionCount={
+                    journalEntries.filter(
+                      (e) =>
+                        e.playedMinutes !== null &&
+                        e.playedMinutes !== undefined &&
+                        e.playedMinutes > 0
+                    ).length
+                  }
+                />
+                <TimesToBeatSection timesToBeat={timesToBeat} />
+              </section>
+            )}
+            {!userId && <TimesToBeatSection timesToBeat={timesToBeat} />}
             {userId && gameId && (
               <JournalEntriesSection
                 journalEntries={journalEntries}

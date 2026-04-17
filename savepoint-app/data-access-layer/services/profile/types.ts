@@ -28,6 +28,10 @@ export type LibraryStats = {
   journalCount: number;
 };
 export type GetProfileResult = ServiceResult<{ profile: Profile }>;
+export type RatingHistogramEntry = {
+  rating: number;
+  count: number;
+};
 export type ProfileWithStats = {
   username: string | null;
   image: string | null;
@@ -38,6 +42,8 @@ export type ProfileWithStats = {
   stats: LibraryStats;
   gameCount: number;
   libraryPreview: LibraryPreviewGame[];
+  ratingHistogram: RatingHistogramEntry[];
+  ratedCount: number;
 };
 export type GetProfileWithStatsResult = ServiceResult<{
   profile: ProfileWithStats;

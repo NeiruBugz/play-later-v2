@@ -19,7 +19,17 @@ export const updateJournalEntryAction = createServerAction<
   schema: UpdateJournalEntrySchema,
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
-    const { entryId, title, content, mood, playSession, libraryItemId } = input;
+    const {
+      entryId,
+      kind,
+      title,
+      content,
+      playedMinutes,
+      tags,
+      mood,
+      playSession,
+      libraryItemId,
+    } = input;
     logger.info({ entryId, userId }, "Updating journal entry");
 
     const journalService = new JournalService();
@@ -32,8 +42,12 @@ export const updateJournalEntryAction = createServerAction<
       updates: {},
     };
 
+    if (kind !== undefined) updateParams.updates.kind = kind;
     if (title !== undefined) updateParams.updates.title = title;
     if (content !== undefined) updateParams.updates.content = content;
+    if (playedMinutes !== undefined)
+      updateParams.updates.playedMinutes = playedMinutes;
+    if (tags !== undefined) updateParams.updates.tags = tags;
     if (mood !== undefined) updateParams.updates.mood = mood;
     if (playSession !== undefined)
       updateParams.updates.playSession = playSession;

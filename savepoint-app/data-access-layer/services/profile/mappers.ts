@@ -3,6 +3,7 @@ import type {
   LibraryStats,
   Profile,
   ProfileWithStats,
+  RatingHistogramEntry,
   RecentGame,
 } from "./types";
 
@@ -58,12 +59,16 @@ export function mapUserToProfileWithStats(
   user: MinimalUser,
   stats: LibraryStatsRepo,
   gameCount: number,
-  libraryPreview: LibraryPreviewGame[]
+  libraryPreview: LibraryPreviewGame[],
+  ratingHistogram: RatingHistogramEntry[],
+  ratedCount: number
 ): ProfileWithStats {
   return {
     ...mapUserToProfile(user),
     stats: mapLibraryStats(stats),
     gameCount,
     libraryPreview,
+    ratingHistogram,
+    ratedCount,
   };
 }

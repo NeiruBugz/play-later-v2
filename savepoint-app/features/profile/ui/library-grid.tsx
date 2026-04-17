@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
 import { Badge } from "@/shared/components/ui/badge";
+import { RatingInput } from "@/shared/components/ui/rating-input";
 import { getStatusConfig, getUpNextLabel } from "@/shared/lib/library-status";
 import { LibraryItemStatus } from "@/shared/types";
 
@@ -9,6 +10,7 @@ export type LibraryGridItem = {
   id: number;
   status: (typeof LibraryItemStatus)[keyof typeof LibraryItemStatus];
   hasBeenPlayed?: boolean;
+  rating?: number | null;
   game: {
     title: string;
     coverImage: string | null;
@@ -69,6 +71,11 @@ export function LibraryGrid({ items }: LibraryGridProps) {
             <p className="body-sm mt-2 line-clamp-2 font-medium">
               {game.title}
             </p>
+            {item.rating !== null && item.rating !== undefined && (
+              <div className="mt-1" data-testid="library-grid-rating">
+                <RatingInput value={item.rating} readOnly size="sm" />
+              </div>
+            )}
           </Link>
         );
       })}

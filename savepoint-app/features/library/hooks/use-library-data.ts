@@ -20,8 +20,12 @@ export type LibraryFilters = {
     | "releaseDate"
     | "startedAt"
     | "completedAt"
-    | "title";
+    | "title"
+    | "rating-desc"
+    | "rating-asc";
   sortOrder?: "asc" | "desc";
+  minRating?: number;
+  unratedOnly?: boolean;
 };
 
 type LibraryPageData = {
@@ -46,8 +50,17 @@ export function useLibraryData(filters: LibraryFilters = {}) {
     queryFn: async ({ pageParam }): Promise<LibraryPageData> => {
       const params = new URLSearchParams(
         Object.entries(filters)
-          .filter(([, value]) => value !== undefined)
-          .map(([key, value]) => [key, String(value)])
+          .filter(([key, value]) => {
+            if (value === undefined) return false;
+            if (key === "unratedOnly") return value === true;
+            return true;
+          })
+          .map(([key, value]) => {
+            if (key === "unratedOnly") {
+              return [key, "1"];
+            }
+            return [key, String(value)];
+          })
       );
       params.set("offset", String(pageParam));
       params.set("limit", String(LIBRARY_PAGE_SIZE));

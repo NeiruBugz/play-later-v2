@@ -19,6 +19,7 @@ import { formatAbsoluteDate } from "@/shared/lib/date";
 import { getStatusLabel, getStatusVariant } from "@/shared/lib/library-status";
 
 import { AddToLibraryButton } from "./add-to-library-button";
+import { LibraryRatingControl } from "./library-rating-control";
 import type { LibraryStatusDisplayProps } from "./library-status-display.types";
 
 const LibraryModal = dynamic(
@@ -56,6 +57,8 @@ export const LibraryStatusDisplay = ({
   }
 
   const status = userLibraryStatus.mostRecent.status;
+  const rating = userLibraryStatus.mostRecent.rating;
+  const libraryItemId = userLibraryStatus.mostRecent.id;
   const statusLabel = getStatusLabel(status);
   const badgeVariant = getStatusVariant(status);
   const updatedDate = formatAbsoluteDate(userLibraryStatus.updatedAt);
@@ -77,7 +80,7 @@ export const LibraryStatusDisplay = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-lg">
-          <div className="gap-md flex items-center" role="status">
+          <div role="status">
             <Badge
               variant={badgeVariant}
               className="text-sm"
@@ -91,6 +94,16 @@ export const LibraryStatusDisplay = ({
               />
               {statusLabel}
             </Badge>
+          </div>
+          <div className="gap-xs flex flex-col">
+            <span className="text-muted-foreground text-xs font-medium">
+              Your rating
+            </span>
+            <LibraryRatingControl
+              libraryItemId={libraryItemId}
+              initialRating={rating}
+              size="md"
+            />
           </div>
           <p className="text-muted-foreground text-xs">
             <time dateTime={userLibraryStatus.updatedAt.toISOString()}>

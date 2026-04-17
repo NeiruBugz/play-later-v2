@@ -24,6 +24,10 @@ export default async function JournalEntryPage({
 
   const entry = entryResult.data;
 
+  if (entry.gameId === null) {
+    notFound();
+  }
+
   const gameResult = await getGameById(entry.gameId);
 
   if (!gameResult.success || !gameResult.data) {

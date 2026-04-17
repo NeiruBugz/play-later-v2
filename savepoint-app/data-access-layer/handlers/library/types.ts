@@ -17,9 +17,15 @@ export interface GetLibraryHandlerInput {
     | "releaseDate"
     | "startedAt"
     | "completedAt"
-    | "title";
+    | "title"
+    | "rating-desc"
+    | "rating-asc";
 
   sortOrder?: "asc" | "desc";
+
+  minRating?: number;
+
+  unratedOnly?: boolean;
 
   offset?: number;
 

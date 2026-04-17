@@ -1,6 +1,6 @@
 "use client";
 
-import { PenLine } from "lucide-react";
+import { PenLine, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { useJournalEntryDialog } from "@/features/journal/hooks";
@@ -69,19 +69,36 @@ function JournalEntryCard({
   );
 }
 
-function EmptyState({ onWriteEntry }: { onWriteEntry: () => void }) {
+function EmptyState({
+  onLogSession,
+  gameId,
+}: {
+  onLogSession: () => void;
+  gameId: string;
+}) {
   return (
     <div className="bg-muted/30 gap-lg p-2xl flex flex-col items-center rounded-lg border border-dashed text-center">
       <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
         <PenLine className="text-primary h-6 w-6" />
       </div>
       <div className="space-y-xs">
-        <p className="body-md font-medium">Document your journey</p>
+        <p className="body-md font-medium">Log your first session</p>
         <p className="body-sm text-muted-foreground">
-          Capture thoughts, progress, and memories as you play
+          Playtime is enough. A thought is optional. Reflections come later.
         </p>
       </div>
-      <Button onClick={onWriteEntry}>Write Your First Entry</Button>
+      <div className="gap-md flex flex-wrap items-center justify-center">
+        <Button onClick={onLogSession}>
+          <Plus className="mr-1 h-4 w-4" aria-hidden />
+          Log session
+        </Button>
+        <Button asChild variant="outline">
+          <Link href={`/journal/new?gameId=${gameId}`}>
+            <PenLine className="mr-1 h-4 w-4" aria-hidden />
+            Reflect
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }
@@ -105,10 +122,18 @@ export function JournalEntriesSection({
             Your Journal
           </h2>
           {hasEntries && (
-            <Button variant="secondary" size="sm" onClick={dialog.open}>
-              <PenLine className="mr-2 h-4 w-4" />
-              Write Entry
-            </Button>
+            <div className="gap-sm flex items-center">
+              <Button size="sm" onClick={dialog.open}>
+                <Plus className="mr-1 h-4 w-4" aria-hidden />
+                Log
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/journal/new?gameId=${gameId}`}>
+                  <PenLine className="mr-1 h-4 w-4" aria-hidden />
+                  Reflect
+                </Link>
+              </Button>
+            </div>
           )}
         </div>
         {hasEntries ? (
@@ -127,7 +152,7 @@ export function JournalEntriesSection({
             ))}
           </div>
         ) : (
-          <EmptyState onWriteEntry={dialog.open} />
+          <EmptyState onLogSession={dialog.open} gameId={gameId} />
         )}
       </section>
 

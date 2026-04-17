@@ -104,10 +104,10 @@ export function ProfileHeader({
             {profile.email && (
               <p className="text-muted-foreground text-sm">{profile.email}</p>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Link
                 href="/profile/settings"
-                className="text-sm font-medium underline-offset-4 hover:underline"
+                className="border-border hover:bg-muted rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
               >
                 Edit Profile
               </Link>

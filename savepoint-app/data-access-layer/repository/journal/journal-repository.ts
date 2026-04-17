@@ -1,6 +1,10 @@
 import "server-only";
 
-import type { JournalEntry, JournalMood } from "@prisma/client";
+import type {
+  JournalEntry,
+  JournalEntryKind,
+  JournalMood,
+} from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
 
@@ -37,8 +41,11 @@ export async function countJournalEntriesByUserId(
 export async function createJournalEntry(params: {
   userId: string;
   gameId: string;
+  kind?: JournalEntryKind;
   title?: string;
   content: string;
+  playedMinutes?: number;
+  tags?: string[];
   mood?: JournalMood;
   playSession?: number;
   libraryItemId?: number;
@@ -47,8 +54,11 @@ export async function createJournalEntry(params: {
     data: {
       userId: params.userId,
       gameId: params.gameId,
+      kind: params.kind ?? "QUICK",
       title: params.title,
       content: params.content,
+      playedMinutes: params.playedMinutes ?? null,
+      tags: params.tags ?? [],
       mood: params.mood ?? null,
       playSession: params.playSession ?? null,
       libraryItemId: params.libraryItemId ?? null,
@@ -104,8 +114,11 @@ export async function updateJournalEntry(params: {
   entryId: string;
   userId: string;
   updates: {
+    kind?: JournalEntryKind;
     title?: string;
     content?: string;
+    playedMinutes?: number | null;
+    tags?: string[];
     mood?: JournalMood | null;
     playSession?: number | null;
     libraryItemId?: number | null;
@@ -115,8 +128,12 @@ export async function updateJournalEntry(params: {
 
   const updateData: Record<string, unknown> = {};
 
+  if (updates.kind !== undefined) updateData.kind = updates.kind;
   if (updates.title !== undefined) updateData.title = updates.title;
   if (updates.content !== undefined) updateData.content = updates.content;
+  if (updates.playedMinutes !== undefined)
+    updateData.playedMinutes = updates.playedMinutes;
+  if (updates.tags !== undefined) updateData.tags = updates.tags;
   if (updates.mood !== undefined) updateData.mood = updates.mood;
   if (updates.playSession !== undefined)
     updateData.playSession = updates.playSession;

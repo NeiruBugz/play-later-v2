@@ -13,6 +13,11 @@ export { ProfileHeader } from "./ui/profile-header";
 export { ProfilePrivateMessage } from "./ui/profile-private-message";
 export type { ProfileHeaderProps } from "./ui/profile-header";
 export { ProfileStatsBar } from "./ui/profile-stats-bar";
+export { RatingHistogram } from "./ui/rating-histogram";
+export type {
+  RatingHistogramBin,
+  RatingHistogramProps,
+} from "./ui/rating-histogram";
 export { ProfileTabNav } from "./ui/profile-tab-nav";
 export type { ProfileTabNavProps } from "./ui/profile-tab-nav";
 export { ProfileVisibilityToggle } from "./ui/profile-visibility-toggle";

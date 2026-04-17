@@ -11,7 +11,14 @@ import {
 } from "@/shared/constants";
 import { prisma } from "@/shared/lib/app/db";
 
-import { DuplicateError, NotFoundError } from "../errors";
+import {
+  DuplicateError,
+  NotFoundError,
+  repositoryError,
+  RepositoryErrorCode,
+  repositorySuccess,
+  type RepositoryResult,
+} from "../errors";
 import { countJournalEntriesByUserId } from "../journal/journal-repository";
 import type {
   CreateLibraryItemInput,
@@ -579,13 +586,17 @@ export async function findLibraryItemsWithFilters(params: {
   status?: LibraryItemStatus;
   platform?: string;
   search?: string;
+  minRating?: number;
+  unratedOnly?: boolean;
   sortBy?:
     | "updatedAt"
     | "createdAt"
     | "releaseDate"
     | "startedAt"
     | "completedAt"
-    | "title";
+    | "title"
+    | "rating-desc"
+    | "rating-asc";
   sortOrder?: "asc" | "desc";
   distinctByGame?: boolean;
   skip?: number;
@@ -596,12 +607,19 @@ export async function findLibraryItemsWithFilters(params: {
     status,
     platform,
     search,
+    minRating,
+    unratedOnly,
     sortBy = "updatedAt",
     sortOrder = "desc",
     distinctByGame = false,
     skip,
     take,
   } = params;
+  const ratingFilter: Pick<Prisma.LibraryItemWhereInput, "rating"> = unratedOnly
+    ? { rating: null }
+    : minRating !== undefined
+      ? { rating: { gte: minRating } }
+      : {};
   const whereClause: Prisma.LibraryItemWhereInput = {
     userId,
     ...(status && { status }),
@@ -609,6 +627,7 @@ export async function findLibraryItemsWithFilters(params: {
     ...(search && {
       game: { title: { contains: search, mode: "insensitive" } },
     }),
+    ...ratingFilter,
   };
   let orderByClause: Prisma.LibraryItemOrderByWithRelationInput;
   switch (sortBy) {
@@ -623,6 +642,12 @@ export async function findLibraryItemsWithFilters(params: {
       break;
     case "title":
       orderByClause = { game: { title: sortOrder } };
+      break;
+    case "rating-desc":
+      orderByClause = { rating: { sort: "desc", nulls: "last" } };
+      break;
+    case "rating-asc":
+      orderByClause = { rating: { sort: "asc", nulls: "last" } };
       break;
     case "updatedAt":
       orderByClause = { updatedAt: sortOrder };
@@ -714,6 +739,22 @@ export async function findLibraryItemsWithFilters(params: {
         const comparison = aTitle.localeCompare(bTitle);
         return sortOrder === "asc" ? comparison : -comparison;
       }
+      case "rating-desc": {
+        const aValue = a.rating;
+        const bValue = b.rating;
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return 1;
+        if (bValue == null) return -1;
+        return bValue - aValue;
+      }
+      case "rating-asc": {
+        const aValue = a.rating;
+        const bValue = b.rating;
+        if (aValue == null && bValue == null) return 0;
+        if (aValue == null) return 1;
+        if (bValue == null) return -1;
+        return aValue - bValue;
+      }
       case "updatedAt": {
         const comparison = a.updatedAt.getTime() - b.updatedAt.getTime();
         return sortOrder === "asc" ? comparison : -comparison;
@@ -726,4 +767,54 @@ export async function findLibraryItemsWithFilters(params: {
     }
   });
   return { items: sortedItems, total: sortedItems.length };
+}
+
+export async function getRatingHistogram({
+  userId,
+}: {
+  userId: string;
+}): Promise<RepositoryResult<Array<{ rating: number; count: number }>>> {
+  const bins = await prisma.libraryItem.groupBy({
+    by: ["rating"],
+    where: { userId, rating: { not: null } },
+    _count: { _all: true },
+  });
+  const histogram = Array.from({ length: 10 }, (_, i) => {
+    const rating = i + 1;
+    const bin = bins.find((b) => b.rating === rating);
+    return { rating, count: bin?._count._all ?? 0 };
+  });
+  return repositorySuccess(histogram);
+}
+
+export async function setRating({
+  libraryItemId,
+  userId,
+  rating,
+}: {
+  libraryItemId: number | string;
+  userId: string;
+  rating: number | null;
+}): Promise<RepositoryResult<void>> {
+  const numericId =
+    typeof libraryItemId === "string"
+      ? Number.parseInt(libraryItemId, 10)
+      : libraryItemId;
+  if (!Number.isInteger(numericId)) {
+    return repositoryError(
+      RepositoryErrorCode.NOT_FOUND,
+      "Library item not found"
+    );
+  }
+  const result = await prisma.libraryItem.updateMany({
+    where: { id: numericId, userId },
+    data: { rating },
+  });
+  if (result.count === 0) {
+    return repositoryError(
+      RepositoryErrorCode.NOT_FOUND,
+      "Library item not found"
+    );
+  }
+  return repositorySuccess(undefined);
 }

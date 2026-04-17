@@ -21,6 +21,7 @@ const createMockEntry = (
   completedAt: null,
   hasBeenPlayed: false,
   statusChangedAt: null,
+  rating: null,
   ...overrides,
 });
 

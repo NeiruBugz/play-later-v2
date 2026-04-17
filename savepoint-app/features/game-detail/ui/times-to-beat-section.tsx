@@ -56,13 +56,16 @@ export function TimesToBeatSection({ timesToBeat }: TimesToBeatSectionProps) {
 
   return (
     <section
-      className="animate-fade-in space-y-lg"
+      className="animate-fade-in space-y-md"
       aria-labelledby="times-to-beat-heading"
     >
-      <h2 id="times-to-beat-heading" className="heading-md font-semibold">
-        Times to Beat
-      </h2>
-      <div className="gap-lg grid sm:grid-cols-2">
+      <h3
+        id="times-to-beat-heading"
+        className="text-muted-foreground text-xs font-medium tracking-wider uppercase"
+      >
+        Average times to beat
+      </h3>
+      <div className="gap-md grid sm:grid-cols-2">
         <TimeCard
           icon={<Clock className="h-5 w-5 text-[var(--status-playing)]" />}
           label="Main Story"

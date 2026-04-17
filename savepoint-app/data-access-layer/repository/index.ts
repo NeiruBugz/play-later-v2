@@ -1,4 +1,12 @@
-export { NotFoundError, DuplicateError } from "./errors";
+export {
+  NotFoundError,
+  DuplicateError,
+  RepositoryErrorCode,
+  repositorySuccess,
+  repositoryError,
+  type RepositoryError,
+  type RepositoryResult,
+} from "./errors";
 export {
   createLibraryItem,
   deleteLibraryItem,
@@ -27,6 +35,8 @@ export {
   countLibraryItemsByUserId,
   findLibraryPreview,
   hasLibraryItemWithStatus,
+  setRating,
+  getRatingHistogram,
   type FindLibraryItemsResult,
 } from "./library/library-repository";
 export {

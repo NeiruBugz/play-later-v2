@@ -269,7 +269,7 @@ export async function createTestJournalEntry(data: {
   return {
     id: entry.id,
     userId: entry.userId,
-    gameId: entry.gameId,
+    gameId: data.gameId,
     title: entry.title,
     content: entry.content,
   };

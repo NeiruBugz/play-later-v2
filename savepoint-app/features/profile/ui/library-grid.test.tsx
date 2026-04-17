@@ -7,6 +7,7 @@ import { LibraryGrid } from "./library-grid";
 type LibraryItem = {
   id: number;
   status: (typeof LibraryItemStatus)[keyof typeof LibraryItemStatus];
+  rating?: number | null;
   game: {
     id: string;
     igdbId: number;
@@ -146,6 +147,30 @@ describe("LibraryGrid", () => {
       expect(screen.getByTestId("library-grid-status-badge")).toHaveTextContent(
         /wishlist/i
       );
+    });
+  });
+
+  describe("rating display", () => {
+    it("renders a compact rating when item.rating is set", () => {
+      renderLibraryGrid([buildItem({ id: 1, rating: 8 })]);
+
+      expect(screen.getByTestId("library-grid-rating")).toBeInTheDocument();
+    });
+
+    it("does not render a rating when item.rating is null", () => {
+      renderLibraryGrid([buildItem({ id: 1, rating: null })]);
+
+      expect(
+        screen.queryByTestId("library-grid-rating")
+      ).not.toBeInTheDocument();
+    });
+
+    it("does not render a rating when item.rating is undefined", () => {
+      renderLibraryGrid([buildItem({ id: 1 })]);
+
+      expect(
+        screen.queryByTestId("library-grid-rating")
+      ).not.toBeInTheDocument();
     });
   });
 

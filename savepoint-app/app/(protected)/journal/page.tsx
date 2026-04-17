@@ -36,7 +36,13 @@ export default async function JournalPage() {
 
   const gameIds =
     entries.length > 0
-      ? [...new Set(entries.map((entry) => entry.gameId))]
+      ? [
+          ...new Set(
+            entries
+              .map((entry) => entry.gameId)
+              .filter((id): id is string => id !== null)
+          ),
+        ]
       : [];
 
   const gamesResult = gameIds.length > 0 ? await getGamesByIds(gameIds) : null;
@@ -61,7 +67,8 @@ export default async function JournalPage() {
         <header>
           <h1 className="heading-xl tracking-tight">Journal</h1>
           <p className="body-md text-muted-foreground">
-            Document your gaming journey
+            Your sessions and reflections, tied to the games you played them
+            for.
           </p>
         </header>
 
