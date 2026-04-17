@@ -23,6 +23,7 @@ import type { LibraryCardProps } from "./library-card.types";
 export const LibraryCard = memo(function LibraryCard({
   item,
   index = 0,
+  activeStatusFilter,
 }: LibraryCardProps & { index?: number }) {
   const { game, status } = item;
   const coverImageId =
@@ -50,7 +51,8 @@ export const LibraryCard = memo(function LibraryCard({
   const staggerIndex = Math.min(index + 1, 12);
 
   const statusConfig = getStatusConfig(status);
-  const showBadge = shouldShowBadge(status);
+  const badgeRedundant = activeStatusFilter === status;
+  const showBadge = shouldShowBadge(status) && !badgeRedundant;
   const badgeLabel =
     status === LibraryItemStatus.UP_NEXT
       ? getUpNextLabel(item.hasBeenPlayed)
