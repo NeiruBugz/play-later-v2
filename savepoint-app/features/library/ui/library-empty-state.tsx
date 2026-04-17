@@ -13,42 +13,41 @@ const EMPTY_STATE_BY_STATUS: Record<
   }
 > = {
   [LibraryItemStatus.PLAYING]: {
-    title: "No games in progress",
-    description: "Start playing a game from your library.",
-    actionLabel: "View Library",
-    actionHref: "/library",
+    title: "Nothing in progress",
+    description: "When you start playing something, it lives here.",
+    actionLabel: "Go to shelf",
+    actionHref: "/library?status=SHELF",
   },
   [LibraryItemStatus.UP_NEXT]: {
-    title: "Nothing queued up",
-    description: "Add games you plan to play next.",
-    actionLabel: "Browse Games",
-    actionHref: "/games/search",
+    title: "Your queue is empty",
+    description: "Queue a game from the shelf for when you're ready.",
+    actionLabel: "Browse the shelf",
+    actionHref: "/library?status=SHELF",
   },
   [LibraryItemStatus.SHELF]: {
-    title: "Nothing on hold",
-    description: "Move games here when you take a break from them.",
-    actionLabel: "View Library",
-    actionHref: "/library",
+    title: "Your shelf is empty",
+    description: "Add games you own — digital or physical — to your shelf.",
+    actionLabel: "Find a game",
+    actionHref: "/games/search",
   },
   [LibraryItemStatus.PLAYED]: {
-    title: "No completed games yet",
-    description: "Mark a game as played when you finish it.",
-    actionLabel: "View Library",
-    actionHref: "/library",
+    title: "Nothing set down yet",
+    description: "Games you've finished — or set aside for now — show up here.",
+    actionLabel: "Browse the shelf",
+    actionHref: "/library?status=SHELF",
   },
   [LibraryItemStatus.WISHLIST]: {
     title: "Your wishlist is empty",
-    description: "Search for games you want to play someday.",
-    actionLabel: "Browse Games",
+    description: "Games you want someday, without pressure to buy them yet.",
+    actionLabel: "Find a game",
     actionHref: "/games/search",
   },
 };
 
 const DEFAULT_EMPTY_STATE = {
-  title: "Your Library is Empty",
-  description:
-    "Start building your gaming library by searching for games and adding them.",
-  actionLabel: "Browse Games",
+  title: "Your library is empty",
+  description: "Start your shelf — add a game you already own.",
+  actionLabel: "Find a game",
   actionHref: "/games/search",
 };
 
