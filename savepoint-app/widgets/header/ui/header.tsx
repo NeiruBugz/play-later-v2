@@ -104,7 +104,8 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
             >
               <Image
                 src="/logo.svg"
-                alt="SavePoint Logo"
+                alt=""
+                aria-hidden="true"
                 width={40}
                 height={40}
                 className="y2k-logo-glow h-8 w-8 md:h-10 md:w-10"
@@ -115,23 +116,10 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
             </Link>
           </h1>
           <nav className="gap-lg md:gap-2xl flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={open}
-              aria-label="Search games (Cmd+K)"
-              className="relative"
-            >
-              <Search className="h-5 w-5" />
-              <kbd className="bg-muted text-muted-foreground pointer-events-none absolute -right-1 -bottom-1 hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
-                {isMac ? "⌘K" : "Ctrl+K"}
-              </kbd>
-            </Button>
             <ThemeToggle />
           </nav>
         </div>
       </header>
-      <CommandPalette isOpen={isOpen} onClose={close} />
     </>
   );
 }
