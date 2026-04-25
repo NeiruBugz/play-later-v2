@@ -114,6 +114,19 @@ export async function findPlatformsForGame(gameId: string): Promise<{
   };
 }
 
+export type KnownPlatform = {
+  id: string;
+  igdbId: number | null;
+  name: string;
+};
+
+export async function findKnownPlatforms(): Promise<KnownPlatform[]> {
+  return prisma.platform.findMany({
+    select: { id: true, igdbId: true, name: true },
+    orderBy: { name: "asc" },
+  });
+}
+
 export async function findSystemPlatforms(): Promise<UniquePlatformResult[]> {
   return prisma.$queryRaw<UniquePlatformResult[]>`
     SELECT p.id, p.name, p.slug

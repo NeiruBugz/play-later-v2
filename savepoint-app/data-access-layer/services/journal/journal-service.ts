@@ -6,6 +6,7 @@ import {
   findJournalEntriesByGameId,
   findJournalEntriesByUserId,
   findJournalEntryById,
+  findLatestJournalDateByGameId,
   updateJournalEntry,
 } from "@/data-access-layer/repository";
 import {
@@ -135,6 +136,21 @@ export class JournalService {
       return serviceSuccess(data);
     } catch (error) {
       return handleServiceError(error, "Failed to update journal entry");
+    }
+  }
+
+  async getLatestEntryDatePerGame(
+    userId: string,
+    gameIds: string[]
+  ): Promise<ServiceResult<Map<string, Date>>> {
+    try {
+      const data = await findLatestJournalDateByGameId({ userId, gameIds });
+      return serviceSuccess(data);
+    } catch (error) {
+      return handleServiceError(
+        error,
+        "Failed to get latest journal entry dates per game"
+      );
     }
   }
 

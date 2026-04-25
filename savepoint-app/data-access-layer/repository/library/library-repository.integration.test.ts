@@ -10,7 +10,10 @@ import {
 } from "@/test/setup/db-factories";
 import { LibraryItemStatus } from "@prisma/client";
 
-import { findLibraryItemsWithFilters } from "./library-repository";
+import {
+  countLibraryItemsByStatus,
+  findLibraryItemsWithFilters,
+} from "./library-repository";
 
 describe("LibraryRepository - Integration Tests", () => {
   beforeAll(async () => {
@@ -607,6 +610,154 @@ describe("LibraryRepository - Integration Tests", () => {
           "Another Game With Release Date"
         );
       });
+    });
+  });
+
+  describe("countLibraryItemsByStatus", () => {
+    it("should return zero counts for all statuses when library is empty", async () => {
+      const user = await createUser();
+
+      const counts = await countLibraryItemsByStatus({ userId: user.id });
+
+      expect(counts[LibraryItemStatus.WISHLIST]).toBe(0);
+      expect(counts[LibraryItemStatus.SHELF]).toBe(0);
+      expect(counts[LibraryItemStatus.UP_NEXT]).toBe(0);
+      expect(counts[LibraryItemStatus.PLAYING]).toBe(0);
+      expect(counts[LibraryItemStatus.PLAYED]).toBe(0);
+    });
+
+    it("should count items for a single status correctly", async () => {
+      const user = await createUser();
+      const game1 = await createGame({ title: "Game A" });
+      const game2 = await createGame({ title: "Game B" });
+
+      await createLibraryItem({
+        userId: user.id,
+        gameId: game1.id,
+        status: LibraryItemStatus.PLAYING,
+      });
+      await createLibraryItem({
+        userId: user.id,
+        gameId: game2.id,
+        status: LibraryItemStatus.PLAYING,
+      });
+
+      const counts = await countLibraryItemsByStatus({ userId: user.id });
+
+      expect(counts[LibraryItemStatus.PLAYING]).toBe(2);
+      expect(counts[LibraryItemStatus.WISHLIST]).toBe(0);
+    });
+
+    it("should count items across mixed statuses", async () => {
+      const user = await createUser();
+      const games = await Promise.all([
+        createGame({ title: "G1" }),
+        createGame({ title: "G2" }),
+        createGame({ title: "G3" }),
+        createGame({ title: "G4" }),
+        createGame({ title: "G5" }),
+      ]);
+
+      await createLibraryItem({
+        userId: user.id,
+        gameId: games[0]!.id,
+        status: LibraryItemStatus.PLAYING,
+      });
+      await createLibraryItem({
+        userId: user.id,
+        gameId: games[1]!.id,
+        status: LibraryItemStatus.PLAYED,
+      });
+      await createLibraryItem({
+        userId: user.id,
+        gameId: games[2]!.id,
+        status: LibraryItemStatus.PLAYED,
+      });
+      await createLibraryItem({
+        userId: user.id,
+        gameId: games[3]!.id,
+        status: LibraryItemStatus.WISHLIST,
+      });
+      await createLibraryItem({
+        userId: user.id,
+        gameId: games[4]!.id,
+        status: LibraryItemStatus.UP_NEXT,
+      });
+
+      const counts = await countLibraryItemsByStatus({ userId: user.id });
+
+      expect(counts[LibraryItemStatus.PLAYING]).toBe(1);
+      expect(counts[LibraryItemStatus.PLAYED]).toBe(2);
+      expect(counts[LibraryItemStatus.WISHLIST]).toBe(1);
+      expect(counts[LibraryItemStatus.UP_NEXT]).toBe(1);
+      expect(counts[LibraryItemStatus.SHELF]).toBe(0);
+    });
+
+    it("should filter counts by platform", async () => {
+      const user = await createUser();
+      const game1 = await createGame({ title: "PS5 Game" });
+      const game2 = await createGame({ title: "PC Game" });
+
+      await createLibraryItem({
+        userId: user.id,
+        gameId: game1.id,
+        status: LibraryItemStatus.PLAYING,
+        platform: "PlayStation 5",
+      });
+      await createLibraryItem({
+        userId: user.id,
+        gameId: game2.id,
+        status: LibraryItemStatus.PLAYING,
+        platform: "PC",
+      });
+
+      const counts = await countLibraryItemsByStatus({
+        userId: user.id,
+        platform: "PlayStation 5",
+      });
+
+      expect(counts[LibraryItemStatus.PLAYING]).toBe(1);
+    });
+
+    it("should filter counts by search term (case-insensitive)", async () => {
+      const user = await createUser();
+      const game1 = await createGame({ title: "Zelda Breath" });
+      const game2 = await createGame({ title: "Elden Ring" });
+
+      await createLibraryItem({
+        userId: user.id,
+        gameId: game1.id,
+        status: LibraryItemStatus.WISHLIST,
+      });
+      await createLibraryItem({
+        userId: user.id,
+        gameId: game2.id,
+        status: LibraryItemStatus.PLAYING,
+      });
+
+      const counts = await countLibraryItemsByStatus({
+        userId: user.id,
+        search: "zelda",
+      });
+
+      expect(counts[LibraryItemStatus.WISHLIST]).toBe(1);
+      expect(counts[LibraryItemStatus.PLAYING]).toBe(0);
+    });
+
+    it("should not include items from other users", async () => {
+      const user1 = await createUser();
+      const user2 = await createUser();
+      const game = await createGame({ title: "Shared Game" });
+
+      await createLibraryItem({
+        userId: user2.id,
+        gameId: game.id,
+        status: LibraryItemStatus.PLAYING,
+      });
+
+      const counts = await countLibraryItemsByStatus({ userId: user1.id });
+
+      expect(counts[LibraryItemStatus.PLAYING]).toBe(0);
     });
   });
 });

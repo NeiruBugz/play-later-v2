@@ -8,9 +8,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
-import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
+import {
+  LIBRARY_STATUS_CONFIG,
+  type StatusBadgeVariant,
+} from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
 import { LibraryItemStatus } from "@/shared/types/library";
+
+const STATUS_CHIP_SELECTED_CLASSES: Record<StatusBadgeVariant, string> = {
+  playing: "bg-[var(--status-playing)] text-[var(--status-playing-foreground)]",
+  played: "bg-[var(--status-played)] text-[var(--status-played-foreground)]",
+  shelf: "bg-[var(--status-shelf)] text-[var(--status-shelf-foreground)]",
+  upNext: "bg-[var(--status-upNext)] text-[var(--status-upNext-foreground)]",
+  wishlist:
+    "bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)]",
+};
 
 const STATUS_HELPER_TEXT: Record<string, string> = {
   [LibraryItemStatus.UP_NEXT]: "Queued to play soon",
@@ -54,8 +66,7 @@ export function StatusChipGroup<T extends FieldValues>({
                   "duration-fast ease-out-expo transition-all",
                   "focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none",
                   isSelected && [
-                    `bg-[var(--status-${variant})]`,
-                    `text-[var(--status-${variant}-foreground)]`,
+                    STATUS_CHIP_SELECTED_CLASSES[variant],
                     "shadow-paper-sm border-transparent",
                   ],
                   !isSelected && [

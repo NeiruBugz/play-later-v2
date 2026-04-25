@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import type { LibraryItemDomain } from "@/features/library/types";
 import { createServerAction } from "@/shared/lib";
+import { AcquisitionType, LibraryItemStatus } from "@/shared/types";
 
 import {
   QuickAddToLibrarySchema,
@@ -19,7 +20,8 @@ export const quickAddToLibraryAction = createServerAction<
   schema: QuickAddToLibrarySchema,
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
-    const { igdbId, status } = input;
+    const { igdbId } = input;
+    const status = input.status ?? LibraryItemStatus.UP_NEXT;
 
     logger.info({ igdbId, status, userId }, "Quick-adding game to library");
 
@@ -27,6 +29,8 @@ export const quickAddToLibraryAction = createServerAction<
       userId: userId!,
       igdbId,
       status,
+      acquisitionType: AcquisitionType.DIGITAL,
+      autoDetectPlatform: true,
     });
 
     if (!result.success) {
@@ -46,7 +50,10 @@ export const quickAddToLibraryAction = createServerAction<
     logger.info(
       {
         userId,
+        igdbId,
         libraryItemId: result.data.libraryItem.id,
+        resolvedPlatform: result.data.libraryItem.platform,
+        autoDetect: true,
         status,
       },
       "Game quick-added to library successfully"

@@ -1,6 +1,15 @@
 import type { LibraryItemWithGameDomain } from "@/features/library/types";
+import type { LibraryItemStatus } from "@/shared/types";
 
 export type { LibraryItemWithGameDomain };
+
+export interface GetStatusCountsHandlerInput {
+  userId: string;
+  platform?: string;
+  search?: string;
+}
+
+export type GetStatusCountsHandlerOutput = Record<LibraryItemStatus, number>;
 
 export interface GetLibraryHandlerInput {
   userId: string;

@@ -35,6 +35,9 @@ export type { EditEntryFormProps } from "./ui/edit-entry-form.types";
 export { QuickAddPopover } from "./ui/quick-add-popover";
 export type { QuickAddPopoverProps } from "./ui/quick-add-popover.types";
 
+export { QuickAddButton } from "./ui/quick-add-button";
+export type { QuickAddButtonProps } from "./ui/quick-add-button";
+
 export { STATUS_OPTIONS } from "./ui/constants";
 
 export { useLibraryModal } from "./hooks/use-library-modal";

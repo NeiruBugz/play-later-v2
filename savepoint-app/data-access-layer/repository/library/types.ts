@@ -28,7 +28,7 @@ export type UpdateLibraryItemInput = {
   libraryItem: {
     id: number;
     status: LibraryItemStatus;
-    platform?: string;
+    platform?: string | null;
     startedAt?: Date;
     completedAt?: Date;
     statusChangedAt?: Date;

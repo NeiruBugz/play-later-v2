@@ -17,10 +17,10 @@ import {
 import { MIN_SEARCH_QUERY_LENGTH } from "@/shared/constants";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
+import { useQuickAddFromPalette } from "../hooks/use-quick-add-from-palette";
 import { getRecentGamesAction } from "../server-actions/get-recent-games";
 import type {
   CommandPaletteProps,
-  GameSearchItem,
   RecentGameItem,
 } from "./command-palette.types";
 import { GameResultItem } from "./game-result-item";
@@ -35,6 +35,13 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const shouldSearch = debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
 
   const { data, isLoading, error } = useGameSearch(debouncedQuery);
+
+  const closeAndReset = () => {
+    onClose();
+    setQuery("");
+  };
+
+  const { quickAdd } = useQuickAddFromPalette({ onSuccess: closeAndReset });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -62,16 +69,9 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     };
   }, [isOpen]);
 
-  const handleGameSelect = (slug: string) => {
+  const handleNavigateToDetail = (slug: string) => {
     router.push(`/games/${slug}`);
-    onClose();
-    setQuery("");
-  };
-
-  const handleAddToLibrary = (game: GameSearchItem) => {
-    router.push(`/games/${game.slug}`);
-    onClose();
-    setQuery("");
+    closeAndReset();
   };
 
   const searchResults =
@@ -89,10 +89,7 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     ) ?? [];
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-      setQuery("");
-    }
+    if (!open) closeAndReset();
   };
 
   return (
@@ -155,7 +152,7 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                         releaseYear: null,
                         platforms: [],
                       }}
-                      onSelect={() => handleGameSelect(game.slug)}
+                      onSelect={() => handleNavigateToDetail(game.slug)}
                     />
                   ))}
                 </CommandGroup>
@@ -175,8 +172,13 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                     <GameResultItem
                       key={game.id}
                       game={game}
-                      onSelect={() => handleGameSelect(game.slug)}
-                      onAddToLibrary={handleAddToLibrary}
+                      showAddHint
+                      onSelect={() =>
+                        quickAdd({
+                          igdbId: Number(game.id),
+                          gameName: game.name,
+                        })
+                      }
                     />
                   ))}
                 </CommandGroup>

@@ -49,13 +49,13 @@ export const GameGridCard = ({ game }: GameCardProps) => {
             </div>
           )}
 
-          {!hasLibraryStatus && (
-            <div className="duration-normal pointer-events-none absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-              <div className="pointer-events-auto">
-                <QuickAddButton igdbId={game.id} gameTitle={game.name} />
-              </div>
-            </div>
-          )}
+          <div className="pointer-events-auto absolute top-1 right-1 z-20">
+            <QuickAddButton
+              igdbId={game.id}
+              gameName={game.name}
+              alreadyInLibrary={hasLibraryStatus}
+            />
+          </div>
 
           <div className="p-md absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
             <h3 className="body-sm line-clamp-2 font-semibold text-white drop-shadow-md">

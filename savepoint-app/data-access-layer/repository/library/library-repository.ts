@@ -818,3 +818,40 @@ export async function setRating({
   }
   return repositorySuccess(undefined);
 }
+
+export async function countLibraryItemsByStatus({
+  userId,
+  platform,
+  search,
+}: {
+  userId: string;
+  platform?: string;
+  search?: string;
+}): Promise<Record<LibraryItemStatus, number>> {
+  const rows = await prisma.libraryItem.groupBy({
+    by: ["status"],
+    where: {
+      userId,
+      ...(platform ? { platform } : {}),
+      ...(search
+        ? { game: { title: { contains: search, mode: "insensitive" } } }
+        : {}),
+    },
+    _count: { _all: true },
+  });
+
+  const rowMap = rows.reduce<Record<string, number>>((acc, row) => {
+    acc[row.status] = row._count._all;
+    return acc;
+  }, {});
+
+  return Object.values(LibraryItemStatus).reduce<
+    Record<LibraryItemStatus, number>
+  >(
+    (acc, status) => {
+      acc[status] = rowMap[status] ?? 0;
+      return acc;
+    },
+    {} as Record<LibraryItemStatus, number>
+  );
+}

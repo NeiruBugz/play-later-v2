@@ -163,6 +163,31 @@ export async function updateJournalEntry(params: {
   }
 }
 
+export async function findLatestJournalDateByGameId(params: {
+  userId: string;
+  gameIds: string[];
+}): Promise<Map<string, Date>> {
+  const { userId, gameIds } = params;
+
+  if (gameIds.length === 0) {
+    return new Map();
+  }
+
+  const groups = await prisma.journalEntry.groupBy({
+    by: ["gameId"],
+    where: { userId, gameId: { in: gameIds } },
+    _max: { createdAt: true },
+  });
+
+  const result = new Map<string, Date>();
+  for (const group of groups) {
+    if (group.gameId && group._max.createdAt) {
+      result.set(group.gameId, group._max.createdAt);
+    }
+  }
+  return result;
+}
+
 export async function deleteJournalEntry(params: {
   entryId: string;
   userId: string;

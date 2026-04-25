@@ -23,6 +23,7 @@ export const UpdateLibraryEntrySchema = z.object({
   status: z.enum(LibraryItemStatus),
   startedAt: z.date().optional(),
   completedAt: z.date().optional(),
+  platform: z.string().nullable().optional(),
 });
 
 export const UpdateLibraryStatusByIgdbSchema = BaseIgdbStatusSchema;
@@ -31,7 +32,10 @@ export const GetLibraryStatusForGamesSchema = z.object({
   igdbIds: z.array(z.number().int().positive()).min(1).max(100),
 });
 
-export const QuickAddToLibrarySchema = BaseIgdbStatusSchema;
+export const QuickAddToLibrarySchema = z.object({
+  igdbId: z.number().int().positive(),
+  status: z.enum(LibraryItemStatus).optional(),
+});
 
 export const SetLibraryRatingSchema = z.object({
   libraryItemId: z.number().int().positive(),

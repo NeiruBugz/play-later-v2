@@ -6,6 +6,7 @@ import { LibraryService } from "@/data-access-layer/services/library/library-ser
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
 
 import type { LibraryItemDomain } from "@/features/library/types";
+import { resolvePrimaryPlatform } from "@/features/manage-library-entry/lib/resolve-primary-platform";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { AcquisitionType, type LibraryItemStatus } from "@/shared/types";
 
@@ -19,6 +20,8 @@ export type AddGameToLibraryInput = {
   platform?: string;
   startedAt?: Date;
   completedAt?: Date;
+  acquisitionType?: AcquisitionType;
+  autoDetectPlatform?: boolean;
 };
 export type AddGameToLibraryResult =
   | {
@@ -37,7 +40,16 @@ export async function addGameToLibrary(
   input: AddGameToLibraryInput
 ): Promise<AddGameToLibraryResult> {
   try {
-    const { userId, igdbId, status, platform, startedAt, completedAt } = input;
+    const {
+      userId,
+      igdbId,
+      status,
+      platform: explicitPlatform,
+      startedAt,
+      completedAt,
+      acquisitionType,
+      autoDetectPlatform,
+    } = input;
     logger.info({ userId, igdbId, status }, "Use case: Adding game to library");
     const profileService = new ProfileService();
     const userResult = await profileService.verifyUserExists({ userId });
@@ -53,6 +65,7 @@ export async function addGameToLibrary(
     }
     const libraryService = new LibraryService();
     let gameResult = await libraryService.findGameByIgdbId(igdbId);
+    let fetchedIgdbPlatforms: Array<{ id: number; name?: string }> | undefined;
     if (!gameResult.success || !gameResult.data) {
       logger.info(
         { igdbId },
@@ -79,6 +92,11 @@ export async function addGameToLibrary(
           error: "Game not found in IGDB",
         };
       }
+      fetchedIgdbPlatforms = (
+        igdbGameResult.data.game as {
+          platforms?: Array<{ id: number; name?: string }>;
+        }
+      ).platforms;
       const gameDetailService = new GameDetailService();
       const populateResult = await gameDetailService.populateGameInDatabase(
         igdbGameResult.data.game
@@ -102,6 +120,45 @@ export async function addGameToLibrary(
         };
       }
     }
+
+    let resolvedPlatform: string | undefined = explicitPlatform;
+    if (autoDetectPlatform === true && explicitPlatform === undefined) {
+      let igdbPlatforms = fetchedIgdbPlatforms;
+
+      if (!igdbPlatforms) {
+        const igdbService = new IgdbService();
+        const igdbGameResult = await igdbService.getGameDetails({
+          gameId: igdbId,
+        });
+        if (igdbGameResult.success && igdbGameResult.data.game) {
+          igdbPlatforms = (
+            igdbGameResult.data.game as {
+              platforms?: Array<{ id: number; name?: string }>;
+            }
+          ).platforms;
+        }
+      }
+
+      const knownPlatformsResult = await libraryService.listPlatforms();
+      const knownPlatforms = knownPlatformsResult.success
+        ? knownPlatformsResult.data
+        : [];
+      const detected = resolvePrimaryPlatform({
+        igdbPlatforms: igdbPlatforms ?? [],
+        knownPlatforms,
+      });
+      resolvedPlatform = detected ?? undefined;
+      logger.info(
+        {
+          userId,
+          igdbId,
+          resolvedPlatform: detected,
+          autoDetect: true,
+        },
+        "Auto-detected primary platform"
+      );
+    }
+
     const existingItemsResult =
       await libraryService.findAllLibraryItemsByGameId({
         userId,
@@ -111,12 +168,30 @@ export async function addGameToLibrary(
       const exactDuplicate = existingItemsResult.data.find(
         (item) =>
           item.status === status &&
-          (item.platform === platform ||
-            (item.platform === null && platform === undefined))
+          (item.platform === resolvedPlatform ||
+            (item.platform === null && resolvedPlatform === undefined))
       );
       if (exactDuplicate) {
+        if (autoDetectPlatform === true) {
+          logger.info(
+            { userId, gameId: gameResult.data.id, status },
+            "Quick add: returning existing library item (idempotent)"
+          );
+          return {
+            success: true,
+            data: {
+              libraryItem: exactDuplicate,
+              gameSlug: gameResult.data.slug,
+            },
+          };
+        }
         logger.warn(
-          { userId, gameId: gameResult.data.id, status, platform },
+          {
+            userId,
+            gameId: gameResult.data.id,
+            status,
+            platform: resolvedPlatform,
+          },
           "Attempted to add duplicate game to library"
         );
         return {
@@ -130,8 +205,8 @@ export async function addGameToLibrary(
       gameId: gameResult.data.id,
       libraryItem: {
         status,
-        acquisitionType: AcquisitionType.DIGITAL,
-        platform: platform ?? undefined,
+        acquisitionType: acquisitionType ?? AcquisitionType.DIGITAL,
+        platform: resolvedPlatform ?? undefined,
         startedAt: startedAt ?? undefined,
         completedAt: completedAt ?? undefined,
       },

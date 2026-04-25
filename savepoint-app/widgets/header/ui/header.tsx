@@ -1,10 +1,9 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
 
 import {
   CommandPalette,
@@ -12,10 +11,6 @@ import {
 } from "@/features/command-palette";
 import { ThemeToggle } from "@/shared/components/theme-toggle";
 import { Button } from "@/shared/components/ui/button";
-
-const subscribeNoop = () => () => {};
-const getIsMac = () => navigator.platform?.includes("Mac") ?? false;
-const getIsMacServer = () => true;
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
@@ -28,7 +23,6 @@ const NAV_LINKS = [
 export function Header({ isAuthorised }: { isAuthorised: boolean }) {
   const { isOpen, open, close } = useCommandPaletteContext();
   const pathname = usePathname();
-  const isMac = useSyncExternalStore(subscribeNoop, getIsMac, getIsMacServer);
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + "/");
@@ -75,16 +69,13 @@ export function Header({ isAuthorised }: { isAuthorised: boolean }) {
                 })}
               </div>
               <Button
-                variant="ghost"
-                size="icon"
+                variant="default"
                 onClick={open}
-                aria-label="Search games (Cmd+K)"
-                className="relative"
+                aria-label="Add Game"
+                className="h-11 w-11 px-0 md:h-9 md:w-auto md:px-4"
               >
-                <Search className="h-5 w-5" />
-                <kbd className="bg-muted text-muted-foreground pointer-events-none absolute -right-1 -bottom-1 hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
-                  {isMac ? "⌘K" : "Ctrl+K"}
-                </kbd>
+                <Plus className="h-5 w-5 md:h-4 md:w-4" aria-hidden="true" />
+                <span className="hidden md:inline">Add Game</span>
               </Button>
               <ThemeToggle />
             </nav>

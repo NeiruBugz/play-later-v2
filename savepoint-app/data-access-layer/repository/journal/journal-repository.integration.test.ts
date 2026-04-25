@@ -12,6 +12,7 @@ import {
   findJournalEntriesByGameId,
   findJournalEntriesByUserId,
   findJournalEntryById,
+  findLatestJournalDateByGameId,
   updateJournalEntry,
 } from "./journal-repository";
 
@@ -1215,6 +1216,128 @@ describe("Journal Repository Integration Tests", () => {
       expect(dbEntry?.title).toBe("Persisted Title");
       expect(dbEntry?.content).toBe("Persisted content");
       expect(dbEntry?.mood).toBe("ACCOMPLISHED");
+    });
+  });
+
+  describe("findLatestJournalDateByGameId", () => {
+    it("returns an empty Map when gameIds is empty", async () => {
+      const result = await findLatestJournalDateByGameId({
+        userId: testUserId,
+        gameIds: [],
+      });
+
+      expect(result).toBeInstanceOf(Map);
+      expect(result.size).toBe(0);
+    });
+
+    it("returns an empty Map when no entries exist for the given gameIds", async () => {
+      const result = await findLatestJournalDateByGameId({
+        userId: testUserId,
+        gameIds: [testGameId],
+      });
+
+      expect(result.size).toBe(0);
+    });
+
+    it("returns the latest createdAt for a single game with multiple entries", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const older = new Date("2024-01-01T10:00:00Z");
+      const newer = new Date("2024-06-01T10:00:00Z");
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          content: "old entry",
+          createdAt: older,
+        },
+      });
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          content: "new entry",
+          createdAt: newer,
+        },
+      });
+
+      const result = await findLatestJournalDateByGameId({
+        userId: testUserId,
+        gameIds: [testGameId],
+      });
+
+      expect(result.size).toBe(1);
+      expect(result.get(testGameId)?.toISOString()).toBe(newer.toISOString());
+    });
+
+    it("returns the correct latest dates for multiple games independently", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const otherGame = await createGameWithRelations({
+        igdbGame: { id: 99999, name: "Other Game", slug: "other-game" },
+        genreIds: [],
+        platformIds: [],
+      });
+
+      const dateA = new Date("2024-03-01T00:00:00Z");
+      const dateB = new Date("2024-09-01T00:00:00Z");
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: testGameId,
+          content: "entry for game A",
+          createdAt: dateA,
+        },
+      });
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: testUserId,
+          gameId: otherGame.id,
+          content: "entry for game B",
+          createdAt: dateB,
+        },
+      });
+
+      const result = await findLatestJournalDateByGameId({
+        userId: testUserId,
+        gameIds: [testGameId, otherGame.id],
+      });
+
+      expect(result.size).toBe(2);
+      expect(result.get(testGameId)?.toISOString()).toBe(dateA.toISOString());
+      expect(result.get(otherGame.id)?.toISOString()).toBe(dateB.toISOString());
+    });
+
+    it("only returns dates for the querying user, not other users", async () => {
+      const { prisma } = await import("@/shared/lib/app/db");
+
+      const otherUser = await prisma.user.create({
+        data: {
+          email: "other2@example.com",
+          username: "otheruser2",
+          usernameNormalized: "otheruser2",
+        },
+      });
+
+      await prisma.journalEntry.create({
+        data: {
+          userId: otherUser.id,
+          gameId: testGameId,
+          content: "another user's entry",
+          createdAt: new Date("2024-12-01"),
+        },
+      });
+
+      const result = await findLatestJournalDateByGameId({
+        userId: testUserId,
+        gameIds: [testGameId],
+      });
+
+      expect(result.size).toBe(0);
     });
   });
 });

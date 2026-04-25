@@ -1,11 +1,10 @@
 export { LibraryGrid } from "./ui/library-grid";
-export { LibraryFilters } from "./ui/library-filters";
 export { LibraryGridSkeleton } from "./ui/library-grid-skeleton";
+export { MobileFilterBar } from "./ui/mobile-filter-bar";
 export { LibraryPageView } from "./ui/library-page-view";
-export { LibraryCardSwipe } from "./ui/library-card-swipe";
-export { LibraryCardMobileActions } from "./ui/library-card-mobile-actions";
+export { LibraryCardListRow } from "./ui/library-card-list-row";
 export { LibraryCard } from "./ui/library-card";
-export { LibraryCardActionBar } from "./ui/library-card-action-bar";
+export { LibraryCardMenu } from "./ui/library-card-menu";
 export { LibraryEmptyState } from "./ui/library-empty-state";
 export { PlatformFilterCombobox } from "./ui/platform-filter-combobox";
 

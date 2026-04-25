@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SavePoint Library Card — Interactive Redesign</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: oklch(0.155 0.007 260);
+      color: oklch(0.93 0.005 250);
+      padding: 40px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: oklch(0.6 0.005 250);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+      margin-bottom: 60px;
+    }
+
+    .card-wrapper {
+      background: oklch(0.18 0.007 260);
+      border: 1px solid oklch(0.24 0.008 250);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 8px 32px oklch(0 0 0 / 0.4);
+    }
+
+    .card-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: oklch(0.6 0.005 250);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-current {
+      background: oklch(0.55 0.2 25 / 0.15);
+      color: oklch(0.75 0.15 75);
+    }
+
+    .badge-improved {
+      background: oklch(0.6 0.16 145 / 0.15);
+      color: oklch(0.6 0.16 145);
+    }
+
+    .interactive-section {
+      margin-top: 60px;
+      padding: 48px;
+      background: oklch(0.18 0.007 260);
+      border: 1px solid oklch(0.24 0.008 250);
+      border-radius: 16px;
+    }
+
+    .interactive-header {
+      margin-bottom: 32px;
+    }
+
+    .interactive-header h2 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .interactive-header p {
+      color: oklch(0.6 0.005 250);
+      font-size: 1rem;
+    }
+
+    .card-demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+    }
+
+    code {
+      background: oklch(0.2 0.007 260);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.875em;
+      font-family: ui-monospace, monospace;
+      color: oklch(0.69 0.17 172);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Library Card Redesign</h1>
+      <p class="subtitle">
+        Enhanced card actions with quick access to common workflows and better metadata display
+      </p>
+    </div>
+
+    <div id="root"></div>
+  </div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    // ============ ICONS ============
+    const CheckCircle = ({ className = "", size = 16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+    );
+
+    const Star = ({ className = "", size = 16, filled = false }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" className={className}>
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+    );
+
+    const Clock = ({ className = "", size = 16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2"/>
+      </svg>
+    );
+
+    const MoreVertical = ({ className = "", size = 16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <circle cx="12" cy="5" r="2"/>
+        <circle cx="12" cy="12" r="2"/>
+        <circle cx="12" cy="19" r="2"/>
+      </svg>
+    );
+
+    const Gamepad = ({ className = "", size = 16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <path d="M6 11h4M8 9v4M15 12h.01M18 12h.01M6 16a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4"/>
+      </svg>
+    );
+
+    const Edit = ({ className = "", size = 16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    );
+
+    const Trash = ({ className = "", size = 16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </svg>
+    );
+
+    const Book = ({ className = "", size = 16 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+    );
+
+    // ============ CURRENT CARD ============
+    const CurrentCard = () => {
+      const [showActions, setShowActions] = useState(false);
+
+      return (
+        <div style={{ position: 'relative' }}>
+          <div 
+            style={{ 
+              width: '220px', 
+              cursor: 'pointer',
+              transition: 'transform 0.2s'
+            }}
+            onMouseEnter={() => setShowActions(true)}
+            onMouseLeave={() => setShowActions(false)}
+          >
+            {/* Cover */}
+            <div style={{ 
+              aspectRatio: '3/4', 
+              background: 'linear-gradient(135deg, oklch(0.3 0.15 175) 0%, oklch(0.25 0.12 200) 100%)',
+              borderRadius: '10px', 
+              border: '1px solid oklch(0.24 0.008 250)', 
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Status dot */}
+              <div style={{ 
+                position: 'absolute', 
+                top: '12px', 
+                left: '12px', 
+                width: '10px', 
+                height: '10px', 
+                background: 'oklch(0.72 0.15 175)', 
+                borderRadius: '50%',
+                boxShadow: '0 0 0 2px oklch(0 0 0 / 0.3)'
+              }} />
+              
+              {/* Pokémon text overlay */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '42px',
+                fontWeight: 900,
+                color: 'oklch(1 0 0 / 0.15)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.02em'
+              }}>
+                POK
+              </div>
+
+              {/* Hover action bar */}
+              {showActions && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(to top, oklch(0 0 0 / 0.95), oklch(0 0 0 / 0.7))',
+                  padding: '16px 12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  animation: 'slideUp 0.2s ease-out'
+                }}>
+                  <button style={{
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    background: 'oklch(0.65 0.15 260)',
+                    color: 'oklch(0.99 0 0)',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}>
+                    <CheckCircle size={14} />
+                    Set it down
+                  </button>
+                  <button style={{
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    background: 'oklch(0.75 0.15 75)',
+                    color: 'oklch(0.1 0.01 75)',
+                    border: 'none',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
+                  }}>
+                    <Star size={14} />
+                    Pause for now
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Title & metadata */}
+            <div style={{ marginTop: '12px' }}>
+              <p style={{ fontSize: '15px', fontWeight: 600, lineHeight: 1.3, marginBottom: '6px' }}>
+                Pokémon Legends: Arceus
+              </p>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '4px', 
+                fontSize: '12px', 
+                color: 'oklch(0.6 0.005 250)',
+                marginBottom: '8px'
+              }}>
+                <div style={{ 
+                  width: '6px', 
+                  height: '6px', 
+                  background: 'oklch(0.72 0.15 175)', 
+                  borderRadius: '50%' 
+                }} />
+                <span>Playing</span>
+              </div>
+              
+              {/* Rating */}
+              <div style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
+                {[1,2,3,4,5].map(i => (
+                  <Star key={i} size={14} filled={i <= 4} style={{ color: i <= 4 ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)' }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============ IMPROVED CARD ============
+    const ImprovedCard = ({ interactive = false, showLabels = false }) => {
+      const [showMenu, setShowMenu] = useState(false);
+      const [rating, setRating] = useState(4);
+      const [hoverRating, setHoverRating] = useState(0);
+      const [showLogModal, setShowLogModal] = useState(false);
+      const menuRef = useRef(null);
+
+      useEffect(() => {
+        const handleClickOutside = (e) => {
+          if (menuRef.current && !menuRef.current.contains(e.target)) {
+            setShowMenu(false);
+          }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+      }, []);
+
+      return (
+        <div style={{ position: 'relative' }}>
+          <div style={{ width: '220px', position: 'relative' }}>
+            {/* Cover */}
+            <div style={{ 
+              aspectRatio: '3/4', 
+              background: 'linear-gradient(135deg, oklch(0.3 0.15 175) 0%, oklch(0.25 0.12 200) 100%)',
+              borderRadius: '10px', 
+              border: '1px solid oklch(0.24 0.008 250)', 
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Context menu button */}
+              {interactive && (
+                <button 
+                  onClick={() => setShowMenu(!showMenu)}
+                  style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '6px',
+                    background: 'oklch(0 0 0 / 0.6)',
+                    backdropFilter: 'blur(8px)',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s',
+                    zIndex: 10
+                  }}
+                >
+                  <MoreVertical size={16} />
+                </button>
+              )}
+
+              {/* Pokémon text overlay */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '42px',
+                fontWeight: 900,
+                color: 'oklch(1 0 0 / 0.15)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.02em'
+              }}>
+                POK
+              </div>
+
+              {/* Bottom metadata overlay */}
+              <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: 'linear-gradient(to top, oklch(0 0 0 / 0.9), transparent)',
+                padding: '32px 12px 12px',
+              }}>
+                {/* Platform badge */}
+                <div style={{ marginBottom: '8px' }}>
+                  <span style={{
+                    padding: '3px 8px',
+                    background: 'oklch(0.24 0.008 250 / 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    borderRadius: '4px',
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    color: 'oklch(0.7 0.005 250)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.03em'
+                  }}>
+                    Switch
+                  </span>
+                </div>
+
+                {/* Rating stars */}
+                <div style={{ display: 'flex', gap: '3px', alignItems: 'center', justifyContent: 'center' }}>
+                  {[1,2,3,4,5].map(i => (
+                    <Star 
+                      key={i} 
+                      size={15} 
+                      filled={i <= (interactive ? (hoverRating || rating) : 4)}
+                      style={{ 
+                        color: i <= (interactive ? (hoverRating || rating) : 4) ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)',
+                        cursor: interactive ? 'pointer' : 'default',
+                        transition: 'all 0.15s'
+                      }}
+                      onMouseEnter={() => interactive && setHoverRating(i)}
+                      onMouseLeave={() => interactive && setHoverRating(0)}
+                      onClick={() => interactive && setRating(i)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Title & metadata */}
+            <div style={{ marginTop: '12px' }}>
+              <p style={{ fontSize: '15px', fontWeight: 600, lineHeight: 1.3, marginBottom: '6px' }}>
+                Pokémon Legends: Arceus
+              </p>
+              
+              {/* Metadata row */}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px',
+                fontSize: '11px',
+                color: 'oklch(0.6 0.005 250)',
+                marginBottom: '10px',
+                fontFamily: 'ui-monospace, monospace'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Clock size={12} />
+                  <span>32h</span>
+                </div>
+                <span style={{ opacity: 0.4 }}>•</span>
+                <span>Started 3d ago</span>
+              </div>
+
+              {showLabels && (
+                <div style={{
+                  fontSize: '9px',
+                  color: 'oklch(0.5 0.005 250)',
+                  fontFamily: 'ui-monospace, monospace',
+                  marginBottom: '10px',
+                  opacity: 0.7
+                }}>
+                  actualPlaytime · startedAt · platformId · rating
+                </div>
+              )}
+
+              {/* Primary action button */}
+              <button 
+                onClick={() => interactive && setShowLogModal(true)}
+                style={{
+                  width: '100%',
+                  padding: '11px 14px',
+                  borderRadius: '8px',
+                  background: 'oklch(0.69 0.17 172)',
+                  color: 'oklch(0.12 0.01 175)',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s',
+                  ...(interactive && {
+                    ':hover': { transform: 'translateY(-1px)' }
+                  })
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px oklch(0.69 0.17 172 / 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <Gamepad size={16} />
+                Log Session
+              </button>
+            </div>
+
+            {/* Context menu */}
+            {interactive && showMenu && (
+              <div 
+                ref={menuRef}
+                style={{
+                  position: 'absolute',
+                  top: '40px',
+                  right: '0',
+                  width: '200px',
+                  background: 'oklch(0.2 0.007 260)',
+                  border: '1px solid oklch(0.24 0.008 250)',
+                  borderRadius: '10px',
+                  boxShadow: '0 8px 32px oklch(0 0 0 / 0.6)',
+                  overflow: 'hidden',
+                  zIndex: 100,
+                  animation: 'fadeIn 0.15s ease-out'
+                }}
+              >
+                {[
+                  { icon: Book, label: 'View Journal Entries', color: 'oklch(0.69 0.17 172)' },
+                  { icon: Edit, label: 'Edit Details', color: 'oklch(0.93 0.005 250)' },
+                  { icon: CheckCircle, label: 'Mark as Played', color: 'oklch(0.6 0.16 145)' },
+                  { icon: Star, label: 'Move to Up Next', color: 'oklch(0.75 0.15 75)' },
+                  { icon: Trash, label: 'Remove from Library', color: 'oklch(0.55 0.2 25)' }
+                ].map((item, i, arr) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => setShowMenu(false)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: i < arr.length - 1 ? '1px solid oklch(0.24 0.008 250)' : 'none',
+                        color: item.color,
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        textAlign: 'left',
+                        transition: 'all 0.15s'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'oklch(0.24 0.008 250)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'none';
+                      }}
+                    >
+                      <Icon size={15} />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Log modal */}
+            {interactive && showLogModal && (
+              <div 
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'oklch(0 0 0 / 0.7)',
+                  backdropFilter: 'blur(4px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1000,
+                  animation: 'fadeIn 0.2s ease-out'
+                }}
+                onClick={() => setShowLogModal(false)}
+              >
+                <div 
+                  style={{
+                    background: 'oklch(0.2 0.007 260)',
+                    border: '1px solid oklch(0.24 0.008 250)',
+                    borderRadius: '16px',
+                    padding: '32px',
+                    maxWidth: '400px',
+                    width: '90%',
+                    boxShadow: '0 20px 60px oklch(0 0 0 / 0.6)',
+                    animation: 'slideUp 0.2s ease-out'
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>
+                    Log Session
+                  </h3>
+                  <p style={{ fontSize: '14px', color: 'oklch(0.6 0.005 250)', marginBottom: '24px' }}>
+                    Pokémon Legends: Arceus
+                  </p>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', display: 'block' }}>
+                      Playtime (minutes)
+                    </label>
+                    <input 
+                      type="number" 
+                      placeholder="60"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        background: 'oklch(0.18 0.007 260)',
+                        border: '1px solid oklch(0.24 0.008 250)',
+                        color: 'oklch(0.93 0.005 250)',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={() => setShowLogModal(false)}
+                      style={{
+                        flex: 1,
+                        padding: '12px',
+                        borderRadius: '8px',
+                        background: 'transparent',
+                        border: '1px solid oklch(0.24 0.008 250)',
+                        color: 'oklch(0.93 0.005 250)',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => setShowLogModal(false)}
+                      style={{
+                        flex: 1,
+                        padding: '12px',
+                        borderRadius: '8px',
+                        background: 'oklch(0.69 0.17 172)',
+                        border: 'none',
+                        color: 'oklch(0.12 0.01 175)',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <style>{`
+            @keyframes slideUp {
+              from {
+                opacity: 0;
+                transform: translateY(10px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+          `}</style>
+        </div>
+      );
+    };
+
+    // ============ MAIN APP ============
+    function App() {
+      return (
+        <div>
+          {/* Comparison section */}
+          <div className="comparison-grid">
+            <div className="card-wrapper">
+              <div className="card-label">
+                Current Design
+                <span className="badge badge-current">From Screenshot</span>
+              </div>
+              <CurrentCard />
+              <div style={{ marginTop: '20px', fontSize: '13px', color: 'oklch(0.6 0.005 250)', lineHeight: 1.6 }}>
+                <strong style={{ color: 'oklch(0.75 0.15 75)' }}>Issues:</strong>
+                <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
+                  <li>Actions hidden behind hover</li>
+                  <li>No quick-log workflow</li>
+                  <li>Limited metadata shown</li>
+                  <li>No platform/date context</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="card-wrapper">
+              <div className="card-label">
+                Improved Design
+                <span className="badge badge-improved">Recommended</span>
+              </div>
+              <ImprovedCard showLabels={true} />
+              <div style={{ marginTop: '20px', fontSize: '13px', color: 'oklch(0.6 0.005 250)', lineHeight: 1.6 }}>
+                <strong style={{ color: 'oklch(0.6 0.16 145)' }}>Enhancements:</strong>
+                <ul style={{ marginTop: '8px', paddingLeft: '20px' }}>
+                  <li>Primary "Log Session" CTA</li>
+                  <li>Quick rating (click stars)</li>
+                  <li>Platform badge + temporal data</li>
+                  <li>Context menu for all actions</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive demo section */}
+          <div className="interactive-section">
+            <div className="interactive-header">
+              <h2>🎮 Interactive Demo</h2>
+              <p>
+                Try the improved card design — click stars to rate, use the ⋮ menu for actions, and click "Log Session" to record playtime
+              </p>
+            </div>
+
+            <div className="card-demo-grid">
+              <ImprovedCard interactive={true} />
+              <ImprovedCard interactive={true} />
+              <ImprovedCard interactive={true} />
+              <ImprovedCard interactive={true} />
+            </div>
+
+            <div style={{ 
+              marginTop: '40px', 
+              padding: '20px 24px', 
+              background: 'oklch(0.69 0.17 172 / 0.08)', 
+              border: '1px solid oklch(0.69 0.17 172 / 0.25)', 
+              borderRadius: '10px' 
+            }}>
+              <p style={{ fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
+                <strong style={{ fontWeight: 600 }}>💾 Database Fields Used:</strong> All metadata comes from existing schema — <code>actualPlaytime</code>, <code>startedAt</code>, <code>rating</code>, <code>platformId</code>, <code>status</code>. No new fields required.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
