@@ -18,7 +18,7 @@ export function LibraryGridSkeleton() {
         role="status"
         aria-label="Loading your game library"
         aria-busy="true"
-        className="hidden sm:grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
+        className="hidden grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
       >
         {Array.from({ length: 12 }).map((_, index) => (
           <LibraryCardSkeleton key={index} index={index} />
@@ -50,7 +50,7 @@ function LibraryCardSkeleton({ index }: { index: number }) {
 
 function LibraryListRowSkeleton() {
   return (
-    <div className="flex w-full flex-row items-start gap-3 rounded-lg border border-border/40 p-3">
+    <div className="border-border/40 flex w-full flex-row items-start gap-3 rounded-lg border p-3">
       <Skeleton className="h-20 w-[60px] shrink-0 rounded-md" />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Skeleton className="h-4 w-3/4" />

@@ -89,7 +89,7 @@ export function LibraryGrid() {
         ))}
       </div>
       <div
-        className="hidden sm:grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
+        className="hidden grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 sm:grid sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
         role="list"
         aria-label="Your game library"
       >
