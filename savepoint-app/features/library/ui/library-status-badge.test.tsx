@@ -10,7 +10,7 @@ describe("LibraryStatusBadge", () => {
     it("renders the Playing label and accessible status role", () => {
       render(<LibraryStatusBadge status={LibraryItemStatus.PLAYING} />);
 
-      const badge = screen.getByRole("status");
+      const badge = screen.getByLabelText(/Status: /);
       expect(badge).toHaveAttribute("aria-label", "Status: Playing");
       expect(badge).toHaveTextContent("Playing");
     });
@@ -23,7 +23,7 @@ describe("LibraryStatusBadge", () => {
       );
 
       const expected = getUpNextLabel(true);
-      expect(screen.getByRole("status")).toHaveTextContent(expected);
+      expect(screen.getByLabelText(/Status: /)).toHaveTextContent(expected);
     });
   });
 
@@ -37,7 +37,7 @@ describe("LibraryStatusBadge", () => {
       );
 
       const expected = getUpNextLabel(false);
-      expect(screen.getByRole("status")).toHaveTextContent(expected);
+      expect(screen.getByLabelText(/Status: /)).toHaveTextContent(expected);
     });
   });
 
@@ -45,7 +45,7 @@ describe("LibraryStatusBadge", () => {
     it("renders nothing", () => {
       render(<LibraryStatusBadge status={LibraryItemStatus.PLAYING} hidden />);
 
-      expect(screen.queryByRole("status")).toBeNull();
+      expect(screen.queryByLabelText(/Status: /)).toBeNull();
       expect(screen.queryByTestId("library-status-badge-dot")).toBeNull();
     });
   });
@@ -54,7 +54,7 @@ describe("LibraryStatusBadge", () => {
     it("renders both a color dot and a text label", () => {
       render(<LibraryStatusBadge status={LibraryItemStatus.SHELF} />);
 
-      const badge = screen.getByRole("status");
+      const badge = screen.getByLabelText(/Status: /);
       expect(badge).toHaveTextContent("Shelf");
 
       const dot = screen.getByTestId("library-status-badge-dot");

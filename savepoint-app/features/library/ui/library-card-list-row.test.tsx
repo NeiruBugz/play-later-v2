@@ -59,9 +59,7 @@ describe("LibraryCardListRow", () => {
     render(<LibraryCardListRow item={makeItem()} />);
 
     expect(screen.getByTestId("game-cover-container")).toBeInTheDocument();
-    expect(
-      screen.getByRole("status", { name: /Status:/i })
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/Status:/i)).toBeInTheDocument();
   });
 
   it("renders title, metadata, rating, and CTA", () => {

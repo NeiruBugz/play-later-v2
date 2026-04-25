@@ -3,6 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { JournalQuickEntrySheet } from "@/features/journal";
 import { Button } from "@/shared/components/ui/button";
@@ -40,12 +41,20 @@ export function LibraryCardCta({ libraryItem }: LibraryCardCtaProps) {
           ? new Date()
           : undefined;
 
-      await updateLibraryStatusAction({
-        libraryItemId: libraryItem.id,
-        status: action.status,
-        startedAt,
-      });
-      await queryClient.invalidateQueries({ queryKey: ["library"] });
+      try {
+        const result = await updateLibraryStatusAction({
+          libraryItemId: libraryItem.id,
+          status: action.status,
+          startedAt,
+        });
+        if (!result.success) {
+          toast.error(result.error ?? "Failed to update status");
+          return;
+        }
+        await queryClient.invalidateQueries({ queryKey: ["library"] });
+      } catch {
+        toast.error("Failed to update status");
+      }
     });
   };
 

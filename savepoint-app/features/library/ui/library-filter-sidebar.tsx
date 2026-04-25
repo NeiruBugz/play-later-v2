@@ -37,15 +37,44 @@ const PRIMARY_SORT_OPTIONS = [
   { value: "completedAt-desc", label: "Completed Date" },
 ] as const;
 
-function getStatusFilterStyles(badgeVariant: StatusBadgeVariant): {
-  active: string;
-  inactive: string;
-} {
-  const cssVarName = `--status-${badgeVariant}`;
-  return {
-    active: `bg-[var(${cssVarName})] text-[var(${cssVarName}-foreground)] hover:bg-[var(${cssVarName})]/90 border-transparent`,
-    inactive: `border-[var(${cssVarName})]/30 text-[var(${cssVarName})] hover:bg-[var(${cssVarName})]/10`,
-  };
+const STATUS_FILTER_STYLES: Record<
+  StatusBadgeVariant,
+  { active: string; inactive: string }
+> = {
+  playing: {
+    active:
+      "bg-[var(--status-playing)] text-[var(--status-playing-foreground)] hover:bg-[var(--status-playing)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-playing)]/30 text-[var(--status-playing)] hover:bg-[var(--status-playing)]/10",
+  },
+  played: {
+    active:
+      "bg-[var(--status-played)] text-[var(--status-played-foreground)] hover:bg-[var(--status-played)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-played)]/30 text-[var(--status-played)] hover:bg-[var(--status-played)]/10",
+  },
+  shelf: {
+    active:
+      "bg-[var(--status-shelf)] text-[var(--status-shelf-foreground)] hover:bg-[var(--status-shelf)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-shelf)]/30 text-[var(--status-shelf)] hover:bg-[var(--status-shelf)]/10",
+  },
+  upNext: {
+    active:
+      "bg-[var(--status-upNext)] text-[var(--status-upNext-foreground)] hover:bg-[var(--status-upNext)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-upNext)]/30 text-[var(--status-upNext)] hover:bg-[var(--status-upNext)]/10",
+  },
+  wishlist: {
+    active:
+      "bg-[var(--status-wishlist)] text-[var(--status-wishlist-foreground)] hover:bg-[var(--status-wishlist)]/90 border-transparent",
+    inactive:
+      "border-[var(--status-wishlist)]/30 text-[var(--status-wishlist)] hover:bg-[var(--status-wishlist)]/10",
+  },
+};
+
+function getStatusFilterStyles(badgeVariant: StatusBadgeVariant) {
+  return STATUS_FILTER_STYLES[badgeVariant];
 }
 
 function getCurrentSortValue(sortBy: string, sortOrder: string): string {

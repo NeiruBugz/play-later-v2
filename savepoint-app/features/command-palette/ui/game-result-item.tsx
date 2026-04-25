@@ -43,11 +43,10 @@ export function GameResultItem({
 
       {showAddHint && (
         <span
-          aria-hidden="true"
           data-testid="quick-add-hint"
           className="gap-xs text-muted-foreground border-border bg-muted/40 px-sm inline-flex shrink-0 items-center rounded-md border py-0.5 text-xs"
         >
-          <Plus className="h-3 w-3" />
+          <Plus aria-hidden="true" className="h-3 w-3" />
           Add to Up Next
         </span>
       )}

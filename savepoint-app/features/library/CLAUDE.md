@@ -32,5 +32,4 @@ The rating row is a fixed-height slot so rated and unrated cards line up vertica
 
 - Imports from `manage-library-entry` for edit/delete modals
 - Exports `LibraryCard` for dashboard use
-- Mobile card supports swipe-to-reveal actions
 - Grid density: 3 cols (sm 5, md 6, lg 8, xl 10, 2xl 12)
