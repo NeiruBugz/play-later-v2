@@ -71,7 +71,7 @@
     "pg": "8.20.0",
     "pino": "10.1.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react-dom": "19.2.5",
     "react-hook-form": "7.68.0",
     "react-icons": "5.5.0",
     "server-only": "0.0.1",
