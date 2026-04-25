@@ -51,6 +51,7 @@ export default defineConfig({
           include: [
             "**/features/**/ui/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/features/**/hooks/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "**/widgets/**/ui/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/shared/components/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/app/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
             "**/shared/hooks/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",

@@ -27,11 +27,15 @@ export const GameCard = ({ game }: GameCardProps) => {
       </div>
     ) : undefined;
 
-  const quickAddOverlay = !hasLibraryStatus ? (
+  const quickAddOverlay = (
     <div className="pointer-events-auto absolute top-1 right-1">
-      <QuickAddButton igdbId={game.id} gameTitle={game.name} />
+      <QuickAddButton
+        igdbId={game.id}
+        gameName={game.name}
+        alreadyInLibrary={hasLibraryStatus}
+      />
     </div>
-  ) : undefined;
+  );
 
   return (
     <UnifiedGameCard

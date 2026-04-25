@@ -4,6 +4,8 @@ import {
 } from "@/test/fixtures/library";
 import { http, HttpResponse } from "msw";
 
+import { LibraryItemStatus } from "@/shared/types";
+
 export const createLibraryHandlers = (items = libraryItemsFixture) => [
   http.get("/api/library", ({ request }) => {
     const url = new URL(request.url);
@@ -55,6 +57,33 @@ export const createLibraryHandlers = (items = libraryItemsFixture) => [
       success: true,
       data: { platforms: uniquePlatformsFixture },
     });
+  }),
+
+  http.get("/api/library/status-counts", ({ request }) => {
+    const url = new URL(request.url);
+    const platform = url.searchParams.get("platform");
+    const search = url.searchParams.get("search");
+
+    let filtered = [...items];
+    if (platform) {
+      filtered = filtered.filter((item) => item.platform === platform);
+    }
+    if (search) {
+      filtered = filtered.filter((item) =>
+        item.game.title.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    const counts = Object.values(LibraryItemStatus).reduce(
+      (acc, s) => ({ ...acc, [s]: 0 }),
+      {} as Record<LibraryItemStatus, number>
+    );
+    for (const item of filtered) {
+      counts[item.status as LibraryItemStatus] =
+        (counts[item.status as LibraryItemStatus] ?? 0) + 1;
+    }
+
+    return HttpResponse.json({ success: true, data: counts });
   }),
 ];
 

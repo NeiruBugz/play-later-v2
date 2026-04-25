@@ -31,6 +31,12 @@ export const GetLibraryItemsServiceSchema = GetLibraryItemsBaseSchema.extend({
   distinctByGame: z.boolean().optional(),
 });
 
+export const GetStatusCountsSchema = z.object({
+  userId: z.string().cuid(),
+  platform: z.string().optional(),
+  search: z.string().optional(),
+});
+
 export const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
   userId: z.string().cuid(),

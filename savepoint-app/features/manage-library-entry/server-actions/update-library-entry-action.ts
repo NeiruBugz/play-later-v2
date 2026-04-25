@@ -19,9 +19,11 @@ export const updateLibraryEntryAction = createServerAction<
   schema: UpdateLibraryEntrySchema,
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
-    const { libraryItemId, status, startedAt, completedAt } = input;
+    const { libraryItemId, status, startedAt, completedAt, platform } = input;
     logger.info({ libraryItemId, status, userId }, "Updating library entry");
     const libraryService = new LibraryService();
+    const normalizedPlatform =
+      platform === undefined ? undefined : platform === "" ? null : platform;
     const updateResult = await libraryService.updateLibraryItem({
       userId: userId!,
       libraryItem: {
@@ -30,6 +32,9 @@ export const updateLibraryEntryAction = createServerAction<
         ...(status !== undefined && { statusChangedAt: new Date() }),
         ...(startedAt !== undefined && { startedAt }),
         ...(completedAt !== undefined && { completedAt }),
+        ...(normalizedPlatform !== undefined && {
+          platform: normalizedPlatform,
+        }),
       },
     });
     if (!updateResult.success) {

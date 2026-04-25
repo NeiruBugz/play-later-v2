@@ -16,10 +16,10 @@ import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
 import { MIN_SEARCH_QUERY_LENGTH } from "@/shared/constants";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
+import { useQuickAddFromPalette } from "../hooks/use-quick-add-from-palette";
 import { getRecentGamesAction } from "../server-actions/get-recent-games";
 import type {
   CommandPaletteProps,
-  GameSearchItem,
   RecentGameItem,
 } from "./command-palette.types";
 import { GameResultItem } from "./game-result-item";
@@ -37,6 +37,13 @@ export function DesktopCommandPalette({
   const shouldSearch = debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
 
   const { data, isLoading, error } = useGameSearch(debouncedQuery);
+
+  const closeAndReset = () => {
+    onClose();
+    setQuery("");
+  };
+
+  const { quickAdd } = useQuickAddFromPalette({ onSuccess: closeAndReset });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -64,16 +71,9 @@ export function DesktopCommandPalette({
     };
   }, [isOpen]);
 
-  const handleGameSelect = (slug: string) => {
+  const handleNavigateToDetail = (slug: string) => {
     router.push(`/games/${slug}`);
-    onClose();
-    setQuery("");
-  };
-
-  const handleAddToLibrary = (game: GameSearchItem) => {
-    router.push(`/games/${game.slug}`);
-    onClose();
-    setQuery("");
+    closeAndReset();
   };
 
   const searchResults =
@@ -91,10 +91,7 @@ export function DesktopCommandPalette({
     ) ?? [];
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      onClose();
-      setQuery("");
-    }
+    if (!open) closeAndReset();
   };
 
   return (
@@ -132,7 +129,7 @@ export function DesktopCommandPalette({
                       releaseYear: null,
                       platforms: [],
                     }}
-                    onSelect={() => handleGameSelect(game.slug)}
+                    onSelect={() => handleNavigateToDetail(game.slug)}
                   />
                 ))}
               </CommandGroup>
@@ -148,8 +145,13 @@ export function DesktopCommandPalette({
                   <GameResultItem
                     key={game.id}
                     game={game}
-                    onSelect={() => handleGameSelect(game.slug)}
-                    onAddToLibrary={handleAddToLibrary}
+                    showAddHint
+                    onSelect={() =>
+                      quickAdd({
+                        igdbId: Number(game.id),
+                        gameName: game.name,
+                      })
+                    }
                   />
                 ))}
               </CommandGroup>

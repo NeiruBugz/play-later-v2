@@ -1,7 +1,12 @@
+export { HeroSearch } from "./hero-search";
 export { LibraryGrid } from "./library-grid";
 export type { LibraryErrorStateProps } from "./library-grid.types";
-export { LibraryFilters } from "./library-filters";
+export { LibraryFilterSidebar } from "./library-filter-sidebar";
+export { LibraryFilterSidebarRail } from "./library-filter-sidebar-rail";
 export { LibraryGridSkeleton } from "./library-grid-skeleton";
+export { MobileFilterBar } from "./mobile-filter-bar";
 export { LibraryPageView } from "./library-page-view";
-export { LibraryCardSwipe } from "./library-card-swipe";
-export { LibraryCardMobileActions } from "./library-card-mobile-actions";
+export { LibraryCardListRow } from "./library-card-list-row";
+export { LibraryStatusBadge } from "./library-status-badge";
+export { LibraryCardMetadata } from "./library-card-metadata";
+export { LibraryCardRating } from "./library-card-rating";

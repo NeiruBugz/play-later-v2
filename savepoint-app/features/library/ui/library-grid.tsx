@@ -6,6 +6,7 @@ import { Button } from "@/shared/components/ui/button";
 import { LibraryItemStatus } from "@/shared/types";
 
 import { LibraryCard } from "./library-card";
+import { LibraryCardListRow } from "./library-card-list-row";
 import { LibraryEmptyState } from "./library-empty-state";
 import { LibraryGridSkeleton } from "./library-grid-skeleton";
 import type { LibraryErrorStateProps } from "./library-grid.types";
@@ -74,7 +75,21 @@ export function LibraryGrid() {
         </div>
       )}
       <div
-        className="grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12"
+        className="flex flex-col gap-2 sm:hidden"
+        role="list"
+        aria-label="Your game library (mobile list)"
+        data-testid="library-list"
+      >
+        {items.map((item) => (
+          <LibraryCardListRow
+            key={item.id}
+            item={item}
+            activeStatusFilter={filters.status}
+          />
+        ))}
+      </div>
+      <div
+        className="hidden sm:grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4 sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(160px,200px))] md:gap-[14px] lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))] lg:gap-4"
         role="list"
         aria-label="Your game library"
       >

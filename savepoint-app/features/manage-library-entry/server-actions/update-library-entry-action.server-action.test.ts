@@ -232,4 +232,83 @@ describe("updateLibraryEntryAction", () => {
       expect(mockUpdateLibraryItem).not.toHaveBeenCalled();
     });
   });
+
+  describe("platform updates", () => {
+    it("forwards a non-empty platform value to the service", async () => {
+      mockUpdateLibraryItem.mockResolvedValue({
+        success: true,
+        data: { ...mockLibraryItem, platform: "PS5" },
+      });
+
+      const result = await updateLibraryEntryAction({
+        libraryItemId: 1,
+        status: LibraryItemStatus.PLAYING,
+        platform: "PS5",
+      });
+
+      expect(result.success).toBe(true);
+      const callArg = mockUpdateLibraryItem.mock.calls[0][0];
+      expect(callArg.libraryItem.platform).toBe("PS5");
+    });
+
+    it("forwards null when platform is explicitly cleared", async () => {
+      mockUpdateLibraryItem.mockResolvedValue({
+        success: true,
+        data: { ...mockLibraryItem, platform: null },
+      });
+
+      await updateLibraryEntryAction({
+        libraryItemId: 1,
+        status: LibraryItemStatus.PLAYING,
+        platform: null,
+      });
+
+      const callArg = mockUpdateLibraryItem.mock.calls[0][0];
+      expect(callArg.libraryItem.platform).toBeNull();
+    });
+
+    it("normalizes empty string to null before forwarding", async () => {
+      mockUpdateLibraryItem.mockResolvedValue({
+        success: true,
+        data: { ...mockLibraryItem, platform: null },
+      });
+
+      await updateLibraryEntryAction({
+        libraryItemId: 1,
+        status: LibraryItemStatus.PLAYING,
+        platform: "",
+      });
+
+      const callArg = mockUpdateLibraryItem.mock.calls[0][0];
+      expect(callArg.libraryItem.platform).toBeNull();
+    });
+
+    it("omits platform when not present in input", async () => {
+      mockUpdateLibraryItem.mockResolvedValue({
+        success: true,
+        data: mockLibraryItem,
+      });
+
+      await updateLibraryEntryAction({
+        libraryItemId: 1,
+        status: LibraryItemStatus.PLAYING,
+      });
+
+      const callArg = mockUpdateLibraryItem.mock.calls[0][0];
+      expect("platform" in callArg.libraryItem).toBe(false);
+    });
+
+    it("rejects unauthenticated callers when platform is set", async () => {
+      mockGetServerUserId.mockResolvedValue(undefined);
+
+      const result = await updateLibraryEntryAction({
+        libraryItemId: 1,
+        status: LibraryItemStatus.PLAYING,
+        platform: "PS5",
+      });
+
+      expect(result.success).toBe(false);
+      expect(mockUpdateLibraryItem).not.toHaveBeenCalled();
+    });
+  });
 });

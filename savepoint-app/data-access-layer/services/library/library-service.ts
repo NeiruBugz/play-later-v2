@@ -1,11 +1,13 @@
 import "server-only";
 
 import {
+  countLibraryItemsByStatus,
   createLibraryItem,
   deleteLibraryItem,
   DuplicateError,
   findAllLibraryItemsByGameId,
   findGameByIgdbId,
+  findKnownPlatforms,
   findLibraryItemById,
   findLibraryItemsWithFilters,
   findMostRecentLibraryItemByGameId,
@@ -15,6 +17,7 @@ import {
   NotFoundError,
   updateLibraryItem,
   type FindLibraryItemsResult,
+  type KnownPlatform,
 } from "@/data-access-layer/repository";
 import {
   AcquisitionType,
@@ -34,6 +37,7 @@ import {
 import {
   DeleteLibraryItemSchema,
   GetLibraryItemsServiceSchema,
+  GetStatusCountsSchema,
   SetRatingSchema,
 } from "./schemas";
 
@@ -73,6 +77,15 @@ export class LibraryService {
       return serviceSuccess(game);
     } catch (error) {
       return handleServiceError(error, "Failed to find game by IGDB ID");
+    }
+  }
+
+  async listPlatforms(): Promise<ServiceResult<KnownPlatform[]>> {
+    try {
+      const platforms = await findKnownPlatforms();
+      return serviceSuccess(platforms);
+    } catch (error) {
+      return handleServiceError(error, "Failed to list platforms");
     }
   }
 
@@ -128,6 +141,7 @@ export class LibraryService {
       startedAt?: Date;
       completedAt?: Date;
       statusChangedAt?: Date;
+      platform?: string | null;
     };
   }) {
     try {
@@ -148,6 +162,9 @@ export class LibraryService {
           statusChangedAt:
             params.libraryItem.statusChangedAt ??
             (statusChanged ? new Date() : undefined),
+          ...(params.libraryItem.platform !== undefined && {
+            platform: params.libraryItem.platform,
+          }),
           ...(isTransitioningToPlayed && { hasBeenPlayed: true }),
         },
       });
@@ -209,6 +226,29 @@ export class LibraryService {
       return handleServiceError(error, "Failed to get library items");
     }
   }
+  async getStatusCounts(input: {
+    userId: string;
+    platform?: string;
+    search?: string;
+  }): Promise<ServiceResult<Record<LibraryItemStatus, number>>> {
+    const validation = GetStatusCountsSchema.safeParse(input);
+    if (!validation.success) {
+      this.logger.warn(
+        { errors: validation.error.issues },
+        "Invalid status counts input"
+      );
+      return serviceError(
+        validation.error.issues[0]?.message ?? "Invalid input parameters"
+      );
+    }
+    try {
+      const data = await countLibraryItemsByStatus(validation.data);
+      return serviceSuccess(data);
+    } catch (error) {
+      return handleServiceError(error, "Failed to get status counts");
+    }
+  }
+
   async deleteLibraryItem(params: {
     libraryItemId: number;
     userId: string;

@@ -9,8 +9,6 @@ import type { LibraryItemDomain } from "@/features/library/types";
 import { useGetPlatforms } from "@/features/manage-library-entry/hooks/use-get-platforms";
 import { Button } from "@/shared/components/ui/button";
 import { Form, FormField } from "@/shared/components/ui/form";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 import { getStatusLabel } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
@@ -113,6 +111,8 @@ export function EntryForm({
   return (
     <EditForm
       entry={entry}
+      filteredPlatforms={filteredPlatforms}
+      isLoadingPlatforms={isLoadingPlatforms}
       onSuccess={onSuccess}
       onCancel={onCancel}
       onDelete={onDelete}
@@ -242,6 +242,11 @@ function AddForm({
 
 interface EditFormProps {
   entry: LibraryItemDomain;
+  filteredPlatforms: {
+    supportedPlatforms: PlatformDomain[];
+    otherPlatforms: PlatformDomain[];
+  };
+  isLoadingPlatforms: boolean;
   onSuccess: () => void;
   onCancel?: () => void;
   onDelete?: (id: number) => void;
@@ -251,6 +256,8 @@ interface EditFormProps {
 
 function EditForm({
   entry,
+  filteredPlatforms,
+  isLoadingPlatforms,
   onSuccess,
   onCancel,
   onDelete,
@@ -263,6 +270,7 @@ function EditForm({
       status: entry.status,
       startedAt: entry.startedAt ?? undefined,
       completedAt: entry.completedAt ?? undefined,
+      platform: entry.platform ?? "",
     },
   });
 
@@ -272,8 +280,29 @@ function EditForm({
       status: entry.status,
       startedAt: entry.startedAt ?? undefined,
       completedAt: entry.completedAt ?? undefined,
+      platform: entry.platform ?? "",
     });
   }, [entry, form]);
+
+  const platformsForCombobox = useMemo(() => {
+    const known = new Set([
+      ...filteredPlatforms.supportedPlatforms.map((p) => p.name),
+      ...filteredPlatforms.otherPlatforms.map((p) => p.name),
+    ]);
+    const isLegacy = !!entry.platform && !known.has(entry.platform);
+    if (!isLegacy) {
+      return filteredPlatforms;
+    }
+    const legacyOption = {
+      id: "legacy",
+      name: `${entry.platform} (legacy)`,
+      slug: "legacy",
+    } as unknown as PlatformDomain;
+    return {
+      supportedPlatforms: filteredPlatforms.supportedPlatforms,
+      otherPlatforms: [legacyOption, ...filteredPlatforms.otherPlatforms],
+    };
+  }, [entry.platform, filteredPlatforms]);
 
   const { isSubmitting, handleSubmit } = useFormSubmission({
     action: updateLibraryEntryAction,
@@ -290,15 +319,45 @@ function EditForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className={cn("gap-lg sm:gap-2xl flex flex-col", className)}
       >
-        <div className="space-y-sm">
-          <Label className="text-muted-foreground text-sm">Platform</Label>
-          <Input
-            value={entry.platform ?? "Not specified"}
-            disabled
-            className="bg-muted cursor-not-allowed"
-            aria-readonly="true"
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="platform"
+          render={({ field }) => {
+            const isLegacy =
+              !!entry.platform &&
+              !platformsForCombobox.supportedPlatforms.some(
+                (p) => p.name === entry.platform
+              ) &&
+              !platformsForCombobox.otherPlatforms.some(
+                (p) =>
+                  p.name !== `${entry.platform} (legacy)` &&
+                  p.name === entry.platform
+              );
+            const displayValue =
+              isLegacy && field.value === entry.platform
+                ? `${entry.platform} (legacy)`
+                : (field.value ?? "");
+            return (
+              <PlatformCombobox
+                field={{
+                  ...field,
+                  value: displayValue,
+                  onChange: (next: string) => {
+                    if (next.endsWith(" (legacy)")) {
+                      field.onChange(entry.platform);
+                    } else {
+                      field.onChange(next);
+                    }
+                  },
+                }}
+                supportedPlatforms={platformsForCombobox.supportedPlatforms}
+                otherPlatforms={platformsForCombobox.otherPlatforms}
+                isLoading={isLoadingPlatforms}
+                description="Change the platform you'll play on"
+              />
+            );
+          }}
+        />
 
         <FormField
           control={form.control}
@@ -316,16 +375,17 @@ function EditForm({
 
         <p className="text-muted-foreground border-border pt-md sm:pt-lg border-t text-xs">
           Added{" "}
-          {entry.createdAt.toLocaleDateString("en-US", {
+          {new Date(entry.createdAt).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
           })}
-          {entry.updatedAt.getTime() !== entry.createdAt.getTime() && (
+          {new Date(entry.updatedAt).getTime() !==
+            new Date(entry.createdAt).getTime() && (
             <>
               {" "}
               · Updated{" "}
-              {entry.updatedAt.toLocaleDateString("en-US", {
+              {new Date(entry.updatedAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",

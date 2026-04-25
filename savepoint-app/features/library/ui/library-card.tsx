@@ -4,20 +4,17 @@ import Link from "next/link";
 import { memo } from "react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
-import { RatingInput } from "@/shared/components/ui/rating-input";
 import { useMediaQuery } from "@/shared/hooks/use-media-query";
-import {
-  getStatusConfig,
-  getUpNextLabel,
-  shouldShowBadge,
-} from "@/shared/lib/library-status";
+import { shouldShowBadge } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
 import { LibraryItemStatus } from "@/shared/types";
 
-import { LibraryCardActionBar } from "./library-card-action-bar";
-import { LibraryCardMobileActions } from "./library-card-mobile-actions";
-import { LibraryCardSwipe } from "./library-card-swipe";
+import { LibraryCardCta } from "./library-card-cta";
+import { LibraryCardMenu } from "./library-card-menu";
+import { LibraryCardMetadata } from "./library-card-metadata";
+import { LibraryCardRating } from "./library-card-rating";
 import type { LibraryCardProps } from "./library-card.types";
+import { LibraryStatusBadge } from "./library-status-badge";
 
 export const LibraryCard = memo(function LibraryCard({
   item,
@@ -49,13 +46,8 @@ export const LibraryCard = memo(function LibraryCard({
 
   const staggerIndex = Math.min(index + 1, 12);
 
-  const statusConfig = getStatusConfig(status);
   const badgeRedundant = activeStatusFilter === status;
   const showBadge = shouldShowBadge(status) && !badgeRedundant;
-  const badgeLabel =
-    status === LibraryItemStatus.UP_NEXT
-      ? getUpNextLabel(item.hasBeenPlayed)
-      : statusConfig.label;
 
   const cardContent = (
     <>
@@ -90,17 +82,14 @@ export const LibraryCard = memo(function LibraryCard({
           style={{ viewTransitionName: `game-cover-${game.igdbId}` }}
         />
 
-        {showBadge && (
-          <span
-            role="status"
-            aria-label={`Status: ${badgeLabel}`}
-            title={badgeLabel}
-            className="absolute top-2 left-2 z-10 h-2.5 w-2.5 rounded-full ring-2 ring-black/30"
-            style={{
-              backgroundColor: `var(--status-${statusConfig.badgeVariant})`,
-            }}
-          />
-        )}
+        <LibraryStatusBadge
+          status={status}
+          hasBeenPlayed={item.hasBeenPlayed}
+          hidden={!showBadge}
+          className="absolute top-2 left-2 z-10"
+        />
+
+        <LibraryCardMenu libraryItem={item} />
       </div>
 
       {/* Jewel: tactical meta strip — lives BELOW the cover, not inside it,
@@ -121,36 +110,29 @@ export const LibraryCard = memo(function LibraryCard({
         {game.title}
       </p>
 
-      {showBadge && (
-        <p className="text-muted-foreground mt-0.5 flex items-center gap-1 text-[11px] leading-none">
-          <span
-            aria-hidden
-            className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
-            style={{
-              backgroundColor: `var(--status-${statusConfig.badgeVariant})`,
-            }}
-          />
-          <span className="truncate">{badgeLabel}</span>
-        </p>
-      )}
+      <LibraryCardMetadata
+        status={status as LibraryItemStatus}
+        startedAt={item.startedAt}
+        createdAt={item.createdAt}
+        updatedAt={item.updatedAt}
+        platform={item.platform}
+      />
 
       <div
         className="mt-0.5 h-4"
         data-testid="library-card-rating"
-        aria-hidden={item.rating === null || item.rating === undefined}
+        data-library-interactive
       >
-        {item.rating !== null && item.rating !== undefined && (
-          <RatingInput value={item.rating} readOnly size="sm" />
-        )}
+        <LibraryCardRating
+          libraryItemId={item.id}
+          initialRating={item.rating}
+          size="sm"
+        />
       </div>
 
-      {!isMobile && (
-        <LibraryCardActionBar
-          libraryItemId={item.id}
-          currentStatus={status as LibraryItemStatus}
-          hasBeenPlayed={item.hasBeenPlayed}
-        />
-      )}
+      <div data-library-interactive>
+        <LibraryCardCta libraryItem={item} />
+      </div>
     </>
   );
 
@@ -170,21 +152,7 @@ export const LibraryCard = memo(function LibraryCard({
       aria-label={game.title}
       style={{ animationDelay: `${staggerIndex * 50}ms` }}
     >
-      {isMobile ? (
-        <LibraryCardSwipe
-          actionBar={
-            <LibraryCardMobileActions
-              libraryItemId={item.id}
-              currentStatus={status as LibraryItemStatus}
-              hasBeenPlayed={item.hasBeenPlayed}
-            />
-          }
-        >
-          {cardContent}
-        </LibraryCardSwipe>
-      ) : (
-        cardContent
-      )}
+      {cardContent}
     </Link>
   );
 });

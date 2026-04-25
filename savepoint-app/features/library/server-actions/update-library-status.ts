@@ -19,7 +19,7 @@ export const updateLibraryStatusAction = createServerAction<
   schema: UpdateLibraryStatusSchema,
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
-    const { libraryItemId, status } = input;
+    const { libraryItemId, status, startedAt } = input;
     logger.info(
       { libraryItemId, status, userId },
       "Updating library item status"
@@ -30,6 +30,7 @@ export const updateLibraryStatusAction = createServerAction<
       libraryItem: {
         id: libraryItemId,
         status,
+        startedAt,
         statusChangedAt: new Date(),
       },
     });

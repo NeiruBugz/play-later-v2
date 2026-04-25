@@ -614,6 +614,76 @@ describe("LibraryService", () => {
         }
       });
     });
+
+    describe("platform contract", () => {
+      it("forwards a non-empty platform string to the repository", async () => {
+        mockFindLibraryItemById.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+        mockUpdateLibraryItem.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+
+        await service.updateLibraryItem({
+          userId: validUserId,
+          libraryItem: {
+            id: libraryItemId,
+            status: LibraryItemStatus.PLAYING,
+            platform: "PS5",
+          },
+        });
+
+        expect(mockUpdateLibraryItem).toHaveBeenCalledWith(
+          expect.objectContaining({
+            libraryItem: expect.objectContaining({ platform: "PS5" }),
+          })
+        );
+      });
+
+      it("forwards null platform to the repository to clear the value", async () => {
+        mockFindLibraryItemById.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+        mockUpdateLibraryItem.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+
+        await service.updateLibraryItem({
+          userId: validUserId,
+          libraryItem: {
+            id: libraryItemId,
+            status: LibraryItemStatus.PLAYING,
+            platform: null,
+          },
+        });
+
+        expect(mockUpdateLibraryItem).toHaveBeenCalledWith(
+          expect.objectContaining({
+            libraryItem: expect.objectContaining({ platform: null }),
+          })
+        );
+      });
+
+      it("does not include platform key when omitted from input", async () => {
+        mockFindLibraryItemById.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+        mockUpdateLibraryItem.mockResolvedValue(
+          createMockLibraryItem(LibraryItemStatus.PLAYING)
+        );
+
+        await service.updateLibraryItem({
+          userId: validUserId,
+          libraryItem: {
+            id: libraryItemId,
+            status: LibraryItemStatus.PLAYING,
+          },
+        });
+
+        const callArg = mockUpdateLibraryItem.mock.calls[0][0];
+        expect("platform" in callArg.libraryItem).toBe(false);
+      });
+    });
   });
 
   describe("setRating", () => {

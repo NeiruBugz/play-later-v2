@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, Pencil, Plus } from "lucide-react";
+import { BookOpen, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -84,7 +84,7 @@ export function QuickLogHeroClient({
                   >
                     {game.title}
                   </Link>
-                  <div className="gap-xs mt-1 flex">
+                  <div className="mt-2 flex flex-col items-start gap-1">
                     <Button
                       type="button"
                       size="sm"
@@ -93,19 +93,14 @@ export function QuickLogHeroClient({
                       onClick={() => handleLogClick(game)}
                     >
                       <Plus className="mr-1 h-3 w-3" aria-hidden />
-                      Log
+                      Log Session
                     </Button>
-                    <Button
-                      asChild
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 px-2 text-xs"
+                    <Link
+                      href={`/journal/new?gameId=${game.id}`}
+                      className="text-muted-foreground hover:text-foreground body-xs px-0 hover:underline"
                     >
-                      <Link href={`/journal/new?gameId=${game.id}`}>
-                        <Pencil className="mr-1 h-3 w-3" aria-hidden />
-                        Reflect
-                      </Link>
-                    </Button>
+                      Reflect
+                    </Link>
                   </div>
                 </div>
               </li>

@@ -1,1 +1,1 @@
-export { GettingStartedChecklist } from "./ui";
+export { EmptyLibraryHero, GettingStartedChecklist } from "./ui";

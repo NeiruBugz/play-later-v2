@@ -1,14 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/shared/components/ui/button";
 import { DialogFooter } from "@/shared/components/ui/dialog";
 import { Form, FormField } from "@/shared/components/ui/form";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
 import { useFormSubmission } from "@/shared/hooks/use-form-submission";
 import { getStatusLabel } from "@/shared/lib/library-status";
+import type { PlatformDomain } from "@/shared/types";
 
+import { useGetPlatforms } from "../hooks/use-get-platforms";
 import {
   UpdateLibraryEntrySchema,
   type UpdateLibraryEntryInput,
@@ -17,10 +19,12 @@ import { updateLibraryEntryAction } from "../server-actions";
 import { DateField } from "./date-field";
 import type { EditEntryFormProps } from "./edit-entry-form.types";
 import { LibraryEntryMetadata } from "./library-entry-metadata";
+import { PlatformCombobox } from "./platform-combobox";
 import { StatusSelect } from "./status-select";
 
 export const EditEntryForm = ({
   item,
+  igdbId,
   onSuccess,
   onCancel,
 }: EditEntryFormProps) => {
@@ -31,8 +35,49 @@ export const EditEntryForm = ({
       status: item.status,
       startedAt: item.startedAt ?? undefined,
       completedAt: item.completedAt ?? undefined,
+      platform: item.platform ?? "",
     },
   });
+
+  const {
+    data: platformsData,
+    isLoading: isLoadingPlatforms,
+    error: platformsError,
+  } = useGetPlatforms(igdbId);
+
+  useEffect(() => {
+    if (platformsError) {
+      toast.error("Failed to load platforms", {
+        description:
+          platformsError instanceof Error
+            ? platformsError.message
+            : "Please try again later.",
+      });
+    }
+  }, [platformsError]);
+
+  const platformsForCombobox = useMemo(() => {
+    const supported = platformsData?.supportedPlatforms ?? [];
+    const other = platformsData?.otherPlatforms ?? [];
+    const known = new Set([
+      ...supported.map((p) => p.name),
+      ...other.map((p) => p.name),
+    ]);
+    const isLegacy = !!item.platform && !known.has(item.platform);
+    if (!isLegacy) {
+      return { supportedPlatforms: supported, otherPlatforms: other };
+    }
+    const legacyOption = {
+      id: "legacy",
+      name: `${item.platform} (legacy)`,
+      slug: "legacy",
+    } as unknown as PlatformDomain;
+    return {
+      supportedPlatforms: supported,
+      otherPlatforms: [legacyOption, ...other],
+    };
+  }, [item.platform, platformsData]);
+
   const { isSubmitting, handleSubmit } = useFormSubmission({
     action: updateLibraryEntryAction,
     successMessage: "Library entry updated",
@@ -56,20 +101,43 @@ export const EditEntryForm = ({
             />
           )}
         />
-        <div className="space-y-md">
-          <Label htmlFor="platform-readonly">Platform</Label>
-          <Input
-            id="platform-readonly"
-            value={item.platform ?? "Not specified"}
-            disabled
-            className="bg-muted cursor-not-allowed"
-            aria-readonly="true"
-          />
-          <p className="text-muted-foreground text-sm">
-            Platform cannot be changed. Create a new entry for a different
-            platform.
-          </p>
-        </div>
+        <FormField
+          control={form.control}
+          name="platform"
+          render={({ field }) => {
+            const isLegacy =
+              !!item.platform &&
+              !platformsForCombobox.supportedPlatforms.some(
+                (p) => p.name === item.platform
+              ) &&
+              platformsForCombobox.otherPlatforms.some(
+                (p) => p.name === `${item.platform} (legacy)`
+              );
+            const displayValue =
+              isLegacy && field.value === item.platform
+                ? `${item.platform} (legacy)`
+                : (field.value ?? "");
+            return (
+              <PlatformCombobox
+                field={{
+                  ...field,
+                  value: displayValue,
+                  onChange: (next: string) => {
+                    if (next.endsWith(" (legacy)")) {
+                      field.onChange(item.platform);
+                    } else {
+                      field.onChange(next);
+                    }
+                  },
+                }}
+                supportedPlatforms={platformsForCombobox.supportedPlatforms}
+                otherPlatforms={platformsForCombobox.otherPlatforms}
+                isLoading={isLoadingPlatforms}
+                description="Change the platform you'll play on"
+              />
+            );
+          }}
+        />
         <FormField
           control={form.control}
           name="startedAt"

@@ -1,4 +1,8 @@
-import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
+import {
+  isSuccessResult,
+  LibraryService,
+  ProfileService,
+} from "@/data-access-layer/services";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -10,7 +14,10 @@ import {
   RecentlyAdded,
   UpNext,
 } from "@/features/dashboard/index.server";
-import { GettingStartedChecklist } from "@/features/onboarding";
+import {
+  EmptyLibraryHero,
+  GettingStartedChecklist,
+} from "@/features/onboarding";
 import { ActivityFeed } from "@/features/social/index.server";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { requireServerUserId } from "@/shared/lib/app/auth";
@@ -60,6 +67,15 @@ export default async function DashboardPage() {
     ? (profileResult.data.profile.username ?? "there")
     : "there";
 
+  const libraryService = new LibraryService();
+  const statusCountsResult = await libraryService.getStatusCounts({ userId });
+  const hasEmptyLibrary =
+    statusCountsResult.success &&
+    Object.values(statusCountsResult.data).reduce(
+      (sum, count) => sum + count,
+      0
+    ) === 0;
+
   return (
     <div className="py-3xl">
       <Suspense fallback={<StatsSkeleton />}>
@@ -70,33 +86,41 @@ export default async function DashboardPage() {
         <GettingStartedChecklist userId={userId} />
       </Suspense>
 
-      <div className="grid gap-2 lg:grid-cols-[1fr_1fr]">
-        <div className="flex flex-col gap-2">
-          <Suspense fallback={<StatsSkeleton />}>
-            <DashboardStats userId={userId} />
-          </Suspense>
-
-          <Suspense fallback={<ActivitySkeleton />}>
-            <ActivityFeed userId={userId} />
-          </Suspense>
+      {hasEmptyLibrary ? (
+        <div className="mt-2">
+          <EmptyLibraryHero variant="dashboard" />
         </div>
+      ) : (
+        <>
+          <div className="grid gap-2 lg:grid-cols-[1fr_1fr]">
+            <div className="flex flex-col gap-2">
+              <Suspense fallback={<StatsSkeleton />}>
+                <DashboardStats userId={userId} />
+              </Suspense>
 
-        <div className="space-y-2">
-          <Suspense fallback={<SectionSkeleton />}>
-            <ContinuePlaying userId={userId} />
-          </Suspense>
+              <Suspense fallback={<ActivitySkeleton />}>
+                <ActivityFeed userId={userId} />
+              </Suspense>
+            </div>
 
-          <Suspense fallback={<SectionSkeleton />}>
-            <UpNext userId={userId} />
-          </Suspense>
-        </div>
-      </div>
+            <div className="space-y-2">
+              <Suspense fallback={<SectionSkeleton />}>
+                <ContinuePlaying userId={userId} />
+              </Suspense>
 
-      <div className="mt-2">
-        <Suspense fallback={<SectionSkeleton />}>
-          <RecentlyAdded userId={userId} />
-        </Suspense>
-      </div>
+              <Suspense fallback={<SectionSkeleton />}>
+                <UpNext userId={userId} />
+              </Suspense>
+            </div>
+          </div>
+
+          <div className="mt-2">
+            <Suspense fallback={<SectionSkeleton />}>
+              <RecentlyAdded userId={userId} />
+            </Suspense>
+          </div>
+        </>
+      )}
     </div>
   );
 }

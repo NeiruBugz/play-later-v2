@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 import type { LibraryItemWithGameDomain } from "@/features/library/types";
 import {
@@ -88,5 +88,6 @@ export function useLibraryData(filters: LibraryFilters = {}) {
     },
     staleTime: LIBRARY_DATA_STALE_TIME_MS,
     gcTime: LIBRARY_DATA_GC_TIME_MS,
+    placeholderData: keepPreviousData,
   });
 }

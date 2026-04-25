@@ -3,7 +3,6 @@
 import { Plus } from "lucide-react";
 
 import { GameCoverImage } from "@/shared/components/game-cover-image";
-import { Button } from "@/shared/components/ui/button";
 import { CommandItem } from "@/shared/components/ui/command";
 
 import type { GameSearchItem } from "./command-palette.types";
@@ -11,13 +10,13 @@ import type { GameSearchItem } from "./command-palette.types";
 interface GameResultItemProps {
   game: GameSearchItem;
   onSelect: () => void;
-  onAddToLibrary?: (game: GameSearchItem) => void;
+  showAddHint?: boolean;
 }
 
 export function GameResultItem({
   game,
   onSelect,
-  onAddToLibrary,
+  showAddHint = false,
 }: GameResultItemProps) {
   return (
     <CommandItem
@@ -42,19 +41,15 @@ export function GameResultItem({
         )}
       </div>
 
-      {onAddToLibrary && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 shrink-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            onAddToLibrary(game);
-          }}
-          aria-label={`Add ${game.name} to library`}
+      {showAddHint && (
+        <span
+          aria-hidden="true"
+          data-testid="quick-add-hint"
+          className="gap-xs text-muted-foreground border-border bg-muted/40 px-sm inline-flex shrink-0 items-center rounded-md border py-0.5 text-xs"
         >
-          <Plus className="h-4 w-4" />
-        </Button>
+          <Plus className="h-3 w-3" />
+          Add to Up Next
+        </span>
       )}
     </CommandItem>
   );

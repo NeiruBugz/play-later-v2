@@ -1,9 +1,12 @@
 export type { HandlerResult, RequestContext, Handler } from "./types";
 
 export { getLibraryHandler } from "./library/get-library-handler";
+export { getStatusCountsHandler } from "./library/get-status-counts-handler";
 export type {
   GetLibraryHandlerInput,
   GetLibraryHandlerOutput,
+  GetStatusCountsHandlerInput,
+  GetStatusCountsHandlerOutput,
   LibraryItemWithGameDomain,
 } from "./library/types";
 

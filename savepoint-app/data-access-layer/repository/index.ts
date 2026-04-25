@@ -37,6 +37,7 @@ export {
   hasLibraryItemWithStatus,
   setRating,
   getRatingHistogram,
+  countLibraryItemsByStatus,
   type FindLibraryItemsResult,
 } from "./library/library-repository";
 export {
@@ -68,6 +69,8 @@ export {
   findPlatformByIgdbId,
   findPlatformsForGame,
   findSystemPlatforms,
+  findKnownPlatforms,
+  type KnownPlatform,
 } from "./platform/platform-repository";
 export {
   createGameWithRelations,
@@ -87,6 +90,7 @@ export {
   findJournalEntriesByUserId,
   updateJournalEntry,
   deleteJournalEntry,
+  findLatestJournalDateByGameId,
 } from "./journal/journal-repository";
 export {
   upsertManyImportedGames,

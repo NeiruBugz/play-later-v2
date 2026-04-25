@@ -2,7 +2,7 @@ import { uniquePlatformsFixture } from "@/test/fixtures/library";
 import { createLibraryHandlers } from "@/test/mocks/handlers";
 import { server } from "@/test/setup/client-setup";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { SessionProvider } from "next-auth/react";
@@ -48,14 +48,30 @@ const createNavigationMock = (initialQuery = "") => {
   return { mockPush, mockReplace, getParams: () => currentParams };
 };
 
+const getMobileFilters = () => screen.getByTestId("mobile-filters");
+
 const elements = {
   getLibraryHeading: () => screen.getByRole("heading", { name: "Library" }),
-  getSortSelect: () => screen.getByRole("combobox", { name: "Sort by" }),
-  getPlatformFilter: () =>
-    screen.getByRole("combobox", { name: "Filter by platform" }),
+  getSortSelect: () => {
+    const dialog = screen.queryByRole("dialog");
+    return dialog
+      ? within(dialog).getByRole("combobox", { name: "Sort by" })
+      : within(getMobileFilters()).getByRole("combobox", { name: "Sort by" });
+  },
+  getPlatformFilter: () => {
+    const dialog = screen.queryByRole("dialog");
+    return dialog
+      ? within(dialog).getByRole("combobox", { name: "Filter by platform" })
+      : within(getMobileFilters()).getByRole("combobox", {
+          name: "Filter by platform",
+        });
+  },
   getMoreFiltersButton: () =>
-    screen.getByRole("button", { name: /more/i, expanded: false }),
-  queryMoreFiltersButton: () => screen.queryByRole("button", { name: /more/i }),
+    within(getMobileFilters()).getByRole("button", {
+      name: /open filters/i,
+    }),
+  queryMoreFiltersButton: () =>
+    within(getMobileFilters()).queryByRole("button", { name: /open filters/i }),
   getSearchInput: () =>
     screen.getByRole("searchbox", { name: "Filter library by title" }),
   getAllStatusesButton: () =>
@@ -89,8 +105,10 @@ const actions = {
     await userEvent.click(elements.getSortOption(option));
   },
   openMoreFilters: async () => {
+    const sheetAlreadyOpen = screen.queryByRole("dialog");
+    if (sheetAlreadyOpen) return;
     const button = elements.queryMoreFiltersButton();
-    if (button && button.getAttribute("aria-expanded") !== "true") {
+    if (button) {
       await userEvent.click(button);
     }
   },
@@ -139,10 +157,10 @@ describe("LibraryPageView", () => {
         expect(elements.getLibraryHeading()).toBeVisible();
       });
 
-      expect(elements.getSortSelect()).toBeVisible();
       expect(elements.getSearchInput()).toBeVisible();
 
       await actions.openMoreFilters();
+      expect(elements.getSortSelect()).toBeVisible();
       expect(elements.getPlatformFilter()).toBeVisible();
     });
 
@@ -162,6 +180,12 @@ describe("LibraryPageView", () => {
 
     it("displays sort select with default value", async () => {
       renderComponent();
+
+      await waitFor(() => {
+        expect(elements.getLibraryHeading()).toBeVisible();
+      });
+
+      await actions.openMoreFilters();
 
       await waitFor(() => {
         expect(elements.getSortSelect()).toBeVisible();
@@ -189,6 +213,31 @@ describe("LibraryPageView", () => {
 
       expect(elements.queryEmptyState()).not.toBeInTheDocument();
       expect(elements.queryErrorState()).not.toBeInTheDocument();
+    });
+
+    it("applies content-aware track sizing classes at each breakpoint", async () => {
+      renderComponent();
+
+      await waitFor(() => {
+        expect(elements.queryLibraryGrid()).toBeVisible();
+      });
+
+      const grid = elements.queryLibraryGrid();
+      expect(grid).toHaveClass(
+        "grid-cols-[repeat(auto-fill,minmax(150px,1fr))]"
+      );
+      expect(grid).toHaveClass(
+        "sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))]"
+      );
+      expect(grid).toHaveClass(
+        "md:grid-cols-[repeat(auto-fill,minmax(160px,200px))]"
+      );
+      expect(grid).toHaveClass(
+        "lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))]"
+      );
+      expect(grid).toHaveClass("gap-4");
+      expect(grid).toHaveClass("md:gap-[14px]");
+      expect(grid).toHaveClass("lg:gap-4");
     });
   });
 
@@ -383,11 +432,15 @@ describe("LibraryPageView", () => {
         "true"
       );
 
-      // Verify platform filter shows "All Platforms"
-      expect(elements.getPlatformFilter()).toHaveTextContent("All Platforms");
-
-      // Verify search input is empty
+      // Verify search input is empty (search lives outside the sheet)
       expect(elements.getSearchInput()).toHaveValue("");
+
+      // Reopen the sheet to verify platform filter is reset to "All Platforms"
+      await actions.openMoreFilters();
+      await waitFor(() => {
+        expect(elements.getPlatformFilter()).toBeVisible();
+      });
+      expect(elements.getPlatformFilter()).toHaveTextContent("All Platforms");
     });
   });
 
@@ -395,6 +448,12 @@ describe("LibraryPageView", () => {
     it("calls router.push with sortBy and sortOrder params and displays selected option", async () => {
       const { mockPush } = createNavigationMock();
       const { rerender } = renderComponent();
+
+      await waitFor(() => {
+        expect(elements.getLibraryHeading()).toBeVisible();
+      });
+
+      await actions.openMoreFilters();
 
       await waitFor(() => {
         expect(elements.getSortSelect()).toBeVisible();
@@ -489,6 +548,12 @@ describe("LibraryPageView", () => {
       renderComponent();
 
       await waitFor(() => {
+        expect(elements.getLibraryHeading()).toBeVisible();
+      });
+
+      await actions.openMoreFilters();
+
+      await waitFor(() => {
         expect(elements.getSortSelect()).toBeVisible();
       });
 
@@ -508,6 +573,12 @@ describe("LibraryPageView", () => {
     it("restores 'Highest rated' label when URL contains ?sortBy=rating-desc", async () => {
       createNavigationMock("sortBy=rating-desc");
       renderComponent();
+
+      await waitFor(() => {
+        expect(elements.getLibraryHeading()).toBeVisible();
+      });
+
+      await actions.openMoreFilters();
 
       await waitFor(() => {
         expect(elements.getSortSelect()).toHaveTextContent("Highest rated");
