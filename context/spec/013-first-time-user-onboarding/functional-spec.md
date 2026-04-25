@@ -154,9 +154,11 @@ This spec does not change any of the above. If acceptance criteria here imply a 
 
 Two new nullable timestamp columns on the `User` table:
 
-- `onboardingCompletedAt: DateTime?` — set once when the user reaches the final stop and confirms.
-- `onboardingSkippedAt: DateTime?` — set once when the user explicitly skips, presses Esc/Close, navigates away mid-tour, or hits the timeout-skip case.
+- `tourCompletedAt: DateTime?` — set once when the user reaches the final stop and confirms.
+- `tourSkippedAt: DateTime?` — set once when the user explicitly skips, presses Esc/Close, navigates away mid-tour, or hits the timeout-skip case.
 
-These are independent: a user may have `onboardingSkippedAt` set without `onboardingCompletedAt`, or vice versa. The auto-start logic uses `onboardingCompletedAt IS NULL AND onboardingSkippedAt IS NULL`.
+These are independent: a user may have `tourSkippedAt` set without `tourCompletedAt`, or vice versa. The auto-start logic uses `tourCompletedAt IS NULL AND tourSkippedAt IS NULL`.
 
 The user-menu **Take the tour again** does not write either column.
+
+The existing `onboardingDismissedAt` column (used by the Getting Started checklist) is **not** touched by this spec.

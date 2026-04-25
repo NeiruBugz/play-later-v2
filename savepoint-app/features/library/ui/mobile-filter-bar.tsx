@@ -24,10 +24,7 @@ import {
   SheetTrigger,
 } from "@/shared/components/ui/sheet";
 import { Switch } from "@/shared/components/ui/switch";
-import {
-  LIBRARY_STATUS_CONFIG,
-  type StatusBadgeVariant,
-} from "@/shared/lib/library-status";
+import { LIBRARY_STATUS_CONFIG } from "@/shared/lib/library-status";
 import { cn } from "@/shared/lib/ui/utils";
 
 import { useOptimisticFilters } from "../hooks/use-optimistic-filters";
@@ -47,11 +44,6 @@ const SORT_OPTIONS = [
   { value: "startedAt-desc", label: "Started Date" },
   { value: "completedAt-desc", label: "Completed Date" },
 ] as const;
-
-function getStatusSegmentStyles(badgeVariant: StatusBadgeVariant): string {
-  const cssVarName = `--status-${badgeVariant}`;
-  return `data-[active=true]:bg-[var(${cssVarName})] data-[active=true]:text-[var(${cssVarName}-foreground)] data-[active=true]:border-transparent`;
-}
 
 interface MobileFilterBarProps {
   isSteamConnected?: boolean;
@@ -165,90 +157,44 @@ export function MobileFilterBar({
     searchParams.get("unratedOnly")
   );
 
-  const advancedFilterCount = [
+  const activeStatusLabel =
+    currentStatus === "__all__"
+      ? null
+      : (LIBRARY_STATUS_CONFIG.find((c) => c.value === currentStatus)?.label ??
+        null);
+
+  const activeFilterCount = [
+    activeStatusLabel,
     searchParams.get("platform"),
     minRatingValue !== null ? "1" : null,
     unratedOnly ? "1" : null,
   ].filter(Boolean).length;
 
-  const isStatusPending = isPending && pendingField === "status";
   const isSortPending = isPending && pendingField === "sort";
   const isPlatformPending = isPending && pendingField === "platform";
+  const isStatusPending = isPending && pendingField === "status";
 
   return (
     <div className="mb-xl space-y-md">
       <div className="gap-sm flex items-center">
-        <div
-          role="group"
-          aria-label="Filter by status"
-          className={cn(
-            "scrollbar-none gap-sm flex flex-1 snap-x snap-mandatory overflow-x-auto",
-            "[mask-image:linear-gradient(to_right,black_0,black_calc(100%-24px),transparent_100%)]"
-          )}
-        >
-          <button
-            type="button"
-            aria-pressed={currentStatus === "__all__"}
-            aria-label="Show all statuses"
-            data-active={currentStatus === "__all__"}
-            onClick={() => setStatus(null)}
-            disabled={isStatusPending}
-            className={cn(
-              "border-input hover:bg-accent hover:text-accent-foreground inline-flex shrink-0 snap-start items-center justify-center rounded-md border bg-transparent px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
-              "data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:border-transparent",
-              "disabled:pointer-events-none disabled:opacity-50"
-            )}
-          >
-            {isStatusPending && currentStatus === "__all__" && (
-              <Loader2
-                className="mr-1.5 h-3 w-3 animate-spin"
-                aria-hidden="true"
-              />
-            )}
-            All
-          </button>
-          {LIBRARY_STATUS_CONFIG.map((config) => {
-            const isActive = currentStatus === config.value;
-            return (
-              <button
-                key={config.value}
-                type="button"
-                aria-pressed={isActive}
-                aria-label={`Filter by ${config.label}`}
-                data-active={isActive}
-                onClick={() => setStatus(config.value)}
-                disabled={isStatusPending}
-                className={cn(
-                  "border-input hover:bg-accent hover:text-accent-foreground inline-flex shrink-0 snap-start items-center justify-center rounded-md border bg-transparent px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
-                  getStatusSegmentStyles(config.badgeVariant),
-                  "disabled:pointer-events-none disabled:opacity-50"
-                )}
-              >
-                {isStatusPending && isActive && (
-                  <Loader2
-                    className="mr-1.5 h-3 w-3 animate-spin"
-                    aria-hidden="true"
-                  />
-                )}
-                {config.label}
-              </button>
-            );
-          })}
-        </div>
-
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className="shrink-0"
+              className="flex-1 justify-start sm:flex-initial"
               aria-label="Open filters"
             >
               <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
               <span className="ml-1.5">Filters</span>
-              {advancedFilterCount > 0 && (
-                <span className="bg-primary text-primary-foreground ml-1.5 rounded-full px-1.5 text-xs tabular-nums">
-                  {advancedFilterCount}
+              {activeStatusLabel && (
+                <span className="text-muted-foreground ml-1.5 text-xs">
+                  · {activeStatusLabel}
+                </span>
+              )}
+              {activeFilterCount > 0 && (
+                <span className="bg-primary text-primary-foreground ml-auto rounded-full px-1.5 text-xs tabular-nums sm:ml-1.5">
+                  {activeFilterCount}
                 </span>
               )}
             </Button>
@@ -275,8 +221,14 @@ export function MobileFilterBar({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setStatus(config.value)}
-                        aria-label={`Filter by ${config.label}`}
+                        onClick={() =>
+                          setStatus(isActive ? null : config.value)
+                        }
+                        aria-label={
+                          isActive
+                            ? `Clear ${config.label} filter`
+                            : `Filter by ${config.label}`
+                        }
                         aria-pressed={isActive}
                         disabled={isStatusPending}
                         className={cn(

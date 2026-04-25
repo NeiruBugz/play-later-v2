@@ -89,62 +89,27 @@ describe("MobileFilterBar", () => {
     );
   });
 
-  describe("segmented control", () => {
-    it("renders the All segment plus all five status segments", () => {
+  describe("trigger", () => {
+    it("does not render an inline status segmented control", () => {
       renderComponent();
 
       expect(
-        screen.getByRole("button", { name: "Show all statuses" })
-      ).toBeVisible();
+        screen.queryByRole("button", { name: "Show all statuses" })
+      ).not.toBeInTheDocument();
       for (const { label } of STATUS_CASES) {
         expect(
-          screen.getByRole("button", { name: `Filter by ${label}` })
-        ).toBeVisible();
+          screen.queryByRole("button", { name: `Filter by ${label}` })
+        ).not.toBeInTheDocument();
       }
     });
 
-    it.each(STATUS_CASES)(
-      "pushes status=$param when the $label segment is clicked",
-      async ({ label, param }) => {
-        const { mockPush } = createNavigationMock();
-        renderComponent();
-
-        await userEvent.click(
-          screen.getByRole("button", { name: `Filter by ${label}` })
-        );
-
-        expect(mockPush).toHaveBeenCalledWith(
-          expect.stringContaining(`status=${param}`),
-          expect.anything()
-        );
-      }
-    );
-
-    it("clears status when the All segment is clicked", async () => {
-      const { mockPush } = createNavigationMock("status=PLAYING");
-      renderComponent();
-
-      await userEvent.click(
-        screen.getByRole("button", { name: "Show all statuses" })
-      );
-
-      const url = new URL(
-        mockPush.mock.calls[0][0] as string,
-        "http://localhost"
-      );
-      expect(url.searchParams.get("status")).toBeNull();
-    });
-
-    it("reflects pressed state for the active status segment", () => {
+    it("shows the active status label inline on the trigger", () => {
       createNavigationMock("status=PLAYING");
       renderComponent();
 
       expect(
-        screen.getByRole("button", { name: "Filter by Playing" })
-      ).toHaveAttribute("aria-pressed", "true");
-      expect(
-        screen.getByRole("button", { name: "Show all statuses" })
-      ).toHaveAttribute("aria-pressed", "false");
+        screen.getByRole("button", { name: "Open filters" })
+      ).toHaveTextContent("Playing");
     });
   });
 
@@ -174,6 +139,27 @@ describe("MobileFilterBar", () => {
       await waitFor(() => {
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
       });
+    });
+
+    it("toggles the active status off when clicked again inside the sheet", async () => {
+      const { mockPush } = createNavigationMock("status=PLAYING");
+      renderComponent();
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Open filters" })
+      );
+
+      const dialog = await screen.findByRole("dialog");
+      mockPush.mockClear();
+      await userEvent.click(
+        within(dialog).getByRole("button", { name: "Clear Playing filter" })
+      );
+
+      const url = new URL(
+        mockPush.mock.calls[0][0] as string,
+        "http://localhost"
+      );
+      expect(url.searchParams.get("status")).toBeNull();
     });
 
     it("renders status counts inside the sheet", async () => {
