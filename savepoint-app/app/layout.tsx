@@ -8,21 +8,69 @@ import { Providers } from "@/shared/providers";
 
 import "@/shared/globals.css";
 
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Archivo,
+  Bowlby_One,
+  Geist,
+  Geist_Mono,
+  JetBrains_Mono,
+  Source_Serif_4,
+  Space_Grotesk,
+  Space_Mono,
+} from "next/font/google";
 import { Suspense } from "react";
 
-const fontSans = Geist({
+const fontDefaultSans = Geist({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-default-sans",
   display: "swap",
   preload: true,
 });
 
-const fontMono = Geist_Mono({
+const fontDefaultMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-default-mono",
   display: "swap",
   preload: true,
+});
+
+const fontPaperDisplay = Source_Serif_4({
+  subsets: ["latin"],
+  variable: "--font-paper-display",
+  display: "swap",
+  preload: true,
+});
+
+const fontCartridgeDisplay = Bowlby_One({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-cartridge-display",
+  display: "swap",
+});
+
+const fontAuroraDisplay = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-aurora-display",
+  display: "swap",
+});
+
+const fontCartridgeSans = Archivo({
+  subsets: ["latin"],
+  variable: "--font-cartridge-sans",
+  display: "swap",
+});
+
+const fontCartridgeMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-cartridge-mono",
+  display: "swap",
+});
+
+const fontAuroraMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-aurora-mono",
+  display: "swap",
 });
 export const viewport: Viewport = {
   width: "device-width",
@@ -94,7 +142,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        fontDefaultSans.variable,
+        fontDefaultMono.variable,
+        fontPaperDisplay.variable,
+        fontCartridgeDisplay.variable,
+        fontCartridgeSans.variable,
+        fontCartridgeMono.variable,
+        fontAuroraDisplay.variable,
+        fontAuroraMono.variable
+      )}
+    >
       <head>
         <link rel="preconnect" href="https://images.igdb.com" />
         <link rel="preconnect" href="https://va.vercel-scripts.com" />
@@ -103,7 +164,7 @@ export default function RootLayout({
         className={cn(
           "bg-background relative min-h-dvh antialiased",
           "selection:bg-primary/20 selection:text-primary-foreground",
-          `font-sans ${fontSans.variable} ${fontMono.variable} antialiased`
+          "font-sans"
         )}
       >
         <SkipToContent />
