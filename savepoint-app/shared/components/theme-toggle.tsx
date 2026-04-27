@@ -87,10 +87,7 @@ export function ThemeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        className={cn(
-          "h-8 w-8",
-          theme === "aurora" && "text-primary"
-        )}
+        className={cn("h-8 w-8", theme === "aurora" && "text-primary")}
         onClick={() => setOpen(!open)}
         aria-label="Change theme"
         aria-expanded={open}
