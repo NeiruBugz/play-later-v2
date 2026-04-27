@@ -24,6 +24,6 @@ Additional optional fields on every entry: `mood` (JournalMood enum), `tags` (st
 
 ## Notes
 
-- Exported for cross-feature use by `game-detail`, `dashboard`, and `timeline`
+- Exported for cross-feature use by `game-detail` and `dashboard`
 - Mood label pairs (enum → UI copy): EXCITED→Hyped, RELAXED→Chill, FRUSTRATED→Fried, ACCOMPLISHED→Proud, CURIOUS→Curious, NOSTALGIC→Nostalgic
 - Tag input is comma-separated free-form; parsed and deduped client-side before submit

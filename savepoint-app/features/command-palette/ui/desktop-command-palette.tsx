@@ -11,7 +11,12 @@ import {
   CommandInput,
   CommandList,
 } from "@/shared/components/ui/command";
-import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import { MIN_SEARCH_QUERY_LENGTH } from "@/shared/constants";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
@@ -113,6 +118,10 @@ export function DesktopCommandPalette({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl gap-0 p-0">
+        <DialogTitle className="sr-only">Command palette</DialogTitle>
+        <DialogDescription className="sr-only">
+          Search games, jump to a page, or run a quick action.
+        </DialogDescription>
         <Command shouldFilter={false}>
           <CommandInput
             ref={inputRef}

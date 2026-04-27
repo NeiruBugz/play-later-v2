@@ -7,7 +7,6 @@ type Theme = (typeof THEMES)[number];
 const AUTHENTICATED_SURFACES = [
   { name: "Library", path: "/library" },
   { name: "Journal", path: "/journal" },
-  { name: "Timeline", path: "/timeline" },
   { name: "Profile", path: "/profile" },
   { name: "Settings", path: "/settings/profile" },
 ] as const;

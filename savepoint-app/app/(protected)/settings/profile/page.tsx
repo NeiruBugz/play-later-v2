@@ -7,7 +7,6 @@ import {
   ProfileSettingsForm,
   ProfileVisibilityToggle,
 } from "@/features/profile";
-import { SteamConnectCard } from "@/features/steam-import";
 import {
   Card,
   CardContent,
@@ -25,18 +24,11 @@ export const metadata: Metadata = {
 export default async function SettingsProfilePage() {
   const userId = await requireServerUserId();
   const profileService = new ProfileService();
-  const [profileResult, steamResult] = await Promise.all([
-    profileService.getProfile({ userId }),
-    profileService.getSteamConnectionStatus({ userId }),
-  ]);
+  const profileResult = await profileService.getProfile({ userId });
 
   if (!isSuccessResult(profileResult)) {
     redirect("/login");
   }
-
-  const steamConnectionStatus = isSuccessResult(steamResult)
-    ? steamResult.data
-    : { connected: false as const };
 
   return (
     <div>
@@ -69,18 +61,6 @@ export default async function SettingsProfilePage() {
                   Preview public profile →
                 </Link>
               )}
-          </CardContent>
-        </Card>
-
-        <Card className="hover:none w-full">
-          <CardHeader>
-            <CardTitle>Connected Accounts</CardTitle>
-            <CardDescription>
-              Connect your gaming platform accounts to import your library
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2xl">
-            <SteamConnectCard initialStatus={steamConnectionStatus} />
           </CardContent>
         </Card>
       </div>

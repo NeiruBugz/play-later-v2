@@ -1,6 +1,6 @@
 # Widget: mobile-nav
 
-Bottom tab bar for `<md` viewports on authenticated routes. Reduced from the legacy 6-tab nav to 4 primary destinations: Library, Journal, Timeline, Profile (Search moved to the mobile top-bar; Dashboard is reachable via the brand mark).
+Bottom tab bar for `<md` viewports on authenticated routes. Primary destinations: Library, Journal, Profile (Search moved to the mobile top-bar; Dashboard is reachable via the brand mark).
 
 ## Structure
 

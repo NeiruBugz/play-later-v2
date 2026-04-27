@@ -28,7 +28,7 @@ const nextConfig = {
         protocol: "http",
       },
       {
-        hostname: "https://authjs.dev",
+        hostname: "authjs.dev",
         protocol: "https",
       }
     ],

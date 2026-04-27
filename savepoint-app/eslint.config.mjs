@@ -245,7 +245,7 @@ const eslintConfig = [
       "features/journal/ui/journal-entry-card.tsx",
       "features/profile/ui/profile-header.tsx",
       "features/profile/ui/profile-tab-nav.tsx",
-      "features/profile/ui/settings-rail.tsx",
+      "widgets/settings-rail/ui/settings-rail.tsx",
       "features/auth/ui/auth-page-view.tsx",
     ],
     rules: {

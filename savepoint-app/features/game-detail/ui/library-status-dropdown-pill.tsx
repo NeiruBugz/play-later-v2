@@ -1,10 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useOptimistic, useTransition } from "react";
-import { toast } from "sonner";
 
-import { updateLibraryStatusAction } from "@/features/manage-library-entry/server-actions";
 import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
@@ -18,6 +15,8 @@ import {
 } from "@/shared/lib/library-status";
 import type { LibraryItemStatus } from "@/shared/types";
 
+import { useOptimisticLibraryStatus } from "../hooks/use-optimistic-library-status";
+
 export interface LibraryStatusDropdownPillProps {
   currentStatus: LibraryItemStatus | undefined;
   igdbId: number;
@@ -27,31 +26,10 @@ export function LibraryStatusDropdownPill({
   currentStatus,
   igdbId,
 }: LibraryStatusDropdownPillProps) {
-  const [optimisticStatus, setOptimisticStatus] = useOptimistic(currentStatus);
-  const [, startTransition] = useTransition();
-
-  const handleSelect = (next: LibraryItemStatus) => {
-    const previous = optimisticStatus;
-
-    startTransition(async () => {
-      setOptimisticStatus(next);
-
-      try {
-        const result = await updateLibraryStatusAction({
-          igdbId,
-          status: next,
-        });
-
-        if (!result || !result.success) {
-          setOptimisticStatus(previous);
-          toast.error("Failed to update library status");
-        }
-      } catch {
-        setOptimisticStatus(previous);
-        toast.error("Failed to update library status");
-      }
-    });
-  };
+  const { optimisticStatus, setStatus } = useOptimisticLibraryStatus(
+    igdbId,
+    currentStatus
+  );
 
   const label = optimisticStatus
     ? getStatusLabel(optimisticStatus)
@@ -69,7 +47,7 @@ export function LibraryStatusDropdownPill({
         {LIBRARY_STATUS_CONFIG.map((config) => (
           <DropdownMenuItem
             key={config.value}
-            onSelect={() => handleSelect(config.value)}
+            onSelect={() => setStatus(config.value)}
             className="gap-2"
             aria-current={
               optimisticStatus === config.value ? "true" : undefined

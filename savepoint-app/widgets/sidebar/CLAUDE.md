@@ -4,7 +4,7 @@ Desktop left-rail navigation for `md+` viewports. Replaces the top-bar nav on de
 
 ## Structure
 
-- `ui/sidebar.tsx` — `AppSidebar` client component: brand mark, primary nav (Library / Journal / Timeline / Profile / Settings), search trigger, user menu, theme toggle
+- `ui/sidebar.tsx` — `AppSidebar` client component: brand mark, primary nav (Library / Journal / Profile / Settings), search trigger, user menu, theme toggle
 - `ui/sidebar-search-trigger.tsx` — icon button that opens the command palette via `useCommandPaletteContext().open()`
 - `ui/sidebar-user-menu.tsx` — dropdown with profile/account links and sign-out; calls `signOut()` from `next-auth/react` directly (no cross-feature import for logout)
 

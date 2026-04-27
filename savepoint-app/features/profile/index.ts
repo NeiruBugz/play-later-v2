@@ -21,7 +21,6 @@ export type {
 export { ProfileTabNav } from "./ui/profile-tab-nav";
 export type { ProfileTabNavProps } from "./ui/profile-tab-nav";
 export { ProfileVisibilityToggle } from "./ui/profile-visibility-toggle";
-export { SettingsRail } from "./ui/settings-rail";
 export { UsernameInput } from "./ui/username-input";
 export type { UsernameInputProps } from "./ui/username-input.types";
 

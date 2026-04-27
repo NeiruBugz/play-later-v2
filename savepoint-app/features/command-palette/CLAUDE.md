@@ -7,7 +7,7 @@ App-wide command palette — the single search/quick-add surface across all brea
 The palette renders three labeled groups (desktop and mobile share the same model):
 
 - **Games** — IGDB search results (or recent library games when the input is empty). Selecting a search result triggers quick-add via `useQuickAddFromPalette` (see spec 012 §2.11) and emits an undo toast. Selecting a recent game navigates to its detail page.
-- **Navigation** — jump to Library, Journal, Timeline, Profile, Settings, or Dashboard. Filtered by simple substring match on label.
+- **Navigation** — jump to Library, Journal, Profile, Settings, or Dashboard. Filtered by simple substring match on label.
 - **Quick actions** — at minimum: "Add game to library" (focuses the input so the user can type a title) and "New journal entry" (navigates to `/journal/new`).
 
 ## ⌘K binding

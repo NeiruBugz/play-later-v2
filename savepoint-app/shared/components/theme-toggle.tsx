@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/shared/lib/ui/utils";
 
-const subscribeNoop = () => () => {};
+const subscribeNoop = () => () => { };
 const getMounted = () => true;
 const getMountedServer = () => false;
 
@@ -105,7 +105,7 @@ export function ThemeToggle() {
       {open && (
         <div
           className={cn(
-            "border-border bg-popover text-popover-foreground shadow-paper-md absolute top-full right-0 z-50 mt-2 min-w-[140px] rounded-lg border p-1",
+            "border-border bg-popover text-popover-foreground shadow-paper-md absolute bottom-full left-0 z-50 mt-2 min-w-35 rounded-lg border p-1",
             "animate-scale-in",
             theme === "y2k" && "y2k-border-glow",
             theme === "jewel" && "jewel-glass-strong jewel-neon"

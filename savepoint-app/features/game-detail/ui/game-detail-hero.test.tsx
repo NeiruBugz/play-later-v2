@@ -54,7 +54,7 @@ vi.mock("./library-status-segmented", () => ({
 }));
 
 vi.mock("../lib/feature-flags", () => ({
-  LIBRARY_STATUS_INLINE_VARIANT: "dropdown",
+  LIBRARY_STATUS_INLINE_VARIANT: "dropdown-pill",
 }));
 
 const MINIMAL_GAME = {

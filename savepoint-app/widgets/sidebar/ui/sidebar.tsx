@@ -1,6 +1,6 @@
 "use client";
 
-import { BookMarked, BookOpen, Clock, Settings, User } from "lucide-react";
+import { BookMarked, BookOpen, Settings, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -25,7 +25,6 @@ import { SidebarUserMenu } from "./sidebar-user-menu";
 const NAV_LINKS = [
   { href: "/library", label: "Library", icon: BookMarked },
   { href: "/journal", label: "Journal", icon: BookOpen },
-  { href: "/timeline", label: "Timeline", icon: Clock },
   { href: "/profile", label: "Profile", icon: User },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;

@@ -108,8 +108,8 @@ export default async function ProtectedLayout({ children }) {
 ```
 
 ### Shell Architecture (spec-014)
-- **Desktop (`md+`)**: Left rail via `widgets/sidebar/` (`AppSidebar`) wrapping primary nav (Library, Journal, Timeline, Profile, Settings), search trigger, user menu.
-- **Mobile (`<md`)**: Sticky top app bar via `widgets/mobile-topbar/` (brand + search icon) and 4-tab bottom bar via `widgets/mobile-nav/` (Library, Journal, Timeline, Profile).
+- **Desktop (`md+`)**: Left rail via `widgets/sidebar/` (`AppSidebar`) wrapping primary nav (Library, Journal, Profile, Settings), search trigger, user menu.
+- **Mobile (`<md`)**: Sticky top app bar via `widgets/mobile-topbar/` (brand + search icon) and bottom bar via `widgets/mobile-nav/` (Library, Journal, Profile).
 - **Settings**: Lives at `/settings/[section]`. `/settings` redirects to `/settings/profile`. Legacy `/profile/settings` redirects to `/settings/profile` (one-release deep-link preservation).
 - `CommandPaletteProvider` is mounted once in `app/(protected)/layout.tsx` and `app/games/layout.tsx`. The `⌘K` / `Ctrl+K` binding is registered in `features/command-palette/hooks/use-command-palette.ts`.
 

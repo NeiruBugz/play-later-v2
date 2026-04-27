@@ -32,7 +32,6 @@ test.describe("[shell] Desktop left rail", () => {
   const NAV_ITEMS = [
     { label: "Library", path: "/library" },
     { label: "Journal", path: "/journal" },
-    { label: "Timeline", path: "/timeline" },
     { label: "Profile", path: "/profile" },
     { label: "Settings", path: "/settings" },
   ];
@@ -150,7 +149,6 @@ test.describe("[shell] Mobile 4-tab nav", () => {
   const MOBILE_TABS = [
     { label: "Library", path: "/library" },
     { label: "Journal", path: "/journal" },
-    { label: "Timeline", path: "/timeline" },
     { label: "Profile", path: "/profile" },
   ];
 

@@ -3,7 +3,6 @@
 import {
   BookMarked,
   BookOpen,
-  Clock,
   LayoutGrid,
   Settings,
   User,
@@ -21,7 +20,6 @@ interface NavigationItem {
 const NAVIGATION_ITEMS: NavigationItem[] = [
   { label: "Library", href: "/library", icon: BookMarked },
   { label: "Journal", href: "/journal", icon: BookOpen },
-  { label: "Timeline", href: "/timeline", icon: Clock },
   { label: "Profile", href: "/profile", icon: User },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Dashboard", href: "/dashboard", icon: LayoutGrid },

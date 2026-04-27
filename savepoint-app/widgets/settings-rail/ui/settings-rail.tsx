@@ -13,6 +13,7 @@ type SettingsSection = {
 
 const SECTIONS: SettingsSection[] = [
   { href: "/settings/profile", label: "Profile", sublabel: "Avatar, username" },
+  { href: "/settings/connections", label: "Connected systems" },
   { href: "/settings/account", label: "Account" },
   // Future: danger-zone items (delete account, etc.) go here in a separate group
 ];

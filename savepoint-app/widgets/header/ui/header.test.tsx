@@ -38,9 +38,6 @@ describe("Header (mobile/unauth top-bar)", () => {
       screen.queryByRole("link", { name: /journal/i })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /timeline/i })
-    ).not.toBeInTheDocument();
-    expect(
       screen.queryByRole("link", { name: /profile/i })
     ).not.toBeInTheDocument();
   });

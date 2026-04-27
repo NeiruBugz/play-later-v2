@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { SettingsRail } from "@/features/profile";
+import { SettingsRail } from "@/widgets/settings-rail";
 import { Separator } from "@/shared/components/ui/separator";
 
 type SettingsLayoutProps = {
