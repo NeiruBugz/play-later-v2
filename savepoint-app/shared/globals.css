@@ -1185,24 +1185,28 @@
     font-weight: var(--font-weight-display);
   }
   .display-lg {
+    font-family: var(--font-display);
     font-size: var(--font-size-display-lg);
     line-height: var(--font-line-height-display-lg);
     letter-spacing: var(--font-letter-spacing-display-lg);
     font-weight: var(--font-weight-display);
   }
   .heading-xl {
+    font-family: var(--font-display);
     font-size: var(--font-size-heading-xl);
     line-height: var(--font-line-height-heading-xl);
     letter-spacing: var(--font-letter-spacing-heading-xl);
     font-weight: var(--font-weight-heading);
   }
   .heading-lg {
+    font-family: var(--font-display);
     font-size: var(--font-size-heading-lg);
     line-height: var(--font-line-height-heading-lg);
     letter-spacing: var(--font-letter-spacing-heading-lg);
     font-weight: var(--font-weight-heading);
   }
   .heading-md {
+    font-family: var(--font-display);
     font-size: var(--font-size-heading-md);
     line-height: var(--font-line-height-heading-md);
     letter-spacing: var(--font-letter-spacing-heading-md);
