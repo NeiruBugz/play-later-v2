@@ -205,6 +205,77 @@ const eslintConfig = [
       "testing-library/no-node-access": "error",
     },
   },
+  // Spec 014 (UI/UX audit v2) — Slice 11 typescale enforcement.
+  // Inside files migrated by Slices 1–10 + 5b, ban legacy heading-*/body-*
+  // utilities and arbitrary text-[NNpx] literals in string literals and
+  // template strings (covers JSX className and cn(...) arguments). Scoped to
+  // the touched-file globs only; out-of-scope pages may still use legacy
+  // utilities until they are migrated separately.
+  {
+    files: [
+      "app/(protected)/settings/layout.tsx",
+      "app/(protected)/settings/page.tsx",
+      "app/(protected)/settings/profile/page.tsx",
+      "app/(protected)/settings/account/page.tsx",
+      "app/(protected)/profile/settings/page.tsx",
+      "app/(protected)/layout.tsx",
+      "app/(protected)/_components/protected-layout-client.tsx",
+      "app/games/layout.tsx",
+      "app/games/_components/games-layout-client.tsx",
+      "app/games/[slug]/page.tsx",
+      "app/u/[username]/layout.tsx",
+      "widgets/sidebar/ui/sidebar.tsx",
+      "widgets/sidebar/ui/sidebar-search-trigger.tsx",
+      "widgets/sidebar/ui/sidebar-user-menu.tsx",
+      "widgets/header/ui/header.tsx",
+      "widgets/header/ui/header.test.tsx",
+      "widgets/mobile-topbar/ui/mobile-topbar.tsx",
+      "widgets/mobile-nav/ui/mobile-nav.tsx",
+      "features/command-palette/ui/desktop-command-palette.tsx",
+      "features/command-palette/ui/mobile-command-palette.tsx",
+      "features/command-palette/ui/palette-navigation-group.tsx",
+      "features/command-palette/ui/palette-quick-actions-group.tsx",
+      "features/onboarding/ui/empty-library-hero.tsx",
+      "features/game-detail/ui/game-detail-hero.tsx",
+      "features/game-detail/ui/library-status-segmented.tsx",
+      "features/game-detail/ui/library-status-dropdown-pill.tsx",
+      "shared/components/ui/segmented-control.tsx",
+      "features/journal/ui/journal-entry-detail.tsx",
+      "features/journal/ui/journal-timeline.tsx",
+      "features/journal/ui/journal-entry-card.tsx",
+      "features/profile/ui/profile-header.tsx",
+      "features/profile/ui/profile-tab-nav.tsx",
+      "widgets/settings-rail/ui/settings-rail.tsx",
+      "features/auth/ui/auth-page-view.tsx",
+    ],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "Literal[value=/\\b(heading-(xl|lg|md|sm|xs)|body-(lg|md|sm|xs)|display-(2xl|xl|lg))\\b/]",
+          message:
+            "Use semantic typescale aliases (text-display, text-h1, text-h2, text-h3, text-body, text-caption) — see shared/lib/typescale/typescale.md.",
+        },
+        {
+          selector:
+            "TemplateElement[value.raw=/\\b(heading-(xl|lg|md|sm|xs)|body-(lg|md|sm|xs)|display-(2xl|xl|lg))\\b/]",
+          message:
+            "Use semantic typescale aliases (text-display, text-h1, text-h2, text-h3, text-body, text-caption) — see shared/lib/typescale/typescale.md.",
+        },
+        {
+          selector: "Literal[value=/\\btext-\\[\\d+px\\]/]",
+          message:
+            "Avoid arbitrary text-[NNpx] literals — use the semantic typescale (text-display/h1/h2/h3/body/caption).",
+        },
+        {
+          selector: "TemplateElement[value.raw=/\\btext-\\[\\d+px\\]/]",
+          message:
+            "Avoid arbitrary text-[NNpx] literals — use the semantic typescale (text-display/h1/h2/h3/body/caption).",
+        },
+      ],
+    },
+  },
   {
     ignores: [
       "node_modules/**",

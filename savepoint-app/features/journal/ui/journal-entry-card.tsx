@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { GameCardCover } from "@/widgets/game-card";
 import type { JournalEntryDomain } from "@/features/journal/types";
-import { Badge } from "@/shared/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -12,7 +11,8 @@ import {
 import { formatRelativeDate } from "@/shared/lib/date";
 import { stripHtmlTags } from "@/shared/lib/rich-text";
 import { cn } from "@/shared/lib/ui/utils";
-import { JournalMood } from "@/shared/types";
+
+import { MOOD_LABELS } from "../lib/mood-labels";
 
 interface GameInfo {
   id: string;
@@ -24,16 +24,8 @@ interface GameInfo {
 interface JournalEntryCardProps {
   entry: JournalEntryDomain;
   game: GameInfo;
+  hideGameMetadata?: boolean;
 }
-
-const MOOD_LABELS: Record<JournalMood, string> = {
-  [JournalMood.EXCITED]: "Hyped",
-  [JournalMood.RELAXED]: "Chill",
-  [JournalMood.FRUSTRATED]: "Fried",
-  [JournalMood.ACCOMPLISHED]: "Proud",
-  [JournalMood.CURIOUS]: "Curious",
-  [JournalMood.NOSTALGIC]: "Nostalgic",
-};
 
 function getContentPreview(content: string, maxLength: number = 100): string {
   const plainText = stripHtmlTags(content);
@@ -51,7 +43,15 @@ function formatPlaytime(minutes: number): string {
   return `${hours}h ${remainder}m`;
 }
 
-function QuickEntryCard({ entry, game }: JournalEntryCardProps) {
+function sanitizeTag(tag: string): string {
+  return tag.replace(/^#+/, "");
+}
+
+function QuickEntryCard({
+  entry,
+  game,
+  hideGameMetadata,
+}: JournalEntryCardProps) {
   const plainNote = entry.content ? stripHtmlTags(entry.content).trim() : "";
   const hasPlaytime =
     entry.playedMinutes !== null && entry.playedMinutes !== undefined;
@@ -66,7 +66,7 @@ function QuickEntryCard({ entry, game }: JournalEntryCardProps) {
         )}
       >
         <CardContent className="p-md gap-md flex items-center">
-          {game.coverImage && (
+          {!hideGameMetadata && game.coverImage && (
             <GameCardCover
               imageId={game.coverImage}
               gameTitle={game.title}
@@ -77,34 +77,41 @@ function QuickEntryCard({ entry, game }: JournalEntryCardProps) {
             />
           )}
           <div className="min-w-0 flex-1">
+            {entry.mood && (
+              <p className="text-caption text-primary/70 mb-0.5 tracking-widest uppercase">
+                {MOOD_LABELS[entry.mood]}
+              </p>
+            )}
             <div className="flex items-baseline gap-2">
-              <span className="body-sm truncate font-medium">{game.title}</span>
-              {hasPlaytime && (
-                <span className="body-sm text-muted-foreground tabular-nums">
-                  · {formatPlaytime(entry.playedMinutes!)}
+              {!hideGameMetadata && (
+                <span className="text-caption truncate font-medium">
+                  {game.title}
                 </span>
               )}
-              <span className="body-sm text-muted-foreground ml-auto flex-shrink-0">
+              {hasPlaytime && (
+                <span className="text-caption text-muted-foreground tabular-nums">
+                  {hideGameMetadata ? "" : "· "}
+                  {formatPlaytime(entry.playedMinutes!)}
+                </span>
+              )}
+              <span className="text-caption text-muted-foreground ml-auto flex-shrink-0">
                 {formatRelativeDate(entry.updatedAt)}
               </span>
             </div>
             {plainNote && (
-              <p className="body-sm text-muted-foreground mt-1 line-clamp-1">
+              <p className="text-caption text-muted-foreground mt-1 line-clamp-1">
                 {plainNote}
               </p>
             )}
-            {(entry.mood || hasTags) && (
-              <div className="mt-1 flex flex-wrap items-center gap-1">
-                {entry.mood && (
-                  <Badge variant="secondary" className="text-xs">
-                    {MOOD_LABELS[entry.mood]}
-                  </Badge>
-                )}
+            {hasTags && (
+              <div className="mt-2 flex flex-wrap gap-1">
                 {entry.tags.slice(0, 3).map((tag) => (
                   <span
                     key={tag}
-                    className="text-muted-foreground text-xs"
-                  >{`#${tag}`}</span>
+                    className="text-caption border-border text-muted-foreground rounded border bg-transparent px-2 py-0.5"
+                  >
+                    {sanitizeTag(tag)}
+                  </span>
                 ))}
               </div>
             )}
@@ -115,21 +122,31 @@ function QuickEntryCard({ entry, game }: JournalEntryCardProps) {
   );
 }
 
-export function JournalEntryCard({ entry, game }: JournalEntryCardProps) {
+export function JournalEntryCard({
+  entry,
+  game,
+  hideGameMetadata,
+}: JournalEntryCardProps) {
   if (entry.kind === "QUICK") {
-    return <QuickEntryCard entry={entry} game={game} />;
+    return (
+      <QuickEntryCard
+        entry={entry}
+        game={game}
+        hideGameMetadata={hideGameMetadata}
+      />
+    );
   }
 
   const displayTitle = entry.title || "Untitled Entry";
   const contentPreview = getContentPreview(entry.content, 100);
+  const hasTags = entry.tags.length > 0;
 
   return (
     <Link href={`/journal/${entry.id}`} className="block">
       <Card className="cursor-pointer transition-shadow hover:shadow-md">
         <CardContent className="p-lg">
           <div className="gap-lg flex">
-            {/* Game Cover Image */}
-            {game.coverImage && (
+            {!hideGameMetadata && game.coverImage && (
               <div className="flex-shrink-0">
                 <GameCardCover
                   imageId={game.coverImage}
@@ -142,34 +159,43 @@ export function JournalEntryCard({ entry, game }: JournalEntryCardProps) {
               </div>
             )}
 
-            {/* Entry Content */}
             <div className="space-y-md min-w-0 flex-1">
-              {/* Header */}
               <div className="space-y-xs">
+                {entry.mood && (
+                  <p className="text-caption text-primary/70 tracking-widest uppercase">
+                    {MOOD_LABELS[entry.mood]}
+                  </p>
+                )}
                 <CardTitle className="line-clamp-1 text-base">
                   {displayTitle}
                 </CardTitle>
-                <CardDescription className="caption">
+                <CardDescription className="text-caption">
                   {formatRelativeDate(entry.updatedAt)}
                 </CardDescription>
               </div>
 
-              {/* Content Preview */}
-              <p className="body-sm text-muted-foreground line-clamp-2">
+              <p className="text-body text-muted-foreground line-clamp-2">
                 {contentPreview}
               </p>
 
-              {/* Footer with Game Name and Mood */}
-              <div className="gap-md flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="body-sm truncate font-medium">{game.title}</p>
+              {!hideGameMetadata && (
+                <p className="text-caption truncate font-medium">
+                  {game.title}
+                </p>
+              )}
+
+              {hasTags && (
+                <div className="flex flex-wrap gap-1">
+                  {entry.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-caption border-border text-muted-foreground rounded border bg-transparent px-2 py-0.5"
+                    >
+                      {sanitizeTag(tag)}
+                    </span>
+                  ))}
                 </div>
-                {entry.mood && (
-                  <Badge variant="secondary" className="flex-shrink-0">
-                    {MOOD_LABELS[entry.mood]}
-                  </Badge>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </CardContent>

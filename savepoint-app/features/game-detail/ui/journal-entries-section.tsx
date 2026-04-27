@@ -6,13 +6,6 @@ import Link from "next/link";
 import { useJournalEntryDialog } from "@/features/journal/hooks";
 import { JournalEntryDialog } from "@/features/journal/ui/journal-entry-dialog";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 
 import type {
   JournalEntriesSectionProps,
@@ -27,78 +20,63 @@ function formatEntryDate(date: Date): string {
   });
 }
 
-function truncateToLines(text: string, maxLines: number): string {
-  const lines = text.split("\n").slice(0, maxLines);
-  const truncated = lines.join("\n");
-
-  const hasMore =
-    text.split("\n").length > maxLines || truncated.length < text.length;
-  return hasMore ? `${truncated}...` : truncated;
-}
-
-function JournalEntryCard({
+function JournalTimelineEntry({
   entry,
   isLast,
 }: JournalEntryCardProps & { isLast: boolean }) {
-  const contentPreview = truncateToLines(entry.content, 2);
   const displayTitle = entry.title || "Untitled Entry";
-  return (
-    <div className="gap-lg relative flex">
-      <div className="flex flex-col items-center">
-        <div className="bg-primary z-10 h-3 w-3 rounded-full" />
-        {!isLast && <div className="bg-border w-px flex-1" />}
-      </div>
-      <Link href={`/journal/${entry.id}`} className="mb-lg -mt-1 block flex-1">
-        <Card className="cursor-pointer transition-shadow hover:shadow-md">
-          <CardHeader className="pb-sm">
-            <CardTitle className="heading-xs line-clamp-1">
-              {displayTitle}
-            </CardTitle>
-            <CardDescription className="caption">
-              {formatEntryDate(entry.createdAt)}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="body-sm text-muted-foreground line-clamp-2">
-              {contentPreview}
-            </p>
-          </CardContent>
-        </Card>
-      </Link>
-    </div>
-  );
-}
+  const snippet = entry.content?.trim() || "";
+  const hasDuration = entry.playedMinutes && entry.playedMinutes > 0;
+  const durationLabel = hasDuration
+    ? entry.playedMinutes! < 60
+      ? `${entry.playedMinutes} min`
+      : `${(entry.playedMinutes! / 60).toFixed(1)} hrs`
+    : null;
 
-function EmptyState({
-  onLogSession,
-  gameId,
-}: {
-  onLogSession: () => void;
-  gameId: string;
-}) {
   return (
-    <div className="bg-muted/30 gap-lg p-2xl flex flex-col items-center rounded-lg border border-dashed text-center">
-      <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-full">
-        <PenLine className="text-primary h-6 w-6" />
+    <div className="relative flex gap-4">
+      <div className="flex flex-col items-center">
+        <div className="bg-primary ring-background z-10 mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ring-2" />
+        {!isLast && <div className="bg-border mt-1 w-0.5 flex-1" />}
       </div>
-      <div className="space-y-xs">
-        <p className="body-md font-medium">Log your first session</p>
-        <p className="body-sm text-muted-foreground">
-          Playtime is enough. A thought is optional. Reflections come later.
+      <Link
+        href={`/journal/${entry.id}`}
+        className="mb-6 block min-w-0 flex-1 pb-0.5 transition-opacity hover:opacity-80"
+      >
+        <p className="text-caption text-muted-foreground mb-1.5 font-mono">
+          {formatEntryDate(entry.createdAt)}
         </p>
-      </div>
-      <div className="gap-md flex flex-wrap items-center justify-center">
-        <Button onClick={onLogSession}>
-          <Plus className="mr-1 h-4 w-4" aria-hidden />
-          Log session
-        </Button>
-        <Button asChild variant="outline">
-          <Link href={`/journal/new?gameId=${gameId}`}>
-            <PenLine className="mr-1 h-4 w-4" aria-hidden />
-            Reflect
-          </Link>
-        </Button>
-      </div>
+        <p className="text-body mb-1 leading-snug font-semibold">
+          {displayTitle}
+        </p>
+        {snippet && (
+          <p className="text-caption text-muted-foreground mb-1.5 line-clamp-2 leading-relaxed">
+            {snippet}
+          </p>
+        )}
+        {(durationLabel || entry.mood) && (
+          <div className="text-caption text-muted-foreground flex items-center gap-2.5">
+            {durationLabel && (
+              <span className="flex items-center gap-1">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-3 w-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  aria-hidden
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+                {durationLabel}
+              </span>
+            )}
+            {entry.mood && <span>Mood · {entry.mood.toLowerCase()}</span>}
+          </div>
+        )}
+      </Link>
     </div>
   );
 }
@@ -113,46 +91,40 @@ export function JournalEntriesSection({
 
   return (
     <>
-      <section
-        className="animate-fade-in space-y-xl"
-        aria-labelledby="journal-heading"
-      >
-        <div className="flex items-center justify-between">
-          <h2 id="journal-heading" className="heading-md font-semibold">
+      <section id="journal" aria-labelledby="journal-heading">
+        <div className="mb-4 flex items-baseline justify-between gap-4">
+          <h2 id="journal-heading" className="text-h2 whitespace-nowrap">
             Your Journal
           </h2>
-          {hasEntries && (
-            <div className="gap-sm flex items-center">
-              <Button size="sm" onClick={dialog.open}>
-                <Plus className="mr-1 h-4 w-4" aria-hidden />
-                Log
-              </Button>
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/journal/new?gameId=${gameId}`}>
-                  <PenLine className="mr-1 h-4 w-4" aria-hidden />
-                  Reflect
-                </Link>
-              </Button>
-            </div>
-          )}
+          <div className="flex shrink-0 gap-2">
+            <Button size="sm" onClick={dialog.open}>
+              <Plus className="mr-1 h-3.5 w-3.5" aria-hidden />
+              Log session
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/journal/new?gameId=${gameId}`}>
+                <PenLine className="mr-1 h-3.5 w-3.5" aria-hidden />
+                Reflect
+              </Link>
+            </Button>
+          </div>
         </div>
+
         {hasEntries ? (
-          <div className="pl-xs">
+          <div className="relative pl-[18px]">
+            <div className="bg-border absolute top-1.5 bottom-1.5 left-1 w-0.5" />
             {journalEntries.map((entry, index) => (
-              <div
+              <JournalTimelineEntry
                 key={entry.id}
-                className="animate-stagger-in"
-                style={{ animationDelay: `${(index + 1) * 50}ms` }}
-              >
-                <JournalEntryCard
-                  entry={entry}
-                  isLast={index === journalEntries.length - 1}
-                />
-              </div>
+                entry={entry}
+                isLast={index === journalEntries.length - 1}
+              />
             ))}
           </div>
         ) : (
-          <EmptyState onLogSession={dialog.open} gameId={gameId} />
+          <p className="text-caption text-muted-foreground py-4">
+            No entries yet — log your first session above.
+          </p>
         )}
       </section>
 

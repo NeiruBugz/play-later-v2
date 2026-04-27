@@ -102,7 +102,9 @@ describe("DesktopCommandPalette", () => {
     const onClose = vi.fn();
     render(<DesktopCommandPalette isOpen={true} onClose={onClose} />);
 
-    const input = screen.getByPlaceholderText("Search all games to add...");
+    const input = screen.getByPlaceholderText(
+      "Search games, jump to a page, or run a quick action..."
+    );
     await userEvent.type(input, "had");
 
     await waitFor(() => {
@@ -123,7 +125,9 @@ describe("DesktopCommandPalette", () => {
     const onClose = vi.fn();
     render(<DesktopCommandPalette isOpen={true} onClose={onClose} />);
 
-    const input = screen.getByPlaceholderText("Search all games to add...");
+    const input = screen.getByPlaceholderText(
+      "Search games, jump to a page, or run a quick action..."
+    );
     await userEvent.type(input, "had");
 
     await waitFor(() => {
@@ -151,7 +155,9 @@ describe("DesktopCommandPalette", () => {
 
     render(<DesktopCommandPalette isOpen={true} onClose={vi.fn()} />);
 
-    const input = screen.getByPlaceholderText("Search all games to add...");
+    const input = screen.getByPlaceholderText(
+      "Search games, jump to a page, or run a quick action..."
+    );
     await userEvent.type(input, "had");
 
     await waitFor(() => {
@@ -180,7 +186,9 @@ describe("DesktopCommandPalette", () => {
     const onClose = vi.fn();
     render(<DesktopCommandPalette isOpen={true} onClose={onClose} />);
 
-    const input = screen.getByPlaceholderText("Search all games to add...");
+    const input = screen.getByPlaceholderText(
+      "Search games, jump to a page, or run a quick action..."
+    );
     await userEvent.type(input, "had");
 
     await waitFor(() => {

@@ -106,12 +106,12 @@ describe("getProfilePageData", () => {
       });
     });
 
-    it("should return full profile data including email", async () => {
+    it("should NOT include email in the returned profile — email never serialized to public DTO", async () => {
       const result = await getProfilePageData(USERNAME, PROFILE_USER_ID);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.profile.email).toBe("gamer@example.com");
+        expect("email" in result.data.profile).toBe(false);
       }
     });
 
@@ -230,7 +230,7 @@ describe("getProfilePageData", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.profile.email).toBeUndefined();
+        expect("email" in result.data.profile).toBe(false);
       }
     });
 
@@ -321,7 +321,7 @@ describe("getProfilePageData", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.profile.email).toBeUndefined();
+        expect("email" in result.data.profile).toBe(false);
       }
     });
 
@@ -432,7 +432,7 @@ describe("getProfilePageData", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.profile.email).toBeUndefined();
+        expect("email" in result.data.profile).toBe(false);
       }
     });
 
@@ -523,12 +523,12 @@ describe("getProfilePageData", () => {
       }
     });
 
-    it("should include email for owner on their own private profile", async () => {
+    it("should NOT include email even for owner — email never serialized to profile DTO", async () => {
       const result = await getProfilePageData(USERNAME, PROFILE_USER_ID);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.profile.email).toBe("gamer@example.com");
+        expect("email" in result.data.profile).toBe(false);
       }
     });
 
@@ -545,6 +545,84 @@ describe("getProfilePageData", () => {
       await getProfilePageData(USERNAME, PROFILE_USER_ID);
 
       expect(mockSocialService.isFollowing).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("email exclusion invariant — all code paths", () => {
+    it("should never include email in profile for owner (public profile)", async () => {
+      mockProfileService.getProfileWithStats.mockResolvedValue({
+        success: true,
+        data: { profile: baseProfileWithStats },
+      });
+
+      const result = await getProfilePageData(USERNAME, PROFILE_USER_ID);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(Object.keys(result.data.profile)).not.toContain("email");
+      }
+    });
+
+    it("should never include email in profile for visitor (public profile)", async () => {
+      mockProfileService.getPublicProfile.mockResolvedValue({
+        success: true,
+        data: {
+          profile: {
+            id: PROFILE_USER_ID,
+            username: USERNAME,
+            name: "Gamer User",
+            image: null,
+            gameCount: 5,
+            libraryPreview: [],
+            isPublicProfile: true,
+            createdAt: baseProfileWithStats.createdAt,
+          },
+        },
+      });
+      mockProfileService.getProfileWithStats.mockResolvedValue({
+        success: true,
+        data: { profile: baseProfileWithStats },
+      });
+      mockSocialService.isFollowing.mockResolvedValue({
+        success: true,
+        data: false,
+      });
+
+      const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(Object.keys(result.data.profile)).not.toContain("email");
+      }
+    });
+
+    it("should never include email in profile for unauthenticated visitor", async () => {
+      mockProfileService.getPublicProfile.mockResolvedValue({
+        success: true,
+        data: {
+          profile: {
+            id: PROFILE_USER_ID,
+            username: USERNAME,
+            name: "Gamer User",
+            image: null,
+            gameCount: 5,
+            libraryPreview: [],
+            isPublicProfile: true,
+            createdAt: baseProfileWithStats.createdAt,
+          },
+        },
+      });
+      mockProfileService.getProfileWithStats.mockResolvedValue({
+        success: true,
+        data: { profile: baseProfileWithStats },
+      });
+
+      const result = await getProfilePageData(USERNAME);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(Object.keys(result.data.profile)).not.toContain("email");
+      }
     });
   });
 

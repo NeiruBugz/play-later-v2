@@ -173,40 +173,6 @@ export default async function Page() {
           </div>
         </div>
       </section>
-      <section className="bg-muted/30 py-5xl">
-        <div className="px-lg container mx-auto">
-          <div className="mx-auto max-w-6xl">
-            <div className="gap-4xl grid items-center md:grid-cols-2">
-              <div className="space-y-2xl">
-                <h2 className="display-lg font-semibold text-balance">
-                  Your Gaming Memories Timeline
-                </h2>
-                <p className="body-lg text-muted-foreground">
-                  View your gaming journey chronologically. See how your tastes
-                  evolved, revisit cherished memories, and reflect on the worlds
-                  you&apos;ve explored.
-                </p>
-                <Button
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                  asChild
-                >
-                  <Link href="/login">Explore Timeline</Link>
-                </Button>
-              </div>
-              <div className="from-primary/20 to-secondary/20 relative aspect-4/3 overflow-hidden rounded-lg bg-linear-to-br">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="space-y-md text-center">
-                    <BookOpen className="text-primary mx-auto h-16 w-16 opacity-50" />
-                    <p className="body-sm text-muted-foreground">
-                      Timeline Preview
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
       <section className="py-5xl">
         <div className="px-lg container mx-auto">
           <div className="space-y-3xl mx-auto max-w-3xl text-center">

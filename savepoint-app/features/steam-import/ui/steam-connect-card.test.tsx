@@ -18,7 +18,7 @@ const mockReplace = vi.fn();
 vi.mock("next/navigation", () => ({
   useSearchParams: () => mockUseSearchParams(),
   useRouter: () => ({ replace: mockReplace }),
-  usePathname: () => "/profile/settings",
+  usePathname: () => "/settings/profile",
 }));
 
 vi.mock("sonner", () => ({

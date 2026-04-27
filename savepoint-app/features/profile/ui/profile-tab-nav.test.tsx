@@ -3,9 +3,11 @@ import { render, screen } from "@testing-library/react";
 import { ProfileTabNav } from "./profile-tab-nav";
 
 const mockUsePathname = vi.fn();
+const mockPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => mockUsePathname(),
+  useRouter: () => ({ push: mockPush }),
 }));
 
 function renderTabNav(username = "gamer42") {
@@ -17,75 +19,35 @@ describe("ProfileTabNav", () => {
     vi.clearAllMocks();
   });
 
-  describe("link rendering", () => {
+  describe("tab rendering", () => {
     beforeEach(() => {
       mockUsePathname.mockReturnValue("/u/gamer42");
     });
 
-    it("renders an Overview link", () => {
+    it("renders an Overview tab", () => {
+      renderTabNav();
+
+      expect(screen.getByRole("tab", { name: "Overview" })).toBeInTheDocument();
+    });
+
+    it("renders a Library tab", () => {
+      renderTabNav();
+
+      expect(screen.getByRole("tab", { name: "Library" })).toBeInTheDocument();
+    });
+
+    it("renders an Activity tab", () => {
+      renderTabNav();
+
+      expect(screen.getByRole("tab", { name: "Activity" })).toBeInTheDocument();
+    });
+
+    it("renders inside a nav landmark with label 'Profile sections'", () => {
       renderTabNav();
 
       expect(
-        screen.getByRole("link", { name: "Overview" })
+        screen.getByRole("navigation", { name: "Profile sections" })
       ).toBeInTheDocument();
-    });
-
-    it("renders a Library link", () => {
-      renderTabNav();
-
-      expect(screen.getByRole("link", { name: "Library" })).toBeInTheDocument();
-    });
-
-    it("renders an Activity link", () => {
-      renderTabNav();
-
-      expect(
-        screen.getByRole("link", { name: "Activity" })
-      ).toBeInTheDocument();
-    });
-
-    it("Overview link href points to /u/{username}", () => {
-      renderTabNav();
-
-      expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute(
-        "href",
-        "/u/gamer42"
-      );
-    });
-
-    it("Library link href points to /u/{username}/library", () => {
-      renderTabNav();
-
-      expect(screen.getByRole("link", { name: "Library" })).toHaveAttribute(
-        "href",
-        "/u/gamer42/library"
-      );
-    });
-
-    it("Activity link href points to /u/{username}/activity", () => {
-      renderTabNav();
-
-      expect(screen.getByRole("link", { name: "Activity" })).toHaveAttribute(
-        "href",
-        "/u/gamer42/activity"
-      );
-    });
-
-    it("uses the provided username in all hrefs", () => {
-      renderTabNav("streamer99");
-
-      expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute(
-        "href",
-        "/u/streamer99"
-      );
-      expect(screen.getByRole("link", { name: "Library" })).toHaveAttribute(
-        "href",
-        "/u/streamer99/library"
-      );
-      expect(screen.getByRole("link", { name: "Activity" })).toHaveAttribute(
-        "href",
-        "/u/streamer99/activity"
-      );
     });
   });
 
@@ -94,30 +56,31 @@ describe("ProfileTabNav", () => {
       mockUsePathname.mockReturnValue("/u/gamer42");
     });
 
-    it("marks the Overview link as active when pathname is /u/{username}", () => {
+    it("marks the Overview tab as active when pathname is /u/{username}", () => {
       renderTabNav();
 
-      expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute(
+      expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute(
         "aria-current",
         "page"
       );
     });
 
-    it("does not mark the Library link as active when pathname is /u/{username}", () => {
+    it("does not mark the Library tab as active when pathname is /u/{username}", () => {
       renderTabNav();
 
-      expect(screen.getByRole("link", { name: "Library" })).not.toHaveAttribute(
+      expect(screen.getByRole("tab", { name: "Library" })).not.toHaveAttribute(
         "aria-current",
         "page"
       );
     });
 
-    it("does not mark the Activity link as active when pathname is /u/{username}", () => {
+    it("does not mark the Activity tab as active when pathname is /u/{username}", () => {
       renderTabNav();
 
-      expect(
-        screen.getByRole("link", { name: "Activity" })
-      ).not.toHaveAttribute("aria-current", "page");
+      expect(screen.getByRole("tab", { name: "Activity" })).not.toHaveAttribute(
+        "aria-current",
+        "page"
+      );
     });
   });
 
@@ -126,29 +89,31 @@ describe("ProfileTabNav", () => {
       mockUsePathname.mockReturnValue("/u/gamer42/library");
     });
 
-    it("marks the Library link as active when pathname is /u/{username}/library", () => {
+    it("marks the Library tab as active when pathname is /u/{username}/library", () => {
       renderTabNav();
 
-      expect(screen.getByRole("link", { name: "Library" })).toHaveAttribute(
+      expect(screen.getByRole("tab", { name: "Library" })).toHaveAttribute(
         "aria-current",
         "page"
       );
     });
 
-    it("does not mark the Overview link as active when pathname is /u/{username}/library", () => {
+    it("does not mark the Overview tab as active when pathname is /u/{username}/library", () => {
       renderTabNav();
 
-      expect(
-        screen.getByRole("link", { name: "Overview" })
-      ).not.toHaveAttribute("aria-current", "page");
+      expect(screen.getByRole("tab", { name: "Overview" })).not.toHaveAttribute(
+        "aria-current",
+        "page"
+      );
     });
 
-    it("does not mark the Activity link as active when pathname is /u/{username}/library", () => {
+    it("does not mark the Activity tab as active when pathname is /u/{username}/library", () => {
       renderTabNav();
 
-      expect(
-        screen.getByRole("link", { name: "Activity" })
-      ).not.toHaveAttribute("aria-current", "page");
+      expect(screen.getByRole("tab", { name: "Activity" })).not.toHaveAttribute(
+        "aria-current",
+        "page"
+      );
     });
   });
 
@@ -157,30 +122,54 @@ describe("ProfileTabNav", () => {
       mockUsePathname.mockReturnValue("/u/gamer42/activity");
     });
 
-    it("marks the Activity link as active when pathname is /u/{username}/activity", () => {
+    it("marks the Activity tab as active when pathname is /u/{username}/activity", () => {
       renderTabNav();
 
-      expect(screen.getByRole("link", { name: "Activity" })).toHaveAttribute(
+      expect(screen.getByRole("tab", { name: "Activity" })).toHaveAttribute(
         "aria-current",
         "page"
       );
     });
 
-    it("does not mark the Overview link as active when pathname is /u/{username}/activity", () => {
+    it("does not mark the Overview tab as active when pathname is /u/{username}/activity", () => {
       renderTabNav();
 
-      expect(
-        screen.getByRole("link", { name: "Overview" })
-      ).not.toHaveAttribute("aria-current", "page");
-    });
-
-    it("does not mark the Library link as active when pathname is /u/{username}/activity", () => {
-      renderTabNav();
-
-      expect(screen.getByRole("link", { name: "Library" })).not.toHaveAttribute(
+      expect(screen.getByRole("tab", { name: "Overview" })).not.toHaveAttribute(
         "aria-current",
         "page"
       );
+    });
+
+    it("does not mark the Library tab as active when pathname is /u/{username}/activity", () => {
+      renderTabNav();
+
+      expect(screen.getByRole("tab", { name: "Library" })).not.toHaveAttribute(
+        "aria-current",
+        "page"
+      );
+    });
+  });
+
+  describe("username in tab values", () => {
+    beforeEach(() => {
+      mockUsePathname.mockReturnValue("/u/streamer99");
+    });
+
+    it("marks the Overview tab active for the given username", () => {
+      renderTabNav("streamer99");
+
+      expect(screen.getByRole("tab", { name: "Overview" })).toHaveAttribute(
+        "aria-current",
+        "page"
+      );
+    });
+
+    it("renders all three tabs for a different username", () => {
+      renderTabNav("streamer99");
+
+      expect(screen.getByRole("tab", { name: "Overview" })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: "Library" })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: "Activity" })).toBeInTheDocument();
     });
   });
 });

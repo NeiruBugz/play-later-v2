@@ -2,14 +2,13 @@
 
 import { Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Drawer } from "vaul";
 
 import { useGameSearch } from "@/features/game-search/hooks/use-game-search";
 import { Button } from "@/shared/components/ui/button";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandList,
@@ -24,12 +23,15 @@ import type {
   RecentGameItem,
 } from "./command-palette.types";
 import { GameResultItem } from "./game-result-item";
+import { PaletteNavigationGroup } from "./palette-navigation-group";
+import { PaletteQuickActionsGroup } from "./palette-quick-actions-group";
 
 export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [recentGames, setRecentGames] = useState<RecentGameItem[]>([]);
   const [isLoadingRecent, setIsLoadingRecent] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const debouncedQuery = useDebouncedValue(query, 300);
   const shouldSearch = debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
@@ -74,6 +76,15 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     closeAndReset();
   };
 
+  const handleNavigate = (href: string) => {
+    router.push(href);
+    closeAndReset();
+  };
+
+  const handleFocusSearch = () => {
+    inputRef.current?.focus();
+  };
+
   const searchResults =
     data?.pages.flatMap((page) =>
       page.games.map((game) => ({
@@ -92,6 +103,11 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
     if (!open) closeAndReset();
   };
 
+  const showEmptyHint =
+    !shouldSearch && !isLoadingRecent && recentGames.length === 0;
+  const showNoResults =
+    shouldSearch && !isLoading && searchResults.length === 0 && !error;
+
   return (
     <Drawer.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Drawer.Portal>
@@ -100,8 +116,8 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           <div className="mt-lg bg-muted mx-auto h-1.5 w-12 shrink-0 rounded-full" />
 
           <div className="border-border px-lg pb-md pt-sm flex items-center justify-between border-b">
-            <Drawer.Title className="text-base font-semibold">
-              Search Games
+            <Drawer.Title className="text-body font-semibold">
+              Command palette
             </Drawer.Title>
             <Button
               variant="ghost"
@@ -120,7 +136,8 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
           >
             <div className="px-lg pt-md pb-md shrink-0">
               <CommandInput
-                placeholder="Search all games to add..."
+                ref={inputRef}
+                placeholder="Search games, jump to a page, or run a quick action..."
                 value={query}
                 onValueChange={setQuery}
                 autoFocus
@@ -134,13 +151,31 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
               )}
 
               {error && shouldSearch && (
-                <CommandEmpty>
+                <div className="py-2xl text-caption text-muted-foreground text-center">
                   Failed to search games. Please try again.
-                </CommandEmpty>
+                </div>
+              )}
+
+              {shouldSearch && !isLoading && searchResults.length > 0 && (
+                <CommandGroup heading="Games">
+                  {searchResults.map((game) => (
+                    <GameResultItem
+                      key={game.id}
+                      game={game}
+                      showAddHint
+                      onSelect={() =>
+                        quickAdd({
+                          igdbId: Number(game.id),
+                          gameName: game.name,
+                        })
+                      }
+                    />
+                  ))}
+                </CommandGroup>
               )}
 
               {!shouldSearch && !isLoadingRecent && recentGames.length > 0 && (
-                <CommandGroup heading="Recent Games">
+                <CommandGroup heading="Games">
                   {recentGames.map((game) => (
                     <GameResultItem
                       key={game.id}
@@ -158,40 +193,28 @@ export function MobileCommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                 </CommandGroup>
               )}
 
-              {!shouldSearch &&
-                !isLoadingRecent &&
-                recentGames.length === 0 && (
-                  <CommandEmpty>
-                    Start typing to search for games...
-                  </CommandEmpty>
-                )}
+              <PaletteNavigationGroup
+                query={query}
+                onNavigate={handleNavigate}
+              />
 
-              {shouldSearch && !isLoading && searchResults.length > 0 && (
-                <CommandGroup heading="Search Results">
-                  {searchResults.map((game) => (
-                    <GameResultItem
-                      key={game.id}
-                      game={game}
-                      showAddHint
-                      onSelect={() =>
-                        quickAdd({
-                          igdbId: Number(game.id),
-                          gameName: game.name,
-                        })
-                      }
-                    />
-                  ))}
-                </CommandGroup>
+              <PaletteQuickActionsGroup
+                query={query}
+                onNavigate={handleNavigate}
+                onFocusSearch={handleFocusSearch}
+              />
+
+              {showNoResults && (
+                <div className="py-2xl text-caption text-muted-foreground text-center">
+                  No games found for &quot;{query}&quot;
+                </div>
               )}
 
-              {shouldSearch &&
-                !isLoading &&
-                searchResults.length === 0 &&
-                !error && (
-                  <CommandEmpty>
-                    No games found for &quot;{query}&quot;
-                  </CommandEmpty>
-                )}
+              {showEmptyHint && (
+                <div className="py-2xl text-caption text-muted-foreground text-center">
+                  Start typing to search for games...
+                </div>
+              )}
             </CommandList>
           </Command>
         </Drawer.Content>

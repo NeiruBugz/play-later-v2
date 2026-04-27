@@ -168,7 +168,7 @@ describe("OnboardingService", () => {
           const setupProfile = result.data.steps.find(
             (s) => s.id === "setup-profile"
           );
-          expect(setupProfile?.actionUrl).toBe("/profile/settings");
+          expect(setupProfile?.actionUrl).toBe("/settings/profile");
           expect(setupProfile?.actionLabel).toBe("Edit profile");
 
           const addGame = result.data.steps.find(

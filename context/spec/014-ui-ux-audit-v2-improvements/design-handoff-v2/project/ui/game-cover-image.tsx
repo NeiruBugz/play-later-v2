@@ -1,0 +1,61 @@
+"use client";
+
+import { Gamepad2 } from "lucide-react";
+import Image from "next/image";
+
+import { cn } from "@/shared/lib/ui/utils";
+
+import type { GameCoverImageProps } from "./game-cover-image.types";
+
+export const GameCoverImage = ({
+  imageId,
+  gameTitle,
+  className,
+  style,
+}: GameCoverImageProps) => {
+  const hasCover = imageId && imageId.trim() !== "";
+
+  if (!hasCover) {
+    return (
+      <div
+        className={cn(
+          "group bg-muted gap-md relative flex aspect-[3/4] w-full max-w-sm flex-col items-center justify-center overflow-hidden rounded-lg",
+          className
+        )}
+        aria-label="No cover image available"
+        data-testid="game-cover-placeholder"
+        style={style}
+      >
+        <Gamepad2
+          className="text-muted-foreground h-16 w-16"
+          data-testid="game-cover-icon"
+        />
+        <p className="text-muted-foreground text-sm font-medium">
+          No cover available
+        </p>
+      </div>
+    );
+  }
+
+  const imageUrl = `https://images.igdb.com/igdb/image/upload/t_cover_big_2x/${imageId}.jpg`;
+  return (
+    <div
+      className={cn(
+        "group relative aspect-[3/4] w-full max-w-sm overflow-hidden rounded-lg",
+        className
+      )}
+      data-testid="game-cover-image"
+      style={style}
+    >
+      <Image
+        src={imageUrl}
+        alt={`${gameTitle} cover`}
+        fill
+        className="object-cover"
+        priority
+        fetchPriority="high"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 384px"
+      />
+    </div>
+  );
+};

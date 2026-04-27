@@ -40,7 +40,7 @@ export function Providers({
   return (
     <NextThemesProvider
       {...props}
-      themes={["light", "dark", "y2k", "jewel", "system"]}
+      themes={["light", "dark", "cartridge", "aurora", "system"]}
     >
       <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={false}>
         <QueryClientProvider client={queryClient}>

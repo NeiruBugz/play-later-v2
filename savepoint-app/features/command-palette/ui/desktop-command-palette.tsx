@@ -2,17 +2,21 @@
 
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useGameSearch } from "@/features/game-search/hooks/use-game-search";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandList,
 } from "@/shared/components/ui/command";
-import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import { MIN_SEARCH_QUERY_LENGTH } from "@/shared/constants";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 
@@ -23,6 +27,8 @@ import type {
   RecentGameItem,
 } from "./command-palette.types";
 import { GameResultItem } from "./game-result-item";
+import { PaletteNavigationGroup } from "./palette-navigation-group";
+import { PaletteQuickActionsGroup } from "./palette-quick-actions-group";
 
 export function DesktopCommandPalette({
   isOpen,
@@ -32,6 +38,7 @@ export function DesktopCommandPalette({
   const [query, setQuery] = useState("");
   const [recentGames, setRecentGames] = useState<RecentGameItem[]>([]);
   const [isLoadingRecent, setIsLoadingRecent] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const debouncedQuery = useDebouncedValue(query, 300);
   const shouldSearch = debouncedQuery.length >= MIN_SEARCH_QUERY_LENGTH;
@@ -76,6 +83,15 @@ export function DesktopCommandPalette({
     closeAndReset();
   };
 
+  const handleNavigate = (href: string) => {
+    router.push(href);
+    closeAndReset();
+  };
+
+  const handleFocusSearch = () => {
+    inputRef.current?.focus();
+  };
+
   const searchResults =
     data?.pages.flatMap((page) =>
       page.games.map((game) => ({
@@ -94,12 +110,22 @@ export function DesktopCommandPalette({
     if (!open) closeAndReset();
   };
 
+  const showEmptyHint =
+    !shouldSearch && !isLoadingRecent && recentGames.length === 0;
+  const showNoResults =
+    shouldSearch && !isLoading && searchResults.length === 0 && !error;
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl gap-0 p-0">
+        <DialogTitle className="sr-only">Command palette</DialogTitle>
+        <DialogDescription className="sr-only">
+          Search games, jump to a page, or run a quick action.
+        </DialogDescription>
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search all games to add..."
+            ref={inputRef}
+            placeholder="Search games, jump to a page, or run a quick action..."
             value={query}
             onValueChange={setQuery}
           />
@@ -111,13 +137,31 @@ export function DesktopCommandPalette({
             )}
 
             {error && shouldSearch && (
-              <CommandEmpty>
+              <div className="py-2xl text-caption text-muted-foreground text-center">
                 Failed to search games. Please try again.
-              </CommandEmpty>
+              </div>
+            )}
+
+            {shouldSearch && !isLoading && searchResults.length > 0 && (
+              <CommandGroup heading="Games">
+                {searchResults.map((game) => (
+                  <GameResultItem
+                    key={game.id}
+                    game={game}
+                    showAddHint
+                    onSelect={() =>
+                      quickAdd({
+                        igdbId: Number(game.id),
+                        gameName: game.name,
+                      })
+                    }
+                  />
+                ))}
+              </CommandGroup>
             )}
 
             {!shouldSearch && !isLoadingRecent && recentGames.length > 0 && (
-              <CommandGroup heading="Recent Games">
+              <CommandGroup heading="Games">
                 {recentGames.map((game) => (
                   <GameResultItem
                     key={game.id}
@@ -135,36 +179,25 @@ export function DesktopCommandPalette({
               </CommandGroup>
             )}
 
-            {!shouldSearch && !isLoadingRecent && recentGames.length === 0 && (
-              <CommandEmpty>Start typing to search for games...</CommandEmpty>
+            <PaletteNavigationGroup query={query} onNavigate={handleNavigate} />
+
+            <PaletteQuickActionsGroup
+              query={query}
+              onNavigate={handleNavigate}
+              onFocusSearch={handleFocusSearch}
+            />
+
+            {showNoResults && (
+              <div className="py-2xl text-caption text-muted-foreground text-center">
+                No games found for &ldquo;{query}&rdquo;
+              </div>
             )}
 
-            {shouldSearch && !isLoading && searchResults.length > 0 && (
-              <CommandGroup heading="Search Results">
-                {searchResults.map((game) => (
-                  <GameResultItem
-                    key={game.id}
-                    game={game}
-                    showAddHint
-                    onSelect={() =>
-                      quickAdd({
-                        igdbId: Number(game.id),
-                        gameName: game.name,
-                      })
-                    }
-                  />
-                ))}
-              </CommandGroup>
+            {showEmptyHint && (
+              <div className="py-2xl text-caption text-muted-foreground text-center">
+                Start typing to search for games...
+              </div>
             )}
-
-            {shouldSearch &&
-              !isLoading &&
-              searchResults.length === 0 &&
-              !error && (
-                <CommandEmpty>
-                  No games found for &ldquo;{query}&rdquo;
-                </CommandEmpty>
-              )}
           </CommandList>
         </Command>
       </DialogContent>

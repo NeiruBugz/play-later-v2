@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SavePoint UI/UX Audit — Comprehensive Analysis</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js" crossorigin="anonymous"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: oklch(0.985 0.002 260);
+      --fg: oklch(0.15 0.01 260);
+      --card: oklch(1 0 0);
+      --card-border: oklch(0.9 0.005 260);
+      --muted: oklch(0.45 0.01 260);
+      --primary: oklch(0.62 0.16 172);
+      --primary-fg: oklch(0.99 0.002 175);
+      --success: oklch(0.6 0.16 145);
+      --warning: oklch(0.75 0.15 75);
+      --error: oklch(0.55 0.2 25);
+      --shadow: 0 2px 8px oklch(0 0 0 / 0.06);
+      --shadow-lg: 0 8px 24px oklch(0 0 0 / 0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: oklch(0.155 0.007 260);
+        --fg: oklch(0.93 0.005 250);
+        --card: oklch(0.18 0.007 260);
+        --card-border: oklch(0.24 0.008 250);
+        --muted: oklch(0.6 0.005 250);
+        --primary: oklch(0.69 0.17 172);
+        --primary-fg: oklch(0.12 0.01 175);
+        --shadow: 0 2px 12px oklch(0 0 0 / 0.45);
+        --shadow-lg: 0 8px 40px oklch(0 0 0 / 0.6);
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page-header {
+      background: var(--card);
+      border-bottom: 1px solid var(--card-border);
+      padding: 2rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+
+    .header-content {
+      max-width: 900px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .meta-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section-header {
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .section-description {
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .toc {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .toc h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .toc-list {
+      list-style: none;
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .toc-item:hover {
+      background: var(--bg);
+    }
+
+    .toc-link {
+      color: var(--fg);
+      text-decoration: none;
+      flex: 1;
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
+
+    .severity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .severity-critical {
+      background: oklch(0.55 0.2 25 / 0.15);
+      color: var(--error);
+    }
+
+    .severity-high {
+      background: oklch(0.75 0.15 75 / 0.15);
+      color: var(--warning);
+    }
+
+    .severity-medium {
+      background: oklch(0.62 0.16 172 / 0.15);
+      color: var(--primary);
+    }
+
+    .severity-low {
+      background: oklch(0.6 0.16 145 / 0.15);
+      color: var(--success);
+    }
+
+    .severity-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .severity-critical .severity-dot {
+      background: var(--error);
+    }
+
+    .severity-high .severity-dot {
+      background: var(--warning);
+    }
+
+    .severity-medium .severity-dot {
+      background: var(--primary);
+    }
+
+    .severity-low .severity-dot {
+      background: var(--success);
+    }
+
+    .finding-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .finding-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .finding-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .finding-description {
+      color: var(--muted);
+      font-size: 0.9375rem;
+      margin-bottom: 1rem;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-panel {
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .comparison-header {
+      padding: 0.75rem 1rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .current {
+      background: oklch(0.55 0.2 25 / 0.08);
+      color: var(--error);
+    }
+
+    .improved {
+      background: oklch(0.6 0.16 145 / 0.08);
+      color: var(--success);
+    }
+
+    .comparison-content {
+      padding: 1rem;
+      background: var(--bg);
+    }
+
+    .mockup-container {
+      background: var(--card);
+      border-radius: 6px;
+      padding: 1.5rem;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .impact-list {
+      list-style: none;
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .impact-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 0.9375rem;
+    }
+
+    .impact-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .impact-positive {
+      background: var(--success);
+    }
+
+    .impact-negative {
+      background: var(--error);
+    }
+
+    .recommendation-box {
+      background: oklch(0.6 0.16 145 / 0.08);
+      border-left: 3px solid var(--success);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+    }
+
+    .recommendation-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9375rem;
+    }
+
+    .recommendation-text {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-label {
+      font-size: 0.875rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    code {
+      background: var(--bg);
+      padding: 0.125rem 0.375rem;
+      border-radius: 4px;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 0.875em;
+      color: var(--primary);
+    }
+
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      background: transparent;
+      padding: 0;
+    }
+
+    pre {
+      margin: 0;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+    const { DesignCanvas, DCSection, DCArtboard } = window;
+
+    // ============ CURRENT STATE MOCKUPS ============
+
+    const CurrentLibraryFilters = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', overflowX: 'auto' }}>
+          <button style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid oklch(0.24 0.008 250)', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500 }}>All</button>
+          <button style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid oklch(0.65 0.15 260 / 0.3)', background: 'transparent', color: 'oklch(0.65 0.15 260)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500 }}>Wishlist</button>
+          <button style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid oklch(0.75 0.15 55 / 0.3)', background: 'transparent', color: 'oklch(0.75 0.15 55)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500 }}>Shelf</button>
+          <button style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid oklch(0.72 0.16 45 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.16 45)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500 }}>Up Next</button>
+          <button style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid oklch(0.72 0.15 175 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.15 175)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500 }}>Playing</button>
+          <button style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid oklch(0.72 0.2 295 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.2 295)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500 }}>Played</button>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <input type="search" placeholder="Filter library..." style={{ flex: 1, minWidth: '200px', height: '36px', padding: '0 12px 0 36px', borderRadius: '6px', border: '1px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px' }} />
+          <select style={{ minWidth: '180px', height: '36px', padding: '0 32px 0 12px', borderRadius: '6px', border: '1px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px' }}>
+            <option>Recently Updated</option>
+          </select>
+          <button style={{ padding: '0 12px', height: '36px', borderRadius: '6px', border: '1px solid oklch(0.24 0.008 250)', background: 'transparent', color: 'oklch(0.93 0.005 250)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="2"/><rect x="3" y="11" width="18" height="2"/></svg>
+            More
+          </button>
+        </div>
+      </div>
+    );
+
+    const CurrentDashboardHero = () => (
+      <div style={{ padding: '24px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ background: 'oklch(0.2 0.007 260 / 0.4)', border: '1px solid oklch(0.24 0.008 250 / 0.4)', borderRadius: '8px', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px' }}>
+            <div>
+              <h1 style={{ fontSize: '30px', fontWeight: 700, marginBottom: '4px' }}>What did you play, username?</h1>
+              <p style={{ fontSize: '14px', color: 'oklch(0.6 0.005 250)' }}>Log tonight's session — playtime is enough, thoughts are optional.</p>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '12px' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '12px', background: 'oklch(0.155 0.007 260 / 0.4)', border: '1px solid oklch(0.24 0.008 250 / 0.4)', borderRadius: '6px' }}>
+                <div style={{ width: '48px', height: '64px', background: 'oklch(0.3 0.01 250)', borderRadius: '4px', flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Game Title {i}</div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button style={{ height: '28px', padding: '0 8px', borderRadius: '4px', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', fontSize: '12px', fontWeight: 500 }}>+ Log</button>
+                    <button style={{ height: '28px', padding: '0 8px', borderRadius: '4px', background: 'transparent', color: 'oklch(0.6 0.005 250)', border: 'none', fontSize: '12px', fontWeight: 500 }}>✏️ Reflect</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    const CurrentLibraryCard = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '8px', left: '8px', width: '10px', height: '10px', background: 'oklch(0.72 0.15 175)', borderRadius: '50%', boxShadow: '0 0 0 2px oklch(0 0 0 / 0.3)' }} />
+          </div>
+          <p style={{ marginTop: '8px', fontSize: '14px', fontWeight: 500, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3 }}>The Legend of Zelda: Breath of the Wild</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+            <div style={{ width: '6px', height: '6px', background: 'oklch(0.72 0.15 175)', borderRadius: '50%' }} />
+            <span style={{ fontSize: '11px', color: 'oklch(0.6 0.005 250)' }}>Playing</span>
+          </div>
+          <div style={{ marginTop: '4px', display: 'flex', gap: '2px' }}>
+            {[1,2,3,4,5].map(i => (
+              <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i <= 4 ? 'oklch(0.75 0.15 75)' : 'oklch(0.3 0.01 250)'}>
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    // ============ IMPROVED STATE MOCKUPS ============
+
+    // Finding #1: Filter Hierarchy Variants
+    const ImprovedFiltersSidebar = () => (
+      <div style={{ display: 'flex', gap: '16px', padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ width: '240px', background: 'oklch(0.15 0.007 260)', borderRadius: '12px', padding: '20px', border: '1px solid oklch(0.24 0.008 250)' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px' }}>Filters</h3>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'oklch(0.6 0.005 250)', marginBottom: '8px', display: 'block' }}>Search</label>
+            <input type="search" placeholder="Filter library..." style={{ width: '100%', height: '40px', padding: '0 12px', borderRadius: '6px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px' }} />
+          </div>
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'oklch(0.6 0.005 250)', marginBottom: '8px', display: 'block' }}>Status</label>
+            {[
+              { label: 'All', count: 326, color: 'oklch(0.69 0.17 172)' },
+              { label: 'Wishlist', count: 42, color: 'oklch(0.65 0.15 260)' },
+              { label: 'Shelf', count: 156, color: 'oklch(0.75 0.15 55)' },
+              { label: 'Up Next', count: 18, color: 'oklch(0.72 0.16 45)' },
+              { label: 'Playing', count: 5, color: 'oklch(0.72 0.15 175)' },
+              { label: 'Played', count: 105, color: 'oklch(0.72 0.2 295)' }
+            ].map((status, i) => (
+              <button key={i} style={{ width: '100%', padding: '10px 12px', marginBottom: '6px', borderRadius: '6px', border: i === 0 ? 'none' : `2px solid ${status.color}30`, background: i === 0 ? status.color : 'transparent', color: i === 0 ? 'oklch(0.12 0.01 175)' : status.color, fontSize: '14px', fontWeight: 600, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left' }}>
+                <span>{status.label}</span>
+                <span style={{ fontSize: '12px', opacity: 0.7 }}>{status.count}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ marginBottom: '12px', color: 'oklch(0.6 0.005 250)', fontSize: '14px' }}>326 games</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
+            {[1,2,3,4].map(i => (
+              <div key={i} style={{ aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px' }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedFiltersCompact = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
+          <input type="search" placeholder="Search library..." style={{ flex: '1 1 260px', height: '40px', padding: '0 12px 0 36px', borderRadius: '8px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px' }} />
+          <select style={{ height: '40px', padding: '0 12px', borderRadius: '6px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px', minWidth: '160px' }}>
+            <option>All Statuses (326)</option>
+            <option>Wishlist (42)</option>
+            <option>Shelf (156)</option>
+            <option>Up Next (18)</option>
+            <option>Playing (5)</option>
+            <option>Played (105)</option>
+          </select>
+          <select style={{ height: '40px', padding: '0 12px', borderRadius: '6px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px', minWidth: '140px' }}>
+            <option>Recently Updated</option>
+          </select>
+        </div>
+        <div style={{ fontSize: '13px', color: 'oklch(0.6 0.005 250)' }}>
+          Showing 326 games • <button style={{ background: 'none', border: 'none', color: 'oklch(0.69 0.17 172)', cursor: 'pointer', textDecoration: 'underline' }}>Advanced Filters</button>
+        </div>
+      </div>
+    );
+
+    // Finding #2: Mobile Filter Variants
+    const CurrentMobileFilters = () => (
+      <div style={{ padding: '16px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', width: '360px', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none' }}>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500, flexShrink: 0 }}>All</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.65 0.15 260 / 0.3)', background: 'transparent', color: 'oklch(0.65 0.15 260)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500, flexShrink: 0 }}>Wishlist</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.75 0.15 55 / 0.3)', background: 'transparent', color: 'oklch(0.75 0.15 55)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500, flexShrink: 0 }}>Shelf</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.72 0.16 45 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.16 45)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500, flexShrink: 0 }}>Up Next</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.72 0.15 175 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.15 175)', fontSize: '13px', whiteSpace: 'nowrap', fontWeight: 500, flexShrink: 0 }}>Playing</button>
+        </div>
+        <div style={{ marginTop: '12px', fontSize: '13px', color: 'oklch(0.6 0.005 250)', textAlign: 'center', padding: '8px', background: 'oklch(0.75 0.15 75 / 0.1)', borderRadius: '6px', border: '1px dashed oklch(0.75 0.15 75 / 0.3)' }}>
+          ← Scroll to see more filters
+        </div>
+      </div>
+    );
+
+    const ImprovedMobileFiltersGrid = () => (
+      <div style={{ padding: '16px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', width: '360px' }}>
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'oklch(0.6 0.005 250)', marginBottom: '8px', display: 'block' }}>Status Filter</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            {[
+              { label: 'All', count: 326, color: 'oklch(0.69 0.17 172)', active: true },
+              { label: 'Wishlist', count: 42, color: 'oklch(0.65 0.15 260)' },
+              { label: 'Shelf', count: 156, color: 'oklch(0.75 0.15 55)' },
+              { label: 'Up Next', count: 18, color: 'oklch(0.72 0.16 45)' },
+              { label: 'Playing', count: 5, color: 'oklch(0.72 0.15 175)' },
+              { label: 'Played', count: 105, color: 'oklch(0.72 0.2 295)' }
+            ].map((status, i) => (
+              <button key={i} style={{ padding: '12px', borderRadius: '8px', border: status.active ? 'none' : `2px solid ${status.color}30`, background: status.active ? status.color : 'transparent', color: status.active ? 'oklch(0.12 0.01 175)' : status.color, fontSize: '14px', fontWeight: 600, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <span>{status.label}</span>
+                <span style={{ fontSize: '18px', fontWeight: 700 }}>{status.count}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedMobileFiltersDropdown = () => (
+      <div style={{ padding: '16px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', width: '360px' }}>
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'oklch(0.6 0.005 250)', marginBottom: '8px', display: 'block' }}>Filter by Status</label>
+          <button style={{ width: '100%', height: '52px', padding: '0 16px', borderRadius: '8px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px' }}>
+              <span style={{ fontSize: '13px', color: 'oklch(0.6 0.005 250)' }}>All Games</span>
+              <span style={{ fontSize: '16px', fontWeight: 600 }}>326 games</span>
+            </div>
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+        </div>
+        <div style={{ background: 'oklch(0.2 0.007 260)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '8px', padding: '8px' }}>
+          {[
+            { label: 'All Games', count: 326, active: true },
+            { label: 'Wishlist', count: 42 },
+            { label: 'On Shelf', count: 156 },
+            { label: 'Up Next', count: 18 },
+            { label: 'Playing', count: 5 },
+            { label: 'Played', count: 105 }
+          ].map((status, i) => (
+            <div key={i} style={{ padding: '12px', borderRadius: '6px', background: status.active ? 'oklch(0.69 0.17 172 / 0.15)' : 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', marginBottom: i < 5 ? '4px' : 0 }}>
+              <span style={{ fontSize: '15px', fontWeight: status.active ? 600 : 500, color: status.active ? 'oklch(0.69 0.17 172)' : 'oklch(0.93 0.005 250)' }}>{status.label}</span>
+              <span style={{ fontSize: '14px', color: 'oklch(0.6 0.005 250)', fontWeight: 600 }}>{status.count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    const ImprovedMobileFiltersTabs = () => (
+      <div style={{ padding: '16px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', width: '360px' }}>
+        <div style={{ background: 'oklch(0.2 0.007 260)', borderRadius: '10px', padding: '4px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginBottom: '12px' }}>
+          <button style={{ padding: '10px 8px', borderRadius: '7px', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>All</button>
+          <button style={{ padding: '10px 8px', borderRadius: '7px', background: 'transparent', color: 'oklch(0.93 0.005 250)', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>Active</button>
+          <button style={{ padding: '10px 8px', borderRadius: '7px', background: 'transparent', color: 'oklch(0.93 0.005 250)', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>Played</button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+          {[
+            { label: 'Wish', count: 42, color: 'oklch(0.65 0.15 260)' },
+            { label: 'Shelf', count: 156, color: 'oklch(0.75 0.15 55)' },
+            { label: 'Next', count: 18, color: 'oklch(0.72 0.16 45)' },
+            { label: 'Play', count: 5, color: 'oklch(0.72 0.15 175)' },
+            { label: 'Done', count: 105, color: 'oklch(0.72 0.2 295)' },
+            { label: 'All', count: 326, color: 'oklch(0.69 0.17 172)' }
+          ].map((status, i) => (
+            <button key={i} style={{ padding: '10px 8px', borderRadius: '8px', border: `2px solid ${status.color}30`, background: 'transparent', color: status.color, fontSize: '12px', fontWeight: 600, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', cursor: 'pointer' }}>
+              <span style={{ fontSize: '16px', fontWeight: 700 }}>{status.count}</span>
+              <span>{status.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+
+    // Finding #3: Dashboard Hero Variants
+    const ImprovedHeroCarousel = () => (
+      <div style={{ padding: '24px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ background: 'linear-gradient(135deg, oklch(0.2 0.007 260) 0%, oklch(0.18 0.02 175) 100%)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '12px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '6px' }}>Continue Playing</h2>
+            <p style={{ fontSize: '14px', color: 'oklch(0.7 0.005 250)' }}>Pick up where you left off</p>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', padding: '20px', background: 'oklch(0.2 0.007 260 / 0.7)', backdropFilter: 'blur(8px)', borderRadius: '12px', border: '1px solid oklch(0.24 0.008 250)' }}>
+              <div style={{ width: '80px', height: '106px', background: 'oklch(0.3 0.01 250)', borderRadius: '8px', flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '20px', fontWeight: 700, marginBottom: '4px' }}>Elden Ring</div>
+                <div style={{ fontSize: '13px', color: 'oklch(0.6 0.005 250)', marginBottom: '12px' }}>Last played 2 hours ago • 32h total</div>
+                <button style={{ width: '100%', height: '44px', borderRadius: '8px', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}>
+                  Log Session
+                </button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '16px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'oklch(0.69 0.17 172)' }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'oklch(0.3 0.01 250)' }} />
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'oklch(0.3 0.01 250)' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedHeroModal = () => (
+      <div style={{ padding: '24px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '520px' }}>
+        <div style={{ width: '100%', maxWidth: '440px', background: 'oklch(0.2 0.007 260)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '16px', boxShadow: '0 20px 60px oklch(0 0 0 / 0.5)' }}>
+          <div style={{ padding: '24px', borderBottom: '1px solid oklch(0.24 0.008 250)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <h2 style={{ fontSize: '22px', fontWeight: 700 }}>Quick Log</h2>
+              <button style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'transparent', border: 'none', color: 'oklch(0.6 0.005 250)', cursor: 'pointer' }}>✕</button>
+            </div>
+            <p style={{ fontSize: '14px', color: 'oklch(0.6 0.005 250)' }}>Log a gaming session</p>
+          </div>
+          <div style={{ padding: '24px' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', display: 'block', color: 'oklch(0.7 0.005 250)' }}>Select Game</label>
+              <select style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '8px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.15 0.007 260)', color: 'oklch(0.93 0.005 250)', fontSize: '15px' }}>
+                <option>Elden Ring (Last played 2h ago)</option>
+                <option>Hollow Knight</option>
+                <option>Hades</option>
+              </select>
+            </div>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', display: 'block', color: 'oklch(0.7 0.005 250)' }}>Playtime (hours)</label>
+              <input type="number" placeholder="2.5" style={{ width: '100%', height: '44px', padding: '0 12px', borderRadius: '8px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.15 0.007 260)', color: 'oklch(0.93 0.005 250)', fontSize: '15px' }} />
+            </div>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, marginBottom: '8px', display: 'block', color: 'oklch(0.7 0.005 250)' }}>Quick Note (optional)</label>
+              <textarea placeholder="Any thoughts?" rows={3} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.15 0.007 260)', color: 'oklch(0.93 0.005 250)', fontSize: '14px', fontFamily: 'system-ui, sans-serif', resize: 'none' }} />
+            </div>
+            <button style={{ width: '100%', height: '48px', borderRadius: '8px', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}>
+              Save Session
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
+    // Finding #4: Card Status Variants
+    const ImprovedCardRibbon = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '12px', right: '-32px', transform: 'rotate(45deg)', background: 'oklch(0.72 0.15 175)', color: 'oklch(0.12 0.01 175)', padding: '4px 40px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center', boxShadow: '0 2px 8px oklch(0 0 0 / 0.3)' }}>
+              Playing
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, oklch(0 0 0 / 0.8), transparent)', padding: '12px 10px 10px', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+              {[1,2,3,4,5].map(i => (
+                <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i <= 4 ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)'}>
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginTop: '10px' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3, marginBottom: '4px' }}>The Legend of Zelda: Breath of the Wild</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'oklch(0.6 0.005 250)' }}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="7" cy="7" r="5"/><path d="M7 3v4l3 2"/>
+              </svg>
+              <span>32h played</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedCardBottomBar = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ width: '180px', borderRadius: '8px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', background: 'oklch(0.2 0.007 260)' }}>
+            <div style={{ aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {[1,2,3,4,5].map(i => (
+                  <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i <= 4 ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)'}>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                ))}
+              </div>
+            </div>
+            <div style={{ padding: '10px', background: 'oklch(0.72 0.15 175)', color: 'oklch(0.12 0.01 175)' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>Playing</div>
+              <div style={{ fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <svg width="12" height="12" fill="currentColor">
+                  <circle cx="6" cy="6" r="5"/><path d="M6 2v4l3 2" stroke="oklch(0.12 0.01 175)" strokeWidth="1.5" fill="none"/>
+                </svg>
+                32h played
+              </div>
+            </div>
+          </div>
+          <p style={{ marginTop: '8px', fontSize: '14px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3 }}>The Legend of Zelda: Breath of the Wild</p>
+        </div>
+      </div>
+    );
+
+    // Finding #5: Filter Count Variants
+    const CurrentFiltersNoCounts = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', fontSize: '13px', fontWeight: 500 }}>All</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.65 0.15 260 / 0.3)', background: 'transparent', color: 'oklch(0.65 0.15 260)', fontSize: '13px', fontWeight: 500 }}>Wishlist</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.75 0.15 55 / 0.3)', background: 'transparent', color: 'oklch(0.75 0.15 55)', fontSize: '13px', fontWeight: 500 }}>Shelf</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.72 0.16 45 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.16 45)', fontSize: '13px', fontWeight: 500 }}>Up Next</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.72 0.15 175 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.15 175)', fontSize: '13px', fontWeight: 500 }}>Playing</button>
+          <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.72 0.2 295 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.2 295)', fontSize: '13px', fontWeight: 500 }}>Played</button>
+        </div>
+      </div>
+    );
+
+    const ImprovedCountsInline = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {[
+            { label: 'All', count: 326, color: 'oklch(0.69 0.17 172)', active: true },
+            { label: 'Wishlist', count: 42, color: 'oklch(0.65 0.15 260)' },
+            { label: 'Shelf', count: 156, color: 'oklch(0.75 0.15 55)' },
+            { label: 'Up Next', count: 18, color: 'oklch(0.72 0.16 45)' },
+            { label: 'Playing', count: 5, color: 'oklch(0.72 0.15 175)' },
+            { label: 'Played', count: 105, color: 'oklch(0.72 0.2 295)' }
+          ].map((status, i) => (
+            <button key={i} style={{ padding: '8px 14px', borderRadius: '6px', border: status.active ? 'none' : `1px solid ${status.color}30`, background: status.active ? status.color : 'transparent', color: status.active ? 'oklch(0.12 0.01 175)' : status.color, fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>{status.label}</span>
+              <span style={{ background: status.active ? 'oklch(0 0 0 / 0.2)' : `${status.color}20`, padding: '1px 6px', borderRadius: '10px', fontSize: '11px', fontWeight: 700 }}>{status.count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+
+    const ImprovedCountsRightAlign = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+          {[
+            { label: 'All', count: 326, color: 'oklch(0.69 0.17 172)', active: true },
+            { label: 'Wishlist', count: 42, color: 'oklch(0.65 0.15 260)' },
+            { label: 'Shelf', count: 156, color: 'oklch(0.75 0.15 55)' },
+            { label: 'Up Next', count: 18, color: 'oklch(0.72 0.16 45)' },
+            { label: 'Playing', count: 5, color: 'oklch(0.72 0.15 175)' },
+            { label: 'Played', count: 105, color: 'oklch(0.72 0.2 295)' }
+          ].map((status, i) => (
+            <button key={i} style={{ padding: '10px 14px', borderRadius: '8px', border: status.active ? 'none' : `2px solid ${status.color}30`, background: status.active ? status.color : 'transparent', color: status.active ? 'oklch(0.12 0.01 175)' : status.color, fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span>{status.label}</span>
+              <span style={{ fontSize: '13px', opacity: 0.8 }}>{status.count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+
+    const ImprovedCountsVisual = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ display: 'grid', gap: '10px' }}>
+          {[
+            { label: 'All', count: 326, color: 'oklch(0.69 0.17 172)', percent: 100 },
+            { label: 'Wishlist', count: 42, color: 'oklch(0.65 0.15 260)', percent: 13 },
+            { label: 'Shelf', count: 156, color: 'oklch(0.75 0.15 55)', percent: 48 },
+            { label: 'Up Next', count: 18, color: 'oklch(0.72 0.16 45)', percent: 6 },
+            { label: 'Playing', count: 5, color: 'oklch(0.72 0.15 175)', percent: 2 },
+            { label: 'Played', count: 105, color: 'oklch(0.72 0.2 295)', percent: 32 }
+          ].map((status, i) => (
+            <div key={i}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: i === 0 ? status.color : 'oklch(0.93 0.005 250)' }}>{status.label}</span>
+                <span style={{ fontSize: '13px', color: 'oklch(0.6 0.005 250)', fontWeight: 600 }}>{status.count}</span>
+              </div>
+              <div style={{ height: '6px', background: 'oklch(0.24 0.008 250)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: status.color, width: `${status.percent}%`, transition: 'width 0.3s' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    // Finding #6: Search Prominence Variants
+    const CurrentSearchInput = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <input type="search" placeholder="Filter library..." style={{ flex: 1, height: '36px', padding: '0 12px 0 36px', borderRadius: '6px', border: '1px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px' }} />
+          <select style={{ height: '36px', padding: '0 32px 0 12px', borderRadius: '6px', border: '1px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px', minWidth: '180px' }}>
+            <option>Recently Updated</option>
+          </select>
+        </div>
+      </div>
+    );
+
+    const ImprovedSearchHero = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ position: 'relative' }}>
+            <svg style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="10" cy="10" r="7"/><path d="M16 16l5 5"/>
+            </svg>
+            <input type="search" placeholder="Search your library..." style={{ width: '100%', height: '52px', padding: '0 48px 0 48px', borderRadius: '10px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '16px', transition: 'all 0.2s' }} />
+            <div style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: 'oklch(0.6 0.005 250)', background: 'oklch(0.24 0.008 250)', padding: '4px 8px', borderRadius: '4px', fontWeight: 600 }}>
+              ⌘K
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedSearchCommand = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', minHeight: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '100%', maxWidth: '480px', background: 'oklch(0.2 0.007 260)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '12px', boxShadow: '0 20px 60px oklch(0 0 0 / 0.5)', overflow: 'hidden' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid oklch(0.24 0.008 250)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="10" cy="10" r="7"/><path d="M16 16l5 5"/>
+            </svg>
+            <input type="text" placeholder="Search games, filters, actions..." style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'oklch(0.93 0.005 250)', fontSize: '15px' }} />
+            <kbd style={{ fontSize: '11px', background: 'oklch(0.24 0.008 250)', padding: '4px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>ESC</kbd>
+          </div>
+          <div style={{ padding: '8px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'oklch(0.6 0.005 250)', padding: '8px 12px' }}>Recent</div>
+            {['Elden Ring', 'Hollow Knight', 'Hades'].map((game, i) => (
+              <div key={i} style={{ padding: '10px 12px', borderRadius: '6px', background: i === 0 ? 'oklch(0.24 0.008 250)' : 'transparent', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                <div style={{ width: '32px', height: '42px', background: 'oklch(0.3 0.01 250)', borderRadius: '4px', flexShrink: 0 }} />
+                <span style={{ fontSize: '14px', fontWeight: 500 }}>{game}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedSearchSticky = () => (
+      <div style={{ padding: '0', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'sticky', top: 0, background: 'oklch(0.18 0.007 260 / 0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid oklch(0.24 0.008 250)', padding: '16px 20px', zIndex: 10 }}>
+          <div style={{ position: 'relative' }}>
+            <svg style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/>
+            </svg>
+            <input type="search" placeholder="Search library..." style={{ width: '100%', height: '44px', padding: '0 16px 0 44px', borderRadius: '8px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '15px' }} />
+          </div>
+        </div>
+        <div style={{ padding: '20px', color: 'oklch(0.6 0.005 250)', fontSize: '13px', textAlign: 'center' }}>
+          ↑ Search bar stays visible while scrolling
+        </div>
+      </div>
+    );
+
+    // Finding #7: Card Metadata Variants
+    const ImprovedCardPlaytime = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative', cursor: 'pointer' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '10px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative', boxShadow: '0 4px 12px oklch(0 0 0 / 0.3)' }}>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, oklch(0 0 0 / 0.9), transparent)', padding: '16px 10px 10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', color: 'white' }}>
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/>
+                </svg>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>32h</span>
+                <span style={{ fontSize: '11px', opacity: 0.7, marginLeft: 'auto' }}>actualPlaytime</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                {[1,2,3,4,5].map(i => (
+                  <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i <= 4 ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)'}>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop: '10px' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3, marginBottom: '4px' }}>The Legend of Zelda</p>
+            <div style={{ fontSize: '11px', color: 'oklch(0.55 0.005 250)', fontFamily: 'ui-monospace, monospace' }}>
+              Started 3d ago <span style={{ opacity: 0.5 }}>(startedAt)</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: '12px', padding: '8px', background: 'oklch(0.75 0.15 75 / 0.1)', border: '1px dashed oklch(0.75 0.15 75 / 0.3)', borderRadius: '6px', fontSize: '10px', color: 'oklch(0.6 0.005 250)' }}>
+          ⚠️ Requires session logging
+        </div>
+      </div>
+    );
+
+    const ImprovedCardPlatform = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative', cursor: 'pointer' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '10px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative', boxShadow: '0 4px 12px oklch(0 0 0 / 0.3)' }}>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, oklch(0 0 0 / 0.8), transparent)', padding: '12px 10px 10px', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+              {[1,2,3,4,5].map(i => (
+                <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i <= 4 ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)'}>
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginTop: '10px' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3, marginBottom: '6px' }}>The Legend of Zelda</p>
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ padding: '2px 8px', background: 'oklch(0.24 0.008 250)', borderRadius: '4px', fontSize: '11px', fontWeight: 600, color: 'oklch(0.7 0.005 250)' }}>Switch</span>
+              <span style={{ fontSize: '10px', color: 'oklch(0.5 0.005 250)', fontFamily: 'ui-monospace, monospace' }}>platformId</span>
+            </div>
+            <div style={{ fontSize: '11px', color: 'oklch(0.55 0.005 250)', marginTop: '3px', fontFamily: 'ui-monospace, monospace' }}>
+              Added 2w ago <span style={{ opacity: 0.5 }}>(createdAt)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedCardCompact = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative', cursor: 'pointer' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '10px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative', boxShadow: '0 4px 12px oklch(0 0 0 / 0.3)' }}>
+            <div style={{ position: 'absolute', top: '8px', left: '8px', width: '10px', height: '10px', background: 'oklch(0.72 0.15 175)', borderRadius: '50%', boxShadow: '0 0 8px oklch(0.72 0.15 175)' }} />
+          </div>
+          <div style={{ marginTop: '8px' }}>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.2, marginBottom: '3px' }}>Zelda: BotW</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: 'oklch(0.6 0.005 250)', marginBottom: '4px', fontFamily: 'ui-monospace, monospace' }}>
+              <span>3d ago</span>
+              <span>★ 4.0</span>
+              <span>Switch</span>
+            </div>
+            <div style={{ fontSize: '9px', color: 'oklch(0.5 0.005 250)', marginBottom: '3px', fontFamily: 'ui-monospace, monospace' }}>
+              startedAt · rating · platformId
+            </div>
+            <div style={{ height: '3px', background: 'oklch(0.24 0.008 250)', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', background: 'oklch(0.72 0.15 175)', width: '65%' }} title="Progress indicator (optional)" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    // Finding #8: Onboarding Variants
+    const CurrentEmptyState = () => (
+      <div style={{ padding: '40px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', textAlign: 'center', minHeight: '360px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div>
+          <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }}>📚</div>
+          <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Your library is empty</h2>
+          <p style={{ fontSize: '14px', color: 'oklch(0.6 0.005 250)', marginBottom: '20px' }}>Start building your gaming collection</p>
+        </div>
+      </div>
+    );
+
+    const ImprovedOnboardingModal = () => (
+      <div style={{ padding: '24px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '480px' }}>
+        <div style={{ width: '100%', maxWidth: '520px', background: 'oklch(0.2 0.007 260)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '16px', boxShadow: '0 20px 60px oklch(0 0 0 / 0.5)', overflow: 'hidden' }}>
+          <div style={{ padding: '32px', textAlign: 'center', background: 'linear-gradient(135deg, oklch(0.2 0.007 260) 0%, oklch(0.18 0.02 175) 100%)' }}>
+            <div style={{ fontSize: '56px', marginBottom: '16px' }}>🎮</div>
+            <h2 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '8px' }}>Welcome to SavePoint!</h2>
+            <p style={{ fontSize: '15px', color: 'oklch(0.7 0.005 250)', maxWidth: '400px', margin: '0 auto' }}>Your personal gaming library and journal. Let's get started by adding some games.</p>
+          </div>
+          <div style={{ padding: '24px', display: 'grid', gap: '12px' }}>
+            <button style={{ padding: '16px', borderRadius: '10px', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+              <svg width="20" height="20" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              Import from Steam
+            </button>
+            <button style={{ padding: '16px', borderRadius: '10px', background: 'oklch(0.24 0.008 250)', color: 'oklch(0.93 0.005 250)', border: 'none', fontSize: '15px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="10" cy="10" r="7"/><path d="M15 15l5 5"/>
+              </svg>
+              Search for Games
+            </button>
+            <button style={{ padding: '16px', borderRadius: '10px', background: 'transparent', color: 'oklch(0.93 0.005 250)', border: '1px solid oklch(0.24 0.008 250)', fontSize: '15px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center' }}>
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+              </svg>
+              Browse Popular Games
+            </button>
+          </div>
+          <div style={{ padding: '16px 24px 24px', textAlign: 'center' }}>
+            <button style={{ background: 'none', border: 'none', color: 'oklch(0.6 0.005 250)', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}>Skip for now</button>
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedOnboardingHero = () => (
+      <div style={{ padding: '40px 24px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', minHeight: '440px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', background: 'linear-gradient(135deg, oklch(0.2 0.007 260) 0%, oklch(0.18 0.02 175) 100%)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '16px', padding: '48px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, width: '300px', height: '300px', background: 'radial-gradient(circle, oklch(0.69 0.17 172 / 0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+            <div style={{ fontSize: '64px', marginBottom: '20px' }}>🎮</div>
+            <h1 style={{ fontSize: '36px', fontWeight: 700, marginBottom: '12px' }}>Start Your Gaming Journey</h1>
+            <p style={{ fontSize: '16px', color: 'oklch(0.7 0.005 250)', maxWidth: '500px', margin: '0 auto 32px' }}>Track your backlog, journal your experiences, and discover your next favorite game.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', maxWidth: '600px', margin: '0 auto' }}>
+              <div style={{ padding: '24px', background: 'oklch(0.2 0.007 260 / 0.7)', backdropFilter: 'blur(8px)', borderRadius: '12px', border: '1px solid oklch(0.24 0.008 250)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>⚡</div>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>Import Steam</h3>
+                <p style={{ fontSize: '13px', color: 'oklch(0.6 0.005 250)' }}>Sync your library instantly</p>
+              </div>
+              <div style={{ padding: '24px', background: 'oklch(0.2 0.007 260 / 0.7)', backdropFilter: 'blur(8px)', borderRadius: '12px', border: '1px solid oklch(0.24 0.008 250)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔍</div>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>Search Games</h3>
+                <p style={{ fontSize: '13px', color: 'oklch(0.6 0.005 250)' }}>Add games manually</p>
+              </div>
+              <div style={{ padding: '24px', background: 'oklch(0.2 0.007 260 / 0.7)', backdropFilter: 'blur(8px)', borderRadius: '12px', border: '1px solid oklch(0.24 0.008 250)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                <div style={{ fontSize: '32px', marginBottom: '12px' }}>🏆</div>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>Browse Popular</h3>
+                <p style={{ fontSize: '13px', color: 'oklch(0.6 0.005 250)' }}>Discover new titles</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedOnboardingTour = () => (
+      <div style={{ padding: '24px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif', minHeight: '400px', position: 'relative' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', paddingTop: '40px' }}>
+          <div style={{ marginBottom: '32px' }}>
+            <div style={{ display: 'inline-flex', gap: '8px', marginBottom: '24px' }}>
+              <div style={{ width: '32px', height: '4px', background: 'oklch(0.69 0.17 172)', borderRadius: '2px' }} />
+              <div style={{ width: '32px', height: '4px', background: 'oklch(0.24 0.008 250)', borderRadius: '2px' }} />
+              <div style={{ width: '32px', height: '4px', background: 'oklch(0.24 0.008 250)', borderRadius: '2px' }} />
+            </div>
+            <div style={{ fontSize: '48px', marginBottom: '20px' }}>📚</div>
+            <h2 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '12px' }}>Build Your Library</h2>
+            <p style={{ fontSize: '15px', color: 'oklch(0.7 0.005 250)', maxWidth: '400px', margin: '0 auto 24px' }}>Add games to your collection. Track what you're playing, what's on your shelf, and what you've completed.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button style={{ padding: '12px 24px', borderRadius: '8px', background: 'transparent', color: 'oklch(0.6 0.005 250)', border: '1px solid oklch(0.24 0.008 250)', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
+              Skip Tour
+            </button>
+            <button style={{ padding: '12px 32px', borderRadius: '8px', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>
+              Next →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
+    // Finding #9: Loading State Variants
+    const CurrentLoadingState = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <button style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', fontSize: '13px', fontWeight: 500 }}>All</button>
+            <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.65 0.15 260 / 0.3)', background: 'transparent', color: 'oklch(0.65 0.15 260)', fontSize: '13px', fontWeight: 500 }}>Wishlist</button>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px' }}>
+          {[1,2,3,4].map(i => (
+            <div key={i} style={{ aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px' }} />
+          ))}
+        </div>
+        <div style={{ marginTop: '16px', padding: '12px', background: 'oklch(0.75 0.15 75 / 0.1)', border: '1px dashed oklch(0.75 0.15 75 / 0.3)', borderRadius: '6px', fontSize: '13px', color: 'oklch(0.6 0.005 250)', textAlign: 'center' }}>
+          No loading indicator when filtering
+        </div>
+      </div>
+    );
+
+    const ImprovedLoadingSkeleton = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <button style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ width: '12px', height: '12px', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+              All
+            </button>
+            <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.65 0.15 260 / 0.3)', background: 'transparent', color: 'oklch(0.65 0.15 260)', fontSize: '13px', fontWeight: 500, opacity: 0.5 }}>Wishlist</button>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px', opacity: 0.5 }}>
+          {[1,2,3,4].map(i => (
+            <div key={i} style={{ aspectRatio: '3/4', background: 'linear-gradient(90deg, oklch(0.3 0.01 250) 0%, oklch(0.35 0.01 250) 50%, oklch(0.3 0.01 250) 100%)', borderRadius: '8px', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+          ))}
+        </div>
+        <style>{`
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+
+    const ImprovedLoadingSpinner = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <button style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', fontSize: '13px', fontWeight: 500 }}>All</button>
+            <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.65 0.15 260 / 0.3)', background: 'transparent', color: 'oklch(0.65 0.15 260)', fontSize: '13px', fontWeight: 500 }}>Wishlist</button>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ width: '32px', height: '32px', border: '3px solid oklch(0.24 0.008 250)', borderTopColor: 'oklch(0.69 0.17 172)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          <div style={{ fontSize: '14px', color: 'oklch(0.6 0.005 250)' }}>Loading games...</div>
+        </div>
+      </div>
+    );
+
+    const ImprovedLoadingOptimistic = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <button style={{ padding: '8px 14px', borderRadius: '6px', border: 'none', background: 'oklch(0.65 0.15 260)', color: 'oklch(0.99 0 0)', fontSize: '13px', fontWeight: 500, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(90deg, transparent, oklch(1 0 0 / 0.2), transparent)', animation: 'progress 1s infinite' }} />
+              <span style={{ position: 'relative', zIndex: 1 }}>Wishlist</span>
+            </button>
+            <button style={{ padding: '8px 14px', borderRadius: '6px', border: '1px solid oklch(0.69 0.17 172 / 0.3)', background: 'transparent', color: 'oklch(0.69 0.17 172)', fontSize: '13px', fontWeight: 500, opacity: 0.5 }}>All</button>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px' }}>
+          {[1,2,3,4].map(i => (
+            <div key={i} style={{ aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px', opacity: i === 1 ? 0.3 : 1, transform: i === 1 ? 'scale(0.95)' : 'scale(1)', transition: 'all 0.3s' }} />
+          ))}
+        </div>
+        <style>{`
+          @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `}</style>
+      </div>
+    );
+
+    // Finding #11: Action Affordance Variants
+    const CurrentCardHiddenActions = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative', cursor: 'pointer' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '8px', left: '8px', width: '10px', height: '10px', background: 'oklch(0.72 0.15 175)', borderRadius: '50%', boxShadow: '0 0 0 2px oklch(0 0 0 / 0.3)' }} />
+          </div>
+          <p style={{ marginTop: '8px', fontSize: '14px', fontWeight: 500, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3 }}>The Legend of Zelda</p>
+          <div style={{ marginTop: '12px', padding: '8px', background: 'oklch(0.75 0.15 75 / 0.1)', border: '1px dashed oklch(0.75 0.15 75 / 0.3)', borderRadius: '6px', fontSize: '11px', color: 'oklch(0.6 0.005 250)', textAlign: 'center' }}>
+            Hover to see actions
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedCardPersistentAction = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '8px', left: '8px', padding: '4px 8px', background: 'oklch(0.72 0.15 175)', color: 'oklch(0.12 0.01 175)', borderRadius: '6px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }}>
+              Playing
+            </div>
+          </div>
+          <p style={{ marginTop: '8px', fontSize: '14px', fontWeight: 500, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3, marginBottom: '8px' }}>The Legend of Zelda</p>
+          <button style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <svg width="14" height="14" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            Log Session
+          </button>
+        </div>
+      </div>
+    );
+
+    const ImprovedCardContextMenu = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '8px', left: '8px', padding: '4px 8px', background: 'oklch(0.72 0.15 175)', color: 'oklch(0.12 0.01 175)', borderRadius: '6px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }}>
+              Playing
+            </div>
+            <button style={{ position: 'absolute', top: '8px', right: '8px', width: '32px', height: '32px', borderRadius: '6px', background: 'oklch(0 0 0 / 0.6)', backdropFilter: 'blur(8px)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="16" height="16" fill="currentColor">
+                <circle cx="8" cy="4" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="12" r="1.5"/>
+              </svg>
+            </button>
+          </div>
+          <p style={{ marginTop: '8px', fontSize: '14px', fontWeight: 500, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3 }}>The Legend of Zelda</p>
+          <div style={{ position: 'absolute', top: '48px', right: '20px', width: '160px', background: 'oklch(0.2 0.007 260)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '8px', boxShadow: '0 8px 24px oklch(0 0 0 / 0.5)', overflow: 'hidden', zIndex: 10 }}>
+            {['Log Session', 'Edit Details', 'Move to Shelf', 'Remove'].map((action, i) => (
+              <div key={i} style={{ padding: '10px 14px', fontSize: '13px', cursor: 'pointer', borderBottom: i < 3 ? '1px solid oklch(0.24 0.008 250)' : 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {action}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedCardFAB = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '8px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '8px', left: '8px', padding: '4px 8px', background: 'oklch(0.72 0.15 175)', color: 'oklch(0.12 0.01 175)', borderRadius: '6px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase' }}>
+              Playing
+            </div>
+            <button style={{ position: 'absolute', bottom: '12px', right: '12px', width: '48px', height: '48px', borderRadius: '50%', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px oklch(0 0 0 / 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="20" height="20" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+              </svg>
+            </button>
+          </div>
+          <p style={{ marginTop: '8px', fontSize: '14px', fontWeight: 500, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3 }}>The Legend of Zelda</p>
+        </div>
+      </div>
+    );
+
+    const ImprovedLibraryFilters = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 600, flex: 1 }}>Library Filters</h2>
+            <span style={{ fontSize: '13px', color: 'oklch(0.6 0.005 250)' }}>326 games</span>
+          </div>
+          <div style={{ position: 'relative', marginBottom: '12px' }}>
+            <svg style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="8" cy="8" r="6"/><path d="M13 13l4 4"/>
+            </svg>
+            <input 
+              type="search" 
+              placeholder="Search your library..." 
+              style={{ 
+                width: '100%', 
+                height: '44px', 
+                padding: '0 16px 0 40px', 
+                borderRadius: '8px', 
+                border: '2px solid oklch(0.24 0.008 250)', 
+                background: 'oklch(0.2 0.008 250)', 
+                color: 'oklch(0.93 0.005 250)', 
+                fontSize: '15px',
+                transition: 'all 0.2s'
+              }} 
+            />
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'oklch(0.6 0.005 250)', marginBottom: '8px' }}>Status</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
+            <button style={{ padding: '10px 14px', borderRadius: '8px', border: 'none', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' }}>
+              <span>All</span>
+              <span style={{ fontSize: '12px', opacity: 0.8 }}>326</span>
+            </button>
+            <button style={{ padding: '10px 14px', borderRadius: '8px', border: '2px solid oklch(0.65 0.15 260 / 0.3)', background: 'transparent', color: 'oklch(0.65 0.15 260)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' }}>
+              <span>Wishlist</span>
+              <span style={{ fontSize: '12px', opacity: 0.7 }}>42</span>
+            </button>
+            <button style={{ padding: '10px 14px', borderRadius: '8px', border: '2px solid oklch(0.75 0.15 55 / 0.3)', background: 'transparent', color: 'oklch(0.75 0.15 55)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' }}>
+              <span>Shelf</span>
+              <span style={{ fontSize: '12px', opacity: 0.7 }}>156</span>
+            </button>
+            <button style={{ padding: '10px 14px', borderRadius: '8px', border: '2px solid oklch(0.72 0.16 45 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.16 45)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' }}>
+              <span>Up Next</span>
+              <span style={{ fontSize: '12px', opacity: 0.7 }}>18</span>
+            </button>
+            <button style={{ padding: '10px 14px', borderRadius: '8px', border: '2px solid oklch(0.72 0.15 175 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.15 175)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' }}>
+              <span>Playing</span>
+              <span style={{ fontSize: '12px', opacity: 0.7 }}>5</span>
+            </button>
+            <button style={{ padding: '10px 14px', borderRadius: '8px', border: '2px solid oklch(0.72 0.2 295 / 0.3)', background: 'transparent', color: 'oklch(0.72 0.2 295)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.2s' }}>
+              <span>Played</span>
+              <span style={{ fontSize: '12px', opacity: 0.7 }}>105</span>
+            </button>
+          </div>
+        </div>
+        <details style={{ marginTop: '16px' }}>
+          <summary style={{ fontSize: '14px', fontWeight: 600, color: 'oklch(0.69 0.17 172)', cursor: 'pointer', listStyle: 'none', display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 0' }}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+            Advanced Filters
+          </summary>
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid oklch(0.24 0.008 250)', display: 'grid', gap: '12px' }}>
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: 500, marginBottom: '6px', display: 'block' }}>Platform</label>
+              <select style={{ width: '100%', height: '40px', padding: '0 12px', borderRadius: '6px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px' }}>
+                <option>All Platforms</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: 500, marginBottom: '6px', display: 'block' }}>Sort by</label>
+              <select style={{ width: '100%', height: '40px', padding: '0 12px', borderRadius: '6px', border: '2px solid oklch(0.24 0.008 250)', background: 'oklch(0.2 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px' }}>
+                <option>Recently Updated</option>
+                <option>Recently Added</option>
+                <option>Title A-Z</option>
+                <option>Highest Rated</option>
+              </select>
+            </div>
+          </div>
+        </details>
+      </div>
+    );
+
+    const ImprovedDashboardHero = () => (
+      <div style={{ padding: '24px', background: 'oklch(0.18 0.007 260)', color: 'oklch(0.93 0.005 250)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ background: 'linear-gradient(135deg, oklch(0.2 0.007 260) 0%, oklch(0.18 0.02 175) 100%)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '12px', padding: '28px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: 'radial-gradient(circle, oklch(0.69 0.17 172 / 0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ marginBottom: '20px' }}>
+              <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '6px', letterSpacing: '-0.01em' }}>Quick Log Session</h1>
+              <p style={{ fontSize: '15px', color: 'oklch(0.7 0.005 250)', maxWidth: '600px' }}>What did you play today? Log your session in seconds — just pick a game and enter playtime.</p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+              {[
+                { title: 'Elden Ring', time: 'Last played 2 hours ago', status: 'oklch(0.72 0.15 175)' },
+                { title: 'Hollow Knight', time: 'Last played yesterday', status: 'oklch(0.72 0.15 175)' },
+                { title: 'Hades', time: 'Last played 3 days ago', status: 'oklch(0.72 0.15 175)' }
+              ].map((game, i) => (
+                <div key={i} style={{ display: 'flex', gap: '14px', alignItems: 'center', padding: '14px', background: 'oklch(0.2 0.007 260 / 0.7)', backdropFilter: 'blur(8px)', border: '1px solid oklch(0.24 0.008 250)', borderRadius: '10px', transition: 'all 0.2s', cursor: 'pointer' }}>
+                  <div style={{ width: '56px', height: '74px', background: 'oklch(0.3 0.01 250)', borderRadius: '6px', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: '6px', right: '6px', width: '8px', height: '8px', background: game.status, borderRadius: '50%', boxShadow: `0 0 8px ${game.status}` }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '15px', fontWeight: 600, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{game.title}</div>
+                    <div style={{ fontSize: '12px', color: 'oklch(0.6 0.005 250)', marginBottom: '8px' }}>{game.time}</div>
+                    <button style={{ height: '32px', padding: '0 14px', borderRadius: '6px', background: 'oklch(0.69 0.17 172)', color: 'oklch(0.12 0.01 175)', border: 'none', fontSize: '13px', fontWeight: 600, width: '100%', transition: 'all 0.2s', cursor: 'pointer' }}>
+                      Log Session
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
+              <button style={{ padding: '10px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid oklch(0.24 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}>
+                + Write Full Journal Entry
+              </button>
+              <button style={{ padding: '10px 16px', borderRadius: '8px', background: 'transparent', border: '1px solid oklch(0.24 0.008 250)', color: 'oklch(0.93 0.005 250)', fontSize: '14px', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s' }}>
+                Browse Shelf
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const ImprovedLibraryCard = () => (
+      <div style={{ padding: '20px', background: 'oklch(0.18 0.007 260)', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ position: 'relative', cursor: 'pointer', transition: 'transform 0.2s' }}>
+          <div style={{ width: '180px', aspectRatio: '3/4', background: 'oklch(0.3 0.01 250)', borderRadius: '10px', border: '1px solid oklch(0.24 0.008 250)', overflow: 'hidden', position: 'relative', boxShadow: '0 4px 12px oklch(0 0 0 / 0.3)' }}>
+            <div style={{ position: 'absolute', top: '10px', left: '10px', padding: '4px 10px', background: 'oklch(0.72 0.15 175)', color: 'oklch(0.12 0.01 175)', borderRadius: '6px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', backdropFilter: 'blur(8px)' }}>
+              Playing
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, oklch(0 0 0 / 0.8), transparent)', padding: '12px 10px 10px', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+              {[1,2,3,4,5].map(i => (
+                <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i <= 4 ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)'}>
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              ))}
+            </div>
+          </div>
+          <div style={{ marginTop: '10px' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3, marginBottom: '4px' }}>The Legend of Zelda: Breath of the Wild</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'oklch(0.6 0.005 250)' }}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="7" cy="7" r="5"/><path d="M7 3v4l3 2"/>
+              </svg>
+              <span>32h played</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    // ============ MAIN APP ============
+
+    function AuditApp() {
+      return (
+        <div>
+          <div className="page-header">
+            <div className="container">
+              <div className="header-content">
+                <h1>SavePoint UI/UX Audit</h1>
+                <p className="subtitle">
+                  Comprehensive analysis of user experience patterns, visual design, and interaction flows — with actionable recommendations for improvement.
+                </p>
+                <div className="meta-grid">
+                  <div className="meta-item">
+                    <span className="meta-label">Audit Date</span>
+                    <span className="meta-value">April 25, 2026</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-label">Scope</span>
+                    <span className="meta-value">Design, Navigation, IA, Interactions, Performance</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-label">Personas</span>
+                    <span className="meta-value">Patient Gamers, Casual Users, Social</span>
+                  </div>
+                  <div className="meta-item">
+                    <span className="meta-label">Platforms</span>
+                    <span className="meta-value">Desktop, Mobile</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="container">
+            <div className="section">
+              <div className="summary-grid">
+                <div className="summary-card">
+                  <div className="summary-number">12</div>
+                  <div className="summary-label">Total Findings</div>
+                </div>
+                <div className="summary-card">
+                  <div className="summary-number">3</div>
+                  <div className="summary-label">High Priority</div>
+                </div>
+                <div className="summary-card">
+                  <div className="summary-number">6</div>
+                  <div className="summary-label">Medium Priority</div>
+                </div>
+                <div className="summary-card">
+                  <div className="summary-number">3</div>
+                  <div className="summary-label">Low Priority</div>
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '1.5rem', padding: '1rem 1.25rem', background: 'oklch(0.69 0.17 172 / 0.08)', border: '1px solid oklch(0.69 0.17 172 / 0.25)', borderRadius: '8px' }}>
+                <p style={{ fontSize: '0.875rem', lineHeight: '1.6', color: 'var(--fg)', margin: 0 }}>
+                  <strong style={{ fontWeight: 600 }}>📊 Data Model Context:</strong> All recommendations reference actual database fields from the LibraryItem schema: <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>status</code>, <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>rating</code>, <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>hasBeenPlayed</code>, <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>createdAt</code>, <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>updatedAt</code>, <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>startedAt</code>, <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>actualPlaytime</code>, <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>acquisitionType</code>, <code style={{ background: 'var(--bg)', padding: '2px 6px', borderRadius: '3px', fontSize: '0.8125rem', fontFamily: 'ui-monospace, monospace' }}>platformId</code>. Note: Playtime displays require active journal/session logging.
+                </p>
+              </div>
+            </div>
+
+            <div className="section">
+              <div className="toc">
+                <h3>Table of Contents</h3>
+                <ul className="toc-list">
+                  <li className="toc-item">
+                    <span className="severity-badge severity-high">
+                      <span className="severity-dot"></span>
+                      High
+                    </span>
+                    <a href="#filter-hierarchy" className="toc-link">1. Library Filter Information Hierarchy</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-high">
+                      <span className="severity-dot"></span>
+                      High
+                    </span>
+                    <a href="#mobile-scroll" className="toc-link">2. Mobile Filter Horizontal Scroll</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-high">
+                      <span className="severity-dot"></span>
+                      High
+                    </span>
+                    <a href="#dashboard-hero" className="toc-link">3. Dashboard Hero Cognitive Load</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-medium">
+                      <span className="severity-dot"></span>
+                      Medium
+                    </span>
+                    <a href="#card-status" className="toc-link">4. Library Card Status Visibility</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-medium">
+                      <span className="severity-dot"></span>
+                      Medium
+                    </span>
+                    <a href="#filter-counts" className="toc-link">5. Missing Filter Counts</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-medium">
+                      <span className="severity-dot"></span>
+                      Medium
+                    </span>
+                    <a href="#search-prominence" className="toc-link">6. Search Input Prominence</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-medium">
+                      <span className="severity-dot"></span>
+                      Medium
+                    </span>
+                    <a href="#card-metadata" className="toc-link">7. Card Metadata Hierarchy</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-medium">
+                      <span className="severity-dot"></span>
+                      Medium
+                    </span>
+                    <a href="#onboarding" className="toc-link">8. Missing First-Time User Guidance</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-medium">
+                      <span className="severity-dot"></span>
+                      Medium
+                    </span>
+                    <a href="#loading-states" className="toc-link">9. Insufficient Loading State Feedback</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-low">
+                      <span className="severity-dot"></span>
+                      Low
+                    </span>
+                    <a href="#visual-rhythm" className="toc-link">10. Inconsistent Visual Rhythm</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-low">
+                      <span className="severity-dot"></span>
+                      Low
+                    </span>
+                    <a href="#action-affordance" className="toc-link">11. Hidden Action Affordances</a>
+                  </li>
+                  <li className="toc-item">
+                    <span className="severity-badge severity-low">
+                      <span className="severity-dot"></span>
+                      Low
+                    </span>
+                    <a href="#theming" className="toc-link">12. Theme-Specific Visual Noise</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <DesignCanvas>
+              <DCSection id="filter-hierarchy" title="1. Library Filter Information Hierarchy">
+                <DCArtboard id="current-filters" label="Current State" width={420} height={240}>
+                  <CurrentLibraryFilters />
+                </DCArtboard>
+                <DCArtboard id="improved-filters-a" label="Option A: Vertical Stack" width={420} height={420}>
+                  <ImprovedLibraryFilters />
+                </DCArtboard>
+                <DCArtboard id="improved-filters-b" label="Option B: Sidebar Panel" width={520} height={460}>
+                  <ImprovedFiltersSidebar />
+                </DCArtboard>
+                <DCArtboard id="improved-filters-c" label="Option C: Compact Inline" width={420} height={320}>
+                  <ImprovedFiltersCompact />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="mobile-scroll" title="2. Mobile Filter Horizontal Scroll">
+                <DCArtboard id="current-mobile-filters" label="Current (Horizontal Scroll)" width={360} height={240}>
+                  <CurrentMobileFilters />
+                </DCArtboard>
+                <DCArtboard id="improved-mobile-grid" label="Option A: 2×3 Grid" width={360} height={340}>
+                  <ImprovedMobileFiltersGrid />
+                </DCArtboard>
+                <DCArtboard id="improved-mobile-dropdown" label="Option B: Dropdown Menu" width={360} height={280}>
+                  <ImprovedMobileFiltersDropdown />
+                </DCArtboard>
+                <DCArtboard id="improved-mobile-tabs" label="Option C: Segmented Tabs" width={360} height={260}>
+                  <ImprovedMobileFiltersTabs />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="dashboard-hero" title="3. Dashboard Hero Cognitive Load">
+                <DCArtboard id="current-hero" label="Current State" width={600} height={400}>
+                  <CurrentDashboardHero />
+                </DCArtboard>
+                <DCArtboard id="improved-hero-a" label="Option A: Single CTA Focus" width={600} height={480}>
+                  <ImprovedDashboardHero />
+                </DCArtboard>
+                <DCArtboard id="improved-hero-b" label="Option B: Carousel" width={600} height={420}>
+                  <ImprovedHeroCarousel />
+                </DCArtboard>
+                <DCArtboard id="improved-hero-c" label="Option C: Quick Log Modal" width={480} height={520}>
+                  <ImprovedHeroModal />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="card-status" title="4. Library Card Status Visibility">
+                <DCArtboard id="current-card" label="Current State" width={220} height={380}>
+                  <CurrentLibraryCard />
+                </DCArtboard>
+                <DCArtboard id="improved-card-a" label="Option A: Badge Overlay" width={220} height={380}>
+                  <ImprovedLibraryCard />
+                </DCArtboard>
+                <DCArtboard id="improved-card-b" label="Option B: Corner Ribbon" width={220} height={380}>
+                  <ImprovedCardRibbon />
+                </DCArtboard>
+                <DCArtboard id="improved-card-c" label="Option C: Bottom Bar" width={220} height={380}>
+                  <ImprovedCardBottomBar />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="filter-counts" title="5. Missing Filter Counts">
+                <DCArtboard id="current-no-counts" label="Current (No Counts)" width={420} height={180}>
+                  <CurrentFiltersNoCounts />
+                </DCArtboard>
+                <DCArtboard id="improved-counts-inline" label="Option A: Inline Badge" width={420} height={180}>
+                  <ImprovedCountsInline />
+                </DCArtboard>
+                <DCArtboard id="improved-counts-right" label="Option B: Right-Aligned" width={420} height={180}>
+                  <ImprovedCountsRightAlign />
+                </DCArtboard>
+                <DCArtboard id="improved-counts-visual" label="Option C: Visual Progress" width={420} height={220}>
+                  <ImprovedCountsVisual />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="search-prominence" title="6. Search Input Prominence">
+                <DCArtboard id="current-search" label="Current State" width={420} height={160}>
+                  <CurrentSearchInput />
+                </DCArtboard>
+                <DCArtboard id="improved-search-hero" label="Option A: Hero Position" width={420} height={180}>
+                  <ImprovedSearchHero />
+                </DCArtboard>
+                <DCArtboard id="improved-search-cmd" label="Option B: Command Palette" width={480} height={220}>
+                  <ImprovedSearchCommand />
+                </DCArtboard>
+                <DCArtboard id="improved-search-sticky" label="Option C: Sticky Header" width={420} height={200}>
+                  <ImprovedSearchSticky />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="card-metadata" title="7. Card Metadata Hierarchy">
+                <DCArtboard id="current-metadata" label="Current State" width={220} height={380}>
+                  <CurrentLibraryCard />
+                </DCArtboard>
+                <DCArtboard id="improved-metadata-playtime" label="Option A: Playtime Focus" width={220} height={380}>
+                  <ImprovedCardPlaytime />
+                </DCArtboard>
+                <DCArtboard id="improved-metadata-platform" label="Option B: Platform Badges" width={220} height={380}>
+                  <ImprovedCardPlatform />
+                </DCArtboard>
+                <DCArtboard id="improved-metadata-compact" label="Option C: Dense Layout" width={220} height={380}>
+                  <ImprovedCardCompact />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="onboarding" title="8. Missing First-Time User Guidance">
+                <DCArtboard id="current-empty" label="Current Empty State" width={600} height={360}>
+                  <CurrentEmptyState />
+                </DCArtboard>
+                <DCArtboard id="improved-onboarding-modal" label="Option A: Welcome Modal" width={520} height={480}>
+                  <ImprovedOnboardingModal />
+                </DCArtboard>
+                <DCArtboard id="improved-onboarding-hero" label="Option B: Hero Section" width={600} height={440}>
+                  <ImprovedOnboardingHero />
+                </DCArtboard>
+                <DCArtboard id="improved-onboarding-tour" label="Option C: Guided Tour" width={600} height={400}>
+                  <ImprovedOnboardingTour />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="loading-states" title="9. Insufficient Loading State Feedback">
+                <DCArtboard id="current-loading" label="Current (No Feedback)" width={420} height={280}>
+                  <CurrentLoadingState />
+                </DCArtboard>
+                <DCArtboard id="improved-loading-skeleton" label="Option A: Skeleton Screens" width={420} height={320}>
+                  <ImprovedLoadingSkeleton />
+                </DCArtboard>
+                <DCArtboard id="improved-loading-spinner" label="Option B: Inline Spinners" width={420} height={280}>
+                  <ImprovedLoadingSpinner />
+                </DCArtboard>
+                <DCArtboard id="improved-loading-optimistic" label="Option C: Optimistic UI" width={420} height={280}>
+                  <ImprovedLoadingOptimistic />
+                </DCArtboard>
+              </DCSection>
+
+              <DCSection id="action-affordance" title="11. Hidden Action Affordances">
+                <DCArtboard id="current-hidden-actions" label="Current (Hover Only)" width={220} height={380}>
+                  <CurrentCardHiddenActions />
+                </DCArtboard>
+                <DCArtboard id="improved-actions-persistent" label="Option A: Persistent Button" width={220} height={400}>
+                  <ImprovedCardPersistentAction />
+                </DCArtboard>
+                <DCArtboard id="improved-actions-context" label="Option B: Context Menu" width={220} height={420}>
+                  <ImprovedCardContextMenu />
+                </DCArtboard>
+                <DCArtboard id="improved-actions-fab" label="Option C: Floating Action" width={220} height={380}>
+                  <ImprovedCardFAB />
+                </DCArtboard>
+              </DCSection>
+            </DesignCanvas>
+
+            <div className="section" id="findings-detail">
+              <div className="section-header">
+                <h2>Detailed Findings</h2>
+                <p className="section-description">
+                  Each finding includes context, user impact, and specific recommendations with visual examples.
+                </p>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">1. Library Filter Information Hierarchy</h3>
+                  </div>
+                  <span className="severity-badge severity-high">
+                    <span className="severity-dot"></span>
+                    High
+                  </span>
+                </div>
+                <p className="finding-description">
+                  The current filter layout treats all controls equally, making it difficult for users to understand their library at a glance. Status filters, search, sort, and advanced options compete for attention without clear visual hierarchy.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Cognitive overload:</strong> Users must scan 2+ rows of controls before they can see their games</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Mobile scroll fatigue:</strong> Horizontal scroll on status chips is invisible on first load, hiding important filters</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>No context:</strong> Missing counts on status filters means users can't tell if a filter is empty before clicking</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Vertical layout with progressive disclosure:</strong> Group filters by importance. Show search + status filters prominently (with counts), collapse advanced filters behind a disclosure. This reduces initial visual noise by ~40% while maintaining full functionality.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">2. Mobile Filter Horizontal Scroll</h3>
+                  </div>
+                  <span className="severity-badge severity-high">
+                    <span className="severity-dot"></span>
+                    High
+                  </span>
+                </div>
+                <p className="finding-description">
+                  Status filter chips use horizontal scroll on mobile (<code>overflow-x: auto</code>) with no visual indicator. This pattern fails the "discoverability" heuristic — users don't know filters exist off-screen.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Hidden filters:</strong> 50%+ of mobile users may never discover "Playing" or "Played" filters</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Poor touchscreen ergonomics:</strong> Horizontal scroll competes with page scroll, causing mis-swipes</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Inconsistent with platform norms:</strong> Most mobile apps use vertical chip wrapping or dropdowns for filters</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Multi-select grid or segmented control:</strong> Use a 2×3 or 3×2 grid of status chips that wraps naturally on mobile. Add counts to each chip. This pattern is familiar from iOS/Material Design and eliminates hidden UI.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">3. Dashboard Hero Cognitive Load</h3>
+                  </div>
+                  <span className="severity-badge severity-high">
+                    <span className="severity-dot"></span>
+                    High
+                  </span>
+                </div>
+                <p className="finding-description">
+                  The "Quick Log Hero" presents 3+ games with dual actions (Log / Reflect) per game, plus a CTA for empty state. The layout emphasizes speed but creates decision paralysis for users with many "Playing" games.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Too many choices:</strong> Hick's Law — decision time increases logarithmically with options</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Ambiguous actions:</strong> "Log" vs "Reflect" distinction isn't clear without reading subtitle</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Visual clutter:</strong> Multiple small buttons + game covers compete for attention</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Single primary action per game:</strong> Show "Log Session" as the hero button, move "Reflect" to a secondary link below or in overflow. Add visual breathing room with gradient background and larger touch targets. Sort games by "last played" to surface the most likely choice first.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">4. Library Card Status Visibility</h3>
+                  </div>
+                  <span className="severity-badge severity-medium">
+                    <span className="severity-dot"></span>
+                    Medium
+                  </span>
+                </div>
+                <p className="finding-description">
+                  Status is shown as a tiny colored dot (10px) in the top-left of the cover, plus a redundant text label below. The dot is easy to miss at a glance, especially for colorblind users. The text label uses valuable space that could show metadata.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Scannability:</strong> Users can't quickly identify status across a grid — the dots blend into cover art</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Accessibility:</strong> Color-only indicators fail WCAG 1.4.1 (Use of Color)</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-positive">+</span>
+                    <span><strong>Works when filters are active:</strong> The dot is hidden when status filter is applied, reducing redundancy</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Badge overlay with text:</strong> Use a small pill badge in the top-left with both color and status text (e.g., "Playing"). This improves scannability and accessibility. Show playtime or other metadata below the title instead of redundant status text.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">5. Missing Filter Counts</h3>
+                  </div>
+                  <span className="severity-badge severity-medium">
+                    <span className="severity-dot"></span>
+                    Medium
+                  </span>
+                </div>
+                <p className="finding-description">
+                  Status filter chips show no item counts. Users can't tell if "Wishlist" has 0 or 100 games without clicking. This violates "recognition over recall" — users must remember their library distribution.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Wasted clicks:</strong> Users click empty filters, see "No games found", and navigate back</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>No sense of progress:</strong> Patient gamers track backlog shrinkage — counts provide that feedback loop</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Inconsistent with genre norms:</strong> Backloggd, Goodreads, Letterboxd all show counts on status filters</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Add counts to all status chips:</strong> Show <code>Status (Count)</code> format, right-aligned or as a subtle badge. Disable/dim empty filters to prevent dead-end clicks. Fetch counts server-side and cache aggressively.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">6. Search Input Prominence</h3>
+                  </div>
+                  <span className="severity-badge severity-medium">
+                    <span className="severity-dot"></span>
+                    Medium
+                  </span>
+                </div>
+                <p className="finding-description">
+                  The search input is visually de-emphasized — same height (36px) as filter chips, sits inline with sort dropdown. For users with 100+ games, search is the primary navigation method, but it's treated as a secondary control.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Reduced discoverability:</strong> New users may not realize search exists, defaulting to tedious scrolling</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Keyboard users penalized:</strong> No obvious focus state or hotkey (Cmd+K)</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-positive">+</span>
+                    <span><strong>Good placeholder text:</strong> "Filter library..." clearly explains purpose</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Elevate search to hero position:</strong> Increase height to 44px, add subtle border glow on focus, position at the very top of filters with its own row. Consider adding a keyboard shortcut indicator (⌘K) for power users. This pattern is familiar from Gmail, Notion, Linear.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">7. Card Metadata Hierarchy</h3>
+                  </div>
+                  <span className="severity-badge severity-medium">
+                    <span className="severity-dot"></span>
+                    Medium
+                  </span>
+                </div>
+                <p className="finding-description">
+                  Library cards show: title (2 lines) → status label → rating stars. No playtime, platform, or last-updated metadata. For patient gamers tracking progress, this omits key context.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Missing context:</strong> Can't see playtime without clicking into detail page</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Redundant status label:</strong> Takes space that could show useful metadata (see Finding #4)</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-positive">+</span>
+                    <span><strong>Good rating display:</strong> Stars are clear and scannable</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Show contextual metadata:</strong> Replace status text label with playtime (for Playing/Played) or platform (for Wishlist/Shelf). Move status to cover badge. Use icons for compactness (clock icon + "32h played").
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">8. Missing First-Time User Guidance</h3>
+                  </div>
+                  <span className="severity-badge severity-medium">
+                    <span className="severity-dot"></span>
+                    Medium
+                  </span>
+                </div>
+                <p className="finding-description">
+                  New users land on an empty dashboard with no guidance on how to add games. The only hint is a "Find a game to start" button when playing games list is empty, but this appears in a non-obvious location.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>High bounce risk:</strong> Empty states without clear CTAs lead to abandonment</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Unclear value prop:</strong> Users don't see what the app can do until library has content</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Friction to first value:</strong> No quick path to Steam import or search from empty state</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Onboarding flow for new users:</strong> Detect empty library and show a welcoming modal or hero section with 3 CTAs: "Import from Steam", "Search for Games", "Browse Popular". Include a preview screenshot of a populated library to communicate value.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">9. Insufficient Loading State Feedback</h3>
+                  </div>
+                  <span className="severity-badge severity-medium">
+                    <span className="severity-dot"></span>
+                    Medium
+                  </span>
+                </div>
+                <p className="finding-description">
+                  The app uses <code>{'<Suspense fallback={<LoadingScreen />}>'}</code> globally, but individual interactions (filter changes, search) show no loading state. Users on slow connections see stale content for 1-3 seconds.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Perceived slowness:</strong> No feedback makes the app feel unresponsive even when it's working</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Double-clicks:</strong> Users re-click filters thinking they didn't register</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-positive">+</span>
+                    <span><strong>Good skeleton for grids:</strong> <code>{'<LibraryGridSkeleton />'}</code> exists and looks polished</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Optimistic UI + subtle spinners:</strong> Show filter button in "loading" state (spinner icon, disabled) during fetch. Fade out current grid and show skeleton during filter/search changes. Use <code>{'useTransition()'}</code> for smoother transitions.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">10. Inconsistent Visual Rhythm</h3>
+                  </div>
+                  <span className="severity-badge severity-low">
+                    <span className="severity-dot"></span>
+                    Low
+                  </span>
+                </div>
+                <p className="finding-description">
+                  The design system uses both semantic spacing tokens (<code>--space-xs</code> through <code>--space-5xl</code>) and Tailwind utility classes (<code>gap-md</code>, <code>p-xl</code>), but application is inconsistent. Some cards use <code>p-xl</code> (16px), others <code>p-2xl</code> (24px).
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Visual noise:</strong> Inconsistent padding/margins create subtle misalignment across pages</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Developer confusion:</strong> Two parallel systems make it unclear which to use</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Enforce spacing scale via linting:</strong> Pick one system (Tailwind is already the default), deprecate CSS custom properties for spacing. Add ESLint rule to flag hard-coded pixel values. Audit existing components and normalize to <code>p-xl</code> for cards, <code>gap-md</code> for inline elements.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">11. Hidden Action Affordances</h3>
+                  </div>
+                  <span className="severity-badge severity-low">
+                    <span className="severity-dot"></span>
+                    Low
+                  </span>
+                </div>
+                <p className="finding-description">
+                  Library cards use a hover-only action bar on desktop (<code>{'<LibraryCardActionBar />'}</code>) that appears over the cover. Mobile uses swipe gestures. Both patterns hide functionality until the user "discovers" them.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Low discoverability:</strong> First-time users may never find quick actions</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-positive">+</span>
+                    <span><strong>Clean card design:</strong> Hiding actions keeps focus on game covers</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-positive">+</span>
+                    <span><strong>Good fallback:</strong> Users can always click into detail page for full controls</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Show one primary action:</strong> For Playing/Up Next cards, show a persistent "Log Session" button below the cover. Keep secondary actions in hover/swipe. This balances discoverability with visual cleanliness.
+                  </p>
+                </div>
+              </div>
+
+              <div className="finding-card">
+                <div className="finding-header">
+                  <div style={{ flex: 1 }}>
+                    <h3 className="finding-title">12. Theme-Specific Visual Noise</h3>
+                  </div>
+                  <span className="severity-badge severity-low">
+                    <span className="severity-dot"></span>
+                    Low
+                  </span>
+                </div>
+                <p className="finding-description">
+                  The app ships with three themes: default dark, Y2K (Xbox green neon), and Jewel (PS2 boot-screen aesthetic). Y2K and Jewel add significant visual effects (glows, chrome text, corner brackets, breathing animations) that may distract from content.
+                </p>
+
+                <ul className="impact-list">
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Accessibility concerns:</strong> Animations and high-contrast glows can trigger motion sensitivity</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-negative">−</span>
+                    <span><strong>Branding confusion:</strong> Jewel/Y2K themes feel like Easter eggs, not core brand</span>
+                  </li>
+                  <li className="impact-item">
+                    <span className="impact-icon impact-positive">+</span>
+                    <span><strong>Good opt-in:</strong> Themes are user-selected, not forced</span>
+                  </li>
+                </ul>
+
+                <div className="recommendation-box">
+                  <div className="recommendation-title">✓ Recommendation</div>
+                  <p className="recommendation-text">
+                    <strong>Respect prefers-reduced-motion:</strong> Disable breathing animations and glows when <code>@media (prefers-reduced-motion: reduce)</code> is active, even in Y2K/Jewel themes. Consider moving experimental themes to a "Labs" section of settings to set expectations.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="section">
+              <div className="section-header">
+                <h2>Summary & Next Steps</h2>
+              </div>
+              <div className="finding-card">
+                <h3 className="finding-title">Prioritized Action Plan</h3>
+                <div className="finding-description" style={{ marginBottom: '1.5rem' }}>
+                  Based on user impact and implementation effort, here's a recommended roadmap:
+                </div>
+
+                <div style={{ display: 'grid', gap: '1rem' }}>
+                  <div style={{ padding: '1rem', background: 'oklch(0.55 0.2 25 / 0.08)', border: '2px solid oklch(0.55 0.2 25 / 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--error)' }}>🔥 Week 1-2: Quick Wins (High Impact, Low Effort)</div>
+                    <ul style={{ paddingLeft: '1.25rem', fontSize: '0.9375rem', lineHeight: 1.6 }}>
+                      <li>Add counts to all status filter chips</li>
+                      <li>Increase search input prominence (height, border, position)</li>
+                      <li>Show playtime metadata on library cards (replace redundant status text)</li>
+                      <li>Add <code>prefers-reduced-motion</code> support to Y2K/Jewel themes</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ padding: '1rem', background: 'oklch(0.75 0.15 75 / 0.08)', border: '2px solid oklch(0.75 0.15 75 / 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--warning)' }}>⚡ Week 3-4: Medium Effort, High Value</div>
+                    <ul style={{ paddingLeft: '1.25rem', fontSize: '0.9375rem', lineHeight: 1.6 }}>
+                      <li>Redesign library filters with vertical layout + progressive disclosure</li>
+                      <li>Replace horizontal scroll with grid/wrap on mobile status filters</li>
+                      <li>Simplify dashboard hero to single primary action per game</li>
+                      <li>Add loading states to filter/search interactions</li>
+                    </ul>
+                  </div>
+
+                  <div style={{ padding: '1rem', background: 'oklch(0.62 0.16 172 / 0.08)', border: '2px solid oklch(0.62 0.16 172 / 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--primary)' }}>🎯 Month 2: Bigger Investments</div>
+                    <ul style={{ paddingLeft: '1.25rem', fontSize: '0.9375rem', lineHeight: 1.6 }}>
+                      <li>Build onboarding flow for new users (empty state → import/search)</li>
+                      <li>Improve card status visibility with badge overlays</li>
+                      <li>Audit and normalize spacing scale across components</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--bg)', borderRadius: '8px' }}>
+                  <div style={{ fontWeight: 600, marginBottom: '0.5rem' }}>📊 Success Metrics</div>
+                  <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--muted)', lineHeight: 1.6 }}>
+                    <li>Time to first game added (target: &lt;60 seconds)</li>
+                    <li>Filter interaction rate (% of sessions using filters)</li>
+                    <li>Mobile filter discovery (% finding hidden chips)</li>
+                    <li>Dashboard quick-log conversion (% completing log from hero)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AuditApp />);
+  </script>
+</body>
+</html>

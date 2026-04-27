@@ -17,7 +17,11 @@ Widgets CANNOT import from:
 
 | Widget | Purpose |
 |--------|---------|
-| `header/` | App-wide navigation header |
+| `header/` | Unauth-only top-bar header (login screen + public profile route group); brand + theme toggle |
+| `sidebar/` | Desktop left-rail navigation for `md+` viewports (spec-014 slice 2) |
+| `mobile-topbar/` | Sticky top app-bar on `<md` for authenticated routes; brand mark, search trigger, theme toggle (spec-014 slice 3) |
+| `mobile-nav/` | Bottom tab bar on `<md` for authenticated routes; primary destinations (Library, Journal, Profile) (spec-014 slice 3) |
+| `settings-rail/` | Section navigation for the `/settings` shell (Profile, Account) |
 | `game-card/` | Compound game card component with cover, content, header, meta, footer, skeleton, and genre badges |
 
 ## Structure Convention

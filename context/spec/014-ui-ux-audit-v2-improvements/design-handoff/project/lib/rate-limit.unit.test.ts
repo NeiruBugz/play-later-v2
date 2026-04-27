@@ -1,0 +1,187 @@
+import { checkRateLimit, type RateLimitInput } from "./rate-limit";
+
+function createMockRequest(ip: string): RateLimitInput {
+  return {
+    headers: new Headers({
+      "x-forwarded-for": ip,
+    }),
+    ip: undefined,
+  };
+}
+
+describe("checkRateLimit", () => {
+  let testCounter = 0;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    testCounter++;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  function getUniqueIP(suffix: string = ""): string {
+    return `192.168.${testCounter}.${suffix || "1"}`;
+  }
+
+  describe("when user makes requests to rate-limited endpoint", () => {
+    it("should allow first 120 requests within the window", async () => {
+      const mockRequest = createMockRequest(getUniqueIP());
+
+      const results = [];
+      for (let i = 0; i < 120; i++) {
+        results.push(await checkRateLimit(mockRequest));
+      }
+
+      results.forEach((result, index) => {
+        expect(result.allowed).toBe(true);
+        expect(result.remaining).toBe(120 - (index + 1));
+      });
+    });
+
+    it("should deny the 121st request within the window", async () => {
+      const mockRequest = createMockRequest(getUniqueIP());
+
+      for (let i = 0; i < 120; i++) {
+        await checkRateLimit(mockRequest);
+      }
+
+      const result = await checkRateLimit(mockRequest);
+
+      expect(result.allowed).toBe(false);
+      expect(result.remaining).toBe(0);
+    });
+
+    it("should reset counter after window expires", async () => {
+      const mockRequest = createMockRequest(getUniqueIP());
+
+      for (let i = 0; i < 120; i++) {
+        await checkRateLimit(mockRequest);
+      }
+
+      const deniedResult = await checkRateLimit(mockRequest);
+      expect(deniedResult.allowed).toBe(false);
+
+      vi.advanceTimersByTime(60_000 + 1);
+
+      const newResult = await checkRateLimit(mockRequest);
+      expect(newResult.allowed).toBe(true);
+      expect(newResult.remaining).toBe(119);
+    });
+
+    it("should track different IPs independently", async () => {
+      const mockRequest1 = createMockRequest(getUniqueIP("1"));
+      const mockRequest2 = createMockRequest(getUniqueIP("2"));
+
+      for (let i = 0; i < 10; i++) {
+        await checkRateLimit(mockRequest1);
+      }
+
+      for (let i = 0; i < 5; i++) {
+        await checkRateLimit(mockRequest2);
+      }
+
+      const result1 = await checkRateLimit(mockRequest1);
+      const result2 = await checkRateLimit(mockRequest2);
+
+      expect(result1.allowed).toBe(true);
+      expect(result1.remaining).toBe(109);
+      expect(result2.allowed).toBe(true);
+      expect(result2.remaining).toBe(114);
+    });
+
+    it("should respect custom limit and window parameters", async () => {
+      const mockRequest = createMockRequest(getUniqueIP());
+
+      const customLimit = 5;
+      const customWindow = 10 * 1000;
+
+      for (let i = 0; i < 5; i++) {
+        await checkRateLimit(mockRequest, customLimit, customWindow);
+      }
+
+      const sixthRequest = await checkRateLimit(
+        mockRequest,
+        customLimit,
+        customWindow
+      );
+
+      expect(sixthRequest.allowed).toBe(false);
+      expect(sixthRequest.remaining).toBe(0);
+    });
+
+    it("should extract IP from x-forwarded-for header when ip is not provided", async () => {
+      const forwardedIP = "203.0.113.1";
+      const mockRequest: RateLimitInput = {
+        headers: new Headers({
+          "x-forwarded-for": forwardedIP,
+        }),
+      };
+
+      const result = await checkRateLimit(mockRequest);
+
+      expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(119);
+    });
+  });
+
+  describe("when handling edge cases", () => {
+    it("should handle requests with no IP information", async () => {
+      const mockRequest: RateLimitInput = {
+        headers: new Headers(),
+      };
+
+      const result = await checkRateLimit(mockRequest);
+
+      expect(result.allowed).toBe(true);
+    });
+
+    it("should maintain rate limit after partial window expiry", async () => {
+      const mockRequest = createMockRequest(getUniqueIP());
+
+      for (let i = 0; i < 10; i++) {
+        await checkRateLimit(mockRequest);
+      }
+
+      vi.advanceTimersByTime(30_000);
+
+      const result = await checkRateLimit(mockRequest);
+      expect(result.allowed).toBe(true);
+      expect(result.remaining).toBe(109);
+    });
+
+    it("should handle concurrent requests from different IPs", async () => {
+      const ips = [getUniqueIP("1"), getUniqueIP("2"), getUniqueIP("3")];
+
+      for (let i = 0; i < 10; i++) {
+        for (const ip of ips) {
+          const request = createMockRequest(ip);
+          await checkRateLimit(request);
+        }
+      }
+
+      for (const ip of ips) {
+        const request = createMockRequest(ip);
+        const { remaining, allowed } = await checkRateLimit(request);
+        expect(allowed).toBe(true);
+        expect(remaining).toBe(109);
+      }
+    });
+
+    it("should handle x-forwarded-for with multiple IPs (proxy chain)", async () => {
+      const mockRequest = createMockRequest(
+        "10.0.0.1, 172.16.0.1, 192.168.1.1"
+      );
+
+      for (let i = 0; i < 120; i++) {
+        await checkRateLimit(mockRequest);
+      }
+
+      const result = await checkRateLimit(mockRequest);
+
+      expect(result.allowed).toBe(false);
+    });
+  });
+});

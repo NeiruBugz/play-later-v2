@@ -1,6 +1,9 @@
+"use client";
+
 import { Gamepad2, Library, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 
+import { useCommandPaletteContext } from "@/features/command-palette";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { cn } from "@/shared/lib/ui/utils";
@@ -16,6 +19,7 @@ export function EmptyLibraryHero({
   variant = "library",
 }: EmptyLibraryHeroProps) {
   const isLibrary = variant === "library";
+  const { open } = useCommandPaletteContext();
 
   return (
     <Card
@@ -35,7 +39,7 @@ export function EmptyLibraryHero({
         <h2
           className={cn(
             "font-semibold tracking-tight",
-            isLibrary ? "heading-lg" : "heading-sm"
+            isLibrary ? "text-h2" : "text-h3"
           )}
         >
           Start Your Gaming Journey
@@ -43,7 +47,7 @@ export function EmptyLibraryHero({
         <p
           className={cn(
             "text-muted-foreground",
-            isLibrary ? "body-md" : "body-sm"
+            isLibrary ? "text-body" : "text-caption"
           )}
         >
           Track what you&apos;re playing, what you&apos;ve finished, and
@@ -68,17 +72,30 @@ export function EmptyLibraryHero({
             Import from Steam
           </Link>
         </Button>
-        <Button
-          asChild
-          variant="outline"
-          size={isLibrary ? "lg" : "default"}
-          className="w-full sm:w-auto"
-        >
-          <Link href={GAMES_SEARCH_HREF}>
+        {isLibrary ? (
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            <Link href={GAMES_SEARCH_HREF}>
+              <Search className="mr-xs h-4 w-4" />
+              Search for Games
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="default"
+            className="w-full sm:w-auto"
+            onClick={open}
+          >
             <Search className="mr-xs h-4 w-4" />
             Search for Games
-          </Link>
-        </Button>
+          </Button>
+        )}
       </div>
     </Card>
   );

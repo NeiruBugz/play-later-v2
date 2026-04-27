@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { FollowButton } from "@/features/social";
 
-import { LogoutButton } from "./logout-button";
+import { deriveBannerGradient } from "../lib/derive-banner-gradient";
 
 type ProfileHeaderProps = {
   profile: {
@@ -12,7 +12,6 @@ type ProfileHeaderProps = {
     name: string | null;
     image: string | null;
     isPublicProfile: boolean;
-    email?: string | null;
   };
   socialCounts: {
     followers: number;
@@ -25,6 +24,9 @@ type ProfileHeaderProps = {
   };
 };
 
+const BANNER_HEIGHT = "h-28 sm:h-36";
+const AVATAR_SIZE = 96;
+
 export function ProfileHeader({
   profile,
   socialCounts,
@@ -33,88 +35,91 @@ export function ProfileHeader({
   const displayName = profile.name ?? profile.username;
   const showFollowButton =
     viewer.isAuthenticated && !viewer.isOwner && profile.isPublicProfile;
+  const bannerGradient = deriveBannerGradient(profile.id);
 
   return (
-    <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-6">
-      <div className="shrink-0">
-        {profile.image ? (
-          <Image
-            width={96}
-            height={96}
-            priority
-            unoptimized
-            src={profile.image}
-            alt={`${displayName}'s avatar`}
-            className="ring-border/50 h-24 w-24 rounded-lg object-cover ring-1"
-          />
-        ) : (
-          <Image
-            width={96}
-            height={96}
-            priority
-            unoptimized
-            src="/default-avatar.svg"
-            alt={`${profile.username}'s avatar`}
-            className="ring-border/50 h-24 w-24 rounded-lg object-cover ring-1"
-          />
-        )}
-      </div>
+    <div className="w-full">
+      <div
+        className={`${BANNER_HEIGHT} w-full rounded-t-lg`}
+        style={{ background: bannerGradient }}
+        aria-hidden="true"
+      />
 
-      <div className="flex flex-1 flex-col items-center gap-3 sm:items-start">
-        <div className="text-center sm:text-left">
-          <h1 className="heading-xl tracking-tight">{displayName}</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            @{profile.username}
-          </p>
-        </div>
-
-        <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-          <Link
-            href={`/u/${profile.username}/followers`}
-            className="hover:text-foreground transition-colors"
-          >
-            <span className="text-foreground font-semibold tabular-nums">
-              {socialCounts.followers}
-            </span>{" "}
-            Followers
-          </Link>
-
-          <span className="text-border mx-1">·</span>
-
-          <Link
-            href={`/u/${profile.username}/following`}
-            className="hover:text-foreground transition-colors"
-          >
-            <span className="text-foreground font-semibold tabular-nums">
-              {socialCounts.following}
-            </span>{" "}
-            Following
-          </Link>
-        </div>
-
-        {showFollowButton && (
-          <FollowButton
-            followingId={profile.id}
-            initialIsFollowing={viewer.isFollowing ?? false}
-          />
-        )}
-
-        {viewer.isOwner && (
-          <div className="flex flex-col items-center gap-2 sm:items-start">
-            {profile.email && (
-              <p className="text-muted-foreground text-sm">{profile.email}</p>
+      <div className="px-4 sm:px-6">
+        <div className="relative flex items-end justify-between">
+          <div className="-mt-12 shrink-0 sm:-mt-16">
+            {profile.image ? (
+              <Image
+                width={AVATAR_SIZE}
+                height={AVATAR_SIZE}
+                priority
+                unoptimized
+                src={profile.image}
+                alt={`${displayName}'s avatar`}
+                className="ring-background h-24 w-24 rounded-lg object-cover ring-4 sm:h-32 sm:w-32"
+              />
+            ) : (
+              <Image
+                width={AVATAR_SIZE}
+                height={AVATAR_SIZE}
+                priority
+                unoptimized
+                src="/default-avatar.svg"
+                alt={`${profile.username}'s avatar`}
+                className="ring-background h-24 w-24 rounded-lg object-cover ring-4 sm:h-32 sm:w-32"
+              />
             )}
-            <div className="flex items-center gap-3">
+          </div>
+
+          <div className="pb-2">
+            {showFollowButton && (
+              <FollowButton
+                followingId={profile.id}
+                initialIsFollowing={viewer.isFollowing ?? false}
+              />
+            )}
+
+            {viewer.isOwner && (
               <Link
-                href="/profile/settings"
+                href="/settings/profile"
                 className="border-border hover:bg-muted rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
               >
                 Edit Profile
               </Link>
-              <LogoutButton />
-            </div>
+            )}
           </div>
-        )}
+        </div>
+
+        <div className="mt-3 space-y-1">
+          <h1 className="text-display tracking-tight">{displayName}</h1>
+          <p className="text-caption text-muted-foreground">
+            @{profile.username}
+          </p>
+
+          <div className="text-caption text-muted-foreground flex items-center gap-1.5 pt-1">
+            <Link
+              href={`/u/${profile.username}/followers`}
+              className="hover:text-foreground transition-colors"
+            >
+              <span className="text-foreground font-semibold tabular-nums">
+                {socialCounts.followers}
+              </span>{" "}
+              Followers
+            </Link>
+
+            <span className="text-border mx-1">·</span>
+
+            <Link
+              href={`/u/${profile.username}/following`}
+              className="hover:text-foreground transition-colors"
+            >
+              <span className="text-foreground font-semibold tabular-nums">
+                {socialCounts.following}
+              </span>{" "}
+              Following
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

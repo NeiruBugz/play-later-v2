@@ -11,18 +11,18 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-paper hover:bg-primary/90 hover:shadow-paper-md active:scale-[0.98] y2k:shadow-[0_0_12px_oklch(0.72_0.22_145/0.3)] y2k:hover:shadow-[0_0_20px_oklch(0.72_0.22_145/0.4)]",
+          "bg-primary text-primary-foreground shadow-paper-sm hover:bg-primary-hover hover:shadow-paper active:bg-primary-active active:scale-[0.98] y2k:shadow-[0_0_12px_oklch(0.72_0.22_145/0.3)] y2k:hover:shadow-[0_0_20px_oklch(0.72_0.22_145/0.4)]",
         destructive:
           "bg-destructive text-destructive-foreground shadow-paper-sm hover:bg-destructive/90 hover:shadow-paper active:scale-[0.98]",
         outline:
-          "border-2 border-border/30 bg-transparent hover:border-primary/40 rounded-lg",
+          "border border-border bg-card text-foreground hover:bg-surface-hover active:bg-surface-active",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-paper-sm hover:bg-secondary/80 hover:shadow-paper active:scale-[0.98]",
+          "bg-secondary text-secondary-foreground shadow-paper-sm hover:bg-surface-hover hover:shadow-paper active:bg-surface-active active:scale-[0.98]",
         ghost:
-          "text-muted-foreground hover:bg-muted/20 hover:text-foreground active:scale-[0.98]",
+          "text-muted-foreground hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
         "ghost-hover":
-          "text-transparent hover:text-muted-foreground hover:bg-muted/20 active:scale-[0.98]",
-        link: "text-primary underline-offset-4 hover:underline hover:text-primary/70",
+          "text-transparent hover:text-muted-foreground hover:bg-accent active:scale-[0.98]",
+        link: "text-primary underline-offset-4 hover:underline hover:text-primary-hover",
       },
       size: {
         default: "h-10 px-xl py-md",

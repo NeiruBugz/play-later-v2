@@ -24,7 +24,7 @@ These features are authorized for cross-feature imports. Only import from their 
 | `library` | Library display components (LibraryCard) on dashboard | `app/(protected)/dashboard/page.tsx` |
 | `whats-new` | App-wide announcement modal | `app/(protected)/layout.tsx` |
 | `profile` | Profile UI components (AvatarUpload, UsernameInput) and server actions | `setup-profile/ui/` |
-| `command-palette` | App-wide Cmd+K search palette | `widgets/header/`, `app/(protected)/layout.tsx`, `app/games/layout.tsx` |
+| `command-palette` | App-wide Cmd+K search palette | `widgets/sidebar/`, `widgets/mobile-topbar/`, `app/(protected)/layout.tsx`, `app/games/layout.tsx`, `app/u/[username]/layout.tsx`, `onboarding/ui/` |
 | `game-search` | Search hooks reused by command palette | `command-palette/ui/` |
 | `social` | Follow system, activity feed, public profile interactions | `profile/ui/`, `app/(protected)/dashboard/page.tsx`, `app/u/[username]/` |
 

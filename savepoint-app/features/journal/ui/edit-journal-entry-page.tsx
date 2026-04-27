@@ -25,18 +25,18 @@ export function EditJournalEntryPage({ entry }: EditJournalEntryPageProps) {
   // game-tied entries in MVP; the schema supports nulls for future use).
   if (entry.gameId === null) {
     return (
-      <main className="py-3xl container mx-auto">
+      <div className="py-3xl container mx-auto">
         <div className="mx-auto max-w-3xl">
           <p className="text-muted-foreground">
             This entry is not tied to a game and cannot be edited here.
           </p>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="py-3xl container mx-auto">
+    <div className="py-3xl container mx-auto">
       <div className="mx-auto max-w-3xl">
         <h1 className="heading-xl mb-xl font-semibold">Edit Journal Entry</h1>
         <JournalEntryForm
@@ -46,6 +46,6 @@ export function EditJournalEntryPage({ entry }: EditJournalEntryPageProps) {
           onCancel={handleCancel}
         />
       </div>
-    </main>
+    </div>
   );
 }

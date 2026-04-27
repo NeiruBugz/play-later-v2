@@ -1,6 +1,6 @@
 "use client";
 
-import { Gem, Monitor, Moon, Sparkles, Sun } from "lucide-react";
+import { Gamepad2, Monitor, Moon, Sparkles, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
@@ -14,8 +14,8 @@ const getMountedServer = () => false;
 const THEMES = [
   { value: "light", label: "Light", icon: Sun },
   { value: "dark", label: "Dark", icon: Moon },
-  { value: "y2k", label: "Y2K", icon: Sparkles },
-  { value: "jewel", label: "Jewel", icon: Gem },
+  { value: "cartridge", label: "Cartridge", icon: Gamepad2 },
+  { value: "aurora", label: "Aurora", icon: Sparkles },
   { value: "system", label: "System", icon: Monitor },
 ] as const;
 
@@ -29,10 +29,10 @@ function ThemeIcon({
   switch (theme) {
     case "dark":
       return <Moon className={className} />;
-    case "y2k":
+    case "cartridge":
+      return <Gamepad2 className={className} />;
+    case "aurora":
       return <Sparkles className={className} />;
-    case "jewel":
-      return <Gem className={className} />;
     case "system":
       return <Monitor className={className} />;
     case "light":
@@ -87,11 +87,7 @@ export function ThemeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        className={cn(
-          "h-8 w-8",
-          theme === "y2k" && "y2k-text-glow text-primary",
-          theme === "jewel" && "jewel-neon-text"
-        )}
+        className={cn("h-8 w-8", theme === "aurora" && "text-primary")}
         onClick={() => setOpen(!open)}
         aria-label="Change theme"
         aria-expanded={open}
@@ -105,10 +101,8 @@ export function ThemeToggle() {
       {open && (
         <div
           className={cn(
-            "border-border bg-popover text-popover-foreground shadow-paper-md absolute top-full right-0 z-50 mt-2 min-w-[140px] rounded-lg border p-1",
-            "animate-scale-in",
-            theme === "y2k" && "y2k-border-glow",
-            theme === "jewel" && "jewel-glass-strong jewel-neon"
+            "border-border bg-popover text-popover-foreground shadow-paper-md absolute bottom-full left-0 z-50 mt-2 min-w-35 rounded-lg border p-1",
+            "animate-scale-in"
           )}
           role="menu"
         >

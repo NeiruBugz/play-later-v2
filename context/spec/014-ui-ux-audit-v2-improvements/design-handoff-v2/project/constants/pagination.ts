@@ -1,0 +1,9 @@
+export const PLATFORM_BREAKDOWN_LIMIT = 5;
+export const RECENT_COMPLETED_ITEMS_LIMIT = 3;
+export const DEFAULT_ITEMS_PER_PAGE = 24;
+export const USER_PREVIEW_ITEMS_LIMIT = 3;
+export const RECENT_GAMES_LIMIT = 5;
+export const FRANCHISE_GAMES_INITIAL_LIMIT = 20;
+export const LIBRARY_PAGE_SIZE = 24;
+
+export const IGDB_SINGLE_RESULT_LIMIT = 1;

@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Detail — Full Page Mock</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: oklch(0.985 0.002 260);
+      --fg: oklch(0.15 0.01 260);
+      --card: oklch(1 0 0);
+      --border: oklch(0.9 0.005 260);
+      --muted: oklch(0.45 0.01 260);
+      --muted-bg: oklch(0.94 0.005 260);
+      --primary: oklch(0.62 0.16 172);
+      --primary-fg: oklch(0.99 0.002 175);
+      --primary-soft: oklch(0.62 0.16 172 / 0.12);
+      --warning: oklch(0.75 0.15 75);
+      --shadow: 0 1px 3px oklch(0 0 0 / 0.05), 0 1px 2px oklch(0 0 0 / 0.04);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: oklch(0.95 0.005 260);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+    }
+    #root { max-width: 1440px; margin: 0 auto; }
+
+    /* === App shell === */
+    .app { display: grid; grid-template-columns: 220px 1fr; min-height: 1000px; background: var(--bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+
+    /* sidebar */
+    .sidebar { background: var(--bg); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+    .brand { display: flex; align-items: center; gap: 8px; padding: 8px 10px 18px; }
+    .brand-mark { width: 22px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, var(--primary), oklch(0.62 0.16 200)); display: grid; place-items: center; color: var(--primary-fg); font-size: 11px; font-weight: 700; }
+    .brand-name { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+    .nav-search { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; background: var(--muted-bg); color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+    .nav-search .kbd { margin-left: auto; font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg); border: 1px solid var(--border); font-family: monospace; }
+    .nav-search svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .nav-link { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--fg); cursor: pointer; }
+    .nav-link.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+    .nav-link svg { width: 14px; height: 14px; }
+    .sidebar-footer { margin-top: auto; padding: 12px 10px 4px; display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--border); }
+    .avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, oklch(0.7 0.15 30), oklch(0.55 0.18 50)); color: white; display: grid; place-items: center; font-size: 11px; font-weight: 600; }
+
+    /* main */
+    .main { padding: 0 0 64px; min-width: 0; }
+
+    /* === HERO LOCKUP (the corrected V1) === */
+    .hero { position: relative; padding: 0 48px; }
+    .hero-banner {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 280px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .hero-banner-img {
+      position: absolute; inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1600&q=80');
+      background-size: cover;
+      background-position: center 30%;
+      filter: saturate(0.85);
+    }
+    .hero-banner-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(180deg, oklch(0.985 0.002 260 / 0) 0%, oklch(0.985 0.002 260 / 0.4) 55%, var(--bg) 88%, var(--bg) 100%),
+        linear-gradient(90deg, oklch(0.985 0.002 260 / 0.6) 0%, oklch(0.985 0.002 260 / 0) 40%);
+    }
+
+    .hero-content {
+      position: relative;
+      padding-top: 140px; /* cover top sits inside the banner */
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 28px;
+      align-items: end;
+    }
+    .hero-cover {
+      width: 200px;
+      aspect-ratio: 3 / 4;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px oklch(0 0 0 / 0.25), 0 4px 12px oklch(0 0 0 / 0.15);
+      background: oklch(0.2 0.05 260);
+      position: relative;
+    }
+    .hero-cover-art {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 30%, oklch(0.85 0.08 175) 0%, oklch(0.55 0.1 200) 50%, oklch(0.18 0.04 260) 100%);
+    }
+    .hero-cover-art::before {
+      content: '';
+      position: absolute; left: 50%; top: 38%;
+      transform: translate(-50%, -50%);
+      width: 90px; height: 110px;
+      background: radial-gradient(ellipse at 50% 35%, oklch(0.95 0.01 260), oklch(0.2 0.04 260) 70%);
+      clip-path: polygon(50% 0%, 70% 18%, 78% 50%, 70% 75%, 60% 88%, 50% 95%, 40% 88%, 30% 75%, 22% 50%, 30% 18%);
+      opacity: 0.85;
+    }
+    .hero-cover-title {
+      position: absolute; left: 0; right: 0; bottom: 14px;
+      text-align: center;
+      font-family: Georgia, serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: white;
+      letter-spacing: 0.05em;
+      text-shadow: 0 2px 6px oklch(0 0 0 / 0.6);
+    }
+
+    .hero-text { padding-bottom: 6px; min-width: 0; }
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hero-eyebrow .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); }
+    .hero-title {
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.02;
+      margin-bottom: 18px;
+      color: var(--fg);
+    }
+    .hero-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* segmented status (existing pattern, kept tight) */
+    .seg {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 8px;
+      background: var(--muted-bg);
+      border: 1px solid var(--border);
+      gap: 2px;
+    }
+    .seg-item {
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .seg-item svg { width: 12px; height: 12px; }
+    .seg-item.active { background: var(--card); color: var(--fg); font-weight: 600; box-shadow: 0 1px 2px oklch(0 0 0 / 0.06); }
+    .seg-item.active.playing { background: var(--primary); color: var(--primary-fg); }
+
+    .stars { display: inline-flex; gap: 1px; padding: 4px 8px; border-radius: 6px; }
+    .stars span { color: oklch(0.85 0.005 260); font-size: 16px; line-height: 1; }
+    .stars span.filled { color: var(--warning); }
+
+    .icon-btn {
+      width: 32px; height: 32px;
+      display: grid; place-items: center;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--muted-bg); }
+    .icon-btn svg { width: 16px; height: 16px; }
+
+    /* tabs strip — anchors hero as its own zone */
+    .tabs {
+      margin-top: 32px;
+      padding: 0 48px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 4px;
+    }
+    .tab {
+      padding: 12px 14px;
+      font-size: 13.5px;
+      color: var(--muted);
+      font-weight: 500;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab.active { color: var(--fg); font-weight: 600; border-bottom-color: var(--primary); }
+    .tab .count { font-size: 11px; color: var(--muted); padding: 1px 5px; border-radius: 99px; background: var(--muted-bg); }
+
+    /* body sections */
+    .body { padding: 32px 48px 0; display: grid; gap: 32px; max-width: 880px; }
+
+    .section-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-eyebrow .rule { flex: 1; height: 1px; background: var(--border); opacity: 0.5; }
+
+    .release-line { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .summary { font-size: 15.5px; line-height: 1.65; color: oklch(0.3 0.01 260); max-width: 720px; }
+
+    .meta-row { display: flex; align-items: baseline; gap: 14px; margin-top: 6px; }
+    .meta-label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-family: 'SF Mono', monospace; min-width: 90px; }
+    .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .badge { padding: 3px 10px; border-radius: 99px; background: var(--muted-bg); font-size: 12px; color: var(--fg); border: 1px solid var(--border); }
+    .badge.platform { display: inline-flex; align-items: center; gap: 5px; }
+
+    h2.section-title { font-size: 22px; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 14px; }
+
+    /* playtime cards */
+    .playtime-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .playtime-card {
+      padding: 18px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .playtime-card.your {
+      background: oklch(0.62 0.16 172 / 0.07);
+      border-color: oklch(0.62 0.16 172 / 0.25);
+      grid-column: 1 / -1;
+    }
+    .playtime-icon {
+      width: 38px; height: 38px;
+      border-radius: 8px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .playtime-icon svg { width: 18px; height: 18px; }
+    .playtime-label { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 2px; }
+    .playtime-value { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+    .playtime-value .unit { font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+    .playtime-meta { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+    .avg-label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-family: 'SF Mono', monospace; margin-bottom: 8px; }
+
+    /* journal section */
+    .journal-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; gap: 16px; }
+    .journal-header h2 { white-space: nowrap; }
+    .journal-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn { padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: var(--primary-fg); }
+    .btn-secondary { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+    .btn svg { width: 13px; height: 13px; }
+
+    .journal-timeline { position: relative; padding-left: 18px; }
+    .journal-timeline::before { content: ''; position: absolute; left: 4px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+    .journal-entry { position: relative; padding: 0 0 24px; }
+    .journal-entry::before {
+      content: '';
+      position: absolute; left: -18px; top: 6px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 0 3px var(--bg);
+    }
+    .journal-date { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 6px; font-family: 'SF Mono', monospace; }
+    .journal-title { font-size: 15.5px; font-weight: 600; margin-bottom: 4px; }
+    .journal-snippet { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin-bottom: 6px; }
+    .journal-meta { display: flex; gap: 10px; font-size: 11.5px; color: var(--muted); }
+    .journal-meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+    /* annotations */
+    .anno-strip { background: oklch(0.75 0.15 75 / 0.08); border-bottom: 1px solid oklch(0.75 0.15 75 / 0.3); padding: 10px 24px; font-size: 12.5px; color: oklch(0.45 0.12 75); display: flex; align-items: center; gap: 10px; }
+    .anno-tag { padding: 2px 8px; border-radius: 4px; background: oklch(0.75 0.15 75 / 0.2); font-weight: 600; font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+    /* meta tray over banner */
+    .breadcrumb {
+      position: relative;
+      padding: 14px 48px 0;
+      font-size: 12.5px;
+      color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+      z-index: 1;
+    }
+    .breadcrumb a { color: var(--muted); text-decoration: none; }
+    .breadcrumb .crumb-sep { opacity: 0.5; }
+    .breadcrumb .current { color: var(--fg); font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const Icon = ({ name }) => {
+      const icons = {
+        search: <path d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>,
+        library: <path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5v14zM4 19.5V21h13" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
+        journal: <path d="M9 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4M16 3l5 5L9 20H4v-5L16 3z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
+        timeline: <path d="M12 8v4l3 2M22 12a10 10 0 11-20 0 10 10 0 0120 0z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>,
+        profile: <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M16 7a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>,
+        settings: <><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" strokeWidth="2" fill="none"/></>,
+        bookmark: <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
+        play: <path d="M5 3l14 9-14 9V3z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
+        shelf: <path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>,
+        check: <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
+        wishlist: <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>,
+        clock: <><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/></>,
+        trophy: <path d="M6 9H4.5a2.5 2.5 0 010-5H6m12 5h1.5a2.5 2.5 0 000-5H18m-12 0v6a6 6 0 0012 0V4H6zm6 12v3m-4 0h8" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
+        plus: <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>,
+        edit: <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
+        more: <><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/><circle cx="5" cy="12" r="1.5" fill="currentColor"/></>,
+        share: <><circle cx="18" cy="5" r="3" stroke="currentColor" strokeWidth="2" fill="none"/><circle cx="6" cy="12" r="3" stroke="currentColor" strokeWidth="2" fill="none"/><circle cx="18" cy="19" r="3" stroke="currentColor" strokeWidth="2" fill="none"/><path d="M8.6 13.5L15.4 17.5M15.4 6.5L8.6 10.5" stroke="currentColor" strokeWidth="2" fill="none"/></>,
+        flag: <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22V15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>,
+      };
+      return <svg viewBox="0 0 24 24">{icons[name]}</svg>;
+    };
+
+    const Sidebar = () => (
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-mark">S</div>
+          <div className="brand-name">SavePoint</div>
+        </div>
+        <div className="nav-search">
+          <Icon name="search" />
+          <span>Search</span>
+          <span className="kbd">⌘K</span>
+        </div>
+        <div className="nav-link active"><Icon name="library" /> Library</div>
+        <div className="nav-link"><Icon name="journal" /> Journal</div>
+        <div className="nav-link"><Icon name="timeline" /> Timeline</div>
+        <div className="nav-link"><Icon name="profile" /> Profile</div>
+        <div className="nav-link"><Icon name="settings" /> Settings</div>
+        <div className="sidebar-footer">
+          <div className="avatar">N</div>
+          <div style={{ fontSize: 12.5 }}>NekuBugz</div>
+        </div>
+      </aside>
+    );
+
+    const Hero = () => (
+      <div className="hero">
+        <div className="hero-banner" aria-hidden>
+          <div className="hero-banner-img" />
+          <div className="hero-banner-overlay" />
+        </div>
+
+        <nav className="breadcrumb">
+          <a>Library</a>
+          <span className="crumb-sep">/</span>
+          <a>Games</a>
+          <span className="crumb-sep">/</span>
+          <span className="current">Resident Evil Requiem</span>
+        </nav>
+
+        <div className="hero-content">
+          <div className="hero-cover">
+            <div className="hero-cover-art" />
+            <div className="hero-cover-title">RESIDENT EVIL<br/>REQUIEM</div>
+          </div>
+
+          <div className="hero-text">
+            <div className="hero-eyebrow">
+              <span>Feb 27, 2026</span>
+              <span className="dot" />
+              <span>Capcom</span>
+              <span className="dot" />
+              <span>Action · Survival Horror</span>
+            </div>
+            <h1 className="hero-title">Resident Evil Requiem</h1>
+            <div className="hero-controls">
+              <div className="seg" role="tablist">
+                <span className="seg-item"><Icon name="bookmark" /> Up Next</span>
+                <span className="seg-item active playing"><Icon name="play" /> Playing</span>
+                <span className="seg-item"><Icon name="shelf" /> Shelf</span>
+                <span className="seg-item"><Icon name="check" /> Played</span>
+                <span className="seg-item"><Icon name="wishlist" /> Wishlist</span>
+              </div>
+              <div className="stars" title="Your rating">
+                <span className="filled">★</span>
+                <span className="filled">★</span>
+                <span className="filled">★</span>
+                <span className="filled">★</span>
+                <span>★</span>
+              </div>
+              <button className="icon-btn" aria-label="More"><Icon name="more" /></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const Tabs = () => (
+      <div className="tabs">
+        <div className="tab active">Overview</div>
+        <div className="tab">Journal <span className="count">3</span></div>
+        <div className="tab">Playtime</div>
+        <div className="tab">Related</div>
+      </div>
+    );
+
+    const Body = () => (
+      <div className="body">
+        <section>
+          <div className="section-eyebrow">// GAME.DETAIL <span className="rule" /> RES-EVIL-REQ</div>
+          <div className="release-line">Released Feb 27, 2026 · 9th mainline entry</div>
+          <p className="summary">
+            Resident Evil Requiem is the ninth entry in the Resident Evil series. Experience terrifying
+            survival horror with FBI analyst Grace Ashcroft, and dive into pulse-pounding action with
+            legendary agent Leon S. Kennedy. Both of their journeys and unique gameplay styles intertwine
+            into a heart-stopping, emotional experience that will chill you to your core.
+          </p>
+          <div className="meta-row" style={{ marginTop: 22 }}>
+            <span className="meta-label">// Genres</span>
+            <div className="badges">
+              <span className="badge">Shooter</span>
+              <span className="badge">Puzzle</span>
+              <span className="badge">Adventure</span>
+            </div>
+          </div>
+          <div className="meta-row">
+            <span className="meta-label">// Platforms</span>
+            <div className="badges">
+              <span className="badge platform">▣ Xbox Series X|S</span>
+              <span className="badge platform">◆ Nintendo Switch 2</span>
+              <span className="badge platform">▦ PC</span>
+              <span className="badge platform">▲ PS5</span>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2 className="section-title">Playtime</h2>
+          <div className="playtime-grid">
+            <div className="playtime-card your">
+              <div className="playtime-icon"><Icon name="clock" /></div>
+              <div>
+                <div className="playtime-label">Your playtime</div>
+                <div className="playtime-value">30<span className="unit">min</span></div>
+              </div>
+              <div className="playtime-meta">1 session</div>
+            </div>
+          </div>
+          <div className="avg-label">// Average times to beat</div>
+          <div className="playtime-grid">
+            <div className="playtime-card">
+              <div className="playtime-icon"><Icon name="clock" /></div>
+              <div>
+                <div className="playtime-label">Main Story</div>
+                <div className="playtime-value">13<span className="unit">hours</span></div>
+              </div>
+            </div>
+            <div className="playtime-card">
+              <div className="playtime-icon"><Icon name="trophy" /></div>
+              <div>
+                <div className="playtime-label">100% Completion</div>
+                <div className="playtime-value">25<span className="unit">hours</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="journal-header">
+            <h2 className="section-title">Your Journal</h2>
+            <div className="journal-actions">
+              <button className="btn btn-primary"><Icon name="plus" /> Log session</button>
+              <button className="btn btn-secondary"><Icon name="edit" /> Reflect</button>
+            </div>
+          </div>
+          <div className="journal-timeline">
+            <div className="journal-entry">
+              <div className="journal-date">Apr 19, 2026</div>
+              <div className="journal-title">First impressions — Castle district</div>
+              <div className="journal-snippet">
+                Atmosphere is unreal. The pacing reminds me of REmake but Grace feels lighter on her feet.
+                Got stuck on the locked archive for 20 minutes before I noticed the rune…
+              </div>
+              <div className="journal-meta">
+                <span><Icon name="clock" /> 30 min</span>
+                <span>Mood · tense</span>
+              </div>
+            </div>
+            <div className="journal-entry" style={{ opacity: 0.55 }}>
+              <div className="journal-date">— No earlier entries —</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+
+    const App = () => (
+      <div className="app">
+        <Sidebar />
+        <div className="main">
+          <Hero />
+          <Tabs />
+          <Body />
+        </div>
+      </div>
+    );
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
