@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  BookMarked,
-  BookOpen,
-  Clock,
-  LayoutGrid,
-  Search,
-  User,
-} from "lucide-react";
+import { BookMarked, BookOpen, Clock, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -16,22 +9,11 @@ import { cn } from "@/shared/lib/ui/utils";
 interface NavItem {
   href: string;
   label: string;
-  icon: typeof Search;
+  icon: typeof BookMarked;
   matchPaths?: string[];
 }
 
 const navItems: NavItem[] = [
-  {
-    href: "/games/search",
-    label: "Search",
-    icon: Search,
-    matchPaths: ["/games"],
-  },
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: LayoutGrid,
-  },
   {
     href: "/library",
     label: "Library",
@@ -112,7 +94,7 @@ export function MobileNav() {
               </div>
               <span
                 className={cn(
-                  "caption duration-fast transition-colors",
+                  "text-caption duration-fast transition-colors",
                   active ? "font-semibold" : "font-medium"
                 )}
               >

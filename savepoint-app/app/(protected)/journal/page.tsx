@@ -14,7 +14,7 @@ export default async function JournalPage() {
 
   if (!entriesResult.success) {
     return (
-      <main className="py-2xl container mx-auto">
+      <div className="py-2xl container mx-auto">
         <div className="space-y-xl">
           <header>
             <h1 className="heading-lg tracking-tight">Journal</h1>
@@ -28,7 +28,7 @@ export default async function JournalPage() {
             </p>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -62,7 +62,7 @@ export default async function JournalPage() {
   });
 
   return (
-    <main className="py-3xl container mx-auto">
+    <div className="py-3xl container mx-auto">
       <div className="space-y-3xl">
         <header>
           <h1 className="heading-xl tracking-tight">Journal</h1>
@@ -74,6 +74,6 @@ export default async function JournalPage() {
 
         <JournalTimeline initialEntries={entries} initialGames={gameRecord} />
       </div>
-    </main>
+    </div>
   );
 }

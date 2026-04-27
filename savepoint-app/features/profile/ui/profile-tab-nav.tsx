@@ -1,7 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
+import {
+  SegmentedControl,
+  SegmentedControlItem,
+} from "@/shared/components/ui/segmented-control";
 
 export interface ProfileTabNavProps {
   username: string;
@@ -9,6 +13,7 @@ export interface ProfileTabNavProps {
 
 export function ProfileTabNav({ username }: ProfileTabNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const tabs = [
     { label: "Overview", href: `/u/${username}` },
@@ -16,28 +21,25 @@ export function ProfileTabNav({ username }: ProfileTabNavProps) {
     { label: "Activity", href: `/u/${username}/activity` },
   ] as const;
 
+  const activeTab =
+    tabs.find((tab) => tab.href === pathname)?.href ?? tabs[0].href;
+
   return (
-    <nav
-      aria-label="Profile sections"
-      className="border-border gap-2xl flex items-center border-b"
-    >
-      {tabs.map(({ label, href }) => {
-        const active = pathname === href;
-        return (
-          <Link
+    <nav aria-label="Profile sections">
+      <SegmentedControl
+        value={activeTab}
+        onValueChange={(value) => router.push(value)}
+      >
+        {tabs.map(({ label, href }) => (
+          <SegmentedControlItem
             key={href}
-            href={href}
-            aria-current={active ? "page" : undefined}
-            className={`body-sm -mb-px border-b-2 px-1 py-3 font-medium transition-colors ${
-              active
-                ? "border-foreground text-foreground"
-                : "text-muted-foreground hover:text-foreground border-transparent"
-            }`}
+            value={href}
+            aria-current={pathname === href ? "page" : undefined}
           >
             {label}
-          </Link>
-        );
-      })}
+          </SegmentedControlItem>
+        ))}
+      </SegmentedControl>
     </nav>
   );
 }

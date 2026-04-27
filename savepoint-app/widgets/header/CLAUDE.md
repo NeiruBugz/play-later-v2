@@ -1,14 +1,12 @@
 # Widget: header
 
-App-wide navigation header with responsive design. Renders site branding, nav links, theme toggle, and command palette trigger.
+Minimal top-bar header for unauthenticated routes (login screen) and the public profile route group (`/u/[username]`). Renders the brand mark and theme toggle. The `isAuthorised` prop tweaks visual emphasis only — the header has no nav links (those moved to `widgets/sidebar` on `md+` and `widgets/mobile-nav` on `<md`).
 
 ## Structure
 
-- `ui/header.tsx` -- Main header with desktop navigation and search trigger
-- `ui/mobile-nav.tsx` -- Bottom navigation bar for mobile viewports
+- `ui/header.tsx` — `Header` client component
 
 ## Notes
 
-- Migrated from `shared/components/` to follow FSD conventions
-- Imports command palette from `features/command-palette` (via context provider)
-- Mounted at layout level in both `(protected)` and `games` route groups
+- The mobile bottom nav previously co-located here was extracted to `widgets/mobile-nav` in spec-014 slice 3
+- The authenticated `(protected)` and `games` layouts no longer mount this component — they use `widgets/mobile-topbar` on `<md` and `widgets/sidebar` on `md+`

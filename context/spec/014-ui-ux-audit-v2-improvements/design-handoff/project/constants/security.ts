@@ -1,0 +1,1 @@
+export const HSTS_MAX_AGE_SECONDS = 31536000;

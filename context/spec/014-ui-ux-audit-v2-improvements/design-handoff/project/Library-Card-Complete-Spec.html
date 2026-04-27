@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Card Redesign Specification — SavePoint</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js" crossorigin="anonymous"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: oklch(0.155 0.007 260);
+      --fg: oklch(0.93 0.005 250);
+      --card: oklch(0.18 0.007 260);
+      --border: oklch(0.24 0.008 250);
+      --muted: oklch(0.6 0.005 250);
+      --primary: oklch(0.69 0.17 172);
+      --primary-fg: oklch(0.12 0.01 175);
+      --success: oklch(0.6 0.16 145);
+      --warning: oklch(0.75 0.15 75);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .spec-header {
+      background: var(--card);
+      border-bottom: 2px solid var(--border);
+      padding: 2rem 1.5rem;
+      margin-bottom: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .spec-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .spec-subtitle {
+      color: var(--muted);
+      font-size: 1.125rem;
+      margin-bottom: 1rem;
+    }
+
+    .spec-nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .spec-nav a {
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--fg);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .spec-nav a:hover {
+      background: var(--primary);
+      color: var(--primary-fg);
+      border-color: var(--primary);
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+
+    .section {
+      margin-bottom: 4rem;
+      scroll-margin-top: 120px;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .spec-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .spec-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-success {
+      background: oklch(0.6 0.16 145 / 0.15);
+      color: var(--success);
+    }
+
+    .badge-warning {
+      background: oklch(0.75 0.15 75 / 0.15);
+      color: var(--warning);
+    }
+
+    .badge-primary {
+      background: oklch(0.69 0.17 172 / 0.15);
+      color: var(--primary);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .code-block {
+      background: oklch(0.12 0.01 260);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+
+    .code-comment {
+      color: oklch(0.55 0.05 260);
+    }
+
+    .code-keyword {
+      color: oklch(0.75 0.15 280);
+    }
+
+    .code-string {
+      color: oklch(0.7 0.12 145);
+    }
+
+    .code-number {
+      color: oklch(0.75 0.15 75);
+    }
+
+    .info-box {
+      background: oklch(0.69 0.17 172 / 0.1);
+      border: 1px solid oklch(0.69 0.17 172 / 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .info-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      color: var(--success);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .implementation-note {
+      background: var(--bg);
+      border-left: 3px solid var(--primary);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .metric {
+      background: var(--bg);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.8125rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="spec-header">
+    <h1>📋 Library Card Redesign Specification</h1>
+    <p class="spec-subtitle">Complete implementation guide for SavePoint library cards — sizing, layout, interactions, and data model</p>
+    <nav class="spec-nav">
+      <a href="#overview">Overview</a>
+      <a href="#sizing">Card Sizing</a>
+      <a href="#layout">Layout & Metadata</a>
+      <a href="#interactions">Interactions</a>
+      <a href="#implementation">Implementation</a>
+      <a href="#demo">Interactive Demo</a>
+    </nav>
+  </div>
+
+  <div class="container">
+    
+    <!-- OVERVIEW -->
+    <section id="overview" class="section">
+      <h2 class="section-title">Overview</h2>
+      <p class="section-subtitle">Key improvements to library card design based on UX audit and data model analysis</p>
+      
+      <div class="comparison-grid">
+        <div class="spec-card">
+          <div class="spec-label">Current Issues</div>
+          <ul class="checklist">
+            <li style="color: var(--warning)">❌ Fixed column counts create inconsistent card sizes (100-150px)</li>
+            <li style="color: var(--warning)">❌ Actions hidden behind hover (poor discoverability)</li>
+            <li style="color: var(--warning)">❌ Minimal metadata display (only status dot + rating)</li>
+            <li style="color: var(--warning)">❌ No quick access to common actions (log session)</li>
+          </ul>
+        </div>
+        
+        <div class="spec-card">
+          <div class="spec-label">Proposed Solution</div>
+          <ul class="checklist">
+            <li><strong>180px minimum</strong> card width for readable metadata</li>
+            <li><strong>Always-visible CTA</strong> for primary actions</li>
+            <li><strong>Rich metadata</strong> display using existing database fields</li>
+            <li><strong>Context menu</strong> for secondary actions</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-title">📊 Data Model Context</div>
+        <p style="font-size: 0.9375rem; line-height: 1.6;">
+          All recommendations use existing LibraryItem fields: <code>status</code>, <code>rating</code>, <code>hasBeenPlayed</code>, <code>createdAt</code>, <code>updatedAt</code>, <code>startedAt</code>, <code>actualPlaytime</code>, <code>acquisitionType</code>, <code>platformId</code>. No schema changes required.
+        </p>
+      </div>
+    </section>
+
+    <!-- CARD SIZING -->
+    <section id="sizing" class="section">
+      <h2 class="section-title">1. Card Sizing Specification</h2>
+      <p class="section-subtitle">Responsive grid with content-aware sizing using CSS Grid auto-fill</p>
+
+      <div class="spec-card">
+        <div class="spec-label">Current Implementation (Problem)</div>
+        <div class="code-block">
+<span class="code-comment">// From: ui/library-grid.tsx (line 77)</span>
+className=<span class="code-string">"grid grid-cols-3 gap-x-2 gap-y-4 
+  sm:grid-cols-5 md:grid-cols-6 
+  lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12"</span>
+        </div>
+        
+        <div class="implementation-note">
+          <strong>⚠️ Problem:</strong> Fixed column counts result in cards ranging from 100-180px depending on viewport. On large screens (2xl), 12 columns = ~120px cards = unreadable metadata.
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-label">Recommended Solution</div>
+        <div class="code-block">
+<span class="code-comment">// Desktop (≥1024px)</span>
+grid-template-columns: <span class="code-keyword">repeat</span>(<span class="code-keyword">auto-fill</span>, <span class="code-keyword">minmax</span>(<span class="code-number">180px</span>, <span class="code-number">220px</span>));
+gap: <span class="code-number">16px</span>;
+
+<span class="code-comment">// Tablet (768px - 1023px)</span>
+grid-template-columns: <span class="code-keyword">repeat</span>(<span class="code-keyword">auto-fill</span>, <span class="code-keyword">minmax</span>(<span class="code-number">160px</span>, <span class="code-number">200px</span>));
+gap: <span class="code-number">14px</span>;
+
+<span class="code-comment">// Mobile (≤767px)</span>
+<span class="code-comment">// Use horizontal list view instead (see Layout section)</span>
+        </div>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="metric-label">Desktop Min Width</div>
+          <div class="metric-value">180px</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Cover Height</div>
+          <div class="metric-value">240px</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">3:4 aspect ratio</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Cards per Row</div>
+          <div class="metric-value">6-7</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem;">@ 1200-1440px</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Grid Gap</div>
+          <div class="metric-value">16px</div>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Viewport</th>
+            <th>Grid Template</th>
+            <th>Min Card Width</th>
+            <th>Typical Columns</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Desktop</strong><br/><span style="font-size: 0.875rem; color: var(--muted);">≥1024px</span></td>
+            <td><code>repeat(auto-fill, minmax(180px, 220px))</code></td>
+            <td><code>180px</code></td>
+            <td>6-7 cols</td>
+          </tr>
+          <tr>
+            <td><strong>Tablet</strong><br/><span style="font-size: 0.875rem; color: var(--muted);">768-1023px</span></td>
+            <td><code>repeat(auto-fill, minmax(160px, 200px))</code></td>
+            <td><code>160px</code></td>
+            <td>4-5 cols</td>
+          </tr>
+          <tr>
+            <td><strong>Mobile</strong><br/><span style="font-size: 0.875rem; color: var(--muted);">≤767px</span></td>
+            <td><code>flex-direction: column</code></td>
+            <td><span class="badge badge-primary">List View</span></td>
+            <td>1 col</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="info-box">
+        <div class="info-title">✅ Why 180px minimum?</div>
+        <ul class="checklist">
+          <li><strong>Cover legibility:</strong> 240px height (3:4 ratio) is comfortable for viewing game art</li>
+          <li><strong>Metadata readable:</strong> Platform badges, playtime, rating display without truncation</li>
+          <li><strong>CTA button:</strong> "Log Session" fits at 13-14px font size</li>
+          <li><strong>Industry standard:</strong> Steam (~190px), Epic Games (~185px), GOG (~180px)</li>
+          <li><strong>Touch targets:</strong> 44px minimum (mobile) easily achievable</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- LAYOUT & METADATA -->
+    <section id="layout" class="section">
+      <h2 class="section-title">2. Layout & Metadata Display</h2>
+      <p class="section-subtitle">Maximize use of existing database fields for contextual information</p>
+
+      <div class="spec-card">
+        <div class="spec-label">Desktop Card Structure (180px+)</div>
+        <div class="code-block">
+<span class="code-comment">// Card structure from top to bottom:</span>
+
+<span class="code-number">1.</span> <strong>Cover Image</strong> (aspect-ratio: 3/4)
+   └─ Status indicator (if not redundant with filter)
+   
+<span class="code-number">2.</span> <strong>Game Title</strong> (font-size: 14px, line-clamp: 2)
+
+<span class="code-number">3.</span> <strong>Metadata Row</strong> (font-size: 11px, color: muted)
+   ├─ Platform badge (from <code>platformId</code>)
+   ├─ Separator (•)
+   └─ Contextual date:
+       • Playing → <code>startedAt</code> ("Started 3d ago")
+       • Shelf → <code>createdAt</code> ("Added 2w ago")
+       • Played → <code>updatedAt</code> ("Finished 5d ago")
+
+<span class="code-number">4.</span> <strong>Rating</strong> (interactive stars, from <code>rating</code>)
+
+<span class="code-number">5.</span> <strong>Primary CTA</strong> (always visible)
+   └─ "Log Session" button (context-aware label)
+
+<span class="code-number">6.</span> <strong>Context Menu</strong> (⋮ button, top-right)
+   └─ Secondary actions
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-label">Mobile List View (≤767px)</div>
+        <div class="code-block">
+<span class="code-comment">// Horizontal layout: cover + metadata row</span>
+
+flex-direction: <span class="code-keyword">row</span>
+gap: <span class="code-number">12px</span>
+padding: <span class="code-number">12px</span>
+
+<span class="code-comment">// Structure:</span>
+├─ <strong>Cover</strong> (60px × 80px, fixed, flex-shrink: 0)
+└─ <strong>Content</strong> (flex: 1, min-width: 0)
+   ├─ Title (font-size: 15px, line-clamp: 1)
+   ├─ Metadata (platform • playtime • rating, 12px)
+   └─ CTA button (full-width, 44px min-height)
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Database Column</th>
+            <th>Display Context</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Platform</strong></td>
+            <td><code>platformId</code></td>
+            <td>Always show</td>
+            <td>Badge format, e.g. "PS5", "Switch"</td>
+          </tr>
+          <tr>
+            <td><strong>Playtime</strong></td>
+            <td><code>actualPlaytime</code></td>
+            <td>If status = PLAYING</td>
+            <td>Format: "32h" or "2h 15m"<br/>⚠️ Requires session logging</td>
+          </tr>
+          <tr>
+            <td><strong>Started Date</strong></td>
+            <td><code>startedAt</code></td>
+            <td>If status = PLAYING or UP_NEXT</td>
+            <td>Relative format: "3d ago", "2w ago"</td>
+          </tr>
+          <tr>
+            <td><strong>Added Date</strong></td>
+            <td><code>createdAt</code></td>
+            <td>If status = SHELF or WISHLIST</td>
+            <td>Relative format: "Added 1w ago"</td>
+          </tr>
+          <tr>
+            <td><strong>Finished Date</strong></td>
+            <td><code>updatedAt</code></td>
+            <td>If status = PLAYED</td>
+            <td>Relative format: "Finished 5d ago"</td>
+          </tr>
+          <tr>
+            <td><strong>Rating</strong></td>
+            <td><code>rating</code></td>
+            <td>Always show if set</td>
+            <td>1-10 scale, display as 5 stars (×2)</td>
+          </tr>
+          <tr>
+            <td><strong>Replay Flag</strong></td>
+            <td><code>hasBeenPlayed</code></td>
+            <td>If status = UP_NEXT</td>
+            <td>Label: "Replay" vs "Up Next"</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- INTERACTIONS -->
+    <section id="interactions" class="section">
+      <h2 class="section-title">3. Interactions & Actions</h2>
+      <p class="section-subtitle">Improved action hierarchy with always-visible primary CTA</p>
+
+      <div class="comparison-grid">
+        <div class="spec-card">
+          <div class="spec-label">Current (Hover-Only)</div>
+          <ul style="list-style: none; padding: 0; font-size: 0.9375rem;">
+            <li style="padding: 0.5rem 0; opacity: 0.5;">❌ Actions hidden until hover</li>
+            <li style="padding: 0.5rem 0; opacity: 0.5;">❌ Poor discoverability</li>
+            <li style="padding: 0.5rem 0; opacity: 0.5;">❌ No mobile equivalent</li>
+            <li style="padding: 0.5rem 0; opacity: 0.5;">❌ Requires precise cursor placement</li>
+          </ul>
+        </div>
+        
+        <div class="spec-card">
+          <div class="spec-label">Proposed (Always Visible)</div>
+          <ul class="checklist">
+            <li><strong>Primary CTA always visible</strong> (no hover required)</li>
+            <li><strong>Context menu (⋮)</strong> for secondary actions</li>
+            <li><strong>Quick rating</strong> (click stars directly)</li>
+            <li><strong>Consistent mobile/desktop</strong> experience</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-label">Action Hierarchy</div>
+        
+        <h4 style="margin: 1.5rem 0 0.75rem; font-size: 1rem;">Primary Action (Always Visible Button)</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Primary CTA</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-primary">PLAYING</span></td>
+              <td>"Log Session"</td>
+              <td>Open modal to record playtime</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-primary">UP_NEXT</span></td>
+              <td>"Start Playing"</td>
+              <td>Change status to PLAYING</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-primary">SHELF</span></td>
+              <td>"Queue It"</td>
+              <td>Change status to UP_NEXT</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-primary">PLAYED</span></td>
+              <td>"Replay"</td>
+              <td>Change status to UP_NEXT + set hasBeenPlayed</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-primary">WISHLIST</span></td>
+              <td>"Add to Shelf"</td>
+              <td>Change status to SHELF</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4 style="margin: 1.5rem 0 0.75rem; font-size: 1rem;">Secondary Actions (Context Menu ⋮)</h4>
+        <ul class="checklist">
+          <li>View Journal Entries</li>
+          <li>Edit Library Details (platform, acquisition type, notes)</li>
+          <li>Change Status (all status options)</li>
+          <li>Remove from Library</li>
+        </ul>
+
+        <h4 style="margin: 1.5rem 0 0.75rem; font-size: 1rem;">Quick Actions (No Modal)</h4>
+        <ul class="checklist">
+          <li><strong>Click stars</strong> → Update rating instantly (optimistic UI)</li>
+          <li><strong>Click cover</strong> → Navigate to game detail page</li>
+        </ul>
+      </div>
+
+      <div class="implementation-note">
+        <strong>💡 Implementation Detail:</strong> The "Log Session" modal should pre-fill the game and open directly to time input. Use the existing <code>actualPlaytime</code> field (store in minutes).
+      </div>
+    </section>
+
+    <!-- IMPLEMENTATION -->
+    <section id="implementation" class="section">
+      <h2 class="section-title">4. Implementation Guide</h2>
+      <p class="section-subtitle">Step-by-step changes to existing components</p>
+
+      <div class="spec-card">
+        <div class="spec-label">File: ui/library-grid.tsx</div>
+        <div class="code-block">
+<span class="code-comment">// BEFORE (line 77):</span>
+className=<span class="code-string">"grid grid-cols-3 gap-x-2 gap-y-4 
+  sm:grid-cols-5 md:grid-cols-6 
+  lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12"</span>
+
+<span class="code-comment">// AFTER:</span>
+className=<span class="code-string">"grid gap-4 
+  grid-cols-[repeat(auto-fill,minmax(150px,1fr))]
+  md:grid-cols-[repeat(auto-fill,minmax(160px,200px))]
+  lg:grid-cols-[repeat(auto-fill,minmax(180px,220px))]"</span>
+
+<span class="code-comment">// Or use CSS module/Tailwind JIT:</span>
+<span class="code-keyword">@media</span> (min-width: <span class="code-number">1024px</span>) {
+  .library-grid {
+    grid-template-columns: <span class="code-keyword">repeat</span>(auto-fill, <span class="code-keyword">minmax</span>(<span class="code-number">180px</span>, <span class="code-number">220px</span>));
+  }
+}
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-label">File: ui/library-card.tsx</div>
+        <div class="code-block">
+<span class="code-comment">// Add to card content (after rating):</span>
+
+<span class="code-comment">// 1. Metadata row (platform + date)</span>
+&lt;div className=<span class="code-string">"mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground"</span>&gt;
+  {platform && (
+    &lt;Badge variant=<span class="code-string">"secondary"</span> className=<span class="code-string">"text-xs"</span>&gt;
+      {platform.name}
+    &lt;/Badge&gt;
+  )}
+  &lt;span&gt;•&lt;/span&gt;
+  &lt;span&gt;{getContextualDate(item)}&lt;/span&gt;
+&lt;/div&gt;
+
+<span class="code-comment">// 2. Primary CTA button</span>
+&lt;Button
+  size=<span class="code-string">"sm"</span>
+  className=<span class="code-string">"mt-2 w-full"</span>
+  onClick={(e) =&gt; {
+    e.preventDefault();
+    handlePrimaryAction(item.status);
+  }}
+&gt;
+  {getPrimaryCTALabel(item.status, item.hasBeenPlayed)}
+&lt;/Button&gt;
+
+<span class="code-comment">// 3. Context menu (top-right absolute)</span>
+&lt;DropdownMenu&gt;
+  &lt;DropdownMenuTrigger 
+    className=<span class="code-string">"absolute top-2 right-2 ..."</span>
+    onClick={(e) =&gt; e.preventDefault()}
+  &gt;
+    &lt;MoreVertical className=<span class="code-string">"h-4 w-4"</span> /&gt;
+  &lt;/DropdownMenuTrigger&gt;
+  &lt;DropdownMenuContent&gt;
+    <span class="code-comment">// Menu items...</span>
+  &lt;/DropdownMenuContent&gt;
+&lt;/DropdownMenu&gt;
+        </div>
+      </div>
+
+      <div class="spec-card">
+        <div class="spec-label">New Utility Functions</div>
+        <div class="code-block">
+<span class="code-comment">// lib/library-card-helpers.ts</span>
+
+<span class="code-keyword">export function</span> getContextualDate(item: LibraryItemWithGameDomain): string {
+  <span class="code-keyword">const</span> { status, startedAt, createdAt, updatedAt } = item;
+  
+  <span class="code-keyword">switch</span> (status) {
+    <span class="code-keyword">case</span> LibraryItemStatus.PLAYING:
+    <span class="code-keyword">case</span> LibraryItemStatus.UP_NEXT:
+      <span class="code-keyword">return</span> startedAt 
+        ? `Started ${formatRelative(startedAt)}` 
+        : `Added ${formatRelative(createdAt)}`;
+    
+    <span class="code-keyword">case</span> LibraryItemStatus.PLAYED:
+      <span class="code-keyword">return</span> `Finished ${formatRelative(updatedAt)}`;
+    
+    <span class="code-keyword">case</span> LibraryItemStatus.SHELF:
+    <span class="code-keyword">case</span> LibraryItemStatus.WISHLIST:
+    <span class="code-keyword">default</span>:
+      <span class="code-keyword">return</span> `Added ${formatRelative(createdAt)}`;
+  }
+}
+
+<span class="code-keyword">export function</span> getPrimaryCTALabel(
+  status: LibraryItemStatus, 
+  hasBeenPlayed: boolean
+): string {
+  <span class="code-keyword">switch</span> (status) {
+    <span class="code-keyword">case</span> LibraryItemStatus.PLAYING:
+      <span class="code-keyword">return</span> <span class="code-string">"Log Session"</span>;
+    <span class="code-keyword">case</span> LibraryItemStatus.UP_NEXT:
+      <span class="code-keyword">return</span> <span class="code-string">"Start Playing"</span>;
+    <span class="code-keyword">case</span> LibraryItemStatus.SHELF:
+      <span class="code-keyword">return</span> <span class="code-string">"Queue It"</span>;
+    <span class="code-keyword">case</span> LibraryItemStatus.PLAYED:
+      <span class="code-keyword">return</span> hasBeenPlayed ? <span class="code-string">"Replay"</span> : <span class="code-string">"Play Again"</span>;
+    <span class="code-keyword">case</span> LibraryItemStatus.WISHLIST:
+      <span class="code-keyword">return</span> <span class="code-string">"Add to Shelf"</span>;
+  }
+}
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-title">🎯 Migration Checklist</div>
+        <ul class="checklist">
+          <li>Update <code>library-grid.tsx</code> grid classes (use auto-fill minmax)</li>
+          <li>Add metadata row to <code>library-card.tsx</code> (platform + contextual date)</li>
+          <li>Add always-visible primary CTA button</li>
+          <li>Add context menu (⋮) with secondary actions</li>
+          <li>Make rating stars clickable (update on click)</li>
+          <li>Create utility functions for contextual date & CTA labels</li>
+          <li>Test responsive behavior at 768px, 1024px, 1440px, 1920px</li>
+          <li>Verify touch targets ≥44px on mobile</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- DEMO -->
+    <section id="demo" class="section">
+      <h2 class="section-title">5. Interactive Demo</h2>
+      <p class="section-subtitle">Live comparison of current vs. proposed design</p>
+      
+      <div id="demo-root"></div>
+    </section>
+
+  </div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const LibraryCard = ({ 
+      width = 180,
+      variant = "proposed",
+      game = {
+        title: "Elden Ring",
+        platform: "PlayStation 5",
+        playtime: "32h",
+        rating: 4,
+        status: "PLAYING",
+        startedAt: "3d ago"
+      }
+    }) => {
+      const [menuOpen, setMenuOpen] = useState(false);
+      const [rating, setRating] = useState(game.rating);
+      const coverHeight = (width / 3) * 4;
+
+      if (variant === "current") {
+        // Current minimal design
+        return (
+          <div style={{ width: `${width}px`, fontFamily: 'system-ui, sans-serif' }}>
+            <div style={{ 
+              width: '100%', 
+              height: `${coverHeight}px`,
+              background: 'oklch(0.25 0.03 260)',
+              borderRadius: '8px',
+              border: '1px solid oklch(0.24 0.008 250)',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '8px',
+                left: '8px',
+                width: '10px',
+                height: '10px',
+                background: 'oklch(0.72 0.15 175)',
+                borderRadius: '50%',
+                boxShadow: '0 0 0 2px oklch(0 0 0 / 0.3)'
+              }} />
+            </div>
+            
+            <div style={{ marginTop: '8px', fontSize: '14px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3 }}>
+              {game.title}
+            </div>
+            
+            <div style={{ marginTop: '6px', display: 'flex', gap: '2px' }}>
+              {[1,2,3,4,5].map(i => (
+                <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i <= rating ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)'}>
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      // Proposed rich design
+      return (
+        <div style={{ width: `${width}px`, fontFamily: 'system-ui, sans-serif', position: 'relative' }}>
+          <div style={{ 
+            width: '100%', 
+            height: `${coverHeight}px`,
+            background: 'oklch(0.25 0.03 260)',
+            borderRadius: '8px',
+            border: '1px solid oklch(0.24 0.008 250)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <button 
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{
+                position: 'absolute',
+                top: '8px',
+                right: '8px',
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                background: 'oklch(0 0 0 / 0.6)',
+                backdropFilter: 'blur(8px)',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px'
+              }}
+            >
+              ⋮
+            </button>
+            
+            {menuOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '40px',
+                right: '8px',
+                width: '160px',
+                background: 'oklch(0.2 0.007 260)',
+                border: '1px solid oklch(0.24 0.008 250)',
+                borderRadius: '8px',
+                boxShadow: '0 8px 24px oklch(0 0 0 / 0.5)',
+                overflow: 'hidden',
+                zIndex: 10
+              }}>
+                {['View Journal', 'Edit Details', 'Mark as Played', 'Remove'].map((action, i) => (
+                  <div 
+                    key={i}
+                    style={{
+                      padding: '10px 14px',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      borderBottom: i < 3 ? '1px solid oklch(0.24 0.008 250)' : 'none',
+                      color: 'oklch(0.93 0.005 250)'
+                    }}
+                  >
+                    {action}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ marginTop: '8px', fontSize: '14px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3 }}>
+            {game.title}
+          </div>
+          
+          <div style={{ 
+            marginTop: '6px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '6px',
+            fontSize: '11px',
+            color: 'oklch(0.6 0.005 250)'
+          }}>
+            <span style={{
+              padding: '2px 8px',
+              background: 'oklch(0.24 0.008 250)',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 600
+            }}>
+              PS5
+            </span>
+            <span>•</span>
+            <span>{game.startedAt}</span>
+          </div>
+          
+          <div style={{ marginTop: '6px', display: 'flex', gap: '2px' }}>
+            {[1,2,3,4,5].map(i => (
+              <svg 
+                key={i} 
+                width="14" 
+                height="14" 
+                viewBox="0 0 24 24" 
+                fill={i <= rating ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)'}
+                style={{ cursor: 'pointer' }}
+                onClick={() => setRating(i)}
+              >
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            ))}
+          </div>
+          
+          <button style={{
+            marginTop: '8px',
+            width: '100%',
+            padding: '10px',
+            borderRadius: '6px',
+            background: 'oklch(0.69 0.17 172)',
+            color: 'oklch(0.12 0.01 175)',
+            border: 'none',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: 'pointer'
+          }}>
+            Log Session
+          </button>
+        </div>
+      );
+    };
+
+    function Demo() {
+      return (
+        <div>
+          <div className="comparison-grid">
+            <div className="spec-card">
+              <div className="spec-label">Current Design (140px)</div>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                <LibraryCard width={140} variant="current" />
+              </div>
+              <ul style={{ fontSize: '0.875rem', color: 'var(--muted)', marginTop: '1rem' }}>
+                <li>Minimal metadata</li>
+                <li>No visible actions</li>
+                <li>Status dot only</li>
+              </ul>
+            </div>
+            
+            <div className="spec-card">
+              <div className="spec-label">Proposed Design (180px)</div>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                <LibraryCard width={180} variant="proposed" />
+              </div>
+              <ul style={{ fontSize: '0.875rem', color: 'var(--success)', marginTop: '1rem' }}>
+                <li>✓ Platform badge + date</li>
+                <li>✓ Always-visible CTA</li>
+                <li>✓ Context menu (⋮)</li>
+                <li>✓ Interactive rating</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="spec-card" style={{ marginTop: '2rem' }}>
+            <div className="spec-label">Size Comparison Grid</div>
+            <div style={{ 
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gap: '2rem',
+              padding: '2rem'
+            }}>
+              <div>
+                <div style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--muted)', textAlign: 'center' }}>
+                  140px (Current)
+                </div>
+                <LibraryCard width={140} variant="proposed" />
+              </div>
+              
+              <div>
+                <div style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--success)', textAlign: 'center', fontWeight: 600 }}>
+                  180px (Recommended)
+                </div>
+                <LibraryCard width={180} variant="proposed" />
+              </div>
+              
+              <div>
+                <div style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--muted)', textAlign: 'center' }}>
+                  220px (Max)
+                </div>
+                <LibraryCard width={220} variant="proposed" />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('demo-root'));
+    root.render(<Demo />);
+  </script>
+</body>
+</html>

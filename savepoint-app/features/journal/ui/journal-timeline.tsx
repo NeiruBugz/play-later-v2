@@ -4,6 +4,7 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
+import { GameCardCover } from "@/widgets/game-card";
 import type { JournalEntryDomain } from "@/features/journal/types";
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { Button } from "@/shared/components/ui/button";
@@ -22,6 +23,51 @@ interface GameInfo {
 interface JournalTimelineProps {
   initialEntries: JournalEntryDomain[];
   initialGames: Record<string, GameInfo>;
+}
+
+interface GameGroup {
+  game: GameInfo;
+  entries: JournalEntryDomain[];
+  latestEntryAt: Date;
+}
+
+function groupEntriesByGame(
+  entries: JournalEntryDomain[],
+  games: Map<string, GameInfo>
+): GameGroup[] {
+  const groupMap = new Map<string, GameGroup>();
+
+  for (const entry of entries) {
+    if (entry.gameId === null) continue;
+    const game = games.get(entry.gameId);
+    if (!game) continue;
+
+    const existing = groupMap.get(entry.gameId);
+    if (existing) {
+      existing.entries.push(entry);
+      if (entry.createdAt > existing.latestEntryAt) {
+        existing.latestEntryAt = entry.createdAt;
+      }
+    } else {
+      groupMap.set(entry.gameId, {
+        game,
+        entries: [entry],
+        latestEntryAt: entry.createdAt,
+      });
+    }
+  }
+
+  for (const group of groupMap.values()) {
+    group.entries.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  return Array.from(groupMap.values()).sort(
+    (a, b) => b.latestEntryAt.getTime() - a.latestEntryAt.getTime()
+  );
+}
+
+function entryCountLabel(count: number): string {
+  return count === 1 ? "1 entry" : `${count} entries`;
 }
 
 export function JournalTimeline({
@@ -59,7 +105,6 @@ export function JournalTimeline({
       setEntries((prev) => [...prev, ...newEntries]);
       setHasMore(newEntries.length === 20);
 
-      // Fetch games for new entries (skip game-less entries)
       const newGameIds = [
         ...new Set(
           newEntries
@@ -108,37 +153,56 @@ export function JournalTimeline({
     );
   }
 
+  const groups = groupEntriesByGame(entries, games);
+
   return (
     <div className="space-y-xl">
       <div className="flex items-center justify-between">
-        <h2 className="heading-md font-semibold">Journal Entries</h2>
+        <h2 className="text-h2 font-semibold">Journal Entries</h2>
         <Button asChild variant="secondary" size="sm">
           <Link href="/journal/new">Write New Entry</Link>
         </Button>
       </div>
 
-      <div className="space-y-lg">
-        {entries.map((entry) => {
-          if (entry.gameId === null) {
-            return null;
-          }
-          const game = games.get(entry.gameId);
-          if (!game) {
-            return null;
-          }
-          return (
-            <JournalEntryCard
-              key={entry.id}
-              entry={entry}
-              game={{
-                id: game.id,
-                title: game.title,
-                slug: game.slug,
-                coverImage: game.coverImage,
-              }}
-            />
-          );
-        })}
+      <div className="space-y-3xl">
+        {groups.map((group) => (
+          <section key={group.game.id}>
+            <Link
+              href={`/games/${group.game.slug}`}
+              className="hover:text-primary mb-lg flex items-center gap-3 transition-colors"
+            >
+              {group.game.coverImage && (
+                <GameCardCover
+                  imageId={group.game.coverImage}
+                  gameTitle={group.game.title}
+                  size="cover_small"
+                  aspectRatio="portrait"
+                  className="h-10 w-7 flex-shrink-0 rounded"
+                  enableHoverEffect={false}
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <h2 className="text-h3 truncate font-semibold">
+                  {group.game.title}
+                </h2>
+                <span className="text-caption text-muted-foreground">
+                  {entryCountLabel(group.entries.length)}
+                </span>
+              </div>
+            </Link>
+
+            <div className="space-y-lg">
+              {group.entries.map((entry) => (
+                <JournalEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  game={group.game}
+                  hideGameMetadata
+                />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
 
       {loadError && (

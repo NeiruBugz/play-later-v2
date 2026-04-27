@@ -1,22 +1,23 @@
 "use client";
 
+import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { GameCard } from "@/widgets/game-card";
 import type { JournalEntryDomain } from "@/features/journal/types";
-import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
-import { formatRelativeDate } from "@/shared/lib/date";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { formatAbsoluteDate } from "@/shared/lib/date";
 
+import { deriveEntryTitle } from "../lib/derive-entry-title";
+import { MOOD_LABELS } from "../lib/mood-labels";
 import { deleteJournalEntryAction } from "../server-actions/delete-journal-entry";
 import { DeleteEntryDialog } from "./delete-entry-dialog";
 
@@ -32,14 +33,27 @@ interface JournalEntryDetailProps {
   game: GameInfo;
 }
 
+function formatPlaytime(minutes: number): string {
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (remainder === 0) return `${hours}h`;
+  return `${hours}h ${remainder}m`;
+}
+
 export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
   const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const displayTitle = entry.title || "Untitled Entry";
-  const isUpdated = entry.updatedAt.getTime() !== entry.createdAt.getTime();
+  const displayTitle = deriveEntryTitle(
+    { title: entry.title, body: entry.content, createdAt: entry.createdAt },
+    { title: game.title }
+  );
+
+  const hasPlaytime =
+    entry.playedMinutes !== null && entry.playedMinutes !== undefined;
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -68,86 +82,63 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
   };
 
   return (
-    <div className="space-y-xl">
-      {/* Entry Header */}
-      <header className="space-y-md">
-        <h1 className="heading-xl font-semibold">{displayTitle}</h1>
-        <div className="gap-md flex flex-wrap items-center">
-          <time
-            dateTime={entry.createdAt.toISOString()}
-            className="text-muted-foreground body-sm"
-          >
-            Created {formatRelativeDate(entry.createdAt)}
-          </time>
-          {isUpdated && (
-            <>
-              <span className="text-muted-foreground">·</span>
-              <time
-                dateTime={entry.updatedAt.toISOString()}
-                className="text-muted-foreground body-sm"
+    <article className="space-y-xl mx-auto max-w-prose">
+      {/* Mood eyebrow */}
+      {entry.mood && (
+        <p className="text-caption text-primary/70 tracking-widest uppercase">
+          {MOOD_LABELS[entry.mood]}
+        </p>
+      )}
+
+      {/* Title row */}
+      <div className="gap-md flex items-start justify-between">
+        <h1 className="text-h1">{displayTitle}</h1>
+
+        <div className="gap-sm flex shrink-0 items-center">
+          <Button asChild size="sm">
+            <Link href={`/journal/${entry.id}/edit`}>Edit</Link>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="More actions"
+                disabled={isDeleting || isPending}
               >
-                Updated {formatRelativeDate(entry.updatedAt)}
-              </time>
-            </>
-          )}
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setIsDeleteDialogOpen(true)}
+              >
+                Delete entry
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </header>
-
-      {/* Game Information Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Game</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <GameCard
-            game={{
-              id: game.id,
-              name: game.title,
-              slug: game.slug,
-              coverImageId: game.coverImage,
-            }}
-            layout="horizontal"
-            density="standard"
-            size="md"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Entry Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Entry</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-lg">
-          <p className="text-sm whitespace-pre-wrap">{entry.content}</p>
-
-          {/* Entry Metadata */}
-          {entry.playSession !== null && (
-            <div className="gap-md pt-lg flex flex-wrap items-center border-t">
-              <div className="space-y-xs">
-                <span className="text-muted-foreground text-xs">
-                  Hours Played
-                </span>
-                <Badge variant="outline">{entry.playSession} hours</Badge>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Actions */}
-      <div className="gap-md flex items-center justify-end">
-        <Button asChild variant="outline">
-          <Link href={`/journal/${entry.id}/edit`}>Edit</Link>
-        </Button>
-        <Button
-          variant="destructive"
-          onClick={() => setIsDeleteDialogOpen(true)}
-          disabled={isDeleting || isPending}
-        >
-          {isDeleting || isPending ? "Deleting..." : "Delete"}
-        </Button>
       </div>
+
+      {/* Metadata line */}
+      <p className="text-caption text-muted-foreground">
+        <Link
+          href={`/games/${game.slug}`}
+          className="hover:text-foreground transition-colors"
+        >
+          {game.title}
+        </Link>
+        {hasPlaytime && <span> · {formatPlaytime(entry.playedMinutes!)}</span>}
+        <span> · </span>
+        <time dateTime={entry.createdAt.toISOString()}>
+          {formatAbsoluteDate(entry.createdAt)}
+        </time>
+      </p>
+
+      {/* Body */}
+      <p className="text-body whitespace-pre-wrap">{entry.content}</p>
 
       <DeleteEntryDialog
         open={isDeleteDialogOpen}
@@ -155,6 +146,6 @@ export function JournalEntryDetail({ entry, game }: JournalEntryDetailProps) {
         onConfirm={handleDelete}
         entryTitle={displayTitle}
       />
-    </div>
+    </article>
   );
 }

@@ -5,8 +5,8 @@ export default async function NewJournalEntryRoute() {
   await requireServerUserId();
 
   return (
-    <main className="py-3xl container mx-auto">
+    <div className="py-3xl container mx-auto">
       <NewJournalEntryPage />
-    </main>
+    </div>
   );
 }

@@ -25,7 +25,7 @@ export const GameDetailSkeleton = () => {
         </div>
       </aside>
       {}
-      <main className="space-y-2xl">
+      <div className="space-y-2xl">
         {}
         <div className="space-y-md">
           {}
@@ -89,7 +89,7 @@ export const GameDetailSkeleton = () => {
             ))}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

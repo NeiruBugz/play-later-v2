@@ -17,7 +17,6 @@ type ProfileResponse = {
   image: string | null;
   createdAt: Date;
   isPublicProfile: boolean;
-  email?: string | null;
 };
 
 export type ProfilePageLibraryStats = {
@@ -79,7 +78,6 @@ async function getProfilePageDataImpl(
       username: string;
       name: string | null;
       image: string | null;
-      email: string | null;
       createdAt: Date;
       isPublicProfile: boolean;
       stats: LibraryStats;
@@ -104,7 +102,6 @@ async function getProfilePageDataImpl(
           username: statsProfile.username,
           name: statsProfile.name,
           image: statsProfile.image,
-          email: statsProfile.email,
           createdAt: statsProfile.createdAt,
           isPublicProfile: statsProfile.isPublicProfile,
           stats: {
@@ -134,7 +131,6 @@ async function getProfilePageDataImpl(
             username: ownerProfileRaw.username,
             name: ownerProfileRaw.name,
             image: ownerProfileRaw.image,
-            email: ownerProfileRaw.email,
             createdAt: ownerProfileRaw.createdAt,
             isPublicProfile: ownerProfileRaw.isPublicProfile,
           },

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
 
-import { Header, MobileNav } from "@/widgets/header";
+import { Header } from "@/widgets/header";
+import { MobileNav } from "@/widgets/mobile-nav";
 import { CommandPaletteProvider } from "@/features/command-palette";
 import { ProfileHeader, ProfilePrivateMessage } from "@/features/profile";
 import { getProfilePageData } from "@/features/profile/index.server";
@@ -43,7 +44,6 @@ export default async function PublicProfileLayout({
               name: profile.name,
               image: profile.image,
               isPublicProfile: profile.isPublicProfile,
-              email: profile.email,
             }}
             socialCounts={socialCounts}
             viewer={viewer}

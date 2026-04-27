@@ -13,7 +13,7 @@ const logger = createLogger({
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const url = new URL(request.url);
-  const settingsUrl = `${url.origin}/profile/settings`;
+  const settingsUrl = `${url.origin}/settings/profile`;
 
   try {
     // 1. Check authentication

@@ -22,7 +22,7 @@ export function GameNotFound({ initialQuery = "" }: GameNotFoundProps) {
     }
   };
   return (
-    <main className="px-lg py-5xl sm:px-2xl lg:px-3xl relative flex flex-1 items-center justify-center overflow-hidden">
+    <div className="px-lg py-5xl sm:px-2xl lg:px-3xl relative flex flex-1 items-center justify-center overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-linear-to-br opacity-60" />
       <div className="gap-2xl relative z-10 mx-auto flex max-w-xl flex-col items-center text-center">
         <span className="bg-secondary/20 text-secondary gap-md px-lg py-sm inline-flex items-center rounded-full text-sm font-medium">
@@ -81,6 +81,6 @@ export function GameNotFound({ initialQuery = "" }: GameNotFoundProps) {
           </Button>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

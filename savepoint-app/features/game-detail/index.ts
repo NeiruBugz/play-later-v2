@@ -1,24 +1,25 @@
 export {
-  ActualPlaytime,
   AddToLibraryButton,
   GameCoverImage,
   GameDescription,
+  GameDetailHero,
   GameDetailSkeleton,
   GameNotFound,
   GameReleaseDate,
   JournalEntriesSection,
-  LibraryStatusDisplay,
-  TimesToBeatSection,
+  LibraryRatingControl,
+  LibraryStatusDropdownPill,
+  LibraryStatusSegmented,
+  PlaytimeSection,
 } from "./ui";
 
 export type {
   AddToLibraryButtonProps,
   GameCoverImageProps,
   GameDescriptionProps,
+  GameDetailHeroProps,
   GameReleaseDateProps,
   JournalEntriesSectionProps,
-  LibraryStatusDisplayProps,
-  TimesToBeatSectionProps,
 } from "./ui";
 
 export type { TimesToBeatData } from "./types";

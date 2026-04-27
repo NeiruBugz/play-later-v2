@@ -22,7 +22,7 @@ export default async function TimelinePage() {
 
   if (!entriesResult.success) {
     return (
-      <main className="py-3xl container mx-auto">
+      <div className="py-3xl container mx-auto">
         <div className="space-y-xl">
           <header>
             <h1 className="heading-xl tracking-tight">Timeline</h1>
@@ -36,7 +36,7 @@ export default async function TimelinePage() {
             </p>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -69,7 +69,7 @@ export default async function TimelinePage() {
   });
 
   return (
-    <main className="py-3xl container mx-auto">
+    <div className="py-3xl container mx-auto">
       <div className="space-y-3xl">
         <header>
           <h1 className="heading-xl tracking-tight">Timeline</h1>
@@ -79,6 +79,6 @@ export default async function TimelinePage() {
         </header>
         <TimelineView entries={entries} games={gameRecord} />
       </div>
-    </main>
+    </div>
   );
 }

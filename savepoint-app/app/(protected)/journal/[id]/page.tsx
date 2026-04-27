@@ -37,7 +37,7 @@ export default async function JournalEntryPage({
   const game = gameResult.data;
 
   return (
-    <main className="py-3xl container mx-auto">
+    <div className="py-3xl container mx-auto">
       <JournalEntryDetail
         entry={entry}
         game={{
@@ -47,6 +47,6 @@ export default async function JournalEntryPage({
           coverImage: game.coverImage,
         }}
       />
-    </main>
+    </div>
   );
 }

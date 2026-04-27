@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -9,15 +8,13 @@ import {
   RelatedGamesSkeleton,
 } from "@/features/browse-related-games";
 import {
-  ActualPlaytime,
-  GameCoverImage,
   GameDescription,
   GameReleaseDate,
   JournalEntriesSection,
-  LibraryStatusDisplay,
-  TimesToBeatSection,
+  PlaytimeSection,
 } from "@/features/game-detail";
 import { getGameDetails } from "@/features/game-detail/index.server";
+import { GameDetailHero } from "@/features/game-detail/ui/game-detail-hero";
 import { PlatformBadges } from "@/shared/components/platform-badges";
 import { IMAGE_API, IMAGE_SIZES } from "@/shared/config/image.config";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
@@ -78,6 +75,7 @@ export default async function GameDetailPage({
   }
   const { game, gameId, timesToBeat, userLibraryStatus, journalEntries } =
     result.data;
+
   const collections = (game.collections ?? []).sort((a, b) =>
     (a.name ?? "").localeCompare(b.name ?? "")
   );
@@ -89,140 +87,121 @@ export default async function GameDetailPage({
     game.genres
       ?.map((g) => g.name)
       .filter((name): name is string => name !== undefined) ?? [];
+
   const bannerImageId = game.screenshots?.[0]?.image_id;
   const bannerUrl = bannerImageId
     ? `${IMAGE_API}/${IMAGE_SIZES["2x_full-hd"]}/${bannerImageId}.jpg`
     : null;
 
+  const hasJournal = !!(userId && gameId);
+  const hasPlaytime =
+    !!(userId && gameId) ||
+    !!(timesToBeat?.mainStory || timesToBeat?.completionist);
+  const hasRelated = collections.length > 0;
+
+  const totalMinutes = journalEntries.reduce(
+    (sum, entry) =>
+      sum +
+      (entry.playedMinutes !== null && entry.playedMinutes !== undefined
+        ? entry.playedMinutes
+        : 0),
+    0
+  );
+  const sessionCount = journalEntries.filter(
+    (e) =>
+      e.playedMinutes !== null &&
+      e.playedMinutes !== undefined &&
+      e.playedMinutes > 0
+  ).length;
+
   return (
-    <div className="relative">
-      {bannerUrl && (
-        <div
-          className="absolute inset-x-0 top-0 -z-10 h-[450px] overflow-hidden"
-          aria-hidden="true"
-        >
+    <div className="pb-16">
+      <GameDetailHero
+        game={{
+          ...game,
+          genres: game.genres ?? [],
+        }}
+        gameId={gameId}
+        bannerUrl={bannerUrl}
+        userId={userId}
+        userLibraryStatus={userLibraryStatus}
+        hasJournal={hasJournal}
+        hasPlaytime={hasPlaytime}
+        hasRelated={hasRelated}
+        journalEntryCount={hasJournal ? journalEntries.length : undefined}
+      />
+
+      <div
+        className="mt-8 max-w-[880px] space-y-8 px-6 md:px-12"
+        aria-label="Game information"
+      >
+        {/* Overview */}
+        <section id="overview" aria-label="Game overview">
           <div
-            className="absolute inset-0 z-10"
-            style={{
-              background:
-                "linear-gradient(to bottom, transparent 0%, transparent 10%, color-mix(in srgb, var(--background) 60%, transparent) 50%, var(--background) 70%)",
-            }}
-          />
-          <Image
-            src={bannerUrl}
-            alt=""
-            fill
-            className="object-cover object-top"
-            priority
-            sizes="100vw"
-          />
-        </div>
-      )}
-
-      <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div
-          className={`gap-y-lg flex flex-col lg:grid lg:grid-cols-[240px_1fr] lg:gap-x-10 ${bannerUrl ? "pt-[280px] sm:pt-[320px] lg:pt-[340px]" : "pt-8"}`}
-        >
-          <aside
-            className="mx-auto w-full max-w-[280px] sm:max-w-[240px] lg:sticky lg:top-20 lg:mx-0 lg:max-w-none lg:self-start"
-            aria-label="Game details sidebar"
+            className="mb-2 flex items-center gap-2 font-mono"
+            aria-hidden="true"
           >
-            <div className="space-y-xl jewel-corners jewel:p-2 jewel:rounded-lg">
-              <GameCoverImage
-                imageId={game.cover?.image_id}
-                gameTitle={game.name}
-                libraryStatus={userLibraryStatus?.mostRecent.status}
-                style={{ viewTransitionName: `game-cover-${game.id}` }}
-              />
-              {userId && (
-                <LibraryStatusDisplay
-                  userLibraryStatus={userLibraryStatus}
-                  igdbId={game.id}
-                  gameTitle={game.name}
-                />
-              )}
+            <span className="text-caption text-muted-foreground tracking-wider uppercase">
+              {"// GAME.DETAIL"}
+            </span>
+            <span className="bg-border h-px flex-1 opacity-50" />
+            <span className="text-caption text-muted-foreground tracking-wider uppercase">
+              {slug.slice(0, 12).toUpperCase()}
+            </span>
+          </div>
+
+          <GameReleaseDate firstReleaseDate={game.first_release_date} />
+          <GameDescription summary={game.summary} />
+
+          {genres.length > 0 && (
+            <div className="mt-5 flex items-baseline gap-3.5">
+              <span className="text-caption text-muted-foreground min-w-[90px] font-mono tracking-wider uppercase">
+                {"// Genres"}
+              </span>
+              <GenreBadges genres={genres} />
             </div>
-          </aside>
+          )}
+          {platforms.length > 0 && (
+            <div className="mt-1.5 flex items-baseline gap-3.5">
+              <span className="text-caption text-muted-foreground min-w-[90px] font-mono tracking-wider uppercase">
+                {"// Platforms"}
+              </span>
+              <PlatformBadges platforms={platforms} />
+            </div>
+          )}
+        </section>
 
-          <main
-            id="main-content"
-            className="space-y-2xl pb-3xl min-w-0"
-            aria-label="Game information"
-          >
-            <header className="space-y-md">
-              <div
-                aria-hidden
-                className="jewel:flex jewel-meta hidden items-center gap-3 opacity-60"
-              >
-                <span>{"// GAME.DETAIL"}</span>
-                <span className="h-px flex-1 bg-[oklch(0.72_0.22_145/0.3)]" />
-                <span>{slug.slice(0, 12).toUpperCase()}</span>
-              </div>
-              <h1 className="heading-xl lg:display-lg jewel-display jewel:tracking-[0.02em] tracking-tight">
-                {game.name}
-              </h1>
-              <GameReleaseDate firstReleaseDate={game.first_release_date} />
-              <GameDescription summary={game.summary} />
-              {genres.length > 0 && (
-                <div className="pt-sm flex items-baseline gap-3">
-                  <span className="text-muted-foreground jewel-meta text-xs font-medium tracking-wider uppercase">
-                    {"// Genres"}
-                  </span>
-                  <GenreBadges genres={genres} />
-                </div>
-              )}
-              {platforms.length > 0 && (
-                <div className="flex items-baseline gap-3">
-                  <span className="text-muted-foreground jewel-meta text-xs font-medium tracking-wider uppercase">
-                    {"// Platforms"}
-                  </span>
-                  <PlatformBadges platforms={platforms} />
-                </div>
-              )}
-            </header>
-            {userId && gameId && (
-              <section
-                className="space-y-lg animate-fade-in"
-                aria-labelledby="playtime-heading"
-              >
-                <h2 id="playtime-heading" className="heading-md font-semibold">
-                  Playtime
-                </h2>
-                <ActualPlaytime
-                  totalMinutes={journalEntries.reduce(
-                    (sum, entry) =>
-                      sum +
-                      (entry.playedMinutes !== null &&
-                      entry.playedMinutes !== undefined
-                        ? entry.playedMinutes
-                        : 0),
-                    0
-                  )}
-                  sessionCount={
-                    journalEntries.filter(
-                      (e) =>
-                        e.playedMinutes !== null &&
-                        e.playedMinutes !== undefined &&
-                        e.playedMinutes > 0
-                    ).length
-                  }
-                />
-                <TimesToBeatSection timesToBeat={timesToBeat} />
-              </section>
-            )}
-            {!userId && <TimesToBeatSection timesToBeat={timesToBeat} />}
-            {userId && gameId && (
-              <JournalEntriesSection
-                journalEntries={journalEntries}
-                gameId={gameId}
-                gameTitle={game.name}
-              />
-            )}
+        {/* Playtime */}
+        {hasPlaytime && (
+          <PlaytimeSection
+            totalMinutes={userId && gameId ? totalMinutes : 0}
+            sessionCount={userId && gameId ? sessionCount : 0}
+            timesToBeat={timesToBeat}
+          />
+        )}
+
+        {/* Journal */}
+        {userId && gameId && (
+          <JournalEntriesSection
+            journalEntries={journalEntries}
+            gameId={gameId}
+            gameTitle={game.name}
+          />
+        )}
+
+        {/* Related */}
+        {hasRelated && (
+          <section id="related" aria-label="Related games">
             <Suspense fallback={<RelatedGamesSkeleton />}>
               <RelatedGames collections={collections} />
             </Suspense>
-          </main>
-        </div>
+          </section>
+        )}
+        {!hasRelated && (
+          <Suspense fallback={<RelatedGamesSkeleton />}>
+            <RelatedGames collections={collections} />
+          </Suspense>
+        )}
       </div>
     </div>
   );

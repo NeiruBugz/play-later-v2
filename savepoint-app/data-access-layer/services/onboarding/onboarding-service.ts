@@ -31,7 +31,7 @@ const ONBOARDING_STEPS = [
     id: "setup-profile",
     title: "Set up your profile",
     description: "Add a username and profile picture",
-    actionUrl: "/profile/settings",
+    actionUrl: "/settings/profile",
     actionLabel: "Edit profile",
   },
   {

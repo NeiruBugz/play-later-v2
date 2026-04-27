@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Add Flow Redesign — SavePoint</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js" crossorigin="anonymous"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: oklch(0.155 0.007 260);
+      --fg: oklch(0.93 0.005 250);
+      --card: oklch(0.18 0.007 260);
+      --border: oklch(0.24 0.008 250);
+      --muted: oklch(0.6 0.005 250);
+      --primary: oklch(0.69 0.17 172);
+      --primary-fg: oklch(0.12 0.01 175);
+      --success: oklch(0.6 0.16 145);
+      --warning: oklch(0.75 0.15 75);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header {
+      background: var(--card);
+      border-bottom: 2px solid var(--border);
+      padding: 2rem 1.5rem;
+      margin-bottom: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1.125rem;
+      margin-bottom: 1rem;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+
+    .section {
+      margin-bottom: 4rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .problem-card {
+      background: oklch(0.55 0.2 25 / 0.1);
+      border: 1px solid oklch(0.55 0.2 25 / 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .problem-title {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: oklch(0.75 0.15 75);
+      font-size: 1.125rem;
+    }
+
+    .problem-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .problem-list li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.9375rem;
+    }
+
+    .problem-list li::before {
+      content: "❌";
+      flex-shrink: 0;
+    }
+
+    .solution-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .solution-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-primary {
+      background: oklch(0.69 0.17 172 / 0.15);
+      color: var(--primary);
+    }
+
+    .badge-success {
+      background: oklch(0.6 0.16 145 / 0.15);
+      color: var(--success);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .flow-diagram {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .flow-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .flow-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: var(--primary-fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .flow-arrow {
+      text-align: center;
+      color: var(--muted);
+      font-size: 1.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      color: var(--success);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .info-box {
+      background: oklch(0.69 0.17 172 / 0.1);
+      border: 1px solid oklch(0.69 0.17 172 / 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .info-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.875rem;
+      font-family: ui-monospace, monospace;
+      color: var(--primary);
+    }
+
+    .demo-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎮 Quick Add Flow Redesign</h1>
+    <p class="subtitle">1-click game addition with smart defaults — eliminating the 4-step modal flow</p>
+  </div>
+
+  <div class="container">
+    
+    <!-- PROBLEM STATEMENT -->
+    <section class="section">
+      <h2 class="section-title">The Problem</h2>
+      
+      <div class="problem-card">
+        <div class="problem-title">Current Flow: Too Many Steps</div>
+        <ul class="problem-list">
+          <li><strong>Can't add from search results</strong> — user must click through to game detail page</li>
+          <li><strong>4-step flow:</strong> Search → Click result → Detail page → "Add to Library" button → Modal form → Submit</li>
+          <li><strong>No quick-add anywhere</strong> — not in navbar, command palette, or search results</li>
+          <li><strong>Friction kills momentum</strong> — users browsing/exploring abandon the add flow</li>
+        </ul>
+      </div>
+
+      <div class="flow-diagram">
+        <div class="solution-label">Current Flow (4 Steps)</div>
+        
+        <div class="flow-step">
+          <div class="flow-number">1</div>
+          <div>
+            <strong>Search for game</strong>
+            <div style="font-size: 0.875rem; color: var(--muted);">Type in search, wait for results</div>
+          </div>
+        </div>
+        
+        <div class="flow-arrow">↓</div>
+        
+        <div class="flow-step">
+          <div class="flow-number">2</div>
+          <div>
+            <strong>Click search result</strong>
+            <div style="font-size: 0.875rem; color: var(--muted);">Navigate to game detail page</div>
+          </div>
+        </div>
+        
+        <div class="flow-arrow">↓</div>
+        
+        <div class="flow-step">
+          <div class="flow-number">3</div>
+          <div>
+            <strong>Open "Add to Library" modal</strong>
+            <div style="font-size: 0.875rem; color: var(--muted);">Fill out status, platform, notes</div>
+          </div>
+        </div>
+        
+        <div class="flow-arrow">↓</div>
+        
+        <div class="flow-step">
+          <div class="flow-number">4</div>
+          <div>
+            <strong>Submit form</strong>
+            <div style="font-size: 0.875rem; color: var(--muted);">Game finally added to library</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUTION -->
+    <section class="section">
+      <h2 class="section-title">The Solution: 1-Click Quick Add</h2>
+      
+      <div class="info-box">
+        <div class="info-title">🎯 Design Principle</div>
+        <p style="font-size: 0.9375rem;">
+          <strong>Add fast, edit later.</strong> Default to smart assumptions (status: UP_NEXT, platform: detect from game metadata), let users refine details after adding. Reduce friction from 4 steps to 1 click.
+        </p>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="solution-card">
+          <div class="solution-label">Smart Defaults</div>
+          <ul class="checklist">
+            <li><strong>Status:</strong> UP_NEXT (safest assumption)</li>
+            <li><strong>Platform:</strong> Auto-detect primary platform from IGDB metadata</li>
+            <li><strong>Rating:</strong> null (user sets after playing)</li>
+            <li><strong>Acquisition:</strong> DIGITAL (most common)</li>
+            <li><strong>Notes:</strong> Empty (add later if needed)</li>
+          </ul>
+        </div>
+        
+        <div class="solution-card">
+          <div class="solution-label">Where to Add Quick-Add Buttons</div>
+          <ul class="checklist">
+            <li><strong>Search results:</strong> Inline "+" button on each card</li>
+            <li><strong>Command palette (⌘K):</strong> "Add game to library" action</li>
+            <li><strong>Navbar:</strong> Global "Add Game" button</li>
+            <li><strong>Game detail page:</strong> Keep existing full modal as fallback</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flow-diagram">
+        <div class="solution-label">New Flow (1 Step)</div>
+        
+        <div class="flow-step">
+          <div class="flow-number">1</div>
+          <div>
+            <strong>Click "+" on search result card</strong>
+            <div style="font-size: 0.875rem; color: var(--muted);">Game added with smart defaults → Toast notification → Done!</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem; padding: 1rem; background: oklch(0.6 0.16 145 / 0.1); border-radius: 8px; border-left: 3px solid var(--success);">
+          <strong style="color: var(--success)">Result:</strong> 75% faster, zero cognitive load, users can bulk-add games while browsing
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE DEMO -->
+    <section class="section">
+      <h2 class="section-title">Interactive Prototype</h2>
+      <div id="demo-root"></div>
+    </section>
+
+  </div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const Search = ({ size = 20 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+    );
+
+    const Plus = ({ size = 20 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+    );
+
+    const Check = ({ size = 20 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+    );
+
+    const Command = ({ size = 20 }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
+      </svg>
+    );
+
+    const GameSearchCard = ({ game, onQuickAdd, isAdded }) => {
+      const [showToast, setShowToast] = useState(false);
+
+      const handleQuickAdd = () => {
+        onQuickAdd(game.id);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2000);
+      };
+
+      return (
+        <div style={{
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
+          borderRadius: '10px',
+          padding: '12px',
+          display: 'flex',
+          gap: '12px',
+          position: 'relative'
+        }}>
+          {/* Cover */}
+          <div style={{
+            width: '80px',
+            height: '106px',
+            background: 'linear-gradient(135deg, oklch(0.3 0.15 175) 0%, oklch(0.25 0.12 200) 100%)',
+            borderRadius: '6px',
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '32px',
+            fontWeight: 900,
+            color: 'oklch(1 0 0 / 0.1)'
+          }}>
+            {game.name.charAt(0)}
+          </div>
+
+          {/* Content */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '4px' }}>
+              {game.name}
+            </h3>
+            <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '8px' }}>
+              {game.platform} • {game.year}
+            </div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '3px 8px',
+              background: 'oklch(0.24 0.008 250)',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: 'var(--muted)'
+            }}>
+              {game.category}
+            </div>
+          </div>
+
+          {/* Quick Add Button */}
+          <button
+            onClick={handleQuickAdd}
+            disabled={isAdded}
+            style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              width: '32px',
+              height: '32px',
+              borderRadius: '6px',
+              background: isAdded ? 'oklch(0.6 0.16 145)' : 'var(--primary)',
+              color: isAdded ? 'oklch(0.12 0.01 145)' : 'var(--primary-fg)',
+              border: 'none',
+              cursor: isAdded ? 'default' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 8px oklch(0 0 0 / 0.2)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              if (!isAdded) {
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            {isAdded ? <Check size={16} /> : <Plus size={16} />}
+          </button>
+
+          {/* Toast */}
+          {showToast && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              background: 'oklch(0.6 0.16 145)',
+              color: 'oklch(0.12 0.01 145)',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              fontSize: '13px',
+              boxShadow: '0 4px 16px oklch(0 0 0 / 0.3)',
+              animation: 'fadeIn 0.2s ease-out',
+              zIndex: 10
+            }}>
+              Added to Up Next!
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const CommandPalette = ({ isOpen, onClose, onAddGame }) => {
+      const [query, setQuery] = useState('');
+
+      if (!isOpen) return null;
+
+      const games = [
+        { id: 1, name: 'Elden Ring', platform: 'PS5', year: 2022, category: 'RPG' },
+        { id: 2, name: 'Baldur\'s Gate 3', platform: 'PC', year: 2023, category: 'RPG' },
+        { id: 3, name: 'Zelda: TOTK', platform: 'Switch', year: 2023, category: 'Adventure' },
+      ];
+
+      const filtered = query.length >= 2 
+        ? games.filter(g => g.name.toLowerCase().includes(query.toLowerCase()))
+        : games;
+
+      return (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'oklch(0 0 0 / 0.7)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            padding: '20vh 1rem 1rem',
+            zIndex: 1000,
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+          onClick={onClose}
+        >
+          <div 
+            style={{
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              width: '100%',
+              maxWidth: '600px',
+              boxShadow: '0 20px 60px oklch(0 0 0 / 0.6)',
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Search Input */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '16px',
+              borderBottom: '1px solid var(--border)'
+            }}>
+              <Search size={20} style={{ color: 'var(--muted)' }} />
+              <input 
+                type="text"
+                placeholder="Search games to add..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                autoFocus
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  color: 'var(--fg)',
+                  fontSize: '16px'
+                }}
+              />
+              <kbd style={{
+                padding: '4px 8px',
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontFamily: 'ui-monospace, monospace',
+                color: 'var(--muted)'
+              }}>
+                ESC
+              </kbd>
+            </div>
+
+            {/* Results */}
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {filtered.map(game => (
+                <button
+                  key={game.id}
+                  onClick={() => {
+                    onAddGame(game.id);
+                    onClose();
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: '1px solid var(--border)',
+                    color: 'var(--fg)',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    transition: 'background 0.15s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'oklch(0.24 0.008 250)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'none';
+                  }}
+                >
+                  <Plus size={16} style={{ color: 'var(--primary)' }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, marginBottom: '2px' }}>{game.name}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                      {game.platform} • {game.category}
+                    </div>
+                  </div>
+                  <div style={{
+                    fontSize: '11px',
+                    color: 'var(--muted)',
+                    fontFamily: 'ui-monospace, monospace'
+                  }}>
+                    Add to Up Next
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    function Demo() {
+      const [addedGames, setAddedGames] = useState(new Set());
+      const [showCommandPalette, setShowCommandPalette] = useState(false);
+      const [toastMessage, setToastMessage] = useState('');
+
+      const games = [
+        { id: 1, name: 'Elden Ring', platform: 'PS5', year: 2022, category: 'RPG' },
+        { id: 2, name: 'Baldur\'s Gate 3', platform: 'PC', year: 2023, category: 'RPG' },
+        { id: 3, name: 'Zelda: TOTK', platform: 'Switch', year: 2023, category: 'Adventure' },
+        { id: 4, name: 'Starfield', platform: 'Xbox', year: 2023, category: 'Sci-Fi' },
+      ];
+
+      const handleQuickAdd = (gameId) => {
+        setAddedGames(prev => new Set([...prev, gameId]));
+        const game = games.find(g => g.id === gameId);
+        setToastMessage(`Added "${game.name}" to Up Next!`);
+        setTimeout(() => setToastMessage(''), 3000);
+      };
+
+      return (
+        <div>
+          {/* Navbar with Quick Add */}
+          <div style={{
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '2rem'
+          }}>
+            <div style={{ fontSize: '18px', fontWeight: 700 }}>SavePoint</div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setShowCommandPalette(true)}
+                style={{
+                  padding: '8px 12px',
+                  background: 'transparent',
+                  border: '1px solid var(--border)',
+                  borderRadius: '6px',
+                  color: 'var(--fg)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '13px'
+                }}
+              >
+                <Command size={14} />
+                <kbd style={{
+                  padding: '2px 4px',
+                  background: 'var(--bg)',
+                  borderRadius: '3px',
+                  fontSize: '11px',
+                  fontFamily: 'ui-monospace, monospace'
+                }}>
+                  ⌘K
+                </kbd>
+              </button>
+              <button
+                style={{
+                  padding: '8px 16px',
+                  background: 'var(--primary)',
+                  color: 'var(--primary-fg)',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <Plus size={16} />
+                Add Game
+              </button>
+            </div>
+          </div>
+
+          {/* Search Results with Quick Add */}
+          <div className="demo-container">
+            <div className="solution-label" style={{ marginBottom: '1rem' }}>
+              Search Results — Try clicking the + button
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {games.map(game => (
+                <GameSearchCard 
+                  key={game.id}
+                  game={game}
+                  onQuickAdd={handleQuickAdd}
+                  isAdded={addedGames.has(game.id)}
+                />
+              ))}
+            </div>
+
+            <div style={{
+              marginTop: '1.5rem',
+              padding: '12px',
+              background: 'oklch(0.69 0.17 172 / 0.1)',
+              border: '1px solid oklch(0.69 0.17 172 / 0.3)',
+              borderRadius: '8px',
+              fontSize: '13px'
+            }}>
+              <strong>💡 Try it:</strong> Click the + button on any game card to add it with smart defaults (Status: Up Next, Platform: auto-detected)
+            </div>
+          </div>
+
+          {/* Command Palette Demo */}
+          <div className="demo-container" style={{ marginTop: '2rem' }}>
+            <div className="solution-label" style={{ marginBottom: '1rem' }}>
+              Command Palette (⌘K) — Try opening it
+            </div>
+            
+            <button
+              onClick={() => setShowCommandPalette(true)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                color: 'var(--muted)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '14px'
+              }}
+            >
+              <Search size={16} />
+              <span>Search games to add...</span>
+              <kbd style={{
+                marginLeft: 'auto',
+                padding: '4px 8px',
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontFamily: 'ui-monospace, monospace'
+              }}>
+                ⌘K
+              </kbd>
+            </button>
+
+            <div style={{
+              marginTop: '1rem',
+              padding: '12px',
+              background: 'oklch(0.69 0.17 172 / 0.1)',
+              border: '1px solid oklch(0.69 0.17 172 / 0.3)',
+              borderRadius: '8px',
+              fontSize: '13px'
+            }}>
+              <strong>💡 Try it:</strong> Click the search bar or press ⌘K to open the command palette and add games from anywhere
+            </div>
+          </div>
+
+          {/* Command Palette */}
+          <CommandPalette 
+            isOpen={showCommandPalette}
+            onClose={() => setShowCommandPalette(false)}
+            onAddGame={handleQuickAdd}
+          />
+
+          {/* Global Toast */}
+          {toastMessage && (
+            <div style={{
+              position: 'fixed',
+              bottom: '2rem',
+              right: '2rem',
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              boxShadow: '0 8px 24px oklch(0 0 0 / 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              animation: 'slideUp 0.3s ease-out',
+              zIndex: 1001
+            }}>
+              <Check size={16} style={{ color: 'var(--success)' }} />
+              <span style={{ fontWeight: 500 }}>{toastMessage}</span>
+            </div>
+          )}
+
+          <style>{`
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            @keyframes slideUp {
+              from {
+                opacity: 0;
+                transform: translateY(20px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          `}</style>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('demo-root'));
+    root.render(<Demo />);
+  </script>
+</body>
+</html>

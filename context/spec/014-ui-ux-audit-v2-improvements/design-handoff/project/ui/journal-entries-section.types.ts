@@ -1,0 +1,11 @@
+import type { JournalEntryDomain } from "@/features/journal/types";
+
+export interface JournalEntriesSectionProps {
+  journalEntries: JournalEntryDomain[];
+  gameId: string;
+  gameTitle: string;
+}
+
+export interface JournalEntryCardProps {
+  entry: JournalEntryDomain;
+}

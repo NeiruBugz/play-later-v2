@@ -64,7 +64,7 @@ export async function updateProfile(
 ): Promise<ActionResult<UpdateProfileData>> {
   const result = await performUpdateProfile(data);
   if (result.success) {
-    revalidatePath("/profile/settings");
+    revalidatePath("/settings/profile");
     revalidatePath("/profile");
     if (result.data.username) {
       revalidatePath(`/u/${result.data.username}`);

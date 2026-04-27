@@ -1020,6 +1020,42 @@
     font-weight: var(--font-weight-caption);
     text-transform: uppercase;
   }
+  /* Semantic type-scale aliases — map onto existing tokens (see shared/lib/typescale/typescale.md) */
+  .text-display {
+    font-size: var(--font-size-display-lg);
+    line-height: var(--font-line-height-display-lg);
+    letter-spacing: var(--font-letter-spacing-display-lg);
+    font-weight: var(--font-weight-display);
+  }
+  .text-h1 {
+    font-size: var(--font-size-heading-xl);
+    line-height: var(--font-line-height-heading-xl);
+    letter-spacing: var(--font-letter-spacing-heading-xl);
+    font-weight: var(--font-weight-heading);
+  }
+  .text-h2 {
+    font-size: var(--font-size-heading-lg);
+    line-height: var(--font-line-height-heading-lg);
+    letter-spacing: var(--font-letter-spacing-heading-lg);
+    font-weight: var(--font-weight-heading);
+  }
+  .text-h3 {
+    font-size: var(--font-size-heading-md);
+    line-height: var(--font-line-height-heading-md);
+    letter-spacing: var(--font-letter-spacing-heading-md);
+    font-weight: var(--font-weight-heading);
+  }
+  .text-body {
+    font-size: var(--font-size-body-md);
+    line-height: var(--font-line-height-body-md);
+    font-weight: var(--font-weight-body);
+  }
+  .text-caption {
+    font-size: var(--font-size-caption);
+    line-height: var(--font-line-height-caption);
+    letter-spacing: var(--font-letter-spacing-caption);
+    font-weight: var(--font-weight-caption);
+  }
   /* Paper-like shadows */
   .shadow-paper-sm {
     box-shadow: var(--shadow-paper-sm);

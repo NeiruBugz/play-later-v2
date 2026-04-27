@@ -8,10 +8,6 @@ vi.mock("@/features/social", () => ({
   FollowButton: vi.fn(() => <button>Follow</button>),
 }));
 
-vi.mock("./logout-button", () => ({
-  LogoutButton: vi.fn(() => <button>Logout</button>),
-}));
-
 const mockFollowButton = vi.mocked(FollowButton);
 
 const BASE_PROFILE: {
@@ -20,7 +16,6 @@ const BASE_PROFILE: {
   name: string | null;
   image: string | null;
   isPublicProfile: boolean;
-  email?: string | null;
 } = {
   id: "user-abc",
   username: "gamer42",
@@ -133,6 +128,24 @@ describe("ProfileHeader", () => {
         `/u/${BASE_PROFILE.username}/following`
       );
     });
+
+    it("never renders any email address", () => {
+      renderProfileHeader({
+        viewer: { isOwner: true, isAuthenticated: true },
+      });
+
+      expect(screen.queryByText(/@.*\./)).not.toBeInTheDocument();
+    });
+
+    it("never renders a Logout button", () => {
+      renderProfileHeader({
+        viewer: { isOwner: true, isAuthenticated: true },
+      });
+
+      expect(
+        screen.queryByRole("button", { name: /logout/i })
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe("given an authenticated visitor who is not the owner, on a public profile", () => {
@@ -204,32 +217,23 @@ describe("ProfileHeader", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("renders the owner email when provided", () => {
-      renderProfileHeader({
-        profile: { email: "gamer42@example.com" },
-        viewer: { isOwner: true, isAuthenticated: true },
-      });
-
-      expect(screen.getByText("gamer42@example.com")).toBeInTheDocument();
-    });
-
-    it("renders an Edit Profile link pointing to /profile/settings", () => {
+    it("renders an Edit Profile link pointing to /settings/profile", () => {
       renderProfileHeader({
         viewer: { isOwner: true, isAuthenticated: true },
       });
 
       const editLink = screen.getByRole("link", { name: /edit profile/i });
-      expect(editLink).toHaveAttribute("href", "/profile/settings");
+      expect(editLink).toHaveAttribute("href", "/settings/profile");
     });
 
-    it("renders the Logout control", () => {
+    it("does not render the Logout control", () => {
       renderProfileHeader({
         viewer: { isOwner: true, isAuthenticated: true },
       });
 
       expect(
-        screen.getByRole("button", { name: /logout/i })
-      ).toBeInTheDocument();
+        screen.queryByRole("button", { name: /logout/i })
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -262,15 +266,6 @@ describe("ProfileHeader", () => {
       expect(
         screen.queryByRole("button", { name: /logout/i })
       ).not.toBeInTheDocument();
-    });
-
-    it("does not render owner email", () => {
-      renderProfileHeader({
-        profile: { email: "gamer42@example.com" },
-        viewer: { isOwner: false, isAuthenticated: false },
-      });
-
-      expect(screen.queryByText("gamer42@example.com")).not.toBeInTheDocument();
     });
   });
 });

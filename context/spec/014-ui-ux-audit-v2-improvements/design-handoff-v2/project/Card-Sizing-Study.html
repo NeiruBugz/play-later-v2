@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Card Sizing Study — SavePoint</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js" crossorigin="anonymous"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: oklch(0.155 0.007 260);
+      --fg: oklch(0.93 0.005 250);
+      --card: oklch(0.18 0.007 260);
+      --border: oklch(0.24 0.008 250);
+      --muted: oklch(0.6 0.005 250);
+      --primary: oklch(0.69 0.17 172);
+      --primary-fg: oklch(0.12 0.01 175);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      padding: 2rem;
+    }
+
+    .header {
+      max-width: 1600px;
+      margin: 0 auto 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .badge {
+      padding: 0.25rem 0.625rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      background: oklch(0.69 0.17 172 / 0.15);
+      color: var(--primary);
+    }
+
+    .grid-demo {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-label {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      font-family: ui-monospace, monospace;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    @media (max-width: 1024px) {
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comp-side {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .comp-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .metrics {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .metric {
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+    }
+
+    .rec-box {
+      background: oklch(0.6 0.16 145 / 0.1);
+      border: 1px solid oklch(0.6 0.16 145 / 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .rec-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: oklch(0.75 0.12 145);
+    }
+
+    .rec-text {
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .warning-box {
+      background: oklch(0.75 0.15 75 / 0.1);
+      border: 1px solid oklch(0.75 0.15 75 / 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    code {
+      background: var(--bg);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.875rem;
+      font-family: ui-monospace, monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Library Card Sizing Study</h1>
+    <p class="subtitle">Exploring optimal card dimensions for desktop and mobile viewports — based on SavePoint's current grid system</p>
+  </div>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Game cover aspect ratio is 3:4 (IGDB standard)
+    const COVER_ASPECT = 3 / 4;
+
+    const LibraryCard = ({ width, title, platform, playtime, rating, startedAt, showMetadata = true }) => {
+      const coverHeight = width / COVER_ASPECT;
+      
+      return (
+        <div style={{ width: `${width}px`, fontFamily: 'system-ui, sans-serif' }}>
+          <div style={{ 
+            width: '100%', 
+            height: `${coverHeight}px`,
+            background: 'oklch(0.25 0.03 260)',
+            borderRadius: '8px',
+            border: '1px solid oklch(0.24 0.008 250)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: '8px',
+              left: '8px',
+              width: '10px',
+              height: '10px',
+              background: 'oklch(0.72 0.15 175)',
+              borderRadius: '50%',
+              boxShadow: '0 0 0 2px oklch(0 0 0 / 0.3)'
+            }} />
+          </div>
+          
+          {showMetadata && (
+            <>
+              <div style={{ marginTop: '8px', fontSize: width < 150 ? '12px' : '14px', fontWeight: 600, color: 'oklch(0.93 0.005 250)', lineHeight: 1.3 }}>
+                {title}
+              </div>
+              
+              <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: width < 150 ? '10px' : '11px', color: 'oklch(0.6 0.005 250)' }}>
+                <span>{platform}</span>
+                <span>•</span>
+                <span>{playtime}</span>
+              </div>
+              
+              <div style={{ marginTop: '6px', display: 'flex', gap: '2px' }}>
+                {[1,2,3,4,5].map(i => (
+                  <svg key={i} width={width < 150 ? '12' : '14'} height={width < 150 ? '12' : '14'} viewBox="0 0 24 24" fill={i <= rating ? 'oklch(0.75 0.15 75)' : 'oklch(0.4 0.01 250)'}>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                ))}
+              </div>
+              
+              <button style={{
+                marginTop: '8px',
+                width: '100%',
+                padding: width < 150 ? '8px' : '10px',
+                borderRadius: '6px',
+                background: 'oklch(0.69 0.17 172)',
+                color: 'oklch(0.12 0.01 175)',
+                border: 'none',
+                fontSize: width < 150 ? '12px' : '13px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}>
+                Log Session
+              </button>
+            </>
+          )}
+        </div>
+      );
+    };
+
+    const GridDemo = ({ minWidth, maxWidth, label, containerWidth = 1200 }) => {
+      const gridStyle = {
+        display: 'grid',
+        gridTemplateColumns: `repeat(auto-fill, minmax(${minWidth}px, ${maxWidth}px))`,
+        gap: '16px',
+        justifyContent: 'start'
+      };
+
+      // Calculate how many cards fit
+      const cardCount = Math.floor(containerWidth / (minWidth + 16));
+      
+      return (
+        <div className="grid-demo">
+          <div className="grid-label">
+            {label}
+          </div>
+          <div style={{ width: `${containerWidth}px`, margin: '0 auto' }}>
+            <div style={gridStyle}>
+              {[1,2,3,4,5,6].map(i => (
+                <LibraryCard 
+                  key={i}
+                  width={minWidth}
+                  title="Elden Ring"
+                  platform="PS5"
+                  playtime="32h"
+                  rating={4}
+                  startedAt="3d ago"
+                />
+              ))}
+            </div>
+          </div>
+          
+          <div className="metrics">
+            <div className="metrics-grid">
+              <div className="metric">
+                <div className="metric-label">Min Width</div>
+                <div className="metric-value">{minWidth}px</div>
+              </div>
+              <div className="metric">
+                <div className="metric-label">Max Width</div>
+                <div className="metric-value">{maxWidth}px</div>
+              </div>
+              <div className="metric">
+                <div className="metric-label">Cards per Row</div>
+                <div className="metric-value">{cardCount}</div>
+              </div>
+              <div className="metric">
+                <div className="metric-label">Cover Height</div>
+                <div className="metric-value">{Math.round(minWidth / COVER_ASPECT)}px</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    function App() {
+      return (
+        <div className="container">
+          
+          {/* Current Implementation */}
+          <div className="section">
+            <h2 className="section-title">
+              Current Implementation
+              <span className="badge">From Codebase</span>
+            </h2>
+            <GridDemo 
+              minWidth={140}
+              maxWidth={200}
+              label="grid-template-columns: repeat(auto-fill, minmax(140px, 200px))"
+              containerWidth={1200}
+            />
+            <div className="warning-box">
+              <strong>Issue:</strong> 140px minimum is very tight for readable metadata (platform, playtime, rating, CTA button). Text truncates aggressively.
+            </div>
+          </div>
+
+          {/* Desktop Recommendations */}
+          <div className="section">
+            <h2 className="section-title">
+              Recommended: Desktop (≥1024px)
+              <span className="badge" style={{ background: 'oklch(0.6 0.16 145 / 0.15)', color: 'oklch(0.75 0.12 145)' }}>Recommended</span>
+            </h2>
+            
+            <GridDemo 
+              minWidth={180}
+              maxWidth={220}
+              label="grid-template-columns: repeat(auto-fill, minmax(180px, 220px))"
+              containerWidth={1200}
+            />
+            
+            <div className="rec-box">
+              <div className="rec-title">✅ Why 180px minimum?</div>
+              <div className="rec-text">
+                • <strong>Cover height:</strong> 240px (3:4 ratio) — comfortable for viewing<br/>
+                • <strong>Metadata legible:</strong> Platform badges, playtime, rating all readable without truncation<br/>
+                • <strong>CTA button:</strong> "Log Session" fits comfortably at 13-14px font<br/>
+                • <strong>6-7 cards per row</strong> on 1200-1440px viewports<br/>
+                • <strong>Matches industry standard:</strong> Steam, Epic, GOG all use ~180-200px
+              </div>
+            </div>
+          </div>
+
+          {/* Tablet */}
+          <div className="section">
+            <h2 className="section-title">Tablet (768px–1023px)</h2>
+            <GridDemo 
+              minWidth={160}
+              maxWidth={200}
+              label="grid-template-columns: repeat(auto-fill, minmax(160px, 200px))"
+              containerWidth={768}
+            />
+          </div>
+
+          {/* Mobile */}
+          <div className="section">
+            <h2 className="section-title">Mobile (≤767px)</h2>
+            
+            <div className="comparison">
+              <div className="comp-side">
+                <div className="comp-label">Option A: 2-Column Grid</div>
+                <GridDemo 
+                  minWidth={150}
+                  maxWidth={200}
+                  label="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"
+                  containerWidth={375}
+                />
+                <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: 'var(--muted)' }}>
+                  <strong>Pros:</strong> Browse more games at once<br/>
+                  <strong>Cons:</strong> Metadata cramped, harder to tap
+                </div>
+              </div>
+              
+              <div className="comp-side">
+                <div className="comp-label">Option B: List View (Recommended Mobile)</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {[1,2,3].map(i => (
+                    <div key={i} style={{ 
+                      display: 'flex', 
+                      gap: '12px', 
+                      padding: '12px',
+                      background: 'oklch(0.2 0.007 260)',
+                      borderRadius: '8px',
+                      border: '1px solid oklch(0.24 0.008 250)'
+                    }}>
+                      <div style={{ 
+                        width: '60px',
+                        height: '80px',
+                        background: 'oklch(0.25 0.03 260)',
+                        borderRadius: '6px',
+                        flexShrink: 0
+                      }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '15px', fontWeight: 600, marginBottom: '4px' }}>Elden Ring</div>
+                        <div style={{ fontSize: '12px', color: 'oklch(0.6 0.005 250)', marginBottom: '8px' }}>
+                          PS5 • 32h • ★★★★☆
+                        </div>
+                        <button style={{
+                          width: '100%',
+                          padding: '8px',
+                          borderRadius: '6px',
+                          background: 'oklch(0.69 0.17 172)',
+                          color: 'oklch(0.12 0.01 175)',
+                          border: 'none',
+                          fontSize: '13px',
+                          fontWeight: 600
+                        }}>
+                          Log Session
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: 'var(--muted)' }}>
+                  <strong>Pros:</strong> Readable, easy to tap, shows more metadata<br/>
+                  <strong>Cons:</strong> See fewer games at once
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Comparison Table */}
+          <div className="section">
+            <h2 className="section-title">Card Size Comparison</h2>
+            <div style={{ 
+              background: 'var(--card)', 
+              border: '1px solid var(--border)', 
+              borderRadius: '12px',
+              padding: '2rem',
+              display: 'grid',
+              gap: '2rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))'
+            }}>
+              <div>
+                <div style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--muted)', textAlign: 'center' }}>
+                  120px (Too Small)
+                </div>
+                <LibraryCard width={120} title="Elden Ring" platform="PS5" playtime="32h" rating={4} />
+              </div>
+              
+              <div>
+                <div style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--muted)', textAlign: 'center' }}>
+                  140px (Current)
+                </div>
+                <LibraryCard width={140} title="Elden Ring" platform="PS5" playtime="32h" rating={4} />
+              </div>
+              
+              <div>
+                <div style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'oklch(0.75 0.12 145)', textAlign: 'center', fontWeight: 600 }}>
+                  180px (Recommended)
+                </div>
+                <LibraryCard width={180} title="Elden Ring" platform="PS5" playtime="32h" rating={4} />
+              </div>
+              
+              <div>
+                <div style={{ marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--muted)', textAlign: 'center' }}>
+                  220px (Generous)
+                </div>
+                <LibraryCard width={220} title="Elden Ring" platform="PlayStation 5" playtime="32h 15m" rating={4} />
+              </div>
+            </div>
+          </div>
+
+          {/* Implementation */}
+          <div className="section">
+            <h2 className="section-title">Implementation Recommendation</h2>
+            <div style={{
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              fontFamily: 'ui-monospace, monospace',
+              fontSize: '0.875rem'
+            }}>
+              <div style={{ color: 'var(--muted)', marginBottom: '0.5rem' }}>// Responsive grid for library-grid.tsx</div>
+              <div style={{ color: 'oklch(0.75 0.12 145)' }}>
+                {`@media (min-width: 1024px) {`}<br/>
+                &nbsp;&nbsp;{`grid-template-columns: repeat(auto-fill, minmax(180px, 220px));`}<br/>
+                {`}`}
+              </div>
+              <br/>
+              <div style={{ color: 'oklch(0.75 0.12 145)' }}>
+                {`@media (min-width: 768px) and (max-width: 1023px) {`}<br/>
+                &nbsp;&nbsp;{`grid-template-columns: repeat(auto-fill, minmax(160px, 200px));`}<br/>
+                {`}`}
+              </div>
+              <br/>
+              <div style={{ color: 'oklch(0.75 0.12 145)' }}>
+                {`@media (max-width: 767px) {`}<br/>
+                &nbsp;&nbsp;{`/* Switch to list view component */`}<br/>
+                {`}`}
+              </div>
+            </div>
+
+            <div className="rec-box" style={{ marginTop: '1.5rem' }}>
+              <div className="rec-title">📏 Summary</div>
+              <div className="rec-text">
+                • <strong>Desktop:</strong> <code>minmax(180px, 220px)</code> — optimal readability + density<br/>
+                • <strong>Tablet:</strong> <code>minmax(160px, 200px)</code> — balanced for medium screens<br/>
+                • <strong>Mobile:</strong> Switch to horizontal list view (60px cover + metadata row)<br/>
+                • <strong>Cover aspect:</strong> Always maintain 3:4 ratio (IGDB standard)<br/>
+                • <strong>Gap:</strong> 16px between cards (current implementation is good)
+              </div>
+            </div>
+          </div>
+
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
