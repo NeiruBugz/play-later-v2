@@ -12,27 +12,27 @@
   --font-runtime-mono: var(--font-default-mono), ui-monospace, monospace;
   --font-display: var(--font-paper-display), Georgia, serif;
   --background: oklch(0.97 0.012 85);
-  --foreground: oklch(0.22 0.02 70);
-  --foreground-body: oklch(0.32 0.02 70);
+  --foreground: oklch(0.18 0.02 60);
+  --foreground-body: oklch(0.28 0.018 60);
   /* Surface colors */
   --card: oklch(0.99 0.008 85);
-  --card-foreground: oklch(0.22 0.02 70);
+  --card-foreground: oklch(0.18 0.02 60);
   --popover: oklch(0.99 0.008 85);
-  --popover-foreground: oklch(0.22 0.02 70);
+  --popover-foreground: oklch(0.18 0.02 60);
   /* Primary — stamp red (event color, not decoration) */
-  --primary: oklch(0.5 0.18 28);
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-hover: oklch(0.45 0.18 28);
-  --primary-active: oklch(0.4 0.18 28);
+  --primary: oklch(0.45 0.16 30);
+  --primary-foreground: oklch(0.99 0.01 85);
+  --primary-hover: oklch(0.4 0.16 30);
+  --primary-active: oklch(0.36 0.16 30);
   /* Secondary — warm second surface (cocoa-tinted cream) */
   --secondary: oklch(0.94 0.014 85);
-  --secondary-foreground: oklch(0.22 0.02 70);
+  --secondary-foreground: oklch(0.18 0.02 60);
   /* Muted */
   --muted: oklch(0.94 0.014 85);
-  --muted-foreground: oklch(0.5 0.02 70);
+  --muted-foreground: oklch(0.5 0.015 60);
   /* Accent — soft cream (hover surface, not chrome) */
   --accent: oklch(0.93 0.018 80);
-  --accent-foreground: oklch(0.22 0.02 70);
+  --accent-foreground: oklch(0.18 0.02 60);
   /* Surface state vars — light theme darkens on interaction */
   --surface-hover: oklch(from var(--card) calc(l - 0.03) c h);
   --surface-active: oklch(from var(--card) calc(l - 0.06) c h);
@@ -51,9 +51,9 @@
   /* Borders and inputs */
   --border: oklch(0.84 0.02 80);
   --input: oklch(0.84 0.02 80);
-  --ring: oklch(0.5 0.18 28);
+  --ring: oklch(0.45 0.16 30);
   /* Chart colors */
-  --chart-1: oklch(0.5 0.18 28);
+  --chart-1: oklch(0.45 0.16 30);
   --chart-2: oklch(0.55 0.12 145);
   --chart-3: oklch(0.6 0.13 75);
   --chart-4: oklch(0.55 0.13 250);
@@ -64,15 +64,15 @@
   --radius-cover: 0.125rem;
   --radius-btn: 0.125rem;
   --radius-chip: 0.125rem;
-  /* Sidebar — same paper stack */
-  --sidebar: oklch(0.97 0.012 85);
-  --sidebar-foreground: oklch(0.22 0.02 70);
-  --sidebar-primary: oklch(0.5 0.18 28);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
+  /* Sidebar — slightly deeper than main bg */
+  --sidebar: oklch(0.95 0.014 85);
+  --sidebar-foreground: oklch(0.18 0.02 60);
+  --sidebar-primary: oklch(0.45 0.16 30);
+  --sidebar-primary-foreground: oklch(0.99 0.01 85);
   --sidebar-accent: oklch(0.93 0.018 80);
-  --sidebar-accent-foreground: oklch(0.22 0.02 70);
-  --sidebar-border: oklch(0.84 0.02 80);
-  --sidebar-ring: oklch(0.5 0.18 28);
+  --sidebar-accent-foreground: oklch(0.18 0.02 60);
+  --sidebar-border: oklch(0.86 0.018 80);
+  --sidebar-ring: oklch(0.45 0.16 30);
   /* Platform brand colors */
   --color-nintendo: #e60012;
   --color-playstation: #0070d1;
@@ -125,14 +125,12 @@
   --font-weight-caption: 500;
   /* Paper edge shadows — 1px solid line at sm/md, soft drop at lg */
   --shadow-paper-sm: 0 1px 0 oklch(0.84 0.02 80);
-  --shadow-paper:
-    0 1px 2px oklch(0 0 0 / 0.08), 0 0 0 1px oklch(0.84 0.02 80);
+  --shadow-paper: 0 1px 2px oklch(0 0 0 / 0.08), 0 0 0 1px oklch(0.84 0.02 80);
   --shadow-paper-md:
     0 1px 2px oklch(0 0 0 / 0.08), 0 0 0 1px oklch(0.84 0.02 80);
   --shadow-paper-lg: 0 4px 16px oklch(0 0 0 / 0.1);
-  --shadow-cover:
-    0 1px 0 oklch(0.84 0.02 80), 0 4px 8px oklch(0 0 0 / 0.08);
-  --shadow-btn: 0 1px 0 oklch(0.4 0.18 28);
+  --shadow-cover: 0 1px 0 oklch(0.84 0.02 80), 0 4px 8px oklch(0 0 0 / 0.08);
+  --shadow-btn: 0 1px 0 oklch(0.36 0.16 30);
   /* Semantic spacing scale - Tailwind-aligned */
   --space-xs: 0.25rem; /* 4px - very tight (Tailwind 1) */
   --space-sm: 0.375rem; /* 6px - tight (Tailwind 1.5) */
@@ -162,12 +160,12 @@
   /* Status colors — Paper bag (per-theme override) */
   --status-wishlist: oklch(0.55 0.13 250);
   --status-wishlist-foreground: oklch(0.99 0 0);
-  --status-shelf: oklch(0.55 0.02 70);
-  --status-shelf-foreground: oklch(0.99 0 0);
+  --status-shelf: oklch(0.5 0.015 60);
+  --status-shelf-foreground: oklch(0.99 0.01 85);
   --status-upNext: oklch(0.6 0.13 75);
-  --status-upNext-foreground: oklch(0.99 0 0);
-  --status-playing: oklch(0.5 0.18 28);
-  --status-playing-foreground: oklch(0.99 0 0);
+  --status-upNext-foreground: oklch(0.99 0.01 85);
+  --status-playing: oklch(0.45 0.16 30);
+  --status-playing-foreground: oklch(0.99 0.01 85);
   --status-played: oklch(0.55 0.12 145);
   --status-played-foreground: oklch(0.99 0 0);
 }
@@ -239,16 +237,13 @@
   --sidebar-ring: oklch(0.72 0.18 260);
   /* Boxart shadows — deep, with primary-tint at lg for covers */
   --shadow-paper-sm: 0 1px 0 oklch(0 0 0 / 0.4);
-  --shadow-paper:
-    0 4px 12px oklch(0 0 0 / 0.4);
-  --shadow-paper-md:
-    0 8px 24px oklch(0 0 0 / 0.5);
+  --shadow-paper: 0 4px 12px oklch(0 0 0 / 0.4);
+  --shadow-paper-md: 0 8px 24px oklch(0 0 0 / 0.5);
   --shadow-paper-lg:
     0 24px 60px oklch(0.72 0.18 260 / 0.4), 0 8px 20px oklch(0 0 0 / 0.5);
   --shadow-cover:
     0 24px 60px oklch(0.72 0.18 260 / 0.4), 0 8px 20px oklch(0 0 0 / 0.5);
-  --shadow-btn:
-    0 1px 0 oklch(0 0 0 / 0.3), inset 0 1px 0 oklch(1 0 0 / 0.15);
+  --shadow-btn: 0 1px 0 oklch(0 0 0 / 0.3), inset 0 1px 0 oklch(1 0 0 / 0.15);
 
   /* Status colors — Boxart bag */
   --status-wishlist: oklch(0.72 0.18 260);
@@ -257,6 +252,7 @@
   --status-shelf-foreground: oklch(0.95 0.01 250);
   --status-upNext: oklch(0.78 0.14 75);
   --status-upNext-foreground: oklch(0.1 0.02 260);
+  /* status-playing pops brighter than primary for stat numbers (design statColor) */
   --status-playing: oklch(0.85 0.16 260);
   --status-playing-foreground: oklch(0.1 0.02 260);
   --status-played: oklch(0.7 0.14 145);
@@ -450,28 +446,28 @@
   --font-runtime-sans: var(--font-cartridge-sans), system-ui, sans-serif;
   --font-runtime-mono: var(--font-cartridge-mono), ui-monospace, monospace;
   --font-display: var(--font-cartridge-display), "Archivo Black", sans-serif;
-  /* Base — manila paper */
-  --background: oklch(0.92 0.022 85);
-  --foreground: oklch(0.24 0.04 60);
-  --foreground-body: oklch(0.34 0.04 60);
+  /* Base — manila paper (saturated, hue 75) */
+  --background: oklch(0.93 0.04 75);
+  --foreground: oklch(0.22 0.04 30);
+  --foreground-body: oklch(0.3 0.04 35);
   /* Surfaces — slightly lifted manila */
-  --card: oklch(0.96 0.018 85);
-  --card-foreground: oklch(0.24 0.04 60);
-  --popover: oklch(0.96 0.018 85);
-  --popover-foreground: oklch(0.24 0.04 60);
+  --card: oklch(0.96 0.035 75);
+  --card-foreground: oklch(0.22 0.04 30);
+  --popover: oklch(0.96 0.035 75);
+  --popover-foreground: oklch(0.22 0.04 30);
   /* Primary — hotseat red */
-  --primary: oklch(0.55 0.22 28);
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-hover: oklch(0.5 0.22 28);
-  --primary-active: oklch(0.45 0.22 28);
+  --primary: oklch(0.6 0.2 30);
+  --primary-foreground: oklch(0.97 0.02 75);
+  --primary-hover: oklch(0.55 0.2 30);
+  --primary-active: oklch(0.5 0.2 30);
   /* Secondary / muted — cocoa-tinted second surface */
-  --secondary: oklch(0.88 0.024 70);
-  --secondary-foreground: oklch(0.24 0.04 60);
-  --muted: oklch(0.88 0.024 70);
-  --muted-foreground: oklch(0.5 0.03 60);
+  --secondary: oklch(0.88 0.04 75);
+  --secondary-foreground: oklch(0.22 0.04 30);
+  --muted: oklch(0.88 0.04 75);
+  --muted-foreground: oklch(0.42 0.04 35);
   /* Accent — soft manila (hover surface) */
-  --accent: oklch(0.88 0.022 80);
-  --accent-foreground: oklch(0.24 0.04 60);
+  --accent: oklch(0.88 0.04 75);
+  --accent-foreground: oklch(0.22 0.04 30);
   /* Surface state vars — daylight darkens on interaction */
   --surface-hover: oklch(from var(--card) calc(l - 0.04) c h);
   --surface-active: oklch(from var(--card) calc(l - 0.07) c h);
@@ -488,9 +484,9 @@
   --info: oklch(0.45 0.16 260);
   --info-foreground: oklch(0.99 0 0);
   /* Borders — heavy cocoa rule */
-  --border: oklch(0.78 0.03 70);
-  --input: oklch(0.78 0.03 70);
-  --ring: oklch(0.24 0.04 60);
+  --border: oklch(0.78 0.04 70);
+  --input: oklch(0.78 0.04 70);
+  --ring: oklch(0.22 0.04 30);
   /* Radii — square. No rounding anywhere. */
   --radius: 0;
   --radius-card: 0;
@@ -503,139 +499,136 @@
   --chart-3: oklch(0.6 0.15 75);
   --chart-4: oklch(0.45 0.16 260);
   --chart-5: oklch(0.65 0.18 230);
-  /* Sidebar — cocoa boxshelf rail (dark sidebar on light bg) */
+  /* Sidebar — cocoa boxshelf rail with red active pill */
   --sidebar: oklch(0.22 0.04 30);
   --sidebar-foreground: oklch(0.97 0.02 75);
-  --sidebar-primary: oklch(0.55 0.22 28);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.32 0.05 30);
+  --sidebar-primary: oklch(0.6 0.2 30);
+  --sidebar-primary-foreground: oklch(0.97 0.02 75);
+  --sidebar-accent: oklch(0.6 0.2 30);
   --sidebar-accent-foreground: oklch(0.97 0.02 75);
   --sidebar-border: oklch(0.32 0.05 30);
-  --sidebar-ring: oklch(0.55 0.22 28);
+  --sidebar-ring: oklch(0.6 0.2 30);
   /* Cartridge shadows — solid offset blocks (hardcover bevel), no blur */
-  --shadow-paper-sm: 2px 2px 0 oklch(0.24 0.04 60);
-  --shadow-paper:
-    3px 3px 0 oklch(0.24 0.04 60);
-  --shadow-paper-md:
-    3px 3px 0 oklch(0.24 0.04 60);
-  --shadow-paper-lg:
-    5px 5px 0 oklch(0.24 0.04 60);
+  --shadow-paper-sm: 2px 2px 0 oklch(0.22 0.04 30);
+  --shadow-paper: 3px 3px 0 oklch(0.22 0.04 30);
+  --shadow-paper-md: 3px 3px 0 oklch(0.22 0.04 30);
+  --shadow-paper-lg: 5px 5px 0 oklch(0.22 0.04 30);
   --shadow-cover:
-    4px 4px 0 oklch(0.24 0.04 60), 12px 12px 0 oklch(0.24 0.04 60 / 0.15);
-  --shadow-btn:
-    2px 2px 0 oklch(0.24 0.04 60);
+    4px 4px 0 oklch(0.22 0.04 30), 12px 12px 0 oklch(0.22 0.04 30 / 0.15);
+  --shadow-btn: 2px 2px 0 oklch(0.22 0.04 30);
 
   /* Status colors — Cartridge bag */
   --status-wishlist: oklch(0.45 0.16 260);
-  --status-wishlist-foreground: oklch(0.99 0 0);
-  --status-shelf: oklch(0.5 0.03 60);
-  --status-shelf-foreground: oklch(0.99 0 0);
+  --status-wishlist-foreground: oklch(0.97 0.02 75);
+  --status-shelf: oklch(0.42 0.04 35);
+  --status-shelf-foreground: oklch(0.97 0.02 75);
   --status-upNext: oklch(0.6 0.15 75);
-  --status-upNext-foreground: oklch(0.24 0.04 60);
-  --status-playing: oklch(0.55 0.22 28);
-  --status-playing-foreground: oklch(0.99 0 0);
+  --status-upNext-foreground: oklch(0.22 0.04 30);
+  --status-playing: oklch(0.6 0.2 30);
+  --status-playing-foreground: oklch(0.97 0.02 75);
   --status-played: oklch(0.5 0.13 145);
-  --status-played-foreground: oklch(0.99 0 0);
+  --status-played-foreground: oklch(0.97 0.02 75);
 }
 
 .aurora {
-  /* Theme · 04 · Aurora — synthesis of Jewel + Y2K. Indigo void + glass + emission. */
+  /* Theme · 04 · Aurora — synthesis of Jewel + Y2K. Indigo void + glass + green emission. */
   --font-runtime-mono: var(--font-aurora-mono), ui-monospace, monospace;
-  --font-display: var(--font-aurora-display), "Space Grotesk", system-ui, sans-serif;
-  /* Indigo void */
-  --background: oklch(0.18 0.04 280);
-  --foreground: oklch(0.97 0.02 280);
-  --foreground-body: oklch(0.86 0.04 280);
+  --font-display:
+    var(--font-aurora-display), "Space Grotesk", system-ui, sans-serif;
+  /* Indigo void — deeper than Boxart */
+  --background: oklch(0.1 0.035 270);
+  --foreground: oklch(0.96 0.015 85);
+  --foreground-body: oklch(0.88 0.018 85);
   /* Glass surfaces — translucent (per Aurora doctrine) */
-  --card: oklch(0.24 0.06 280 / 0.7);
-  --card-foreground: oklch(0.97 0.02 280);
-  --popover: oklch(0.24 0.06 280 / 0.95);
-  --popover-foreground: oklch(0.97 0.02 280);
-  /* Primary — indigo emission */
-  --primary: oklch(0.7 0.18 280);
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-hover: oklch(0.66 0.18 280);
-  --primary-active: oklch(0.62 0.18 280);
+  --card: oklch(0.14 0.035 265 / 0.55);
+  --card-foreground: oklch(0.96 0.015 85);
+  --popover: oklch(0.14 0.035 265 / 0.95);
+  --popover-foreground: oklch(0.96 0.015 85);
+  /* Primary — Xbox-green emission (Jewel's core) */
+  --primary: oklch(0.72 0.22 145);
+  --primary-foreground: oklch(0.08 0.02 145);
+  --primary-hover: oklch(0.68 0.22 145);
+  --primary-active: oklch(0.64 0.22 145);
   /* Secondary / muted — surface-2 (translucent) */
-  --secondary: oklch(0.3 0.08 280 / 0.5);
-  --secondary-foreground: oklch(0.97 0.02 280);
-  --muted: oklch(0.3 0.08 280 / 0.5);
-  --muted-foreground: oklch(0.66 0.05 280);
+  --secondary: oklch(0.16 0.04 268 / 0.55);
+  --secondary-foreground: oklch(0.96 0.015 85);
+  --muted: oklch(0.16 0.04 268 / 0.55);
+  --muted-foreground: oklch(0.72 0.02 85);
   /* Accent — soft glass (hover surface) */
-  --accent: oklch(0.28 0.06 280 / 0.5);
-  --accent-foreground: oklch(0.97 0.02 280);
-  /* Surface state vars — translucent layers brighten on interaction */
+  --accent: oklch(0.18 0.045 268);
+  --accent-foreground: oklch(0.96 0.015 85);
+  /* Surface state vars — translucent layers brighten with green emission */
   --surface-hover: oklch(from var(--primary) l c h / 0.12);
   --surface-active: oklch(from var(--primary) l c h / 0.18);
   /* Destructive */
   --destructive: oklch(0.6 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
   /* Success */
-  --success: oklch(0.75 0.16 155);
-  --success-foreground: oklch(0.18 0.04 280);
+  --success: oklch(0.72 0.22 145);
+  --success-foreground: oklch(0.08 0.02 145);
   /* Warning */
-  --warning: oklch(0.8 0.16 75);
-  --warning-foreground: oklch(0.18 0.04 280);
+  --warning: oklch(0.78 0.16 75);
+  --warning-foreground: oklch(0.1 0.035 270);
   /* Info */
   --info: oklch(0.75 0.15 290);
-  --info-foreground: oklch(0.18 0.04 280);
+  --info-foreground: oklch(0.1 0.035 270);
   /* Spark — magenta ceremonial accent (rationed) */
   --spark: oklch(0.7 0.25 340);
   /* Borders — translucent rule */
-  --border: oklch(0.4 0.07 280 / 0.6);
-  --input: oklch(0.4 0.07 280 / 0.6);
-  --ring: oklch(0.7 0.18 280);
+  --border: oklch(0.22 0.04 268);
+  --input: oklch(0.22 0.04 268);
+  --ring: oklch(0.72 0.22 145);
   /* Radii — Aurora's softest set */
-  --radius: 0.625rem;
-  --radius-card: 0.75rem;
-  --radius-cover: 0.5rem;
-  --radius-btn: 0.5rem;
-  --radius-chip: 9999px;
+  --radius: 0.375rem;
+  --radius-card: 0.375rem;
+  --radius-cover: 0.25rem;
+  --radius-btn: 0.25rem;
+  --radius-chip: 0.1875rem;
   /* Chart colors */
-  --chart-1: oklch(0.7 0.18 280);
+  --chart-1: oklch(0.72 0.22 145);
   --chart-2: oklch(0.75 0.16 155);
-  --chart-3: oklch(0.8 0.16 75);
+  --chart-3: oklch(0.78 0.16 75);
   --chart-4: oklch(0.75 0.15 290);
   --chart-5: oklch(0.7 0.25 340);
   /* Sidebar — deeper void */
-  --sidebar: oklch(0.14 0.04 280);
-  --sidebar-foreground: oklch(0.97 0.02 280);
-  --sidebar-primary: oklch(0.7 0.18 280);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.28 0.06 280 / 0.5);
-  --sidebar-accent-foreground: oklch(0.97 0.02 280);
-  --sidebar-border: oklch(0.4 0.07 280 / 0.6);
-  --sidebar-ring: oklch(0.7 0.18 280);
-  /* Aurora shadows — emission glow + inner highlight (jewel-box) */
+  --sidebar: oklch(0.08 0.03 270);
+  --sidebar-foreground: oklch(0.96 0.015 85);
+  --sidebar-primary: oklch(0.72 0.22 145);
+  --sidebar-primary-foreground: oklch(0.08 0.02 145);
+  --sidebar-accent: oklch(0.18 0.045 268);
+  --sidebar-accent-foreground: oklch(0.96 0.015 85);
+  --sidebar-border: oklch(0.2 0.04 268);
+  --sidebar-ring: oklch(0.72 0.22 145);
+  /* Aurora shadows — green emission glow + inner highlight (jewel-box) */
   --shadow-paper-sm: 0 1px 0 oklch(1 0 0 / 0.1);
   --shadow-paper:
-    0 8px 24px oklch(0.1 0.04 280 / 0.6), inset 0 1px 0 oklch(1 0 0 / 0.1);
+    0 8px 24px oklch(0 0 0 / 0.6), inset 0 1px 0 oklch(1 0 0 / 0.1);
   --shadow-paper-md:
-    0 8px 24px oklch(0.1 0.04 280 / 0.6), inset 0 1px 0 oklch(1 0 0 / 0.1);
+    0 8px 24px oklch(0 0 0 / 0.6), inset 0 1px 0 oklch(1 0 0 / 0.1);
   --shadow-paper-lg:
-    0 24px 64px oklch(0.7 0.18 280 / 0.3),
+    0 24px 64px oklch(0 0 0 / 0.6), 0 0 40px oklch(0.72 0.22 145 / 0.2),
     inset 0 1px 0 oklch(1 0 0 / 0.15);
   --shadow-cover:
-    0 12px 32px oklch(0.7 0.18 280 / 0.4),
-    0 0 0 1px oklch(0.4 0.07 280 / 0.6);
+    0 0 0 1px oklch(0.72 0.22 145 / 0.25), 0 24px 60px oklch(0 0 0 / 0.6),
+    0 0 40px oklch(0.72 0.22 145 / 0.2);
   --shadow-btn:
-    0 0 24px oklch(0.7 0.18 280 / 0.5),
-    inset 0 1px 0 oklch(1 0 0 / 0.2);
+    0 0 12px oklch(0.72 0.22 145 / 0.4),
+    inset 0 1px 0 oklch(0.96 0.015 85 / 0.15);
 
   /* Status colors — Aurora bag */
   --status-wishlist: oklch(0.75 0.15 290);
-  --status-wishlist-foreground: oklch(0.18 0.04 280);
+  --status-wishlist-foreground: oklch(0.1 0.035 270);
   --status-shelf: oklch(0.6 0.05 280);
-  --status-shelf-foreground: oklch(0.18 0.04 280);
+  --status-shelf-foreground: oklch(0.1 0.035 270);
   --status-upNext: oklch(0.78 0.16 75);
-  --status-upNext-foreground: oklch(0.18 0.04 280);
-  --status-playing: oklch(0.7 0.18 280);
-  --status-playing-foreground: oklch(0.99 0 0);
+  --status-upNext-foreground: oklch(0.1 0.035 270);
+  --status-playing: oklch(0.72 0.22 145);
+  --status-playing-foreground: oklch(0.08 0.02 145);
   --status-played: oklch(0.75 0.16 155);
-  --status-played-foreground: oklch(0.18 0.04 280);
+  --status-played-foreground: oklch(0.1 0.035 270);
 }
 
-/* Aurora ambient — indigo bloom on background, scanline overlay */
+/* Aurora ambient — green emission bloom + magenta-spark whisper, scanline overlay */
 .aurora body::before {
   content: "";
   position: fixed;
@@ -643,8 +636,16 @@
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 80% 0%, oklch(0.7 0.18 280 / 0.3), transparent 50%),
-    radial-gradient(ellipse at 0% 100%, oklch(0.5 0.18 320 / 0.15), transparent 50%);
+    radial-gradient(
+      ellipse at 25% 10%,
+      oklch(0.72 0.22 145 / 0.18),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 90% 100%,
+      oklch(0.7 0.25 340 / 0.08),
+      transparent 50%
+    );
 }
 
 .aurora body::after {
