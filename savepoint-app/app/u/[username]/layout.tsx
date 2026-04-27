@@ -2,13 +2,13 @@ import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
 
-import { CommandPaletteProvider } from "@/features/command-palette";
-import { ProfileHeader, ProfilePrivateMessage } from "@/features/profile";
-import { getProfilePageData } from "@/features/profile/index.server";
 import { Header } from "@/widgets/header";
 import { MobileNav } from "@/widgets/mobile-nav";
 import { MobileTopbar } from "@/widgets/mobile-topbar";
 import { AppSidebar } from "@/widgets/sidebar";
+import { CommandPaletteProvider } from "@/features/command-palette";
+import { ProfileHeader, ProfilePrivateMessage } from "@/features/profile";
+import { getProfilePageData } from "@/features/profile/index.server";
 import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
 
