@@ -7,7 +7,7 @@ Browse/search games via IGDB with category filtering and list/grid view toggle. 
 - `hooks/` -- search state, library status, view preference
 - `ui/` -- search input, results grid, game cards, category badges, quick-add
 - `lib/` -- category label helper
-- `constants.ts`, `schemas.ts`, `types.ts`
+- `constants.ts`, `schemas.ts` (re-exports the zod `SearchGamesSchema` from `data-access-layer/handlers/game-search/schemas`), `types.ts`
 
 ## Notes
 

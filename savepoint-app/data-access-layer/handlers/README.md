@@ -59,7 +59,7 @@ Handlers provide a clean separation between HTTP transport concerns and business
 | **Can Import** | Handlers, use-cases, services, shared | Services, repositories, shared | Services, shared |
 | **Imported By** | API routes only | Handlers, use-cases, server actions | Handlers, server actions, pages |
 | **Returns** | `HandlerResult<T>` (with HTTP status) | `ServiceResult<T>` | Custom result types |
-| **Example** | `gameSearchHandler` | `IgdbService` | `getGameDetails` |
+| **Example** | `igdbSearchHandler` | `IgdbService` | `getGameDetails` |
 
 ## File Structure
 

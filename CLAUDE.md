@@ -22,6 +22,29 @@ For layer-specific architecture details, see each layer's own `CLAUDE.md`:
 - `lambdas-py/CLAUDE.md` — Lambda inventory, pipeline flow, critical gotchas
 - `infra/CLAUDE.md` — Module inventory, env structure, state management
 
+## Where to look first
+
+Map from common agent tasks to the canonical source of truth. Read the linked file before editing.
+
+| If you want to... | Look here |
+|---|---|
+| Add a route / page | `savepoint-app/app/CLAUDE.md` (App Router conventions, caching, layouts) |
+| Add a feature (UI + actions + hooks) | `savepoint-app/features/CLAUDE.md` (parent rules, allowlist, trip-wires) — then mirror the closest existing feature |
+| Add a server action | `next-safe-action` `authorizedActionClient`; examples in any feature's `server-actions/` |
+| Add an API route | `app/api/.../route.ts` → handler from `data-access-layer/handlers/` |
+| Compose multiple services | Create a use-case in `features/<name>/use-cases/`. Services may NOT call other services. |
+| Decode a Result return | `data-access-layer/CLAUDE.md` Trip-wires (`.ok` vs `.success` matters) |
+| Add a DB column / relation | `savepoint-app/prisma/schema.prisma` → `pnpm --filter savepoint prisma migrate dev` |
+| Add a widget | `savepoint-app/widgets/CLAUDE.md` (responsive layout map + import rules) |
+| Reuse logic across features | Lift to `savepoint-app/shared/`. Cross-feature imports require allowlist entry. |
+| Bind a new keyboard shortcut | `savepoint-app/widgets/CLAUDE.md` — ⌘K is reserved for `command-palette` |
+| Run a single test file | `pnpm --filter savepoint test <path>` (jsdom default), `test:backend` for node, `test:utilities` for utilities |
+| Modify Lambda code / pipeline | `lambdas-py/CLAUDE.md` (inventory, S3 field names) |
+| Modify infra / Terraform | `infra/CLAUDE.md` (modules, env structure, state) |
+| Find spec for a recent feature | `context/spec/NNN-<name>/` — recent: 007, 009, 010, 011, 012, 014 (lineage in `features/CLAUDE.md`) |
+| Trigger Steam import locally | `savepoint-app/scripts/README.md` + `lambdas-py/CLAUDE.md` |
+| Understand caching / `use cache` | `features/CLAUDE.md` § Next.js 16 conventions |
+
 ## Quick Start
 
 ```bash

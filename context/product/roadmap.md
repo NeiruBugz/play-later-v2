@@ -2,276 +2,138 @@
 
 _This roadmap outlines our strategic direction based on customer needs and business goals. It focuses on the "what" and "why," not the technical "how."_
 
+_Each phase is a single ordered list. Within Phase 2, items are ordered by dependency — earlier items unlock later ones._
+
 ---
 
 ## Phase 1: Core Foundation _(Complete)_
 
-_The highest priority features that form the core foundation of SavePoint—enabling users to track their gaming library and begin journaling._
+_The highest priority features that form the core foundation of SavePoint — enabling users to track their gaming library and begin journaling._
 
-- [x] **Technical Foundation & Refactoring**
-  - [x] **IGDB Integration Consolidation:** Refactor IGDB implementation to eliminate duplication between `shared/lib/igdb.ts` and `data-access-layer/services/igdb/igdb-service.ts`. Extract types to `igdb-api-types` package for unified type definitions. Deprecate legacy utility in favor of service layer pattern.
-
-- [x] **User Account Essentials**
-  - [x] **Google OAuth Sign-Up & Login:** Allow users to create an account and sign in using Google OAuth as the primary authentication method.
-  - [x] **Credentials-Based Login:** Provide email/password authentication as a secondary option, primarily for testing and development scenarios (E2E tests with Playwright).
-  - [x] **Basic Profile Management:** Enable users to view and update their name and basic profile information after signing up.
-
-- [x] **Game Metadata Foundation**
-  - [x] **IGDB Integration:** Connect to IGDB as the primary source for game metadata, covers, descriptions, release dates, and platform information.
-  - [x] **Game Search:** Allow users to search for games via IGDB to add to their library.
-  - [x] **Game Detail Pages:** Create rich game detail pages showing IGDB metadata and user's personal journal entries for that game.
-
-- [x] **Personal Gaming Library**
-  - [x] **Add Games to Library:** Enable users to add games from IGDB search results to their personal library.
-  - [x] **Journey Status Tracking:** Allow users to mark games with status indicators (Want to Play, Owned, Playing, Played) to organize their collection by intent.
-  - [x] **Library View & Organization:** Display the user's gaming library in a clear, browsable format with filtering by status and platform.
-
-- [x] **Gaming Journal**
-  - [x] **Write Journal Entries:** Provide a form for users to write reflections and memories about their gaming experiences, linked to specific games.
-  - [x] **View Personal Journal:** Display a chronological timeline of the user's journal entries to revisit past reflections.
-
-- [x] **Steam Library Integration — Stage 1: Technical Foundation** _(Spec 002 — Completed)_
-  - [x] **Lambda Integration:** Connect existing Lambda pipeline (fetch Steam library → IGDB enrichment → `ImportedGame` staging table)
-  - [x] **Feature Flag:** Environment-based toggle to disable Steam import flow in production (avoid AWS costs until ready)
-  - [x] **Local Testing:** SAM/LocalStack setup for local Lambda invocation during development
-  - [x] Steam profile connection UI (Steam ID input)
-  - [x] Imported games stored in `ImportedGame` table (existing schema: storefront, playtime, IGDB match status)
-
-- [x] **Code Health & Developer Experience** _(Spec 004 — Completed)_
-- [x] **Library Status Redesign** _(Spec 005 — Completed)_
-- [x] **FSD Architecture Compliance** _(Spec 007 — Completed)_
-
-- [x] **Social Engagement** _(Spec 008 — Completed)_
-
-  _Follow other users, view activity feed of status changes and library adds. Includes public user profiles. See [spec](../spec/008-social-engagement/functional-spec.md)._
-  - [x] Public user profiles with display name, avatar, stats, recent activity, and library preview
-  - [x] Profile visibility toggle (public/private)
-  - [x] Follow/unfollow from profile pages with public follow lists
-  - [x] Activity feed widget on dashboard (status changes + library adds from followed users)
-  - [x] Empty state with popular activity for users with no follows
+- [x] **IGDB Integration Consolidation** — unified types in `igdb-api-types`, deprecated legacy utility in favor of service layer.
+- [x] **Google OAuth Sign-Up & Login** — primary authentication method.
+- [x] **Credentials-Based Login** — secondary email/password flow for testing and E2E.
+- [x] **Basic Profile Management** — view/update name and basic profile info.
+- [x] **IGDB Integration** — primary source for game metadata, covers, descriptions, release dates, platforms.
+- [x] **Game Search** — search IGDB to add to library.
+- [x] **Game Detail Pages** — IGDB metadata + user's personal journal entries.
+- [x] **Add Games to Library** — from IGDB search results.
+- [x] **Journey Status Tracking** — Want to Play / Owned / Playing / Played.
+- [x] **Library View & Organization** — browsable view with status/platform filters.
+- [x] **Write Journal Entries** — reflections and memories linked to specific games.
+- [x] **View Personal Journal** — chronological timeline of past reflections.
+- [x] **Steam Library Integration — Stage 1: Technical Foundation** _(Spec 002)_ — Lambda pipeline, feature flag, local SAM/LocalStack, Steam profile UI, `ImportedGame` staging table.
+- [x] **Code Health & Developer Experience** _(Spec 004)_
+- [x] **Library Status Redesign** _(Spec 005)_
+- [x] **FSD Architecture Compliance** _(Spec 007)_
+- [x] **Social Engagement** _(Spec 008)_ — follow system, activity feed, public profile foundation.
+- [x] **Unified Profile View** _(Spec 009)_ — `/u/[username]` consolidates personal + public profile surfaces.
 
 ---
 
 ## Phase 2: Internal Depth & Polish
 
-_Everything we can ship on our own data + IGDB, with no AWS / external platform dependencies. Deepens the social, reflection, curation, and discovery surfaces, and hardens dashboard and polish. Ships before Platform Integrations so the product is mature before bulk library imports land._
+_Everything we can ship on our own data + IGDB, with no AWS / external platform dependencies. Ordered by dependency: data primitives first, then consumers, then polish._
 
 ### Shipped
 
-- [x] **Next.js 16 Feature Adoption** _(Spec 010 — Completed)_
+- [x] **Next.js 16 Feature Adoption** _(Spec 010)_ — `cacheComponents`, `"use cache"` directive, view transitions.
+- [x] **Code Health & DX Round 2** _(Spec 006)_
+- [x] **Star Ratings** _(Spec 011)_ — 1–10 ratings on library entries with sort/filter and rating histogram.
+- [x] **Patient-Gamer UX Overhaul** _(post-011)_ — UX pass shipped on top of star ratings.
+- [x] **UX Audit — Round 1** _(Spec 012)_ — library scannability, mobile filters, dashboard hero, onboarding entry, library card redesign, quick add.
+- [x] **UX Audit — Round 2** _(Spec 014)_ — game detail / journal / profile / settings / auth surfaces; navigational connective tissue; Raycast-style command center direction. 12 pinned findings (3 High / 7 Medium / 2 Low).
 
-  _Adopted `cacheComponents` for back-nav state preservation, migrated all `unstable_cache` to `"use cache"` directive, added 24h caching to platform endpoints, enabled `experimental.viewTransition` with cover-image morphs across Library/Search/Detail routes. 1,209 tests pass, zero `unstable_cache` imports remain. See [spec](../spec/010-nextjs-16-feature-adoption/functional-spec.md)._
+### In Progress
 
-- [x] **Code Health & Developer Experience (Round 2)** _(Spec 006 — Completed)_
+### Ordered Backlog
 
-  _Shipped in PR #184 plus follow-ups. Root `CLAUDE.md`, `Makefile`, `scripts/README.md`, repository-bypass fixes, `.gitignore` hardening, `lambdas-py` CI job all merged._
-  - [x] **P0:** Root CLAUDE.md with project purpose, cross-service architecture, and key commands (AI-01)
-  - [x] **P1:** Dev server run instructions in CLAUDE.md ecosystem (AI-07); tasks.md generated for spec 005 (SDD-05); cross-layer branching convention documented (E2E-01)
-  - [x] **P2:** Repository bypass violations fixed (ARCH-02); CLAUDE.md files trimmed (AI-06); `.gitignore` hardened for certs/secrets (SEC-05); stale `savepoint-app/README.md` link fixed and `scripts/README.md` added (DOC-02/04); root `Makefile` with cross-layer targets and `lambdas-py` CI job added (E2E-05)
+1. [ ] **Per-Playthrough Logs** — multiple playthroughs per library entry, each with start/end dates, rating, platform, optional notes. Playthrough timeline on game detail. Journal/review entries can attach to a specific playthrough. _Data primitive — unblocks Reviews and Aggregate Game Stats._
 
-### 2A · Data Foundations
+2. [ ] **Reviews** — short-form, public, rated takes on a game; distinct from private long-form Journal. Public review feed on game detail; personal review history on profile; visibility setting (public/private/followers). _Depends on Per-Playthrough Logs._
 
-_Primitives that unlock the rest of the phase._
+3. [ ] **Public Reflections** — opt-in to make journal entries public; browse community reflections on a game. _Builds on Spec 008 public profiles._
 
-- [x] **Star Ratings** _(Spec 011)_
-  - [ ] 1–10 (or 1–5 with half-steps) rating on each library entry
-  - [ ] Rating visible on library cards and game detail
-  - [ ] Sort/filter library by rating
-  - [ ] Rating histogram on personal profile
+4. [ ] **Game Detail Redesign** — single coordinated pass: hero with blurred cover backdrop, one-click status strip (no modal), personal stats column (playthroughs / your rating / journal count), community stats column, playthrough timeline, reviews feed, franchise / series / expansions / related games. _Consumes Per-Playthrough Logs + Reviews; replaces piecemeal asks (in-page status toggles, enhanced game details, fallback cover rendering)._
 
-- [ ] **Per-Playthrough Logs** _(Spec TBD)_
+5. [ ] **Aggregate Game Stats** — community data on game detail: play counts (playing / played / backlog / wishlist), average rating + histogram, average / median completion time, review count. _Depends on Reviews._
 
-  _Support replays, New Game+, and multiple completions. A library entry becomes a container for one or more playthroughs, each with its own start/end date, rating, platform, and optional notes._
-  - [ ] Multiple playthrough records per library entry
-  - [ ] Per-playthrough rating + dates + platform
-  - [ ] Playthrough timeline on game detail (personal view)
-  - [ ] Journal/review entries can attach to a specific playthrough
+6. [ ] **Bento Dashboard Reflow** — 12-col responsive grid with consistent height tiers; fills viewport on ≥1280px; graceful stacking on mobile/tablet; widget chrome aligned with terminal aesthetic. _Container for the next four items._
 
-### 2B · Reflection & Reviews
+7. [ ] **Upcoming Releases Widget** — countdowns for unreleased wishlisted games using IGDB release dates.
 
-_Two distinct models: private long-form Journal vs public short-form Reviews._
+8. [ ] **YTD Stats Card** — games finished this year, hours logged, journal entries, top genres / platforms. _Depends on Star Ratings._
 
-- [ ] **Reviews** _(Spec TBD)_
+9. [ ] **Pick Up Where You Left Off** — surface oldest `Playing` with days-since-last-update to nudge against backlog guilt.
 
-  _Short-form, public, rated takes on a game. Distinct from Journal entries (which remain private, long-form, and reflective). Product framing: Journal = "what this game meant to me", Review = "should you play this"._
-  - [ ] Write a review tied to a library entry + rating
-  - [ ] Public review feed on game detail pages
-  - [ ] Personal review history on profile
-  - [ ] Review visibility setting (public/private/followers)
-  - [ ] Clear UX separation from Journal entries
+10. [ ] **Gaming Events Calendar** — IGDB events endpoint integration; dashboard widget (next 3–5 events with countdowns); dedicated `/events` page; event detail (date, stream link, expected announcements).
 
-- [ ] **Community Reflections** _(Spec TBD)_
+11. [ ] **Similar Games Discovery** — IGDB-driven recommendations on game detail.
 
-  _Builds on the already-shipped public profiles from Spec 008._
-  - [ ] **Public Reflections:** Enable users to optionally make their journal entries public to share perspectives with the community.
-  - [ ] **Browse Community Reflections:** Allow users to read how others experienced the same games before diving in themselves.
+12. [ ] **Browse / Catalog** — first-class IGDB browse surface (trending, recent releases, by genre).
 
-### 2C · Community Surfaces
+13. [ ] **Curated Collections** — create personal themed collections (e.g., "Cozy Winter Games") from library; browse personal collections view. _Public sharing deferred to Phase 4._
 
-_Aggregate community data, surfaced where it's decision-useful._
+14. [ ] **First-Time User Onboarding** _(Spec 013)_ — server-persisted guided tour covering Library, Dashboard, Add Game (⌘K + navbar), Profile/settings; one-time per user across devices, re-triggerable from user menu.
 
-- [ ] **Aggregate Game Stats** _(Spec TBD)_
+15. [ ] **Library View Modes** — grid (default), compact grid, dense list (table with title + status + rating + platform + playtime); persists per user.
 
-  _Community data surfaced on game detail pages. Depends on ratings and reviews shipping first._
-  - [ ] Play counts (playing / played / backlog / wishlist)
-  - [ ] Average community rating + rating histogram
-  - [ ] Average / median completion time (from status-change timestamps)
-  - [ ] Review count and recent reviews snippet
+16. [ ] **Bulk Library Actions** — multi-select with bulk status change / delete.
 
-- [ ] **Profile Slug Resolution** _(Spec TBD)_
-
-  _`/u/[slug]` gracefully handles display-name-style misses: suggest closest username match and surface a "did you mean…" experience instead of a hard 404._
-
-### 2D · Curation
-
-- [ ] **Curated Collections** _(Spec TBD)_
-  - [ ] **Create Themed Collections:** Allow users to create personal, themed collections (e.g., "Cozy Winter Games," "Games That Made Me Think") from their library.
-  - [ ] **Browse Personal Collections:** Display all of a user's collections in an organized view for easy navigation.
-
-  _Public sharing stays in Phase 4 under Community Collections._
-
-### 2E · Discovery
-
-_Uses already-integrated IGDB — no new external dependency._
-
-- [ ] **Similar Games Discovery** _(Spec TBD)_ — IGDB-driven recommendations on game detail.
-- [ ] **Enhanced Game Details** _(Spec TBD)_ — franchise, series, expansions, and related games on detail pages.
-- [ ] **Browse / Catalog** _(Spec TBD)_ — first-class IGDB browse surface (trending, recent releases, by genre) so users have something to do when their library feels dull.
-- [ ] **Mood-Based Recommendations** _(Spec TBD)_ — "I want something cozy tonight" filter over library + IGDB.
-
-### 2F · Dashboard & Retention
-
-_Reclaim the empty real estate on the dashboard._
-
-- [ ] **Upcoming Releases Widget** _(Spec TBD)_ — countdowns for unreleased wishlisted games using IGDB release dates.
-- [ ] **YTD Stats Card** _(Spec TBD)_ — games finished this year, hours logged, journal entries written, top genres / platforms.
-- [ ] **"Pick up where you left off"** _(Spec TBD)_ — surface oldest `Playing` with days-since-last-update to nudge against backlog guilt.
-- [ ] **Year-in-Review / Wrapped** _(Spec TBD)_ — shareable year-end stat card (finished, hours, top-rated, top genres). Depends on Ratings.
-
-### 2G · Polish & Power Use
-
-- [ ] **Fallback Cover Rendering** _(Spec TBD)_ — typographic cover from title + platform color when IGDB art is missing or not yet cached.
-- [ ] **In-Page Status Toggles** _(Spec TBD)_ — Played / Playing / Shelf / Wishlist / Up Next one-click on game detail (no modal).
-- [ ] **Global Quick-Log CTA** _(Spec TBD)_ — persistent header entry point (button + ⌘K) to log/add a game from any page, with smart default status.
-- [ ] **Bulk Library Actions** _(Spec TBD)_ — multi-select on library with bulk status change / delete. Useful independent of Steam import.
-- [ ] **Keyboard Navigation Palette** _(Spec TBD)_ — `g l` → library, `g j` → journal, `n` → new log, etc.
-
-### 2H · Layout & UI Refresh
-
-_The cyberpunk / terminal aesthetic is a brand asset — keep it. The problem is density: the dashboard wastes ~30–40% of viewport real estate below the fold, and there are no time-sensitive surfaces. This cluster reclaims that space and adds industry context._
-
-- [ ] **Bento Dashboard Reflow** _(Spec TBD)_
-
-  _Denser, viewport-filling dashboard on a 12-column grid with consistent height tiers. Widgets include existing (Library stats, Activity, Playing, Up Next, Recently Added) plus new (Upcoming Releases, YTD Stats, Pick Up Where You Left Off, Gaming Events)._
-  - [ ] 12-col responsive grid with height tiers
-  - [ ] Fill viewport on ≥1280px; graceful stacking on mobile/tablet
-  - [ ] Consistent widget chrome aligned with the terminal aesthetic
-
-- [ ] **Gaming Events Calendar** _(Spec TBD)_
-
-  _Industry event countdowns: Summer Games Fest, Gamescom, The Game Awards, Nintendo Direct, PlayStation State of Play, Xbox Showcase. Integrate with the IGDB events endpoint for automatic updates — no hand-curation burden._
-  - [ ] IGDB events endpoint integration (fetch + cache)
-  - [ ] Dashboard widget with next 3–5 upcoming events + countdowns
-  - [ ] Dedicated `/events` page with full calendar view
-  - [ ] Event detail: date, stream link, expected announcements (where available)
-  - [ ] Optional: notify/remind me for an event (later milestone)
-
-- [ ] **Library View Modes** _(Spec TBD)_
-  - [ ] Grid (current default)
-  - [ ] Compact grid (more cards per row)
-  - [ ] Dense list (table with title + status + rating + platform + playtime)
-  - [ ] View preference persists per user
-
-- [ ] **Game Detail Redesign** _(Spec TBD)_
-
-  _One coordinated redesign pass instead of piecemeal additions across specs._
-  - [ ] Hero with blurred cover backdrop
-  - [ ] One-click status strip (no modal)
-  - [ ] Stats column: personal (playthroughs, your rating, journal count) + community (aggregate stats from 2C)
-  - [ ] Playthrough timeline
-  - [ ] Reviews feed
-
-- [ ] **Theme Variants & Density Modes** _(Spec TBD)_
-  - [ ] Keep "Terminal Green" as default
-  - [ ] Add at least one contrast variant (e.g., "Paper" / light, "Amber" retro)
-  - [ ] Comfortable / compact density toggle applied app-wide
-  - [ ] Preferences persist per user
-
-- [ ] **Logged-Out Landing Page** _(Spec TBD)_
-
-  _Currently `/` likely redirects to auth. A proper marketing landing page in the product's aesthetic makes SavePoint shareable and gives the terminal/cyberpunk brand a public face._
-  - [ ] Hero with product pitch + screenshots
-  - [ ] Feature highlights (library, journal, reviews, events, imports)
-  - [ ] Sign in / sign up CTAs
-  - [ ] Public profile / library preview links for SEO
+17. [ ] **Global Quick-Log CTA** — persistent header entry point (button + ⌘K) to log/add a game from any page with smart default status.
 
 ---
 
 ## Phase 3: Platform Integrations
 
-_Expand library import to external gaming platforms. Gated on external APIs (Steam, PSN, Xbox) and the AWS Lambda enrichment pipeline. Deferred until Phase 2 internal work is shipped so progress is not blocked by third-party constraints._
+_Expand library import to external gaming platforms. Gated on external APIs (Steam, PSN, Xbox) and the AWS Lambda enrichment pipeline. Deferred until Phase 2 internal work is shipped so progress is not blocked by third-party constraints. Ordered by readiness — Steam pipeline is furthest along._
 
-- [ ] **Steam Library Integration — Stages 2 & 3: Curation** _(Spec 003)_
+1. [ ] **Steam Library — Stages 2 & 3: Curation** _(Spec 003)_ — paginated list of imported Steam games with sort/filter; individual import via auto-match IGDB on Steam App ID; manual IGDB search fallback; smart status assignment (playtime/recency → Owned/Playing/Played); dismiss action; checkbox multi-select with bulk import; selection persists across pagination. _Philosophy: import is curation, not bulk transfer._
 
-  _Philosophy: SavePoint is for games you intend to experience, not a catalog. Steam import is curation, not bulk transfer. See [Product Definition](product-definition.md#23-ux-principles)._
+2. [ ] **Steam Library — Stage 4: Ongoing Sync** — re-import detects new games only; optional periodic sync for new purchases.
 
-  - [ ] **Stage 2: Individual Curation Interface**
-    - [ ] Paginated list of imported Steam games with sorting/filtering
-    - [ ] Individual import: click game → auto-match IGDB via Steam App ID → add to library
-    - [ ] Manual IGDB search for games that don't auto-match
-    - [ ] Smart status assignment (playtime/recency → Owned/Playing/Played)
-    - [ ] Dismiss action to soft-delete unwanted games from list
+3. [ ] **PlayStation Trophy Integration** _(Research Complete)_ — PSN username + "About Me" verification via `psn-api`; fetch trophy list; match to IGDB; reuse Steam curation UI. See [research/playstation-integration.md](../research/playstation-integration.md).
 
-  - [ ] **Stage 3: Bulk Selection & Import**
-    - [ ] Checkbox selection on each game row
-    - [ ] Bulk actions: Select All / Deselect All / Select All on Page
-    - [ ] Bulk import: import multiple selected games at once
-    - [ ] Selection state persists across pagination
-
-- [ ] **Steam Library Integration — Stage 4: Ongoing Sync**
-  - [ ] Re-import detects new games only (no duplicates)
-  - [ ] Optional: periodic sync for new purchases
-
-- [ ] **PlayStation Trophy Integration** _(Research Complete)_
-
-  _Import games based on earned trophies. Uses unofficial PSN API with "About Me" verification (same approach as PSNProfiles). See [research/playstation-integration.md](../research/playstation-integration.md)._
-  - [ ] **Stage 1: Account Linking**
-    - [ ] PSN username input with verification code flow
-    - [ ] "About Me" verification via psn-api library
-    - [ ] Store verified PSN account link in database
-
-  - [ ] **Stage 2: Trophy Import**
-    - [ ] Fetch trophy list (games with trophies earned)
-    - [ ] Match to IGDB games (similar to Steam import)
-    - [ ] Store in `ImportedGame` staging table
-
-  - [ ] **Stage 3: Curation** _(Shared with Steam)_
-    - [ ] Reuse Steam import curation UI
-    - [ ] User selects which trophy games to track
-
-- [ ] **Xbox Game Pass Integration** _(Research Complete)_
-
-  _Import games and achievements via OpenXBL API. Supports full game library (not just achievements). See [research/xbox-integration.md](../research/xbox-integration.md)._
-  - [ ] **Stage 1: Account Linking**
-    - [ ] OpenXBL OAuth integration ("Login with Xbox")
-    - [ ] Store Xbox XUID and access credentials
-    - [ ] Gamertag display in user profile
-
-  - [ ] **Stage 2: Game Import**
-    - [ ] Fetch title history (full owned games)
-    - [ ] Match to IGDB games (similar to Steam import)
-    - [ ] Store in `ImportedGame` staging table
-    - [ ] Include achievement data for enrichment
-
-  - [ ] **Stage 3: Curation** _(Shared with Steam/PlayStation)_
-    - [ ] Reuse platform import curation UI
-    - [ ] User selects which Xbox games to track
+4. [ ] **Xbox Game Pass Integration** _(Research Complete)_ — OpenXBL OAuth ("Login with Xbox"); fetch full title history; match to IGDB; achievement enrichment; reuse Steam curation UI. See [research/xbox-integration.md](../research/xbox-integration.md).
 
 ---
 
 ## Phase 4: Community Scaling
 
-_Features that build on Phase 2 community foundations. Depends on Curated Collections shipping first._
+_Builds on Phase 2 community foundations. Depends on Curated Collections shipping first._
 
-- [ ] **Community Collections**
-  - [ ] Allow users to share their themed collections publicly for others to discover and draw inspiration from.
+1. [ ] **Community Collections** — share themed collections publicly for others to discover and draw inspiration from.
+
+---
+
+## Phase 5: Tech Health & Hygiene
+
+_Audit-driven tech debt and process improvements. Sourced from `context/audits/2026-04-28/recommendations.md`. Non-blocking on product work but pays compounding interest. Runs in parallel with feature work. Ordered P1 → P2._
+
+1. [ ] **Architecture Doc Refresh** _(P1, SDD-03)_ — back-propagate spec 010 (Next.js 16) into `context/architecture.md`; correct "Next.js 15" → "Next.js 16"; move Upstash Redis from "Future considerations" to active stack.
+
+2. [ ] **Spec Status Reconciliation** _(P1, SDD-06)_ — mark spec 002 as Completed (55/55 tasks done); audit specs 009 and 012 against shipped state; run `/awos:verify` to formalize.
+
+3. [ ] **Cross-Layer Vertical Slices** _(P1, E2E-01)_ — for items requiring data-pipeline or infra changes (PSN/Xbox imports, ongoing Steam sync), keep work in a single branch spanning `savepoint-app` + `lambdas-py` + `infra` rather than per-layer PRs.
+
+4. [ ] **Terraform CI Parity** _(P2, E2E-05)_ — path-conditional job in `.github/workflows/pr-checks.yml` running `terraform fmt -check -recursive` and `terraform validate` from `infra/envs/dev/`.
+
+5. [ ] **Decompose Oversized Lambda Modules** _(P2, ARCH-06)_ — split `lambdas-py/src/services/database.py` (769 LOC), `handlers/database_import.py` (696 LOC), `models/db.py` (526 LOC) by responsibility.
+
+6. [ ] **Tighten FSD Type Boundaries** _(P2, ARCH-02)_ — move shared types out of repository layer for `features/social/ui/{followers,following}-list.tsx`; import from `entities/social/types`.
+
+---
+
+## Archive — Not Pursuing
+
+_Items previously on the roadmap that have been dropped to keep the working list focused. Documented here so the decision is traceable; revisit if context changes._
+
+- **Mood-Based Recommendations** — speculative; no clear signal users want a "cozy tonight" filter over their own library.
+- **Year-in-Review / Wrapped** — seasonal one-shot; high cost relative to once-a-year payoff.
+- **Theme Variants & Density Modes** — Terminal Green is the brand; alternative themes dilute identity for marginal user value.
+- **Logged-Out Landing Page** — marketing surface, not core loop; defer until there's a growth motion to support.
+- **Profile Slug Resolution** — minor polish on a low-traffic 404 path; not worth bespoke "did you mean…" infrastructure.
+- **Keyboard Navigation Palette** _(g l, g j, n, etc.)_ — power-user shortcut layer; ⌘K already covers the same intent.
+- **Fallback Cover Rendering** — folded into Game Detail Redesign / UX Audit as needed; not its own roadmap line.
+- **Enhanced Game Details** _(franchise / series / expansions)_ — folded into Game Detail Redesign.
+- **In-Page Status Toggles** — folded into Game Detail Redesign.

@@ -142,6 +142,40 @@ const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "GameService" });
 const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GameSearchHandler" });
 ```
 
+## Trip-wires
+
+Non-obvious gotchas that have caused real bugs.
+
+### Result type shapes are NOT interchangeable
+
+| Type | Discriminator | Defined in |
+|------|---------------|------------|
+| `RepositoryResult<T>` | `.ok` (true/false) | `repository/errors.ts` |
+| `ServiceResult<T, E>` | `.success` (true/false) | `services/types.ts` |
+| `HandlerResult<T>` | `.success` (true/false) | `handlers/types.ts` |
+
+Destructuring `.ok` on a `ServiceResult` or `HandlerResult` yields `undefined` — silent bug. When forwarding a repository result up through a service, transform the shape; do not pass it through.
+
+### Some repository functions return plain rows, not `RepositoryResult`
+
+For example, `updateUserProfile` in `repository/user/user-repository.ts` returns the user row directly. Always read the function's return type before assuming a Result wrapper. Tests that call these via `expect(result.ok).toBe(true)` are buggy (see `test/guides/INTEGRATION_TESTING.md` — known stale).
+
+### Service-to-service calls are forbidden
+
+If service A needs service B, create a use-case in `features/<name>/use-cases/` that orchestrates both. Services that import other services trigger ESLint errors and indicate a missing use-case.
+
+### Handlers must skip the repository
+
+Handlers → services → repositories. A handler importing from `repository/` is always wrong; lift the call into a service.
+
+### Server actions skip handlers
+
+Server actions go directly: action → service (or use-case) → repository. Handlers exist only for API routes.
+
+### Logging context is mandatory
+
+Use `createLogger({ [LOGGER_CONTEXT.SERVICE]: "Name" })` (or `.HANDLER` / `.REPOSITORY`). Untagged logs make production debugging painful.
+
 ## Testing Strategy
 
 | Layer | Test Type | Database |

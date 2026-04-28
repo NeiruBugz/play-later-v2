@@ -49,16 +49,16 @@ API routes live in `app/api/` and should:
 
 ```typescript
 // app/api/games/search/route.ts
-import { gameSearchHandler } from "@/data-access-layer/handlers";
+import { igdbSearchHandler } from "@/data-access-layer/handlers";
 
 export async function GET(request: Request) {
-  const result = await gameSearchHandler.search(params);
+  const result = await igdbSearchHandler(input, context);
 
-  if (!result.ok) {
-    return NextResponse.json(result.error, { status: result.error.status });
+  if (!result.success) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  return NextResponse.json(result.data);
+  return NextResponse.json(result.data, { status: result.status });
 }
 ```
 

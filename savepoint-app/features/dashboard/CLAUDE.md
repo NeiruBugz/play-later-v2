@@ -12,6 +12,6 @@ Main dashboard view. The page leads with a reflection-first quick-log hero ("Wha
 
 ## Notes
 
-- Consumes `onboarding`, `journal`, `library`, and `social` features for cross-feature UI
+- Consumes `onboarding`, `journal`, `library` (notably `LibraryCard`), and `social` features for cross-feature UI
 - The hero sits above the onboarding checklist; the intent is that returning users land on "log tonight's session" as the first action
 - Stats are demoted below the hero so the dashboard can't feel like an empty collection on small libraries
