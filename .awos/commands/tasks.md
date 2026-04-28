@@ -103,5 +103,4 @@ Follow this process precisely.
 
 1.  **Identify Path:** The output path is the `tasks.md` file inside the directory you identified in Step 1.
 2.  **Save File:** Once the user approves the draft, write the final task list into this file.
-3.  **Sync to Linear:** After saving, execute `/awos:linear` to create Linear Issues for each task slice under the spec's Project.
-4.  **Conclude:** Announce the completion and the file's location: "The task list has been created and synced to Linear. You can find it at `context/spec/[directory-name]/tasks.md`. Let's get to work! Execute the next task with `/awos:implement` when you're ready."
+3.  **Conclude:** Announce the completion and the file's location: "The task list has been created. You can find it at `context/spec/[directory-name]/tasks.md`. Let's get to work! Execute the next task with `/awos:implement` when you're ready."

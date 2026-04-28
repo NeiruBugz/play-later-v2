@@ -77,5 +77,4 @@ Follow this logic precisely.
 
 1.  **Confirm:** Give a final confirmation: "Great! I am now saving the roadmap."
 2.  **Save File:** Write the final, complete roadmap content to `context/product/roadmap.md`.
-3.  **Sync to Linear:** After saving, execute `/awos:linear` to sync any roadmap changes (new specs, status changes) to Linear.
-4.  **Conclude:** End the session with a clear message: "Done. I've saved the roadmap to `context/product/roadmap.md` and synced to Linear. It's ready to guide your project's implementation. Start shaping the architecture by running `/awos:architecture` command."
+3.  **Conclude:** End the session with a clear message: "Done. I've saved the roadmap to `context/product/roadmap.md`. It's ready to guide your project's implementation. Start shaping the architecture by running `/awos:architecture` command."
