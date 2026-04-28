@@ -27,6 +27,11 @@ function formatStarLabel(rating: number): string {
   return Number.isInteger(stars) ? stars.toFixed(0) : stars.toFixed(1);
 }
 
+function computeBarHeightPercent(count: number, maxCount: number): number {
+  if (count === 0 || maxCount === 0) return 0;
+  return Math.max(MIN_BAR_HEIGHT_PERCENT, Math.round((count / maxCount) * 100));
+}
+
 export function RatingHistogram({
   ratingHistogram,
   ratedCount,
@@ -62,15 +67,7 @@ export function RatingHistogram({
           aria-label={`Histogram of ${ratedCount} rated games across 10 rating bins`}
         >
           {ratingHistogram.map(({ rating, count }) => {
-            const heightPercent =
-              maxCount === 0
-                ? 0
-                : count === 0
-                  ? 0
-                  : Math.max(
-                      MIN_BAR_HEIGHT_PERCENT,
-                      Math.round((count / maxCount) * 100)
-                    );
+            const heightPercent = computeBarHeightPercent(count, maxCount);
             const starLabel = formatStarLabel(rating);
             const label = `${count} ${count === 1 ? "game" : "games"} rated ${starLabel}★`;
 

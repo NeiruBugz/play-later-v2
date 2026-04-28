@@ -24,51 +24,39 @@ type ProfileHeaderProps = {
   };
 };
 
-const BANNER_HEIGHT = "h-28 sm:h-36";
-const AVATAR_SIZE = 96;
-
 export function ProfileHeader({
   profile,
   socialCounts,
   viewer,
 }: ProfileHeaderProps) {
   const displayName = profile.name ?? profile.username;
+  const avatarSrc = profile.image ?? "/default-avatar.svg";
+  const avatarAlt = profile.image
+    ? `${displayName}'s avatar`
+    : `${profile.username}'s avatar`;
   const showFollowButton =
     viewer.isAuthenticated && !viewer.isOwner && profile.isPublicProfile;
-  const bannerGradient = deriveBannerGradient(profile.id);
 
   return (
     <div className="w-full">
       <div
-        className={`${BANNER_HEIGHT} w-full rounded-t-lg`}
-        style={{ background: bannerGradient }}
+        className="h-28 w-full rounded-t-lg sm:h-36"
+        style={{ background: deriveBannerGradient(profile.id) }}
         aria-hidden="true"
       />
 
       <div className="px-4 sm:px-6">
         <div className="relative flex items-end justify-between">
           <div className="-mt-12 shrink-0 sm:-mt-16">
-            {profile.image ? (
-              <Image
-                width={AVATAR_SIZE}
-                height={AVATAR_SIZE}
-                priority
-                unoptimized
-                src={profile.image}
-                alt={`${displayName}'s avatar`}
-                className="ring-background h-24 w-24 rounded-lg object-cover ring-4 sm:h-32 sm:w-32"
-              />
-            ) : (
-              <Image
-                width={AVATAR_SIZE}
-                height={AVATAR_SIZE}
-                priority
-                unoptimized
-                src="/default-avatar.svg"
-                alt={`${profile.username}'s avatar`}
-                className="ring-background h-24 w-24 rounded-lg object-cover ring-4 sm:h-32 sm:w-32"
-              />
-            )}
+            <Image
+              width={96}
+              height={96}
+              priority
+              unoptimized
+              src={avatarSrc}
+              alt={avatarAlt}
+              className="ring-background h-24 w-24 rounded-lg object-cover ring-4 sm:h-32 sm:w-32"
+            />
           </div>
 
           <div className="pb-2">
@@ -97,31 +85,42 @@ export function ProfileHeader({
           </p>
 
           <div className="text-caption text-muted-foreground flex items-center gap-1.5 pt-1">
-            <Link
+            <SocialCountLink
               href={`/u/${profile.username}/followers`}
-              className="hover:text-foreground transition-colors"
-            >
-              <span className="text-foreground font-semibold tabular-nums">
-                {socialCounts.followers}
-              </span>{" "}
-              Followers
-            </Link>
+              count={socialCounts.followers}
+              label="Followers"
+            />
 
             <span className="text-border mx-1">·</span>
 
-            <Link
+            <SocialCountLink
               href={`/u/${profile.username}/following`}
-              className="hover:text-foreground transition-colors"
-            >
-              <span className="text-foreground font-semibold tabular-nums">
-                {socialCounts.following}
-              </span>{" "}
-              Following
-            </Link>
+              count={socialCounts.following}
+              label="Following"
+            />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function SocialCountLink({
+  href,
+  count,
+  label,
+}: {
+  href: string;
+  count: number;
+  label: string;
+}) {
+  return (
+    <Link href={href} className="hover:text-foreground transition-colors">
+      <span className="text-foreground font-semibold tabular-nums">
+        {count}
+      </span>{" "}
+      {label}
+    </Link>
   );
 }
 
