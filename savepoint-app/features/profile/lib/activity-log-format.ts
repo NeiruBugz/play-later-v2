@@ -26,7 +26,7 @@ export function getRelativeTime(date: Date): string {
   if (diffDays < 30) return `${diffDays}d ago`;
 
   const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths < 12) return `${diffMonths}mo ago`;
+  if (diffDays < 365) return `${diffMonths}mo ago`;
 
   return `${Math.floor(diffDays / 365)}y ago`;
 }

@@ -35,8 +35,9 @@ export function ActivityLog({ userId, initialData }: ActivityLogProps) {
     fetchNextPage,
   });
 
-  const items =
-    data?.pages.flatMap((page: PaginatedFeedResult) => page.items) ?? [];
+  if (!data) return null;
+
+  const items = data.pages.flatMap((page: PaginatedFeedResult) => page.items);
 
   if (items.length === 0) {
     return (

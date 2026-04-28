@@ -34,6 +34,7 @@ export function useAvatarUpload({
 
     setError(null);
     setSelectedFile(file);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(URL.createObjectURL(file));
   };
 
