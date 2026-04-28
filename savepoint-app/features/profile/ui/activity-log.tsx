@@ -3,187 +3,21 @@
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useRef, type ReactNode } from "react";
+
+import { useInfiniteScrollSentinel } from "@/shared/hooks/use-infinite-scroll-sentinel";
+import { cn } from "@/shared/lib/ui/utils";
 
 import { useActivityLog } from "../hooks/use-activity-log";
+import {
+  formatStatus,
+  getRelativeTime,
+  isStatusChange,
+} from "../lib/activity-log-format";
 import type {
   ActivityLogItem as FeedItemRow,
   ActivityLogPage as PaginatedFeedResult,
 } from "../lib/activity-log-types";
-
-const STATUS_LABELS: Record<string, string> = {
-  WISHLIST: "Wishlist",
-  SHELF: "Shelf",
-  UP_NEXT: "Up Next",
-  PLAYING: "Playing",
-  PLAYED: "Played",
-};
-
-function formatStatus(status: string): string {
-  return STATUS_LABELS[status] ?? status;
-}
-
-function getRelativeTime(date: Date): string {
-  const diffMs = Date.now() - date.getTime();
-  const diffSeconds = Math.floor(diffMs / 1000);
-  if (diffSeconds < 60) return "just now";
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths < 12) return `${diffMonths}mo ago`;
-  const diffYears = Math.floor(diffDays / 365);
-  return `${diffYears}y ago`;
-}
-
-function isStatusChange(row: FeedItemRow): boolean {
-  if (!row.statusChangedAt) return false;
-  const activityTs = row.activityTimestamp.getTime();
-  const changedTs = row.statusChangedAt.getTime();
-  const createdTs = row.createdAt.getTime();
-  return activityTs === changedTs && changedTs > createdTs;
-}
-
-function UserAvatar({
-  name,
-  username,
-  image,
-}: {
-  name: string | null;
-  username: string | null;
-  image: string | null;
-}) {
-  const displayName = name ?? username ?? "Unknown";
-  if (image) {
-    return (
-      <Image
-        width={36}
-        height={36}
-        src={image}
-        alt={`${displayName}'s avatar`}
-        className="ring-border/50 h-9 w-9 rounded-full object-cover ring-1"
-      />
-    );
-  }
-  const initial = displayName.charAt(0).toUpperCase();
-  return (
-    <div className="bg-primary/10 text-primary flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
-      {initial}
-    </div>
-  );
-}
-
-function GameCoverThumbnail({
-  coverImage,
-  title,
-}: {
-  coverImage: string | null;
-  title: string;
-}) {
-  if (!coverImage) {
-    return (
-      <div className="bg-muted text-muted-foreground flex h-12 w-9 shrink-0 items-center justify-center rounded text-[8px]">
-        N/A
-      </div>
-    );
-  }
-  const isFullUrl = /^https?:\/\//i.test(coverImage);
-  const src = isFullUrl
-    ? coverImage
-    : `https://images.igdb.com/igdb/image/upload/t_thumb/${coverImage}.jpg`;
-  return (
-    <Image
-      width={36}
-      height={48}
-      src={src}
-      alt={`${title} cover`}
-      className="h-12 w-9 shrink-0 rounded object-cover"
-    />
-  );
-}
-
-function ActivityLogRow({ item }: { item: FeedItemRow }) {
-  const displayName = item.userName ?? item.userUsername ?? "Unknown";
-  const statusChange = isStatusChange(item);
-
-  const gameLink = (
-    <Link
-      href={`/games/${item.gameSlug}`}
-      className="text-foreground font-medium hover:underline"
-    >
-      {item.gameTitle}
-    </Link>
-  );
-
-  return (
-    <li className="flex gap-3 py-3">
-      <div className="shrink-0">
-        {item.userUsername ? (
-          <Link href={`/u/${item.userUsername}`}>
-            <UserAvatar
-              name={item.userName}
-              username={item.userUsername}
-              image={item.userImage}
-            />
-          </Link>
-        ) : (
-          <UserAvatar
-            name={item.userName}
-            username={item.userUsername}
-            image={item.userImage}
-          />
-        )}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              {item.userUsername ? (
-                <Link
-                  href={`/u/${item.userUsername}`}
-                  className="text-foreground truncate text-sm font-medium hover:underline"
-                >
-                  {displayName}
-                </Link>
-              ) : (
-                <span className="text-foreground truncate text-sm font-medium">
-                  {displayName}
-                </span>
-              )}
-              <span className="text-muted-foreground shrink-0 text-xs">
-                {getRelativeTime(item.activityTimestamp)}
-              </span>
-            </div>
-
-            {statusChange ? (
-              <p className="text-muted-foreground text-sm">
-                marked {gameLink} as{" "}
-                <span className="text-foreground font-medium">
-                  {formatStatus(item.status)}
-                </span>
-              </p>
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                added {gameLink} to their library
-              </p>
-            )}
-          </div>
-
-          <Link href={`/games/${item.gameSlug}`} className="shrink-0">
-            <GameCoverThumbnail
-              coverImage={item.gameCoverImage}
-              title={item.gameTitle}
-            />
-          </Link>
-        </div>
-      </div>
-    </li>
-  );
-}
 
 export type ActivityLogProps = {
   userId: string;
@@ -196,26 +30,15 @@ export function ActivityLog({ userId, initialData }: ActivityLogProps) {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useActivityLog({ userId, initialData });
 
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+  useInfiniteScrollSentinel(sentinelRef, {
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: "200px" }
-    );
+  if (!data) return null;
 
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const items =
-    data?.pages.flatMap((page: PaginatedFeedResult) => page.items) ?? [];
+  const items = data.pages.flatMap((page: PaginatedFeedResult) => page.items);
 
   if (items.length === 0) {
     return (
@@ -254,5 +77,159 @@ export function ActivityLog({ userId, initialData }: ActivityLogProps) {
         </div>
       )}
     </>
+  );
+}
+
+function ActivityLogRow({ item }: { item: FeedItemRow }) {
+  const displayName = item.userName ?? item.userUsername ?? "Unknown";
+  const statusChange = isStatusChange(item);
+
+  const gameLink = (
+    <Link
+      href={`/games/${item.gameSlug}`}
+      className="text-foreground font-medium hover:underline"
+    >
+      {item.gameTitle}
+    </Link>
+  );
+
+  return (
+    <li className="flex gap-3 py-3">
+      <div className="shrink-0">
+        <UserLink username={item.userUsername}>
+          <UserAvatar
+            name={item.userName}
+            username={item.userUsername}
+            image={item.userImage}
+          />
+        </UserLink>
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <UserLink
+                username={item.userUsername}
+                className={cn(
+                  "text-foreground truncate text-sm font-medium",
+                  item.userUsername && "hover:underline"
+                )}
+              >
+                {displayName}
+              </UserLink>
+              <span className="text-muted-foreground shrink-0 text-xs">
+                {getRelativeTime(item.activityTimestamp)}
+              </span>
+            </div>
+
+            {statusChange ? (
+              <p className="text-muted-foreground text-sm">
+                marked {gameLink} as{" "}
+                <span className="text-foreground font-medium">
+                  {formatStatus(item.status)}
+                </span>
+              </p>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                added {gameLink} to their library
+              </p>
+            )}
+          </div>
+
+          <Link href={`/games/${item.gameSlug}`} className="shrink-0">
+            <GameCoverThumbnail
+              coverImage={item.gameCoverImage}
+              title={item.gameTitle}
+            />
+          </Link>
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function UserLink({
+  username,
+  className,
+  children,
+}: {
+  username: string | null;
+  className?: string;
+  children: ReactNode;
+}) {
+  if (!username) {
+    return className ? (
+      <span className={className}>{children}</span>
+    ) : (
+      <>{children}</>
+    );
+  }
+
+  return (
+    <Link href={`/u/${username}`} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+function UserAvatar({
+  name,
+  username,
+  image,
+}: {
+  name: string | null;
+  username: string | null;
+  image: string | null;
+}) {
+  const displayName = name ?? username ?? "Unknown";
+
+  if (image) {
+    return (
+      <Image
+        width={36}
+        height={36}
+        src={image}
+        alt={`${displayName}'s avatar`}
+        className="ring-border/50 h-9 w-9 rounded-full object-cover ring-1"
+      />
+    );
+  }
+
+  return (
+    <div className="bg-primary/10 text-primary flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold">
+      {displayName.charAt(0).toUpperCase()}
+    </div>
+  );
+}
+
+function GameCoverThumbnail({
+  coverImage,
+  title,
+}: {
+  coverImage: string | null;
+  title: string;
+}) {
+  if (!coverImage) {
+    return (
+      <div className="bg-muted text-muted-foreground flex h-12 w-9 shrink-0 items-center justify-center rounded text-[8px]">
+        N/A
+      </div>
+    );
+  }
+
+  const isFullUrl = /^https?:\/\//i.test(coverImage);
+  const src = isFullUrl
+    ? coverImage
+    : `https://images.igdb.com/igdb/image/upload/t_thumb/${coverImage}.jpg`;
+
+  return (
+    <Image
+      width={36}
+      height={48}
+      src={src}
+      alt={`${title} cover`}
+      className="h-12 w-9 shrink-0 rounded object-cover"
+    />
   );
 }

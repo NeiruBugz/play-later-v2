@@ -28,41 +28,51 @@ export function ProfileSettingsForm({
     currentAvatar ?? null
   );
   const [hasValidationError, setHasValidationError] = useState(false);
+
   const [state, formAction, isPending] = useActionState(
     updateProfileFormAction,
     initialFormState
   );
+
   useEffect(() => {
     if (state.status !== "success") return;
+
     let cancelled = false;
-    Promise.resolve().then(() => {
+    queueMicrotask(() => {
       if (cancelled) return;
       toast.success(state.message ?? "Profile updated successfully!");
       setUsername((current) => state.submittedUsername ?? current.trim());
     });
+
     return () => {
       cancelled = true;
     };
   }, [state]);
+
   const handleAvatarUploadSuccess = (url: string) => {
     setAvatarUrl(url);
     toast.success("Profile image uploaded successfully.");
   };
+
   const handleAvatarUploadError = (error: string) => {
     toast.error(error, {
       description: "Please try again or choose a different image.",
     });
   };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (username.trim().length < 3 || username.trim().length > 25) {
+    const trimmed = username.trim();
+    if (trimmed.length < 3 || trimmed.length > 25) {
       event.preventDefault();
     }
   };
+
   const trimmedUsername = username.trim();
   const showServerError =
     state.status === "error" &&
     !!state.message &&
     state.submittedUsername === trimmedUsername;
+
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>

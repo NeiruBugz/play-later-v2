@@ -23,16 +23,16 @@ export function UsernameInput({
     value,
     currentUsername
   );
+
   const displayError = externalError || validationMessage;
   const showError =
     (externalError || validationStatus === "error") && displayError;
   const showSuccess = !externalError && validationStatus === "available";
+
   useEffect(() => {
-    if (onValidationChange) {
-      const hasError = Boolean(showError);
-      onValidationChange(hasError);
-    }
+    onValidationChange?.(Boolean(showError));
   }, [showError, onValidationChange]);
+
   return (
     <div className="space-y-md">
       <Label htmlFor="username">{label}</Label>
