@@ -33,7 +33,6 @@
   "dependencies": {
     "@auth/prisma-adapter": "2.11.1",
     "@aws-sdk/client-s3": "3.1024.0",
-    "@aws-sdk/client-sqs": "3.1024.0",
     "@hookform/resolvers": "5.2.2",
     "@prisma/adapter-pg": "7.6.0",
     "@prisma/client": "7.6.0",

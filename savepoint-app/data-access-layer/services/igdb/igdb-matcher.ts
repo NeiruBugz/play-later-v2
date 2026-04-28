@@ -36,8 +36,6 @@ export function resetTokenCache(): void {
  * Match a Steam game to IGDB using Steam App ID lookup.
  * Uses IGDB's external_games table which has Steam Store URL mappings.
  *
- * This mirrors the Lambda implementation in lambdas-py/src/lambdas/clients/igdb.py
- *
  * @param params - Steam App ID to match
  * @returns ServiceResult with matched IGDB game or null if not found
  *

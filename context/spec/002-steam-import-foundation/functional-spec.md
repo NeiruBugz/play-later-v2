@@ -1,7 +1,7 @@
 # Functional Specification: Steam Library Integration - Stage 1 Technical Foundation
 
 - **Roadmap Item:** Steam Library Integration - Stage 1: Technical Foundation
-- **Status:** Draft
+- **Status:** Completed
 - **Author:** Claude (AI Assistant)
 
 ---
@@ -43,15 +43,15 @@ Users can connect their Steam account to SavePoint and see their owned games, se
 
 **Acceptance Criteria:**
 
-- [ ] User can access "Connect Steam" from both the Profile/Settings page AND the Library page
-- [ ] User can connect via Steam OpenID OAuth (primary method)
-- [ ] User can alternatively enter their Steam ID manually (17-digit Steam ID64 or custom URL like `steamcommunity.com/id/username`)
-- [ ] Upon successful connection, the following is persisted to the User record:
+- [x] User can access "Connect Steam" from both the Profile/Settings page AND the Library page
+- [x] User can connect via Steam OpenID OAuth (primary method)
+- [x] User can alternatively enter their Steam ID manually (17-digit Steam ID64 or custom URL like `steamcommunity.com/id/username`)
+- [x] Upon successful connection, the following is persisted to the User record:
   - Steam ID64
   - Steam display name
   - Steam avatar URL
-- [ ] User sees confirmation message: "Steam account connected successfully"
-- [ ] Connected Steam account info is displayed in the Profile/Settings area
+- [x] User sees confirmation message: "Steam account connected successfully"
+- [x] Connected Steam account info is displayed in the Profile/Settings area
 
 ### 2.2 Import Path Selection
 
@@ -59,11 +59,11 @@ Users can connect their Steam account to SavePoint and see their owned games, se
 
 **Acceptance Criteria:**
 
-- [ ] User sees two import options after connecting Steam:
+- [x] User sees two import options after connecting Steam:
   1. **"Fetch & Curate"** (Manual path) - "Fetch your owned games and select which ones to add to your library"
   2. **"Background Sync"** (Lambda path) - "Automatically import all games in the background"
-- [ ] Background Sync option shows a "Coming Soon" badge when feature flag is OFF
-- [ ] Background Sync option is fully functional when feature flag is ON (development only)
+- [x] Background Sync option shows a "Coming Soon" badge when feature flag is OFF
+- [x] Background Sync option is fully functional when feature flag is ON (development only)
 
 ### 2.3 Manual Import Path Foundation
 
@@ -71,14 +71,14 @@ Users can connect their Steam account to SavePoint and see their owned games, se
 
 **Acceptance Criteria:**
 
-- [ ] Clicking "Fetch & Curate" triggers a request to fetch the user's owned games from Steam Web API
-- [ ] Games are fetched and stored in the `ImportedGame` table with:
+- [x] Clicking "Fetch & Curate" triggers a request to fetch the user's owned games from Steam Web API
+- [x] Games are fetched and stored in the `ImportedGame` table with:
   - `storefront`: STEAM
   - `storefrontGameId`: Steam App ID
   - `name`: Game name from Steam
   - `playtime`: Total playtime in minutes
   - `igdbMatchStatus`: PENDING (enrichment happens on-demand later)
-- [ ] Re-fetching updates existing records (upsert behavior) and adds new games
+- [x] Re-fetching updates existing records (upsert behavior) and adds new games
 
 ### 2.4 Background Sync Path Foundation
 
@@ -86,12 +86,12 @@ Users can connect their Steam account to SavePoint and see their owned games, se
 
 **Acceptance Criteria:**
 
-- [ ] Clicking "Background Sync" (when enabled) triggers the Lambda pipeline
-- [ ] Import runs in the background - user is NOT blocked waiting
-- [ ] User receives a toast notification when import completes: "Steam import complete! X games imported."
-- [ ] If import fails, user receives notification with clear error message
-- [ ] Lambda pipeline flow: Steam fetch → S3 → IGDB enrichment → S3 → Database import
-- [ ] All games stored in `ImportedGame` table with appropriate `igdbMatchStatus`
+- [x] Clicking "Background Sync" (when enabled) triggers the Lambda pipeline
+- [x] Import runs in the background - user is NOT blocked waiting
+- [x] User receives a toast notification when import completes: "Steam import complete! X games imported."
+- [x] If import fails, user receives notification with clear error message
+- [x] Lambda pipeline flow: Steam fetch → S3 → IGDB enrichment → S3 → Database import
+- [x] All games stored in `ImportedGame` table with appropriate `igdbMatchStatus`
 
 ### 2.5 View Imported Games
 
@@ -99,46 +99,46 @@ Users can connect their Steam account to SavePoint and see their owned games, se
 
 **Acceptance Criteria:**
 
-- [ ] Imported games viewable from the Profile/Settings area (same location as Steam connection)
-- [ ] Shows total count header: "X games imported from Steam"
+- [x] Imported games viewable from the Profile/Settings area (same location as Steam connection)
+- [x] Shows total count header: "X games imported from Steam"
 
 **Display per game:**
 
-- [ ] Game name
-- [ ] Playtime (formatted as hours, e.g., "12.5 hrs" or "Never played")
-- [ ] Last played date (formatted relative, e.g., "3 days ago" or "Never")
+- [x] Game name
+- [x] Playtime (formatted as hours, e.g., "12.5 hrs" or "Never played")
+- [x] Last played date (formatted relative, e.g., "3 days ago" or "Never")
 
 **Pagination:**
 
-- [ ] Results paginated (default 25 games per page)
-- [ ] Page navigation controls (Previous / Next, page numbers)
-- [ ] Total page count displayed
+- [x] Results paginated (default 25 games per page)
+- [x] Page navigation controls (Previous / Next, page numbers)
+- [x] Total page count displayed
 
 **Search:**
 
-- [ ] Fuzzy search by game name
-- [ ] Search updates results as user types (debounced)
-- [ ] "No results found" state when search matches nothing
+- [x] Fuzzy search by game name
+- [x] Search updates results as user types (debounced)
+- [x] "No results found" state when search matches nothing
 
 **Filtering:**
 
-- [ ] **Playtime Status:** All / Played / Never Played
-- [ ] **Playtime Range:** All / <1 hr / 1-10 hrs / 10-50 hrs / 50+ hrs
-- [ ] **Platform Played On:** All / Windows / Mac / Linux (based on where playtime > 0)
-- [ ] **Last Played:** All / Last 30 days / Last year / Over a year ago / Never
-- [ ] Multiple filters can be combined (AND logic)
-- [ ] Active filters shown as removable chips/tags
-- [ ] "Clear all filters" action
+- [x] **Playtime Status:** All / Played / Never Played
+- [x] **Playtime Range:** All / <1 hr / 1-10 hrs / 10-50 hrs / 50+ hrs
+- [x] **Platform Played On:** All / Windows / Mac / Linux (based on where playtime > 0)
+- [x] **Last Played:** All / Last 30 days / Last year / Over a year ago / Never
+- [x] Multiple filters can be combined (AND logic)
+- [x] Active filters shown as removable chips/tags
+- [x] "Clear all filters" action
 
 **Sorting:**
 
-- [ ] Name (A-Z) - default
-- [ ] Name (Z-A)
-- [ ] Playtime (High to Low)
-- [ ] Playtime (Low to High)
-- [ ] Last Played (Recent First)
-- [ ] Last Played (Oldest First)
-- [ ] Recently Added (newest imports first)
+- [x] Name (A-Z) - default
+- [x] Name (Z-A)
+- [x] Playtime (High to Low)
+- [x] Playtime (Low to High)
+- [x] Last Played (Recent First)
+- [x] Last Played (Oldest First)
+- [x] Recently Added (newest imports first)
 
 ### 2.6 Error Handling
 
@@ -146,11 +146,11 @@ Users can connect their Steam account to SavePoint and see their owned games, se
 
 **Acceptance Criteria:**
 
-- [ ] If Steam profile is private, show: "Your Steam profile game details are set to private. To import your library, please set your game details to public in [Steam Privacy Settings](https://steamcommunity.com/my/edit/settings)."
-- [ ] If Steam ID is invalid, show: "We couldn't find a Steam profile with that ID. Please check the ID and try again."
-- [ ] If Steam API is unavailable, show: "Steam is temporarily unavailable. Please try again later."
-- [ ] If Lambda invocation fails (background sync), show: "Background import failed. Please try again or use manual fetch."
-- [ ] All errors include a "Try Again" or "Retry" action
+- [x] If Steam profile is private, show: "Your Steam profile game details are set to private. To import your library, please set your game details to public in [Steam Privacy Settings](https://steamcommunity.com/my/edit/settings)."
+- [x] If Steam ID is invalid, show: "We couldn't find a Steam profile with that ID. Please check the ID and try again."
+- [x] If Steam API is unavailable, show: "Steam is temporarily unavailable. Please try again later."
+- [x] If Lambda invocation fails (background sync), show: "Background import failed. Please try again or use manual fetch."
+- [x] All errors include a "Try Again" or "Retry" action
 
 ### 2.7 Feature Flag Behavior
 
@@ -158,11 +158,11 @@ Users can connect their Steam account to SavePoint and see their owned games, se
 
 **Acceptance Criteria:**
 
-- [ ] Environment variable `ENABLE_STEAM_BACKGROUND_SYNC` controls Lambda path availability
-- [ ] When OFF: Background Sync option visible with "Coming Soon" badge, click shows informational message
-- [ ] When ON: Background Sync option fully functional
-- [ ] Manual import path is always available regardless of feature flag
-- [ ] Feature flag is OFF by default in production, ON in development
+- [x] Environment variable `ENABLE_STEAM_BACKGROUND_SYNC` controls Lambda path availability
+- [x] When OFF: Background Sync option visible with "Coming Soon" badge, click shows informational message
+- [x] When ON: Background Sync option fully functional
+- [x] Manual import path is always available regardless of feature flag
+- [x] Feature flag is OFF by default in production, ON in development
 
 ---
 
@@ -190,3 +190,16 @@ _(The following are separate roadmap items and will be addressed in their own sp
 - **Discovery & Exploration** - Similar games, enhanced game details
 - **Curated Collections** - Creating and browsing themed collections
 - **All Phase 3 features** - Community reflections, social engagement, advanced discovery
+
+---
+
+## Verification footer (2026-04-28)
+
+This spec shipped Stage 1 (Technical Foundation) and was originally marked complete based on 55/55 tasks done. All acceptance criteria above were satisfied at the time of shipping.
+
+**Subsequent supersession by spec 015 (Retire Lambdas Pipeline):**
+
+- §2.4 (Background Sync Path Foundation) — the Lambda-based sync pipeline was retired. The "Background Sync" UI button remains visible (per spec 015 R3), but clicking it no longer triggers a Lambda; it returns the existing "background sync currently disabled" message. AC referencing the Lambda pipeline flow (Steam fetch → S3 → IGDB → S3 → DB) and background completion toasts no longer describe runtime behavior.
+- §2.7 (Feature Flag Behavior) — the `ENABLE_STEAM_BACKGROUND_SYNC` env var was removed. `steamImportConfig.isBackgroundSyncEnabled` is hardcoded `false`. The "ON in development" path is permanently dormant.
+
+These changes are intentional and tracked in `context/spec/015-retire-lambdas-pipeline/`. Spec 002 remains in the repo as the historical record of how the foundation was originally built.

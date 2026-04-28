@@ -1,7 +1,7 @@
 # Technical Specification: UI/UX Audit Improvements (High + Medium Priority)
 
 - **Functional Specification:** [`functional-spec.md`](./functional-spec.md)
-- **Status:** Draft
+- **Status:** Completed
 - **Author(s):** Nail Badiullin
 
 ---

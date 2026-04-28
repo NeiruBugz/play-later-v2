@@ -33,8 +33,6 @@ export const env = createEnv({
     S3_AVATAR_PATH_PREFIX: process.env.S3_AVATAR_PATH_PREFIX,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
-    ENABLE_STEAM_BACKGROUND_SYNC: process.env.ENABLE_STEAM_BACKGROUND_SYNC,
-    STEAM_SYNC_QUEUE_URL: process.env.STEAM_SYNC_QUEUE_URL,
   },
   server: {
     AUTH_COGNITO_ID: z.string({ message: "AUTH_COGNITO_ID is required" }),
@@ -97,19 +95,5 @@ export const env = createEnv({
 
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
-
-    // Steam Background Sync Feature Flag
-    // Enable background synchronization of Steam library via SQS/Lambda
-    // Set to 'true' to enable background sync, defaults to 'false' (disabled)
-    ENABLE_STEAM_BACKGROUND_SYNC: z
-      .enum(["true", "false"])
-      .optional()
-      .default("false"),
-
-    // Steam Sync SQS Queue URL
-    // AWS SQS queue URL for background Steam library synchronization
-    // Required when ENABLE_STEAM_BACKGROUND_SYNC is 'true'
-    // Example: https://sqs.us-east-1.amazonaws.com/123456789012/steam-sync-queue.fifo
-    STEAM_SYNC_QUEUE_URL: z.string().url().optional(),
   },
 });
