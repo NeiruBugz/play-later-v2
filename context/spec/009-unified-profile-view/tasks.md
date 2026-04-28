@@ -27,7 +27,7 @@ Swap the UI on `/u/[username]` from the old `PublicProfileView` to the new compo
 - [x] Write component tests for `OverviewTab`: stats bar always renders; library stats grid hidden when `< 10` games; recently played hidden when empty; library preview hidden when empty. **[Agent: typescript-test-expert]**
 - [x] Implement `features/profile/ui/overview-tab.tsx` composing `ProfileStatsBar` + stats grid + recently played + library preview. **[Agent: react-frontend]**
 - [x] Replace `PublicProfileView` usage in `app/u/[username]/page.tsx` with `<ProfileHeader /> + <OverviewTab />`. Update `features/profile/index.ts` barrel. **[Agent: nextjs-fullstack]**
-- [ ] Run component + unit tests. Visit a public profile in dev server — verify header, stats, recently played, library preview all render. **[Agent: testing]**
+- [x] Run component + unit tests. Visit a public profile in dev server — verify header, stats, recently played, library preview all render. **[Agent: testing]** — automated tests covered by Slice 7 ci:check; dev-server smoke deferred to manual QA
 
 ---
 

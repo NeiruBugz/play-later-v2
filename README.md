@@ -4,10 +4,9 @@
 
 [![E2E Tests (Playwright)](https://github.com/NeiruBugz/play-later-v2/actions/workflows/e2e.yml/badge.svg)](https://github.com/NeiruBugz/play-later-v2/actions/workflows/e2e.yml)
 
-This repository contains three top-level modules:
+This repository contains two top-level modules:
 
 - savepoint-app: Next.js application (Auth.js/Prisma, features, tests)
-- lambdas-py: Python AWS Lambda functions (Steam import, IGDB enrichment)
 - infra: Terraform infrastructure (RDS, ECS, S3, environments, modules)
 
 Getting started with the app:

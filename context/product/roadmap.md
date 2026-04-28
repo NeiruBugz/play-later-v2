@@ -88,6 +88,8 @@ _Everything we can ship on our own data + IGDB, with no AWS / external platform 
 
 _Expand library import to external gaming platforms. Gated on external APIs (Steam, PSN, Xbox) and the AWS Lambda enrichment pipeline. Deferred until Phase 2 internal work is shipped so progress is not blocked by third-party constraints. Ordered by readiness — Steam pipeline is furthest along._
 
+> **Blocked — Lambda pipeline removed in spec 015. Items below require the pipeline to be rebuilt before they can ship.**
+
 1. [ ] **Steam Library — Stages 2 & 3: Curation** _(Spec 003)_ — paginated list of imported Steam games with sort/filter; individual import via auto-match IGDB on Steam App ID; manual IGDB search fallback; smart status assignment (playtime/recency → Owned/Playing/Played); dismiss action; checkbox multi-select with bulk import; selection persists across pagination. _Philosophy: import is curation, not bulk transfer._
 
 2. [ ] **Steam Library — Stage 4: Ongoing Sync** — re-import detects new games only; optional periodic sync for new purchases.
@@ -110,15 +112,15 @@ _Builds on Phase 2 community foundations. Depends on Curated Collections shippin
 
 _Audit-driven tech debt and process improvements. Sourced from `context/audits/2026-04-28/recommendations.md`. Non-blocking on product work but pays compounding interest. Runs in parallel with feature work. Ordered P1 → P2._
 
-1. [ ] **Architecture Doc Refresh** _(P1, SDD-03)_ — back-propagate spec 010 (Next.js 16) into `context/architecture.md`; correct "Next.js 15" → "Next.js 16"; move Upstash Redis from "Future considerations" to active stack.
+1. [x] **Architecture Doc Refresh** _(P1, SDD-03)_ — back-propagate spec 010 (Next.js 16) into `context/architecture.md`; correct "Next.js 15" → "Next.js 16"; move Upstash Redis from "Future considerations" to active stack.
 
-2. [ ] **Spec Status Reconciliation** _(P1, SDD-06)_ — mark spec 002 as Completed (55/55 tasks done); audit specs 009 and 012 against shipped state; run `/awos:verify` to formalize.
+2. [x] **Spec Status Reconciliation** _(P1, SDD-06)_ — mark spec 002 as Completed (55/55 tasks done); audit specs 009 and 012 against shipped state; run `/awos:verify` to formalize.
 
 3. [ ] **Cross-Layer Vertical Slices** _(P1, E2E-01)_ — for items requiring data-pipeline or infra changes (PSN/Xbox imports, ongoing Steam sync), keep work in a single branch spanning `savepoint-app` + `lambdas-py` + `infra` rather than per-layer PRs.
 
 4. [ ] **Terraform CI Parity** _(P2, E2E-05)_ — path-conditional job in `.github/workflows/pr-checks.yml` running `terraform fmt -check -recursive` and `terraform validate` from `infra/envs/dev/`.
 
-5. [ ] **Decompose Oversized Lambda Modules** _(P2, ARCH-06)_ — split `lambdas-py/src/services/database.py` (769 LOC), `handlers/database_import.py` (696 LOC), `models/db.py` (526 LOC) by responsibility.
+5. [x] **Decompose Oversized Lambda Modules** _(P2, ARCH-06)_ — resolved by deletion in spec 015; `lambdas-py/services/database.py`, `handlers/database_import.py`, and `models/db.py` were removed along with the rest of the Lambda pipeline.
 
 6. [ ] **Tighten FSD Type Boundaries** _(P2, ARCH-02)_ — move shared types out of repository layer for `features/social/ui/{followers,following}-list.tsx`; import from `entities/social/types`.
 

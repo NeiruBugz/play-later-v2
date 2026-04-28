@@ -4,22 +4,18 @@ SavePoint is a gaming backlog management app for gamers who want to track their 
 
 ## Architecture
 
-Monorepo with three layers:
+Monorepo with two layers:
 
 | Layer | Tech | Purpose |
 |---|---|---|
 | `savepoint-app/` | Next.js 15 (App Router), TypeScript, Prisma, Vitest | Web frontend + backend API |
-| `lambdas-py/` | Python 3.12, uv, SQLAlchemy, Pydantic | AWS Lambda pipeline (Steam import, IGDB enrichment, DB write) |
-| `infra/` | Terraform >= 1.5, AWS provider ~> 5.0 | Infrastructure as Code (Cognito, S3, ECR, Lambda, SQS, Secrets Manager) |
+| `infra/` | Terraform >= 1.5, AWS provider ~> 5.0 | Infrastructure as Code (Cognito, S3, ECR, SQS, Secrets Manager) |
 
-**Cross-layer communication**: SQS queues trigger Lambda pipelines. Lambdas exchange intermediate data via S3 CSV files. All layers share a PostgreSQL database. The Next.js app enqueues SQS messages to kick off the Lambda pipeline.
-
-**Package manager**: pnpm 10 (workspace with `savepoint-app/` as the sole JS package). Python layer uses `uv`.
+**Package manager**: pnpm 10 (workspace with `savepoint-app/` as the sole JS package).
 
 For layer-specific architecture details, see each layer's own `CLAUDE.md`:
 - `savepoint-app/app/CLAUDE.md` — App Router conventions, import rules, caching
 - `savepoint-app/data-access-layer/CLAUDE.md` — DAL architecture (handlers, services, repository, domain)
-- `lambdas-py/CLAUDE.md` — Lambda inventory, pipeline flow, critical gotchas
 - `infra/CLAUDE.md` — Module inventory, env structure, state management
 
 ## Where to look first
@@ -39,10 +35,8 @@ Map from common agent tasks to the canonical source of truth. Read the linked fi
 | Reuse logic across features | Lift to `savepoint-app/shared/`. Cross-feature imports require allowlist entry. |
 | Bind a new keyboard shortcut | `savepoint-app/widgets/CLAUDE.md` — ⌘K is reserved for `command-palette` |
 | Run a single test file | `pnpm --filter savepoint test <path>` (jsdom default), `test:backend` for node, `test:utilities` for utilities |
-| Modify Lambda code / pipeline | `lambdas-py/CLAUDE.md` (inventory, S3 field names) |
 | Modify infra / Terraform | `infra/CLAUDE.md` (modules, env structure, state) |
 | Find spec for a recent feature | `context/spec/NNN-<name>/` — recent: 007, 009, 010, 011, 012, 014 (lineage in `features/CLAUDE.md`) |
-| Trigger Steam import locally | `savepoint-app/scripts/README.md` + `lambdas-py/CLAUDE.md` |
 | Understand caching / `use cache` | `features/CLAUDE.md` § Next.js 16 conventions |
 
 ## Quick Start
@@ -65,7 +59,6 @@ pnpm --filter savepoint prisma migrate dev
 pnpm --filter savepoint dev
 ```
 
-For `lambdas-py` setup, see `lambdas-py/CLAUDE.md` (uses `uv sync --all-extras`).
 For `infra` setup, see `infra/CLAUDE.md` (run from `infra/envs/dev/`).
 
 ## Commands by Layer
@@ -87,18 +80,6 @@ For `infra` setup, see `infra/CLAUDE.md` (run from `infra/envs/dev/`).
 | All CI checks | `pnpm --filter savepoint ci:check` |
 | Auto-fix lint+format | `pnpm --filter savepoint ci:fix` |
 
-### lambdas-py
-
-All commands run from `lambdas-py/`. Always use `uv run` prefix.
-
-| Task | Command |
-|---|---|
-| Install | `uv sync --all-extras` |
-| Test (all) | `uv run pytest` |
-| Test (unit) | `uv run pytest -m unit` |
-| Lint | `uv run ruff check src/` |
-| Type check | `uv run mypy src/` |
-
 ### infra
 
 All commands run from `infra/envs/dev/` (or `prod/`).
@@ -115,7 +96,7 @@ All commands run from `infra/envs/dev/` (or `prod/`).
 
 **Conventional commits**: enforced via commitlint (`@commitlint/config-conventional`). Messages follow the format: `type(scope): description` (e.g., `feat(library): add bulk delete`).
 
-**Cross-layer changes**: Keep changes that span multiple layers (e.g., `savepoint-app` + `lambdas-py` + `infra`) in a single branch. Do not split features into separate per-layer branches.
+**Cross-layer changes**: Keep changes that span both layers (`savepoint-app` + `infra`) in a single branch. Do not split features into separate per-layer branches.
 
 ## Spec-First Workflow
 

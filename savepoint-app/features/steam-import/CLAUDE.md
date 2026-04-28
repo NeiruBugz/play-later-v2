@@ -1,3 +1,6 @@
+# Spec 015 note: Lambda pipeline retired. UI surfaces (sync button, import flow) remain intact,
+# but background sync is permanently disabled — `isBackgroundSyncEnabled` is hardcoded `false`.
+
 # Feature: steam-import
 
 Steam library import pipeline: connect Steam account, fetch games, match with IGDB, and import to library.

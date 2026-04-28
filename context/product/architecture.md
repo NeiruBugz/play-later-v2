@@ -4,13 +4,14 @@
 
 ## 1. Application & Technology Stack
 
-**Full-Stack Framework:** Next.js 15 with App Router
+**Full-Stack Framework:** Next.js 16 with App Router (Turbopack default for dev, `cacheComponents: true` enabled)
 
 - Server Components for game detail pages and library views (SEO-optimized, efficient data fetching)
 - Server Actions for mutations (add game, write journal entry, update library status)
 - API Routes (minimal usage - primarily for authentication callbacks)
 - React 19 with TypeScript for type-safe component development
 - Turbopack for fast development builds and production optimization
+- Per-component caching via the `"use cache"` directive with `cacheLife` / `cacheTag` (adopted in spec 010); cross-route view transitions via the View Transitions API
 
 **Frontend Stack:**
 
@@ -170,10 +171,9 @@ export const addGameToLibrary = authorizedActionClient
 
 **Caching Strategy:**
 
-- **Phase 1:** No separate caching layer (PostgreSQL performance sufficient for MVP)
-- **Application-level caching:** Next.js Server Components provide built-in request memoization
-- **IGDB response caching:** Game metadata stored in PostgreSQL `Game` table acts as persistent cache
-- **Future consideration:** Redis for session storage and hot-path queries if performance metrics indicate need
+- **Application-level caching:** Next.js 16 `cacheComponents` + `"use cache"` directive with `cacheLife` / `cacheTag` for per-component memoization (see `data-access-layer/handlers/igdb/`, `features/game-detail/use-cases/`).
+- **IGDB response caching:** Game metadata stored in PostgreSQL `Game` table acts as persistent cache.
+- **Distributed cache:** **Upstash Redis** (serverless, REST-based) for hot-path read-through caching and rate-limit primitives. Configured via `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (server-only).
 
 ---
 
@@ -189,10 +189,10 @@ export const addGameToLibrary = authorizedActionClient
   - Consolidate to `data-access-layer/services/igdb/igdb-service.ts`
   - Extract types to `igdb-api-types` package for unified type definitions across codebase
 
-**Platform Integration (Phase 2):**
+**Platform Integration (Phase 3 — currently Blocked):**
 
-- **Steam Web API:** Library import, game ownership verification, achievement synchronization
-- **Steam OpenID:** Authentication integration (already configured in NextAuth for future use)
+- **Steam Web API:** Account linking and profile read are active; library import / ownership / achievement sync are deferred — the AWS Lambda enrichment pipeline that powered them was retired in spec 015. Sync UI surfaces remain visible and return a permanently-disabled response. PSN and Xbox integrations are paused on the same dependency.
+- **Steam OpenID:** Authentication integration (configured in NextAuth, not currently surfaced).
 
 **File Storage (Phase 3+):**
 
@@ -247,13 +247,12 @@ export const addGameToLibrary = authorizedActionClient
 - Component tests (`pnpm test --project=components`)
 - Migration validation: Schema drift detection, destructive operation warnings
 
-**Deployment Workflow** (`.github/workflows/deploy.yml` - future enhancement):\*\*
+**Deployment Workflow** (`.github/workflows/deploy.yml` — pending):
 
-- Database migrations via `prisma migrate deploy` (safe, idempotent)
-- Docker image build and push to Amazon ECR
-- ECS service update with rolling deployment strategy
-- Health check validation before completing deployment
-- Automatic rollback on health check failure
+- Database migrations via `prisma migrate deploy` (safe, idempotent).
+- Container build and push to a registry (ECR or alternative — to be re-stood-up; the previous ECR module was deleted in spec 015 along with the Lambda pipeline).
+- ECS service update with rolling deployment strategy.
+- Health check validation before completing deployment; automatic rollback on failure.
 
 **Current Focus:** Quality gates and migration safety validation. Full deployment automation to ECS deferred until production readiness.
 
@@ -506,7 +505,7 @@ export default defineConfig({
 
 ## 9. Feature-Sliced Design (FSD) Architecture
 
-SavePoint implements a **modified Feature-Sliced Design (FSD)** architecture adapted for Next.js 15 App Router, combining FSD principles with Domain-Driven Design patterns and a custom data-access layer.
+SavePoint implements a **modified Feature-Sliced Design (FSD)** architecture adapted for Next.js 16 App Router, combining FSD principles with Domain-Driven Design patterns and a custom data-access layer.
 
 ### FSD Layer Mapping
 
@@ -577,7 +576,7 @@ features/[feature-name]/
 | `dashboard` | Dashboard overview |
 | `journal` | Journal entry system |
 | `onboarding` | New user getting-started flow |
-| `steam-import` | Steam library import pipeline trigger |
+| `steam-import` | Steam account connect/disconnect, profile read, dormant sync surfaces (Lambda pipeline retired in spec 015) |
 | `social` | Follow system, activity feed, public profile interactions |
 | `whats-new` | App-wide announcement modal |
 
@@ -643,12 +642,13 @@ Import rules enforced via `eslint-plugin-boundaries`:
 
 ## Architecture Decision Records
 
-**ADR-001: Why Next.js 15 App Router?**
+**ADR-001: Why Next.js 16 App Router?**
 
 - Server Components reduce client bundle size for game metadata rendering
 - Server Actions provide type-safe mutations without manual API route creation
 - Built-in caching and revalidation for optimal performance
 - Strong TypeScript integration for full-stack type safety
+- Spec 010 adopted `cacheComponents` + `"use cache"` + View Transitions, deepening the framework lock-in
 
 **ADR-002: Why pragmatic four-layer architecture?**
 
@@ -673,7 +673,7 @@ Import rules enforced via `eslint-plugin-boundaries`:
 - ACID transactions for data consistency (library updates, journal creation)
 - Proven scalability for read-heavy workloads
 
-**ADR-005: Why ECS Fargate over serverless (Lambda)?**
+**ADR-005: Why ECS Fargate for the Next.js app?**
 
 - Next.js Server Components benefit from persistent container context
 - Avoids cold start latency for interactive user experience
