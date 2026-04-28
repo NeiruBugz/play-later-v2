@@ -78,3 +78,8 @@ Available without import: `describe`, `it`, `test`, `expect`, `vi`, `beforeEach`
 - Over-mocking (mock only external boundaries)
 - Large, unfocused test suites
 - Ignoring error paths
+
+## Notes on Relocated Code
+
+- `shared/lib/profile/` was moved to `features/profile/lib/`. Tests for that code now sit alongside the feature.
+- `shared/lib/game/` was removed (dead code) — no tests should target it.

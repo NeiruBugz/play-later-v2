@@ -39,9 +39,11 @@ See [README.md](./README.md) for comprehensive documentation on the handlers lay
 
 ## Existing Handlers
 
-- `game-search/` - Public game search with rate limiting
-- `library/` - Library operations
-- `platform/` - Platform metadata
+- `igdb/` - Public IGDB game search with rate limiting (`igdbSearchHandler`)
+- `game-search/` - Shared Zod schemas for IGDB search inputs (no handler)
+- `library/` - Library operations (`getLibraryHandler`, `getStatusCountsHandler`)
+- `platform/` - Platform metadata (`getPlatformsHandler`, `getUniquePlatformsHandler`)
+- `social/` - Activity feed (`activityFeedHandler`)
 - `steam-import/` - Steam library import flow
   - `fetch-steam-games.handler.ts` - Fetch & import Steam library to DB
   - `steam-connect.handler.ts` - Steam account connection via OpenID

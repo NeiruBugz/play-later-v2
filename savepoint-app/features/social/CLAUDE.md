@@ -13,4 +13,4 @@ Social engagement — follow system, activity feed, public profile interactions.
 
 - Uses split barrel exports: `index.ts` (client-safe) and `index.server.ts` (async RSC components)
 - ActivityFeed is a hybrid: RSC for initial render, client infinite scroll for pagination
-- Cross-feature dependency: `profile/ui/` imports FollowButton from `social`
+- Authorized cross-feature consumer: `profile/ui/` imports `FollowButton` from `social`'s public API (see allowlist in `features/CLAUDE.md`)

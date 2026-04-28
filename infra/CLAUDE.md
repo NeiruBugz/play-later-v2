@@ -68,6 +68,8 @@ s3_bucket_name                  → S3_BUCKET_NAME
 
 **`enable_cognito_native = false`** means only federated IdPs (Google) are shown on the Hosted UI. Setting to `true` adds email/password login.
 
-**VPC config for `database_import_lambda`** is commented out pending RDS setup. Add subnet/SG IDs when RDS is provisioned.
+**`steam_import_lambda` SQS event source** caps concurrency at `maximum_concurrency = 5` (defined in `envs/dev/main.tf` ~line 122). Bump deliberately — this is the per-queue cap, not a Lambda reserved-concurrency setting.
+
+**VPC config for `database_import_lambda`** is commented out pending RDS setup (`envs/dev/main.tf` ~lines 164-168). Add subnet/SG IDs when RDS is provisioned.
 
 **No `provider default_tags`** — each module manages its own tag merging via a `local.default_tags` + `local.tags` pattern. New modules must follow this same pattern.

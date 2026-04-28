@@ -11,7 +11,7 @@ Bottom tab bar for `<md` viewports on authenticated routes. Primary destinations
 - Sticky to the viewport bottom with `safe-area-inset-bottom` padding
 - 44pt minimum hit targets for accessibility
 - Carries its own `md:hidden` so the layout does not need to wrap it
-- Theme classes mirror the legacy nav (`y2k:`)
+- `y2k:` classes are intentional theme tokens (see `tailwind.config`) — used in `ui/mobile-nav.tsx` to mirror the legacy nav
 
 ## Import Rules
 

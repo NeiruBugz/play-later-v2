@@ -126,22 +126,22 @@ LOG_LEVEL=INFO
 
 Fetches a user's Steam library and uploads raw data to S3 as CSV.
 
-**Input:** `{ "steam_id": "76561198..." }`
-**Output:** `{ "s3_key": "raw/steam-library-{steam_id}-{timestamp}.csv" }`
+**Input:** `{ "user_id": "...", "steam_id64": "76561198..." }`
+**Output:** `{ "success": true, "s3_location": "s3://bucket/raw/steam-library-...csv", "game_count": 42 }`
 
 ### 2. IGDB Enrichment (`igdb_enrichment`)
 
 Downloads raw Steam CSV, classifies apps, enriches with IGDB data, uploads enriched CSV.
 
-**Input:** `{ "s3_key": "raw/steam-library-..." }`
-**Output:** `{ "s3_key": "enriched/steam-library-...-enriched.csv" }`
+**Input:** `{ "user_id": "...", "s3_location": "s3://bucket/raw/steam-library-..." }`
+**Output:** `{ "success": true, "s3_enriched_location": "s3://bucket/enriched/...-enriched.csv", "stats": {...} }`
 
 ### 3. Database Import (`database_import`)
 
 Downloads enriched CSV and upserts data to PostgreSQL.
 
-**Input:** `{ "s3_key": "enriched/steam-library-...-enriched.csv" }`
-**Output:** `{ "imported_count": 42, "skipped_count": 3 }`
+**Input:** `{ "user_id": "...", "s3_enriched_location": "s3://bucket/enriched/...-enriched.csv" }`
+**Output:** `{ "success": true, "stats": {...} }`
 
 ## Architecture
 
@@ -230,27 +230,7 @@ aws secretsmanager put-secret-value \
 
 ### Build and Push Container Images
 
-**Important:** Docker builds must use the lock file (`uv.lock`) for reproducible Lambda deployments.
-
-```bash
-# Authenticate with ECR
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR_URL>
-
-# Build and push images (example for steam-import)
-# Ensure Dockerfile uses: uv sync --frozen or uv sync --locked
-docker build -t savepoint-lambdas:steam-import -f Dockerfile.steam-import .
-docker tag savepoint-lambdas:steam-import <ECR_URL>:steam-import-latest
-docker push <ECR_URL>:steam-import-latest
-```
-
-**Dockerfile requirements:**
-- Must copy `uv.lock` before running `uv sync`
-- Use `uv sync --frozen` or `uv sync --locked` to enforce exact versions
-- Example:
-  ```dockerfile
-  COPY pyproject.toml uv.lock ./
-  RUN uv sync --frozen --no-dev
-  ```
+Docker images are built via the infra Terraform module / CI; see `infra/modules/steam-import/` and the `lambda-container` module. Image builds must consume the committed `uv.lock` (`uv sync --frozen` or `uv sync --locked`) for reproducible Lambda deployments.
 
 ## License
 

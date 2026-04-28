@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Audit Report — 2026-04-28 — play-later-v2</title>
+<style>
+  :root {
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --gray: #9ca3af;
+    --orange: #f97316;
+    --blue: #3b82f6;
+    --darkred: #991b1b;
+    --bg: #ffffff;
+    --fg: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --row-alt: #f9fafb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 20px 64px;
+  }
+  header.report-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+  }
+  header.report-header h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+  }
+  header.report-header .meta {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .score-block {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .score-num {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .grade-pill {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .grade-A { background: var(--green); }
+  .grade-B { background: var(--blue); }
+  .grade-C { background: var(--orange); }
+  .grade-D { background: var(--red); }
+  .grade-F { background: var(--darkred); }
+  .delta-badge {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .delta-badge.neg {
+    background: #fef2f2;
+    color: #991b1b;
+    border-color: #fecaca;
+  }
+  .toolbar {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    z-index: 10;
+  }
+  .toolbar button {
+    background: var(--fg);
+    color: white;
+    border: 0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .toolbar button:hover { background: #1f2937; }
+  h2 {
+    margin: 32px 0 12px;
+    font-size: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: #f3f4f6;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--muted);
+  }
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  .status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+  .status-PASS { background: var(--green); }
+  .status-WARN { background: var(--yellow); color: #422006; }
+  .status-FAIL { background: var(--red); }
+  .status-SKIP { background: var(--gray); }
+  .sev {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .sev-critical { background: #fee2e2; color: #991b1b; }
+  .sev-high { background: #ffedd5; color: #9a3412; }
+  .sev-medium { background: #fef9c3; color: #713f12; }
+  .sev-low { background: #f3f4f6; color: #374151; }
+  details {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    background: white;
+  }
+  details summary {
+    cursor: pointer;
+    padding: 6px 0;
+    font-weight: 600;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: "▶";
+    font-size: 11px;
+    color: var(--muted);
+    transition: transform 0.15s;
+  }
+  details[open] summary::before { transform: rotate(90deg); }
+  details summary .dim-score {
+    margin-left: auto;
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .row-issue { background: #fffbeb; }
+  .row-fail { background: #fef2f2; }
+  body.issues-only tr[data-status='PASS'],
+  body.issues-only tr[data-status='SKIP'] {
+    display: none;
+  }
+  body.issues-only details:not(:has(tr[data-status='FAIL'], tr[data-status='WARN'])) {
+    display: none;
+  }
+  .pri {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .pri-P0 { background: var(--darkred); }
+  .pri-P1 { background: var(--red); }
+  .pri-P2 { background: var(--orange); }
+  code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  @media print {
+    .toolbar { display: none; }
+    details { border: 0; padding: 0; }
+    details > * { display: block !important; }
+    details summary::before { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="report-header">
+  <h1>Code Audit Report</h1>
+  <div class="meta">play-later-v2 — Date: 2026-04-28 — Scope: all dimensions</div>
+  <div class="score-block">
+    <span class="score-num">95%</span>
+    <span class="grade-pill grade-A">Grade A</span>
+    <span class="delta-badge">+4 vs 2026-04-01 (91% A)</span>
+  </div>
+</header>
+
+<div class="toolbar">
+  <button id="toggle-filter" type="button">Show issues only</button>
+</div>
+
+<h2>Summary</h2>
+<table>
+  <thead>
+    <tr><th>#</th><th>Dimension</th><th>Score</th><th>Grade</th><th>Delta</th><th>Crit</th><th>High</th><th>Med</th><th>Low</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>Project Topology</td><td>100%</td><td><span class="grade-pill grade-A">A</span></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>2</td><td>Code Architecture</td><td>100%</td><td><span class="grade-pill grade-A">A</span></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>3</td><td>Documentation Quality</td><td>100%</td><td><span class="grade-pill grade-A">A</span></td><td>+8</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>4</td><td>AI Development Tooling</td><td>100%</td><td><span class="grade-pill grade-A">A</span></td><td>+14</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>5</td><td>Security Guardrails</td><td>100%</td><td><span class="grade-pill grade-A">A</span></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>6</td><td>Software Best Practices</td><td>100%</td><td><span class="grade-pill grade-A">A</span></td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>7</td><td>Spec-Driven Development</td><td>89%</td><td><span class="grade-pill grade-B">B</span></td><td>+7</td><td>0</td><td>0</td><td>2</td><td>0</td></tr>
+    <tr><td>8</td><td>End-to-End Delivery</td><td>71%</td><td><span class="grade-pill grade-C">C</span></td><td>+7</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+  </tbody>
+</table>
+
+<h2>Per-Dimension Detail</h2>
+
+<details open>
+<summary>Project Topology <span class="dim-score">100% — Grade A</span></summary>
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr data-status="PASS"><td>TOPO-01</td><td>Repository structure type</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Monorepo — 3 independent build roots: <code>savepoint-app/</code>, <code>lambdas-py/</code>, <code>infra/</code></td></tr>
+<tr data-status="PASS"><td>TOPO-02</td><td>Application layer inventory</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Next.js 16 fullstack, Python AWS Lambda pipeline, Terraform IaC</td></tr>
+<tr data-status="PASS"><td>TOPO-03</td><td>Database and storage</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>PostgreSQL 16 (Prisma + SQLAlchemy), S3 via LocalStack, Upstash Redis</td></tr>
+<tr data-status="PASS"><td>TOPO-04</td><td>Infrastructure layer</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Terraform with modules for Cognito, ECR, Lambda, S3, SQS</td></tr>
+<tr data-status="PASS"><td>TOPO-05</td><td>Language inventory</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>TypeScript/TSX (1126), Python (38), HCL</td></tr>
+<tr data-status="PASS"><td>TOPO-06</td><td>Inter-layer communication</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>SQS queues, S3 CSV hand-off, REST API routes</td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary>Code Architecture <span class="dim-score">100% — Grade A</span></summary>
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr data-status="PASS"><td>ARCH-01</td><td>Declared architectural pattern</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>FSD declared in <code>savepoint-app/{app,widgets,shared}/CLAUDE.md</code>; DAL 4-layer pattern in <code>data-access-layer/CLAUDE.md</code></td></tr>
+<tr data-status="PASS"><td>ARCH-02</td><td>Module boundaries respected</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td><code>eslint-plugin-boundaries</code> 9-element matrix; <code>no-restricted-imports</code> blocks Prisma at HTTP boundary</td></tr>
+<tr data-status="PASS"><td>ARCH-03</td><td>Single Responsibility</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>5/617 non-test TS files exceed 500 LOC (0.8%)</td></tr>
+<tr data-status="PASS"><td>ARCH-04</td><td>Separation of concerns</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Three-tier separation; pages delegate to features/services</td></tr>
+<tr data-status="PASS"><td>ARCH-05</td><td>Consistent naming</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>kebab-case (TS) and snake_case (Python) uniform</td></tr>
+<tr data-status="PASS"><td>ARCH-06</td><td>Reasonable file sizes</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Largest TS file 857 LOC; 3 lambdas-py files >500 LOC are decomposition candidates</td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary>Documentation Quality <span class="dim-score">100% — Grade A</span></summary>
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr data-status="PASS"><td>DOC-01</td><td>Root README useful</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>Setup steps, module overview, AWOS workflow</td></tr>
+<tr data-status="PASS"><td>DOC-02</td><td>Service-level READMEs</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>All 3 service dirs have READMEs</td></tr>
+<tr data-status="SKIP"><td>DOC-03</td><td>API documentation</td><td><span class="sev sev-high">high</span></td><td><span class="status status-SKIP">SKIP</span></td><td>Skip-When met — small closed API with co-located client</td></tr>
+<tr data-status="PASS"><td>DOC-04</td><td>No stale documentation</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>5 sampled doc claims verified accurate</td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary>AI Development Tooling <span class="dim-score">100% — Grade A</span></summary>
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr data-status="PASS"><td>AI-01</td><td>CLAUDE.md presence & quality</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>34 CLAUDE.md files, all under 200 lines, layered ecosystem</td></tr>
+<tr data-status="PASS"><td>AI-02</td><td>Custom slash commands</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>10 custom slash commands (awos workflow)</td></tr>
+<tr data-status="PASS"><td>AI-03</td><td>Skills configured</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>5 skills configured</td></tr>
+<tr data-status="PASS"><td>AI-04</td><td>Specialized agents</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>10 specialized agents</td></tr>
+<tr data-status="PASS"><td>AI-05</td><td>MCP servers</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>3 MCP servers + Playwright plugin</td></tr>
+<tr data-status="PASS"><td>AI-06</td><td>Hooks configured</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>PreToolUse (sensitive-file guard) + PostToolUse (format+lint)</td></tr>
+<tr data-status="PASS"><td>AI-07</td><td>Run/observe tooling per layer</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Web UI, API, Lambdas, IaC all covered</td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary>Security Guardrails <span class="dim-score">100% — Grade A</span></summary>
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr data-status="PASS"><td>SEC-01</td><td>.gitignore covers secrets</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td><code>.env*</code>, keys, certs, credentials, full Terraform state/tfvars patterns</td></tr>
+<tr data-status="PASS"><td>SEC-02</td><td>Sensitive-file hook</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>PreToolUse hook <code>check-sensitive-files.sh</code> verified active</td></tr>
+<tr data-status="PASS"><td>SEC-03</td><td>.env.example templates</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Three <code>.env.example</code> templates, placeholders only</td></tr>
+<tr data-status="PASS"><td>SEC-04</td><td>No real secrets in tracked code</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>Only <code>.env.test</code> with localhost-only literal</td></tr>
+<tr data-status="PASS"><td>SEC-05</td><td>No leaked credentials</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td>No real secrets, AWS keys, or private-key headers found</td></tr>
+</tbody>
+</table>
+</details>
+
+<details>
+<summary>Software Best Practices <span class="dim-score">100% — Grade A</span></summary>
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr data-status="PASS"><td>SBP-01</td><td>Linter configured</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>ESLint (TS) + Ruff (Python), CI-enforced</td></tr>
+<tr data-status="PASS"><td>SBP-02</td><td>Formatter configured</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Prettier + Ruff format</td></tr>
+<tr data-status="PASS"><td>SBP-03</td><td>Strict typing</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>TS <code>strict: true</code>; mypy <code>strict = true</code>; ~4 <code>any</code> uses</td></tr>
+<tr data-status="PASS"><td>SBP-04</td><td>Test infrastructure</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>151 TS test files (Vitest + Playwright); 13 pytest files</td></tr>
+<tr data-status="PASS"><td>SBP-05</td><td>CI/CD pipeline</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>4 workflows: pr-checks, e2e, integration, deploy</td></tr>
+<tr data-status="PASS"><td>SBP-06</td><td>Error handling discipline</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Sampled catch blocks log via pino; no empty catches</td></tr>
+<tr data-status="PASS"><td>SBP-07</td><td>Dependency lockfiles &amp; bot</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td><code>pnpm-lock.yaml</code> + <code>uv.lock</code> committed; Dependabot weekly</td></tr>
+</tbody>
+</table>
+</details>
+
+<details open>
+<summary>Spec-Driven Development <span class="dim-score">89% — Grade B</span></summary>
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr data-status="PASS"><td>SDD-01</td><td>AWOS installed</td><td><span class="sev sev-critical">critical</span></td><td><span class="status status-PASS">PASS</span></td><td><code>.awos/commands/</code> present; <code>context/spec/</code> populated</td></tr>
+<tr data-status="PASS"><td>SDD-02</td><td>Spec triads present</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>13 numbered specs with complete functional/tech/tasks triads</td></tr>
+<tr data-status="WARN" class="row-issue"><td>SDD-03</td><td>Architecture document reflects codebase</td><td><span class="sev sev-high">high</span></td><td><span class="status status-WARN">WARN</span></td><td>Doc says "Next.js 15" but <code>package.json</code> has <code>next 16.2.3</code>; Redis listed as "Future" but Upstash Redis is active</td></tr>
+<tr data-status="PASS"><td>SDD-04</td><td>Branches correlate with specs</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>71% of recent feat/ branches correlate with spec activity</td></tr>
+<tr data-status="PASS"><td>SDD-05</td><td>Agent assignments in tasks</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>~100% annotation coverage with specialist agents</td></tr>
+<tr data-status="WARN" class="row-issue"><td>SDD-06</td><td>No stale or abandoned specs</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-WARN">WARN</span></td><td>Spec 002 marked Draft but 55/55 tasks complete — status hygiene miss</td></tr>
+</tbody>
+</table>
+</details>
+
+<details open>
+<summary>End-to-End Delivery <span class="dim-score">71% — Grade C</span></summary>
+<table>
+<thead><tr><th>#</th><th>Check</th><th>Severity</th><th>Status</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr data-status="FAIL" class="row-fail"><td>E2E-01</td><td>Cross-layer feature branches</td><td><span class="sev sev-high">high</span></td><td><span class="status status-FAIL">FAIL</span></td><td>1/10 recent feat branches touches 2+ service dirs (~10%, below 25% threshold). None touch <code>infra/</code></td></tr>
+<tr data-status="PASS"><td>E2E-02</td><td>No layer-split branch pairs</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>No layer-split anti-patterns</td></tr>
+<tr data-status="PASS"><td>E2E-03</td><td>Spec↔branch traceability</td><td><span class="sev sev-high">high</span></td><td><span class="status status-PASS">PASS</span></td><td>Bidirectional traceability via commits and tasks.md checkboxes</td></tr>
+<tr data-status="PASS"><td>E2E-04</td><td>No orphaned artifacts</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>All detected layers connected (Lambda → DB → app, SQS, S3)</td></tr>
+<tr data-status="PASS"><td>E2E-05</td><td>Unified delivery infrastructure</td><td><span class="sev sev-medium">medium</span></td><td><span class="status status-PASS">PASS</span></td><td>Root <code>docker-compose.yml</code>, pnpm workspace, unified <code>pr-checks.yml</code>. Minor: no Terraform validate in CI</td></tr>
+</tbody>
+</table>
+</details>
+
+<h2>Top Recommendations</h2>
+<table>
+<thead><tr><th>#</th><th>Priority</th><th>Effort</th><th>Dimension</th><th>Recommendation</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><span class="pri pri-P1">P1</span></td><td>Low</td><td>Spec-Driven Development</td><td>Update <code>context/architecture.md</code> to Next.js 16 + active Upstash Redis (back-propagate spec 010)</td></tr>
+<tr><td>2</td><td><span class="pri pri-P1">P1</span></td><td>Low</td><td>Spec-Driven Development</td><td>Mark spec 002 as Completed; reconcile In-Review specs 009/012 with delivery state</td></tr>
+<tr><td>3</td><td><span class="pri pri-P1">P1</span></td><td>Medium</td><td>End-to-End Delivery</td><td>Prefer single cross-layer branches (app + lambdas + infra) for roadmap items rather than UI-only iterations</td></tr>
+<tr><td>4</td><td><span class="pri pri-P2">P2</span></td><td>Low</td><td>End-to-End Delivery</td><td>Add <code>terraform fmt -check</code> / <code>validate</code> job to <code>pr-checks.yml</code></td></tr>
+<tr><td>5</td><td><span class="pri pri-P2">P2</span></td><td>Medium</td><td>Code Architecture</td><td>Decompose <code>lambdas-py/services/database.py</code> (769), <code>handlers/database_import.py</code> (696), <code>models/db.py</code> (526)</td></tr>
+<tr><td>6</td><td><span class="pri pri-P2">P2</span></td><td>Low</td><td>Code Architecture</td><td>Resolve type-only repository imports in <code>features/social/ui/{followers,following}-list.tsx</code></td></tr>
+</tbody>
+</table>
+
+</div>
+<script>
+  (function() {
+    var btn = document.getElementById('toggle-filter');
+    btn.addEventListener('click', function() {
+      var on = document.body.classList.toggle('issues-only');
+      btn.textContent = on ? 'Show all' : 'Show issues only';
+    });
+  })();
+</script>
+</body>
+</html>

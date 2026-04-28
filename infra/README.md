@@ -1,5 +1,7 @@
 Infrastructure (Terraform)
 
+> Operational reference is `CLAUDE.md`. This README focuses on Cognito/S3 setup specifics.
+
 Overview
 
 - Location: `infra/`

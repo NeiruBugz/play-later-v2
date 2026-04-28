@@ -1,7 +1,7 @@
 # Functional Specification: UI/UX Audit V2 — Round 2 Improvements
 
 - **Roadmap Item:** UI/UX Audit V2 follow-through — implement all 12 pinned findings from the SavePoint UI/UX Audit, Volume II (April 2026), plus the Raycast-style global command center direction.
-- **Status:** Draft
+- **Status:** Completed
 - **Author:** Nail Badiullin
 
 ---
