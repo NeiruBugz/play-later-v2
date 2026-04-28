@@ -48,10 +48,12 @@ export function useAvatarUpload({
   const onFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) selectFile(file);
+    e.currentTarget.value = "";
   };
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    if (isUploading) return;
     setIsDragging(true);
   };
 
@@ -60,6 +62,7 @@ export function useAvatarUpload({
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
+    if (isUploading) return;
     const file = e.dataTransfer.files?.[0];
     if (file) selectFile(file);
   };

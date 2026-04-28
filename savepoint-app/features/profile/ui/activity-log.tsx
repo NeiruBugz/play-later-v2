@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRef, type ReactNode } from "react";
 
 import { useInfiniteScrollSentinel } from "@/shared/hooks/use-infinite-scroll-sentinel";
+import { cn } from "@/shared/lib/ui/utils";
 
 import { useActivityLog } from "../hooks/use-activity-log";
 import {
@@ -110,7 +111,10 @@ function ActivityLogRow({ item }: { item: FeedItemRow }) {
             <div className="flex items-center gap-1.5">
               <UserLink
                 username={item.userUsername}
-                className="text-foreground truncate text-sm font-medium hover:underline"
+                className={cn(
+                  "text-foreground truncate text-sm font-medium",
+                  item.userUsername && "hover:underline"
+                )}
               >
                 {displayName}
               </UserLink>
