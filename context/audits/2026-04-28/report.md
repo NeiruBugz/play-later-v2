@@ -2,131 +2,150 @@
 
 **Date:** 2026-04-28
 **Scope:** all dimensions
-**Overall Score:** 95% — Grade **A**
+**Overall Score:** 93% — Grade **A**
 **Previous Audit:** 2026-04-01 — 91% Grade A
 
 ## Summary
 
-| #   | Dimension               | Score | Grade | Delta | Critical | High | Medium | Low |
-| --- | ----------------------- | ----- | ----- | ----- | -------- | ---- | ------ | --- |
-| 1   | Project Topology        | 100%  | A     | 0     | 0        | 0    | 0      | 0   |
-| 2   | Code Architecture       | 100%  | A     | 0     | 0        | 0    | 0      | 0   |
-| 3   | Documentation Quality   | 100%  | A     | +8    | 0        | 0    | 0      | 0   |
-| 4   | AI Development Tooling  | 100%  | A     | +14   | 0        | 0    | 0      | 0   |
-| 5   | Security Guardrails     | 100%  | A     | 0     | 0        | 0    | 0      | 0   |
-| 6   | Software Best Practices | 100%  | A     | 0     | 0        | 0    | 0      | 0   |
-| 7   | Spec-Driven Development | 89%   | B     | +7    | 0        | 0    | 2      | 0   |
-| 8   | End-to-End Delivery     | 71%   | C     | +7    | 0        | 1    | 0      | 0   |
+| #   | Dimension                | Score | Grade | Delta | Critical | High | Medium | Low |
+| --- | ------------------------ | ----- | ----- | ----- | -------- | ---- | ------ | --- |
+| 1   | Project Topology         | 100%  | A     | 0     | 0        | 0    | 0      | 0   |
+| 2   | Code Architecture        | 88%   | B     | -12   | 0        | 1    | 0      | 0   |
+| 3   | Documentation Quality    | 75%   | B     | -17   | 0        | 1    | 1      | 0   |
+| 4   | AI Development Tooling   | 100%  | A     | +14   | 0        | 0    | 0      | 0   |
+| 5   | Quality Assurance        | 85%   | B     | new   | 1        | 0    | 0      | 1   |
+| 6   | Security Guardrails      | 100%  | A     | 0     | 0        | 0    | 0      | 0   |
+| 7   | Software Best Practices  | 95%   | A     | -5    | 0        | 0    | 1      | 0   |
+| 8   | Spec-Driven Development  | 96%   | A     | +14   | 0        | 0    | 1      | 0   |
+| 9   | End-to-End Delivery      | 100%  | A     | +36   | 0        | 0    | 0      | 0   |
 
 ## Dimension: Project Topology
 
 **Score:** 100% — Grade **A**
 
-| #       | Check                        | Severity | Status | Evidence                                                                                  |
-| ------- | ---------------------------- | -------- | ------ | ----------------------------------------------------------------------------------------- |
-| TOPO-01 | Repository structure type    | medium   | PASS   | Monorepo — 3 independent build roots: `savepoint-app/`, `lambdas-py/`, `infra/`           |
-| TOPO-02 | Application layer inventory  | medium   | PASS   | Next.js 16 fullstack, Python AWS Lambda pipeline, Terraform IaC                           |
-| TOPO-03 | Database and storage         | medium   | PASS   | PostgreSQL 16 (Prisma + SQLAlchemy), S3 via LocalStack dev, Upstash Redis (rate-limiting) |
-| TOPO-04 | Infrastructure layer         | medium   | PASS   | Terraform with modules for Cognito, ECR, Lambda, S3, SQS                                  |
-| TOPO-05 | Language inventory           | medium   | PASS   | TypeScript/TSX (1126), Python (38), HCL                                                   |
-| TOPO-06 | Inter-layer communication    | medium   | PASS   | SQS queues, S3 CSV hand-off, REST API routes between Next.js layers                       |
+| #       | Check                              | Severity | Status | Evidence                                                                                  |
+| ------- | ---------------------------------- | -------- | ------ | ----------------------------------------------------------------------------------------- |
+| TOPO-01 | Repository structure type          | medium   | PASS   | Monorepo: pnpm workspace (`savepoint-app/`) + Terraform layer (`infra/`); lambdas-py retired (1b03733) |
+| TOPO-02 | Application layer inventory        | medium   | PASS   | (1) Next.js 15 web-app at `savepoint-app/`; (2) Terraform IaC at `infra/`                 |
+| TOPO-03 | Database and storage detection     | medium   | PASS   | PostgreSQL 16 (Prisma); Postgres :6432, pgAdmin :5050, LocalStack :4568; AWS S3 module    |
+| TOPO-04 | Infrastructure layer detection     | medium   | PASS   | Terraform >=1.5, AWS ~>5.0; modules `cognito`, `s3`; Docker Compose; 4 GH Actions workflows |
+| TOPO-05 | Language inventory                 | medium   | PASS   | TS: 693 .ts + 438 .tsx = 1131; JSX: 29; HCL: 14                                           |
+| TOPO-06 | Inter-layer communication patterns | medium   | PASS   | Next.js REST routes + `next-safe-action`; external IGDB/Steam/Cognito/S3                  |
 
 ## Dimension: Code Architecture
 
-**Score:** 100% — Grade **A**
+**Score:** 88% — Grade **B**
 
-| #       | Check                          | Severity | Status | Evidence                                                                                              |
-| ------- | ------------------------------ | -------- | ------ | ----------------------------------------------------------------------------------------------------- |
-| ARCH-01 | Declared architectural pattern | high     | PASS   | FSD declared in `savepoint-app/{app,widgets,shared}/CLAUDE.md`; DAL 4-layer pattern in `data-access-layer/CLAUDE.md` |
-| ARCH-02 | Module boundaries respected    | high     | PASS   | `eslint-plugin-boundaries` 9-element matrix in `eslint.config.mjs`; `no-restricted-imports` blocks Prisma at HTTP boundary |
-| ARCH-03 | Single Responsibility          | medium   | PASS   | No god modules; only 5/617 non-test TS files exceed 500 LOC (0.8%)                                    |
-| ARCH-04 | Separation of concerns         | high     | PASS   | Three-tier separation; pages delegate to features/services                                            |
-| ARCH-05 | Consistent naming              | medium   | PASS   | kebab-case (TS) and snake_case (Python) uniformly applied                                             |
-| ARCH-06 | Reasonable file sizes          | medium   | PASS   | Largest TS file 857 LOC; 3 lambdas-py files >500 LOC are decomposition candidates but under threshold |
+| #       | Check                                          | Severity | Status | Evidence                                                                                          |
+| ------- | ---------------------------------------------- | -------- | ------ | ------------------------------------------------------------------------------------------------- |
+| ARCH-01 | Declared or recognizable architectural pattern | high     | PASS   | FSD declared in `features/CLAUDE.md`; on-disk `app/`, `widgets/`, `features/`, `shared/` + DAL    |
+| ARCH-02 | Module boundaries are respected                | high     | WARN   | 7 DAL→features imports (2 runtime — `validateUsername` in profile-service, `SearchGamesSchema` in igdb-handler — and 5 type-only) violate declared one-way direction |
+| ARCH-03 | Single Responsibility Principle in modules     | medium   | PASS   | Domain-named modules; no `helpers/`/`misc/`/`common/`; largest cluster `features/library/ui` 29 files |
+| ARCH-04 | Separation of concerns across layers           | high     | PASS   | DAL handler→service→repository→domain split honored; features split UI/server-actions/use-cases  |
+| ARCH-05 | Consistent file and directory naming           | medium   | PASS   | kebab-case throughout; tests colocated; canonical Terraform filenames                             |
+| ARCH-06 | Reasonable file sizes                          | medium   | PASS   | 4/620 source files >500 lines (0.65%); none >1000                                                 |
 
 ## Dimension: Documentation Quality
 
-**Score:** 100% — Grade **A**
+**Score:** 75% — Grade **B**
 
-| #      | Check                  | Severity | Status | Evidence                                                                                       |
-| ------ | ---------------------- | -------- | ------ | ---------------------------------------------------------------------------------------------- |
-| DOC-01 | Root README useful     | critical | PASS   | Setup steps, module overview, AWOS workflow                                                    |
-| DOC-02 | Service-level READMEs  | high     | PASS   | All 3 service dirs (`savepoint-app`, `lambdas-py`, `infra`) have READMEs with setup/build/test |
-| DOC-03 | API documentation      | high     | SKIP   | Skip-When met — small closed API (12 route handlers) with co-located Next.js client            |
-| DOC-04 | No stale documentation | medium   | PASS   | 5 sampled doc claims (ports 6060/6432/5050/4568, `ci:check`, `test:components`/`backend`, layer CLAUDE.md paths) verified accurate |
+| #      | Check                            | Severity | Status | Evidence                                                                                          |
+| ------ | -------------------------------- | -------- | ------ | ------------------------------------------------------------------------------------------------- |
+| DOC-01 | Root README exists and is useful | critical | PASS   | Project overview, quickstart, AWOS workflow; new-dev-followable                                   |
+| DOC-02 | Service-level READMEs exist      | high     | WARN   | Missing in `app/api/`, `prisma/`, `infra/modules/`, `infra/envs/`                                 |
+| DOC-03 | API documentation                | high     | SKIP   | Internal closed API + co-located client; no public consumers                                      |
+| DOC-04 | No stale documentation           | medium   | WARN   | `README.md:10` claims RDS/ECS; `CLAUDE.md:8` claims ECR/SQS/Secrets Manager — none exist post-1b03733 |
 
 ## Dimension: AI Development Tooling
 
 **Score:** 100% — Grade **A**
 
-| #      | Check                         | Severity | Status | Evidence                                                                                                |
-| ------ | ----------------------------- | -------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| AI-01  | CLAUDE.md presence & quality  | high     | PASS   | 34 CLAUDE.md files, all under 200 lines, layered with concrete non-obvious content                      |
-| AI-02  | Custom slash commands         | medium   | PASS   | 10 custom slash commands (awos workflow)                                                                |
-| AI-03  | Skills configured             | medium   | PASS   | 5 skills configured                                                                                     |
-| AI-04  | Specialized agents            | medium   | PASS   | 10 specialized agents                                                                                   |
-| AI-05  | MCP servers configured        | medium   | PASS   | 3 MCP servers in `.mcp.json` + Playwright plugin                                                        |
-| AI-06  | Hooks configured              | medium   | PASS   | PreToolUse (sensitive-file guard) + PostToolUse (format+lint) hooks                                     |
-| AI-07  | Run/observe tooling per layer | medium   | PASS   | Web UI, API, Lambdas, IaC all have run/observe tooling                                                  |
+| #     | Check                                              | Severity | Status | Evidence                                                                                |
+| ----- | -------------------------------------------------- | -------- | ------ | --------------------------------------------------------------------------------------- |
+| AI-01 | CLAUDE.md ecosystem provides adequate AI context   | critical | PASS   | 26 CLAUDE.md files; root + layer-level + per-feature/widget; all essentials covered     |
+| AI-02 | Custom slash commands exist                        | medium   | PASS   | 10 commands under `.claude/commands/awos/`                                              |
+| AI-03 | Skills are configured                              | low      | PASS   | 5 skills (frontend-design, grill-me, react-best-practices, react-fsd, terraform)        |
+| AI-04 | MCP servers configured                             | low      | PASS   | `.mcp.json` defines 3 (awos-recruitment, terraform-mcp, aws-knowledge-mcp)              |
+| AI-05 | Hooks are configured                               | low      | PASS   | PreToolUse (sensitive file guard) + PostToolUse (auto format+lint)                      |
+| AI-06 | CLAUDE.md files are meaningful and well-structured | high     | PASS   | All 26 files <200 lines (max 188); concrete, non-obvious; no tree dumps                 |
+| AI-07 | Agent can run and observe the application          | critical | PASS   | Playwright plugin enabled for Web UI; Bash/curl for API; `terraform plan` for IaC       |
+
+## Dimension: Quality Assurance
+
+**Score:** 85% — Grade **B**
+
+| #      | Check                                  | Severity | Status | Evidence                                                                              |
+| ------ | -------------------------------------- | -------- | ------ | ------------------------------------------------------------------------------------- |
+| QA-01  | Test infrastructure with adequate coverage | critical | WARN   | 152 test files vs 619 source modules — file-linkage ratio ~25%                       |
+| QA-02  | Unit tier present                      | high     | PASS   | 35 `*.unit.test.ts` files; dedicated utilities + backend Vitest projects             |
+| QA-03  | Integration tier present               | high     | PASS   | 27 `*.integration.test.ts`; integration project with `pool: forks`                    |
+| QA-04  | E2E tier present                       | high     | PASS   | Playwright + 10 `.spec.ts` in `savepoint-app/e2e/`                                   |
+| QA-05  | Pyramid shape — no inversion           | medium   | PASS   | unit/component/backend ~150 >> integration 27 >> e2e 10                               |
+| QA-06  | Coverage reporting configured          | low      | WARN   | `vitest.coverage.config.ts` configured but no `thresholds` block                      |
+| QA-07  | Test data management                   | low      | PASS   | `test/fixtures/`, `test/setup/db-factories/`, `@faker-js/faker`                       |
+| QA-08  | Test isolation — mocking infrastructure | medium   | PASS   | `vi.mock` in 94 files; MSW 2.13; aws-sdk-client-mock 4.1                             |
+| QA-09  | Contract testing                       | high     | SKIP   | Single web app + IaC; no inter-service contracts                                      |
+| QA-10  | ML model iteration testing             | high     | SKIP   | No ML frameworks                                                                      |
 
 ## Dimension: Security Guardrails
 
 **Score:** 100% — Grade **A**
 
-| #     | Check                            | Severity | Status | Evidence                                                                                                                  |
-| ----- | -------------------------------- | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
-| SEC-01 | .gitignore covers secrets       | critical | PASS   | `.env*`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `credentials*`, `secrets*`, plus full Terraform state/tfvars patterns        |
-| SEC-02 | Sensitive-file hook configured  | critical | PASS   | `.claude/settings.json` PreToolUse hook `check-sensitive-files.sh` verified active during audit                           |
-| SEC-03 | .env.example templates          | high     | PASS   | Three `.env.example` templates (root, savepoint-app, lambdas-py), placeholders only                                       |
-| SEC-04 | No real secrets in tracked code | critical | PASS   | Only `savepoint-app/.env.test` tracked beyond `.example` (localhost-only literal `test-secret-for-e2e-testing-only`)      |
-| SEC-05 | No leaked credentials in code   | critical | PASS   | No real secrets, AWS keys, or private-key headers found in tracked source                                                 |
+| #      | Check                                          | Severity | Status | Evidence                                                                       |
+| ------ | ---------------------------------------------- | -------- | ------ | ------------------------------------------------------------------------------ |
+| SEC-01 | `.env` files are gitignored                    | critical | PASS   | `.gitignore:41-51`; only `*.env.example` and placeholder `.env.test` tracked  |
+| SEC-02 | AI agent hooks restrict access to sensitive files | critical | PASS   | PreToolUse hook blocks Read/Edit/Write/Glob/Grep/Bash on env/keys/secrets    |
+| SEC-03 | `.env.example` or template exists              | high     | PASS   | Root + `savepoint-app/` + Terraform `dev`/`prod` tfvars.example, all placeholders |
+| SEC-04 | No secrets in committed files                  | critical | PASS   | rg for AKIA/PRIVATE KEY/credential-like patterns: no real secrets found       |
+| SEC-05 | Sensitive files in `.gitignore` coverage       | high     | PASS   | Stack-relevant: keys, certs, tfstate, tfvars, build artifacts, IDE dirs        |
 
 ## Dimension: Software Best Practices
 
-**Score:** 100% — Grade **A**
+**Score:** 95% — Grade **A**
 
-| #      | Check                       | Severity | Status | Evidence                                                                                          |
-| ------ | --------------------------- | -------- | ------ | ------------------------------------------------------------------------------------------------- |
-| SBP-01 | Linter configured           | high     | PASS   | ESLint (TS) + Ruff (Python), CI-enforced                                                          |
-| SBP-02 | Formatter configured        | medium   | PASS   | Prettier (TS) + Ruff format (Python)                                                              |
-| SBP-03 | Strict typing               | high     | PASS   | TS `strict: true`; mypy `strict = true`; `any` usage negligible (~4 hits)                         |
-| SBP-04 | Test infrastructure         | high     | PASS   | 151 TS test files (Vitest, 4 projects + Playwright e2e); 13 pytest files with coverage            |
-| SBP-05 | CI/CD pipeline              | high     | PASS   | 4 GitHub Actions workflows: pr-checks, e2e, integration, deploy                                   |
-| SBP-06 | Error handling discipline   | medium   | PASS   | All sampled catch blocks log via pino with structured context; no empty catches                   |
-| SBP-07 | Dependency lockfiles & bot  | medium   | PASS   | `pnpm-lock.yaml` + `uv.lock` committed; Dependabot weekly for npm, pip, terraform                 |
+| #      | Check                              | Severity | Status | Evidence                                                                                   |
+| ------ | ---------------------------------- | -------- | ------ | ------------------------------------------------------------------------------------------ |
+| SBP-01 | Linting configured and enforced    | high     | PASS   | ESLint flat config; `--max-warnings 0`; `eslint-plugin-boundaries` enforces DAL layering   |
+| SBP-02 | Formatting automated               | medium   | WARN   | Prettier + lint-staged installed but no `.husky/`; pre-commit relies on CI                 |
+| SBP-03 | Type safety enforced               | high     | PASS   | `strict: true`, `strictNullChecks`; zero `@ts-ignore`; only 2 incidental `any` in e2e      |
+| SBP-05 | CI/CD pipeline exists              | high     | PASS   | 4 workflows: pr-checks, deploy, e2e, integration                                            |
+| SBP-06 | Error handling consistent          | high     | PASS   | All sampled catch blocks delegate to `handleServiceError`; structured Pino logs            |
+| SBP-07 | Dependencies managed               | medium   | PASS   | `pnpm-lock.yaml`; Dependabot weekly (npm + terraform); pinned exact versions               |
 
 ## Dimension: Spec-Driven Development
 
-**Score:** 89% — Grade **B**
+**Score:** 96% — Grade **A**
 
-| #      | Check                                   | Severity | Status | Evidence                                                                                                                                                              |
-| ------ | --------------------------------------- | -------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SDD-01 | AWOS installed                          | critical | PASS   | `.awos/commands/` present; `context/spec/` populated                                                                                                                  |
-| SDD-02 | Spec triads present                     | high     | PASS   | 13 numbered specs with complete functional/tech/tasks triads                                                                                                          |
-| SDD-03 | Architecture document reflects codebase | high     | WARN   | `architecture.md` says "Next.js 15" but `package.json` has `next 16.2.3` (spec 010 migration not back-propagated); Redis listed as "Future" but Upstash Redis is live |
-| SDD-04 | Branches correlate with specs           | high     | PASS   | 71% of recent feat/ branches correlate with spec activity                                                                                                             |
-| SDD-05 | Agent assignments in tasks              | medium   | PASS   | ~100% annotation coverage with specialist agents                                                                                                                      |
-| SDD-06 | No stale or abandoned specs             | medium   | WARN   | Spec 002 marked Draft but 55/55 tasks complete — status hygiene miss                                                                                                  |
+| #      | Check                                       | Severity | Status | Evidence                                                                                 |
+| ------ | ------------------------------------------- | -------- | ------ | ---------------------------------------------------------------------------------------- |
+| SDD-01 | AWOS is installed and set up                | critical | PASS   | 11 `.awos/commands/` + 11 wrappers; `context/product/` + `context/spec/` present         |
+| SDD-02 | Product context documents are complete      | high     | PASS   | product-definition (100L), roadmap (141L), architecture (795L)                           |
+| SDD-03 | Architecture document reflects codebase reality | high | PASS   | Stack declarations confirmed in package.json + topology; lambdas-py removal reflected     |
+| SDD-04 | Features are implemented through specs      | critical | PASS   | 15 numbered specs (002–016); 6 of 8 recent feat branches touched specs (~75%)            |
+| SDD-05 | Spec directories are structurally complete  | high     | PASS   | 15 of 16 (94%) have full triad; `jewel-theme/` skeleton predates AWOS                    |
+| SDD-06 | No stale or abandoned specs                 | medium   | WARN   | `005-library-status-redesign/functional-spec.md` missing `Status:` line despite shipped  |
+| SDD-07 | Tasks have meaningful agent assignments     | medium   | PASS   | All 15 tasks.md annotated; specialist agents dominate; general-purpose on glue/verify    |
 
 ## Dimension: End-to-End Delivery
 
-**Score:** 71% — Grade **C**
+**Score:** 100% — Grade **A**
 
-| #      | Check                          | Severity | Status | Evidence                                                                                                                                          |
-| ------ | ------------------------------ | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| E2E-01 | Cross-layer feature branches   | high     | FAIL   | 1/10 recent feat branches touches 2+ service dirs (~10%, below 25% threshold). Most work is `savepoint-app`-only UI/UX; none touch `infra/`       |
-| E2E-02 | No layer-split branch pairs    | medium   | PASS   | No layer-split anti-patterns                                                                                                                      |
-| E2E-03 | Spec↔branch traceability       | high     | PASS   | Bidirectional traceability — commits cite spec numbers, tasks.md checkboxes track delivery                                                        |
-| E2E-04 | No orphaned artifacts          | medium   | PASS   | All detected layers (Lambda → DB → app, SQS, S3) are connected                                                                                    |
-| E2E-05 | Unified delivery infrastructure | medium  | PASS   | Root `docker-compose.yml`, pnpm workspace, unified `pr-checks.yml` runs Node + conditional `lambdas-py` jobs. Minor: no Terraform validate in CI  |
+| #      | Check                              | Severity | Status | Evidence                                                                                |
+| ------ | ---------------------------------- | -------- | ------ | --------------------------------------------------------------------------------------- |
+| E2E-01 | Cross-layer feature branches       | high     | PASS   | 6 of 8 recent feat branches cross ≥2 top-level dirs (75%, threshold ≥50%)                |
+| E2E-02 | No layer-split branching pattern   | medium   | PASS   | No `*-backend`/`*-frontend`/`*-api`/`*-ui` paired branches                               |
+| E2E-03 | Spec-to-delivery traceability      | high     | PASS   | Bidirectional — commits cite spec numbers; specs have ticked tasks.md                    |
+| E2E-04 | No orphaned artifacts              | medium   | PASS   | API↔UI↔DB end-to-end connected; no defined-but-unreferenced surfaces                     |
+| E2E-05 | Shared ownership enablers          | medium   | PASS   | Root `Makefile`, `docker-compose.yml`, workspace `package.json`, 4 unified GH workflows  |
 
 ## Top Recommendations
 
-| #   | Priority | Effort | Dimension               | Recommendation                                                                                                                          |
-| --- | -------- | ------ | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | P1       | Low    | Spec-Driven Development | Update `context/architecture.md` to reflect Next.js 16 and active Upstash Redis usage (back-propagate spec 010)                         |
-| 2   | P1       | Low    | Spec-Driven Development | Mark spec 002 status as Completed (55/55 tasks done); reconcile In-Review specs 009/012 status with actual delivery                     |
-| 3   | P1       | Medium | End-to-End Delivery     | When new product slices land, prefer single branches that touch `savepoint-app` + `lambdas-py` + `infra` together rather than UI-only iterations |
-| 4   | P2       | Low    | End-to-End Delivery     | Add `terraform validate`/`fmt -check` job to `pr-checks.yml` so infra changes get CI parity with app/lambda layers                      |
-| 5   | P2       | Medium | Code Architecture       | Decompose `lambdas-py/services/database.py` (769 LOC), `handlers/database_import.py` (696 LOC), `models/db.py` (526 LOC) into focused modules |
-| 6   | P2       | Low    | Code Architecture       | Replace 2 type-only repository imports in `features/social/ui/{followers,following}-list.tsx` with shared types to clean up boundaries leak |
+| #   | Priority | Effort | Dimension                | Recommendation                                                                                              |
+| --- | -------- | ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| 1   | P1       | Low    | Documentation Quality    | Update `README.md:10` and `CLAUDE.md:8` to remove retired RDS/ECS/ECR/SQS/Secrets Manager references        |
+| 2   | P1       | Medium | Quality Assurance        | Improve test linkage ratio (~25%) — co-locate `*.test.ts` with under-tested DAL services and feature use-cases |
+| 3   | P1       | Medium | Documentation Quality    | Add READMEs (or pointer CLAUDE.md) in `app/api/`, `prisma/`, `infra/modules/`, `infra/envs/`                |
+| 4   | P2       | Low    | Quality Assurance        | Add `coverage.thresholds` block in `vitest.coverage.config.ts` to gate CI on coverage regressions           |
+| 5   | P2       | Low    | Spec-Driven Development  | Add `**Status:** Completed` line to `context/spec/005-library-status-redesign/functional-spec.md`           |
+| 6   | P2       | Low    | Software Best Practices  | Wire `.husky/pre-commit` to invoke `lint-staged` so formatting/lint enforce locally, not only in CI         |
+| 7   | P2       | Medium | Code Architecture        | Lift `validateUsername` + shared schemas/types from `features/*` into `shared/` or `data-access-layer/domain/` to remove the 7 DAL→features import leaks |

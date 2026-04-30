@@ -26,7 +26,8 @@
     ]
   },
   "enabledPlugins": {
-    "playwright@claude-plugins-official": true
+    "playwright@claude-plugins-official": true,
+    "awos@awos-marketplace": true
   },
   "extraKnownMarketplaces": {
     "awos-marketplace": {

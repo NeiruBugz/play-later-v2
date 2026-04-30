@@ -2,61 +2,61 @@
 
 ## P0 — Fix Immediately
 
-_None — no critical-severity FAILs._
+_None._ No critical FAILs across any dimension.
 
 ## P1 — Fix Soon
 
-### 1. Back-propagate Next.js 16 + Redis to architecture.md
+### 1. Remove stale infra references in top-level docs
 
-- **Dimension:** Spec-Driven Development
-- **Check:** SDD-03
+- **Dimension:** Documentation Quality
+- **Check:** DOC-04
 - **Effort:** Low
-- **Details:** Edit `context/architecture.md`:
-  - Replace "Next.js 15" with "Next.js 16" (codebase is on `next@16.2.3` per `savepoint-app/package.json`).
-  - Move Upstash Redis out of "Future considerations" — `@upstash/redis` and `@upstash/ratelimit` are active runtime dependencies (rate-limiting).
-  - Cross-reference spec 010 (Next.js 16 migration) so future drift is traceable.
+- **Details:** `README.md:10` describes infra as "Terraform infrastructure (RDS, ECS, S3, environments, modules)" and `CLAUDE.md:8` lists "Cognito, S3, ECR, SQS, Secrets Manager". Reality post-1b03733: only `infra/modules/cognito` and `infra/modules/s3` exist. Edit both lines to read "Cognito, S3" (or "Terraform IaC for AWS Cognito + S3"). Sweep nearby paragraphs for any other lambdas-py / Python pipeline / SQS leftovers.
 
-### 2. Reconcile spec status hygiene
+### 2. Increase test linkage for DAL and features
+
+- **Dimension:** Quality Assurance
+- **Check:** QA-01 (critical WARN — drives the dimension's main deduction)
+- **Effort:** Medium
+- **Details:** 152 test files cover ~25% of 619 source modules by naming-linkage. Prioritize co-locating tests for under-tested services in `data-access-layer/services/**` and use-cases in `features/**/use-cases/**`, since handlers and repositories already have decent unit/integration coverage. Treat as ongoing per-feature work, not a one-shot.
+
+### 3. Add service-level docs to undocumented dirs
+
+- **Dimension:** Documentation Quality
+- **Check:** DOC-02
+- **Effort:** Medium
+- **Details:** Add a brief README.md (or layered CLAUDE.md if AI-context is the primary need) to:
+  - `savepoint-app/app/api/` — handler pattern, route conventions, auth wrapper
+  - `savepoint-app/prisma/` — migration workflow, schema conventions
+  - `infra/modules/` — module index + how to add a new module
+  - `infra/envs/` — env layout, state backend, plan/apply workflow
+
+## P2 — Improve When Possible
+
+### 4. Add coverage thresholds to gate CI
+
+- **Dimension:** Quality Assurance
+- **Check:** QA-06
+- **Effort:** Low
+- **Details:** Extend `savepoint-app/vitest.coverage.config.ts` with a `coverage.thresholds` block (e.g. `lines: 70`, `functions: 70`, `branches: 60`) so coverage regressions fail CI rather than passing silently. Tune to current baseline first.
+
+### 5. Mark spec 005 as Completed
 
 - **Dimension:** Spec-Driven Development
 - **Check:** SDD-06
 - **Effort:** Low
-- **Details:**
-  - `context/spec/002-*/`: status currently `Draft`, but tasks.md shows 55/55 `[x]`. Update status to `Completed`.
-  - Re-check specs 009 and 012 (`In Review`) against actual delivery state — if shipped, mark `Completed`; if still in flight, leave but ensure tasks.md reflects reality.
-  - Run `/awos:verify` on any spec where status disagrees with task completion.
+- **Details:** `context/spec/005-library-status-redesign/functional-spec.md` lacks a `Status:` field even though the roadmap shows it shipped. Add `- **Status:** Completed` near the spec header to close the consistency gap.
 
-### 3. Resume cross-layer vertical slices
+### 6. Wire Husky pre-commit to lint-staged
 
-- **Dimension:** End-to-End Delivery
-- **Check:** E2E-01
-- **Effort:** Medium
-- **Details:** Recent feature branches concentrate on `savepoint-app/` UI/UX (9/10 branches). Backend pipeline is stable but `lambdas-py/` and `infra/` have not moved with feature work. For upcoming roadmap items requiring data-pipeline or infra changes, keep the change in a single branch rather than splitting into per-layer PRs. Spec 011 already demonstrates this pattern works — repeat it.
-
-## P2 — Improve When Possible
-
-### 4. Add Terraform CI checks
-
-- **Dimension:** End-to-End Delivery
-- **Check:** E2E-05
+- **Dimension:** Software Best Practices
+- **Check:** SBP-02
 - **Effort:** Low
-- **Details:** Add a job to `.github/workflows/pr-checks.yml` (conditional on `infra/**` paths) running `terraform fmt -check -recursive` and `terraform validate` from `infra/envs/dev/`. Brings infra to parity with the app and lambda CI gates.
+- **Details:** `lint-staged` is installed but no `.husky/` directory exists, so format/lint enforcement only runs in CI. Run `pnpm dlx husky init` (or equivalent), add `.husky/pre-commit` containing `pnpm lint-staged`, and commit. Catches violations before push and shortens CI feedback loops.
 
-### 5. Decompose oversized lambdas-py modules
-
-- **Dimension:** Code Architecture
-- **Check:** ARCH-06
-- **Effort:** Medium
-- **Details:** Three files exceed the 500-LOC soft threshold:
-  - `lambdas-py/src/services/database.py` (769 LOC)
-  - `lambdas-py/src/handlers/database_import.py` (696 LOC)
-  - `lambdas-py/src/models/db.py` (526 LOC)
-
-  Split by responsibility (e.g., separate read vs. write services in `database.py`; separate model groups in `db.py`). Currently passes the threshold check but is the largest concentrated tech debt.
-
-### 6. Clean type-only boundary leak in social feature
+### 7. Lift cross-feature dependencies into shared/DAL
 
 - **Dimension:** Code Architecture
 - **Check:** ARCH-02
-- **Effort:** Low
-- **Details:** `features/social/ui/followers-list.tsx` and `following-list.tsx` import types directly from the repository layer, bypassing FSD boundaries. Move shared types into `entities/social/types` (or wherever the canonical domain type lives) and import from there. Type-only so non-blocking, but tightens the FSD boundary contract.
+- **Effort:** Medium
+- **Details:** 7 DAL→features imports violate the declared one-way direction in `features/CLAUDE.md`. Two are runtime: `data-access-layer/services/profile/profile-service.ts` imports `validateUsername` from `@/features/profile/lib`, and `data-access-layer/handlers/igdb/igdb-handler.ts` imports `SearchGamesSchema` from `@/features/game-search`. Five are type-only (activity-feed, journal, library, social typings). Move shared validators/schemas/types into `shared/` (cross-cutting) or `data-access-layer/domain/` (domain-owned). Add an `eslint-plugin-boundaries` rule to lock the direction once cleaned.
