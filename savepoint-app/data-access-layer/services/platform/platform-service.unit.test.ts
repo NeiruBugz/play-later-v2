@@ -1,20 +1,146 @@
 import {
   findGameByIgdbId,
   findPlatformsForGame,
+  findSystemPlatforms,
+  upsertPlatforms,
 } from "@/data-access-layer/repository";
 import type { Platform } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getPlatformsForGame } from "./platform-service";
+import { NotFoundError } from "@/shared/lib/errors";
+
+import {
+  getPlatformsForGame,
+  getSystemPlatforms,
+  savePlatforms,
+} from "./platform-service";
 
 vi.mock("@/data-access-layer/repository", () => ({
   findGameByIgdbId: vi.fn(),
   findPlatformsForGame: vi.fn(),
+  findSystemPlatforms: vi.fn(),
+  upsertPlatforms: vi.fn(),
 }));
+
+const mockPlatform = (overrides: Partial<Platform> = {}): Platform => ({
+  id: "plat1",
+  igdbId: 167,
+  name: "PlayStation 5",
+  slug: "ps5",
+  abbreviation: "PS5",
+  alternativeName: null,
+  generation: 9,
+  platformFamily: null,
+  platformType: null,
+  checksum: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  ...overrides,
+});
+
+const mockGame = {
+  id: "clx123abc456def",
+  igdbId: 12345,
+  title: "Test Game",
+  slug: "test-game",
+  summary: "A test game",
+  storyline: null,
+  coverImage: "https://example.com/cover.jpg",
+  releaseDate: new Date("2024-01-01"),
+  aggregatedRating: 85.5,
+  aggregatedRatingCount: 100,
+  category: "main_game",
+  checksum: "test-checksum",
+  url: "https://igdb.com/games/test-game",
+  createdAt: new Date("2025-01-01"),
+  updatedAt: new Date("2025-01-01"),
+};
+
+describe("getSystemPlatforms", () => {
+  let mockFindSystemPlatforms: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFindSystemPlatforms = vi.mocked(findSystemPlatforms);
+  });
+
+  it("returns platform list on success", async () => {
+    const platforms = [{ id: "plat1", name: "PlayStation 5", slug: "ps5" }];
+    mockFindSystemPlatforms.mockResolvedValue(platforms);
+
+    const result = await getSystemPlatforms();
+
+    expect(result.platforms).toEqual(platforms);
+    expect(mockFindSystemPlatforms).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns empty list when no platforms exist", async () => {
+    mockFindSystemPlatforms.mockResolvedValue([]);
+
+    const result = await getSystemPlatforms();
+
+    expect(result.platforms).toEqual([]);
+  });
+
+  it("propagates repository errors as thrown errors", async () => {
+    mockFindSystemPlatforms.mockRejectedValue(
+      new Error("Database connection failed")
+    );
+
+    await expect(getSystemPlatforms()).rejects.toThrow(
+      "Database connection failed"
+    );
+  });
+});
+
+describe("savePlatforms", () => {
+  let mockUpsertPlatforms: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUpsertPlatforms = vi.mocked(upsertPlatforms);
+  });
+
+  it("returns upserted platforms on success", async () => {
+    const platforms = [mockPlatform()];
+    mockUpsertPlatforms.mockResolvedValue(platforms);
+
+    const result = await savePlatforms([{ id: 167, name: "PlayStation 5" }]);
+
+    expect(result).toEqual(platforms);
+    expect(mockUpsertPlatforms).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns empty array for empty input", async () => {
+    mockUpsertPlatforms.mockResolvedValue([]);
+
+    const result = await savePlatforms([]);
+
+    expect(result).toEqual([]);
+  });
+
+  it("propagates repository errors as thrown errors", async () => {
+    mockUpsertPlatforms.mockRejectedValue(new Error("Upsert failed"));
+
+    await expect(savePlatforms([{ id: 1 }])).rejects.toThrow("Upsert failed");
+  });
+});
 
 describe("getPlatformsForGame", () => {
   let mockFindGameByIgdbId: ReturnType<typeof vi.fn>;
   let mockFindPlatformsForGame: ReturnType<typeof vi.fn>;
+
+  const validIgdbId = 12345;
+  const mockSupportedPlatforms: Platform[] = [mockPlatform()];
+  const mockOtherPlatforms: Platform[] = [
+    mockPlatform({
+      id: "plat3",
+      igdbId: 6,
+      name: "PC (Microsoft Windows)",
+      slug: "win",
+      abbreviation: "PC",
+    }),
+  ];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -22,314 +148,118 @@ describe("getPlatformsForGame", () => {
     mockFindPlatformsForGame = vi.mocked(findPlatformsForGame);
   });
 
-  describe("getPlatformsForGame", () => {
-    const validIgdbId = 12345;
-    const mockGameId = "clx123abc456def";
-
-    const mockGame = {
-      id: mockGameId,
-      igdbId: validIgdbId,
-      title: "Test Game",
-      slug: "test-game",
-      summary: "A test game",
-      storyline: null,
-      coverImage: "https://example.com/cover.jpg",
-      releaseDate: new Date("2024-01-01"),
-      aggregatedRating: 85.5,
-      aggregatedRatingCount: 100,
-      category: "main_game",
-      checksum: "test-checksum",
-      url: "https://igdb.com/games/test-game",
-      createdAt: new Date("2025-01-01"),
-      updatedAt: new Date("2025-01-01"),
-    };
-
-    const mockSupportedPlatforms: Platform[] = [
-      {
-        id: "plat1",
-        igdbId: 167,
-        name: "PlayStation 5",
-        slug: "ps5",
-        abbreviation: "PS5",
-        alternativeName: null,
-        generation: 9,
-        platformFamily: null,
-        platformType: null,
-        checksum: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: "plat2",
-        igdbId: 169,
-        name: "Xbox Series X|S",
-        slug: "xbox-series-xs",
-        abbreviation: "Series X|S",
-        alternativeName: null,
-        generation: 9,
-        platformFamily: null,
-        platformType: null,
-        checksum: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
-
-    const mockOtherPlatforms: Platform[] = [
-      {
-        id: "plat3",
-        igdbId: 6,
-        name: "PC (Microsoft Windows)",
-        slug: "win",
-        abbreviation: "PC",
-        alternativeName: "Windows",
-        generation: null,
-        platformFamily: null,
-        platformType: null,
-        checksum: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
-
-    describe("success scenarios", () => {
-      it("should return success result with platforms when both repositories succeed", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(mockGame);
-        mockFindPlatformsForGame.mockResolvedValue({
-          supportedPlatforms: mockSupportedPlatforms,
-          otherPlatforms: mockOtherPlatforms,
-        });
-
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.supportedPlatforms).toEqual(
-            mockSupportedPlatforms
-          );
-          expect(result.data.otherPlatforms).toEqual(mockOtherPlatforms);
-          expect(result.data.supportedPlatforms).toHaveLength(2);
-          expect(result.data.otherPlatforms).toHaveLength(1);
-        }
-
-        expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);
-        expect(mockFindGameByIgdbId).toHaveBeenCalledTimes(1);
-        expect(mockFindPlatformsForGame).toHaveBeenCalledWith(mockGameId);
-        expect(mockFindPlatformsForGame).toHaveBeenCalledTimes(1);
+  describe("success scenarios", () => {
+    it("returns grouped platforms when game exists", async () => {
+      mockFindGameByIgdbId.mockResolvedValue(mockGame);
+      mockFindPlatformsForGame.mockResolvedValue({
+        supportedPlatforms: mockSupportedPlatforms,
+        otherPlatforms: mockOtherPlatforms,
       });
 
-      it("should return success with empty platform arrays", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(mockGame);
-        mockFindPlatformsForGame.mockResolvedValue({
-          supportedPlatforms: [],
-          otherPlatforms: [],
-        });
+      const result = await getPlatformsForGame(validIgdbId);
 
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.supportedPlatforms).toEqual([]);
-          expect(result.data.otherPlatforms).toEqual([]);
-        }
-      });
-
-      it("should return success with only supported platforms", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(mockGame);
-        mockFindPlatformsForGame.mockResolvedValue({
-          supportedPlatforms: mockSupportedPlatforms,
-          otherPlatforms: [],
-        });
-
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.supportedPlatforms).toEqual(
-            mockSupportedPlatforms
-          );
-          expect(result.data.otherPlatforms).toEqual([]);
-        }
-      });
-
-      it("should return success with only other platforms", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(mockGame);
-        mockFindPlatformsForGame.mockResolvedValue({
-          supportedPlatforms: [],
-          otherPlatforms: mockOtherPlatforms,
-        });
-
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.supportedPlatforms).toEqual([]);
-          expect(result.data.otherPlatforms).toEqual(mockOtherPlatforms);
-        }
-      });
+      expect(result.supportedPlatforms).toEqual(mockSupportedPlatforms);
+      expect(result.otherPlatforms).toEqual(mockOtherPlatforms);
+      expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);
+      expect(mockFindPlatformsForGame).toHaveBeenCalledWith(mockGame.id);
     });
 
-    describe("game not found scenarios", () => {
-      it("should return error when game does not exist in database", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(null);
-
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Game not found");
-        }
-
-        expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);
-        expect(mockFindPlatformsForGame).not.toHaveBeenCalled();
+    it("returns empty platform arrays when game has none linked", async () => {
+      mockFindGameByIgdbId.mockResolvedValue(mockGame);
+      mockFindPlatformsForGame.mockResolvedValue({
+        supportedPlatforms: [],
+        otherPlatforms: [],
       });
 
-      it("should return error when findGameByIgdbId repository fails", async () => {
-        mockFindGameByIgdbId.mockRejectedValue(
-          new Error("Database connection failed")
-        );
+      const result = await getPlatformsForGame(validIgdbId);
 
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Database connection failed");
-        }
-
-        expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);
-        expect(mockFindPlatformsForGame).not.toHaveBeenCalled();
-      });
+      expect(result.supportedPlatforms).toEqual([]);
+      expect(result.otherPlatforms).toEqual([]);
     });
 
-    describe("platform fetch error scenarios", () => {
-      it("should return error when findPlatformsForGame repository fails", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(mockGame);
-        mockFindPlatformsForGame.mockRejectedValue(
-          new Error("Failed to query platforms")
-        );
-
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Failed to query platforms");
-        }
-
-        expect(mockFindGameByIgdbId).toHaveBeenCalledWith(validIgdbId);
-        expect(mockFindPlatformsForGame).toHaveBeenCalledWith(mockGameId);
+    it("returns only supported platforms when all are linked", async () => {
+      mockFindGameByIgdbId.mockResolvedValue(mockGame);
+      mockFindPlatformsForGame.mockResolvedValue({
+        supportedPlatforms: mockSupportedPlatforms,
+        otherPlatforms: [],
       });
+
+      const result = await getPlatformsForGame(validIgdbId);
+
+      expect(result.supportedPlatforms).toEqual(mockSupportedPlatforms);
+      expect(result.otherPlatforms).toEqual([]);
     });
 
-    describe("exception handling", () => {
-      it("should handle unexpected exceptions from findGameByIgdbId", async () => {
-        const unexpectedError = new Error("Unexpected database error");
-        mockFindGameByIgdbId.mockRejectedValue(unexpectedError);
-
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Unexpected database error");
-        }
+    it("calls repositories in correct order", async () => {
+      const callOrder: string[] = [];
+      mockFindGameByIgdbId.mockImplementation(async () => {
+        callOrder.push("findGameByIgdbId");
+        return mockGame;
+      });
+      mockFindPlatformsForGame.mockImplementation(async () => {
+        callOrder.push("findPlatformsForGame");
+        return { supportedPlatforms: [], otherPlatforms: [] };
       });
 
-      it("should handle unexpected exceptions from findPlatformsForGame", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(mockGame);
-        const unexpectedError = new Error("Query timeout");
-        mockFindPlatformsForGame.mockRejectedValue(unexpectedError);
+      await getPlatformsForGame(validIgdbId);
 
-        const result = await getPlatformsForGame(validIgdbId);
+      expect(callOrder).toEqual(["findGameByIgdbId", "findPlatformsForGame"]);
+    });
+  });
 
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Query timeout");
-        }
-      });
+  describe("game not found", () => {
+    it("throws NotFoundError when game does not exist", async () => {
+      mockFindGameByIgdbId.mockResolvedValue(null);
 
-      it("should handle non-Error exceptions", async () => {
-        mockFindGameByIgdbId.mockRejectedValue("String error");
-
-        const result = await getPlatformsForGame(validIgdbId);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Failed to get platforms for game");
-        }
-      });
+      await expect(getPlatformsForGame(validIgdbId)).rejects.toThrow(
+        NotFoundError
+      );
+      expect(mockFindPlatformsForGame).not.toHaveBeenCalled();
     });
 
-    describe("edge cases", () => {
-      it("should handle game with zero igdbId", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(null);
+    it("throws NotFoundError for zero igdbId", async () => {
+      mockFindGameByIgdbId.mockResolvedValue(null);
 
-        const result = await getPlatformsForGame(0);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Game not found");
-        }
-      });
-
-      it("should handle negative igdbId", async () => {
-        mockFindGameByIgdbId.mockResolvedValue(null);
-
-        const result = await getPlatformsForGame(-1);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Game not found");
-        }
-      });
-
-      it("should handle very large igdbId", async () => {
-        const largeIgdbId = 999999999;
-        mockFindGameByIgdbId.mockResolvedValue(null);
-
-        const result = await getPlatformsForGame(largeIgdbId);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Game not found");
-        }
-
-        expect(mockFindGameByIgdbId).toHaveBeenCalledWith(largeIgdbId);
-      });
+      await expect(getPlatformsForGame(0)).rejects.toThrow(NotFoundError);
     });
 
-    describe("service method isolation", () => {
-      it("should not mutate input parameters", async () => {
-        const inputIgdbId = 12345;
-        mockFindGameByIgdbId.mockResolvedValue(mockGame);
-        mockFindPlatformsForGame.mockResolvedValue({
-          supportedPlatforms: mockSupportedPlatforms,
-          otherPlatforms: mockOtherPlatforms,
-        });
+    it("throws NotFoundError for negative igdbId", async () => {
+      mockFindGameByIgdbId.mockResolvedValue(null);
 
-        await getPlatformsForGame(inputIgdbId);
+      await expect(getPlatformsForGame(-1)).rejects.toThrow(NotFoundError);
+    });
 
-        expect(inputIgdbId).toBe(12345);
-      });
+    it("throws NotFoundError for very large igdbId when not found", async () => {
+      mockFindGameByIgdbId.mockResolvedValue(null);
 
-      it("should call repositories in correct order (game first, then platforms)", async () => {
-        const callOrder: string[] = [];
+      await expect(getPlatformsForGame(999999999)).rejects.toThrow(
+        NotFoundError
+      );
+      expect(mockFindGameByIgdbId).toHaveBeenCalledWith(999999999);
+    });
+  });
 
-        mockFindGameByIgdbId.mockImplementation(async () => {
-          callOrder.push("findGameByIgdbId");
-          return mockGame;
-        });
+  describe("repository errors propagate", () => {
+    it("propagates error from findGameByIgdbId", async () => {
+      mockFindGameByIgdbId.mockRejectedValue(
+        new Error("Database connection failed")
+      );
 
-        mockFindPlatformsForGame.mockImplementation(async () => {
-          callOrder.push("findPlatformsForGame");
-          return {
-            supportedPlatforms: mockSupportedPlatforms,
-            otherPlatforms: mockOtherPlatforms,
-          };
-        });
+      await expect(getPlatformsForGame(validIgdbId)).rejects.toThrow(
+        "Database connection failed"
+      );
+      expect(mockFindPlatformsForGame).not.toHaveBeenCalled();
+    });
 
-        await getPlatformsForGame(validIgdbId);
+    it("propagates error from findPlatformsForGame", async () => {
+      mockFindGameByIgdbId.mockResolvedValue(mockGame);
+      mockFindPlatformsForGame.mockRejectedValue(
+        new Error("Failed to query platforms")
+      );
 
-        expect(callOrder).toEqual(["findGameByIgdbId", "findPlatformsForGame"]);
-      });
+      await expect(getPlatformsForGame(validIgdbId)).rejects.toThrow(
+        "Failed to query platforms"
+      );
     });
   });
 });

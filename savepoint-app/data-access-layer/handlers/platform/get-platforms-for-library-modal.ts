@@ -7,6 +7,7 @@ import {
 import type { Platform } from "@prisma/client";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { NotFoundError } from "@/shared/lib/errors";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.USE_CASE]: "getPlatformsForLibraryModalUseCase",
@@ -36,25 +37,39 @@ export async function getPlatformsForLibraryModal(
   logger.info({ igdbId }, "Use case: Fetching platforms for library modal");
 
   try {
-    const dbResult = await getPlatformsForGame(igdbId);
+    let dbResult: {
+      supportedPlatforms: Platform[];
+      otherPlatforms: Platform[];
+    } | null = null;
 
-    if (dbResult.success) {
-      const { supportedPlatforms, otherPlatforms } = dbResult.data;
-
-      if (supportedPlatforms.length > 0 || otherPlatforms.length > 0) {
-        logger.info(
-          {
-            igdbId,
-            supportedCount: supportedPlatforms.length,
-            otherCount: otherPlatforms.length,
-          },
-          "Platforms found in database"
-        );
-        return {
-          success: true,
-          data: { supportedPlatforms, otherPlatforms },
-        };
+    try {
+      dbResult = await getPlatformsForGame(igdbId);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
+    }
+
+    if (
+      dbResult &&
+      (dbResult.supportedPlatforms.length > 0 ||
+        dbResult.otherPlatforms.length > 0)
+    ) {
+      logger.info(
+        {
+          igdbId,
+          supportedCount: dbResult.supportedPlatforms.length,
+          otherCount: dbResult.otherPlatforms.length,
+        },
+        "Platforms found in database"
+      );
+      return {
+        success: true,
+        data: {
+          supportedPlatforms: dbResult.supportedPlatforms,
+          otherPlatforms: dbResult.otherPlatforms,
+        },
+      };
     }
 
     logger.info(
@@ -89,20 +104,22 @@ export async function getPlatformsForLibraryModal(
         const gameDetailService = new GameDetailService();
         await gameDetailService.populateGameInDatabase(igdbGame);
 
-        const refreshedResult = await getPlatformsForGame(igdbId);
-        if (refreshedResult.success) {
+        try {
+          const refreshedResult = await getPlatformsForGame(igdbId);
           logger.info(
             {
               igdbId,
-              supportedCount: refreshedResult.data.supportedPlatforms.length,
-              otherCount: refreshedResult.data.otherPlatforms.length,
+              supportedCount: refreshedResult.supportedPlatforms.length,
+              otherCount: refreshedResult.otherPlatforms.length,
             },
             "Platforms populated from IGDB"
           );
           return {
             success: true,
-            data: refreshedResult.data,
+            data: refreshedResult,
           };
+        } catch {
+          // Fall through to return empty arrays
         }
       }
     }
@@ -125,19 +142,21 @@ export async function getPlatformsForLibraryModal(
 
       await savePlatforms(mappedPlatforms);
 
-      const refreshedResult = await getPlatformsForGame(igdbId);
-      if (refreshedResult.success) {
+      try {
+        const refreshedResult = await getPlatformsForGame(igdbId);
         logger.info(
           {
             igdbId,
-            otherCount: refreshedResult.data.otherPlatforms.length,
+            otherCount: refreshedResult.otherPlatforms.length,
           },
           "All IGDB platforms populated as fallback"
         );
         return {
           success: true,
-          data: refreshedResult.data,
+          data: refreshedResult,
         };
+      } catch {
+        // Fall through to return empty arrays
       }
     }
 
