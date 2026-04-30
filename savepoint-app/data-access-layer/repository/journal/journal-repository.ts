@@ -7,8 +7,7 @@ import type {
 } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
-
-import { NotFoundError } from "../errors";
+import { NotFoundError } from "@/shared/lib/errors";
 
 export async function findJournalEntriesByGameId(params: {
   gameId: string;

@@ -1,4 +1,3 @@
-import { NotFoundError } from "@/data-access-layer/repository";
 import {
   createJournalEntry,
   deleteJournalEntry,
@@ -7,6 +6,8 @@ import {
   updateJournalEntry,
 } from "@/data-access-layer/repository/journal/journal-repository";
 import { JournalMood, type JournalEntry } from "@prisma/client";
+
+import { NotFoundError } from "@/shared/lib/errors";
 
 import { JournalService } from "./journal-service";
 
