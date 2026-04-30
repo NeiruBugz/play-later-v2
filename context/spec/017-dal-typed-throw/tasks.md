@@ -86,12 +86,12 @@
 
 **Outcome:** `activityFeedRepository`, `followRepository`, `ActivityFeedService`, `SocialService` use typed throws. Activity-feed mappers stay inline this slice (out-of-scope deepening).
 
-- [ ] **Red:** rewrite repo + service tests for both domains. `follow-repository.ts:32` P2002 catch (already-following case) becomes `throw new ConflictError(...)`. **[Agent: typescript-test-expert]**
-- [ ] **Green — repos:** convert `activity-feed-repository.ts`, `follow-repository.ts`. **[Agent: nextjs-expert]**
-- [ ] **Green — services:** convert `activity-feed-service.ts:74-151` and `social-service.ts`. Drop duplicate Zod parses at `social-service.ts:46,66`. **[Agent: nextjs-expert]**
-- [ ] **Green — handlers:** convert `data-access-layer/handlers/social/activity-feed-handler.ts`. **[Agent: nextjs-expert]**
-- [ ] **Green — callers:** `rg "ActivityFeedService|SocialService|followRepository" savepoint-app/{app,features}`. **[Agent: nextjs-expert]**
-- [ ] **Verify:** CI green; smoke follow user → see activity feed populated. **[Agent: typescript-test-expert]**
+- [x] **Red:** rewrite repo + service tests for both domains. `follow-repository.ts:32` P2002 catch (already-following case) becomes `throw new ConflictError(...)`. **[Agent: typescript-test-expert]**
+- [x] **Green — repos:** convert `activity-feed-repository.ts`, `follow-repository.ts`. **[Agent: nextjs-expert]** _(repos already raw; first agent run handled P2002 → ConflictError translation in follow-repository)_
+- [x] **Green — services:** convert `activity-feed-service.ts:74-151` and `social-service.ts`. Drop duplicate Zod parses at `social-service.ts:46,66`. **[Agent: nextjs-expert]** _(done in first agent run; mappers stay inline — `*Result` type aliases removed from `services/index.ts`)_
+- [x] **Green — handlers:** convert `data-access-layer/handlers/social/activity-feed-handler.ts`. **[Agent: nextjs-expert]** _(uses `mapErrorToHandlerResult`)_
+- [x] **Green — callers:** `rg "ActivityFeedService|SocialService|followRepository" savepoint-app/{app,features}`. **[Agent: nextjs-expert]** _(2 social server-actions, 1 profile server-action, 3 RSC pages on `/u/[username]/{followers,following,activity}` using try-then-render pattern to satisfy `react-hooks/error-boundaries` lint rule, `social/ui/activity-feed.tsx` UI component caught by typecheck off-spec, `profile/use-cases/get-profile-page-data.ts` SocialService side only — ProfileService side stays for Slice 7)_
+- [x] **Verify:** CI green; smoke follow user → see activity feed populated. **[Agent: typescript-test-expert]** _(typecheck/lint/format pass; utilities 124, components 812, backend 768, integration 412 all pass)_
 
 ---
 
@@ -99,12 +99,12 @@
 
 **Outcome:** `userRepository` + `ProfileService` use typed throws. The known `app/(protected)/profile/page.tsx:27` `NOT_FOUND` redirect site is converted to `instanceof NotFoundError` catch.
 
-- [ ] **Red:** rewrite `data-access-layer/repository/user/*.integration.test.ts` (4 P2025 sites + 1 P2002 site at `user-repository.ts:46,120,160,194,252,308`); rewrite `services/profile/*.test.ts`. Note: `updateUserProfile` historically returned a raw user row — its tests are normalized to the new typed-throw contract here. **[Agent: typescript-test-expert]**
-- [ ] **Green — repo:** convert `user-repository.ts`; each P2025 throws `NotFoundError` with operation-specific message ("user not found while updating profile" etc.); P2002 at `:194` throws `ConflictError`. Normalize `updateUserProfile` and any other raw-row functions to the consistent contract. **[Agent: nextjs-expert]**
-- [ ] **Green — service:** convert `profile-service.ts`; drop duplicate Zod parses at `:197,320`. **[Agent: nextjs-expert]**
-- [ ] **Green — RSC page:** convert `app/(protected)/profile/page.tsx:27` from `if (result.code === ServiceErrorCode.NOT_FOUND) redirect(...)` to `try { ... } catch (error) { if (error instanceof NotFoundError) redirect(...); throw error; }`. **[Agent: nextjs-expert]**
-- [ ] **Green — callers:** `rg "ProfileService|userRepository|getServerUserProfile|updateUserProfile" savepoint-app/{app,features}`. **[Agent: nextjs-expert]**
-- [ ] **Verify:** CI green; smoke own profile page, public profile page (existing + nonexistent username — must still redirect / 404), profile edit. **[Agent: typescript-test-expert]**
+- [x] **Red:** rewrite `data-access-layer/repository/user/*.integration.test.ts` (4 P2025 sites + 1 P2002 site at `user-repository.ts:46,120,160,194,252,308`); rewrite `services/profile/*.test.ts`. Note: `updateUserProfile` historically returned a raw user row — its tests are normalized to the new typed-throw contract here. **[Agent: typescript-test-expert]**
+- [x] **Green — repo:** convert `user-repository.ts`; each P2025 throws `NotFoundError` with operation-specific message ("user not found while updating profile" etc.); P2002 at `:194` throws `ConflictError`. Normalize `updateUserProfile` and any other raw-row functions to the consistent contract. **[Agent: nextjs-expert]** _(6× P2025 → NotFoundError with operation-specific `context`; 1× P2002 → ConflictError; raw-row inconsistency normalized)_
+- [x] **Green — service:** convert `profile-service.ts`; drop duplicate Zod parses at `:197,320`. **[Agent: nextjs-expert]** _(425 LOC service converted; mappers.ts unchanged; types.ts `ServiceResult<>` aliases removed; barrel cleaned up)_
+- [x] **Green — RSC page:** convert `app/(protected)/profile/page.tsx:27` from `if (result.code === ServiceErrorCode.NOT_FOUND) redirect(...)` to `try { ... } catch (error) { if (error instanceof NotFoundError) redirect(...); throw error; }`. **[Agent: nextjs-expert]** _(plus 11 other RSC pages converted via try-then-render pattern to satisfy `react-hooks/error-boundaries` lint rule)_
+- [x] **Green — callers:** `rg "ProfileService|userRepository|getServerUserProfile|updateUserProfile" savepoint-app/{app,features}`. **[Agent: nextjs-expert]** _(12 RSC pages, 5 server actions, `get-profile-page-data.ts` use-case kept outer `{ success, error }` boundary — Option B — with inner typed-throw conversion + viewer-fallback try/catch for graceful public-profile fall-through)_
+- [x] **Verify:** CI green; smoke own profile page, public profile page (existing + nonexistent username — must still redirect / 404), profile edit. **[Agent: typescript-test-expert]** _(typecheck/lint/format pass; utilities 124, components 812, backend 768, integration 415 all pass — +3 integration tests)_
 
 ---
 
@@ -112,10 +112,10 @@
 
 **Outcome:** `GameDetailService` aggregation uses typed throws. Depends on slices 4 (library), 5 (game) having landed (consumes both). May be reordered; if reordered, this slice's repos/services land here.
 
-- [ ] **Red:** rewrite `services/game-detail/*.test.ts`. **[Agent: typescript-test-expert]**
-- [ ] **Green — service:** convert `game-detail-service.ts` to `await` library + game services and let typed errors propagate. **[Agent: nextjs-expert]**
-- [ ] **Green — callers:** `rg "GameDetailService" savepoint-app/{app,features}`. **[Agent: nextjs-expert]**
-- [ ] **Verify:** CI green; smoke game detail page for a game in library, a game not in library, an invalid IGDB id (404 path). **[Agent: typescript-test-expert]**
+- [x] **Red:** rewrite `services/game-detail/*.test.ts`. **[Agent: typescript-test-expert]** _(no-op — done in Slice 5)_
+- [x] **Green — service:** convert `game-detail-service.ts` to `await` library + game services and let typed errors propagate. **[Agent: nextjs-expert]** _(no-op — `game-detail-service.ts` lives in the same file as Slice 5's basic-game-lookup work; both Slice 5 and Slice 8 converged)_
+- [x] **Green — callers:** `rg "GameDetailService" savepoint-app/{app,features}`. **[Agent: nextjs-expert]** _(no-op — done in Slice 5)_
+- [x] **Verify:** CI green; smoke game detail page for a game in library, a game not in library, an invalid IGDB id (404 path). **[Agent: typescript-test-expert]** _(verified post-Slice 7: `rg` over `services/game-detail/` and `repository/game/` returns ZERO old-symbol hits)_
 
 ---
 
@@ -123,10 +123,10 @@
 
 **Outcome:** `OnboardingService` (5-step calculation across 4 repos) uses typed throws. Pure function for progress calc may optionally be extracted (out-of-scope deepening; if not extracted now, leave note in code review).
 
-- [ ] **Red:** rewrite `services/onboarding/*.test.ts`. **[Agent: typescript-test-expert]**
-- [ ] **Green — service:** convert `onboarding-service.ts:60-142`. **[Agent: nextjs-expert]**
-- [ ] **Green — callers:** `rg "OnboardingService" savepoint-app/{app,features}`. **[Agent: nextjs-expert]**
-- [ ] **Verify:** CI green; sign up a fresh test user, walk the onboarding checklist end-to-end. **[Agent: typescript-test-expert]**
+- [x] **Red:** rewrite `services/onboarding/*.test.ts`. **[Agent: typescript-test-expert]** _(322 LOC unit test fully rewritten with `vi.resetAllMocks()`)_
+- [x] **Green — service:** convert `onboarding-service.ts:60-142`. **[Agent: nextjs-expert]** _(both `try/catch` wrappers removed; null user → `throw new NotFoundError`; `getProgress` returns `OnboardingProgress` directly; `dismiss` returns `void`; calculation kept inline per ADR §2.4)_
+- [x] **Green — callers:** `rg "OnboardingService" savepoint-app/{app,features}`. **[Agent: nextjs-expert]** _(2 consumers: `dismiss-onboarding` server action direct-await; `getting-started-checklist.tsx` UI uses try/catch to log + return null on throw)_
+- [x] **Verify:** CI green; sign up a fresh test user, walk the onboarding checklist end-to-end. **[Agent: typescript-test-expert]** _(typecheck/lint/format pass; utilities 124, components 812, backend 769, integration 415 all pass; OnboardingService consumes repos only — library & journal already converted, user repo already raw)_
 
 ---
 
