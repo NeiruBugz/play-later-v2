@@ -134,12 +134,12 @@
 
 **Outcome:** `importedGameRepository` + `ImportedGameService` use typed throws. P2025 catch at `imported-game-repository.ts:241` becomes `NotFoundError`. The `domain/imported-game` DTO is preserved (out-of-scope deepening).
 
-- [ ] **Red:** rewrite repo + service tests. **[Agent: typescript-test-expert]**
-- [ ] **Green — repo:** convert `imported-game-repository.ts`. **[Agent: nextjs-expert]**
-- [ ] **Green — service:** convert `imported-game-service.ts`. **[Agent: nextjs-expert]**
-- [ ] **Green — handlers:** convert `data-access-layer/handlers/steam-import/imported-games.handler.ts`. **[Agent: nextjs-expert]**
-- [ ] **Green — callers:** `rg "ImportedGameService|importedGameRepository" savepoint-app/{app,features}`. **[Agent: nextjs-expert]**
-- [ ] **Verify:** CI green; smoke `/steam/games` page (lists imported games or empty state). **[Agent: typescript-test-expert]**
+- [x] **Red:** rewrite repo + service tests. **[Agent: typescript-test-expert]**
+- [x] **Green — repo:** convert `imported-game-repository.ts`. **[Agent: nextjs-expert]** _(P2025 → NotFoundError with operation-specific context; uses `@/shared/lib/errors` not the legacy DAL-local class)_
+- [x] **Green — service:** convert `imported-game-service.ts`. **[Agent: nextjs-expert]** _(`dismissImportedGame` returns void; `findImportedGameById` returns `T | null`; `updateImportedGameStatus` throws NotFoundError on missing)_
+- [x] **Green — handlers:** convert `data-access-layer/handlers/steam-import/imported-games.handler.ts`. **[Agent: nextjs-expert]** _(uses `mapErrorToHandlerResult`)_
+- [x] **Green — callers:** `rg "ImportedGameService|importedGameRepository" savepoint-app/{app,features}`. **[Agent: nextjs-expert]** _(dismiss action direct-await; `import-game-to-library` use-case has its ImportedGameService side converted — Steam + IGDB consumer patterns intact for Slices 11/12)_
+- [x] **Verify:** CI green; smoke `/steam/games` page (lists imported games or empty state). **[Agent: typescript-test-expert]** _(typecheck/lint/format pass; utilities 124, components 812, backend 768, integration 415 all pass; **critical follow-up fix**: `journal-repository.ts` and `journal-service.unit.test.ts` were importing `NotFoundError` from the legacy `data-access-layer/repository/errors` instead of `@/shared/lib/errors` — silent class-identity mismatch would have broken `instanceof NotFoundError` checks in the journal RSC pages' `notFound()` redirects. Fixed in this slice. Same risk class noted by Slice 10 agent for imported-game; cross-codebase audit confirms no other stragglers.)_
 
 ---
 
@@ -147,12 +147,12 @@
 
 **Outcome:** `SteamService` and `SteamOpenIdService` throw typed errors. Domain-specific subclasses introduced here. Steam-import handlers and the connect/disconnect flow consume typed errors.
 
-- [ ] **Catalog extension:** create `data-access-layer/services/steam/errors.ts` exporting `SteamProfilePrivateError extends ExternalServiceError` and `SteamApiUnavailableError extends ExternalServiceError`. Co-located unit tests. **[Agent: nextjs-expert]**
-- [ ] **Red:** rewrite `services/steam/*.test.ts` and `services/steam/steam-openid-service.test.ts` to expect typed throws (private profile → `SteamProfilePrivateError`, API unavailable → `SteamApiUnavailableError`, validation → `ZodError`). **[Agent: typescript-test-expert]**
-- [ ] **Green — service:** convert `steam-service.ts` and `steam-openid-service.ts`. Drop duplicate Zod parses at `steam-service.ts:245`, `steam-openid-service.ts:48,67,79`. **[Agent: nextjs-expert]**
-- [ ] **Green — handlers:** convert `data-access-layer/handlers/steam-import/{steam-connect,fetch-steam-games}.handler.ts`; explicit override in their `catch` blocks: `SteamProfilePrivateError → 403`. **[Agent: nextjs-expert]**
-- [ ] **Green — callers:** `rg "SteamService|SteamOpenIdService" savepoint-app/{app,features}`; update Steam connect button server actions, OpenID callback page. **[Agent: nextjs-expert]**
-- [ ] **Verify:** CI green; smoke Steam connect (private profile → expect friendly error), Steam disconnect, current `triggerBackgroundSync` disabled-error path still surfaces. **[Agent: typescript-test-expert]**
+- [x] **Catalog extension:** create `data-access-layer/services/steam/errors.ts` exporting `SteamProfilePrivateError extends ExternalServiceError` and `SteamApiUnavailableError extends ExternalServiceError`. Co-located unit tests. **[Agent: nextjs-expert]**
+- [x] **Red:** rewrite `services/steam/*.test.ts` and `services/steam/steam-openid-service.test.ts` to expect typed throws (private profile → `SteamProfilePrivateError`, API unavailable → `SteamApiUnavailableError`, validation → `ZodError`). **[Agent: typescript-test-expert]** _(485 + 201 LOC unit tests rewritten with `vi.resetAllMocks()`; +`getOwnedGames` coverage)_
+- [x] **Green — service:** convert `steam-service.ts` and `steam-openid-service.ts`. Drop duplicate Zod parses at `steam-service.ts:245`, `steam-openid-service.ts:48,67,79`. **[Agent: nextjs-expert]** _(both services drop ServiceResult; `STEAM_PROFILE_PRIVATE` → `SteamProfilePrivateError`, `STEAM_API_UNAVAILABLE` → `SteamApiUnavailableError`; 4+ duplicate Zod parses deleted; types.ts cleaned)_
+- [x] **Green — handlers:** convert `data-access-layer/handlers/steam-import/{steam-connect,fetch-steam-games}.handler.ts`; explicit override in their `catch` blocks: `SteamProfilePrivateError → 403`. **[Agent: nextjs-expert]** _(both handlers have explicit `if (error instanceof SteamProfilePrivateError) return 403` before falling through to `mapErrorToHandlerResult` — first demonstration of per-handler override pattern; `mapErrorToHandlerResult` enriched with `ExternalServiceError → 503` default)_
+- [x] **Green — callers:** `rg "SteamService|SteamOpenIdService" savepoint-app/{app,features}`; update Steam connect button server actions, OpenID callback page. **[Agent: nextjs-expert]** _(`disconnect-steam` action direct-await; `app/api/steam/auth/callback/route.ts` uses nested try/catch; `import-game-to-library.ts` SteamService side converted, IGDB side intact for Slice 12)_
+- [x] **Verify:** CI green; smoke Steam connect (private profile → expect friendly error), Steam disconnect, current `triggerBackgroundSync` disabled-error path still surfaces. **[Agent: typescript-test-expert]** _(typecheck/lint/format pass; utilities 124, components 812, backend 789 (+21), integration 415 all pass)_
 
 ---
 
@@ -160,13 +160,13 @@
 
 **Outcome:** `IgdbService` and `IgdbMatcher` throw typed errors. `IgdbRateLimitError` introduced. `handlers/igdb/igdb-handler.ts:54-59` switch-on-code is replaced with `instanceof` mapping. Use-case retry decision at `import-game-to-library.ts:134-135` consumes typed errors.
 
-- [ ] **Catalog extension:** create `data-access-layer/services/igdb/errors.ts` exporting `IgdbRateLimitError extends RateLimitError`. Co-located unit tests. **[Agent: nextjs-expert]**
-- [ ] **Red:** rewrite `services/igdb/*.test.ts` and `services/igdb/igdb-matcher.test.ts`. Drop the seven `VALIDATION_ERROR` test paths (igdb-service input re-validation deletion). **[Agent: typescript-test-expert]**
-- [ ] **Green — service:** convert `igdb-service.ts` (8 methods, ~7 duplicate Zod parses at `:156,203,242,304,389,428,488` — deleted), `igdb-matcher.ts:62`. Throw `IgdbRateLimitError` on rate-limit responses; `ExternalServiceError` on other API failures; `ZodError` on parsing IGDB response payloads. **[Agent: nextjs-expert]**
-- [ ] **Green — handler:** convert `data-access-layer/handlers/igdb/igdb-handler.ts`; the `case ServiceErrorCode.X` switch becomes `instanceof` chain inside the catch block (`ZodError → 400`, `NotFoundError → 404`, `IgdbRateLimitError → 429`, `RateLimitError → 429`, default → 500). **[Agent: nextjs-expert]**
-- [ ] **Green — use-case:** convert `features/steam-import/use-cases/import-game-to-library.ts:134-135` from `matchResult.code === EXTERNAL_SERVICE_ERROR || IGDB_RATE_LIMITED` to `error instanceof IgdbRateLimitError || error instanceof ExternalServiceError`. **[Agent: nextjs-expert]**
-- [ ] **Green — callers:** `rg "IgdbService|igdbMatcher" savepoint-app/{app,features}`. **[Agent: nextjs-expert]**
-- [ ] **Verify:** CI green; smoke IGDB game search via `/api/igdb/search` (valid query → results, invalid → 400, rate-limited → 429). **[Agent: typescript-test-expert]**
+- [x] **Catalog extension:** create `data-access-layer/services/igdb/errors.ts` exporting `IgdbRateLimitError extends RateLimitError`. Co-located unit tests. **[Agent: nextjs-expert]**
+- [x] **Red:** rewrite `services/igdb/*.test.ts` and `services/igdb/igdb-matcher.test.ts`. Drop the seven `VALIDATION_ERROR` test paths (igdb-service input re-validation deletion). **[Agent: typescript-test-expert]** _(4 service unit tests rewritten: igdb-discovery 463 LOC, igdb-edge-cases 315 LOC, igdb-search 257 LOC, igdb-matcher 209 LOC)_
+- [x] **Green — service:** convert `igdb-service.ts` (8 methods, ~7 duplicate Zod parses at `:156,203,242,304,389,428,488` — deleted), `igdb-matcher.ts:62`. Throw `IgdbRateLimitError` on rate-limit responses; `ExternalServiceError` on other API failures; `ZodError` on parsing IGDB response payloads. **[Agent: nextjs-expert]** _(528 LOC service + 142 LOC matcher converted; IGDB API response parsing preserved as legitimate `ZodError` throws)_
+- [x] **Green — handler:** convert `data-access-layer/handlers/igdb/igdb-handler.ts`; the `case ServiceErrorCode.X` switch becomes `instanceof` chain inside the catch block (`ZodError → 400`, `NotFoundError → 404`, `IgdbRateLimitError → 429`, `RateLimitError → 429`, default → 500). **[Agent: nextjs-expert]** _(switch gone; handler delegates to `mapErrorToHandlerResult` which already covers all those codes including `ExternalServiceError → 503` from Slice 11)_
+- [x] **Green — use-case:** convert `features/steam-import/use-cases/import-game-to-library.ts:134-135` from `matchResult.code === EXTERNAL_SERVICE_ERROR || IGDB_RATE_LIMITED` to `error instanceof IgdbRateLimitError || error instanceof ExternalServiceError`. **[Agent: nextjs-expert]** _(both `:134-145` and `:219-230` blocks converted to `try/catch` + `instanceof`-based retry decision — the climax of the migration's consumer-side branching)_
+- [x] **Green — callers:** `rg "IgdbService|igdbMatcher" savepoint-app/{app,features}`. **[Agent: nextjs-expert]** _(add-game-to-library use-case + tests; get-game-details use-case + tests; api/games/search route; browse-related-games UI; plus 5 stale integration test mocks fixed post-agent: library-actions, quick-add-to-library-action, add-game-to-library integration tests had `mockResolvedValue({ success: true, data: ... })` shapes that needed flattening to raw)_
+- [x] **Verify:** CI green; smoke IGDB game search via `/api/igdb/search` (valid query → results, invalid → 400, rate-limited → 429). **[Agent: typescript-test-expert]** _(typecheck/lint/format pass; utilities 124, components 812, backend 790 (+1), integration 415 all pass after the 5 mock-shape fixes)_
 
 ---
 
@@ -174,10 +174,10 @@
 
 **Outcome:** `AuthService` (sign-up/sign-in credentials path) throws typed errors. Last service to convert.
 
-- [ ] **Red:** rewrite `services/auth/*.test.ts`. **[Agent: typescript-test-expert]**
-- [ ] **Green — service:** convert `auth-service.ts`. **[Agent: nextjs-expert]**
-- [ ] **Green — callers:** `rg "AuthService" savepoint-app/{app,features}`; update sign-up / sign-in server actions. **[Agent: nextjs-expert]**
-- [ ] **Verify:** CI green; smoke sign-up (happy path + duplicate email → friendly error), sign-in (happy + bad password). **[Agent: typescript-test-expert]**
+- [x] **Red:** rewrite `services/auth/*.test.ts`. **[Agent: inline]** _(unit test rewritten with `vi.resetAllMocks()` + `.rejects.toThrow(ConflictError)`; consumer test rewritten to mock `mockRejectedValue(new ConflictError(...))` instead of resolving with `{ success: false }`)_
+- [x] **Green — service:** convert `auth-service.ts`. **[Agent: inline]** _(`signUp` throws `ConflictError` for both pre-check duplicate AND inline P2002 unique-constraint catch; outer wrapper rethrows; `types.ts` `SignUpResult = ServiceResult<...>` flattened to raw)_
+- [x] **Green — callers:** `rg "AuthService" savepoint-app/{app,features}`; update sign-up / sign-in server actions. **[Agent: inline]** _(`features/auth/server-actions/sign-up.ts` direct-await; outer try/catch surfaces `error.message` to `ActionResult.error` so `ConflictError` message reaches the user)_
+- [x] **Verify:** CI green; smoke sign-up (happy path + duplicate email → friendly error), sign-in (happy + bad password). **[Agent: inline]** _(typecheck/lint/format pass; utilities 124, components 812, backend 790, integration 415 all pass; **bonus fix**: IGDB unit-test files were flaky from limiter-state pollution between tests — added `await __resetLimiterForTests()` to `beforeEach` of all 4 IGDB unit-test files)_
 
 ---
 
