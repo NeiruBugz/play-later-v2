@@ -19,35 +19,23 @@ export const getJournalEntriesAction = createServerAction<
   schema: GetJournalEntriesSchema,
   requireAuth: true,
   handler: async ({ input, userId, logger }) => {
-    // After parsing, limit will always be a number due to default
     const { cursor, limit } = input;
     logger.info({ userId, cursor, limit }, "Fetching journal entries");
 
     const journalService = new JournalService();
-    const result = await journalService.findJournalEntriesByUserId({
+    const entries = await journalService.findJournalEntriesByUserId({
       userId: userId!,
       limit,
       cursor,
     });
 
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, cursor },
-        "Failed to fetch journal entries"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
-
     logger.info(
-      { userId, count: result.data.length, cursor },
+      { userId, count: entries.length, cursor },
       "Journal entries fetched successfully"
     );
     return {
       success: true,
-      data: result.data,
+      data: entries,
     };
   },
 });

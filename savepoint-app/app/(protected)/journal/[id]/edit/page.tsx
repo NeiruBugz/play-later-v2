@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { EditJournalEntryPage as EditJournalEntryPageContent } from "@/features/journal";
 import { requireServerUserId } from "@/shared/lib/app/auth";
+import { NotFoundError } from "@/shared/lib/errors";
 
 export default async function EditJournalEntryPage({
   params,
@@ -13,16 +14,14 @@ export default async function EditJournalEntryPage({
   const { id } = await params;
 
   const journalService = new JournalService();
-  const entryResult = await journalService.findJournalEntryById({
-    entryId: id,
-    userId,
-  });
 
-  if (!entryResult.success) {
-    notFound();
+  let entry;
+  try {
+    entry = await journalService.findJournalEntryById({ entryId: id, userId });
+  } catch (error) {
+    if (error instanceof NotFoundError) notFound();
+    throw error;
   }
-
-  const entry = entryResult.data;
 
   return <EditJournalEntryPageContent entry={entry} />;
 }

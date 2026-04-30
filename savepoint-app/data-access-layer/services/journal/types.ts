@@ -1,10 +1,8 @@
 import type { JournalEntryDomain } from "@/features/journal/types";
 
-import type { ServiceResult } from "../types";
+export type FindJournalEntriesResult = JournalEntryDomain[];
 
-export type FindJournalEntriesResult = ServiceResult<JournalEntryDomain[]>;
-
-export interface JournalService {
+export interface JournalServiceContract {
   findJournalEntriesByGameId(params: {
     userId: string;
     gameId: string;
