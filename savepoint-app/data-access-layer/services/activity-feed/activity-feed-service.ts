@@ -17,13 +17,6 @@ import type {
 } from "@/features/social/types";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
-import { handleServiceError, serviceSuccess } from "../types";
-import type {
-  GetFeedForUserResult,
-  GetPopularFeedResult,
-  GetUserActivityResult,
-} from "./types";
-
 const DEFAULT_FEED_LIMIT = 20;
 
 function computeEventType(row: FeedItemRow): FeedEventType {
@@ -80,73 +73,54 @@ export class ActivityFeedService {
     userId: string,
     cursor?: FeedCursor,
     limit?: number
-  ): Promise<GetFeedForUserResult> {
-    try {
-      const feedLimit = limit ?? DEFAULT_FEED_LIMIT;
-      const parsedCursor = parseCursor(cursor);
+  ): Promise<PaginatedFeed> {
+    const feedLimit = limit ?? DEFAULT_FEED_LIMIT;
+    const parsedCursor = parseCursor(cursor);
 
-      this.logger.debug(
-        { userId, cursor: parsedCursor, limit: feedLimit },
-        "Fetching user feed"
-      );
+    this.logger.debug(
+      { userId, cursor: parsedCursor, limit: feedLimit },
+      "Fetching user feed"
+    );
 
-      const result = await findFeedForUser(userId, parsedCursor, feedLimit);
-
-      return serviceSuccess(mapPaginatedResult(result));
-    } catch (error) {
-      return handleServiceError(error, "Failed to fetch user feed");
-    }
+    const result = await findFeedForUser(userId, parsedCursor, feedLimit);
+    return mapPaginatedResult(result);
   }
 
   async getPopularFeed(
     excludeUserId?: string,
     cursor?: FeedCursor,
     limit?: number
-  ): Promise<GetPopularFeedResult> {
-    try {
-      const feedLimit = limit ?? DEFAULT_FEED_LIMIT;
-      const parsedCursor = parseCursor(cursor);
+  ): Promise<PaginatedFeed> {
+    const feedLimit = limit ?? DEFAULT_FEED_LIMIT;
+    const parsedCursor = parseCursor(cursor);
 
-      this.logger.debug(
-        { excludeUserId, cursor: parsedCursor, limit: feedLimit },
-        "Fetching popular feed"
-      );
+    this.logger.debug(
+      { excludeUserId, cursor: parsedCursor, limit: feedLimit },
+      "Fetching popular feed"
+    );
 
-      const result = await findPopularFeed(
-        excludeUserId,
-        parsedCursor,
-        feedLimit
-      );
-
-      return serviceSuccess(mapPaginatedResult(result));
-    } catch (error) {
-      return handleServiceError(error, "Failed to fetch popular feed");
-    }
+    const result = await findPopularFeed(
+      excludeUserId,
+      parsedCursor,
+      feedLimit
+    );
+    return mapPaginatedResult(result);
   }
 
   async getUserActivity(
     userId: string,
     cursor?: FeedCursor,
     limit?: number
-  ): Promise<GetUserActivityResult> {
-    try {
-      const feedLimit = limit ?? DEFAULT_FEED_LIMIT;
-      const parsedCursor = parseCursor(cursor);
+  ): Promise<PaginatedFeed> {
+    const feedLimit = limit ?? DEFAULT_FEED_LIMIT;
+    const parsedCursor = parseCursor(cursor);
 
-      this.logger.debug(
-        { userId, cursor: parsedCursor, limit: feedLimit },
-        "Fetching user activity"
-      );
+    this.logger.debug(
+      { userId, cursor: parsedCursor, limit: feedLimit },
+      "Fetching user activity"
+    );
 
-      const result = await findActivityByUserId(
-        userId,
-        parsedCursor,
-        feedLimit
-      );
-
-      return serviceSuccess(mapPaginatedResult(result));
-    } catch (error) {
-      return handleServiceError(error, "Failed to fetch user activity");
-    }
+    const result = await findActivityByUserId(userId, parsedCursor, feedLimit);
+    return mapPaginatedResult(result);
   }
 }

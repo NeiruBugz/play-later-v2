@@ -12,17 +12,24 @@ import { ActivityFeedEmpty } from "./activity-feed-empty";
 
 export async function ActivityFeed({ userId }: { userId: string }) {
   const service = new ActivityFeedService();
-  const result = await service.getFeedForUser(userId);
 
-  const initialData = result.success
-    ? result.data
-    : { items: [], nextCursor: null };
+  let initialData: Awaited<ReturnType<typeof service.getFeedForUser>>;
+  try {
+    initialData = await service.getFeedForUser(userId);
+  } catch {
+    initialData = { items: [], nextCursor: null };
+  }
 
   const hasItems = initialData.items.length > 0;
 
   if (!hasItems) {
-    const popularResult = await service.getPopularFeed(userId);
-    const popularItems = popularResult.success ? popularResult.data.items : [];
+    let popularItems: typeof initialData.items = [];
+    try {
+      const popularResult = await service.getPopularFeed(userId);
+      popularItems = popularResult.items;
+    } catch {
+      popularItems = [];
+    }
 
     return (
       <Card variant="flat" className="flex flex-1 flex-col">

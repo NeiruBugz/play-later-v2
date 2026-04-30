@@ -5,7 +5,6 @@ import {
   countFollowing,
   createFollow,
   deleteFollow,
-  DuplicateError,
   findFollowers,
   findFollowing,
   findUserById,
@@ -13,20 +12,16 @@ import {
 } from "@/data-access-layer/repository";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
 import {
-  handleServiceError,
-  serviceError,
-  ServiceErrorCode,
-  serviceSuccess,
-} from "../types";
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/shared/lib/errors";
+
 import type {
-  FollowUserResult,
-  GetFollowCountsResult,
-  GetFollowersResult,
-  GetFollowingResult,
-  IsFollowingResult,
-  UnfollowUserResult,
+  FollowCounts,
+  PaginatedFollowersResult,
+  PaginatedFollowingResult,
 } from "./types";
 
 const DEFAULT_PAGE_SIZE = 20;
@@ -34,156 +29,86 @@ const DEFAULT_PAGE_SIZE = 20;
 export class SocialService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "SocialService" });
 
-  async followUser(
-    followerId: string,
-    followingId: string
-  ): Promise<FollowUserResult> {
-    try {
-      if (followerId === followingId) {
-        this.logger.warn({ followerId }, "Self-follow attempt");
-        return serviceError(
-          "You cannot follow yourself",
-          ServiceErrorCode.VALIDATION_ERROR
-        );
-      }
+  async followUser(followerId: string, followingId: string): Promise<void> {
+    if (followerId === followingId) {
+      this.logger.warn({ followerId }, "Self-follow attempt");
+      throw new ConflictError("You cannot follow yourself", { followerId });
+    }
 
-      const targetUser = await findUserById(followingId, {
-        select: { id: true, isPublicProfile: true },
+    const targetUser = await findUserById(followingId, {
+      select: { id: true, isPublicProfile: true },
+    });
+
+    if (!targetUser) {
+      this.logger.warn({ followingId }, "Follow target user not found");
+      throw new NotFoundError("User not found");
+    }
+
+    if (!targetUser.isPublicProfile) {
+      this.logger.warn(
+        { followerId, followingId },
+        "Follow attempt on non-public profile"
+      );
+      throw new UnauthorizedError("Cannot follow a private profile", {
+        followerId,
+        followingId,
       });
-
-      if (!targetUser) {
-        this.logger.warn({ followingId }, "Follow target user not found");
-        return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
-      }
-
-      if (!targetUser.isPublicProfile) {
-        this.logger.warn(
-          { followerId, followingId },
-          "Follow attempt on non-public profile"
-        );
-        return serviceError(
-          "Cannot follow a private profile",
-          ServiceErrorCode.VALIDATION_ERROR
-        );
-      }
-
-      try {
-        await createFollow(followerId, followingId);
-      } catch (error) {
-        if (error instanceof DuplicateError) {
-          this.logger.warn(
-            { followerId, followingId },
-            "Duplicate follow attempt"
-          );
-          return serviceError(
-            "Already following this user",
-            ServiceErrorCode.CONFLICT
-          );
-        }
-        throw error;
-      }
-
-      return serviceSuccess(undefined);
-    } catch (error) {
-      return handleServiceError(error, "Failed to follow user");
     }
+
+    await createFollow(followerId, followingId);
   }
 
-  async unfollowUser(
-    followerId: string,
-    followingId: string
-  ): Promise<UnfollowUserResult> {
-    try {
-      await deleteFollow(followerId, followingId);
-      return serviceSuccess(undefined);
-    } catch (error) {
-      return handleServiceError(error, "Failed to unfollow user");
-    }
+  async unfollowUser(followerId: string, followingId: string): Promise<void> {
+    await deleteFollow(followerId, followingId);
   }
 
-  async isFollowing(
-    followerId: string,
-    followingId: string
-  ): Promise<IsFollowingResult> {
-    try {
-      const following = await isFollowing(followerId, followingId);
-      return serviceSuccess(following);
-    } catch (error) {
-      return handleServiceError(error, "Failed to check follow status");
-    }
+  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+    return isFollowing(followerId, followingId);
   }
 
-  async getFollowCounts(userId: string): Promise<GetFollowCountsResult> {
-    try {
-      const [followers, following] = await Promise.all([
-        countFollowers(userId),
-        countFollowing(userId),
-      ]);
-      return serviceSuccess({ followers, following });
-    } catch (error) {
-      return handleServiceError(error, "Failed to get follow counts");
-    }
+  async getFollowCounts(userId: string): Promise<FollowCounts> {
+    const [followers, following] = await Promise.all([
+      countFollowers(userId),
+      countFollowing(userId),
+    ]);
+    return { followers, following };
   }
 
   async getFollowers(
     userId: string,
     page?: number
-  ): Promise<GetFollowersResult> {
-    try {
-      const user = await findUserById(userId, {
-        select: { id: true, isPublicProfile: true },
-      });
+  ): Promise<PaginatedFollowersResult> {
+    const user = await findUserById(userId, {
+      select: { id: true, isPublicProfile: true },
+    });
 
-      if (!user || !user.isPublicProfile) {
-        this.logger.warn({ userId }, "getFollowers called for non-public user");
-        return serviceError(
-          "User not found or profile is private",
-          ServiceErrorCode.NOT_FOUND
-        );
-      }
-
-      const currentPage = page ?? 1;
-      const skip = (currentPage - 1) * DEFAULT_PAGE_SIZE;
-
-      const result = await findFollowers(userId, {
-        skip,
-        take: DEFAULT_PAGE_SIZE,
-      });
-
-      return serviceSuccess(result);
-    } catch (error) {
-      return handleServiceError(error, "Failed to get followers");
+    if (!user || !user.isPublicProfile) {
+      this.logger.warn({ userId }, "getFollowers called for non-public user");
+      throw new NotFoundError("User not found or profile is private");
     }
+
+    const currentPage = page ?? 1;
+    const skip = (currentPage - 1) * DEFAULT_PAGE_SIZE;
+
+    return findFollowers(userId, { skip, take: DEFAULT_PAGE_SIZE });
   }
 
   async getFollowing(
     userId: string,
     page?: number
-  ): Promise<GetFollowingResult> {
-    try {
-      const user = await findUserById(userId, {
-        select: { id: true, isPublicProfile: true },
-      });
+  ): Promise<PaginatedFollowingResult> {
+    const user = await findUserById(userId, {
+      select: { id: true, isPublicProfile: true },
+    });
 
-      if (!user || !user.isPublicProfile) {
-        this.logger.warn({ userId }, "getFollowing called for non-public user");
-        return serviceError(
-          "User not found or profile is private",
-          ServiceErrorCode.NOT_FOUND
-        );
-      }
-
-      const currentPage = page ?? 1;
-      const skip = (currentPage - 1) * DEFAULT_PAGE_SIZE;
-
-      const result = await findFollowing(userId, {
-        skip,
-        take: DEFAULT_PAGE_SIZE,
-      });
-
-      return serviceSuccess(result);
-    } catch (error) {
-      return handleServiceError(error, "Failed to get following");
+    if (!user || !user.isPublicProfile) {
+      this.logger.warn({ userId }, "getFollowing called for non-public user");
+      throw new NotFoundError("User not found or profile is private");
     }
+
+    const currentPage = page ?? 1;
+    const skip = (currentPage - 1) * DEFAULT_PAGE_SIZE;
+
+    return findFollowing(userId, { skip, take: DEFAULT_PAGE_SIZE });
   }
 }

@@ -4,7 +4,6 @@ import {
   findPopularFeed,
 } from "@/data-access-layer/repository";
 
-import { ServiceErrorCode } from "../types";
 import { ActivityFeedService } from "./activity-feed-service";
 
 vi.mock("@/data-access-layer/repository", () => ({
@@ -43,7 +42,7 @@ describe("ActivityFeedService", () => {
   let mockFindActivityByUserId: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     service = new ActivityFeedService();
     mockFindFeedForUser = vi.mocked(findFeedForUser);
     mockFindPopularFeed = vi.mocked(findPopularFeed);
@@ -61,10 +60,7 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getFeedForUser("user-123");
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.items[0].eventType).toBe("LIBRARY_ADD");
-        }
+        expect(result.items[0].eventType).toBe("LIBRARY_ADD");
       });
 
       it("should map statusChangedAt: [date] to eventType STATUS_CHANGE", async () => {
@@ -78,10 +74,7 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getFeedForUser("user-123");
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.items[0].eventType).toBe("STATUS_CHANGE");
-        }
+        expect(result.items[0].eventType).toBe("STATUS_CHANGE");
       });
 
       it("should use activityTimestamp as the item timestamp", async () => {
@@ -94,10 +87,7 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getFeedForUser("user-123");
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.items[0].timestamp).toEqual(activityTimestamp);
-        }
+        expect(result.items[0].timestamp).toEqual(activityTimestamp);
       });
 
       it("should map all row fields onto the feed item correctly", async () => {
@@ -111,24 +101,21 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getFeedForUser("user-123");
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          const item = result.data.items[0];
-          expect(item.id).toBe(String(row.id));
-          expect(item.status).toBe(row.status);
-          expect(item.user).toEqual({
-            id: row.userId,
-            name: row.userName,
-            username: row.userUsername,
-            image: row.userImage,
-          });
-          expect(item.game).toEqual({
-            id: row.gameId,
-            title: row.gameTitle,
-            coverImage: row.gameCoverImage,
-            slug: row.gameSlug,
-          });
-        }
+        const item = result.items[0];
+        expect(item.id).toBe(String(row.id));
+        expect(item.status).toBe(row.status);
+        expect(item.user).toEqual({
+          id: row.userId,
+          name: row.userName,
+          username: row.userUsername,
+          image: row.userImage,
+        });
+        expect(item.game).toEqual({
+          id: row.gameId,
+          title: row.gameTitle,
+          coverImage: row.gameCoverImage,
+          slug: row.gameSlug,
+        });
       });
     });
 
@@ -185,13 +172,10 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getFeedForUser("user-123");
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.nextCursor).toEqual({
-            timestamp: cursorDate.toISOString(),
-            id: "99",
-          });
-        }
+        expect(result.nextCursor).toEqual({
+          timestamp: cursorDate.toISOString(),
+          id: "99",
+        });
       });
 
       it("should return null nextCursor when repository returns null cursor", async () => {
@@ -199,24 +183,17 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getFeedForUser("user-123");
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.nextCursor).toBeNull();
-        }
+        expect(result.nextCursor).toBeNull();
       });
     });
 
     describe("error handling", () => {
-      it("should return INTERNAL_ERROR when repository throws", async () => {
+      it("should propagate errors thrown by the repository", async () => {
         mockFindFeedForUser.mockRejectedValue(new Error("DB unavailable"));
 
-        const result = await service.getFeedForUser("user-123");
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("DB unavailable");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(service.getFeedForUser("user-123")).rejects.toThrow(
+          "DB unavailable"
+        );
       });
     });
   });
@@ -232,10 +209,7 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getPopularFeed();
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.items[0].eventType).toBe("LIBRARY_ADD");
-        }
+        expect(result.items[0].eventType).toBe("LIBRARY_ADD");
       });
 
       it("should map statusChangedAt: [date] to eventType STATUS_CHANGE", async () => {
@@ -249,10 +223,7 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getPopularFeed();
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.items[0].eventType).toBe("STATUS_CHANGE");
-        }
+        expect(result.items[0].eventType).toBe("STATUS_CHANGE");
       });
     });
 
@@ -266,13 +237,10 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getPopularFeed();
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.nextCursor).toEqual({
-            timestamp: cursorDate.toISOString(),
-            id: "7",
-          });
-        }
+        expect(result.nextCursor).toEqual({
+          timestamp: cursorDate.toISOString(),
+          id: "7",
+        });
       });
     });
 
@@ -292,16 +260,12 @@ describe("ActivityFeedService", () => {
     });
 
     describe("error handling", () => {
-      it("should return INTERNAL_ERROR when repository throws", async () => {
+      it("should propagate errors thrown by the repository", async () => {
         mockFindPopularFeed.mockRejectedValue(new Error("Network failure"));
 
-        const result = await service.getPopularFeed();
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Network failure");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(service.getPopularFeed()).rejects.toThrow(
+          "Network failure"
+        );
       });
     });
   });
@@ -310,7 +274,7 @@ describe("ActivityFeedService", () => {
     const userId = "user-999";
 
     describe("success path", () => {
-      it("should return success with mapped paginated feed when repository resolves", async () => {
+      it("should return mapped paginated feed when repository resolves", async () => {
         const row = buildFeedItemRow({ statusChangedAt: null });
         mockFindActivityByUserId.mockResolvedValue({
           items: [row],
@@ -319,11 +283,8 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getUserActivity(userId);
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.items).toHaveLength(1);
-          expect(result.data.nextCursor).toBeNull();
-        }
+        expect(result.items).toHaveLength(1);
+        expect(result.nextCursor).toBeNull();
       });
 
       it("should pass userId, parsed cursor, and limit to findActivityByUserId", async () => {
@@ -381,13 +342,10 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getUserActivity(userId);
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.nextCursor).toEqual({
-            timestamp: cursorDate.toISOString(),
-            id: "55",
-          });
-        }
+        expect(result.nextCursor).toEqual({
+          timestamp: cursorDate.toISOString(),
+          id: "55",
+        });
       });
 
       it("should return null nextCursor when repository returns null", async () => {
@@ -398,24 +356,17 @@ describe("ActivityFeedService", () => {
 
         const result = await service.getUserActivity(userId);
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.nextCursor).toBeNull();
-        }
+        expect(result.nextCursor).toBeNull();
       });
     });
 
     describe("error handling", () => {
-      it("should return INTERNAL_ERROR when repository throws", async () => {
+      it("should propagate errors thrown by the repository", async () => {
         mockFindActivityByUserId.mockRejectedValue(new Error("DB timeout"));
 
-        const result = await service.getUserActivity(userId);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("DB timeout");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(service.getUserActivity(userId)).rejects.toThrow(
+          "DB timeout"
+        );
       });
     });
   });

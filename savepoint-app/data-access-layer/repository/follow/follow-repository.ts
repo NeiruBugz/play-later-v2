@@ -3,8 +3,8 @@ import "server-only";
 import { Prisma, type Follow } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
+import { ConflictError } from "@/shared/lib/errors";
 
-import { DuplicateError } from "../errors";
 import type {
   PaginatedFollowersResult,
   PaginatedFollowingResult,
@@ -31,7 +31,10 @@ export async function createFollow(
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
-      throw new DuplicateError("Already following this user");
+      throw new ConflictError("Already following this user", {
+        followerId,
+        followingId,
+      });
     }
     throw error;
   }

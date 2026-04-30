@@ -1,7 +1,8 @@
 import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 
-import { DuplicateError } from "../errors";
+import { ConflictError } from "@/shared/lib/errors";
+
 import {
   countFollowers,
   countFollowing,
@@ -41,7 +42,7 @@ describe("FollowRepository - Integration Tests", () => {
       await createFollow(follower.id, following.id);
 
       await expect(createFollow(follower.id, following.id)).rejects.toThrow(
-        DuplicateError
+        ConflictError
       );
     });
   });
