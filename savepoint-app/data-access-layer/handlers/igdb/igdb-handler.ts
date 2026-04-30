@@ -1,5 +1,5 @@
 import { IgdbService } from "@/data-access-layer/services";
-import { ServiceErrorCode } from "@/data-access-layer/services/types";
+import { IgdbRateLimitError } from "@/data-access-layer/services/igdb/errors";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { SearchGamesSchema } from "@/features/game-search";
@@ -11,6 +11,7 @@ import {
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult, RequestContext } from "../types";
 import type { IgdbSearchHandlerInput, IgdbSearchHandlerOutput } from "./types";
 
@@ -35,32 +36,10 @@ async function getCachedIgdbSearch(
     "IGDB search cache miss - fetching from service"
   );
 
-  const result = await igdbService.searchGamesByName({
+  return igdbService.searchGamesByName({
     name: normalizedQuery,
     offset,
   });
-
-  if (!result.success) {
-    throw Object.assign(new Error(result.error), {
-      code: result.code ?? ServiceErrorCode.INTERNAL_ERROR,
-    });
-  }
-
-  return result.data;
-}
-
-function mapServiceErrorCodeToStatus(code: ServiceErrorCode | undefined) {
-  switch (code) {
-    case ServiceErrorCode.VALIDATION_ERROR:
-      return HTTP_STATUS.BAD_REQUEST;
-    case ServiceErrorCode.NOT_FOUND:
-      return HTTP_STATUS.NOT_FOUND;
-    case ServiceErrorCode.IGDB_RATE_LIMITED:
-    case ServiceErrorCode.RATE_LIMITED:
-      return HTTP_STATUS.TOO_MANY_REQUESTS;
-    default:
-      return HTTP_STATUS.INTERNAL_SERVER_ERROR;
-  }
 }
 
 async function search(
@@ -114,23 +93,24 @@ async function search(
       status: HTTP_STATUS.OK,
     };
   } catch (error) {
-    const code = (error as { code?: ServiceErrorCode }).code;
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Game search is temporarily unavailable. Please try again later.";
-    const status = mapServiceErrorCodeToStatus(code);
-
     logger.error(
       { error, query: normalizedQuery, offset },
       "IGDB search failed"
     );
 
-    return {
-      success: false,
-      error: message,
-      status,
-    };
+    if (error instanceof IgdbRateLimitError) {
+      const retryAfter = error.context?.retryAfter as number | undefined;
+      return {
+        success: false,
+        error: error.message,
+        status: HTTP_STATUS.TOO_MANY_REQUESTS,
+        ...(retryAfter
+          ? { headers: { "Retry-After": String(retryAfter) } }
+          : {}),
+      };
+    }
+
+    return mapErrorToHandlerResult(error);
   }
 }
 

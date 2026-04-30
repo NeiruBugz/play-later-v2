@@ -1,6 +1,9 @@
-import { __resetTokenCacheForTests } from "@/shared/lib/igdb";
+import { NotFoundError } from "@/shared/lib/errors";
+import {
+  __resetLimiterForTests,
+  __resetTokenCacheForTests,
+} from "@/shared/lib/igdb";
 
-import { ServiceErrorCode } from "../types";
 import { IgdbService } from "./igdb-service";
 
 vi.mock("@/env.mjs", () => ({
@@ -19,50 +22,27 @@ Object.defineProperty(global, "fetch", {
 describe("IgdbService", () => {
   let service: IgdbService;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+  beforeEach(async () => {
+    vi.resetAllMocks();
     mockFetch.mockReset();
     __resetTokenCacheForTests();
+    await __resetLimiterForTests();
     service = new IgdbService();
   });
 
   describe("searchGamesByName", () => {
     describe("when service throws", () => {
-      it("should return VALIDATION_ERROR for empty game name", async () => {
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
-        const result = await service.searchGamesByName({ name: "" });
-
-        expect(result.success).toBe(false);
-        if ("error" in result) {
-          expect(result.error).toBe("Game name is required for search");
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        }
+      it("should throw when game name is empty", async () => {
+        await expect(service.searchGamesByName({ name: "" })).rejects.toThrow();
       });
 
-      it("should return VALIDATION_ERROR for whitespace-only game name", async () => {
-        mockFetch.mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({
-            access_token: "test_token",
-            expires_in: 3600,
-          }),
-        });
-        const result = await service.searchGamesByName({ name: "   " });
-
-        expect(result.success).toBe(false);
-        if ("error" in result) {
-          expect(result.error).toBe("Game name is required for search");
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        }
+      it("should throw when game name is whitespace-only", async () => {
+        await expect(
+          service.searchGamesByName({ name: "   " })
+        ).rejects.toThrow();
       });
 
-      it("should return NOT_FOUND when API returns null", async () => {
+      it("should throw NotFoundError when API returns null", async () => {
         mockFetch
           .mockResolvedValueOnce({
             ok: true,
@@ -75,16 +55,13 @@ describe("IgdbService", () => {
             ok: true,
             json: async () => null,
           });
-        const result = await service.searchGamesByName({ name: "test game" });
 
-        expect(result.success).toBe(false);
-        if ("error" in result) {
-          expect(result.error).toBe("Failed to find games");
-          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-        }
+        await expect(
+          service.searchGamesByName({ name: "test game" })
+        ).rejects.toThrow(NotFoundError);
       });
 
-      it("should return NOT_FOUND when API returns undefined", async () => {
+      it("should throw NotFoundError when API returns undefined", async () => {
         mockFetch
           .mockResolvedValueOnce({
             ok: true,
@@ -97,13 +74,10 @@ describe("IgdbService", () => {
             ok: true,
             json: async () => undefined,
           });
-        const result = await service.searchGamesByName({ name: "test game" });
 
-        expect(result.success).toBe(false);
-        if ("error" in result) {
-          expect(result.error).toBe("Failed to find games");
-          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-        }
+        await expect(
+          service.searchGamesByName({ name: "test game" })
+        ).rejects.toThrow(NotFoundError);
       });
     });
 
@@ -127,11 +101,8 @@ describe("IgdbService", () => {
             name: "nonexistent game",
           });
 
-          expect(result.success).toBe(true);
-          if ("data" in result) {
-            expect(result.data?.games).toEqual([]);
-            expect(result.data?.count).toBe(0);
-          }
+          expect(result.games).toEqual([]);
+          expect(result.count).toBe(0);
         });
 
         it("should handle search without fields", async () => {
@@ -173,10 +144,7 @@ describe("IgdbService", () => {
 
           const result = await service.searchGamesByName({ name: "test game" });
 
-          expect(result.success).toBe(true);
-          if ("data" in result) {
-            expect(result.data?.games).toEqual(mockGames);
-          }
+          expect(result.games).toEqual(mockGames);
         });
       });
 
@@ -240,16 +208,14 @@ describe("IgdbService", () => {
             ok: true,
             json: async () => mockGames,
           });
+
           const result = await service.searchGamesByName({
             name: "cyberpunk",
             fields: { platform: "PC" },
           });
 
-          expect(result.success).toBe(true);
-          if ("data" in result) {
-            expect(result.data?.games).toEqual(mockGames);
-            expect(result.data?.count).toBe(2);
-          }
+          expect(result.games).toEqual(mockGames);
+          expect(result.count).toBe(2);
         });
       });
     });

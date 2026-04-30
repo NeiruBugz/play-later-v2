@@ -81,22 +81,19 @@ describe("quickAddToLibraryAction - Integration Tests", () => {
     });
 
     mockGetGameDetails.mockResolvedValue({
-      success: true,
-      data: {
-        game: {
-          id: 12345,
-          name: "Existing Game",
-          slug: "existing-game",
-          summary: "A test game",
-          cover: { image_id: "cover123" },
-          first_release_date: 1609459200,
-          genres: [],
-          platforms: [
-            { id: igdbXboxSeriesId, name: "Xbox Series X|S" },
-            { id: igdbPs5Id, name: "PlayStation 5" },
-            { id: igdbPcId, name: "PC" },
-          ],
-        },
+      game: {
+        id: 12345,
+        name: "Existing Game",
+        slug: "existing-game",
+        summary: "A test game",
+        cover: { image_id: "cover123" },
+        first_release_date: 1609459200,
+        genres: [],
+        platforms: [
+          { id: igdbXboxSeriesId, name: "Xbox Series X|S" },
+          { id: igdbPs5Id, name: "PlayStation 5" },
+          { id: igdbPcId, name: "PC" },
+        ],
       },
     });
 

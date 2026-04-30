@@ -1,4 +1,7 @@
-import { __resetTokenCacheForTests } from "@/shared/lib/igdb";
+import {
+  __resetLimiterForTests,
+  __resetTokenCacheForTests,
+} from "@/shared/lib/igdb";
 
 import { IgdbService } from "./igdb-service";
 
@@ -18,10 +21,11 @@ Object.defineProperty(global, "fetch", {
 describe("IgdbService", () => {
   let service: IgdbService;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+  beforeEach(async () => {
+    vi.resetAllMocks();
     mockFetch.mockReset();
     __resetTokenCacheForTests();
+    await __resetLimiterForTests();
     service = new IgdbService();
   });
 
@@ -57,17 +61,14 @@ describe("IgdbService", () => {
           slug: "minimal-data-game",
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.game.id).toBe(99999);
-          expect(result.data.game.name).toBe("Minimal Data Game");
-          expect(result.data.game.slug).toBe("minimal-data-game");
-          expect(result.data.game.aggregated_rating).toBeUndefined();
-          expect(result.data.game.genres).toBeUndefined();
-          expect(result.data.game.screenshots).toBeUndefined();
-          expect(result.data.game.game_modes).toBeUndefined();
-          expect(result.data.game.websites).toBeUndefined();
-        }
+        expect(result.game.id).toBe(99999);
+        expect(result.game.name).toBe("Minimal Data Game");
+        expect(result.game.slug).toBe("minimal-data-game");
+        expect(result.game.aggregated_rating).toBeUndefined();
+        expect(result.game.genres).toBeUndefined();
+        expect(result.game.screenshots).toBeUndefined();
+        expect(result.game.game_modes).toBeUndefined();
+        expect(result.game.websites).toBeUndefined();
       });
 
       it("should handle game with sparse data (some optional fields)", async () => {
@@ -109,18 +110,15 @@ describe("IgdbService", () => {
           slug: "sparse-data-game",
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.game.id).toBe(88888);
-          expect(result.data.game.genres).toHaveLength(1);
-          expect(result.data.game.platforms).toHaveLength(1);
-          expect(result.data.game.release_dates).toHaveLength(1);
-          expect(result.data.game.release_dates?.[0].platform).toBeUndefined();
-          expect(result.data.game.aggregated_rating).toBeUndefined();
-          expect(result.data.game.screenshots).toBeUndefined();
-          expect(result.data.game.themes).toBeUndefined();
-          expect(result.data.game.involved_companies).toBeUndefined();
-        }
+        expect(result.game.id).toBe(88888);
+        expect(result.game.genres).toHaveLength(1);
+        expect(result.game.platforms).toHaveLength(1);
+        expect(result.game.release_dates).toHaveLength(1);
+        expect(result.game.release_dates?.[0].platform).toBeUndefined();
+        expect(result.game.aggregated_rating).toBeUndefined();
+        expect(result.game.screenshots).toBeUndefined();
+        expect(result.game.themes).toBeUndefined();
+        expect(result.game.involved_companies).toBeUndefined();
       });
 
       it("should handle release dates with missing platform field", async () => {
@@ -162,14 +160,11 @@ describe("IgdbService", () => {
           slug: "incomplete-release-dates",
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.game.release_dates).toHaveLength(2);
-          expect(result.data.game.release_dates?.[0].human).toBe("2024");
-          expect(result.data.game.release_dates?.[0].platform).toBeUndefined();
-          expect(result.data.game.release_dates?.[1].human).toBeUndefined();
-          expect(result.data.game.release_dates?.[1].platform).toBeUndefined();
-        }
+        expect(result.game.release_dates).toHaveLength(2);
+        expect(result.game.release_dates?.[0].human).toBe("2024");
+        expect(result.game.release_dates?.[0].platform).toBeUndefined();
+        expect(result.game.release_dates?.[1].human).toBeUndefined();
+        expect(result.game.release_dates?.[1].platform).toBeUndefined();
       });
 
       it("should handle similar games without cover images", async () => {
@@ -215,21 +210,14 @@ describe("IgdbService", () => {
           slug: "test-game",
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.game.similar_games).toHaveLength(2);
-          expect(result.data.game.similar_games?.[0].cover).toBeUndefined();
-          expect(
-            result.data.game.similar_games?.[0].release_dates
-          ).toBeUndefined();
-          expect(result.data.game.similar_games?.[1].cover).toBeDefined();
-          expect(
-            result.data.game.similar_games?.[1].release_dates
-          ).toBeUndefined();
-          expect(
-            result.data.game.similar_games?.[1].first_release_date
-          ).toBeUndefined();
-        }
+        expect(result.game.similar_games).toHaveLength(2);
+        expect(result.game.similar_games?.[0].cover).toBeUndefined();
+        expect(result.game.similar_games?.[0].release_dates).toBeUndefined();
+        expect(result.game.similar_games?.[1].cover).toBeDefined();
+        expect(result.game.similar_games?.[1].release_dates).toBeUndefined();
+        expect(
+          result.game.similar_games?.[1].first_release_date
+        ).toBeUndefined();
       });
     });
 
@@ -268,12 +256,9 @@ describe("IgdbService", () => {
 
         const result = await service.searchGamesByName({ name: "game" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.games).toHaveLength(2);
-          expect(result.data.games[0].first_release_date).toBeUndefined();
-          expect(result.data.games[1].first_release_date).toBe(1704067200);
-        }
+        expect(result.games).toHaveLength(2);
+        expect(result.games[0].first_release_date).toBeUndefined();
+        expect(result.games[1].first_release_date).toBe(1704067200);
       });
 
       it("should handle search results with missing platforms", async () => {
@@ -303,12 +288,9 @@ describe("IgdbService", () => {
 
         const result = await service.searchGamesByName({ name: "game" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.games).toHaveLength(1);
-          expect(result.data.games[0].platforms).toBeUndefined();
-          expect(result.data.games[0].release_dates).toBeUndefined();
-        }
+        expect(result.games).toHaveLength(1);
+        expect(result.games[0].platforms).toBeUndefined();
+        expect(result.games[0].release_dates).toBeUndefined();
       });
     });
   });

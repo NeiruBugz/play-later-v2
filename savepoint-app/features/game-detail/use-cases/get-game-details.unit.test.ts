@@ -84,17 +84,13 @@ describe("getGameDetails", () => {
   describe("success scenarios", () => {
     it("should return game details without user data when userId is not provided", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: {
-          timesToBeat: {
-            mainStory: 50,
-            completionist: 150,
-          },
+        timesToBeat: {
+          mainStory: 50,
+          completionist: 150,
         },
       });
 
@@ -127,13 +123,11 @@ describe("getGameDetails", () => {
 
     it("should return game details with user library status when userId is provided", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
@@ -202,14 +196,12 @@ describe("getGameDetails", () => {
       };
 
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: gameWithObjectFranchise },
+        game: gameWithObjectFranchise,
       });
 
-      mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: false,
-        error: "No data available",
-      });
+      mockIgdbService.getTimesToBeat.mockRejectedValue(
+        new Error("No data available")
+      );
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
@@ -232,13 +224,11 @@ describe("getGameDetails", () => {
       };
 
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: gameWithDuplicates },
+        game: gameWithDuplicates,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
@@ -261,13 +251,11 @@ describe("getGameDetails", () => {
       };
 
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: gameWithoutFranchise },
+        game: gameWithoutFranchise,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
@@ -284,13 +272,11 @@ describe("getGameDetails", () => {
 
     it("should handle user with no library items or journal entries", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
@@ -323,13 +309,11 @@ describe("getGameDetails", () => {
 
     it("should handle game not in database yet (for authenticated user)", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
@@ -354,13 +338,11 @@ describe("getGameDetails", () => {
 
     it("should continue when populateGameInDatabase fails silently", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockRejectedValue(
@@ -385,13 +367,11 @@ describe("getGameDetails", () => {
       };
 
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: gameWithZeroFranchise },
+        game: gameWithZeroFranchise,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
@@ -409,10 +389,9 @@ describe("getGameDetails", () => {
 
   describe("error scenarios", () => {
     it("should return error when IGDB fetch fails", async () => {
-      mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: false,
-        error: "Game not found in IGDB",
-      });
+      mockIgdbService.getGameDetailsBySlug.mockRejectedValue(
+        new Error("Game not found in IGDB")
+      );
 
       const result = await getGameDetails({
         slug: "nonexistent-game",
@@ -461,13 +440,11 @@ describe("getGameDetails", () => {
 
     it("should handle library service errors gracefully when fetching user data", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
@@ -496,13 +473,11 @@ describe("getGameDetails", () => {
 
     it("should handle journal service errors gracefully", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);

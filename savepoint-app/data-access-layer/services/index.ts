@@ -18,9 +18,10 @@ export {
   type GameDetailsParams,
   type GameDetailsResult,
   type PlatformsResult,
-  type IgdbService as IgdbServiceInterface,
+  type IgdbServiceContract,
 } from "./igdb/types";
 export { IgdbService } from "./igdb/igdb-service";
+export { IgdbRateLimitError } from "./igdb/errors";
 export {
   type SignUpInput,
   type AuthUserData,

@@ -65,17 +65,7 @@ export async function addGameToLibrary(
       const igdbGameResult = await igdbService.getGameDetails({
         gameId: igdbId,
       });
-      if (!igdbGameResult.success) {
-        logger.error(
-          { igdbId, error: igdbGameResult.error },
-          "Failed to fetch game from IGDB"
-        );
-        return {
-          success: false,
-          error: "Failed to fetch game details from IGDB",
-        };
-      }
-      if (!igdbGameResult.data.game) {
+      if (!igdbGameResult.game) {
         logger.error({ igdbId }, "Game not found in IGDB");
         return {
           success: false,
@@ -83,12 +73,12 @@ export async function addGameToLibrary(
         };
       }
       fetchedIgdbPlatforms = (
-        igdbGameResult.data.game as {
+        igdbGameResult.game as {
           platforms?: Array<{ id: number; name?: string }>;
         }
       ).platforms;
       const gameDetailService = new GameDetailService();
-      await gameDetailService.populateGameInDatabase(igdbGameResult.data.game);
+      await gameDetailService.populateGameInDatabase(igdbGameResult.game);
       game = await libraryService.findGameByIgdbId(igdbId);
       if (!game) {
         logger.error({ igdbId }, "Game still not found after population");
@@ -108,9 +98,9 @@ export async function addGameToLibrary(
         const igdbGameResult = await igdbService.getGameDetails({
           gameId: igdbId,
         });
-        if (igdbGameResult.success && igdbGameResult.data.game) {
+        if (igdbGameResult.game) {
           igdbPlatforms = (
-            igdbGameResult.data.game as {
+            igdbGameResult.game as {
               platforms?: Array<{ id: number; name?: string }>;
             }
           ).platforms;

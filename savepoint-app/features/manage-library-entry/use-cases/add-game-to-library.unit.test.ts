@@ -209,10 +209,7 @@ describe("addGameToLibrary", () => {
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(mockGame);
 
-      mockIgdbService.getGameDetails.mockResolvedValue({
-        success: true,
-        data: { game: mockIgdbGame },
-      });
+      mockIgdbService.getGameDetails.mockResolvedValue({ game: mockIgdbGame });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
@@ -353,10 +350,9 @@ describe("addGameToLibrary", () => {
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(null);
 
-      mockIgdbService.getGameDetails.mockResolvedValue({
-        success: false,
-        error: "IGDB API error",
-      });
+      mockIgdbService.getGameDetails.mockRejectedValue(
+        new Error("Failed to fetch game details from IGDB")
+      );
 
       const result = await addGameToLibrary({
         userId: validUserId,
@@ -397,10 +393,7 @@ describe("addGameToLibrary", () => {
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(null);
 
-      mockIgdbService.getGameDetails.mockResolvedValue({
-        success: true,
-        data: { game: mockIgdbGame },
-      });
+      mockIgdbService.getGameDetails.mockResolvedValue({ game: mockIgdbGame });
 
       mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 

@@ -40,13 +40,7 @@ async function getCachedGameBySlug(slug: string) {
   cacheTag("igdb-game-detail");
 
   const igdbService = new IgdbService();
-  const result = await igdbService.getGameDetailsBySlug({ slug });
-
-  if (!result.success) {
-    throw new Error(result.error);
-  }
-
-  return result.data;
+  return igdbService.getGameDetailsBySlug({ slug });
 }
 
 async function getCachedTimesToBeat(igdbId: number) {
@@ -55,13 +49,12 @@ async function getCachedTimesToBeat(igdbId: number) {
   cacheTag("igdb-times-to-beat");
 
   const igdbService = new IgdbService();
-  const result = await igdbService.getTimesToBeat({ igdbId });
-
-  if (!result.success) {
+  try {
+    const result = await igdbService.getTimesToBeat({ igdbId });
+    return result.timesToBeat;
+  } catch {
     return undefined;
   }
-
-  return result.data.timesToBeat;
 }
 
 export const getGameDetails = cache(async function getGameDetails(params: {

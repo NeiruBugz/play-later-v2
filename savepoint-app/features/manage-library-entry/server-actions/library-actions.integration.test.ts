@@ -67,18 +67,15 @@ describe("addToLibraryAction - Integration Tests", () => {
     vi.clearAllMocks();
 
     mockGetGameDetails.mockResolvedValue({
-      success: true,
-      data: {
-        game: {
-          id: 999,
-          name: "Test Game",
-          slug: "test-game",
-          summary: "A test game",
-          cover: { image_id: "test123" },
-          first_release_date: 1609459200,
-          genres: [{ id: 1, name: "Action", slug: "action" }],
-          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
-        },
+      game: {
+        id: 999,
+        name: "Test Game",
+        slug: "test-game",
+        summary: "A test game",
+        cover: { image_id: "test123" },
+        first_release_date: 1609459200,
+        genres: [{ id: 1, name: "Action", slug: "action" }],
+        platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
       },
     });
 
@@ -287,18 +284,15 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   beforeEach(async () => {
     await resetTestDatabase();
     mockGetGameDetails.mockResolvedValue({
-      success: true,
-      data: {
-        game: {
-          id: 999,
-          name: "Test Game",
-          slug: "test-game",
-          summary: "A test game",
-          cover: { image_id: "test123" },
-          first_release_date: 1609459200,
-          genres: [{ id: 1, name: "Action", slug: "action" }],
-          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
-        },
+      game: {
+        id: 999,
+        name: "Test Game",
+        slug: "test-game",
+        summary: "A test game",
+        cover: { image_id: "test123" },
+        first_release_date: 1609459200,
+        genres: [{ id: 1, name: "Action", slug: "action" }],
+        platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
       },
     });
 
