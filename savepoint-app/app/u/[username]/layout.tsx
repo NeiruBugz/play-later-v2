@@ -1,4 +1,4 @@
-import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
+import { ProfileService } from "@/data-access-layer/services";
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
 
@@ -39,12 +39,14 @@ export default async function PublicProfileLayout({
   let avatarUrl: string | null = null;
   if (viewerUserId) {
     const profileService = new ProfileService();
-    const viewerProfile = await profileService.getProfile({
-      userId: viewerUserId,
-    });
-    if (isSuccessResult(viewerProfile)) {
-      displayName = viewerProfile.data.profile.username ?? "User";
-      avatarUrl = viewerProfile.data.profile.image ?? null;
+    try {
+      const viewerProfile = await profileService.getProfile({
+        userId: viewerUserId,
+      });
+      displayName = viewerProfile.username ?? "User";
+      avatarUrl = viewerProfile.image ?? null;
+    } catch {
+      // non-critical — sidebar still renders with defaults
     }
   }
 

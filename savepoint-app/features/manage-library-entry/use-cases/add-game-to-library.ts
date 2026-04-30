@@ -52,17 +52,7 @@ export async function addGameToLibrary(
     } = input;
     logger.info({ userId, igdbId, status }, "Use case: Adding game to library");
     const profileService = new ProfileService();
-    const userResult = await profileService.verifyUserExists({ userId });
-    if (!userResult.success) {
-      logger.error(
-        { userId, error: userResult.error },
-        "Failed to verify user existence"
-      );
-      return {
-        success: false,
-        error: userResult.error,
-      };
-    }
+    await profileService.verifyUserExists({ userId });
     const libraryService = new LibraryService();
     let game = await libraryService.findGameByIgdbId(igdbId);
     let fetchedIgdbPlatforms: Array<{ id: number; name?: string }> | undefined;

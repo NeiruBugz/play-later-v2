@@ -1,4 +1,8 @@
-import { ProfileService, SocialService } from "@/data-access-layer/services";
+import {
+  ProfileService,
+  SocialService,
+  type PaginatedFollowersResult,
+} from "@/data-access-layer/services";
 import type { Metadata } from "next";
 
 import { FollowersList } from "@/features/social";
@@ -12,13 +16,19 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  const result = await profileService.getPublicProfile(username);
 
-  if (!result.success || !result.data.profile) {
+  let profile: Awaited<ReturnType<ProfileService["getPublicProfile"]>>;
+  try {
+    profile = await profileService.getPublicProfile(username);
+  } catch {
     return { title: "Profile Not Found | SavePoint" };
   }
 
-  const displayName = result.data.profile.name ?? result.data.profile.username;
+  if (!profile) {
+    return { title: "Profile Not Found | SavePoint" };
+  }
+
+  const displayName = profile.name ?? profile.username;
 
   return {
     title: `${displayName}'s Followers | SavePoint`,
@@ -33,9 +43,11 @@ export default async function FollowersPage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
-  const profileResult = await profileService.getPublicProfile(username);
 
-  if (!profileResult.success || !profileResult.data.profile) {
+  let profile: Awaited<ReturnType<ProfileService["getPublicProfile"]>>;
+  try {
+    profile = await profileService.getPublicProfile(username);
+  } catch {
     return (
       <div className="py-3xl text-center">
         <h1 className="heading-lg mb-md">Profile not found</h1>
@@ -46,10 +58,23 @@ export default async function FollowersPage({
     );
   }
 
-  const { profile } = profileResult.data;
-  const followersResult = await socialService.getFollowers(profile.id);
+  if (!profile) {
+    return (
+      <div className="py-3xl text-center">
+        <h1 className="heading-lg mb-md">Profile not found</h1>
+        <p className="text-muted-foreground body-md">
+          This profile doesn&apos;t exist or is set to private.
+        </p>
+      </div>
+    );
+  }
 
-  if (!followersResult.success) {
+  const displayName = profile.name ?? profile.username;
+
+  let followers: PaginatedFollowersResult | null = null;
+  try {
+    followers = await socialService.getFollowers(profile.id);
+  } catch {
     return (
       <div className="py-3xl text-center">
         <h1 className="heading-lg mb-md">Something went wrong</h1>
@@ -60,17 +85,12 @@ export default async function FollowersPage({
     );
   }
 
-  const displayName = profile.name ?? profile.username;
-
   return (
     <div className="space-y-lg">
       <h1 className="heading-lg tracking-tight">
         {displayName}&apos;s Followers
       </h1>
-      <FollowersList
-        users={followersResult.data.followers}
-        total={followersResult.data.total}
-      />
+      <FollowersList users={followers.followers} total={followers.total} />
     </div>
   );
 }

@@ -26,14 +26,9 @@ export async function fetchUserActivityAction(
   const viewerUserId = await getOptionalServerUserId();
   const profileService = new ProfileService();
 
-  const profileResult = await profileService.getProfile({
-    userId: input.userId,
-  });
-  if (!profileResult.success) {
-    throw new Error(profileResult.error);
-  }
+  const profile = await profileService.getProfile({ userId: input.userId });
   const isOwner = viewerUserId === input.userId;
-  if (!profileResult.data.profile.isPublicProfile && !isOwner) {
+  if (!profile.isPublicProfile && !isOwner) {
     throw new Error("Profile is private");
   }
 
@@ -45,17 +40,11 @@ export async function fetchUserActivityAction(
       }
     : undefined;
 
-  const result = await service.getUserActivity(
+  const mapped = await service.getUserActivity(
     input.userId,
     serviceCursor,
     input.limit
   );
-
-  if (!result.success) {
-    throw new Error(result.error);
-  }
-
-  const mapped = result.data;
 
   return {
     items: mapped.items.map((item) => ({

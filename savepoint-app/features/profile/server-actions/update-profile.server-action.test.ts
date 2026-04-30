@@ -68,8 +68,8 @@ describe("updateProfile server action", () => {
 
     it("should trim username and update profile successfully", async () => {
       mockUpdateProfile.mockResolvedValue({
-        success: true,
-        data: { username: "newusername", image: null },
+        username: "newusername",
+        image: null,
       });
 
       const result = await updateProfile({
@@ -92,11 +92,8 @@ describe("updateProfile server action", () => {
       });
     });
 
-    it("should handle profile service error", async () => {
-      mockUpdateProfile.mockResolvedValue({
-        success: false,
-        error: "Username already exists",
-      });
+    it("should handle profile service error (thrown error serialized by createServerAction)", async () => {
+      mockUpdateProfile.mockRejectedValue(new Error("Username already exists"));
 
       const result = await updateProfile({
         username: "takenusername",
@@ -134,8 +131,8 @@ describe("updateProfile server action", () => {
 
     it("should handle avatarUrl being omitted", async () => {
       mockUpdateProfile.mockResolvedValue({
-        success: true,
-        data: { username: "newusername", image: null },
+        username: "newusername",
+        image: null,
       });
 
       const result = await updateProfile({
@@ -214,8 +211,8 @@ describe("updateProfile server action", () => {
 
     it("should successfully update profile and revalidate path", async () => {
       mockUpdateProfile.mockResolvedValue({
-        success: true,
-        data: { username: "newusername", image: null },
+        username: "newusername",
+        image: null,
       });
 
       const formData = new FormData();
@@ -241,8 +238,8 @@ describe("updateProfile server action", () => {
 
     it("should handle empty avatarUrl as undefined", async () => {
       mockUpdateProfile.mockResolvedValue({
-        success: true,
-        data: { username: "newusername", image: null },
+        username: "newusername",
+        image: null,
       });
 
       const formData = new FormData();
@@ -260,10 +257,7 @@ describe("updateProfile server action", () => {
     });
 
     it("should return error when profile update fails", async () => {
-      mockUpdateProfile.mockResolvedValue({
-        success: false,
-        error: "Username already exists",
-      });
+      mockUpdateProfile.mockRejectedValue(new Error("Username already exists"));
 
       const formData = new FormData();
       formData.append("username", "takenusername");

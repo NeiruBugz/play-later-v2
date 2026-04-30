@@ -50,17 +50,12 @@ describe("setLibraryRatingAction server action", () => {
     });
 
     mockGetProfile = vi.fn().mockResolvedValue({
-      success: true,
-      data: {
-        profile: {
-          username: "testuser",
-          image: null,
-          email: null,
-          name: null,
-          createdAt: new Date(),
-          isPublicProfile: true,
-        },
-      },
+      username: "testuser",
+      image: null,
+      email: null,
+      name: null,
+      createdAt: new Date(),
+      isPublicProfile: true,
     });
     MockProfileService.mockImplementation(function () {
       return {

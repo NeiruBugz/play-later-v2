@@ -3,8 +3,8 @@ import "server-only";
 import { Prisma, type User } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
+import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 
-import { DuplicateError, NotFoundError } from "../errors";
 import {
   type GetUserBySteamIdInput,
   type GetUserByUsernameInput,
@@ -45,7 +45,9 @@ export async function updateUserSteamData({
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError("User not found while updating Steam data", {
+        userId,
+      });
     }
     throw error;
   }
@@ -119,7 +121,9 @@ export async function updateUserData({
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError("User not found while updating user data", {
+        userId,
+      });
     }
     throw error;
   }
@@ -159,7 +163,9 @@ export async function disconnectSteam({
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError("User not found while disconnecting Steam", {
+        userId,
+      });
     }
     throw error;
   }
@@ -193,7 +199,9 @@ export async function createUserWithCredentials(input: {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
-      throw new DuplicateError("User with this email already exists");
+      throw new ConflictError("User with this email already exists", {
+        email: input.email,
+      });
     }
     throw error;
   }
@@ -251,7 +259,10 @@ export async function updateOnboardingDismissed(userId: string): Promise<void> {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError(
+        "User not found while updating onboarding status",
+        { userId }
+      );
     }
     throw error;
   }
@@ -307,7 +318,9 @@ export async function updateUserProfile(
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2025"
     ) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError("User not found while updating profile", {
+        userId,
+      });
     }
     throw error;
   }

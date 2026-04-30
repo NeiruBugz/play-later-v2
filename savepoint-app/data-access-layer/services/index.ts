@@ -29,23 +29,15 @@ export {
 export { AuthService } from "./auth/auth-service";
 export {
   type GetProfileInput,
-  type GetProfileResult,
   type GetProfileWithStatsInput,
-  type GetProfileWithStatsResult,
   type UpdateProfileInput,
-  type UpdateProfileResult,
   type CheckUsernameAvailabilityInput,
-  type CheckUsernameAvailabilityResult,
   type CompleteSetupInput,
-  type CompleteSetupResult,
   type UpdateAvatarUrlInput,
-  type UpdateAvatarUrlResult,
   type CheckSetupStatusInput,
-  type CheckSetupStatusResult,
   type Profile,
   type ProfileWithStats,
   type PublicProfile,
-  type GetPublicProfileResult,
   type LibraryStats,
   type RecentGame,
 } from "./profile/types";
@@ -73,6 +65,8 @@ export {
   OnboardingService,
   type OnboardingStep,
   type OnboardingProgress,
+  type GetOnboardingProgressInput,
+  type DismissOnboardingInput,
 } from "./onboarding";
 export {
   SteamService,
@@ -97,10 +91,6 @@ export {
 } from "./activity-feed/types";
 export {
   type FollowCounts,
-  type FollowUserResult,
-  type UnfollowUserResult,
-  type IsFollowingResult,
-  type GetFollowCountsResult,
-  type GetFollowersResult,
-  type GetFollowingResult,
+  type PaginatedFollowersResult,
+  type PaginatedFollowingResult,
 } from "./social/types";

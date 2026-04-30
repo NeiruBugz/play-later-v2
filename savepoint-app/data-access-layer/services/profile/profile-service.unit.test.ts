@@ -12,7 +12,6 @@ import {
   basicUserProfileFixture,
   existingUserForRedirectFixture,
   existingUserWithTakenUsernameFixture,
-  libraryStatsErrorFixture,
   libraryStatsSuccessFixture,
   newUserForRedirectFixture,
   userAtExactBoundaryFixture,
@@ -30,8 +29,8 @@ import {
 } from "@/test/fixtures/service/profile";
 
 import { validateUsername } from "@/features/profile/lib";
+import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 
-import { ServiceErrorCode } from "../types";
 import { ProfileService } from "./profile-service";
 
 vi.mock("@/data-access-layer/repository", () => ({
@@ -62,7 +61,7 @@ describe("ProfileService", () => {
   let mockValidateUsername: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     service = new ProfileService();
     mockCountLibraryItemsByUserId = vi.mocked(countLibraryItemsByUserId);
     mockFindLibraryPreview = vi.mocked(findLibraryPreview);
@@ -86,15 +85,9 @@ describe("ProfileService", () => {
     it("should return basic profile data for a user", async () => {
       mockFindUserById.mockResolvedValue(basicUserProfileFixture);
 
-      const result = await service.getProfile({
-        userId: "user-123",
-      });
+      const result = await service.getProfile({ userId: "user-123" });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile).toEqual(basicUserProfileFixture);
-      }
-
+      expect(result).toEqual(basicUserProfileFixture);
       expect(mockFindUserById).toHaveBeenCalledWith("user-123", {
         select: {
           username: true,
@@ -107,34 +100,30 @@ describe("ProfileService", () => {
       });
     });
 
-    it("should return error when user is not found", async () => {
+    it("should throw NotFoundError when user is not found", async () => {
       mockFindUserById.mockResolvedValue(null);
 
-      const result = await service.getProfile({
-        userId: "nonexistent-user",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("User not found");
-        expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-      }
+      await expect(
+        service.getProfile({ userId: "nonexistent-user" })
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("should handle unexpected errors", async () => {
+    it("should include userId in NotFoundError context", async () => {
+      mockFindUserById.mockResolvedValue(null);
+
+      await expect(
+        service.getProfile({ userId: "nonexistent-user" })
+      ).rejects.toMatchObject({ message: "User not found" });
+    });
+
+    it("should propagate unexpected errors", async () => {
       mockFindUserById.mockRejectedValue(
         new Error("Database connection failed")
       );
 
-      const result = await service.getProfile({
-        userId: "user-123",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Database connection failed");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.getProfile({ userId: "user-123" })).rejects.toThrow(
+        "Database connection failed"
+      );
     });
   });
 
@@ -143,27 +132,20 @@ describe("ProfileService", () => {
       mockFindUserById.mockResolvedValue(basicUserProfileFixture);
       mockGetLibraryStatsByUserId.mockResolvedValue(libraryStatsSuccessFixture);
 
-      const result = await service.getProfileWithStats({
-        userId: "user-123",
-      });
+      const result = await service.getProfileWithStats({ userId: "user-123" });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile.username).toBe("testuser");
-        expect(result.data.profile.email).toBe("test@example.com");
-        expect(result.data.profile.stats.statusCounts).toEqual({
-          WISHLIST: 5,
-          SHELF: 3,
-          PLAYING: 2,
-          PLAYED: 10,
-        });
-        expect(result.data.profile.stats.recentGames).toHaveLength(2);
-        expect(result.data.profile.stats.recentGames[0].title).toBe(
-          "Test Game 1"
-        );
-        expect(result.data.profile.ratingHistogram).toHaveLength(10);
-        expect(result.data.profile.ratedCount).toBe(0);
-      }
+      expect(result.username).toBe("testuser");
+      expect(result.email).toBe("test@example.com");
+      expect(result.stats.statusCounts).toEqual({
+        WISHLIST: 5,
+        SHELF: 3,
+        PLAYING: 2,
+        PLAYED: 10,
+      });
+      expect(result.stats.recentGames).toHaveLength(2);
+      expect(result.stats.recentGames[0].title).toBe("Test Game 1");
+      expect(result.ratingHistogram).toHaveLength(10);
+      expect(result.ratedCount).toBe(0);
 
       expect(mockFindUserById).toHaveBeenCalledWith("user-123", {
         select: {
@@ -192,57 +174,38 @@ describe("ProfileService", () => {
 
       const result = await service.getProfileWithStats({ userId: "user-123" });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile.ratingHistogram).toEqual(histogram);
-        expect(result.data.profile.ratedCount).toBe(10);
-      }
+      expect(result.ratingHistogram).toEqual(histogram);
+      expect(result.ratedCount).toBe(10);
     });
 
-    it("should return error when user is not found", async () => {
+    it("should throw NotFoundError when user is not found", async () => {
       mockFindUserById.mockResolvedValue(null);
 
-      const result = await service.getProfileWithStats({
-        userId: "nonexistent-user",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("User not found");
-        expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-      }
+      await expect(
+        service.getProfileWithStats({ userId: "nonexistent-user" })
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("should return error when library stats fetch fails", async () => {
+    it("should propagate errors from library stats fetch", async () => {
       mockFindUserById.mockResolvedValue(basicUserProfileFixture);
-      mockGetLibraryStatsByUserId.mockRejectedValue(libraryStatsErrorFixture);
+      mockGetLibraryStatsByUserId.mockRejectedValue(
+        new Error("Failed to fetch library stats")
+      );
 
-      const result = await service.getProfileWithStats({
-        userId: "user-123",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Failed to fetch library stats");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(
+        service.getProfileWithStats({ userId: "user-123" })
+      ).rejects.toThrow("Failed to fetch library stats");
     });
 
-    it("should handle unexpected errors during stats fetch", async () => {
+    it("should propagate unexpected errors during stats fetch", async () => {
       mockFindUserById.mockResolvedValue(basicUserProfileFixture);
       mockGetLibraryStatsByUserId.mockRejectedValue(
         new Error("Connection timeout")
       );
 
-      const result = await service.getProfileWithStats({
-        userId: "user-123",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Connection timeout");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(
+        service.getProfileWithStats({ userId: "user-123" })
+      ).rejects.toThrow("Connection timeout");
     });
   });
 
@@ -271,19 +234,15 @@ describe("ProfileService", () => {
 
       const result = await service.getPublicProfile("publicuser");
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile).toMatchObject({
-          id: "user-public-123",
-          name: "Public User",
-          username: "publicuser",
-          image: "https://example.com/avatar.jpg",
-          gameCount: 42,
-          libraryPreview: [],
-          isPublicProfile: true,
-        });
-      }
-
+      expect(result).toMatchObject({
+        id: "user-public-123",
+        name: "Public User",
+        username: "publicuser",
+        image: "https://example.com/avatar.jpg",
+        gameCount: 42,
+        libraryPreview: [],
+        isPublicProfile: true,
+      });
       expect(mockFindUserByUsername).toHaveBeenCalledWith("publicuser");
     });
 
@@ -303,78 +262,58 @@ describe("ProfileService", () => {
 
       const result = await service.getPublicProfile("privateuser");
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile).toMatchObject({
-          id: "user-private-456",
-          username: "privateuser",
-          isPublicProfile: false,
-          gameCount: 0,
-          libraryPreview: [],
-        });
-      }
-
+      expect(result).toMatchObject({
+        id: "user-private-456",
+        username: "privateuser",
+        isPublicProfile: false,
+        gameCount: 0,
+        libraryPreview: [],
+      });
       expect(mockCountLibraryItemsByUserId).not.toHaveBeenCalled();
     });
 
-    it("should return null profile for a non-existent username", async () => {
+    it("should return null for a non-existent username", async () => {
       mockFindUserByUsername.mockResolvedValue(null);
 
       const result = await service.getPublicProfile("unknownuser");
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.profile).toBeNull();
-      }
-
+      expect(result).toBeNull();
       expect(mockCountLibraryItemsByUserId).not.toHaveBeenCalled();
     });
 
-    it("should handle unexpected errors", async () => {
+    it("should propagate unexpected errors", async () => {
       mockFindUserByUsername.mockRejectedValue(
         new Error("Database connection failed")
       );
 
-      const result = await service.getPublicProfile("publicuser");
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Database connection failed");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.getPublicProfile("publicuser")).rejects.toThrow(
+        "Database connection failed"
+      );
     });
   });
 
   describe("checkUsernameAvailability", () => {
-    it("should return available: true when username is not taken", async () => {
+    it("should return true when username is not taken", async () => {
       mockFindUserByNormalizedUsername.mockResolvedValue(null);
 
       const result = await service.checkUsernameAvailability({
         username: "newuser123",
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.available).toBe(true);
-      }
-
+      expect(result).toBe(true);
       expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
         "newuser123"
       );
     });
 
-    it("should return available: false when username is already taken", async () => {
+    it("should return false when username is already taken", async () => {
       mockFindUserByNormalizedUsername.mockResolvedValue({ id: "user-123" });
 
       const result = await service.checkUsernameAvailability({
         username: "existinguser",
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.available).toBe(false);
-      }
-
+      expect(result).toBe(false);
       expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
         "existinguser"
       );
@@ -387,30 +326,20 @@ describe("ProfileService", () => {
         username: "ExistingUser",
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.available).toBe(false);
-      }
-
+      expect(result).toBe(false);
       expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
         "existinguser"
       );
     });
 
-    it("should handle database errors gracefully", async () => {
+    it("should propagate database errors", async () => {
       mockFindUserByNormalizedUsername.mockRejectedValue(
         new Error("Database connection failed")
       );
 
-      const result = await service.checkUsernameAvailability({
-        username: "testuser",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Database connection failed");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(
+        service.checkUsernameAvailability({ username: "testuser" })
+      ).rejects.toThrow("Database connection failed");
     });
   });
 
@@ -428,17 +357,10 @@ describe("ProfileService", () => {
           profileSetupCompletedAt: null,
         });
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
+        const result = await service.updateProfile({ userId, username });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.username).toBe("existinguser");
-          expect(result.data.image).toBeNull();
-        }
-
+        expect(result.username).toBe("existinguser");
+        expect(result.image).toBeNull();
         expect(mockValidateUsername).toHaveBeenCalledWith("existinguser");
         expect(mockFindUserById).toHaveBeenCalledWith(userId, {
           select: { username: true },
@@ -469,11 +391,7 @@ describe("ProfileService", () => {
           username: newUsername,
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.username).toBe("newuser123");
-        }
-
+        expect(result.username).toBe("newuser123");
         expect(mockValidateUsername).toHaveBeenCalledWith("newuser123");
         expect(mockFindUserById).toHaveBeenCalledWith(userId, {
           select: { username: true },
@@ -507,12 +425,8 @@ describe("ProfileService", () => {
           avatarUrl,
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.username).toBe("testuser");
-          expect(result.data.image).toBe(avatarUrl);
-        }
-
+        expect(result.username).toBe("testuser");
+        expect(result.image).toBe(avatarUrl);
         expect(mockUpdateUserProfile).toHaveBeenCalledWith(userId, {
           username: "testuser",
           usernameNormalized: "testuser",
@@ -522,181 +436,91 @@ describe("ProfileService", () => {
     });
 
     describe("validation error scenarios", () => {
-      it("should return error when username is too short", async () => {
-        const userId = "user-123";
-        const username = "ab";
-
+      it("should throw when username is too short", async () => {
         mockValidateUsername.mockReturnValue({
           valid: false,
           error: "Username must be 3-25 characters",
         });
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
+        await expect(
+          service.updateProfile({ userId: "user-123", username: "ab" })
+        ).rejects.toThrow("Username must be 3-25 characters");
 
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Username must be 3-25 characters");
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        }
-
-        expect(mockValidateUsername).toHaveBeenCalledWith("ab");
         expect(mockFindUserById).not.toHaveBeenCalled();
         expect(mockUpdateUserProfile).not.toHaveBeenCalled();
       });
 
-      it("should return error when username is too long", async () => {
-        const userId = "user-123";
+      it("should throw when username is too long", async () => {
         const username = "a".repeat(26);
-
         mockValidateUsername.mockReturnValue({
           valid: false,
           error: "Username must be 3-25 characters",
         });
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
+        await expect(
+          service.updateProfile({ userId: "user-123", username })
+        ).rejects.toThrow("Username must be 3-25 characters");
 
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Username must be 3-25 characters");
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        }
-
-        expect(mockValidateUsername).toHaveBeenCalledWith(username);
         expect(mockFindUserById).not.toHaveBeenCalled();
       });
 
-      it("should return error when username contains invalid characters", async () => {
-        const userId = "user-123";
-        const username = "user@name!";
-
+      it("should throw when username contains invalid characters", async () => {
         mockValidateUsername.mockReturnValue({
           valid: false,
           error: "Username can only contain letters, numbers, _, -, and .",
         });
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
+        await expect(
+          service.updateProfile({ userId: "user-123", username: "user@name!" })
+        ).rejects.toThrow(
+          "Username can only contain letters, numbers, _, -, and ."
+        );
 
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe(
-            "Username can only contain letters, numbers, _, -, and ."
-          );
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        }
-
-        expect(mockValidateUsername).toHaveBeenCalledWith("user@name!");
         expect(mockFindUserById).not.toHaveBeenCalled();
       });
 
-      it("should return error when username is reserved", async () => {
-        const userId = "user-123";
-        const username = "admin";
-
+      it("should throw when username is reserved", async () => {
         mockValidateUsername.mockReturnValue({
           valid: false,
           error: "Username is not allowed",
         });
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
+        await expect(
+          service.updateProfile({ userId: "user-123", username: "admin" })
+        ).rejects.toThrow("Username is not allowed");
 
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Username is not allowed");
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        }
-
-        expect(mockValidateUsername).toHaveBeenCalledWith("admin");
-        expect(mockFindUserById).not.toHaveBeenCalled();
-      });
-
-      it("should return error when username contains profanity", async () => {
-        const userId = "user-123";
-        const username = "badword123";
-
-        mockValidateUsername.mockReturnValue({
-          valid: false,
-          error: "Username is not allowed",
-        });
-
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Username is not allowed");
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        }
-
-        expect(mockValidateUsername).toHaveBeenCalledWith("badword123");
         expect(mockFindUserById).not.toHaveBeenCalled();
       });
     });
 
     describe("conflict scenarios", () => {
-      it("should return error when username is already taken (case-insensitive)", async () => {
-        const userId = "user-123";
-        const username = "NewUser";
-
+      it("should throw ConflictError when username is already taken (case-insensitive)", async () => {
         mockValidateUsername.mockReturnValue({ valid: true });
         mockFindUserById.mockResolvedValue({ username: "olduser" });
         mockFindUserByNormalizedUsername.mockResolvedValue(
           existingUserWithTakenUsernameFixture
         );
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
+        await expect(
+          service.updateProfile({ userId: "user-123", username: "NewUser" })
+        ).rejects.toThrow(ConflictError);
 
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Username already exists");
-          expect(result.code).toBe(ServiceErrorCode.CONFLICT);
-        }
-
-        expect(mockValidateUsername).toHaveBeenCalledWith("NewUser");
-        expect(mockFindUserById).toHaveBeenCalledWith(userId, {
-          select: { username: true },
-        });
         expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
           "newuser"
         );
         expect(mockUpdateUserProfile).not.toHaveBeenCalled();
       });
 
-      it("should check availability case-insensitively for changed username", async () => {
-        const userId = "user-123";
-        const username = "NEWUSER";
-
+      it("should throw ConflictError with correct message", async () => {
         mockValidateUsername.mockReturnValue({ valid: true });
         mockFindUserById.mockResolvedValue({ username: "olduser" });
         mockFindUserByNormalizedUsername.mockResolvedValue(
           existingUserWithTakenUsernameFixture
         );
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.CONFLICT);
-        }
+        await expect(
+          service.updateProfile({ userId: "user-123", username: "NEWUSER" })
+        ).rejects.toMatchObject({ message: "Username already exists" });
 
         expect(mockFindUserByNormalizedUsername).toHaveBeenCalledWith(
           "newuser"
@@ -705,37 +529,23 @@ describe("ProfileService", () => {
     });
 
     describe("not found scenarios", () => {
-      it("should return error when user is not found", async () => {
-        const userId = "nonexistent-user";
-        const username = "validuser";
-
+      it("should throw NotFoundError when user is not found", async () => {
         mockValidateUsername.mockReturnValue({ valid: true });
         mockFindUserById.mockResolvedValue(null);
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
+        await expect(
+          service.updateProfile({
+            userId: "nonexistent-user",
+            username: "validuser",
+          })
+        ).rejects.toThrow(NotFoundError);
 
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("User not found");
-          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-        }
-
-        expect(mockValidateUsername).toHaveBeenCalledWith("validuser");
-        expect(mockFindUserById).toHaveBeenCalledWith(userId, {
-          select: { username: true },
-        });
         expect(mockUpdateUserProfile).not.toHaveBeenCalled();
       });
     });
 
     describe("error handling", () => {
-      it("should handle repository errors during update", async () => {
-        const userId = "user-123";
-        const username = "validuser";
-
+      it("should propagate repository errors during update", async () => {
         mockValidateUsername.mockReturnValue({ valid: true });
         mockFindUserById.mockResolvedValue({ username: "olduser" });
         mockFindUserByNormalizedUsername.mockResolvedValue(null);
@@ -743,59 +553,32 @@ describe("ProfileService", () => {
           new Error("Database connection failed")
         );
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Database connection failed");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(
+          service.updateProfile({ userId: "user-123", username: "validuser" })
+        ).rejects.toThrow("Database connection failed");
       });
 
-      it("should handle errors during user lookup", async () => {
-        const userId = "user-123";
-        const username = "validuser";
-
+      it("should propagate errors during user lookup", async () => {
         mockValidateUsername.mockReturnValue({ valid: true });
         mockFindUserById.mockRejectedValue(
           new Error("Database connection timeout")
         );
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Database connection timeout");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(
+          service.updateProfile({ userId: "user-123", username: "validuser" })
+        ).rejects.toThrow("Database connection timeout");
       });
 
-      it("should handle errors during availability check", async () => {
-        const userId = "user-123";
-        const username = "newuser";
-
+      it("should propagate errors during availability check", async () => {
         mockValidateUsername.mockReturnValue({ valid: true });
         mockFindUserById.mockResolvedValue({ username: "olduser" });
         mockFindUserByNormalizedUsername.mockRejectedValue(
           new Error("Database query failed")
         );
 
-        const result = await service.updateProfile({
-          userId,
-          username,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Username already exists");
-          expect(result.code).toBe(ServiceErrorCode.CONFLICT);
-        }
+        await expect(
+          service.updateProfile({ userId: "user-123", username: "newuser" })
+        ).rejects.toThrow("Database query failed");
       });
     });
   });
@@ -817,12 +600,8 @@ describe("ProfileService", () => {
 
         const result = await service.checkSetupStatus({ userId: "user-123" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.needsSetup).toBe(true);
-          expect(result.data.suggestedUsername).toBe("johndoe");
-        }
-
+        expect(result.needsSetup).toBe(true);
+        expect(result.suggestedUsername).toBe("johndoe");
         expect(mockFindUserById).toHaveBeenCalledWith("user-123", {
           select: {
             username: true,
@@ -840,11 +619,8 @@ describe("ProfileService", () => {
 
         const result = await service.checkSetupStatus({ userId: "user-123" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.needsSetup).toBe(true);
-          expect(result.data.suggestedUsername).toBe("johndoe");
-        }
+        expect(result.needsSetup).toBe(true);
+        expect(result.suggestedUsername).toBe("johndoe");
       });
 
       it("should return needsSetup: true for new user without username created within 5 minutes", async () => {
@@ -854,11 +630,8 @@ describe("ProfileService", () => {
 
         const result = await service.checkSetupStatus({ userId: "user-456" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.needsSetup).toBe(true);
-          expect(result.data.suggestedUsername).toBe("janesmith");
-        }
+        expect(result.needsSetup).toBe(true);
+        expect(result.suggestedUsername).toBe("janesmith");
       });
 
       it("should return needsSetup: false for existing user with username created 10 minutes ago", async () => {
@@ -866,11 +639,8 @@ describe("ProfileService", () => {
 
         const result = await service.checkSetupStatus({ userId: "user-789" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.needsSetup).toBe(false);
-          expect(result.data.suggestedUsername).toBeUndefined();
-        }
+        expect(result.needsSetup).toBe(false);
+        expect(result.suggestedUsername).toBeUndefined();
       });
 
       it("should return needsSetup: false for user at exact 5-minute boundary with username", async () => {
@@ -880,11 +650,8 @@ describe("ProfileService", () => {
           userId: "user-boundary",
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.needsSetup).toBe(false);
-          expect(result.data.suggestedUsername).toBeUndefined();
-        }
+        expect(result.needsSetup).toBe(false);
+        expect(result.suggestedUsername).toBeUndefined();
       });
 
       it("should return needsSetup: true for user just under 5-minute boundary", async () => {
@@ -894,11 +661,8 @@ describe("ProfileService", () => {
           userId: "user-recent",
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.needsSetup).toBe(true);
-          expect(result.data.suggestedUsername).toBe("recentuser");
-        }
+        expect(result.needsSetup).toBe(true);
+        expect(result.suggestedUsername).toBe("recentuser");
       });
     });
 
@@ -908,10 +672,7 @@ describe("ProfileService", () => {
 
         const result = await service.checkSetupStatus({ userId: "user-123" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.suggestedUsername).toBe("johndoe");
-        }
+        expect(result.suggestedUsername).toBe("johndoe");
       });
 
       it("should remove special characters from suggested username", async () => {
@@ -921,10 +682,7 @@ describe("ProfileService", () => {
 
         const result = await service.checkSetupStatus({ userId: "user-456" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.suggestedUsername).toBe("johnpaulobrien");
-        }
+        expect(result.suggestedUsername).toBe("johnpaulobrien");
       });
 
       it("should truncate suggested username to 20 characters", async () => {
@@ -932,11 +690,8 @@ describe("ProfileService", () => {
 
         const result = await service.checkSetupStatus({ userId: "user-long" });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.suggestedUsername).toBe("christopheralexander");
-          expect(result.data.suggestedUsername?.length).toBe(20);
-        }
+        expect(result.suggestedUsername).toBe("christopheralexander");
+        expect(result.suggestedUsername?.length).toBe(20);
       });
 
       it("should return undefined suggested username when setup not needed", async () => {
@@ -946,11 +701,8 @@ describe("ProfileService", () => {
           userId: "user-existing",
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.needsSetup).toBe(false);
-          expect(result.data.suggestedUsername).toBeUndefined();
-        }
+        expect(result.needsSetup).toBe(false);
+        expect(result.suggestedUsername).toBeUndefined();
       });
 
       it("should return undefined suggested username when name is null", async () => {
@@ -960,27 +712,18 @@ describe("ProfileService", () => {
           userId: "user-noname",
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.needsSetup).toBe(true);
-          expect(result.data.suggestedUsername).toBeUndefined();
-        }
+        expect(result.needsSetup).toBe(true);
+        expect(result.suggestedUsername).toBeUndefined();
       });
     });
 
     describe("error scenarios", () => {
-      it("should return NOT_FOUND error when user does not exist", async () => {
+      it("should throw NotFoundError when user does not exist", async () => {
         mockFindUserById.mockResolvedValue(null);
 
-        const result = await service.checkSetupStatus({
-          userId: "nonexistent-user",
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("User not found");
-          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-        }
+        await expect(
+          service.checkSetupStatus({ userId: "nonexistent-user" })
+        ).rejects.toThrow(NotFoundError);
 
         expect(mockFindUserById).toHaveBeenCalledWith("nonexistent-user", {
           select: {
@@ -992,18 +735,14 @@ describe("ProfileService", () => {
         });
       });
 
-      it("should handle unexpected database error gracefully", async () => {
+      it("should propagate unexpected database errors", async () => {
         mockFindUserById.mockRejectedValue(
           new Error("Database connection failed")
         );
 
-        const result = await service.checkSetupStatus({ userId: "user-123" });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Database connection failed");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(
+          service.checkSetupStatus({ userId: "user-123" })
+        ).rejects.toThrow("Database connection failed");
       });
     });
   });
@@ -1023,11 +762,8 @@ describe("ProfileService", () => {
 
       const result = await service.getRedirectAfterAuth({ userId: "user-1" });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.redirectTo).toBe("/profile/setup");
-        expect(result.data.isNewUser).toBe(true);
-      }
+      expect(result.redirectTo).toBe("/profile/setup");
+      expect(result.isNewUser).toBe(true);
     });
 
     it("should redirect existing users to /dashboard", async () => {
@@ -1035,11 +771,8 @@ describe("ProfileService", () => {
 
       const result = await service.getRedirectAfterAuth({ userId: "user-2" });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.redirectTo).toBe("/dashboard");
-        expect(result.data.isNewUser).toBe(false);
-      }
+      expect(result.redirectTo).toBe("/dashboard");
+      expect(result.isNewUser).toBe(false);
     });
 
     it("should fail-safe to /dashboard when status check fails", async () => {
@@ -1047,11 +780,8 @@ describe("ProfileService", () => {
 
       const result = await service.getRedirectAfterAuth({ userId: "user-3" });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.redirectTo).toBe("/dashboard");
-        expect(result.data.isNewUser).toBe(false);
-      }
+      expect(result.redirectTo).toBe("/dashboard");
+      expect(result.isNewUser).toBe(false);
     });
   });
 });

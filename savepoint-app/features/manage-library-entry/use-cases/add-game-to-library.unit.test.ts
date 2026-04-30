@@ -117,10 +117,7 @@ describe("addGameToLibrary", () => {
 
   describe("success scenarios", () => {
     it("should successfully add game to library when game exists in database", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(mockGame);
 
@@ -163,10 +160,7 @@ describe("addGameToLibrary", () => {
       const startedAt = new Date("2025-01-01");
       const completedAt = new Date("2025-01-15");
 
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(mockGame);
 
@@ -209,10 +203,7 @@ describe("addGameToLibrary", () => {
     });
 
     it("should fetch and populate game from IGDB when not in database", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId
         .mockResolvedValueOnce(null)
@@ -252,10 +243,7 @@ describe("addGameToLibrary", () => {
         platform: "PlayStation 5",
       };
 
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(mockGame);
 
@@ -286,10 +274,7 @@ describe("addGameToLibrary", () => {
         status: LibraryItemStatus.WISHLIST,
       };
 
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(mockGame);
 
@@ -322,10 +307,7 @@ describe("addGameToLibrary", () => {
         platform: null,
       };
 
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(mockGame);
 
@@ -348,10 +330,9 @@ describe("addGameToLibrary", () => {
 
   describe("error scenarios", () => {
     it("should return error when user verification fails", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: false,
-        error: "User not found",
-      });
+      mockProfileService.verifyUserExists.mockRejectedValue(
+        new Error("User account not found")
+      );
 
       const result = await addGameToLibrary({
         userId: validUserId,
@@ -361,17 +342,14 @@ describe("addGameToLibrary", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("User not found");
+        expect(result.error).toBe("User account not found");
       }
 
       expect(mockLibraryService.findGameByIgdbId).not.toHaveBeenCalled();
     });
 
     it("should return error when IGDB fetch fails", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(null);
 
@@ -393,10 +371,7 @@ describe("addGameToLibrary", () => {
     });
 
     it("should return error when IGDB returns no game data", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(null);
 
@@ -418,10 +393,7 @@ describe("addGameToLibrary", () => {
     });
 
     it("should return error when game not found after population", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(null);
 
@@ -445,10 +417,7 @@ describe("addGameToLibrary", () => {
     });
 
     it("should return error when exact duplicate exists", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(mockGame);
 
@@ -471,10 +440,7 @@ describe("addGameToLibrary", () => {
     });
 
     it("should return error when library item creation fails", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(mockGame);
 
@@ -531,10 +497,7 @@ describe("addGameToLibrary", () => {
     });
 
     it("should propagate error when existing items query throws", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(mockGame);
 
@@ -555,10 +518,7 @@ describe("addGameToLibrary", () => {
     });
 
     it("should return error when IGDB game data structure is missing", async () => {
-      mockProfileService.verifyUserExists.mockResolvedValue({
-        success: true,
-        data: { exists: true },
-      });
+      mockProfileService.verifyUserExists.mockResolvedValue(undefined);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue(null);
 

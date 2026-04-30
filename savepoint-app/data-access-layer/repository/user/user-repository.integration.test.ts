@@ -1,8 +1,13 @@
-import { NotFoundError } from "@/data-access-layer/repository";
 import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 
-import { findUserById, updateUserProfile } from "./user-repository";
+import { ConflictError, NotFoundError } from "@/shared/lib/errors";
+
+import {
+  createUserWithCredentials,
+  findUserById,
+  updateUserProfile,
+} from "./user-repository";
 
 describe("UserRepository - Integration Tests", () => {
   beforeAll(async () => {
@@ -117,6 +122,16 @@ describe("UserRepository - Integration Tests", () => {
           username: "newusername",
         })
       ).rejects.toThrow(NotFoundError);
+    });
+
+    it("should include operation context in NotFoundError", async () => {
+      const nonExistentId = "clxxxxxxxxxxxxxxxxxxxxxxxx";
+
+      await expect(
+        updateUserProfile(nonExistentId, { username: "newusername" })
+      ).rejects.toMatchObject({
+        message: expect.stringContaining("updating profile"),
+      });
     });
 
     it("should succeed with empty data object (no-op update)", async () => {
@@ -290,6 +305,28 @@ describe("UserRepository - Integration Tests", () => {
         username: "user3",
         usernameNormalized: "user3",
         image: "https://example.com/avatar2.jpg",
+      });
+    });
+  });
+
+  describe("createUserWithCredentials", () => {
+    it("should throw ConflictError when email already exists", async () => {
+      const email = "duplicate@example.com";
+      await createUser({ email });
+
+      await expect(
+        createUserWithCredentials({ email, password: "hashedpassword" })
+      ).rejects.toThrow(ConflictError);
+    });
+
+    it("should include email in ConflictError context", async () => {
+      const email = "duplicate@example.com";
+      await createUser({ email });
+
+      await expect(
+        createUserWithCredentials({ email, password: "hashedpassword" })
+      ).rejects.toMatchObject({
+        message: expect.stringContaining("email already exists"),
       });
     });
   });

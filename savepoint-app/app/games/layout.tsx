@@ -1,4 +1,4 @@
-import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
+import { ProfileService } from "@/data-access-layer/services";
 import type { PropsWithChildren } from "react";
 
 import { Header } from "@/widgets/header";
@@ -21,11 +21,12 @@ export default async function GameDetailsLayout({
 
   if (userId) {
     const profileService = new ProfileService();
-    const profileResult = await profileService.getProfile({ userId });
-
-    if (isSuccessResult(profileResult)) {
-      displayName = profileResult.data.profile.username ?? "User";
-      avatarUrl = profileResult.data.profile.image ?? null;
+    try {
+      const profile = await profileService.getProfile({ userId });
+      displayName = profile.username ?? "User";
+      avatarUrl = profile.image ?? null;
+    } catch {
+      // non-critical — sidebar still renders with defaults
     }
   }
 

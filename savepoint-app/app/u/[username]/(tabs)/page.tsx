@@ -13,13 +13,19 @@ export async function generateMetadata({
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;
-  const result = await profileService.getPublicProfile(username);
 
-  if (!result.success || !result.data.profile) {
+  let profile: Awaited<ReturnType<ProfileService["getPublicProfile"]>>;
+  try {
+    profile = await profileService.getPublicProfile(username);
+  } catch {
     return { title: "Profile Not Found | SavePoint" };
   }
 
-  const displayName = result.data.profile.name ?? result.data.profile.username;
+  if (!profile) {
+    return { title: "Profile Not Found | SavePoint" };
+  }
+
+  const displayName = profile.name ?? profile.username;
 
   return {
     title: `${displayName}'s Profile | SavePoint`,

@@ -37,20 +37,10 @@ export const uploadAvatar = createServerAction<
     }
     const profileService = new ProfileService();
     logger.debug({ userId }, "Saving avatar URL to profile");
-    const updateResult = await profileService.updateAvatarUrl({
+    await profileService.updateAvatarUrl({
       userId: userId!,
       avatarUrl: uploadResult.data.url,
     });
-    if (!updateResult.success) {
-      logger.error(
-        { userId, reason: "failed_to_save_avatar_url" },
-        "Saving avatar URL failed"
-      );
-      return {
-        success: false,
-        error: "Failed to save avatar URL",
-      };
-    }
     logger.info({ userId }, "Avatar uploaded and profile updated");
     return {
       success: true,

@@ -1,4 +1,4 @@
-import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
+import { ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -24,9 +24,11 @@ export const metadata: Metadata = {
 export default async function SettingsProfilePage() {
   const userId = await requireServerUserId();
   const profileService = new ProfileService();
-  const profileResult = await profileService.getProfile({ userId });
 
-  if (!isSuccessResult(profileResult)) {
+  let profile: Awaited<ReturnType<ProfileService["getProfile"]>>;
+  try {
+    profile = await profileService.getProfile({ userId });
+  } catch {
     redirect("/login");
   }
 
@@ -36,8 +38,8 @@ export default async function SettingsProfilePage() {
 
       <div className="gap-2xl flex flex-col">
         <ProfileSettingsForm
-          currentUsername={profileResult.data.profile.username}
-          currentAvatar={profileResult.data.profile.image}
+          currentUsername={profile.username}
+          currentAvatar={profile.image}
         />
 
         <Card className="hover:none w-full">
@@ -49,18 +51,17 @@ export default async function SettingsProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <ProfileVisibilityToggle
-              isPublicProfile={profileResult.data.profile.isPublicProfile}
-              username={profileResult.data.profile.username ?? ""}
+              isPublicProfile={profile.isPublicProfile}
+              username={profile.username ?? ""}
             />
-            {profileResult.data.profile.isPublicProfile &&
-              profileResult.data.profile.username && (
-                <Link
-                  href={`/u/${profileResult.data.profile.username}`}
-                  className="text-primary hover:text-primary/80 inline-block text-sm font-medium underline-offset-4 hover:underline"
-                >
-                  Preview public profile →
-                </Link>
-              )}
+            {profile.isPublicProfile && profile.username && (
+              <Link
+                href={`/u/${profile.username}`}
+                className="text-primary hover:text-primary/80 inline-block text-sm font-medium underline-offset-4 hover:underline"
+              >
+                Preview public profile →
+              </Link>
+            )}
           </CardContent>
         </Card>
       </div>

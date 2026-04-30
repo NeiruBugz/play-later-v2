@@ -35,26 +35,13 @@ export async function checkUsernameAvailability(data: { username: string }) {
     }
     const profileService = new ProfileService();
     logger.info({ username }, "Checking username availability");
-    const result = await profileService.checkUsernameAvailability({
+    const available = await profileService.checkUsernameAvailability({
       username,
     });
-    if (!result.success) {
-      logger.error(
-        { username, reason: result.error },
-        "Check availability failed"
-      );
-      return {
-        success: false as const,
-        error: result.error,
-      };
-    }
-    logger.info(
-      { username, available: result.data.available },
-      "Username availability checked"
-    );
+    logger.info({ username, available }, "Username availability checked");
     return {
       success: true as const,
-      available: result.data.available,
+      available,
     };
   } catch (err) {
     logger.error({ err }, "Unexpected error in checkUsernameAvailability");

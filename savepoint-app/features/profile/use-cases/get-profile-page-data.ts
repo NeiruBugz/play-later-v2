@@ -86,42 +86,37 @@ async function getProfilePageDataImpl(
     } | null = null;
 
     if (viewerId) {
-      const statsResult = await profileService.getProfileWithStats({
-        userId: viewerId,
-      });
-      if (statsResult && !statsResult.success) {
-        return { success: false, error: statsResult.error };
-      }
-      const statsProfile = statsResult?.success
-        ? statsResult.data.profile
-        : null;
+      try {
+        const statsProfile = await profileService.getProfileWithStats({
+          userId: viewerId,
+        });
 
-      if (statsProfile && statsProfile.username === username) {
-        ownerProfileRaw = {
-          id: viewerId,
-          username: statsProfile.username,
-          name: statsProfile.name,
-          image: statsProfile.image,
-          createdAt: statsProfile.createdAt,
-          isPublicProfile: statsProfile.isPublicProfile,
-          stats: {
-            ...statsProfile.stats,
-            ratingHistogram: statsProfile.ratingHistogram,
-            ratedCount: statsProfile.ratedCount,
-          },
-          gameCount: statsProfile.gameCount,
-          libraryPreview: statsProfile.libraryPreview,
-        };
+        if (statsProfile.username === username) {
+          ownerProfileRaw = {
+            id: viewerId,
+            username: statsProfile.username,
+            name: statsProfile.name,
+            image: statsProfile.image,
+            createdAt: statsProfile.createdAt,
+            isPublicProfile: statsProfile.isPublicProfile,
+            stats: {
+              ...statsProfile.stats,
+              ratingHistogram: statsProfile.ratingHistogram,
+              ratedCount: statsProfile.ratedCount,
+            },
+            gameCount: statsProfile.gameCount,
+            libraryPreview: statsProfile.libraryPreview,
+          };
+        }
+      } catch {
+        // Viewer profile fetch failed — fall through to public profile path
       }
     }
 
     if (ownerProfileRaw) {
-      const followCountsResult = await socialService.getFollowCounts(
+      const followCounts = await socialService.getFollowCounts(
         ownerProfileRaw.id
       );
-      if (!followCountsResult.success) {
-        return { success: false, error: followCountsResult.error };
-      }
 
       return {
         success: true,
@@ -137,7 +132,7 @@ async function getProfilePageDataImpl(
           stats: ownerProfileRaw.stats,
           libraryPreview: ownerProfileRaw.libraryPreview,
           gameCount: ownerProfileRaw.gameCount,
-          socialCounts: followCountsResult.data,
+          socialCounts: followCounts,
           viewer: {
             isOwner: true,
             isAuthenticated: true,
@@ -147,24 +142,16 @@ async function getProfilePageDataImpl(
       };
     }
 
-    const publicResult = await profileService.getPublicProfile(username);
-    if (!publicResult.success) {
-      return { success: false, error: publicResult.error };
-    }
-    if (!publicResult.data.profile) {
+    const pub = await profileService.getPublicProfile(username);
+    if (!pub) {
       return { success: false, error: "Profile not found" };
     }
-
-    const pub = publicResult.data.profile;
 
     const isAuthenticated = viewerId !== undefined && viewerId !== null;
     const isOwner = false;
     const isPrivate = pub.isPublicProfile === false && !isOwner;
 
-    const followCountsResult = await socialService.getFollowCounts(pub.id);
-    if (!followCountsResult.success) {
-      return { success: false, error: followCountsResult.error };
-    }
+    const followCounts = await socialService.getFollowCounts(pub.id);
 
     const viewer: Viewer = {
       isOwner,
@@ -172,10 +159,8 @@ async function getProfilePageDataImpl(
     };
 
     if (isAuthenticated && !isOwner && !isPrivate) {
-      const followResult = await socialService.isFollowing(viewerId!, pub.id);
-      if (followResult.success) {
-        viewer.isFollowing = followResult.data;
-      }
+      const following = await socialService.isFollowing(viewerId!, pub.id);
+      viewer.isFollowing = following;
     }
 
     const data: ProfilePageData = {
@@ -188,7 +173,7 @@ async function getProfilePageDataImpl(
         isPublicProfile: pub.isPublicProfile,
       },
       gameCount: isPrivate ? 0 : pub.gameCount,
-      socialCounts: followCountsResult.data,
+      socialCounts: followCounts,
       viewer,
       isPrivate,
     };
@@ -196,16 +181,13 @@ async function getProfilePageDataImpl(
     if (!isPrivate) {
       data.libraryPreview = pub.libraryPreview;
 
-      const visitorStatsResult = await profileService.getProfileWithStats({
+      const visitorStats = await profileService.getProfileWithStats({
         userId: pub.id,
       });
-      if (!visitorStatsResult.success) {
-        return { success: false, error: visitorStatsResult.error };
-      }
       data.stats = {
-        ...visitorStatsResult.data.profile.stats,
-        ratingHistogram: visitorStatsResult.data.profile.ratingHistogram,
-        ratedCount: visitorStatsResult.data.profile.ratedCount,
+        ...visitorStats.stats,
+        ratingHistogram: visitorStats.ratingHistogram,
+        ratedCount: visitorStats.ratedCount,
       };
     }
 
