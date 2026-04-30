@@ -1,13 +1,4 @@
 export {
-  NotFoundError,
-  DuplicateError,
-  RepositoryErrorCode,
-  repositorySuccess,
-  repositoryError,
-  type RepositoryError,
-  type RepositoryResult,
-} from "./errors";
-export {
   createLibraryItem,
   deleteLibraryItem,
   findLibraryItemById,

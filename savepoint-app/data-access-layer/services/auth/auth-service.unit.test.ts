@@ -1,6 +1,5 @@
 import {
   createUserWithCredentials,
-  DuplicateError,
   findUserByEmail,
 } from "@/data-access-layer/repository";
 import {
@@ -109,7 +108,7 @@ describe("AuthService", () => {
       mockHashPassword.mockResolvedValue(givenHashedPassword);
 
       mockCreateUserWithCredentials.mockRejectedValue(
-        new DuplicateError("Unique constraint failed on the fields: (`email`)")
+        new Error("Unique constraint failed on the fields: (`email`)")
       );
 
       await expect(
