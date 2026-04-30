@@ -18,21 +18,20 @@ export async function GettingStartedChecklist({
   });
 
   const service = new OnboardingService();
-  const result = await service.getProgress({ userId });
 
-  if (!result.success) {
-    logger.error(
-      { error: result.error, userId },
-      "Failed to get onboarding progress"
-    );
+  let progress;
+  try {
+    progress = await service.getProgress({ userId });
+  } catch (error) {
+    logger.error({ error, userId }, "Failed to get onboarding progress");
     return null;
   }
 
-  const { isDismissed, isComplete } = result.data;
+  const { isDismissed, isComplete } = progress;
 
   if (isDismissed || isComplete) {
     return null;
   }
 
-  return <GettingStarted progress={result.data} />;
+  return <GettingStarted progress={progress} />;
 }

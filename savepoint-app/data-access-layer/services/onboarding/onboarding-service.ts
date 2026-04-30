@@ -9,12 +9,11 @@ import {
 } from "@/data-access-layer/repository";
 import { LibraryItemStatus } from "@prisma/client";
 
-import { serviceError, ServiceErrorCode, serviceSuccess } from "../types";
+import { NotFoundError } from "@/shared/lib/errors";
+
 import type {
   DismissOnboardingInput,
-  DismissOnboardingResult,
   GetOnboardingProgressInput,
-  GetOnboardingProgressResult,
   OnboardingProgress,
   OnboardingStep,
 } from "./types";
@@ -60,41 +59,23 @@ const ONBOARDING_STEPS = [
 export class OnboardingService {
   async getProgress(
     input: GetOnboardingProgressInput
-  ): Promise<GetOnboardingProgressResult> {
+  ): Promise<OnboardingProgress> {
     const { userId } = input;
 
-    let onboardingStatus;
-    try {
-      onboardingStatus = await getOnboardingStatus(userId);
-    } catch {
-      return serviceError(
-        "Failed to get onboarding status",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
-    }
+    const onboardingStatus = await getOnboardingStatus(userId);
 
     if (!onboardingStatus) {
-      return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
+      throw new NotFoundError("User not found", { userId });
     }
 
     const isDismissed = onboardingStatus.onboardingDismissedAt !== null;
     const isProfileSetup = onboardingStatus.profileSetupCompletedAt !== null;
 
-    let libraryCount: number;
-    let hasPlaying: boolean;
-    let journalCount: number;
-    try {
-      [libraryCount, hasPlaying, journalCount] = await Promise.all([
-        countLibraryItemsByUserId(userId),
-        hasLibraryItemWithStatus(userId, LibraryItemStatus.PLAYING),
-        countJournalEntriesByUserId(userId),
-      ]);
-    } catch {
-      return serviceError(
-        "Failed to get onboarding progress",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
-    }
+    const [libraryCount, hasPlaying, journalCount] = await Promise.all([
+      countLibraryItemsByUserId(userId),
+      hasLibraryItemWithStatus(userId, LibraryItemStatus.PLAYING),
+      countJournalEntriesByUserId(userId),
+    ]);
 
     const completionStatus: Record<string, boolean> = {
       "create-account": true,
@@ -113,31 +94,17 @@ export class OnboardingService {
     const totalCount = steps.length;
     const isComplete = completedCount === totalCount;
 
-    const progress: OnboardingProgress = {
+    return {
       steps,
       completedCount,
       totalCount,
       isDismissed: isDismissed || isComplete,
       isComplete,
     };
-
-    return serviceSuccess(progress);
   }
 
-  async dismiss(
-    input: DismissOnboardingInput
-  ): Promise<DismissOnboardingResult> {
+  async dismiss(input: DismissOnboardingInput): Promise<void> {
     const { userId } = input;
-
-    try {
-      await updateOnboardingDismissed(userId);
-    } catch {
-      return serviceError(
-        "Failed to dismiss onboarding",
-        ServiceErrorCode.INTERNAL_ERROR
-      );
-    }
-
-    return serviceSuccess(undefined);
+    await updateOnboardingDismissed(userId);
   }
 }
