@@ -75,11 +75,8 @@ describe("GameDetailService Integration Tests", () => {
 
     const result = await gameDetailService.populateGameInDatabase(igdbGame);
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBeDefined();
-      expect(result.data?.title).toBe("Service Test Game");
-    }
+    expect(result).toBeDefined();
+    expect(result?.title).toBe("Service Test Game");
 
     const game = await waitForGameInDatabase(54321);
 
@@ -116,16 +113,13 @@ describe("GameDetailService Integration Tests", () => {
 
     const firstResult =
       await gameDetailService.populateGameInDatabase(igdbGame);
-    expect(firstResult.success).toBe(true);
+    expect(firstResult).toBeDefined();
 
     await waitForGameInDatabase(11111);
 
     const secondResult =
       await gameDetailService.populateGameInDatabase(igdbGame);
-    expect(secondResult.success).toBe(true);
-    if (secondResult.success) {
-      expect(secondResult.data).toBeNull();
-    }
+    expect(secondResult).toBeNull();
 
     const prisma = getTestDatabase();
     const count = await prisma.game.count({ where: { igdbId: 11111 } });
@@ -159,11 +153,8 @@ describe("GameDetailService Integration Tests", () => {
 
     const result = await gameDetailService.populateGameInDatabase(igdbGame);
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBeDefined();
-      expect(result.data?.title).toBe("Game Without Metadata");
-    }
+    expect(result).toBeDefined();
+    expect(result?.title).toBe("Game Without Metadata");
 
     const game = await waitForGameInDatabase(11111);
 
@@ -184,12 +175,9 @@ describe("GameDetailService Integration Tests", () => {
 
     const result = await gameDetailService.populateGameInDatabase(igdbGame);
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBeDefined();
-      expect(result.data?.title).toBe("Minimal Data Game");
-      expect(result.data?.slug).toBe("minimal-data-game");
-    }
+    expect(result).toBeDefined();
+    expect(result?.title).toBe("Minimal Data Game");
+    expect(result?.slug).toBe("minimal-data-game");
 
     const game = await waitForGameInDatabase(99999);
 
@@ -214,11 +202,8 @@ describe("GameDetailService Integration Tests", () => {
 
     const result = await gameDetailService.populateGameInDatabase(igdbGame);
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBeDefined();
-      expect(result.data?.title).toBe("Sparse Data Game");
-    }
+    expect(result).toBeDefined();
+    expect(result?.title).toBe("Sparse Data Game");
 
     const game = await waitForGameInDatabase(88888);
 
@@ -240,11 +225,8 @@ describe("GameDetailService Integration Tests", () => {
 
     const result = await gameDetailService.populateGameInDatabase(igdbGame);
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBeDefined();
-      expect(result.data?.title).toBe("No Rating Game");
-    }
+    expect(result).toBeDefined();
+    expect(result?.title).toBe("No Rating Game");
 
     const game = await waitForGameInDatabase(77777);
 

@@ -64,9 +64,9 @@ export async function addGameToLibrary(
       };
     }
     const libraryService = new LibraryService();
-    let gameResult = await libraryService.findGameByIgdbId(igdbId);
+    let game = await libraryService.findGameByIgdbId(igdbId);
     let fetchedIgdbPlatforms: Array<{ id: number; name?: string }> | undefined;
-    if (!gameResult.success || !gameResult.data) {
+    if (!game) {
       logger.info(
         { igdbId },
         "Game not in database, fetching from IGDB and populating"
@@ -98,21 +98,9 @@ export async function addGameToLibrary(
         }
       ).platforms;
       const gameDetailService = new GameDetailService();
-      const populateResult = await gameDetailService.populateGameInDatabase(
-        igdbGameResult.data.game
-      );
-      if (!populateResult.success) {
-        logger.error(
-          { igdbId, error: populateResult.error },
-          "Failed to populate game in database"
-        );
-        return {
-          success: false,
-          error: "Failed to save game to database",
-        };
-      }
-      gameResult = await libraryService.findGameByIgdbId(igdbId);
-      if (!gameResult.success || !gameResult.data) {
+      await gameDetailService.populateGameInDatabase(igdbGameResult.data.game);
+      game = await libraryService.findGameByIgdbId(igdbId);
+      if (!game) {
         logger.error({ igdbId }, "Game still not found after population");
         return {
           success: false,
@@ -139,10 +127,7 @@ export async function addGameToLibrary(
         }
       }
 
-      const knownPlatformsResult = await libraryService.listPlatforms();
-      const knownPlatforms = knownPlatformsResult.success
-        ? knownPlatformsResult.data
-        : [];
+      const knownPlatforms = await libraryService.listPlatforms();
       const detected = resolvePrimaryPlatform({
         igdbPlatforms: igdbPlatforms ?? [],
         knownPlatforms,
@@ -159,50 +144,47 @@ export async function addGameToLibrary(
       );
     }
 
-    const existingItemsResult =
-      await libraryService.findAllLibraryItemsByGameId({
-        userId,
-        gameId: gameResult.data.id,
-      });
-    if (existingItemsResult.success && existingItemsResult.data) {
-      const exactDuplicate = existingItemsResult.data.find(
-        (item) =>
-          item.status === status &&
-          (item.platform === resolvedPlatform ||
-            (item.platform === null && resolvedPlatform === undefined))
-      );
-      if (exactDuplicate) {
-        if (autoDetectPlatform === true) {
-          logger.info(
-            { userId, gameId: gameResult.data.id, status },
-            "Quick add: returning existing library item (idempotent)"
-          );
-          return {
-            success: true,
-            data: {
-              libraryItem: exactDuplicate,
-              gameSlug: gameResult.data.slug,
-            },
-          };
-        }
-        logger.warn(
-          {
-            userId,
-            gameId: gameResult.data.id,
-            status,
-            platform: resolvedPlatform,
-          },
-          "Attempted to add duplicate game to library"
+    const existingItems = await libraryService.findAllLibraryItemsByGameId({
+      userId,
+      gameId: game.id,
+    });
+    const exactDuplicate = existingItems.find(
+      (item) =>
+        item.status === status &&
+        (item.platform === resolvedPlatform ||
+          (item.platform === null && resolvedPlatform === undefined))
+    );
+    if (exactDuplicate) {
+      if (autoDetectPlatform === true) {
+        logger.info(
+          { userId, gameId: game.id, status },
+          "Quick add: returning existing library item (idempotent)"
         );
         return {
-          success: false,
-          error: "This game is already in your library",
+          success: true,
+          data: {
+            libraryItem: exactDuplicate,
+            gameSlug: game.slug,
+          },
         };
       }
+      logger.warn(
+        {
+          userId,
+          gameId: game.id,
+          status,
+          platform: resolvedPlatform,
+        },
+        "Attempted to add duplicate game to library"
+      );
+      return {
+        success: false,
+        error: "This game is already in your library",
+      };
     }
-    const libraryItemResult = await libraryService.createLibraryItem({
+    const libraryItem = await libraryService.createLibraryItem({
       userId,
-      gameId: gameResult.data.id,
+      gameId: game.id,
       libraryItem: {
         status,
         acquisitionType: acquisitionType ?? AcquisitionType.DIGITAL,
@@ -211,25 +193,11 @@ export async function addGameToLibrary(
         completedAt: completedAt ?? undefined,
       },
     });
-    if (!libraryItemResult.success) {
-      logger.error(
-        {
-          error: libraryItemResult.error,
-          userId,
-          gameId: gameResult.data.id,
-        },
-        "Failed to create library item"
-      );
-      return {
-        success: false,
-        error: libraryItemResult.error,
-      };
-    }
     logger.info(
       {
         userId,
-        gameId: gameResult.data.id,
-        libraryItemId: libraryItemResult.data.id,
+        gameId: game.id,
+        libraryItemId: libraryItem.id,
         status,
       },
       "Game added to library successfully"
@@ -237,8 +205,8 @@ export async function addGameToLibrary(
     return {
       success: true,
       data: {
-        libraryItem: libraryItemResult.data,
-        gameSlug: gameResult.data.slug,
+        libraryItem,
+        gameSlug: game.slug,
       },
     };
   } catch (error) {

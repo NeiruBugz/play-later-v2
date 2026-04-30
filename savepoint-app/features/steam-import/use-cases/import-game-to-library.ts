@@ -201,18 +201,7 @@ export async function importGameToLibrary(
     );
   }
 
-  const gameResult = await getGameByIgdbId(igdbId);
-  if (!gameResult.success) {
-    logger.error(
-      { error: gameResult.error, igdbId },
-      "Failed to check if game exists in database"
-    );
-    return {
-      success: false,
-      error: "Failed to check game existence",
-    };
-  }
-  const game = gameResult.data;
+  const game = await getGameByIgdbId(igdbId);
 
   let gameId: string;
   let gameSlug: string;
@@ -256,22 +245,11 @@ export async function importGameToLibrary(
     }
 
     const gameDetailService = new GameDetailService();
-    const populateResult = await gameDetailService.populateGameInDatabase(
+    const populatedGame = await gameDetailService.populateGameInDatabase(
       igdbGameData.game
     );
 
-    if (!populateResult.success) {
-      logger.error(
-        { error: populateResult.error, igdbId },
-        "Failed to populate game in database"
-      );
-      return {
-        success: false,
-        error: "Failed to create game record",
-      };
-    }
-
-    if (!populateResult.data) {
+    if (!populatedGame) {
       logger.error({ igdbId }, "Game population returned no data");
       return {
         success: false,
@@ -279,8 +257,8 @@ export async function importGameToLibrary(
       };
     }
 
-    gameId = populateResult.data.id;
-    gameSlug = populateResult.data.slug;
+    gameId = populatedGame.id;
+    gameSlug = populatedGame.slug;
     logger.info(
       { gameId, igdbId, slug: gameSlug },
       "Successfully created game in database"
@@ -288,25 +266,14 @@ export async function importGameToLibrary(
   }
 
   const libraryService = new LibraryService();
-  const existingItemsResult = await libraryService.findAllLibraryItemsByGameId({
+  const existingItems = await libraryService.findAllLibraryItemsByGameId({
     userId,
     gameId,
   });
 
-  if (!existingItemsResult.success) {
-    logger.error(
-      { error: existingItemsResult.error, userId, gameId },
-      "Failed to check library"
-    );
-    return {
-      success: false,
-      error: "Failed to check library",
-    };
-  }
-
-  if (existingItemsResult.data && existingItemsResult.data.length > 0) {
+  if (existingItems.length > 0) {
     logger.warn(
-      { userId, gameId, existingCount: existingItemsResult.data.length },
+      { userId, gameId, existingCount: existingItems.length },
       "Game already in user library (marking as MATCHED)"
     );
 
@@ -328,7 +295,7 @@ export async function importGameToLibrary(
     };
   }
 
-  const createResult = await libraryService.createLibraryItem({
+  const libraryItem = await libraryService.createLibraryItem({
     userId,
     gameId,
     libraryItem: {
@@ -337,17 +304,6 @@ export async function importGameToLibrary(
       platform: "PC (Microsoft Windows)",
     },
   });
-
-  if (!createResult.success) {
-    logger.error(
-      { error: createResult.error, userId, gameId },
-      "Failed to create library item"
-    );
-    return {
-      success: false,
-      error: createResult.error || "Failed to create library item",
-    };
-  }
 
   const updateStatusResult = await importedGameService.updateStatus({
     id: importedGameId,
@@ -365,7 +321,7 @@ export async function importGameToLibrary(
     {
       importedGameId,
       gameId,
-      libraryItemId: createResult.data.id,
+      libraryItemId: libraryItem.id,
       gameSlug,
     },
     "Successfully imported game to library"
@@ -374,7 +330,7 @@ export async function importGameToLibrary(
   return {
     success: true,
     data: {
-      libraryItem: createResult.data,
+      libraryItem,
       gameSlug,
     },
   };

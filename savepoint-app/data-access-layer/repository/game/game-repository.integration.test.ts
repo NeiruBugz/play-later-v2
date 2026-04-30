@@ -1,5 +1,6 @@
-import { DuplicateError } from "@/data-access-layer/repository";
 import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
+
+import { ConflictError } from "@/shared/lib/errors";
 
 import { upsertGenre } from "../genre/genre-repository";
 import { upsertPlatform } from "../platform/platform-repository";
@@ -137,7 +138,7 @@ describe("Game Repository Integration Tests", () => {
         genreIds: [testGenreId],
         platformIds: [testPlatformId],
       })
-    ).rejects.toThrow(DuplicateError);
+    ).rejects.toThrow(ConflictError);
   });
 
   it("should return null when game slug is not found", async () => {

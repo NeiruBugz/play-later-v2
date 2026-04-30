@@ -61,10 +61,7 @@ export {
   LibrarySortBySchema,
   LibrarySortOrderSchema,
 } from "./library/schemas";
-export {
-  type FindJournalEntriesResult,
-  type JournalService as IJournalService,
-} from "./journal/types";
+export { type FindJournalEntriesResult } from "./journal/types";
 export { JournalService } from "./journal/journal-service";
 export {
   GameDetailService,

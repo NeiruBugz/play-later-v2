@@ -7,32 +7,10 @@ export default async function JournalPage() {
   const userId = await requireServerUserId();
 
   const journalService = new JournalService();
-  const entriesResult = await journalService.findJournalEntriesByUserId({
+  const entries = await journalService.findJournalEntriesByUserId({
     userId,
     limit: 20,
   });
-
-  if (!entriesResult.success) {
-    return (
-      <div className="py-2xl container mx-auto">
-        <div className="space-y-xl">
-          <header>
-            <h1 className="heading-lg tracking-tight">Journal</h1>
-            <p className="text-muted-foreground text-sm">
-              Document your gaming journey
-            </p>
-          </header>
-          <div className="space-y-lg border-border/50 bg-muted/10 p-3xl flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed text-center">
-            <p className="body-sm text-muted-foreground">
-              Failed to load journal entries. Please try again later.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const entries = entriesResult.data;
 
   const gameIds =
     entries.length > 0
@@ -45,8 +23,10 @@ export default async function JournalPage() {
         ]
       : [];
 
-  const gamesResult = gameIds.length > 0 ? await getGamesByIds(gameIds) : null;
-  const games = gamesResult?.success ? gamesResult.data : [];
+  const games =
+    gameIds.length > 0
+      ? await getGamesByIds(gameIds)
+      : ([] as Awaited<ReturnType<typeof getGamesByIds>>);
   const gameRecord: Record<
     string,
     { id: string; title: string; slug: string; coverImage: string | null }

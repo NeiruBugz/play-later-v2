@@ -1,6 +1,6 @@
-import { ServiceErrorCode } from "@/data-access-layer/services/types";
 import type { Game } from "@prisma/client";
 
+import { ConflictError } from "@/shared/lib/errors";
 import type { FullGameInfoResponse } from "@/shared/types";
 
 import * as repository from "../../repository/game/game-repository";
@@ -22,7 +22,7 @@ describe("GameDetailService - Unit Tests", () => {
   );
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     service = new GameDetailService();
   });
 
@@ -53,7 +53,7 @@ describe("GameDetailService - Unit Tests", () => {
   });
 
   describe("populateGameInDatabase", () => {
-    it("should return success with game data when population succeeds", async () => {
+    it("should return game data when population succeeds", async () => {
       const mockGame: Game = {
         id: "game-uuid",
         title: "Test Game",
@@ -80,50 +80,41 @@ describe("GameDetailService - Unit Tests", () => {
       const igdbGame = createMockIgdbGame();
       const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual(mockGame);
-        expect(result.data?.title).toBe("Test Game");
-        expect(result.data?.igdbId).toBe(12345);
-      }
+      expect(result).toEqual(mockGame);
+      expect(result?.title).toBe("Test Game");
+      expect(result?.igdbId).toBe(12345);
     });
 
-    it("should return success with null when game already exists", async () => {
+    it("should return null when game already exists", async () => {
       mockGameExistsByIgdbId.mockResolvedValue(true);
 
       const igdbGame = createMockIgdbGame();
       const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBeNull();
-      }
+      expect(result).toBeNull();
 
       expect(mockUpsertGenres).not.toHaveBeenCalled();
       expect(mockUpsertPlatforms).not.toHaveBeenCalled();
       expect(mockCreateGameWithRelations).not.toHaveBeenCalled();
     });
 
-    it("should return error when genre upsert fails", async () => {
+    it("should throw when genre upsert fails", async () => {
       mockGameExistsByIgdbId.mockResolvedValue(false);
       mockUpsertGenres.mockRejectedValue(new Error("Failed to upsert genres"));
 
       const igdbGame = createMockIgdbGame({
         genres: [{ id: 1, name: "Action", slug: "action" }],
       });
-      const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Failed to upsert genres");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.populateGameInDatabase(igdbGame)).rejects.toThrow(
+        "Failed to upsert genres"
+      );
 
       expect(mockUpsertPlatforms).not.toHaveBeenCalled();
       expect(mockCreateGameWithRelations).not.toHaveBeenCalled();
     });
 
-    it("should return error when platform upsert fails", async () => {
+    it("should throw when platform upsert fails", async () => {
       mockGameExistsByIgdbId.mockResolvedValue(false);
       mockUpsertGenres.mockResolvedValue([]);
       mockUpsertPlatforms.mockRejectedValue(
@@ -133,18 +124,15 @@ describe("GameDetailService - Unit Tests", () => {
       const igdbGame = createMockIgdbGame({
         platforms: [{ id: 1, name: "PC", slug: "pc" }],
       });
-      const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Failed to upsert platforms");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.populateGameInDatabase(igdbGame)).rejects.toThrow(
+        "Failed to upsert platforms"
+      );
 
       expect(mockCreateGameWithRelations).not.toHaveBeenCalled();
     });
 
-    it("should return error when game creation fails", async () => {
+    it("should throw when game creation fails with a non-conflict error", async () => {
       mockGameExistsByIgdbId.mockResolvedValue(false);
       mockUpsertGenres.mockResolvedValue([]);
       mockUpsertPlatforms.mockResolvedValue([]);
@@ -153,41 +141,36 @@ describe("GameDetailService - Unit Tests", () => {
       );
 
       const igdbGame = createMockIgdbGame();
-      const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Failed to create game");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.populateGameInDatabase(igdbGame)).rejects.toThrow(
+        "Failed to create game"
+      );
     });
 
-    it("should handle unexpected errors gracefully", async () => {
-      mockGameExistsByIgdbId.mockRejectedValue(
-        new Error("Database connection lost")
+    it("should return null when game creation throws ConflictError (concurrent request)", async () => {
+      mockGameExistsByIgdbId.mockResolvedValue(false);
+      mockUpsertGenres.mockResolvedValue([]);
+      mockUpsertPlatforms.mockResolvedValue([]);
+      mockCreateGameWithRelations.mockRejectedValue(
+        new ConflictError("Game already exists", { igdbId: 12345 })
       );
 
       const igdbGame = createMockIgdbGame();
       const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Database connection lost");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      expect(result).toBeNull();
     });
 
-    it("should handle errors without messages gracefully", async () => {
-      mockGameExistsByIgdbId.mockRejectedValue("Unknown error");
+    it("should throw when gameExistsByIgdbId fails", async () => {
+      mockGameExistsByIgdbId.mockRejectedValue(
+        new Error("Database connection lost")
+      );
 
       const igdbGame = createMockIgdbGame();
-      const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Unknown error");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.populateGameInDatabase(igdbGame)).rejects.toThrow(
+        "Database connection lost"
+      );
     });
 
     it("should process genres when provided", async () => {
@@ -227,7 +210,7 @@ describe("GameDetailService - Unit Tests", () => {
       });
       const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(true);
+      expect(result).not.toBeNull();
       expect(mockUpsertGenres).toHaveBeenCalledWith([
         { id: 1, name: "Action", slug: "action" },
       ]);
@@ -280,7 +263,7 @@ describe("GameDetailService - Unit Tests", () => {
       });
       const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(true);
+      expect(result).not.toBeNull();
       expect(mockUpsertPlatforms).toHaveBeenCalledWith([
         expect.objectContaining({
           id: 6,
@@ -319,7 +302,7 @@ describe("GameDetailService - Unit Tests", () => {
       const igdbGame = createMockIgdbGame({ genres: [] });
       const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(true);
+      expect(result).not.toBeNull();
       expect(mockUpsertGenres).not.toHaveBeenCalled();
       expect(mockCreateGameWithRelations).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -352,7 +335,7 @@ describe("GameDetailService - Unit Tests", () => {
       const igdbGame = createMockIgdbGame({ platforms: [] });
       const result = await service.populateGameInDatabase(igdbGame);
 
-      expect(result.success).toBe(true);
+      expect(result).not.toBeNull();
       expect(mockUpsertPlatforms).not.toHaveBeenCalled();
       expect(mockCreateGameWithRelations).toHaveBeenCalledWith(
         expect.objectContaining({

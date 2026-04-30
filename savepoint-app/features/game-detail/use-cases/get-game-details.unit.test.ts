@@ -46,7 +46,7 @@ describe("getGameDetails", () => {
   const mockJournalEntry = createJournalEntryFixture();
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockGameDetailService = {
       populateGameInDatabase: vi.fn(),
@@ -98,10 +98,7 @@ describe("getGameDetails", () => {
         },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -139,30 +136,25 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: true,
-        data: { id: "game-456", igdbId: 12345, slug: mockGame.slug },
+        id: "game-456",
+        igdbId: 12345,
+        slug: mockGame.slug,
       });
 
-      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue({
-        success: true,
-        data: mockLibraryItem,
-      });
+      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue(
+        mockLibraryItem
+      );
 
-      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
-        success: true,
-        data: [mockLibraryItem],
-      });
+      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue([
+        mockLibraryItem,
+      ]);
 
-      mockJournalService.findJournalEntriesByGameId.mockResolvedValue({
-        success: true,
-        data: [mockJournalEntry],
-      });
+      mockJournalService.findJournalEntriesByGameId.mockResolvedValue([
+        mockJournalEntry,
+      ]);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -219,10 +211,7 @@ describe("getGameDetails", () => {
         error: "No data available",
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -252,10 +241,7 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -284,10 +270,7 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -310,30 +293,21 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: true,
-        data: { id: "game-456", igdbId: 12345, slug: mockGame.slug },
+        id: "game-456",
+        igdbId: 12345,
+        slug: mockGame.slug,
       });
 
-      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue(
+        null
+      );
 
-      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue([]);
 
-      mockJournalService.findJournalEntriesByGameId.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockJournalService.findJournalEntriesByGameId.mockResolvedValue([]);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -358,15 +332,9 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
-      mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: false,
-        error: "Game not found",
-      });
+      mockLibraryService.findGameByIgdbId.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -395,10 +363,9 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: false,
-        error: { code: "DATABASE_ERROR", message: "Database error" },
-      });
+      mockGameDetailService.populateGameInDatabase.mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -427,10 +394,7 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -506,40 +470,28 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: true,
-        data: { id: "game-456", igdbId: 12345, slug: mockGame.slug },
+        id: "game-456",
+        igdbId: 12345,
+        slug: mockGame.slug,
       });
 
-      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue({
-        success: false,
-        error: "Database connection lost",
-      });
+      mockLibraryService.findMostRecentLibraryItemByGameId.mockRejectedValue(
+        new Error("Database connection lost")
+      );
 
-      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue([]);
 
-      mockJournalService.findJournalEntriesByGameId.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockJournalService.findJournalEntriesByGameId.mockResolvedValue([]);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
         userId: "user-123",
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.userLibraryStatus).toBeUndefined();
-      }
+      expect(result.success).toBe(false);
     });
 
     it("should handle journal service errors gracefully", async () => {
@@ -553,30 +505,25 @@ describe("getGameDetails", () => {
         data: { timesToBeat: undefined },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: true,
-        data: { id: "game-456", igdbId: 12345, slug: mockGame.slug },
+        id: "game-456",
+        igdbId: 12345,
+        slug: mockGame.slug,
       });
 
-      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue({
-        success: true,
-        data: mockLibraryItem,
-      });
+      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue(
+        mockLibraryItem
+      );
 
-      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
-        success: true,
-        data: [mockLibraryItem],
-      });
+      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue([
+        mockLibraryItem,
+      ]);
 
-      mockJournalService.findJournalEntriesByGameId.mockResolvedValue({
-        success: false,
-        error: "Failed to fetch journal entries",
-      });
+      mockJournalService.findJournalEntriesByGameId.mockRejectedValue(
+        new Error("Failed to fetch journal entries")
+      );
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",

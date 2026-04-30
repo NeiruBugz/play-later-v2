@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { JournalEntryDetail } from "@/features/journal";
 import { requireServerUserId } from "@/shared/lib/app/auth";
+import { NotFoundError } from "@/shared/lib/errors";
 
 export default async function JournalEntryPage({
   params,
@@ -13,28 +14,24 @@ export default async function JournalEntryPage({
   const { id } = await params;
 
   const journalService = new JournalService();
-  const entryResult = await journalService.findJournalEntryById({
-    entryId: id,
-    userId,
-  });
 
-  if (!entryResult.success) {
-    notFound();
+  let entry;
+  try {
+    entry = await journalService.findJournalEntryById({ entryId: id, userId });
+  } catch (error) {
+    if (error instanceof NotFoundError) notFound();
+    throw error;
   }
-
-  const entry = entryResult.data;
 
   if (entry.gameId === null) {
     notFound();
   }
 
-  const gameResult = await getGameById(entry.gameId);
+  const game = await getGameById(entry.gameId);
 
-  if (!gameResult.success || !gameResult.data) {
+  if (!game) {
     notFound();
   }
-
-  const game = gameResult.data;
 
   return (
     <div className="py-3xl container mx-auto">
