@@ -49,10 +49,10 @@ export async function deleteLibraryItem({
   });
 
   if (!item) {
-    return repositoryError(
-      RepositoryErrorCode.NOT_FOUND,
-      "Library item not found"
-    );
+    throw new NotFoundError("Library item not found", {
+      libraryItemId,
+      userId,
+    });
   }
 
   await prisma.libraryItem.delete({ where: { id: libraryItemId } });

@@ -69,21 +69,17 @@ if (result.success) {
 
 ## Error Handling
 
-Both services return `ServiceResult<T>` types:
+Both services return raw data on success and throw typed errors on failure (see `data-access-layer/CLAUDE.md` Error Model and `context/decisions/DAL_TYPED_THROW.md`).
 
-```typescript
-type ServiceResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string; code?: ServiceErrorCode };
-```
+### Typed errors thrown
 
-### Error Codes
+- `ZodError` — invalid input or malformed OpenID response
+- `UnauthorizedError` — invalid OpenID signature
+- `NotFoundError` — Steam user not found
+- `SteamProfilePrivateError` (co-located in `./errors.ts`) — Steam profile is set to private
+- `SteamApiUnavailableError` (co-located in `./errors.ts`) — Steam API errors / network failures
 
-- `VALIDATION_ERROR`: Invalid input or malformed OpenID response
-- `UNAUTHORIZED`: Invalid OpenID signature
-- `NOT_FOUND`: Steam user not found
-- `INTERNAL_ERROR`: Network errors or unexpected failures
-- `EXTERNAL_SERVICE_ERROR`: Steam API errors
+`fetch-steam-games.handler` and `steam-connect.handler` map `SteamProfilePrivateError → 403` explicitly before delegating other errors to `mapErrorToHandlerResult`.
 
 ## Testing
 
