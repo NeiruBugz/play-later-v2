@@ -2,7 +2,7 @@
 
 - **Functional Specification:** [`functional-spec.md`](./functional-spec.md)
 - **Decision Record:** [`context/decisions/DAL_TYPED_THROW.md`](../../decisions/DAL_TYPED_THROW.md)
-- **Status:** Draft
+- **Status:** In Review
 - **Author(s):** Nail Badiullin
 
 ---

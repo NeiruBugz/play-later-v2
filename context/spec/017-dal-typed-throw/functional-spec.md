@@ -1,7 +1,7 @@
 # Functional Specification: DAL Typed-Throw Migration
 
 - **Roadmap Item:** Audit-driven follow-up to the 2026-04-28 data-access-layer audit. Replace the three-layer `Result` wrapper machinery in the Data Access Layer (DAL) with typed exceptions caught at request edges. Captured as decision in `context/decisions/DAL_TYPED_THROW.md`.
-- **Status:** Draft
+- **Status:** In Review
 - **Author:** Nail Badiullin
 
 ---
