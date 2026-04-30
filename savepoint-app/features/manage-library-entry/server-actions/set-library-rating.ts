@@ -22,22 +22,11 @@ export const setLibraryRatingAction = createServerAction<
     );
 
     const libraryService = new LibraryService();
-    const result = await libraryService.setRating({
+    await libraryService.setRating({
       libraryItemId,
       userId: userId!,
       rating,
     });
-
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, libraryItemId },
-        "Failed to set library rating"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
 
     revalidatePath("/library");
 

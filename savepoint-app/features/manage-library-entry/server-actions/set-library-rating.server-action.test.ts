@@ -40,7 +40,7 @@ describe("setLibraryRatingAction server action", () => {
   let mockGetProfile: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockSetRating = vi.fn();
     MockLibraryService.mockImplementation(function () {
@@ -73,7 +73,7 @@ describe("setLibraryRatingAction server action", () => {
 
   describe("Happy path", () => {
     it("calls service with userId from session, revalidates both paths, and returns success", async () => {
-      mockSetRating.mockResolvedValue({ success: true, data: undefined });
+      mockSetRating.mockResolvedValue(undefined);
 
       const result = await setLibraryRatingAction({
         libraryItemId: 42,
@@ -94,7 +94,7 @@ describe("setLibraryRatingAction server action", () => {
     });
 
     it("accepts rating = null (clear rating) and still revalidates", async () => {
-      mockSetRating.mockResolvedValue({ success: true, data: undefined });
+      mockSetRating.mockResolvedValue(undefined);
 
       const result = await setLibraryRatingAction({
         libraryItemId: 42,

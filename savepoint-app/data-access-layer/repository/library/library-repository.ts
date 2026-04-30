@@ -10,15 +10,8 @@ import {
   USER_PREVIEW_ITEMS_LIMIT,
 } from "@/shared/constants";
 import { prisma } from "@/shared/lib/app/db";
+import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 
-import {
-  DuplicateError,
-  NotFoundError,
-  repositoryError,
-  RepositoryErrorCode,
-  repositorySuccess,
-  type RepositoryResult,
-} from "../errors";
 import { countJournalEntriesByUserId } from "../journal/journal-repository";
 import type {
   CreateLibraryItemInput,
@@ -48,7 +41,10 @@ export async function createLibraryItem({
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
-      throw new DuplicateError("Library item already exists");
+      throw new ConflictError("Library item already exists", {
+        userId,
+        gameId,
+      });
     }
     throw error;
   }
@@ -773,18 +769,17 @@ export async function getRatingHistogram({
   userId,
 }: {
   userId: string;
-}): Promise<RepositoryResult<Array<{ rating: number; count: number }>>> {
+}): Promise<Array<{ rating: number; count: number }>> {
   const bins = await prisma.libraryItem.groupBy({
     by: ["rating"],
     where: { userId, rating: { not: null } },
     _count: { _all: true },
   });
-  const histogram = Array.from({ length: 10 }, (_, i) => {
+  return Array.from({ length: 10 }, (_, i) => {
     const rating = i + 1;
     const bin = bins.find((b) => b.rating === rating);
     return { rating, count: bin?._count._all ?? 0 };
   });
-  return repositorySuccess(histogram);
 }
 
 export async function setRating({
@@ -792,31 +787,20 @@ export async function setRating({
   userId,
   rating,
 }: {
-  libraryItemId: number | string;
+  libraryItemId: number;
   userId: string;
   rating: number | null;
-}): Promise<RepositoryResult<void>> {
-  const numericId =
-    typeof libraryItemId === "string"
-      ? Number.parseInt(libraryItemId, 10)
-      : libraryItemId;
-  if (!Number.isInteger(numericId)) {
-    return repositoryError(
-      RepositoryErrorCode.NOT_FOUND,
-      "Library item not found"
-    );
-  }
+}): Promise<void> {
   const result = await prisma.libraryItem.updateMany({
-    where: { id: numericId, userId },
+    where: { id: libraryItemId, userId },
     data: { rating },
   });
   if (result.count === 0) {
-    return repositoryError(
-      RepositoryErrorCode.NOT_FOUND,
-      "Library item not found"
-    );
+    throw new NotFoundError("Library item not found", {
+      libraryItemId,
+      userId,
+    });
   }
-  return repositorySuccess(undefined);
 }
 
 export async function countLibraryItemsByStatus({

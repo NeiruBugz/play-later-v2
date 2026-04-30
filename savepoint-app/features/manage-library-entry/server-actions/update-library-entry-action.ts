@@ -24,7 +24,7 @@ export const updateLibraryEntryAction = createServerAction<
     const libraryService = new LibraryService();
     const normalizedPlatform =
       platform === undefined ? undefined : platform === "" ? null : platform;
-    const updateResult = await libraryService.updateLibraryItem({
+    const data = await libraryService.updateLibraryItem({
       userId: userId!,
       libraryItem: {
         id: libraryItemId,
@@ -37,28 +37,18 @@ export const updateLibraryEntryAction = createServerAction<
         }),
       },
     });
-    if (!updateResult.success) {
-      logger.error(
-        { error: updateResult.error, userId, libraryItemId },
-        "Failed to update library entry"
-      );
-      return {
-        success: false,
-        error: "Failed to update library entry",
-      };
-    }
     revalidatePath("/games/[slug]", "page");
     logger.info(
       {
         userId,
-        libraryItemId: updateResult.data.id,
+        libraryItemId: data.id,
         status,
       },
       "Library entry updated successfully"
     );
     return {
       success: true,
-      data: updateResult.data,
+      data,
     };
   },
 });

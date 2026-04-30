@@ -78,7 +78,7 @@ export class ProfileService {
     input: GetProfileWithStatsInput
   ): Promise<GetProfileWithStatsResult> {
     try {
-      const [user, stats, gameCount, libraryPreview, histogramResult] =
+      const [user, stats, gameCount, libraryPreview, ratingHistogram] =
         await Promise.all([
           findUserById(input.userId, {
             select: {
@@ -99,7 +99,6 @@ export class ProfileService {
         this.logger.warn({ userId: input.userId }, "User not found");
         return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
       }
-      const ratingHistogram = histogramResult.ok ? histogramResult.data : [];
       const ratedCount = ratingHistogram.reduce(
         (sum, entry) => sum + entry.count,
         0

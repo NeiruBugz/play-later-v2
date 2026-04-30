@@ -9,6 +9,7 @@ import {
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult, RequestContext } from "../types";
 import type {
   GetStatusCountsHandlerInput,
@@ -60,25 +61,17 @@ export async function getStatusCountsHandler(
     };
   }
 
-  const libraryService = new LibraryService();
-  const result = await libraryService.getStatusCounts(validation.data);
+  try {
+    const libraryService = new LibraryService();
+    const data = await libraryService.getStatusCounts(validation.data);
 
-  if (!result.success) {
-    logger.error(
-      { userId, error: result.error },
-      "Service failed to fetch status counts"
-    );
+    logger.debug({ userId }, "Status counts fetched");
     return {
-      success: false,
-      error: result.error,
-      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      success: true,
+      data,
+      status: HTTP_STATUS.OK,
     };
+  } catch (error) {
+    return mapErrorToHandlerResult(error);
   }
-
-  logger.debug({ userId }, "Status counts fetched");
-  return {
-    success: true,
-    data: result.data,
-    status: HTTP_STATUS.OK,
-  };
 }

@@ -72,13 +72,12 @@ describe("ProfileService", () => {
     mockFindUserByUsername = vi.mocked(findUserByUsername);
     mockGetLibraryStatsByUserId = vi.mocked(getLibraryStatsByUserId);
     mockGetRatingHistogram = vi.mocked(getRatingHistogram);
-    mockGetRatingHistogram.mockResolvedValue({
-      ok: true,
-      data: Array.from({ length: 10 }, (_, i) => ({
+    mockGetRatingHistogram.mockResolvedValue(
+      Array.from({ length: 10 }, (_, i) => ({
         rating: i + 1,
         count: 0,
-      })),
-    });
+      }))
+    );
     mockUpdateUserProfile = vi.mocked(updateUserProfile);
     mockValidateUsername = vi.mocked(validateUsername);
   });
@@ -189,7 +188,7 @@ describe("ProfileService", () => {
         rating: i + 1,
         count: i < 3 ? 0 : i === 4 ? 7 : i === 7 ? 3 : 0,
       }));
-      mockGetRatingHistogram.mockResolvedValue({ ok: true, data: histogram });
+      mockGetRatingHistogram.mockResolvedValue(histogram);
 
       const result = await service.getProfileWithStats({ userId: "user-123" });
 

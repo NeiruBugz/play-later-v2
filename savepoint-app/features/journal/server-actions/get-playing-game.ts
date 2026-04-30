@@ -21,22 +21,11 @@ export const getPlayingGameAction = createServerAction<
     logger.info({ userId }, "Fetching currently playing game");
 
     const libraryService = new LibraryService();
-    const result = await libraryService.getMostRecentPlayingGame({
+    const game = await libraryService.getMostRecentPlayingGame({
       userId: userId!,
     });
 
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId },
-        "Failed to fetch playing game"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
-
-    if (!result.data) {
+    if (!game) {
       logger.debug({ userId }, "No currently playing games found");
       return {
         success: true,
@@ -45,17 +34,17 @@ export const getPlayingGameAction = createServerAction<
     }
 
     logger.info(
-      { userId, gameId: result.data.gameId },
+      { userId, gameId: game.gameId },
       "Playing game fetched successfully"
     );
 
     return {
       success: true,
       data: {
-        id: result.data.gameId,
-        title: result.data.name,
-        igdbId: result.data.igdbId,
-        coverImage: result.data.coverImageId,
+        id: game.gameId,
+        title: game.name,
+        igdbId: game.igdbId,
+        coverImage: game.coverImageId,
       },
     };
   },

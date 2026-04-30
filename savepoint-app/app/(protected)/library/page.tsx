@@ -17,7 +17,7 @@ export default async function LibraryPage() {
   const profileService = new ProfileService();
   const libraryService = new LibraryService();
 
-  const [steamStatusResult, statusCountsResult] = await Promise.all([
+  const [steamStatusResult, statusCounts] = await Promise.all([
     profileService.getSteamConnectionStatus({ userId }),
     libraryService.getStatusCounts({ userId }),
   ]);
@@ -25,12 +25,10 @@ export default async function LibraryPage() {
   const isSteamConnected =
     steamStatusResult.success && steamStatusResult.data.connected;
 
-  const totalLibraryItems = statusCountsResult.success
-    ? Object.values(statusCountsResult.data).reduce(
-        (sum, count) => sum + count,
-        0
-      )
-    : null;
+  const totalLibraryItems = Object.values(statusCounts).reduce(
+    (sum, count) => sum + count,
+    0
+  );
 
   if (totalLibraryItems === 0) {
     return (

@@ -24,21 +24,10 @@ export const deleteLibraryItemAction = createServerAction<
     logger.info({ libraryItemId }, "Attempting to delete library item");
 
     const libraryService = new LibraryService();
-    const result = await libraryService.deleteLibraryItem({
+    await libraryService.deleteLibraryItem({
       libraryItemId,
       userId: userId!,
     });
-
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, libraryItemId },
-        "LibraryService failed to delete library item"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
 
     revalidatePath("/library");
     revalidatePath("/games/[slug]", "page");

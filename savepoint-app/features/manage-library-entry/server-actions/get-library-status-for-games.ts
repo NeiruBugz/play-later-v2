@@ -30,22 +30,18 @@ export const getLibraryStatusForGames = createServerAction<
 
     await Promise.all(
       igdbIds.map(async (igdbId: number) => {
-        const gameResult = await libraryService.findGameByIgdbId(igdbId);
-        if (!gameResult.success || !gameResult.data) {
+        const game = await libraryService.findGameByIgdbId(igdbId);
+        if (!game) {
           statusMap[igdbId] = null;
           return;
         }
 
-        const libraryResult =
-          await libraryService.findMostRecentLibraryItemByGameId({
-            userId: userId!,
-            gameId: gameResult.data.id,
-          });
+        const item = await libraryService.findMostRecentLibraryItemByGameId({
+          userId: userId!,
+          gameId: game.id,
+        });
 
-        statusMap[igdbId] =
-          libraryResult.success && libraryResult.data
-            ? libraryResult.data.status
-            : null;
+        statusMap[igdbId] = item ? item.status : null;
       })
     );
 

@@ -28,13 +28,7 @@ export async function DashboardStats({ userId }: DashboardStatsProps) {
 
     logger.info({ userId }, "Fetching dashboard stats");
 
-    const [
-      wishlistResult,
-      shelfResult,
-      upNextResult,
-      playingResult,
-      playedResult,
-    ] = await Promise.all([
+    const [wishlist, shelf, upNext, playing, played] = await Promise.all([
       service.getLibraryItems({
         userId,
         status: LibraryItemStatus.WISHLIST,
@@ -62,48 +56,12 @@ export async function DashboardStats({ userId }: DashboardStatsProps) {
       }),
     ]);
 
-    if (!wishlistResult.success) {
-      logger.error(
-        { error: wishlistResult.error, userId },
-        "Failed to fetch wishlist stats"
-      );
-      throw new Error(wishlistResult.error);
-    }
-    if (!shelfResult.success) {
-      logger.error(
-        { error: shelfResult.error, userId },
-        "Failed to fetch shelf stats"
-      );
-      throw new Error(shelfResult.error);
-    }
-    if (!upNextResult.success) {
-      logger.error(
-        { error: upNextResult.error, userId },
-        "Failed to fetch up next stats"
-      );
-      throw new Error(upNextResult.error);
-    }
-    if (!playingResult.success) {
-      logger.error(
-        { error: playingResult.error, userId },
-        "Failed to fetch playing stats"
-      );
-      throw new Error(playingResult.error);
-    }
-    if (!playedResult.success) {
-      logger.error(
-        { error: playedResult.error, userId },
-        "Failed to fetch played stats"
-      );
-      throw new Error(playedResult.error);
-    }
-
     const stats: DashboardStatsData = {
-      wishlist: wishlistResult.data.total,
-      shelf: shelfResult.data.total,
-      upNext: upNextResult.data.total,
-      playing: playingResult.data.total,
-      played: playedResult.data.total,
+      wishlist: wishlist.total,
+      shelf: shelf.total,
+      upNext: upNext.total,
+      playing: playing.total,
+      played: played.total,
       total: 0,
     };
 

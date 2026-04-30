@@ -26,7 +26,7 @@ export async function ContinuePlaying({ userId }: ContinuePlayingProps) {
 
     logger.info({ userId }, "Fetching continue playing games");
 
-    const result = await service.getLibraryItems({
+    const data = await service.getLibraryItems({
       userId,
       status: LibraryItemStatus.PLAYING,
       sortBy: "startedAt",
@@ -34,15 +34,7 @@ export async function ContinuePlaying({ userId }: ContinuePlayingProps) {
       distinctByGame: true,
     });
 
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId },
-        "Failed to fetch continue playing games"
-      );
-      throw new Error(result.error);
-    }
-
-    const limitedItems = result.data.items.slice(0, CONTINUE_PLAYING_LIMIT);
+    const limitedItems = data.items.slice(0, CONTINUE_PLAYING_LIMIT);
 
     logger.info(
       { userId, count: limitedItems.length },
@@ -55,7 +47,7 @@ export async function ContinuePlaying({ userId }: ContinuePlayingProps) {
       <DashboardGameSection
         title="Playing"
         items={limitedItems}
-        totalCount={result.data.items.length}
+        totalCount={data.items.length}
         viewAllHref="/library?status=PLAYING"
         viewAllLabel="View All Playing"
         emptyMessage="No games in progress. Start exploring something new!"

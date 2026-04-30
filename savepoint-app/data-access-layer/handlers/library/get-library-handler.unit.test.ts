@@ -1,6 +1,7 @@
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { NotFoundError } from "@/shared/lib/errors";
 import { LibraryItemStatus } from "@/shared/types";
 
 import type { RequestContext } from "../types";
@@ -21,7 +22,7 @@ describe("getLibraryHandler", () => {
   let mockGetLibraryItems: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockGetLibraryItems = vi.fn();
 
@@ -96,8 +97,9 @@ describe("getLibraryHandler", () => {
 
     it("should accept all valid input combinations", async () => {
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: [], total: 0, hasMore: false },
+        items: [],
+        total: 0,
+        hasMore: false,
       });
 
       const params = {
@@ -117,8 +119,9 @@ describe("getLibraryHandler", () => {
 
     it("should handle optional parameters correctly (only userId provided)", async () => {
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: [], total: 0, hasMore: false },
+        items: [],
+        total: 0,
+        hasMore: false,
       });
 
       const params = {
@@ -140,8 +143,9 @@ describe("getLibraryHandler", () => {
   describe("Orchestration", () => {
     it("should call LibraryService.getLibraryItems with correct parameters", async () => {
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: [], total: 0, hasMore: false },
+        items: [],
+        total: 0,
+        hasMore: false,
       });
 
       const params = {
@@ -168,8 +172,9 @@ describe("getLibraryHandler", () => {
 
     it("should pass distinctByGame: true to service (library view requirement)", async () => {
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: [], total: 0, hasMore: false },
+        items: [],
+        total: 0,
+        hasMore: false,
       });
 
       const params = {
@@ -216,8 +221,9 @@ describe("getLibraryHandler", () => {
       ];
 
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: mockData, total: 1, hasMore: false },
+        items: mockData,
+        total: 1,
+        hasMore: false,
       });
 
       const params = {
@@ -239,8 +245,9 @@ describe("getLibraryHandler", () => {
 
     it("should return empty array when no library items found", async () => {
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: [], total: 0, hasMore: false },
+        items: [],
+        total: 0,
+        hasMore: false,
       });
 
       const params = {
@@ -287,8 +294,9 @@ describe("getLibraryHandler", () => {
       ];
 
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: mockData, total: 1, hasMore: false },
+        items: mockData,
+        total: 1,
+        hasMore: false,
       });
 
       const params = {
@@ -307,8 +315,9 @@ describe("getLibraryHandler", () => {
 
     it("should support filtering by platform", async () => {
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: [], total: 0, hasMore: false },
+        items: [],
+        total: 0,
+        hasMore: false,
       });
 
       const params = {
@@ -327,8 +336,9 @@ describe("getLibraryHandler", () => {
 
     it("should support search filtering", async () => {
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: [], total: 0, hasMore: false },
+        items: [],
+        total: 0,
+        hasMore: false,
       });
 
       const params = {
@@ -347,8 +357,9 @@ describe("getLibraryHandler", () => {
 
     it("should support sorting by different fields", async () => {
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: [], total: 0, hasMore: false },
+        items: [],
+        total: 0,
+        hasMore: false,
       });
 
       const params = {
@@ -369,11 +380,10 @@ describe("getLibraryHandler", () => {
   });
 
   describe("Error Handling", () => {
-    it("should return HandlerResult with error on service failure", async () => {
-      mockGetLibraryItems.mockResolvedValue({
-        success: false,
-        error: "Database connection failed",
-      });
+    it("should return HandlerResult with 500 on service throw", async () => {
+      mockGetLibraryItems.mockRejectedValue(
+        new Error("Database connection failed")
+      );
 
       const params = {
         userId: "clx123abc456def789ghi",
@@ -388,11 +398,10 @@ describe("getLibraryHandler", () => {
       }
     });
 
-    it("should propagate service error messages", async () => {
-      mockGetLibraryItems.mockResolvedValue({
-        success: false,
-        error: "Failed to fetch library items",
-      });
+    it("should return 404 when service throws NotFoundError", async () => {
+      mockGetLibraryItems.mockRejectedValue(
+        new NotFoundError("Library items not found")
+      );
 
       const params = {
         userId: "clx123abc456def789ghi",
@@ -402,28 +411,7 @@ describe("getLibraryHandler", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.status).toBe(500);
-        expect(result.error).toBe("Failed to fetch library items");
-      }
-    });
-
-    it("should handle empty service error strings", async () => {
-      mockGetLibraryItems.mockResolvedValue({
-        success: false,
-        error: "",
-      });
-
-      const params = {
-        userId: "clx123abc456def789ghi",
-      };
-
-      const result = await getLibraryHandler(params, mockContext);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.status).toBe(500);
-
-        expect(result.error).toBe("");
+        expect(result.status).toBe(404);
       }
     });
   });
@@ -482,8 +470,9 @@ describe("getLibraryHandler", () => {
       ];
 
       mockGetLibraryItems.mockResolvedValue({
-        success: true,
-        data: { items: mockData, total: 2, hasMore: false },
+        items: mockData,
+        total: 2,
+        hasMore: false,
       });
 
       const params = {

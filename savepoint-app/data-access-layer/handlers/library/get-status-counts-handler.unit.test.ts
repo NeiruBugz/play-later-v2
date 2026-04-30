@@ -1,6 +1,7 @@
 import { LibraryService } from "@/data-access-layer/services/library/library-service";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { NotFoundError } from "@/shared/lib/errors";
 import { LibraryItemStatus } from "@/shared/types";
 
 import type { RequestContext } from "../types";
@@ -25,7 +26,7 @@ describe("getStatusCountsHandler", () => {
   let mockGetStatusCounts: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockGetStatusCounts = vi.fn();
 
@@ -52,10 +53,7 @@ describe("getStatusCountsHandler", () => {
     });
 
     it("should accept valid userId with no optional filters", async () => {
-      mockGetStatusCounts.mockResolvedValue({
-        success: true,
-        data: ZEROED_COUNTS,
-      });
+      mockGetStatusCounts.mockResolvedValue(ZEROED_COUNTS);
 
       const result = await getStatusCountsHandler(
         { userId: "clx123abc456def789ghi" },
@@ -67,10 +65,7 @@ describe("getStatusCountsHandler", () => {
     });
 
     it("should accept optional platform and search filters", async () => {
-      mockGetStatusCounts.mockResolvedValue({
-        success: true,
-        data: ZEROED_COUNTS,
-      });
+      mockGetStatusCounts.mockResolvedValue(ZEROED_COUNTS);
 
       const result = await getStatusCountsHandler(
         {
@@ -87,10 +82,7 @@ describe("getStatusCountsHandler", () => {
 
   describe("Orchestration", () => {
     it("should call LibraryService.getStatusCounts with validated input", async () => {
-      mockGetStatusCounts.mockResolvedValue({
-        success: true,
-        data: ZEROED_COUNTS,
-      });
+      mockGetStatusCounts.mockResolvedValue(ZEROED_COUNTS);
 
       await getStatusCountsHandler(
         {
@@ -117,10 +109,7 @@ describe("getStatusCountsHandler", () => {
         [LibraryItemStatus.WISHLIST]: 7,
       };
 
-      mockGetStatusCounts.mockResolvedValue({
-        success: true,
-        data: mockCounts,
-      });
+      mockGetStatusCounts.mockResolvedValue(mockCounts);
 
       const result = await getStatusCountsHandler(
         { userId: "clx123abc456def789ghi" },
@@ -137,11 +126,8 @@ describe("getStatusCountsHandler", () => {
   });
 
   describe("Error Handling", () => {
-    it("should return HTTP 500 when service fails", async () => {
-      mockGetStatusCounts.mockResolvedValue({
-        success: false,
-        error: "Database error",
-      });
+    it("should return HTTP 500 when service throws an unexpected error", async () => {
+      mockGetStatusCounts.mockRejectedValue(new Error("Database error"));
 
       const result = await getStatusCountsHandler(
         { userId: "clx123abc456def789ghi" },
@@ -155,11 +141,10 @@ describe("getStatusCountsHandler", () => {
       }
     });
 
-    it("should propagate service error messages", async () => {
-      mockGetStatusCounts.mockResolvedValue({
-        success: false,
-        error: "Failed to get status counts",
-      });
+    it("should return HTTP 404 when service throws NotFoundError", async () => {
+      mockGetStatusCounts.mockRejectedValue(
+        new NotFoundError("Library not found")
+      );
 
       const result = await getStatusCountsHandler(
         { userId: "clx123abc456def789ghi" },
@@ -168,7 +153,8 @@ describe("getStatusCountsHandler", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("Failed to get status counts");
+        expect(result.status).toBe(404);
+        expect(result.error).toBe("Library not found");
       }
     });
   });

@@ -68,13 +68,9 @@ export default async function DashboardPage() {
     : "there";
 
   const libraryService = new LibraryService();
-  const statusCountsResult = await libraryService.getStatusCounts({ userId });
+  const statusCounts = await libraryService.getStatusCounts({ userId });
   const hasEmptyLibrary =
-    statusCountsResult.success &&
-    Object.values(statusCountsResult.data).reduce(
-      (sum, count) => sum + count,
-      0
-    ) === 0;
+    Object.values(statusCounts).reduce((sum, count) => sum + count, 0) === 0;
 
   return (
     <div className="py-3xl">

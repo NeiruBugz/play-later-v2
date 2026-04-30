@@ -31,13 +31,11 @@ describe("LibraryRepository.getRatingHistogram - Integration", () => {
     await createLibraryItem({ userId: user.id, gameId: g4.id, rating: 10 });
     await createLibraryItem({ userId: user.id, gameId: g5.id, rating: null });
 
-    const result = await getRatingHistogram({ userId: user.id });
+    const histogram = await getRatingHistogram({ userId: user.id });
 
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.data).toHaveLength(10);
+    expect(histogram).toHaveLength(10);
     const byRating = Object.fromEntries(
-      result.data.map((b) => [b.rating, b.count])
+      histogram.map((b) => [b.rating, b.count])
     );
     expect(byRating[1]).toBe(0);
     expect(byRating[2]).toBe(0);
@@ -49,7 +47,7 @@ describe("LibraryRepository.getRatingHistogram - Integration", () => {
     expect(byRating[8]).toBe(0);
     expect(byRating[9]).toBe(0);
     expect(byRating[10]).toBe(1);
-    expect(result.data.map((b) => b.rating)).toEqual([
+    expect(histogram.map((b) => b.rating)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     ]);
   });
@@ -79,13 +77,11 @@ describe("LibraryRepository.getRatingHistogram - Integration", () => {
       });
     }
 
-    const result = await getRatingHistogram({ userId: user.id });
+    const histogram = await getRatingHistogram({ userId: user.id });
 
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.data).toHaveLength(10);
+    expect(histogram).toHaveLength(10);
     for (let rating = 1; rating <= 10; rating++) {
-      const bin = result.data.find((b) => b.rating === rating);
+      const bin = histogram.find((b) => b.rating === rating);
       expect(bin?.count).toBe(rating + 1);
     }
   });
@@ -95,13 +91,11 @@ describe("LibraryRepository.getRatingHistogram - Integration", () => {
     const game = await createGame({ title: "Unrated" });
     await createLibraryItem({ userId: user.id, gameId: game.id, rating: null });
 
-    const result = await getRatingHistogram({ userId: user.id });
+    const histogram = await getRatingHistogram({ userId: user.id });
 
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.data).toHaveLength(10);
-    expect(result.data.every((b) => b.count === 0)).toBe(true);
-    expect(result.data.map((b) => b.rating)).toEqual([
+    expect(histogram).toHaveLength(10);
+    expect(histogram.every((b) => b.count === 0)).toBe(true);
+    expect(histogram.map((b) => b.rating)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     ]);
   });
@@ -117,16 +111,14 @@ describe("LibraryRepository.getRatingHistogram - Integration", () => {
     await createLibraryItem({ userId: other.id, gameId: g2.id, rating: 5 });
     await createLibraryItem({ userId: other.id, gameId: g1.id, rating: 9 });
 
-    const result = await getRatingHistogram({ userId: owner.id });
+    const histogram = await getRatingHistogram({ userId: owner.id });
 
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
     const byRating = Object.fromEntries(
-      result.data.map((b) => [b.rating, b.count])
+      histogram.map((b) => [b.rating, b.count])
     );
     expect(byRating[5]).toBe(1);
     expect(byRating[9]).toBe(0);
-    const total = result.data.reduce((sum, b) => sum + b.count, 0);
+    const total = histogram.reduce((sum, b) => sum + b.count, 0);
     expect(total).toBe(1);
   });
 });

@@ -700,7 +700,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (result.success) return;
-      expect(result.error).toContain("Failed to update library entry");
+      expect(result.error).toContain("Library item not found");
     });
 
     it("should return error when library item belongs to different user", async () => {
@@ -722,7 +722,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (result.success) return;
-      expect(result.error).toContain("Failed to update library entry");
+      expect(result.error).toContain("Library item not found");
 
       const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },

@@ -24,7 +24,7 @@ export const getRecentGamesAction = createServerAction<void, RecentGameItem[]>({
 
     const service = new LibraryService();
 
-    const result = await service.getLibraryItems({
+    const data = await service.getLibraryItems({
       userId,
       status: LibraryItemStatus.PLAYING,
       sortBy: "startedAt",
@@ -32,15 +32,7 @@ export const getRecentGamesAction = createServerAction<void, RecentGameItem[]>({
       distinctByGame: true,
     });
 
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId },
-        "Failed to fetch recent games"
-      );
-      return { success: false, error: result.error };
-    }
-
-    const recentGames: RecentGameItem[] = result.data.items
+    const recentGames: RecentGameItem[] = data.items
       .slice(0, RECENT_GAMES_LIMIT)
       .map((item) => ({
         id: item.id,

@@ -23,7 +23,7 @@ export async function RecentlyAdded({ userId }: RecentlyAddedProps) {
 
     logger.info({ userId }, "Fetching recently added games");
 
-    const result = await service.getLibraryItems({
+    const data = await service.getLibraryItems({
       userId,
       sortBy: "createdAt",
       sortOrder: "desc",
@@ -31,16 +31,8 @@ export async function RecentlyAdded({ userId }: RecentlyAddedProps) {
       limit: RECENTLY_ADDED_LIMIT,
     });
 
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId },
-        "Failed to fetch recently added games"
-      );
-      throw new Error(result.error);
-    }
-
     logger.info(
-      { userId, count: result.data.items.length },
+      { userId, count: data.items.length },
       "Recently added games fetched successfully"
     );
 
@@ -49,7 +41,7 @@ export async function RecentlyAdded({ userId }: RecentlyAddedProps) {
     return (
       <DashboardGameSection
         title="Recently Added"
-        items={result.data.items}
+        items={data.items}
         viewAllHref="/library?sortBy=createdAt&sortOrder=desc"
         viewAllLabel="View Library"
         emptyMessage="Your library is empty. Add some games to get started!"

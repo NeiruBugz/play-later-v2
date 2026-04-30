@@ -2,12 +2,13 @@ import {
   deleteLibraryItem,
   findLibraryItemById,
   findLibraryItemsWithFilters,
-  NotFoundError,
   setRating,
   updateLibraryItem,
 } from "@/data-access-layer/repository";
 import { LibraryItemStatus } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { NotFoundError } from "@/shared/lib/errors";
 
 import { LibraryService } from "./library-service";
 
@@ -38,7 +39,7 @@ describe("LibraryService", () => {
   let mockSetRating: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     service = new LibraryService();
     mockFindLibraryItemsWithFilters = vi.mocked(findLibraryItemsWithFilters);
     mockFindLibraryItemById = vi.mocked(findLibraryItemById);
@@ -97,7 +98,7 @@ describe("LibraryService", () => {
     ];
 
     describe("success scenarios", () => {
-      it("should return success result when repository succeeds", async () => {
+      it("should return items when repository succeeds", async () => {
         mockFindLibraryItemsWithFilters.mockResolvedValue({
           items: mockLibraryItems,
           total: 2,
@@ -107,17 +108,16 @@ describe("LibraryService", () => {
           userId: validUserId,
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.items).toHaveLength(2);
-          expect(result.data.total).toBe(2);
-          expect(result.data.hasMore).toBe(false);
-          expect(result.data.items[0]?.game._count.libraryItems).toBe(1);
-          expect(result.data.items[1]?.game._count.libraryItems).toBe(1);
-        }
+        expect(result.items).toHaveLength(2);
+        expect(result.total).toBe(2);
+        expect(result.hasMore).toBe(false);
+        expect(result.items[0]?.game._count.libraryItems).toBe(1);
+        expect(result.items[1]?.game._count.libraryItems).toBe(1);
 
         expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith({
           userId: validUserId,
+          skip: undefined,
+          take: undefined,
         });
       });
 
@@ -138,7 +138,16 @@ describe("LibraryService", () => {
 
         await service.getLibraryItems(params);
 
-        expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith(params);
+        expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith(
+          expect.objectContaining({
+            userId: validUserId,
+            status: LibraryItemStatus.WISHLIST,
+            platform: "PlayStation 5",
+            search: "Test",
+            sortBy: "createdAt",
+            sortOrder: "desc",
+          })
+        );
       });
 
       it("should forward minRating to repository", async () => {
@@ -230,64 +239,32 @@ describe("LibraryService", () => {
           userId: validUserId,
         });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.items).toEqual([]);
-          expect(result.data.items).toHaveLength(0);
-          expect(result.data.total).toBe(0);
-          expect(result.data.hasMore).toBe(false);
-        }
-      });
-    });
-
-    describe("validation scenarios", () => {
-      it("should return validation error for invalid input", async () => {
-        const result = await service.getLibraryItems({
-          userId: "invalid-id",
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toContain("cuid");
-        }
-
-        expect(mockFindLibraryItemsWithFilters).not.toHaveBeenCalled();
+        expect(result.items).toEqual([]);
+        expect(result.items).toHaveLength(0);
+        expect(result.total).toBe(0);
+        expect(result.hasMore).toBe(false);
       });
     });
 
     describe("error scenarios", () => {
-      it("should return error result when repository fails", async () => {
+      it("should throw when repository fails", async () => {
         mockFindLibraryItemsWithFilters.mockRejectedValue(
           new Error("Database connection failed")
         );
 
-        const result = await service.getLibraryItems({
-          userId: validUserId,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Database connection failed");
-        }
-
-        expect(mockFindLibraryItemsWithFilters).toHaveBeenCalledWith({
-          userId: validUserId,
-        });
+        await expect(
+          service.getLibraryItems({ userId: validUserId })
+        ).rejects.toThrow("Database connection failed");
       });
 
-      it("should handle unexpected errors gracefully", async () => {
+      it("should propagate unexpected errors", async () => {
         mockFindLibraryItemsWithFilters.mockRejectedValue(
           new Error("Connection timeout")
         );
 
-        const result = await service.getLibraryItems({
-          userId: validUserId,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Connection timeout");
-        }
+        await expect(
+          service.getLibraryItems({ userId: validUserId })
+        ).rejects.toThrow("Connection timeout");
       });
     });
   });
@@ -300,91 +277,43 @@ describe("LibraryService", () => {
       it("should successfully delete when authorized", async () => {
         mockDeleteLibraryItem.mockResolvedValue(undefined);
 
-        const result = await service.deleteLibraryItem({
+        await service.deleteLibraryItem({
           libraryItemId: validLibraryItemId,
           userId: validUserId,
         });
-
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data).toBeUndefined();
-        }
 
         expect(mockDeleteLibraryItem).toHaveBeenCalledWith({
           libraryItemId: validLibraryItemId,
           userId: validUserId,
         });
-      });
-    });
-
-    describe("validation scenarios", () => {
-      it("should return validation error for invalid input", async () => {
-        const result = await service.deleteLibraryItem({
-          libraryItemId: -1,
-          userId: validUserId,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBeTruthy();
-        }
-
-        expect(mockDeleteLibraryItem).not.toHaveBeenCalled();
       });
     });
 
     describe("error scenarios", () => {
-      it("should return error when library item not found", async () => {
+      it("should throw NotFoundError when library item not found", async () => {
         mockDeleteLibraryItem.mockRejectedValue(
           new NotFoundError("Library item not found")
         );
 
-        const result = await service.deleteLibraryItem({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toContain("not found");
-        }
-
-        expect(mockDeleteLibraryItem).toHaveBeenCalledWith({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-        });
+        await expect(
+          service.deleteLibraryItem({
+            libraryItemId: validLibraryItemId,
+            userId: validUserId,
+          })
+        ).rejects.toThrow(NotFoundError);
       });
 
-      it("should handle database errors during deletion", async () => {
+      it("should propagate database errors during deletion", async () => {
         mockDeleteLibraryItem.mockRejectedValue(
           new Error("Database connection failed")
         );
 
-        const result = await service.deleteLibraryItem({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Database connection failed");
-        }
-      });
-
-      it("should handle unexpected errors gracefully", async () => {
-        mockDeleteLibraryItem.mockRejectedValue(
-          new Error("Connection timeout")
-        );
-
-        const result = await service.deleteLibraryItem({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Connection timeout");
-        }
+        await expect(
+          service.deleteLibraryItem({
+            libraryItemId: validLibraryItemId,
+            userId: validUserId,
+          })
+        ).rejects.toThrow("Database connection failed");
       });
     });
   });
@@ -425,10 +354,11 @@ describe("LibraryService", () => {
             createMockLibraryItem(from)
           );
 
-          mockUpdateLibraryItem.mockResolvedValue({
+          const updated = {
             ...createMockLibraryItem(to),
             updatedAt: new Date("2025-01-02"),
-          });
+          };
+          mockUpdateLibraryItem.mockResolvedValue(updated);
 
           const result = await service.updateLibraryItem({
             userId: validUserId,
@@ -438,11 +368,7 @@ describe("LibraryService", () => {
             },
           });
 
-          expect(result.success).toBe(true);
-          if (result.success) {
-            expect(result.data.status).toBe(to);
-          }
-
+          expect(result.status).toBe(to);
           expect(mockUpdateLibraryItem).toHaveBeenCalled();
         }
       );
@@ -528,28 +454,25 @@ describe("LibraryService", () => {
     });
 
     describe("error scenarios", () => {
-      it("should return error when library item not found", async () => {
+      it("should throw NotFoundError when library item not found", async () => {
         mockFindLibraryItemById.mockRejectedValue(
           new NotFoundError("Library item not found")
         );
 
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.PLAYING,
-          },
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Library item not found");
-        }
+        await expect(
+          service.updateLibraryItem({
+            userId: validUserId,
+            libraryItem: {
+              id: libraryItemId,
+              status: LibraryItemStatus.PLAYING,
+            },
+          })
+        ).rejects.toThrow(NotFoundError);
 
         expect(mockUpdateLibraryItem).not.toHaveBeenCalled();
       });
 
-      it("should return error when repository update fails", async () => {
+      it("should throw when repository update fails", async () => {
         mockFindLibraryItemById.mockResolvedValue(
           createMockLibraryItem(LibraryItemStatus.WISHLIST)
         );
@@ -558,60 +481,31 @@ describe("LibraryService", () => {
           new Error("Database update failed")
         );
 
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.PLAYING,
-          },
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Database update failed");
-        }
+        await expect(
+          service.updateLibraryItem({
+            userId: validUserId,
+            libraryItem: {
+              id: libraryItemId,
+              status: LibraryItemStatus.PLAYING,
+            },
+          })
+        ).rejects.toThrow("Database update failed");
       });
 
-      it("should handle unexpected errors during status fetch", async () => {
+      it("should propagate unexpected errors during status fetch", async () => {
         mockFindLibraryItemById.mockRejectedValue(
           new Error("Connection timeout")
         );
 
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.PLAYING,
-          },
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Connection timeout");
-        }
-      });
-
-      it("should handle unexpected errors during update", async () => {
-        mockFindLibraryItemById.mockResolvedValue(
-          createMockLibraryItem(LibraryItemStatus.WISHLIST)
-        );
-
-        mockUpdateLibraryItem.mockRejectedValue(
-          new Error("Database connection lost")
-        );
-
-        const result = await service.updateLibraryItem({
-          userId: validUserId,
-          libraryItem: {
-            id: libraryItemId,
-            status: LibraryItemStatus.PLAYING,
-          },
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Database connection lost");
-        }
+        await expect(
+          service.updateLibraryItem({
+            userId: validUserId,
+            libraryItem: {
+              id: libraryItemId,
+              status: LibraryItemStatus.PLAYING,
+            },
+          })
+        ).rejects.toThrow("Connection timeout");
       });
     });
 
@@ -690,75 +584,16 @@ describe("LibraryService", () => {
     const validUserId = "clx123abc456def";
     const validLibraryItemId = 42;
 
-    describe("validation rejections", () => {
-      it("should reject rating of 0", async () => {
-        const result = await service.setRating({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-          rating: 0,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe("VALIDATION_ERROR");
-        }
-        expect(mockSetRating).not.toHaveBeenCalled();
-      });
-
-      it("should reject rating of 11", async () => {
-        const result = await service.setRating({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-          rating: 11,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe("VALIDATION_ERROR");
-        }
-        expect(mockSetRating).not.toHaveBeenCalled();
-      });
-
-      it("should reject a non-integer float rating (5.5)", async () => {
-        const result = await service.setRating({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-          rating: 5.5,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe("VALIDATION_ERROR");
-        }
-        expect(mockSetRating).not.toHaveBeenCalled();
-      });
-
-      it("should reject NaN as rating", async () => {
-        const result = await service.setRating({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-          rating: NaN,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe("VALIDATION_ERROR");
-        }
-        expect(mockSetRating).not.toHaveBeenCalled();
-      });
-    });
-
     describe("valid pass-through values", () => {
       it("should accept null to clear a rating", async () => {
-        mockSetRating.mockResolvedValue({ ok: true, data: undefined });
+        mockSetRating.mockResolvedValue(undefined);
 
-        const result = await service.setRating({
+        await service.setRating({
           libraryItemId: validLibraryItemId,
           userId: validUserId,
           rating: null,
         });
 
-        expect(result.success).toBe(true);
         expect(mockSetRating).toHaveBeenCalledWith({
           libraryItemId: validLibraryItemId,
           userId: validUserId,
@@ -767,84 +602,73 @@ describe("LibraryService", () => {
       });
 
       it("should accept the minimum valid rating of 1", async () => {
-        mockSetRating.mockResolvedValue({ ok: true, data: undefined });
+        mockSetRating.mockResolvedValue(undefined);
 
-        const result = await service.setRating({
+        await service.setRating({
           libraryItemId: validLibraryItemId,
           userId: validUserId,
           rating: 1,
         });
 
-        expect(result.success).toBe(true);
         expect(mockSetRating).toHaveBeenCalledWith(
           expect.objectContaining({ rating: 1 })
         );
       });
 
       it("should accept the maximum valid rating of 10", async () => {
-        mockSetRating.mockResolvedValue({ ok: true, data: undefined });
+        mockSetRating.mockResolvedValue(undefined);
 
-        const result = await service.setRating({
+        await service.setRating({
           libraryItemId: validLibraryItemId,
           userId: validUserId,
           rating: 10,
         });
 
-        expect(result.success).toBe(true);
         expect(mockSetRating).toHaveBeenCalledWith(
           expect.objectContaining({ rating: 10 })
         );
       });
 
       it("should accept a mid-range rating of 5", async () => {
-        mockSetRating.mockResolvedValue({ ok: true, data: undefined });
+        mockSetRating.mockResolvedValue(undefined);
 
-        const result = await service.setRating({
+        await service.setRating({
           libraryItemId: validLibraryItemId,
           userId: validUserId,
           rating: 5,
         });
 
-        expect(result.success).toBe(true);
         expect(mockSetRating).toHaveBeenCalledWith(
           expect.objectContaining({ rating: 5 })
         );
       });
     });
 
-    describe("repository failure mapping", () => {
-      it("should map a NOT_FOUND repository result to a NOT_FOUND service error", async () => {
-        mockSetRating.mockResolvedValue({
-          ok: false,
-          error: { code: "NOT_FOUND", message: "Library item not found" },
-        });
+    describe("repository failure propagation", () => {
+      it("should throw NotFoundError when library item not found", async () => {
+        mockSetRating.mockRejectedValue(
+          new NotFoundError("Library item not found")
+        );
 
-        const result = await service.setRating({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-          rating: 5,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe("NOT_FOUND");
-          expect(result.error).toBe("Library item not found");
-        }
+        await expect(
+          service.setRating({
+            libraryItemId: validLibraryItemId,
+            userId: validUserId,
+            rating: 5,
+          })
+        ).rejects.toThrow(NotFoundError);
       });
 
-      it("should propagate unexpected repository errors as internal errors", async () => {
+      it("should propagate unexpected repository errors", async () => {
         mockSetRating.mockRejectedValue(new Error("Database connection lost"));
 
-        const result = await service.setRating({
-          libraryItemId: validLibraryItemId,
-          userId: validUserId,
-          rating: 5,
-        });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe("INTERNAL_ERROR");
-        }
+        await expect(
+          service.setRating({
+            libraryItemId: validLibraryItemId,
+            userId: validUserId,
+            rating: 5,
+          })
+        ).rejects.toThrow("Database connection lost");
       });
     });
   });

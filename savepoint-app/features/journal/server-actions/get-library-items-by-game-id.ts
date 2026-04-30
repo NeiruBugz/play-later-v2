@@ -22,29 +22,18 @@ export const getLibraryItemsByGameIdAction = createServerAction<
     logger.info({ gameId, userId }, "Fetching library items by game ID");
 
     const libraryService = new LibraryService();
-    const result = await libraryService.findAllLibraryItemsByGameId({
+    const data = await libraryService.findAllLibraryItemsByGameId({
       userId: userId!,
       gameId,
     });
 
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, gameId },
-        "Failed to fetch library items"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
-
     logger.info(
-      { userId, gameId, count: result.data.length },
+      { userId, gameId, count: data.length },
       "Library items fetched successfully"
     );
     return {
       success: true,
-      data: result.data,
+      data,
     };
   },
 });
