@@ -1,5 +1,5 @@
+import { SteamProfilePrivateError } from "@/data-access-layer/services/steam/errors";
 import { SteamService } from "@/data-access-layer/services/steam/steam-service";
-import { ServiceErrorCode } from "@/data-access-layer/services/types";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import {
@@ -9,6 +9,7 @@ import {
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult, RequestContext } from "../types";
 import { connectSteamSchema } from "./schemas";
 import type {
@@ -63,74 +64,42 @@ export async function connectSteamHandler(
 
   const steamService = new SteamService();
 
-  const validateResult = await steamService.validateSteamId({
-    input: validation.data.steamId,
-  });
-
-  if (!validateResult.success) {
-    logger.warn(
-      { steamId, code: validateResult.code, error: validateResult.error },
-      "Steam ID validation failed"
-    );
-
-    const statusMap: Partial<Record<ServiceErrorCode, number>> = {
-      [ServiceErrorCode.VALIDATION_ERROR]: HTTP_STATUS.BAD_REQUEST,
-      [ServiceErrorCode.NOT_FOUND]: HTTP_STATUS.NOT_FOUND,
-      [ServiceErrorCode.UNAUTHORIZED]: HTTP_STATUS.FORBIDDEN,
-      [ServiceErrorCode.EXTERNAL_SERVICE_ERROR]:
-        HTTP_STATUS.SERVICE_UNAVAILABLE,
-      [ServiceErrorCode.STEAM_API_UNAVAILABLE]: HTTP_STATUS.SERVICE_UNAVAILABLE,
-      [ServiceErrorCode.RATE_LIMITED]: HTTP_STATUS.TOO_MANY_REQUESTS,
-    };
-
+  let steamId64: string;
+  try {
+    steamId64 = await steamService.validateSteamId({
+      input: validation.data.steamId,
+    });
+  } catch (error) {
+    logger.warn({ steamId, error }, "Steam ID validation failed");
     return {
       success: false,
-      error: validateResult.error,
-      status: validateResult.code
-        ? (statusMap[validateResult.code] ?? HTTP_STATUS.INTERNAL_SERVER_ERROR)
-        : HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      error: "Invalid Steam ID or Steam profile not found",
+      status: HTTP_STATUS.BAD_REQUEST,
     };
   }
 
-  const steamId64 = validateResult.data;
+  let profile: Awaited<ReturnType<SteamService["getPlayerSummary"]>>;
+  try {
+    profile = await steamService.getPlayerSummary({ steamId64 });
+  } catch (error) {
+    logger.error({ steamId64, error }, "Failed to fetch Steam profile");
 
-  const profileResult = await steamService.getPlayerSummary({ steamId64 });
+    if (error instanceof SteamProfilePrivateError) {
+      return {
+        success: false,
+        error: error.message,
+        status: HTTP_STATUS.FORBIDDEN,
+      };
+    }
 
-  if (!profileResult.success) {
-    logger.error(
-      { steamId64, code: profileResult.code, error: profileResult.error },
-      "Failed to fetch Steam profile"
-    );
-
-    const statusMap: Partial<Record<ServiceErrorCode, number>> = {
-      [ServiceErrorCode.NOT_FOUND]: HTTP_STATUS.NOT_FOUND,
-      [ServiceErrorCode.UNAUTHORIZED]: HTTP_STATUS.FORBIDDEN,
-      [ServiceErrorCode.STEAM_PROFILE_PRIVATE]: HTTP_STATUS.FORBIDDEN,
-      [ServiceErrorCode.EXTERNAL_SERVICE_ERROR]:
-        HTTP_STATUS.SERVICE_UNAVAILABLE,
-      [ServiceErrorCode.STEAM_API_UNAVAILABLE]: HTTP_STATUS.SERVICE_UNAVAILABLE,
-      [ServiceErrorCode.RATE_LIMITED]: HTTP_STATUS.TOO_MANY_REQUESTS,
-    };
-
-    return {
-      success: false,
-      error: profileResult.error,
-      status: profileResult.code
-        ? (statusMap[profileResult.code] ?? HTTP_STATUS.INTERNAL_SERVER_ERROR)
-        : HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    };
+    return mapErrorToHandlerResult(error);
   }
 
-  const profile = profileResult.data;
-
-  const connectResult = await steamService.connectSteamAccount({
-    userId,
-    profile,
-  });
-
-  if (!connectResult.success) {
+  try {
+    await steamService.connectSteamAccount({ userId, profile });
+  } catch (error) {
     logger.error(
-      { userId, steamId64, error: connectResult.error },
+      { userId, steamId64, error },
       "Failed to update user with Steam data"
     );
     return {

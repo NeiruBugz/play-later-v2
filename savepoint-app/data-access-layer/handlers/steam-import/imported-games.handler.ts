@@ -3,6 +3,7 @@ import { ImportedGameService } from "@/data-access-layer/services";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult } from "../types";
 import type {
   ImportedGamesHandlerInput,
@@ -52,56 +53,46 @@ export async function importedGamesHandler(
     "Fetching imported games"
   );
 
-  const importedGameService = new ImportedGameService();
-  const result = await importedGameService.findByUserId({
-    userId,
-    page: validatedPage,
-    limit: validatedLimit,
-    search,
-    playtimeStatus,
-    playtimeRange,
-    platform,
-    lastPlayed,
-    sortBy,
-    showAlreadyImported,
-  });
+  try {
+    const importedGameService = new ImportedGameService();
+    const {
+      items,
+      total,
+      page: resultPage,
+      limit: resultLimit,
+      totalPages,
+    } = await importedGameService.findByUserId({
+      userId,
+      page: validatedPage,
+      limit: validatedLimit,
+      search,
+      playtimeStatus,
+      playtimeRange,
+      platform,
+      lastPlayed,
+      sortBy,
+      showAlreadyImported,
+    });
 
-  if (!result.success) {
-    logger.error(
-      { userId, error: result.error },
-      "Failed to fetch imported games"
+    logger.info(
+      { userId, total, page: resultPage, totalPages },
+      "Successfully fetched imported games"
     );
+
     return {
-      success: false,
-      error: "Failed to fetch imported games. Please try again.",
-      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    };
-  }
-
-  const {
-    items,
-    total,
-    page: resultPage,
-    limit: resultLimit,
-    totalPages,
-  } = result.data;
-
-  logger.info(
-    { userId, total, page: resultPage, totalPages },
-    "Successfully fetched imported games"
-  );
-
-  return {
-    success: true,
-    data: {
-      games: items,
-      pagination: {
-        page: resultPage,
-        limit: resultLimit,
-        total,
-        totalPages,
+      success: true,
+      data: {
+        games: items,
+        pagination: {
+          page: resultPage,
+          limit: resultLimit,
+          total,
+          totalPages,
+        },
       },
-    },
-    status: HTTP_STATUS.OK,
-  };
+      status: HTTP_STATUS.OK,
+    };
+  } catch (error) {
+    return mapErrorToHandlerResult(error);
+  }
 }

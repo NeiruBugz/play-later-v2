@@ -32,7 +32,7 @@ export const createJournalEntryAction = createServerAction<
     } = input;
     logger.info({ gameId, userId }, "Creating journal entry");
     const journalService = new JournalService();
-    const result = await journalService.createJournalEntry({
+    const entry = await journalService.createJournalEntry({
       userId: userId!,
       gameId,
       kind,
@@ -44,29 +44,19 @@ export const createJournalEntryAction = createServerAction<
       playSession,
       libraryItemId,
     });
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, gameId },
-        "Failed to create journal entry"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
     revalidatePath("/journal");
     revalidatePath("/games/[slug]", "page");
     logger.info(
       {
         userId,
-        entryId: result.data.id,
+        entryId: entry.id,
         gameId,
       },
       "Journal entry created successfully"
     );
     return {
       success: true,
-      data: result.data,
+      data: entry,
     };
   },
 });

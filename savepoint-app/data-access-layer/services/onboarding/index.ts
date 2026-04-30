@@ -3,7 +3,5 @@ export type {
   OnboardingStep,
   OnboardingProgress,
   GetOnboardingProgressInput,
-  GetOnboardingProgressResult,
   DismissOnboardingInput,
-  DismissOnboardingResult,
 } from "./types";

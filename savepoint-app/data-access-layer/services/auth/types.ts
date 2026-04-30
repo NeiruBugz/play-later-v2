@@ -1,5 +1,3 @@
-import type { ServiceResult } from "../types";
-
 export type SignUpInput = {
   email: string;
   password: string;
@@ -10,7 +8,7 @@ export type AuthUserData = {
   email: string;
   name: string | null;
 };
-export type SignUpResult = ServiceResult<{
+export type SignUpResult = {
   user: AuthUserData;
   message: string;
-}>;
+};

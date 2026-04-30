@@ -3,8 +3,7 @@ import "server-only";
 import { Prisma, type Game as PrismaGame } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
-
-import { DuplicateError } from "../errors";
+import { ConflictError } from "@/shared/lib/errors";
 
 type GameWithRelations = PrismaGame & {
   genres: Array<{ genre: { id: string; name: string; slug: string } }>;
@@ -113,7 +112,10 @@ export async function createGameWithRelations(params: {
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
-      throw new DuplicateError("Game already exists");
+      throw new ConflictError("Game already exists", {
+        igdbId: params.igdbGame.id,
+        slug: params.igdbGame.slug,
+      });
     }
     throw error;
   }

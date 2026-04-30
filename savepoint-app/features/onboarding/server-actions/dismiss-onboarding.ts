@@ -19,15 +19,7 @@ export const dismissOnboarding = createServerAction<
     logger.info({ userId }, "Dismissing onboarding");
 
     const service = new OnboardingService();
-    const result = await service.dismiss({ userId: userId! });
-
-    if (!result.success) {
-      logger.error(
-        { userId, reason: result.error },
-        "Dismiss onboarding failed"
-      );
-      return { success: false, error: result.error };
-    }
+    await service.dismiss({ userId: userId! });
 
     revalidatePath("/dashboard");
     logger.info({ userId }, "Onboarding dismissed successfully");

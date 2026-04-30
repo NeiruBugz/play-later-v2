@@ -25,7 +25,7 @@ export const updateLibraryStatusAction = createServerAction<
       "Updating library item status"
     );
     const libraryService = new LibraryService();
-    const result = await libraryService.updateLibraryItem({
+    const data = await libraryService.updateLibraryItem({
       userId: userId!,
       libraryItem: {
         id: libraryItemId,
@@ -34,28 +34,18 @@ export const updateLibraryStatusAction = createServerAction<
         statusChangedAt: new Date(),
       },
     });
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, libraryItemId },
-        "LibraryService failed to update library item"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
     revalidatePath("/library");
     logger.info(
       {
         userId,
-        libraryItemId: result.data.id,
+        libraryItemId: data.id,
         status,
       },
       "Library item status updated successfully"
     );
     return {
       success: true,
-      data: result.data,
+      data,
     };
   },
 });

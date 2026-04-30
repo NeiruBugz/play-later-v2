@@ -26,39 +26,28 @@ export async function getQuickLogPlayingGames(
   const libraryService = new LibraryService();
   const journalService = new JournalService();
 
-  const libraryResult = await libraryService.getLibraryItems({
+  const libraryData = await libraryService.getLibraryItems({
     userId,
     status: LibraryItemStatus.PLAYING,
     distinctByGame: true,
   });
 
-  if (!libraryResult.success) {
-    logger.error(
-      { error: libraryResult.error, userId },
-      "Failed to fetch playing games"
-    );
-    return [];
-  }
-
-  const items = libraryResult.data.items;
+  const items = libraryData.items;
   if (items.length === 0) {
     return [];
   }
 
   const gameIds = items.map((item) => item.game.id);
 
-  const journalResult = await journalService.getLatestEntryDatePerGame(
-    userId,
-    gameIds
-  );
-
-  const latestJournalDates = journalResult.success
-    ? journalResult.data
-    : new Map<string, Date>();
-
-  if (!journalResult.success) {
+  let latestJournalDates = new Map<string, Date>();
+  try {
+    latestJournalDates = await journalService.getLatestEntryDatePerGame(
+      userId,
+      gameIds
+    );
+  } catch (error) {
     logger.warn(
-      { error: journalResult.error, userId },
+      { error, userId },
       "Failed to fetch latest journal dates; falling back to library timestamps"
     );
   }

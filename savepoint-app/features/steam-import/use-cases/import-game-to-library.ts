@@ -6,11 +6,12 @@ import {
   IgdbService,
   ImportedGameService,
   LibraryService,
-  ServiceErrorCode,
 } from "@/data-access-layer/services";
+import { IgdbRateLimitError } from "@/data-access-layer/services/igdb/errors";
 import { matchSteamGameToIgdb } from "@/data-access-layer/services/igdb/igdb-matcher";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { ExternalServiceError } from "@/shared/lib/errors";
 import {
   AcquisitionType,
   LibraryItemStatus,
@@ -48,6 +49,26 @@ type ImportGameToLibraryResult =
       error: string;
     };
 
+async function tryUpdateStatus(
+  importedGameService: ImportedGameService,
+  importedGameId: string,
+  userId: string,
+  status: "UNMATCHED" | "MATCHED" | "IGNORED" | "PENDING"
+): Promise<void> {
+  try {
+    await importedGameService.updateStatus({
+      id: importedGameId,
+      userId,
+      status,
+    });
+  } catch (error) {
+    logger.error(
+      { error, importedGameId, status },
+      "Failed to update imported game status"
+    );
+  }
+}
+
 export async function importGameToLibrary(
   input: ImportGameToLibraryInput
 ): Promise<ImportGameToLibraryResult> {
@@ -59,22 +80,11 @@ export async function importGameToLibrary(
   );
 
   const importedGameService = new ImportedGameService();
-  const importedGameResult = await importedGameService.findById({
+  const importedGame = await importedGameService.findById({
     id: importedGameId,
     userId,
   });
-  if (!importedGameResult.success) {
-    logger.error(
-      { error: importedGameResult.error, importedGameId, userId },
-      "Failed to fetch imported game"
-    );
-    return {
-      success: false,
-      error: "Failed to fetch imported game",
-    };
-  }
 
-  const importedGame = importedGameResult.data;
   if (!importedGame) {
     logger.warn({ importedGameId, userId }, "Imported game not found");
     return {
@@ -84,12 +94,9 @@ export async function importGameToLibrary(
   }
 
   let igdbId: number;
-  let igdbGameData:
-    | Extract<
-        Awaited<ReturnType<IgdbService["getGameDetails"]>>,
-        { success: true }
-      >["data"]
-    | null = null;
+  let igdbGameData: {
+    game: Awaited<ReturnType<IgdbService["getGameDetails"]>>["game"];
+  } | null = null;
 
   if (manualIgdbId) {
     logger.info(
@@ -108,37 +115,32 @@ export async function importGameToLibrary(
         { importedGameId },
         "Cannot auto-match: missing storefrontGameId"
       );
-      const updateStatusResult = await importedGameService.updateStatus({
-        id: importedGameId,
+      await tryUpdateStatus(
+        importedGameService,
+        importedGameId,
         userId,
-        status: "UNMATCHED",
-      });
-      if (!updateStatusResult.success) {
-        logger.error(
-          { error: updateStatusResult.error, importedGameId },
-          "Failed to update status to UNMATCHED"
-        );
-      }
+        "UNMATCHED"
+      );
       return {
         success: false,
         error: "Cannot match game without Steam App ID",
       };
     }
 
-    const matchResult = await matchSteamGameToIgdb({
-      steamAppId: importedGame.storefrontGameId,
-    });
+    let matchResult: Awaited<ReturnType<typeof matchSteamGameToIgdb>>;
+    try {
+      matchResult = await matchSteamGameToIgdb({
+        steamAppId: importedGame.storefrontGameId,
+      });
+    } catch (error) {
+      const isRetryable =
+        error instanceof IgdbRateLimitError ||
+        error instanceof ExternalServiceError;
 
-    if (!matchResult.success) {
-      const isNetworkError =
-        matchResult.code === ServiceErrorCode.EXTERNAL_SERVICE_ERROR ||
-        matchResult.code === ServiceErrorCode.IGDB_RATE_LIMITED;
-
-      if (isNetworkError) {
+      if (isRetryable) {
         logger.warn(
           {
-            error: matchResult.error,
-            errorCode: matchResult.code,
+            error,
             importedGameId,
           },
           "Network error during Steam to IGDB matching - game stays PENDING for retry"
@@ -146,73 +148,51 @@ export async function importGameToLibrary(
         return {
           success: false,
           error:
-            matchResult.error || "Network error occurred. Please try again.",
+            error instanceof Error
+              ? error.message
+              : "Network error occurred. Please try again.",
         };
       }
 
-      logger.error(
-        { error: matchResult.error, importedGameId },
-        "Steam to IGDB matching failed"
-      );
-      const updateStatusResult = await importedGameService.updateStatus({
-        id: importedGameId,
+      logger.error({ error, importedGameId }, "Steam to IGDB matching failed");
+      await tryUpdateStatus(
+        importedGameService,
+        importedGameId,
         userId,
-        status: "UNMATCHED",
-      });
-      if (!updateStatusResult.success) {
-        logger.error(
-          { error: updateStatusResult.error, importedGameId },
-          "Failed to update status to UNMATCHED"
-        );
-      }
+        "UNMATCHED"
+      );
       return {
         success: false,
-        error: matchResult.error || "IGDB matching failed",
+        error: error instanceof Error ? error.message : "IGDB matching failed",
       };
     }
 
-    if (!matchResult.data.game) {
+    if (!matchResult.game) {
       logger.warn(
         { importedGameId, steamAppId: importedGame.storefrontGameId },
         "No IGDB match found for Steam game"
       );
-      const updateStatusResult = await importedGameService.updateStatus({
-        id: importedGameId,
+      await tryUpdateStatus(
+        importedGameService,
+        importedGameId,
         userId,
-        status: "UNMATCHED",
-      });
-      if (!updateStatusResult.success) {
-        logger.error(
-          { error: updateStatusResult.error, importedGameId },
-          "Failed to update status to UNMATCHED"
-        );
-      }
+        "UNMATCHED"
+      );
       return {
         success: false,
         error: "No IGDB match found for this Steam game",
       };
     }
 
-    igdbId = matchResult.data.game.id;
-    igdbGameData = { game: matchResult.data.game };
+    igdbId = matchResult.game.id;
+    igdbGameData = { game: matchResult.game };
     logger.info(
-      { importedGameId, igdbId, gameName: matchResult.data.game.name },
+      { importedGameId, igdbId, gameName: matchResult.game.name },
       "Successfully matched Steam game to IGDB"
     );
   }
 
-  const gameResult = await getGameByIgdbId(igdbId);
-  if (!gameResult.success) {
-    logger.error(
-      { error: gameResult.error, igdbId },
-      "Failed to check if game exists in database"
-    );
-    return {
-      success: false,
-      error: "Failed to check game existence",
-    };
-  }
-  const game = gameResult.data;
+  const game = await getGameByIgdbId(igdbId);
 
   let gameId: string;
   let gameSlug: string;
@@ -229,13 +209,14 @@ export async function importGameToLibrary(
 
     if (!igdbGameData) {
       const igdbService = new IgdbService();
-      const igdbDetailsResult = await igdbService.getGameDetails({
-        gameId: igdbId,
-      });
-
-      if (!igdbDetailsResult.success) {
+      let igdbDetails: Awaited<ReturnType<IgdbService["getGameDetails"]>>;
+      try {
+        igdbDetails = await igdbService.getGameDetails({
+          gameId: igdbId,
+        });
+      } catch (error) {
         logger.error(
-          { error: igdbDetailsResult.error, igdbId },
+          { error, igdbId },
           "Failed to fetch game details from IGDB"
         );
         return {
@@ -244,7 +225,7 @@ export async function importGameToLibrary(
         };
       }
 
-      igdbGameData = igdbDetailsResult.data;
+      igdbGameData = { game: igdbDetails.game };
     }
 
     if (!igdbGameData || !igdbGameData.game) {
@@ -256,22 +237,11 @@ export async function importGameToLibrary(
     }
 
     const gameDetailService = new GameDetailService();
-    const populateResult = await gameDetailService.populateGameInDatabase(
+    const populatedGame = await gameDetailService.populateGameInDatabase(
       igdbGameData.game
     );
 
-    if (!populateResult.success) {
-      logger.error(
-        { error: populateResult.error, igdbId },
-        "Failed to populate game in database"
-      );
-      return {
-        success: false,
-        error: "Failed to create game record",
-      };
-    }
-
-    if (!populateResult.data) {
+    if (!populatedGame) {
       logger.error({ igdbId }, "Game population returned no data");
       return {
         success: false,
@@ -279,8 +249,8 @@ export async function importGameToLibrary(
       };
     }
 
-    gameId = populateResult.data.id;
-    gameSlug = populateResult.data.slug;
+    gameId = populatedGame.id;
+    gameSlug = populatedGame.slug;
     logger.info(
       { gameId, igdbId, slug: gameSlug },
       "Successfully created game in database"
@@ -288,39 +258,23 @@ export async function importGameToLibrary(
   }
 
   const libraryService = new LibraryService();
-  const existingItemsResult = await libraryService.findAllLibraryItemsByGameId({
+  const existingItems = await libraryService.findAllLibraryItemsByGameId({
     userId,
     gameId,
   });
 
-  if (!existingItemsResult.success) {
-    logger.error(
-      { error: existingItemsResult.error, userId, gameId },
-      "Failed to check library"
-    );
-    return {
-      success: false,
-      error: "Failed to check library",
-    };
-  }
-
-  if (existingItemsResult.data && existingItemsResult.data.length > 0) {
+  if (existingItems.length > 0) {
     logger.warn(
-      { userId, gameId, existingCount: existingItemsResult.data.length },
+      { userId, gameId, existingCount: existingItems.length },
       "Game already in user library (marking as MATCHED)"
     );
 
-    const updateStatusResult = await importedGameService.updateStatus({
-      id: importedGameId,
+    await tryUpdateStatus(
+      importedGameService,
+      importedGameId,
       userId,
-      status: "MATCHED",
-    });
-    if (!updateStatusResult.success) {
-      logger.error(
-        { error: updateStatusResult.error, importedGameId },
-        "Failed to update imported game status to MATCHED"
-      );
-    }
+      "MATCHED"
+    );
 
     return {
       success: false,
@@ -328,7 +282,7 @@ export async function importGameToLibrary(
     };
   }
 
-  const createResult = await libraryService.createLibraryItem({
+  const libraryItem = await libraryService.createLibraryItem({
     userId,
     gameId,
     libraryItem: {
@@ -338,34 +292,13 @@ export async function importGameToLibrary(
     },
   });
 
-  if (!createResult.success) {
-    logger.error(
-      { error: createResult.error, userId, gameId },
-      "Failed to create library item"
-    );
-    return {
-      success: false,
-      error: createResult.error || "Failed to create library item",
-    };
-  }
-
-  const updateStatusResult = await importedGameService.updateStatus({
-    id: importedGameId,
-    userId,
-    status: "MATCHED",
-  });
-  if (!updateStatusResult.success) {
-    logger.error(
-      { error: updateStatusResult.error, importedGameId },
-      "Failed to update imported game status to MATCHED"
-    );
-  }
+  await tryUpdateStatus(importedGameService, importedGameId, userId, "MATCHED");
 
   logger.info(
     {
       importedGameId,
       gameId,
-      libraryItemId: createResult.data.id,
+      libraryItemId: libraryItem.id,
       gameSlug,
     },
     "Successfully imported game to library"
@@ -374,7 +307,7 @@ export async function importGameToLibrary(
   return {
     success: true,
     data: {
-      libraryItem: createResult.data,
+      libraryItem,
       gameSlug,
     },
   };

@@ -1,6 +1,6 @@
 import type { RequestContext } from "@/data-access-layer/handlers/types";
+import { IgdbRateLimitError } from "@/data-access-layer/services/igdb/errors";
 import type { GameSearchResult } from "@/data-access-layer/services/igdb/types";
-import { ServiceErrorCode } from "@/data-access-layer/services/types";
 
 import { igdbSearchHandler } from "./igdb-handler";
 
@@ -53,10 +53,7 @@ const mockSearchResult: GameSearchResult = {
 describe("igdbSearchHandler.search", () => {
   beforeEach(() => {
     mockSearchGamesByName.mockReset();
-    mockSearchGamesByName.mockResolvedValue({
-      success: true,
-      data: mockSearchResult,
-    });
+    mockSearchGamesByName.mockResolvedValue(mockSearchResult);
   });
 
   it("happy path: returns status 200 with service data", async () => {
@@ -85,12 +82,12 @@ describe("igdbSearchHandler.search", () => {
     });
   });
 
-  it("returns status 429 when service returns IGDB_RATE_LIMITED", async () => {
-    mockSearchGamesByName.mockResolvedValueOnce({
-      success: false,
-      error: "Rate limited",
-      code: ServiceErrorCode.IGDB_RATE_LIMITED,
-    });
+  it("returns status 429 when service throws IgdbRateLimitError", async () => {
+    mockSearchGamesByName.mockRejectedValueOnce(
+      new IgdbRateLimitError(
+        "IGDB rate limit exceeded. Please try again later."
+      )
+    );
 
     const result = await igdbSearchHandler.search(
       { query: "zelda", offset: 0 },

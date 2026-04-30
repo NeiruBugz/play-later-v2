@@ -1,4 +1,7 @@
-import { ServiceErrorCode } from "../types";
+import { ExternalServiceError } from "@/shared/lib/errors";
+import { __resetLimiterForTests } from "@/shared/lib/igdb";
+
+import { IgdbRateLimitError } from "./errors";
 import { matchSteamGameToIgdb, resetTokenCache } from "./igdb-matcher";
 
 vi.mock("@/env.mjs", () => ({
@@ -16,20 +19,15 @@ Object.defineProperty(global, "fetch", {
 
 describe("matchSteamGameToIgdb", () => {
   beforeEach(async () => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     mockFetch.mockReset();
     resetTokenCache();
+    await __resetLimiterForTests();
   });
 
   describe("validation", () => {
-    it("should return VALIDATION_ERROR for empty Steam App ID", async () => {
-      const result = await matchSteamGameToIgdb({ steamAppId: "" });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Steam App ID is required");
-        expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-      }
+    it("should throw ZodError for empty Steam App ID", async () => {
+      await expect(matchSteamGameToIgdb({ steamAppId: "" })).rejects.toThrow();
     });
   });
 
@@ -60,15 +58,11 @@ describe("matchSteamGameToIgdb", () => {
 
       const result = await matchSteamGameToIgdb({ steamAppId: "570" });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.game).toBeDefined();
-        expect(result.data.game?.id).toBe(1234);
-        expect(result.data.game?.name).toBe("Dota 2");
-        expect(result.data.game?.slug).toBe("dota-2");
-      }
+      expect(result.game).toBeDefined();
+      expect(result.game?.id).toBe(1234);
+      expect(result.game?.name).toBe("Dota 2");
+      expect(result.game?.slug).toBe("dota-2");
 
-      // Verify correct Steam Store URL construction
       expect(mockFetch).toHaveBeenCalledTimes(2);
       const secondCall = mockFetch.mock.calls[1];
       expect(secondCall?.[0]).toContain("/games");
@@ -93,15 +87,12 @@ describe("matchSteamGameToIgdb", () => {
 
       const result = await matchSteamGameToIgdb({ steamAppId: "999999" });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.game).toBeNull();
-      }
+      expect(result.game).toBeNull();
     });
   });
 
   describe("error handling", () => {
-    it("should return EXTERNAL_SERVICE_ERROR when token fetch fails", async () => {
+    it("should throw ExternalServiceError when token fetch fails", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
@@ -109,15 +100,12 @@ describe("matchSteamGameToIgdb", () => {
         json: async () => ({}),
       });
 
-      const result = await matchSteamGameToIgdb({ steamAppId: "570" });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.EXTERNAL_SERVICE_ERROR);
-      }
+      await expect(matchSteamGameToIgdb({ steamAppId: "570" })).rejects.toThrow(
+        ExternalServiceError
+      );
     });
 
-    it("should return EXTERNAL_SERVICE_ERROR when IGDB API fails", async () => {
+    it("should throw ExternalServiceError when IGDB API fails", async () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
@@ -133,15 +121,12 @@ describe("matchSteamGameToIgdb", () => {
           headers: { get: () => null },
         });
 
-      const result = await matchSteamGameToIgdb({ steamAppId: "570" });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.EXTERNAL_SERVICE_ERROR);
-      }
+      await expect(matchSteamGameToIgdb({ steamAppId: "570" })).rejects.toThrow(
+        ExternalServiceError
+      );
     });
 
-    it("should return EXTERNAL_SERVICE_ERROR when response validation fails", async () => {
+    it("should throw ExternalServiceError when response validation fails", async () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
@@ -159,27 +144,20 @@ describe("matchSteamGameToIgdb", () => {
           ],
         });
 
-      const result = await matchSteamGameToIgdb({ steamAppId: "570" });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Invalid response from IGDB");
-        expect(result.code).toBe(ServiceErrorCode.EXTERNAL_SERVICE_ERROR);
-      }
+      await expect(matchSteamGameToIgdb({ steamAppId: "570" })).rejects.toThrow(
+        ExternalServiceError
+      );
     });
 
-    it("should return EXTERNAL_SERVICE_ERROR when fetch throws an error", async () => {
+    it("should throw ExternalServiceError when fetch throws an error", async () => {
       mockFetch.mockRejectedValue(new Error("Network failure"));
 
-      const result = await matchSteamGameToIgdb({ steamAppId: "570" });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.EXTERNAL_SERVICE_ERROR);
-      }
+      await expect(matchSteamGameToIgdb({ steamAppId: "570" })).rejects.toThrow(
+        ExternalServiceError
+      );
     });
 
-    it("should return IGDB_RATE_LIMITED when API returns 429", async () => {
+    it("should throw IgdbRateLimitError when API returns 429", async () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
@@ -195,15 +173,30 @@ describe("matchSteamGameToIgdb", () => {
           headers: { get: () => null },
         });
 
-      const result = await matchSteamGameToIgdb({ steamAppId: "570" });
+      await expect(matchSteamGameToIgdb({ steamAppId: "570" })).rejects.toThrow(
+        IgdbRateLimitError
+      );
+    });
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.IGDB_RATE_LIMITED);
-        expect(result.error).toBe(
-          "IGDB rate limit exceeded. Please try again later."
-        );
-      }
+    it("should include rate limit message when API returns 429", async () => {
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            access_token: "test_token",
+            expires_in: 3600,
+          }),
+        })
+        .mockResolvedValue({
+          ok: false,
+          status: 429,
+          statusText: "Too Many Requests",
+          headers: { get: () => null },
+        });
+
+      await expect(matchSteamGameToIgdb({ steamAppId: "570" })).rejects.toThrow(
+        "IGDB rate limit exceeded. Please try again later."
+      );
     });
   });
 });

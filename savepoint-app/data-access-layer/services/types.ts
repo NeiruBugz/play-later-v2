@@ -1,29 +1,3 @@
-import { Prisma } from "@prisma/client";
-
-import { logger } from "@/shared/lib";
-
-export type ServiceResult<TData> =
-  | {
-      success: true;
-      data: TData;
-    }
-  | {
-      success: false;
-      error: string;
-      code?: ServiceErrorCode;
-    };
-export enum ServiceErrorCode {
-  VALIDATION_ERROR = "VALIDATION_ERROR",
-  NOT_FOUND = "NOT_FOUND",
-  UNAUTHORIZED = "UNAUTHORIZED",
-  CONFLICT = "CONFLICT",
-  INTERNAL_ERROR = "INTERNAL_ERROR",
-  EXTERNAL_SERVICE_ERROR = "EXTERNAL_SERVICE_ERROR",
-  STEAM_PROFILE_PRIVATE = "STEAM_PROFILE_PRIVATE",
-  STEAM_API_UNAVAILABLE = "STEAM_API_UNAVAILABLE",
-  RATE_LIMITED = "RATE_LIMITED",
-  IGDB_RATE_LIMITED = "IGDB_RATE_LIMITED",
-}
 export type PaginatedResult<TItem> = {
   items: TItem[];
   total: number;
@@ -44,41 +18,3 @@ export type CursorPaginatedResult<TItem> = {
 export type BaseServiceInput = {
   userId: string;
 };
-export type ExtractServiceData<T> =
-  T extends ServiceResult<infer TData> ? TData : never;
-export function isSuccessResult<TData>(
-  result: ServiceResult<TData>
-): result is { success: true; data: TData } {
-  return result.success === true;
-}
-export function isErrorResult<TData>(
-  result: ServiceResult<TData>
-): result is { success: false; error: string; code?: ServiceErrorCode } {
-  return result.success === false;
-}
-
-export function serviceSuccess<TData>(data: TData): ServiceResult<TData> {
-  return { success: true, data };
-}
-
-export function serviceError(
-  message: string,
-  code?: ServiceErrorCode
-): ServiceResult<never> {
-  return { success: false, error: message, code };
-}
-
-export function handleServiceError(
-  error: unknown,
-  fallbackMessage = "An unexpected error occurred"
-): ServiceResult<never> {
-  if (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2002"
-  ) {
-    return serviceError("Resource already exists", ServiceErrorCode.CONFLICT);
-  }
-  const message = error instanceof Error ? error.message : fallbackMessage;
-  logger.error({ error, message }, "Service error occurred");
-  return serviceError(message, ServiceErrorCode.INTERNAL_ERROR);
-}

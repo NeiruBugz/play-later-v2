@@ -6,7 +6,7 @@ This directory contains the abstraction layer between the application and data s
 
 The Data Access Layer:
 - Abstracts database operations behind clean interfaces
-- Implements business logic with the Result pattern
+- Implements business logic that throws typed errors on failure
 - Provides HTTP request orchestration for API routes
 - Maps between Prisma models and domain types
 
@@ -22,7 +22,7 @@ API Routes / Server Actions
 │               │ (validation, rate limit)│
 ├───────────────┼─────────────────────────┤
 │  services/    │ Business logic          │
-│               │ (Result pattern)        │
+│               │ (typed-throw)           │
 ├───────────────┼─────────────────────────┤
 │  repository/  │ Data access             │
 │               │ (Prisma operations)     │
@@ -39,8 +39,8 @@ API Routes / Server Actions
 | Layer | Responsibility | Returns |
 |-------|---------------|---------|
 | **Handlers** | Request validation, rate limiting, orchestration | `HandlerResult<TData>` |
-| **Services** | Business logic, external APIs, validation | `ServiceResult<TData, TError>` |
-| **Repository** | Direct Prisma operations, no business logic | Prisma types or domain types |
+| **Services** | Business logic, external APIs | Raw data; throws typed errors on failure |
+| **Repository** | Direct Prisma operations, no business logic | Raw data (`T`, `T \| null`, `T[]`); throws typed errors on failure |
 | **Domain** | Type mapping, enums, DTOs | Domain types |
 
 ## Data Flow Rules
@@ -86,24 +86,68 @@ import { prisma } from "@/shared/lib/db";
 // features/**/*.ts → handlers ❌
 ```
 
-## Result Pattern
+## Error Model
 
-All services return structured results instead of throwing errors:
+Repositories and services throw **typed errors** on failure. Edges (server actions, API route handlers, RSC pages) catch and serialize. The full design rationale is in [`context/decisions/DAL_TYPED_THROW.md`](../../context/decisions/DAL_TYPED_THROW.md).
+
+### Catalog
+
+Generic typed errors live in `@/shared/lib/errors`, all extending an abstract `DomainError` with a structured `context` field:
+
+| Class | Default HTTP status (via `mapErrorToHandlerResult`) |
+|---|---|
+| `NotFoundError` | 404 |
+| `ConflictError` | 409 |
+| `UnauthorizedError` | 401 |
+| `RateLimitError` | 429 (surfaces `Retry-After` from `context.retryAfter`) |
+| `ExternalServiceError` | 503 |
+| `ZodError` (from Zod itself) | 400 |
+
+Domain-specific subclasses are co-located with their service:
+- `services/igdb/errors.ts` — `IgdbRateLimitError extends RateLimitError`
+- `services/steam/errors.ts` — `SteamProfilePrivateError extends ExternalServiceError`, `SteamApiUnavailableError extends ExternalServiceError`
+
+### How errors propagate
 
 ```typescript
-// Type definition
-type ServiceResult<TData, TError = ServiceError> =
-  | { success: true; data: TData }
-  | { success: false; error: TError };
-
-// Usage
-const result = await gameService.searchGames(query);
-if (result.success) {
-  return result.data;
-} else {
-  console.error(result.error.code, result.error.message);
+// repository
+async function requireGameById(id: string): Promise<Game> {
+  const game = await prisma.game.findUnique({ where: { id } });
+  if (!game) throw new NotFoundError("Game not found", { gameId: id });
+  return game;
 }
+
+// service — no Result wrapping
+async function getGameDetails(id: string): Promise<Game> {
+  return requireGameById(id);
+}
+
+// handler — catches and maps to HandlerResult
+try {
+  const game = await gameService.getGameDetails(id);
+  return { success: true, data: game, status: 200 };
+} catch (error) {
+  return mapErrorToHandlerResult(error, logger);
+}
+
+// server action — wrapper at shared/lib/server-action/create-server-action.ts
+//                 already catches and serializes throws into ActionResult.error
+
+// RSC page — try-then-render (react-hooks/error-boundaries lint rule
+//            forbids JSX inside try/catch)
+let game: Game;
+try {
+  game = await gameService.getGameDetails(id);
+} catch (error) {
+  if (error instanceof NotFoundError) notFound();
+  throw error;
+}
+return <GameView game={game} />;
 ```
+
+### Per-handler status overrides
+
+Handlers can override the default `mapErrorToHandlerResult` mapping with explicit `instanceof` checks before delegating. Example: `fetch-steam-games.handler.ts` returns 403 for `SteamProfilePrivateError` instead of the default 503 for `ExternalServiceError`.
 
 ## Adding New Functionality
 
@@ -112,7 +156,7 @@ if (result.success) {
 2. Create types: `services/[domain]/types.ts`
 3. Create service: `services/[domain]/[domain]-service.ts`
 4. Export from `services/index.ts`
-5. Add unit tests
+5. Add unit tests with mocked repositories
 
 ### Adding a New Repository
 1. Create directory: `repository/[domain]/`
@@ -142,23 +186,15 @@ const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "GameService" });
 const logger = createLogger({ [LOGGER_CONTEXT.HANDLER]: "GameSearchHandler" });
 ```
 
+Errors are logged **once at the edge** (server action wrapper, handler `catch`, page error boundary). Typed errors carry structured `context` so the edge log line has full data without re-deriving it. Do not log-and-rethrow inside services or repositories.
+
 ## Trip-wires
 
 Non-obvious gotchas that have caused real bugs.
 
-### Result type shapes are NOT interchangeable
+### Class identity matters for typed errors
 
-| Type | Discriminator | Defined in |
-|------|---------------|------------|
-| `RepositoryResult<T>` | `.ok` (true/false) | `repository/errors.ts` |
-| `ServiceResult<T, E>` | `.success` (true/false) | `services/types.ts` |
-| `HandlerResult<T>` | `.success` (true/false) | `handlers/types.ts` |
-
-Destructuring `.ok` on a `ServiceResult` or `HandlerResult` yields `undefined` — silent bug. When forwarding a repository result up through a service, transform the shape; do not pass it through.
-
-### Some repository functions return plain rows, not `RepositoryResult`
-
-For example, `updateUserProfile` in `repository/user/user-repository.ts` returns the user row directly. Always read the function's return type before assuming a Result wrapper. Tests that call these via `expect(result.ok).toBe(true)` are buggy (see `test/guides/INTEGRATION_TESTING.md` — known stale).
+Always import typed errors from `@/shared/lib/errors` (or the co-located `services/<domain>/errors.ts` for domain-specific subclasses). Never import them via any other path. `instanceof` checks compare prototype chains; the same class name imported via two different module paths is not the same class — `instanceof` will silently return `false` and `mapErrorToHandlerResult` will fall through to 500.
 
 ### Service-to-service calls are forbidden
 

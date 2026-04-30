@@ -26,7 +26,7 @@ Map from common agent tasks to the canonical source of truth. Read the linked fi
 |---|---|
 | Add a route / page | `savepoint-app/app/CLAUDE.md` (App Router conventions, caching, layouts) |
 | Add a feature (UI + actions + hooks) | `savepoint-app/features/CLAUDE.md` (parent rules, allowlist, trip-wires) — then mirror the closest existing feature |
-| Add a server action | `next-safe-action` `authorizedActionClient`; examples in any feature's `server-actions/` |
+| Add a server action | `createServerAction` from `@/shared/lib` (Zod schema + handler returning `ActionResult`); examples in any feature's `server-actions/` |
 | Add an API route | `app/api/.../route.ts` → handler from `data-access-layer/handlers/` |
 | Compose multiple services | Create a use-case in `features/<name>/use-cases/`. Services may NOT call other services. |
 | Decode a Result return | `data-access-layer/CLAUDE.md` Trip-wires (`.ok` vs `.success` matters) |
@@ -120,3 +120,17 @@ All workflows run on PRs targeting `main`.
 | Deploy | `deploy.yml` | Production deployment |
 | E2E | `e2e.yml` | End-to-end Playwright tests |
 | Integration | `integration.yml` | Integration test suite |
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `NeiruBugz/play-later-v2` (primary). Linear is also used for spec sync via `/awos:linear`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical defaults (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context monorepo: `CONTEXT-MAP.md` at root, per-layer `CONTEXT.md` under `savepoint-app/` and `infra/`. See `docs/agents/domain.md`.

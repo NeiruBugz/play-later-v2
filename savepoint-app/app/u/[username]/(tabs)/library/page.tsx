@@ -40,15 +40,11 @@ export default async function ProfileLibraryPage({
     return null;
   }
 
-  const libraryResult = await libraryService.getLibraryItems({
+  const libraryData = await libraryService.getLibraryItems({
     userId: profileResult.data.profile.id,
   });
 
-  if (!libraryResult.success) {
-    return null;
-  }
-
-  const items = libraryResult.data.items.map((item) => ({
+  const items = libraryData.items.map((item) => ({
     id: item.id,
     status: item.status,
     hasBeenPlayed: item.hasBeenPlayed,

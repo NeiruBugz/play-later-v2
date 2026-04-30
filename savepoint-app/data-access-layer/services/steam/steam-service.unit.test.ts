@@ -11,7 +11,9 @@ import {
   vi,
 } from "vitest";
 
-import { ServiceErrorCode } from "../types";
+import { NotFoundError } from "@/shared/lib/errors";
+
+import { SteamApiUnavailableError, SteamProfilePrivateError } from "./errors";
 import { SteamService } from "./steam-service";
 import type {
   SteamPlayerSummariesResponse,
@@ -60,6 +62,7 @@ describe("SteamService", () => {
 
   afterEach(() => {
     server.resetHandlers();
+    vi.resetAllMocks();
   });
 
   afterAll(() => {
@@ -99,13 +102,10 @@ describe("SteamService", () => {
         vanityUrl: mockVanityUrl,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(mockSteamId64);
-      }
+      expect(result).toBe(mockSteamId64);
     });
 
-    it("should return NOT_FOUND error for non-existent vanity URL", async () => {
+    it("should throw NotFoundError for non-existent vanity URL", async () => {
       const mockResponse: SteamResolveVanityResponse = {
         response: {
           success: 42,
@@ -119,18 +119,12 @@ describe("SteamService", () => {
         })
       );
 
-      const result = await service.resolveVanityURL({
-        vanityUrl: "nonexistent",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-        expect(result.error).toBe("Steam profile not found");
-      }
+      await expect(
+        service.resolveVanityURL({ vanityUrl: "nonexistent" })
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("should return STEAM_API_UNAVAILABLE when Steam API returns 5xx error", async () => {
+    it("should throw SteamApiUnavailableError when Steam API returns 5xx error", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
           return HttpResponse.json(
@@ -140,40 +134,24 @@ describe("SteamService", () => {
         })
       );
 
-      const result = await service.resolveVanityURL({
-        vanityUrl: mockVanityUrl,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.STEAM_API_UNAVAILABLE);
-        expect(result.error).toBe(
-          "Steam is temporarily unavailable. Please try again later."
-        );
-      }
+      await expect(
+        service.resolveVanityURL({ vanityUrl: mockVanityUrl })
+      ).rejects.toThrow(SteamApiUnavailableError);
     });
 
-    it("should return STEAM_API_UNAVAILABLE when Steam API request fails (network error)", async () => {
+    it("should throw SteamApiUnavailableError on network error", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
           return HttpResponse.error();
         })
       );
 
-      const result = await service.resolveVanityURL({
-        vanityUrl: mockVanityUrl,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.STEAM_API_UNAVAILABLE);
-        expect(result.error).toBe(
-          "Steam is temporarily unavailable. Please try again later."
-        );
-      }
+      await expect(
+        service.resolveVanityURL({ vanityUrl: mockVanityUrl })
+      ).rejects.toThrow(SteamApiUnavailableError);
     });
 
-    it("should return RATE_LIMITED when Steam API returns 429 error", async () => {
+    it("should throw SteamApiUnavailableError when Steam API returns 429", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
           return HttpResponse.json(
@@ -183,17 +161,24 @@ describe("SteamService", () => {
         })
       );
 
-      const result = await service.resolveVanityURL({
-        vanityUrl: mockVanityUrl,
-      });
+      await expect(
+        service.resolveVanityURL({ vanityUrl: mockVanityUrl })
+      ).rejects.toThrow(SteamApiUnavailableError);
+    });
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.RATE_LIMITED);
-        expect(result.error).toBe(
-          "Too many requests to Steam. Please wait a moment and try again."
-        );
-      }
+    it("should include rate-limit message when 429", async () => {
+      server.use(
+        http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
+          return HttpResponse.json(
+            { error: "Too Many Requests" },
+            { status: 429 }
+          );
+        })
+      );
+
+      await expect(
+        service.resolveVanityURL({ vanityUrl: mockVanityUrl })
+      ).rejects.toThrow("Too many requests to Steam");
     });
   });
 
@@ -233,19 +218,16 @@ describe("SteamService", () => {
         steamId64: mockSteamId64,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({
-          steamId64: mockSteamId64,
-          displayName: "Test User",
-          avatarUrl: "https://avatars.steamstatic.com/test_full.jpg",
-          profileUrl: `https://steamcommunity.com/id/${mockVanityUrl}/`,
-          isPublic: true,
-        });
-      }
+      expect(result).toEqual({
+        steamId64: mockSteamId64,
+        displayName: "Test User",
+        avatarUrl: "https://avatars.steamstatic.com/test_full.jpg",
+        profileUrl: `https://steamcommunity.com/id/${mockVanityUrl}/`,
+        isPublic: true,
+      });
     });
 
-    it("should return UNAUTHORIZED error for private profile", async () => {
+    it("should throw SteamProfilePrivateError for private profile", async () => {
       const mockResponse: SteamPlayerSummariesResponse = {
         response: {
           players: [
@@ -266,20 +248,38 @@ describe("SteamService", () => {
         })
       );
 
-      const result = await service.getPlayerSummary({
-        steamId64: mockSteamId64,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.STEAM_PROFILE_PRIVATE);
-        expect(result.error).toContain(
-          "Steam profile game details are set to private"
-        );
-      }
+      await expect(
+        service.getPlayerSummary({ steamId64: mockSteamId64 })
+      ).rejects.toThrow(SteamProfilePrivateError);
     });
 
-    it("should return NOT_FOUND error for non-existent Steam ID", async () => {
+    it("should throw SteamProfilePrivateError with descriptive message for private profile", async () => {
+      const mockResponse: SteamPlayerSummariesResponse = {
+        response: {
+          players: [
+            {
+              steamid: mockSteamId64,
+              personaname: "Private User",
+              profileurl: `https://steamcommunity.com/id/${mockVanityUrl}/`,
+              avatarfull: "https://avatars.steamstatic.com/test_full.jpg",
+              communityvisibilitystate: 1,
+            },
+          ],
+        },
+      };
+
+      server.use(
+        http.get(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/`, () => {
+          return HttpResponse.json(mockResponse);
+        })
+      );
+
+      await expect(
+        service.getPlayerSummary({ steamId64: mockSteamId64 })
+      ).rejects.toThrow("Steam profile game details are set to private");
+    });
+
+    it("should throw NotFoundError for non-existent Steam ID", async () => {
       const mockResponse: SteamPlayerSummariesResponse = {
         response: {
           players: [],
@@ -292,18 +292,12 @@ describe("SteamService", () => {
         })
       );
 
-      const result = await service.getPlayerSummary({
-        steamId64: "99999999999999999",
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-        expect(result.error).toBe("Steam profile not found");
-      }
+      await expect(
+        service.getPlayerSummary({ steamId64: "99999999999999999" })
+      ).rejects.toThrow(NotFoundError);
     });
 
-    it("should return STEAM_API_UNAVAILABLE when Steam API returns 5xx error", async () => {
+    it("should throw SteamApiUnavailableError when Steam API returns 5xx error", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/`, () => {
           return HttpResponse.json(
@@ -313,40 +307,24 @@ describe("SteamService", () => {
         })
       );
 
-      const result = await service.getPlayerSummary({
-        steamId64: mockSteamId64,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.STEAM_API_UNAVAILABLE);
-        expect(result.error).toBe(
-          "Steam is temporarily unavailable. Please try again later."
-        );
-      }
+      await expect(
+        service.getPlayerSummary({ steamId64: mockSteamId64 })
+      ).rejects.toThrow(SteamApiUnavailableError);
     });
 
-    it("should return STEAM_API_UNAVAILABLE when Steam API request fails (network error)", async () => {
+    it("should throw SteamApiUnavailableError on network error", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/`, () => {
           return HttpResponse.error();
         })
       );
 
-      const result = await service.getPlayerSummary({
-        steamId64: mockSteamId64,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.STEAM_API_UNAVAILABLE);
-        expect(result.error).toBe(
-          "Steam is temporarily unavailable. Please try again later."
-        );
-      }
+      await expect(
+        service.getPlayerSummary({ steamId64: mockSteamId64 })
+      ).rejects.toThrow(SteamApiUnavailableError);
     });
 
-    it("should return RATE_LIMITED when Steam API returns 429 error", async () => {
+    it("should throw SteamApiUnavailableError when Steam API returns 429", async () => {
       server.use(
         http.get(`${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v2/`, () => {
           return HttpResponse.json(
@@ -356,17 +334,9 @@ describe("SteamService", () => {
         })
       );
 
-      const result = await service.getPlayerSummary({
-        steamId64: mockSteamId64,
-      });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.RATE_LIMITED);
-        expect(result.error).toBe(
-          "Too many requests to Steam. Please wait a moment and try again."
-        );
-      }
+      await expect(
+        service.getPlayerSummary({ steamId64: mockSteamId64 })
+      ).rejects.toThrow(SteamApiUnavailableError);
     });
   });
 
@@ -374,10 +344,7 @@ describe("SteamService", () => {
     it("should return Steam ID64 directly if input is 17-digit number", async () => {
       const result = await service.validateSteamId({ input: mockSteamId64 });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(mockSteamId64);
-      }
+      expect(result).toBe(mockSteamId64);
     });
 
     it("should return Steam ID64 directly if input is 17-digit number with whitespace", async () => {
@@ -385,10 +352,7 @@ describe("SteamService", () => {
         input: `  ${mockSteamId64}  `,
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(mockSteamId64);
-      }
+      expect(result).toBe(mockSteamId64);
     });
 
     it("should resolve vanity URL if input is not Steam ID64", async () => {
@@ -407,13 +371,10 @@ describe("SteamService", () => {
 
       const result = await service.validateSteamId({ input: mockVanityUrl });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(mockSteamId64);
-      }
+      expect(result).toBe(mockSteamId64);
     });
 
-    it("should return VALIDATION_ERROR for invalid vanity URL", async () => {
+    it("should throw NotFoundError when vanity URL is not found", async () => {
       const mockResponse: SteamResolveVanityResponse = {
         response: {
           success: 42,
@@ -427,59 +388,138 @@ describe("SteamService", () => {
         })
       );
 
-      const result = await service.validateSteamId({
-        input: "invalidvanityurl",
+      await expect(
+        service.validateSteamId({ input: "invalidvanityurl" })
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it("should throw SteamApiUnavailableError when Steam API is unavailable", async () => {
+      server.use(
+        http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
+          return HttpResponse.json(
+            { error: "Internal Server Error" },
+            { status: 500 }
+          );
+        })
+      );
+
+      await expect(
+        service.validateSteamId({ input: mockVanityUrl })
+      ).rejects.toThrow(SteamApiUnavailableError);
+    });
+  });
+
+  describe("getOwnedGames", () => {
+    it("should return owned games list", async () => {
+      server.use(
+        http.get(`${STEAM_API_BASE}/IPlayerService/GetOwnedGames/v1/`, () => {
+          return HttpResponse.json({
+            response: {
+              game_count: 1,
+              games: [
+                {
+                  appid: 440,
+                  name: "Team Fortress 2",
+                  playtime_forever: 120,
+                  playtime_windows_forever: 100,
+                  playtime_mac_forever: 20,
+                  playtime_linux_forever: 0,
+                  img_icon_url: "icon.jpg",
+                  img_logo_url: "logo.jpg",
+                  rtime_last_played: 1704067200,
+                },
+              ],
+            },
+          });
+        })
+      );
+
+      const result = await service.getOwnedGames({ steamId64: mockSteamId64 });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        appId: 440,
+        name: "Team Fortress 2",
+        playtimeForever: 120,
+        playtimeWindows: 100,
+        playtimeMac: 20,
+        playtimeLinux: 0,
+        imgIconUrl: "icon.jpg",
+        imgLogoUrl: "logo.jpg",
+        rtimeLastPlayed: 1704067200,
       });
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        expect(result.error).toContain("Invalid Steam ID");
-      }
     });
 
-    it("should return VALIDATION_ERROR for input that is not 17 digits", async () => {
-      const mockResponse: SteamResolveVanityResponse = {
-        response: {
-          success: 42,
-          message: "No match",
-        },
-      };
-
+    it("should return empty array when user has no games", async () => {
       server.use(
-        http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
-          return HttpResponse.json(mockResponse);
+        http.get(`${STEAM_API_BASE}/IPlayerService/GetOwnedGames/v1/`, () => {
+          return HttpResponse.json({
+            response: {
+              game_count: 0,
+              games: [],
+            },
+          });
         })
       );
 
-      const result = await service.validateSteamId({ input: "12345" });
+      const result = await service.getOwnedGames({ steamId64: mockSteamId64 });
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-      }
+      expect(result).toHaveLength(0);
     });
 
-    it("should return VALIDATION_ERROR for empty input after trim", async () => {
-      const mockResponse: SteamResolveVanityResponse = {
-        response: {
-          success: 42,
-          message: "No match",
-        },
-      };
-
+    it("should throw SteamProfilePrivateError when game_count > 0 but no games returned", async () => {
       server.use(
-        http.get(`${STEAM_API_BASE}/ISteamUser/ResolveVanityURL/v1/`, () => {
-          return HttpResponse.json(mockResponse);
+        http.get(`${STEAM_API_BASE}/IPlayerService/GetOwnedGames/v1/`, () => {
+          return HttpResponse.json({
+            response: {
+              game_count: 5,
+            },
+          });
         })
       );
 
-      const result = await service.validateSteamId({ input: "   " });
+      await expect(
+        service.getOwnedGames({ steamId64: mockSteamId64 })
+      ).rejects.toThrow(SteamProfilePrivateError);
+    });
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-      }
+    it("should throw SteamApiUnavailableError when Steam API returns 5xx", async () => {
+      server.use(
+        http.get(`${STEAM_API_BASE}/IPlayerService/GetOwnedGames/v1/`, () => {
+          return new HttpResponse(null, { status: 500 });
+        })
+      );
+
+      await expect(
+        service.getOwnedGames({ steamId64: mockSteamId64 })
+      ).rejects.toThrow(SteamApiUnavailableError);
+    });
+
+    it("should throw SteamApiUnavailableError when Steam API returns 429", async () => {
+      server.use(
+        http.get(`${STEAM_API_BASE}/IPlayerService/GetOwnedGames/v1/`, () => {
+          return HttpResponse.json(
+            { error: "Too Many Requests" },
+            { status: 429 }
+          );
+        })
+      );
+
+      await expect(
+        service.getOwnedGames({ steamId64: mockSteamId64 })
+      ).rejects.toThrow(SteamApiUnavailableError);
+    });
+
+    it("should throw SteamApiUnavailableError on network error", async () => {
+      server.use(
+        http.get(`${STEAM_API_BASE}/IPlayerService/GetOwnedGames/v1/`, () => {
+          return HttpResponse.error();
+        })
+      );
+
+      await expect(
+        service.getOwnedGames({ steamId64: mockSteamId64 })
+      ).rejects.toThrow(SteamApiUnavailableError);
     });
   });
 });

@@ -1,13 +1,10 @@
-import {
-  isSuccessResult,
-  ProfileService,
-  ServiceErrorCode,
-} from "@/data-access-layer/services";
+import { ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { requireServerUserId } from "@/shared/lib/app/auth";
+import { NotFoundError } from "@/shared/lib/errors";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -18,18 +15,19 @@ export default async function ProfilePage() {
   const userId = await requireServerUserId();
   const logger = createLogger({ [LOGGER_CONTEXT.PAGE]: "ProfilePage" });
   const service = new ProfileService();
-  const result = await service.getProfileWithStats({ userId });
-  if (!isSuccessResult(result)) {
-    logger.error(
-      { error: result.error, code: result.code },
-      "Failed to load profile"
-    );
-    if (result.code === ServiceErrorCode.NOT_FOUND) {
+
+  let profile: Awaited<ReturnType<ProfileService["getProfileWithStats"]>>;
+  try {
+    profile = await service.getProfileWithStats({ userId });
+  } catch (error) {
+    if (error instanceof NotFoundError) {
       redirect("/login");
     }
+    logger.error({ error, userId }, "Failed to load profile");
     redirect("/error");
   }
-  const username = result.data.profile.username;
+
+  const username = profile.username;
   if (!username) {
     redirect("/profile/setup");
   }

@@ -15,27 +15,13 @@ import {
   type JournalEntry,
 } from "@prisma/client";
 
-import {
-  handleServiceError,
-  serviceSuccess,
-  type ServiceResult,
-} from "../types";
-
 export class JournalService {
   async findJournalEntriesByGameId(params: {
     userId: string;
     gameId: string;
     limit?: number;
-  }) {
-    try {
-      const data = await findJournalEntriesByGameId(params);
-      return serviceSuccess(data);
-    } catch (error) {
-      return handleServiceError(
-        error,
-        "Failed to find journal entries by game ID"
-      );
-    }
+  }): Promise<JournalEntry[]> {
+    return findJournalEntriesByGameId(params);
   }
 
   private generateAutoTitle(timezone?: string): string {
@@ -60,54 +46,30 @@ export class JournalService {
     playSession?: number;
     libraryItemId?: number;
     timezone?: string;
-  }): Promise<ServiceResult<JournalEntry>> {
-    try {
-      const finalTitle =
-        params.title?.trim() || this.generateAutoTitle(params.timezone);
+  }): Promise<JournalEntry> {
+    const finalTitle =
+      params.title?.trim() || this.generateAutoTitle(params.timezone);
 
-      const data = await createJournalEntry({
-        ...params,
-        title: finalTitle,
-      });
-      return serviceSuccess(data);
-    } catch (error) {
-      return handleServiceError(error, "Failed to create journal entry");
-    }
+    return createJournalEntry({
+      ...params,
+      title: finalTitle,
+    });
   }
 
   async findJournalEntryById(params: {
     entryId: string;
     userId: string;
-  }): Promise<ServiceResult<JournalEntry>> {
-    try {
-      const data = await findJournalEntryById(params);
-      return serviceSuccess(data);
-    } catch (error) {
-      return handleServiceError(error, "Failed to find journal entry by ID");
-    }
+  }): Promise<JournalEntry> {
+    return findJournalEntryById(params);
   }
 
   async findJournalEntriesByUserId(params: {
     userId: string;
     limit?: number;
     cursor?: string;
-  }): Promise<ServiceResult<JournalEntry[]>> {
-    try {
-      const { userId, limit = 20, cursor } = params;
-
-      const data = await findJournalEntriesByUserId({
-        userId,
-        limit,
-        cursor,
-      });
-
-      return serviceSuccess(data);
-    } catch (error) {
-      return handleServiceError(
-        error,
-        "Failed to find journal entries by user ID"
-      );
-    }
+  }): Promise<JournalEntry[]> {
+    const { userId, limit = 20, cursor } = params;
+    return findJournalEntriesByUserId({ userId, limit, cursor });
   }
 
   async updateJournalEntry(params: {
@@ -123,49 +85,23 @@ export class JournalService {
       playSession?: number | null;
       libraryItemId?: number | null;
     };
-  }): Promise<ServiceResult<JournalEntry>> {
-    try {
-      const { userId, entryId, updates } = params;
-
-      const data = await updateJournalEntry({
-        entryId,
-        userId,
-        updates,
-      });
-
-      return serviceSuccess(data);
-    } catch (error) {
-      return handleServiceError(error, "Failed to update journal entry");
-    }
+  }): Promise<JournalEntry> {
+    const { userId, entryId, updates } = params;
+    return updateJournalEntry({ entryId, userId, updates });
   }
 
   async getLatestEntryDatePerGame(
     userId: string,
     gameIds: string[]
-  ): Promise<ServiceResult<Map<string, Date>>> {
-    try {
-      const data = await findLatestJournalDateByGameId({ userId, gameIds });
-      return serviceSuccess(data);
-    } catch (error) {
-      return handleServiceError(
-        error,
-        "Failed to get latest journal entry dates per game"
-      );
-    }
+  ): Promise<Map<string, Date>> {
+    return findLatestJournalDateByGameId({ userId, gameIds });
   }
 
   async deleteJournalEntry(params: {
     userId: string;
     entryId: string;
-  }): Promise<ServiceResult<void>> {
-    try {
-      const { userId, entryId } = params;
-
-      await deleteJournalEntry({ entryId, userId });
-
-      return serviceSuccess(undefined);
-    } catch (error) {
-      return handleServiceError(error, "Failed to delete journal entry");
-    }
+  }): Promise<void> {
+    const { userId, entryId } = params;
+    await deleteJournalEntry({ entryId, userId });
   }
 }

@@ -26,7 +26,7 @@ export async function UpNext({ userId }: UpNextProps) {
 
     logger.info({ userId }, "Fetching up next games");
 
-    const result = await service.getLibraryItems({
+    const data = await service.getLibraryItems({
       userId,
       status: LibraryItemStatus.UP_NEXT,
       sortBy: "updatedAt",
@@ -34,15 +34,7 @@ export async function UpNext({ userId }: UpNextProps) {
       distinctByGame: true,
     });
 
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId },
-        "Failed to fetch up next games"
-      );
-      throw new Error(result.error);
-    }
-
-    const limitedItems = result.data.items.slice(0, UP_NEXT_LIMIT);
+    const limitedItems = data.items.slice(0, UP_NEXT_LIMIT);
 
     logger.info(
       { userId, count: limitedItems.length },
@@ -55,7 +47,7 @@ export async function UpNext({ userId }: UpNextProps) {
       <DashboardGameSection
         title="Up Next"
         items={limitedItems}
-        totalCount={result.data.items.length}
+        totalCount={data.items.length}
         viewAllHref="/library?status=UP_NEXT"
         viewAllLabel="View All Up Next"
         emptyMessage="No games queued up"

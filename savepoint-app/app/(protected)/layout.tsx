@@ -1,4 +1,4 @@
-import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
+import { ProfileService } from "@/data-access-layer/services";
 import type { PropsWithChildren } from "react";
 
 import { MobileNav } from "@/widgets/mobile-nav";
@@ -17,15 +17,16 @@ export default async function ProtectedLayout({ children }: PropsWithChildren) {
   const userId = await requireServerUserId();
 
   const profileService = new ProfileService();
-  const profileResult = await profileService.getProfile({ userId });
 
-  const displayName =
-    isSuccessResult(profileResult) && profileResult.data.profile.username
-      ? profileResult.data.profile.username
-      : "User";
-  const avatarUrl = isSuccessResult(profileResult)
-    ? (profileResult.data.profile.image ?? null)
-    : null;
+  let displayName = "User";
+  let avatarUrl: string | null = null;
+  try {
+    const profile = await profileService.getProfile({ userId });
+    displayName = profile.username ?? "User";
+    avatarUrl = profile.image ?? null;
+  } catch {
+    // non-critical — sidebar still renders with defaults
+  }
 
   return (
     <CommandPaletteProvider>

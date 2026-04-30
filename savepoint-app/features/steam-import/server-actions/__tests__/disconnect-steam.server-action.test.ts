@@ -56,10 +56,7 @@ describe("disconnectSteam server action", () => {
     });
 
     it("should successfully disconnect Steam account", async () => {
-      mockDisconnectSteam.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDisconnectSteam.mockResolvedValue(undefined);
 
       const result = await disconnectSteam({});
 
@@ -72,31 +69,8 @@ describe("disconnectSteam server action", () => {
       });
     });
 
-    it("should return error when SteamService fails", async () => {
-      const errorMessage = "Database connection failed";
-      const errorObject = {
-        code: "INTERNAL_ERROR" as const,
-        message: errorMessage,
-        timestamp: new Date(),
-      };
-      mockDisconnectSteam.mockResolvedValue({
-        success: false,
-        error: errorObject,
-      });
-
-      const result = await disconnectSteam({});
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toEqual(errorObject);
-      }
-    });
-
     it("should revalidate settings and profile paths on success", async () => {
-      mockDisconnectSteam.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDisconnectSteam.mockResolvedValue(undefined);
 
       await disconnectSteam({});
 
@@ -104,39 +78,12 @@ describe("disconnectSteam server action", () => {
       expect(mockRevalidatePath).toHaveBeenCalledWith("/profile");
     });
 
-    it("should not revalidate paths on error", async () => {
-      mockDisconnectSteam.mockResolvedValue({
-        success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: "Failed to disconnect",
-          timestamp: new Date(),
-        },
-      });
+    it("should not revalidate paths when service throws", async () => {
+      mockDisconnectSteam.mockRejectedValue(new Error("Database error"));
 
       await disconnectSteam({});
 
       expect(mockRevalidatePath).not.toHaveBeenCalled();
-    });
-
-    it("should handle service errors with proper error structure", async () => {
-      const errorDetails = {
-        code: "EXTERNAL_SERVICE_ERROR" as const,
-        message: "Service unavailable",
-        timestamp: new Date(),
-      };
-
-      mockDisconnectSteam.mockResolvedValue({
-        success: false,
-        error: errorDetails,
-      });
-
-      const result = await disconnectSteam({});
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toEqual(errorDetails);
-      }
     });
   });
 
@@ -194,26 +141,6 @@ describe("disconnectSteam server action", () => {
         error: "An unexpected error occurred",
       });
     });
-
-    it("should return error message from service errors", async () => {
-      const errorMessage = "Failed to update database";
-      const errorObject = {
-        code: "INTERNAL_ERROR" as const,
-        message: errorMessage,
-        timestamp: new Date(),
-      };
-      mockDisconnectSteam.mockResolvedValue({
-        success: false,
-        error: errorObject,
-      });
-
-      const result = await disconnectSteam({});
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toEqual(errorObject);
-      }
-    });
   });
 
   describe("input validation", () => {
@@ -222,10 +149,7 @@ describe("disconnectSteam server action", () => {
     });
 
     it("should accept empty input object", async () => {
-      mockDisconnectSteam.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDisconnectSteam.mockResolvedValue(undefined);
 
       const result = await disconnectSteam({});
 
@@ -242,10 +166,7 @@ describe("disconnectSteam server action", () => {
     });
 
     it("should revalidate both paths on successful disconnect", async () => {
-      mockDisconnectSteam.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDisconnectSteam.mockResolvedValue(undefined);
 
       await disconnectSteam({});
 
@@ -259,7 +180,6 @@ describe("disconnectSteam server action", () => {
       mockDisconnectSteam.mockImplementation(async () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         handlerCompleted = true;
-        return { success: true, data: undefined };
       });
 
       await disconnectSteam({});

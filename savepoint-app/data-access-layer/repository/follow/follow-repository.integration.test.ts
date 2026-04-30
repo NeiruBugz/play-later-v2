@@ -1,7 +1,8 @@
 import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 
-import { DuplicateError } from "../errors";
+import { ConflictError } from "@/shared/lib/errors";
+
 import {
   countFollowers,
   countFollowing,
@@ -34,14 +35,14 @@ describe("FollowRepository - Integration Tests", () => {
       });
     });
 
-    it("should throw DuplicateError when creating the same follow relationship twice", async () => {
+    it("should throw ConflictError when creating the same follow relationship twice", async () => {
       const follower = await createUser();
       const following = await createUser();
 
       await createFollow(follower.id, following.id);
 
       await expect(createFollow(follower.id, following.id)).rejects.toThrow(
-        DuplicateError
+        ConflictError
       );
     });
   });

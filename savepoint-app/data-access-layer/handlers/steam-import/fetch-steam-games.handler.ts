@@ -1,5 +1,5 @@
+import { SteamProfilePrivateError } from "@/data-access-layer/services/steam/errors";
 import { SteamService } from "@/data-access-layer/services/steam/steam-service";
-import { ServiceErrorCode } from "@/data-access-layer/services/types";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import {
@@ -9,6 +9,7 @@ import {
 import { createLogger, LOGGER_CONTEXT, prisma } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult, RequestContext } from "../types";
 import type {
   FetchSteamGamesHandlerInput,
@@ -73,41 +74,29 @@ export async function fetchSteamGamesHandler(
       status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
     };
   }
+
   const steamService = new SteamService();
 
-  const ownedGamesResult = await steamService.getOwnedGames({ steamId64 });
-
-  if (!ownedGamesResult.success) {
+  let ownedGames: Awaited<ReturnType<SteamService["getOwnedGames"]>>;
+  try {
+    ownedGames = await steamService.getOwnedGames({ steamId64 });
+  } catch (error) {
     logger.error(
-      {
-        userId,
-        steamId64,
-        code: ownedGamesResult.code,
-        error: ownedGamesResult.error,
-      },
+      { error, userId, steamId64 },
       "Failed to fetch owned games from Steam"
     );
 
-    const statusMap: Partial<Record<ServiceErrorCode, number>> = {
-      [ServiceErrorCode.UNAUTHORIZED]: HTTP_STATUS.FORBIDDEN,
-      [ServiceErrorCode.STEAM_PROFILE_PRIVATE]: HTTP_STATUS.FORBIDDEN,
-      [ServiceErrorCode.EXTERNAL_SERVICE_ERROR]:
-        HTTP_STATUS.SERVICE_UNAVAILABLE,
-      [ServiceErrorCode.STEAM_API_UNAVAILABLE]: HTTP_STATUS.SERVICE_UNAVAILABLE,
-      [ServiceErrorCode.RATE_LIMITED]: HTTP_STATUS.TOO_MANY_REQUESTS,
-    };
+    if (error instanceof SteamProfilePrivateError) {
+      return {
+        success: false,
+        error: error.message,
+        status: HTTP_STATUS.FORBIDDEN,
+      };
+    }
 
-    return {
-      success: false,
-      error: ownedGamesResult.error,
-      status: ownedGamesResult.code
-        ? (statusMap[ownedGamesResult.code] ??
-          HTTP_STATUS.INTERNAL_SERVER_ERROR)
-        : HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    };
+    return mapErrorToHandlerResult(error);
   }
 
-  const ownedGames = ownedGamesResult.data;
   const totalGames = ownedGames.length;
 
   logger.info({ userId, totalGames }, "Fetched owned games from Steam");
@@ -116,7 +105,6 @@ export async function fetchSteamGamesHandler(
 
   let importedCount: number;
   try {
-    // 1. Single query - get all existing games for this user/storefront
     const existingGames = await prisma.importedGame.findMany({
       where: {
         userId,
@@ -129,7 +117,6 @@ export async function fetchSteamGamesHandler(
       existingGames.map((g) => [g.storefrontGameId, g.id])
     );
 
-    // 2. Separate into creates and updates
     const toCreate: typeof ownedGames = [];
     const toUpdate: Array<{ id: string; game: (typeof ownedGames)[number] }> =
       [];
@@ -148,7 +135,6 @@ export async function fetchSteamGamesHandler(
       "Separated games into creates and updates"
     );
 
-    // 3. Bulk create new games (single query)
     if (toCreate.length > 0) {
       await prisma.importedGame.createMany({
         data: toCreate.map((game) => ({
@@ -172,7 +158,6 @@ export async function fetchSteamGamesHandler(
       logger.info({ userId, count: toCreate.length }, "Created new games");
     }
 
-    // 4. Batch updates with extended timeout
     for (let i = 0; i < toUpdate.length; i += UPDATE_BATCH_SIZE) {
       const batch = toUpdate.slice(i, i + UPDATE_BATCH_SIZE);
       const now = new Date();

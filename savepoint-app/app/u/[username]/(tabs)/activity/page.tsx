@@ -41,16 +41,19 @@ export default async function ProfileActivityPage({
     return null;
   }
 
-  const activityResult = await activityFeedService.getUserActivity(
-    profileResult.data.profile.id
-  );
-
-  if (!activityResult.success) {
+  let activityData: Awaited<
+    ReturnType<typeof activityFeedService.getUserActivity>
+  >;
+  try {
+    activityData = await activityFeedService.getUserActivity(
+      profileResult.data.profile.id
+    );
+  } catch {
     return null;
   }
 
   const initialData: ActivityLogPage = {
-    items: activityResult.data.items.map((item) => ({
+    items: activityData.items.map((item) => ({
       id: Number(item.id),
       status: item.status,
       createdAt: new Date(item.timestamp),
@@ -66,10 +69,10 @@ export default async function ProfileActivityPage({
       gameCoverImage: item.game.coverImage,
       gameSlug: item.game.slug,
     })),
-    nextCursor: activityResult.data.nextCursor
+    nextCursor: activityData.nextCursor
       ? {
-          timestamp: new Date(activityResult.data.nextCursor.timestamp),
-          id: Number(activityResult.data.nextCursor.id),
+          timestamp: new Date(activityData.nextCursor.timestamp),
+          id: Number(activityData.nextCursor.id),
         }
       : null,
   };

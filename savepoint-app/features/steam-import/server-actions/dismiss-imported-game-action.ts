@@ -24,21 +24,10 @@ export const dismissImportedGameAction = createServerAction<
     );
 
     const importedGameService = new ImportedGameService();
-    const result = await importedGameService.dismissImportedGame({
+    await importedGameService.dismissImportedGame({
       importedGameId: input.importedGameId,
       userId: userId!,
     });
-
-    if (!result.success) {
-      logger.error(
-        { importedGameId: input.importedGameId, error: result.error },
-        "Failed to dismiss imported game"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
 
     revalidatePath("/steam/games");
 

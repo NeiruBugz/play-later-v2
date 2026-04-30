@@ -5,26 +5,23 @@
 
 ## Results
 
-| #   | Check                              | Severity | Status | Evidence                                                                                                                                                  |
-| --- | ---------------------------------- | -------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Repository structure type          | medium   | PASS   | Monorepo: 3 independent build roots — `savepoint-app/package.json`, `lambdas-py/pyproject.toml`, `infra/` (Terraform); pnpm-workspace.yaml at root        |
-| 2   | Application layer inventory        | medium   | PASS   | 3 layers detected: Next.js web app (`savepoint-app/`), Python AWS Lambda pipeline (`lambdas-py/`), Terraform IaC (`infra/`)                              |
-| 3   | Database and storage detection     | medium   | PASS   | PostgreSQL 16 (relational, Prisma ORM at `savepoint-app/prisma/schema.prisma` + SQLAlchemy in lambdas), S3/LocalStack (object), Upstash Redis (key-value) |
-| 4   | Infrastructure layer detection     | medium   | PASS   | Terraform (`infra/envs/{dev,prod}` + 7 modules: cognito, ecr, lambda-container, lambda-imports-bucket, s3, secrets, steam-import); docker-compose.yml    |
-| 5   | Language inventory                 | medium   | PASS   | TypeScript: 688 .ts + 438 .tsx, JSX: 29, Python: 38, plus HCL (Terraform .tf files)                                                                       |
-| 6   | Inter-layer communication patterns | medium   | PASS   | SQS queues (Next.js → Lambda pipeline via `@aws-sdk/client-sqs`), S3 CSV intermediate files between Lambdas, REST API routes under `savepoint-app/app/api` |
+| #   | Check | Severity | Status | Evidence |
+| --- | ----- | -------- | ------ | -------- |
+| TOPO-01 | Repository structure type | medium | PASS | Monorepo: pnpm workspace (`pnpm-workspace.yaml`) with `savepoint-app/package.json` as the sole JS package + `infra/` Terraform layer; root `package.json` orchestrates. lambdas-py pipeline retired (commit 1b03733). |
+| TOPO-02 | Application layer inventory | medium | PASS | (1) Web app: Next.js 15 App Router + TypeScript at `savepoint-app/` (frontend pages + REST API routes + server actions). (2) IaC: Terraform at `infra/` with modules `cognito`, `s3` and envs `dev`, `prod`. |
+| TOPO-03 | Database and storage detection | medium | PASS | PostgreSQL 16 via Prisma (`savepoint-app/prisma/schema.prisma` + `prisma/migrations/`); local services in `docker-compose.yml`: Postgres :6432, pgAdmin :5050, LocalStack S3 :4568; AWS S3 module at `infra/modules/s3`. |
+| TOPO-04 | Infrastructure layer detection | medium | PASS | Terraform >= 1.5, AWS provider ~> 5.0; `infra/envs/{dev,prod}`, `infra/modules/{cognito,s3}` (14 `.tf` files); Docker Compose for local dev; GitHub Actions workflows: `pr-checks.yml`, `deploy.yml`, `e2e.yml`, `integration.yml`. |
+| TOPO-05 | Language inventory | medium | PASS | TypeScript: 693 `.ts` + 438 `.tsx` = 1131 files; JSX: 29; HCL/Terraform: 14 `.tf`. No Python/Go/Rust files in repo. |
+| TOPO-06 | Inter-layer communication patterns | medium | PASS | Internal: Next.js REST API routes under `savepoint-app/app/api/**/route.ts` (auth, games, library, social, steam) + `next-safe-action` server actions. External: IGDB API, Steam API, AWS Cognito (auth via NextAuth), AWS S3 (storage). No gRPC/GraphQL/OpenAPI; SQS pipeline retired. |
 
 ## Topology Summary
 
-- **Structure:** monorepo
+- **Structure:** monorepo (pnpm workspace + Terraform IaC layer)
 - **Layers:**
-  - Web app (frontend + backend API): Next.js 16 (App Router) + React 19 at `savepoint-app/` (primary language: TypeScript)
-  - Data access layer: Prisma 7 + pg at `savepoint-app/data-access-layer/` (primary language: TypeScript)
-  - Serverless pipeline: AWS Lambda (Python 3.12, SQLAlchemy, Pydantic, httpx) at `lambdas-py/src/lambdas/` — handlers: steam_import, igdb_enrichment, database_import, hello (primary language: Python)
-  - Infrastructure-as-Code: Terraform >= 1.5 (AWS provider ~> 5.0) at `infra/` (primary language: HCL)
-  - Local dev orchestration: docker-compose at repo root (PostgreSQL, pgAdmin, LocalStack)
-- **Storage:** Relational with PostgreSQL 16 (Prisma ORM in app, SQLAlchemy in lambdas), Object storage with S3 (LocalStack in dev), Key-value with Upstash Redis (`@upstash/redis`, `@upstash/ratelimit`)
-- **Infrastructure:** Terraform (envs: dev, prod; modules: cognito, ecr, lambda-container, lambda-imports-bucket, s3, secrets, steam-import), Docker / docker-compose, AWS Cognito (auth), AWS ECR (container images)
-- **Languages:** TypeScript (1126 files: 688 .ts + 438 .tsx), Python (38 files), JSX (29 files), HCL (Terraform .tf — multiple)
-- **Communication:** SQS message queues (savepoint-app enqueues → lambdas-py consumes), S3 CSV intermediate artifacts between Lambda stages, REST API routes (`savepoint-app/app/api/{auth,games,library,social,steam}`), NextAuth (Cognito provider). No OpenAPI spec, gRPC, or GraphQL detected.
-- **Service directories:** `savepoint-app/`, `lambdas-py/`, `infra/`
+  - web-app: Next.js 15 (App Router) + React + TypeScript at `savepoint-app/` (lang: TypeScript)
+  - iac: Terraform >= 1.5 / AWS provider ~> 5.0 at `infra/` (lang: HCL)
+- **Storage:** PostgreSQL 16 via Prisma ORM (`savepoint-app/prisma/`); AWS S3 (LocalStack locally, real S3 in AWS); NextAuth/Cognito-managed sessions
+- **Infrastructure:** Terraform modules (`cognito`, `s3`); envs `dev`/`prod`; Docker Compose (postgres, pgadmin, localstack); GitHub Actions CI (pr-checks, deploy, e2e, integration)
+- **Languages:** TypeScript (1131 files: 693 .ts + 438 .tsx), JSX (29), HCL (14 .tf)
+- **Communication:** Internal — Next.js REST API routes + `next-safe-action` server actions (single-process app + DB). External — IGDB API, Steam API, AWS Cognito, AWS S3
+- **Service directories:** `savepoint-app/` (web app root), `infra/` (IaC), `savepoint-app/app/api/` (API routes), `savepoint-app/features/`, `savepoint-app/data-access-layer/`, `savepoint-app/widgets/`, `savepoint-app/shared/`, `savepoint-app/prisma/`, `infra/modules/`, `infra/envs/`

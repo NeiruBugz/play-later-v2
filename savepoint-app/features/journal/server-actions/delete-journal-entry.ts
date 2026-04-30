@@ -23,21 +23,10 @@ export const deleteJournalEntryAction = createServerAction<
 
     const journalService = new JournalService();
 
-    const result = await journalService.deleteJournalEntry({
+    await journalService.deleteJournalEntry({
       userId: userId!,
       entryId,
     });
-
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, entryId },
-        "Failed to delete journal entry"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
 
     revalidatePath("/journal");
     revalidatePath("/games/[slug]", "page");

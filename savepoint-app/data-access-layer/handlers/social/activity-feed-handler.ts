@@ -9,6 +9,7 @@ import {
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult, RequestContext } from "../types";
 import type {
   ActivityFeedHandlerInput,
@@ -102,40 +103,32 @@ export async function activityFeedHandler(
     };
   }
 
-  const service = new ActivityFeedService();
-  const result = await service.getFeedForUser(
-    userId,
-    validation.data.cursor,
-    validation.data.limit
-  );
-
-  if (!result.success) {
-    logger.error(
-      { userId, error: result.error },
-      "Failed to fetch activity feed"
-    );
-    return {
-      success: false,
-      error: result.error,
-      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    };
-  }
-
-  logger.debug(
-    {
+  try {
+    const service = new ActivityFeedService();
+    const data = await service.getFeedForUser(
       userId,
-      itemCount: result.data.items.length,
-      hasMore: result.data.nextCursor !== null,
-    },
-    "Activity feed fetched"
-  );
+      validation.data.cursor,
+      validation.data.limit
+    );
 
-  return {
-    success: true,
-    data: {
-      items: result.data.items,
-      nextCursor: result.data.nextCursor,
-    },
-    status: HTTP_STATUS.OK,
-  };
+    logger.debug(
+      {
+        userId,
+        itemCount: data.items.length,
+        hasMore: data.nextCursor !== null,
+      },
+      "Activity feed fetched"
+    );
+
+    return {
+      success: true,
+      data: {
+        items: data.items,
+        nextCursor: data.nextCursor,
+      },
+      status: HTTP_STATUS.OK,
+    };
+  } catch (error) {
+    return mapErrorToHandlerResult(error);
+  }
 }

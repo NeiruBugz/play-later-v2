@@ -1,4 +1,3 @@
-import { NotFoundError } from "@/data-access-layer/repository";
 import {
   cleanupDatabase,
   resetTestDatabase,
@@ -6,6 +5,8 @@ import {
 } from "@/test/setup/database";
 import { createUser } from "@/test/setup/db-factories";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+
+import { NotFoundError } from "@/shared/lib/errors";
 
 import {
   countImportedGamesByUserId,

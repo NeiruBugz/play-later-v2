@@ -1,13 +1,37 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ServiceErrorCode } from "../types";
+import { UnauthorizedError } from "@/shared/lib/errors";
+
 import { SteamOpenIdService } from "./steam-openid-service";
+
+vi.mock("@/shared/lib", () => {
+  const mockLogger = {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    trace: vi.fn(),
+    fatal: vi.fn(),
+  };
+
+  return {
+    createLogger: vi.fn(() => mockLogger),
+    logger: mockLogger,
+    LOGGER_CONTEXT: {
+      SERVICE: "service",
+    },
+  };
+});
 
 describe("SteamOpenIdService", () => {
   let service: SteamOpenIdService;
 
   beforeEach(() => {
     service = new SteamOpenIdService();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   describe("getAuthUrl", () => {
@@ -52,21 +76,27 @@ describe("SteamOpenIdService", () => {
   });
 
   describe("validateCallback", () => {
-    it("returns VALIDATION_ERROR when mode is not id_res", async () => {
+    it("throws UnauthorizedError when mode is not id_res", async () => {
       const params = new URLSearchParams({
         "openid.mode": "cancel",
       });
 
-      const result = await service.validateCallback(params);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        expect(result.error).toBe("Invalid OpenID mode");
-      }
+      await expect(service.validateCallback(params)).rejects.toThrow(
+        UnauthorizedError
+      );
     });
 
-    it("returns UNAUTHORIZED when signature verification fails", async () => {
+    it("throws UnauthorizedError with 'Invalid OpenID mode' when mode is not id_res", async () => {
+      const params = new URLSearchParams({
+        "openid.mode": "cancel",
+      });
+
+      await expect(service.validateCallback(params)).rejects.toThrow(
+        "Invalid OpenID mode"
+      );
+    });
+
+    it("throws UnauthorizedError when signature verification fails", async () => {
       const params = new URLSearchParams({
         "openid.mode": "id_res",
         "openid.claimed_id":
@@ -78,16 +108,12 @@ describe("SteamOpenIdService", () => {
         text: async () => "is_valid:false",
       });
 
-      const result = await service.validateCallback(params);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.UNAUTHORIZED);
-        expect(result.error).toBe("Invalid OpenID signature");
-      }
+      await expect(service.validateCallback(params)).rejects.toThrow(
+        UnauthorizedError
+      );
     });
 
-    it("returns VALIDATION_ERROR when claimed_id is missing", async () => {
+    it("throws UnauthorizedError when claimed_id is missing", async () => {
       const params = new URLSearchParams({
         "openid.mode": "id_res",
       });
@@ -97,16 +123,12 @@ describe("SteamOpenIdService", () => {
         text: async () => "is_valid:true",
       });
 
-      const result = await service.validateCallback(params);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        expect(result.error).toBe("Missing claimed_id");
-      }
+      await expect(service.validateCallback(params)).rejects.toThrow(
+        "Missing claimed_id"
+      );
     });
 
-    it("returns VALIDATION_ERROR when Steam ID cannot be extracted", async () => {
+    it("throws UnauthorizedError when Steam ID cannot be extracted from claimed_id", async () => {
       const params = new URLSearchParams({
         "openid.mode": "id_res",
         "openid.claimed_id": "https://steamcommunity.com/openid/invalid",
@@ -117,13 +139,9 @@ describe("SteamOpenIdService", () => {
         text: async () => "is_valid:true",
       });
 
-      const result = await service.validateCallback(params);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        expect(result.error).toBe("Could not extract Steam ID");
-      }
+      await expect(service.validateCallback(params)).rejects.toThrow(
+        "Could not extract Steam ID"
+      );
     });
 
     it("successfully validates callback and returns Steam ID64", async () => {
@@ -142,10 +160,7 @@ describe("SteamOpenIdService", () => {
 
       const result = await service.validateCallback(params);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBe(steamId64);
-      }
+      expect(result).toBe(steamId64);
 
       expect(global.fetch).toHaveBeenCalledWith(
         "https://steamcommunity.com/openid/login",
@@ -160,7 +175,7 @@ describe("SteamOpenIdService", () => {
       expect(sentParams.get("openid.mode")).toBe("check_authentication");
     });
 
-    it("returns INTERNAL_ERROR when fetch throws", async () => {
+    it("propagates error when fetch throws", async () => {
       const params = new URLSearchParams({
         "openid.mode": "id_res",
         "openid.claimed_id":
@@ -169,15 +184,12 @@ describe("SteamOpenIdService", () => {
 
       global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
 
-      const result = await service.validateCallback(params);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.validateCallback(params)).rejects.toThrow(
+        "Network error"
+      );
     });
 
-    it("returns UNAUTHORIZED when Steam API returns non-ok status", async () => {
+    it("returns false from verifySignature when Steam API returns non-ok status, then throws UnauthorizedError", async () => {
       const params = new URLSearchParams({
         "openid.mode": "id_res",
         "openid.claimed_id":
@@ -190,12 +202,9 @@ describe("SteamOpenIdService", () => {
         statusText: "Internal Server Error",
       });
 
-      const result = await service.validateCallback(params);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.code).toBe(ServiceErrorCode.UNAUTHORIZED);
-      }
+      await expect(service.validateCallback(params)).rejects.toThrow(
+        UnauthorizedError
+      );
     });
   });
 });

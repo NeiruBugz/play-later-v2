@@ -2,6 +2,8 @@ import { getServerUserId } from "@/auth";
 import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
+import { NotFoundError } from "@/shared/lib/errors";
+
 import { deleteJournalEntryAction } from "./delete-journal-entry";
 
 vi.mock("@/auth", () => ({
@@ -30,7 +32,7 @@ describe("deleteJournalEntryAction server action", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockDeleteJournalEntry = vi.fn();
     MockJournalService.mockImplementation(function () {
@@ -44,10 +46,7 @@ describe("deleteJournalEntryAction server action", () => {
 
   describe("Success Path", () => {
     it("should successfully delete journal entry when service succeeds", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDeleteJournalEntry.mockResolvedValue(undefined);
 
       const result = await deleteJournalEntryAction(validInput);
 
@@ -60,10 +59,7 @@ describe("deleteJournalEntryAction server action", () => {
     });
 
     it("should revalidate journal page after successful deletion", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDeleteJournalEntry.mockResolvedValue(undefined);
 
       await deleteJournalEntryAction(validInput);
 
@@ -71,10 +67,7 @@ describe("deleteJournalEntryAction server action", () => {
     });
 
     it("should revalidate game detail pages after successful deletion", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDeleteJournalEntry.mockResolvedValue(undefined);
 
       await deleteJournalEntryAction(validInput);
 
@@ -82,10 +75,7 @@ describe("deleteJournalEntryAction server action", () => {
     });
 
     it("should call revalidatePath exactly twice on success", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDeleteJournalEntry.mockResolvedValue(undefined);
 
       await deleteJournalEntryAction(validInput);
 
@@ -149,10 +139,9 @@ describe("deleteJournalEntryAction server action", () => {
 
   describe("Service Errors", () => {
     it("should return error when journal entry is not found", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Journal entry not found",
-      });
+      mockDeleteJournalEntry.mockRejectedValue(
+        new NotFoundError("Journal entry not found")
+      );
 
       const result = await deleteJournalEntryAction(validInput);
 
@@ -163,10 +152,9 @@ describe("deleteJournalEntryAction server action", () => {
     });
 
     it("should return error when user does not own the journal entry", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Journal entry not found",
-      });
+      mockDeleteJournalEntry.mockRejectedValue(
+        new NotFoundError("Journal entry not found")
+      );
 
       const result = await deleteJournalEntryAction(validInput);
 
@@ -176,11 +164,10 @@ describe("deleteJournalEntryAction server action", () => {
       }
     });
 
-    it("should return error when service fails to delete entry", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Failed to delete journal entry",
-      });
+    it("should return error when service throws on delete", async () => {
+      mockDeleteJournalEntry.mockRejectedValue(
+        new Error("Failed to delete journal entry")
+      );
 
       const result = await deleteJournalEntryAction(validInput);
 
@@ -190,11 +177,8 @@ describe("deleteJournalEntryAction server action", () => {
       }
     });
 
-    it("should not revalidate paths when service fails", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Database error",
-      });
+    it("should not revalidate paths when service throws", async () => {
+      mockDeleteJournalEntry.mockRejectedValue(new Error("Database error"));
 
       await deleteJournalEntryAction(validInput);
 
@@ -238,10 +222,7 @@ describe("deleteJournalEntryAction server action", () => {
 
   describe("Service Integration", () => {
     it("should instantiate JournalService correctly", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDeleteJournalEntry.mockResolvedValue(undefined);
 
       await deleteJournalEntryAction(validInput);
 
@@ -249,10 +230,7 @@ describe("deleteJournalEntryAction server action", () => {
     });
 
     it("should call deleteJournalEntry with userId from authentication", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDeleteJournalEntry.mockResolvedValue(undefined);
 
       mockGetServerUserId.mockResolvedValue("custom-user-id");
 
@@ -265,10 +243,7 @@ describe("deleteJournalEntryAction server action", () => {
     });
 
     it("should pass correct entryId to service", async () => {
-      mockDeleteJournalEntry.mockResolvedValue({
-        success: true,
-        data: undefined,
-      });
+      mockDeleteJournalEntry.mockResolvedValue(undefined);
 
       const customInput = {
         entryId: "entry-custom-999",

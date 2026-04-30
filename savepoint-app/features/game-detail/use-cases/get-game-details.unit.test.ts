@@ -46,7 +46,7 @@ describe("getGameDetails", () => {
   const mockJournalEntry = createJournalEntryFixture();
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockGameDetailService = {
       populateGameInDatabase: vi.fn(),
@@ -84,24 +84,17 @@ describe("getGameDetails", () => {
   describe("success scenarios", () => {
     it("should return game details without user data when userId is not provided", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: {
-          timesToBeat: {
-            mainStory: 50,
-            completionist: 150,
-          },
+        timesToBeat: {
+          mainStory: 50,
+          completionist: 150,
         },
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -130,39 +123,32 @@ describe("getGameDetails", () => {
 
     it("should return game details with user library status when userId is provided", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: true,
-        data: { id: "game-456", igdbId: 12345, slug: mockGame.slug },
+        id: "game-456",
+        igdbId: 12345,
+        slug: mockGame.slug,
       });
 
-      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue({
-        success: true,
-        data: mockLibraryItem,
-      });
+      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue(
+        mockLibraryItem
+      );
 
-      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
-        success: true,
-        data: [mockLibraryItem],
-      });
+      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue([
+        mockLibraryItem,
+      ]);
 
-      mockJournalService.findJournalEntriesByGameId.mockResolvedValue({
-        success: true,
-        data: [mockJournalEntry],
-      });
+      mockJournalService.findJournalEntriesByGameId.mockResolvedValue([
+        mockJournalEntry,
+      ]);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -210,19 +196,14 @@ describe("getGameDetails", () => {
       };
 
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: gameWithObjectFranchise },
+        game: gameWithObjectFranchise,
       });
 
-      mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: false,
-        error: "No data available",
-      });
+      mockIgdbService.getTimesToBeat.mockRejectedValue(
+        new Error("No data available")
+      );
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -243,19 +224,14 @@ describe("getGameDetails", () => {
       };
 
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: gameWithDuplicates },
+        game: gameWithDuplicates,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -275,19 +251,14 @@ describe("getGameDetails", () => {
       };
 
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: gameWithoutFranchise },
+        game: gameWithoutFranchise,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -301,39 +272,28 @@ describe("getGameDetails", () => {
 
     it("should handle user with no library items or journal entries", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: true,
-        data: { id: "game-456", igdbId: 12345, slug: mockGame.slug },
+        id: "game-456",
+        igdbId: 12345,
+        slug: mockGame.slug,
       });
 
-      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue(
+        null
+      );
 
-      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue([]);
 
-      mockJournalService.findJournalEntriesByGameId.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockJournalService.findJournalEntriesByGameId.mockResolvedValue([]);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -349,24 +309,16 @@ describe("getGameDetails", () => {
 
     it("should handle game not in database yet (for authenticated user)", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
-      mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: false,
-        error: "Game not found",
-      });
+      mockLibraryService.findGameByIgdbId.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -386,19 +338,16 @@ describe("getGameDetails", () => {
 
     it("should continue when populateGameInDatabase fails silently", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: false,
-        error: { code: "DATABASE_ERROR", message: "Database error" },
-      });
+      mockGameDetailService.populateGameInDatabase.mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -418,19 +367,14 @@ describe("getGameDetails", () => {
       };
 
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: gameWithZeroFranchise },
+        game: gameWithZeroFranchise,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
@@ -445,10 +389,9 @@ describe("getGameDetails", () => {
 
   describe("error scenarios", () => {
     it("should return error when IGDB fetch fails", async () => {
-      mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: false,
-        error: "Game not found in IGDB",
-      });
+      mockIgdbService.getGameDetailsBySlug.mockRejectedValue(
+        new Error("Game not found in IGDB")
+      );
 
       const result = await getGameDetails({
         slug: "nonexistent-game",
@@ -497,86 +440,65 @@ describe("getGameDetails", () => {
 
     it("should handle library service errors gracefully when fetching user data", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: true,
-        data: { id: "game-456", igdbId: 12345, slug: mockGame.slug },
+        id: "game-456",
+        igdbId: 12345,
+        slug: mockGame.slug,
       });
 
-      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue({
-        success: false,
-        error: "Database connection lost",
-      });
+      mockLibraryService.findMostRecentLibraryItemByGameId.mockRejectedValue(
+        new Error("Database connection lost")
+      );
 
-      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue([]);
 
-      mockJournalService.findJournalEntriesByGameId.mockResolvedValue({
-        success: true,
-        data: [],
-      });
+      mockJournalService.findJournalEntriesByGameId.mockResolvedValue([]);
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",
         userId: "user-123",
       });
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.userLibraryStatus).toBeUndefined();
-      }
+      expect(result.success).toBe(false);
     });
 
     it("should handle journal service errors gracefully", async () => {
       mockIgdbService.getGameDetailsBySlug.mockResolvedValue({
-        success: true,
-        data: { game: mockGame },
+        game: mockGame,
       });
 
       mockIgdbService.getTimesToBeat.mockResolvedValue({
-        success: true,
-        data: { timesToBeat: undefined },
+        timesToBeat: undefined,
       });
 
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       mockLibraryService.findGameByIgdbId.mockResolvedValue({
-        success: true,
-        data: { id: "game-456", igdbId: 12345, slug: mockGame.slug },
+        id: "game-456",
+        igdbId: 12345,
+        slug: mockGame.slug,
       });
 
-      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue({
-        success: true,
-        data: mockLibraryItem,
-      });
+      mockLibraryService.findMostRecentLibraryItemByGameId.mockResolvedValue(
+        mockLibraryItem
+      );
 
-      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue({
-        success: true,
-        data: [mockLibraryItem],
-      });
+      mockLibraryService.findAllLibraryItemsByGameId.mockResolvedValue([
+        mockLibraryItem,
+      ]);
 
-      mockJournalService.findJournalEntriesByGameId.mockResolvedValue({
-        success: false,
-        error: "Failed to fetch journal entries",
-      });
+      mockJournalService.findJournalEntriesByGameId.mockRejectedValue(
+        new Error("Failed to fetch journal entries")
+      );
 
       const result = await getGameDetails({
         slug: "the-legend-of-zelda-breath-of-the-wild",

@@ -2,7 +2,6 @@ import type { z } from "zod";
 
 import type { FullGameInfoResponse, SearchResponse } from "@/shared/types";
 
-import type { ServiceResult } from "../types";
 import type {
   CollectionGamesByIdSchema,
   FranchiseDetailsSchema,
@@ -89,27 +88,21 @@ export interface CollectionGamesResult {
   games: Array<CollectionGame>;
 }
 
-export interface IgdbService {
-  searchGamesByName(
-    params: GameSearchParams
-  ): Promise<ServiceResult<GameSearchResult>>;
-  getGameDetails(
-    params: GameDetailsParams
-  ): Promise<ServiceResult<GameDetailsResult>>;
+export interface IgdbServiceContract {
+  searchGamesByName(params: GameSearchParams): Promise<GameSearchResult>;
+  getGameDetails(params: GameDetailsParams): Promise<GameDetailsResult>;
   getGameDetailsBySlug(
     params: GetGameDetailsBySlugParams
-  ): Promise<ServiceResult<GameDetailsBySlugResult>>;
-  getPlatforms(): Promise<ServiceResult<PlatformsResult>>;
+  ): Promise<GameDetailsBySlugResult>;
+  getPlatforms(): Promise<PlatformsResult>;
   getFranchiseGames(
     params: GetFranchiseGamesParams
-  ): Promise<ServiceResult<FranchiseGamesResult>>;
+  ): Promise<FranchiseGamesResult>;
   getFranchiseDetails(
     params: GetFranchiseDetailsParams
-  ): Promise<ServiceResult<FranchiseDetailsResult>>;
-  getTimesToBeat(
-    params: GetTimesToBeatParams
-  ): Promise<ServiceResult<TimesToBeatResult>>;
+  ): Promise<FranchiseDetailsResult>;
+  getTimesToBeat(params: GetTimesToBeatParams): Promise<TimesToBeatResult>;
   getCollectionGamesById(params: {
     collectionId: number;
-  }): Promise<ServiceResult<CollectionGamesResult>>;
+  }): Promise<CollectionGamesResult>;
 }

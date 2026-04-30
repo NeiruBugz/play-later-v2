@@ -7,6 +7,7 @@ import {
 import type { Platform } from "@prisma/client";
 
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { NotFoundError } from "@/shared/lib/errors";
 
 const logger = createLogger({
   [LOGGER_CONTEXT.USE_CASE]: "getPlatformsForLibraryModalUseCase",
@@ -36,25 +37,39 @@ export async function getPlatformsForLibraryModal(
   logger.info({ igdbId }, "Use case: Fetching platforms for library modal");
 
   try {
-    const dbResult = await getPlatformsForGame(igdbId);
+    let dbResult: {
+      supportedPlatforms: Platform[];
+      otherPlatforms: Platform[];
+    } | null = null;
 
-    if (dbResult.success) {
-      const { supportedPlatforms, otherPlatforms } = dbResult.data;
-
-      if (supportedPlatforms.length > 0 || otherPlatforms.length > 0) {
-        logger.info(
-          {
-            igdbId,
-            supportedCount: supportedPlatforms.length,
-            otherCount: otherPlatforms.length,
-          },
-          "Platforms found in database"
-        );
-        return {
-          success: true,
-          data: { supportedPlatforms, otherPlatforms },
-        };
+    try {
+      dbResult = await getPlatformsForGame(igdbId);
+    } catch (error) {
+      if (!(error instanceof NotFoundError)) {
+        throw error;
       }
+    }
+
+    if (
+      dbResult &&
+      (dbResult.supportedPlatforms.length > 0 ||
+        dbResult.otherPlatforms.length > 0)
+    ) {
+      logger.info(
+        {
+          igdbId,
+          supportedCount: dbResult.supportedPlatforms.length,
+          otherCount: dbResult.otherPlatforms.length,
+        },
+        "Platforms found in database"
+      );
+      return {
+        success: true,
+        data: {
+          supportedPlatforms: dbResult.supportedPlatforms,
+          otherPlatforms: dbResult.otherPlatforms,
+        },
+      };
     }
 
     logger.info(
@@ -63,48 +78,55 @@ export async function getPlatformsForLibraryModal(
     );
 
     const igdbService = new IgdbService();
-    const igdbResult = await igdbService.getGameDetails({ gameId: igdbId });
 
-    if (igdbResult.success && igdbResult.data.game) {
-      const igdbGame = igdbResult.data.game;
+    try {
+      const igdbResult = await igdbService.getGameDetails({ gameId: igdbId });
 
-      if (igdbGame.platforms && igdbGame.platforms.length > 0) {
-        const mappedPlatforms = igdbGame.platforms.map((p) => ({
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          abbreviation: p.abbreviation,
-          alternative_name: p.alternative_name,
-          generation: p.generation,
-          platform_family:
-            typeof p.platform_family === "number"
-              ? p.platform_family
-              : undefined,
-          platform_type:
-            typeof p.platform_type === "number" ? p.platform_type : undefined,
-        }));
+      if (igdbResult.game) {
+        const igdbGame = igdbResult.game;
 
-        await savePlatforms(mappedPlatforms);
+        if (igdbGame.platforms && igdbGame.platforms.length > 0) {
+          const mappedPlatforms = igdbGame.platforms.map((p) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.slug,
+            abbreviation: p.abbreviation,
+            alternative_name: p.alternative_name,
+            generation: p.generation,
+            platform_family:
+              typeof p.platform_family === "number"
+                ? p.platform_family
+                : undefined,
+            platform_type:
+              typeof p.platform_type === "number" ? p.platform_type : undefined,
+          }));
 
-        const gameDetailService = new GameDetailService();
-        await gameDetailService.populateGameInDatabase(igdbGame);
+          await savePlatforms(mappedPlatforms);
 
-        const refreshedResult = await getPlatformsForGame(igdbId);
-        if (refreshedResult.success) {
-          logger.info(
-            {
-              igdbId,
-              supportedCount: refreshedResult.data.supportedPlatforms.length,
-              otherCount: refreshedResult.data.otherPlatforms.length,
-            },
-            "Platforms populated from IGDB"
-          );
-          return {
-            success: true,
-            data: refreshedResult.data,
-          };
+          const gameDetailService = new GameDetailService();
+          await gameDetailService.populateGameInDatabase(igdbGame);
+
+          try {
+            const refreshedResult = await getPlatformsForGame(igdbId);
+            logger.info(
+              {
+                igdbId,
+                supportedCount: refreshedResult.supportedPlatforms.length,
+                otherCount: refreshedResult.otherPlatforms.length,
+              },
+              "Platforms populated from IGDB"
+            );
+            return {
+              success: true,
+              data: refreshedResult,
+            };
+          } catch {
+            // Fall through to return empty arrays
+          }
         }
       }
+    } catch {
+      // IGDB game details unavailable — fall through to platform fallback
     }
 
     logger.info(
@@ -112,33 +134,36 @@ export async function getPlatformsForLibraryModal(
       "Game has no platforms in IGDB, fetching all platforms as fallback"
     );
 
-    const allPlatformsResult = await igdbService.getPlatforms();
-    if (
-      allPlatformsResult.success &&
-      allPlatformsResult.data.platforms.length > 0
-    ) {
-      const mappedPlatforms = allPlatformsResult.data.platforms.map((p) => ({
-        id: p.id,
-        name: p.name,
-        slug: `platform-${p.id}`,
-      }));
+    try {
+      const allPlatformsResult = await igdbService.getPlatforms();
+      if (allPlatformsResult.platforms.length > 0) {
+        const mappedPlatforms = allPlatformsResult.platforms.map((p) => ({
+          id: p.id,
+          name: p.name,
+          slug: `platform-${p.id}`,
+        }));
 
-      await savePlatforms(mappedPlatforms);
+        await savePlatforms(mappedPlatforms);
 
-      const refreshedResult = await getPlatformsForGame(igdbId);
-      if (refreshedResult.success) {
-        logger.info(
-          {
-            igdbId,
-            otherCount: refreshedResult.data.otherPlatforms.length,
-          },
-          "All IGDB platforms populated as fallback"
-        );
-        return {
-          success: true,
-          data: refreshedResult.data,
-        };
+        try {
+          const refreshedResult = await getPlatformsForGame(igdbId);
+          logger.info(
+            {
+              igdbId,
+              otherCount: refreshedResult.otherPlatforms.length,
+            },
+            "All IGDB platforms populated as fallback"
+          );
+          return {
+            success: true,
+            data: refreshedResult,
+          };
+        } catch {
+          // Fall through to return empty arrays
+        }
       }
+    } catch {
+      // IGDB platforms unavailable — fall through to empty result
     }
 
     logger.warn({ igdbId }, "Failed to fetch platforms from any source");

@@ -10,6 +10,7 @@ import {
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult, RequestContext } from "../types";
 import type { GetLibraryHandlerInput, GetLibraryHandlerOutput } from "./types";
 
@@ -71,33 +72,26 @@ export async function getLibraryHandler(
     };
   }
 
-  const libraryService = new LibraryService();
-  const isPaginated =
-    validation.data.offset !== undefined || validation.data.limit !== undefined;
-  const result = await libraryService.getLibraryItems({
-    ...validation.data,
-    distinctByGame: !isPaginated,
-  });
+  try {
+    const libraryService = new LibraryService();
+    const isPaginated =
+      validation.data.offset !== undefined ||
+      validation.data.limit !== undefined;
+    const data = await libraryService.getLibraryItems({
+      ...validation.data,
+      distinctByGame: !isPaginated,
+    });
 
-  if (!result.success) {
-    logger.error(
-      { userId, error: result.error },
-      "Service failed to fetch library items"
+    logger.debug(
+      { userId, count: data.items.length, total: data.total },
+      "Library items fetched"
     );
     return {
-      success: false,
-      error: result.error,
-      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      success: true,
+      data,
+      status: HTTP_STATUS.OK,
     };
+  } catch (error) {
+    return mapErrorToHandlerResult(error);
   }
-
-  logger.debug(
-    { userId, count: result.data.items.length, total: result.data.total },
-    "Library items fetched"
-  );
-  return {
-    success: true,
-    data: result.data,
-    status: HTTP_STATUS.OK,
-  };
 }

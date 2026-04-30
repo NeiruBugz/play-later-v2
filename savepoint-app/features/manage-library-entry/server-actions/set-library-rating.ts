@@ -22,29 +22,22 @@ export const setLibraryRatingAction = createServerAction<
     );
 
     const libraryService = new LibraryService();
-    const result = await libraryService.setRating({
+    await libraryService.setRating({
       libraryItemId,
       userId: userId!,
       rating,
     });
 
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, libraryItemId },
-        "Failed to set library rating"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
-
     revalidatePath("/library");
 
     const profileService = new ProfileService();
-    const profileResult = await profileService.getProfile({ userId: userId! });
-    if (profileResult.success && profileResult.data.profile.username) {
-      revalidatePath(`/u/${profileResult.data.profile.username}`);
+    try {
+      const profile = await profileService.getProfile({ userId: userId! });
+      if (profile.username) {
+        revalidatePath(`/u/${profile.username}`);
+      }
+    } catch {
+      // non-critical — rating was already saved, revalidation of profile is best-effort
     }
 
     logger.info(

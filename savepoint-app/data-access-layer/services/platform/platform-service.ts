@@ -8,27 +8,8 @@ import {
 } from "@/data-access-layer/repository";
 import type { Platform } from "@prisma/client";
 
+import { NotFoundError } from "@/shared/lib/errors";
 import { UniquePlatformResult } from "@/shared/types/platform";
-
-import {
-  handleServiceError,
-  serviceError,
-  serviceSuccess,
-  type ServiceResult,
-} from "../types";
-
-export async function getSystemPlatforms(): Promise<
-  ServiceResult<{
-    platforms: UniquePlatformResult[];
-  }>
-> {
-  try {
-    const platforms = await findSystemPlatforms();
-    return serviceSuccess({ platforms });
-  } catch (error) {
-    return handleServiceError(error, "Failed to get system platforms");
-  }
-}
 
 type UpsertPlatformInput = {
   id: number;
@@ -42,36 +23,32 @@ type UpsertPlatformInput = {
   checksum?: string;
 };
 
-export async function savePlatforms(
-  platforms: UpsertPlatformInput[]
-): Promise<ServiceResult<Platform[]>> {
-  try {
-    const result = await upsertPlatforms(platforms);
-    return serviceSuccess(result);
-  } catch (error) {
-    return handleServiceError(error, "Failed to save platforms");
-  }
+export async function getSystemPlatforms(): Promise<{
+  platforms: UniquePlatformResult[];
+}> {
+  const platforms = await findSystemPlatforms();
+  return { platforms };
 }
 
-export async function getPlatformsForGame(igdbId: number): Promise<
-  ServiceResult<{
-    supportedPlatforms: Platform[];
-    otherPlatforms: Platform[];
-  }>
-> {
-  try {
-    const game = await findGameByIgdbId(igdbId);
-    if (!game) {
-      return serviceError("Game not found");
-    }
+export async function savePlatforms(
+  platforms: UpsertPlatformInput[]
+): Promise<Platform[]> {
+  return upsertPlatforms(platforms);
+}
 
-    const platformData = await findPlatformsForGame(game.id);
-
-    return serviceSuccess({
-      supportedPlatforms: platformData.supportedPlatforms,
-      otherPlatforms: platformData.otherPlatforms,
-    });
-  } catch (error) {
-    return handleServiceError(error, "Failed to get platforms for game");
+export async function getPlatformsForGame(igdbId: number): Promise<{
+  supportedPlatforms: Platform[];
+  otherPlatforms: Platform[];
+}> {
+  const game = await findGameByIgdbId(igdbId);
+  if (!game) {
+    throw new NotFoundError("Game not found", { gameId: igdbId });
   }
+
+  const platformData = await findPlatformsForGame(game.id);
+
+  return {
+    supportedPlatforms: platformData.supportedPlatforms,
+    otherPlatforms: platformData.otherPlatforms,
+  };
 }

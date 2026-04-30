@@ -1,4 +1,5 @@
 export type { HandlerResult, RequestContext, Handler } from "./types";
+export { mapErrorToHandlerResult } from "./map-error";
 
 export { getLibraryHandler } from "./library/get-library-handler";
 export { getStatusCountsHandler } from "./library/get-status-counts-handler";

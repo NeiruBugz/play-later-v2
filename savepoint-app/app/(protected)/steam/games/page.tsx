@@ -11,11 +11,18 @@ export default async function SteamGamesPage() {
   const userId = await requireServerUserId();
 
   const profileService = new ProfileService();
-  const steamStatusResult = await profileService.getSteamConnectionStatus({
-    userId,
-  });
 
-  if (!steamStatusResult.success || !steamStatusResult.data.connected) {
+  let steamConnected = false;
+  try {
+    const steamStatus = await profileService.getSteamConnectionStatus({
+      userId,
+    });
+    steamConnected = steamStatus.connected;
+  } catch {
+    // treat failure as not connected
+  }
+
+  if (!steamConnected) {
     redirect("/profile");
   }
 

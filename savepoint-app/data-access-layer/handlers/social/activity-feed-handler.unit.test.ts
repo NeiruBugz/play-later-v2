@@ -46,7 +46,7 @@ describe("activityFeedHandler", () => {
   let mockGetFeedForUser: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockGetFeedForUser = vi.fn();
 
@@ -60,8 +60,8 @@ describe("activityFeedHandler", () => {
   describe("Success Path", () => {
     it("should return feed items for authenticated user", async () => {
       mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [mockFeedItem], nextCursor: null },
+        items: [mockFeedItem],
+        nextCursor: null,
       });
 
       const result = await activityFeedHandler(
@@ -80,8 +80,8 @@ describe("activityFeedHandler", () => {
 
     it("should return nextCursor when there are more items", async () => {
       mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [mockFeedItem], nextCursor: mockNextCursor },
+        items: [mockFeedItem],
+        nextCursor: mockNextCursor,
       });
 
       const result = await activityFeedHandler(
@@ -96,10 +96,7 @@ describe("activityFeedHandler", () => {
     });
 
     it("should return empty items array when feed is empty", async () => {
-      mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [], nextCursor: null },
-      });
+      mockGetFeedForUser.mockResolvedValue({ items: [], nextCursor: null });
 
       const result = await activityFeedHandler(
         { userId: validUserId },
@@ -117,10 +114,7 @@ describe("activityFeedHandler", () => {
 
   describe("Pagination", () => {
     it("should use default limit of 20 when limit is not provided", async () => {
-      mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [], nextCursor: null },
-      });
+      mockGetFeedForUser.mockResolvedValue({ items: [], nextCursor: null });
 
       await activityFeedHandler({ userId: validUserId }, mockContext);
 
@@ -132,10 +126,7 @@ describe("activityFeedHandler", () => {
     });
 
     it("should pass parsed limit to service when limit is provided", async () => {
-      mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [], nextCursor: null },
-      });
+      mockGetFeedForUser.mockResolvedValue({ items: [], nextCursor: null });
 
       await activityFeedHandler(
         { userId: validUserId, limit: "10" },
@@ -155,10 +146,7 @@ describe("activityFeedHandler", () => {
         id: "42",
       };
 
-      mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [], nextCursor: null },
-      });
+      mockGetFeedForUser.mockResolvedValue({ items: [], nextCursor: null });
 
       await activityFeedHandler(
         {
@@ -181,10 +169,7 @@ describe("activityFeedHandler", () => {
         id: "99",
       };
 
-      mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [], nextCursor: null },
-      });
+      mockGetFeedForUser.mockResolvedValue({ items: [], nextCursor: null });
 
       await activityFeedHandler(
         {
@@ -311,10 +296,7 @@ describe("activityFeedHandler", () => {
     });
 
     it("should accept limit at maximum boundary of 50", async () => {
-      mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [], nextCursor: null },
-      });
+      mockGetFeedForUser.mockResolvedValue({ items: [], nextCursor: null });
 
       const result = await activityFeedHandler(
         { userId: validUserId, limit: "50" },
@@ -330,10 +312,7 @@ describe("activityFeedHandler", () => {
     });
 
     it("should accept limit at minimum boundary of 1", async () => {
-      mockGetFeedForUser.mockResolvedValue({
-        success: true,
-        data: { items: [], nextCursor: null },
-      });
+      mockGetFeedForUser.mockResolvedValue({ items: [], nextCursor: null });
 
       const result = await activityFeedHandler(
         { userId: validUserId, limit: "1" },
@@ -350,11 +329,10 @@ describe("activityFeedHandler", () => {
   });
 
   describe("Error Handling", () => {
-    it("should return 500 when ActivityFeedService fails", async () => {
-      mockGetFeedForUser.mockResolvedValue({
-        success: false,
-        error: "Database connection failed",
-      });
+    it("should return 500 when ActivityFeedService throws an unexpected error", async () => {
+      mockGetFeedForUser.mockRejectedValue(
+        new Error("Database connection failed")
+      );
 
       const result = await activityFeedHandler(
         { userId: validUserId },
@@ -368,11 +346,10 @@ describe("activityFeedHandler", () => {
       }
     });
 
-    it("should propagate the service error message", async () => {
-      mockGetFeedForUser.mockResolvedValue({
-        success: false,
-        error: "Failed to fetch user feed",
-      });
+    it("should propagate the error message", async () => {
+      mockGetFeedForUser.mockRejectedValue(
+        new Error("Failed to fetch user feed")
+      );
 
       const result = await activityFeedHandler(
         { userId: validUserId },

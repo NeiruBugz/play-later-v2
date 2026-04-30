@@ -27,19 +27,12 @@ export const getGamesByIdsAction = createServerAction<
     const { gameIds } = input;
     logger.info({ gameIdsCount: gameIds.length }, "Fetching games by IDs");
 
-    const result = await getGamesByIds(gameIds);
+    const games = await getGamesByIds(gameIds);
 
-    if (!result.success) {
-      return { success: false, error: result.error };
-    }
-
-    logger.info(
-      { gamesCount: result.data.length },
-      "Games fetched successfully"
-    );
+    logger.info({ gamesCount: games.length }, "Games fetched successfully");
     return {
       success: true,
-      data: result.data,
+      data: games,
     };
   },
 });

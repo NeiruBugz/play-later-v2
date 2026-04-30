@@ -1,4 +1,5 @@
-import { isSuccessResult, ProfileService } from "@/data-access-layer/services";
+import { ProfileService } from "@/data-access-layer/services";
+import type { SteamConnectionStatus } from "@/data-access-layer/services/profile/types";
 import type { Metadata } from "next";
 
 import { SteamConnectCard } from "@/features/steam-import";
@@ -19,11 +20,15 @@ export const metadata: Metadata = {
 export default async function ConnectedSystemsPage() {
   const userId = await requireServerUserId();
   const profileService = new ProfileService();
-  const steamResult = await profileService.getSteamConnectionStatus({ userId });
 
-  const steamConnectionStatus = isSuccessResult(steamResult)
-    ? steamResult.data
-    : { connected: false as const };
+  let steamConnectionStatus: SteamConnectionStatus = { connected: false };
+  try {
+    steamConnectionStatus = await profileService.getSteamConnectionStatus({
+      userId,
+    });
+  } catch {
+    // non-critical — page renders with disconnected state
+  }
 
   return (
     <div>

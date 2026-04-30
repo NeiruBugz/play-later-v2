@@ -18,409 +18,304 @@ import {
   SUGGESTED_USERNAME_MAX_LENGTH,
 } from "@/shared/constants";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { ConflictError, NotFoundError } from "@/shared/lib/errors";
 
-import {
-  handleServiceError,
-  serviceError,
-  ServiceErrorCode,
-  serviceSuccess,
-} from "../types";
 import { mapUserToProfile, mapUserToProfileWithStats } from "./mappers";
 import type {
   CheckSetupStatusInput,
-  CheckSetupStatusResult,
   CheckUsernameAvailabilityInput,
-  CheckUsernameAvailabilityResult,
   CompleteSetupInput,
-  CompleteSetupResult,
   GetProfileInput,
-  GetProfileResult,
   GetProfileWithStatsInput,
-  GetProfileWithStatsResult,
-  GetPublicProfileResult,
   GetSteamConnectionStatusInput,
-  GetSteamConnectionStatusResult,
+  Profile,
+  ProfileWithStats,
+  PublicProfile,
+  SteamConnectionStatus,
   UpdateAvatarUrlInput,
-  UpdateAvatarUrlResult,
   UpdateProfileInput,
-  UpdateProfileResult,
 } from "./types";
 
 export class ProfileService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "ProfileService" });
-  async getProfile(input: GetProfileInput): Promise<GetProfileResult> {
-    try {
-      const user = await findUserById(input.userId, {
-        select: {
-          username: true,
-          image: true,
-          email: true,
-          name: true,
-          createdAt: true,
-          isPublicProfile: true,
-        },
-      });
-      if (!user) {
-        this.logger.warn({ userId: input.userId }, "User not found");
-        return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
-      }
-      const profile = mapUserToProfile(user);
-      return serviceSuccess({ profile });
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error fetching profile"
-      );
-      return handleServiceError(error, "Failed to fetch profile");
+
+  async getProfile(input: GetProfileInput): Promise<Profile> {
+    const user = await findUserById(input.userId, {
+      select: {
+        username: true,
+        image: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        isPublicProfile: true,
+      },
+    });
+    if (!user) {
+      this.logger.warn({ userId: input.userId }, "User not found");
+      throw new NotFoundError("User not found", { userId: input.userId });
     }
+    return mapUserToProfile(user);
   }
+
   async getProfileWithStats(
     input: GetProfileWithStatsInput
-  ): Promise<GetProfileWithStatsResult> {
-    try {
-      const [user, stats, gameCount, libraryPreview, histogramResult] =
-        await Promise.all([
-          findUserById(input.userId, {
-            select: {
-              username: true,
-              image: true,
-              email: true,
-              name: true,
-              createdAt: true,
-              isPublicProfile: true,
-            },
-          }),
-          getLibraryStatsByUserId(input.userId),
-          countLibraryItemsByUserId(input.userId),
-          findLibraryPreview(input.userId),
-          getRatingHistogram({ userId: input.userId }),
-        ]);
-      if (!user) {
-        this.logger.warn({ userId: input.userId }, "User not found");
-        return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
-      }
-      const ratingHistogram = histogramResult.ok ? histogramResult.data : [];
-      const ratedCount = ratingHistogram.reduce(
-        (sum, entry) => sum + entry.count,
-        0
-      );
-      const profile = mapUserToProfileWithStats(
-        user,
-        stats,
-        gameCount,
-        libraryPreview.map((item) => item.game),
-        ratingHistogram,
-        ratedCount
-      );
-      return serviceSuccess({ profile });
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error fetching profile with stats"
-      );
-      return handleServiceError(error, "Failed to fetch profile with stats");
-    }
-  }
-  async getPublicProfile(username: string): Promise<GetPublicProfileResult> {
-    try {
-      const user = await findUserByUsername(username);
-
-      if (!user) {
-        return serviceSuccess({ profile: null });
-      }
-
-      if (!user.isPublicProfile) {
-        return serviceSuccess({
-          profile: {
-            id: user.id,
-            name: user.name,
-            username: user.username!,
-            image: user.image,
-            gameCount: 0,
-            libraryPreview: [],
-            isPublicProfile: false,
-            createdAt: user.createdAt,
+  ): Promise<ProfileWithStats> {
+    const [user, stats, gameCount, libraryPreview, ratingHistogram] =
+      await Promise.all([
+        findUserById(input.userId, {
+          select: {
+            username: true,
+            image: true,
+            email: true,
+            name: true,
+            createdAt: true,
+            isPublicProfile: true,
           },
-        });
-      }
-
-      const [gameCount, libraryPreview] = await Promise.all([
-        countLibraryItemsByUserId(user.id),
-        findLibraryPreview(user.id),
+        }),
+        getLibraryStatsByUserId(input.userId),
+        countLibraryItemsByUserId(input.userId),
+        findLibraryPreview(input.userId),
+        getRatingHistogram({ userId: input.userId }),
       ]);
-
-      return serviceSuccess({
-        profile: {
-          id: user.id,
-          name: user.name,
-          username: user.username!,
-          image: user.image,
-          gameCount,
-          libraryPreview: libraryPreview.map((item) => item.game),
-          isPublicProfile: true,
-          createdAt: user.createdAt,
-        },
-      });
-    } catch (error) {
-      this.logger.error({ error, username }, "Error fetching public profile");
-      return handleServiceError(error, "Failed to fetch public profile");
+    if (!user) {
+      this.logger.warn({ userId: input.userId }, "User not found");
+      throw new NotFoundError("User not found", { userId: input.userId });
     }
+    const ratedCount = ratingHistogram.reduce(
+      (sum, entry) => sum + entry.count,
+      0
+    );
+    return mapUserToProfileWithStats(
+      user,
+      stats,
+      gameCount,
+      libraryPreview.map((item) => item.game),
+      ratingHistogram,
+      ratedCount
+    );
   }
+
+  async getPublicProfile(username: string): Promise<PublicProfile | null> {
+    const user = await findUserByUsername(username);
+
+    if (!user) {
+      return null;
+    }
+
+    if (!user.isPublicProfile) {
+      return {
+        id: user.id,
+        name: user.name,
+        username: user.username!,
+        image: user.image,
+        gameCount: 0,
+        libraryPreview: [],
+        isPublicProfile: false,
+        createdAt: user.createdAt,
+      };
+    }
+
+    const [gameCount, libraryPreview] = await Promise.all([
+      countLibraryItemsByUserId(user.id),
+      findLibraryPreview(user.id),
+    ]);
+
+    return {
+      id: user.id,
+      name: user.name,
+      username: user.username!,
+      image: user.image,
+      gameCount,
+      libraryPreview: libraryPreview.map((item) => item.game),
+      isPublicProfile: true,
+      createdAt: user.createdAt,
+    };
+  }
+
   async checkUsernameAvailability(
     input: CheckUsernameAvailabilityInput
-  ): Promise<CheckUsernameAvailabilityResult> {
-    try {
-      const normalized = input.username.toLowerCase();
-      const existingUser = await findUserByNormalizedUsername(normalized);
-      const available = !existingUser;
-      return serviceSuccess({
-        available,
-      });
-    } catch (error) {
-      this.logger.error(
-        { error, username: input.username },
-        "Error checking username availability"
-      );
-      return handleServiceError(error, "Failed to check username availability");
-    }
+  ): Promise<boolean> {
+    const normalized = input.username.toLowerCase();
+    const existingUser = await findUserByNormalizedUsername(normalized);
+    return !existingUser;
   }
-  async updateProfile(input: UpdateProfileInput): Promise<UpdateProfileResult> {
-    try {
+
+  async updateProfile(input: UpdateProfileInput): Promise<{
+    username: string | null;
+    image: string | null;
+  }> {
+    const validation = validateUsername(input.username);
+    if (!validation.valid) {
+      this.logger.warn(
+        { userId: input.userId, username: input.username },
+        "Invalid username"
+      );
+      throw new Error(validation.error);
+    }
+    const currentUser = await findUserById(input.userId, {
+      select: { username: true },
+    });
+    if (!currentUser) {
+      this.logger.warn({ userId: input.userId }, "User not found");
+      throw new NotFoundError("User not found", { userId: input.userId });
+    }
+    if (currentUser.username !== input.username) {
+      const available = await this.checkUsernameAvailability({
+        username: input.username,
+      });
+      if (!available) {
+        this.logger.warn(
+          { userId: input.userId, username: input.username },
+          "Username already taken"
+        );
+        throw new ConflictError("Username already exists", {
+          username: input.username,
+        });
+      }
+    }
+    const updatedUser = await updateUserProfile(input.userId, {
+      username: input.username,
+      usernameNormalized: input.username.toLowerCase(),
+      image: input.avatarUrl,
+      ...(input.isPublicProfile !== undefined && {
+        isPublicProfile: input.isPublicProfile,
+      }),
+    });
+    return {
+      username: updatedUser.username,
+      image: updatedUser.image,
+    };
+  }
+
+  async updateAvatarUrl(input: UpdateAvatarUrlInput): Promise<void> {
+    const user = await findUserById(input.userId, {
+      select: { id: true },
+    });
+    if (!user) {
+      this.logger.warn({ userId: input.userId }, "User not found");
+      throw new NotFoundError("User not found", { userId: input.userId });
+    }
+    await updateUserProfile(input.userId, {
+      image: input.avatarUrl,
+    });
+  }
+
+  async checkSetupStatus(input: CheckSetupStatusInput): Promise<{
+    needsSetup: boolean;
+    suggestedUsername?: string;
+  }> {
+    const user = await findUserById(input.userId, {
+      select: {
+        username: true,
+        name: true,
+        profileSetupCompletedAt: true,
+        createdAt: true,
+      },
+    });
+    if (!user) {
+      this.logger.warn({ userId: input.userId }, "User not found");
+      throw new NotFoundError("User not found", { userId: input.userId });
+    }
+    if (user.profileSetupCompletedAt) {
+      return {
+        needsSetup: false,
+        suggestedUsername: undefined,
+      };
+    }
+    const thresholdTime = new Date(Date.now() - NEW_USER_THRESHOLD_MS);
+    const isNewUser = user.createdAt > thresholdTime;
+    const needsSetup = !user.username || isNewUser;
+    let suggestedUsername: string | undefined;
+    if (needsSetup && user.name) {
+      suggestedUsername = user.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "")
+        .slice(0, SUGGESTED_USERNAME_MAX_LENGTH);
+    }
+    return {
+      needsSetup,
+      suggestedUsername,
+    };
+  }
+
+  async completeSetup(input: CompleteSetupInput): Promise<{
+    username: string | null;
+    image: string | null;
+  }> {
+    if (input.username) {
       const validation = validateUsername(input.username);
       if (!validation.valid) {
         this.logger.warn(
           { userId: input.userId, username: input.username },
           "Invalid username"
         );
-        return serviceError(
-          validation.error,
-          ServiceErrorCode.VALIDATION_ERROR
+        throw new Error(validation.error);
+      }
+      const available = await this.checkUsernameAvailability({
+        username: input.username,
+      });
+      if (!available) {
+        this.logger.warn(
+          { userId: input.userId, username: input.username },
+          "Username already taken"
         );
-      }
-      const currentUser = await findUserById(input.userId, {
-        select: { username: true },
-      });
-      if (!currentUser) {
-        this.logger.warn({ userId: input.userId }, "User not found");
-        return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
-      }
-      if (currentUser.username !== input.username) {
-        const availabilityResult = await this.checkUsernameAvailability({
+        throw new ConflictError("Username already exists", {
           username: input.username,
         });
-        if (!availabilityResult.success || !availabilityResult.data.available) {
-          this.logger.warn(
-            { userId: input.userId, username: input.username },
-            "Username already taken"
-          );
-          return serviceError(
-            "Username already exists",
-            ServiceErrorCode.CONFLICT
-          );
-        }
       }
-      const updatedUser = await updateUserProfile(input.userId, {
-        username: input.username,
-        usernameNormalized: input.username.toLowerCase(),
-        image: input.avatarUrl,
-        ...(input.isPublicProfile !== undefined && {
-          isPublicProfile: input.isPublicProfile,
-        }),
-      });
-      return serviceSuccess({
-        username: updatedUser.username,
-        image: updatedUser.image,
-      });
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error updating profile"
-      );
-      return handleServiceError(error, "Failed to update profile");
     }
+    const updatedUser = await updateUserProfile(input.userId, {
+      username: input.username,
+      usernameNormalized: input.username?.toLowerCase(),
+      image: input.avatarUrl,
+      profileSetupCompletedAt: new Date(),
+    });
+    return {
+      username: updatedUser.username,
+      image: updatedUser.image,
+    };
   }
-  async updateAvatarUrl(
-    input: UpdateAvatarUrlInput
-  ): Promise<UpdateAvatarUrlResult> {
-    try {
-      const user = await findUserById(input.userId, {
-        select: { id: true },
-      });
-      if (!user) {
-        this.logger.warn({ userId: input.userId }, "User not found");
-        return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
-      }
-      await updateUserProfile(input.userId, {
-        image: input.avatarUrl,
-      });
-      return serviceSuccess(undefined);
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error updating avatar URL"
-      );
-      return handleServiceError(error, "Failed to update avatar URL");
-    }
-  }
-  async checkSetupStatus(
-    input: CheckSetupStatusInput
-  ): Promise<CheckSetupStatusResult> {
-    try {
-      const user = await findUserById(input.userId, {
-        select: {
-          username: true,
-          name: true,
-          profileSetupCompletedAt: true,
-          createdAt: true,
-        },
-      });
-      if (!user) {
-        this.logger.warn({ userId: input.userId }, "User not found");
-        return serviceError("User not found", ServiceErrorCode.NOT_FOUND);
-      }
-      if (user.profileSetupCompletedAt) {
-        return serviceSuccess({
-          needsSetup: false,
-          suggestedUsername: undefined,
-        });
-      }
-      const thresholdTime = new Date(Date.now() - NEW_USER_THRESHOLD_MS);
-      const isNewUser = user.createdAt > thresholdTime;
-      const needsSetup = !user.username || isNewUser;
-      let suggestedUsername: string | undefined;
-      if (needsSetup && user.name) {
-        suggestedUsername = user.name
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, "")
-          .slice(0, SUGGESTED_USERNAME_MAX_LENGTH);
-      }
-      return serviceSuccess({
-        needsSetup,
-        suggestedUsername,
-      });
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error checking setup status"
-      );
-      return handleServiceError(error, "Failed to check setup status");
-    }
-  }
-  async completeSetup(input: CompleteSetupInput): Promise<CompleteSetupResult> {
-    try {
-      if (input.username) {
-        const validation = validateUsername(input.username);
-        if (!validation.valid) {
-          this.logger.warn(
-            { userId: input.userId, username: input.username },
-            "Invalid username"
-          );
-          return serviceError(
-            validation.error,
-            ServiceErrorCode.VALIDATION_ERROR
-          );
-        }
-        const availabilityResult = await this.checkUsernameAvailability({
-          username: input.username,
-        });
-        if (!availabilityResult.success || !availabilityResult.data.available) {
-          this.logger.warn(
-            { userId: input.userId, username: input.username },
-            "Username already taken"
-          );
-          return serviceError(
-            "Username already exists",
-            ServiceErrorCode.CONFLICT
-          );
-        }
-      }
-      const updatedUser = await updateUserProfile(input.userId, {
-        username: input.username,
-        usernameNormalized: input.username?.toLowerCase(),
-        image: input.avatarUrl,
-        profileSetupCompletedAt: new Date(),
-      });
-      return serviceSuccess({
-        username: updatedUser.username,
-        image: updatedUser.image,
-      });
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error completing profile setup"
-      );
-      return handleServiceError(error, "Failed to complete setup");
-    }
-  }
+
   async getRedirectAfterAuth(input: {
     userId: string;
-  }): Promise<import("./types").GetRedirectAfterAuthResult> {
+  }): Promise<{ redirectTo: string; isNewUser: boolean }> {
     try {
       const status = await this.checkSetupStatus({ userId: input.userId });
-      if (!status.success) {
-        return serviceSuccess({ redirectTo: "/dashboard", isNewUser: false });
-      }
-      const isNewUser = status.data.needsSetup;
+      const isNewUser = status.needsSetup;
       const redirectTo = isNewUser ? "/profile/setup" : "/dashboard";
-      return serviceSuccess({ redirectTo, isNewUser });
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error determining post-auth redirect"
-      );
-      return handleServiceError(
-        error,
-        "Failed to determine post-auth redirect"
-      );
+      return { redirectTo, isNewUser };
+    } catch {
+      return { redirectTo: "/dashboard", isNewUser: false };
     }
   }
-  async verifyUserExists(input: { userId: string }) {
-    try {
-      const user = await findUserById(input.userId, {
-        select: { id: true },
+
+  async verifyUserExists(input: { userId: string }): Promise<void> {
+    const user = await findUserById(input.userId, {
+      select: { id: true },
+    });
+    if (!user) {
+      this.logger.warn({ userId: input.userId }, "User not found");
+      throw new NotFoundError("User account not found", {
+        userId: input.userId,
       });
-      if (!user) {
-        this.logger.warn({ userId: input.userId }, "User not found");
-        return serviceError(
-          "User account not found",
-          ServiceErrorCode.NOT_FOUND
-        );
-      }
-      return serviceSuccess(undefined);
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error verifying user existence"
-      );
-      return handleServiceError(error, "Failed to verify user account");
     }
   }
+
   async getSteamConnectionStatus(
     input: GetSteamConnectionStatusInput
-  ): Promise<GetSteamConnectionStatusResult> {
-    try {
-      const steamData = await getUserSteamData({ userId: input.userId });
-      if (!steamData || !steamData.steamId64 || !steamData.steamUsername) {
-        return serviceSuccess({ connected: false });
-      }
-      return serviceSuccess({
-        connected: true,
-        profile: {
-          steamId64: steamData.steamId64,
-          displayName: steamData.steamUsername,
-          avatarUrl: steamData.steamAvatar || "",
-          profileUrl: steamData.steamProfileURL || "",
-        },
-      });
-    } catch (error) {
-      this.logger.error(
-        { error, userId: input.userId },
-        "Error fetching Steam connection status"
-      );
-      return handleServiceError(
-        error,
-        "Failed to fetch Steam connection status"
-      );
+  ): Promise<SteamConnectionStatus> {
+    const steamData = await getUserSteamData({ userId: input.userId });
+    if (!steamData || !steamData.steamId64 || !steamData.steamUsername) {
+      return { connected: false };
     }
+    return {
+      connected: true,
+      profile: {
+        steamId64: steamData.steamId64,
+        displayName: steamData.steamUsername,
+        avatarUrl: steamData.steamAvatar || "",
+        profileUrl: steamData.steamProfileURL || "",
+      },
+    };
   }
 }

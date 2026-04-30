@@ -1,16 +1,8 @@
 export {
-  type ServiceResult,
-  ServiceErrorCode,
   type PaginatedResult,
   type CursorPaginatedResult,
   type PaginationInput,
   type BaseServiceInput,
-  serviceSuccess,
-  serviceError,
-  handleServiceError,
-  isSuccessResult,
-  isErrorResult,
-  type ExtractServiceData,
 } from "./types";
 export {
   type GameSearchParams,
@@ -18,9 +10,10 @@ export {
   type GameDetailsParams,
   type GameDetailsResult,
   type PlatformsResult,
-  type IgdbService as IgdbServiceInterface,
+  type IgdbServiceContract,
 } from "./igdb/types";
 export { IgdbService } from "./igdb/igdb-service";
+export { IgdbRateLimitError } from "./igdb/errors";
 export {
   type SignUpInput,
   type AuthUserData,
@@ -29,23 +22,15 @@ export {
 export { AuthService } from "./auth/auth-service";
 export {
   type GetProfileInput,
-  type GetProfileResult,
   type GetProfileWithStatsInput,
-  type GetProfileWithStatsResult,
   type UpdateProfileInput,
-  type UpdateProfileResult,
   type CheckUsernameAvailabilityInput,
-  type CheckUsernameAvailabilityResult,
   type CompleteSetupInput,
-  type CompleteSetupResult,
   type UpdateAvatarUrlInput,
-  type UpdateAvatarUrlResult,
   type CheckSetupStatusInput,
-  type CheckSetupStatusResult,
   type Profile,
   type ProfileWithStats,
   type PublicProfile,
-  type GetPublicProfileResult,
   type LibraryStats,
   type RecentGame,
 } from "./profile/types";
@@ -61,10 +46,7 @@ export {
   LibrarySortBySchema,
   LibrarySortOrderSchema,
 } from "./library/schemas";
-export {
-  type FindJournalEntriesResult,
-  type JournalService as IJournalService,
-} from "./journal/types";
+export { type FindJournalEntriesResult } from "./journal/types";
 export { JournalService } from "./journal/journal-service";
 export {
   GameDetailService,
@@ -76,6 +58,8 @@ export {
   OnboardingService,
   type OnboardingStep,
   type OnboardingProgress,
+  type GetOnboardingProgressInput,
+  type DismissOnboardingInput,
 } from "./onboarding";
 export {
   SteamService,
@@ -100,10 +84,6 @@ export {
 } from "./activity-feed/types";
 export {
   type FollowCounts,
-  type FollowUserResult,
-  type UnfollowUserResult,
-  type IsFollowingResult,
-  type GetFollowCountsResult,
-  type GetFollowersResult,
-  type GetFollowingResult,
+  type PaginatedFollowersResult,
+  type PaginatedFollowingResult,
 } from "./social/types";

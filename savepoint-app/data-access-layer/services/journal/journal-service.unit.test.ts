@@ -1,4 +1,3 @@
-import { NotFoundError } from "@/data-access-layer/repository";
 import {
   createJournalEntry,
   deleteJournalEntry,
@@ -8,7 +7,8 @@ import {
 } from "@/data-access-layer/repository/journal/journal-repository";
 import { JournalMood, type JournalEntry } from "@prisma/client";
 
-import { ServiceErrorCode } from "../types";
+import { NotFoundError } from "@/shared/lib/errors";
+
 import { JournalService } from "./journal-service";
 
 vi.mock("@/data-access-layer/repository/journal/journal-repository", () => ({
@@ -28,7 +28,7 @@ describe("JournalService", () => {
   let mockDeleteJournalEntry: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     service = new JournalService();
     mockCreateJournalEntry = vi.mocked(createJournalEntry);
     mockFindJournalEntryById = vi.mocked(findJournalEntryById);
@@ -39,11 +39,9 @@ describe("JournalService", () => {
 
   describe("generateAutoTitle", () => {
     it("should generate date in 'MMM DD, YYYY' format", () => {
-      // Access private method via any
       const serviceAny = service as any;
       const title = serviceAny.generateAutoTitle("America/New_York");
 
-      // Verify format: "Dec 25, 2024"
       expect(title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
     });
 
@@ -51,7 +49,6 @@ describe("JournalService", () => {
       const serviceAny = service as any;
       const title = serviceAny.generateAutoTitle();
 
-      // Verify format is consistent
       expect(title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
     });
   });
@@ -87,22 +84,19 @@ describe("JournalService", () => {
 
       const result = await service.createJournalEntry(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          id: "entry-789",
-          userId: "user-123",
-          gameId: "game-456",
-          title: "My First Entry",
-          content: "This is my first journal entry.",
-          mood: null,
-          playSession: null,
-          libraryItemId: null,
-          visibility: "PRIVATE",
-        });
-        expect(result.data.createdAt).toBeInstanceOf(Date);
-        expect(result.data.updatedAt).toBeInstanceOf(Date);
-      }
+      expect(result).toMatchObject({
+        id: "entry-789",
+        userId: "user-123",
+        gameId: "game-456",
+        title: "My First Entry",
+        content: "This is my first journal entry.",
+        mood: null,
+        playSession: null,
+        libraryItemId: null,
+        visibility: "PRIVATE",
+      });
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.updatedAt).toBeInstanceOf(Date);
 
       expect(mockCreateJournalEntry).toHaveBeenCalledWith(validParams);
     });
@@ -126,91 +120,58 @@ describe("JournalService", () => {
 
       const result = await service.createJournalEntry(paramsWithOptionalFields);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          id: "entry-789",
-          mood: JournalMood.EXCITED,
-          playSession: 5,
-          libraryItemId: 123,
-        });
-      }
+      expect(result).toMatchObject({
+        id: "entry-789",
+        mood: JournalMood.EXCITED,
+        playSession: 5,
+        libraryItemId: 123,
+      });
 
       expect(mockCreateJournalEntry).toHaveBeenCalledWith(
         paramsWithOptionalFields
       );
     });
 
-    it("should map repository result to domain model correctly", async () => {
+    it("should return entry with all expected domain fields", async () => {
       mockCreateJournalEntry.mockResolvedValue(mockPrismaJournalEntry);
 
       const result = await service.createJournalEntry(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        // Verify domain model structure (not Prisma structure)
-        expect(result.data).toHaveProperty("id");
-        expect(result.data).toHaveProperty("userId");
-        expect(result.data).toHaveProperty("gameId");
-        expect(result.data).toHaveProperty("title");
-        expect(result.data).toHaveProperty("content");
-        expect(result.data).toHaveProperty("mood");
-        expect(result.data).toHaveProperty("playSession");
-        expect(result.data).toHaveProperty("libraryItemId");
-        expect(result.data).toHaveProperty("visibility");
-        expect(result.data).toHaveProperty("createdAt");
-        expect(result.data).toHaveProperty("updatedAt");
-        expect(result.data).toHaveProperty("publishedAt");
-        // Verify it's a domain model, not Prisma model
-        expect(result.data).not.toHaveProperty("user");
-        expect(result.data).not.toHaveProperty("game");
-        expect(result.data).not.toHaveProperty("libraryItem");
-      }
+      expect(result).toHaveProperty("id");
+      expect(result).toHaveProperty("userId");
+      expect(result).toHaveProperty("gameId");
+      expect(result).toHaveProperty("title");
+      expect(result).toHaveProperty("content");
+      expect(result).toHaveProperty("mood");
+      expect(result).toHaveProperty("playSession");
+      expect(result).toHaveProperty("libraryItemId");
+      expect(result).toHaveProperty("visibility");
+      expect(result).toHaveProperty("createdAt");
+      expect(result).toHaveProperty("updatedAt");
+      expect(result).toHaveProperty("publishedAt");
+      expect(result).not.toHaveProperty("user");
+      expect(result).not.toHaveProperty("game");
+      expect(result).not.toHaveProperty("libraryItem");
     });
 
-    it("should return error when repository returns error", async () => {
+    it("should throw when repository throws", async () => {
       mockCreateJournalEntry.mockRejectedValue(
-        new Error(
-          "Failed to create journal entry: Foreign key constraint violation"
-        )
+        new Error("Foreign key constraint violation")
       );
 
-      const result = await service.createJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Failed to create journal entry");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.createJournalEntry(validParams)).rejects.toThrow(
+        "Foreign key constraint violation"
+      );
     });
 
-    it("should validate required fields are provided", async () => {
-      // Test with missing title
-
-      // TypeScript will catch this, but we test runtime behavior
-      // The service should handle validation if needed
-      mockCreateJournalEntry.mockResolvedValue(mockPrismaJournalEntry);
-
-      // Note: TypeScript will prevent calling without required fields
-      // This test verifies the service passes through to repository
-      const result = await service.createJournalEntry(validParams);
-
-      expect(result.success).toBe(true);
-      expect(mockCreateJournalEntry).toHaveBeenCalledWith(validParams);
-    });
-
-    it("should handle unexpected errors", async () => {
+    it("should throw NotFoundError when repository throws NotFoundError", async () => {
       mockCreateJournalEntry.mockRejectedValue(
-        new Error("Unexpected database error")
+        new NotFoundError("Game not found")
       );
 
-      const result = await service.createJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Unexpected database error");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.createJournalEntry(validParams)).rejects.toThrow(
+        NotFoundError
+      );
     });
 
     it("should call repository with correct parameters", async () => {
@@ -227,19 +188,6 @@ describe("JournalService", () => {
       });
     });
 
-    it("should handle repository error with NOT_FOUND code", async () => {
-      mockCreateJournalEntry.mockRejectedValue(
-        new NotFoundError("Game not found")
-      );
-
-      const result = await service.createJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Game not found");
-      }
-    });
-
     it("should auto-generate title when title is empty string", async () => {
       const paramsWithEmptyTitle = {
         ...validParams,
@@ -247,7 +195,6 @@ describe("JournalService", () => {
       };
 
       mockCreateJournalEntry.mockImplementation((params) => {
-        // Repository should receive the auto-generated title
         expect(params.title).not.toBe("");
         expect(params.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
         return Promise.resolve({
@@ -258,10 +205,7 @@ describe("JournalService", () => {
 
       const result = await service.createJournalEntry(paramsWithEmptyTitle);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
-      }
+      expect(result.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
     });
 
     it("should auto-generate title when title is undefined", async () => {
@@ -282,10 +226,7 @@ describe("JournalService", () => {
 
       const result = await service.createJournalEntry(paramsWithoutTitle);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
-      }
+      expect(result.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
     });
 
     it("should preserve user-provided title when not empty", async () => {
@@ -299,10 +240,7 @@ describe("JournalService", () => {
         })
       );
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.title).toBe("My First Entry");
-      }
+      expect(result.title).toBe("My First Entry");
     });
 
     it("should use provided timezone for auto-generated title", async () => {
@@ -314,8 +252,6 @@ describe("JournalService", () => {
       };
 
       mockCreateJournalEntry.mockImplementation((params) => {
-        // We can't test the exact output without mocking Date,
-        // but we can verify the title is generated
         expect(params.title).toBeDefined();
         expect(params.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
         return Promise.resolve({
@@ -326,7 +262,7 @@ describe("JournalService", () => {
 
       const result = await service.createJournalEntry(paramsWithTimezone);
 
-      expect(result.success).toBe(true);
+      expect(result.title).toMatch(/^[A-Z][a-z]{2} \d{1,2}, \d{4}$/);
     });
   });
 
@@ -359,93 +295,75 @@ describe("JournalService", () => {
 
       const result = await service.findJournalEntryById(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          id: "entry-789",
-          userId: "user-123",
-          gameId: "game-456",
-          title: "My Entry",
-          content: "This is my journal entry.",
-          mood: JournalMood.EXCITED,
-          playSession: 5,
-          libraryItemId: null,
-          visibility: "PRIVATE",
-        });
-        expect(result.data.createdAt).toBeInstanceOf(Date);
-        expect(result.data.updatedAt).toBeInstanceOf(Date);
-      }
+      expect(result).toMatchObject({
+        id: "entry-789",
+        userId: "user-123",
+        gameId: "game-456",
+        title: "My Entry",
+        content: "This is my journal entry.",
+        mood: JournalMood.EXCITED,
+        playSession: 5,
+        libraryItemId: null,
+        visibility: "PRIVATE",
+      });
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.updatedAt).toBeInstanceOf(Date);
 
       expect(mockFindJournalEntryById).toHaveBeenCalledWith(validParams);
     });
 
-    it("should map repository result to domain model correctly", async () => {
+    it("should return entry with all expected domain fields", async () => {
       mockFindJournalEntryById.mockResolvedValue(mockPrismaJournalEntry);
 
       const result = await service.findJournalEntryById(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        // Verify domain model structure (not Prisma structure)
-        expect(result.data).toHaveProperty("id");
-        expect(result.data).toHaveProperty("userId");
-        expect(result.data).toHaveProperty("gameId");
-        expect(result.data).toHaveProperty("title");
-        expect(result.data).toHaveProperty("content");
-        expect(result.data).toHaveProperty("mood");
-        expect(result.data).toHaveProperty("playSession");
-        expect(result.data).toHaveProperty("libraryItemId");
-        expect(result.data).toHaveProperty("visibility");
-        expect(result.data).toHaveProperty("createdAt");
-        expect(result.data).toHaveProperty("updatedAt");
-        expect(result.data).toHaveProperty("publishedAt");
-        // Verify it's a domain model, not Prisma model
-        expect(result.data).not.toHaveProperty("user");
-        expect(result.data).not.toHaveProperty("game");
-        expect(result.data).not.toHaveProperty("libraryItem");
-      }
+      expect(result).toHaveProperty("id");
+      expect(result).toHaveProperty("userId");
+      expect(result).toHaveProperty("gameId");
+      expect(result).toHaveProperty("title");
+      expect(result).toHaveProperty("content");
+      expect(result).toHaveProperty("mood");
+      expect(result).toHaveProperty("playSession");
+      expect(result).toHaveProperty("libraryItemId");
+      expect(result).toHaveProperty("visibility");
+      expect(result).toHaveProperty("createdAt");
+      expect(result).toHaveProperty("updatedAt");
+      expect(result).toHaveProperty("publishedAt");
+      expect(result).not.toHaveProperty("user");
+      expect(result).not.toHaveProperty("game");
+      expect(result).not.toHaveProperty("libraryItem");
     });
 
-    it("should return error when entry is not found", async () => {
+    it("should throw NotFoundError when entry is not found", async () => {
       mockFindJournalEntryById.mockRejectedValue(
         new NotFoundError("Journal entry not found")
       );
 
-      const result = await service.findJournalEntryById(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Journal entry not found");
-      }
+      await expect(service.findJournalEntryById(validParams)).rejects.toThrow(
+        NotFoundError
+      );
 
       expect(mockFindJournalEntryById).toHaveBeenCalledWith(validParams);
     });
 
-    it("should return error when user doesn't own the entry", async () => {
+    it("should throw NotFoundError when user doesn't own the entry", async () => {
       mockFindJournalEntryById.mockRejectedValue(
         new NotFoundError("Journal entry not found")
       );
 
-      const result = await service.findJournalEntryById(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Journal entry not found");
-      }
+      await expect(service.findJournalEntryById(validParams)).rejects.toThrow(
+        NotFoundError
+      );
     });
 
-    it("should handle unexpected errors", async () => {
+    it("should throw when repository throws unexpected error", async () => {
       mockFindJournalEntryById.mockRejectedValue(
         new Error("Unexpected database error")
       );
 
-      const result = await service.findJournalEntryById(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Unexpected database error");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.findJournalEntryById(validParams)).rejects.toThrow(
+        "Unexpected database error"
+      );
     });
 
     it("should call repository with correct parameters", async () => {
@@ -511,35 +429,32 @@ describe("JournalService", () => {
 
       const result = await service.findJournalEntriesByUserId(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(2);
-        expect(result.data[0]).toMatchObject({
-          id: "entry-1",
-          userId: "user-123",
-          gameId: "game-456",
-          title: "First Entry",
-          content: "Content of first entry",
-          mood: JournalMood.EXCITED,
-          playSession: 1,
-          libraryItemId: 100,
-          visibility: "PRIVATE",
-        });
-        expect(result.data[0].createdAt).toBeInstanceOf(Date);
-        expect(result.data[0].updatedAt).toBeInstanceOf(Date);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        id: "entry-1",
+        userId: "user-123",
+        gameId: "game-456",
+        title: "First Entry",
+        content: "Content of first entry",
+        mood: JournalMood.EXCITED,
+        playSession: 1,
+        libraryItemId: 100,
+        visibility: "PRIVATE",
+      });
+      expect(result[0].createdAt).toBeInstanceOf(Date);
+      expect(result[0].updatedAt).toBeInstanceOf(Date);
 
-        expect(result.data[1]).toMatchObject({
-          id: "entry-2",
-          userId: "user-123",
-          gameId: "game-789",
-          title: "Second Entry",
-          mood: null,
-          playSession: null,
-          libraryItemId: null,
-          visibility: "PUBLIC",
-        });
-        expect(result.data[1].publishedAt).toBeInstanceOf(Date);
-      }
+      expect(result[1]).toMatchObject({
+        id: "entry-2",
+        userId: "user-123",
+        gameId: "game-789",
+        title: "Second Entry",
+        mood: null,
+        playSession: null,
+        libraryItemId: null,
+        visibility: "PUBLIC",
+      });
+      expect(result[1].publishedAt).toBeInstanceOf(Date);
 
       expect(mockFindJournalEntriesByUserId).toHaveBeenCalledWith({
         userId: "user-123",
@@ -560,10 +475,7 @@ describe("JournalService", () => {
 
       const result = await service.findJournalEntriesByUserId(paramsWithCursor);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toHaveLength(2);
-      }
+      expect(result).toHaveLength(2);
 
       expect(mockFindJournalEntriesByUserId).toHaveBeenCalledWith({
         userId: "user-123",
@@ -581,47 +493,42 @@ describe("JournalService", () => {
         mockPrismaJournalEntries
       );
 
-      const result =
-        await service.findJournalEntriesByUserId(paramsWithoutLimit);
+      await service.findJournalEntriesByUserId(paramsWithoutLimit);
 
-      expect(result.success).toBe(true);
       expect(mockFindJournalEntriesByUserId).toHaveBeenCalledWith({
         userId: "user-123",
         limit: 20,
       });
     });
 
-    it("should correctly map domain models with all fields", async () => {
+    it("should correctly return entries with all fields", async () => {
       mockFindJournalEntriesByUserId.mockResolvedValue(
         mockPrismaJournalEntries
       );
 
       const result = await service.findJournalEntriesByUserId(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        result.data.forEach((entry: unknown) => {
-          expect(entry).toHaveProperty("id");
-          expect(entry).toHaveProperty("userId");
-          expect(entry).toHaveProperty("gameId");
-          expect(entry).toHaveProperty("title");
-          expect(entry).toHaveProperty("content");
-          expect(entry).toHaveProperty("mood");
-          expect(entry).toHaveProperty("playSession");
-          expect(entry).toHaveProperty("libraryItemId");
-          expect(entry).toHaveProperty("visibility");
-          expect(entry).toHaveProperty("createdAt");
-          expect(entry).toHaveProperty("updatedAt");
-          expect(entry).toHaveProperty("publishedAt");
-        });
+      result.forEach((entry) => {
+        expect(entry).toHaveProperty("id");
+        expect(entry).toHaveProperty("userId");
+        expect(entry).toHaveProperty("gameId");
+        expect(entry).toHaveProperty("title");
+        expect(entry).toHaveProperty("content");
+        expect(entry).toHaveProperty("mood");
+        expect(entry).toHaveProperty("playSession");
+        expect(entry).toHaveProperty("libraryItemId");
+        expect(entry).toHaveProperty("visibility");
+        expect(entry).toHaveProperty("createdAt");
+        expect(entry).toHaveProperty("updatedAt");
+        expect(entry).toHaveProperty("publishedAt");
+      });
 
-        expect(result.data[0].createdAt).toBeInstanceOf(Date);
-        expect(result.data[0].updatedAt).toBeInstanceOf(Date);
-        expect(result.data[1].publishedAt).toBeInstanceOf(Date);
-      }
+      expect(result[0].createdAt).toBeInstanceOf(Date);
+      expect(result[0].updatedAt).toBeInstanceOf(Date);
+      expect(result[1].publishedAt).toBeInstanceOf(Date);
     });
 
-    it("should return error when repository returns NOT_FOUND error (invalid cursor)", async () => {
+    it("should throw NotFoundError when cursor points to non-existent entry", async () => {
       const paramsWithInvalidCursor = {
         userId: "user-123",
         limit: 10,
@@ -632,58 +539,43 @@ describe("JournalService", () => {
         new NotFoundError("Cursor entry not found")
       );
 
-      const result = await service.findJournalEntriesByUserId(
-        paramsWithInvalidCursor
-      );
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Cursor entry not found");
-      }
+      await expect(
+        service.findJournalEntriesByUserId(paramsWithInvalidCursor)
+      ).rejects.toThrow(NotFoundError);
 
       expect(mockFindJournalEntriesByUserId).toHaveBeenCalledWith(
         paramsWithInvalidCursor
       );
     });
 
-    it("should return error when repository returns DATABASE_ERROR", async () => {
+    it("should throw when repository throws database error", async () => {
       mockFindJournalEntriesByUserId.mockRejectedValue(
         new Error("Failed to find journal entries: Connection timeout")
       );
 
-      const result = await service.findJournalEntriesByUserId(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Failed to find journal entries");
-      }
+      await expect(
+        service.findJournalEntriesByUserId(validParams)
+      ).rejects.toThrow("Failed to find journal entries");
 
       expect(mockFindJournalEntriesByUserId).toHaveBeenCalledWith(validParams);
     });
 
-    it("should handle unexpected errors", async () => {
+    it("should throw when repository throws unexpected error", async () => {
       mockFindJournalEntriesByUserId.mockRejectedValue(
         new Error("Unexpected database error")
       );
 
-      const result = await service.findJournalEntriesByUserId(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Unexpected database error");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(
+        service.findJournalEntriesByUserId(validParams)
+      ).rejects.toThrow("Unexpected database error");
     });
 
-    it("should handle empty results successfully", async () => {
+    it("should return empty array when repository returns empty", async () => {
       mockFindJournalEntriesByUserId.mockResolvedValue([]);
 
       const result = await service.findJournalEntriesByUserId(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual([]);
-      }
+      expect(result).toEqual([]);
 
       expect(mockFindJournalEntriesByUserId).toHaveBeenCalledWith(validParams);
     });
@@ -756,69 +648,58 @@ describe("JournalService", () => {
 
       const result = await service.updateJournalEntry(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          id: "entry-789",
-          userId: "user-123",
-          gameId: "game-456",
-          title: "Updated Title",
-          content: "Updated content",
-          mood: JournalMood.EXCITED,
-          playSession: 5,
-          libraryItemId: 100,
-          visibility: "PRIVATE",
-        });
-        expect(result.data.createdAt).toBeInstanceOf(Date);
-        expect(result.data.updatedAt).toBeInstanceOf(Date);
-      }
+      expect(result).toMatchObject({
+        id: "entry-789",
+        userId: "user-123",
+        gameId: "game-456",
+        title: "Updated Title",
+        content: "Updated content",
+        mood: JournalMood.EXCITED,
+        playSession: 5,
+        libraryItemId: 100,
+        visibility: "PRIVATE",
+      });
+      expect(result.createdAt).toBeInstanceOf(Date);
+      expect(result.updatedAt).toBeInstanceOf(Date);
 
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(validParams);
     });
 
-    it("should map repository result to domain model correctly", async () => {
+    it("should return entry with all expected domain fields", async () => {
       mockUpdateJournalEntry.mockResolvedValue(mockPrismaJournalEntry);
 
       const result = await service.updateJournalEntry(validParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        // Verify domain model structure (not Prisma structure)
-        expect(result.data).toHaveProperty("id");
-        expect(result.data).toHaveProperty("userId");
-        expect(result.data).toHaveProperty("gameId");
-        expect(result.data).toHaveProperty("title");
-        expect(result.data).toHaveProperty("content");
-        expect(result.data).toHaveProperty("mood");
-        expect(result.data).toHaveProperty("playSession");
-        expect(result.data).toHaveProperty("libraryItemId");
-        expect(result.data).toHaveProperty("visibility");
-        expect(result.data).toHaveProperty("createdAt");
-        expect(result.data).toHaveProperty("updatedAt");
-        expect(result.data).toHaveProperty("publishedAt");
-        // Verify it's a domain model, not Prisma model
-        expect(result.data).not.toHaveProperty("user");
-        expect(result.data).not.toHaveProperty("game");
-        expect(result.data).not.toHaveProperty("libraryItem");
-      }
+      expect(result).toHaveProperty("id");
+      expect(result).toHaveProperty("userId");
+      expect(result).toHaveProperty("gameId");
+      expect(result).toHaveProperty("title");
+      expect(result).toHaveProperty("content");
+      expect(result).toHaveProperty("mood");
+      expect(result).toHaveProperty("playSession");
+      expect(result).toHaveProperty("libraryItemId");
+      expect(result).toHaveProperty("visibility");
+      expect(result).toHaveProperty("createdAt");
+      expect(result).toHaveProperty("updatedAt");
+      expect(result).toHaveProperty("publishedAt");
+      expect(result).not.toHaveProperty("user");
+      expect(result).not.toHaveProperty("game");
+      expect(result).not.toHaveProperty("libraryItem");
     });
 
-    it("should return error when entry is not found", async () => {
+    it("should throw NotFoundError when entry is not found", async () => {
       mockUpdateJournalEntry.mockRejectedValue(
         new NotFoundError("Journal entry not found")
       );
 
-      const result = await service.updateJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Journal entry not found");
-      }
+      await expect(service.updateJournalEntry(validParams)).rejects.toThrow(
+        NotFoundError
+      );
 
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(validParams);
     });
 
-    it("should return error when user doesn't own the entry", async () => {
+    it("should throw NotFoundError when user doesn't own the entry", async () => {
       const paramsWithDifferentUser = {
         userId: "different-user",
         entryId: "entry-789",
@@ -829,45 +710,35 @@ describe("JournalService", () => {
         new NotFoundError("Journal entry not found")
       );
 
-      const result = await service.updateJournalEntry(paramsWithDifferentUser);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Journal entry not found");
-      }
+      await expect(
+        service.updateJournalEntry(paramsWithDifferentUser)
+      ).rejects.toThrow(NotFoundError);
 
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(
         paramsWithDifferentUser
       );
     });
 
-    it("should handle repository DATABASE_ERROR", async () => {
+    it("should throw when repository throws database error", async () => {
       mockUpdateJournalEntry.mockRejectedValue(
         new Error("Failed to update journal entry: Database connection failed")
       );
 
-      const result = await service.updateJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Failed to update journal entry");
-      }
+      await expect(service.updateJournalEntry(validParams)).rejects.toThrow(
+        "Failed to update journal entry"
+      );
 
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(validParams);
     });
 
-    it("should handle unexpected errors", async () => {
+    it("should throw when repository throws unexpected error", async () => {
       mockUpdateJournalEntry.mockRejectedValue(
         new Error("Unexpected database error")
       );
 
-      const result = await service.updateJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Unexpected database error");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.updateJournalEntry(validParams)).rejects.toThrow(
+        "Unexpected database error"
+      );
     });
 
     it("should update only title field", async () => {
@@ -888,11 +759,7 @@ describe("JournalService", () => {
 
       const result = await service.updateJournalEntry(partialUpdateParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.title).toBe("Only Title Updated");
-      }
-
+      expect(result.title).toBe("Only Title Updated");
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(partialUpdateParams);
     });
 
@@ -914,11 +781,7 @@ describe("JournalService", () => {
 
       const result = await service.updateJournalEntry(partialUpdateParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.content).toBe("Only content updated");
-      }
-
+      expect(result.content).toBe("Only content updated");
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(partialUpdateParams);
     });
 
@@ -948,16 +811,13 @@ describe("JournalService", () => {
 
       const result = await service.updateJournalEntry(multiFieldUpdateParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toMatchObject({
-          title: "Multi-field Update",
-          content: "Updated content with multiple fields",
-          mood: JournalMood.ACCOMPLISHED,
-          playSession: 10,
-          libraryItemId: 200,
-        });
-      }
+      expect(result).toMatchObject({
+        title: "Multi-field Update",
+        content: "Updated content with multiple fields",
+        mood: JournalMood.ACCOMPLISHED,
+        playSession: 10,
+        libraryItemId: 200,
+      });
 
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(
         multiFieldUpdateParams
@@ -982,11 +842,7 @@ describe("JournalService", () => {
 
       const result = await service.updateJournalEntry(nullMoodParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.mood).toBeNull();
-      }
-
+      expect(result.mood).toBeNull();
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(nullMoodParams);
     });
 
@@ -1008,11 +864,7 @@ describe("JournalService", () => {
 
       const result = await service.updateJournalEntry(nullPlaySessionParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.playSession).toBeNull();
-      }
-
+      expect(result.playSession).toBeNull();
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(
         nullPlaySessionParams
       );
@@ -1036,11 +888,7 @@ describe("JournalService", () => {
 
       const result = await service.updateJournalEntry(nullLibraryItemParams);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.libraryItemId).toBeNull();
-      }
-
+      expect(result.libraryItemId).toBeNull();
       expect(mockUpdateJournalEntry).toHaveBeenCalledWith(
         nullLibraryItemParams
       );
@@ -1072,32 +920,26 @@ describe("JournalService", () => {
     it("should successfully delete journal entry when repository succeeds", async () => {
       mockDeleteJournalEntry.mockResolvedValue(undefined);
 
-      const result = await service.deleteJournalEntry(validParams);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toBeUndefined();
-      }
+      await expect(
+        service.deleteJournalEntry(validParams)
+      ).resolves.toBeUndefined();
 
       expect(mockDeleteJournalEntry).toHaveBeenCalledWith(validParams);
     });
 
-    it("should return error when entry is not found", async () => {
+    it("should throw NotFoundError when entry is not found", async () => {
       mockDeleteJournalEntry.mockRejectedValue(
         new NotFoundError("Journal entry not found")
       );
 
-      const result = await service.deleteJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Journal entry not found");
-      }
+      await expect(service.deleteJournalEntry(validParams)).rejects.toThrow(
+        NotFoundError
+      );
 
       expect(mockDeleteJournalEntry).toHaveBeenCalledWith(validParams);
     });
 
-    it("should return error when user doesn't own the entry", async () => {
+    it("should throw NotFoundError when user doesn't own the entry", async () => {
       const paramsWithDifferentUser = {
         userId: "different-user",
         entryId: "entry-789",
@@ -1107,45 +949,35 @@ describe("JournalService", () => {
         new NotFoundError("Journal entry not found")
       );
 
-      const result = await service.deleteJournalEntry(paramsWithDifferentUser);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Journal entry not found");
-      }
+      await expect(
+        service.deleteJournalEntry(paramsWithDifferentUser)
+      ).rejects.toThrow(NotFoundError);
 
       expect(mockDeleteJournalEntry).toHaveBeenCalledWith(
         paramsWithDifferentUser
       );
     });
 
-    it("should handle repository DATABASE_ERROR", async () => {
+    it("should throw when repository throws database error", async () => {
       mockDeleteJournalEntry.mockRejectedValue(
         new Error("Failed to delete journal entry: Database connection failed")
       );
 
-      const result = await service.deleteJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Failed to delete journal entry");
-      }
+      await expect(service.deleteJournalEntry(validParams)).rejects.toThrow(
+        "Failed to delete journal entry"
+      );
 
       expect(mockDeleteJournalEntry).toHaveBeenCalledWith(validParams);
     });
 
-    it("should handle unexpected errors", async () => {
+    it("should throw when repository throws unexpected error", async () => {
       mockDeleteJournalEntry.mockRejectedValue(
         new Error("Unexpected database error")
       );
 
-      const result = await service.deleteJournalEntry(validParams);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Unexpected database error");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.deleteJournalEntry(validParams)).rejects.toThrow(
+        "Unexpected database error"
+      );
     });
 
     it("should call repository with correct parameters", async () => {

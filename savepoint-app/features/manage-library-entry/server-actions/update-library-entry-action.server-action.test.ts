@@ -52,7 +52,7 @@ describe("updateLibraryEntryAction", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockUpdateLibraryItem = vi.fn();
     MockLibraryService.mockImplementation(function () {
@@ -68,8 +68,8 @@ describe("updateLibraryEntryAction", () => {
     it("should pass statusChangedAt when status is included in update", async () => {
       const beforeCall = new Date();
       mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: { ...mockLibraryItem, status: LibraryItemStatus.PLAYING },
+        ...mockLibraryItem,
+        status: LibraryItemStatus.PLAYING,
       });
 
       await updateLibraryEntryAction({
@@ -94,13 +94,10 @@ describe("updateLibraryEntryAction", () => {
 
     it("should pass statusChangedAt when status is included alongside other fields", async () => {
       mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: {
-          ...mockLibraryItem,
-          status: LibraryItemStatus.PLAYED,
-          startedAt: new Date("2025-05-01"),
-          completedAt: new Date("2025-06-01"),
-        },
+        ...mockLibraryItem,
+        status: LibraryItemStatus.PLAYED,
+        startedAt: new Date("2025-05-01"),
+        completedAt: new Date("2025-06-01"),
       });
 
       await updateLibraryEntryAction({
@@ -130,8 +127,8 @@ describe("updateLibraryEntryAction", () => {
     it("should call updateLibraryItem with correct userId and libraryItemId", async () => {
       mockGetServerUserId.mockResolvedValue("user-456");
       mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: { ...mockLibraryItem, userId: "user-456" },
+        ...mockLibraryItem,
+        userId: "user-456",
       });
 
       await updateLibraryEntryAction({
@@ -153,10 +150,7 @@ describe("updateLibraryEntryAction", () => {
 
   describe("success path", () => {
     it("should revalidate game page on success", async () => {
-      mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: mockLibraryItem,
-      });
+      mockUpdateLibraryItem.mockResolvedValue(mockLibraryItem);
 
       await updateLibraryEntryAction({
         libraryItemId: 1,
@@ -167,10 +161,7 @@ describe("updateLibraryEntryAction", () => {
     });
 
     it("should return success with data from service", async () => {
-      mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: mockLibraryItem,
-      });
+      mockUpdateLibraryItem.mockResolvedValue(mockLibraryItem);
 
       const result = await updateLibraryEntryAction({
         libraryItemId: 1,
@@ -185,11 +176,10 @@ describe("updateLibraryEntryAction", () => {
   });
 
   describe("error path", () => {
-    it("should return error when service fails", async () => {
-      mockUpdateLibraryItem.mockResolvedValue({
-        success: false,
-        error: "Library item not found",
-      });
+    it("should return error when service throws", async () => {
+      mockUpdateLibraryItem.mockRejectedValue(
+        new Error("Library item not found")
+      );
 
       const result = await updateLibraryEntryAction({
         libraryItemId: 1,
@@ -198,15 +188,12 @@ describe("updateLibraryEntryAction", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("Failed to update library entry");
+        expect(result.error).toBe("Library item not found");
       }
     });
 
-    it("should not revalidate when service fails", async () => {
-      mockUpdateLibraryItem.mockResolvedValue({
-        success: false,
-        error: "Some error",
-      });
+    it("should not revalidate when service throws", async () => {
+      mockUpdateLibraryItem.mockRejectedValue(new Error("Some error"));
 
       await updateLibraryEntryAction({
         libraryItemId: 1,
@@ -236,8 +223,8 @@ describe("updateLibraryEntryAction", () => {
   describe("platform updates", () => {
     it("forwards a non-empty platform value to the service", async () => {
       mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: { ...mockLibraryItem, platform: "PS5" },
+        ...mockLibraryItem,
+        platform: "PS5",
       });
 
       const result = await updateLibraryEntryAction({
@@ -253,8 +240,8 @@ describe("updateLibraryEntryAction", () => {
 
     it("forwards null when platform is explicitly cleared", async () => {
       mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: { ...mockLibraryItem, platform: null },
+        ...mockLibraryItem,
+        platform: null,
       });
 
       await updateLibraryEntryAction({
@@ -269,8 +256,8 @@ describe("updateLibraryEntryAction", () => {
 
     it("normalizes empty string to null before forwarding", async () => {
       mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: { ...mockLibraryItem, platform: null },
+        ...mockLibraryItem,
+        platform: null,
       });
 
       await updateLibraryEntryAction({
@@ -284,10 +271,7 @@ describe("updateLibraryEntryAction", () => {
     });
 
     it("omits platform when not present in input", async () => {
-      mockUpdateLibraryItem.mockResolvedValue({
-        success: true,
-        data: mockLibraryItem,
-      });
+      mockUpdateLibraryItem.mockResolvedValue(mockLibraryItem);
 
       await updateLibraryEntryAction({
         libraryItemId: 1,

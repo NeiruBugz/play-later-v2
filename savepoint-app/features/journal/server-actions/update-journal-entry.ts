@@ -54,18 +54,7 @@ export const updateJournalEntryAction = createServerAction<
     if (libraryItemId !== undefined)
       updateParams.updates.libraryItemId = libraryItemId;
 
-    const result = await journalService.updateJournalEntry(updateParams);
-
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, entryId },
-        "Failed to update journal entry"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
+    const entry = await journalService.updateJournalEntry(updateParams);
 
     revalidatePath("/journal/[id]", "page");
     revalidatePath("/journal");
@@ -74,14 +63,14 @@ export const updateJournalEntryAction = createServerAction<
     logger.info(
       {
         userId,
-        entryId: result.data.id,
+        entryId: entry.id,
       },
       "Journal entry updated successfully"
     );
 
     return {
       success: true,
-      data: result.data,
+      data: entry,
     };
   },
 });

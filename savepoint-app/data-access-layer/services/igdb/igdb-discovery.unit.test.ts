@@ -1,6 +1,10 @@
-import { __resetTokenCacheForTests } from "@/shared/lib/igdb";
+import { ExternalServiceError, NotFoundError } from "@/shared/lib/errors";
+import {
+  __resetLimiterForTests,
+  __resetTokenCacheForTests,
+} from "@/shared/lib/igdb";
 
-import { ServiceErrorCode } from "../types";
+import { IgdbRateLimitError } from "./errors";
 import { IgdbService } from "./igdb-service";
 
 vi.mock("@/env.mjs", () => ({
@@ -19,10 +23,11 @@ Object.defineProperty(global, "fetch", {
 describe("IgdbService", () => {
   let service: IgdbService;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+  beforeEach(async () => {
+    vi.resetAllMocks();
     mockFetch.mockReset();
     __resetTokenCacheForTests();
+    await __resetLimiterForTests();
     service = new IgdbService();
   });
 
@@ -65,27 +70,24 @@ describe("IgdbService", () => {
 
         const result = await service.getFranchiseGames(params);
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.games).toHaveLength(2);
-          expect(result.data.games[0].id).toBe(1);
-          expect(result.data.games[0].name).toBe(
-            "The Legend of Zelda: Breath of the Wild"
-          );
-          expect(result.data.games[0].slug).toBe(
-            "the-legend-of-zelda-breath-of-the-wild"
-          );
-          expect(result.data.games[1].id).toBe(2);
-          expect(result.data.games[1].name).toBe(
-            "The Legend of Zelda: Tears of the Kingdom"
-          );
-          expect(result.data.pagination).toEqual({
-            total: 2,
-            offset: 0,
-            limit: 20,
-            hasMore: false,
-          });
-        }
+        expect(result.games).toHaveLength(2);
+        expect(result.games[0].id).toBe(1);
+        expect(result.games[0].name).toBe(
+          "The Legend of Zelda: Breath of the Wild"
+        );
+        expect(result.games[0].slug).toBe(
+          "the-legend-of-zelda-breath-of-the-wild"
+        );
+        expect(result.games[1].id).toBe(2);
+        expect(result.games[1].name).toBe(
+          "The Legend of Zelda: Tears of the Kingdom"
+        );
+        expect(result.pagination).toEqual({
+          total: 2,
+          offset: 0,
+          limit: 20,
+          hasMore: false,
+        });
       });
 
       it("should handle empty response (no games in franchise) gracefully", async () => {
@@ -111,16 +113,13 @@ describe("IgdbService", () => {
 
         const result = await service.getFranchiseGames(params);
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.games).toEqual([]);
-          expect(result.data.pagination).toEqual({
-            total: 0,
-            offset: 0,
-            limit: 20,
-            hasMore: false,
-          });
-        }
+        expect(result.games).toEqual([]);
+        expect(result.pagination).toEqual({
+          total: 0,
+          offset: 0,
+          limit: 20,
+          hasMore: false,
+        });
       });
 
       it("should handle games without cover images", async () => {
@@ -153,17 +152,14 @@ describe("IgdbService", () => {
 
         const result = await service.getFranchiseGames(params);
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.games).toHaveLength(1);
-          expect(result.data.games[0].cover).toBeUndefined();
-          expect(result.data.pagination).toEqual({
-            total: 1,
-            offset: 0,
-            limit: 20,
-            hasMore: false,
-          });
-        }
+        expect(result.games).toHaveLength(1);
+        expect(result.games[0].cover).toBeUndefined();
+        expect(result.pagination).toEqual({
+          total: 1,
+          offset: 0,
+          limit: 20,
+          hasMore: false,
+        });
       });
 
       it("should handle API returning empty array", async () => {
@@ -189,93 +185,54 @@ describe("IgdbService", () => {
 
         const result = await service.getFranchiseGames(params);
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.games).toEqual([]);
-          expect(result.data.pagination).toEqual({
-            total: 0,
-            offset: 0,
-            limit: 20,
-            hasMore: false,
-          });
-        }
+        expect(result.games).toEqual([]);
+        expect(result.pagination).toEqual({
+          total: 0,
+          offset: 0,
+          limit: 20,
+          hasMore: false,
+        });
       });
     });
 
     describe("when service throws", () => {
-      it("should return VALIDATION_ERROR when franchise ID is null", async () => {
+      it("should throw ZodError when franchise ID is null", async () => {
         const params = { franchiseId: null as any, currentGameId: 1 };
 
-        const result = await service.getFranchiseGames(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-          expect(result.error).toContain("Valid franchise ID is required");
-        }
+        await expect(service.getFranchiseGames(params)).rejects.toThrow();
       });
 
-      it("should return VALIDATION_ERROR when franchise ID is undefined", async () => {
+      it("should throw ZodError when franchise ID is undefined", async () => {
         const params = { franchiseId: undefined as any, currentGameId: 1 };
 
-        const result = await service.getFranchiseGames(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-          expect(result.error).toContain("Valid franchise ID is required");
-        }
+        await expect(service.getFranchiseGames(params)).rejects.toThrow();
       });
 
-      it("should return VALIDATION_ERROR when franchise ID is zero", async () => {
+      it("should throw ZodError when franchise ID is zero", async () => {
         const params = { franchiseId: 0, currentGameId: 1 };
 
-        const result = await service.getFranchiseGames(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-          expect(result.error).toContain("Valid franchise ID is required");
-        }
+        await expect(service.getFranchiseGames(params)).rejects.toThrow();
       });
 
-      it("should return VALIDATION_ERROR when franchise ID is negative", async () => {
+      it("should throw ZodError when franchise ID is negative", async () => {
         const params = { franchiseId: -100, currentGameId: 1 };
 
-        const result = await service.getFranchiseGames(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-          expect(result.error).toContain("Valid franchise ID is required");
-        }
+        await expect(service.getFranchiseGames(params)).rejects.toThrow();
       });
 
-      it("should return VALIDATION_ERROR when current game ID is null", async () => {
+      it("should throw ZodError when current game ID is null", async () => {
         const params = { franchiseId: 123, currentGameId: null as any };
 
-        const result = await service.getFranchiseGames(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-          expect(result.error).toContain("Valid current game ID is required");
-        }
+        await expect(service.getFranchiseGames(params)).rejects.toThrow();
       });
 
-      it("should return VALIDATION_ERROR when current game ID is zero", async () => {
+      it("should throw ZodError when current game ID is zero", async () => {
         const params = { franchiseId: 123, currentGameId: 0 };
 
-        const result = await service.getFranchiseGames(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-          expect(result.error).toContain("Valid current game ID is required");
-        }
+        await expect(service.getFranchiseGames(params)).rejects.toThrow();
       });
 
-      it("should return INTERNAL_ERROR when IGDB API returns 500", async () => {
+      it("should throw ExternalServiceError when IGDB API returns 500", async () => {
         const params = { franchiseId: 123, currentGameId: 1 };
 
         mockFetch
@@ -293,29 +250,22 @@ describe("IgdbService", () => {
             headers: { get: () => null },
           });
 
-        const result = await service.getFranchiseGames(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-          expect(result.error).toContain("Failed to fetch franchise games");
-        }
+        await expect(service.getFranchiseGames(params)).rejects.toThrow(
+          ExternalServiceError
+        );
       });
 
-      it("should return INTERNAL_ERROR when token fetch fails", async () => {
+      it("should throw ExternalServiceError when token fetch fails", async () => {
         const params = { franchiseId: 123, currentGameId: 1 };
 
         mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
-        const result = await service.getFranchiseGames(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(service.getFranchiseGames(params)).rejects.toThrow(
+          ExternalServiceError
+        );
       });
 
-      it("should return INTERNAL_ERROR when API returns undefined", async () => {
+      it("should throw ExternalServiceError when API returns undefined", async () => {
         const params = { franchiseId: 456, currentGameId: 1 };
 
         mockFetch
@@ -331,13 +281,32 @@ describe("IgdbService", () => {
             json: async () => undefined,
           });
 
-        const result = await service.getFranchiseGames(params);
+        await expect(service.getFranchiseGames(params)).rejects.toThrow(
+          ExternalServiceError
+        );
+      });
 
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-          expect(result.error).toContain("Failed to fetch franchise games");
-        }
+      it("should throw IgdbRateLimitError when IGDB API returns 429", async () => {
+        const params = { franchiseId: 123, currentGameId: 1 };
+
+        mockFetch
+          .mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({
+              access_token: "test_token",
+              expires_in: 3600,
+            }),
+          })
+          .mockResolvedValue({
+            ok: false,
+            status: 429,
+            statusText: "Too Many Requests",
+            headers: { get: () => null },
+          });
+
+        await expect(service.getFranchiseGames(params)).rejects.toThrow(
+          IgdbRateLimitError
+        );
       });
     });
   });
@@ -384,17 +353,14 @@ describe("IgdbService", () => {
 
         const result = await service.getCollectionGamesById(params);
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.id).toBe(123);
-          expect(result.data.name).toBe("The Witcher Collection");
-          expect(result.data.games).toHaveLength(2);
-          expect(result.data.games[0].name).toBe("The Witcher");
-          expect(result.data.games[1].name).toBe("The Witcher 2");
-        }
+        expect(result.id).toBe(123);
+        expect(result.name).toBe("The Witcher Collection");
+        expect(result.games).toHaveLength(2);
+        expect(result.games[0].name).toBe("The Witcher");
+        expect(result.games[1].name).toBe("The Witcher 2");
       });
 
-      it("should return NOT_FOUND when collection does not exist", async () => {
+      it("should throw NotFoundError when collection does not exist", async () => {
         const params = { collectionId: 999999 };
 
         mockFetch.mockResolvedValueOnce({
@@ -410,29 +376,20 @@ describe("IgdbService", () => {
           json: async () => [],
         });
 
-        const result = await service.getCollectionGamesById(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-          expect(result.error).toBe("Collection not found");
-        }
+        await expect(service.getCollectionGamesById(params)).rejects.toThrow(
+          NotFoundError
+        );
       });
 
-      it("should return VALIDATION_ERROR for invalid collection ID", async () => {
+      it("should throw ZodError for invalid collection ID", async () => {
         const params = { collectionId: -1 };
 
-        const result = await service.getCollectionGamesById(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.VALIDATION_ERROR);
-        }
+        await expect(service.getCollectionGamesById(params)).rejects.toThrow();
       });
     });
 
     describe("when service throws", () => {
-      it("should return INTERNAL_ERROR when IGDB API fails", async () => {
+      it("should throw ExternalServiceError when IGDB API fails", async () => {
         const params = { collectionId: 123 };
 
         mockFetch
@@ -450,13 +407,9 @@ describe("IgdbService", () => {
             headers: { get: () => null },
           });
 
-        const result = await service.getCollectionGamesById(params);
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-          expect(result.error).toContain("Failed to fetch collection games");
-        }
+        await expect(service.getCollectionGamesById(params)).rejects.toThrow(
+          ExternalServiceError
+        );
       });
     });
   });

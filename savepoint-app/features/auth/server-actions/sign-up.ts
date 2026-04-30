@@ -23,13 +23,6 @@ export async function signUpAction(data: SignUpInput) {
   try {
     const authService = new AuthService();
     const result = await authService.signUp(validated.data);
-    if (!result.success) {
-      logger.error({ err: result.error }, "Failed to sign up user");
-      return {
-        success: false as const,
-        error: result.error,
-      };
-    }
     await signIn("credentials", {
       email: validated.data.email,
       password: validated.data.password,
@@ -38,7 +31,7 @@ export async function signUpAction(data: SignUpInput) {
     logger.info({}, "User signed up successfully");
     return {
       success: true as const,
-      message: result.data.message,
+      message: result.message,
     };
   } catch (error) {
     if (isNextAuthRedirect(error)) {
@@ -48,7 +41,8 @@ export async function signUpAction(data: SignUpInput) {
     logger.error({ err: error }, "Unexpected error occurred during sign up");
     return {
       success: false as const,
-      error: "An unexpected error occurred",
+      error:
+        error instanceof Error ? error.message : "An unexpected error occurred",
     };
   }
 }

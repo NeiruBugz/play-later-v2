@@ -5,6 +5,7 @@ import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import type { UniquePlatformResult } from "@/shared/types/platform";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult, RequestContext } from "../types";
 
 const logger = createLogger({
@@ -22,13 +23,7 @@ async function getCachedUniquePlatforms(): Promise<{
 
   logger.info("Unique platforms cache miss - fetching from service");
 
-  const result = await getSystemPlatforms();
-
-  if (!result.success) {
-    throw new Error(result.error);
-  }
-
-  return result.data;
+  return getSystemPlatforms();
 }
 
 export async function getUniquePlatformsHandler(
@@ -50,17 +45,6 @@ export async function getUniquePlatformsHandler(
       status: HTTP_STATUS.OK,
     };
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to fetch unique platforms";
-
-    logger.error({ error }, "Failed to fetch unique platforms");
-
-    return {
-      success: false,
-      error: message,
-      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    };
+    return mapErrorToHandlerResult(error);
   }
 }

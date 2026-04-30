@@ -1,12 +1,5 @@
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-
-import {
-  handleServiceError,
-  serviceError,
-  ServiceErrorCode,
-  serviceSuccess,
-  type ServiceResult,
-} from "../types";
+import { UnauthorizedError } from "@/shared/lib/errors";
 
 const logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "SteamOpenIdService" });
 
@@ -37,54 +30,32 @@ export class SteamOpenIdService {
     }
   }
 
-  async validateCallback(
-    params: URLSearchParams
-  ): Promise<ServiceResult<string>> {
+  async validateCallback(params: URLSearchParams): Promise<string> {
     const mode = params.get("openid.mode");
     if (mode !== "id_res") {
       logger.warn({ mode }, "Invalid OpenID mode");
-      return serviceError(
-        "Invalid OpenID mode",
-        ServiceErrorCode.VALIDATION_ERROR
-      );
+      throw new UnauthorizedError("Invalid OpenID mode", { mode });
     }
 
-    try {
-      const isValid = await this.verifySignature(params);
-      if (!isValid) {
-        logger.warn("Invalid OpenID signature");
-        return serviceError(
-          "Invalid OpenID signature",
-          ServiceErrorCode.UNAUTHORIZED
-        );
-      }
-
-      const claimedId = params.get("openid.claimed_id");
-      if (!claimedId) {
-        logger.warn("Missing claimed_id in OpenID response");
-        return serviceError(
-          "Missing claimed_id",
-          ServiceErrorCode.VALIDATION_ERROR
-        );
-      }
-
-      const steamId64 = this.extractSteamId(claimedId);
-      if (!steamId64) {
-        logger.warn(
-          { claimedId },
-          "Could not extract Steam ID from claimed_id"
-        );
-        return serviceError(
-          "Could not extract Steam ID",
-          ServiceErrorCode.VALIDATION_ERROR
-        );
-      }
-
-      return serviceSuccess(steamId64);
-    } catch (error) {
-      logger.error({ error }, "Failed to validate Steam OpenID callback");
-      return handleServiceError(error, "Failed to validate OpenID callback");
+    const isValid = await this.verifySignature(params);
+    if (!isValid) {
+      logger.warn("Invalid OpenID signature");
+      throw new UnauthorizedError("Invalid OpenID signature");
     }
+
+    const claimedId = params.get("openid.claimed_id");
+    if (!claimedId) {
+      logger.warn("Missing claimed_id in OpenID response");
+      throw new UnauthorizedError("Missing claimed_id");
+    }
+
+    const steamId64 = this.extractSteamId(claimedId);
+    if (!steamId64) {
+      logger.warn({ claimedId }, "Could not extract Steam ID from claimed_id");
+      throw new UnauthorizedError("Could not extract Steam ID", { claimedId });
+    }
+
+    return steamId64;
   }
 
   private async verifySignature(params: URLSearchParams): Promise<boolean> {

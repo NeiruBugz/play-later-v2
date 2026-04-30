@@ -3,6 +3,7 @@ import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
 import type { JournalEntryDomain } from "@/features/journal/types";
+import { NotFoundError } from "@/shared/lib/errors";
 import { JournalMood, JournalVisibility } from "@/shared/types/journal";
 
 import { createJournalEntryAction } from "./create-journal-entry";
@@ -53,7 +54,7 @@ describe("createJournalEntryAction server action", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockCreateJournalEntry = vi.fn();
     MockJournalService.mockImplementation(function () {
@@ -67,10 +68,7 @@ describe("createJournalEntryAction server action", () => {
 
   describe("Success Path", () => {
     it("should successfully create journal entry when service succeeds", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockCreateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       const result = await createJournalEntryAction(validInput);
 
@@ -102,10 +100,7 @@ describe("createJournalEntryAction server action", () => {
         libraryItemId: 123,
       };
 
-      mockCreateJournalEntry.mockResolvedValue({
-        success: true,
-        data: entryWithOptionalFields,
-      });
+      mockCreateJournalEntry.mockResolvedValue(entryWithOptionalFields);
 
       const result = await createJournalEntryAction(inputWithOptionalFields);
 
@@ -126,10 +121,7 @@ describe("createJournalEntryAction server action", () => {
     });
 
     it("should revalidate journal page after successful creation", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockCreateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await createJournalEntryAction(validInput);
 
@@ -137,10 +129,7 @@ describe("createJournalEntryAction server action", () => {
     });
 
     it("should revalidate game detail pages after successful creation", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockCreateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await createJournalEntryAction(validInput);
 
@@ -148,10 +137,7 @@ describe("createJournalEntryAction server action", () => {
     });
 
     it("should call revalidatePath exactly twice on success", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockCreateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await createJournalEntryAction(validInput);
 
@@ -256,7 +242,7 @@ describe("createJournalEntryAction server action", () => {
     it("should not revalidate paths when validation fails", async () => {
       await createJournalEntryAction({
         ...validInput,
-        title: "",
+        content: "",
       });
 
       expect(mockRevalidatePath).not.toHaveBeenCalled();
@@ -264,11 +250,10 @@ describe("createJournalEntryAction server action", () => {
   });
 
   describe("Service Errors", () => {
-    it("should return error when service fails to create entry", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Failed to create journal entry",
-      });
+    it("should return error when service throws on create", async () => {
+      mockCreateJournalEntry.mockRejectedValue(
+        new Error("Failed to create journal entry")
+      );
 
       const result = await createJournalEntryAction(validInput);
 
@@ -278,11 +263,8 @@ describe("createJournalEntryAction server action", () => {
       }
     });
 
-    it("should not revalidate paths when service fails", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Database error",
-      });
+    it("should not revalidate paths when service throws", async () => {
+      mockCreateJournalEntry.mockRejectedValue(new Error("Database error"));
 
       await createJournalEntryAction(validInput);
 
@@ -290,10 +272,9 @@ describe("createJournalEntryAction server action", () => {
     });
 
     it("should return error when game does not exist", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Game not found",
-      });
+      mockCreateJournalEntry.mockRejectedValue(
+        new NotFoundError("Game not found")
+      );
 
       const result = await createJournalEntryAction(validInput);
 
@@ -340,10 +321,7 @@ describe("createJournalEntryAction server action", () => {
 
   describe("Service Integration", () => {
     it("should instantiate JournalService correctly", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockCreateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await createJournalEntryAction(validInput);
 
@@ -351,10 +329,7 @@ describe("createJournalEntryAction server action", () => {
     });
 
     it("should call createJournalEntry with userId from authentication", async () => {
-      mockCreateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockCreateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       mockGetServerUserId.mockResolvedValue("custom-user-id");
 

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
+import { mapErrorToHandlerResult } from "../map-error";
 import type { HandlerResult, RequestContext } from "../types";
 import { getPlatformsForLibraryModal } from "./get-platforms-for-library-modal";
 import type {
@@ -76,17 +77,6 @@ export async function getPlatformsHandler(
       status: HTTP_STATUS.OK,
     };
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to fetch platforms for game";
-
-    logger.error({ igdbId, error }, "Use-case failed to fetch platforms");
-
-    return {
-      success: false,
-      error: message,
-      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    };
+    return mapErrorToHandlerResult(error);
   }
 }

@@ -7,8 +7,8 @@ import {
 } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
+import { NotFoundError } from "@/shared/lib/errors";
 
-import { NotFoundError } from "../errors";
 import type {
   CreateImportedGameInput,
   ImportedGameQueryOptions,

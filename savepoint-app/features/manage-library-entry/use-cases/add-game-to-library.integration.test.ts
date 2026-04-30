@@ -51,18 +51,15 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
     vi.clearAllMocks();
 
     mockGetGameDetails.mockResolvedValue({
-      success: true,
-      data: {
-        game: {
-          id: 999,
-          name: "Test Game from IGDB",
-          slug: "test-game-from-igdb",
-          summary: "A test game fetched from IGDB",
-          cover: { image_id: "test123" },
-          first_release_date: 1609459200,
-          genres: [{ id: 1, name: "Action", slug: "action" }],
-          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
-        },
+      game: {
+        id: 999,
+        name: "Test Game from IGDB",
+        slug: "test-game-from-igdb",
+        summary: "A test game fetched from IGDB",
+        cover: { image_id: "test123" },
+        first_release_date: 1609459200,
+        genres: [{ id: 1, name: "Action", slug: "action" }],
+        platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
       },
     });
 
@@ -197,10 +194,7 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
     });
 
     it("should return error when IGDB fetch fails", async () => {
-      mockGetGameDetails.mockResolvedValueOnce({
-        success: false,
-        error: "IGDB API error",
-      });
+      mockGetGameDetails.mockRejectedValueOnce(new Error("IGDB API error"));
 
       const result = await addGameToLibrary({
         userId: testUser.id,
@@ -211,14 +205,11 @@ describe("addGameToLibrary - Use Case Integration Tests", () => {
       expect(result.success).toBe(false);
       if (result.success) return;
 
-      expect(result.error).toContain("Failed to fetch game details from IGDB");
+      expect(result.error).toContain("IGDB API error");
     });
 
     it("should return error when game not found in IGDB", async () => {
-      mockGetGameDetails.mockResolvedValueOnce({
-        success: true,
-        data: { game: null },
-      });
+      mockGetGameDetails.mockResolvedValueOnce({ game: null });
 
       const result = await addGameToLibrary({
         userId: testUser.id,

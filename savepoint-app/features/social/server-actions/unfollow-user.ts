@@ -21,18 +21,7 @@ export const unfollowUserAction = createServerAction<UnfollowUserInput, void>({
     logger.info({ followingId }, "Attempting to unfollow user");
 
     const socialService = new SocialService();
-    const result = await socialService.unfollowUser(userId!, followingId);
-
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, followingId },
-        "SocialService failed to unfollow user"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
+    await socialService.unfollowUser(userId!, followingId);
 
     revalidatePath("/u/[username]", "page");
 

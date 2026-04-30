@@ -43,18 +43,10 @@ const performUpdateProfile = createServerAction<
       isPublicProfile: sanitizedData.isPublicProfile,
     });
 
-    if (!result.success) {
-      logger.error({ userId, reason: result.error }, "Profile update failed");
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
-
     logger.info({ userId }, "Profile updated successfully");
     return {
       success: true,
-      data: result.data,
+      data: result,
     };
   },
 });

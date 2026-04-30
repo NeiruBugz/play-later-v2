@@ -37,7 +37,7 @@ describe("deleteLibraryItemAction server action", () => {
   let mockDeleteLibraryItem: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockDeleteLibraryItem = vi.fn();
     MockLibraryService.mockImplementation(function () {
@@ -51,9 +51,7 @@ describe("deleteLibraryItemAction server action", () => {
 
   describe("Success Path", () => {
     it("should delete library item and return success", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: true,
-      });
+      mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       const result = await deleteLibraryItemAction({
         libraryItemId: 42,
@@ -70,9 +68,7 @@ describe("deleteLibraryItemAction server action", () => {
     });
 
     it("should revalidate library page after successful deletion", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: true,
-      });
+      mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       await deleteLibraryItemAction({
         libraryItemId: 42,
@@ -82,9 +78,7 @@ describe("deleteLibraryItemAction server action", () => {
     });
 
     it("should revalidate game detail pages after successful deletion", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: true,
-      });
+      mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       await deleteLibraryItemAction({
         libraryItemId: 42,
@@ -94,9 +88,7 @@ describe("deleteLibraryItemAction server action", () => {
     });
 
     it("should call revalidatePath exactly twice on success", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: true,
-      });
+      mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       await deleteLibraryItemAction({
         libraryItemId: 42,
@@ -183,11 +175,10 @@ describe("deleteLibraryItemAction server action", () => {
   });
 
   describe("Service Errors", () => {
-    it("should return error when service fails to delete", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: false,
-        error: "Library item not found",
-      });
+    it("should return error when service throws for missing item", async () => {
+      mockDeleteLibraryItem.mockRejectedValue(
+        new Error("Library item not found")
+      );
 
       const result = await deleteLibraryItemAction({
         libraryItemId: 999,
@@ -199,11 +190,10 @@ describe("deleteLibraryItemAction server action", () => {
       });
     });
 
-    it("should not revalidate paths when service fails", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: false,
-        error: "Library item not found",
-      });
+    it("should not revalidate paths when service throws", async () => {
+      mockDeleteLibraryItem.mockRejectedValue(
+        new Error("Library item not found")
+      );
 
       await deleteLibraryItemAction({
         libraryItemId: 999,
@@ -212,11 +202,10 @@ describe("deleteLibraryItemAction server action", () => {
       expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
 
-    it("should return error when user tries to delete another user's item", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: false,
-        error: "Not authorized to delete this library item",
-      });
+    it("should return error when service throws authorization error", async () => {
+      mockDeleteLibraryItem.mockRejectedValue(
+        new Error("Not authorized to delete this library item")
+      );
 
       const result = await deleteLibraryItemAction({
         libraryItemId: 42,
@@ -273,9 +262,7 @@ describe("deleteLibraryItemAction server action", () => {
 
   describe("Edge Cases", () => {
     it("should handle maximum safe integer ID", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: true,
-      });
+      mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       const result = await deleteLibraryItemAction({
         libraryItemId: Number.MAX_SAFE_INTEGER,
@@ -289,9 +276,7 @@ describe("deleteLibraryItemAction server action", () => {
     });
 
     it("should handle ID value of 1", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: true,
-      });
+      mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       const result = await deleteLibraryItemAction({
         libraryItemId: 1,
@@ -307,9 +292,7 @@ describe("deleteLibraryItemAction server action", () => {
 
   describe("Service Integration", () => {
     it("should instantiate LibraryService correctly", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: true,
-      });
+      mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       await deleteLibraryItemAction({
         libraryItemId: 42,
@@ -319,9 +302,7 @@ describe("deleteLibraryItemAction server action", () => {
     });
 
     it("should call deleteLibraryItem with both libraryItemId and userId", async () => {
-      mockDeleteLibraryItem.mockResolvedValue({
-        success: true,
-      });
+      mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       mockGetServerUserId.mockResolvedValue("custom-user-id");
 

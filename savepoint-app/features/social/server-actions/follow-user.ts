@@ -21,18 +21,7 @@ export const followUserAction = createServerAction<FollowUserInput, void>({
     logger.info({ userId, followingId }, "Following user");
 
     const socialService = new SocialService();
-    const result = await socialService.followUser(userId!, followingId);
-
-    if (!result.success) {
-      logger.error(
-        { error: result.error, userId, followingId },
-        "SocialService failed to follow user"
-      );
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
+    await socialService.followUser(userId!, followingId);
 
     revalidatePath("/u/[username]", "page");
     logger.info({ userId, followingId }, "User followed successfully");

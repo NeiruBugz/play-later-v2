@@ -17,20 +17,22 @@ export default async function LibraryPage() {
   const profileService = new ProfileService();
   const libraryService = new LibraryService();
 
-  const [steamStatusResult, statusCountsResult] = await Promise.all([
-    profileService.getSteamConnectionStatus({ userId }),
-    libraryService.getStatusCounts({ userId }),
-  ]);
+  let isSteamConnected = false;
+  try {
+    const steamStatus = await profileService.getSteamConnectionStatus({
+      userId,
+    });
+    isSteamConnected = steamStatus.connected;
+  } catch {
+    // non-critical — library renders without Steam import button
+  }
 
-  const isSteamConnected =
-    steamStatusResult.success && steamStatusResult.data.connected;
+  const statusCounts = await libraryService.getStatusCounts({ userId });
 
-  const totalLibraryItems = statusCountsResult.success
-    ? Object.values(statusCountsResult.data).reduce(
-        (sum, count) => sum + count,
-        0
-      )
-    : null;
+  const totalLibraryItems = Object.values(statusCounts).reduce(
+    (sum, count) => sum + count,
+    0
+  );
 
   if (totalLibraryItems === 0) {
     return (

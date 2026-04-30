@@ -72,7 +72,7 @@ describe("getProfilePageData", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockProfileService = {
       getProfileWithStats: vi.fn(),
@@ -92,18 +92,14 @@ describe("getProfilePageData", () => {
       return mockSocialService as unknown as SocialService;
     });
 
-    mockSocialService.getFollowCounts.mockResolvedValue({
-      success: true,
-      data: followCounts,
-    });
+    mockSocialService.getFollowCounts.mockResolvedValue(followCounts);
   });
 
   describe("path 1: owner viewing own profile (public)", () => {
     beforeEach(() => {
-      mockProfileService.getProfileWithStats.mockResolvedValue({
-        success: true,
-        data: { profile: baseProfileWithStats },
-      });
+      mockProfileService.getProfileWithStats.mockResolvedValue(
+        baseProfileWithStats
+      );
     });
 
     it("should NOT include email in the returned profile — email never serialized to public DTO", async () => {
@@ -182,47 +178,31 @@ describe("getProfilePageData", () => {
   describe("path 2: authenticated visitor on public profile", () => {
     beforeEach(() => {
       mockProfileService.getPublicProfile.mockResolvedValue({
-        success: true,
-        data: {
-          profile: {
-            id: PROFILE_USER_ID,
-            username: USERNAME,
-            name: "Gamer User",
-            image: "https://example.com/avatar.jpg",
-            gameCount: 18,
-            libraryPreview: baseProfileWithStats.libraryPreview,
-            isPublicProfile: true,
-            createdAt: baseProfileWithStats.createdAt,
-          },
-        },
+        id: PROFILE_USER_ID,
+        username: USERNAME,
+        name: "Gamer User",
+        image: "https://example.com/avatar.jpg",
+        gameCount: 18,
+        libraryPreview: baseProfileWithStats.libraryPreview,
+        isPublicProfile: true,
+        createdAt: baseProfileWithStats.createdAt,
       });
 
       mockProfileService.getProfileWithStats.mockImplementation(
         async ({ userId }: { userId: string }) => {
           if (userId === PROFILE_USER_ID) {
-            return {
-              success: true,
-              data: { profile: baseProfileWithStats },
-            };
+            return baseProfileWithStats;
           }
           return {
-            success: true,
-            data: {
-              profile: {
-                ...baseProfileWithStats,
-                id: userId,
-                username: "different-viewer",
-                email: "viewer@example.com",
-              },
-            },
+            ...baseProfileWithStats,
+            id: userId,
+            username: "different-viewer",
+            email: "viewer@example.com",
           };
         }
       );
 
-      mockSocialService.isFollowing.mockResolvedValue({
-        success: true,
-        data: false,
-      });
+      mockSocialService.isFollowing.mockResolvedValue(false);
     });
 
     it("should NOT include email in the returned profile", async () => {
@@ -268,10 +248,7 @@ describe("getProfilePageData", () => {
     });
 
     it("should call isFollowing and return result in viewer", async () => {
-      mockSocialService.isFollowing.mockResolvedValue({
-        success: true,
-        data: true,
-      });
+      mockSocialService.isFollowing.mockResolvedValue(true);
 
       const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
 
@@ -295,25 +272,19 @@ describe("getProfilePageData", () => {
   describe("path 3: unauthenticated visitor on public profile", () => {
     beforeEach(() => {
       mockProfileService.getPublicProfile.mockResolvedValue({
-        success: true,
-        data: {
-          profile: {
-            id: PROFILE_USER_ID,
-            username: USERNAME,
-            name: "Gamer User",
-            image: "https://example.com/avatar.jpg",
-            gameCount: 18,
-            libraryPreview: baseProfileWithStats.libraryPreview,
-            isPublicProfile: true,
-            createdAt: baseProfileWithStats.createdAt,
-          },
-        },
+        id: PROFILE_USER_ID,
+        username: USERNAME,
+        name: "Gamer User",
+        image: "https://example.com/avatar.jpg",
+        gameCount: 18,
+        libraryPreview: baseProfileWithStats.libraryPreview,
+        isPublicProfile: true,
+        createdAt: baseProfileWithStats.createdAt,
       });
 
-      mockProfileService.getProfileWithStats.mockResolvedValue({
-        success: true,
-        data: { profile: baseProfileWithStats },
-      });
+      mockProfileService.getProfileWithStats.mockResolvedValue(
+        baseProfileWithStats
+      );
     });
 
     it("should NOT include email in the returned profile", async () => {
@@ -374,19 +345,14 @@ describe("getProfilePageData", () => {
   describe("path 4: any visitor on private profile (non-owner)", () => {
     beforeEach(() => {
       mockProfileService.getPublicProfile.mockResolvedValue({
-        success: true,
-        data: {
-          profile: {
-            id: PROFILE_USER_ID,
-            username: USERNAME,
-            name: "Gamer User",
-            image: "https://example.com/avatar.jpg",
-            gameCount: 0,
-            libraryPreview: [],
-            isPublicProfile: false,
-            createdAt: baseProfileWithStats.createdAt,
-          },
-        },
+        id: PROFILE_USER_ID,
+        username: USERNAME,
+        name: "Gamer User",
+        image: "https://example.com/avatar.jpg",
+        gameCount: 0,
+        libraryPreview: [],
+        isPublicProfile: false,
+        createdAt: baseProfileWithStats.createdAt,
       });
     });
 
@@ -494,13 +460,8 @@ describe("getProfilePageData", () => {
   describe("path 5: owner viewing their own private profile", () => {
     beforeEach(() => {
       mockProfileService.getProfileWithStats.mockResolvedValue({
-        success: true,
-        data: {
-          profile: {
-            ...baseProfileWithStats,
-            isPublicProfile: false,
-          },
-        },
+        ...baseProfileWithStats,
+        isPublicProfile: false,
       });
     });
 
@@ -550,10 +511,9 @@ describe("getProfilePageData", () => {
 
   describe("email exclusion invariant — all code paths", () => {
     it("should never include email in profile for owner (public profile)", async () => {
-      mockProfileService.getProfileWithStats.mockResolvedValue({
-        success: true,
-        data: { profile: baseProfileWithStats },
-      });
+      mockProfileService.getProfileWithStats.mockResolvedValue(
+        baseProfileWithStats
+      );
 
       const result = await getProfilePageData(USERNAME, PROFILE_USER_ID);
 
@@ -565,28 +525,19 @@ describe("getProfilePageData", () => {
 
     it("should never include email in profile for visitor (public profile)", async () => {
       mockProfileService.getPublicProfile.mockResolvedValue({
-        success: true,
-        data: {
-          profile: {
-            id: PROFILE_USER_ID,
-            username: USERNAME,
-            name: "Gamer User",
-            image: null,
-            gameCount: 5,
-            libraryPreview: [],
-            isPublicProfile: true,
-            createdAt: baseProfileWithStats.createdAt,
-          },
-        },
+        id: PROFILE_USER_ID,
+        username: USERNAME,
+        name: "Gamer User",
+        image: null,
+        gameCount: 5,
+        libraryPreview: [],
+        isPublicProfile: true,
+        createdAt: baseProfileWithStats.createdAt,
       });
-      mockProfileService.getProfileWithStats.mockResolvedValue({
-        success: true,
-        data: { profile: baseProfileWithStats },
-      });
-      mockSocialService.isFollowing.mockResolvedValue({
-        success: true,
-        data: false,
-      });
+      mockProfileService.getProfileWithStats.mockResolvedValue(
+        baseProfileWithStats
+      );
+      mockSocialService.isFollowing.mockResolvedValue(false);
 
       const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
 
@@ -598,24 +549,18 @@ describe("getProfilePageData", () => {
 
     it("should never include email in profile for unauthenticated visitor", async () => {
       mockProfileService.getPublicProfile.mockResolvedValue({
-        success: true,
-        data: {
-          profile: {
-            id: PROFILE_USER_ID,
-            username: USERNAME,
-            name: "Gamer User",
-            image: null,
-            gameCount: 5,
-            libraryPreview: [],
-            isPublicProfile: true,
-            createdAt: baseProfileWithStats.createdAt,
-          },
-        },
+        id: PROFILE_USER_ID,
+        username: USERNAME,
+        name: "Gamer User",
+        image: null,
+        gameCount: 5,
+        libraryPreview: [],
+        isPublicProfile: true,
+        createdAt: baseProfileWithStats.createdAt,
       });
-      mockProfileService.getProfileWithStats.mockResolvedValue({
-        success: true,
-        data: { profile: baseProfileWithStats },
-      });
+      mockProfileService.getProfileWithStats.mockResolvedValue(
+        baseProfileWithStats
+      );
 
       const result = await getProfilePageData(USERNAME);
 
@@ -627,11 +572,10 @@ describe("getProfilePageData", () => {
   });
 
   describe("error propagation", () => {
-    it("should propagate failure when ProfileService.getPublicProfile returns an error", async () => {
-      mockProfileService.getPublicProfile.mockResolvedValue({
-        success: false,
-        error: { code: "NOT_FOUND", message: "User not found" },
-      });
+    it("should return failure when ProfileService.getPublicProfile throws", async () => {
+      mockProfileService.getPublicProfile.mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
 
@@ -640,11 +584,10 @@ describe("getProfilePageData", () => {
       expect(mockSocialService.isFollowing).not.toHaveBeenCalled();
     });
 
-    it("should propagate failure when ProfileService.getProfileWithStats returns an error", async () => {
-      mockProfileService.getProfileWithStats.mockResolvedValue({
-        success: false,
-        error: { code: "NOT_FOUND", message: "User not found" },
-      });
+    it("should return failure when ProfileService.getProfileWithStats throws", async () => {
+      mockProfileService.getProfileWithStats.mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await getProfilePageData(USERNAME, PROFILE_USER_ID);
 
@@ -652,67 +595,48 @@ describe("getProfilePageData", () => {
       expect(mockSocialService.getFollowCounts).not.toHaveBeenCalled();
     });
 
-    it("should propagate failure when SocialService.getFollowCounts returns an error", async () => {
+    it("should return failure when SocialService.getFollowCounts throws", async () => {
       mockProfileService.getPublicProfile.mockResolvedValue({
-        success: true,
-        data: {
-          profile: {
-            id: PROFILE_USER_ID,
-            username: USERNAME,
-            name: "Gamer User",
-            image: null,
-            gameCount: 5,
-            libraryPreview: [],
-            isPublicProfile: true,
-            createdAt: baseProfileWithStats.createdAt,
-          },
-        },
+        id: PROFILE_USER_ID,
+        username: USERNAME,
+        name: "Gamer User",
+        image: null,
+        gameCount: 5,
+        libraryPreview: [],
+        isPublicProfile: true,
+        createdAt: baseProfileWithStats.createdAt,
       });
 
-      mockSocialService.getFollowCounts.mockResolvedValue({
-        success: false,
-        error: { code: "INTERNAL_ERROR", message: "Database error" },
-      });
+      mockSocialService.getFollowCounts.mockRejectedValue(
+        new Error("Database error")
+      );
 
       const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
 
       expect(result.success).toBe(false);
     });
 
-    it("should propagate failure when visitor-branch getProfileWithStats returns an error", async () => {
+    it("should return failure when visitor-branch getProfileWithStats throws", async () => {
       mockProfileService.getPublicProfile.mockResolvedValue({
-        success: true,
-        data: {
-          profile: {
-            id: PROFILE_USER_ID,
-            username: USERNAME,
-            name: "Gamer User",
-            image: null,
-            gameCount: 5,
-            libraryPreview: [],
-            isPublicProfile: true,
-            createdAt: baseProfileWithStats.createdAt,
-          },
-        },
+        id: PROFILE_USER_ID,
+        username: USERNAME,
+        name: "Gamer User",
+        image: null,
+        gameCount: 5,
+        libraryPreview: [],
+        isPublicProfile: true,
+        createdAt: baseProfileWithStats.createdAt,
       });
 
       mockProfileService.getProfileWithStats.mockImplementation(
         async ({ userId }: { userId: string }) => {
           if (userId === PROFILE_USER_ID) {
-            return {
-              success: false,
-              error: { code: "NOT_FOUND", message: "User not found" },
-            };
+            throw new Error("User not found");
           }
           return {
-            success: true,
-            data: {
-              profile: {
-                ...baseProfileWithStats,
-                id: userId,
-                username: "different-viewer",
-              },
-            },
+            ...baseProfileWithStats,
+            id: userId,
+            username: "different-viewer",
           };
         }
       );
@@ -722,11 +646,8 @@ describe("getProfilePageData", () => {
       expect(result.success).toBe(false);
     });
 
-    it("should return failure when getPublicProfile returns profile: null (user not found)", async () => {
-      mockProfileService.getPublicProfile.mockResolvedValue({
-        success: true,
-        data: { profile: null },
-      });
+    it("should return failure when getPublicProfile returns null (user not found)", async () => {
+      mockProfileService.getPublicProfile.mockResolvedValue(null);
 
       const result = await getProfilePageData(USERNAME, VIEWER_USER_ID);
 

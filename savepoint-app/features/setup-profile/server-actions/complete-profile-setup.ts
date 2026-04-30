@@ -40,19 +40,11 @@ const performCompleteSetup = createServerAction<
       avatarUrl: sanitizedData.avatarUrl,
     });
 
-    if (!result.success) {
-      logger.error({ userId, reason: result.error }, "Complete setup failed");
-      return {
-        success: false,
-        error: result.error,
-      };
-    }
-
     logger.info({ userId }, "Profile setup completed");
     revalidatePath("/dashboard");
     return {
       success: true,
-      data: result.data,
+      data: result,
     };
   },
 });

@@ -40,13 +40,7 @@ async function getCachedGameBySlug(slug: string) {
   cacheTag("igdb-game-detail");
 
   const igdbService = new IgdbService();
-  const result = await igdbService.getGameDetailsBySlug({ slug });
-
-  if (!result.success) {
-    throw new Error(result.error);
-  }
-
-  return result.data;
+  return igdbService.getGameDetailsBySlug({ slug });
 }
 
 async function getCachedTimesToBeat(igdbId: number) {
@@ -55,13 +49,12 @@ async function getCachedTimesToBeat(igdbId: number) {
   cacheTag("igdb-times-to-beat");
 
   const igdbService = new IgdbService();
-  const result = await igdbService.getTimesToBeat({ igdbId });
-
-  if (!result.success) {
+  try {
+    const result = await igdbService.getTimesToBeat({ igdbId });
+    return result.timesToBeat;
+  } catch {
     return undefined;
   }
-
-  return result.data.timesToBeat;
 }
 
 export const getGameDetails = cache(async function getGameDetails(params: {
@@ -90,22 +83,12 @@ export const getGameDetails = cache(async function getGameDetails(params: {
     const game = gameData.game;
 
     const gameDetailService = new GameDetailService();
-    gameDetailService
-      .populateGameInDatabase(game)
-      .then((populateResult) => {
-        if (!populateResult.success) {
-          logger.error(
-            { error: populateResult.error, slug: params.slug },
-            "Background game population failed"
-          );
-        }
-      })
-      .catch((error) => {
-        logger.error(
-          { error, slug: params.slug },
-          "Unexpected error during background game population"
-        );
-      });
+    gameDetailService.populateGameInDatabase(game).catch((error) => {
+      logger.error(
+        { error, slug: params.slug },
+        "Background game population failed"
+      );
+    });
 
     const franchiseIds: number[] = [];
     if (typeof game.franchise === "number" && game.franchise > 0) {
@@ -145,60 +128,60 @@ export const getGameDetails = cache(async function getGameDetails(params: {
     if (params.userId) {
       const libraryService = new LibraryService();
 
-      const [timesToBeat, gameResult] = await Promise.all([
+      const [timesToBeat, dbGame] = await Promise.all([
         getCachedTimesToBeat(game.id),
         libraryService.findGameByIgdbId(game.id),
       ]);
 
-      if (gameResult.success && gameResult.data) {
-        gameId = gameResult.data.id;
+      if (dbGame) {
+        gameId = dbGame.id;
         const journalService = new JournalService();
-        const [libraryItemResult, allLibraryItemsResult, journalEntriesResult] =
+        const [mostRecentItem, allItems, fetchedJournalEntries] =
           await Promise.all([
             libraryService.findMostRecentLibraryItemByGameId({
               userId: params.userId,
-              gameId: gameResult.data.id,
+              gameId: dbGame.id,
             }),
             libraryService.findAllLibraryItemsByGameId({
               userId: params.userId,
-              gameId: gameResult.data.id,
+              gameId: dbGame.id,
             }),
-            journalService.findJournalEntriesByGameId({
-              userId: params.userId,
-              gameId: gameResult.data.id,
-              limit: 3,
-            }),
+            journalService
+              .findJournalEntriesByGameId({
+                userId: params.userId,
+                gameId: dbGame.id,
+                limit: 3,
+              })
+              .catch((error) => {
+                logger.warn(
+                  { error, userId: params.userId, gameId: dbGame.id },
+                  "Failed to fetch journal entries; falling back to empty"
+                );
+                return [] as JournalEntryDomain[];
+              }),
           ]);
-        if (
-          libraryItemResult.success &&
-          libraryItemResult.data &&
-          libraryItemResult.data !== null
-        ) {
-          const allItems =
-            allLibraryItemsResult.success && allLibraryItemsResult.data
-              ? allLibraryItemsResult.data
-              : [];
+        if (mostRecentItem) {
           userLibraryStatus = {
-            mostRecent: libraryItemResult.data,
-            updatedAt: libraryItemResult.data.updatedAt,
+            mostRecent: mostRecentItem,
+            updatedAt: mostRecentItem.updatedAt,
             allItems,
           };
           logger.debug(
             {
               userId: params.userId,
-              gameId: gameResult.data.id,
-              status: libraryItemResult.data.status,
+              gameId: dbGame.id,
+              status: mostRecentItem.status,
               totalItems: allItems.length,
             },
             "Found user library status for game"
           );
         }
-        if (journalEntriesResult.success && journalEntriesResult.data) {
-          journalEntries = journalEntriesResult.data;
+        journalEntries = fetchedJournalEntries;
+        if (journalEntries.length > 0) {
           logger.debug(
             {
               userId: params.userId,
-              gameId: gameResult.data.id,
+              gameId: dbGame.id,
               count: journalEntries.length,
             },
             "Found journal entries for game"

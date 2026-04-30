@@ -1,6 +1,7 @@
-import { NotFoundError } from "@/data-access-layer/repository";
 import { resetTestDatabase, setupDatabase } from "@/test/setup/database";
 import { createLibraryItem } from "@/test/setup/db-factories";
+
+import { NotFoundError } from "@/shared/lib/errors";
 
 import { createGameWithRelations } from "../game/game-repository";
 import { upsertGenre } from "../genre/genre-repository";

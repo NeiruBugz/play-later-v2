@@ -49,7 +49,7 @@ describe("getPlatformsForLibraryModal", () => {
   });
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockGameDetailService = {
       populateGameInDatabase: vi.fn(),
@@ -74,10 +74,7 @@ describe("getPlatformsForLibraryModal", () => {
 
   describe("success scenarios", () => {
     it("should return platforms immediately when found in database (fast path)", async () => {
-      mockGetPlatformsForGame.mockResolvedValue({
-        success: true,
-        data: mockPlatformsResponse,
-      });
+      mockGetPlatformsForGame.mockResolvedValue(mockPlatformsResponse);
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
@@ -97,25 +94,13 @@ describe("getPlatformsForLibraryModal", () => {
 
     it("should fetch from IGDB when database returns empty platforms", async () => {
       mockGetPlatformsForGame
-        .mockResolvedValueOnce({
-          success: true,
-          data: { supportedPlatforms: [], otherPlatforms: [] },
-        })
-        .mockResolvedValueOnce({
-          success: true,
-          data: mockPlatformsResponse,
-        });
+        .mockResolvedValueOnce({ supportedPlatforms: [], otherPlatforms: [] })
+        .mockResolvedValueOnce(mockPlatformsResponse);
 
-      mockIgdbService.getGameDetails.mockResolvedValue({
-        success: true,
-        data: { game: mockIgdbGame },
-      });
+      mockIgdbService.getGameDetails.mockResolvedValue({ game: mockIgdbGame });
 
-      mockSavePlatforms.mockResolvedValue({ success: true, data: [] });
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockSavePlatforms.mockResolvedValue([]);
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
@@ -143,34 +128,24 @@ describe("getPlatformsForLibraryModal", () => {
       });
 
       mockGetPlatformsForGame
+        .mockResolvedValueOnce({ supportedPlatforms: [], otherPlatforms: [] })
         .mockResolvedValueOnce({
-          success: true,
-          data: { supportedPlatforms: [], otherPlatforms: [] },
-        })
-        .mockResolvedValueOnce({
-          success: true,
-          data: {
-            supportedPlatforms: [],
-            otherPlatforms: mockPlatformsResponse.otherPlatforms,
-          },
+          supportedPlatforms: [],
+          otherPlatforms: mockPlatformsResponse.otherPlatforms,
         });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
-        success: true,
-        data: { game: gameWithoutPlatforms },
+        game: gameWithoutPlatforms,
       });
 
       mockIgdbService.getPlatforms.mockResolvedValue({
-        success: true,
-        data: {
-          platforms: [
-            { id: 167, name: "PlayStation 5" },
-            { id: 6, name: "PC" },
-          ],
-        },
+        platforms: [
+          { id: 167, name: "PlayStation 5" },
+          { id: 6, name: "PC" },
+        ],
       });
 
-      mockSavePlatforms.mockResolvedValue({ success: true, data: [] });
+      mockSavePlatforms.mockResolvedValue([]);
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
@@ -181,19 +156,17 @@ describe("getPlatformsForLibraryModal", () => {
 
     it("should return empty arrays when all fallbacks fail", async () => {
       mockGetPlatformsForGame.mockResolvedValue({
-        success: true,
-        data: { supportedPlatforms: [], otherPlatforms: [] },
+        supportedPlatforms: [],
+        otherPlatforms: [],
       });
 
-      mockIgdbService.getGameDetails.mockResolvedValue({
-        success: false,
-        error: "IGDB API error",
-      });
+      mockIgdbService.getGameDetails.mockRejectedValue(
+        new Error("IGDB API error")
+      );
 
-      mockIgdbService.getPlatforms.mockResolvedValue({
-        success: false,
-        error: "IGDB API error",
-      });
+      mockIgdbService.getPlatforms.mockRejectedValue(
+        new Error("IGDB API error")
+      );
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
@@ -206,32 +179,17 @@ describe("getPlatformsForLibraryModal", () => {
   });
 
   describe("error scenarios", () => {
-    it("should handle database service errors gracefully", async () => {
-      mockGetPlatformsForGame.mockResolvedValue({
-        success: false,
-        error: "Database error",
-      });
-
-      mockIgdbService.getGameDetails.mockResolvedValue({
-        success: true,
-        data: { game: mockIgdbGame },
-      });
-
-      mockSavePlatforms.mockResolvedValue({ success: true, data: [] });
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+    it("should handle database NotFoundError by falling through to IGDB", async () => {
+      const { NotFoundError } = await import("@/shared/lib/errors");
 
       mockGetPlatformsForGame
-        .mockResolvedValueOnce({
-          success: false,
-          error: "Database error",
-        })
-        .mockResolvedValueOnce({
-          success: true,
-          data: mockPlatformsResponse,
-        });
+        .mockRejectedValueOnce(new NotFoundError("Game not found"))
+        .mockResolvedValueOnce(mockPlatformsResponse);
+
+      mockIgdbService.getGameDetails.mockResolvedValue({ game: mockIgdbGame });
+
+      mockSavePlatforms.mockResolvedValue([]);
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
@@ -262,28 +220,13 @@ describe("getPlatformsForLibraryModal", () => {
 
     it("should handle upsert failures gracefully and continue", async () => {
       mockGetPlatformsForGame
-        .mockResolvedValueOnce({
-          success: true,
-          data: { supportedPlatforms: [], otherPlatforms: [] },
-        })
-        .mockResolvedValueOnce({
-          success: true,
-          data: mockPlatformsResponse,
-        });
+        .mockResolvedValueOnce({ supportedPlatforms: [], otherPlatforms: [] })
+        .mockResolvedValueOnce(mockPlatformsResponse);
 
-      mockIgdbService.getGameDetails.mockResolvedValue({
-        success: true,
-        data: { game: mockIgdbGame },
-      });
+      mockIgdbService.getGameDetails.mockResolvedValue({ game: mockIgdbGame });
 
-      mockSavePlatforms.mockResolvedValue({
-        success: false,
-        error: "Upsert failed",
-      });
-      mockGameDetailService.populateGameInDatabase.mockResolvedValue({
-        success: true,
-        data: null,
-      });
+      mockSavePlatforms.mockRejectedValue(new Error("Upsert failed"));
+      mockGameDetailService.populateGameInDatabase.mockResolvedValue(null);
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
@@ -299,31 +242,21 @@ describe("getPlatformsForLibraryModal", () => {
       });
 
       mockGetPlatformsForGame
+        .mockResolvedValueOnce({ supportedPlatforms: [], otherPlatforms: [] })
         .mockResolvedValueOnce({
-          success: true,
-          data: { supportedPlatforms: [], otherPlatforms: [] },
-        })
-        .mockResolvedValueOnce({
-          success: true,
-          data: {
-            supportedPlatforms: [],
-            otherPlatforms: mockPlatformsResponse.otherPlatforms,
-          },
+          supportedPlatforms: [],
+          otherPlatforms: mockPlatformsResponse.otherPlatforms,
         });
 
       mockIgdbService.getGameDetails.mockResolvedValue({
-        success: true,
-        data: { game: gameWithUndefinedPlatforms },
+        game: gameWithUndefinedPlatforms,
       });
 
       mockIgdbService.getPlatforms.mockResolvedValue({
-        success: true,
-        data: {
-          platforms: [{ id: 6, name: "PC" }],
-        },
+        platforms: [{ id: 6, name: "PC" }],
       });
 
-      mockSavePlatforms.mockResolvedValue({ success: true, data: [] });
+      mockSavePlatforms.mockResolvedValue([]);
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 
@@ -333,19 +266,13 @@ describe("getPlatformsForLibraryModal", () => {
 
     it("should handle IGDB returning null game", async () => {
       mockGetPlatformsForGame.mockResolvedValue({
-        success: true,
-        data: { supportedPlatforms: [], otherPlatforms: [] },
+        supportedPlatforms: [],
+        otherPlatforms: [],
       });
 
-      mockIgdbService.getGameDetails.mockResolvedValue({
-        success: true,
-        data: { game: null },
-      });
+      mockIgdbService.getGameDetails.mockResolvedValue({ game: null });
 
-      mockIgdbService.getPlatforms.mockResolvedValue({
-        success: false,
-        error: "No platforms",
-      });
+      mockIgdbService.getPlatforms.mockRejectedValue(new Error("No platforms"));
 
       const result = await getPlatformsForLibraryModal({ igdbId: validIgdbId });
 

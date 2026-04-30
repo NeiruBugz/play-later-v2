@@ -55,7 +55,7 @@ describe("getQuickLogPlayingGames", () => {
   let mockGetLatestEntryDatePerGame: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockGetLibraryItems = vi.fn();
     mockGetLatestEntryDatePerGame = vi.fn();
@@ -75,26 +75,20 @@ describe("getQuickLogPlayingGames", () => {
 
   it("returns empty array when no playing games", async () => {
     mockGetLibraryItems.mockResolvedValue({
-      success: true,
-      data: { items: [], total: 0, hasMore: false },
+      items: [],
+      total: 0,
+      hasMore: false,
     });
-    mockGetLatestEntryDatePerGame.mockResolvedValue({
-      success: true,
-      data: new Map(),
-    });
+    mockGetLatestEntryDatePerGame.mockResolvedValue(new Map());
 
     const result = await getQuickLogPlayingGames(userId);
     expect(result).toEqual([]);
   });
 
-  it("returns empty array when library service fails", async () => {
-    mockGetLibraryItems.mockResolvedValue({
-      success: false,
-      error: "DB error",
-    });
+  it("returns empty array when library service throws", async () => {
+    mockGetLibraryItems.mockRejectedValue(new Error("DB error"));
 
-    const result = await getQuickLogPlayingGames(userId);
-    expect(result).toEqual([]);
+    await expect(getQuickLogPlayingGames(userId)).rejects.toThrow("DB error");
   });
 
   it("sorts by latestJournal date when journal is most recent", async () => {
@@ -102,23 +96,19 @@ describe("getQuickLogPlayingGames", () => {
     const updatedAtB = new Date("2025-01-02T10:00:00Z");
 
     mockGetLibraryItems.mockResolvedValue({
-      success: true,
-      data: {
-        items: [
-          makeLibraryItem("game-a", { updatedAt: updatedAtA }),
-          makeLibraryItem("game-b", { updatedAt: updatedAtB }),
-        ],
-        total: 2,
-        hasMore: false,
-      },
+      items: [
+        makeLibraryItem("game-a", { updatedAt: updatedAtA }),
+        makeLibraryItem("game-b", { updatedAt: updatedAtB }),
+      ],
+      total: 2,
+      hasMore: false,
     });
 
     const journalDateA = new Date("2025-01-10T10:00:00Z");
 
-    mockGetLatestEntryDatePerGame.mockResolvedValue({
-      success: true,
-      data: new Map([["game-a", journalDateA]]),
-    });
+    mockGetLatestEntryDatePerGame.mockResolvedValue(
+      new Map([["game-a", journalDateA]])
+    );
 
     const result = await getQuickLogPlayingGames(userId);
 
@@ -131,24 +121,18 @@ describe("getQuickLogPlayingGames", () => {
     const updatedAtB = new Date("2025-02-01T10:00:00Z");
 
     mockGetLibraryItems.mockResolvedValue({
-      success: true,
-      data: {
-        items: [
-          makeLibraryItem("game-a", {
-            startedAt: startedAtA,
-            updatedAt: new Date("2025-01-01"),
-          }),
-          makeLibraryItem("game-b", { updatedAt: updatedAtB }),
-        ],
-        total: 2,
-        hasMore: false,
-      },
+      items: [
+        makeLibraryItem("game-a", {
+          startedAt: startedAtA,
+          updatedAt: new Date("2025-01-01"),
+        }),
+        makeLibraryItem("game-b", { updatedAt: updatedAtB }),
+      ],
+      total: 2,
+      hasMore: false,
     });
 
-    mockGetLatestEntryDatePerGame.mockResolvedValue({
-      success: true,
-      data: new Map(),
-    });
+    mockGetLatestEntryDatePerGame.mockResolvedValue(new Map());
 
     const result = await getQuickLogPlayingGames(userId);
 
@@ -162,24 +146,20 @@ describe("getQuickLogPlayingGames", () => {
     const updatedAtB = new Date("2025-01-09T10:00:00Z");
 
     mockGetLibraryItems.mockResolvedValue({
-      success: true,
-      data: {
-        items: [
-          makeLibraryItem("game-a", { updatedAt: updatedAtA }),
-          makeLibraryItem("game-b", { updatedAt: updatedAtB }),
-        ],
-        total: 2,
-        hasMore: false,
-      },
+      items: [
+        makeLibraryItem("game-a", { updatedAt: updatedAtA }),
+        makeLibraryItem("game-b", { updatedAt: updatedAtB }),
+      ],
+      total: 2,
+      hasMore: false,
     });
 
-    mockGetLatestEntryDatePerGame.mockResolvedValue({
-      success: true,
-      data: new Map([
+    mockGetLatestEntryDatePerGame.mockResolvedValue(
+      new Map([
         ["game-a", sameJournalDate],
         ["game-b", sameJournalDate],
-      ]),
-    });
+      ])
+    );
 
     const result = await getQuickLogPlayingGames(userId);
 
@@ -195,40 +175,32 @@ describe("getQuickLogPlayingGames", () => {
     );
 
     mockGetLibraryItems.mockResolvedValue({
-      success: true,
-      data: { items, total: 5, hasMore: false },
+      items,
+      total: 5,
+      hasMore: false,
     });
 
-    mockGetLatestEntryDatePerGame.mockResolvedValue({
-      success: true,
-      data: new Map(),
-    });
+    mockGetLatestEntryDatePerGame.mockResolvedValue(new Map());
 
     const result = await getQuickLogPlayingGames(userId);
 
     expect(result).toHaveLength(3);
   });
 
-  it("falls back to library timestamps when journal service fails", async () => {
+  it("falls back to library timestamps when journal service throws", async () => {
     const updatedAtA = new Date("2025-01-05T10:00:00Z");
     const updatedAtB = new Date("2025-01-01T10:00:00Z");
 
     mockGetLibraryItems.mockResolvedValue({
-      success: true,
-      data: {
-        items: [
-          makeLibraryItem("game-a", { updatedAt: updatedAtA }),
-          makeLibraryItem("game-b", { updatedAt: updatedAtB }),
-        ],
-        total: 2,
-        hasMore: false,
-      },
+      items: [
+        makeLibraryItem("game-a", { updatedAt: updatedAtA }),
+        makeLibraryItem("game-b", { updatedAt: updatedAtB }),
+      ],
+      total: 2,
+      hasMore: false,
     });
 
-    mockGetLatestEntryDatePerGame.mockResolvedValue({
-      success: false,
-      error: "DB error",
-    });
+    mockGetLatestEntryDatePerGame.mockRejectedValue(new Error("DB error"));
 
     const result = await getQuickLogPlayingGames(userId);
 
@@ -246,14 +218,12 @@ describe("getQuickLogPlayingGames", () => {
     item.game.slug = "my-game";
 
     mockGetLibraryItems.mockResolvedValue({
-      success: true,
-      data: { items: [item], total: 1, hasMore: false },
+      items: [item],
+      total: 1,
+      hasMore: false,
     });
 
-    mockGetLatestEntryDatePerGame.mockResolvedValue({
-      success: true,
-      data: new Map(),
-    });
+    mockGetLatestEntryDatePerGame.mockResolvedValue(new Map());
 
     const result = await getQuickLogPlayingGames(userId);
 

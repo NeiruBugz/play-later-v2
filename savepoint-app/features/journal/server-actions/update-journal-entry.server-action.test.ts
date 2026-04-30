@@ -3,6 +3,7 @@ import { JournalService } from "@/data-access-layer/services";
 import { revalidatePath } from "next/cache";
 
 import type { JournalEntryDomain } from "@/features/journal/types";
+import { NotFoundError } from "@/shared/lib/errors";
 import { JournalMood, JournalVisibility } from "@/shared/types/journal";
 
 import { updateJournalEntryAction } from "./update-journal-entry";
@@ -53,7 +54,7 @@ describe("updateJournalEntryAction server action", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockUpdateJournalEntry = vi.fn();
     MockJournalService.mockImplementation(function () {
@@ -67,10 +68,7 @@ describe("updateJournalEntryAction server action", () => {
 
   describe("Success Path", () => {
     it("should successfully update journal entry when service succeeds", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       const result = await updateJournalEntryAction(validInput);
 
@@ -94,7 +92,7 @@ describe("updateJournalEntryAction server action", () => {
         entryId: "entry-456",
         title: "New Title",
         content: "New content",
-        mood: "RELAXED" as const,
+        mood: JournalMood.RELAXED,
         playSession: 10,
         libraryItemId: 999,
       };
@@ -108,19 +106,9 @@ describe("updateJournalEntryAction server action", () => {
         libraryItemId: 999,
       };
 
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: entryWithOptionalFields,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(entryWithOptionalFields);
 
-      const inputWithOptionalFieldsFixed = {
-        ...inputWithOptionalFields,
-        mood: JournalMood.RELAXED,
-      };
-
-      const result = await updateJournalEntryAction(
-        inputWithOptionalFieldsFixed
-      );
+      const result = await updateJournalEntryAction(inputWithOptionalFields);
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -151,10 +139,7 @@ describe("updateJournalEntryAction server action", () => {
         title: "Only Title Updated",
       };
 
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: entryWithTitleUpdated,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(entryWithTitleUpdated);
 
       const result = await updateJournalEntryAction(inputTitleOnly);
 
@@ -183,10 +168,7 @@ describe("updateJournalEntryAction server action", () => {
         content: "Only content updated here.",
       };
 
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: entryWithContentUpdated,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(entryWithContentUpdated);
 
       const result = await updateJournalEntryAction(inputContentOnly);
 
@@ -221,10 +203,7 @@ describe("updateJournalEntryAction server action", () => {
         libraryItemId: null,
       };
 
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: entryWithNulls,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(entryWithNulls);
 
       const result = await updateJournalEntryAction(inputWithNulls);
 
@@ -237,10 +216,7 @@ describe("updateJournalEntryAction server action", () => {
     });
 
     it("should revalidate journal detail page after successful update", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await updateJournalEntryAction(validInput);
 
@@ -248,10 +224,7 @@ describe("updateJournalEntryAction server action", () => {
     });
 
     it("should revalidate journal list page after successful update", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await updateJournalEntryAction(validInput);
 
@@ -259,10 +232,7 @@ describe("updateJournalEntryAction server action", () => {
     });
 
     it("should revalidate game detail pages after successful update", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await updateJournalEntryAction(validInput);
 
@@ -270,10 +240,7 @@ describe("updateJournalEntryAction server action", () => {
     });
 
     it("should call revalidatePath exactly three times on success", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await updateJournalEntryAction(validInput);
 
@@ -390,10 +357,9 @@ describe("updateJournalEntryAction server action", () => {
 
   describe("Service Errors", () => {
     it("should return error when journal entry is not found", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Journal entry not found",
-      });
+      mockUpdateJournalEntry.mockRejectedValue(
+        new NotFoundError("Journal entry not found")
+      );
 
       const result = await updateJournalEntryAction(validInput);
 
@@ -404,10 +370,9 @@ describe("updateJournalEntryAction server action", () => {
     });
 
     it("should return error when user does not own the journal entry", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Journal entry not found",
-      });
+      mockUpdateJournalEntry.mockRejectedValue(
+        new NotFoundError("Journal entry not found")
+      );
 
       const result = await updateJournalEntryAction(validInput);
 
@@ -417,11 +382,10 @@ describe("updateJournalEntryAction server action", () => {
       }
     });
 
-    it("should return error when service fails to update entry", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Failed to update journal entry",
-      });
+    it("should return error when service throws on update", async () => {
+      mockUpdateJournalEntry.mockRejectedValue(
+        new Error("Failed to update journal entry")
+      );
 
       const result = await updateJournalEntryAction(validInput);
 
@@ -431,11 +395,8 @@ describe("updateJournalEntryAction server action", () => {
       }
     });
 
-    it("should not revalidate paths when service fails", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: false,
-        error: "Database error",
-      });
+    it("should not revalidate paths when service throws", async () => {
+      mockUpdateJournalEntry.mockRejectedValue(new Error("Database error"));
 
       await updateJournalEntryAction(validInput);
 
@@ -479,10 +440,7 @@ describe("updateJournalEntryAction server action", () => {
 
   describe("Service Integration", () => {
     it("should instantiate JournalService correctly", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await updateJournalEntryAction(validInput);
 
@@ -490,10 +448,7 @@ describe("updateJournalEntryAction server action", () => {
     });
 
     it("should call updateJournalEntry with userId from authentication", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       mockGetServerUserId.mockResolvedValue("custom-user-id");
 
@@ -510,10 +465,7 @@ describe("updateJournalEntryAction server action", () => {
     });
 
     it("should pass only provided fields to service", async () => {
-      mockUpdateJournalEntry.mockResolvedValue({
-        success: true,
-        data: mockJournalEntryDomain,
-      });
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       const partialInput = {
         entryId: "entry-456",

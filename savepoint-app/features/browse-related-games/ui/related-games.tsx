@@ -14,19 +14,21 @@ import type { RelatedGamesProps } from "./related-games.types";
 export async function RelatedGames({ collections }: RelatedGamesProps) {
   const igdbService = new IgdbService();
 
-  const collectionsWithGamesPromises = collections.map((collection) =>
-    igdbService.getCollectionGamesById({ collectionId: collection.id })
-  );
-  const collectionsWithGamesResults = await Promise.all(
-    collectionsWithGamesPromises
-  );
-  if (!collectionsWithGamesResults.every((result) => result.success)) {
-    return null;
-  }
-
-  const collectionsWithGames = collectionsWithGamesResults
-    .filter((result) => result.success)
-    .map((result) => result.data!);
+  const collectionsWithGames = (
+    await Promise.allSettled(
+      collections.map((collection) =>
+        igdbService.getCollectionGamesById({ collectionId: collection.id })
+      )
+    )
+  )
+    .filter(
+      (
+        result
+      ): result is PromiseFulfilledResult<
+        Awaited<ReturnType<IgdbService["getCollectionGamesById"]>>
+      > => result.status === "fulfilled"
+    )
+    .map((result) => result.value);
 
   if (collectionsWithGames.length === 0) {
     return null;

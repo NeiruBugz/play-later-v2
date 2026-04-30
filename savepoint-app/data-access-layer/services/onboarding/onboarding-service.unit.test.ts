@@ -3,12 +3,12 @@ import {
   countLibraryItemsByUserId,
   getOnboardingStatus,
   hasLibraryItemWithStatus,
-  NotFoundError,
   updateOnboardingDismissed,
 } from "@/data-access-layer/repository";
 import { LibraryItemStatus } from "@prisma/client";
 
-import { ServiceErrorCode } from "../types";
+import { NotFoundError } from "@/shared/lib/errors";
+
 import { OnboardingService } from "./onboarding-service";
 
 vi.mock("@/data-access-layer/repository", async (importOriginal) => {
@@ -33,7 +33,7 @@ describe("OnboardingService", () => {
   let mockUpdateOnboardingDismissed: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     service = new OnboardingService();
     mockGetOnboardingStatus = vi.mocked(getOnboardingStatus);
     mockCountLibraryItems = vi.mocked(countLibraryItemsByUserId);
@@ -55,24 +55,21 @@ describe("OnboardingService", () => {
         mockHasPlayingItem.mockResolvedValue(false);
         mockCountJournalEntries.mockResolvedValue(0);
 
-        const result = await service.getProgress({ userId });
+        const progress = await service.getProgress({ userId });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.completedCount).toBe(1);
-          expect(result.data.totalCount).toBe(5);
-          expect(result.data.isDismissed).toBe(false);
-          expect(result.data.isComplete).toBe(false);
+        expect(progress.completedCount).toBe(1);
+        expect(progress.totalCount).toBe(5);
+        expect(progress.isDismissed).toBe(false);
+        expect(progress.isComplete).toBe(false);
 
-          const stepMap = Object.fromEntries(
-            result.data.steps.map((s) => [s.id, s.isComplete])
-          );
-          expect(stepMap["create-account"]).toBe(true);
-          expect(stepMap["setup-profile"]).toBe(false);
-          expect(stepMap["add-first-game"]).toBe(false);
-          expect(stepMap["start-playing"]).toBe(false);
-          expect(stepMap["write-journal"]).toBe(false);
-        }
+        const stepMap = Object.fromEntries(
+          progress.steps.map((s) => [s.id, s.isComplete])
+        );
+        expect(stepMap["create-account"]).toBe(true);
+        expect(stepMap["setup-profile"]).toBe(false);
+        expect(stepMap["add-first-game"]).toBe(false);
+        expect(stepMap["start-playing"]).toBe(false);
+        expect(stepMap["write-journal"]).toBe(false);
 
         expect(mockGetOnboardingStatus).toHaveBeenCalledWith(userId);
         expect(mockCountLibraryItems).toHaveBeenCalledWith(userId);
@@ -92,23 +89,20 @@ describe("OnboardingService", () => {
         mockHasPlayingItem.mockResolvedValue(false);
         mockCountJournalEntries.mockResolvedValue(0);
 
-        const result = await service.getProgress({ userId });
+        const progress = await service.getProgress({ userId });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.completedCount).toBe(3);
-          expect(result.data.totalCount).toBe(5);
-          expect(result.data.isComplete).toBe(false);
+        expect(progress.completedCount).toBe(3);
+        expect(progress.totalCount).toBe(5);
+        expect(progress.isComplete).toBe(false);
 
-          const stepMap = Object.fromEntries(
-            result.data.steps.map((s) => [s.id, s.isComplete])
-          );
-          expect(stepMap["create-account"]).toBe(true);
-          expect(stepMap["setup-profile"]).toBe(true);
-          expect(stepMap["add-first-game"]).toBe(true);
-          expect(stepMap["start-playing"]).toBe(false);
-          expect(stepMap["write-journal"]).toBe(false);
-        }
+        const stepMap = Object.fromEntries(
+          progress.steps.map((s) => [s.id, s.isComplete])
+        );
+        expect(stepMap["create-account"]).toBe(true);
+        expect(stepMap["setup-profile"]).toBe(true);
+        expect(stepMap["add-first-game"]).toBe(true);
+        expect(stepMap["start-playing"]).toBe(false);
+        expect(stepMap["write-journal"]).toBe(false);
       });
 
       it("should return progress with all steps complete", async () => {
@@ -120,21 +114,18 @@ describe("OnboardingService", () => {
         mockHasPlayingItem.mockResolvedValue(true);
         mockCountJournalEntries.mockResolvedValue(2);
 
-        const result = await service.getProgress({ userId });
+        const progress = await service.getProgress({ userId });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.completedCount).toBe(5);
-          expect(result.data.totalCount).toBe(5);
-          expect(result.data.isComplete).toBe(true);
-          expect(result.data.isDismissed).toBe(true);
+        expect(progress.completedCount).toBe(5);
+        expect(progress.totalCount).toBe(5);
+        expect(progress.isComplete).toBe(true);
+        expect(progress.isDismissed).toBe(true);
 
-          const allComplete = result.data.steps.every((s) => s.isComplete);
-          expect(allComplete).toBe(true);
-        }
+        const allComplete = progress.steps.every((s) => s.isComplete);
+        expect(allComplete).toBe(true);
       });
 
-      it("should return isDismissed true when user has dismissed", async () => {
+      it("should return isDismissed true when user has explicitly dismissed", async () => {
         mockGetOnboardingStatus.mockResolvedValue({
           profileSetupCompletedAt: null,
           onboardingDismissedAt: new Date(),
@@ -143,13 +134,10 @@ describe("OnboardingService", () => {
         mockHasPlayingItem.mockResolvedValue(false);
         mockCountJournalEntries.mockResolvedValue(0);
 
-        const result = await service.getProgress({ userId });
+        const progress = await service.getProgress({ userId });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          expect(result.data.isDismissed).toBe(true);
-          expect(result.data.isComplete).toBe(false);
-        }
+        expect(progress.isDismissed).toBe(true);
+        expect(progress.isComplete).toBe(false);
       });
 
       it("should include step metadata with action URLs and labels", async () => {
@@ -161,59 +149,53 @@ describe("OnboardingService", () => {
         mockHasPlayingItem.mockResolvedValue(false);
         mockCountJournalEntries.mockResolvedValue(0);
 
-        const result = await service.getProgress({ userId });
+        const progress = await service.getProgress({ userId });
 
-        expect(result.success).toBe(true);
-        if (result.success) {
-          const setupProfile = result.data.steps.find(
-            (s) => s.id === "setup-profile"
-          );
-          expect(setupProfile?.actionUrl).toBe("/settings/profile");
-          expect(setupProfile?.actionLabel).toBe("Edit profile");
+        const setupProfile = progress.steps.find(
+          (s) => s.id === "setup-profile"
+        );
+        expect(setupProfile?.actionUrl).toBe("/settings/profile");
+        expect(setupProfile?.actionLabel).toBe("Edit profile");
 
-          const addGame = result.data.steps.find(
-            (s) => s.id === "add-first-game"
-          );
-          expect(addGame?.actionUrl).toBe("/games/search");
-          expect(addGame?.actionLabel).toBe("Browse games");
+        const addGame = progress.steps.find((s) => s.id === "add-first-game");
+        expect(addGame?.actionUrl).toBe("/games/search");
+        expect(addGame?.actionLabel).toBe("Browse games");
 
-          const createAccount = result.data.steps.find(
-            (s) => s.id === "create-account"
-          );
-          expect(createAccount?.actionUrl).toBeNull();
-          expect(createAccount?.actionLabel).toBeNull();
-        }
+        const createAccount = progress.steps.find(
+          (s) => s.id === "create-account"
+        );
+        expect(createAccount?.actionUrl).toBeNull();
+        expect(createAccount?.actionLabel).toBeNull();
       });
     });
 
     describe("error scenarios", () => {
-      it("should return NOT_FOUND when user does not exist", async () => {
+      it("should throw NotFoundError when user does not exist", async () => {
         mockGetOnboardingStatus.mockResolvedValue(null);
 
-        const result = await service.getProgress({ userId });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("User not found");
-          expect(result.code).toBe(ServiceErrorCode.NOT_FOUND);
-        }
-      });
-
-      it("should return error when getOnboardingStatus fails", async () => {
-        mockGetOnboardingStatus.mockRejectedValue(
-          new Error("Database connection failed")
+        await expect(service.getProgress({ userId })).rejects.toThrow(
+          NotFoundError
         );
-
-        const result = await service.getProgress({ userId });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Failed to get onboarding status");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
       });
 
-      it("should return error when countLibraryItems fails", async () => {
+      it("should throw NotFoundError with userId context when user not found", async () => {
+        mockGetOnboardingStatus.mockResolvedValue(null);
+
+        await expect(service.getProgress({ userId })).rejects.toThrow(
+          "User not found"
+        );
+      });
+
+      it("should propagate error when getOnboardingStatus rejects", async () => {
+        const dbError = new Error("Database connection failed");
+        mockGetOnboardingStatus.mockRejectedValue(dbError);
+
+        await expect(service.getProgress({ userId })).rejects.toThrow(
+          "Database connection failed"
+        );
+      });
+
+      it("should propagate error when countLibraryItems rejects", async () => {
         mockGetOnboardingStatus.mockResolvedValue({
           profileSetupCompletedAt: null,
           onboardingDismissedAt: null,
@@ -224,16 +206,12 @@ describe("OnboardingService", () => {
         mockHasPlayingItem.mockResolvedValue(false);
         mockCountJournalEntries.mockResolvedValue(0);
 
-        const result = await service.getProgress({ userId });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Failed to get onboarding progress");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(service.getProgress({ userId })).rejects.toThrow(
+          "Failed to count library items"
+        );
       });
 
-      it("should return error when hasLibraryItemWithStatus fails", async () => {
+      it("should propagate error when hasLibraryItemWithStatus rejects", async () => {
         mockGetOnboardingStatus.mockResolvedValue({
           profileSetupCompletedAt: null,
           onboardingDismissedAt: null,
@@ -244,16 +222,12 @@ describe("OnboardingService", () => {
         );
         mockCountJournalEntries.mockResolvedValue(0);
 
-        const result = await service.getProgress({ userId });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Failed to get onboarding progress");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(service.getProgress({ userId })).rejects.toThrow(
+          "Failed to check playing status"
+        );
       });
 
-      it("should return error when countJournalEntries fails", async () => {
+      it("should propagate error when countJournalEntries rejects", async () => {
         mockGetOnboardingStatus.mockResolvedValue({
           profileSetupCompletedAt: null,
           onboardingDismissedAt: null,
@@ -264,13 +238,9 @@ describe("OnboardingService", () => {
           new Error("Failed to count journal entries")
         );
 
-        const result = await service.getProgress({ userId });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Failed to get onboarding progress");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(service.getProgress({ userId })).rejects.toThrow(
+          "Failed to count journal entries"
+        );
       });
     });
   });
@@ -279,43 +249,35 @@ describe("OnboardingService", () => {
     const userId = "user-123";
 
     describe("success scenarios", () => {
-      it("should dismiss onboarding successfully", async () => {
+      it("should dismiss onboarding successfully and return void", async () => {
         mockUpdateOnboardingDismissed.mockResolvedValue(undefined);
 
         const result = await service.dismiss({ userId });
 
-        expect(result.success).toBe(true);
+        expect(result).toBeUndefined();
         expect(mockUpdateOnboardingDismissed).toHaveBeenCalledWith(userId);
       });
     });
 
     describe("error scenarios", () => {
-      it("should return error when updateOnboardingDismissed fails", async () => {
+      it("should propagate error when updateOnboardingDismissed rejects", async () => {
         mockUpdateOnboardingDismissed.mockRejectedValue(
           new Error("Database connection failed")
         );
 
-        const result = await service.dismiss({ userId });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Failed to dismiss onboarding");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(service.dismiss({ userId })).rejects.toThrow(
+          "Database connection failed"
+        );
       });
 
-      it("should return error when user not found", async () => {
+      it("should propagate NotFoundError when user not found during dismiss", async () => {
         mockUpdateOnboardingDismissed.mockRejectedValue(
           new NotFoundError("User not found")
         );
 
-        const result = await service.dismiss({ userId: "nonexistent" });
-
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error).toBe("Failed to dismiss onboarding");
-          expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-        }
+        await expect(
+          service.dismiss({ userId: "nonexistent" })
+        ).rejects.toThrow(NotFoundError);
       });
     });
   });

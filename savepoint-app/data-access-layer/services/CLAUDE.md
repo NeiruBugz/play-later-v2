@@ -4,31 +4,32 @@ See [README.md](./README.md) for comprehensive documentation on the service laye
 
 ## Quick Reference
 
-**Purpose**: Business logic layer implementing the Result pattern for type-safe error handling.
+**Purpose**: Business logic layer. Services return raw data on success and throw typed errors on failure.
 
 **Core Principles**:
 - Stateless operations (instantiated per request)
-- Result-based errors (no thrown exceptions)
+- Typed-throw error model (no Result wrappers)
 - Repository delegation (never direct Prisma)
-- Input validation (Zod schemas at boundaries)
-- Structured logging (Pino with LOGGER_CONTEXT.SERVICE)
+- Trust typed input (validation lives at the request edge — no defensive re-parsing)
+- Structured logging (Pino with `LOGGER_CONTEXT.SERVICE`)
 
 ## Available Services
 
 | Service | Purpose |
 |---------|---------|
 | `ProfileService` | User profile and library stats |
-| `AuthService` | Sign-up/sign-in (credentials only) |
+| `AuthService` | Sign-up (credentials only) |
 | `IgdbService` | IGDB API client (game search, details, franchises) |
 | `LibraryService` | Library item operations |
 | `JournalService` | Journal entry management |
 | `PlatformService` | Platform metadata |
 | `GameDetailService` | Game detail aggregation |
-| `GameService` | Basic game lookups by ID |
 | `OnboardingService` | 5-step onboarding checklist tracking |
 | `SteamService` | Steam Web API (owned games, player summary, connect/disconnect) |
 | `SteamOpenIdService` | Steam OpenID authentication flow |
 | `ImportedGameService` | Imported games management (find, dismiss, status updates) |
+| `SocialService` | Follow / unfollow |
+| `ActivityFeedService` | Activity feed query helpers |
 
 ## When Working on Services
 
@@ -36,15 +37,15 @@ See [README.md](./README.md) for comprehensive documentation on the service laye
 
 1. Create directory: `services/[domain]/`
 2. Define types: `services/[domain]/types.ts`
-3. Implement service extending `BaseService`
+3. Implement the service. Each method either returns its data type directly or throws a typed error from `@/shared/lib/errors` (or a co-located `services/[domain]/errors.ts` for domain-specific subclasses).
 4. Export from `services/index.ts`
-5. Add unit tests with mocked repositories
+5. Add unit tests with mocked repositories — assert returned values directly; assert error paths via `await expect(...).rejects.toThrow(NotFoundError)` etc. Use `vi.resetAllMocks()` (not `clearAllMocks()`) in `beforeEach` to drain `mockResolvedValueOnce` queues between tests.
 
 ## Key Patterns
 
-- Services extend `BaseService` and return `ServiceResult` via `this.success()` / `this.error()`
-- Services NEVER call other services -- use use-cases for orchestration
-- Unit tests mock repositories; test all error paths and verify logging calls
+- Services NEVER call other services — use a use-case in `features/<name>/use-cases/` for orchestration
+- Unit tests mock repositories; tests assert raw return values for happy paths and typed throws for error paths
+- Import typed errors from `@/shared/lib/errors` (or co-located `errors.ts`), NEVER from other paths — class identity matters
 
 ## Security Guidelines
 
@@ -57,5 +58,7 @@ See [README.md](./README.md) for comprehensive documentation on the service laye
 
 1. ❌ Calling other services (use use-cases)
 2. ❌ Direct Prisma calls (use repositories)
-3. ❌ Throwing errors (return ServiceResult)
-4. ❌ Trusting client-provided userId
+3. ❌ Returning a Result-shaped object from a service (the service throws on failure)
+4. ❌ Re-parsing input that the action edge already validated with Zod
+5. ❌ Trusting client-provided userId
+6. ❌ Importing typed errors from `data-access-layer/repository/...` paths (use `@/shared/lib/errors` or co-located `errors.ts`)

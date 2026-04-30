@@ -25,9 +25,9 @@ export const updateLibraryStatusAction = createServerAction<
     logger.info({ igdbId, status, userId }, "Updating library status");
 
     const libraryService = new LibraryService();
-    const gameResult = await libraryService.findGameByIgdbId(igdbId);
+    const game = await libraryService.findGameByIgdbId(igdbId);
 
-    if (!gameResult.success || !gameResult.data) {
+    if (!game) {
       logger.info(
         { igdbId, userId },
         "Game not in library, adding with new status"
@@ -35,33 +35,19 @@ export const updateLibraryStatusAction = createServerAction<
       return addToLibraryAction({ igdbId, status, platform: undefined });
     }
 
-    const game = gameResult.data;
-    const libraryItemsResult =
+    const mostRecentItem =
       await libraryService.findMostRecentLibraryItemByGameId({
         userId: userId!,
         gameId: game.id,
       });
 
-    if (!libraryItemsResult.success) {
-      logger.error(
-        { error: libraryItemsResult.error, userId, gameId: game.id },
-        "Failed to find library items"
-      );
-      return {
-        success: false,
-        error: "Failed to find library items",
-      };
-    }
-
-    if (!libraryItemsResult.data) {
+    if (!mostRecentItem) {
       logger.info(
         { igdbId, userId },
         "No library item found, adding game to library"
       );
       return addToLibraryAction({ igdbId, status, platform: undefined });
     }
-
-    const mostRecentItem = libraryItemsResult.data;
 
     if (status === mostRecentItem.status) {
       logger.info(
@@ -71,7 +57,7 @@ export const updateLibraryStatusAction = createServerAction<
       return { success: true, data: mostRecentItem };
     }
 
-    const updateResult = await libraryService.updateLibraryItem({
+    const data = await libraryService.updateLibraryItem({
       userId: userId!,
       libraryItem: {
         id: mostRecentItem.id,
@@ -80,22 +66,11 @@ export const updateLibraryStatusAction = createServerAction<
       },
     });
 
-    if (!updateResult.success) {
-      logger.error(
-        { error: updateResult.error, userId, libraryItemId: mostRecentItem.id },
-        "Failed to update library item"
-      );
-      return {
-        success: false,
-        error: "Failed to update library status",
-      };
-    }
-
     revalidatePath(`/games/${game.slug}`);
     logger.info(
       {
         userId,
-        libraryItemId: updateResult.data.id,
+        libraryItemId: data.id,
         status,
       },
       "Library status updated successfully"
@@ -103,7 +78,7 @@ export const updateLibraryStatusAction = createServerAction<
 
     return {
       success: true,
-      data: updateResult.data,
+      data,
     };
   },
 });

@@ -1,8 +1,4 @@
-import {
-  isSuccessResult,
-  LibraryService,
-  ProfileService,
-} from "@/data-access-layer/services";
+import { LibraryService, ProfileService } from "@/data-access-layer/services";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -57,24 +53,29 @@ export default async function DashboardPage() {
   const userId = await requireServerUserId();
 
   const service = new ProfileService();
-  const statusResult = await service.checkSetupStatus({ userId });
-  if (statusResult.success && statusResult.data.needsSetup) {
+
+  let setupStatus: { needsSetup: boolean } = { needsSetup: false };
+  try {
+    setupStatus = await service.checkSetupStatus({ userId });
+  } catch {
+    // if setup status fails, do not redirect — stay on dashboard
+  }
+  if (setupStatus.needsSetup) {
     redirect("/profile/setup");
   }
 
-  const profileResult = await service.getProfileWithStats({ userId });
-  const username = isSuccessResult(profileResult)
-    ? (profileResult.data.profile.username ?? "there")
-    : "there";
+  let username = "there";
+  try {
+    const profile = await service.getProfileWithStats({ userId });
+    username = profile.username ?? "there";
+  } catch {
+    // non-critical — greeting still renders with fallback
+  }
 
   const libraryService = new LibraryService();
-  const statusCountsResult = await libraryService.getStatusCounts({ userId });
+  const statusCounts = await libraryService.getStatusCounts({ userId });
   const hasEmptyLibrary =
-    statusCountsResult.success &&
-    Object.values(statusCountsResult.data).reduce(
-      (sum, count) => sum + count,
-      0
-    ) === 0;
+    Object.values(statusCounts).reduce((sum, count) => sum + count, 0) === 0;
 
   return (
     <div className="py-3xl">

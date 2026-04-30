@@ -67,18 +67,15 @@ describe("addToLibraryAction - Integration Tests", () => {
     vi.clearAllMocks();
 
     mockGetGameDetails.mockResolvedValue({
-      success: true,
-      data: {
-        game: {
-          id: 999,
-          name: "Test Game",
-          slug: "test-game",
-          summary: "A test game",
-          cover: { image_id: "test123" },
-          first_release_date: 1609459200,
-          genres: [{ id: 1, name: "Action", slug: "action" }],
-          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
-        },
+      game: {
+        id: 999,
+        name: "Test Game",
+        slug: "test-game",
+        summary: "A test game",
+        cover: { image_id: "test123" },
+        first_release_date: 1609459200,
+        genres: [{ id: 1, name: "Action", slug: "action" }],
+        platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
       },
     });
 
@@ -287,18 +284,15 @@ describe("updateLibraryStatusAction - Integration Tests", () => {
   beforeEach(async () => {
     await resetTestDatabase();
     mockGetGameDetails.mockResolvedValue({
-      success: true,
-      data: {
-        game: {
-          id: 999,
-          name: "Test Game",
-          slug: "test-game",
-          summary: "A test game",
-          cover: { image_id: "test123" },
-          first_release_date: 1609459200,
-          genres: [{ id: 1, name: "Action", slug: "action" }],
-          platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
-        },
+      game: {
+        id: 999,
+        name: "Test Game",
+        slug: "test-game",
+        summary: "A test game",
+        cover: { image_id: "test123" },
+        first_release_date: 1609459200,
+        genres: [{ id: 1, name: "Action", slug: "action" }],
+        platforms: [{ id: 1, name: "PC", slug: "pc", abbreviation: "PC" }],
       },
     });
 
@@ -700,7 +694,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (result.success) return;
-      expect(result.error).toContain("Failed to update library entry");
+      expect(result.error).toContain("Library item not found");
     });
 
     it("should return error when library item belongs to different user", async () => {
@@ -722,7 +716,7 @@ describe("updateLibraryEntryAction - Integration Tests", () => {
 
       expect(result.success).toBe(false);
       if (result.success) return;
-      expect(result.error).toContain("Failed to update library entry");
+      expect(result.error).toContain("Library item not found");
 
       const dbItem = await getTestDatabase().libraryItem.findUnique({
         where: { id: libraryItem.id },
