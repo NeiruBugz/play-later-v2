@@ -15,8 +15,8 @@ import {
 } from "@fixtures/service/auth";
 
 import { hashPassword } from "@/shared/lib";
+import { ConflictError } from "@/shared/lib/errors";
 
-import { ServiceErrorCode } from "../types";
 import { AuthService } from "./auth-service";
 
 describe("AuthService", () => {
@@ -26,7 +26,7 @@ describe("AuthService", () => {
   let mockCreateUserWithCredentials: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     service = new AuthService();
     mockHashPassword = vi.mocked(hashPassword);
     mockFindUserByEmail = vi.mocked(findUserByEmail);
@@ -42,10 +42,7 @@ describe("AuthService", () => {
 
       const result = await service.signUp(signUpInputFixture);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.user.email).toBe("newuser@example.com");
-      }
+      expect(result.user.email).toBe("newuser@example.com");
 
       expect(mockFindUserByEmail).toHaveBeenCalledWith("newuser@example.com");
       expect(mockCreateUserWithCredentials).toHaveBeenCalledWith({
@@ -62,11 +59,8 @@ describe("AuthService", () => {
 
       const result = await service.signUp(signUpInputFixture);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.user).toEqual(createdUserFixture);
-        expect(result.data.message).toBe("Account created successfully");
-      }
+      expect(result.user).toEqual(createdUserFixture);
+      expect(result.message).toBe("Account created successfully");
 
       expect(mockFindUserByEmail).toHaveBeenCalledWith("newuser@example.com");
       expect(mockHashPassword).toHaveBeenCalledWith("securepassword123");
@@ -86,10 +80,7 @@ describe("AuthService", () => {
 
       const result = await service.signUp(signUpInputWithoutNameFixture);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.user.name).toBeNull();
-      }
+      expect(result.user.name).toBeNull();
 
       expect(mockCreateUserWithCredentials).toHaveBeenCalledWith({
         email: "newuser@example.com",
@@ -98,23 +89,22 @@ describe("AuthService", () => {
       });
     });
 
-    it("should return error when user already exists", async () => {
+    it("should throw ConflictError when user already exists", async () => {
       mockFindUserByEmail.mockResolvedValue(existingUserFixture);
 
-      const result = await service.signUp(signUpInputForExistingUserFixture);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("An account with this email already exists");
-        expect(result.code).toBe(ServiceErrorCode.CONFLICT);
-      }
+      await expect(
+        service.signUp(signUpInputForExistingUserFixture)
+      ).rejects.toThrow(ConflictError);
+      await expect(
+        service.signUp(signUpInputForExistingUserFixture)
+      ).rejects.toThrow("An account with this email already exists");
 
       expect(mockFindUserByEmail).toHaveBeenCalledWith("existing@example.com");
       expect(mockHashPassword).not.toHaveBeenCalled();
       expect(mockCreateUserWithCredentials).not.toHaveBeenCalled();
     });
 
-    it("should handle unique constraint violation from database", async () => {
+    it("should translate unique constraint violation to ConflictError", async () => {
       mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
 
@@ -122,46 +112,32 @@ describe("AuthService", () => {
         new DuplicateError("Unique constraint failed on the fields: (`email`)")
       );
 
-      const result = await service.signUp(
-        signUpInputForUniqueConstraintViolationFixture
-      );
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("An account with this email already exists");
-        expect(result.code).toBe(ServiceErrorCode.CONFLICT);
-      }
+      await expect(
+        service.signUp(signUpInputForUniqueConstraintViolationFixture)
+      ).rejects.toThrow(ConflictError);
     });
 
-    it("should handle password hashing errors", async () => {
+    it("should propagate password hashing errors", async () => {
       mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockRejectedValue(new Error("Hashing failed"));
 
-      const result = await service.signUp(signUpInputFixture);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Hashing failed");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.signUp(signUpInputFixture)).rejects.toThrow(
+        "Hashing failed"
+      );
 
       expect(mockCreateUserWithCredentials).not.toHaveBeenCalled();
     });
 
-    it("should handle database errors during user creation", async () => {
+    it("should propagate database errors during user creation", async () => {
       mockFindUserByEmail.mockResolvedValue(null);
       mockHashPassword.mockResolvedValue(givenHashedPassword);
       mockCreateUserWithCredentials.mockRejectedValue(
         new Error("Database connection failed")
       );
 
-      const result = await service.signUp(signUpInputFixture);
-
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe("Database connection failed");
-        expect(result.code).toBe(ServiceErrorCode.INTERNAL_ERROR);
-      }
+      await expect(service.signUp(signUpInputFixture)).rejects.toThrow(
+        "Database connection failed"
+      );
     });
 
     it("should handle case when database returns user with null email", async () => {
@@ -173,10 +149,7 @@ describe("AuthService", () => {
 
       const result = await service.signUp(signUpInputFixture);
 
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.user.id).toBe("user-123");
-      }
+      expect(result.user.id).toBe("user-123");
     });
   });
 });

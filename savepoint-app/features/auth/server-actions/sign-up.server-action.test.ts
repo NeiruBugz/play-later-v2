@@ -1,6 +1,8 @@
 import * as authModule from "@/auth";
 import { AuthService } from "@/data-access-layer/services";
 
+import { ConflictError } from "@/shared/lib/errors";
+
 import { signUpAction } from "./sign-up";
 
 vi.mock("@/auth", () => ({
@@ -18,7 +20,7 @@ describe("signUpAction", () => {
   let mockSignIn: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     mockAuthService = {
       signUp: vi.fn(),
@@ -39,15 +41,12 @@ describe("signUpAction", () => {
     };
 
     mockAuthService.signUp.mockResolvedValue({
-      success: true,
-      data: {
-        user: {
-          id: "user-123",
-          email: "newuser@example.com",
-          name: "John Doe",
-        },
-        message: "Account created successfully",
+      user: {
+        id: "user-123",
+        email: "newuser@example.com",
+        name: "John Doe",
       },
+      message: "Account created successfully",
     });
 
     mockSignIn.mockResolvedValue(undefined);
@@ -74,15 +73,12 @@ describe("signUpAction", () => {
     };
 
     mockAuthService.signUp.mockResolvedValue({
-      success: true,
-      data: {
-        user: {
-          id: "user-123",
-          email: "newuser@example.com",
-          name: null,
-        },
-        message: "Account created successfully",
+      user: {
+        id: "user-123",
+        email: "newuser@example.com",
+        name: null,
       },
+      message: "Account created successfully",
     });
 
     mockSignIn.mockResolvedValue(undefined);
@@ -96,18 +92,16 @@ describe("signUpAction", () => {
     });
   });
 
-  it("should return error when user already exists", async () => {
+  it("should surface ConflictError message when user already exists", async () => {
     const signUpData = {
       email: "existing@example.com",
       password: "securepassword123",
       name: "John Doe",
     };
 
-    mockAuthService.signUp.mockResolvedValue({
-      success: false,
-      error: "An account with this email already exists",
-      code: "CONFLICT",
-    });
+    mockAuthService.signUp.mockRejectedValue(
+      new ConflictError("An account with this email already exists")
+    );
 
     const result = await signUpAction(signUpData);
 
@@ -155,18 +149,16 @@ describe("signUpAction", () => {
     expect(mockSignIn).not.toHaveBeenCalled();
   });
 
-  it("should handle service errors gracefully", async () => {
+  it("should surface raw error message when service throws an unexpected error", async () => {
     const signUpData = {
       email: "user@example.com",
       password: "securepassword123",
       name: "John Doe",
     };
 
-    mockAuthService.signUp.mockResolvedValue({
-      success: false,
-      error: "Database connection failed",
-      code: "INTERNAL_ERROR",
-    });
+    mockAuthService.signUp.mockRejectedValue(
+      new Error("Database connection failed")
+    );
 
     const result = await signUpAction(signUpData);
 
@@ -178,14 +170,14 @@ describe("signUpAction", () => {
     expect(mockSignIn).not.toHaveBeenCalled();
   });
 
-  it("should handle unexpected errors", async () => {
+  it("should fall back to generic message when thrown value is not an Error", async () => {
     const signUpData = {
       email: "user@example.com",
       password: "securepassword123",
       name: "John Doe",
     };
 
-    mockAuthService.signUp.mockRejectedValue(new Error("Unexpected error"));
+    mockAuthService.signUp.mockRejectedValue("string-not-error");
 
     const result = await signUpAction(signUpData);
 
@@ -229,21 +221,21 @@ describe("signUpAction", () => {
     ];
 
     mockAuthService.signUp.mockResolvedValue({
-      success: true,
-      data: {
-        user: {
-          id: "user-123",
-          email: "test@example.com",
-          name: "Test",
-        },
-        message: "Account created successfully",
+      user: {
+        id: "user-123",
+        email: "test@example.com",
+        name: "Test",
       },
+      message: "Account created successfully",
     });
 
     mockSignIn.mockResolvedValue(undefined);
 
     for (const email of validEmails) {
       vi.clearAllMocks();
+      vi.mocked(AuthService).mockImplementation(function () {
+        return mockAuthService as unknown as AuthService;
+      });
 
       const result = await signUpAction({
         email,
