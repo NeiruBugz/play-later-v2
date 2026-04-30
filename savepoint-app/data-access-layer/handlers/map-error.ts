@@ -4,6 +4,7 @@ import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 import {
   ConflictError,
   DomainError,
+  ExternalServiceError,
   NotFoundError,
   RateLimitError,
   UnauthorizedError,
@@ -19,6 +20,7 @@ function resolveStatus(error: unknown): number {
   if (error instanceof UnauthorizedError) return 401;
   if (error instanceof ConflictError) return 409;
   if (error instanceof RateLimitError) return 429;
+  if (error instanceof ExternalServiceError) return 503;
   return 500;
 }
 
