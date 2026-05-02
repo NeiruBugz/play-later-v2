@@ -243,13 +243,13 @@ importers:
         version: 6.0.1(babel-plugin-react-compiler@1.0.0)(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))
       '@vitest/coverage-v8':
         specifier: 4.1.2
-        version: 4.1.2(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.6))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)))
+        version: 4.1.2(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)))
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
       aws-sdk-client-mock-vitest:
         specifier: 7.0.1
-        version: 7.0.1(@smithy/types@4.14.0)(aws-sdk-client-mock@4.1.0)(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.6))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)))
+        version: 7.0.1(@smithy/types@4.14.0)(aws-sdk-client-mock@4.1.0)(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)))
       babel-plugin-react-compiler:
         specifier: 1.0.0
         version: 1.0.0
@@ -300,7 +300,7 @@ importers:
         version: 0.2.0
       jsdom:
         specifier: 27.3.0
-        version: 27.3.0(postcss@8.5.6)
+        version: 27.3.0(postcss@8.5.12)
       knip:
         specifier: 5.73.3
         version: 5.73.3(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(typescript@5.9.3)
@@ -314,8 +314,8 @@ importers:
         specifier: 13.1.3
         version: 13.1.3
       postcss:
-        specifier: 8.5.6
-        version: 8.5.6
+        specifier: 8.5.12
+        version: 8.5.12
       prettier:
         specifier: 3.7.4
         version: 3.7.4
@@ -339,7 +339,7 @@ importers:
         version: 8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)
       vitest:
         specifier: 4.1.2
-        version: 4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.6))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))
+        version: 4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))
 
 packages:
 
@@ -4556,12 +4556,8 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.6:
-    resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
-    engines: {node: ^10 || ^12 || >=14}
-
-  postcss@8.5.8:
-    resolution: {integrity: sha512-OW/rX8O/jXnm82Ey1k44pObPtdblfiuWnrd8X7GJ7emImCOstunGbXUpp7HdBrFQX6rJzn3sPT397Wp5aCwCHg==}
+  postcss@8.5.12:
+    resolution: {integrity: sha512-W62t/Se6rA0Az3DfCL0AqJwXuKwBeYg6nOaIgzP+xZ7N5BFCI7DYi1qs6ygUYT6rvfi6t9k65UMLJC+PHZpDAA==}
     engines: {node: ^10 || ^12 || >=14}
 
   postgres-array@2.0.0:
@@ -6254,9 +6250,9 @@ snapshots:
     dependencies:
       '@csstools/css-tokenizer': 3.0.4
 
-  '@csstools/css-syntax-patches-for-csstree@1.0.14(postcss@8.5.6)':
+  '@csstools/css-syntax-patches-for-csstree@1.0.14(postcss@8.5.12)':
     dependencies:
-      postcss: 8.5.6
+      postcss: 8.5.12
 
   '@csstools/css-tokenizer@3.0.4': {}
 
@@ -7763,7 +7759,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.2.2
       '@tailwindcss/oxide': 4.2.2
-      postcss: 8.5.6
+      postcss: 8.5.12
       tailwindcss: 4.2.2
 
   '@tanstack/eslint-plugin-query@5.96.2(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)':
@@ -8193,7 +8189,7 @@ snapshots:
     optionalDependencies:
       babel-plugin-react-compiler: 1.0.0
 
-  '@vitest/coverage-v8@4.1.2(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.6))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)))':
+  '@vitest/coverage-v8@4.1.2(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)))':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
       '@vitest/utils': 4.1.2
@@ -8205,7 +8201,7 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.6))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))
+      vitest: 4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))
 
   '@vitest/expect@4.1.2':
     dependencies:
@@ -8391,12 +8387,12 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws-sdk-client-mock-vitest@7.0.1(@smithy/types@4.14.0)(aws-sdk-client-mock@4.1.0)(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.6))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))):
+  aws-sdk-client-mock-vitest@7.0.1(@smithy/types@4.14.0)(aws-sdk-client-mock@4.1.0)(vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))):
     dependencies:
       '@smithy/types': 4.14.0
       '@vitest/expect': 4.1.2
       aws-sdk-client-mock: 4.1.0
-      vitest: 4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.6))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))
+      vitest: 4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))
 
   aws-sdk-client-mock@4.1.0:
     dependencies:
@@ -8611,10 +8607,10 @@ snapshots:
 
   css.escape@1.5.1: {}
 
-  cssstyle@5.3.4(postcss@8.5.6):
+  cssstyle@5.3.4(postcss@8.5.12):
     dependencies:
       '@asamuzakjp/css-color': 4.1.0
-      '@csstools/css-syntax-patches-for-csstree': 1.0.14(postcss@8.5.6)
+      '@csstools/css-syntax-patches-for-csstree': 1.0.14(postcss@8.5.12)
       css-tree: 3.1.0
     transitivePeerDependencies:
       - postcss
@@ -9103,7 +9099,7 @@ snapshots:
   eslint-plugin-tailwindcss@3.18.2(tailwindcss@4.1.18):
     dependencies:
       fast-glob: 3.3.3
-      postcss: 8.5.6
+      postcss: 8.5.12
       tailwindcss: 4.1.18
 
   eslint-plugin-testing-library@7.13.6(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3):
@@ -9669,11 +9665,11 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  jsdom@27.3.0(postcss@8.5.6):
+  jsdom@27.3.0(postcss@8.5.12):
     dependencies:
       '@acemir/cssom': 0.9.29
       '@asamuzakjp/dom-selector': 6.7.6
-      cssstyle: 5.3.4(postcss@8.5.6)
+      cssstyle: 5.3.4(postcss@8.5.12)
       data-urls: 6.0.0
       decimal.js: 10.6.0
       html-encoding-sniffer: 4.0.0
@@ -10317,13 +10313,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.6:
-    dependencies:
-      nanoid: 3.3.11
-      picocolors: 1.1.1
-      source-map-js: 1.2.1
-
-  postcss@8.5.8:
+  postcss@8.5.12:
     dependencies:
       nanoid: 3.3.11
       picocolors: 1.1.1
@@ -11064,7 +11054,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.8
+      postcss: 8.5.12
       rolldown: 1.0.0-rc.12(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)
       tinyglobby: 0.2.15
     optionalDependencies:
@@ -11076,7 +11066,7 @@ snapshots:
       - '@emnapi/core'
       - '@emnapi/runtime'
 
-  vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.6))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)):
+  vitest@4.1.2(@types/node@24.10.1)(jsdom@27.3.0(postcss@8.5.12))(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3)):
     dependencies:
       '@vitest/expect': 4.1.2
       '@vitest/mocker': 4.1.2(msw@2.13.0(@types/node@24.10.1)(typescript@5.9.3))(vite@8.0.5(@emnapi/core@1.7.1)(@emnapi/runtime@1.7.1)(@types/node@24.10.1)(jiti@2.6.1)(yaml@2.8.3))
@@ -11100,7 +11090,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.10.1
-      jsdom: 27.3.0(postcss@8.5.6)
+      jsdom: 27.3.0(postcss@8.5.12)
     transitivePeerDependencies:
       - msw
 
