@@ -1,7 +1,7 @@
 "use server";
 
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import {
   UpdateProfileSchema,
@@ -44,8 +44,8 @@ const performUpdateProfile = createServerAction<
     });
 
     const tags = userTags(userId!);
-    revalidateTag(tags.profile, "max");
-    revalidateTag(tags.profileStats, "max");
+    updateTag(tags.profile);
+    updateTag(tags.profileStats);
 
     logger.info({ userId }, "Profile updated successfully");
     return {

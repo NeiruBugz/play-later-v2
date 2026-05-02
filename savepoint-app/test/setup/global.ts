@@ -35,7 +35,8 @@ process.env.AWS_ACCESS_KEY_ID = "test";
 process.env.AWS_SECRET_ACCESS_KEY = "test";
 process.env.S3_BUCKET_NAME = "savepoint-dev";
 process.env.S3_AVATAR_PATH_PREFIX = "user-avatars/";
-vi.mock("@/shared/lib", () => {
+vi.mock("@/shared/lib", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/shared/lib")>();
   const mockLogger = {
     fatal: vi.fn(),
     error: vi.fn(),
@@ -97,13 +98,7 @@ vi.mock("@/shared/lib", () => {
         .trim()
     ),
     convertReleaseDateToIsoStringDate: vi.fn((date?: string) => date),
-    userTags: vi.fn((userId: string) => ({
-      profile: `user:${userId}:profile`,
-      setup: `user:${userId}:setup`,
-      steamConnection: `user:${userId}:steam-connection`,
-      libraryCounts: `user:${userId}:library:counts`,
-      profileStats: `user:${userId}:profile-stats`,
-    })),
+    userTags: actual.userTags,
     LOGGER_CONTEXT: {
       SERVICE: "service",
       SERVER_ACTION: "serverAction",

@@ -1,7 +1,7 @@
 "use server";
 
 import { SteamService } from "@/data-access-layer/services";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 
 import { createServerAction, userTags, type ActionResult } from "@/shared/lib";
@@ -18,7 +18,7 @@ export const disconnectSteam = createServerAction<Record<string, never>, void>({
     const steamService = new SteamService();
     await steamService.disconnectSteam({ userId: userId! });
 
-    revalidateTag(userTags(userId!).steamConnection, "max");
+    updateTag(userTags(userId!).steamConnection);
     revalidatePath("/settings");
     revalidatePath("/profile");
 

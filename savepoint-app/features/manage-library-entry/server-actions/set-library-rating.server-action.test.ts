@@ -1,6 +1,8 @@
 import { getServerUserId } from "@/auth";
 import { LibraryService, ProfileService } from "@/data-access-layer/services";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+
+import { userTags } from "@/shared/lib";
 
 import { setLibraryRatingAction } from "./set-library-rating";
 
@@ -15,7 +17,7 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {
@@ -33,6 +35,7 @@ vi.mock("@/shared/lib", async (importOriginal) => {
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
+const mockUpdateTag = vi.mocked(updateTag);
 const MockLibraryService = vi.mocked(LibraryService);
 const MockProfileService = vi.mocked(ProfileService);
 
@@ -148,6 +151,40 @@ describe("setLibraryRatingAction server action", () => {
         error: "Invalid input data",
       });
       expect(mockSetRating).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("updateTag wiring", () => {
+    it("calls updateTag with profileStats on success", async () => {
+      mockSetRating.mockResolvedValue(undefined);
+
+      await setLibraryRatingAction({ libraryItemId: 42, rating: 8 });
+
+      expect(mockUpdateTag).toHaveBeenCalledWith(
+        userTags("user-123").profileStats
+      );
+    });
+
+    it("does NOT call updateTag when service throws", async () => {
+      mockSetRating.mockRejectedValue(new Error("DB failure"));
+
+      await setLibraryRatingAction({ libraryItemId: 42, rating: 8 });
+
+      expect(mockUpdateTag).not.toHaveBeenCalled();
+    });
+
+    it("does NOT call updateTag on validation error", async () => {
+      await setLibraryRatingAction({ libraryItemId: 42, rating: 11 });
+
+      expect(mockUpdateTag).not.toHaveBeenCalled();
+    });
+
+    it("does NOT call updateTag when unauthenticated", async () => {
+      mockGetServerUserId.mockResolvedValue(undefined);
+
+      await setLibraryRatingAction({ libraryItemId: 42, rating: 8 });
+
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
   });
 

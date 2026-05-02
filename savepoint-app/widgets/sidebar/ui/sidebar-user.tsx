@@ -1,5 +1,4 @@
-import { ProfileService } from "@/data-access-layer/services";
-
+import { getDisplayProfile } from "@/features/profile/index.server";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 
 import { SidebarUserMenu } from "./sidebar-user-menu";
@@ -9,19 +8,7 @@ interface SidebarUserProps {
 }
 
 export async function SidebarUser({ userId }: SidebarUserProps) {
-  const profileService = new ProfileService();
-
-  let displayName = "User";
-  let avatarUrl: string | null = null;
-
-  try {
-    const profile = await profileService.getProfile({ userId });
-    displayName = profile.username ?? "User";
-    avatarUrl = profile.image ?? null;
-  } catch {
-    // non-critical — renders with defaults
-  }
-
+  const { displayName, avatarUrl } = await getDisplayProfile({ userId });
   return <SidebarUserMenu displayName={displayName} avatarUrl={avatarUrl} />;
 }
 

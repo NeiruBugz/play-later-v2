@@ -99,10 +99,16 @@ async function getCachedProfileWithStats(
   );
 }
 
+class UserNotFoundForSetup extends Error {
+  constructor() {
+    super("User not found during setup-status check");
+    this.name = "UserNotFoundForSetup";
+  }
+}
+
 async function getCachedSetupStatus(userId: string): Promise<{
   needsSetup: boolean;
   suggestedUsername?: string;
-  found: boolean;
 }> {
   "use cache";
   cacheTag(userTags(userId).setup);
@@ -117,13 +123,12 @@ async function getCachedSetupStatus(userId: string): Promise<{
     },
   });
   if (!user) {
-    return { needsSetup: false, found: false };
+    throw new UserNotFoundForSetup();
   }
   if (user.profileSetupCompletedAt) {
     return {
       needsSetup: false,
       suggestedUsername: undefined,
-      found: true,
     };
   }
   const thresholdTime = new Date(Date.now() - NEW_USER_THRESHOLD_MS);
@@ -139,7 +144,6 @@ async function getCachedSetupStatus(userId: string): Promise<{
   return {
     needsSetup,
     suggestedUsername,
-    found: true,
   };
 }
 
@@ -301,15 +305,15 @@ export class ProfileService {
     needsSetup: boolean;
     suggestedUsername?: string;
   }> {
-    const result = await getCachedSetupStatus(input.userId);
-    if (!result.found) {
-      this.logger.warn({ userId: input.userId }, "User not found");
-      throw new NotFoundError("User not found", { userId: input.userId });
+    try {
+      return await getCachedSetupStatus(input.userId);
+    } catch (error) {
+      if (error instanceof UserNotFoundForSetup) {
+        this.logger.warn({ userId: input.userId }, "User not found");
+        throw new NotFoundError("User not found", { userId: input.userId });
+      }
+      throw error;
     }
-    return {
-      needsSetup: result.needsSetup,
-      suggestedUsername: result.suggestedUsername,
-    };
   }
 
   async completeSetup(input: CompleteSetupInput): Promise<{

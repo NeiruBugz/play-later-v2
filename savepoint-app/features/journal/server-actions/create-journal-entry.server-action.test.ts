@@ -1,8 +1,9 @@
 import { getServerUserId } from "@/auth";
 import { JournalService } from "@/data-access-layer/services";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import type { JournalEntryDomain } from "@/features/journal/types";
+import { userTags } from "@/shared/lib";
 import { NotFoundError } from "@/shared/lib/errors";
 import { JournalMood, JournalVisibility } from "@/shared/types/journal";
 
@@ -18,14 +19,14 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.unmock("@/shared/lib");
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
-const mockRevalidateTag = vi.mocked(revalidateTag);
+const mockUpdateTag = vi.mocked(updateTag);
 const MockJournalService = vi.mocked(JournalService);
 
 describe("createJournalEntryAction server action", () => {
@@ -146,35 +147,34 @@ describe("createJournalEntryAction server action", () => {
       expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
     });
 
-    it("should revalidate profileStats tag on success", async () => {
+    it("should update profileStats tag on success", async () => {
       mockCreateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
 
       await createJournalEntryAction(validInput);
 
-      expect(mockRevalidateTag).toHaveBeenCalledWith(
-        "user:user-789:profile-stats",
-        "max"
+      expect(mockUpdateTag).toHaveBeenCalledWith(
+        userTags("user-789").profileStats
       );
     });
   });
 
-  describe("revalidateTag wiring", () => {
-    it("should NOT call revalidateTag when service throws", async () => {
+  describe("updateTag wiring", () => {
+    it("should NOT call updateTag when service throws", async () => {
       mockCreateJournalEntry.mockRejectedValue(new Error("DB failure"));
 
       const result = await createJournalEntryAction(validInput);
 
       expect(result.success).toBe(false);
-      expect(mockRevalidateTag).not.toHaveBeenCalled();
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
 
-    it("should NOT call revalidateTag on validation error", async () => {
+    it("should NOT call updateTag on validation error", async () => {
       const result = await createJournalEntryAction({
         gameId: "",
       } as never);
 
       expect(result.success).toBe(false);
-      expect(mockRevalidateTag).not.toHaveBeenCalled();
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
   });
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import {
   CompleteProfileSetupSchema,
@@ -41,8 +41,8 @@ const performCompleteSetup = createServerAction<
     });
 
     const tags = userTags(userId!);
-    revalidateTag(tags.setup, "max");
-    revalidateTag(tags.profile, "max");
+    updateTag(tags.setup);
+    updateTag(tags.profile);
 
     logger.info({ userId }, "Profile setup completed");
     revalidatePath("/dashboard");

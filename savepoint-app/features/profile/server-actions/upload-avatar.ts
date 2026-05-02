@@ -1,7 +1,7 @@
 "use server";
 
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { revalidateTag } from "next/cache";
+import { updateTag } from "next/cache";
 
 import { UploadAvatarSchema } from "@/features/profile/lib";
 import { createServerAction, userTags } from "@/shared/lib";
@@ -43,8 +43,8 @@ export const uploadAvatar = createServerAction<
       avatarUrl: uploadResult.data.url,
     });
     const tags = userTags(userId!);
-    revalidateTag(tags.profile, "max");
-    revalidateTag(tags.profileStats, "max");
+    updateTag(tags.profile);
+    updateTag(tags.profileStats);
     logger.info({ userId }, "Avatar uploaded and profile updated");
     return {
       success: true,

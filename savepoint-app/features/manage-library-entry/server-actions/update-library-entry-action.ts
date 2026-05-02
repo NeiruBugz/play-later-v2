@@ -1,7 +1,7 @@
 "use server";
 
 import { LibraryService } from "@/data-access-layer/services";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import type { LibraryItemDomain } from "@/features/library/types";
 import { createServerAction, userTags } from "@/shared/lib";
@@ -38,8 +38,8 @@ export const updateLibraryEntryAction = createServerAction<
       },
     });
     const tags = userTags(userId!);
-    revalidateTag(tags.libraryCounts, "max");
-    revalidateTag(tags.profileStats, "max");
+    updateTag(tags.libraryCounts);
+    updateTag(tags.profileStats);
     revalidatePath("/games/[slug]", "page");
     logger.info(
       {

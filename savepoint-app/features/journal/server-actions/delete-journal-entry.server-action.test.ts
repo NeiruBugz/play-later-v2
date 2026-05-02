@@ -1,7 +1,8 @@
 import { getServerUserId } from "@/auth";
 import { JournalService } from "@/data-access-layer/services";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
+import { userTags } from "@/shared/lib";
 import { NotFoundError } from "@/shared/lib/errors";
 
 import { deleteJournalEntryAction } from "./delete-journal-entry";
@@ -16,14 +17,14 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.unmock("@/shared/lib");
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
-const mockRevalidateTag = vi.mocked(revalidateTag);
+const mockUpdateTag = vi.mocked(updateTag);
 const MockJournalService = vi.mocked(JournalService);
 
 describe("deleteJournalEntryAction server action", () => {
@@ -260,19 +261,18 @@ describe("deleteJournalEntryAction server action", () => {
     });
   });
 
-  describe("revalidateTag wiring", () => {
-    it("should call revalidateTag with profileStats on success", async () => {
+  describe("updateTag wiring", () => {
+    it("should call updateTag with profileStats on success", async () => {
       mockDeleteJournalEntry.mockResolvedValue(undefined);
 
       await deleteJournalEntryAction(validInput);
 
-      expect(mockRevalidateTag).toHaveBeenCalledWith(
-        "user:user-789:profile-stats",
-        "max"
+      expect(mockUpdateTag).toHaveBeenCalledWith(
+        userTags("user-789").profileStats
       );
     });
 
-    it("should NOT call revalidateTag when service throws", async () => {
+    it("should NOT call updateTag when service throws", async () => {
       mockDeleteJournalEntry.mockRejectedValue(
         new NotFoundError("Entry not found", { entryId: "entry-456" })
       );
@@ -280,7 +280,7 @@ describe("deleteJournalEntryAction server action", () => {
       const result = await deleteJournalEntryAction(validInput);
 
       expect(result.success).toBe(false);
-      expect(mockRevalidateTag).not.toHaveBeenCalled();
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
   });
 });

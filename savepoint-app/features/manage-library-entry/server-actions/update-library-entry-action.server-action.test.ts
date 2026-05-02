@@ -1,7 +1,9 @@
 import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services";
 import { LibraryItemStatus } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+
+import { userTags } from "@/shared/lib";
 
 import { updateLibraryEntryAction } from "./update-library-entry-action";
 
@@ -15,7 +17,7 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {
@@ -33,6 +35,7 @@ vi.mock("@/shared/lib", async (importOriginal) => {
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
+const mockUpdateTag = vi.mocked(updateTag);
 const MockLibraryService = vi.mocked(LibraryService);
 
 describe("updateLibraryEntryAction", () => {
@@ -218,6 +221,32 @@ describe("updateLibraryEntryAction", () => {
       }
 
       expect(mockUpdateLibraryItem).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("updateTag wiring", () => {
+    it("calls updateTag with libraryCounts and profileStats on success", async () => {
+      mockUpdateLibraryItem.mockResolvedValue(mockLibraryItem);
+
+      await updateLibraryEntryAction({
+        libraryItemId: 1,
+        status: LibraryItemStatus.PLAYING,
+      });
+
+      const tags = userTags("user-123");
+      expect(mockUpdateTag).toHaveBeenCalledWith(tags.libraryCounts);
+      expect(mockUpdateTag).toHaveBeenCalledWith(tags.profileStats);
+    });
+
+    it("does NOT call updateTag when service throws", async () => {
+      mockUpdateLibraryItem.mockRejectedValue(new Error("DB failure"));
+
+      await updateLibraryEntryAction({
+        libraryItemId: 1,
+        status: LibraryItemStatus.PLAYING,
+      });
+
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
   });
 

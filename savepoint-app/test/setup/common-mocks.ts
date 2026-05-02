@@ -111,11 +111,9 @@ vi.mock("@/shared/lib/library-status", () => {
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
   revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
   cacheTag: vi.fn(),
   cacheLife: vi.fn(),
-  unstable_cache: vi.fn(
-    <T extends (...args: unknown[]) => unknown>(fn: T) => fn
-  ),
 }));
 
 vi.mock("next/navigation", () => ({

@@ -1,7 +1,7 @@
 "use server";
 
 import { LibraryService, ProfileService } from "@/data-access-layer/services";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import { createServerAction, userTags } from "@/shared/lib";
 
@@ -28,7 +28,7 @@ export const setLibraryRatingAction = createServerAction<
       rating,
     });
 
-    revalidateTag(userTags(userId!).profileStats, "max");
+    updateTag(userTags(userId!).profileStats);
     revalidatePath("/library");
 
     const profileService = new ProfileService();

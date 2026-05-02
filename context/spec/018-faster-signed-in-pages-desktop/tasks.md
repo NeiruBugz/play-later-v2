@@ -45,7 +45,7 @@
 ### Slice 7: TTFB — Vercel region matches Neon, cold starts mitigated
 - [x] Neon region confirmed: **AWS US East 1 (N. Virginia)** → `vercel.json` `regions` set to `["iad1"]`. **[Agent: general-purpose]**
 - [ ] **MANUAL** Confirm `DATABASE_URL` in Vercel env uses the pooled Neon hostname (`-pooler.<region>.aws.neon.tech`). **[Agent: nextjs-fullstack]**
-- [x] Add `vercel.json` at `savepoint-app/` with `{ "regions": ["fra1"] }` (placeholder — adjust per the manual step above). **[Agent: nextjs-fullstack]**
+- [x] Add `vercel.json` at `savepoint-app/` with `{ "regions": ["iad1"] }`. **[Agent: nextjs-fullstack]**
 - [x] Add a Vercel Cron in `vercel.json` calling `/api/health` every 4 minutes (interim cold-start mitigation; Neon is on Free tier so `suspend_timeout` cannot be disabled, keep-warm cron is the only option). **[Agent: nextjs-fullstack]**
 - [x] Add `/api/health` route at `app/api/health/route.ts` that runs `SELECT 1` and returns 200. **[Agent: nextjs-fullstack]**
 - [ ] **MANUAL / POST-DEPLOY** Pull cold-window TTFB samples (20 requests over 24h), confirm p75 < 400ms. Use `mcp__vercel__get_runtime_logs` and Speed Insights. **[Agent: testing]**

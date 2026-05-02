@@ -9,9 +9,9 @@ export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`;
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "unknown" },
+      { ok: false, error: "service unavailable" },
       { status: 503 }
     );
   }

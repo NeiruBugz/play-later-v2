@@ -13,7 +13,7 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {
@@ -32,10 +32,12 @@ vi.mock("@/shared/lib", async (importOriginal) => {
 const { getServerUserId } = await import("@/auth");
 const { SteamService: MockSteamService } =
   await import("@/data-access-layer/services");
-const { revalidatePath } = await import("next/cache");
+const { revalidatePath, updateTag } = await import("next/cache");
+const { userTags } = await import("@/shared/lib");
 
 const mockGetServerUserId = getServerUserId as Mock;
 const mockRevalidatePath = revalidatePath as Mock;
+const mockUpdateTag = updateTag as Mock;
 
 describe("disconnectSteam server action", () => {
   let mockDisconnectSteam: ReturnType<typeof vi.fn>;
@@ -174,6 +176,24 @@ describe("disconnectSteam server action", () => {
       expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
       expect(mockRevalidatePath).toHaveBeenCalledWith("/settings");
       expect(mockRevalidatePath).toHaveBeenCalledWith("/profile");
+    });
+
+    it("should call updateTag with steamConnection on success", async () => {
+      mockDisconnectSteam.mockResolvedValue(undefined);
+
+      await disconnectSteam({});
+
+      expect(mockUpdateTag).toHaveBeenCalledWith(
+        userTags("user-123").steamConnection
+      );
+    });
+
+    it("should NOT call updateTag when service throws", async () => {
+      mockDisconnectSteam.mockRejectedValue(new Error("Database error"));
+
+      await disconnectSteam({});
+
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
 
     it("should call revalidate after handler completes", async () => {

@@ -1,7 +1,7 @@
 "use server";
 
 import { JournalService } from "@/data-access-layer/services";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import type { JournalEntryDomain } from "@/features/journal/types";
 import { createServerAction, userTags } from "@/shared/lib";
@@ -56,7 +56,7 @@ export const updateJournalEntryAction = createServerAction<
 
     const entry = await journalService.updateJournalEntry(updateParams);
 
-    revalidateTag(userTags(userId!).profileStats, "max");
+    updateTag(userTags(userId!).profileStats);
     revalidatePath("/journal/[id]", "page");
     revalidatePath("/journal");
     revalidatePath("/games/[slug]", "page");

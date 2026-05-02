@@ -1,6 +1,8 @@
 import { getServerUserId } from "@/auth";
 import { LibraryService } from "@/data-access-layer/services";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+
+import { userTags } from "@/shared/lib";
 
 import { deleteLibraryItemAction } from "./delete-library-item";
 
@@ -14,7 +16,7 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {
@@ -32,7 +34,7 @@ vi.mock("@/shared/lib", async (importOriginal) => {
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
-const mockRevalidateTag = vi.mocked(revalidateTag);
+const mockUpdateTag = vi.mocked(updateTag);
 const MockLibraryService = vi.mocked(LibraryService);
 
 describe("deleteLibraryItemAction server action", () => {
@@ -292,44 +294,39 @@ describe("deleteLibraryItemAction server action", () => {
     });
   });
 
-  describe("revalidateTag wiring", () => {
-    it("should call revalidateTag with libraryCounts and profileStats on success", async () => {
+  describe("updateTag wiring", () => {
+    it("should call updateTag with libraryCounts and profileStats on success", async () => {
       mockDeleteLibraryItem.mockResolvedValue(undefined);
 
       await deleteLibraryItemAction({ libraryItemId: 42 });
 
-      expect(mockRevalidateTag).toHaveBeenCalledWith(
-        "user:user-123:library:counts",
-        "max"
-      );
-      expect(mockRevalidateTag).toHaveBeenCalledWith(
-        "user:user-123:profile-stats",
-        "max"
-      );
+      const tags = userTags("user-123");
+      expect(mockUpdateTag).toHaveBeenCalledWith(tags.libraryCounts);
+      expect(mockUpdateTag).toHaveBeenCalledWith(tags.profileStats);
     });
 
-    it("should NOT call revalidateTag when service throws", async () => {
+    it("should NOT call updateTag when service throws", async () => {
       mockDeleteLibraryItem.mockRejectedValue(
         new Error("Library item not found")
       );
 
       await deleteLibraryItemAction({ libraryItemId: 999 });
 
-      expect(mockRevalidateTag).not.toHaveBeenCalled();
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
 
-    it("should NOT call revalidateTag on validation error", async () => {
+    it("should NOT call updateTag on validation error", async () => {
       await deleteLibraryItemAction({ libraryItemId: -1 });
 
-      expect(mockRevalidateTag).not.toHaveBeenCalled();
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
 
-    it("should NOT call revalidateTag when unauthenticated", async () => {
+    it("should NOT call updateTag when unauthenticated", async () => {
       mockGetServerUserId.mockResolvedValue(undefined);
 
       await deleteLibraryItemAction({ libraryItemId: 42 });
 
-      expect(mockRevalidateTag).not.toHaveBeenCalled();
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
   });
 

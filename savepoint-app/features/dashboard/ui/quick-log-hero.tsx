@@ -1,7 +1,6 @@
 import "server-only";
 
-import { ProfileService } from "@/data-access-layer/services";
-
+import { getGreetingUsername } from "../use-cases/get-greeting-username";
 import { getQuickLogPlayingGames } from "../use-cases/get-quick-log-playing-games";
 import { QuickLogHeroClient } from "./quick-log-hero-client";
 
@@ -10,16 +9,9 @@ interface QuickLogHeroProps {
 }
 
 export async function QuickLogHero({ userId }: QuickLogHeroProps) {
-  const service = new ProfileService();
-
-  let username = "there";
-  try {
-    const profile = await service.getProfileWithStats({ userId });
-    username = profile.username ?? "there";
-  } catch {
-    // non-critical — greeting still renders with fallback
-  }
-
-  const playingGames = await getQuickLogPlayingGames(userId);
+  const [username, playingGames] = await Promise.all([
+    getGreetingUsername({ userId }),
+    getQuickLogPlayingGames(userId),
+  ]);
   return <QuickLogHeroClient username={username} playingGames={playingGames} />;
 }

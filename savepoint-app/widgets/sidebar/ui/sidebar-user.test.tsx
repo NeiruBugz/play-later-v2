@@ -3,14 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 
 import { SidebarUser, SidebarUserSkeleton } from "./sidebar-user";
 
-const mockGetProfile = vi.fn();
+const mockGetDisplayProfile = vi.fn();
 
-vi.mock("@/data-access-layer/services", () => {
-  class MockProfileService {
-    getProfile = mockGetProfile;
-  }
-  return { ProfileService: MockProfileService };
-});
+vi.mock("@/features/profile/index.server", () => ({
+  getDisplayProfile: (...args: unknown[]) => mockGetDisplayProfile(...args),
+}));
 
 vi.mock("next/image", () => ({
   default: ({
@@ -44,10 +41,10 @@ vi.mock("./sidebar-user-menu", () => ({
 }));
 
 describe("SidebarUser", () => {
-  it("renders the user display name and avatar when getProfile succeeds", async () => {
-    mockGetProfile.mockResolvedValueOnce({
-      username: "gamer42",
-      image: "https://example.com/avatar.png",
+  it("renders the user display name and avatar when getDisplayProfile resolves", async () => {
+    mockGetDisplayProfile.mockResolvedValueOnce({
+      displayName: "gamer42",
+      avatarUrl: "https://example.com/avatar.png",
     });
 
     render(await SidebarUser({ userId: "user-1" }));
@@ -59,8 +56,11 @@ describe("SidebarUser", () => {
     );
   });
 
-  it("renders default 'User' name and no avatar when getProfile throws", async () => {
-    mockGetProfile.mockRejectedValueOnce(new Error("User not found"));
+  it("renders default 'User' name and no avatar when getDisplayProfile returns defaults", async () => {
+    mockGetDisplayProfile.mockResolvedValueOnce({
+      displayName: "User",
+      avatarUrl: null,
+    });
 
     render(await SidebarUser({ userId: "missing-user" }));
 

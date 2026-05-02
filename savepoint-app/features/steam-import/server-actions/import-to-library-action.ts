@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import { createServerAction, userTags, type ActionResult } from "@/shared/lib";
 
@@ -44,8 +44,8 @@ export const importToLibraryAction = createServerAction<
     }
 
     const tags = userTags(userId!);
-    revalidateTag(tags.libraryCounts, "max");
-    revalidateTag(tags.profileStats, "max");
+    updateTag(tags.libraryCounts);
+    updateTag(tags.profileStats);
     revalidatePath("/library");
     revalidatePath("/steam/games");
 

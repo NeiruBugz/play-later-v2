@@ -1,8 +1,9 @@
 import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import type { UpdateProfileFormState } from "@/features/profile/types";
+import { userTags } from "@/shared/lib";
 
 import { updateProfile, updateProfileFormAction } from "./update-profile";
 
@@ -16,7 +17,7 @@ vi.mock("@/data-access-layer/services/profile/profile-service", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
-  revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {
@@ -34,7 +35,7 @@ vi.mock("@/shared/lib", async (importOriginal) => {
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
-const mockRevalidateTag = vi.mocked(revalidateTag);
+const mockUpdateTag = vi.mocked(updateTag);
 const MockProfileService = vi.mocked(ProfileService);
 
 describe("updateProfile server action", () => {
@@ -320,8 +321,8 @@ describe("updateProfile server action", () => {
     });
   });
 
-  describe("revalidateTag wiring", () => {
-    it("should call revalidateTag with profile and profileStats on success", async () => {
+  describe("updateTag wiring", () => {
+    it("should call updateTag with profile and profileStats on success", async () => {
       mockUpdateProfile.mockResolvedValue({
         username: "newusername",
         image: null,
@@ -329,30 +330,25 @@ describe("updateProfile server action", () => {
 
       await updateProfile({ username: "newusername" });
 
-      expect(mockRevalidateTag).toHaveBeenCalledWith(
-        "user:user-123:profile",
-        "max"
-      );
-      expect(mockRevalidateTag).toHaveBeenCalledWith(
-        "user:user-123:profile-stats",
-        "max"
-      );
+      const tags = userTags("user-123");
+      expect(mockUpdateTag).toHaveBeenCalledWith(tags.profile);
+      expect(mockUpdateTag).toHaveBeenCalledWith(tags.profileStats);
     });
 
-    it("should NOT call revalidateTag when service throws", async () => {
+    it("should NOT call updateTag when service throws", async () => {
       mockUpdateProfile.mockRejectedValue(new Error("Username already exists"));
 
       const result = await updateProfile({ username: "takenusername" });
 
       expect(result.success).toBe(false);
-      expect(mockRevalidateTag).not.toHaveBeenCalled();
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
 
-    it("should NOT call revalidateTag on validation error", async () => {
+    it("should NOT call updateTag on validation error", async () => {
       const result = await updateProfile({ username: "ab" });
 
       expect(result.success).toBe(false);
-      expect(mockRevalidateTag).not.toHaveBeenCalled();
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
   });
 });
