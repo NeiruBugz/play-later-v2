@@ -26,6 +26,7 @@ vi.mock("@/shared/lib", async () => {
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
   revalidateTag: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.mock("@/auth", () => ({
