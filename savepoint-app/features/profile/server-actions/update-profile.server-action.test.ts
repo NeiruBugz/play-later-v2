@@ -1,6 +1,6 @@
 import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import type { UpdateProfileFormState } from "@/features/profile/types";
 
@@ -16,6 +16,7 @@ vi.mock("@/data-access-layer/services/profile/profile-service", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {
@@ -33,6 +34,7 @@ vi.mock("@/shared/lib", async (importOriginal) => {
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
+const mockRevalidateTag = vi.mocked(revalidateTag);
 const MockProfileService = vi.mocked(ProfileService);
 
 describe("updateProfile server action", () => {
@@ -315,6 +317,42 @@ describe("updateProfile server action", () => {
         submittedUsername: "testuser",
       });
       expect(mockRevalidatePath).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("revalidateTag wiring", () => {
+    it("should call revalidateTag with profile and profileStats on success", async () => {
+      mockUpdateProfile.mockResolvedValue({
+        username: "newusername",
+        image: null,
+      });
+
+      await updateProfile({ username: "newusername" });
+
+      expect(mockRevalidateTag).toHaveBeenCalledWith(
+        "user:user-123:profile",
+        "max"
+      );
+      expect(mockRevalidateTag).toHaveBeenCalledWith(
+        "user:user-123:profile-stats",
+        "max"
+      );
+    });
+
+    it("should NOT call revalidateTag when service throws", async () => {
+      mockUpdateProfile.mockRejectedValue(new Error("Username already exists"));
+
+      const result = await updateProfile({ username: "takenusername" });
+
+      expect(result.success).toBe(false);
+      expect(mockRevalidateTag).not.toHaveBeenCalled();
+    });
+
+    it("should NOT call revalidateTag on validation error", async () => {
+      const result = await updateProfile({ username: "ab" });
+
+      expect(result.success).toBe(false);
+      expect(mockRevalidateTag).not.toHaveBeenCalled();
     });
   });
 });

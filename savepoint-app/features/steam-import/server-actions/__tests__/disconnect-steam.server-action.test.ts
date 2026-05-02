@@ -13,6 +13,7 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {

@@ -1,12 +1,13 @@
 import { SteamProfilePrivateError } from "@/data-access-layer/services/steam/errors";
 import { SteamService } from "@/data-access-layer/services/steam/steam-service";
+import { revalidateTag } from "next/cache";
 
 import { HTTP_STATUS } from "@/shared/config/http-codes";
 import {
   DEFAULT_RATE_LIMIT_REQUESTS,
   RATE_LIMIT_RETRY_AFTER_SECONDS,
 } from "@/shared/constants";
-import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT, userTags } from "@/shared/lib";
 import { checkRateLimit } from "@/shared/lib/rate-limit";
 
 import { mapErrorToHandlerResult } from "../map-error";
@@ -97,6 +98,7 @@ export async function connectSteamHandler(
 
   try {
     await steamService.connectSteamAccount({ userId, profile });
+    revalidateTag(userTags(userId).steamConnection, "max");
   } catch (error) {
     logger.error(
       { userId, steamId64, error },

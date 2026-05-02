@@ -1,9 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import type { LibraryItemDomain } from "@/features/library/types";
-import { createServerAction } from "@/shared/lib";
+import { createServerAction, userTags } from "@/shared/lib";
 import { AcquisitionType, LibraryItemStatus } from "@/shared/types";
 
 import {
@@ -44,6 +44,9 @@ export const quickAddToLibraryAction = createServerAction<
       };
     }
 
+    const tags = userTags(userId!);
+    revalidateTag(tags.libraryCounts, "max");
+    revalidateTag(tags.profileStats, "max");
     revalidatePath(`/games/${result.data.gameSlug}`);
     revalidatePath("/library");
 

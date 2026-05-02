@@ -15,6 +15,7 @@ import {
   GettingStartedChecklist,
 } from "@/features/onboarding";
 import { ActivityFeed } from "@/features/social/index.server";
+import { SectionBoundary } from "@/shared/components/section-boundary";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { requireServerUserId } from "@/shared/lib/app/auth";
 
@@ -52,40 +53,43 @@ function ActivitySkeleton() {
 export default async function DashboardPage() {
   const userId = await requireServerUserId();
 
-  const service = new ProfileService();
+  const profileService = new ProfileService();
+  const libraryService = new LibraryService();
+
+  const [setupStatusResult, statusCountsResult] = await Promise.allSettled([
+    profileService.checkSetupStatus({ userId }),
+    libraryService.getStatusCounts({ userId }),
+  ]);
 
   let setupStatus: { needsSetup: boolean } = { needsSetup: false };
-  try {
-    setupStatus = await service.checkSetupStatus({ userId });
-  } catch {
-    // if setup status fails, do not redirect — stay on dashboard
+  if (setupStatusResult.status === "fulfilled") {
+    setupStatus = setupStatusResult.value;
   }
+  // if setup status fails, do not redirect — stay on dashboard
   if (setupStatus.needsSetup) {
     redirect("/profile/setup");
   }
 
-  let username = "there";
-  try {
-    const profile = await service.getProfileWithStats({ userId });
-    username = profile.username ?? "there";
-  } catch {
-    // non-critical — greeting still renders with fallback
+  if (statusCountsResult.status === "rejected") {
+    throw statusCountsResult.reason;
   }
-
-  const libraryService = new LibraryService();
-  const statusCounts = await libraryService.getStatusCounts({ userId });
+  const statusCounts = statusCountsResult.value;
   const hasEmptyLibrary =
     Object.values(statusCounts).reduce((sum, count) => sum + count, 0) === 0;
 
   return (
     <div className="py-3xl">
-      <Suspense fallback={<StatsSkeleton />}>
-        <QuickLogHero userId={userId} username={username} />
-      </Suspense>
+      <SectionBoundary>
+        <Suspense fallback={<StatsSkeleton />}>
+          <QuickLogHero userId={userId} />
+        </Suspense>
+      </SectionBoundary>
 
-      <Suspense fallback={<OnboardingSkeleton />}>
-        <GettingStartedChecklist userId={userId} />
-      </Suspense>
+      <SectionBoundary>
+        <Suspense fallback={<OnboardingSkeleton />}>
+          <GettingStartedChecklist userId={userId} />
+        </Suspense>
+      </SectionBoundary>
 
       {hasEmptyLibrary ? (
         <div className="mt-2">
@@ -95,30 +99,40 @@ export default async function DashboardPage() {
         <>
           <div className="grid gap-2 lg:grid-cols-[1fr_1fr]">
             <div className="flex flex-col gap-2">
-              <Suspense fallback={<StatsSkeleton />}>
-                <DashboardStats userId={userId} />
-              </Suspense>
+              <SectionBoundary>
+                <Suspense fallback={<StatsSkeleton />}>
+                  <DashboardStats userId={userId} />
+                </Suspense>
+              </SectionBoundary>
 
-              <Suspense fallback={<ActivitySkeleton />}>
-                <ActivityFeed userId={userId} />
-              </Suspense>
+              <SectionBoundary>
+                <Suspense fallback={<ActivitySkeleton />}>
+                  <ActivityFeed userId={userId} />
+                </Suspense>
+              </SectionBoundary>
             </div>
 
             <div className="space-y-2">
-              <Suspense fallback={<SectionSkeleton />}>
-                <ContinuePlaying userId={userId} />
-              </Suspense>
+              <SectionBoundary>
+                <Suspense fallback={<SectionSkeleton />}>
+                  <ContinuePlaying userId={userId} />
+                </Suspense>
+              </SectionBoundary>
 
-              <Suspense fallback={<SectionSkeleton />}>
-                <UpNext userId={userId} />
-              </Suspense>
+              <SectionBoundary>
+                <Suspense fallback={<SectionSkeleton />}>
+                  <UpNext userId={userId} />
+                </Suspense>
+              </SectionBoundary>
             </div>
           </div>
 
           <div className="mt-2">
-            <Suspense fallback={<SectionSkeleton />}>
-              <RecentlyAdded userId={userId} />
-            </Suspense>
+            <SectionBoundary>
+              <Suspense fallback={<SectionSkeleton />}>
+                <RecentlyAdded userId={userId} />
+              </Suspense>
+            </SectionBoundary>
           </div>
         </>
       )}

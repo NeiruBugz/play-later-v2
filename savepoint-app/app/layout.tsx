@@ -1,6 +1,5 @@
 import { type Metadata, type Viewport } from "next";
 
-import { LoadingScreen } from "@/shared/components/loading-screen";
 import { SkipToContent } from "@/shared/components/skip-to-content";
 import { SpeedInsightsClient } from "@/shared/components/speed-insights";
 import { cn } from "@/shared/lib/ui/utils";
@@ -18,7 +17,6 @@ import {
   Space_Grotesk,
   Space_Mono,
 } from "next/font/google";
-import { Suspense } from "react";
 
 const fontDefaultSans = Geist({
   subsets: ["latin"],
@@ -175,7 +173,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div id="root" className="relative flex min-h-dvh flex-col">
-            <Suspense fallback={<LoadingScreen />}>{children}</Suspense>
+            {children}
           </div>
           <SpeedInsightsClient />
         </Providers>

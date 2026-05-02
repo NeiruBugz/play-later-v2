@@ -97,6 +97,13 @@ vi.mock("@/shared/lib", () => {
         .trim()
     ),
     convertReleaseDateToIsoStringDate: vi.fn((date?: string) => date),
+    userTags: vi.fn((userId: string) => ({
+      profile: `user:${userId}:profile`,
+      setup: `user:${userId}:setup`,
+      steamConnection: `user:${userId}:steam-connection`,
+      libraryCounts: `user:${userId}:library:counts`,
+      profileStats: `user:${userId}:profile-stats`,
+    })),
     LOGGER_CONTEXT: {
       SERVICE: "service",
       SERVER_ACTION: "serverAction",

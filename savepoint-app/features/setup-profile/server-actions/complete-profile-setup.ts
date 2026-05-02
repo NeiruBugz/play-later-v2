@@ -1,13 +1,13 @@
 "use server";
 
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import {
   CompleteProfileSetupSchema,
   type CompleteProfileSetupInput,
 } from "@/features/profile/lib";
-import { createServerAction, type ActionResult } from "@/shared/lib";
+import { createServerAction, userTags, type ActionResult } from "@/shared/lib";
 
 type CompleteSetupData = {
   username: string | null;
@@ -39,6 +39,10 @@ const performCompleteSetup = createServerAction<
       username: sanitizedData.username,
       avatarUrl: sanitizedData.avatarUrl,
     });
+
+    const tags = userTags(userId!);
+    revalidateTag(tags.setup, "max");
+    revalidateTag(tags.profile, "max");
 
     logger.info({ userId }, "Profile setup completed");
     revalidatePath("/dashboard");

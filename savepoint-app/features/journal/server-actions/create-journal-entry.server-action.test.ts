@@ -1,6 +1,6 @@
 import { getServerUserId } from "@/auth";
 import { JournalService } from "@/data-access-layer/services";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import type { JournalEntryDomain } from "@/features/journal/types";
 import { NotFoundError } from "@/shared/lib/errors";
@@ -18,12 +18,14 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
 }));
 
 vi.unmock("@/shared/lib");
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
+const mockRevalidateTag = vi.mocked(revalidateTag);
 const MockJournalService = vi.mocked(JournalService);
 
 describe("createJournalEntryAction server action", () => {
@@ -142,6 +144,37 @@ describe("createJournalEntryAction server action", () => {
       await createJournalEntryAction(validInput);
 
       expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
+    });
+
+    it("should revalidate profileStats tag on success", async () => {
+      mockCreateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
+
+      await createJournalEntryAction(validInput);
+
+      expect(mockRevalidateTag).toHaveBeenCalledWith(
+        "user:user-789:profile-stats",
+        "max"
+      );
+    });
+  });
+
+  describe("revalidateTag wiring", () => {
+    it("should NOT call revalidateTag when service throws", async () => {
+      mockCreateJournalEntry.mockRejectedValue(new Error("DB failure"));
+
+      const result = await createJournalEntryAction(validInput);
+
+      expect(result.success).toBe(false);
+      expect(mockRevalidateTag).not.toHaveBeenCalled();
+    });
+
+    it("should NOT call revalidateTag on validation error", async () => {
+      const result = await createJournalEntryAction({
+        gameId: "",
+      } as never);
+
+      expect(result.success).toBe(false);
+      expect(mockRevalidateTag).not.toHaveBeenCalled();
     });
   });
 

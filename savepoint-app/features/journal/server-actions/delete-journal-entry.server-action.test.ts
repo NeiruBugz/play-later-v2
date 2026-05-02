@@ -1,6 +1,6 @@
 import { getServerUserId } from "@/auth";
 import { JournalService } from "@/data-access-layer/services";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { NotFoundError } from "@/shared/lib/errors";
 
@@ -16,12 +16,14 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
 }));
 
 vi.unmock("@/shared/lib");
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
+const mockRevalidateTag = vi.mocked(revalidateTag);
 const MockJournalService = vi.mocked(JournalService);
 
 describe("deleteJournalEntryAction server action", () => {
@@ -255,6 +257,30 @@ describe("deleteJournalEntryAction server action", () => {
         userId: "user-789",
         entryId: "entry-custom-999",
       });
+    });
+  });
+
+  describe("revalidateTag wiring", () => {
+    it("should call revalidateTag with profileStats on success", async () => {
+      mockDeleteJournalEntry.mockResolvedValue(undefined);
+
+      await deleteJournalEntryAction(validInput);
+
+      expect(mockRevalidateTag).toHaveBeenCalledWith(
+        "user:user-789:profile-stats",
+        "max"
+      );
+    });
+
+    it("should NOT call revalidateTag when service throws", async () => {
+      mockDeleteJournalEntry.mockRejectedValue(
+        new NotFoundError("Entry not found", { entryId: "entry-456" })
+      );
+
+      const result = await deleteJournalEntryAction(validInput);
+
+      expect(result.success).toBe(false);
+      expect(mockRevalidateTag).not.toHaveBeenCalled();
     });
   });
 });

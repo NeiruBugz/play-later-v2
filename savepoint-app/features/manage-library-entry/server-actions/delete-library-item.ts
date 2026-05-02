@@ -1,10 +1,10 @@
 "use server";
 
 import { LibraryService } from "@/data-access-layer/services";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
-import { createServerAction, type ActionResult } from "@/shared/lib";
+import { createServerAction, userTags, type ActionResult } from "@/shared/lib";
 
 const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
@@ -29,6 +29,9 @@ export const deleteLibraryItemAction = createServerAction<
       userId: userId!,
     });
 
+    const tags = userTags(userId!);
+    revalidateTag(tags.libraryCounts, "max");
+    revalidateTag(tags.profileStats, "max");
     revalidatePath("/library");
     revalidatePath("/games/[slug]", "page");
 

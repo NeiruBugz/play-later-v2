@@ -4,6 +4,7 @@ import { BookMarked, BookOpen, Settings, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { ThemeToggle } from "@/shared/components/theme-toggle";
 import {
@@ -20,7 +21,6 @@ import {
 import { cn } from "@/shared/lib/ui/utils";
 
 import { SidebarSearchTrigger } from "./sidebar-search-trigger";
-import { SidebarUserMenu } from "./sidebar-user-menu";
 
 const NAV_LINKS = [
   { href: "/library", label: "Library", icon: BookMarked },
@@ -30,11 +30,10 @@ const NAV_LINKS = [
 ] as const;
 
 interface AppSidebarProps {
-  displayName: string;
-  avatarUrl: string | null;
+  userSlot: ReactNode;
 }
 
-export function AppSidebar({ displayName, avatarUrl }: AppSidebarProps) {
+export function AppSidebar({ userSlot }: AppSidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -117,7 +116,7 @@ export function AppSidebar({ displayName, avatarUrl }: AppSidebarProps) {
         <div className="flex items-center justify-between px-2 pb-1 group-data-[collapsible=icon]:justify-center">
           <ThemeToggle />
         </div>
-        <SidebarUserMenu displayName={displayName} avatarUrl={avatarUrl} />
+        {userSlot}
       </SidebarFooter>
     </Sidebar>
   );

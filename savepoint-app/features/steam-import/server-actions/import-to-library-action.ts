@@ -1,8 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
-import { createServerAction, type ActionResult } from "@/shared/lib";
+import { createServerAction, userTags, type ActionResult } from "@/shared/lib";
 
 import { ImportToLibrarySchema, type ImportToLibraryInput } from "../schemas";
 import { importGameToLibrary } from "../use-cases/import-game-to-library";
@@ -43,6 +43,9 @@ export const importToLibraryAction = createServerAction<
       };
     }
 
+    const tags = userTags(userId!);
+    revalidateTag(tags.libraryCounts, "max");
+    revalidateTag(tags.profileStats, "max");
     revalidatePath("/library");
     revalidatePath("/steam/games");
 

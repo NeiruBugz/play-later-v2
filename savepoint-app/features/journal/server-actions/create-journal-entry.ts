@@ -1,10 +1,10 @@
 "use server";
 
 import { JournalService } from "@/data-access-layer/services";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import type { JournalEntryDomain } from "@/features/journal/types";
-import { createServerAction } from "@/shared/lib";
+import { createServerAction, userTags } from "@/shared/lib";
 
 import {
   CreateJournalEntrySchema,
@@ -44,6 +44,7 @@ export const createJournalEntryAction = createServerAction<
       playSession,
       libraryItemId,
     });
+    revalidateTag(userTags(userId!).profileStats, "max");
     revalidatePath("/journal");
     revalidatePath("/games/[slug]", "page");
     logger.info(
