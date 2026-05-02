@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,23 +15,14 @@
     "allowUnreachableCode": false,
     "jsx": "react-jsx",
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "target": "ESNext",
-    "types": [
-      "vitest/globals"
-    ],
+    "types": ["vitest/globals"],
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@fixtures/*": [
-        "test/fixtures/*"
-      ],
-      "@prisma/client": [
-        "./shared/lib/prisma/client"
-      ],
-      "@prisma/client/*": [
-        "./node_modules/@prisma/client/*"
-      ]
+      "@/*": ["./*"],
+      "@fixtures/*": ["test/fixtures/*"],
+      "@prisma/client": ["./shared/lib/prisma/client"],
+      "@prisma/client/*": ["./node_modules/@prisma/client/*"]
     },
     "plugins": [
       {
@@ -52,8 +39,5 @@
     "test/vitest.d.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    ".next"
-  ]
+  "exclude": ["node_modules", ".next"]
 }
