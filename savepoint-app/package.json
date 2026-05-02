@@ -70,7 +70,7 @@
     "nextjs-toploader": "3.9.17",
     "pg": "8.20.0",
     "pino": "10.1.0",
-    "react": "19.2.3",
+    "react": "19.2.5",
     "react-dom": "19.2.5",
     "react-hook-form": "7.68.0",
     "react-icons": "5.5.0",
