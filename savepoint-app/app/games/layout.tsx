@@ -1,10 +1,13 @@
-import { ProfileService } from "@/data-access-layer/services";
-import type { PropsWithChildren } from "react";
+import { Suspense, type PropsWithChildren } from "react";
 
 import { Header } from "@/widgets/header";
 import { MobileNav } from "@/widgets/mobile-nav";
 import { MobileTopbar } from "@/widgets/mobile-topbar";
 import { AppSidebar } from "@/widgets/sidebar";
+import {
+  SidebarUser,
+  SidebarUserSkeleton,
+} from "@/widgets/sidebar/ui/sidebar-user";
 import { CommandPaletteProvider } from "@/features/command-palette";
 import { SidebarInset, SidebarProvider } from "@/shared/components/ui/sidebar";
 import { getOptionalServerUserId } from "@/shared/lib/app/auth";
@@ -16,26 +19,18 @@ export default async function GameDetailsLayout({
 }: PropsWithChildren) {
   const userId = await getOptionalServerUserId();
 
-  let displayName = "User";
-  let avatarUrl: string | null = null;
-
-  if (userId) {
-    const profileService = new ProfileService();
-    try {
-      const profile = await profileService.getProfile({ userId });
-      displayName = profile.username ?? "User";
-      avatarUrl = profile.image ?? null;
-    } catch {
-      // non-critical — sidebar still renders with defaults
-    }
-  }
-
   return (
     <CommandPaletteProvider>
       <GamesLayoutClient>
         <SidebarProvider>
           {userId && (
-            <AppSidebar displayName={displayName} avatarUrl={avatarUrl} />
+            <AppSidebar
+              userSlot={
+                <Suspense fallback={<SidebarUserSkeleton />}>
+                  <SidebarUser userId={userId} />
+                </Suspense>
+              }
+            />
           )}
 
           <SidebarInset>

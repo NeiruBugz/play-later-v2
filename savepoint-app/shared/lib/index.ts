@@ -39,3 +39,4 @@ export {
   cn,
 } from "./ui";
 export { createServerAction, type ActionResult } from "./server-action";
+export { userTags } from "./cache-tags";

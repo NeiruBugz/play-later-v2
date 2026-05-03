@@ -27,7 +27,7 @@ Reusable, domain-agnostic code shared across the application: UI components, uti
 ## Components
 
 - `components/ui/` -- shadcn/ui base components (Button, Dialog, Input, Form, etc.)
-- `components/` -- Generic reusable components (BrowserBackButton, GameCoverImage, LoadingScreen, PlatformBadges, SkipToContent, SpeedInsights, ThemeToggle)
+- `components/` -- Generic reusable components (BrowserBackButton, GameCoverImage, PlatformBadges, SkipToContent, SpeedInsights, ThemeToggle)
 
 ## What Moved Out
 

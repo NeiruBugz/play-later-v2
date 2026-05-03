@@ -1,11 +1,14 @@
-import { ProfileService } from "@/data-access-layer/services";
 import { notFound } from "next/navigation";
-import type { PropsWithChildren } from "react";
+import { Suspense, type PropsWithChildren } from "react";
 
 import { Header } from "@/widgets/header";
 import { MobileNav } from "@/widgets/mobile-nav";
 import { MobileTopbar } from "@/widgets/mobile-topbar";
 import { AppSidebar } from "@/widgets/sidebar";
+import {
+  SidebarUser,
+  SidebarUserSkeleton,
+} from "@/widgets/sidebar/ui/sidebar-user";
 import { CommandPaletteProvider } from "@/features/command-palette";
 import { ProfileHeader, ProfilePrivateMessage } from "@/features/profile";
 import { getProfilePageData } from "@/features/profile/index.server";
@@ -35,27 +38,18 @@ export default async function PublicProfileLayout({
   const isOwner = viewer.isOwner;
   const showPrivateMessage = isPrivate && !isOwner;
 
-  let displayName = "User";
-  let avatarUrl: string | null = null;
-  if (viewerUserId) {
-    const profileService = new ProfileService();
-    try {
-      const viewerProfile = await profileService.getProfile({
-        userId: viewerUserId,
-      });
-      displayName = viewerProfile.username ?? "User";
-      avatarUrl = viewerProfile.image ?? null;
-    } catch {
-      // non-critical — sidebar still renders with defaults
-    }
-  }
-
   return (
     <CommandPaletteProvider>
       <PublicProfileLayoutClient>
         <SidebarProvider>
           {viewerUserId && (
-            <AppSidebar displayName={displayName} avatarUrl={avatarUrl} />
+            <AppSidebar
+              userSlot={
+                <Suspense fallback={<SidebarUserSkeleton />}>
+                  <SidebarUser userId={viewerUserId} />
+                </Suspense>
+              }
+            />
           )}
 
           <SidebarInset id="main-content">

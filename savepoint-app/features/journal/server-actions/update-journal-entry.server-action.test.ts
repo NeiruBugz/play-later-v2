@@ -1,8 +1,9 @@
 import { getServerUserId } from "@/auth";
 import { JournalService } from "@/data-access-layer/services";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 
 import type { JournalEntryDomain } from "@/features/journal/types";
+import { userTags } from "@/shared/lib";
 import { NotFoundError } from "@/shared/lib/errors";
 import { JournalMood, JournalVisibility } from "@/shared/types/journal";
 
@@ -18,12 +19,14 @@ vi.mock("@/data-access-layer/services", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
+  updateTag: vi.fn(),
 }));
 
 vi.unmock("@/shared/lib");
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
+const mockUpdateTag = vi.mocked(updateTag);
 const MockJournalService = vi.mocked(JournalService);
 
 describe("updateJournalEntryAction server action", () => {
@@ -481,6 +484,43 @@ describe("updateJournalEntryAction server action", () => {
           mood: "EXCITED",
         },
       });
+    });
+  });
+
+  describe("updateTag wiring", () => {
+    it("should call updateTag with profileStats on success", async () => {
+      mockUpdateJournalEntry.mockResolvedValue(mockJournalEntryDomain);
+
+      await updateJournalEntryAction(validInput);
+
+      expect(mockUpdateTag).toHaveBeenCalledWith(
+        userTags("user-789").profileStats
+      );
+    });
+
+    it("should NOT call updateTag when service throws", async () => {
+      mockUpdateJournalEntry.mockRejectedValue(
+        new NotFoundError("Entry not found", { entryId: "entry-456" })
+      );
+
+      const result = await updateJournalEntryAction(validInput);
+
+      expect(result.success).toBe(false);
+      expect(mockUpdateTag).not.toHaveBeenCalled();
+    });
+
+    it("should NOT call updateTag when unauthenticated", async () => {
+      mockGetServerUserId.mockResolvedValue(undefined);
+
+      await updateJournalEntryAction(validInput);
+
+      expect(mockUpdateTag).not.toHaveBeenCalled();
+    });
+
+    it("should NOT call updateTag on validation error", async () => {
+      await updateJournalEntryAction({ entryId: "", title: "Valid" });
+
+      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
   });
 });
