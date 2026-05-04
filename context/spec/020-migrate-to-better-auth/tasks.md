@@ -14,21 +14,33 @@
 Goal: `better-auth` installed, configured, and reachable at a dev-only route. NextAuth still primary. App fully functional.
 
 - [x] Add `better-auth` to `savepoint-app/package.json` and run `pnpm install`. **[Agent: nextjs-expert]**
-- [ ] Create `savepoint-app/auth.better.ts` (temporary side-car): instantiate Better Auth with the Cognito provider, Prisma adapter pointing at the existing Prisma client. Do NOT export from anywhere production-facing yet. **[Agent: nextjs-expert]**
-- [ ] Add new env vars to `.env.example`: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `AUTH_MIGRATION_CUTOVER_AT`. Document each in the file's comments. **[Agent: nextjs-expert]**
-- [ ] Add a dev-only route `app/api/auth-ba-dev/[...all]/route.ts` mounting `auth.better.ts`'s handler. Gate behind `NODE_ENV !== "production"`. **[Agent: nextjs-expert]**
-- [ ] Verification: `pnpm --filter savepoint dev` boots; existing NextAuth sign-in still works; production build still succeeds. **[Agent: feature-dev:code-reviewer]**
+- [x] Create `savepoint-app/auth.better.ts` (temporary side-car): instantiate Better Auth with the Cognito provider, Prisma adapter pointing at the existing Prisma client. Do NOT export from anywhere production-facing yet. **[Agent: nextjs-expert]**
+- [x] Add new env vars to `.env.example` AND `env.mjs` (typed via `@t3-oss/env-nextjs`): `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `AUTH_MIGRATION_CUTOVER_AT`, `AUTH_COGNITO_DOMAIN`. Document each in the file's comments. **[Agent: nextjs-expert]**
+- [x] Add a dev-only route `app/api/auth-ba-dev/[...all]/route.ts` mounting `auth.better.ts`'s handler. Gate behind `NODE_ENV !== "production"`. **[Agent: nextjs-expert]**
+- [x] Verification: `pnpm --filter savepoint dev` boots; existing NextAuth sign-in still works; production build still succeeds. **[Agent: feature-dev:code-reviewer]**
+  - Typecheck: clean. Lint: clean. NextAuth path untouched (only new files added).
+  - Production build: passes after rebasing on `main` post spec-018 revert (PR #316). Vercel can deploy from `main` again.
 
 ## Slice 2: Schema migration to Better Auth shape (preview-only)
 
-Goal: Prisma schema updated to BA shape; migration generated and tested against a Neon dev branch. **NOT applied to prod yet.**
+Goal: Prisma schema updated to BA shape; migration generated and tested against the **local Postgres** (docker-compose `:6432`). **NOT applied to prod yet.** Neon branching is reserved for the cutover rollback in Slice 10 (and an optional rehearsal in Slice 5/6).
 
-- [ ] Create a Neon dev branch from `main` for migration rehearsal. Update local `.env.local` `DATABASE_URL` to point at the branch. **[Agent: prisma-database]**
-- [ ] Update `savepoint-app/prisma/schema.prisma`: rename `User`→`user`, `Account`→`account` (with column renames per tech spec §2.2), `Session`→`session`, `VerificationToken`→`verification`. Preserve all SavePoint-specific User extensions. Update relation references. **[Agent: prisma-database]**
-- [ ] Run `pnpm --filter savepoint prisma migrate dev --name better_auth_migration --create-only`. Hand-edit the generated SQL to use `RENAME` instead of drop/create where Prisma's diff is too aggressive. Convert `expires_at INTEGER` → `accessTokenExpiresAt TIMESTAMP` via `to_timestamp()`. **[Agent: prisma-database]**
+- [x] Update `savepoint-app/prisma/schema.prisma`: rename `User`→`user`, `Account`→`account` (with column renames per tech spec §2.2), `Session`→`session`, `VerificationToken`→`verification`. Preserve all SavePoint-specific User extensions. Update relation references. **[Agent: prisma-database]**
+  - Used `@@map("User"/"Account"/"Session"/"VerificationToken")` to keep PG table names stable; the next task's hand-edited migration SQL adds the `ALTER TABLE ... RENAME TO ...` statements and removes the `@@map` directives.
+  - `User.emailVerified DateTime?` → `Boolean @default(false)` per BA shape.
+  - `Account` unique constraint moved from `[provider, providerAccountId]` → `[providerId, accountId]`. Dropped `type`/`token_type`/`session_state`. Added `refreshTokenExpiresAt`, `password`, `createdAt`, `updatedAt`.
+  - `verification` unique on `value` only (was compound `[identifier, token]`); added `id`, `createdAt`, `updatedAt`.
+  - `prisma format` + `prisma validate` clean. Downstream typecheck failures expected until next task addresses code-side `prisma.User.*` → `prisma.user.*` updates.
+- [x] Run `pnpm --filter savepoint prisma migrate dev --name better_auth_migration --create-only` against local Postgres. Hand-edit the generated SQL to use `RENAME` instead of drop/create where Prisma's diff is too aggressive. Convert `expires_at INTEGER` → `accessTokenExpiresAt TIMESTAMP` via `to_timestamp()`. **[Agent: prisma-database]**
+  - Migration: `prisma/migrations/20260504152002_better_auth_migration/migration.sql`. Hand-crafted SQL: ALTER TABLE renames (User/Account/Session/VerificationToken → lowercase), column renames per tech spec § 2.2, `expires_at INT → accessTokenExpiresAt TIMESTAMP` via `to_timestamp()`, `User.emailVerified DateTime? → BOOLEAN` via `USING ("emailVerified" IS NOT NULL)`, `verification.id` PK added, session/verification truncated.
+  - `@@map` directives removed from schema.prisma; Prisma model names now match SQL table names directly.
+  - `@auth/prisma-adapter` replaced with hand-built `buildNextAuthAdapter()` shim in `auth.ts` mapping field-rename pairs (provider/providerId, sessionToken/token, etc.) so NextAuth keeps working until Slice 6.
+  - Code-side updates across 7 files (Prisma client `User`/`Account`/`Session` model name → lowercase).
+  - **Pre-existing drift discovered**: local DB had 3 columns (`User.playthroughsVisibility`, `JournalEntry.playthroughId`, `LibraryItem.platformId`) not in migration history. Worked around by manually applying SQL via `psql -f` and inserting into `_prisma_migrations` directly. ⚠️ The drift itself is not from this task — it's stale local-DB state from unmerged work — but it should be tracked down separately.
+  - typecheck ✅, lint ✅, test:backend ✅ (790 tests), test:utilities ✅ (124 tests), `prisma migrate status` ✅.
 - [ ] Write a migration test: seed a test DB with a NextAuth-shape User+Account+Session row, run the migration, assert all rows preserved with renamed columns. Lives in `savepoint-app/prisma/__tests__/better-auth-migration.test.ts`. **[Agent: typescript-test-expert]**
 - [ ] Update `prisma/seed.ts` (if present) to use BA schema shape. **[Agent: prisma-database]**
-- [ ] Verification: `pnpm --filter savepoint prisma migrate dev` applies cleanly on the Neon branch; migration test passes; `pnpm --filter savepoint typecheck` succeeds across the codebase (Prisma client types update). **[Agent: feature-dev:code-reviewer]**
+- [ ] Verification: `pnpm --filter savepoint prisma migrate dev` applies cleanly locally; migration test passes; `pnpm --filter savepoint typecheck` succeeds across the codebase (Prisma client types update). **[Agent: feature-dev:code-reviewer]**
 
 > ⚠️ This slice changes the Prisma client types; downstream code referring to `prisma.User.*` (PascalCase) becomes `prisma.user.*` (lowercase). Resolve all type errors in this slice before moving on. NextAuth's `@auth/prisma-adapter` still works because its model bindings are configurable — set `@@map("user")` etc. on the Prisma models or pass `tableMappings` to the adapter to keep NextAuth functional until Slice 6.
 
