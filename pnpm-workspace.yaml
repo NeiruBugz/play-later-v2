@@ -1,5 +1,8 @@
 packages:
   - savepoint-app
+  - savepoint-tanstack
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - '@vercel/speed-insights'
+  - esbuild
+  - lightningcss
