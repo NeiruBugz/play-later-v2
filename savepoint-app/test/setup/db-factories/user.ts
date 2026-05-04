@@ -1,6 +1,6 @@
 import { getTestDatabase } from "@/test/setup/database";
 import { faker, seedFaker } from "@/test/setup/faker";
-import { type User } from "@prisma/client";
+import { type user as User } from "@prisma/client";
 
 let userCounter = 0;
 

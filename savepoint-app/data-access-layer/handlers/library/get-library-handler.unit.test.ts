@@ -34,15 +34,15 @@ describe("getLibraryHandler", () => {
   });
 
   describe("Input Validation", () => {
-    it("should reject invalid userId (not a CUID)", async () => {
-      const params = { userId: "invalid-id" };
+    it("should reject empty userId", async () => {
+      const params = { userId: "" };
 
       const result = await getLibraryHandler(params, mockContext);
 
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(400);
-        expect(result.error).toContain("Invalid");
+        expect(result.error).toContain("Too small");
       }
       expect(mockGetLibraryItems).not.toHaveBeenCalled();
     });

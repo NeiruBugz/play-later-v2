@@ -16,7 +16,7 @@ const FOLLOWER_USER_SELECT = {
   name: true,
   username: true,
   image: true,
-} satisfies Prisma.UserSelect;
+} satisfies Prisma.userSelect;
 
 export async function createFollow(
   followerId: string,

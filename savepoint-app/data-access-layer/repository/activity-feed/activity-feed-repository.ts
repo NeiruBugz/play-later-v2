@@ -91,7 +91,7 @@ export async function findFeedForUser(
     SELECT ${SELECT_COLUMNS}
     FROM "LibraryItem" li
     JOIN "Follow" f ON f."followingId" = li."userId"
-    JOIN "User" u ON u."id" = li."userId"
+    JOIN "user" u ON u."id" = li."userId"
     JOIN "Game" g ON g."id" = li."gameId"
     WHERE f."followerId" = ${userId}
       AND u."isPublicProfile" = true
@@ -118,7 +118,7 @@ export async function findActivityByUserId(
   const rows = await prisma.$queryRaw<Array<Record<string, unknown>>>`
     SELECT ${SELECT_COLUMNS}
     FROM "LibraryItem" li
-    JOIN "User" u ON u."id" = li."userId"
+    JOIN "user" u ON u."id" = li."userId"
     JOIN "Game" g ON g."id" = li."gameId"
     WHERE li."userId" = ${userId}
       ${cursorCondition}
@@ -147,7 +147,7 @@ export async function findPopularFeed(
   const rows = await prisma.$queryRaw<Array<Record<string, unknown>>>`
     SELECT ${SELECT_COLUMNS}
     FROM "LibraryItem" li
-    JOIN "User" u ON u."id" = li."userId"
+    JOIN "user" u ON u."id" = li."userId"
     JOIN "Game" g ON g."id" = li."gameId"
     WHERE u."isPublicProfile" = true
       ${excludeCondition}

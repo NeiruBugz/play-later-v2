@@ -1,15 +1,17 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { auth } from "@/auth";
+import { APIError } from "better-auth/api";
+import { headers } from "next/headers";
 
 import { SignInSchema, type SignInInput } from "@/features/auth/schemas";
 import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
-import {
-  isAuthenticationError,
-  isNextAuthRedirect,
-} from "@/shared/lib/auth/handle-next-auth-error";
 
-export async function signInAction(data: SignInInput) {
+export async function signInAction(
+  data: SignInInput
+): Promise<
+  { success: true; message: string } | { success: false; error: string }
+> {
   const logger = createLogger({
     [LOGGER_CONTEXT.SERVER_ACTION]: "signInAction",
   });
@@ -18,35 +20,39 @@ export async function signInAction(data: SignInInput) {
   if (!validated.success) {
     logger.warn({ err: validated.error }, "Validation error during sign in");
     return {
-      success: false as const,
+      success: false,
       error: validated.error.issues[0]?.message ?? "Validation error",
     };
   }
 
   try {
     logger.info({ method: "credentials" }, "Signing in user");
-    await signIn("credentials", {
-      email: validated.data.email,
-      password: validated.data.password,
-      redirectTo: "/dashboard",
+    await auth.api.signInEmail({
+      body: {
+        email: validated.data.email,
+        password: validated.data.password,
+      },
+      headers: await headers(),
     });
     return {
-      success: true as const,
+      success: true,
       message: "Signed in successfully",
     };
   } catch (error) {
-    if (isNextAuthRedirect(error)) {
-      logger.debug("Redirecting after successful sign in");
-      throw error;
-    }
-    if (isAuthenticationError(error)) {
-      logger.warn({ err: error }, "Invalid credentials during sign in");
+    if (error instanceof APIError) {
+      logger.warn(
+        { status: error.status, message: error.message },
+        "Invalid credentials during sign in"
+      );
       return {
-        success: false as const,
+        success: false,
         error: "Invalid email or password",
       };
     }
     logger.error({ err: error }, "Unexpected error during sign in");
-    throw error;
+    return {
+      success: false,
+      error: "An unexpected error occurred",
+    };
   }
 }

@@ -38,16 +38,13 @@ describe("getStatusCountsHandler", () => {
   });
 
   describe("Input Validation", () => {
-    it("should reject invalid userId (not a CUID)", async () => {
-      const result = await getStatusCountsHandler(
-        { userId: "not-a-cuid" },
-        mockContext
-      );
+    it("should reject empty userId", async () => {
+      const result = await getStatusCountsHandler({ userId: "" }, mockContext);
 
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.status).toBe(400);
-        expect(result.error).toContain("Invalid");
+        expect(result.error).toContain("Too small");
       }
       expect(mockGetStatusCounts).not.toHaveBeenCalled();
     });

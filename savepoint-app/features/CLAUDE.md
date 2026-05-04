@@ -41,7 +41,7 @@ Create a use-case when a feature needs to orchestrate multiple services. Use-cas
 
 ## Server Actions
 
-All mutations use `next-safe-action` with `authorizedActionClient`. Pattern: Zod schema + `.action()` handler. See existing examples in any feature's `server-actions/` directory.
+All mutations use the homegrown `createServerAction` factory from `@/shared/lib/server-action/`. Pattern: Zod schema + handler returning `ActionResult`. See existing examples in any feature's `server-actions/` directory.
 
 ## Naming Conventions
 
@@ -73,12 +73,12 @@ Non-obvious gotchas that have caused real bugs. Read before editing features.
 4. **Cross-feature imports require an entry in the allowlist table above** — adding one without updating the table will fail review and confuse future agents.
 5. **`auth` uses dual barrel exports**: `index.ts` for client modules, `index.server.ts` for server-only modules. Server-only code in the wrong barrel breaks builds with bundler errors that don't point to the real cause.
 6. **`setup-profile` is a thin shim** — delegates to `profile`'s server actions. Don't reimplement profile logic there.
-7. **Server actions use `next-safe-action` `authorizedActionClient`** — not raw `async` functions. Pattern: Zod schema → `.action()` handler.
+7. **Server actions use `createServerAction` from `@/shared/lib/server-action/`** — not raw `async` functions, not third-party action libraries. Pattern: Zod schema → handler returning `ActionResult`.
 8. **Use-cases compose multiple services**. A single-service call belongs in a hook or server action, not a use-case. Services may NOT call other services — that's what use-cases are for.
 
 ## Key Patterns
 
-- **Form submissions**: Server actions with Zod validation via `authorizedActionClient`
+- **Form submissions**: Server actions with Zod validation via `createServerAction` from `@/shared/lib/server-action/`
 - **Optimistic updates**: TanStack Query `useMutation` with `onMutate`/`onError` rollback
 - **Infinite scroll**: TanStack Query `useInfiniteQuery`
 - **Error handling in hooks**: Message-based pattern matching with `ErrorHandler[]` arrays

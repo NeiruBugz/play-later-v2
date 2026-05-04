@@ -14,9 +14,8 @@ vi.mock("@/auth", () => ({
   getServerUserId: vi.fn(),
 }));
 
-process.env.NEXTAUTH_SECRET = "test-secret";
-process.env.AUTH_SECRET = "test-secret";
-process.env.AUTH_URL = "http://localhost:3000";
+process.env.BETTER_AUTH_SECRET = "test-better-auth-secret";
+process.env.BETTER_AUTH_URL = "http://localhost:3000";
 process.env.AUTH_COGNITO_ID = "test-cognito-id";
 process.env.AUTH_COGNITO_SECRET = "test-cognito-secret";
 process.env.AUTH_COGNITO_ISSUER =

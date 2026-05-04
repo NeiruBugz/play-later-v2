@@ -69,14 +69,14 @@ But I'm a Software Engineer, so I can build my own tool to cover all my needs fo
 
 ### Authentication & APIs
 
-- **[NextAuth.js v5](https://next-auth.js.org/)** - Authentication system
+- **[Better Auth](https://www.better-auth.com/)** - Authentication (DB sessions, Cognito federation)
 - **[Steam OpenID](https://steamcommunity.com/dev)** - Steam integration
 - **[IGDB API](https://www.igdb.com/api)** - Game metadata
 
 ### State Management & Data Fetching
 
 - **[TanStack Query](https://tanstack.com/query)** - Data fetching and caching
-- **[next-safe-action](https://next-safe-action.dev/)** - Type-safe server actions
+- Homegrown `createServerAction` factory at `shared/lib/server-action/` - Type-safe server actions
 - **[Zod](https://zod.dev/)** - Schema validation
 
 ### Development Tools

@@ -51,7 +51,7 @@ See [README.md](./README.md) for comprehensive documentation on the service laye
 
 1. **Always validate userId** from authenticated session
 2. **Never accept userId from client input** without verification
-3. Use `authorizedActionClient` in server actions
+3. Obtain userId via `getServerUserId()` from `@/shared/lib` at the server-action edge before passing it to the service
 4. Repository functions enforce restrictive defaults
 
 ## Common Mistakes to Avoid

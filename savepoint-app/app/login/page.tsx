@@ -1,12 +1,13 @@
-import { auth } from "@/auth";
+import { getServerUserId } from "@/auth";
 import { redirect } from "next/navigation";
 
 import { AuthPageView } from "@/features/auth";
+import { MigrationNotice } from "@/features/auth/index.server";
 
 export default async function AuthPage() {
-  const session = await auth();
-  if (session?.user) {
+  const userId = await getServerUserId();
+  if (userId) {
     redirect("/dashboard");
   }
-  return <AuthPageView />;
+  return <AuthPageView notice={<MigrationNotice />} />;
 }

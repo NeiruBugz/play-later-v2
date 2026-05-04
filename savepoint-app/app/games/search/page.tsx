@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getServerUserId } from "@/auth";
 import type { Metadata } from "next";
 
 import { GameSearchInput } from "@/features/game-search";
@@ -15,8 +15,7 @@ export default async function GameSearchPage({
 }: GameSearchPageProps) {
   const { q } = await searchParams;
   const initialQuery = q || "";
-  const session = await auth();
-  const userId = session?.user?.id;
+  const userId = await getServerUserId();
 
   return (
     <div className="px-2xl py-2xl container mx-auto">

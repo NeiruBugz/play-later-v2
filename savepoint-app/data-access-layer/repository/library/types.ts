@@ -4,7 +4,7 @@ import {
   type LibraryItem,
   type LibraryItemStatus,
   type Prisma,
-  type User,
+  type user as User,
 } from "@prisma/client";
 
 export type CreateLibraryItemInput = {

@@ -15,7 +15,7 @@ export const LibrarySortBySchema = z.enum([
 export const LibrarySortOrderSchema = z.enum(["asc", "desc"]);
 
 export const GetLibraryItemsBaseSchema = z.object({
-  userId: z.string().cuid(),
+  userId: z.string().min(1),
   status: z.nativeEnum(LibraryItemStatus).optional(),
   platform: z.string().optional(),
   search: z.string().optional(),
@@ -32,14 +32,14 @@ export const GetLibraryItemsServiceSchema = GetLibraryItemsBaseSchema.extend({
 });
 
 export const GetStatusCountsSchema = z.object({
-  userId: z.string().cuid(),
+  userId: z.string().min(1),
   platform: z.string().optional(),
   search: z.string().optional(),
 });
 
 export const DeleteLibraryItemSchema = z.object({
   libraryItemId: z.number().int().positive(),
-  userId: z.string().cuid(),
+  userId: z.string().min(1),
 });
 
 export const SetRatingSchema = z.object({

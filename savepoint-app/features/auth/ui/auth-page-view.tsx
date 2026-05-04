@@ -1,9 +1,14 @@
 import { env } from "@/env.mjs";
+import { type ReactNode } from "react";
 
 import { CredentialsForm } from "./credentials-form";
 import { GoogleSignInButton } from "./google-sign-in-button";
 
-export function AuthPageView() {
+type AuthPageViewProps = {
+  notice?: ReactNode;
+};
+
+export function AuthPageView({ notice }: AuthPageViewProps = {}) {
   const shouldIncludeCredentialsSignIn =
     env.NODE_ENV !== "production" || env.AUTH_ENABLE_CREDENTIALS === "true";
 
@@ -17,6 +22,8 @@ export function AuthPageView() {
             Your games and the things you&apos;ve thought about them.
           </p>
         </div>
+
+        {notice}
 
         <div className="space-y-xl">
           <GoogleSignInButton />

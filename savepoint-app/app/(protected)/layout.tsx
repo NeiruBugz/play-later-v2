@@ -1,6 +1,7 @@
 import { ProfileService } from "@/data-access-layer/services";
 import type { PropsWithChildren } from "react";
 
+import { AuthMigrationBanner } from "@/widgets/auth-migration-banner";
 import { MobileNav } from "@/widgets/mobile-nav";
 import { MobileTopbar } from "@/widgets/mobile-topbar";
 import { AppSidebar } from "@/widgets/sidebar";
@@ -35,6 +36,7 @@ export default async function ProtectedLayout({ children }: PropsWithChildren) {
           <AppSidebar displayName={displayName} avatarUrl={avatarUrl} />
 
           <SidebarInset id="main-content">
+            <AuthMigrationBanner />
             <MobileTopbar />
 
             <div className="px-lg pt-lg md:px-2xl md:pb-lg container mx-auto pb-36">

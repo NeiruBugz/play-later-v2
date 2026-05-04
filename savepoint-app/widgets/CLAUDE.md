@@ -42,4 +42,4 @@ Each widget uses FSD segments: `ui/` for components and types, `lib/` for varian
 3. **Widgets cannot fetch data.** Pass server-loaded props from the layout (Server Component) — no `data-access-layer` imports, no client-side queries owning the request.
 4. **`y2k:` Tailwind classes in `mobile-nav` are intentional** theme tokens, not legacy holdover. Configured in `tailwind.config`.
 5. **Sidebar collapse state is cookie-backed** via the shadcn `SidebarProvider`. Do not add a parallel state machine.
-6. **`sidebar-user-menu` calls `signOut()` from `next-auth/react` directly** to avoid a cross-feature import for logout. Mirror this pattern if adding new sign-out surfaces.
+6. **`sidebar-user-menu` calls `authClient.signOut()` from `@/shared/lib/auth-client` directly** to avoid a cross-feature import for logout. Mirror this pattern if adding new sign-out surfaces.

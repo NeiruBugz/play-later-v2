@@ -1,70 +1,82 @@
 import { env } from "@/env.mjs";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import NextAuth from "next-auth";
-import Cognito from "next-auth/providers/cognito";
-import Credentials from "next-auth/providers/credentials";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { nextCookies } from "better-auth/next-js";
+import { headers } from "next/headers";
 
-import { sessionErrorHandler } from "@/shared/lib";
-import { onAuthorize } from "@/shared/lib/app/auth/credentials-callbacks";
-import {
-  onJwt,
-  onRedirect,
-  onSession,
-  onSignIn,
-} from "@/shared/lib/app/auth/oauth-callbacks";
 import { prisma } from "@/shared/lib/app/db";
 
-const SESSION_MAX_AGE = 30 * 24 * 60 * 60;
-const SESSION_UPDATE_AGE = 24 * 60 * 60;
+function parseCognitoIssuer(issuer: string): {
+  region: string | undefined;
+  userPoolId: string | undefined;
+} {
+  const match = issuer.match(
+    /^https:\/\/cognito-idp\.([^.]+)\.amazonaws\.com\/([^/]+)$/
+  );
+
+  if (!match) return { region: undefined, userPoolId: undefined };
+
+  return { region: match[1], userPoolId: match[2] };
+}
+
+const { region, userPoolId } = parseCognitoIssuer(env.AUTH_COGNITO_ISSUER);
+
+const cognitoReady = Boolean(
+  env.AUTH_COGNITO_ID &&
+  env.AUTH_COGNITO_SECRET &&
+  env.AUTH_COGNITO_DOMAIN &&
+  region &&
+  userPoolId
+);
+
+if (!cognitoReady) {
+  throw new Error(
+    "Invalid Cognito configuration: AUTH_COGNITO_ID, AUTH_COGNITO_SECRET, AUTH_COGNITO_DOMAIN, and a parseable AUTH_COGNITO_ISSUER are all required."
+  );
+}
+
+const socialProviders = {
+  cognito: {
+    clientId: env.AUTH_COGNITO_ID,
+    clientSecret: env.AUTH_COGNITO_SECRET,
+    domain: env.AUTH_COGNITO_DOMAIN as string,
+    region: region as string,
+    userPoolId: userPoolId as string,
+  },
+};
+
 const enableCredentials =
-  process.env.NODE_ENV === "test" ||
-  process.env.AUTH_ENABLE_CREDENTIALS === "true";
-export const { auth, handlers, signIn } = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  callbacks: {
-    signIn: onSignIn,
-    redirect: onRedirect,
-    jwt: onJwt,
-    session: onSession,
+  env.NODE_ENV !== "production" && env.AUTH_ENABLE_CREDENTIALS === "true";
+
+export const auth = betterAuth({
+  secret: env.BETTER_AUTH_SECRET,
+  baseURL: env.BETTER_AUTH_URL,
+
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
+
+  socialProviders,
+
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["cognito"],
+    },
   },
-  providers: [
-    Cognito({
-      issuer: env.AUTH_COGNITO_ISSUER,
-      clientId: env.AUTH_COGNITO_ID,
-      clientSecret: env.AUTH_COGNITO_SECRET,
-      checks: ["nonce"],
-      authorization: {
-        params: { identity_provider: "Google" },
-      },
-    }),
-    ...(enableCredentials
-      ? [
-          Credentials({
-            name: "credentials",
-            credentials: {
-              email: { label: "Email", type: "email" },
-              password: { label: "Password", type: "password" },
-            },
-            authorize: onAuthorize,
-          }),
-        ]
-      : []),
-  ],
-  session: {
-    maxAge: SESSION_MAX_AGE,
-    strategy: "jwt",
-    updateAge: SESSION_UPDATE_AGE,
+
+  emailAndPassword: {
+    enabled: enableCredentials,
   },
+
+  plugins: [nextCookies()],
 });
-export const getServerUserId = async () => {
-  try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      sessionErrorHandler();
-      return;
-    }
-    return session.user.id;
-  } catch (error) {
-    console.error(error);
-  }
+
+export type Auth = typeof auth;
+
+export const handler = auth.handler;
+
+export const getServerUserId = async (): Promise<string | undefined> => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  return session?.user?.id;
 };

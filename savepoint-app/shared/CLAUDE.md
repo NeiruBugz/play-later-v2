@@ -20,8 +20,9 @@ Reusable, domain-agnostic code shared across the application: UI components, uti
 | Prisma client | `@/shared/lib/db` | Singleton instance |
 | Logger (Pino) | `createLogger` from `@/shared/lib` | Use `LOGGER_CONTEXT.SERVICE`, `.HANDLER`, `.SERVER_ACTION` |
 | Tailwind merge | `cn` from `@/shared/lib/tailwind-merge` | Class merging utility |
-| Auth helper | `getServerUserId` from `@/shared/lib/auth` | Returns userId or null; redirect if null |
-| Safe actions | `authorizedActionClient`, `actionClient` from `@/shared/lib/safe-action` | next-safe-action setup |
+| Auth helper | `getServerUserId` from `@/shared/lib` | Returns `string | undefined`; redirect if undefined |
+| Server actions | `createServerAction` from `@/shared/lib/server-action/` | Zod schema + handler returning `ActionResult` |
+| Auth client | `authClient`, `useSession`, `signIn`, `signOut` from `@/shared/lib/auth-client` | Better Auth client surfaces (client components only) |
 | Rate limiting | `@/shared/lib/rate-limit` | For API routes |
 
 ## Components
