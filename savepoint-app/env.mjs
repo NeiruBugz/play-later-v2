@@ -6,6 +6,10 @@ export const env = createEnv({
     AUTH_COGNITO_ID: process.env.AUTH_COGNITO_ID,
     AUTH_COGNITO_SECRET: process.env.AUTH_COGNITO_SECRET,
     AUTH_COGNITO_ISSUER: process.env.AUTH_COGNITO_ISSUER,
+    AUTH_COGNITO_DOMAIN: process.env.AUTH_COGNITO_DOMAIN,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    AUTH_MIGRATION_CUTOVER_AT: process.env.AUTH_MIGRATION_CUTOVER_AT,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     AUTH_SECRET: process.env.AUTH_SECRET,
@@ -42,10 +46,14 @@ export const env = createEnv({
     AUTH_COGNITO_ISSUER: z.string({
       message: "AUTH_COGNITO_ISSUER is required",
     }),
+    AUTH_COGNITO_DOMAIN: z.string().optional(),
+    BETTER_AUTH_SECRET: z.string().optional(),
+    BETTER_AUTH_URL: z.url().optional(),
+    AUTH_MIGRATION_CUTOVER_AT: z.string().optional(),
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
     AUTH_SECRET: z.string({ message: "AUTH_SECRET is required" }),
-    AUTH_URL: z.string().url({ message: "AUTH_URL is required" }),
+    AUTH_URL: z.url({ message: "AUTH_URL is required" }),
     IGDB_CLIENT_ID: z.string({ message: "IGDB_CLIENT_ID is required" }),
     IGDB_CLIENT_SECRET: z.string({ message: "IGDB_CLIENT_SECRET is required" }),
     LOG_LEVEL: z
@@ -61,16 +69,12 @@ export const env = createEnv({
     POSTGRES_DATABASE: z.string({ message: "POSTGRES_DATABASE is required" }),
     POSTGRES_HOST: z.string({ message: "POSTGRES_HOST is required" }),
     POSTGRES_PASSWORD: z.string({ message: "POSTGRES_PASSWORD is required" }),
-    POSTGRES_PRISMA_URL: z
-      .string()
-      .url({ message: "POSTGRES_PRISMA_URL is required" }),
-    POSTGRES_URL: z.string().url({ message: "POSTGRES_URL is required" }),
-    POSTGRES_URL_NO_SSL: z
-      .string()
-      .url({ message: "POSTGRES_URL_NO_SSL is required" }),
-    POSTGRES_URL_NON_POOLING: z
-      .string()
-      .url({ message: "POSTGRES_URL_NON_POOLING is required" }),
+    POSTGRES_PRISMA_URL: z.url({ message: "POSTGRES_PRISMA_URL is required" }),
+    POSTGRES_URL: z.url({ message: "POSTGRES_URL is required" }),
+    POSTGRES_URL_NO_SSL: z.url({ message: "POSTGRES_URL_NO_SSL is required" }),
+    POSTGRES_URL_NON_POOLING: z.url({
+      message: "POSTGRES_URL_NON_POOLING is required",
+    }),
     POSTGRES_USER: z.string({ message: "POSTGRES_USER is required" }),
     STEAM_API_KEY: z.string({ message: "STEAM_API_KEY is required" }),
 
