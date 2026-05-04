@@ -39,10 +39,7 @@ describe("getStatusCountsHandler", () => {
 
   describe("Input Validation", () => {
     it("should reject empty userId", async () => {
-      const result = await getStatusCountsHandler(
-        { userId: "" },
-        mockContext
-      );
+      const result = await getStatusCountsHandler({ userId: "" }, mockContext);
 
       expect(result.success).toBe(false);
       if (!result.success) {
