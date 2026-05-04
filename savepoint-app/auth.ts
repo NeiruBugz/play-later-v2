@@ -69,6 +69,11 @@ export const auth = betterAuth({
     enabled: enableCredentials,
   },
 
+  session: {
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
+  },
+
   plugins: [nextCookies()],
 });
 
