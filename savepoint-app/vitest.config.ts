@@ -81,6 +81,7 @@ export default defineConfig({
             "**/data-access-layer/repository/**/*.unit.test.{js,ts,jsx,tsx}",
             "**/data-access-layer/handlers/**/*.unit.test.{js,ts,jsx,tsx}",
             "**/app/api/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+            "proxy.test.{js,ts}",
           ],
           exclude: [
             "**/node_modules/**",

@@ -4,21 +4,44 @@ import { allHandlers } from "@/test/mocks/handlers";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
 
-vi.mock("next-auth/react", () => ({
-  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
-  useSession: vi.fn(() => ({
-    data: {
-      user: {
-        id: "test-user-id",
-        email: "test@example.com",
-        name: "Test User",
-      },
+vi.mock("@/shared/lib/auth-client", () => {
+  const signOut = vi.fn(
+    async ({
+      fetchOptions,
+    }: { fetchOptions?: { onSuccess?: () => void } } = {}) => {
+      fetchOptions?.onSuccess?.();
+    }
+  );
+  const signInSocial = vi.fn(async () => undefined);
+  return {
+    authClient: {
+      signOut,
+      signIn: { social: signInSocial },
+      useSession: vi.fn(() => ({
+        data: {
+          user: {
+            id: "test-user-id",
+            email: "test@example.com",
+            name: "Test User",
+          },
+        },
+        isPending: false,
+      })),
     },
-    status: "authenticated",
-  })),
-  signIn: vi.fn(),
-  signOut: vi.fn(),
-}));
+    signOut,
+    signIn: { social: signInSocial },
+    useSession: vi.fn(() => ({
+      data: {
+        user: {
+          id: "test-user-id",
+          email: "test@example.com",
+          name: "Test User",
+        },
+      },
+      isPending: false,
+    })),
+  };
+});
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({

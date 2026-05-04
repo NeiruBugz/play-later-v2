@@ -8,8 +8,8 @@ vi.mock("@/env.mjs", () => ({
     AUTH_COGNITO_SECRET: "test-cognito-secret",
     AUTH_COGNITO_ISSUER:
       "https://cognito-idp.us-east-1.amazonaws.com/test-pool",
-    AUTH_SECRET: "test-secret-key-must-be-at-least-32-chars-long",
-    AUTH_URL: "http://localhost:3000",
+    BETTER_AUTH_SECRET: "test-better-auth-secret-min-32-chars-long-xxxx",
+    BETTER_AUTH_URL: "http://localhost:3000",
     AUTH_ENABLE_CREDENTIALS: false,
 
     IGDB_CLIENT_ID: "test-igdb-client-id",

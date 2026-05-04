@@ -97,12 +97,12 @@ Use the `(protected)` route group with a layout that checks authentication:
 
 ```typescript
 // app/(protected)/layout.tsx
-import { auth } from "@/auth";
+import { getServerUserId } from "@/shared/lib";
 import { redirect } from "next/navigation";
 
 export default async function ProtectedLayout({ children }) {
-  const session = await auth();
-  if (!session) redirect("/login");
+  const userId = await getServerUserId();
+  if (!userId) redirect("/login");
   return <>{children}</>;
 }
 ```

@@ -76,13 +76,12 @@ SavePoint implements a **pragmatic four-layer architecture** where layers are us
 | Single service operation | ❌ No | ❌ No | Profile update → ProfileService directly |
 | Public API with rate limiting | ✅ Yes | Depends | Game search API → handler → service |
 
-**Server Action Framework:** next-safe-action
+**Server Action Framework:** Homegrown `createServerAction` factory (`shared/lib/server-action/`)
 
-- Type-safe server actions with automatic input validation
-- Built-in authorization middleware (`authorizedActionClient`)
-- Reduces boilerplate for validation/auth before service layer
-- Consistent error handling patterns
-- Factory pattern: `createServerAction` standardizes all server actions
+- Type-safe server actions with Zod input validation and `ActionResult<T>` return type
+- `requireAuth` option calls `getServerUserId()` and rejects unauthenticated callers
+- Consistent error handling: `{ success: true; data: T } | { success: false; error: string }`
+- All server actions call this factory — no third-party action library in use
 
 **Result Type Patterns:**
 
@@ -111,37 +110,44 @@ type RepositoryResult<T> =
 
 ## 2. Authentication & Authorization
 
-**Authentication Provider:** NextAuth v5 (Beta)
+**Authentication Runtime:** Better Auth (`betterAuth({...})` instance in `savepoint-app/auth.ts`)
 
-- **Primary Method:** Google OAuth for production user authentication
-- **Secondary Method:** Credentials provider (email/password) for E2E testing with Playwright
-- Configuration: `auth.ts` at project root
+- **Primary identity provider:** AWS Cognito (Google federation), wired via `socialProviders.cognito`
+- **Account linking:** enabled with `trustedProviders: ["cognito"]` — Cognito accounts auto-link on first sign-in
+- **Email+password:** enabled only when `AUTH_ENABLE_CREDENTIALS=true` (non-prod / E2E testing)
+- **Route mount:** `app/api/auth/[...all]/route.ts` via `toNextJsHandler(auth)`
 
 **Session Management:**
 
-- Database sessions via Prisma Adapter (persistent, server-side validation)
-- Session storage in PostgreSQL for security and consistency
-- Server-side session access via `getServerUserId()` helper function
+- DB sessions stored in the PostgreSQL `session` table (not JWT) via `prismaAdapter`
+- Server-side session lookup: `getServerUserId()` in `auth.ts` — returns `string | undefined`, backed by `auth.api.getSession({ headers })`
+- Client-side sign-out: `authClient.signOut()` from `@/shared/lib/auth-client`
 
 **Authorization Pattern:**
 
 ```typescript
-// Server Action with next-safe-action
-export const addGameToLibrary = authorizedActionClient
-  .inputSchema(AddGameSchema)
-  .action(async ({ parsedInput, ctx: { userId } }) => {
-    // userId automatically extracted from session
-    // Input automatically validated against Zod schema
-    return GameService.addToLibrary(userId, parsedInput);
-  });
+// Server Action using createServerAction (requireAuth: true by default)
+export const addGameToLibrary = createServerAction({
+  actionName: "addGameToLibrary",
+  schema: AddGameSchema,
+  handler: async ({ input, userId }) => {
+    // userId extracted from DB session by the factory
+    return GameService.addToLibrary(userId!, input);
+  },
+});
 ```
+
+**Migration Compatibility (Cutover Period):**
+
+- `proxy.ts` (Next.js middleware equivalent) detects stale `next-auth.*` cookies post-cutover, clears them, and sets `auth_migrated=1` cookie
+- `MigrationNotice` component (`features/auth/ui/migration-notice.tsx`) on `/login` reads the flag and shows a one-shot notice, then clears it via `clear-migrated-cookie` server action
 
 **Security Principles:**
 
 - All mutations require authenticated session
-- User ID extracted from session (never from client input)
+- User ID extracted from server-side DB session (never trusted from client input)
 - Authorization checks happen before service layer execution
-- Session tokens stored securely (httpOnly cookies)
+- Session stored in PostgreSQL with httpOnly cookies for the session token
 
 ---
 
@@ -192,7 +198,7 @@ export const addGameToLibrary = authorizedActionClient
 **Platform Integration (Phase 3 — currently Blocked):**
 
 - **Steam Web API:** Account linking and profile read are active; library import / ownership / achievement sync are deferred — the AWS Lambda enrichment pipeline that powered them was retired in spec 015. Sync UI surfaces remain visible and return a permanently-disabled response. PSN and Xbox integrations are paused on the same dependency.
-- **Steam OpenID:** Authentication integration (configured in NextAuth, not currently surfaced).
+- **Steam OpenID:** Authentication integration not currently surfaced.
 
 **File Storage (Phase 3+):**
 
@@ -346,7 +352,7 @@ logger.info("Journal entry created", {
 - **Environment:** Node
 - **Dependencies:** Mocked Prisma client, mocked external APIs (IGDB)
 - **Speed:** Fast (<5s for full suite, no I/O operations)
-- **Setup File:** `test/setup/unit-setup.ts` with global Prisma/NextAuth mocks
+- **Setup File:** `test/setup/unit-setup.ts` with global Prisma/auth mocks
 - **Example scenarios:** Service Zod validation errors, Result type handling, edge case logic, utility functions
 
 **2. Integration Tests** (`.integration.test.ts`)
@@ -470,10 +476,10 @@ export default defineConfig({
 
 **Authentication Security:**
 
-- OAuth 2.0 via Google (trusted identity provider)
-- NextAuth session tokens stored in httpOnly cookies (prevents XSS attacks)
-- CSRF protection built into NextAuth
-- Credentials provider restricted to test environments only
+- OAuth 2.0 via AWS Cognito (Google federation upstream)
+- Better Auth session tokens stored in httpOnly cookies (prevents XSS attacks)
+- CSRF protection built into Better Auth
+- Email+password provider gated behind `AUTH_ENABLE_CREDENTIALS` (non-prod only)
 
 **Authorization Enforcement:**
 
@@ -493,7 +499,7 @@ export default defineConfig({
 
 - Zod schemas validate all external input at API boundaries
 - Parameterized queries via Prisma (prevents SQL injection)
-- next-safe-action middleware enforces validation before business logic
+- `createServerAction` factory enforces Zod validation before business logic
 
 **Dependency Security:**
 
@@ -775,11 +781,17 @@ Import rules enforced via `eslint-plugin-boundaries`:
 
 **Document Metadata:**
 
-- **Version:** 2.1
-- **Last Updated:** 2026-03-31 (FSD Architecture Compliance — Spec 007)
+- **Version:** 2.2
+- **Last Updated:** 2026-05-04 (Better Auth migration — Spec 020 Slice 8)
 - **Status:** Active
 - **Maintained By:** Solo developer with AI assistance
 - **Review Cadence:** After each major phase completion
+- **Changes in v2.2:**
+  - §2: Replaced NextAuth v5 with Better Auth + DB sessions. Documented Cognito social provider, account linking, `AUTH_ENABLE_CREDENTIALS` gate, `getServerUserId()`, route mount via `toNextJsHandler`, client sign-out, and migration-cutover compatibility layer (`proxy.ts` + `MigrationNotice`)
+  - §1: Replaced `next-safe-action` claims with accurate description of homegrown `createServerAction` factory (`shared/lib/server-action/`)
+  - §4: Removed stale NextAuth reference from Steam OpenID line
+  - §7: Removed NextAuth from unit-setup mock description
+  - §8: Replaced NextAuth / next-safe-action references with Better Auth / `createServerAction`
 - **Changes in v2.1:**
   - Added `widgets/` layer to FSD hierarchy (GameCard, Header)
   - Updated layer diagram, boundary enforcement table, and compliance summary

@@ -1,9 +1,9 @@
 "use client";
 
 import { LogOut, Settings, User } from "lucide-react";
-import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shared/components/ui/sidebar";
+import { authClient } from "@/shared/lib/auth-client";
 
 interface SidebarUserMenuProps {
   displayName: string;
@@ -27,6 +28,17 @@ export function SidebarUserMenu({
   displayName,
   avatarUrl,
 }: SidebarUserMenuProps) {
+  const router = useRouter();
+  const handleSignOut = () => {
+    void authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+          router.refresh();
+        },
+      },
+    });
+  };
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -70,7 +82,7 @@ export function SidebarUserMenu({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut()}
+              onClick={handleSignOut}
               className="text-destructive focus:text-destructive"
             >
               <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />

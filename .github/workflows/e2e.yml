@@ -80,6 +80,8 @@ jobs:
           # Auth
           AUTH_URL=http://localhost:6060
           AUTH_SECRET=ci-e2e-secret
+          BETTER_AUTH_SECRET=ci-better-auth-secret-for-e2e
+          BETTER_AUTH_URL=http://localhost:6060
           AUTH_ENABLE_CREDENTIALS=true
           AUTH_COGNITO_ID=dummy
           AUTH_COGNITO_SECRET=dummy

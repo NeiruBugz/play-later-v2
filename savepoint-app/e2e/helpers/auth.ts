@@ -44,7 +44,7 @@ export async function isAuthenticated(page: Page): Promise<boolean> {
 }
 export async function getSession(page: Page): Promise<unknown> {
   return page.evaluate(async () => {
-    const res = await fetch("/api/auth/session");
+    const res = await fetch("/api/auth/get-session");
     return res.json();
   });
 }

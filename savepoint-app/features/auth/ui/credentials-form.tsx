@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -55,6 +56,8 @@ export function CredentialsForm() {
     },
     shouldUnregister: true,
   });
+  const router = useRouter();
+
   const toggleMode = useCallback(() => {
     clearErrors();
     setMode((prevMode) => {
@@ -65,11 +68,13 @@ export function CredentialsForm() {
       return nextMode;
     });
   }, [clearErrors, getValues, reset]);
+
   useEffect(() => {
     if (mode === "signup") {
       trigger("password");
     }
   }, [mode, trigger]);
+
   const onSubmit = handleSubmit((values) => {
     startTransition(async () => {
       clearErrors("root");
@@ -89,7 +94,9 @@ export function CredentialsForm() {
             type: "server",
             message: result.error,
           });
+          return;
         }
+        router.refresh();
       } catch {
         setError("root", {
           type: "server",
@@ -98,9 +105,11 @@ export function CredentialsForm() {
       }
     });
   });
+
   const passwordHint =
     errors.password?.message ??
     (mode === "signup" ? "Must be at least 8 characters" : undefined);
+
   return (
     <div>
       {errors.root?.message && (

@@ -8,10 +8,6 @@ export {
   prisma,
 } from "./app";
 export { LOGGER_CONTEXT, type LoggerContextKey } from "./app/logger-context";
-export {
-  isNextAuthRedirect,
-  isAuthenticationError,
-} from "./auth/handle-next-auth-error";
 export { formatRelativeDate, formatAbsoluteDate } from "./date";
 export {
   platformMapper,
@@ -39,3 +35,4 @@ export {
   cn,
 } from "./ui";
 export { createServerAction, type ActionResult } from "./server-action";
+export { authClient, useSession, signIn, signOut } from "./auth-client";

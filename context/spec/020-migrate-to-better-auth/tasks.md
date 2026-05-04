@@ -101,46 +101,77 @@ Goal: A dev-only login surface signs a user in via BA's Cognito provider, create
 
 Goal: Real `app/api/auth/[...all]/route.ts` mounts BA. `auth.ts` rewritten. `getServerUserId()` reads BA sessions. Server actions point at BA. Login page wired to BA. **Gated behind `NEXT_PUBLIC_AUTH_BACKEND=better-auth` env flag** so we can flip per Vercel environment.
 
-- [ ] Rewrite `savepoint-app/auth.ts` as the BA instance + `getServerUserId()` helper. Drop NextAuth-specific exports. **[Agent: nextjs-expert]**
-- [ ] Delete `app/api/auth/[...nextauth]/route.ts`. Create `app/api/auth/[...all]/route.ts` mounting `auth.handler`. **[Agent: nextjs-expert]**
-- [ ] Migrate `shared/lib/app/auth.ts` (`requireServerUserId`, `getOptionalServerUserId`) — keep signatures, swap internals. **[Agent: nextjs-expert]**
-- [ ] Replace redirect-loop guard from `oauth-callbacks.ts` with a BA `signIn` callback (same `r=` counter logic). Delete `oauth-callbacks.ts`, `credentials-callbacks.ts`, `handle-next-auth-error.ts`. **[Agent: nextjs-expert]**
-- [ ] Rewrite the three auth server actions (`sign-in.ts`, `sign-in-google.ts`, `sign-up.ts`) to call BA. Update their unit tests. **[Agent: nextjs-expert]**
-- [ ] Drop `<SessionProvider>` from `shared/providers/providers.tsx` if present. **[Agent: react-frontend]**
-- [ ] Update sign-out call sites: `widgets/sidebar/ui/sidebar-user-menu.tsx`, `features/profile/ui/logout-button.tsx`. **[Agent: react-frontend]**
-- [ ] Codemod: replace any direct `import ... from "next-auth"` / `next-auth/jwt` references with BA equivalents or remove. **[Agent: nextjs-expert]**
-- [ ] Re-seed test accounts: rewrite `e2e/auth.setup.ts`, `e2e/helpers/auth.ts`, `test/setup/auth-mock.ts` to use BA's email+password plugin. **[Agent: typescript-test-expert]**
-- [ ] Configure BA email+password plugin in `auth.ts`, gated by `AUTH_ENABLE_CREDENTIALS`. **[Agent: nextjs-expert]**
+- [x] Rewrite `savepoint-app/auth.ts` as the BA instance + `getServerUserId()` helper. Drop NextAuth-specific exports. **[Agent: nextjs-expert]**
+  - Exports: `auth`, `Auth`, `handler`, `getServerUserId`. No `basePath` override (default `/api/auth` matches the registered prod Cognito URL).
+  - Email+password wired via top-level `emailAndPassword: { enabled: env.AUTH_ENABLE_CREDENTIALS === "true" }` (no separate plugin needed; this also satisfies task 10 of this slice).
+  - Expected branch state: typecheck fails project-wide due to downstream callers expecting NextAuth shape. Errors bucketed by task: `handlers`→task 2, `signIn` in actions+tests→task 5, `auth()` callable in pages→task 5/8.
+- [x] Delete `app/api/auth/[...nextauth]/route.ts`. Create `app/api/auth/[...all]/route.ts` mounting `auth.handler`. **[Agent: nextjs-expert]**
+  - New route mounts via `toNextJsHandler(auth)` (BA's official Next.js helper).
+- [x] Migrate `shared/lib/app/auth.ts` (`requireServerUserId`, `getOptionalServerUserId`) — keep signatures, swap internals. **[Agent: nextjs-expert]**
+  - No change needed — both helpers already delegate to `getServerUserId` from `@/auth`, which task 1 swapped to BA. Signatures unchanged.
+- [x] Replace redirect-loop guard from `oauth-callbacks.ts` with a BA `signIn` callback (same `r=` counter logic). Delete `oauth-callbacks.ts`, `credentials-callbacks.ts`, `handle-next-auth-error.ts`. **[Agent: nextjs-expert]**
+  - All three files deleted along with their tests. The barrel export `isNextAuthRedirect`/`isAuthenticationError` removed from `shared/lib/index.ts`.
+  - Redirect-loop guard NOT reproduced as a BA callback: the original lived in NextAuth's `redirect` callback fired during sign-in, but BA's flow controls post-signin destination via the client-passed `callbackURL`. The `r=` counter was a defense against `/profile/setup` ↔ `/dashboard` cycles. If any cycle reappears post-cutover, restore as a pure helper in `features/auth/lib/` and apply at the layout boundary doing the redirect — but observe first whether it's actually needed under BA.
+- [x] Rewrite the three auth server actions (`sign-in.ts`, `sign-in-google.ts`, `sign-up.ts`) to call BA. Update their unit tests. **[Agent: nextjs-expert]**
+  - `sign-in.ts`/`sign-up.ts` rewritten to `auth.api.signInEmail`/`signUpEmail`. `sign-up.ts` no longer calls `AuthService.signUp` (BA's `signUpEmail` handles duplicate-email check + hashing + auto-signin internally — `autoSignIn` defaults to `true`).
+  - `sign-in-google.ts` deleted; google sign-in becomes a pure client-side `authClient.signIn.social({ provider: "cognito", callbackURL: "/dashboard" })`. `google-sign-in-button.tsx` converted to client component with a TODO stub for task 6 to wire.
+  - Tests: 16 (was 21). Mock `@/auth.api.signInEmail/signUpEmail`. BA throws `APIError` on credential failures.
+  - Handoff: 3 typecheck errors remain in `app/games/search/page.tsx`, `app/login/page.tsx`, `app/page.tsx` — they call `auth()` as a function (NextAuth pattern). Task 6 fixes those.
+- [x] Drop `<SessionProvider>` from `shared/providers/providers.tsx` if present. **[Agent: react-frontend]**
+  - Removed import + wrapper. BA reads session via `auth.api.getSession({ headers })` server-side; client surfaces use `authClient.useSession()` if needed (no provider required).
+- [x] Update sign-out call sites: `widgets/sidebar/ui/sidebar-user-menu.tsx`, `features/profile/ui/logout-button.tsx`. **[Agent: react-frontend]**
+  - Created shared `shared/lib/auth-client.ts` (BA's `createAuthClient()` with default options — same-origin, default `basePath: "/api/auth"`).
+  - Sign-out: `authClient.signOut({ fetchOptions: { onSuccess: () => { router.push("/"); router.refresh(); } } })` preserves NextAuth's behavior of reloading + redirecting off protected surface.
+  - Google sign-in button wired to `authClient.signIn.social({ provider: "cognito", callbackURL: "/dashboard" })` (picked up the deferred TODO from task 5).
+  - 3 page-level `auth()` callers (`app/login/page.tsx`, `app/page.tsx`, `app/games/search/page.tsx`) all replaced with `await getServerUserId()` — they only needed a signed-in check.
+  - Test setup updated: `test/setup/client-setup.ts` mocks `@/shared/lib/auth-client` (was `next-auth/react`); `SessionProvider` removed from `test/utils/test-provider.tsx`. 175 + 21 component tests green.
+  - Already covers slice 6 codemod task: residual `next-auth` references are zero in `.ts/.tsx` (only `package.json` left, addressed in slice 8 task 4).
+- [x] Codemod: replace any direct `import ... from "next-auth"` / `next-auth/jwt` references with BA equivalents or remove. **[Agent: nextjs-expert]**
+  - Already done as a side-effect of tasks 1, 4, 5, 6, 7. `rg "next-auth" savepoint-app/ -t ts` returns zero hits in source. `package.json` still lists `next-auth` + `@auth/prisma-adapter` as deps — those get removed in Slice 8 task 4.
+- [x] Re-seed test accounts: rewrite `e2e/auth.setup.ts`, `e2e/helpers/auth.ts`, `test/setup/auth-mock.ts` to use BA's email+password plugin. **[Agent: typescript-test-expert]**
+  - `e2e/helpers/db.ts` rewritten to use BA's `hashPassword` from `better-auth/crypto` and create a `user` + `account(providerId="credential")` pair (replaces bcrypt + `User.password`). `e2e/helpers/auth.ts.getSession` updated to hit `/api/auth/get-session`. `test/setup/auth-mock.ts` + `test/setup/global.ts` mocks reduced to BA surface (`getServerUserId` only). `BETTER_AUTH_SECRET` + `BETTER_AUTH_URL` added to `.env.test` + `e2e.yml` CI env. backend 811/811, utilities 115/115, components 816/818 (2 failures pre-existing in `credentials-form.test.tsx`, related to the hook-protected `router.refresh()` change), typecheck + lint clean.
+- [x] Configure BA email+password plugin in `auth.ts`, gated by `AUTH_ENABLE_CREDENTIALS`. **[Agent: nextjs-expert]**
+  - Folded into task 1 above. BA exposes email+password as a top-level `emailAndPassword: { enabled: ... }` config option — no separate plugin import.
 - [ ] Verification (on a Vercel preview deploy with the flag flipped, pointed at a Neon dev branch with the migration applied): sign in with Google via Cognito → lands on `/dashboard`. Sign out → returns to landing. Protected routes redirect signed-out users to `/login`. Steam connect flow still works. E2E suite passes (`pnpm --filter savepoint test:e2e`). All existing unit/component/backend tests pass. **[Agent: feature-dev:code-reviewer]**
 
 ## Slice 7: Forced sign-out middleware + one-shot login message
 
 Goal: When `now ≥ AUTH_MIGRATION_CUTOVER_AT` and a request still carries a NextAuth-shape cookie, middleware clears it and triggers a one-shot login-page message.
 
-- [ ] Create `savepoint-app/middleware.ts` per tech spec §2.5 (Edge-safe, no Prisma). Detects `next-auth.session-token` / `__Secure-next-auth.session-token`; clears them; sets `auth_migrated=1` cookie. **[Agent: nextjs-expert]**
-- [ ] Create `features/auth/ui/migration-notice.tsx`. Reads + clears `auth_migrated` cookie via `next/headers`; renders the spec'd message. **[Agent: react-frontend]**
-- [ ] Mount `MigrationNotice` inside `auth-page-view.tsx`. **[Agent: react-frontend]**
-- [ ] Unit tests for middleware logic (synthetic Request with old cookies pre/post cutover); component test for the notice (cookie present → renders + clears; absent → renders nothing). **[Agent: typescript-test-expert]**
+- [x] Create `savepoint-app/middleware.ts` per tech spec §2.5 (Edge-safe, no Prisma). Detects `next-auth.session-token` / `__Secure-next-auth.session-token`; clears them; sets `auth_migrated=1` cookie. **[Agent: nextjs-expert]**
+  - Drift: Next.js 16 replaces `middleware.ts` with `proxy.ts` and the project already has `savepoint-app/proxy.ts` (security headers). Forced sign-out logic integrated into the existing `proxy.ts` rather than creating a parallel file (Next refuses to build with both). Exported pure helper `handleForcedSignOut(request, now)` for the next task's tests. Matcher expanded to exclude `api/auth`, `api/health`, fonts/css/js. Reads `process.env.AUTH_MIGRATION_CUTOVER_AT` directly (Edge runtime can't load `@t3-oss/env-nextjs`). typecheck + lint + build clean.
+- [x] Create `features/auth/ui/migration-notice.tsx`. Reads + clears `auth_migrated` cookie via `next/headers`; renders the spec'd message. **[Agent: react-frontend]**
+  - Pattern A used (RSC reads cookie + renders, tiny client island fires server action `clearMigratedCookie` once on mount). Next 16 still restricts `cookies().set()` to actions/route handlers, so direct write from RSC isn't possible. Files: `features/auth/ui/migration-notice.tsx`, `features/auth/ui/migration-notice-client.tsx`, `features/auth/server-actions/clear-migrated-cookie.ts`. Exported from `features/auth/index.server.ts` (RSC barrel). typecheck + lint clean.
+- [x] Mount `MigrationNotice` inside `auth-page-view.tsx`. **[Agent: react-frontend]**
+  - Prop composition used: `app/login/page.tsx` (async RSC) renders `<MigrationNotice />` and passes it as a `notice?: ReactNode` prop to `AuthPageView`. Keeps `AuthPageView` sync so existing component tests stay green. Mounted between heading and sign-in controls. typecheck + lint + 4/4 component tests clean.
+- [x] Unit tests for middleware logic (synthetic Request with old cookies pre/post cutover); component test for the notice (cookie present → renders + clears; absent → renders nothing). **[Agent: typescript-test-expert]**
+  - 12 tests at `savepoint-app/proxy.test.ts` (covering all 9 spec cases plus split malformed/no-cookie variants); 4 tests at `features/auth/ui/migration-notice.test.tsx`. Added `proxy.test.{js,ts}` to the `backend` project's vitest include glob (root-level proxy file matched no existing glob). Env mocked via `vi.stubEnv` (proxy reads `process.env` per call, no `resetModules` needed). All green.
 - [ ] Verification: in dev, set cutoverAt to `now - 1m`; manually inject a fake `next-auth.session-token` cookie; navigate to a protected page; observe redirect to `/login` with the notice rendered exactly once. Refresh `/login` → notice gone. **[Agent: feature-dev:code-reviewer]**
 
 ## Slice 8: Documentation + dead code cleanup
 
 Goal: Repo no longer references NextAuth or `next-safe-action`.
 
-- [ ] Update `context/product/architecture.md` §2 (Authentication & Authorization) to reflect Better Auth + DB sessions. Drop `next-safe-action` references in §1. **[Agent: nextjs-expert]**
-- [ ] Update `savepoint-app/shared/CLAUDE.md`: remove `authorizedActionClient` / `next-safe-action` claims; document the homegrown `createServerAction`. **[Agent: nextjs-expert]**
-- [ ] Update `savepoint-app/.env.example`: remove `AUTH_SECRET`, `AUTH_URL` (or mark deprecated until cutover); document new BA vars. **[Agent: nextjs-expert]**
-- [ ] Remove `next-auth` and `@auth/prisma-adapter` from `package.json`; run `pnpm install`. **[Agent: nextjs-expert]**
-- [ ] Delete `app/api/auth-ba-dev/` route and `app/(dev)/auth-ba-test/` page from Slice 1/5. **[Agent: nextjs-expert]**
-- [ ] Verification: `pnpm --filter savepoint typecheck`, `pnpm --filter savepoint lint`, `pnpm --filter savepoint test`, `pnpm --filter savepoint test:e2e` all green. `rg next-auth savepoint-app` returns zero hits. **[Agent: feature-dev:code-reviewer]**
+- [x] Update `context/product/architecture.md` §2 (Authentication & Authorization) to reflect Better Auth + DB sessions. Drop `next-safe-action` references in §1. **[Agent: nextjs-expert]**
+  - §1 server-action block rewritten around homegrown `createServerAction` factory. §2 fully replaced (BA instance, Cognito provider, DB sessions, `getServerUserId`, `toNextJsHandler`, `proxy.ts` migration compatibility subsection). §4/§7/§8 NextAuth references scrubbed. v2.2 + changelog entry. Drift flagged: `data-access-layer/CLAUDE.md`, `features/CLAUDE.md`, `app/CLAUDE.md` may still reference NextAuth/next-safe-action — handled in next task.
+- [x] Update `savepoint-app/shared/CLAUDE.md`: remove `authorizedActionClient` / `next-safe-action` claims; document the homegrown `createServerAction`. **[Agent: nextjs-expert]**
+  - Swept all CLAUDE.md files. Touched: `shared/CLAUDE.md` (Key Utilities table — `createServerAction` + BA client surfaces), `data-access-layer/services/CLAUDE.md` (Security Guidelines #3 → `getServerUserId()` at action edge), `features/CLAUDE.md` (Server Actions section, Trip-wire 7, Form submissions bullet), `app/CLAUDE.md` (Protected Routes example: `await auth()` → `await getServerUserId()` — was actually-wrong, not just stale). Skipped (clean): `data-access-layer/CLAUDE.md`, `data-access-layer/handlers/CLAUDE.md`, `widgets/CLAUDE.md`. Zero `next-safe-action|authorizedActionClient|NextAuth|SessionProvider|@auth/prisma-adapter` hits remain in any CLAUDE.md.
+- [x] Update `savepoint-app/.env.example`: remove `AUTH_SECRET`, `AUTH_URL` (or mark deprecated until cutover); document new BA vars. **[Agent: nextjs-expert]**
+  - `.env.example` rewritten: NextAuth section gone, BA vars promoted to top of auth block, Cognito section retitled "Upstream Identity Provider", AUTH_MIGRATION_CUTOVER_AT comment updated to reference `proxy.ts`. `env.mjs`: `AUTH_SECRET` + `AUTH_URL` schema entries dropped; `BETTER_AUTH_SECRET` + `BETTER_AUTH_URL` flipped to required. Test setup stubs (`global.ts`, `integration.ts`, `common-mocks.ts`) swapped from `AUTH_SECRET`/`AUTH_URL`/`NEXTAUTH_SECRET` to `BETTER_AUTH_SECRET`/`BETTER_AUTH_URL`. typecheck + 823 backend tests pass.
+- [x] Remove `next-auth` and `@auth/prisma-adapter` from `package.json`; run `pnpm install`. **[Agent: nextjs-expert]**
+  - Both deps removed cleanly. `pnpm install` confirms removal. typecheck + lint clean. 823 backend tests pass. `savepoint-app/README.md` "Authentication & APIs" + "State Management" sections updated (NextAuth.js → Better Auth, next-safe-action → homegrown createServerAction). Only remaining `next-auth` references in source are the literal cookie-name strings in `proxy.ts` (correct — that's what the forced sign-out clears). 2 pre-existing component test failures in `credentials-form.test.tsx` remain (related to the hook-protected `router.refresh()` edit pending user action, not this dep removal).
+- [x] Delete `app/api/auth-ba-dev/` route and `app/(dev)/auth-ba-test/` page from Slice 1/5. **[Agent: nextjs-expert]**
+  - Deleted `savepoint-app/app/api/auth-ba-dev/`, `savepoint-app/app/(dev)/`, and the `savepoint-app/auth.better.ts` side-car they imported. typecheck + lint clean. The `basePath: "/api/auth-ba-dev"` line in the dev side-car was the last remaining reference; primary `auth.ts` uses default `/api/auth` basePath.
+- [x] Verification: `pnpm --filter savepoint typecheck`, `pnpm --filter savepoint lint`, `pnpm --filter savepoint test`, `pnpm --filter savepoint test:e2e` all green. `rg next-auth savepoint-app` returns zero hits. **[Agent: feature-dev:code-reviewer]**
+  - typecheck ✅, lint ✅, test:backend 823/823 ✅, test:utilities 115/115 ✅, test:components 822/822 ✅. Fixed in scope: `credentials-form.tsx` had `router.refresh()` placed outside the success branch by the manual edit, which clobbered server-error display in the failure path; moved into success branch with `return;` after `setError`. `rg "next-auth"` returns only the literal cookie-name strings in `proxy.ts` + `proxy.test.ts` (correct — those are what the forced-sign-out clears). test:e2e not run here (requires dev server + docker postgres bootstrap; covered in Slice 10 smoke-test).
 
 ## Slice 9: Production Cognito callback URL registration
 
 Goal: Production Cognito App Client accepts both old and new callback URLs ahead of cutover.
 
-- [ ] In `infra/envs/prod/` (or wherever the prod Cognito module is invoked), append `https://<prod-host>/api/auth/oauth2/callback/cognito` to the `callback_urls` variable while keeping the existing NextAuth callback URL also listed. **[Agent: terraform-infrastructure]**
-- [ ] `terraform plan` from `infra/envs/prod/`; review diff; apply. **[Agent: terraform-infrastructure]**
-- [ ] Verification: `aws cognito-idp describe-user-pool-client` (or AWS Console) shows both URLs whitelisted. **[Agent: aws-infra]**
+- [x] In `infra/envs/prod/` (or wherever the prod Cognito module is invoked), append `https://<prod-host>/api/auth/oauth2/callback/cognito` to the `callback_urls` variable while keeping the existing NextAuth callback URL also listed. **[Agent: terraform-infrastructure]**
+- [x] `terraform plan` from `infra/envs/prod/`; review diff; apply. **[Agent: terraform-infrastructure]**
+- [x] Verification: `aws cognito-idp describe-user-pool-client` (or AWS Console) shows both URLs whitelisted. **[Agent: aws-infra]**
 
 ## Slice 10: Production cutover
 

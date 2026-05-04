@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import * as bcrypt from "bcryptjs";
+import { hashPassword } from "better-auth/crypto";
 import { Pool } from "pg";
 
 let pool: Pool | undefined;
@@ -31,14 +31,23 @@ export async function createTestUser(data: {
   username: string;
   password: string;
 }): Promise<TestUser> {
-  const hashedPassword = await bcrypt.hash(data.password, 10);
+  const passwordHash = await hashPassword(data.password);
   const email = data.email.trim().toLowerCase();
-  const user = await getPrisma().user.create({
+  const client = getPrisma();
+  const user = await client.user.create({
     data: {
-      email: email,
+      email,
+      emailVerified: true,
       username: data.username,
       usernameNormalized: data.username.toLowerCase(),
-      password: hashedPassword,
+    },
+  });
+  await client.account.create({
+    data: {
+      userId: user.id,
+      providerId: "credential",
+      accountId: user.id,
+      password: passwordHash,
     },
   });
   return {
@@ -53,13 +62,22 @@ export async function createTestUserWithoutUsername(data: {
   password: string;
   name?: string;
 }): Promise<TestUser> {
-  const hashedPassword = await bcrypt.hash(data.password, 10);
+  const passwordHash = await hashPassword(data.password);
   const email = data.email.trim().toLowerCase();
-  const user = await getPrisma().user.create({
+  const client = getPrisma();
+  const user = await client.user.create({
     data: {
       email,
-      password: hashedPassword,
+      emailVerified: true,
       name: data.name ?? null,
+    },
+  });
+  await client.account.create({
+    data: {
+      userId: user.id,
+      providerId: "credential",
+      accountId: user.id,
+      password: passwordHash,
     },
   });
   return {

@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { getServerUserId } from "@/auth";
 import { BookOpen, Clock, Heart, Library, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,8 +8,8 @@ import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 
 export default async function Page() {
-  const session = await auth();
-  if (session?.user) {
+  const userId = await getServerUserId();
+  if (userId) {
     redirect("/dashboard");
   }
   return (
