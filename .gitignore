@@ -49,6 +49,7 @@ yarn-error.log*
 
 .contentlayer
 .env
+.env.prod
 # next-video
 videos/*
 !videos/*.json
