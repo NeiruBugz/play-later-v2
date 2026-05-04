@@ -1,12 +1,9 @@
-import { Suspense, type PropsWithChildren } from "react";
+import { ProfileService } from "@/data-access-layer/services";
+import type { PropsWithChildren } from "react";
 
 import { MobileNav } from "@/widgets/mobile-nav";
 import { MobileTopbar } from "@/widgets/mobile-topbar";
 import { AppSidebar } from "@/widgets/sidebar";
-import {
-  SidebarUser,
-  SidebarUserSkeleton,
-} from "@/widgets/sidebar/ui/sidebar-user";
 import { CommandPaletteProvider } from "@/features/command-palette";
 import { JournalFab } from "@/features/journal";
 import { WhatsNewModal } from "@/features/whats-new";
@@ -19,17 +16,23 @@ import { ProtectedLayoutClient } from "./_components/protected-layout-client";
 export default async function ProtectedLayout({ children }: PropsWithChildren) {
   const userId = await requireServerUserId();
 
+  const profileService = new ProfileService();
+
+  let displayName = "User";
+  let avatarUrl: string | null = null;
+  try {
+    const profile = await profileService.getProfile({ userId });
+    displayName = profile.username ?? "User";
+    avatarUrl = profile.image ?? null;
+  } catch {
+    // non-critical — sidebar still renders with defaults
+  }
+
   return (
     <CommandPaletteProvider>
       <ProtectedLayoutClient>
         <SidebarProvider>
-          <AppSidebar
-            userSlot={
-              <Suspense fallback={<SidebarUserSkeleton />}>
-                <SidebarUser userId={userId} />
-              </Suspense>
-            }
-          />
+          <AppSidebar displayName={displayName} avatarUrl={avatarUrl} />
 
           <SidebarInset id="main-content">
             <MobileTopbar />

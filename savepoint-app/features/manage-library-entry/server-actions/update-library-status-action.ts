@@ -1,10 +1,10 @@
 "use server";
 
 import { LibraryService } from "@/data-access-layer/services";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 import type { LibraryItemDomain } from "@/features/library/types";
-import { createServerAction, userTags } from "@/shared/lib";
+import { createServerAction } from "@/shared/lib";
 
 import {
   UpdateLibraryStatusByIgdbSchema,
@@ -66,9 +66,6 @@ export const updateLibraryStatusAction = createServerAction<
       },
     });
 
-    const tags = userTags(userId!);
-    updateTag(tags.libraryCounts);
-    updateTag(tags.profileStats);
     revalidatePath(`/games/${game.slug}`);
     logger.info(
       {

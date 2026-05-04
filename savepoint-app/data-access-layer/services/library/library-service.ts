@@ -23,9 +23,8 @@ import {
   LibraryItemStatus,
   type LibraryItem,
 } from "@prisma/client";
-import { cacheLife, cacheTag } from "next/cache";
 
-import { createLogger, LOGGER_CONTEXT, userTags } from "@/shared/lib";
+import { createLogger, LOGGER_CONTEXT } from "@/shared/lib";
 
 type SortField =
   | "updatedAt"
@@ -55,18 +54,6 @@ export type GetLibraryItemsResult = {
   total: number;
   hasMore: boolean;
 };
-
-async function getCachedStatusCounts(input: {
-  userId: string;
-  platform?: string;
-  search?: string;
-}): Promise<Record<LibraryItemStatus, number>> {
-  "use cache";
-  cacheTag(userTags(input.userId).libraryCounts);
-  cacheLife("seconds");
-
-  return countLibraryItemsByStatus(input);
-}
 export class LibraryService {
   private logger = createLogger({ [LOGGER_CONTEXT.SERVICE]: "LibraryService" });
 
@@ -179,7 +166,7 @@ export class LibraryService {
     platform?: string;
     search?: string;
   }): Promise<Record<LibraryItemStatus, number>> {
-    return getCachedStatusCounts(input);
+    return countLibraryItemsByStatus(input);
   }
 
   async deleteLibraryItem(params: {

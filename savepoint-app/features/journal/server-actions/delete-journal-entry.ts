@@ -1,9 +1,9 @@
 "use server";
 
 import { JournalService } from "@/data-access-layer/services";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
-import { createServerAction, userTags } from "@/shared/lib";
+import { createServerAction } from "@/shared/lib";
 
 import {
   DeleteJournalEntrySchema,
@@ -28,7 +28,6 @@ export const deleteJournalEntryAction = createServerAction<
       entryId,
     });
 
-    updateTag(userTags(userId!).profileStats);
     revalidatePath("/journal");
     revalidatePath("/games/[slug]", "page");
 

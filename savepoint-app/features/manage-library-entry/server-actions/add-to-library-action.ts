@@ -1,9 +1,9 @@
 "use server";
 
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 import type { LibraryItemDomain } from "@/features/library/types";
-import { createServerAction, userTags } from "@/shared/lib";
+import { createServerAction } from "@/shared/lib";
 
 import { AddToLibrarySchema, type AddToLibraryInput } from "../schemas";
 import { addGameToLibrary } from "../use-cases/add-game-to-library";
@@ -36,9 +36,6 @@ export const addToLibraryAction = createServerAction<
         error: result.error,
       };
     }
-    const tags = userTags(userId!);
-    updateTag(tags.libraryCounts);
-    updateTag(tags.profileStats);
     revalidatePath(`/games/${result.data.gameSlug}`);
     logger.info(
       {
