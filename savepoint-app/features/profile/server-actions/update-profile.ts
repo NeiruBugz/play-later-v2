@@ -1,14 +1,14 @@
 "use server";
 
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 import {
   UpdateProfileSchema,
   type UpdateProfileInput,
 } from "@/features/profile/lib";
 import type { UpdateProfileFormState } from "@/features/profile/types";
-import { createServerAction, userTags, type ActionResult } from "@/shared/lib";
+import { createServerAction, type ActionResult } from "@/shared/lib";
 
 type UpdateProfileData = {
   username: string | null;
@@ -42,10 +42,6 @@ const performUpdateProfile = createServerAction<
       avatarUrl: sanitizedData.avatarUrl,
       isPublicProfile: sanitizedData.isPublicProfile,
     });
-
-    const tags = userTags(userId!);
-    updateTag(tags.profile);
-    updateTag(tags.profileStats);
 
     logger.info({ userId }, "Profile updated successfully");
     return {

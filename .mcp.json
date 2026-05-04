@@ -22,10 +22,6 @@
         "run",
         "https://knowledge-mcp.global.api.aws"
       ]
-    },
-    "vercel": {
-      "type": "http",
-      "url": "https://mcp.vercel.com"
     }
   }
 }

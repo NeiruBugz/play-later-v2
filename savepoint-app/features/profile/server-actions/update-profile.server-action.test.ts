@@ -1,9 +1,8 @@
 import { getServerUserId } from "@/auth";
 import { ProfileService } from "@/data-access-layer/services/profile/profile-service";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 import type { UpdateProfileFormState } from "@/features/profile/types";
-import { userTags } from "@/shared/lib";
 
 import { updateProfile, updateProfileFormAction } from "./update-profile";
 
@@ -17,7 +16,6 @@ vi.mock("@/data-access-layer/services/profile/profile-service", () => ({
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
-  updateTag: vi.fn(),
 }));
 
 vi.mock("@/shared/lib", async (importOriginal) => {
@@ -35,7 +33,6 @@ vi.mock("@/shared/lib", async (importOriginal) => {
 
 const mockGetServerUserId = vi.mocked(getServerUserId);
 const mockRevalidatePath = vi.mocked(revalidatePath);
-const mockUpdateTag = vi.mocked(updateTag);
 const MockProfileService = vi.mocked(ProfileService);
 
 describe("updateProfile server action", () => {
@@ -318,37 +315,6 @@ describe("updateProfile server action", () => {
         submittedUsername: "testuser",
       });
       expect(mockRevalidatePath).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("updateTag wiring", () => {
-    it("should call updateTag with profile and profileStats on success", async () => {
-      mockUpdateProfile.mockResolvedValue({
-        username: "newusername",
-        image: null,
-      });
-
-      await updateProfile({ username: "newusername" });
-
-      const tags = userTags("user-123");
-      expect(mockUpdateTag).toHaveBeenCalledWith(tags.profile);
-      expect(mockUpdateTag).toHaveBeenCalledWith(tags.profileStats);
-    });
-
-    it("should NOT call updateTag when service throws", async () => {
-      mockUpdateProfile.mockRejectedValue(new Error("Username already exists"));
-
-      const result = await updateProfile({ username: "takenusername" });
-
-      expect(result.success).toBe(false);
-      expect(mockUpdateTag).not.toHaveBeenCalled();
-    });
-
-    it("should NOT call updateTag on validation error", async () => {
-      const result = await updateProfile({ username: "ab" });
-
-      expect(result.success).toBe(false);
-      expect(mockUpdateTag).not.toHaveBeenCalled();
     });
   });
 });
