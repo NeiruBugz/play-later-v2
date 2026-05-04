@@ -7,50 +7,57 @@ datasource db {
   provider = "postgresql"
 }
 
-// ----- NextAuth Authorization Models ------//
+// ----- Better Auth Authorization Models ------//
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+model account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String
+  accountId             String
+  refreshToken          String?   @db.Text
+  accessToken           String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  idToken               String?   @db.Text
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([providerId, accountId])
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model VerificationToken {
+model verification {
+  id         String   @id @default(cuid())
   identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
+  value      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
-model User {
+model user {
   id                      String                 @id @default(cuid())
   name                    String?
   email                   String?                @unique
-  emailVerified           DateTime?
+  emailVerified           Boolean                @default(false)
   image                   String?
-  password                String? // For credentials authentication
+  password                String?
   username                String?                @unique
   usernameNormalized      String?                @unique
   isPublicProfile         Boolean                @default(false)
@@ -63,16 +70,15 @@ model User {
   steamUsername           String?
   steamAvatar             String?
   steamConnectedAt        DateTime?
-  Account                 Account[]
-  Session                 Session[]
+  account                 account[]
+  session                 session[]
   LibraryItem             LibraryItem[]
   Review                  Review[]
   JournalEntry            JournalEntry[]
   IgnoredImportedGames    IgnoredImportedGames[]
-
-  ImportedGame ImportedGame[]
-  followers    Follow[]             @relation("UserIsFollowed")
-  following    Follow[]             @relation("UserFollows")
+  ImportedGame            ImportedGame[]
+  followers               Follow[]               @relation("UserIsFollowed")
+  following               Follow[]               @relation("UserFollows")
 }
 
 // ----- Application Models ------//
@@ -112,7 +118,7 @@ model LibraryItem {
   acquisitionType AcquisitionType   @default(DIGITAL)
   gameId          String
   game            Game              @relation("GameLibraryItems", fields: [gameId], references: [id], onDelete: Cascade)
-  User            User              @relation(fields: [userId], references: [id])
+  User            user              @relation(fields: [userId], references: [id])
   startedAt       DateTime?
   completedAt     DateTime?
   hasBeenPlayed   Boolean           @default(false)
@@ -130,41 +136,39 @@ model LibraryItem {
 model Review {
   id          Int      @id @default(autoincrement())
   /// Legacy/unused. Pending Reviews spec (Phase 2B). User-facing ratings live on LibraryItem.rating (1-10 half-step scale).
-  rating      Int      @default(0) // Rating from 0 to 10
-  content     String? // Optional review text
+  rating      Int      @default(0)
+  content     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   completedOn String?
   userId      String
   gameId      String
-  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
   Game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
 }
 
 model JournalEntry {
-  id             String            @id @default(cuid())
-  kind           JournalEntryKind  @default(QUICK)
-  title          String? // Optional title for the entry
-  content        String            @db.Text // Body text; required for REFLECTION, optional for QUICK
-  playedMinutes  Int? // Minutes played in this session (QUICK entries)
-  tags           String[]          @default([])
-  mood           JournalMood? // Optional mood indicator
-  playSession    Int? // Session number for this game
-  visibility     JournalVisibility @default(PRIVATE)
+  id            String            @id @default(cuid())
+  kind          JournalEntryKind  @default(QUICK)
+  title         String?
+  content       String            @db.Text
+  playedMinutes Int?
+  tags          String[]          @default([])
+  mood          JournalMood?
+  playSession   Int?
+  visibility    JournalVisibility @default(PRIVATE)
 
-  // Relationships
   userId        String
-  gameId        String? // Nullable to forward-proof future game-less entries
-  libraryItemId Int? // Optional link to library item
+  gameId        String?
+  libraryItemId Int?
 
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        user         @relation(fields: [userId], references: [id], onDelete: Cascade)
   game        Game?        @relation(fields: [gameId], references: [id], onDelete: Cascade)
   libraryItem LibraryItem? @relation(fields: [libraryItemId], references: [id], onDelete: SetNull)
 
-  // Metadata
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  publishedAt DateTime? // When made public
+  publishedAt DateTime?
 
   @@index([userId, createdAt])
   @@index([gameId])
@@ -175,7 +179,7 @@ model IgnoredImportedGames {
   id     String @id @default(cuid())
   name   String
   userId String
-  User   User   @relation(fields: [userId], references: [id])
+  User   user   @relation(fields: [userId], references: [id])
 }
 
 model ImportedGame {
@@ -195,7 +199,7 @@ model ImportedGame {
   updatedAt        DateTime        @updatedAt
   deletedAt        DateTime?
   userId           String
-  User             User            @relation(fields: [userId], references: [id])
+  User             user            @relation(fields: [userId], references: [id])
 
   @@index([userId, deletedAt])
   @@index([storefrontGameId])
@@ -223,8 +227,8 @@ enum AcquisitionType {
 }
 
 enum JournalEntryKind {
-  QUICK // Lightweight log: playtime + optional note
-  REFLECTION // Long-form reflection with title + rich content
+  QUICK
+  REFLECTION
 }
 
 enum JournalMood {
@@ -237,16 +241,16 @@ enum JournalMood {
 }
 
 enum JournalVisibility {
-  PRIVATE // Only user can see
-  FRIENDS_ONLY // Future feature
-  PUBLIC // Anyone can see
+  PRIVATE
+  FRIENDS_ONLY
+  PUBLIC
 }
 
 enum IgdbMatchStatus {
-  PENDING // Initial state, not yet processed
-  MATCHED // Successfully matched to an IGDB entry
-  UNMATCHED // Could not be matched to IGDB (requires manual review)
-  IGNORED // User chose to ignore this game
+  PENDING
+  MATCHED
+  UNMATCHED
+  IGNORED
 }
 
 // ----- Game Metadata Models ------//
@@ -311,8 +315,8 @@ model Follow {
   followingId String
   createdAt   DateTime @default(now())
 
-  follower  User @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
-  following User @relation("UserIsFollowed", fields: [followingId], references: [id], onDelete: Cascade)
+  follower  user @relation("UserFollows", fields: [followerId], references: [id], onDelete: Cascade)
+  following user @relation("UserIsFollowed", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@id([followerId, followingId])
   @@index([followerId])

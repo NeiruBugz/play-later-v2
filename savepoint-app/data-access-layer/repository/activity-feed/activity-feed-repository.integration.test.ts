@@ -5,7 +5,7 @@ import {
   createUser,
   testDb,
 } from "@/test/setup/db-factories";
-import { type User } from "@prisma/client";
+import { type user as User } from "@prisma/client";
 
 import { findFeedForUser, findPopularFeed } from "./activity-feed-repository";
 

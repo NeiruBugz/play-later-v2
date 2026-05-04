@@ -1,6 +1,6 @@
 import "server-only";
 
-import { Prisma, type User } from "@prisma/client";
+import { Prisma, type user as User } from "@prisma/client";
 
 import { prisma } from "@/shared/lib/app/db";
 import { ConflictError, NotFoundError } from "@/shared/lib/errors";
@@ -207,10 +207,10 @@ export async function createUserWithCredentials(input: {
   }
 }
 
-export async function findUserById<T extends Prisma.UserSelect>(
+export async function findUserById<T extends Prisma.userSelect>(
   userId: string,
   options: { select: T }
-): Promise<Prisma.UserGetPayload<{ select: T }> | null> {
+): Promise<Prisma.userGetPayload<{ select: T }> | null> {
   return prisma.user.findUnique({
     where: { id: userId },
     select: options.select,
@@ -233,9 +233,9 @@ const PUBLIC_PROFILE_SELECT = {
   image: true,
   isPublicProfile: true,
   createdAt: true,
-} satisfies Prisma.UserSelect;
+} satisfies Prisma.userSelect;
 
-export type PublicProfileUser = Prisma.UserGetPayload<{
+export type PublicProfileUser = Prisma.userGetPayload<{
   select: typeof PUBLIC_PROFILE_SELECT;
 }>;
 

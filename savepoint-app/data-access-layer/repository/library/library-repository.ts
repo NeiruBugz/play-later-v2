@@ -241,7 +241,7 @@ export async function getOtherUsersLibrariesPaginated({
   search?: string;
 }): Promise<{
   users: Array<{
-    user: Prisma.UserGetPayload<{
+    user: Prisma.userGetPayload<{
       include: {
         _count: { select: { LibraryItem: true } };
         LibraryItem: { include: { game: true } };
@@ -255,7 +255,7 @@ export async function getOtherUsersLibrariesPaginated({
   count: number;
 }> {
   const skip = Math.max((page || 1) - 1, 0) * itemsPerPage;
-  const userWhere: Prisma.UserWhereInput = {
+  const userWhere: Prisma.userWhereInput = {
     id: { not: userId },
     username: { not: null },
     ...(search
