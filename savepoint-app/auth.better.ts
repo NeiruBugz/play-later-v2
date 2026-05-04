@@ -10,10 +10,10 @@
  * rewritten as the Better Auth instance.
  */
 
+import { env } from "@/env.mjs";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 
-import { env } from "@/env.mjs";
 import { prisma } from "@/shared/lib/app/db";
 
 function parseCognitoIssuer(issuer: string): {
@@ -31,23 +31,36 @@ function parseCognitoIssuer(issuer: string): {
 
 const { region, userPoolId } = parseCognitoIssuer(env.AUTH_COGNITO_ISSUER);
 
+const cognitoReady = Boolean(
+  env.AUTH_COGNITO_ID &&
+  env.AUTH_COGNITO_SECRET &&
+  env.AUTH_COGNITO_DOMAIN &&
+  region &&
+  userPoolId
+);
+
+const socialProviders = cognitoReady
+  ? {
+      cognito: {
+        clientId: env.AUTH_COGNITO_ID,
+        clientSecret: env.AUTH_COGNITO_SECRET,
+        domain: env.AUTH_COGNITO_DOMAIN as string,
+        region: region as string,
+        userPoolId: userPoolId as string,
+      },
+    }
+  : {};
+
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
+  basePath: "/api/auth-ba-dev",
 
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
 
-  socialProviders: {
-    cognito: {
-      clientId: env.AUTH_COGNITO_ID,
-      clientSecret: env.AUTH_COGNITO_SECRET,
-      domain: env.AUTH_COGNITO_DOMAIN as string,
-      region: region as string,
-      userPoolId: userPoolId as string,
-    },
-  },
+  socialProviders,
 
   account: {
     accountLinking: {

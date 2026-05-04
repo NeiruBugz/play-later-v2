@@ -1,6 +1,7 @@
 import { ProfileService } from "@/data-access-layer/services";
 import type { PropsWithChildren } from "react";
 
+import { AuthMigrationBanner } from "@/widgets/auth-migration-banner";
 import { Header } from "@/widgets/header";
 import { MobileNav } from "@/widgets/mobile-nav";
 import { MobileTopbar } from "@/widgets/mobile-topbar";
@@ -39,6 +40,7 @@ export default async function GameDetailsLayout({
           )}
 
           <SidebarInset>
+            {userId && <AuthMigrationBanner />}
             {userId ? (
               <MobileTopbar />
             ) : (
