@@ -54,7 +54,7 @@ Single Prisma migration (`prisma/migrations/<timestamp>_better_auth_migration/`)
 5. `ALTER TABLE "User" RENAME TO "user"`. No column drops — BA `additionalFields` covers everything.
 6. Update relation FKs to point at lowercased table names.
 
-**Rollback:** the migration is reversible via the symmetric down migration. `Session`/`VerificationToken` data is not restored on rollback (acceptable — short-lived tokens). `Account` data is fully reversible because no information is lost in the rename.
+**Rollback:** there is no symmetric down migration. The schema migration intentionally truncates `session` and `verification` (short-lived tokens), which cannot be reversibly restored from the post-migration state. `account` renames are technically reversible by hand, but the operational rollback path is **Neon branching + redeploy**: the pre-migration Neon branch (created in Slice 10) is the snapshot. If rollback is needed, repoint Vercel's `DATABASE_URL` to that branch and redeploy the previous tag — no down-migration SQL is run.
 
 **Out of this migration:** zero data loss for `User`, `Account`, `LibraryItem`, `JournalEntry`, `Review`, `Follow`, Steam fields, `ImportedGame`, `IgnoredImportedGames`.
 

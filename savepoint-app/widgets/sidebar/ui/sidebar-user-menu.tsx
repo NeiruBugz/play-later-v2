@@ -36,6 +36,9 @@ export function SidebarUserMenu({
           router.push("/");
           router.refresh();
         },
+        onError: (ctx) => {
+          console.error("Sign-out failed", ctx.error);
+        },
       },
     });
   };

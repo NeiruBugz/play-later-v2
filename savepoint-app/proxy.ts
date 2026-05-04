@@ -94,7 +94,13 @@ export function proxy(request: NextRequest): NextResponse {
   if (handleForcedSignOut(request, new Date())) {
     for (const name of ALL_LEGACY_COOKIES) {
       if (request.cookies.has(name)) {
-        response.cookies.set(name, "", { maxAge: 0, path: "/" });
+        const requiresSecurePrefix =
+          name.startsWith("__Secure-") || name.startsWith("__Host-");
+        response.cookies.set(name, "", {
+          maxAge: 0,
+          path: "/",
+          ...(requiresSecurePrefix && { secure: true }),
+        });
       }
     }
 

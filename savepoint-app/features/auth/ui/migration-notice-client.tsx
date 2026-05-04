@@ -10,7 +10,7 @@ export function MigrationNoticeCookieClearer() {
   useEffect(() => {
     if (ranRef.current) return;
     ranRef.current = true;
-    void clearMigratedCookieAction();
+    void clearMigratedCookieAction(undefined);
   }, []);
 
   return null;

@@ -8,6 +8,11 @@ export function GoogleSignInButton() {
     void authClient.signIn.social({
       provider: "cognito",
       callbackURL: "/dashboard",
+      fetchOptions: {
+        onError: (ctx) => {
+          console.error("Cognito sign-in failed", ctx.error);
+        },
+      },
     });
   };
   return (

@@ -47,7 +47,11 @@ export const env = createEnv({
     AUTH_COGNITO_DOMAIN: z.string().optional(),
     BETTER_AUTH_SECRET: z.string({ message: "BETTER_AUTH_SECRET is required" }),
     BETTER_AUTH_URL: z.url({ message: "BETTER_AUTH_URL is required" }),
-    AUTH_MIGRATION_CUTOVER_AT: z.string().optional(),
+    AUTH_MIGRATION_CUTOVER_AT: z
+      .iso
+      .datetime({ offset: true, message: "AUTH_MIGRATION_CUTOVER_AT must be ISO-8601 UTC" })
+      .optional()
+      .or(z.literal("")),
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
     IGDB_CLIENT_ID: z.string({ message: "IGDB_CLIENT_ID is required" }),

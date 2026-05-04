@@ -30,6 +30,8 @@
  */
 
 import { execSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { betterAuth } from "better-auth";
@@ -140,7 +142,7 @@ beforeAll(async () => {
       POSTGRES_PRISMA_URL: databaseUrl,
       POSTGRES_URL_NON_POOLING: databaseUrl,
     },
-    cwd: "/Users/nailbadiullin/Developer/personal/play-later-v2/savepoint-app",
+    cwd: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."),
   });
 
   pool = new Pool({ connectionString: databaseUrl });

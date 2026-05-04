@@ -29,19 +29,24 @@ const cognitoReady = Boolean(
   userPoolId
 );
 
-const socialProviders = cognitoReady
-  ? {
-      cognito: {
-        clientId: env.AUTH_COGNITO_ID,
-        clientSecret: env.AUTH_COGNITO_SECRET,
-        domain: env.AUTH_COGNITO_DOMAIN as string,
-        region: region as string,
-        userPoolId: userPoolId as string,
-      },
-    }
-  : {};
+if (!cognitoReady) {
+  throw new Error(
+    "Invalid Cognito configuration: AUTH_COGNITO_ID, AUTH_COGNITO_SECRET, AUTH_COGNITO_DOMAIN, and a parseable AUTH_COGNITO_ISSUER are all required."
+  );
+}
 
-const enableCredentials = env.AUTH_ENABLE_CREDENTIALS === "true";
+const socialProviders = {
+  cognito: {
+    clientId: env.AUTH_COGNITO_ID,
+    clientSecret: env.AUTH_COGNITO_SECRET,
+    domain: env.AUTH_COGNITO_DOMAIN as string,
+    region: region as string,
+    userPoolId: userPoolId as string,
+  },
+};
+
+const enableCredentials =
+  env.NODE_ENV !== "production" && env.AUTH_ENABLE_CREDENTIALS === "true";
 
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET,

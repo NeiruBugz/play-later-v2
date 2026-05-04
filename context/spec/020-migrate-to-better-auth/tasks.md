@@ -162,8 +162,7 @@ Goal: Repo no longer references NextAuth or `next-safe-action`.
   - Both deps removed cleanly. `pnpm install` confirms removal. typecheck + lint clean. 823 backend tests pass. `savepoint-app/README.md` "Authentication & APIs" + "State Management" sections updated (NextAuth.js → Better Auth, next-safe-action → homegrown createServerAction). Only remaining `next-auth` references in source are the literal cookie-name strings in `proxy.ts` (correct — that's what the forced sign-out clears). 2 pre-existing component test failures in `credentials-form.test.tsx` remain (related to the hook-protected `router.refresh()` edit pending user action, not this dep removal).
 - [x] Delete `app/api/auth-ba-dev/` route and `app/(dev)/auth-ba-test/` page from Slice 1/5. **[Agent: nextjs-expert]**
   - Deleted `savepoint-app/app/api/auth-ba-dev/`, `savepoint-app/app/(dev)/`, and the `savepoint-app/auth.better.ts` side-car they imported. typecheck + lint clean. The `basePath: "/api/auth-ba-dev"` line in the dev side-car was the last remaining reference; primary `auth.ts` uses default `/api/auth` basePath.
-- [x] Verification: `pnpm --filter savepoint typecheck`, `pnpm --filter savepoint lint`, `pnpm --filter savepoint test`, `pnpm --filter savepoint test:e2e` all green. `rg next-auth savepoint-app` returns zero hits. **[Agent: feature-dev:code-reviewer]**
-  - typecheck ✅, lint ✅, test:backend 823/823 ✅, test:utilities 115/115 ✅, test:components 822/822 ✅. Fixed in scope: `credentials-form.tsx` had `router.refresh()` placed outside the success branch by the manual edit, which clobbered server-error display in the failure path; moved into success branch with `return;` after `setError`. `rg "next-auth"` returns only the literal cookie-name strings in `proxy.ts` + `proxy.test.ts` (correct — those are what the forced-sign-out clears). test:e2e not run here (requires dev server + docker postgres bootstrap; covered in Slice 10 smoke-test).
+- [ ] Verification: `pnpm --filter savepoint typecheck`, `pnpm --filter savepoint lint`, `pnpm --filter savepoint test`, `pnpm --filter savepoint test:e2e` all green. `rg next-auth savepoint-app` returns zero hits. **[Agent: feature-dev:code-reviewer]**
 
 ## Slice 9: Production Cognito callback URL registration
 
@@ -179,8 +178,9 @@ Goal: Production runs Better Auth. All users forced through one-time sign-in.
 
 > **Rollback story (Neon):** Neon branching is the snapshot. The pre-migration branch becomes the rollback target. If the migration goes sideways, repoint Vercel's `DATABASE_URL` to the rollback branch and redeploy the previous tag.
 
-- [ ] **Pre-deploy:** create a Neon branch from `main` named `pre-better-auth-cutover-<YYYYMMDD>`. Record its connection string in this task as the rollback target. **[Agent: prisma-database]**
-- [ ] Set Vercel production env vars: `AUTH_MIGRATION_CUTOVER_AT` = chosen UTC timestamp ≥ 48h in the future, `BETTER_AUTH_SECRET` (reuse `AUTH_SECRET` value), `BETTER_AUTH_URL`, `NEXT_PUBLIC_AUTH_BACKEND=better-auth`. **[Agent: nextjs-expert]**
+- [x] **Pre-deploy:** create a Neon branch from `main` named `pre-better-auth-cutover-<YYYYMMDD>`. Record its connection string in this task as the rollback target. **[Agent: prisma-database]**
+  - **Neon rollback branch:** pre-better-auth-cutover-20260504
+- [x] Set Vercel production env vars: `AUTH_MIGRATION_CUTOVER_AT` = chosen UTC timestamp ≥ 48h in the future, `BETTER_AUTH_SECRET` (reuse `AUTH_SECRET` value), `BETTER_AUTH_URL`, `NEXT_PUBLIC_AUTH_BACKEND=better-auth`. **[Agent: nextjs-expert]**
 - [ ] **Deploy banner-only build first** (Slice 4 merged on the legacy NextAuth branch — banner reads `AUTH_MIGRATION_CUTOVER_AT` and surfaces to all signed-in users for 48h). Confirm banner appears in production. **[Agent: feature-dev:code-reviewer]**
 - [ ] **Wait 48h.** Monitor for any user reports. **[Agent: general-purpose]**
 - [ ] **At cutover-time deploy:** merge the BA branch to `main`. Vercel build runs `prisma migrate deploy` against the production Neon DB, then promotes. **[Agent: nextjs-expert]**
@@ -216,6 +216,6 @@ Goal: Spec marked Completed; rollback artifacts retired.
 _(To be filled in during/after Slice 10.)_
 
 - **Actual cutover timestamp (UTC):** _TBD_
-- **Neon rollback branch:** _TBD_
+- **Neon rollback branch:** pre-better-auth-cutover-20260504
 - **Anomalies observed:** _TBD_
 - **Time to first successful post-cutover sign-in:** _TBD_

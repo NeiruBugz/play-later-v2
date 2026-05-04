@@ -24,7 +24,7 @@ DROP INDEX IF EXISTS "Account_provider_providerAccountId_key";
 -- Add new TIMESTAMP column
 ALTER TABLE "Account" ADD COLUMN "accessTokenExpiresAt" TIMESTAMP(3);
 -- Backfill from epoch integer
-UPDATE "Account" SET "accessTokenExpiresAt" = to_timestamp("expires_at") WHERE "expires_at" IS NOT NULL;
+UPDATE "Account" SET "accessTokenExpiresAt" = (to_timestamp("expires_at") AT TIME ZONE 'UTC') WHERE "expires_at" IS NOT NULL;
 -- Drop the old integer column
 ALTER TABLE "Account" DROP COLUMN "expires_at";
 
