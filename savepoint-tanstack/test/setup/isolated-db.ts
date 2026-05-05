@@ -74,8 +74,19 @@ export async function setupIsolatedDatabase(
   const prisma = new PrismaClient({ adapter });
   await prisma.$connect();
 
+  const globalForPrisma = globalThis as unknown as {
+    prisma: PrismaClient | undefined;
+    pool: Pool | undefined;
+  };
+  const previousPrisma = globalForPrisma.prisma;
+  const previousPool = globalForPrisma.pool;
+  globalForPrisma.prisma = prisma;
+  globalForPrisma.pool = pool;
+
   async function teardown() {
     try {
+      globalForPrisma.prisma = previousPrisma;
+      globalForPrisma.pool = previousPool;
       await prisma.$disconnect();
       await pool.end();
     } finally {

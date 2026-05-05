@@ -1,4 +1,5 @@
 import { authClient } from "@/shared/api/auth-client";
+import { Button } from "@/shared/ui/button";
 
 export function CognitoSignInButton() {
   const handleSignIn = () => {
@@ -9,8 +10,8 @@ export function CognitoSignInButton() {
   };
 
   return (
-    <button type="button" onClick={handleSignIn}>
+    <Button type="button" onClick={handleSignIn}>
       Sign in with Cognito
-    </button>
+    </Button>
   );
 }

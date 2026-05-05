@@ -65,12 +65,14 @@ Per-layer guidance is in `src/<layer>/README.md`.
 
 Two layers only — no service classes, no `Result` wrappers, no domain mappers:
 
-1. **`entities/<noun>/api/*.server.ts`** — plain async functions. Direct Prisma calls. Throw `AppError` subclasses (`NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`) on failure. No DI, no classes.
-2. **`features/<intent>/api/*.server.ts`** — thin `createServerFn` wrappers from `@tanstack/react-start`: `.validator(zodSchema).handler(async ({ data, context }) => …)`. Resolve `userId` from session inside the handler — never trust it from input. Delegate to entity queries.
+1. **`entities/<noun>/api/*.server.ts`** — plain async functions. Direct Prisma calls via the [`prisma`](./src/shared/lib/db.ts) singleton. Throw [`AppError`](./src/shared/lib/errors.ts) subclasses (`NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`) on failure. No DI, no classes. **Reference:** [`src/entities/profile/api/get-profile.server.ts`](./src/entities/profile/api/get-profile.server.ts).
+2. **`features/<intent>/api/*.server.ts`** — thin `createServerFn` wrappers from `@tanstack/react-start`: `.validator(zodSchema).handler(async ({ data, context }) => …)`. Resolve `userId` from session inside the handler — never trust it from input. Delegate to entity queries. **Reference:** [`src/features/auth-email-sign-in/api/get-credentials-enabled.ts`](./src/features/auth-email-sign-in/api/get-credentials-enabled.ts), [`src/entities/session/api/require-user-id.ts`](./src/entities/session/api/require-user-id.ts).
 
-Errors bubble up to the route `errorComponent` (or root error boundary in `src/app/`), which branches on `AppError.code` for user-facing copy.
+Errors bubble up to the route `errorComponent` or the root error boundary at [`src/app/error-boundary.tsx`](./src/app/error-boundary.tsx) (mounted in `__root.tsx`), which branches on `AppError.code` for user-facing copy.
 
 **ID format:** Better Auth emits 32-char nanoid user IDs. Never use `z.string().cuid()`; use `z.string().min(1)`.
+
+**FSD reaffirmation for the DAL:** entity queries import only from `@/shared/*`. Feature server fns import from `@/entities/*` and `@/shared/*`. Server fns never import other features; entity queries never import features. Enforced by `eslint-plugin-boundaries`.
 
 ## Path aliases
 

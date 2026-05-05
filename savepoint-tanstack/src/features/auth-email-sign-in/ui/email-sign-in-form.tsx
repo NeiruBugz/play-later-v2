@@ -1,9 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useId } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { authClient } from "@/shared/api/auth-client";
+import { Button } from "@/shared/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/ui/form";
+import { Input } from "@/shared/ui/input";
 
 const emailSignInSchema = z.object({
   email: z.email(),
@@ -13,10 +22,7 @@ const emailSignInSchema = z.object({
 type EmailSignInValues = z.infer<typeof emailSignInSchema>;
 
 export function EmailSignInForm({ enabled }: { enabled: boolean }) {
-  const emailId = useId();
-  const passwordId = useId();
-
-  const { register, handleSubmit } = useForm<EmailSignInValues>({
+  const form = useForm<EmailSignInValues>({
     resolver: zodResolver(emailSignInSchema),
     defaultValues: { email: "", password: "" },
   });
@@ -25,7 +31,7 @@ export function EmailSignInForm({ enabled }: { enabled: boolean }) {
     return null;
   }
 
-  const onSubmit = handleSubmit((values) => {
+  const onSubmit = form.handleSubmit((values) => {
     void authClient.signIn.email({
       email: values.email,
       password: values.password,
@@ -34,24 +40,40 @@ export function EmailSignInForm({ enabled }: { enabled: boolean }) {
   });
 
   return (
-    <form onSubmit={onSubmit}>
-      <label htmlFor={emailId}>Email</label>
-      <input
-        id={emailId}
-        type="email"
-        autoComplete="email"
-        {...register("email")}
-      />
-
-      <label htmlFor={passwordId}>Password</label>
-      <input
-        id={passwordId}
-        type="password"
-        autoComplete="current-password"
-        {...register("password")}
-      />
-
-      <button type="submit">Sign in</button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={onSubmit}>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" autoComplete="email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Sign in</Button>
+      </form>
+    </Form>
   );
 }

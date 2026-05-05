@@ -79,28 +79,28 @@ FSD: `features/auth-cognito-sign-in/ui/`, `features/auth-email-sign-in/ui/` (dev
 
 FSD: `shared/lib/db`, `shared/lib/errors`, `entities/profile/{model,api}`, `app/error-boundary`.
 
-- [ ] **RED**: unit tests for `AppError` taxonomy (codes preserved, `toJSON`, instanceof checks) in `shared/lib/errors`. **[Agent: typescript-test-expert]**
-- [ ] **RED**: integration tests for `getProfileById` and `getProfileByUsername` against real PG — happy path + missing-user case (expect `NotFoundError`). **[Agent: typescript-test-expert]**
-- [ ] **GREEN**: `src/shared/lib/db.ts` — Prisma singleton with `globalThis` cache (mirror `savepoint-app/shared/lib/app/db.ts`). **[Agent: prisma-database]**
-- [ ] **GREEN**: `src/shared/lib/errors.ts` — `AppError` base + `NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `src/entities/profile/model/types.ts` (Zod + TS types) and `src/entities/profile/api/get-profile.server.ts` — `getProfileById(userId)`, `getProfileByUsername(username)`. Plain async, throw `NotFoundError`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `src/app/error-boundary.tsx` mounted in `__root.tsx` — branches on `AppError.code` for user-facing copy. **[Agent: tanstack-fullstack]**
-- [ ] Document the C2 DAL pattern in `savepoint-tanstack/CLAUDE.md`: features hold server fns, entities hold queries, no Result wrappers, AppError taxonomy, ID format (nanoid not cuid → `z.string().min(1)`). Reaffirm FSD layer rules. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: `test:integration` green; CLAUDE.md reads cleanly; ESLint boundary rule passes. **[Agent: feature-dev:code-reviewer]**
+- [x] **RED**: unit tests for `AppError` taxonomy (codes preserved, `toJSON`, instanceof checks) in `shared/lib/errors`. **[Agent: typescript-test-expert]**
+- [x] **RED**: integration tests for `getProfileById` and `getProfileByUsername` against real PG — happy path + missing-user case (expect `NotFoundError`). **[Agent: typescript-test-expert]**
+- [x] **GREEN**: `src/shared/lib/db.ts` — Prisma singleton with `globalThis` cache (mirror `savepoint-app/shared/lib/app/db.ts`). Originally landed during Slice 1 close; refined here with a Proxy export so test-side overrides take effect. **[Agent: prisma-database]**
+- [x] **GREEN**: `src/shared/lib/errors.ts` — `AppError` base + `NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `src/entities/profile/model/types.ts` (Zod + TS types) and `src/entities/profile/api/get-profile.server.ts` — `getProfileById(userId)`, `getProfileByUsername(username)`. Plain async, throw `NotFoundError`. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `src/app/error-boundary.tsx` mounted in `__root.tsx` — branches on `AppError.code` for user-facing copy. **[Agent: tanstack-fullstack]**
+- [x] Document the C2 DAL pattern in `savepoint-tanstack/CLAUDE.md`: features hold server fns, entities hold queries, no Result wrappers, AppError taxonomy, ID format (nanoid not cuid → `z.string().min(1)`). Reaffirm FSD layer rules. **[Agent: tanstack-fullstack]**
+- [x] **Verification**: `test:integration` green; CLAUDE.md reads cleanly; ESLint boundary rule passes. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 4: Profile read — own profile + public `/u/$username`
 
 FSD: `entities/profile/{api,ui}` (display-only), `entities/library-item/api` (stats), `widgets/profile-overview` (composes entity UI), routes are thin.
 
-- [ ] **shadcn setup**: install shadcn/ui (Tailwind v4 compatible setup for TanStack Start; pin exact versions matching `savepoint-app/`'s shadcn dep set), wire `components.json`, generate the primitives the upcoming UI ports need first — `button`, `input`, `label`, `form`, `card`, `avatar` — into `src/shared/ui/`. Refactor `cognito-sign-in-button.tsx` and `email-sign-in-form.tsx` (Slice 2 ports) to use the new primitives so the auth flow lands on the same design system. Lint must keep FSD boundaries clean (`features → shared/ui`). **[Agent: react-frontend]**
-- [ ] **RED**: integration tests for `getLibraryStats(userId)` and `getRecentGames(userId)` against real PG. **[Agent: typescript-test-expert]**
-- [ ] **RED**: component tests for `entities/profile/ui/profile-header.tsx` and `profile-stats-bar.tsx` (render with stub data). **[Agent: typescript-test-expert]**
-- [ ] **GREEN**: extend `entities/profile/api/` with `getLibraryStats` and `getRecentGames` (or place them in `entities/library-item/api/` if shape clearly belongs there). **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: port `profile-header.tsx`, `profile-stats-bar.tsx`, `overview-tab.tsx`, `library-grid.tsx` (read-only; component identifiers stay PascalCase) into `entities/profile/ui/` and `entities/library-item/ui/`. Swap `next/link` → TanStack `Link`, `next/image` → `<img>`. **[Agent: react-frontend]**
-- [ ] **GREEN**: `widgets/profile-overview/ui/profile-overview.tsx` composes the entity UI; `widgets/library-grid/` for read-only library grid. **[Agent: react-frontend]**
-- [ ] **GREEN**: replace `_authed/profile.tsx` placeholder — loader calls `getProfileById(userId)` + stats; renders `<ProfileOverview/>`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `src/routes/u.$username.tsx` — public, loader calls `getProfileByUsername`; throws `NotFoundError` on miss → root error component renders 404. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: signed-in user `:6061/profile` matches `:6060/u/<own-username>` data shape; `:6061/u/<own-username>` public; `:6061/u/does-not-exist` → 404. Side-by-side parity vs `:6060`. **[Agent: feature-dev:code-reviewer]**
+- [x] **shadcn setup**: install shadcn/ui (Tailwind v4 compatible setup for TanStack Start; pin exact versions matching `savepoint-app/`'s shadcn dep set), wire `components.json`, generate the primitives the upcoming UI ports need first — `button`, `input`, `label`, `form`, `card`, `avatar` — into `src/shared/ui/`. Refactor `cognito-sign-in-button.tsx` and `email-sign-in-form.tsx` (Slice 2 ports) to use the new primitives so the auth flow lands on the same design system. Lint must keep FSD boundaries clean (`features → shared/ui`). **[Agent: react-frontend]**
+- [x] **RED**: integration tests for `getLibraryStats(userId)` and `getRecentGames(userId)` against real PG. **[Agent: typescript-test-expert]**
+- [x] **RED**: component tests for `entities/profile/ui/profile-header.tsx` and `profile-stats-bar.tsx` (render with stub data). **[Agent: typescript-test-expert]**
+- [x] **GREEN**: extend `entities/profile/api/` with `getLibraryStats` and `getRecentGames` (or place them in `entities/library-item/api/` if shape clearly belongs there). Placed under `entities/library-item/api/` since the data source is `LibraryItem`. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: port `profile-header.tsx`, `profile-stats-bar.tsx`, `overview-tab.tsx`, `library-grid.tsx` (read-only; component identifiers stay PascalCase) into `entities/profile/ui/` and `entities/library-item/ui/`. Swap `next/link` → TanStack `Link`, `next/image` → `<img>`. **[Agent: react-frontend]**
+- [x] **GREEN**: `widgets/profile-overview/ui/profile-overview.tsx` composes the entity UI; `widgets/library-grid/` is skipped this slice (the read-only library grid is just the entity component; the wrapper widget arrives in Slice 10 alongside filter/sort UI). **[Agent: react-frontend]**
+- [x] **GREEN**: replace `_authed/profile.tsx` placeholder — loader calls `getProfileById(userId)` + stats; renders `<ProfileOverview/>`. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `src/routes/u.$username.tsx` — public, loader calls `getProfileByUsername`; throws `NotFoundError` on miss → root error component renders 404. **[Agent: tanstack-fullstack]**
+- [x] **Verification**: typecheck + lint (incl. FSD boundaries) + format:check all 0; full test suite 14 files / 72 tests passing (incl. profile UI components, `getLibraryStats`, `getRecentGames`, `getProfileById`, `getProfileByUsername`). Cross-app side-by-side parity deferred to Slice 20 cutover (single-app dev mode). Login route now also redirects already-signed-in users to `/profile`. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 5: Profile mutations — username, visibility, settings persist
 
