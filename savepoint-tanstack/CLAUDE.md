@@ -95,16 +95,39 @@ Per-layer guidance is in `src/<layer>/README.md`.
 
 ## DAL conventions (C2 pattern)
 
-Two layers only — no service classes, no `Result` wrappers, no domain mappers:
+Two layers only — no service classes, no `Result` wrappers, no domain mappers. Vocabulary used below ("loader-direct read," "feature server fn," "UX-hint query," "privacy invariant," "handler helper") is defined in [CONTEXT.md](./CONTEXT.md). Read that first.
 
 1. **`entities/<noun>/api/*.server.ts`** — plain async functions. Direct Prisma calls via the [`prisma`](./src/shared/lib/db.ts) singleton. Throw [`AppError`](./src/shared/lib/errors.ts) subclasses (`NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`) on failure. No DI, no classes. **Reference:** [`src/entities/profile/api/get-profile.server.ts`](./src/entities/profile/api/get-profile.server.ts).
-2. **`features/<intent>/api/*.server.ts`** — thin `createServerFn` wrappers from `@tanstack/react-start`: `.validator(zodSchema).handler(async ({ data, context }) => …)`. Resolve `userId` from session inside the handler — never trust it from input. Delegate to entity queries. **Reference:** [`src/features/auth-email-sign-in/api/get-credentials-enabled.ts`](./src/features/auth-email-sign-in/api/get-credentials-enabled.ts), [`src/entities/session/api/require-user-id.ts`](./src/entities/session/api/require-user-id.ts).
+2. **`features/<intent>/api/*.server.ts`** — `createServerFn` wrappers from `@tanstack/react-start`: `.inputValidator(...).handler(async ({ data }) => …)`. Delegate to entity queries. Resolve `userId` via `requireUserId()` (handler helper) — never trust it from input, never call `getServerUserId` directly. **Reference:** [`src/features/auth-email-sign-in/api/get-email-sign-in-enabled.ts`](./src/features/auth-email-sign-in/api/get-email-sign-in-enabled.ts).
 
 Errors bubble up to the route `errorComponent` or the root error boundary at [`src/app/error-boundary/`](./src/app/error-boundary/) (mounted in `__root.tsx`), which branches on `AppError.code` for user-facing copy.
+
+### Binding rules
+
+- **Strict feature-server-fn rule.** A `features/<name>/api/` server fn exists **iff at least one consumer is not a route loader**. Non-loader consumers: client components (`useServerFn`), other server fns, route `beforeLoad` guards. If only a route loader needs it, write a [loader-direct read](./CONTEXT.md#loader-direct-read) — no escape hatch for "the composition is large."
+- **Authed handlers use `requireUserId()`.** The handler helper resolves the request internally and throws `UnauthorizedError` on miss. The route-guard `requireUserIdOrRedirectFn` is for `beforeLoad` (it redirects). The low-level `getServerUserId(request)` is for tests and conditional-read paths only.
+- **No re-`parse` in handlers.** `createServerFn`'s `.inputValidator` output is trusted. Handlers never re-validate, never branch on whether they're under test, never wrap `getRequest()` with a try/catch fallback.
+- **Single source for database invariants.** Each unique/FK constraint is translated to `AppError` in **exactly one place**: the entity update query that maps the Prisma error code (inspect `error.meta?.target` to scope the mapping to the right column). Feature handlers do not pre-check.
+- **UX-hint queries are not enforcement.** Queries like `getUsernameAvailability` exist only for live UI feedback. They are never called from a feature handler as a precondition check. See [UX-hint query](./CONTEXT.md#ux-hint-query).
+- **Privacy invariants live on the entity.** A privacy gate (e.g., "public profile only") is encoded inside the entity query that throws `NotFoundError` for both "missing" and "denied," not in a feature handler or route guard. See [Privacy invariant](./CONTEXT.md#privacy-invariant).
+- **No specialized subset queries.** If query `B`'s result is a field of aggregate `A`'s result, delete `B` and read from `A`. Change `A`'s shape if it's wrong.
 
 **ID format:** Better Auth emits 32-char nanoid user IDs. Never use `z.string().cuid()`; use `z.string().min(1)`.
 
 **FSD reaffirmation for the DAL:** entity queries import only from `@/shared/*`. Feature server fns import from `@/entities/*` and `@/shared/*`. Server fns never import other features; entity queries never import features. Enforced by `eslint-plugin-boundaries`.
+
+### Pending compliance (refactor in flight)
+
+Code that does not yet match the rules above — to be cleaned up in the next architectural commits. Listed so the rules read as the source of truth, not the code:
+
+- `requireUserId()` handler helper not yet introduced. Current handlers call `getServerUserId(getRequest())` + null-check inline. `entities/session/api/require-user-id.ts` currently exports the **route-guard server fn** (will be renamed `require-user-id-or-redirect.ts`); the handler helper will then take the original filename.
+- `getCurrentUserIdFn` in `entities/session/api/get-current-user-id.ts` is the "redirect-if-authed" gate used by `/login` to bounce signed-in users to `/profile`. Its name reads as a low-level reader, not a guard — to be renamed (e.g., `redirectIfAuthedFn`) in a follow-up so the two redirect intents are symmetrically named with `requireUserIdOrRedirectFn`.
+- `features/profile-overview/` is a feature with no UI; both server fns wrap two entity reads each. Slated for inlining into the route loaders (`/_authed/profile`, `/u/$username`) per the strict rule.
+- `entities/profile/api/get-public-profile.server.ts` does not yet exist; the `!isPublicProfile` privacy gate currently lives in `getPublicProfileViewFn`. To be moved into the entity query.
+- `safeGetRequest()` in `features/edit-profile/api/update-profile.ts` plus the double `parse` of `UPDATE_PROFILE_INPUT`. To be deleted; tests will mock `auth.api.getSession`.
+- `updateProfileFn` pre-checks uniqueness before calling `updateProfile`. To be deleted; the entity's `P2002` mapping is the single enforcement seam (and will be narrowed by inspecting `error.meta?.target`).
+- `isUsernameAvailable` to be renamed `getUsernameAvailability` to mark its UX-hint intent.
+- `entities/library-item/api/get-recent-games.server.ts` returns a strict subset of `getLibraryStats`. Slated for deletion.
 
 ## Path aliases
 
