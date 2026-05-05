@@ -1,10 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 
 import { getProfileById } from "@/entities/profile/api";
 import type { Profile } from "@/entities/profile/model/types";
-import { getServerUserId } from "@/entities/session/api/get-session.server";
-import { UnauthorizedError } from "@/shared/lib/errors";
+import { requireUserId } from "@/entities/session/api/require-user-id";
 
 export type ProfileSettingsView = {
   profile: Profile;
@@ -12,10 +10,7 @@ export type ProfileSettingsView = {
 
 export const getProfileSettingsFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<ProfileSettingsView> => {
-    const userId = await getServerUserId(getRequest());
-    if (!userId) {
-      throw new UnauthorizedError("Not signed in");
-    }
+    const userId = await requireUserId();
     const profile = await getProfileById(userId);
     return { profile };
   }

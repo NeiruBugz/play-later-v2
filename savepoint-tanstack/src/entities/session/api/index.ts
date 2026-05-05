@@ -1,3 +1,4 @@
 export { getCurrentUserIdFn } from "./get-current-user-id";
 export { getServerUserId } from "./get-session.server";
-export { requireUserIdFn } from "./require-user-id";
+export { requireUserId } from "./require-user-id";
+export { requireUserIdOrRedirectFn } from "./require-user-id-or-redirect";

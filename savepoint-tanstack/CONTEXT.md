@@ -2,7 +2,6 @@
 
 > Companion to [CLAUDE.md](./CLAUDE.md). CLAUDE.md is the rule book; this file is the dictionary the rules speak in. When a rule says "loader-direct read" or "UX-hint query," look here for the definition.
 
-
 ## Why this file exists
 
 The FSD layer map and import rules in CLAUDE.md describe **where** code goes. This file describes **what concepts** the layers contain, so future slices don't re-litigate the same architectural questions:
@@ -12,7 +11,6 @@ The FSD layer map and import rules in CLAUDE.md describe **where** code goes. Th
 - "Is this a UX hint or an enforcement gate?"
 
 Definitions here are stable. Rules in CLAUDE.md may evolve. If a rule changes, update both files in the same commit.
-
 
 ## DAL concepts
 
@@ -42,7 +40,7 @@ export const Route = createFileRoute("/_authed/profile")({
 
 **Trade-off accepted:** loaders carry composition logic — even non-trivial `Promise.all` of N reads — when the result is only consumed by that one route. The win is no empty `features/<name>/` shells whose sole job is to wrap entity queries.
 
-**Counter-indication:** if the composition becomes complex enough that *the entity layer* is the right home (e.g., a privacy gate, a status materialization rule), push the logic into a deeper entity query, not into a feature.
+**Counter-indication:** if the composition becomes complex enough that _the entity layer_ is the right home (e.g., a privacy gate, a status materialization rule), push the logic into a deeper entity query, not into a feature.
 
 ### Feature server fn
 
@@ -64,18 +62,21 @@ If the only consumer is a route loader, the call is a [loader-direct read](#load
 export const fooFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => fooSchema.parse(data))
   .handler(async ({ data }): Promise<Foo> => {
-    const userId = await requireUserId(); // never read getServerUserId here
-    // ...delegate to entity queries...
+    const parsed = fooSchema.parse(data); // re-parse — see below
+    const userId = await requireUserId();
+    // ...delegate to entity queries with `parsed`...
   });
 ```
 
-The validator's output is **trusted** by the handler. Never re-`parse` inside the handler. Never branch on whether you're under test.
+**Why the handler re-parses.** TanStack Start runs `.inputValidator` only on cross-network requests. Programmatic callers — other server fns, tests, and the test harness invoking `fooFn({ data })` directly — bypass the validator entirely. The handler's own `parse` is the only validation those call paths see. The redundancy is structural: each `parse` covers a different call path, and removing either one creates a hole.
+
+Handlers never branch on whether they're under test. They never catch `getRequest()` to provide a stub fallback — that workaround belongs in the test harness, not in production handler code.
 
 ### Privacy invariant
 
 ---
 
-A rule about *who* may read an entity, owned by the entity query layer — not by feature handlers, not by route guards.
+A rule about _who_ may read an entity, owned by the entity query layer — not by feature handlers, not by route guards.
 
 Canonical example: a `User` row is publicly readable only when `isPublicProfile = true`. The query that powers `/u/$username` lives at `entities/profile/api/get-public-profile.server.ts` and throws `NotFoundError` for **both** "row missing" and "row exists but private." Callers (loaders, server fns, route guards) cannot distinguish the two cases — by design.
 
@@ -101,18 +102,17 @@ Canonical example: `getUsernameAvailability(username)` powers the live hint as t
 
 Two distinct shapes for "I need the signed-in user ID," with different intents:
 
-| Concept | Module | Behaviour | Used in |
-|---|---|---|---|
-| **Handler helper** | `requireUserId()` | Reads `getRequest()`, calls `auth.api.getSession`, throws `UnauthorizedError` on miss. | Inside `createServerFn` handlers. |
-| **Route-guard server fn** | `requireUserIdOrRedirectFn` | Same lookup; throws `redirect({ to: "/login" })` on miss. | `beforeLoad` of `_authed.tsx` and other guarded route groups. |
-| **Low-level reader** | `getServerUserId(request)` | Returns `string \| undefined`. Never throws. | Tests; rare conditional-read paths where "no user" is a normal branch. |
+| Concept                   | Module                      | Behaviour                                                                              | Used in                                                                |
+| ------------------------- | --------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Handler helper**        | `requireUserId()`           | Reads `getRequest()`, calls `auth.api.getSession`, throws `UnauthorizedError` on miss. | Inside `createServerFn` handlers.                                      |
+| **Route-guard server fn** | `requireUserIdOrRedirectFn` | Same lookup; throws `redirect({ to: "/login" })` on miss.                              | `beforeLoad` of `_authed.tsx` and other guarded route groups.          |
+| **Low-level reader**      | `getServerUserId(request)`  | Returns `string \| undefined`. Never throws.                                           | Tests; rare conditional-read paths where "no user" is a normal branch. |
 
 **Rule:** authed feature handlers and authed loaders call `requireUserId()`. They do **not** call `getServerUserId` directly — doing so re-introduces the four-line null-check ritual the helper exists to remove.
 
-
 ## Domain nouns
 
-> *Filled in slice-by-slice as entities arrive. Each entry names the noun, points at its module, and lists invariants that live with it. Today: Profile, LibraryItem, Session. Future: Game, JournalEntry, Follow.*
+> _Filled in slice-by-slice as entities arrive. Each entry names the noun, points at its module, and lists invariants that live with it. Today: Profile, LibraryItem, Session. Future: Game, JournalEntry, Follow._
 
 ### Profile
 
@@ -125,7 +125,7 @@ Module: [`src/entities/profile/`](./src/entities/profile/).
 Invariants owned here:
 
 - **Username uniqueness** — enforced by the database unique index on `usernameNormalized`. Surfaced once: `update-profile.server.ts` maps Prisma `P2002` (target = `usernameNormalized`) to `ConflictError`. The UX-hint counterpart is `getUsernameAvailability`.
-- **Public-profile privacy** — `getPublicProfile(username)` throws `NotFoundError` when the row is missing *or* when `isPublicProfile === false`. See [Privacy invariant](#privacy-invariant).
+- **Public-profile privacy** — `getPublicProfile(username)` throws `NotFoundError` when the row is missing _or_ when `isPublicProfile === false`. See [Privacy invariant](#privacy-invariant).
 
 ### LibraryItem
 

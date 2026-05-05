@@ -1,4 +1,13 @@
-import { afterEach, beforeEach } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
+
+vi.mock("@tanstack/react-start/server", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@tanstack/react-start/server")>();
+  return {
+    ...actual,
+    getRequest: vi.fn(() => new Request("http://localhost")),
+  };
+});
 
 process.env.NODE_ENV = "test";
 process.env.BETTER_AUTH_SECRET = "test-better-auth-secret";
