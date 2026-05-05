@@ -14,6 +14,7 @@
 >   - `src/entities/` — domain nouns (`session`, `user`, `profile`, `game`, `library-item`, `journal-entry`). Each entity has `model/` (types/zod), `api/` (plain async query fns that throw `AppError`), `ui/` (display-only)
 >   - `src/shared/` — `lib/` (db, logger, errors, auth-client), `ui/` (shadcn primitives), `config/` (env), `api/` (S3, IGDB low-level clients)
 > - **Layer discipline**: server fns live in `features/*/api/`, queries in `entities/*/api/`. A feature server fn composes entity queries; entity queries never import features. Routes import widgets/features; widgets import features/entities; features import entities; entities import shared. No upward imports.
+> - **File naming**: **kebab-case** for every file and directory (`cognito-sign-in-button.tsx`, `profile-header.tsx`, `update-profile.server.ts`, `get-game-details.server.ts`, `add-game-modal.tsx`). Exported React component identifiers stay PascalCase; hooks stay `useCamelCase`. Server-only modules use the `.server.ts` suffix. Tests sit next to the file as `<name>.test.ts(x)` (unit) or `<name>.integration.test.ts` (integration). Mirror `savepoint-app/`'s kebab-case convention; CI lint should reject PascalCase filenames.
 > - Each slice leaves both `savepoint-app/` (untouched) and `savepoint-tanstack/` (under construction) runnable. Verification is local-only until cutover (S20).
 
 ---
@@ -40,11 +41,11 @@
 - [x] **RED**: Create `savepoint-tanstack/vitest.config.ts` with `unit` (jsdom, mocked Prisma) and `integration` (node, real PG, sequential) projects; author one intentionally failing canary test per project to prove harness wiring. Add `test:unit`, `test:integration`, `test` scripts. **[Agent: typescript-test-expert]**
 - [x] **GREEN**: Make canary tests pass; tests then stay as harness sentinels. **[Agent: typescript-test-expert]**
 - [x] **FSD scaffold**: create empty `src/app/`, `src/widgets/`, `src/features/`, `src/entities/`, `src/shared/{lib,ui,config,api}/` directories with `index.ts` barrel stubs and a `README.md` per layer summarizing rules. Add ESLint `boundaries`/`import/no-restricted-paths` rule blocking upward imports between layers. **[Agent: react-architect]**
-- [ ] Add unit test asserting the FSD ESLint rule fires on a synthetic upward-import fixture (regression guard against silent rule disable). **[Agent: typescript-test-expert]**
-- [ ] Add CI workflow `.github/workflows/pr-checks-tanstack.yml`, path-conditional on `savepoint-tanstack/**`: typecheck → lint (incl. FSD boundary rule) → format check → unit. **[Agent: tanstack-fullstack]**
-- [ ] Add a CI step (or pre-commit hook) that diffs `savepoint-app/prisma/schema.prisma` against `savepoint-tanstack/prisma/schema.prisma` and fails on divergence. **[Agent: prisma-database]**
-- [ ] Create `savepoint-tanstack/CLAUDE.md`: purpose, under-construction notice, link to spec 021, **TDD policy**, **FSD layer map and import rules**, path aliases. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: `pnpm --filter savepoint-tanstack typecheck && lint && format:check && test`; dev server on `:6061`; `/` renders clean; ESLint boundary fixture rejected as expected. **[Agent: tanstack-fullstack]**
+- [x] Add unit test asserting the FSD ESLint rule fires on a synthetic upward-import fixture (regression guard against silent rule disable). **[Agent: typescript-test-expert]**
+- [x] Add CI workflow `.github/workflows/pr-checks-tanstack.yml`, path-conditional on `savepoint-tanstack/**`: typecheck → lint (incl. FSD boundary rule) → format check → unit. **[Agent: tanstack-fullstack]**
+- [x] Add a CI step (or pre-commit hook) that diffs `savepoint-app/prisma/schema.prisma` against `savepoint-tanstack/prisma/schema.prisma` and fails on divergence. **[Agent: prisma-database]**
+- [x] Create `savepoint-tanstack/CLAUDE.md`: purpose, under-construction notice, link to spec 021, **TDD policy**, **FSD layer map and import rules**, path aliases. **[Agent: tanstack-fullstack]**
+- [x] **Verification**: `pnpm --filter savepoint-tanstack typecheck && lint && format:check && test`; dev server on `:6061`; `/` renders clean; ESLint boundary fixture rejected as expected. **[Agent: tanstack-fullstack]**
 
 ### Slice 1: Better Auth wired — anonymous session lookup works
 
@@ -61,16 +62,16 @@ FSD: `entities/session` (read), `shared/lib/auth` (BA instance + handler), `shar
 
 ### Slice 2: Login route — Cognito sign-in lands authenticated user on protected page
 
-FSD: `features/auth-cognito-sign-in/ui/`, `features/auth-credentials-sign-in/ui/` (dev only), `features/auth-sign-out/ui/LogoutButton.tsx`. Routes in `src/routes/`. Route guard via `beforeLoad` consumes `entities/session`.
+FSD: `features/auth-cognito-sign-in/ui/`, `features/auth-credentials-sign-in/ui/` (dev only), `features/auth-sign-out/ui/logout-button.tsx`. Routes in `src/routes/`. Route guard via `beforeLoad` consumes `entities/session`. **All component files use kebab-case** (`cognito-sign-in-button.tsx`); React component identifiers stay PascalCase (`CognitoSignInButton`).
 
-- [ ] **RED**: component test for `features/auth-cognito-sign-in/ui/CognitoSignInButton.tsx` — click triggers `authClient.signIn.social({ provider: "cognito" })`. **[Agent: typescript-test-expert]**
-- [ ] **RED**: component test for `features/auth-credentials-sign-in/ui/CredentialsForm.tsx` — submit posts to `signInEmail`; renders only when `env.AUTH_ENABLE_CREDENTIALS`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/auth-cognito-sign-in/ui/cognito-sign-in-button.tsx` — click triggers `authClient.signIn.social({ provider: "cognito" })`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/auth-credentials-sign-in/ui/credentials-form.tsx` — submit posts to `signInEmail`; renders only when `env.AUTH_ENABLE_CREDENTIALS`. **[Agent: typescript-test-expert]**
 - [ ] **RED**: route test for `_authed` guard — unauthenticated request redirects to `/login`. **[Agent: typescript-test-expert]**
-- [ ] **GREEN**: build `features/auth-cognito-sign-in/ui/CognitoSignInButton.tsx` and (dev-only) `features/auth-credentials-sign-in/ui/CredentialsForm.tsx` (port from `savepoint-app/features/auth/ui/credentials-form.tsx`, RHF + Zod). **[Agent: react-frontend]**
+- [ ] **GREEN**: build `features/auth-cognito-sign-in/ui/cognito-sign-in-button.tsx` and (dev-only) `features/auth-credentials-sign-in/ui/credentials-form.tsx` (port from `savepoint-app/features/auth/ui/credentials-form.tsx`, RHF + Zod). **[Agent: react-frontend]**
 - [ ] **GREEN**: `src/routes/login.tsx` composes the two features. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `src/routes/_authed.tsx` (route group) — `beforeLoad` calls `getServerUserId` from `entities/session/api`; redirects to `/login` on miss. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `src/routes/_authed/profile.tsx` — minimal "Hello, signed in as <userId>" placeholder. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `features/auth-sign-out/ui/LogoutButton.tsx` — `authClient.signOut({ fetchOptions: { onSuccess: () => router.invalidate() } })`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `features/auth-sign-out/ui/logout-button.tsx` — `authClient.signOut({ fetchOptions: { onSuccess: () => router.invalidate() } })`. **[Agent: tanstack-fullstack]**
 - [ ] Add the local dev TanStack callback URL to the dev Cognito App Client — path `/api/auth/callback/cognito`, host `http://localhost:6061`. **[Agent: terraform-infrastructure]**
 - [ ] **Verification**: with both apps running (`:6060` Next, `:6061` TanStack), Cognito sign-in on `:6061` → lands on `/profile`; `session` row in shared DB is valid on `:6060` refresh (cross-app sharing). **[Agent: tanstack-fullstack]**
 
