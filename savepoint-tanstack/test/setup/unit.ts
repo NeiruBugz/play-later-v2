@@ -1,6 +1,6 @@
 import { afterEach, vi } from "vitest";
 
-vi.mock("@/lib/db", () => ({
+vi.mock("@/shared/lib/db", () => ({
   prisma: {
     $transaction: vi.fn(),
     user: {

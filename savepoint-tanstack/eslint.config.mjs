@@ -3,6 +3,7 @@ import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 import jestDom from "eslint-plugin-jest-dom";
 import testingLibrary from "eslint-plugin-testing-library";
+import boundaries from "eslint-plugin-boundaries";
 import prettier from "eslint-config-prettier";
 
 export default tseslint.config(
@@ -49,5 +50,76 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "off",
     },
   },
-  prettier
+  // FSD layer boundary enforcement — applies only to src/**
+  {
+    files: ["src/**/*.ts", "src/**/*.tsx"],
+    plugins: {
+      boundaries,
+    },
+    settings: {
+      "boundaries/ignore": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+      ],
+      "boundaries/elements": [
+        { type: "app", pattern: "src/app/**/*", mode: "file" },
+        { type: "routes", pattern: "src/routes/**/*", mode: "file" },
+        { type: "widgets", pattern: "src/widgets/**/*", mode: "file" },
+        { type: "features", pattern: "src/features/**/*", mode: "file" },
+        { type: "entities", pattern: "src/entities/**/*", mode: "file" },
+        { type: "shared", pattern: "src/shared/**/*", mode: "file" },
+      ],
+    },
+    rules: {
+      "boundaries/dependencies": [
+        "error",
+        {
+          default: "disallow",
+          rules: [
+            {
+              from: { type: "app" },
+              allow: {
+                to: { type: ["routes", "widgets", "features", "entities", "shared"] },
+              },
+            },
+            {
+              from: { type: "routes" },
+              allow: {
+                to: { type: ["widgets", "features", "entities", "shared"] },
+              },
+            },
+            {
+              from: { type: "widgets" },
+              allow: {
+                to: { type: ["features", "entities", "shared"] },
+              },
+            },
+            {
+              from: { type: "features" },
+              allow: {
+                to: { type: ["entities", "shared"] },
+              },
+            },
+            {
+              from: { type: "entities" },
+              allow: {
+                to: { type: ["shared"] },
+              },
+            },
+            {
+              from: { type: "shared" },
+              allow: {
+                to: { type: ["shared"] },
+              },
+            },
+          ],
+        },
+      ],
+      "boundaries/no-unknown": "off",
+      "boundaries/no-unknown-files": "off",
+    },
+  },
+  prettier,
 );
