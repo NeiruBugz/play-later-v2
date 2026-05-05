@@ -1,0 +1,4 @@
+-- Step 1: Add new enum values
+ALTER TYPE "LibraryItemStatus" ADD VALUE IF NOT EXISTS 'WISHLIST';
+ALTER TYPE "LibraryItemStatus" ADD VALUE IF NOT EXISTS 'SHELF';
+ALTER TYPE "LibraryItemStatus" ADD VALUE IF NOT EXISTS 'UP_NEXT';
