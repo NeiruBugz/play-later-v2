@@ -4,4 +4,4 @@ export {
   updateProfile,
   type UpdateProfileInput,
 } from "./update-profile.server";
-export { isUsernameAvailable } from "./is-username-available.server";
+export { getUsernameAvailability } from "./get-username-availability.server";

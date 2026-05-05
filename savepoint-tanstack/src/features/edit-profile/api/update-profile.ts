@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
-import { isUsernameAvailable, updateProfile } from "@/entities/profile/api";
+import { getUsernameAvailability, updateProfile } from "@/entities/profile/api";
 import type { Profile } from "@/entities/profile/model/types";
 import { getServerUserId } from "@/entities/session/api/get-session.server";
 import { requireUserId } from "@/entities/session/api/require-user-id";
@@ -10,7 +10,6 @@ import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
 } from "@/shared/lib/constants";
-import { ConflictError } from "@/shared/lib/errors";
 
 const UPDATE_PROFILE_INPUT = z.object({
   name: z.string().min(1).optional(),
@@ -37,15 +36,10 @@ export const updateProfileFn = createServerFn({ method: "POST" })
 
     const userId = await requireUserId();
 
-    if (parsed.username !== undefined) {
-      const available = await isUsernameAvailable(parsed.username, userId);
-      if (!available) {
-        throw new ConflictError("Username already taken", {
-          username: parsed.username,
-        });
-      }
-    }
-
+    // No pre-check on username uniqueness here — the database unique index
+    // is the single enforcement seam, surfaced as ConflictError by
+    // entities/profile/api/update-profile.server.ts. Pre-checking would
+    // re-introduce a TOCTOU race the constraint already closes.
     return updateProfile(userId, parsed);
   });
 
@@ -57,6 +51,6 @@ export const checkUsernameFn = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ available: boolean }> => {
     const parsed = CHECK_USERNAME_INPUT.parse(data);
     const userId = await getServerUserId(getRequest());
-    const available = await isUsernameAvailable(parsed.username, userId);
+    const available = await getUsernameAvailability(parsed.username, userId);
     return { available };
   });

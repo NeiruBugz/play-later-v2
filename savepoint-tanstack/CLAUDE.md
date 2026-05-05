@@ -121,8 +121,6 @@ Errors bubble up to the route `errorComponent` or the root error boundary at [`s
 Code that does not yet match the rules above — to be cleaned up in the next architectural commits. Listed so the rules read as the source of truth, not the code:
 
 - `getCurrentUserIdFn` in `entities/session/api/get-current-user-id.ts` is the "redirect-if-authed" gate used by `/login` to bounce signed-in users to `/profile`. Its name reads as a low-level reader, not a guard — to be renamed (e.g., `redirectIfAuthedFn`) in a follow-up so the two redirect intents are symmetrically named with `requireUserIdOrRedirectFn`.
-- `updateProfileFn` pre-checks uniqueness before calling `updateProfile`. To be deleted; the entity's `P2002` mapping is the single enforcement seam (and will be narrowed by inspecting `error.meta?.target`).
-- `isUsernameAvailable` to be renamed `getUsernameAvailability` to mark its UX-hint intent.
 - `entities/library-item/api/get-recent-games.server.ts` returns a strict subset of `getLibraryStats`. Slated for deletion.
 
 ## Path aliases
