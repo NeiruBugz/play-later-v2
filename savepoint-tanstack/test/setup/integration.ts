@@ -7,6 +7,7 @@ process.env.AUTH_COGNITO_ID = "test-cognito-id";
 process.env.AUTH_COGNITO_SECRET = "test-cognito-secret";
 process.env.AUTH_COGNITO_ISSUER =
   "https://cognito-idp.us-east-1.amazonaws.com/test-pool";
+process.env.AUTH_COGNITO_DOMAIN = "auth.test.example.com";
 process.env.IGDB_CLIENT_ID = "test-igdb-id";
 process.env.IGDB_CLIENT_SECRET = "test-igdb-secret";
 process.env.POSTGRES_URL = "postgresql://postgres:postgres@localhost:6432/test";

@@ -54,11 +54,11 @@ FSD: `entities/session` (read), `shared/lib/auth` (BA instance + handler), `shar
 - [x] Install `better-auth` (pin exact version matching `savepoint-app/`). **[Agent: tanstack-fullstack]**
 - [x] **RED**: integration test hitting `/api/auth/get-session` unauthenticated → asserts `null` body + 200. **[Agent: typescript-test-expert]**
 - [x] **RED**: integration test mirroring `savepoint-app/test/integration/better-auth-cognito-sign-in.integration.test.ts` — per-test isolated PG, all migrations applied, BA `idToken` shortcut + `verifyIdToken: () => true`; assert `user`, `account` (`providerId="cognito"`, `accountId=<sub>`), `session` rows; assert `Set-Cookie` present (validates persistence without `nextCookies`). **[Agent: typescript-test-expert]**
-- [ ] **GREEN**: `src/shared/lib/auth/auth.server.ts` — BA instance: same `BETTER_AUTH_SECRET`, `prismaAdapter`, Cognito social provider, `accountLinking.trustedProviders=["cognito"]`, session `30d / 1d`. **NO** `nextCookies()` plugin. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `src/routes/api/auth/$.ts` mounts `auth.handler` via Web Request/Response catch-all. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `src/entities/session/api/get-session.server.ts` — `getServerUserId(request: Request): Promise<string | undefined>` reading `Headers` from a loader/server fn. Entity-layer query (no feature deps). **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `src/shared/api/auth-client.ts` — `authClient` from `better-auth/react`, basePath `/api/auth`. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: `pnpm --filter savepoint-tanstack test:integration` green. **[Agent: typescript-test-expert]**
+- [x] **GREEN**: `src/shared/lib/auth/auth.server.ts` — BA instance: same `BETTER_AUTH_SECRET`, `prismaAdapter`, Cognito social provider, `accountLinking.trustedProviders=["cognito"]`, session `30d / 1d`. **NO** `nextCookies()` plugin. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `src/routes/api/auth/$.ts` mounts `auth.handler` via Web Request/Response catch-all. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `src/entities/session/api/get-session.server.ts` — `getServerUserId(request: Request): Promise<string | undefined>` reading `Headers` from a loader/server fn. Entity-layer query (no feature deps). **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `src/shared/api/auth-client.ts` — `authClient` from `better-auth/react`, basePath `/api/auth`. **[Agent: tanstack-fullstack]**
+- [x] **Verification**: `pnpm --filter savepoint-tanstack test:integration` green. **[Agent: typescript-test-expert]**
 
 ### Slice 2: Login route — Cognito sign-in lands authenticated user on protected page
 
