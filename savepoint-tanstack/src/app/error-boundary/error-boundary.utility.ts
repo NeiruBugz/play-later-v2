@@ -1,18 +1,8 @@
-import { Link } from "@tanstack/react-router";
-
 import { AppError } from "@/shared/lib/errors";
 
-type ErrorBoundaryProps = {
-  error: Error;
-};
+import type { ErrorView } from "./error-boundary.type";
 
-type ErrorView = {
-  title: string;
-  description: string;
-  showLoginLink?: boolean;
-};
-
-function resolveView(error: Error): ErrorView {
+export function resolveView(error: Error): ErrorView {
   if (!(error instanceof AppError)) {
     return {
       title: "Unexpected error",
@@ -41,17 +31,4 @@ function resolveView(error: Error): ErrorView {
         description: "An error occurred. Please try again.",
       };
   }
-}
-
-export function ErrorBoundary({ error }: ErrorBoundaryProps) {
-  const view = resolveView(error);
-
-  return (
-    <div role="alert">
-      <h1>{view.title}</h1>
-      <p>{view.description}</p>
-      {view.showLoginLink ? <Link to="/login">Sign in</Link> : null}
-      <Link to="/">Go home</Link>
-    </div>
-  );
 }

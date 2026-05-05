@@ -13,4 +13,4 @@ Providers, root router wiring, global styles, and the root error boundary.
 | -------------------- | ------------------------------------------------ |
 | `providers/`         | React context providers, theme wiring            |
 | `styles/`            | Global CSS, font imports                         |
-| `error-boundary.tsx` | Root error boundary branching on `AppError.code` |
+| `error-boundary/`    | Root error boundary branching on `AppError.code` |

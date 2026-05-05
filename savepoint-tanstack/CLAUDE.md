@@ -38,6 +38,38 @@ Every component / route test in `src/**/*.test.tsx` follows the same shape. See 
 
 A shared page-object-ish helper file is not used yet — `elements` / `actions` are inline per test. Lift to shared helpers only when a real reuse case appears.
 
+## Component file conventions
+
+Every UI component in `src/{app,routes,widgets,features,entities}/**/ui/` lives in its **own folder** with a barrel. The reference shape is [`src/app/error-boundary/`](./src/app/error-boundary/).
+
+Folder layout, where `<name>` is the kebab-case component name:
+
+```
+<name>/
+├── index.ts              # barrel — public surface
+├── <name>.tsx            # component (named export, no default)
+├── <name>.type.ts        # prop + view-model types
+├── <name>.utility.ts     # pure helpers used only by this component (optional)
+└── <name>.test.tsx       # co-located test (optional)
+```
+
+**Rules**
+
+1. **One component per folder.** Folder name = component name in kebab-case = file basename. The component itself is a named export matching the PascalCase folder name (`error-boundary/` → `ErrorBoundary`).
+2. **`index.ts` is the public surface.** It re-exports the component value and any prop/view-model type that callers outside the folder need:
+   ```ts
+   export { ErrorBoundary } from "./error-boundary";
+   export type { ErrorBoundaryProps } from "./error-boundary.type";
+   ```
+   Callers import from the folder (`from "./error-boundary"` or `from "@/app/error-boundary"`), never from a sibling `.type` / `.utility` module directly.
+3. **Inside the folder, relative `./<name>.type` / `./<name>.utility` is allowed.** That's the whole point — internal cohesion, external opacity. See [`src/app/error-boundary/error-boundary.tsx`](./src/app/error-boundary/error-boundary.tsx).
+4. **`.type.ts` holds props plus any view-model types** the component needs to express its shape. Domain types still live in `entities/<noun>/model/`. The `.type.ts` file imports from `model/` when it needs a domain noun — it does not redefine domain types.
+5. **`.utility.ts` is for pure, component-local helpers.** Anything reused across components belongs in `shared/lib/` or, if domain-shaped, on the entity. If a `.utility.ts` is reused by a sibling component, lift it.
+6. **Parent `ui/index.ts` re-exports each component folder.** Pattern: `export { Foo } from "./foo"; export type { FooProps } from "./foo";` — the extensionless path resolves to the folder's barrel.
+7. **No default exports.** Same rule as the rest of the app.
+
+**Migrating from a flat shape:** if you encounter `<name>.tsx` + `<name>.type.ts` as siblings inside `ui/`, move them into a `<name>/` folder and add the barrel. Tests come along unchanged — the relative `./<name>` import resolves to the sibling `.tsx` file inside the new folder.
+
 ## FSD layer map
 
 Top → bottom. Lower may not import upper.
@@ -68,7 +100,7 @@ Two layers only — no service classes, no `Result` wrappers, no domain mappers:
 1. **`entities/<noun>/api/*.server.ts`** — plain async functions. Direct Prisma calls via the [`prisma`](./src/shared/lib/db.ts) singleton. Throw [`AppError`](./src/shared/lib/errors.ts) subclasses (`NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`) on failure. No DI, no classes. **Reference:** [`src/entities/profile/api/get-profile.server.ts`](./src/entities/profile/api/get-profile.server.ts).
 2. **`features/<intent>/api/*.server.ts`** — thin `createServerFn` wrappers from `@tanstack/react-start`: `.validator(zodSchema).handler(async ({ data, context }) => …)`. Resolve `userId` from session inside the handler — never trust it from input. Delegate to entity queries. **Reference:** [`src/features/auth-email-sign-in/api/get-credentials-enabled.ts`](./src/features/auth-email-sign-in/api/get-credentials-enabled.ts), [`src/entities/session/api/require-user-id.ts`](./src/entities/session/api/require-user-id.ts).
 
-Errors bubble up to the route `errorComponent` or the root error boundary at [`src/app/error-boundary.tsx`](./src/app/error-boundary.tsx) (mounted in `__root.tsx`), which branches on `AppError.code` for user-facing copy.
+Errors bubble up to the route `errorComponent` or the root error boundary at [`src/app/error-boundary/`](./src/app/error-boundary/) (mounted in `__root.tsx`), which branches on `AppError.code` for user-facing copy.
 
 **ID format:** Better Auth emits 32-char nanoid user IDs. Never use `z.string().cuid()`; use `z.string().min(1)`.
 
