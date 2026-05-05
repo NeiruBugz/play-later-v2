@@ -3,6 +3,7 @@ import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import { ErrorBoundary } from "@/app/error-boundary";
+import { Toaster } from "@/shared/ui/sonner";
 
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -59,6 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Header />
         {children}
         <Footer />
+        <Toaster />
         <TanStackDevtools
           config={{
             position: "bottom-right",

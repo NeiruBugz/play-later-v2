@@ -1,6 +1,7 @@
 import { useRouter } from "@tanstack/react-router";
 
 import { authClient } from "@/shared/api/auth-client";
+import { Button } from "@/shared/ui/button";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -16,8 +17,8 @@ export function LogoutButton() {
   };
 
   return (
-    <button type="button" onClick={handleLogout}>
+    <Button variant="destructive" type="button" onClick={handleLogout}>
       Sign out
-    </button>
+    </Button>
   );
 }

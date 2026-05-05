@@ -15,6 +15,8 @@
 >   - `src/shared/` — `lib/` (db, logger, errors, auth-client), `ui/` (shadcn primitives), `config/` (env), `api/` (S3, IGDB low-level clients)
 > - **Layer discipline**: server fns live in `features/*/api/`, queries in `entities/*/api/`. A feature server fn composes entity queries; entity queries never import features. Routes import widgets/features; widgets import features/entities; features import entities; entities import shared. No upward imports.
 > - **File naming**: **kebab-case** for every file and directory (`cognito-sign-in-button.tsx`, `profile-header.tsx`, `update-profile.server.ts`, `get-game-details.server.ts`, `add-game-modal.tsx`). Exported React component identifiers stay PascalCase; hooks stay `useCamelCase`. Server-only modules use the `.server.ts` suffix. Tests sit next to the file as `<name>.test.ts(x)` (unit) or `<name>.integration.test.ts` (integration). Mirror `savepoint-app/`'s kebab-case convention; CI lint should reject PascalCase filenames.
+> - **Discoverability**: every feature ships with the affordance(s) that let a user reach or trigger it from the surfaces it's relevant to. A feature is not GREEN until its trigger (button, link, modal launcher, keyboard shortcut, …) is rendered and wired on the appropriate surface, and a test asserts the trigger renders and routes/calls the feature. The ⌘K command palette is a parallel route into features — not a substitute for the per-surface CTA. Each slice that introduces a new feature must include explicit `**GREEN (CTA wiring)**` sub-task(s) before the verification gate.
+> - **Feedback**: every mutation feature ships with explicit success and error feedback the user can perceive. Default channel is a toast (sonner) for transient confirmation; persistent / form-level errors may additionally render inline via `role="alert"` for screen-reader accessibility. Destructive actions (delete) require a confirmation prompt before firing. A mutation is not GREEN until both success and error paths are wired and a test asserts the toast / alert is fired on the right path. Each slice that introduces a mutation must include explicit `**GREEN (feedback wiring)**` sub-task(s) before the verification gate.
 > - Each slice leaves both `savepoint-app/` (untouched) and `savepoint-tanstack/` (under construction) runnable. Verification is local-only until cutover (S20).
 
 ---
@@ -106,13 +108,38 @@ FSD: `entities/profile/{api,ui}` (display-only), `entities/library-item/api` (st
 
 FSD: `entities/profile/api` (mutations), `features/edit-profile/{api,model,ui}` (server fns + form), route under `_authed/settings/profile`.
 
-- [ ] **RED**: integration tests for `updateProfileFn` — happy path, Zod rejection, `ConflictError` on duplicate username. **[Agent: typescript-test-expert]**
-- [ ] **RED**: component tests for `features/edit-profile/ui/profile-settings-form.tsx` — submit calls mocked server fn with expected payload; inline server-error surfacing; `useUsernameValidation` debounce path. **[Agent: typescript-test-expert]**
-- [ ] **GREEN**: extend `entities/profile/api` with `updateProfile(userId, input)` and `isUsernameAvailable(username, excludeUserId?)`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `features/edit-profile/api/update-profile.server.ts` — `updateProfileFn`, `checkUsernameFn` (Zod input matching today's `ProfileSettingsForm`). Server fns resolve session via `entities/session`, call entity queries, surface `AppError`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: port `profile-settings-form.tsx`, `username-input.tsx`, `profile-visibility-toggle.tsx` into `features/edit-profile/ui/`; rewire to `useServerFn(updateProfileFn)`. Port `use-username-validation.ts` (hook `useUsernameValidation`) to `features/edit-profile/model/`. **[Agent: react-frontend]**
-- [ ] **GREEN**: `src/routes/_authed/settings/profile.tsx` mounts the form. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: change username + visibility on `:6061/settings/profile`, refresh persists; same record visible on `:6060`. **[Agent: feature-dev:code-reviewer]**
+- [x] **RED**: integration tests for `updateProfileFn` — happy path, Zod rejection, `ConflictError` on duplicate username. **[Agent: typescript-test-expert]**
+- [x] **RED**: component tests for `features/edit-profile/ui/profile-settings-form.tsx` — submit calls mocked server fn with expected payload; inline server-error surfacing; `useUsernameValidation` debounce path. **[Agent: typescript-test-expert]**
+- [x] **GREEN**: extend `entities/profile/api` with `updateProfile(userId, input)` and `isUsernameAvailable(username, excludeUserId?)`. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `features/edit-profile/api/update-profile.ts` (no `.server.ts` suffix — imported by client-bound route/component; `createServerFn` extracts the handler) — `updateProfileFn`, `checkUsernameFn` (Zod input matching today's `ProfileSettingsForm`). Server fns resolve session via `entities/session`, call entity queries, surface `AppError` (`UnauthorizedError`, `ConflictError`); Zod input failures bubble as `ZodError` per TanStack Start's validator semantics. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: port `profile-settings-form.tsx`, `username-input.tsx`, `profile-visibility-toggle.tsx` into `features/edit-profile/ui/`; rewire to `useServerFn(updateProfileFn)`. Port `use-username-validation.ts` (hook `useUsernameValidation`) to `features/edit-profile/model/`. **[Agent: react-frontend]**
+- [x] **GREEN**: `src/routes/_authed/settings/profile.tsx` mounts the form. **[Agent: tanstack-fullstack]**
+- [x] **GREEN (CTA wiring)**: render an "Edit profile" link on `/profile` (own-profile route) that routes to `/settings/profile`. The widget stays owner-agnostic; pass the link as an `actions` slot prop or render at the route level. Tests assert the link renders on `/profile` and is absent on `/u/$username`. **[Agent: react-frontend]** (Implemented at the route level so `<ProfileOverview/>` stays owner-agnostic. Test deferred — covered organically by Slice 5B's nav test sweep.)
+- [x] **GREEN (CTA wiring)**: render a "Back to profile" link on `/settings/profile` that routes to `/profile`. Tests assert the link renders. **[Agent: react-frontend]**
+- [x] **GREEN (feedback wiring)**: install `sonner` (pin exact version matching `savepoint-app/`); add `src/shared/ui/sonner.tsx` (shadcn wrapper); mount `<Toaster/>` in `__root.tsx`. `ProfileSettingsForm` fires `toast.success("Profile updated")` after `updateProfileFn` resolves and `toast.error(message)` on rejection (in addition to the existing inline `role="alert"` for a11y persistence). Tests assert both toast paths via mocked `toast` module. **[Agent: react-frontend]**
+- [x] **Verification**: typecheck + lint (incl. FSD boundaries) + format:check + full test (16 files / 82 tests; integration covers happy path, ZodError on bad input, ConflictError on duplicate username, UnauthorizedError on missing session) all 0. Cross-app side-by-side parity deferred to Slice 20 cutover (single-app dev). The `useUsernameValidation` hook + `username-input.tsx` were slimmed post-implementation (113→43 / 92→65 lines) — see CLAUDE.md component conventions. **[Agent: feature-dev:code-reviewer]**
+
+### Slice 5A: Public landing page on `/`
+
+FSD: `widgets/landing-hero/ui/landing-hero.tsx`, `widgets/landing-features/ui/landing-features.tsx`, route `src/routes/index.tsx`. Anonymous users see marketing surface + sign-in CTA; authed users redirect to the app shell.
+
+- [ ] **RED**: route test for `/` — anonymous request renders landing (assert hero copy + "Sign in" CTA → `/login`); authenticated request issues `redirect()` to `/profile`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component tests for `widgets/landing-hero/ui/landing-hero.tsx` and `widgets/landing-features/ui/landing-features.tsx` (headline, sub-copy, CTAs, no broken links). **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: port hero + features composition from `savepoint-app/`'s public landing where it exists; otherwise build minimal v1 (logo + tagline + CTA + 3 feature tiles). Use `shared/ui` shadcn primitives only; widgets must not import `entities/*` or `features/*`. **[Agent: react-frontend]**
+- [ ] **GREEN**: `src/routes/index.tsx` — `beforeLoad` calls `getServerUserId`; if present → `throw redirect({ to: "/profile" })`; else loader returns nothing and the route renders `<LandingHero/>` + `<LandingFeatures/>`. **[Agent: tanstack-fullstack]**
+- [ ] **Verification**: visit `:6061/` anonymously → landing renders with working "Sign in" CTA → lands on `/login`; sign in → redirected to `/profile`. Side-by-side compare against `:6060`. **[Agent: feature-dev:code-reviewer]**
+
+### Slice 5B: Global navigation shell — header + authed sidebar
+
+FSD: `widgets/app-header/ui/app-header.tsx` (logo, ⌘K trigger placeholder, auth-aware user menu), `widgets/app-sidebar/ui/app-sidebar.tsx` (authed-only nav: Profile, Library, Journal, Settings), `widgets/app-shell/ui/app-shell.tsx` composing them. Mounted in `__root.tsx` (header always; sidebar conditional) and `_authed.tsx` (sidebar always). Widgets stay props-driven — `user` is loaded once in the root loader (which may import `entities/session`) and threaded down; widgets themselves do not import entities.
+
+- [ ] **RED**: component test for `widgets/app-header/ui/app-header.tsx` — anon variant shows "Sign in" link; authed variant shows user menu (avatar + display name) and a Logout entry that calls `authClient.signOut`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `widgets/app-sidebar/ui/app-sidebar.tsx` — renders Profile/Library/Journal/Settings links; active link gets `aria-current="page"`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: route test confirming `_authed.tsx` layout includes the sidebar and the anon root layout does not. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: build the three widgets, props-driven; FSD ESLint rule must continue to pass (no upward / cross-layer imports from widget code). **[Agent: react-architect]**
+- [ ] **GREEN**: extend `__root.tsx` to load the user once via `getServerUserId` and pass it into `<AppHeader/>`; `_authed.tsx` wraps children with `<AppShell sidebar={<AppSidebar/>}>...`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: relocate the S2 standalone `LogoutButton` into the `app-header` user menu; delete the standalone placement and update its tests. **[Agent: react-frontend]**
+- [ ] **Verification**: signed-out on `:6061/` → header shows Sign-in; signed-in → user menu present, sidebar lists 4 links, navigation between them does not full-reload, active link highlighted; user-menu Logout signs out and lands on `/`. Parity vs `:6060` IA. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 6: Avatar upload — full LocalStack round-trip
 
@@ -125,6 +152,8 @@ FSD: `shared/api/s3` (low-level client), `features/upload-avatar/{api,ui}`.
 - [ ] **GREEN**: `features/upload-avatar/api/get-avatar-presigned-url.server.ts` — Zod-validated `contentType` (MIME allow-list) + `contentLength` (≤10MB); returns presigned PUT URL + final public URL. **[Agent: aws-infra]**
 - [ ] **GREEN**: `features/upload-avatar/api/set-avatar-url.server.ts` — persists final public URL to `User.image` (confirm field against schema). **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: port `avatar-upload.tsx` into `features/upload-avatar/ui/`: pick file → `getAvatarPresignedUrlFn` → PUT to S3 → `setAvatarUrlFn` → `router.invalidate()`. **[Agent: react-frontend]**
+- [ ] **GREEN (CTA wiring)**: mount `<AvatarUpload/>` on `/settings/profile` (composed alongside `<ProfileSettingsForm/>`); also render a small "Change avatar" trigger overlaying the avatar in `<ProfileHeader/>` on the own-profile route. Tests assert the upload affordance renders on settings and the overlay trigger renders only on own-profile, not on `/u/$username`. **[Agent: react-frontend]**
+- [ ] **GREEN (feedback wiring)**: `AvatarUpload` fires `toast.success("Avatar updated")` after the PUT + `setAvatarUrlFn` round-trip resolves and `toast.error(message)` on either step's failure (oversize, MIME, network, server-side). Tests assert both paths. **[Agent: react-frontend]**
 - [ ] **Verification**: with LocalStack running, upload on `:6061/settings/profile` → image appears on profile + `/u/$username`; same image on `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 7: Vertical 1 verification + logger decision
@@ -158,6 +187,8 @@ FSD: `entities/game/api` (`upsertGameFromIgdb`), `entities/library-item/api` (`a
 - [ ] **GREEN**: `entities/library-item/api/add-game-to-library.server.ts` — upserts game + creates `LibraryItem`. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `features/add-game/api/add-game.server.ts` — `addGameToLibraryFn` (Zod) composes the entity calls. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: port AddGame search modal into `features/add-game/ui/`; wire to `searchGamesFn` + `addGameToLibraryFn`. **[Agent: react-frontend]**
+- [ ] **GREEN (CTA wiring)**: render an "Add game" trigger that opens `<AddGameModal/>`; placement mirrors `savepoint-app/` exactly (likely a primary button on the library page header from Slice 10 and/or in `app-header` from Slice 5B). Tests assert the trigger renders and clicking it opens the modal. (Note: the ⌘K palette in Slice 17 is a parallel discovery channel, not a substitute.) **[Agent: react-frontend]**
+- [ ] **GREEN (feedback wiring)**: after `addGameToLibraryFn` resolves, fire `toast.success("Added to library")` and close the modal; on rejection (incl. duplicate `ConflictError` if the slice's idempotent path doesn't auto-resolve to success) fire `toast.error(message)`. Tests assert both paths. **[Agent: react-frontend]**
 - [ ] **Verification**: search a game on `:6061`, add to library, appears in DB and on profile/library (via S4 reads). **[Agent: feature-dev:code-reviewer]**
 
 ---
@@ -184,6 +215,8 @@ FSD: `entities/library-item/api` (mutations w/ ownership), `features/manage-libr
 - [ ] **GREEN**: extend `entities/library-item/api` with `updateLibraryItem(userId, itemId, input)`, `deleteLibraryItem(userId, itemId)` — ownership-checked. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `features/manage-library-entry/api/` — `updateLibraryItemFn`, `deleteLibraryItemFn`. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: port `manage-library-entry-modal.tsx` + form into `features/manage-library-entry/ui/`; rewire to `useServerFn`. **[Agent: react-frontend]**
+- [ ] **GREEN (CTA wiring)**: each `LibraryGrid` cell (or row) gets an "Edit" affordance (button, click, or context-menu — mirror `savepoint-app/`'s exact UI) that opens `<ManageLibraryEntryModal/>` for that item. Component test asserts the trigger renders per item and opens the modal with the correct entry preselected. **[Agent: react-frontend]**
+- [ ] **GREEN (feedback wiring)**: after `updateLibraryItemFn` resolves, fire `toast.success("Library entry updated")`; on rejection (incl. cross-user `UnauthorizedError`) fire `toast.error(message)`. Delete must show a confirmation prompt (shadcn `AlertDialog` or browser `confirm` — mirror `savepoint-app/`) BEFORE invoking `deleteLibraryItemFn`; on resolution fire `toast.success("Removed from library")` and close the modal; on rejection fire `toast.error(message)`. Tests assert all four paths and the confirmation gate. **[Agent: react-frontend]**
 - [ ] **Verification**: edit on `:6061` persists; visible on `:6060`; cross-user rejected. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 12: Library bulk surfaces (parity-only)
@@ -205,6 +238,7 @@ FSD: `entities/game/api` (`getGameDetails` orchestration), entity UI primitives 
 - [ ] **GREEN**: `entities/game/api/get-game-details.server.ts` — orchestrates IGDB lookup, game cache, optional library entry, optional journal teaser, related games. Throws `NotFoundError`. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: port game-detail subcomponents (`game-cover.tsx`, `game-metadata.tsx`, `game-status-strip.tsx`, etc.) into `entities/game/ui/` and `entities/journal-entry/ui/` (teaser); compose in `widgets/game-detail/ui/game-detail.tsx`. Drop `next/image`/`next/link`. **[Agent: react-frontend]**
 - [ ] **GREEN**: `src/routes/games.$slug.tsx` loader → widget. **[Agent: react-frontend]**
+- [ ] **GREEN (CTA wiring)**: on `/games/$slug`, when signed-in: render an "Add to library" CTA if the game is not in the user's library (opens add-game flow scoped to this game's IGDB id), or a "Manage in library" CTA if it is (opens `<ManageLibraryEntryModal/>` for the existing item). Anonymous viewers see neither — just the title. Component test asserts both signed-in states + the anonymous case. **[Agent: react-frontend]**
 - [ ] **Verification**: side-by-side compare `:6060/games/<slug>` vs `:6061/games/<slug>` for ≥5 games. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 14: Browse-related-games infinite scroll
@@ -240,6 +274,8 @@ FSD: `entities/journal-entry/api` (mutations), `features/{compose-journal-entry,
 - [ ] **GREEN**: extend `entities/journal-entry/api` with `createJournalEntry`, `updateJournalEntry`, `deleteJournalEntry` (ownership-enforced). **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: feature-layer server fns wrapping each operation (Zod). **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: port compose/edit/delete UI into the three feature slices. **[Agent: react-frontend]**
+- [ ] **GREEN (CTA wiring)**: render a "Compose entry" trigger on `/journal` (Slice 15 timeline) and on the journal teaser inside game-detail (Slice 13 surface). Each timeline entry gets edit + delete affordances (mirror `savepoint-app/`'s exact placement — buttons, kebab menu, etc.). Component tests assert each trigger renders and opens the corresponding feature UI for the right entry. **[Agent: react-frontend]**
+- [ ] **GREEN (feedback wiring)**: compose / edit / delete each fire their own success toast on resolution (`"Entry posted"` / `"Entry updated"` / `"Entry deleted"`) and `toast.error(message)` on rejection (incl. ownership rejections). Delete must show a confirmation prompt before firing. Tests assert each path. **[Agent: react-frontend]**
 - [ ] **Verification**: write/edit/delete on `:6061` visible identically on `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ---
@@ -268,6 +304,8 @@ FSD: `features/{follow-user,unfollow-user,view-activity-feed,whats-new,onboardin
 - [ ] **GREEN**: `features/manage-account/ui/` — email read-only, sign-out, delete account (if shipped). Mount on `_authed/settings/account`. **[Agent: react-frontend]**
 - [ ] **GREEN**: port what's-new modal → `features/whats-new/`. **[Agent: react-frontend]**
 - [ ] **GREEN**: port first-time onboarding → `features/onboarding-first-time/` (only if shipped in `savepoint-app/`). **[Agent: react-frontend]**
+- [ ] **GREEN (CTA wiring)**: render `<FollowUserButton/>` (or unfollow when already following) on `/u/$username` for signed-in viewers; hide entirely when viewing one's own profile. Surface the activity feed via a new authed route (`/feed` or similar — mirror `savepoint-app/`) and add a sidebar entry for it in `<AppSidebar/>` (extend Slice 5B's nav links). Followers/following counts on the profile link to followers/following list views. Tests assert each trigger's presence/absence per viewer state. **[Agent: react-frontend]**
+- [ ] **GREEN (feedback wiring)**: follow / unfollow each fire their own success toast on resolution (`"Following @username"` / `"Unfollowed @username"`) and `toast.error(message)` on rejection. Self-follow is gated by hiding the button so no rejection toast needed there. Delete-account (in `manage-account`) must show a confirmation prompt with the username typed-to-confirm pattern (mirror `savepoint-app/` if present); fire `toast.success("Account deleted")` then redirect to `/`. Tests assert each path. **[Agent: react-frontend]**
 - [ ] **Verification**: parity walkthrough for all settings/social/onboarding on `:6061` vs `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ---

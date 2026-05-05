@@ -39,6 +39,11 @@ export default defineConfig({
           setupFiles: ["./test/setup/unit.ts"],
           pool: "threads",
           globals: true,
+          fakeTimers: {
+            toFake: ["setTimeout", "clearTimeout"],
+            shouldAdvanceTime: true,
+            advanceTimeDelta: 20,
+          },
         },
       },
       {

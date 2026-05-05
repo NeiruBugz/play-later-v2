@@ -1,1 +1,5 @@
 export const RECENT_GAMES_LIMIT = 5;
+
+export const USERNAME_MIN_LENGTH = 3;
+export const USERNAME_MAX_LENGTH = 25;
+export const USERNAME_VALIDATION_DEBOUNCE_MS = 500;
