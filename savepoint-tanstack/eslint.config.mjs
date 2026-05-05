@@ -23,6 +23,23 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    files: ["test/**/*.{ts,tsx,mjs,cjs,js}", "**/*.config.{ts,mjs,cjs,js}"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        Buffer: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        global: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+      },
+    },
+  },
+  {
     plugins: {
       "react-hooks": reactHooks,
     },

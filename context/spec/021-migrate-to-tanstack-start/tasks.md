@@ -51,9 +51,9 @@
 
 FSD: `entities/session` (read), `shared/lib/auth` (BA instance + handler), `shared/api/auth-client` (BA react client).
 
-- [ ] Install `better-auth` (pin exact version matching `savepoint-app/`). **[Agent: tanstack-fullstack]**
-- [ ] **RED**: integration test hitting `/api/auth/get-session` unauthenticated → asserts `null` body + 200. **[Agent: typescript-test-expert]**
-- [ ] **RED**: integration test mirroring `savepoint-app/test/integration/better-auth-cognito-sign-in.integration.test.ts` — per-test isolated PG, all migrations applied, BA `idToken` shortcut + `verifyIdToken: () => true`; assert `user`, `account` (`providerId="cognito"`, `accountId=<sub>`), `session` rows; assert `Set-Cookie` present (validates persistence without `nextCookies`). **[Agent: typescript-test-expert]**
+- [x] Install `better-auth` (pin exact version matching `savepoint-app/`). **[Agent: tanstack-fullstack]**
+- [x] **RED**: integration test hitting `/api/auth/get-session` unauthenticated → asserts `null` body + 200. **[Agent: typescript-test-expert]**
+- [x] **RED**: integration test mirroring `savepoint-app/test/integration/better-auth-cognito-sign-in.integration.test.ts` — per-test isolated PG, all migrations applied, BA `idToken` shortcut + `verifyIdToken: () => true`; assert `user`, `account` (`providerId="cognito"`, `accountId=<sub>`), `session` rows; assert `Set-Cookie` present (validates persistence without `nextCookies`). **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: `src/shared/lib/auth/auth.server.ts` — BA instance: same `BETTER_AUTH_SECRET`, `prismaAdapter`, Cognito social provider, `accountLinking.trustedProviders=["cognito"]`, session `30d / 1d`. **NO** `nextCookies()` plugin. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `src/routes/api/auth/$.ts` mounts `auth.handler` via Web Request/Response catch-all. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `src/entities/session/api/get-session.server.ts` — `getServerUserId(request: Request): Promise<string | undefined>` reading `Headers` from a loader/server fn. Entity-layer query (no feature deps). **[Agent: tanstack-fullstack]**
@@ -93,10 +93,10 @@ FSD: `shared/lib/db`, `shared/lib/errors`, `entities/profile/{model,api}`, `app/
 FSD: `entities/profile/{api,ui}` (display-only), `entities/library-item/api` (stats), `widgets/profile-overview` (composes entity UI), routes are thin.
 
 - [ ] **RED**: integration tests for `getLibraryStats(userId)` and `getRecentGames(userId)` against real PG. **[Agent: typescript-test-expert]**
-- [ ] **RED**: component tests for `entities/profile/ui/ProfileHeader.tsx` and `ProfileStatsBar.tsx` (render with stub data). **[Agent: typescript-test-expert]**
+- [ ] **RED**: component tests for `entities/profile/ui/profile-header.tsx` and `profile-stats-bar.tsx` (render with stub data). **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: extend `entities/profile/api/` with `getLibraryStats` and `getRecentGames` (or place them in `entities/library-item/api/` if shape clearly belongs there). **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: port `ProfileHeader`, `ProfileStatsBar`, `OverviewTab`, `LibraryGrid` (read-only) into `entities/profile/ui/` and `entities/library-item/ui/`. Swap `next/link` → TanStack `Link`, `next/image` → `<img>`. **[Agent: react-frontend]**
-- [ ] **GREEN**: `widgets/profile-overview/ui/ProfileOverview.tsx` composes the entity UI; `widgets/library-grid/` for read-only library grid. **[Agent: react-frontend]**
+- [ ] **GREEN**: port `profile-header.tsx`, `profile-stats-bar.tsx`, `overview-tab.tsx`, `library-grid.tsx` (read-only; component identifiers stay PascalCase) into `entities/profile/ui/` and `entities/library-item/ui/`. Swap `next/link` → TanStack `Link`, `next/image` → `<img>`. **[Agent: react-frontend]**
+- [ ] **GREEN**: `widgets/profile-overview/ui/profile-overview.tsx` composes the entity UI; `widgets/library-grid/` for read-only library grid. **[Agent: react-frontend]**
 - [ ] **GREEN**: replace `_authed/profile.tsx` placeholder — loader calls `getProfileById(userId)` + stats; renders `<ProfileOverview/>`. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `src/routes/u.$username.tsx` — public, loader calls `getProfileByUsername`; throws `NotFoundError` on miss → root error component renders 404. **[Agent: tanstack-fullstack]**
 - [ ] **Verification**: signed-in user `:6061/profile` matches `:6060/u/<own-username>` data shape; `:6061/u/<own-username>` public; `:6061/u/does-not-exist` → 404. Side-by-side parity vs `:6060`. **[Agent: feature-dev:code-reviewer]**
@@ -106,10 +106,10 @@ FSD: `entities/profile/{api,ui}` (display-only), `entities/library-item/api` (st
 FSD: `entities/profile/api` (mutations), `features/edit-profile/{api,model,ui}` (server fns + form), route under `_authed/settings/profile`.
 
 - [ ] **RED**: integration tests for `updateProfileFn` — happy path, Zod rejection, `ConflictError` on duplicate username. **[Agent: typescript-test-expert]**
-- [ ] **RED**: component tests for `features/edit-profile/ui/ProfileSettingsForm.tsx` — submit calls mocked server fn with expected payload; inline server-error surfacing; `useUsernameValidation` debounce path. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component tests for `features/edit-profile/ui/profile-settings-form.tsx` — submit calls mocked server fn with expected payload; inline server-error surfacing; `useUsernameValidation` debounce path. **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: extend `entities/profile/api` with `updateProfile(userId, input)` and `isUsernameAvailable(username, excludeUserId?)`. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `features/edit-profile/api/update-profile.server.ts` — `updateProfileFn`, `checkUsernameFn` (Zod input matching today's `ProfileSettingsForm`). Server fns resolve session via `entities/session`, call entity queries, surface `AppError`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: port `ProfileSettingsForm`, `UsernameInput`, `ProfileVisibilityToggle` into `features/edit-profile/ui/`; rewire to `useServerFn(updateProfileFn)`. Port `useUsernameValidation` to `features/edit-profile/model/`. **[Agent: react-frontend]**
+- [ ] **GREEN**: port `profile-settings-form.tsx`, `username-input.tsx`, `profile-visibility-toggle.tsx` into `features/edit-profile/ui/`; rewire to `useServerFn(updateProfileFn)`. Port `use-username-validation.ts` (hook `useUsernameValidation`) to `features/edit-profile/model/`. **[Agent: react-frontend]**
 - [ ] **GREEN**: `src/routes/_authed/settings/profile.tsx` mounts the form. **[Agent: tanstack-fullstack]**
 - [ ] **Verification**: change username + visibility on `:6061/settings/profile`, refresh persists; same record visible on `:6060`. **[Agent: feature-dev:code-reviewer]**
 
@@ -119,11 +119,11 @@ FSD: `shared/api/s3` (low-level client), `features/upload-avatar/{api,ui}`.
 
 - [ ] **RED**: integration test for `getAvatarPresignedUrlFn` against LocalStack — valid URL, reject oversize, reject disallowed MIME with `ValidationError`. **[Agent: typescript-test-expert]**
 - [ ] **RED**: integration test for `setAvatarUrlFn` — persists URL to user record; rejects unauthenticated. **[Agent: typescript-test-expert]**
-- [ ] **RED**: component test for `features/upload-avatar/ui/AvatarUpload.tsx` — happy flow with mocked server fns + fetch. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/upload-avatar/ui/avatar-upload.tsx` — happy flow with mocked server fns + fetch. **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: `src/shared/api/s3.ts` — AWS SDK v3 client honoring `AWS_ENDPOINT_URL`, `S3_BUCKET_NAME`, `S3_AVATAR_PATH_PREFIX` (mirror `savepoint-app/shared/lib/storage/`). **[Agent: aws-infra]**
 - [ ] **GREEN**: `features/upload-avatar/api/get-avatar-presigned-url.server.ts` — Zod-validated `contentType` (MIME allow-list) + `contentLength` (≤10MB); returns presigned PUT URL + final public URL. **[Agent: aws-infra]**
 - [ ] **GREEN**: `features/upload-avatar/api/set-avatar-url.server.ts` — persists final public URL to `User.image` (confirm field against schema). **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: port `AvatarUpload` into `features/upload-avatar/ui/`: pick file → `getAvatarPresignedUrlFn` → PUT to S3 → `setAvatarUrlFn` → `router.invalidate()`. **[Agent: react-frontend]**
+- [ ] **GREEN**: port `avatar-upload.tsx` into `features/upload-avatar/ui/`: pick file → `getAvatarPresignedUrlFn` → PUT to S3 → `setAvatarUrlFn` → `router.invalidate()`. **[Agent: react-frontend]**
 - [ ] **Verification**: with LocalStack running, upload on `:6061/settings/profile` → image appears on profile + `/u/$username`; same image on `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 7: Vertical 1 verification + logger decision
@@ -152,7 +152,7 @@ FSD: `shared/api/igdb` (low-level REST + token cache), `features/search-games/ap
 FSD: `entities/game/api` (`upsertGameFromIgdb`), `entities/library-item/api` (`addGameToLibrary`), `features/add-game/{api,ui}`.
 
 - [ ] **RED**: integration tests — `upsertGameFromIgdb` (cache miss + hit), `addGameToLibrary` (creates LibraryItem, idempotent on duplicate, ownership-aware). **[Agent: typescript-test-expert]**
-- [ ] **RED**: component test for `features/add-game/ui/AddGameModal.tsx` — search → select → add wires to mocked server fns. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/add-game/ui/add-game-modal.tsx` — search → select → add wires to mocked server fns. **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: `entities/game/api/upsert-game.server.ts` — fetches IGDB if not cached, upserts `Game`. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `entities/library-item/api/add-game-to-library.server.ts` — upserts game + creates `LibraryItem`. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `features/add-game/api/add-game.server.ts` — `addGameToLibraryFn` (Zod) composes the entity calls. **[Agent: tanstack-fullstack]**
@@ -171,7 +171,7 @@ FSD: `entities/library-item/api` (`getLibrary`), `features/filter-library/{model
 - [ ] **RED**: component test for `features/filter-library/ui/` — filter controls update search params; loader observed via mocked router. **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: extend `entities/library-item/api` with `getLibrary(userId, filters)` (status/sort/platform/rating). **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: port filters/sort controls into `features/filter-library/ui/`; persist via TanStack Router `Link search`. **[Agent: react-frontend]**
-- [ ] **GREEN**: `widgets/library-page/ui/LibraryPage.tsx` composes filters + grid; `src/routes/_authed/library.tsx` loader calls `getLibrary` and renders the widget. **[Agent: react-frontend]**
+- [ ] **GREEN**: `widgets/library-page/ui/library-page.tsx` composes filters + grid; `src/routes/_authed/library.tsx` loader calls `getLibrary` and renders the widget. **[Agent: react-frontend]**
 - [ ] **Verification**: `:6061/library` matches `:6060` for same user; filters/sort identical. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 11: Library mutations — status / rating / platform / delete
@@ -182,7 +182,7 @@ FSD: `entities/library-item/api` (mutations w/ ownership), `features/manage-libr
 - [ ] **RED**: component test for `features/manage-library-entry/ui/` — submit invokes mocked server fn; surfaces `UnauthorizedError` inline. **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: extend `entities/library-item/api` with `updateLibraryItem(userId, itemId, input)`, `deleteLibraryItem(userId, itemId)` — ownership-checked. **[Agent: tanstack-fullstack]**
 - [ ] **GREEN**: `features/manage-library-entry/api/` — `updateLibraryItemFn`, `deleteLibraryItemFn`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: port ManageLibraryEntry modal/form into `features/manage-library-entry/ui/`; rewire to `useServerFn`. **[Agent: react-frontend]**
+- [ ] **GREEN**: port `manage-library-entry-modal.tsx` + form into `features/manage-library-entry/ui/`; rewire to `useServerFn`. **[Agent: react-frontend]**
 - [ ] **Verification**: edit on `:6061` persists; visible on `:6060`; cross-user rejected. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 12: Library bulk surfaces (parity-only)
@@ -202,7 +202,7 @@ FSD: `entities/game/api` (`getGameDetails` orchestration), entity UI primitives 
 - [ ] **RED**: integration tests for `getGameDetails` — signed-in vs anonymous, missing slug → `NotFoundError`, cache miss vs hit. **[Agent: typescript-test-expert]**
 - [ ] **RED**: component tests for entity UI subcomponents (cover, metadata, status strip). **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: `entities/game/api/get-game-details.server.ts` — orchestrates IGDB lookup, game cache, optional library entry, optional journal teaser, related games. Throws `NotFoundError`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: port game-detail subcomponents into `entities/game/ui/` and `entities/journal-entry/ui/` (teaser); compose in `widgets/game-detail/ui/GameDetail.tsx`. Drop `next/image`/`next/link`. **[Agent: react-frontend]**
+- [ ] **GREEN**: port game-detail subcomponents (`game-cover.tsx`, `game-metadata.tsx`, `game-status-strip.tsx`, etc.) into `entities/game/ui/` and `entities/journal-entry/ui/` (teaser); compose in `widgets/game-detail/ui/game-detail.tsx`. Drop `next/image`/`next/link`. **[Agent: react-frontend]**
 - [ ] **GREEN**: `src/routes/games.$slug.tsx` loader → widget. **[Agent: react-frontend]**
 - [ ] **Verification**: side-by-side compare `:6060/games/<slug>` vs `:6061/games/<slug>` for ≥5 games. **[Agent: feature-dev:code-reviewer]**
 
