@@ -1,8 +1,4 @@
-import type { Profile } from "@/entities/profile/model/types";
-
-type ProfileHeaderProps = {
-  profile: Profile;
-};
+import type { ProfileHeaderProps } from "./profile-header.type";
 
 const DEFAULT_AVATAR_SRC = "/default-avatar.svg";
 

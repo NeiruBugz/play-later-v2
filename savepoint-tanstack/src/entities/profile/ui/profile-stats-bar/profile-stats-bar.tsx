@@ -1,16 +1,6 @@
 import { Card } from "@/shared/ui/card";
 
-type StatItem = {
-  label: string;
-  value: number;
-};
-
-type ProfileStatsBarProps = {
-  totalGames: number;
-  playing: number;
-  completed: number;
-  journalEntries: number;
-};
+import type { ProfileStatsBarProps, StatItem } from "./profile-stats-bar.type";
 
 export function ProfileStatsBar({
   totalGames,

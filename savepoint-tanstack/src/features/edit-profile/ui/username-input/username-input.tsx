@@ -3,14 +3,8 @@ import { Check, Loader2, X } from "lucide-react";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 
-import { useUsernameValidation } from "../model/use-username-validation";
-
-type UsernameInputProps = {
-  value: string;
-  onChange: (value: string) => void;
-  id?: string;
-  currentUsername?: string;
-};
+import { useUsernameValidation } from "../../model/use-username-validation";
+import type { UsernameInputProps } from "./username-input.type";
 
 export function UsernameInput({
   value,

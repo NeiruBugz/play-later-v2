@@ -1,12 +1,7 @@
-import type { LibraryStats } from "@/entities/library-item/api/get-library-stats.server";
-import type { Profile } from "@/entities/profile/model/types";
 import { OverviewTab } from "@/entities/profile/ui/overview-tab";
 import { ProfileHeader } from "@/entities/profile/ui/profile-header";
 
-type ProfileOverviewProps = {
-  profile: Profile;
-  stats: LibraryStats;
-};
+import type { ProfileOverviewProps } from "./profile-overview.type";
 
 export function ProfileOverview({ profile, stats }: ProfileOverviewProps) {
   const gameCount = Object.values(stats.statusCounts).reduce(
@@ -21,5 +16,3 @@ export function ProfileOverview({ profile, stats }: ProfileOverviewProps) {
     </div>
   );
 }
-
-export type { ProfileOverviewProps };

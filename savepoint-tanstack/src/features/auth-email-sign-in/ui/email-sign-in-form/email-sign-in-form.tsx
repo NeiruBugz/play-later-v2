@@ -14,6 +14,8 @@ import {
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
 
+import type { EmailSignInFormProps } from "./email-sign-in-form.type";
+
 const emailSignInSchema = z.object({
   email: z.email(),
   password: z.string().min(1),
@@ -21,7 +23,7 @@ const emailSignInSchema = z.object({
 
 type EmailSignInValues = z.infer<typeof emailSignInSchema>;
 
-export function EmailSignInForm({ enabled }: { enabled: boolean }) {
+export function EmailSignInForm({ enabled }: EmailSignInFormProps) {
   const form = useForm<EmailSignInValues>({
     resolver: zodResolver(emailSignInSchema),
     defaultValues: { email: "", password: "" },

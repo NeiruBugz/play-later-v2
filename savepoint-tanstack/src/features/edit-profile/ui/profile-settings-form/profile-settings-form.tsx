@@ -2,28 +2,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
-import type { Profile } from "@/entities/profile/model/types";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 
-import { updateProfileFn } from "../api/update-profile";
-import { ProfileVisibilityToggle } from "./profile-visibility-toggle";
-import { UsernameInput } from "./username-input";
-
-const formSchema = z.object({
-  name: z.string().min(1),
-  username: z.string().min(3).max(25),
-  isPublicProfile: z.boolean(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-type ProfileSettingsFormProps = {
-  profile: Profile;
-};
+import { updateProfileFn } from "../../api/update-profile";
+import { ProfileVisibilityToggle } from "../profile-visibility-toggle";
+import { UsernameInput } from "../username-input";
+import {
+  formSchema,
+  type FormValues,
+  type ProfileSettingsFormProps,
+} from "./profile-settings-form.type";
 
 export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);

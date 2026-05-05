@@ -1,12 +1,7 @@
 import { Label } from "@/shared/ui/label";
 import { Switch } from "@/shared/ui/switch";
 
-type ProfileVisibilityToggleProps = {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  id?: string;
-  disabled?: boolean;
-};
+import type { ProfileVisibilityToggleProps } from "./profile-visibility-toggle.type";
 
 export function ProfileVisibilityToggle({
   checked,

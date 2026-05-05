@@ -5,10 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Profile } from "@/entities/profile/model/types";
 
-import { checkUsernameFn, updateProfileFn } from "../api/update-profile";
+import { checkUsernameFn, updateProfileFn } from "../../api/update-profile";
 import { ProfileSettingsForm } from "./profile-settings-form";
 
-vi.mock("../api/update-profile", () => ({
+vi.mock("../../api/update-profile", () => ({
   updateProfileFn: vi.fn(),
   checkUsernameFn: vi.fn(),
 }));
