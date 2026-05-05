@@ -3,8 +3,8 @@ import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
 import { ErrorBoundary } from "@/app";
-import { Header } from "@/widgets/header";
 import { Toaster } from "@/shared/ui/sonner";
+import { Header } from "@/widgets/header";
 
 import appCss from "../styles.css?url";
 

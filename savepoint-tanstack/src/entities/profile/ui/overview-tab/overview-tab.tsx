@@ -1,7 +1,7 @@
 import { LibraryGrid } from "@/entities/library-item/ui/library-grid";
 
-import type { OverviewTabProps } from "./overview-tab.type";
 import { ProfileStatsBar } from "../profile-stats-bar";
+import type { OverviewTabProps } from "./overview-tab.type";
 
 export function OverviewTab({ stats, gameCount }: OverviewTabProps) {
   const playing = stats.statusCounts.PLAYING ?? 0;
