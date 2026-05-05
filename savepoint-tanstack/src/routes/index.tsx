@@ -73,8 +73,8 @@ function App() {
             Edit <code>src/routes/index.tsx</code> to customize the home page.
           </li>
           <li>
-            Update <code>src/components/Header.tsx</code> and{" "}
-            <code>src/components/Footer.tsx</code> for brand links.
+            Update <code>src/widgets/header/</code> for brand links and the top
+            navigation.
           </li>
           <li>
             Add routes in <code>src/routes</code> and tweak visual tokens in{" "}
