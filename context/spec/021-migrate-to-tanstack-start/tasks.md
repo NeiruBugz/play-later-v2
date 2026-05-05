@@ -4,7 +4,17 @@
 - **Technical Spec:** [technical-considerations.md](./technical-considerations.md)
 - **Status:** Draft
 
-> **Methodology**: TDD per slice — write the test first, then the implementation. Each slice leaves both `savepoint-app/` (untouched) and `savepoint-tanstack/` (under construction) runnable. Verification is local-only until the cutover slice (S20).
+> **Methodology**:
+> - **TDD (red → green → refactor)**: every slice lists test sub-tasks **before** implementation sub-tasks. A slice is not green until its tests were authored failing first, then made to pass. PR descriptions must reference the failing-test commit.
+> - **FSD (Feature-Sliced Design)**: mirror `savepoint-app/`'s layered architecture. Layers (top → bottom, lower may not import upper):
+>   - `src/app/` — providers, root router wiring, global styles, error boundary
+>   - `src/routes/` — TanStack file-based routes (thin loaders/components — pages layer equivalent)
+>   - `src/widgets/` — composite UI blocks (header, profile composition, library grid)
+>   - `src/features/` — user-intent slices (`auth-cognito-sign-in`, `edit-profile`, `add-game`, `manage-library-entry`, `journal-compose`, `command-palette`, `follow-user`, …). Each feature has `model/`, `api/` (server fns), `ui/`
+>   - `src/entities/` — domain nouns (`session`, `user`, `profile`, `game`, `library-item`, `journal-entry`). Each entity has `model/` (types/zod), `api/` (plain async query fns that throw `AppError`), `ui/` (display-only)
+>   - `src/shared/` — `lib/` (db, logger, errors, auth-client), `ui/` (shadcn primitives), `config/` (env), `api/` (S3, IGDB low-level clients)
+> - **Layer discipline**: server fns live in `features/*/api/`, queries in `entities/*/api/`. A feature server fn composes entity queries; entity queries never import features. Routes import widgets/features; widgets import features/entities; features import entities; entities import shared. No upward imports.
+> - Each slice leaves both `savepoint-app/` (untouched) and `savepoint-tanstack/` (under construction) runnable. Verification is local-only until cutover (S20).
 
 ---
 
@@ -23,80 +33,102 @@
     4. `@types/node` 22.10.2 < Vite 8's required 22.12.0 — bump in next sub-task.
     5. `@tailwindcss/vite` 4.1.18 peer-dep mismatch with Vite 8 (declares `^5||^6||^7`); runtime works; revisit if breakage surfaces.
     6. `.cta.json` left by scaffolder; harmless.
-- [ ] Register `savepoint-tanstack` in root `pnpm-workspace.yaml`; mirror tsconfig strict settings, ESLint base rules, Prettier config from `savepoint-app/`. **[Agent: tanstack-fullstack]**
-- [ ] Copy `savepoint-app/prisma/schema.prisma` and `savepoint-app/prisma/migrations/` verbatim into `savepoint-tanstack/prisma/`; expose only `prisma:generate` and `prisma:format` in `package.json` (NO `migrate` scripts). **[Agent: prisma-database]**
-- [ ] Copy `savepoint-app/tailwind.config.ts`, `globals.css`, design tokens, and font setup verbatim into `savepoint-tanstack/`; verify no `next/*` imports leak. **[Agent: react-frontend]**
-- [ ] Create `savepoint-tanstack/env.ts` (Zod-validated, server/client split) mirroring all keys from `savepoint-app/env.mjs`; consume `env` everywhere — never raw `process.env.*`. **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/vitest.config.ts` with `unit` (node, mocked Prisma) and `integration` (node, real PG, sequential) projects; add `pnpm --filter savepoint-tanstack test` scripts. **[Agent: typescript-test-expert]**
-- [ ] Add CI workflow `.github/workflows/pr-checks-tanstack.yml`, path-conditional on `savepoint-tanstack/**`: typecheck → lint → format check → unit. **[Agent: tanstack-fullstack]**
+- [x] Register `savepoint-tanstack` in root `pnpm-workspace.yaml`; mirror tsconfig strict settings, ESLint base rules, Prettier config from `savepoint-app/`. **[Agent: tanstack-fullstack]**
+- [x] Copy `savepoint-app/prisma/schema.prisma` and `savepoint-app/prisma/migrations/` verbatim into `savepoint-tanstack/prisma/`; expose only `prisma:generate` and `prisma:format` in `package.json` (NO `migrate` scripts). **[Agent: prisma-database]**
+- [x] Copy `savepoint-app/tailwind.config.ts`, `globals.css`, design tokens, and font setup verbatim into `savepoint-tanstack/`; verify no `next/*` imports leak. **[Agent: react-frontend]**
+- [x] Create `savepoint-tanstack/env.ts` (Zod-validated, server/client split) mirroring all keys from `savepoint-app/env.mjs`; consume `env` everywhere — never raw `process.env.*`. **[Agent: tanstack-fullstack]**
+- [x] **RED**: Create `savepoint-tanstack/vitest.config.ts` with `unit` (jsdom, mocked Prisma) and `integration` (node, real PG, sequential) projects; author one intentionally failing canary test per project to prove harness wiring. Add `test:unit`, `test:integration`, `test` scripts. **[Agent: typescript-test-expert]**
+- [x] **GREEN**: Make canary tests pass; tests then stay as harness sentinels. **[Agent: typescript-test-expert]**
+- [ ] **FSD scaffold**: create empty `src/app/`, `src/widgets/`, `src/features/`, `src/entities/`, `src/shared/{lib,ui,config,api}/` directories with `index.ts` barrel stubs and a `README.md` per layer summarizing rules. Add ESLint `boundaries`/`import/no-restricted-paths` rule blocking upward imports between layers. **[Agent: react-architect]**
+- [ ] Add unit test asserting the FSD ESLint rule fires on a synthetic upward-import fixture (regression guard against silent rule disable). **[Agent: typescript-test-expert]**
+- [ ] Add CI workflow `.github/workflows/pr-checks-tanstack.yml`, path-conditional on `savepoint-tanstack/**`: typecheck → lint (incl. FSD boundary rule) → format check → unit. **[Agent: tanstack-fullstack]**
 - [ ] Add a CI step (or pre-commit hook) that diffs `savepoint-app/prisma/schema.prisma` against `savepoint-tanstack/prisma/schema.prisma` and fails on divergence. **[Agent: prisma-database]**
-- [ ] Create minimal `savepoint-tanstack/CLAUDE.md` stub (purpose, "this app is under construction", link to spec 021); will grow per slice. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: run `pnpm --filter savepoint-tanstack typecheck && lint && format:check && test`; start dev server on `:6061` (different port from `savepoint-app/` on `:6060`); confirm `/` renders without errors and produces no console warnings. **[Agent: tanstack-fullstack]**
+- [ ] Create `savepoint-tanstack/CLAUDE.md`: purpose, under-construction notice, link to spec 021, **TDD policy**, **FSD layer map and import rules**, path aliases. **[Agent: tanstack-fullstack]**
+- [ ] **Verification**: `pnpm --filter savepoint-tanstack typecheck && lint && format:check && test`; dev server on `:6061`; `/` renders clean; ESLint boundary fixture rejected as expected. **[Agent: tanstack-fullstack]**
 
 ### Slice 1: Better Auth wired — anonymous session lookup works
 
+FSD: `entities/session` (read), `shared/lib/auth` (BA instance + handler), `shared/api/auth-client` (BA react client).
+
 - [ ] Install `better-auth` (pin exact version matching `savepoint-app/`). **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/app/lib/auth/auth.ts` — BA instance with same `BETTER_AUTH_SECRET`, `prismaAdapter`, Cognito social provider, `accountLinking.trustedProviders=["cognito"]`, session lifetime `30d / 1d`. **NO** `nextCookies()` plugin. **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/app/routes/api/auth/$.ts` mounting `auth.handler` directly via Web Request/Response (catch-all). **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/app/lib/auth/get-session.ts` — `getServerUserId(request: Request): Promise<string | undefined>` reading the `Headers` from a loader/server fn. **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/app/lib/auth/auth-client.ts` — `authClient` from `better-auth/react`, basePath `/api/auth`. **[Agent: tanstack-fullstack]**
-- [ ] Write integration test: hit `/api/auth/get-session` unauthenticated → assert `null` body + 200. **[Agent: typescript-test-expert]**
-- [ ] Write integration test mirroring `savepoint-app/test/integration/better-auth-cognito-sign-in.integration.test.ts`: per-test isolated PG DB, all migrations applied, BA `idToken` shortcut + `verifyIdToken: () => true` to drive Cognito sign-in; assert `user`, `account` (`providerId="cognito"`, `accountId=<sub>`), and `session` rows; assert `Set-Cookie` header is present on the response (validates session persistence without `nextCookies`). **[Agent: typescript-test-expert]**
-- [ ] **Verification**: run `pnpm --filter savepoint-tanstack test:integration`; both tests pass against real PG. **[Agent: typescript-test-expert]**
+- [ ] **RED**: integration test hitting `/api/auth/get-session` unauthenticated → asserts `null` body + 200. **[Agent: typescript-test-expert]**
+- [ ] **RED**: integration test mirroring `savepoint-app/test/integration/better-auth-cognito-sign-in.integration.test.ts` — per-test isolated PG, all migrations applied, BA `idToken` shortcut + `verifyIdToken: () => true`; assert `user`, `account` (`providerId="cognito"`, `accountId=<sub>`), `session` rows; assert `Set-Cookie` present (validates persistence without `nextCookies`). **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `src/shared/lib/auth/auth.server.ts` — BA instance: same `BETTER_AUTH_SECRET`, `prismaAdapter`, Cognito social provider, `accountLinking.trustedProviders=["cognito"]`, session `30d / 1d`. **NO** `nextCookies()` plugin. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `src/routes/api/auth/$.ts` mounts `auth.handler` via Web Request/Response catch-all. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `src/entities/session/api/get-session.server.ts` — `getServerUserId(request: Request): Promise<string | undefined>` reading `Headers` from a loader/server fn. Entity-layer query (no feature deps). **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `src/shared/api/auth-client.ts` — `authClient` from `better-auth/react`, basePath `/api/auth`. **[Agent: tanstack-fullstack]**
+- [ ] **Verification**: `pnpm --filter savepoint-tanstack test:integration` green. **[Agent: typescript-test-expert]**
 
 ### Slice 2: Login route — Cognito sign-in lands authenticated user on protected page
 
-- [ ] Create `savepoint-tanstack/app/routes/login.tsx` — Cognito sign-in button + (dev-only, gated on `env.AUTH_ENABLE_CREDENTIALS`) credentials form using RHF + Zod (port `savepoint-app/features/auth/ui/credentials-form.tsx`). **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/app/routes/_authed.tsx` (or use `beforeLoad` on a route group) — guard that calls `getServerUserId(request)` and redirects to `/login` when absent. **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/app/routes/_authed/profile.tsx` — minimal "Hello, you are signed in as <userId>" placeholder for now. **[Agent: tanstack-fullstack]**
-- [ ] Implement client-side sign-out via `authClient.signOut({ fetchOptions: { onSuccess: () => router.invalidate() }})` in a `LogoutButton`. **[Agent: tanstack-fullstack]**
-- [ ] Component test: login route renders both sign-in surfaces; clicking Cognito button triggers `authClient.signIn.social({ provider: "cognito" })`; credentials form posts to `signInEmail`. **[Agent: typescript-test-expert]**
-- [ ] Add the local dev TanStack callback URL to the dev Cognito App Client (manual via AWS Console or terraform if managed) — same path `/api/auth/callback/cognito`, host `http://localhost:6061`. **[Agent: terraform-infrastructure]**
-- [ ] **Verification**: with both apps running locally (`:6060` Next, `:6061` TanStack), sign in via Cognito on `:6061` → land on `/profile` placeholder; verify `session` row exists in shared DB and is also valid when `:6060` is refreshed (cross-app session sharing). **[Agent: tanstack-fullstack]**
+FSD: `features/auth-cognito-sign-in/ui/`, `features/auth-credentials-sign-in/ui/` (dev only), `features/auth-sign-out/ui/LogoutButton.tsx`. Routes in `src/routes/`. Route guard via `beforeLoad` consumes `entities/session`.
+
+- [ ] **RED**: component test for `features/auth-cognito-sign-in/ui/CognitoSignInButton.tsx` — click triggers `authClient.signIn.social({ provider: "cognito" })`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/auth-credentials-sign-in/ui/CredentialsForm.tsx` — submit posts to `signInEmail`; renders only when `env.AUTH_ENABLE_CREDENTIALS`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: route test for `_authed` guard — unauthenticated request redirects to `/login`. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: build `features/auth-cognito-sign-in/ui/CognitoSignInButton.tsx` and (dev-only) `features/auth-credentials-sign-in/ui/CredentialsForm.tsx` (port from `savepoint-app/features/auth/ui/credentials-form.tsx`, RHF + Zod). **[Agent: react-frontend]**
+- [ ] **GREEN**: `src/routes/login.tsx` composes the two features. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `src/routes/_authed.tsx` (route group) — `beforeLoad` calls `getServerUserId` from `entities/session/api`; redirects to `/login` on miss. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `src/routes/_authed/profile.tsx` — minimal "Hello, signed in as <userId>" placeholder. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `features/auth-sign-out/ui/LogoutButton.tsx` — `authClient.signOut({ fetchOptions: { onSuccess: () => router.invalidate() } })`. **[Agent: tanstack-fullstack]**
+- [ ] Add the local dev TanStack callback URL to the dev Cognito App Client — path `/api/auth/callback/cognito`, host `http://localhost:6061`. **[Agent: terraform-infrastructure]**
+- [ ] **Verification**: with both apps running (`:6060` Next, `:6061` TanStack), Cognito sign-in on `:6061` → lands on `/profile`; `session` row in shared DB is valid on `:6060` refresh (cross-app sharing). **[Agent: tanstack-fullstack]**
 
 ### Slice 3: DAL conventions established + first profile query
 
-- [ ] Create `savepoint-tanstack/app/lib/db.ts` — Prisma singleton with `globalThis` cache (mirror `savepoint-app/shared/lib/app/db.ts`). **[Agent: prisma-database]**
-- [ ] Create `savepoint-tanstack/app/lib/errors.ts` — `AppError` base + `NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`. **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/app/lib/queries/profile.ts` — `getProfileById(userId)`, `getProfileByUsername(username)`. Plain async functions, throw `NotFoundError` on miss. **[Agent: tanstack-fullstack]**
-- [ ] Integration test for `getProfileById` and `getProfileByUsername` against real PG — happy path + missing-user case. **[Agent: typescript-test-expert]**
-- [ ] Document the C2 DAL pattern in `savepoint-tanstack/CLAUDE.md`: server-fn + queries split, no Result wrappers, AppError taxonomy, ID format (nanoid not cuid → `z.string().min(1)`). **[Agent: tanstack-fullstack]**
-- [ ] Add `errorComponent` to `__root.tsx` that branches on `AppError.code` and renders user-facing copy. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: `pnpm --filter savepoint-tanstack test:integration` green; CLAUDE.md reads cleanly. **[Agent: feature-dev:code-reviewer]**
+FSD: `shared/lib/db`, `shared/lib/errors`, `entities/profile/{model,api}`, `app/error-boundary`.
+
+- [ ] **RED**: unit tests for `AppError` taxonomy (codes preserved, `toJSON`, instanceof checks) in `shared/lib/errors`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: integration tests for `getProfileById` and `getProfileByUsername` against real PG — happy path + missing-user case (expect `NotFoundError`). **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `src/shared/lib/db.ts` — Prisma singleton with `globalThis` cache (mirror `savepoint-app/shared/lib/app/db.ts`). **[Agent: prisma-database]**
+- [ ] **GREEN**: `src/shared/lib/errors.ts` — `AppError` base + `NotFoundError`, `ConflictError`, `ValidationError`, `UnauthorizedError`, `UpstreamError`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `src/entities/profile/model/types.ts` (Zod + TS types) and `src/entities/profile/api/get-profile.server.ts` — `getProfileById(userId)`, `getProfileByUsername(username)`. Plain async, throw `NotFoundError`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `src/app/error-boundary.tsx` mounted in `__root.tsx` — branches on `AppError.code` for user-facing copy. **[Agent: tanstack-fullstack]**
+- [ ] Document the C2 DAL pattern in `savepoint-tanstack/CLAUDE.md`: features hold server fns, entities hold queries, no Result wrappers, AppError taxonomy, ID format (nanoid not cuid → `z.string().min(1)`). Reaffirm FSD layer rules. **[Agent: tanstack-fullstack]**
+- [ ] **Verification**: `test:integration` green; CLAUDE.md reads cleanly; ESLint boundary rule passes. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 4: Profile read — own profile + public `/u/$username`
 
-- [ ] Replace `/profile` placeholder: route `loader` calls `getProfileById(userId)`; renders ported `ProfileHeader`, `ProfileStatsBar`, `OverviewTab`, `LibraryGrid` (read-only) from `savepoint-app/features/profile/ui/`. Swap `next/link` → TanStack `Link`, `next/image` → plain `<img>`. **[Agent: react-frontend]**
-- [ ] Create `savepoint-tanstack/app/routes/u.$username.tsx` — public route, loader calls `getProfileByUsername`; throws `NotFoundError` on miss → router renders error component with 404 copy. **[Agent: react-frontend]**
-- [ ] Add `getLibraryStats(userId)` and `getRecentGames(userId)` to `lib/queries/profile.ts` (or `lib/queries/library.ts` if the existing structure justifies it) — read-only stats queries needed for ProfileStatsBar/OverviewTab. **[Agent: tanstack-fullstack]**
-- [ ] Component tests for ported profile UI: snapshot/render assertions for ProfileHeader and ProfileStatsBar with stub data. **[Agent: typescript-test-expert]**
-- [ ] Integration tests for `getLibraryStats`, `getRecentGames`. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: signed-in user visits `:6061/profile` → sees own profile with same data shape as `:6060/u/<own-username>`; visit `:6061/u/<own-username>` → sees public profile; visit `:6061/u/does-not-exist` → 404 page renders. Compare side-by-side against `:6060` for parity. **[Agent: feature-dev:code-reviewer]**
+FSD: `entities/profile/{api,ui}` (display-only), `entities/library-item/api` (stats), `widgets/profile-overview` (composes entity UI), routes are thin.
+
+- [ ] **RED**: integration tests for `getLibraryStats(userId)` and `getRecentGames(userId)` against real PG. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component tests for `entities/profile/ui/ProfileHeader.tsx` and `ProfileStatsBar.tsx` (render with stub data). **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: extend `entities/profile/api/` with `getLibraryStats` and `getRecentGames` (or place them in `entities/library-item/api/` if shape clearly belongs there). **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port `ProfileHeader`, `ProfileStatsBar`, `OverviewTab`, `LibraryGrid` (read-only) into `entities/profile/ui/` and `entities/library-item/ui/`. Swap `next/link` → TanStack `Link`, `next/image` → `<img>`. **[Agent: react-frontend]**
+- [ ] **GREEN**: `widgets/profile-overview/ui/ProfileOverview.tsx` composes the entity UI; `widgets/library-grid/` for read-only library grid. **[Agent: react-frontend]**
+- [ ] **GREEN**: replace `_authed/profile.tsx` placeholder — loader calls `getProfileById(userId)` + stats; renders `<ProfileOverview/>`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `src/routes/u.$username.tsx` — public, loader calls `getProfileByUsername`; throws `NotFoundError` on miss → root error component renders 404. **[Agent: tanstack-fullstack]**
+- [ ] **Verification**: signed-in user `:6061/profile` matches `:6060/u/<own-username>` data shape; `:6061/u/<own-username>` public; `:6061/u/does-not-exist` → 404. Side-by-side parity vs `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 5: Profile mutations — username, visibility, settings persist
 
-- [ ] Add `updateProfile(userId, input)` and `isUsernameAvailable(username, excludeUserId?)` to `lib/queries/profile.ts`. **[Agent: tanstack-fullstack]**
-- [ ] Create `savepoint-tanstack/app/lib/server-fns/profile.ts` — `updateProfileFn` (Zod input matching today's `ProfileSettingsForm` schema), `checkUsernameFn`. Server fns resolve session, call query, surface `AppError` properly. **[Agent: tanstack-fullstack]**
-- [ ] Port `ProfileSettingsForm`, `UsernameInput`, `ProfileVisibilityToggle` UI from `savepoint-app/features/profile/ui/`; adapt action wiring to `useServerFn(updateProfileFn)` instead of next-safe-action / createServerAction. **[Agent: react-frontend]**
-- [ ] Port `useUsernameValidation` hook; wire to `checkUsernameFn`. **[Agent: react-frontend]**
-- [ ] Mount settings form on a new `/settings/profile` route under the authed group. **[Agent: tanstack-fullstack]**
-- [ ] Integration tests: `updateProfileFn` happy path + Zod-rejection + `ConflictError` on duplicate username. **[Agent: typescript-test-expert]**
-- [ ] Component tests: ProfileSettingsForm submits → mocked server fn called with expected payload; surfaces server error inline. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: signed-in user changes username + visibility on `:6061/settings/profile` → refresh → values persist; same record visible on `:6060` (shared DB). **[Agent: feature-dev:code-reviewer]**
+FSD: `entities/profile/api` (mutations), `features/edit-profile/{api,model,ui}` (server fns + form), route under `_authed/settings/profile`.
+
+- [ ] **RED**: integration tests for `updateProfileFn` — happy path, Zod rejection, `ConflictError` on duplicate username. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component tests for `features/edit-profile/ui/ProfileSettingsForm.tsx` — submit calls mocked server fn with expected payload; inline server-error surfacing; `useUsernameValidation` debounce path. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: extend `entities/profile/api` with `updateProfile(userId, input)` and `isUsernameAvailable(username, excludeUserId?)`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `features/edit-profile/api/update-profile.server.ts` — `updateProfileFn`, `checkUsernameFn` (Zod input matching today's `ProfileSettingsForm`). Server fns resolve session via `entities/session`, call entity queries, surface `AppError`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port `ProfileSettingsForm`, `UsernameInput`, `ProfileVisibilityToggle` into `features/edit-profile/ui/`; rewire to `useServerFn(updateProfileFn)`. Port `useUsernameValidation` to `features/edit-profile/model/`. **[Agent: react-frontend]**
+- [ ] **GREEN**: `src/routes/_authed/settings/profile.tsx` mounts the form. **[Agent: tanstack-fullstack]**
+- [ ] **Verification**: change username + visibility on `:6061/settings/profile`, refresh persists; same record visible on `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 6: Avatar upload — full LocalStack round-trip
 
-- [ ] Create `savepoint-tanstack/app/lib/storage/s3.ts` — AWS SDK v3 S3 client honoring `AWS_ENDPOINT_URL`, `S3_BUCKET_NAME`, `S3_AVATAR_PATH_PREFIX` (mirror `savepoint-app/shared/lib/storage/`). **[Agent: aws-infra]**
-- [ ] Add `getAvatarPresignedUrlFn` server fn — Zod-validated `contentType` (image MIME allow-list) + `contentLength` (≤10MB); returns presigned PUT URL + final public URL. **[Agent: aws-infra]**
-- [ ] Add `setAvatarUrlFn` server fn — persists final public URL to `User.image` (or current avatar field — confirm against schema). **[Agent: tanstack-fullstack]**
-- [ ] Port `AvatarUpload` component: client picks file → calls `getAvatarPresignedUrlFn` → PUT direct to S3 → calls `setAvatarUrlFn` → invalidates route. **[Agent: react-frontend]**
-- [ ] Integration test: `getAvatarPresignedUrlFn` returns valid presigned URL signed against LocalStack endpoint; reject oversize / disallowed MIME with `ValidationError`. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: with LocalStack running (`docker compose up -d`), upload an avatar on `:6061/settings/profile` → image appears on profile + `/u/$username`; same image visible on `:6060` (shared bucket). **[Agent: feature-dev:code-reviewer]**
+FSD: `shared/api/s3` (low-level client), `features/upload-avatar/{api,ui}`.
+
+- [ ] **RED**: integration test for `getAvatarPresignedUrlFn` against LocalStack — valid URL, reject oversize, reject disallowed MIME with `ValidationError`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: integration test for `setAvatarUrlFn` — persists URL to user record; rejects unauthenticated. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/upload-avatar/ui/AvatarUpload.tsx` — happy flow with mocked server fns + fetch. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `src/shared/api/s3.ts` — AWS SDK v3 client honoring `AWS_ENDPOINT_URL`, `S3_BUCKET_NAME`, `S3_AVATAR_PATH_PREFIX` (mirror `savepoint-app/shared/lib/storage/`). **[Agent: aws-infra]**
+- [ ] **GREEN**: `features/upload-avatar/api/get-avatar-presigned-url.server.ts` — Zod-validated `contentType` (MIME allow-list) + `contentLength` (≤10MB); returns presigned PUT URL + final public URL. **[Agent: aws-infra]**
+- [ ] **GREEN**: `features/upload-avatar/api/set-avatar-url.server.ts` — persists final public URL to `User.image` (confirm field against schema). **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port `AvatarUpload` into `features/upload-avatar/ui/`: pick file → `getAvatarPresignedUrlFn` → PUT to S3 → `setAvatarUrlFn` → `router.invalidate()`. **[Agent: react-frontend]**
+- [ ] **Verification**: with LocalStack running, upload on `:6061/settings/profile` → image appears on profile + `/u/$username`; same image on `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 7: Vertical 1 verification + logger decision
 
 - [ ] Run full parity walkthrough across `:6060` ↔ `:6061`: sign-in, profile read, settings edit, avatar upload, public profile, sign-out. Document any divergence in `savepoint-tanstack/CLAUDE.md` "known gaps". **[Agent: feature-dev:code-reviewer]**
-- [ ] **Logger decision** (deferred from S0): copy `savepoint-app/shared/lib/logger.ts` (pino) verbatim into `savepoint-tanstack/app/lib/logger.ts` OR pick a slimmer alternative; document rationale in CLAUDE.md. Default-on if no decision: copy verbatim. **[Agent: tanstack-fullstack]**
+- [ ] **Logger decision** (deferred from S0): copy `savepoint-app/shared/lib/logger.ts` (pino) verbatim into `src/shared/lib/logger.ts` OR pick a slimmer alternative; document rationale in CLAUDE.md. Default: copy verbatim. **[Agent: tanstack-fullstack]**
 - [ ] Sweep `console.*` calls introduced during S0–S6, replace with logger. **[Agent: tanstack-fullstack]**
 - [ ] **Verification**: parity walkthrough green; logger emits structured JSON in dev console. **[Agent: feature-dev:code-reviewer]**
 
@@ -106,20 +138,25 @@
 
 ### Slice 8: IGDB client + search server function
 
-- [ ] Create `lib/queries/igdb.ts` — port IGDB token cache + REST helpers from `savepoint-app/data-access-layer/services/igdb/`; module-level token state, 60s safety margin on refresh. Throw `UpstreamError` on IGDB failures. **[Agent: tanstack-fullstack]**
-- [ ] Create `lib/server-fns/igdb.ts` — `searchGamesFn(query)`, `getGameByIdFn(id)`, `getGameBySlugFn(slug)`. **[Agent: tanstack-fullstack]**
-- [ ] Unit tests for token cache (refresh on expiry, parallel-call deduplication, 60s margin). **[Agent: typescript-test-expert]**
-- [ ] Integration tests with mocked HTTP layer for `searchGamesFn` happy path + error mapping to `UpstreamError`. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: temporary `/dev/igdb-search` route renders results from `searchGamesFn`; tests green. **[Agent: tanstack-fullstack]**
+FSD: `shared/api/igdb` (low-level REST + token cache), `features/search-games/api` (server fns).
+
+- [ ] **RED**: unit tests for token cache (refresh on expiry, parallel-call dedup, 60s margin). **[Agent: typescript-test-expert]**
+- [ ] **RED**: integration tests (mocked HTTP) for `searchGamesFn` happy path + error mapping to `UpstreamError`. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `src/shared/api/igdb/` — port token cache + REST helpers from `savepoint-app/data-access-layer/services/igdb/`; module-level token state, 60s safety margin. Throw `UpstreamError`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `features/search-games/api/` — `searchGamesFn(query)`, `getGameByIdFn(id)`, `getGameBySlugFn(slug)`. **[Agent: tanstack-fullstack]**
+- [ ] **Verification**: temporary `/dev/igdb-search` route renders `searchGamesFn` results; tests green. **[Agent: tanstack-fullstack]**
 
 ### Slice 9: Add-game flow end-to-end
 
-- [ ] Add `lib/queries/game.ts` with `upsertGameFromIgdb(igdbId)` — fetches IGDB metadata if not cached, upserts `Game` row. **[Agent: tanstack-fullstack]**
-- [ ] Add `lib/queries/library.ts` with `addGameToLibrary(userId, igdbId, status)` — upserts game + creates `LibraryItem`. **[Agent: tanstack-fullstack]**
-- [ ] Add `addGameToLibraryFn` server fn (Zod-validated). **[Agent: tanstack-fullstack]**
-- [ ] Port AddGame search modal UI from `savepoint-app/features/add-game/`; wire to `searchGamesFn` + `addGameToLibraryFn`. **[Agent: react-frontend]**
-- [ ] Integration tests: `upsertGameFromIgdb` (cache miss + cache hit), `addGameToLibrary` (creates LibraryItem, idempotent on duplicate). **[Agent: typescript-test-expert]**
-- [ ] **Verification**: search a game on `:6061`, add to library, see it appear in DB and (via Slice 4 read paths) on profile/library. **[Agent: feature-dev:code-reviewer]**
+FSD: `entities/game/api` (`upsertGameFromIgdb`), `entities/library-item/api` (`addGameToLibrary`), `features/add-game/{api,ui}`.
+
+- [ ] **RED**: integration tests — `upsertGameFromIgdb` (cache miss + hit), `addGameToLibrary` (creates LibraryItem, idempotent on duplicate, ownership-aware). **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/add-game/ui/AddGameModal.tsx` — search → select → add wires to mocked server fns. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `entities/game/api/upsert-game.server.ts` — fetches IGDB if not cached, upserts `Game`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `entities/library-item/api/add-game-to-library.server.ts` — upserts game + creates `LibraryItem`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `features/add-game/api/add-game.server.ts` — `addGameToLibraryFn` (Zod) composes the entity calls. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port AddGame search modal into `features/add-game/ui/`; wire to `searchGamesFn` + `addGameToLibraryFn`. **[Agent: react-frontend]**
+- [ ] **Verification**: search a game on `:6061`, add to library, appears in DB and on profile/library (via S4 reads). **[Agent: feature-dev:code-reviewer]**
 
 ---
 
@@ -127,25 +164,31 @@
 
 ### Slice 10: Library list with filters and sort
 
-- [ ] Add `getLibrary(userId, filters)` to `lib/queries/library.ts` — supports status filter, sort (rating/added/title), platform filter, rating filter. **[Agent: tanstack-fullstack]**
-- [ ] Create `app/routes/_authed/library.tsx` — loader fetches via `getLibrary`; renders ported library list UI from `savepoint-app/features/library/`. **[Agent: react-frontend]**
-- [ ] Port library filters / sort controls; persist filter state via search params (TanStack Router `Link search`). **[Agent: react-frontend]**
-- [ ] Integration tests for `getLibrary` covering each filter combination. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: library page on `:6061` shows same entries in same order as `:6060` for the test user; filters/sort behave identically. **[Agent: feature-dev:code-reviewer]**
+FSD: `entities/library-item/api` (`getLibrary`), `features/filter-library/{model,ui}`, `widgets/library-page/`, route `_authed/library`.
+
+- [ ] **RED**: integration tests for `getLibrary` covering each filter/sort combination (status, platform, rating, title-sort). **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/filter-library/ui/` — filter controls update search params; loader observed via mocked router. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: extend `entities/library-item/api` with `getLibrary(userId, filters)` (status/sort/platform/rating). **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port filters/sort controls into `features/filter-library/ui/`; persist via TanStack Router `Link search`. **[Agent: react-frontend]**
+- [ ] **GREEN**: `widgets/library-page/ui/LibraryPage.tsx` composes filters + grid; `src/routes/_authed/library.tsx` loader calls `getLibrary` and renders the widget. **[Agent: react-frontend]**
+- [ ] **Verification**: `:6061/library` matches `:6060` for same user; filters/sort identical. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 11: Library mutations — status / rating / platform / delete
 
-- [ ] Add `updateLibraryItem(userId, itemId, input)` and `deleteLibraryItem(userId, itemId)` to `lib/queries/library.ts` — enforce ownership, throw `UnauthorizedError` on cross-user access. **[Agent: tanstack-fullstack]**
-- [ ] Add `updateLibraryItemFn`, `deleteLibraryItemFn` server fns. **[Agent: tanstack-fullstack]**
-- [ ] Port ManageLibraryEntry modal + form from `savepoint-app/features/manage-library-entry/`; rewire actions. **[Agent: react-frontend]**
-- [ ] Integration tests: ownership enforcement, status/rating/platform updates, delete. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: edit a library item on `:6061` → persists, same record visible on `:6060`; cross-user access attempt rejected. **[Agent: feature-dev:code-reviewer]**
+FSD: `entities/library-item/api` (mutations w/ ownership), `features/manage-library-entry/{api,ui}`.
+
+- [ ] **RED**: integration tests — ownership enforcement (cross-user → `UnauthorizedError`), status/rating/platform updates, delete. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/manage-library-entry/ui/` — submit invokes mocked server fn; surfaces `UnauthorizedError` inline. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: extend `entities/library-item/api` with `updateLibraryItem(userId, itemId, input)`, `deleteLibraryItem(userId, itemId)` — ownership-checked. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `features/manage-library-entry/api/` — `updateLibraryItemFn`, `deleteLibraryItemFn`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port ManageLibraryEntry modal/form into `features/manage-library-entry/ui/`; rewire to `useServerFn`. **[Agent: react-frontend]**
+- [ ] **Verification**: edit on `:6061` persists; visible on `:6060`; cross-user rejected. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 12: Library bulk surfaces (parity-only)
 
-- [ ] Audit current `savepoint-app/` for shipped bulk surfaces (multi-select etc.); only port what is currently shipped. If "Bulk Library Actions" is still on the roadmap (not shipped), this slice is a no-op — document in CLAUDE.md and skip. **[Agent: feature-dev:code-explorer]**
-- [ ] If shipped: port multi-select UI + bulk status change / bulk delete server fns. **[Agent: react-frontend]**
-- [ ] **Verification**: parity walkthrough; no new behavior introduced beyond what `savepoint-app/` already does. **[Agent: feature-dev:code-reviewer]**
+- [ ] Audit `savepoint-app/` for shipped bulk surfaces. If "Bulk Library Actions" is roadmap-only (not shipped), document as no-op in CLAUDE.md and skip. **[Agent: feature-dev:code-explorer]**
+- [ ] If shipped: **RED** integration + component tests first; then port to `features/bulk-manage-library/` (multi-select UI + bulk status / bulk delete server fns). **[Agent: react-frontend]**
+- [ ] **Verification**: parity walkthrough; no new behavior. **[Agent: feature-dev:code-reviewer]**
 
 ---
 
@@ -153,16 +196,23 @@
 
 ### Slice 13: `/games/$slug` route with full data composition
 
-- [ ] Add `getGameDetails(slug, userId?)` orchestration in `lib/queries/game.ts` — IGDB lookup, game cache, library entry (if signed in), journal entries (if signed in), related games. Throws `NotFoundError` on miss. **[Agent: tanstack-fullstack]**
-- [ ] Create `app/routes/games.$slug.tsx` — loader calls `getGameDetails`; renders ported game detail composition from `savepoint-app/features/game-detail/`. **[Agent: react-frontend]**
-- [ ] Port relevant UI subcomponents (cover, metadata, status strip, journal teaser) — drop `next/image` / `next/link`. **[Agent: react-frontend]**
-- [ ] Integration tests: `getGameDetails` for signed-in vs anonymous; missing slug; cache miss vs cache hit. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: side-by-side compare `:6060/games/<slug>` and `:6061/games/<slug>` for at least 5 games; surface any divergence. **[Agent: feature-dev:code-reviewer]**
+FSD: `entities/game/api` (`getGameDetails` orchestration), entity UI primitives (cover/metadata), `widgets/game-detail/` composition.
+
+- [ ] **RED**: integration tests for `getGameDetails` — signed-in vs anonymous, missing slug → `NotFoundError`, cache miss vs hit. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component tests for entity UI subcomponents (cover, metadata, status strip). **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `entities/game/api/get-game-details.server.ts` — orchestrates IGDB lookup, game cache, optional library entry, optional journal teaser, related games. Throws `NotFoundError`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port game-detail subcomponents into `entities/game/ui/` and `entities/journal-entry/ui/` (teaser); compose in `widgets/game-detail/ui/GameDetail.tsx`. Drop `next/image`/`next/link`. **[Agent: react-frontend]**
+- [ ] **GREEN**: `src/routes/games.$slug.tsx` loader → widget. **[Agent: react-frontend]**
+- [ ] **Verification**: side-by-side compare `:6060/games/<slug>` vs `:6061/games/<slug>` for ≥5 games. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 14: Browse-related-games infinite scroll
 
-- [ ] Port browse-related-games surface; use TanStack Router search params + loader pagination instead of TanStack Query. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: scroll behavior, page size, total count match `savepoint-app/`. **[Agent: feature-dev:code-reviewer]**
+FSD: `features/browse-related-games/{api,ui}` (server-fn-paginated, TanStack Router search-param driven).
+
+- [ ] **RED**: integration test for paginated server fn — page size, total count, ordering. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for infinite-scroll UI — sentinel intersection invokes loader/server-fn next page. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: port surface into `features/browse-related-games/`; use TanStack Router search params + loader pagination (no TanStack Query). **[Agent: tanstack-fullstack]**
+- [ ] **Verification**: scroll, page size, total count match `savepoint-app/`. **[Agent: feature-dev:code-reviewer]**
 
 ---
 
@@ -170,18 +220,25 @@
 
 ### Slice 15: Journal timeline read
 
-- [ ] Add `getJournalTimeline(userId)` and `getJournalEntriesForGame(userId, gameId)` to `lib/queries/journal.ts`. **[Agent: tanstack-fullstack]**
-- [ ] Create `app/routes/_authed/journal.tsx` — chronological timeline UI ported from `savepoint-app/features/journal/`. **[Agent: react-frontend]**
-- [ ] Integration tests for both queries. **[Agent: typescript-test-expert]**
+FSD: `entities/journal-entry/{api,ui}`, `widgets/journal-timeline/`, route `_authed/journal`.
+
+- [ ] **RED**: integration tests for `getJournalTimeline(userId)` and `getJournalEntriesForGame(userId, gameId)`. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for timeline rendering (empty, populated, mixed entry kinds). **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `entities/journal-entry/api/get-journal.server.ts` — both queries. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port timeline UI into `entities/journal-entry/ui/` and compose in `widgets/journal-timeline/`. **[Agent: react-frontend]**
+- [ ] **GREEN**: `src/routes/_authed/journal.tsx` loader → widget. **[Agent: react-frontend]**
 - [ ] **Verification**: timeline on `:6061` matches `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 16: Journal entry CRUD
 
-- [ ] Add `createJournalEntry`, `updateJournalEntry`, `deleteJournalEntry` to `lib/queries/journal.ts` — ownership-enforced. **[Agent: tanstack-fullstack]**
-- [ ] Add corresponding server fns. **[Agent: tanstack-fullstack]**
-- [ ] Port journal compose + edit + delete UI. **[Agent: react-frontend]**
-- [ ] Integration tests for each operation incl. ownership rejection. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: write/edit/delete an entry on `:6061`; visible identically on `:6060`. **[Agent: feature-dev:code-reviewer]**
+FSD: `entities/journal-entry/api` (mutations), `features/{compose-journal-entry,edit-journal-entry,delete-journal-entry}/{api,ui}`.
+
+- [ ] **RED**: integration tests for create/update/delete incl. ownership rejection. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component tests for compose + edit + delete UI (form submit, optimistic invalidation). **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: extend `entities/journal-entry/api` with `createJournalEntry`, `updateJournalEntry`, `deleteJournalEntry` (ownership-enforced). **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: feature-layer server fns wrapping each operation (Zod). **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port compose/edit/delete UI into the three feature slices. **[Agent: react-frontend]**
+- [ ] **Verification**: write/edit/delete on `:6061` visible identically on `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ---
 
@@ -189,9 +246,11 @@
 
 ### Slice 17: ⌘K command palette
 
-- [ ] Port command palette UI from `savepoint-app/features/command-palette/`; rebind ⌘K shortcut; reuse `searchGamesFn`. **[Agent: react-frontend]**
-- [ ] Integration tests for keyboard binding + search debounce. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: ⌘K opens on `:6061`, searches games, navigates to game detail via TanStack Router. **[Agent: feature-dev:code-reviewer]**
+FSD: `features/command-palette/{model,ui}` (reuses `features/search-games/api`).
+
+- [ ] **RED**: component tests — ⌘K binding opens palette; debounce window enforced; result click navigates via TanStack Router. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: port palette into `features/command-palette/`; rebind ⌘K; reuse `searchGamesFn`. **[Agent: react-frontend]**
+- [ ] **Verification**: ⌘K on `:6061` opens, searches, navigates. **[Agent: feature-dev:code-reviewer]**
 
 ---
 
@@ -199,12 +258,15 @@
 
 ### Slice 18: Remaining surfaces
 
-- [ ] Settings shell `/settings/account` — port account section (email read-only, sign-out, delete account if shipped). **[Agent: react-frontend]**
-- [ ] Social: follow/unfollow server fns + queries; followers/following list routes; activity feed. Port from `savepoint-app/features/social/`. **[Agent: tanstack-fullstack]**
-- [ ] What's-new modal port. **[Agent: react-frontend]**
-- [ ] First-time onboarding port (only if shipped in `savepoint-app/`). **[Agent: react-frontend]**
-- [ ] Integration tests for each social server fn. **[Agent: typescript-test-expert]**
-- [ ] **Verification**: parity walkthrough across all settings/social/onboarding flows on `:6061` vs `:6060`. **[Agent: feature-dev:code-reviewer]**
+FSD: `features/{follow-user,unfollow-user,view-activity-feed,whats-new,onboarding-first-time,manage-account}/`, `entities/follow/`, route `_authed/settings/account`.
+
+- [ ] **RED**: integration tests for each social server fn (follow, unfollow, list followers/following, activity feed) — incl. self-follow rejection, idempotency. **[Agent: typescript-test-expert]**
+- [ ] **RED**: component tests for follow/unfollow buttons, what's-new modal trigger, onboarding step gating. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `entities/follow/api/` queries; `features/follow-user/api`, `features/unfollow-user/api`, `features/view-activity-feed/api` server fns. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `features/manage-account/ui/` — email read-only, sign-out, delete account (if shipped). Mount on `_authed/settings/account`. **[Agent: react-frontend]**
+- [ ] **GREEN**: port what's-new modal → `features/whats-new/`. **[Agent: react-frontend]**
+- [ ] **GREEN**: port first-time onboarding → `features/onboarding-first-time/` (only if shipped in `savepoint-app/`). **[Agent: react-frontend]**
+- [ ] **Verification**: parity walkthrough for all settings/social/onboarding on `:6061` vs `:6060`. **[Agent: feature-dev:code-reviewer]**
 
 ---
 
@@ -213,9 +275,11 @@
 ### Slice 19: Final parity audit
 
 - [ ] Generate a parity matrix: every URL in `savepoint-app/` mapped to its equivalent in `savepoint-tanstack/`. Block on any unmapped URL. **[Agent: feature-dev:code-explorer]**
-- [ ] Cross-app session check on every authed route: sign in on `:6060`, navigate to each route on `:6061`, confirm it loads correctly. **[Agent: feature-dev:code-reviewer]**
-- [ ] CodeRabbit-style independent review of `savepoint-tanstack/` end-to-end before cutover. **[Agent: feature-dev:code-reviewer]**
-- [ ] **Verification**: parity matrix is 100% green; no critical findings outstanding. **[Agent: feature-dev:code-reviewer]**
+- [ ] **FSD audit**: enumerate every file in `savepoint-tanstack/src/`; verify it sits in the correct layer (`app|routes|widgets|features|entities|shared`); confirm no upward imports; confirm no `next/*` references. Output a findings table; block cutover on any violation. **[Agent: react-architect]**
+- [ ] **Test-coverage audit**: confirm every server fn has an integration test; every ported feature UI has at least one component test; coverage threshold met. **[Agent: typescript-test-expert]**
+- [ ] Cross-app session check on every authed route: sign in on `:6060`, navigate each route on `:6061`. **[Agent: feature-dev:code-reviewer]**
+- [ ] CodeRabbit-style independent review of `savepoint-tanstack/` end-to-end. **[Agent: feature-dev:code-reviewer]**
+- [ ] **Verification**: parity matrix 100% green; FSD audit clean; no critical findings. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 20: Cutover PR
 
@@ -245,7 +309,8 @@
 | Agent | Used For |
 |---|---|
 | `tanstack-fullstack` | TanStack Start setup, routing, server fns, queries, BA wiring, env, conventions |
-| `react-frontend` | UI ports (Tailwind, shadcn, RHF + Zod forms, components) |
+| `react-architect` | FSD scaffold, layer rules, ESLint boundary rule, FSD audit at cutover |
+| `react-frontend` | UI ports (Tailwind, shadcn, RHF + Zod forms, components) into correct FSD layers |
 | `prisma-database` | Prisma schema copy + drift check (no migrations from this app) |
 | `aws-infra` | S3 client + LocalStack presigned URLs |
 | `terraform-infrastructure` | Cognito callback URL changes (dev + prod) |
