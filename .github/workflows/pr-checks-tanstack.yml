@@ -1,0 +1,54 @@
+name: PR Code Quality Checks (TanStack)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "savepoint-tanstack/**"
+      - "savepoint-app/prisma/schema.prisma"
+      - "pnpm-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/pr-checks-tanstack.yml"
+
+concurrency:
+  group: pr-checks-tanstack-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality (typecheck, lint, format, unit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prisma schema drift check (savepoint-app ↔ savepoint-tanstack)
+        run: |
+          if ! diff -q savepoint-app/prisma/schema.prisma savepoint-tanstack/prisma/schema.prisma; then
+            echo ""
+            echo "savepoint-tanstack/prisma/schema.prisma has diverged from savepoint-app/prisma/schema.prisma."
+            echo "Re-run the copy from spec 021 Slice 0 task 3 to restore parity, or update both schemas in lockstep."
+            exit 1
+          fi
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm --filter savepoint-tanstack typecheck
+
+      - name: Lint (incl. FSD boundary rule)
+        run: pnpm --filter savepoint-tanstack lint
+
+      - name: Format check
+        run: pnpm --filter savepoint-tanstack format:check
+
+      - name: Unit tests
+        run: pnpm --filter savepoint-tanstack test:unit
