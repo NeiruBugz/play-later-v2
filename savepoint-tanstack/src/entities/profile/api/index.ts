@@ -1,4 +1,5 @@
 export { getProfileById, getProfileByUsername } from "./get-profile.server";
+export { getPublicProfile } from "./get-public-profile.server";
 export {
   updateProfile,
   type UpdateProfileInput,

@@ -1,12 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import { getLibraryStats } from "@/entities/library-item/api/get-library-stats.server";
+import { getProfileById } from "@/entities/profile/api/get-profile.server";
+import { requireUserId } from "@/entities/session/api/require-user-id";
 import { LogoutButton } from "@/features/auth-sign-out/ui/logout-button";
-import { getProfileViewFn } from "@/features/profile-overview/api/get-profile-view";
 import { Button } from "@/shared/ui/button";
 import { ProfileOverview } from "@/widgets/profile-overview";
 
 export const Route = createFileRoute("/_authed/profile")({
-  loader: () => getProfileViewFn(),
+  loader: async () => {
+    const userId = await requireUserId();
+    const [profile, stats] = await Promise.all([
+      getProfileById(userId),
+      getLibraryStats(userId),
+    ]);
+    return { profile, stats };
+  },
   component: ProfilePage,
 });
 

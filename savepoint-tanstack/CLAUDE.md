@@ -120,11 +120,7 @@ Errors bubble up to the route `errorComponent` or the root error boundary at [`s
 
 Code that does not yet match the rules above — to be cleaned up in the next architectural commits. Listed so the rules read as the source of truth, not the code:
 
-- `requireUserId()` handler helper not yet introduced. Current handlers call `getServerUserId(getRequest())` + null-check inline. `entities/session/api/require-user-id.ts` currently exports the **route-guard server fn** (will be renamed `require-user-id-or-redirect.ts`); the handler helper will then take the original filename.
 - `getCurrentUserIdFn` in `entities/session/api/get-current-user-id.ts` is the "redirect-if-authed" gate used by `/login` to bounce signed-in users to `/profile`. Its name reads as a low-level reader, not a guard — to be renamed (e.g., `redirectIfAuthedFn`) in a follow-up so the two redirect intents are symmetrically named with `requireUserIdOrRedirectFn`.
-- `features/profile-overview/` is a feature with no UI; both server fns wrap two entity reads each. Slated for inlining into the route loaders (`/_authed/profile`, `/u/$username`) per the strict rule.
-- `entities/profile/api/get-public-profile.server.ts` does not yet exist; the `!isPublicProfile` privacy gate currently lives in `getPublicProfileViewFn`. To be moved into the entity query.
-- `safeGetRequest()` in `features/edit-profile/api/update-profile.ts` to be deleted (helper owns `getRequest()`). The double `parse` of `UPDATE_PROFILE_INPUT` is correct and stays — see "Validate twice" rule above.
 - `updateProfileFn` pre-checks uniqueness before calling `updateProfile`. To be deleted; the entity's `P2002` mapping is the single enforcement seam (and will be narrowed by inspecting `error.meta?.target`).
 - `isUsernameAvailable` to be renamed `getUsernameAvailability` to mark its UX-hint intent.
 - `entities/library-item/api/get-recent-games.server.ts` returns a strict subset of `getLibraryStats`. Slated for deletion.
