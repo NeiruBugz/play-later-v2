@@ -42,6 +42,10 @@ export const Route = createFileRoute("/_authed/profile")({
 
 **Counter-indication:** if the composition becomes complex enough that _the entity layer_ is the right home (e.g., a privacy gate, a status materialization rule), push the logic into a deeper entity query, not into a feature.
 
+**Known bundler caveat (TanStack Start v1 + Vite `import-protection`).** The canonical shape above breaks at runtime when the route is preloaded on the client (default `preload: "intent"` triggers on hover). Top-level `.server.ts` imports in a route file are not stripped from the client bundle by TanStack Start's route-extractor, so the protection plugin denies them and the preload promise never resolves — the entire app hangs on hover. Imports inside a `createServerFn().handler(...)` body **are** stripped, because the plugin replaces the body with an RPC stub on the client build.
+
+Until the extractor learns to strip loader-only imports (or until we drop hover preload), a route whose loader needs server-only modules must wrap that work in a `createServerFn` exported from a non-`.server.ts` file (mirroring `getProfileSettingsFn`). The route file then imports only the server-fn value, which is client-safe. This server fn is loader-only and would, by the strict rule, not exist; the bundler reality is the only justification for it. Mark such fns with a brief comment referencing this caveat. The rule itself remains correct as the target architecture — only the canonical shape's literal `import { x } from "./x.server"` line is currently the foot-gun.
+
 ### Feature server fn
 
 ---

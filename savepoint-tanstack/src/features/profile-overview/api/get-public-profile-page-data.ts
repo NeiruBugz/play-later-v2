@@ -1,0 +1,27 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+
+import {
+  getLibraryStats,
+  type LibraryStats,
+} from "@/entities/library-item/api";
+import { getPublicProfile } from "@/entities/profile/api";
+import type { Profile } from "@/entities/profile/model/types";
+
+const inputSchema = z.object({
+  username: z.string().min(1),
+});
+
+export type PublicProfilePageView = {
+  profile: Profile;
+  stats: LibraryStats;
+};
+
+export const getPublicProfilePageDataFn = createServerFn({ method: "GET" })
+  .inputValidator((value: unknown) => inputSchema.parse(value))
+  .handler(async ({ data }): Promise<PublicProfilePageView> => {
+    const { username } = inputSchema.parse(data);
+    const profile = await getPublicProfile(username);
+    const stats = await getLibraryStats(profile.id);
+    return { profile, stats };
+  });

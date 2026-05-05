@@ -1,15 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { getLibraryStats } from "@/entities/library-item/api/get-library-stats.server";
-import { getPublicProfile } from "@/entities/profile/api/get-public-profile.server";
+import { getPublicProfilePageDataFn } from "@/features/profile-overview/api";
 import { ProfileOverview } from "@/widgets/profile-overview";
 
 export const Route = createFileRoute("/u/$username")({
-  loader: async ({ params }) => {
-    const profile = await getPublicProfile(params.username);
-    const stats = await getLibraryStats(profile.id);
-    return { profile, stats };
-  },
+  loader: ({ params }) =>
+    getPublicProfilePageDataFn({ data: { username: params.username } }),
   component: PublicProfilePage,
 });
 

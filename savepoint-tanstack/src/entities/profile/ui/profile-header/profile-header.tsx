@@ -1,6 +1,6 @@
 import type { ProfileHeaderProps } from "./profile-header.type";
 
-const DEFAULT_AVATAR_SRC = "/default-avatar.svg";
+const DEFAULT_AVATAR_SRC = "/default-avatar.png";
 
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const displayName = profile.name ?? profile.username ?? "User";

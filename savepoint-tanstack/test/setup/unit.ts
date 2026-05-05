@@ -1,3 +1,5 @@
+import "@testing-library/jest-dom";
+
 import { afterEach, vi } from "vitest";
 
 if (typeof globalThis.ResizeObserver === "undefined") {

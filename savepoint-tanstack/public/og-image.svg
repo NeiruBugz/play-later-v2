@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- OG Image with Memory Card and SavePoint branding -->
+
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E293B;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#9CA3AF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6B7280;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Memory Card (scaled up) -->
+  <g transform="translate(200, 165)">
+    <!-- Card body -->
+    <rect x="0" y="0" width="280" height="300" rx="8" ry="8" fill="url(#cardGrad)"/>
+
+    <!-- Top ridge -->
+    <rect x="0" y="0" width="280" height="40" rx="8" ry="8" fill="#4B5563"/>
+    <rect x="10" y="10" width="20" height="20" rx="3" fill="#374151"/>
+    <rect x="40" y="10" width="20" height="20" rx="3" fill="#374151"/>
+    <rect x="70" y="10" width="20" height="20" rx="3" fill="#374151"/>
+    <rect x="100" y="10" width="20" height="20" rx="3" fill="#374151"/>
+    <rect x="130" y="10" width="20" height="20" rx="3" fill="#374151"/>
+    <rect x="160" y="10" width="20" height="20" rx="3" fill="#374151"/>
+    <rect x="190" y="10" width="20" height="20" rx="3" fill="#374151"/>
+    <rect x="220" y="10" width="20" height="20" rx="3" fill="#374151"/>
+    <rect x="250" y="10" width="20" height="20" rx="3" fill="#374151"/>
+
+    <!-- Label area -->
+    <rect x="20" y="50" width="240" height="230" rx="6" ry="6" fill="#E5E7EB"/>
+
+    <!-- 3x3 grid -->
+    <rect x="30" y="60" width="65" height="60" rx="4" fill="#374151"/>
+    <rect x="107.5" y="60" width="65" height="60" rx="4" fill="#374151"/>
+    <rect x="185" y="60" width="65" height="60" rx="4" fill="#374151"/>
+
+    <rect x="30" y="135" width="65" height="60" rx="4" fill="#374151"/>
+    <rect x="107.5" y="135" width="65" height="60" rx="4" fill="#374151"/>
+    <rect x="185" y="135" width="65" height="60" rx="4" fill="#374151"/>
+
+    <rect x="30" y="210" width="65" height="60" rx="4" fill="#374151"/>
+    <rect x="107.5" y="210" width="65" height="60" rx="4" fill="#374151"/>
+    <rect x="185" y="210" width="65" height="60" rx="4" fill="#374151"/>
+
+    <!-- Highlighted block -->
+    <rect x="30" y="60" width="65" height="60" rx="4" fill="#6366F1"/>
+
+    <!-- Shine -->
+    <rect x="0" y="0" width="280" height="30" rx="8" ry="8" fill="rgba(255,255,255,0.1)"/>
+    <rect x="0" y="0" width="140" height="300" rx="8" ry="8" fill="rgba(255,255,255,0.05)"/>
+  </g>
+
+  <!-- Text Content -->
+  <text x="550" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="#F1F5F9">
+    SavePoint
+  </text>
+  <text x="550" y="300" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="400" fill="#94A3B8">
+    Your Personal Gaming Library
+  </text>
+  <text x="550" y="360" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="300" fill="#64748B">
+    Curate games. Journal experiences.
+  </text>
+  <text x="550" y="410" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="300" fill="#64748B">
+    Preserve memories.
+  </text>
+</svg>

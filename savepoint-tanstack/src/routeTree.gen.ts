@@ -15,6 +15,8 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
+import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
+import { Route as AuthedJournalRouteImport } from './routes/_authed/journal'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedSettingsProfileRouteImport } from './routes/_authed/settings/profile'
 
@@ -47,6 +49,16 @@ const AuthedProfileRoute = AuthedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedLibraryRoute = AuthedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedJournalRoute = AuthedJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -62,6 +74,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/journal': typeof AuthedJournalRoute
+  '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
   '/u/$username': typeof UUsernameRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
@@ -71,6 +85,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/journal': typeof AuthedJournalRoute
+  '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
   '/u/$username': typeof UUsernameRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
@@ -82,6 +98,8 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
+  '/_authed/journal': typeof AuthedJournalRoute
+  '/_authed/library': typeof AuthedLibraryRoute
   '/_authed/profile': typeof AuthedProfileRoute
   '/u/$username': typeof UUsernameRoute
   '/_authed/settings/profile': typeof AuthedSettingsProfileRoute
@@ -93,6 +111,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/login'
+    | '/journal'
+    | '/library'
     | '/profile'
     | '/u/$username'
     | '/settings/profile'
@@ -102,6 +122,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/login'
+    | '/journal'
+    | '/library'
     | '/profile'
     | '/u/$username'
     | '/settings/profile'
@@ -112,6 +134,8 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/about'
     | '/login'
+    | '/_authed/journal'
+    | '/_authed/library'
     | '/_authed/profile'
     | '/u/$username'
     | '/_authed/settings/profile'
@@ -171,6 +195,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedProfileRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/library': {
+      id: '/_authed/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthedLibraryRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/journal': {
+      id: '/_authed/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof AuthedJournalRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -189,11 +227,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedJournalRoute: typeof AuthedJournalRoute
+  AuthedLibraryRoute: typeof AuthedLibraryRoute
   AuthedProfileRoute: typeof AuthedProfileRoute
   AuthedSettingsProfileRoute: typeof AuthedSettingsProfileRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedJournalRoute: AuthedJournalRoute,
+  AuthedLibraryRoute: AuthedLibraryRoute,
   AuthedProfileRoute: AuthedProfileRoute,
   AuthedSettingsProfileRoute: AuthedSettingsProfileRoute,
 }

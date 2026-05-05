@@ -4,9 +4,5 @@ import { requireUserIdOrRedirectFn } from "@/entities/session/api/require-user-i
 
 export const Route = createFileRoute("/_authed")({
   beforeLoad: () => requireUserIdOrRedirectFn(),
-  component: AuthedLayout,
+  component: () => <Outlet />,
 });
-
-function AuthedLayout() {
-  return <Outlet />;
-}
