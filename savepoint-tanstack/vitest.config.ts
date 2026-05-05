@@ -29,6 +29,7 @@ export default defineConfig({
             "src/**/*.unit.test.{ts,tsx}",
             "src/**/*.test.{ts,tsx}",
             "test/canary/**/*.canary.test.{ts,tsx}",
+            "test/eslint/**/*.test.{ts,tsx}",
           ],
           exclude: [
             "**/node_modules/**",
