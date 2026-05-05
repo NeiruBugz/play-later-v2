@@ -1,7 +1,7 @@
 import { env } from "@env";
 import { createServerFn } from "@tanstack/react-start";
 
-export const getCredentialsEnabledFn = createServerFn({
+export const getEmailSignInEnabledFn = createServerFn({
   method: "GET",
 }).handler(async (): Promise<{ credentialsEnabled: boolean }> => {
   return {
