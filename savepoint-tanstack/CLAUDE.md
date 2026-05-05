@@ -23,6 +23,20 @@ Binding rule from the spec methodology header:
 - PR descriptions reference the failing-test commit.
 - Canary harness sentinel tests live in [`test/canary/`](./test/canary/) and [`test/integration/canary.integration.test.ts`](./test/integration/canary.integration.test.ts) — do not delete them. They prove the unit + integration harnesses are wired.
 - The boundary-rule regression guard at [`test/eslint/`](./test/eslint/) is also load-bearing — do not delete.
+- During a **RED** sub-task it is fine — and expected — for `typecheck`, `test:unit`, and `test:integration` to fail. Use plain static imports of the not-yet-created module so the failure is clear and TS-honest. Do **not** reach for `import("./x" as string)` / `/* @vite-ignore */` tricks to keep typecheck green; that hides the signal. CI gates at the slice boundary, not at every intermediate commit.
+
+## Component test conventions
+
+Every component / route test in `src/**/*.test.tsx` follows the same shape. See [`src/features/auth-cognito-sign-in/ui/cognito-sign-in-button.test.tsx`](./src/features/auth-cognito-sign-in/ui/cognito-sign-in-button.test.tsx) and [`src/features/auth-email-sign-in/ui/email-sign-in-form.test.tsx`](./src/features/auth-email-sign-in/ui/email-sign-in-form.test.tsx) as the reference shape.
+
+1. **Element vocabulary** — module-level `const elements = { ... }` map of domain-named query helpers wrapping `screen.getByX` / `screen.queryByX`. Names express intent (`getSocialProviderButton`, `getEmailInput`), not RTL mechanics. Centralizes "how do we find X" so a label/role change is a one-place edit.
+2. **Action vocabulary** — module-level `const actions = { ... }` map of domain-named user interactions, each composing one or more `elements` calls plus a `userEvent` interaction. Names are domain verbs (`submitForm`, `clickSocialProviderButton`), not mechanical motion. Built on top of `elements` — composition is the point.
+3. **Given / When / Then describe nesting** — outer `describe(ComponentName)` for the subject; inner `describe("given …")` for a scenario; `it("...")` is a single Then. The inner describe groups `it`s that share the same arranged state.
+4. **Arrange in `beforeEach`, assertion-only `it`s** — `render(...)` and the triggering interaction migrate UP from inside `it` into the sibling `beforeEach`. Each `it` body is **only** the assertion. Multiple `it`s under one `describe` re-run the arrange+act with clean state.
+5. **Implicit-setup `userEvent`** — `await userEvent.click(...)` directly. Skip `const user = userEvent.setup()` unless you actually need to configure delay / clipboard / skipHover.
+6. **Strings over regex** — `screen.getByRole("button", { name: "Sign in" })`, never `{ name: /sign in/i }`. Strict equality, no regex parsing tax, no case-insensitivity to mask label drift.
+
+A shared page-object-ish helper file is not used yet — `elements` / `actions` are inline per test. Lift to shared helpers only when a real reuse case appears.
 
 ## FSD layer map
 

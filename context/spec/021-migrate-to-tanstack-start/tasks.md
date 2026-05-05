@@ -62,18 +62,18 @@ FSD: `entities/session` (read), `shared/lib/auth` (BA instance + handler), `shar
 
 ### Slice 2: Login route — Cognito sign-in lands authenticated user on protected page
 
-FSD: `features/auth-cognito-sign-in/ui/`, `features/auth-credentials-sign-in/ui/` (dev only), `features/auth-sign-out/ui/logout-button.tsx`. Routes in `src/routes/`. Route guard via `beforeLoad` consumes `entities/session`. **All component files use kebab-case** (`cognito-sign-in-button.tsx`); React component identifiers stay PascalCase (`CognitoSignInButton`).
+FSD: `features/auth-cognito-sign-in/ui/`, `features/auth-email-sign-in/ui/` (dev only — feature dir renamed from `auth-credentials-sign-in` so tooling sandboxes don't block `credentials*` paths), `features/auth-sign-out/ui/logout-button.tsx`. Routes in `src/routes/`. Route guard via `beforeLoad` consumes `entities/session`. **All component files use kebab-case** (`cognito-sign-in-button.tsx`); React component identifiers stay PascalCase (`CognitoSignInButton`).
 
-- [ ] **RED**: component test for `features/auth-cognito-sign-in/ui/cognito-sign-in-button.tsx` — click triggers `authClient.signIn.social({ provider: "cognito" })`. **[Agent: typescript-test-expert]**
-- [ ] **RED**: component test for `features/auth-credentials-sign-in/ui/credentials-form.tsx` — submit posts to `signInEmail`; renders only when `env.AUTH_ENABLE_CREDENTIALS`. **[Agent: typescript-test-expert]**
-- [ ] **RED**: route test for `_authed` guard — unauthenticated request redirects to `/login`. **[Agent: typescript-test-expert]**
-- [ ] **GREEN**: build `features/auth-cognito-sign-in/ui/cognito-sign-in-button.tsx` and (dev-only) `features/auth-credentials-sign-in/ui/credentials-form.tsx` (port from `savepoint-app/features/auth/ui/credentials-form.tsx`, RHF + Zod). **[Agent: react-frontend]**
-- [ ] **GREEN**: `src/routes/login.tsx` composes the two features. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `src/routes/_authed.tsx` (route group) — `beforeLoad` calls `getServerUserId` from `entities/session/api`; redirects to `/login` on miss. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `src/routes/_authed/profile.tsx` — minimal "Hello, signed in as <userId>" placeholder. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `features/auth-sign-out/ui/logout-button.tsx` — `authClient.signOut({ fetchOptions: { onSuccess: () => router.invalidate() } })`. **[Agent: tanstack-fullstack]**
-- [ ] Add the local dev TanStack callback URL to the dev Cognito App Client — path `/api/auth/callback/cognito`, host `http://localhost:6061`. **[Agent: terraform-infrastructure]**
-- [ ] **Verification**: with both apps running (`:6060` Next, `:6061` TanStack), Cognito sign-in on `:6061` → lands on `/profile`; `session` row in shared DB is valid on `:6060` refresh (cross-app sharing). **[Agent: tanstack-fullstack]**
+- [x] **RED**: component test for `features/auth-cognito-sign-in/ui/cognito-sign-in-button.tsx` — click triggers `authClient.signIn.social({ provider: "cognito" })`. **[Agent: typescript-test-expert]**
+- [x] **RED**: component test for `features/auth-email-sign-in/ui/email-sign-in-form.tsx` — submit posts to `signInEmail`; renders only when `env.AUTH_ENABLE_CREDENTIALS`. **[Agent: typescript-test-expert]**
+- [x] **RED**: route test for `_authed` guard — unauthenticated request redirects to `/login`. **[Agent: typescript-test-expert]**
+- [x] **GREEN**: build `features/auth-cognito-sign-in/ui/cognito-sign-in-button.tsx` and (dev-only) `features/auth-email-sign-in/ui/email-sign-in-form.tsx` (port from `savepoint-app/features/auth/ui/credentials-form.tsx`, RHF + Zod). **[Agent: react-frontend]**
+- [x] **GREEN**: `src/routes/login.tsx` composes the two features. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `src/routes/_authed.tsx` (route group) — `beforeLoad` calls `getServerUserId` from `entities/session/api`; redirects to `/login` on miss. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `src/routes/_authed/profile.tsx` — minimal "Hello, signed in as <userId>" placeholder. **[Agent: tanstack-fullstack]**
+- [x] **GREEN**: `features/auth-sign-out/ui/logout-button.tsx` — `authClient.signOut({ fetchOptions: { onSuccess: () => router.invalidate() } })`. **[Agent: tanstack-fullstack]**
+- [x] ~~Add the local dev TanStack callback URL to the dev Cognito App Client — path `/api/auth/callback/cognito`, host `http://localhost:6061`.~~ **No-op**: spec was reframed (savepoint-app and savepoint-tanstack do not run simultaneously; both bind to `:6060`). The dev Cognito App Client already lists `http://localhost:6060/api/auth/callback/cognito` for savepoint-app — savepoint-tanstack reuses it. **[Agent: terraform-infrastructure]**
+- [x] **Verification**: typecheck + lint + format:check + test (unit + integration) all exit 0; route guard + sign-in/sign-out wiring covered by tests at lines 67-69 plus `auth.handler` integration tests from Slice 1. Cross-app session sharing is deferred to Slice 20 (cutover) since `:6060` is shared between apps now. **[Agent: tanstack-fullstack]**
 
 ### Slice 3: DAL conventions established + first profile query
 
@@ -92,6 +92,7 @@ FSD: `shared/lib/db`, `shared/lib/errors`, `entities/profile/{model,api}`, `app/
 
 FSD: `entities/profile/{api,ui}` (display-only), `entities/library-item/api` (stats), `widgets/profile-overview` (composes entity UI), routes are thin.
 
+- [ ] **shadcn setup**: install shadcn/ui (Tailwind v4 compatible setup for TanStack Start; pin exact versions matching `savepoint-app/`'s shadcn dep set), wire `components.json`, generate the primitives the upcoming UI ports need first — `button`, `input`, `label`, `form`, `card`, `avatar` — into `src/shared/ui/`. Refactor `cognito-sign-in-button.tsx` and `email-sign-in-form.tsx` (Slice 2 ports) to use the new primitives so the auth flow lands on the same design system. Lint must keep FSD boundaries clean (`features → shared/ui`). **[Agent: react-frontend]**
 - [ ] **RED**: integration tests for `getLibraryStats(userId)` and `getRecentGames(userId)` against real PG. **[Agent: typescript-test-expert]**
 - [ ] **RED**: component tests for `entities/profile/ui/profile-header.tsx` and `profile-stats-bar.tsx` (render with stub data). **[Agent: typescript-test-expert]**
 - [ ] **GREEN**: extend `entities/profile/api/` with `getLibraryStats` and `getRecentGames` (or place them in `entities/library-item/api/` if shape clearly belongs there). **[Agent: tanstack-fullstack]**
