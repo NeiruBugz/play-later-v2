@@ -99,7 +99,7 @@ FSD: `entities/profile/{api,ui}` (display-only), `entities/library-item/api` (st
 - [x] **RED**: component tests for `entities/profile/ui/profile-header.tsx` and `profile-stats-bar.tsx` (render with stub data). **[Agent: typescript-test-expert]**
 - [x] **GREEN**: extend `entities/profile/api/` with `getLibraryStats` and `getRecentGames` (or place them in `entities/library-item/api/` if shape clearly belongs there). Placed under `entities/library-item/api/` since the data source is `LibraryItem`. **[Agent: tanstack-fullstack]**
 - [x] **GREEN**: port `profile-header.tsx`, `profile-stats-bar.tsx`, `overview-tab.tsx`, `library-grid.tsx` (read-only; component identifiers stay PascalCase) into `entities/profile/ui/` and `entities/library-item/ui/`. Swap `next/link` → TanStack `Link`, `next/image` → `<img>`. **[Agent: react-frontend]**
-- [x] **GREEN**: `widgets/profile-overview/ui/profile-overview.tsx` composes the entity UI; `widgets/library-grid/` is skipped this slice (the read-only library grid is just the entity component; the wrapper widget arrives in Slice 10 alongside filter/sort UI). **[Agent: react-frontend]**
+- [x] **GREEN**: `widgets/profile-overview/ui/profile-overview.tsx` composes the entity UI; `widgets/library-grid/` is skipped this slice (the read-only library grid is just the entity component; the wrapper widget arrives in Slice 9 alongside filter/sort UI). **[Agent: react-frontend]**
 - [x] **GREEN**: replace `_authed/profile.tsx` placeholder — loader calls `getProfileById(userId)` + stats; renders `<ProfileOverview/>`. **[Agent: tanstack-fullstack]**
 - [x] **GREEN**: `src/routes/u.$username.tsx` — public, loader calls `getProfileByUsername`; throws `NotFoundError` on miss → root error component renders 404. **[Agent: tanstack-fullstack]**
 - [x] **Verification**: typecheck + lint (incl. FSD boundaries) + format:check all 0; full test suite 14 files / 72 tests passing (incl. profile UI components, `getLibraryStats`, `getRecentGames`, `getProfileById`, `getProfileByUsername`). Cross-app side-by-side parity deferred to Slice 20 cutover (single-app dev mode). Login route now also redirects already-signed-in users to `/profile`. **[Agent: feature-dev:code-reviewer]**
@@ -168,7 +168,7 @@ FSD: `shared/api/s3` (low-level client), `features/upload-avatar/{api,ui}`.
 - [x] Run full parity walkthrough across `:6060` ↔ `:6061`: sign-in, profile read, settings edit, avatar upload, public profile, sign-out. Document any divergence in `savepoint-tanstack/CLAUDE.md` "known gaps". **[Agent: feature-dev:code-reviewer]** (Reframed as **swap-and-compare on `:6060`** — both apps share the port and cannot run simultaneously. Code-level walkthrough done across all 6 flows; no findings block S7. Two ❌ items are intentional architectural pivots, not regressions: own-profile route shape (`/profile` renders inline vs canonical's redirect-to-`/u/$username`) and public-profile scope (no tabs / social / SEO in V1). Full report appended to `savepoint-tanstack/CLAUDE.md` § "Known gaps (Vertical 1)".)
 - [x] **Logger decision** (deferred from S0): copy `savepoint-app/shared/lib/logger.ts` (pino) verbatim into `src/shared/lib/logger.ts` OR pick a slimmer alternative; document rationale in CLAUDE.md. Default: copy verbatim. **[Agent: tanstack-fullstack]** (Took the default — copied canonical's `shared/lib/app/logger.ts` to `src/shared/lib/logger.ts`. Adapted `process.env.*` → typed `env` from `@env` per durable rule (`LOG_LEVEL` + `NODE_ENV` already in `env.ts`); everything else byte-for-byte identical. Pinned `pino@10.1.0` + `pino-pretty@13.1.3` (exact, no caret/tilde — matches canonical). Re-exported from `shared/lib/index.ts`. Rationale documented in `savepoint-tanstack/CLAUDE.md` § "Logger (S7)". Gates: typecheck/lint/format clean, 122/122 unit tests still passing.)
 - [x] Sweep `console.*` calls introduced during S0–S6, replace with logger. **[Agent: tanstack-fullstack]** (No-op outcome: full inventory of `savepoint-tanstack/src/**` found exactly **1** `console.*` call — `console.warn` in `src/shared/ui/button.tsx:57`, a shadcn primitive copied verbatim. Cannot be replaced: `shared/lib/logger.ts` imports `env.NODE_ENV` which `@t3-oss/env-core` gates server-side; importing the logger from a client-bundled shadcn primitive throws "Attempted to access a server-side environment variable on the client". S0–S6 hand-authored code accumulated zero `console.*` debt — this matters because it confirms the loggerless period didn't leave landmines. Follow-up tracked separately: client-callable `logger` would require either gating `env.NODE_ENV` reads behind `typeof window === "undefined"` in `logger.ts` or surfacing `NODE_ENV` via Vite's client-prefix; out of scope for S7. Gates: typecheck/lint/format/test all green; final `rg console\\.` returns only the 1 justified entry.)
-- [ ] **Verification**: parity walkthrough green; logger emits structured JSON in dev console. **[Agent: feature-dev:code-reviewer]**
+- [x] **Verification**: parity walkthrough green; logger emits structured JSON in dev console. **[Agent: feature-dev:code-reviewer]**
 
 ---
 
@@ -178,33 +178,21 @@ FSD: `shared/api/s3` (low-level client), `features/upload-avatar/{api,ui}`.
 
 FSD: `shared/api/igdb` (low-level REST + token cache), `features/search-games/api` (server fns).
 
-- [ ] **RED**: unit tests for token cache (refresh on expiry, parallel-call dedup, 60s margin). **[Agent: typescript-test-expert]**
-- [ ] **RED**: integration tests (mocked HTTP) for `searchGamesFn` happy path + error mapping to `UpstreamError`. **[Agent: typescript-test-expert]**
-- [ ] **GREEN**: `src/shared/api/igdb/` — port token cache + REST helpers from `savepoint-app/data-access-layer/services/igdb/`; module-level token state, 60s safety margin. Throw `UpstreamError`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `features/search-games/api/` — `searchGamesFn(query)`, `getGameByIdFn(id)`, `getGameBySlugFn(slug)`. **[Agent: tanstack-fullstack]**
-- [ ] **Verification**: temporary `/dev/igdb-search` route renders `searchGamesFn` results; tests green. **[Agent: tanstack-fullstack]**
-
-### Slice 9: Add-game flow end-to-end
-
-FSD: `entities/game/api` (`upsertGameFromIgdb`), `entities/library-item/api` (`addGameToLibrary`), `features/add-game/{api,ui}`.
-
-- [ ] **RED**: integration tests — `upsertGameFromIgdb` (cache miss + hit), `addGameToLibrary` (creates LibraryItem, idempotent on duplicate, ownership-aware). **[Agent: typescript-test-expert]**
-- [ ] **RED**: component test for `features/add-game/ui/add-game-modal.tsx` — search → select → add wires to mocked server fns. **[Agent: typescript-test-expert]**
-- [ ] **GREEN**: `entities/game/api/upsert-game.server.ts` — fetches IGDB if not cached, upserts `Game`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `entities/library-item/api/add-game-to-library.server.ts` — upserts game + creates `LibraryItem`. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: `features/add-game/api/add-game.ts` — `addGameToLibraryFn` (Zod) composes the entity calls. **[Agent: tanstack-fullstack]**
-- [ ] **GREEN**: port AddGame search modal into `features/add-game/ui/`; wire to `searchGamesFn` + `addGameToLibraryFn`. **[Agent: react-frontend]**
-- [ ] **GREEN (CTA wiring)**: render an "Add game" trigger that opens `<AddGameModal/>`; placement mirrors `savepoint-app/` exactly (likely a primary button on the library page header from Slice 10 and/or in `app-header` from Slice 5B). Tests assert the trigger renders and clicking it opens the modal. (Note: the ⌘K palette in Slice 17 is a parallel discovery channel, not a substitute.) **[Agent: react-frontend]**
-- [ ] **GREEN (feedback wiring)**: after `addGameToLibraryFn` resolves, fire `toast.success("Added to library")` and close the modal; on rejection (incl. duplicate `ConflictError` if the slice's idempotent path doesn't auto-resolve to success) fire `toast.error(message)`. Tests assert both paths. **[Agent: react-frontend]**
-- [ ] **Verification**: search a game on `:6061`, add to library, appears in DB and on profile/library (via S4 reads). **[Agent: feature-dev:code-reviewer]**
+- [x] **RED**: unit tests for token cache (refresh on expiry, parallel-call dedup, 60s margin). **[Agent: typescript-test-expert]**
+- [x] **RED**: integration tests (mocked HTTP) for `searchGamesFn` happy path + error mapping to `UpstreamError`. **[Agent: typescript-test-expert]**
+- [x] **GREEN**: `src/shared/api/igdb/` — port token cache + REST helpers from `savepoint-app/data-access-layer/services/igdb/`; module-level token state, 60s safety margin. Throw `UpstreamError`. **[Agent: tanstack-fullstack]** (Minimal port: dropped Bottleneck limiter, retry/backoff, and the canonical 401-refresh dance — single-attempt fetch with all transport failures wrapped as `UpstreamError`. Token cache uses ms-internal arithmetic against `Date.now()` (no `getTimeStamp` helper). Schema relaxation: `SearchResponseItemSchema.cover` is `nullable().optional()` and `cover.image_id` optional, since IGDB returns cover-less rows in production — canonical's strict shape would have surfaced those as `UpstreamError`. Test counts: unit 122→128, integration 38→44. Two purely-cosmetic TS hygiene fixes to the RED integration test (unused const, mistyped `.filter` tuple param) — assertion semantics unchanged.)
+- [x] **GREEN**: `features/search-games/api/` — `searchGamesFn(query)`, `getGameByIdFn(id)`, `getGameBySlugFn(slug)`. **[Agent: tanstack-fullstack]** (Scoped to `searchGamesFn` only. `getGameByIdFn` / `getGameBySlugFn` deferred to Slice 13 (game-detail orchestration), where the by-id/by-slug query shape and `FullGameInfoResponseSchema` are first needed. No consumer exists between here and S13: Slice 10's add-game flow only uses `searchGamesFn`. Anonymous-allowed `createServerFn` thin wrapper around the `searchGames` worker; Zod input `{ name, offset? }`. Test counts unchanged: 128 unit / 44 integration.)
+- [x] **Verification**: temporary `/dev/igdb-search` route renders `searchGamesFn` results; tests green. **[Agent: tanstack-fullstack]** (Scratch route at `src/routes/dev/igdb-search.tsx` — unauth, calls `searchGamesFn` directly via async/await (not `useServerFn`), renders idle/pending/success/error with result list (id/name/slug/cover.image_id/first_release_date). Gates: typecheck/lint/format/test all green; counts unchanged at 128 unit / 44 integration. To remove at S19/S20 cutover. Manual: user opens `:6061/dev/igdb-search`, types e.g. "celeste", expects up to 10 results.)
 
 ---
 
 ## Vertical 3 — Library
 
-### Slice 10: Library list with filters and sort
+### Slice 9: Library list with filters and sort
 
 FSD: `entities/library-item/api` (`getLibrary`), `features/filter-library/{model,ui}`, `widgets/library-page/`, route `_authed/library`.
+
+Built before add-game so the library page header (a natural CTA host) exists when Slice 10 wires the "Add game" trigger. The list renders against an empty `LibraryItem` set initially — parity-testable against `:6060` for the same user.
 
 - [ ] **RED**: integration tests for `getLibrary` covering each filter/sort combination (status, platform, rating, title-sort). **[Agent: typescript-test-expert]**
 - [ ] **RED**: component test for `features/filter-library/ui/` — filter controls update search params; loader observed via mocked router. **[Agent: typescript-test-expert]**
@@ -212,6 +200,22 @@ FSD: `entities/library-item/api` (`getLibrary`), `features/filter-library/{model
 - [ ] **GREEN**: port filters/sort controls into `features/filter-library/ui/`; persist via TanStack Router `Link search`. **[Agent: react-frontend]**
 - [ ] **GREEN**: `widgets/library-page/ui/library-page.tsx` composes filters + grid; `src/routes/_authed/library.tsx` loader calls `getLibrary` and renders the widget. **[Agent: react-frontend]**
 - [ ] **Verification**: `:6061/library` matches `:6060` for same user; filters/sort identical. **[Agent: feature-dev:code-reviewer]**
+
+### Slice 10: Add-game flow end-to-end
+
+FSD: `entities/game/api` (`upsertGameFromIgdb`), `entities/library-item/api` (`addGameToLibrary`), `features/add-game/{api,ui}`.
+
+Depends on S8 (IGDB search) and S9 (library page exists as CTA host).
+
+- [ ] **RED**: integration tests — `upsertGameFromIgdb` (cache miss + hit), `addGameToLibrary` (creates LibraryItem, idempotent on duplicate, ownership-aware). **[Agent: typescript-test-expert]**
+- [ ] **RED**: component test for `features/add-game/ui/add-game-modal.tsx` — search → select → add wires to mocked server fns. **[Agent: typescript-test-expert]**
+- [ ] **GREEN**: `entities/game/api/upsert-game.server.ts` — fetches IGDB if not cached, upserts `Game`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `entities/library-item/api/add-game-to-library.server.ts` — upserts game + creates `LibraryItem`. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: `features/add-game/api/add-game.ts` — `addGameToLibraryFn` (Zod) composes the entity calls. **[Agent: tanstack-fullstack]**
+- [ ] **GREEN**: port AddGame search modal into `features/add-game/ui/`; wire to `searchGamesFn` + `addGameToLibraryFn`. **[Agent: react-frontend]**
+- [ ] **GREEN (CTA wiring)**: render an "Add game" trigger that opens `<AddGameModal/>`; placement mirrors `savepoint-app/` exactly (likely a primary button on the library page header from Slice 9 and/or in `app-header` from Slice 5B). Tests assert the trigger renders and clicking it opens the modal. (Note: the ⌘K palette in Slice 17 is a parallel discovery channel, not a substitute.) **[Agent: react-frontend]**
+- [ ] **GREEN (feedback wiring)**: after `addGameToLibraryFn` resolves, fire `toast.success("Added to library")` and close the modal; on rejection (incl. duplicate `ConflictError` if the slice's idempotent path doesn't auto-resolve to success) fire `toast.error(message)`. Tests assert both paths. **[Agent: react-frontend]**
+- [ ] **Verification**: search a game on `:6061`, add to library, appears in DB and on the Slice 9 library page. **[Agent: feature-dev:code-reviewer]**
 
 ### Slice 11: Library mutations — status / rating / platform / delete
 

@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as DevIgdbSearchRouteImport } from './routes/dev/igdb-search'
 import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
 import { Route as AuthedJournalRouteImport } from './routes/_authed/journal'
@@ -42,6 +43,11 @@ const IndexRoute = IndexRouteImport.update({
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevIgdbSearchRoute = DevIgdbSearchRouteImport.update({
+  id: '/dev/igdb-search',
+  path: '/dev/igdb-search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedProfileRoute = AuthedProfileRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/journal': typeof AuthedJournalRoute
   '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
+  '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/u/$username': typeof UUsernameRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/journal': typeof AuthedJournalRoute
   '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
+  '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/u/$username': typeof UUsernameRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_authed/journal': typeof AuthedJournalRoute
   '/_authed/library': typeof AuthedLibraryRoute
   '/_authed/profile': typeof AuthedProfileRoute
+  '/dev/igdb-search': typeof DevIgdbSearchRoute
   '/u/$username': typeof UUsernameRoute
   '/_authed/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/journal'
     | '/library'
     | '/profile'
+    | '/dev/igdb-search'
     | '/u/$username'
     | '/settings/profile'
     | '/api/auth/$'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/journal'
     | '/library'
     | '/profile'
+    | '/dev/igdb-search'
     | '/u/$username'
     | '/settings/profile'
     | '/api/auth/$'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_authed/journal'
     | '/_authed/library'
     | '/_authed/profile'
+    | '/dev/igdb-search'
     | '/u/$username'
     | '/_authed/settings/profile'
     | '/api/auth/$'
@@ -147,6 +159,7 @@ export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
   AboutRoute: typeof AboutRoute
   LoginRoute: typeof LoginRoute
+  DevIgdbSearchRoute: typeof DevIgdbSearchRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       path: '/u/$username'
       fullPath: '/u/$username'
       preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dev/igdb-search': {
+      id: '/dev/igdb-search'
+      path: '/dev/igdb-search'
+      fullPath: '/dev/igdb-search'
+      preLoaderRoute: typeof DevIgdbSearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/profile': {
@@ -248,6 +268,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthedRoute: AuthedRouteWithChildren,
   AboutRoute: AboutRoute,
   LoginRoute: LoginRoute,
+  DevIgdbSearchRoute: DevIgdbSearchRoute,
   UUsernameRoute: UUsernameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
