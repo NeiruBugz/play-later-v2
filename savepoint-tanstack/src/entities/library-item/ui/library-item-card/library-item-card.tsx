@@ -1,15 +1,37 @@
+import type { KeyboardEvent } from "react";
+
+import { cn } from "@/shared/lib/utils";
+
 import { getStatusLabel } from "../../model";
 import type { LibraryItemCardProps } from "./library-item-card.type";
 import { buildCoverImageUrl } from "./library-item-card.utility";
 
-export function LibraryItemCard({ item }: LibraryItemCardProps) {
+export function LibraryItemCard({ item, onClick }: LibraryItemCardProps) {
   const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_cover_big");
   const statusLabel = getStatusLabel(item.status);
+
+  const isInteractive = typeof onClick === "function";
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (!isInteractive) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onClick?.();
+    }
+  };
 
   return (
     <article
       aria-label={item.game.title}
-      className="gap-sm border-border bg-card p-md shadow-paper-sm flex flex-col rounded-lg border"
+      role={isInteractive ? "button" : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      onClick={isInteractive ? onClick : undefined}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
+      className={cn(
+        "gap-sm border-border bg-card p-md shadow-paper-sm flex flex-col rounded-lg border",
+        isInteractive &&
+          "focus-visible:ring-ring cursor-pointer transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:outline-none"
+      )}
     >
       {coverUrl ? (
         <img

@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AddGameTrigger } from "./add-game-trigger";
+
 // Mock the server fns the modal calls so the rendered dialog body never
 // crosses the network or server boundary.
 vi.mock("@/features/add-game/api/search-games-fn", () => ({
@@ -12,11 +14,8 @@ vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
 }));
 
-import { AddGameTrigger } from "./add-game-trigger";
-
 const elements = {
-  getTriggerButton: () =>
-    screen.getByRole("button", { name: "Add game" }),
+  getTriggerButton: () => screen.getByRole("button", { name: "Add game" }),
   queryDialog: () => screen.queryByRole("dialog"),
   queryDialogTitle: () =>
     screen.queryByRole("heading", { name: "Add game", level: 2 }),

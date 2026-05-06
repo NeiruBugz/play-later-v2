@@ -1,12 +1,22 @@
+import { useState } from "react";
+
 import { LibraryItemCard } from "@/entities/library-item";
+import type { LibraryItemWithGame } from "@/entities/library-item/model";
 import { AddGameTrigger } from "@/features/add-game";
 import { LibraryFilters } from "@/features/filter-library";
+import { LibraryModal } from "@/features/manage-library-entry";
 
 import type { LibraryPageProps } from "./library-page.type";
 
 export function LibraryPage(props: LibraryPageProps) {
   const { items, total, status, platform, minRating, sortBy, sortOrder } =
     props;
+
+  // Host owns modal state (canonical pattern). One modal mounted at the
+  // page level; each card receives an onClick that selects its entry.
+  // Avoids N modals in the DOM and keeps the entity card display-only.
+  const [selectedEntry, setSelectedEntry] =
+    useState<LibraryItemWithGame | null>(null);
 
   return (
     <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
@@ -46,11 +56,24 @@ export function LibraryPage(props: LibraryPageProps) {
         >
           {items.map((item) => (
             <li key={item.id}>
-              <LibraryItemCard item={item} />
+              <LibraryItemCard
+                item={item}
+                onClick={() => setSelectedEntry(item)}
+              />
             </li>
           ))}
         </ul>
       )}
+
+      {selectedEntry !== null ? (
+        <LibraryModal
+          entry={selectedEntry}
+          open={true}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) setSelectedEntry(null);
+          }}
+        />
+      ) : null}
     </main>
   );
 }

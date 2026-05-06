@@ -43,6 +43,12 @@ import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { addGameToLibraryFn } from "../../api/add-game-to-library-fn";
+// Import after mocks are declared.
+import { searchGamesFn } from "../../api/search-games-fn";
+// RED import — this module does not exist until the GREEN step.
+import { AddGameModal } from "./add-game-modal";
+
 // --- Server fn mocks ---------------------------------------------------------
 // Both server fns are mocked at the module level so the component under test
 // never crosses the network or server boundary.
@@ -69,13 +75,6 @@ const mockRouterInvalidate = vi.fn();
 vi.mock("@tanstack/react-router", () => ({
   useRouter: () => ({ invalidate: mockRouterInvalidate }),
 }));
-
-// Import after mocks are declared.
-import { searchGamesFn } from "../../api/search-games-fn";
-import { addGameToLibraryFn } from "../../api/add-game-to-library-fn";
-
-// RED import — this module does not exist until the GREEN step.
-import { AddGameModal } from "./add-game-modal";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -118,7 +117,8 @@ const defaultProps = { onAdded };
 const elements = {
   getSearchInput: () => screen.getByRole("searchbox", { name: "Search games" }),
   getAddButton: () => screen.getByRole("button", { name: "Add to library" }),
-  queryAddButton: () => screen.queryByRole("button", { name: "Add to library" }),
+  queryAddButton: () =>
+    screen.queryByRole("button", { name: "Add to library" }),
   getGameButton: (name: string) => screen.getByRole("button", { name }),
   queryGameButton: (name: string) => screen.queryByRole("button", { name }),
   getLoadingText: () => screen.getByText("Searching..."),
@@ -217,7 +217,9 @@ describe("AddGameModal", () => {
 
     it("renders Hollow Knight: Silksong as a clickable result", async () => {
       await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight: Silksong")).not.toBeNull();
+        expect(
+          elements.queryGameButton("Hollow Knight: Silksong")
+        ).not.toBeNull();
       });
     });
 
@@ -332,7 +334,9 @@ describe("AddGameModal", () => {
 
       await actions.submitSearch("Hollow");
       await waitFor(() => {
-        expect(elements.queryGameButton("Hollow Knight: Silksong")).not.toBeNull();
+        expect(
+          elements.queryGameButton("Hollow Knight: Silksong")
+        ).not.toBeNull();
       });
       await actions.selectGame("Hollow Knight: Silksong");
       await actions.clickAdd();

@@ -2,14 +2,13 @@ import { useRouter } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
+import type { SearchResponseItem } from "@/shared/api/igdb";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { cn } from "@/shared/lib/utils";
 
 import { addGameToLibraryFn } from "../../api/add-game-to-library-fn";
 import { searchGamesFn } from "../../api/search-games-fn";
-
-import type { SearchResponseItem } from "@/shared/api/igdb";
 
 type AddGameModalProps = {
   onAdded: () => void;
@@ -63,8 +62,8 @@ export function AddGameModal({ onAdded }: AddGameModalProps) {
   const showResults = !isSearching && results !== null && results.length > 0;
 
   return (
-    <div className="flex flex-col gap-lg">
-      <form onSubmit={handleSubmit} className="flex gap-md">
+    <div className="gap-lg flex flex-col">
+      <form onSubmit={handleSubmit} className="gap-md flex">
         <Input
           type="search"
           aria-label="Search games"
@@ -76,17 +75,21 @@ export function AddGameModal({ onAdded }: AddGameModalProps) {
       </form>
 
       {isSearching ? (
-        <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-muted-foreground text-sm"
+        >
           Searching...
         </p>
       ) : null}
 
       {showEmpty ? (
-        <p className="text-sm text-muted-foreground">No results found</p>
+        <p className="text-muted-foreground text-sm">No results found</p>
       ) : null}
 
       {showResults ? (
-        <ul className="flex flex-col gap-sm">
+        <ul className="gap-sm flex flex-col">
           {results!.map((game) => {
             const isSelected = selectedId === game.id;
             return (
@@ -96,9 +99,9 @@ export function AddGameModal({ onAdded }: AddGameModalProps) {
                   onClick={() => setSelectedId(game.id)}
                   aria-pressed={isSelected}
                   className={cn(
-                    "w-full rounded-md border border-border px-md py-sm text-left text-sm transition-colors",
+                    "border-border px-md py-sm w-full rounded-md border text-left text-sm transition-colors",
                     isSelected
-                      ? "border-primary bg-primary/10 ring-1 ring-primary"
+                      ? "border-primary bg-primary/10 ring-primary ring-1"
                       : "hover:bg-surface-hover"
                   )}
                 >

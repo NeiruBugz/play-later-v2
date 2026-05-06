@@ -17,11 +17,19 @@
  *   application layer. ConflictError is NOT thrown on duplicate.
  */
 
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // RED import — this module does not exist until the GREEN step.
 import { addGameToLibrary } from "@/entities/library-item/api/add-game-to-library.server";
-
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 
 import {
@@ -101,9 +109,7 @@ function makeGame(igdbId: number, suffix: string) {
 // IGDB fetch mock (mirrors search-games.integration.test.ts pattern)
 // ---------------------------------------------------------------------------
 
-function makeFetchMock(
-  igdbBody: unknown = [MOCK_IGDB_GAME]
-) {
+function makeFetchMock(igdbBody: unknown = [MOCK_IGDB_GAME]) {
   return vi.fn().mockImplementation((url: string) => {
     if (url.includes("id.twitch.tv")) {
       return Promise.resolve({
@@ -147,7 +153,9 @@ describe("addGameToLibrary", () => {
   describe("given a user and a game already in the DB", () => {
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser("alice") });
-      await db.prisma.game.create({ data: makeGame(IGDB_ID_EXISTING, "existing") });
+      await db.prisma.game.create({
+        data: makeGame(IGDB_ID_EXISTING, "existing"),
+      });
     });
 
     it("creates and returns a LibraryItem owned by the user", async () => {
@@ -266,7 +274,9 @@ describe("addGameToLibrary", () => {
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser("owner1") });
       await db.prisma.user.create({ data: makeUser("owner2") });
-      await db.prisma.game.create({ data: makeGame(IGDB_ID_EXISTING, "shared") });
+      await db.prisma.game.create({
+        data: makeGame(IGDB_ID_EXISTING, "shared"),
+      });
     });
 
     it("stamps LibraryItem with the caller's userId, not another user's", async () => {
@@ -307,10 +317,18 @@ describe("addGameToLibrary", () => {
   describe("status variants", () => {
     beforeEach(async () => {
       await db.prisma.user.create({ data: makeUser("statustest") });
-      await db.prisma.game.create({ data: makeGame(IGDB_ID_EXISTING, "statusgame") });
+      await db.prisma.game.create({
+        data: makeGame(IGDB_ID_EXISTING, "statusgame"),
+      });
     });
 
-    const statuses = ["WISHLIST", "SHELF", "UP_NEXT", "PLAYING", "PLAYED"] as const;
+    const statuses = [
+      "WISHLIST",
+      "SHELF",
+      "UP_NEXT",
+      "PLAYING",
+      "PLAYED",
+    ] as const;
 
     for (const status of statuses) {
       it(`creates LibraryItem with status ${status}`, async () => {

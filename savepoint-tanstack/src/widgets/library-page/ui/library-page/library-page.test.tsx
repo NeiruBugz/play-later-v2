@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { LibraryItemWithGame } from "@/entities/library-item/model";
@@ -9,6 +10,7 @@ import { LibraryPage } from "./library-page";
 // so we don't need a router context for a pure widget render test.
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => vi.fn(),
+  useRouter: () => ({ invalidate: vi.fn() }),
   Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
@@ -21,6 +23,17 @@ vi.mock("@/features/add-game/api/search-games-fn", () => ({
 
 vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
   addGameToLibraryFn: vi.fn(),
+}));
+
+// LibraryModal calls these server fns on Save / Confirm-Delete. We mock at the
+// module level so opening the modal in this widget test never crosses the
+// server boundary. Click-to-open behavior does not invoke them.
+vi.mock("@/features/manage-library-entry/api/update-library-item-fn", () => ({
+  updateLibraryItemFn: vi.fn(),
+}));
+
+vi.mock("@/features/manage-library-entry/api/delete-library-item-fn", () => ({
+  deleteLibraryItemFn: vi.fn(),
 }));
 
 const buildItem = (overrides: {
@@ -71,8 +84,19 @@ const elements = {
     screen.queryByRole("heading", { name: title, level: 3 }),
   getLibraryList: () => screen.getByRole("list", { name: "Library items" }),
   queryLibraryList: () => screen.queryByRole("list", { name: "Library items" }),
-  queryAddGameTrigger: () =>
-    screen.queryByRole("button", { name: "Add game" }),
+  queryAddGameTrigger: () => screen.queryByRole("button", { name: "Add game" }),
+  getCardButton: (title: string) => screen.getByRole("button", { name: title }),
+  queryDialog: () => screen.queryByRole("dialog"),
+  getDialog: () => screen.getByRole("dialog"),
+  getDialogCloseButton: () => screen.getByRole("button", { name: "Close" }),
+  queryDialogTitle: (title: string) =>
+    screen.queryByRole("heading", { name: title, level: 2 }),
+};
+
+const actions = {
+  clickCard: async (title: string) =>
+    userEvent.click(elements.getCardButton(title)),
+  closeDialog: async () => userEvent.click(elements.getDialogCloseButton()),
 };
 
 describe("LibraryPage", () => {
@@ -133,6 +157,74 @@ describe("LibraryPage", () => {
 
     it("mounts the AddGameTrigger in the page header", () => {
       expect(elements.queryAddGameTrigger()).not.toBeNull();
+    });
+
+    it("exposes each card as an accessible button named after the game", () => {
+      expect(elements.getCardButton("Hollow Knight")).toBeDefined();
+      expect(elements.getCardButton("Celeste")).toBeDefined();
+    });
+
+    it("does not render the dialog before any card is clicked", () => {
+      expect(elements.queryDialog()).toBeNull();
+    });
+  });
+
+  describe("given the user clicks a library card", () => {
+    beforeEach(async () => {
+      const items = [
+        buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+        buildItem({ id: 2, gameTitle: "Celeste" }),
+      ];
+      render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+      await actions.clickCard("Hollow Knight");
+    });
+
+    it("opens the library modal", () => {
+      expect(elements.queryDialog()).not.toBeNull();
+    });
+
+    it("preselects the clicked entry by surfacing its title in the dialog", () => {
+      // <DialogTitle> renders as h2 inside the Radix dialog content.
+      expect(elements.queryDialogTitle("Hollow Knight")).not.toBeNull();
+    });
+
+    it("does not preselect any other entry", () => {
+      expect(elements.queryDialogTitle("Celeste")).toBeNull();
+    });
+  });
+
+  describe("given the user clicks card A, closes the modal, then clicks card B", () => {
+    beforeEach(async () => {
+      const items = [
+        buildItem({ id: 1, gameTitle: "Hollow Knight" }),
+        buildItem({ id: 2, gameTitle: "Celeste" }),
+      ];
+      render(<LibraryPage items={items} total={2} {...defaultViewProps} />);
+      await actions.clickCard("Hollow Knight");
+      await actions.closeDialog();
+      await actions.clickCard("Celeste");
+    });
+
+    it("re-opens the dialog for the second entry", () => {
+      expect(elements.queryDialog()).not.toBeNull();
+      expect(elements.queryDialogTitle("Celeste")).not.toBeNull();
+    });
+
+    it("no longer surfaces the first entry's title in the dialog", () => {
+      expect(elements.queryDialogTitle("Hollow Knight")).toBeNull();
+    });
+  });
+
+  describe("given the user opens the modal then closes it", () => {
+    beforeEach(async () => {
+      const items = [buildItem({ id: 1, gameTitle: "Hollow Knight" })];
+      render(<LibraryPage items={items} total={1} {...defaultViewProps} />);
+      await actions.clickCard("Hollow Knight");
+      await actions.closeDialog();
+    });
+
+    it("removes the dialog from the DOM", () => {
+      expect(elements.queryDialog()).toBeNull();
     });
   });
 });

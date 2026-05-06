@@ -9,11 +9,19 @@
  * the same pattern established in search-games.integration.test.ts (Slice 8).
  */
 
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 // RED import — this module does not exist until the GREEN step.
 import { upsertGameFromIgdb } from "@/entities/game/api/upsert-game.server";
-
 import { __resetTokenCacheForTests } from "@/shared/api/igdb/token";
 
 import {
