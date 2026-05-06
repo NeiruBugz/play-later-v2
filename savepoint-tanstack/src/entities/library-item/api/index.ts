@@ -6,3 +6,5 @@ export type {
 } from "./get-library.server";
 export { getLibraryStats } from "./get-library-stats.server";
 export type { LibraryStats, RecentGame } from "./get-library-stats.server";
+export { addGameToLibrary } from "./add-game-to-library.server";
+export type { AddGameToLibraryInput } from "./add-game-to-library.server";

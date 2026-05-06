@@ -12,6 +12,17 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// AddGameTrigger renders an <AddGameModal/> inside a Dialog, which calls these
+// server fns when the user submits a search / clicks Add. We mock them at the
+// module level so the widget render test never crosses the server boundary.
+vi.mock("@/features/add-game/api/search-games-fn", () => ({
+  searchGamesFn: vi.fn(),
+}));
+
+vi.mock("@/features/add-game/api/add-game-to-library-fn", () => ({
+  addGameToLibraryFn: vi.fn(),
+}));
+
 const buildItem = (overrides: {
   id: number;
   gameTitle: string;
@@ -60,6 +71,8 @@ const elements = {
     screen.queryByRole("heading", { name: title, level: 3 }),
   getLibraryList: () => screen.getByRole("list", { name: "Library items" }),
   queryLibraryList: () => screen.queryByRole("list", { name: "Library items" }),
+  queryAddGameTrigger: () =>
+    screen.queryByRole("button", { name: "Add game" }),
 };
 
 describe("LibraryPage", () => {
@@ -82,6 +95,10 @@ describe("LibraryPage", () => {
 
     it("mounts the LibraryFilters status controls", () => {
       expect(elements.queryPlayingFilterButton()).not.toBeNull();
+    });
+
+    it("mounts the AddGameTrigger in the page header", () => {
+      expect(elements.queryAddGameTrigger()).not.toBeNull();
     });
   });
 
@@ -112,6 +129,10 @@ describe("LibraryPage", () => {
 
     it("still mounts LibraryFilters", () => {
       expect(elements.queryPlayingFilterButton()).not.toBeNull();
+    });
+
+    it("mounts the AddGameTrigger in the page header", () => {
+      expect(elements.queryAddGameTrigger()).not.toBeNull();
     });
   });
 });

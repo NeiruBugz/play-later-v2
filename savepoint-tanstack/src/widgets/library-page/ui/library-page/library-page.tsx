@@ -1,4 +1,5 @@
 import { LibraryItemCard } from "@/entities/library-item";
+import { AddGameTrigger } from "@/features/add-game";
 import { LibraryFilters } from "@/features/filter-library";
 
 import type { LibraryPageProps } from "./library-page.type";
@@ -10,10 +11,13 @@ export function LibraryPage(props: LibraryPageProps) {
   return (
     <main className="gap-xl container mx-auto flex flex-col px-4 py-6">
       <header className="gap-md flex items-baseline justify-between">
-        <h1 className="text-h1">Library</h1>
-        <p className="text-muted-foreground text-sm" aria-live="polite">
-          {total} {total === 1 ? "game" : "games"}
-        </p>
+        <div className="gap-md flex items-baseline">
+          <h1 className="text-h1">Library</h1>
+          <p className="text-muted-foreground text-sm" aria-live="polite">
+            {total} {total === 1 ? "game" : "games"}
+          </p>
+        </div>
+        <AddGameTrigger />
       </header>
 
       <LibraryFilters
@@ -38,7 +42,7 @@ export function LibraryPage(props: LibraryPageProps) {
       ) : (
         <ul
           aria-label="Library items"
-          className="gap-md grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+          className="gap-md grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6"
         >
           {items.map((item) => (
             <li key={item.id}>

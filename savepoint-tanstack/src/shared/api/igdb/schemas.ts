@@ -47,7 +47,7 @@ export const SearchResponseItemSchema = z.object({
   name: z.string(),
   slug: z.string(),
   cover: CoverSchema.nullable().optional(),
-  first_release_date: z.number().optional(),
+  first_release_date: z.number().nullable().optional(),
   platforms: z.array(PlatformSchema).optional(),
   release_dates: z.array(ReleaseDateSchema).optional(),
   game_type: z.union([z.number(), GameTypeSchema]).optional(),
