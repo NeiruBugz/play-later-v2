@@ -1,18 +1,9 @@
 import { RECENT_GAMES_LIMIT } from "@/shared/lib/constants";
 import { prisma } from "@/shared/lib/db";
 
-export type RecentGame = {
-  gameId: string;
-  title: string;
-  coverImage: string | null;
-  lastPlayed: Date;
-};
+import type { LibraryStats, RecentGame } from "../model/types";
 
-export type LibraryStats = {
-  statusCounts: Record<string, number>;
-  recentGames: RecentGame[];
-  journalCount: number;
-};
+export type { LibraryStats, RecentGame } from "../model/types";
 
 export async function getLibraryStats(userId: string): Promise<LibraryStats> {
   const [statusCountsRaw, recentItems, journalCount] = await Promise.all([
