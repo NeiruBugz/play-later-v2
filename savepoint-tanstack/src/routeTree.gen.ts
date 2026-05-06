@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 import { Route as DevIgdbSearchRouteImport } from './routes/dev/igdb-search'
 import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedLibraryRouteImport } from './routes/_authed/library'
@@ -43,6 +44,11 @@ const IndexRoute = IndexRouteImport.update({
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesSlugRoute = GamesSlugRouteImport.update({
+  id: '/games/$slug',
+  path: '/games/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevIgdbSearchRoute = DevIgdbSearchRouteImport.update({
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
+  '/games/$slug': typeof GamesSlugRoute
   '/u/$username': typeof UUsernameRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/library': typeof AuthedLibraryRoute
   '/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
+  '/games/$slug': typeof GamesSlugRoute
   '/u/$username': typeof UUsernameRoute
   '/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/_authed/library': typeof AuthedLibraryRoute
   '/_authed/profile': typeof AuthedProfileRoute
   '/dev/igdb-search': typeof DevIgdbSearchRoute
+  '/games/$slug': typeof GamesSlugRoute
   '/u/$username': typeof UUsernameRoute
   '/_authed/settings/profile': typeof AuthedSettingsProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/profile'
     | '/dev/igdb-search'
+    | '/games/$slug'
     | '/u/$username'
     | '/settings/profile'
     | '/api/auth/$'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/profile'
     | '/dev/igdb-search'
+    | '/games/$slug'
     | '/u/$username'
     | '/settings/profile'
     | '/api/auth/$'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/_authed/library'
     | '/_authed/profile'
     | '/dev/igdb-search'
+    | '/games/$slug'
     | '/u/$username'
     | '/_authed/settings/profile'
     | '/api/auth/$'
@@ -160,6 +172,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   LoginRoute: typeof LoginRoute
   DevIgdbSearchRoute: typeof DevIgdbSearchRoute
+  GamesSlugRoute: typeof GamesSlugRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -199,6 +212,13 @@ declare module '@tanstack/react-router' {
       path: '/u/$username'
       fullPath: '/u/$username'
       preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/$slug': {
+      id: '/games/$slug'
+      path: '/games/$slug'
+      fullPath: '/games/$slug'
+      preLoaderRoute: typeof GamesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev/igdb-search': {
@@ -269,6 +289,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   LoginRoute: LoginRoute,
   DevIgdbSearchRoute: DevIgdbSearchRoute,
+  GamesSlugRoute: GamesSlugRoute,
   UUsernameRoute: UUsernameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

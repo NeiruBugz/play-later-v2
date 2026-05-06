@@ -10,7 +10,7 @@ export type IgdbCoverSize =
 
 export function buildCoverImageUrl(
   coverImage: string | null | undefined,
-  size: IgdbCoverSize = "t_cover_big_2x"
+  size: IgdbCoverSize = "t_cover_big"
 ): string | null {
   if (!coverImage) return null;
   if (IGDB_SIZE_SEGMENT_RE.test(coverImage)) {

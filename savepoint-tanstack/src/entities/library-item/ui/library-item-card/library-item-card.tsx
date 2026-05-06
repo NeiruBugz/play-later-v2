@@ -5,10 +5,13 @@ import { cn } from "@/shared/lib/utils";
 import { getStatusLabel } from "../../model";
 import type { LibraryItemCardProps } from "./library-item-card.type";
 import { buildCoverImageUrl } from "./library-item-card.utility";
+import { Link } from "@tanstack/react-router";
 
 export function LibraryItemCard({ item, onClick }: LibraryItemCardProps) {
   const coverUrl = buildCoverImageUrl(item.game.coverImage, "t_cover_big");
   const statusLabel = getStatusLabel(item.status);
+
+  const detailsLink = `/games/${item.game.slug}`;
 
   const isInteractive = typeof onClick === "function";
 
@@ -53,6 +56,11 @@ export function LibraryItemCard({ item, onClick }: LibraryItemCardProps) {
         <span className="text-muted-foreground text-xs tracking-wide uppercase">
           {statusLabel}
         </span>
+      </div>
+      <div>
+        <Link to="/games/$slug" params={{ slug: item.game.slug }}>
+          See details
+        </Link>
       </div>
     </article>
   );

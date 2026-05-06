@@ -1,1 +1,1 @@
-export { AddGameModal, AddGameTrigger } from "./ui";
+export { AddFromGameDetailButton, AddGameModal, AddGameTrigger } from "./ui";
