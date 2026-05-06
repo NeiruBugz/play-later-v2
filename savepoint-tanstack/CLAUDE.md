@@ -144,7 +144,7 @@ From [`tsconfig.json`](./tsconfig.json):
 | If you want to...                           | Look here                                                                                                                                                                                                                                   |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Add a route                                 | [`src/routes/`](./src/routes/) (TanStack file-based; `$param` for dynamic segments, `_authed/` for guarded group)                                                                                                                           |
-| Add a server fn (mutation, authed re-fetch) | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix — see "File naming" above)                                                                                                                                                       |
+| Add a server fn (mutation, authed re-fetch) | `src/features/<name>/api/<fn-name>.ts` (NO `.server` suffix — see "File naming" above)                                                                                                                                                      |
 | Add an entity query (read)                  | `src/entities/<name>/api/<query-name>.server.ts`                                                                                                                                                                                            |
 | Add a composite UI block                    | `src/widgets/<name>/ui/...`                                                                                                                                                                                                                 |
 | Add a shared primitive                      | [`src/shared/lib/`](./src/shared/lib/) or [`src/shared/ui/`](./src/shared/ui/)                                                                                                                                                              |
@@ -169,13 +169,13 @@ From [`tsconfig.json`](./tsconfig.json):
 
 ## Foot-guns we've hit (read before adding server fns / browser-direct AWS calls)
 
-These are silent-failure traps surfaced during slices 5B–6. Each fails at *runtime* under specific conditions and is invisible to typecheck / lint / unit tests. Manual verification at slice boundaries is the only structural defence — but knowing the pattern saves a debugging cycle.
+These are silent-failure traps surfaced during slices 5B–6. Each fails at _runtime_ under specific conditions and is invisible to typecheck / lint / unit tests. Manual verification at slice boundaries is the only structural defence — but knowing the pattern saves a debugging cycle.
 
 ### Bundler-graph traps
 
 1. **`.server.ts` filename is a bundler-enforced client boundary.** See [File naming](#file-naming-serverts-is-a-bundler-boundary-not-a-runtime-tag). `createServerFn`-wrapped feature modules MUST drop the suffix; only genuinely server-only modules (DB client, auth instance, entity queries, `getServerUserId`) get it.
 2. **Loader-direct read of a `.server.ts` from a route module hangs the app on hover-preload.** The Vite plugin denies the import on the client build but TanStack's route extractor doesn't strip it from preload. See [CONTEXT.md → Loader-direct read → Known bundler caveat](./CONTEXT.md#loader-direct-read). Workaround: wrap the work in a `createServerFn` exported from a non-`.server.ts` file; the route imports the server fn value, which is client-safe.
-3. **Custom shims around `createServerFn` leak server modules into the client bundle.** Specifically: any export that retains a *module-level reference* to the handler function (e.g. `Object.assign(async opts => result ?? handler(opts), _serverFn)`) holds the handler graph open on the client side. The Start Vite plugin only strips the body of the literal `.handler(fn)` call; it does NOT chase secondary references. Symptom: `[Client] Warning: Error in route match: __root__/` wrapped in a `CatchBoundaryImpl`. Fix: never re-export the bare handler; if a test path needs to call the impl directly, split into `getX.server.ts` (plain async worker) + `getXFn.ts` (`createServerFn` thin wrapper) and import the worker from server-only test code.
+3. **Custom shims around `createServerFn` leak server modules into the client bundle.** Specifically: any export that retains a _module-level reference_ to the handler function (e.g. `Object.assign(async opts => result ?? handler(opts), _serverFn)`) holds the handler graph open on the client side. The Start Vite plugin only strips the body of the literal `.handler(fn)` call; it does NOT chase secondary references. Symptom: `[Client] Warning: Error in route match: __root__/` wrapped in a `CatchBoundaryImpl`. Fix: never re-export the bare handler; if a test path needs to call the impl directly, split into `getX.server.ts` (plain async worker) + `getXFn.ts` (`createServerFn` thin wrapper) and import the worker from server-only test code.
 
 ### Runtime / dev-environment traps
 
@@ -188,10 +188,80 @@ These are silent-failure traps surfaced during slices 5B–6. Each fails at *run
 
 8. **`createServerFn` returns `undefined` when invoked programmatically in vitest.** The Start Vite plugin AST-rewrites `.handler(fn)` into `.handler(generatedExtractedFn, fn)`, and the framework's client base middleware reads from the generated extracted-fn shape; without the plugin loaded in the test harness, the framework drops the handler's return value. Symptom: integration tests assert on a server-fn return and get `undefined`. Two acceptable mitigations: (a) the worker/server-fn split from foot-gun #3, where the test imports the plain worker directly; (b) future: add the Start Vite plugin to [`vitest.config.ts`](./vitest.config.ts) so `createServerFn` works end-to-end in tests. Tests that assert only on side effects (DB writes, mock call counts) are unaffected.
 
+## Logger (S7)
+
+Pino chosen, copied **verbatim** from `savepoint-app/shared/lib/app/logger.ts` to [`src/shared/lib/logger.ts`](./src/shared/lib/logger.ts), with the only edit being `process.env.*` → typed `env` from `@env` (durable project rule). Versions pinned to match the canonical app exactly (`pino@10.1.0`, `pino-pretty@13.1.3`) so log shape, redaction paths, and error normalization stay byte-identical across the migration. Dev uses `pino-pretty` transport (colorized, single-line off); prod emits structured JSON. Ticks the spec's "default: copy verbatim" decision for S7.
+
 ## Known gaps / pending decisions
 
-- **Logger** not yet ported — Slice 7 decides (default: copy `savepoint-app/shared/lib/logger.ts` pino verbatim).
+- [x] **Logger** ported (S7) — see Logger section above.
 - **Real `db.ts`** (Prisma singleton) not yet wired — Slice 3 implements.
 - **Auth** not yet wired — Slice 1 (Better Auth, no `nextCookies()` plugin).
 - **Tailwind** scaffolded as v4 (CSS-first); `savepoint-app/` uses v3 (JS config). Tokens are translated, not copy-pasted verbatim.
 - **No production deployment** until Slice 20 cutover. Verification is local-only until then.
+
+## Known gaps (Vertical 1)
+
+Scope: slices 0–6. Both apps now bind to `:6060` — verification is **swap-and-compare** (stop one app, start the other) against the same Postgres on `:6432`. Side-by-side parity is deferred to S20 cutover.
+
+### Flow 1 — Cognito sign-in (`/login`)
+
+- ✅ Authed users redirected away from `/login` (`beforeLoad` guard).
+- ✅ OAuth via `authClient.signIn.social({ provider: "cognito" })`.
+- ✅ Branded layout ported via [`widgets/auth-page/ui/auth-page-view`](./src/widgets/auth-page/ui/auth-page-view/auth-page-view.tsx) — centered `max-w-md` card, `text-display` "SavePoint" headline, tagline, divider w/ "or", `sr-only` `<h1>` for a11y. Slot-based composition (route owns feature wiring). Cognito button promoted to `variant="outline"` + full-width.
+- ⚠️ `callbackURL` divergence: tanstack → `/profile`; canonical → `/dashboard` (route doesn't exist here yet).
+- ⚠️ Button label cosmetic: canonical renders Google-logo SVG + "Sign in with Google"; tanstack renders plain "Sign in with Cognito" (no logo). Visual treatment matches; copy / icon do not.
+- ⚠️ No `onError` handler on the Cognito sign-in button — silent SSO failure. Low severity.
+
+### Flow 2 — Own profile read (`/profile`)
+
+- ❌ **Intentional architectural pivot** (NOT a regression): canonical `/profile` is redirect-only (`/u/${username}` if set, `/profile/setup` otherwise); tanstack `/profile` renders the own-profile view inline via `<ProfileOverview/>`. Reviewers must not treat as parity break.
+- ⚠️ No `/profile/setup` onboarding route in tanstack. Out of scope for V1.
+- ✅ Auth guard via `_authed.tsx` → `requireUserIdOrRedirectFn`.
+- ✅ `getProfilePageDataFn` parallel-loads `getLibraryStats` + `getProfileById`.
+- ⚠️ Page `<title>` still shows starter placeholder; canonical sets `"Profile"`.
+
+### Flow 3 — Settings edit (`/settings/profile`)
+
+- ✅ Display name, username (with debounced availability check), visibility toggle all present.
+- ✅ `toast.success` on save; inline `role="alert"` on rejection.
+- ✅ Username uniqueness enforced at DB; `ConflictError` surfaced to toast (single-source per simplification plan).
+- ⚠️ Layout differs: canonical embeds avatar in the form card; tanstack splits `<AvatarUpload/>` as a top-level section. Intentional.
+- ⚠️ "Preview public profile →" link absent on tanstack settings.
+- ✅ "Back to profile" link present.
+
+### Flow 4 — Avatar upload via LocalStack (`/settings/profile`, `/profile`)
+
+- ✅ Three-step flow: presigned URL → browser PUT → `setAvatarUrlFn`.
+- ✅ `requestChecksumCalculation: "WHEN_REQUIRED"` wired (foot-gun #5).
+- ✅ `router.invalidate()` after persist; image refreshes everywhere.
+- ✅ MIME allow-list: jpeg/png/gif/webp.
+- ✅ Two surfaces: settings section + own-profile `<ProfileHeader/>` overlay (slot pattern, gated by `isOwnProfile`).
+- ⚠️ No client-side size pre-check (canonical also lacks one — parity).
+
+### Flow 5 — Public profile (`/u/$username`)
+
+- ❌ **Intentional V1 scope gap** (NOT a regression): canonical `/u/[username]` is a tabbed layout (Overview / Library / Activity), with social counts, follow button, private-profile message, and `generateMetadata`. Tanstack renders flat `<ProfileOverview/>` only. Tabs / social / SEO arrive in later verticals.
+- ✅ Privacy gate at the entity layer (`getPublicProfile` → `NotFoundError` for private profiles).
+- ⚠️ Unknown username surfaces the generic root error boundary; canonical hits a styled 404 page.
+- ⚠️ No `<title>` / OG metadata.
+
+### Flow 6 — Sign-out (sidebar user menu)
+
+- ✅ `authClient.signOut()` triggered from sidebar; `router.invalidate()` re-runs root loader, sidebar disappears, lands on landing page.
+- ⚠️ Sidebar uses bespoke `<ul role="menu">` popover; canonical uses shadcn `DropdownMenu` with extra "Profile settings" / "Account" entries (latter routes not yet ported).
+- ⚠️ Standalone `LogoutButton` feature component is unused by the sidebar (kept for tests / potential reuse).
+- ⚠️ No `onError` handler on `signOut()` — silent failure. Parity with canonical.
+
+### Summary
+
+| Flow                 | Status                                                | Blocking S7? |
+| -------------------- | ----------------------------------------------------- | ------------ |
+| 1 — Cognito sign-in  | ✅ layout ported (post-S7T1); ⚠️ copy/icon gaps only  | No           |
+| 2 — Own profile read | ❌ intentional pivot, documented                      | No           |
+| 3 — Settings edit    | ⚠️ minor layout / missing preview link                | No           |
+| 4 — Avatar upload    | ✅ functional parity                                  | No           |
+| 5 — Public profile   | ❌ V1 scope boundary, documented                      | No           |
+| 6 — Sign-out         | ⚠️ menu items missing (account routes not yet ported) | No           |
+
+No findings block Slice 7. Items marked ❌ are intentional architectural / scope pivots, not regressions.

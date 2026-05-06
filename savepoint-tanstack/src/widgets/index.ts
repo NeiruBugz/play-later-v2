@@ -1,6 +1,7 @@
 export { AppShell } from "./app-shell";
 export type { AppShellProps } from "./app-shell";
 export { AppSidebar } from "./app-sidebar";
+export { AuthPageView } from "./auth-page";
 export {
   LandingFeatures,
   LandingFeaturesStrip,

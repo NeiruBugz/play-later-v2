@@ -32,7 +32,9 @@ import {
   s3Client,
 } from "@/shared/api/s3";
 import { ValidationError } from "@/shared/lib/errors";
+import { createLogger } from "@/shared/lib/logger";
 
+const log = createLogger({ scope: "presign-avatar" });
 const PRESIGN_EXPIRES_SECONDS = 300;
 
 const INPUT_SCHEMA = z.object({
@@ -64,9 +66,7 @@ export const getAvatarPresignedUrlFn = createServerFn({ method: "POST" })
     }
   })
   .handler(
-    async ({
-      data,
-    }): Promise<{ uploadUrl: string; publicUrl: string }> => {
+    async ({ data }): Promise<{ uploadUrl: string; publicUrl: string }> => {
       // Re-parse server-side: inputValidator runs only on cross-network
       // calls; programmatic callers (other server fns) bypass it.
       let parsed: z.infer<typeof INPUT_SCHEMA>;
@@ -74,10 +74,12 @@ export const getAvatarPresignedUrlFn = createServerFn({ method: "POST" })
         parsed = INPUT_SCHEMA.parse(data);
       } catch (error) {
         if (error instanceof ZodError) {
-          throw new ValidationError(
+          const validationError = new ValidationError(
             error.issues.map((issue) => issue.message).join("; "),
             { issues: error.issues }
           );
+          log.error({ err: validationError }, "presign validation failed");
+          throw validationError;
         }
         throw error;
       }
@@ -102,6 +104,14 @@ export const getAvatarPresignedUrlFn = createServerFn({ method: "POST" })
         ? `${env.AWS_ENDPOINT_URL}/${AVATAR_BUCKET}/${key}`
         : `https://${AVATAR_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${key}`;
 
+      log.info(
+        {
+          contentType: parsed.contentType,
+          contentLength: parsed.contentLength,
+          key,
+        },
+        "presigned url issued"
+      );
       return { uploadUrl, publicUrl };
     }
   );

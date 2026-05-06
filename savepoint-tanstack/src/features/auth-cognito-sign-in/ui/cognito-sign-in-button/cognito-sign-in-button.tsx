@@ -10,7 +10,12 @@ export function CognitoSignInButton() {
   };
 
   return (
-    <Button type="button" onClick={handleSignIn}>
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full cursor-pointer"
+      onClick={handleSignIn}
+    >
       Sign in with Cognito
     </Button>
   );
